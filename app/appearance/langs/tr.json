@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "Şablon hedefi genel olmayan bir adrese çözümlendi ve engellendi; nedeni vekil sunucunun Fake-IP modu olabilir. Bu alan adını Fake-IP dışında tutun veya gerçek IP döndüren DNS kullanın",
 	"pdfLinearizedYes": "Evet",
 	"pdfLinearizedNo": "Hayır",
 	"tagRemovalDatabaseTip": "Seçilen veritabanlarından kayıtlar ve alan değerleri kaldırılır. Kaynak içerik korunur ve işlem geri alınabilir. Seçilmeyen veritabanları kayıtlarını korur.",

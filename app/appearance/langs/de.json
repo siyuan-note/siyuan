@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "Das Vorlagenziel wird zu einer nicht öffentlichen Adresse aufgelöst und wurde blockiert; Ursache kann der Fake-IP-Modus des Proxys sein. Diese Domain von Fake-IP ausschließen oder DNS mit echten IP-Adressen verwenden",
 	"pdfLinearizedYes": "Ja",
 	"pdfLinearizedNo": "Nein",
 	"tagRemovalDatabaseTip": "Die Einträge und ihre Feldwerte werden aus den ausgewählten Datenbanken entfernt. Der Quellinhalt bleibt erhalten; der Vorgang kann rückgängig gemacht werden. Nicht ausgewählte Datenbanken behalten ihre Einträge.",

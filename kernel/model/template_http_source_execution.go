@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/siyuan-note/siyuan/kernel/av"
-
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -211,4 +211,13 @@ func templateHTTPDatabaseSourceScope(runtime *templatehttp.Execution) func(strin
 		}
 		return registerTemplateHTTPSource(runtime, owner, source)
 	}
+}
+
+func attributeViewItemHTTPContext(executions []*templatehttp.Execution) *sql.AttributeViewRenderContext {
+	context := sql.NewAttributeViewRenderContext()
+	if len(executions) > 0 {
+		context.TemplateHTTP = executions[0]
+		context.TemplateHTTPSourceScope = templateHTTPDatabaseSourceScope(executions[0])
+	}
+	return context
 }

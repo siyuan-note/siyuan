@@ -79,9 +79,22 @@ func TestAttributeViewHTTPTemplateNeedsInteractionAndRedactsErrors(t *testing.T)
 	key := av.NewKey("template", "HTTP", "", av.KeyTypeTemplate)
 	key.Template = `.action{httpGet "https://example.com/secret-token" unexpected}`
 	database := &av.AttributeView{ID: "database", KeyValues: []*av.KeyValues{{Key: blockKey}, {Key: key}}}
-	fillAttributeViewTemplateValues(database, &av.View{ID: "view"}, newHTTPTemplateTestTable(blockKey, key), nil, renderContext)
-	if err = renderContext.HTTPTemplateError(); err == nil || strings.Contains(err.Error(), "secret-token") {
-		t.Fatalf("interactive render lost or leaked its template error: %v", err)
+	table := newHTTPTemplateTestTable(blockKey, key)
+	fillAttributeViewTemplateValues(database, &av.View{ID: "view"}, table, nil, renderContext)
+	if err = renderContext.HTTPTemplateError(); err != nil || !renderContext.HasTemplateErrors() {
+		t.Fatalf("field error terminated the render or was lost: %v", err)
+	}
+	for _, row := range table.Rows {
+		if got := row.GetValue(key.ID).Template.Content; got != "template_error" {
+			t.Fatalf("field error was not safely displayed: %q", got)
+		}
+	}
+	var codes []string
+	execution.SetErrorHandler(func(code string) { codes = append(codes, code) })
+	renderContext.PushTemplateErrors()
+	renderContext.PushTemplateErrors()
+	if strings.Join(codes, ",") != "template_error" {
+		t.Fatalf("template errors were not directed and deduplicated: %v", codes)
 	}
 }
 
@@ -104,6 +117,9 @@ func TestAttributeViewHTTPTemplateStopsAfterCancellation(t *testing.T) {
 	fillAttributeViewTemplateValues(database, &av.View{ID: "view"}, table, nil, renderContext)
 	if confirmations != 1 || execution.Err() == nil {
 		t.Fatalf("canceled execution continued: prompts=%d err=%v", confirmations, execution.Err())
+	}
+	if renderContext.HTTPTemplateError() == nil {
+		t.Fatal("cancellation was reduced to a field error")
 	}
 }
 

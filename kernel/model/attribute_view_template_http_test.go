@@ -25,6 +25,45 @@ func TestAttributeViewHTTPRenderCanceledResultIsDiscarded(t *testing.T) {
 	}
 }
 
+func TestAttributeViewHTTPFieldErrorKeepsOtherFields(t *testing.T) {
+	for _, invalidTemplate := range []string{
+		`.action{httpGet "https://example.com/secret" unknownFunction}`,
+		`.action{if false}.action{httpGet "https://example.com/secret"}.action{end}private.action{index "x" 10}`,
+	} {
+		for _, nested := range []bool{false, true} {
+			database, _ := nestedFixture(t, 3)
+			if !nested {
+				database.Views[0].SubItemsDisplay = "flat"
+			}
+			bad := av.NewKey("bad-http", "Bad", "", av.KeyTypeTemplate)
+			bad.Template = invalidTemplate
+			good := av.NewKey("good-template", "Good", "", av.KeyTypeTemplate)
+			good.Template = "available"
+			for _, key := range []*av.Key{bad, good} {
+				database.KeyValues = append(database.KeyValues, &av.KeyValues{Key: key})
+				database.Views[0].Table.Columns = append(database.Views[0].Table.Columns,
+					&av.ViewTableColumn{BaseField: &av.BaseField{ID: key.ID}})
+			}
+			execution := templatehttp.New(context.Background(), "render", nil)
+			var codes []string
+			execution.SetErrorHandler(func(code string) { codes = append(codes, code) })
+			table := nestedRender(t, database, "", 1, 10, nil, AttributeViewRenderOptions{TemplateHTTP: execution})
+			if len(table.Rows) != 3 {
+				t.Fatalf("missing rows: %d", len(table.Rows))
+			}
+			for _, row := range table.Rows {
+				if row.GetValue(good.ID).Template.Content != "available" || row.GetValue(bad.ID).Template.Content != "template_error" {
+					t.Fatal("field failure affected the database result")
+				}
+			}
+			if len(codes) != 1 || codes[0] != "template_error" {
+				t.Fatalf("unsafe or duplicate errors: %v", codes)
+			}
+			execution.Close()
+		}
+	}
+}
+
 func TestNestedAttributeViewHTTPTemplateUsesExecution(t *testing.T) {
 	database, _ := nestedFixture(t, 3)
 	key := av.NewKey("http-template", "HTTP", "", av.KeyTypeTemplate)

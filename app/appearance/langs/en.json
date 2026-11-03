@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "The template target resolves to a non-public address and was blocked; proxy Fake-IP mode may be the cause. Exclude this domain from Fake-IP or use real-IP DNS",
 	"pdfLinearizedYes": "Yes",
 	"pdfLinearizedNo": "No",
 	"tagRemovalDatabaseTip": "Selected databases will lose these entries and their field values. Source content is kept; the operation can be undone. Unselected databases keep their entries.",

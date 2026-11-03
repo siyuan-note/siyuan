@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "テンプレートの接続先が公開 IP 以外に解決されたため遮断しました。プロキシの Fake-IP モードが原因の可能性があります。このドメインを Fake-IP の対象外にするか実 IP を返す DNS を使用してください",
 	"pdfLinearizedYes": "はい",
 	"pdfLinearizedNo": "いいえ",
 	"tagRemovalDatabaseTip": "選択したデータベースから項目とそのフィールド値を削除します。元の内容は保持され、操作は元に戻せます。選択していないデータベースの項目は保持されます。",

@@ -19,7 +19,9 @@ const runCases = async () => {
             } else if (url.endsWith("getAttributeViewBacklinks")) {
                 callback({data: {total: 0, items: []}});
             }
+            return Promise.resolve();
         },
+        guardTemplateHTTPRequest: () => ({signal: new AbortController().signal, dispose() {}}),
         renderAVRichTextElements: () => {},
         preserveAVBindingRange: () => () => {},
         preserveRelatedAVViews: () => {},
@@ -36,7 +38,7 @@ const runCases = async () => {
         dayjs: () => ({format: () => "20260909120000"}),
         transaction: (_protyle, doOperations, undoOperations) => transactions.push({doOperations, undoOperations}),
     });
-    const protyle = {};
+    const protyle = {options: {}};
     for (const detached of [true, false]) {
         const itemID = detached ? "detached-item" : "bound-item";
         const row = {avID: "database", itemID, valueID: "primary-value", databaseBlockID: "carrier-b"};

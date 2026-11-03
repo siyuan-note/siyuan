@@ -13,6 +13,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
@@ -196,7 +197,7 @@ func GetAttributeViewBacklinksByCarrier(itemID, valueID, blockID string, context
 }
 
 // related 区分来源关系授权和原生详情的真实目标载体授权；两者均不接受客户端指定笔记本。
-func GetAttributeViewItemKeysWithContext(avID, itemID, valueID, blockID string, context *AttributeViewRelationContext, related bool) ([]*BlockAttributeViewKeys, error) {
+func GetAttributeViewItemKeysWithContext(avID, itemID, valueID, blockID string, context *AttributeViewRelationContext, related bool, executions ...*templatehttp.Execution) ([]*BlockAttributeViewKeys, error) {
 	waitForSyncingStorages()
 	var target *av.AttributeView
 	var members []string
@@ -237,7 +238,7 @@ func GetAttributeViewItemKeysWithContext(avID, itemID, valueID, blockID string, 
 	if err != nil {
 		return nil, err
 	}
-	renderContext := sql.NewAttributeViewRenderContext()
+	renderContext := attributeViewItemHTTPContext(executions)
 	renderContext.ReadOnly = true
 	collection, ok := sql.RenderViewItemWithContext(target, view, itemID, renderContext).(av.Collection)
 	if !ok {

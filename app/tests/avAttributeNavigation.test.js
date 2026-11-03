@@ -16,9 +16,11 @@ const runCases = (sources) => {
     window.DOMPurify = {sanitize: value => value};
     window.siyuan = {config: {editor: {}}, languages: {database: "Database", empty: "Empty", untitled: "Untitled"}};
     const dependencies = {
-        "../../../util/fetch": {fetchPost: (url, _data, callback) => callback({
-            data: url.endsWith("getAttributeViewKeys") ? tables : {total: 0},
-        })},
+        "../../../util/fetch": {fetchPost: (url, _data, callback) => {
+            callback({data: url.endsWith("getAttributeViewKeys") ? tables : {total: 0}});
+            return Promise.resolve();
+        }},
+        "../../../template/http": {guardTemplateHTTPRequest: () => ({signal: new AbortController().signal, dispose() {}})},
         "../../../util/escape": {escapeAttr: escape, escapeHtml: escape, escapeAriaLabel: escape, escapeHtmlTextAndAttr: escape},
         "../../../emoji/fileTreeIcon": {getFileTreeIconHTML: () => "<svg></svg>"},
         "../../../util/hostCapabilities": {getHostCapabilities: () => ({remoteKernel: true})},
@@ -28,6 +30,7 @@ const runCases = (sources) => {
         "./col": {getColIconByType: () => "iconDatabase"},
         "./cell": {cellValueIsEmpty: () => false, popTextCell: (_protyle, cells, type) => edited.push({cells, type})},
         "./binding": {preserveAVBindingRange: () => () => {}},
+        "./relatedView": {preserveRelatedAVViews() {}, mountRelatedAVViews() {}, syncRelatedAVViews() {}},
         "./richText": {
             renderAVRichTextElements: () => {},
             getAVRichTextSafeURL: value => value,

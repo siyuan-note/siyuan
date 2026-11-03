@@ -36,6 +36,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/xrash/smetrics"
@@ -3852,7 +3853,7 @@ func getAttributeViewBacklinkTargets(nodeID, avID, itemID, valueID string) (ret 
 	return
 }
 
-func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttributeViewKeys) {
+func GetAttributeViewItemKeys(avID, itemID, valueID string, executions ...*templatehttp.Execution) (ret []*BlockAttributeViewKeys) {
 	waitForSyncingStorages()
 
 	ret = []*BlockAttributeViewKeys{}
@@ -3880,7 +3881,7 @@ func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttribu
 	if nil != err {
 		return
 	}
-	viewable := sql.RenderViewItem(attrView, view, itemID)
+	viewable := sql.RenderViewItemWithContext(attrView, view, itemID, attributeViewItemHTTPContext(executions))
 	collection, ok := viewable.(av.Collection)
 	if !ok {
 		return
@@ -3907,7 +3908,7 @@ func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttribu
 	return
 }
 
-func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
+func GetBlockAttributeViewKeys(nodeID string, executions ...*templatehttp.Execution) (ret []*BlockAttributeViewKeys) {
 	waitForSyncingStorages()
 
 	ret = []*BlockAttributeViewKeys{}
@@ -3949,7 +3950,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 			continue
 		}
 
-		viewable := sql.RenderViewItem(attrView, view, itemID)
+		viewable := sql.RenderViewItemWithContext(attrView, view, itemID, attributeViewItemHTTPContext(executions))
 		collection, ok := viewable.(av.Collection)
 		if !ok {
 			continue

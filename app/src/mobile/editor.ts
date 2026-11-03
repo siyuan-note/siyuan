@@ -332,7 +332,8 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                     }
                     try {
                         if (preserveContent) {
-                            const prepared = await prepareDatabaseAttributePanel(editor.protyle, id);
+                            const prepared = await prepareDatabaseAttributePanel(editor.protyle, id,
+                                () => isValid() && window.siyuan.mobile.editor === editor);
                             if (!prepared || !isValid() || window.siyuan.mobile.editor !== editor) {
                                 fail();
                                 return;

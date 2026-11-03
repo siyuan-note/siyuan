@@ -1953,7 +1953,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Optional parameters are dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5. The timeout is in seconds, up to 10. Only GET is supported; private networks and proxies are not supported. Do not put real secrets in shareable templates: keys may be synced or shared with the template. Cross-origin redirects clear custom headers. SiYuan login credentials are not attached automatically."
+					"Data": "Optional parameters are dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5. The timeout is in seconds, up to 10. Only GET is supported; private networks and proxies are not supported. Do not put real secrets in shareable templates: keys may be synced or shared with the template. Cross-origin redirects clear custom headers. SiYuan login credentials are not attached automatically. If DNS returns a non-public address, including a proxy Fake-IP address, access is blocked. Exclude the API domain from Fake-IP or use DNS that returns real IP addresses."
 				}
 			]
 		},
@@ -2023,7 +2023,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Network failures, denied access, and unsuccessful HTTP status codes return error. Use an ok branch to display fallback content. Results are not inserted if total limits are exceeded or execution is interrupted. If daily-note creation is interrupted, the created document remains and its content template is not retried automatically."
+					"Data": "Network failures, denied access, and unsuccessful HTTP status codes return error. Use an ok branch to display fallback content. Results are not inserted if total limits are exceeded or execution is interrupted. If daily-note creation is interrupted, the created document remains and its content template is not retried automatically. Database attribute panels use the same network confirmation and template permissions. Opening a field editor does not fetch data; saved changes trigger recalculation. Ordinary HTTP template parsing or evaluation errors appear in the affected field and do not prevent other fields from displaying; canceled or locked executions still discard results."
 				}
 			]
 		},

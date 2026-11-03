@@ -93,7 +93,7 @@ export const guardTemplateHTTPRequest = (isCurrent: () => boolean, owner?: Eleme
 
 export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockID?: string},
                                          headers?: Record<string, string>, signal?: AbortSignal) => {
-    if (!["/api/template/render", "/api/av/renderAttributeView", "/api/filetree/createDailyNote"].includes(url) ||
+    if (!["/api/template/render", "/api/av/renderAttributeView", "/api/av/getAttributeViewKeys", "/api/filetree/createDailyNote"].includes(url) ||
         window.siyuan.isPublish || signal?.aborted) {
         return undefined;
     }
@@ -110,10 +110,13 @@ export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockI
     const id = genUUID();
     let ownerGuard: ReturnType<typeof guardTemplateHTTPRequest>;
     let owners: Element[];
-    if (url === "/api/av/renderAttributeView") {
+    if (url === "/api/av/renderAttributeView" || url === "/api/av/getAttributeViewKeys") {
         const selector = data.blockID ? `[data-node-id="${CSS.escape(data.blockID)}"]` :
             `[data-av-id="${CSS.escape(data.id || "")}"]`;
         const owner = signalOwners.get(signal);
+        if (url === "/api/av/getAttributeViewKeys" && !owner) {
+            return undefined;
+        }
         owners = owner ? [owner] : Array.from(document.querySelectorAll(selector));
         // 没有实际界面载体的计算请求使用无交互路径。
         if (!owners.length) {
@@ -199,7 +202,8 @@ export const processTemplateHTTPEvent = (cmd: string, data: HTTPEvent) => {
             const errorKey = data.errorCode === "denied" ? "templateHTTPDenied" :
                 ["confirmation_timeout", "timeout"].includes(data.errorCode) ? "templateHTTPTimeout" :
                     ["budget_exceeded", "response_too_large", "redirect_limit"].includes(data.errorCode) ? "templateHTTPLimit" :
-                        ["invalid_target", "unsafe_target", "invalid_options"].includes(data.errorCode) ? "templateHTTPInvalid" :
+                        data.errorCode === "unsafe_target" ? "templateHTTPUnsafeTarget" :
+                        ["invalid_target", "invalid_options"].includes(data.errorCode) ? "templateHTTPInvalid" :
                             data.errorCode === "interaction_required" ? "templateHTTPPermission" : "templateHTTPFailed";
             if (data.errorCode !== "execution_ended") {
                 showMessage(lang[errorKey], 7000, "error", `template-http-error-${execution.id}`);

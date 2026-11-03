@@ -14,6 +14,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -723,6 +724,15 @@ var getCurrentAttrViewImages = contractHandler(apicontract.GetCurrentAttrViewIma
 })
 
 var getAttributeViewKeys = contractHandler(apicontract.GetAttributeViewKeys, func(c *gin.Context, request apicontract.GetAttributeViewKeysRequest) apicontract.Response[[]*apicontract.AVBlockAttributeViewKeys] {
+	execution, executionErr := startTemplateHTTP(c, "attribute-keys:"+request.ID+":"+request.AvID)
+	if executionErr != nil {
+		return apicontract.Failure[[]*apicontract.AVBlockAttributeViewKeys](-1, executionErr.Error())
+	}
+	defer execution.Close()
+	var runtime *templatehttp.Execution
+	if execution != nil {
+		runtime = execution.Runtime
+	}
 	var values []*model.BlockAttributeViewKeys
 	if request.RelationContext != nil || request.BlockID != "" {
 		if request.RelationContext != nil && model.IsReadOnlyRoleContext(c) {
@@ -740,14 +750,17 @@ var getAttributeViewKeys = contractHandler(apicontract.GetAttributeViewKeys, fun
 			return apicontract.Failure[[]*apicontract.AVBlockAttributeViewKeys](-1, av.ErrAttributeViewNotFound.Error())
 		}
 		var err error
-		values, err = model.GetAttributeViewItemKeysWithContext(request.AvID, request.ItemID, request.ValueID, request.BlockID, context, related)
+		values, err = model.GetAttributeViewItemKeysWithContext(request.AvID, request.ItemID, request.ValueID, request.BlockID, context, related, runtime)
 		if err != nil {
 			return apicontract.Failure[[]*apicontract.AVBlockAttributeViewKeys](-1, err.Error())
 		}
 	} else if request.AvID != "" && (request.ItemID != "" || request.ValueID != "") {
-		values = model.GetAttributeViewItemKeys(request.AvID, request.ItemID, request.ValueID)
+		values = model.GetAttributeViewItemKeys(request.AvID, request.ItemID, request.ValueID, runtime)
 	} else {
-		values = model.GetBlockAttributeViewKeys(request.ID)
+		values = model.GetBlockAttributeViewKeys(request.ID, runtime)
+	}
+	if runtime != nil && runtime.Err() != nil {
+		return apicontract.Failure[[]*apicontract.AVBlockAttributeViewKeys](-1, runtime.Err().Error())
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		values = model.FilterBlockAttributeViewKeysByPublishAccess(c, model.GetPublishAccess(), values)

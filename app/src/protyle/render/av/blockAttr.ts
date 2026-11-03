@@ -1,4 +1,5 @@
 import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {guardTemplateHTTPRequest} from "../../../template/http";
 import {clearAVAttributeDropTarget, getAVAttributeDropTarget, getAVAttributePreviousID, getAVAttributeSort, IAVAttributeDropTarget} from "./attributePanelDrag";
 import {observeAVAttributeLayout, updateAVAttributeLayout} from "./attributePanelLayout";
 import {isAVTextType} from "./capabilities";
@@ -131,9 +132,14 @@ const handleRichTextInteraction = (protyle: IProtyle, event: MouseEvent) => {
 };
 
 export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IProtyle, cb?: (element: HTMLElement) => void,
-                                  row?: { avID: string, itemID: string, valueID: string, databaseBlockID: string }) => {
+                                  row?: { avID: string, itemID: string, valueID: string, databaseBlockID: string },
+                                  lifecycle?: {owner: Element, isCurrent: () => boolean}) => {
     const renderID = (++attributeViewRenderID).toString();
     element.dataset.avAttributeRenderId = renderID;
+    const owner = lifecycle?.owner || element;
+    const requestGuard = protyle.disabled || protyle.options.history?.created || protyle.options.history?.snapshot ?
+        undefined : guardTemplateHTTPRequest(() => owner.isConnected &&
+            element.dataset.avAttributeRenderId === renderID && (lifecycle?.isCurrent() ?? true), owner);
     fetchPost("/api/av/getAttributeViewKeys", row ? {id, avID: row.avID, itemID: row.itemID, valueID: row.valueID,
         blockID: row.databaseBlockID} : {id}, (response) => {
         if (element.dataset.avAttributeRenderId !== renderID) {
@@ -646,7 +652,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             syncRelatedAVViews(element);
             updateAVAttributeLayout(element);
         });
-    });
+    }, undefined, undefined, requestGuard?.signal).finally(() => requestGuard?.dispose());
 };
 
 const renderAttributeViewBacklinks = (element: HTMLElement, id: string, renderID: string,

@@ -5,13 +5,75 @@
 package model
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 )
+
+func TestAttributeViewItemKeysHTTPExecution(t *testing.T) {
+	fixture := setupDatabaseBlockTransactionTest(t, true)
+	database := fixture.attrView
+	primary := database.GetBlockKeyValues()
+	itemID := ast.NewNodeID()
+	primary.Values = []*av.Value{{ID: ast.NewNodeID(), KeyID: primary.Key.ID, BlockID: itemID,
+		Type: av.KeyTypeBlock, Block: &av.ValueBlock{ID: fixture.tree.ID, Content: "Selected"}}}
+	key := av.NewKey(ast.NewNodeID(), "HTTP", "", av.KeyTypeTemplate)
+	key.Template = `.action{(httpGet "https://example.com/data").error}`
+	database.KeyValues = append(database.KeyValues, &av.KeyValues{Key: key})
+	fixture.tableView.ItemIDs = []string{itemID}
+	fixture.tableView.Table.Columns = append(fixture.tableView.Table.Columns,
+		&av.ViewTableColumn{BaseField: &av.BaseField{ID: key.ID}})
+	if err := av.SaveAttributeView(database); err != nil {
+		t.Fatal(err)
+	}
+	av.UpsertBlockRel(database.ID, "20260803091003-avblock")
+	cache.PutBlockIALInBox(fixture.tree.ID, fixture.tree.Box, map[string]string{av.NodeAttrNameAvs: database.ID})
+	t.Cleanup(func() { cache.RemoveBlockIAL(fixture.tree.ID) })
+	for _, mode := range []string{"item", "bound", "carrier"} {
+		t.Run(mode, func(t *testing.T) {
+			confirmations := 0
+			execution := templatehttp.New(context.Background(), "panel", func(context.Context, templatehttp.Request) bool {
+				confirmations++
+				return false
+			})
+			defer execution.Close()
+			var keys []*BlockAttributeViewKeys
+			switch mode {
+			case "item":
+				keys = GetAttributeViewItemKeys(database.ID, itemID, "", execution)
+			case "bound":
+				keys = GetBlockAttributeViewKeys(fixture.tree.ID, execution)
+			case "carrier":
+				var err error
+				keys, err = GetAttributeViewItemKeysWithContext(database.ID, itemID, "", "20260803091003-avblock",
+					&AttributeViewRelationContext{SourceAvID: database.ID}, false, execution)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			if len(keys) != 1 {
+				t.Fatalf("missing panel values: %+v", keys)
+			}
+			found := false
+			for _, values := range keys[0].KeyValues {
+				if values.Key.ID == key.ID {
+					found = true
+					if got := values.Values[0].Template.Content; got != "denied" {
+						t.Fatalf("panel did not use execution: %q", got)
+					}
+				}
+			}
+			if !found || confirmations != 1 {
+				t.Fatalf("unexpected HTTP field or prompts: %v %d", found, confirmations)
+			}
+		})
+	}
+}
 
 func TestAttributeViewItemKeysKeepComputedValuesAndPositions(t *testing.T) {
 	fixture := setupDatabaseBlockTransactionTest(t, true)

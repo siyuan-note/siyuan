@@ -40,6 +40,7 @@ const cases = async (compiled, mobile) => {
         getAVSelectedItemIDs: () => [], getAVSelectedItemPoints: () => [], getFieldsByData: () => [],
         getPageSize: () => ({}), isAVRenderData: () => true,
         preserveAVBindingRange: () => noop,
+        guardTemplateHTTPRequest: () => ({signal: new AbortController().signal, dispose() {}}),
         prepareFilterColumns: () => pendingFilter ? new Promise(resolve => { filterResolve = resolve; }) : Promise.resolve(),
         avRender: async (element, editor, callback) => {
             if (!element.dataset.nodeId) return;
@@ -59,6 +60,7 @@ const cases = async (compiled, mobile) => {
             else if (url.endsWith("getCurrentAttrViewImages")) callback({code: 0, data: ["assets/member.png", "assets/unrelated.png"]});
             else if (url.endsWith("getAttributeViewKeys")) callback({code: 0, data: []});
             else if (url.endsWith("getAttributeViewBacklinks")) callback({code: 0, data: {total: 0, items: []}});
+            return Promise.resolve();
         },
         fetchSyncPost: async (url, payload) => {
             requests.push({url, payload});

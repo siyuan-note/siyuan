@@ -4200,6 +4200,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 获取条目或绑定块的属性字段；支持与 renderTemplate 相同的 HTTP 执行请求头，确认只发送到发起窗口。
+     * 无执行请求头或发布读取时不启用联网；条目成员范围、载体权限和加密笔记本访问边界保持有效。
+     * 当前来源版本的模板许可可复用；取消、窗口断开或笔记本锁定后丢弃结果。
+     */
     "/api/av/getAttributeViewKeys": {
         request: GetAttributeViewKeysRequestInput;
         response: { "code": 0; "data": Array<AVBlockAttributeViewKeys | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4359,6 +4364,7 @@ export interface APIPOSTRoutes {
      * relationContext 从来源关联字段推导目标，成员范围在筛选、分组、统计、分页和定位前生效，支持游离条目。
      * 关联明细仅支持表格，不保存临时排序或 temporaryFilters；后者与目标视图已有筛选相交。
      * 无效上下文、未知配置版本和发布读取角色均拒绝访问，不回退到完整数据库。
+     * HTTP 模板字段的普通解析、求值错误作为字段内容返回，并定向提示发起窗口；取消、锁定和执行超限仍终止请求。
      */
     "/api/av/renderAttributeView": {
         request: RenderAttributeViewRequestInput;

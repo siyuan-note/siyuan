@@ -72,7 +72,7 @@ const createPanel = (mobile = false) => {
 };
 
 for (const mobile of [false, true]) {
-    for (const type of ["select", "date"] as const) {
+    for (const type of ["select", "date", "edit"] as const) {
         test(`${type} editors load metadata without moving the cell panel on resize (${mobile ? "mobile" : "desktop"})`, () => {
             const h = createPanel(mobile);
             h.options.type = type;

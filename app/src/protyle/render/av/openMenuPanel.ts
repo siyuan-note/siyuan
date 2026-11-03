@@ -57,8 +57,8 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
     getAnchorRect();
     const avID = options.data?.id || options.blockElement.getAttribute("data-av-id");
     const avPageSize = getPageSize(options.blockElement);
-    // 日期和选项编辑从单元格读取当前值，加载字段配置时无需重新计算整库模板与汇总。
-    const ignoreRows = ["config", "properties", "sorts", "filters", "contextFilter", "switcher", "select", "date"].includes(options.type);
+    // 字段编辑仅加载配置，日期和选项编辑从单元格读取当前值，避免计算整库模板与汇总。
+    const ignoreRows = ["config", "properties", "sorts", "filters", "contextFilter", "switcher", "select", "date", "edit"].includes(options.type);
     const fetchPayload = {
         id: avID,
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",

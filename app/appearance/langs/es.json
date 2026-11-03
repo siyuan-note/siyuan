@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "El destino de la plantilla se resuelve en una dirección no pública y se ha bloqueado; puede deberse al modo Fake-IP del proxy. Excluye este dominio de Fake-IP o usa DNS con IP reales",
 	"pdfLinearizedYes": "Sí",
 	"pdfLinearizedNo": "No",
 	"tagRemovalDatabaseTip": "Se eliminarán las entradas y sus valores de campo de las bases de datos seleccionadas. Se conserva el contenido original y la operación se puede deshacer. Las bases de datos no seleccionadas conservan sus entradas.",

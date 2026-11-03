@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "Het sjabloondoel wordt omgezet naar een niet-openbaar adres en is geblokkeerd; de Fake-IP-modus van de proxy kan de oorzaak zijn. Sluit dit domein uit van Fake-IP of gebruik DNS met echte IP-adressen",
 	"pdfLinearizedYes": "Ja",
 	"pdfLinearizedNo": "Nee",
 	"tagRemovalDatabaseTip": "De vermeldingen en hun veldwaarden worden uit de geselecteerde databases verwijderd. De broninhoud blijft behouden en de bewerking kan ongedaan worden gemaakt. Niet-geselecteerde databases behouden hun vermeldingen.",

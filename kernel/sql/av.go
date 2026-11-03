@@ -71,20 +71,12 @@ func (context *AttributeViewRenderContext) HasTemplateErrors() bool {
 	return context != nil && len(context.templateErrors) != 0
 }
 
-// HTTPTemplateError 将交互执行中的模板语法错误交给发起请求，避免广播到其他窗口。
+// HTTPTemplateError 仅将取消、锁定和执行预算终止提升为整个渲染失败。
 func (context *AttributeViewRenderContext) HTTPTemplateError() error {
 	if context == nil || context.TemplateHTTP == nil {
 		return nil
 	}
-	if err := context.TemplateHTTP.Err(); err != nil {
-		return err
-	}
-	for _, templateErr := range context.sortedTemplateErrors() {
-		if templateErr.httpTemplate {
-			return errors.New(templateErr.renderErr)
-		}
-	}
-	return nil
+	return context.TemplateHTTP.Err()
 }
 
 func (context *AttributeViewRenderContext) addTemplateError(attrView *av.AttributeView, templateKey *av.Key,
@@ -150,6 +142,7 @@ func (context *AttributeViewRenderContext) PushTemplateErrors() {
 	for _, templateErr := range context.sortedTemplateErrors() {
 		// 联网模板的错误留在本次执行内，避免向其他窗口广播数据范围信息。
 		if context.TemplateHTTP != nil && templateErr.httpTemplate {
+			context.TemplateHTTP.ReportTemplateError()
 			continue
 		}
 		detail := fmt.Sprintf(util.Langs[util.Lang][374], templateErr.attributeViewName, templateErr.templateFieldName,
@@ -1202,7 +1195,8 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 				content, renderErr = executeTemplateField(tpl, ial, keyValues, storedValueCache, execution)
 			}
 			if renderErr != nil && strings.Contains(templateContent, "httpGet") {
-				renderErr = errors.New("HTTP template evaluation failed")
+				renderErr = errors.New("template_error")
+				content = renderErr.Error()
 			}
 			if nil != renderErr {
 				renderContext.addTemplateError(attrView, templateKey, item, renderErr)

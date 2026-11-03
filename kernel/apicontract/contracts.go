@@ -1664,6 +1664,7 @@ var RenderHistoryAttributeView = define[RenderHistoryAttributeViewRequest, AVArc
 // relationContext 从来源关联字段推导目标，成员范围在筛选、分组、统计、分页和定位前生效，支持游离条目。
 // 关联明细仅支持表格，不保存临时排序或 temporaryFilters；后者与目标视图已有筛选相交。
 // 无效上下文、未知配置版本和发布读取角色均拒绝访问，不回退到完整数据库。
+// HTTP 模板字段的普通解析、求值错误作为字段内容返回，并定向提示发起窗口；取消、锁定和执行超限仍终止请求。
 var RenderAttributeView = define[RenderAttributeViewRequest, AVRenderResult]("renderAttributeView", "/api/av/renderAttributeView", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, FastJSON: true}, "POST")
 var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalendarUndatedData]("getAttributeViewCalendarUndated", "/api/av/getAttributeViewCalendarUndated", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1671,6 +1672,10 @@ var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalenda
 // groupID 可选，省略、null 或空字符串时保留整个视图行为；指定时仅返回该分组图片，分组不存在则报错。
 // 分组先按组内手动顺序排列，再应用视图排序；同一单元格按资源顺序返回，不受分页或虚拟滚动限制。
 var GetCurrentAttrViewImages = define[GetCurrentAttrViewImagesRequest, []string]("getCurrentAttrViewImages", "/api/av/getCurrentAttrViewImages", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 获取条目或绑定块的属性字段；支持与 renderTemplate 相同的 HTTP 执行请求头，确认只发送到发起窗口。
+// 无执行请求头或发布读取时不启用联网；条目成员范围、载体权限和加密笔记本访问边界保持有效。
+// 当前来源版本的模板许可可复用；取消、窗口断开或笔记本锁定后丢弃结果。
 var GetAttributeViewKeys = define[GetAttributeViewKeysRequest, []*AVBlockAttributeViewKeys]("getAttributeViewKeys", "/api/av/getAttributeViewKeys", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewSearchTarget = define[GetAttributeViewSearchTargetRequest, *AVAttributeViewSearchTarget]("getAttributeViewSearchTarget", "/api/av/getAttributeViewSearchTarget", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewBacklinks = define[GetAttributeViewBacklinksRequest, *AVAttributeViewBacklinks]("getAttributeViewBacklinks", "/api/av/getAttributeViewBacklinks", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")

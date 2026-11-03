@@ -16,10 +16,11 @@ const updateEmptyState = (element: HTMLElement, hideEmpty: boolean) => {
 const preparedBodies = new WeakMap<IProtyle, {id: string, element: HTMLElement}>();
 
 // 在替换正文前准备属性，提交时由同一个编辑器接管事件和只读状态。
-export const prepareDatabaseAttributePanel = (protyle: IProtyle, id: string) => {
+export const prepareDatabaseAttributePanel = (protyle: IProtyle, id: string, isCurrent = () => true) => {
     return new Promise<(() => void) | undefined>(resolve => {
         const element = document.createElement("div");
         element.className = "custom-attr protyle-db-attr__body";
+        const sourceID = protyle.block.id;
         let finished = false;
         const timeout = window.setTimeout(() => {
             finished = true;
@@ -33,7 +34,8 @@ export const prepareDatabaseAttributePanel = (protyle: IProtyle, id: string) => 
             finished = true;
             window.clearTimeout(timeout);
             resolve(() => preparedBodies.set(protyle, {id, element: rendered}));
-        });
+        }, undefined, {owner: protyle.element,
+            isCurrent: () => !finished && protyle.block.id === sourceID && isCurrent()});
     });
 };
 
@@ -170,7 +172,8 @@ export class AVAttributePanel {
         if (prepared?.id === targetID) {
             rendered(prepared.element);
         } else {
-            renderAVAttribute(bodyElement, targetID, this.protyle, rendered);
+            renderAVAttribute(bodyElement, targetID, this.protyle, rendered, undefined,
+                {owner: this.protyle.element, isCurrent: () => token === this.renderToken});
         }
     }
 

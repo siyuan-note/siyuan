@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "La destinazione del modello si risolve in un indirizzo non pubblico ed è stata bloccata; potrebbe dipendere dalla modalità Fake-IP del proxy. Escludi questo dominio da Fake-IP o usa un DNS con IP reali",
 	"pdfLinearizedYes": "Sì",
 	"pdfLinearizedNo": "No",
 	"tagRemovalDatabaseTip": "Le voci e i relativi valori dei campi saranno rimosse dai database selezionati. Il contenuto originale viene conservato e l’operazione può essere annullata. I database non selezionati mantengono le proprie voci.",

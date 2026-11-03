@@ -25,17 +25,20 @@ const browserCases = async (source: string, css: string) => {
         keyValues: ["A", "B", "C", "D", "E", "F"].map(id => ({key: {id, name: id, type: "text"}, values: [{text: {content: id}}]}))}));
     const render = new Function("fetchPost", "createEmptyAVValue", "getColIconByType", "cellValueIsEmpty", "genAVAttributeRowHTML",
         "preserveAVBindingRange", "renderAVRichTextElements", "hasClosestBlock", "hasClosestByClassName", "transaction", "hasDataTransferFiles",
-        "escapeHtmlTextAndAttr", "preserveRelatedAVViews", "mountRelatedAVViews", "syncRelatedAVViews",
+        "escapeHtmlTextAndAttr", "preserveRelatedAVViews", "mountRelatedAVViews", "syncRelatedAVViews", "guardTemplateHTTPRequest",
         source + "\nreturn {renderAVAttribute, getAVAttributeDropTarget, getAVAttributeSort};")(
-        (url: string, _body: unknown, callback: (response: {data: unknown}) => void) =>
-            callback({data: url.endsWith("getAttributeViewKeys") ? tables : {total: 0}}),
+        (url: string, _body: unknown, callback: (response: {data: unknown}) => void) => {
+            callback({data: url.endsWith("getAttributeViewKeys") ? tables : {total: 0}});
+            return Promise.resolve();
+        },
         () => ({}), () => "iconText", () => false,
         ({keyID}: {keyID: string}) => `<div class="av__row block__icons" data-col-id="${keyID}" data-id="item">
             <div class="block__icon" draggable="true">drag</div><div class="block__logo">${keyID}</div></div>`,
         () => () => {}, () => {}, (element: HTMLElement) => element?.closest('[data-type="NodeAttributeView"]'),
         (element: HTMLElement, className: string) => element?.closest("." + className),
         (_protyle: unknown, forward: IOperation[], undo: IOperation[]) => operations.push([forward, undo]),
-        (types: string[]) => types.includes("Files"), escapeHtmlTextAndAttr, () => {}, () => {}, () => {});
+        (types: string[]) => types.includes("Files"), escapeHtmlTextAndAttr, () => {}, () => {}, () => {},
+        () => ({signal: new AbortController().signal, dispose() {}}));
     const fixture = (className = "protyle-db-attr__body", width = 1100) => {
         document.body.innerHTML = "";
         operations.length = 0;

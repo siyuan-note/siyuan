@@ -2220,6 +2220,9 @@ The field types (`keyType`) are:
 ### Render
 
 * `/api/av/renderAttributeView`
+
+Ordinary HTTP template parsing or evaluation errors are returned in the affected field while the database remains available; cancellation, notebook locking, and execution limits still terminate rendering.
+
 * Parameters
 
   ```json

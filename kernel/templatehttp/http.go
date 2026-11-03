@@ -272,6 +272,11 @@ func (e *Execution) SetErrorHandler(handler func(code string)) {
 	e.mu.Unlock()
 }
 
+// ReportTemplateError 只向当前执行报告固定错误码，避免泄露模板源码或接口密钥。
+func (e *Execution) ReportTemplateError() {
+	e.preflightFailure("template_error")
+}
+
 func (e *Execution) notifyError(code string) {
 	e.mu.Lock()
 	e.approvalsFailed = true

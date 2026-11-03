@@ -2216,6 +2216,9 @@ if (response.code === 0 && response.data) {
 ### 渲染
 
 * `/api/av/renderAttributeView`
+
+普通 HTTP 模板解析或求值错误在对应字段中返回，数据库仍可显示；取消、笔记本锁定和执行超限仍终止渲染。
+
 * 参数
 
   ```json

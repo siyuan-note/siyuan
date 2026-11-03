@@ -283,10 +283,11 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     const renderAttributes = new Function("fetchPost", "createEmptyAVValue", "getColIconByType", "cellValueIsEmpty",
         "genAVAttributeRowHTML", "preserveAVBindingRange", "renderAVRichTextElements", "getAVTemplateInteractiveElement",
         "hasClosestByClassName", "hasClosestByAttribute", "hasClosestBlock", "openLink", "checkFold", "openFileById", "Constants",
-        "escapeHtmlTextAndAttr", "preserveRelatedAVViews", "mountRelatedAVViews", "syncRelatedAVViews",
+        "escapeHtmlTextAndAttr", "preserveRelatedAVViews", "mountRelatedAVViews", "syncRelatedAVViews", "guardTemplateHTTPRequest",
         blockSource + "\nreturn renderAVAttribute;")(
         (url: string, _data: unknown, callback: (response: {data: unknown}) => void) => {
             callback({data: url === "/api/av/getAttributeViewKeys" ? tables : {total: 0}});
+            return Promise.resolve();
         }, () => ({}), () => "iconText", (value: IAVCellValue) => !value.text.content,
         (options: {keyID: string, attributePanelVisibility: string, empty: boolean}) =>
             `<div class="av__row" data-col-id="${options.keyID}" data-panel-visibility="${options.attributePanelVisibility}" data-empty="${options.empty}"></div>`,
@@ -299,13 +300,13 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         (_id: string, callback: (zoomIn: boolean, action: string[], isRoot: boolean) => void) =>
             callback(foldedTarget, foldedTarget ? ["all"] : ["context", "scroll"], false),
         (options: IOpenFileOptions) => splitOpens.push(options), {CB_GET_HL: "highlight"}, escapeHtmlTextAndAttr,
-        () => {}, () => {}, () => {});
+        () => {}, () => {}, () => {}, () => ({signal: new AbortController().signal, dispose() {}}));
     const xssPayload = "<img src=x onerror=\"globalThis.__siyuanAVPanelXss=1\">";
     tables[0].avName = xssPayload;
     const xssBody = document.createElement("div");
     xssBody.className = "custom-attr protyle-db-attr__body";
     document.body.append(xssBody);
-    renderAttributes(xssBody, "document", {disabled: false});
+    renderAttributes(xssBody, "document", {disabled: false, options: {}});
     const xssHeader = xssBody.querySelector<HTMLElement>('[data-av-id="database-a"] .custom-attr__avheader .fn__ellipsis');
     check.equal(xssBody.querySelector("img"), null, "database names must not become elements in the attribute panel header");
     check.equal(xssHeader.textContent, xssPayload, "database names are shown as text in the attribute panel header");
@@ -315,7 +316,7 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         const body = document.createElement("div");
         body.className = className;
         document.body.append(body);
-        const protyle = {disabled: false};
+        const protyle = {disabled: false, options: {}};
         renderAttributes(body, "document", protyle);
         const visible = (id: string, avID = "database-a") => getComputedStyle(body.querySelector(
             `[data-av-id="${avID}"] .av__row[data-col-id="${id}"]`)).display !== "none";
@@ -348,7 +349,7 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     }
     const topBody = document.createElement("div");
     topBody.className = "custom-attr protyle-db-attr__body";
-    renderAttributes(topBody, "document", {disabled: false});
+    renderAttributes(topBody, "document", {disabled: false, options: {}});
     check.equal(topBody.querySelector('[data-type="toggle-panel-visibility"]'), null, "top panels reuse their existing edit button");
     const dialog = document.createElement("div");
     dialog.className = "b3-dialog--open";

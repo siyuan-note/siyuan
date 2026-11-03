@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "Cieľ šablóny sa prekladá na neverejnú adresu a bol zablokovaný; príčinou môže byť režim Fake-IP servera proxy. Vylúčte túto doménu z Fake-IP alebo použite DNS so skutočnými IP adresami",
 	"pdfLinearizedYes": "Áno",
 	"pdfLinearizedNo": "Nie",
 	"tagRemovalDatabaseTip": "Záznamy a hodnoty ich polí sa odstránia z vybraných databáz. Zdrojový obsah sa zachová a operáciu možno vrátiť späť. Nevybrané databázy si ponechajú svoje záznamy.",

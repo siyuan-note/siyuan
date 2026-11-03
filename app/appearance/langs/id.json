@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "Tujuan templat mengarah ke alamat nonpublik dan diblokir; mode Fake-IP proksi mungkin penyebabnya. Kecualikan domain ini dari Fake-IP atau gunakan DNS dengan IP asli",
 	"pdfLinearizedYes": "Ya",
 	"pdfLinearizedNo": "Tidak",
 	"tagRemovalDatabaseTip": "Entri dan nilai bidangnya akan dihapus dari basis data yang dipilih. Konten sumber tetap tersimpan dan tindakan dapat dibatalkan. Entri pada basis data yang tidak dipilih tetap tersimpan.",

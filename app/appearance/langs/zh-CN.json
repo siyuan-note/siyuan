@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "模板目标解析到非公网地址，已阻止访问，可能与代理 Fake-IP 模式有关；请将该域名排除在 Fake-IP 之外或使用真实 IP 解析",
 	"pdfLinearizedYes": "是",
 	"pdfLinearizedNo": "否",
 	"tagRemovalDatabaseTip": "将移出所选数据库中的条目及其字段值，保留原文，操作可撤销。未选择的数据库保留条目。",

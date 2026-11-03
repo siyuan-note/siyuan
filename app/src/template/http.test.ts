@@ -14,7 +14,8 @@ const loadHTTP = () => {
     const owner = {isConnected: true, closest: (): Element => null};
     const siyuan = {isPublish: false, ws: {ws: {url: "ws://localhost/ws?app=app&id=main-session&type=main", readyState: 1}},
         languages: {templateHTTPConfirm: "HTTP?", templateHTTPWarning: "Warning", templateHTTPTemplateWarning: "Multiple targets", templateHTTPWaiting: "Waiting",
-            templateHTTPRequesting: "Requesting", templateHTTPTimeout: "Timed out", templateHTTPFailed: "Failed"}};
+            templateHTTPRequesting: "Requesting", templateHTTPTimeout: "Timed out", templateHTTPFailed: "Failed",
+            templateHTTPUnsafeTarget: "Non-public address; check Fake-IP"}};
     let id = 0;
     let invalidations = 0;
     const exports: Record<string, (...args: any[]) => any> = {};
@@ -64,6 +65,30 @@ test("template requests bind one execution to the exact main socket", () => {
     assert.equal(request.headers["X-Siyuan-Template-Session"], "main-session");
     assert.equal(request.headers.custom, "header");
     assert.equal(state.requests.length, 0);
+    request.finish();
+});
+
+test("attribute panels require an explicit live owner and cancel stale confirmations", () => {
+    const state = loadHTTP();
+    assert.equal(state.begin("/api/av/getAttributeViewKeys"), undefined);
+    const guard = state.exports.guardTemplateHTTPRequest(() => state.owner.isConnected, state.owner);
+    const request = state.begin("/api/av/getAttributeViewKeys", guard.signal);
+    assert.equal(request.headers["X-Siyuan-Template-Session"], "main-session");
+    state.event("templateHTTPConfirm", {confirmID: "panel", executionID: request.headers["X-Siyuan-Template-Execution"]});
+    state.owner.isConnected = false;
+    state.dialogs[0].approve();
+    assert.equal(request.signal.aborted, true);
+    assert.equal(state.requests.some(item => item.url.endsWith("respondHTTP")), false);
+    assert.equal(state.requests[0].url, "/api/template/cancelHTTP");
+    guard.dispose();
+    assert.equal(state.timers.size, 0);
+});
+
+test("non-public targets explain the possible Fake-IP cause", () => {
+    const state = loadHTTP();
+    const request = state.begin();
+    state.event("templateHTTPStatus", {state: "error", errorCode: "unsafe_target"});
+    assert.equal(state.messages[0][0], state.siyuan.languages.templateHTTPUnsafeTarget);
     request.finish();
 });
 

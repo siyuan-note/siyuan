@@ -1,4 +1,5 @@
 {
+	"templateHTTPUnsafeTarget": "Cel szablonu wskazuje adres niepubliczny i został zablokowany; przyczyną może być tryb Fake-IP serwera proxy. Wyklucz tę domenę z Fake-IP lub użyj DNS zwracającego rzeczywiste adresy IP",
 	"pdfLinearizedYes": "Tak",
 	"pdfLinearizedNo": "Nie",
 	"tagRemovalDatabaseTip": "Wpisy i wartości ich pól zostaną usunięte z wybranych baz danych. Treść źródłowa zostanie zachowana, a operację można cofnąć. Niewybrane bazy danych zachowają swoje wpisy.",

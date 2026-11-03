@@ -157,7 +157,8 @@ export const newDatabaseRowModel = (options: {
                 currentElement: matchedElement,
             });
         },
-            {avID: data.avID, itemID: data.itemID, valueID: data.valueID, databaseBlockID: data.blockID});
+            {avID: data.avID, itemID: data.itemID, valueID: data.valueID, databaseBlockID: data.blockID},
+            {owner: custom.element, isCurrent: () => !destroyed && currentRenderVersion === renderVersion});
     };
     const model = new Custom({
         app: options.app,

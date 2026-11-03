@@ -173,7 +173,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
             itemID: renderData.itemID,
             valueID: renderData.valueID,
             databaseBlockID: renderData.databaseBlockID,
-        });
+        }, {owner: rowElement, isCurrent: () => !destroyed && currentRenderVersion === renderVersion});
     };
     context.ghostProtyle = new Protyle(protyle.app, document.createElement("div"), {
         blockId: data.databaseBlockID,

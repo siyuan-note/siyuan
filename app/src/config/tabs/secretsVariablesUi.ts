@@ -79,7 +79,7 @@ export const mountSecretsBlock = (root: HTMLElement) => {
                 return;
             }
             showDeleteConfirm(name, () => {
-                saveSecrets(root, window.siyuan.config.secrets.items.filter((item) => item.name !== name));
+                return saveSecrets(root, window.siyuan.config.secrets.items.filter((item) => item.name !== name));
             });
         }
     });
@@ -178,7 +178,7 @@ export const mountVariablesBlock = (root: HTMLElement) => {
                 return;
             }
             showDeleteConfirm(name, () => {
-                saveVariables(root, window.siyuan.config.variables.items.filter((item) => item.name !== name));
+                return saveVariables(root, window.siyuan.config.variables.items.filter((item) => item.name !== name));
             });
         }
     });
@@ -391,13 +391,19 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
     });
 };
 
-const showDeleteConfirm = (title: string, onConfirm: () => void) => {
+const showDeleteConfirm = (title: string, onConfirm: () => Promise<unknown>) => {
     mobileConfirmDialog(
         window.siyuan.languages.deleteOpConfirm,
         window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
-        onConfirm,
+        async () => {
+            await onConfirm();
+            return true;
+        },
         undefined,
         true,
+        undefined,
+        undefined,
+        {awaitConfirm: true},
     );
 };
 

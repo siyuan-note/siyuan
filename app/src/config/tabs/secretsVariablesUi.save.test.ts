@@ -5,6 +5,50 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 
 for (const kind of ["secret", "variable"]) {
+    test(`mobile ${kind} deletion returns persistence failure and supports retry`, async () => {
+        const namespace = kind === "secret" ? "secrets" : "variables";
+        const items = [{name: "remove", value: "test"}, {name: "keep", value: "test"}];
+        let click: (event: unknown) => void;
+        let confirm: () => Promise<boolean>;
+        let options: {awaitConfirm: boolean};
+        let fail = true;
+        let saved: unknown;
+        const root = {querySelector: (selector: string) => selector.endsWith("Block")
+            ? {addEventListener: (_event: string, handler: typeof click) => { click = handler; }}
+            : {innerHTML: ""}};
+        const exports = {} as Record<string, (root: unknown) => void>;
+        const compiled = transpileModule(readFileSync("src/config/tabs/secretsVariablesUi.ts", "utf8"),
+            {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
+        runInNewContext(compiled, {
+            exports,
+            window: {siyuan: {config: {[namespace]: {items}}, languages: {confirmDeleteTip: "${x}"}}},
+            require: () => ({
+                isMobile: () => true,
+                escapeHtmlTextAndAttr: (value: string) => value,
+                [`${namespace}ConfigApi`]: {patch: async (_key: string, next: unknown) => {
+                    if (fail) throw new Error("delete failed");
+                    saved = next;
+                }},
+                mobileConfirmDialog: (...args: unknown[]) => {
+                    confirm = args[2] as typeof confirm;
+                    options = args[7] as typeof options;
+                },
+            }),
+        });
+        exports[kind === "secret" ? "mountSecretsBlock" : "mountVariablesBlock"](root);
+        const action = {dataset: {type: kind === "secret" ? "deleteSecret" : "deleteVariable"},
+            closest: () => ({dataset: {secretName: "remove", variableName: "remove"}})};
+        click({target: {closest: () => action}, preventDefault() {}, stopPropagation() {}});
+        assert.equal(options.awaitConfirm, true);
+        await assert.rejects(confirm(), /delete failed/);
+        assert.equal(saved, undefined);
+        assert.equal(items.length, 2);
+        fail = false;
+        assert.equal(await confirm(), true);
+        assert.deepEqual(JSON.parse(JSON.stringify(saved)), kind === "secret"
+            ? [{name: "keep", value: "test", allowedHosts: []}] : [{name: "keep", value: "test"}]);
+    });
+
     test(`mobile ${kind} editor waits for persistence and keeps its draft on failure`, async () => {
         const values = {itemName: {value: "draft"}, itemValue: {value: "unsaved"}, itemAllowedHosts: {value: "api.example.com"}};
         const clicks: (() => void)[] = [];

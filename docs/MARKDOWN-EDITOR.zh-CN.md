@@ -24,9 +24,11 @@ Vditor 锁定为 `4.0.1`，关闭其自带缓存。离线清单使用仓库内�
 | 平台 | 独立命名空间 | 系统备份策略 |
 | --- | --- | --- |
 | 桌面 | 应用配置根目录下的 `markdown/`，默认 `~/.config/siyuan/markdown/` | 不接入思源同步；操作系统备份可能包含该目录 |
-| Android | `Context.getNoBackupFilesDir()/markdown-v1/` | 使用系统明确排除备份的目录 |
-| iOS | Application Support 下的 `MarkdownEditor/` | 设置 `isExcludedFromBackup` |
-| HarmonyOS | `Context.filesDir/markdown-private/` | 在应用备份规则中排除 |
+| Android | `Context.getExternalFilesDir(null)/home/.config/siyuan/markdown/` | 在旧版备份、云备份及设备传输规则中排除此目录 |
+| iOS | `Documents/home/.config/siyuan/markdown/` | 设置 `isExcludedFromBackup` |
+| HarmonyOS | `Context.filesDir/workspaces/home/.config/siyuan/markdown/` | 在应用备份规则中排除 |
+
+移动端沿用各自现有的模拟 `home`，无需启动内核即可定位配置目录。所有平台的草稿与写入恢复记录位于 `markdown/recovery/`，编辑偏好与文件树状态位于 `markdown/` 根目录，保持各原生平台的存储格式。
 
 偏好和恢复记录都有格式版本。恢复记录校验内容、记录目标代次及编辑版本，安全更新后才确认持久化；未知版本和损坏记录保留原件，不以默认值覆盖。恢复容量为 256 MiB、最多 1,024 条记录；不按时间自动淘汰未保存内容，容量不足时反馈错误。用户可以显式恢复或清理非活跃会话的草稿，不能清理仍被其他编辑容器使用的恢复记录。
 

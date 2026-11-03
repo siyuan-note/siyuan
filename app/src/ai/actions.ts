@@ -1,7 +1,7 @@
 import {MobileDialog} from "../dialog/mobileDialog";
 import {toggleMenu} from "../menus/menuToggle";
 import {markMenuInnerScroll} from "../menus/Menu";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
@@ -51,17 +51,19 @@ const editDialog = (item: IAIEditorAction) => {
             showMessage(window.siyuan.languages["_kernel"][142]);
             return;
         }
-        fetchPost("/api/ai/editor/saveAction", {
-            id: item.id,
-            name: nameElement.value,
-            action: customElement.value,
-        }, () => {
-            dialog.destroy();
+        void dialog.runPending(async () => {
+            const response = await fetchSyncPost("/api/ai/editor/saveAction", {
+                id: item.id,
+                name: nameElement.value,
+                action: customElement.value,
+            });
+            return response.code === 0;
         });
     });
     btnsElement[0].addEventListener("click", () => {
-        fetchPost("/api/ai/editor/removeAction", {id: item.id}, () => {
-            dialog.destroy();
+        void dialog.runPending(async () => {
+            const response = await fetchSyncPost("/api/ai/editor/removeAction", {id: item.id});
+            return response.code === 0;
         });
     });
     dialog.focusWhenReady(() => nameElement);
@@ -106,11 +108,12 @@ const customDialog = (protyle: IProtyle, elements: HTMLElement[], range?: Range)
             showMessage(window.siyuan.languages["_kernel"][142]);
             return;
         }
-        fetchPost("/api/ai/editor/saveAction", {
-            name: nameElement.value,
-            action: customElement.value,
-        }, () => {
-            dialog.destroy();
+        void dialog.runPending(async () => {
+            const response = await fetchSyncPost("/api/ai/editor/saveAction", {
+                name: nameElement.value,
+                action: customElement.value,
+            });
+            return response.code === 0;
         });
     });
     dialog.focusWhenReady(() => nameElement);

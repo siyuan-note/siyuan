@@ -101,6 +101,14 @@ import {
     stripSemanticMarkersFromRangeText,
 } from "../protyle/util/inlineElementMarker";
 
+const renderAssetPreview = (element: HTMLElement, path: string) => {
+    if (element.dataset.assetPreviewPath === path) {
+        return;
+    }
+    element.dataset.assetPreviewPath = path;
+    element.innerHTML = path ? renderAssetsPreview(path) : window.siyuan.languages.emptyContent;
+};
+
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = [], session?: IMenuSession,
                          initial = false) => {
     fetchPost("/api/search/searchAsset", {
@@ -117,14 +125,10 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
         });
 
         const listElement = element.querySelector(".b3-list");
-        const previewElement = element.querySelector("#preview");
+        const previewElement = element.querySelector<HTMLElement>("#preview");
         const inputElement = element.querySelector("input");
         listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-        if (response.data.length > 0) {
-            previewElement.innerHTML = renderAssetsPreview(response.data[0].path);
-        } else {
-            previewElement.innerHTML = window.siyuan.languages.emptyContent;
-        }
+        renderAssetPreview(previewElement, response.data[0]?.path || "");
         const show = () => {
             /// #if MOBILE
             if (initial) {
@@ -163,10 +167,11 @@ const buildAssetMenu = (protyle: IProtyle, position: IPosition, callback?: (url:
     if (menu.isOpen) {
         return;
     }
+    const showPreview = !isMobile() && window.outerWidth >= window.outerWidth / 2 + 260;
     menu.addItem({
         iconHTML: "",
         type: "readonly",
-        label: `<div class="fn__flex" style="max-height: ${isMobile() ? "80" : "50"}vh">
+        label: `<div class="fn__flex${showPreview ? " asset-menu--preview" : ""}" style="max-height: ${isMobile() ? "80" : "50"}vh">
 <div class="fn__flex-column" style="${isMobile() ? "width:100%" : "min-width: 260px;max-width:420px"}">
     <div class="fn__flex" style="margin: 0 8px 4px 8px">
         <input class="b3-text-field fn__flex-1"/>
@@ -177,19 +182,19 @@ const buildAssetMenu = (protyle: IProtyle, position: IPosition, callback?: (url:
     </div>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div></div>
 </div>
-<div id="preview" style="width: 360px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;word-break: break-all;"></div>
+<div id="preview" style="width: 360px;display: ${showPreview ? "flex" : "none"};min-height: 0;padding: 8px;overflow: auto;justify-content: center;align-items: center;word-break: break-all;"></div>
 </div>`,
         bind(element) {
             element.style.maxWidth = "none";
             const listElement = element.querySelector(".b3-list");
-            const previewElement = element.querySelector("#preview");
+            const previewElement = element.querySelector<HTMLElement>("#preview");
             listElement.addEventListener("mouseover", (event) => {
                 const target = event.target as HTMLElement;
                 const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
                 if (!hoverItemElement) {
                     return;
                 }
-                previewElement.innerHTML = renderAssetsPreview(hoverItemElement.getAttribute("data-value"));
+                renderAssetPreview(previewElement, hoverItemElement.getAttribute("data-value"));
             });
             const inputElement = element.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -200,7 +205,7 @@ const buildAssetMenu = (protyle: IProtyle, position: IPosition, callback?: (url:
                 if (!isEmpty) {
                     const currentElement = upDownHint(listElement, event);
                     if (currentElement) {
-                        previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"));
+                        renderAssetPreview(previewElement, currentElement.getAttribute("data-value"));
                         event.stopPropagation();
                     }
                 }

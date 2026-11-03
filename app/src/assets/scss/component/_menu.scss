@@ -1,6 +1,11 @@
 @use "../util/mixin";
 @use "../component/list";
 
+.asset-menu--preview {
+  // 图片加载和切换不参与菜单高度计算，避免资源列表随重新定位移动。
+  height: 50vh;
+}
+
 .b3-menu {
   position: fixed;
   border-radius: var(--b3-border-radius-b);

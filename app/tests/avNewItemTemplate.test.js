@@ -17,15 +17,27 @@ const runCases = async (sources, mobile) => {
     const pending = [];
     let dialog;
     let saved;
+    let holdTransactions = false;
+    const writes = [];
     const api = load(sources.template, {
-        "../../../dialog": {Dialog: class {
+        "../../../dialog/mobileDialog": {MobileDialog: class {
+            pending = false;
             constructor(options) {
                 this.element = document.createElement("div");
                 this.element.innerHTML = options.content;
                 document.body.append(this.element);
                 dialog = {element: this.element, destroy: () => this.destroy()};
             }
-            destroy() { this.element.remove(); }
+            destroy() { if (!this.pending) this.element.remove(); }
+            async runPending(task) {
+                if (this.pending) return false;
+                this.pending = true;
+                let success = false;
+                try { success = await task(); } catch { success = false; }
+                this.pending = false;
+                if (success) this.destroy();
+                return success;
+            }
         }},
         "../../../util/functions": {isMobile: () => mobile},
         "../../../util/escape": {escapeHtml: String, escapeAttr: String},
@@ -43,11 +55,13 @@ const runCases = async (sources, mobile) => {
         }},
         "./calendar/state": {getCalendarCreationDate: () => 123},
         "./render": {avRender() {}},
-        "../../wysiwyg/transaction": {transaction: (_protyle, operations, undo) => { saved = {operations, undo}; }},
+        "../../wysiwyg/transaction": {transaction: (_protyle, operations, undo, options) => {
+            assert.equal(options.awaitResponse, true);
+            saved = {operations, undo};
+            if (holdTransactions) return new Promise((resolve, reject) => writes.push({resolve, reject}));
+        }},
         "./openDatabaseRow": {openDatabaseRowByData: (_protyle, data, options) => calls.push({data, options})},
         "../../../dialog/message": {showMessage() {}},
-        "../../../mobile/util/bindBottomSheetDialog": {bindBottomSheetDialog: () => () => {}},
-        "../../../mobile/util/keyboardToolbar": {activeBlur() {}},
     });
     const block = document.createElement("div");
     Object.assign(block.dataset, {avId: "database", nodeId: "carrier", avType: "table"});
@@ -105,6 +119,27 @@ const runCases = async (sources, mobile) => {
     dialog.element.querySelector('[data-role="confirm"]').click();
     assert.equal(saved.operations[0].data.templates[0].openAfterCreate, false);
     dialog.destroy();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    holdTransactions = true;
+    api.openNewItemTemplateDialog({protyle, blockElement: block, data: {id: "database"}, createNew: true});
+    const draft = dialog.element.querySelector('[data-role="template-name"]');
+    draft.value = "Retry template";
+    const confirm = dialog.element.querySelector('[data-role="confirm"]');
+    confirm.click();
+    confirm.click();
+    dialog.destroy();
+    assert.equal(writes.length, 1, "pending template saves are deduplicated");
+    assert.equal(dialog.element.isConnected, true);
+    writes[0].reject(new Error("save failed"));
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(dialog.element.isConnected, true, "failed persistence retains the template editor");
+    assert.equal(draft.value, "Retry template");
+    confirm.click();
+    assert.equal(writes.length, 2);
+    writes[1].resolve();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(dialog.element.isConnected, false);
+    holdTransactions = false;
 
     for (const failure of ["error", "unavailable", "closed", "readonly"]) {
         const before = calls.length;

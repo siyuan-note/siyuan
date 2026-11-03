@@ -6,6 +6,7 @@ package model
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,6 +14,50 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestDocumentSourceJournalConcurrentScanAndWrites(t *testing.T) {
+	oldQueue := util.QueueDir
+	util.QueueDir = t.TempDir()
+	t.Cleanup(func() { util.QueueDir = oldQueue })
+	j := &documentSourceJournal{Version: 1, ID: ast.NewNodeID(), State: "pending", Files: []*documentSourceFile{
+		{Box: ast.NewNodeID(), Path: "/" + ast.NewNodeID() + ".sy", Before: []byte("before"), After: []byte("after")},
+	}}
+	if err := j.save(); err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan struct{})
+	result := make(chan error, 1)
+	go func() {
+		for {
+			select {
+			case <-done:
+				result <- nil
+				return
+			default:
+				if _, err := readDocumentSourceJournals(); err != nil {
+					result <- fmt.Errorf("scan: %w", err)
+					return
+				}
+			}
+		}
+	}()
+	var writeErr error
+	for i := 0; i < 100 && writeErr == nil; i++ {
+		if writeErr = j.save(); writeErr == nil {
+			writeErr = j.remove()
+		}
+		if writeErr == nil {
+			writeErr = j.save()
+		}
+	}
+	close(done)
+	if err := <-result; err != nil {
+		t.Error(err)
+	}
+	if writeErr != nil {
+		t.Fatal(writeErr)
+	}
+}
 
 func TestDocumentSourceRecoveryPreservesConflictsAndCorruptRecords(t *testing.T) {
 	for _, corrupt := range []bool{false, true} {

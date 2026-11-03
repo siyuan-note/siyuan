@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"
@@ -78,6 +79,9 @@ type documentSourceJournal struct {
 	Move      *documentSourceMove   `json:"move,omitempty"`
 	Recovered []string              `json:"recovered,omitempty"`
 }
+
+// 协调恢复记录扫描和替换，避免 Windows 读取句柄阻止重命名或删除。
+var documentSourceJournalLock sync.RWMutex
 
 func documentSourceJournalBase() string { return filepath.Join(util.QueueDir, "document-sources") }
 
@@ -181,10 +185,20 @@ func (j *documentSourceJournal) save() error {
 	if err != nil {
 		return err
 	}
+	documentSourceJournalLock.Lock()
+	defer documentSourceJournalLock.Unlock()
 	return os.Rename(file.Name(), j.filename())
 }
 
+func (j *documentSourceJournal) remove() error {
+	documentSourceJournalLock.Lock()
+	defer documentSourceJournalLock.Unlock()
+	return os.Remove(j.filename())
+}
+
 func readDocumentSourceJournals() ([]*documentSourceJournal, error) {
+	documentSourceJournalLock.RLock()
+	defer documentSourceJournalLock.RUnlock()
 	if util.QueueDir == "" {
 		return nil, nil
 	}
@@ -381,7 +395,7 @@ func recoverDocumentSources() error {
 			logging.LogWarnf("preserved current transaction sources [%s]; recovery archived", entry.ID)
 		}
 		if !slices.ContainsFunc(entry.Files, func(file *documentSourceFile) bool { return file.Kind == "" }) {
-			if err = os.Remove(entry.filename()); err != nil {
+			if err = entry.remove(); err != nil {
 				return err
 			}
 		}
@@ -423,7 +437,7 @@ func finishDocumentSourceRecovery(box string) error {
 			}
 		}
 		if complete {
-			err = os.Remove(j.filename())
+			err = j.remove()
 		} else {
 			err = j.save()
 		}

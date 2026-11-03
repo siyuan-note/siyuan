@@ -364,7 +364,7 @@ func (tx *Transaction) rollbackDocumentSources() {
 		}
 	}
 	if tx.sourceRollbackErr == nil {
-		if err := os.Remove(j.filename()); err != nil {
+		if err := j.remove(); err != nil {
 			tx.sourceRollbackErr = err
 		}
 	}
@@ -379,7 +379,7 @@ func (tx *Transaction) releaseDocumentSources(committed bool) {
 	tx.sourceRelationBoundaries = nil
 	tx.sourceMirrors, tx.sourceBlockAttrs = nil, nil
 	if committed && tx.sourceJournal != nil {
-		if err := os.Remove(tx.sourceJournal.filename()); err != nil {
+		if err := tx.sourceJournal.remove(); err != nil {
 			logging.LogWarnf("retain committed transaction recovery [%s]: %s", tx.sourceJournal.ID, err)
 		}
 	}

@@ -2139,7 +2139,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	})
 	if recovery != nil {
 		if err == nil {
-			err = os.Remove(recovery.filename())
+			err = recovery.remove()
 		} else {
 			util.MarkIndexFixDirty()
 		}

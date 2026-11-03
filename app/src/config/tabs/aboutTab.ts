@@ -162,8 +162,8 @@ const mountAboutVersionSlot = (root: HTMLElement) => {
             if (!received) logStage("request_failed");
         });
     });
-    root.querySelector("#viewChangelogBtn")?.addEventListener("click", () => {
-        openChangelog(true);
+    root.querySelector("#viewChangelogBtn")?.addEventListener("click", (event) => {
+        void openChangelog(true, event.currentTarget as HTMLButtonElement);
     });
     const updateElement = root.querySelector("#checkUpdateBtn") as HTMLButtonElement | null;
     updateElement?.addEventListener("click", () => {

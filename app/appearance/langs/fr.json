@@ -1,4 +1,5 @@
 {
+	"changelogUnavailable": "Impossible de charger le journal des modifications. Consultez cette version sur GitHub ou réessayez plus tard",
 	"templateHTTPUnsafeTarget": "La cible du modèle est résolue en une adresse non publique et a été bloquée ; le mode Fake-IP du proxy peut en être la cause. Excluez ce domaine de Fake-IP ou utilisez un DNS renvoyant les adresses IP réelles",
 	"pdfLinearizedYes": "Oui",
 	"pdfLinearizedNo": "Non",

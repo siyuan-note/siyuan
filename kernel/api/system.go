@@ -6,6 +6,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -83,13 +84,27 @@ var getNetwork = contractHandler(apicontract.GetNetwork, func(c *gin.Context, re
 	return apicontract.Success(apicontract.NetworkData{Proxy: proxy})
 })
 
-var getChangelog = contractHandler(apicontract.SystemGetChangelog, func(c *gin.Context, request apicontract.SystemChangelogRequest) (ret apicontract.Response[apicontract.SystemChangelogData]) {
-	ret = apicontract.Success(apicontract.SystemChangelogData{})
+var getReleaseChangelog = model.GetReleaseChangelog
 
-	force := request.Force
+var getChangelog = contractHandler(apicontract.SystemGetChangelog, func(c *gin.Context, request apicontract.SystemChangelogRequest) apicontract.Response[apicontract.SystemChangelogData] {
+	return loadChangelog(c.Request.Context(), request.Force, util.Ver)
+})
 
+func loadChangelog(ctx context.Context, force bool, version string) (ret apicontract.Response[apicontract.SystemChangelogData]) {
 	data := apicontract.SystemChangelogData{}
 	ret = apicontract.Success(data)
+
+	if !util.IsReleaseVer(version) {
+		if !force {
+			return
+		}
+		content, err := getReleaseChangelog(ctx, version)
+		if err != nil {
+			logging.LogWarnf("get changelog for v%s failed: %s", version, err)
+			return apicontract.Failure[apicontract.SystemChangelogData](-1, "release changelog is unavailable")
+		}
+		return apicontract.Success(apicontract.SystemChangelogData{Show: true, HTML: content, Version: version})
+	}
 
 	changelogsDir := filepath.Join(util.WorkingDir, "changelogs")
 	if !gulu.File.IsDir(changelogsDir) {
@@ -100,19 +115,13 @@ var getChangelog = contractHandler(apicontract.SystemGetChangelog, func(c *gin.C
 		return
 	}
 
-	if !force && !util.IsReleaseVer(util.Ver) {
-		model.Conf.ShowChangelog = false
-		model.Conf.Save()
-		return
-	}
-
-	changelogVer := util.Ver
+	changelogVer := version
 	changelogPath := getChangelogPath(changelogsDir, changelogVer)
 	if force && changelogPath == "" {
-		changelogVer, changelogPath = getLatestChangelog(changelogsDir, util.Ver)
+		changelogVer, changelogPath = getLatestChangelog(changelogsDir, version)
 	}
 	if changelogPath == "" {
-		logging.LogErrorf("changelog not found for v%s", util.Ver)
+		logging.LogErrorf("changelog not found for v%s", version)
 		return
 	}
 
@@ -135,7 +144,7 @@ var getChangelog = contractHandler(apicontract.SystemGetChangelog, func(c *gin.C
 	data.Version = changelogVer
 	ret = apicontract.Success(data)
 	return
-})
+}
 
 func getChangelogPath(changelogsDir, ver string) string {
 	verDir := filepath.Join(changelogsDir, "v"+ver)

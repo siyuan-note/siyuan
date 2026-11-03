@@ -1,4 +1,5 @@
 {
+	"changelogUnavailable": "לא ניתן לטעון את יומן השינויים. אפשר לצפות בגרסה הזו ב-GitHub או לנסות שוב מאוחר יותר",
 	"templateHTTPUnsafeTarget": "יעד התבנית נפתר לכתובת שאינה ציבורית ונחסם; ייתכן שהסיבה היא מצב Fake-IP של שרת ה־Proxy. יש להחריג דומיין זה מ־Fake-IP או להשתמש ב־DNS שמחזיר כתובות IP אמיתיות",
 	"pdfLinearizedYes": "כן",
 	"pdfLinearizedNo": "לא",

@@ -1,4 +1,5 @@
 {
+	"changelogUnavailable": "Değişiklik günlüğü yüklenemedi. Bu sürümü GitHub'da görüntüleyin veya daha sonra tekrar deneyin",
 	"templateHTTPUnsafeTarget": "Şablon hedefi genel olmayan bir adrese çözümlendi ve engellendi; nedeni vekil sunucunun Fake-IP modu olabilir. Bu alan adını Fake-IP dışında tutun veya gerçek IP döndüren DNS kullanın",
 	"pdfLinearizedYes": "Evet",
 	"pdfLinearizedNo": "Hayır",

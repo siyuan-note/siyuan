@@ -1,4 +1,5 @@
 {
+	"changelogUnavailable": "無法載入更新日誌，可在 GitHub 查看該版本，或稍後重試",
 	"templateHTTPUnsafeTarget": "範本目標解析為非公網位址，已阻止存取，可能與代理 Fake-IP 模式有關；請將該網域排除於 Fake-IP 之外或使用真實 IP 解析",
 	"pdfLinearizedYes": "是",
 	"pdfLinearizedNo": "否",

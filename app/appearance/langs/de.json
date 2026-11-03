@@ -1,4 +1,5 @@
 {
+	"changelogUnavailable": "Das Änderungsprotokoll konnte nicht geladen werden. Diese Version auf GitHub ansehen oder später erneut versuchen",
 	"templateHTTPUnsafeTarget": "Das Vorlagenziel wird zu einer nicht öffentlichen Adresse aufgelöst und wurde blockiert; Ursache kann der Fake-IP-Modus des Proxys sein. Diese Domain von Fake-IP ausschließen oder DNS mit echten IP-Adressen verwenden",
 	"pdfLinearizedYes": "Ja",
 	"pdfLinearizedNo": "Nein",

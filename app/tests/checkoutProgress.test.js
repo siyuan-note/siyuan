@@ -182,6 +182,13 @@ const run = async () => {
                 assert.equal(calls.length,1);
                 assert.deepEqual(calls.shift().data,{taskID:"first",token:"window-token",saved:true});
                 progress("first",0,3);
+                progress("first",0,3,"applying",{current:0,total:0,message:"Indexing document"});
+                assert.equal(root.querySelector('[data-type="message"]').textContent,"Indexing document");
+                root.querySelector('[data-action="toggle"]').click();
+                assert.equal(root.querySelector('[data-type="message"]').textContent,"Indexing document");
+                assert.equal(root.querySelector('[role="progressbar"]').hasAttribute("aria-valuenow"),false);
+                root.querySelector('[data-action="toggle"]').click();
+                progress("first",0,3);
                 root.querySelector('[data-action="toggle"]').focus();
                 document.activeElement.dispatchEvent(new KeyboardEvent("keydown",{key:"Tab",bubbles:true,cancelable:true}));
                 assert.equal(document.activeElement,root.querySelector('[data-action="cancel"]'));

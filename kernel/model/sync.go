@@ -525,6 +525,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 		removeRootIDs = append(removeRootIDs, rootID)
 
 		msg := fmt.Sprintf(Conf.Language(39), rootID)
+		updateSyncCheckoutIndexMessage(msg)
 		util.IncBootProgress(bootProgressPart, msg)
 		pushSyncStatusBar(msg)
 
@@ -582,6 +583,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 			hpathRefresh.Lock()
 			defer hpathRefresh.Unlock()
 			msg := fmt.Sprintf(Conf.Language(40), util.GetTreeID(p))
+			updateSyncCheckoutIndexMessage(msg)
 			util.IncBootProgress(bootProgressPart, msg)
 			pushSyncStatusBar(msg)
 

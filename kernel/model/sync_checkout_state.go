@@ -23,6 +23,28 @@ var syncCheckoutRevision atomic.Int64
 
 var errSyncCheckoutBusy = errors.New("sync checkout write admission is busy")
 
+func (task *syncCheckoutTask) beginIndexing() {
+	task.Lock()
+	defer task.Unlock()
+	task.indexing = true
+	task.message = Conf.Language(436)
+	task.revision = syncCheckoutRevision.Add(1)
+	task.broadcastLocked(0)
+}
+
+func updateSyncCheckoutIndexMessage(message string) {
+	activeSyncCheckout.Lock()
+	defer activeSyncCheckout.Unlock()
+	if task := activeSyncCheckout.task; task != nil {
+		task.Lock()
+		defer task.Unlock()
+		if task.indexing && task.message != message {
+			task.message = message
+			task.revision = syncCheckoutRevision.Add(1)
+		}
+	}
+}
+
 type syncCheckoutClient struct {
 	token     string
 	confirmed bool
@@ -56,6 +78,9 @@ func (task *syncCheckoutTask) snapshotLocked() apicontract.SyncCheckoutState {
 		Blocking: task.phase != "background" && task.phase != "done", Canceling: task.canceling,
 		Current: task.progress.Written, Total: task.progress.Size, Message: task.message,
 		UpsertRootIDs: []string{}, RemoveRootIDs: []string{}}
+	if task.indexing {
+		state.Current, state.Total = 0, 0
+	}
 	roots := map[string]bool{}
 	if task.phase == "background" || task.phase == "done" {
 		for id, upsert := range task.refreshedRoots {
@@ -220,6 +245,7 @@ func (task *syncCheckoutTask) completeApply() {
 	}
 	task.Unlock()
 	if changes.DataChanged() {
+		task.beginIndexing()
 		calcPetalDiff(task.beforePetals, changes)
 		processSyncMergeResult(false, false, changes, &dejavu.TrafficStat{}, "c", 0, true)
 	}
@@ -249,6 +275,7 @@ func (task *syncCheckoutTask) completeApply() {
 		task.releaseWrites = nil
 	}
 	task.phase, task.revision = "background", syncCheckoutRevision.Add(1)
+	task.indexing = false
 	task.broadcastLocked(0)
 	task.Unlock()
 }

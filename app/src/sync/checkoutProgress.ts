@@ -127,7 +127,7 @@ const render = () => {
     root.classList.toggle("sync-checkout--background", !state.blocking);
     root.classList.toggle("sync-checkout--compact", state.compact || !state.blocking);
     root.querySelector(".sync-checkout__notice").classList.toggle("fn__none", !state.blocking || state.compact);
-    updateProgressContent(root, state.compact ? window.siyuan.languages._kernel[81] : state.message,
+    updateProgressContent(root, state.compact && state.total > 0 ? window.siyuan.languages._kernel[81] : state.message,
         state.current, state.total, "percent");
     root.querySelector('[data-action="toggle"] span').textContent = state.compact ?
         window.siyuan.languages.expand : window.siyuan.languages.collapseSyncDetails;

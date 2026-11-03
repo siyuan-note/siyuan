@@ -24,6 +24,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestSyncCheckoutIndexProgressSurvivesPeriodicPush(t *testing.T) {
+	task := prepareSyncCheckoutStateTest(t)
+	task.progress = dejavu.CheckoutProgress{Path: "document.sy", Written: 100, Size: 100}
+	task.beginIndexing()
+	updateSyncCheckoutIndexMessage("Indexing document")
+	task.push()
+	state := GetSyncCheckout("", "").Task
+	if state.Message != "Indexing document" || state.Current != 0 || state.Total != 0 {
+		t.Fatalf("indexing retained completed file progress: %+v", state)
+	}
+	task.Lock()
+	task.indexing = false
+	task.Unlock()
+	updateSyncCheckoutIndexMessage("Unrelated status")
+	if state := GetSyncCheckout("", "").Task; state.Message != "Indexing document" {
+		t.Fatalf("non-indexing status replaced task message: %+v", state)
+	}
+}
+
 func TestSyncCheckoutPreparationStartsTimeoutOnlyAfterUIReady(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		task := prepareSyncCheckoutStateTest(t)

@@ -902,17 +902,23 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         inputElement.focus();
         callMobileAppShowKeyboard();
         if (type === "template") {
+            inputElement.value = "";
+            inputElement.disabled = true;
             fetchPost("/api/av/renderAttributeView", {
                 id: blockElement.dataset.avId,
                 blockID: blockElement.dataset.nodeId,
+                ignoreRows: true,
             }, (response) => {
-                if (!isAVRenderData(response.data)) {
+                if (!avMaskElement.isConnected || response.code !== 0 || !isAVRenderData(response.data)) {
                     return;
                 }
                 getFieldsByData(response.data).find((item: IAVColumn) => {
                     if (item.id === getColId(cellElements[0], viewType)) {
                         inputElement.value = item.template;
                         inputElement.dataset.template = item.template;
+                        inputElement.disabled = false;
+                        inputElement.focus();
+                        inputElement.select();
                         return true;
                     }
                 });
@@ -1018,7 +1024,8 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
     if (type === "template") {
         const colId = getColId(cellElements[0], viewType);
         const textElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
-        if (textElement.value !== textElement.dataset.template && !blockElement.getAttribute("data-loading")) {
+        if (textElement.dataset.template !== undefined && !textElement.disabled &&
+            textElement.value !== textElement.dataset.template && !blockElement.getAttribute("data-loading")) {
             transaction(protyle, [{
                 action: "updateAttrViewColTemplate",
                 id: colId,

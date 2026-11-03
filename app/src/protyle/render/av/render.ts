@@ -1,3 +1,4 @@
+import {fetchAVRender, AVAutomaticRefresh} from "./httpRender";
 import {isAVSelectType} from "./capabilities";
 import {guardTemplateHTTPRequest} from "../../../template/http";
 import {clearSubItemsViewportAnchor, getSubItemsRequest, prepareSubItemsViewport, reconcileSubItems, restoreSubItemsView} from "./subItemsState";
@@ -583,7 +584,7 @@ const afterRenderTable = (options: ITableOptions) => {
 };
 
 export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true,
-                               avData?: IAV, automaticRefresh = false) => {
+                               avData?: IAV, automaticRefresh: AVAutomaticRefresh = false, inheritedRenderToken?: symbol) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         avElements = [element];
@@ -607,20 +608,20 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             continue;
         }
         e.removeAttribute("data-rendering");
-        if (e.getAttribute("data-render") === "true" || hasClosestByClassName(e, "av__gallery-content")) {
+        if ((e.getAttribute("data-render") === "true" && !avData) || hasClosestByClassName(e, "av__gallery-content")) {
             continue;
         }
         if (isMobile() || isInMobileApp()) {
             e.classList.add("av--touch");
         }
-        const renderToken = beginAVRender(e);
+        const renderToken = inheritedRenderToken || beginAVRender(e);
 
         if (e.getAttribute("data-av-type") === "gallery") {
-            await renderGallery({blockElement: e, protyle, cb, renderAll});
+            await renderGallery({blockElement: e, protyle, cb, renderAll, data: avData, automaticRefresh, renderToken});
             continue;
         }
         if (e.getAttribute("data-av-type") === "kanban") {
-            await renderKanban({blockElement: e, protyle, cb, renderAll});
+            await renderKanban({blockElement: e, protyle, cb, renderAll, data: avData, automaticRefresh, renderToken});
             continue;
         }
 
@@ -736,9 +737,10 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 ...common, ...paging, created, carrierViewID,
             }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
                 ...common, ...paging, snapshot, carrierViewID,
-            }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
+            }, undefined, false) : fetchAVRender({
                 ...common, ...paging,
-                automaticRefresh,
+                automaticRefresh: !!automaticRefresh,
+                preserveHTTPResults: automaticRefresh === "presentation",
                 initialLayout: e.getAttribute("data-av-type"),
                 createIfNotExist: !window.siyuan.isPublish && !standalone && !relationHost,
                 targetItemID: locateParams?.targetItemID || "",
@@ -746,7 +748,8 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 temporarySort: relationHost ? relationHost.temporarySort : getReadonlyAVSortRequest(e, protyle, common.viewID),
                 temporaryFilters: relationHost?.temporaryFilters,
                 relationContext: relationHost?.relationContext,
-            }, undefined, false, requestGuard.signal)).finally(requestGuard.dispose);
+            }, requestGuard.signal, e, () => isCurrentAVRender(e, renderToken),
+            preview => avRender(e, protyle, undefined, true, preview, automaticRefresh, renderToken))).finally(requestGuard.dispose);
             if (!isCurrentAVRender(e, renderToken)) {
                 continue;
             }
@@ -785,7 +788,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             setAVVisibleViewIDs(e, getAVVisibleViewIDs(e, data.views));
         }
         prepareAVLocate(e, data, resetData);
-        if (data.view.nested) {
+        if (data.view.nested && !data.pendingHTTPTemplates?.length) {
             prepareSubItemsViewport(e, data, resetData.virtualData);
         }
         if (data.viewType === "calendar") {
@@ -793,11 +796,11 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             continue;
         }
         if (data.viewType === "gallery") {
-            await renderGallery({blockElement: e, protyle, cb, renderAll, data});
+            await renderGallery({blockElement: e, protyle, cb, renderAll, data, automaticRefresh, renderToken});
             continue;
         }
         if (data.viewType === "kanban") {
-            await renderKanban({blockElement: e, protyle, cb, renderAll, data});
+            await renderKanban({blockElement: e, protyle, cb, renderAll, data, automaticRefresh, renderToken});
             continue;
         }
         const view = data.view as IAVTable;
@@ -1308,7 +1311,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
                 removeAVPasteSkeleton(item);
                 item.removeAttribute("data-loading");
-            }, true, undefined, true);
+            }, true, undefined, operation.action === "setAttrViewSorts" ? "presentation" : true);
         });
     }, ["insertAttrViewBlock", "addAttrViewCol", "removeAttrViewCol", "duplicateAttrViewKey"].includes(operation.action) ? 2 : 100);
 };

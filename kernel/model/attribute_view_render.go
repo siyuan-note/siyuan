@@ -502,6 +502,7 @@ func RenderAttributeViewWithTargetReadOnly(blockID, avID, viewID, query string, 
 
 // AttributeViewRenderOptions 仅影响本次渲染，不参与数据库持久化。
 type AttributeViewRenderOptions struct {
+	HTTPPreview      *sql.HTTPTemplatePreview
 	RelationContext  *AttributeViewRelationContext
 	TemporaryFilters []*av.ViewFilter
 	TemplateHTTP     *templatehttp.Execution
@@ -673,12 +674,20 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 		err = contextErr
 		return
 	}
+	if options.HTTPPreview.Prepare(attrView) && !ignoreRows {
+		plan := planAttributeViewTemplates(attrView, view, query, false)
+		if plan == nil || len(plan.required) != 0 || options.Nested != nil {
+			// 筛选、排序、分组和日历依赖模板结果时先展示字段结构，避免临时行集被误认作最终结果。
+			ignoreRows = true
+		}
+	}
 	if options.Nested != nil && attrView.SubItems != nil && attrView.SubItems.Enabled && view.SubItemsDisplay == "nested" && (view.LayoutType == av.LayoutTypeTable || view.LayoutType == av.LayoutTypeList) {
 		return renderNestedAttributeView(attrView, view, query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, filterContext, options)
 	}
 
 	// 渲染视图
 	renderContext := sql.NewAttributeViewRenderContext()
+	renderContext.HTTPPreview = options.HTTPPreview
 	renderContext.TemplateHTTP = options.TemplateHTTP
 	renderContext.TemplateHTTPSourceScope = templateHTTPDatabaseSourceScope(options.TemplateHTTP)
 	defer func() {
@@ -692,7 +701,7 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 	}
 	defer renderContext.PushTemplateErrors()
 	var orderReuse *attributeViewOrderReuse
-	if !ignoreRows && strings.TrimSpace(query) == "" && filterContext == nil && target == nil && targetGroupID == "" && options.RelationContext == nil {
+	if options.HTTPPreview == nil && !ignoreRows && strings.TrimSpace(query) == "" && filterContext == nil && target == nil && targetGroupID == "" && options.RelationContext == nil {
 		orderReuse = planAttributeViewOrderReuse(attrView, view, nodeID, writable)
 		if reused, found := orderReuse.renderPage(attrView, view, page, pageSize, renderContext); found {
 			timing.Count("order_cache_hit", 1)

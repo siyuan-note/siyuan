@@ -2219,6 +2219,8 @@ if (response.code === 0 && response.data) {
 
 普通 HTTP 模板解析或求值错误在对应字段中返回，数据库仍可显示；取消、笔记本锁定和执行超限仍终止渲染。
 
+`deferHTTPTemplates` 默认为 `false`。设为 `true` 时先返回未执行联网模板的视图，`pendingHTTPTemplates` 列出待求值字段 ID；同库模板一并延后。筛选、排序、分组、统计、日历或嵌套布局依赖模板结果时，仅返回结构，不返回临时行集。不带该标记再次请求，获取最终结果并按正常流程确认联网。`preserveHTTPResults` 默认为 `false`；配合 `automaticRefresh: true`，排序等展示操作可复用模板当前成功快照，包括读取外部块或 SQL 的模板。来源、行输入、权限和缓存边界仍生效；单独设置该标记不会覆盖手动刷新。
+
 * 参数
 
   ```json

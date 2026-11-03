@@ -10,6 +10,8 @@ for (const layout of ["table", "gallery", "kanban"]) {
         const nested = {expandedIDs: ["parent"], childPaging: {parent: {page: 2, pageSize: 50}}};
         const methods: Record<string, (...args: unknown[]) => Promise<void>> = {};
         const imports: Record<string, unknown> = {
+            fetchAVRender: (request: unknown, signal: AbortSignal) =>
+                (imports.fetchSyncPost as (...args: unknown[]) => Promise<unknown>)("/api/av/renderAttributeView", request, undefined, false, signal),
             Constants: {CB_GET_AV_NO_CREATE: "standalone"},
             getAVSelectedItemPoints: (): [] => [],
             getPageSize: () => ({unGroupPage: 3, unGroupPageSize: 50, groupPageSize: {}}),

@@ -371,6 +371,10 @@ type RenderHistoryAttributeViewRequest struct {
 }
 
 type RenderAttributeViewRequest struct {
+	// 首屏返回尚未联网的视图及待加载字段；默认 false，不影响现有同步调用。
+	DeferHTTPTemplates bool `json:"deferHTTPTemplates" api:"optional,nullable"`
+	// 仅在 automaticRefresh 为 true 的展示操作中复用外部查询依赖模板的当前快照。
+	PreserveHTTPResults bool `json:"preserveHTTPResults" api:"optional,nullable"`
 	// 自动重渲复用来源、行及模板输入未变的内存结果；默认 false，显式刷新重新求值。
 	AutomaticRefresh bool `json:"automaticRefresh" api:"optional,nullable"`
 	// 从来源关联字段推导目标及条目集合；无效上下文报错，不能回退为整个数据库。

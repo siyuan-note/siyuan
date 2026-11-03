@@ -1,4 +1,5 @@
 import {avRender, initUnfoldedGroupTables, setAVGroupFolded} from "./render";
+import type {AVAutomaticRefresh} from "./httpRender";
 import {avClick} from "./action";
 import {beginAVRender} from "./locate";
 import {canEditAVHost, createAVHostProtyle, deleteAVRelationHost, IAVRelationHost, registerAVHostRefresh, setAVRelationHost} from "./host";
@@ -76,7 +77,7 @@ class RelatedAVView {
     private editor: IProtyle;
     private folded = false;
     private dirty = true;
-    private automaticRefresh = false;
+    private automaticRefresh: AVAutomaticRefresh = false;
     private disposed = false;
     private renderVersion = 0;
     private timeout?: ReturnType<typeof setTimeout>;
@@ -232,7 +233,7 @@ class RelatedAVView {
         if (visible && this.dirty) void this.render();
     }
 
-    invalidate(automaticRefresh = false) {
+    invalidate(automaticRefresh: AVAutomaticRefresh = false) {
         this.automaticRefresh = automaticRefresh;
         this.renderVersion++;
         this.dirty = true;
@@ -407,13 +408,13 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
             label: field.name, icon: getColIconByType(field.type), submenu: (["ASC", "DESC"] as const).map(order => ({
                 label: window.siyuan.languages[order === "ASC" ? "asc" : "desc"],
                 checked: this.host.temporarySort?.column === field.id && this.host.temporarySort.order === order,
-                click: () => { this.host.temporarySort = {column: field.id, order}; this.invalidate(); },
+                click: () => { this.host.temporarySort = {column: field.id, order}; this.invalidate("presentation"); },
             })),
         }));
         menu.addSeparator();
         menu.addItem({label: window.siyuan.languages.avRestoreDefaultSort, click: () => {
             this.host.temporarySort = undefined;
-            this.invalidate();
+            this.invalidate("presentation");
         }});
         const rect = target.getBoundingClientRect();
         menu.open({x: rect.left, y: rect.bottom, h: rect.height});

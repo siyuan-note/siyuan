@@ -146,6 +146,52 @@ func TestTemplateInputSignatureDoesNotCacheExternalReads(t *testing.T) {
 	}
 }
 
+func TestAttributeViewPresentationRefreshPreservesExternalTemplateSnapshots(t *testing.T) {
+	templatehttp.ClearTemplateResults()
+	t.Cleanup(templatehttp.ClearTemplateResults)
+	primary := av.NewKey("primary", "Primary", "", av.KeyTypeBlock)
+	computed := av.NewKey("computed", "Computed", "", av.KeyTypeTemplate)
+	computed.Template = `.action{if false}.action{querySQL "select * from blocks"}.action{end}.action{.Primary}:.action{uuidv4}`
+	database := &av.AttributeView{ID: "presentation-test", KeyValues: []*av.KeyValues{
+		{Key: primary, Values: []*av.Value{
+			newTemplateErrorTestBlockValue(primary.ID, "20261030000000-item00b", "Beta"),
+			newTemplateErrorTestBlockValue(primary.ID, "20261030000000-item00a", "Alpha"),
+		}}, {Key: computed},
+	}}
+	render := func(automatic, presentation bool) []string {
+		t.Helper()
+		execution := templatehttp.New(context.Background(), "render", nil)
+		defer execution.Close()
+		execution.SetAutomaticRefresh(automatic)
+		execution.SetPreserveHTTPResults(presentation)
+		context := NewAttributeViewRenderContext()
+		context.TemplateHTTP = execution
+		table := newHTTPTemplateTestTable(primary, computed)
+		fillAttributeViewTemplateValues(database, &av.View{ID: "view"}, table, nil, context)
+		if context.HasTemplateErrors() || execution.Err() != nil {
+			t.Fatalf("template failed: %+v %v", context.templateErrors, execution.Err())
+		}
+		execution.CommitTemplateResults()
+		return []string{table.Rows[0].GetValue(computed.ID).Template.Content, table.Rows[1].GetValue(computed.ID).Template.Content}
+	}
+	first := render(false, false)
+	if got := render(true, true); got[0] != first[0] || got[1] != first[1] {
+		t.Fatal("sorting recomputed external dependencies", first, got)
+	}
+	database.KeyValues[0].Values[0].Block.Content = "Changed"
+	changed := render(true, true)
+	if changed[0] == first[0] || changed[1] != first[1] {
+		t.Fatal("presentation snapshot ignored changed row inputs", first, changed)
+	}
+	automatic := render(true, false)
+	if automatic[0] == changed[0] || automatic[1] == changed[1] {
+		t.Fatal("data refresh reused external dependencies")
+	}
+	if manual := render(false, true); manual[0] == automatic[0] || manual[1] == automatic[1] {
+		t.Fatal("presentation flag overrode manual refresh")
+	}
+}
+
 func TestTemplateInputSignaturePreservesInputTypes(t *testing.T) {
 	for _, source := range []string{`{{kindOf .Value}}`, `{{kindOf (index .id_mod "value")}}`, `{{printf "%v" .}}`} {
 		tpl := template.Must(template.New("").Funcs(template.FuncMap{"kindOf": func(any) string { return "" }}).Parse(source))

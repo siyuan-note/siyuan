@@ -93,6 +93,7 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		data.ContextFilter = nil
 		data.ContextFilterFields = []*apicontract.AVAttributeViewContextFilterField{}
 	}
+	data.PendingHTTPTemplates = options.HTTPPreview.Pending()
 	return apicontract.Success(apicontract.NewAVRenderResult(data))
 }
 

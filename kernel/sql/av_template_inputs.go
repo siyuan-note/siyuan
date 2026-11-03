@@ -116,15 +116,12 @@ func templateInputSignature(tpl *template.Template, data map[string]any) (string
 		}
 	}
 	walk(tpl.Tree.Root, true)
-	if !cacheable {
-		return "", false
-	}
 	raw, err := json.Marshal(inputs)
 	if err != nil {
 		return "", false
 	}
 	hash := sha256.Sum256(raw)
-	return hex.EncodeToString(hash[:]), true
+	return hex.EncodeToString(hash[:]), cacheable
 }
 
 func templateInputValue(value any) any {

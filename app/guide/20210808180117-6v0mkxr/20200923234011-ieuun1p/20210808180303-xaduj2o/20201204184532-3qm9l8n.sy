@@ -2018,12 +2018,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261103231923-go0qtln",
-				"updated": "20261103231923"
+				"updated": "20261104010000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Denying a database template field denies subsequent requests from that field version for all rows in the current execution, without saving a permanent denial. During automatic updates, successful row results are reused when the template and its referenced inputs are unchanged. Editing unrelated fields, adding rows, or binding the primary key does not recalculate existing rows unless their template inputs change. Manual refresh or reopening evaluates templates again. Dynamic access to an entire row uses the whole row as its dependency; templates reading other blocks or SQL results recalculate conservatively. Results are held only in a bounded memory cache and are cleared when a notebook locks or permission is revoked; evicted results are recalculated. There is no scheduled refresh."
+					"Data": "Denying a database template field denies subsequent requests from that field version for all rows in the current execution, without saving a permanent denial. During automatic updates, successful row results are reused when the template and its referenced inputs are unchanged. Editing unrelated fields, adding rows, or binding the primary key does not recalculate existing rows unless their template inputs change. Manual refresh or reopening evaluates templates again. Dynamic access to an entire row uses the whole row as its dependency; templates reading other blocks or SQL results recalculate conservatively. Results are held only in a bounded memory cache and are cleared when a notebook locks or permission is revoked; evicted results are recalculated. There is no scheduled refresh. On first opening, the database structure and available stored rows appear before HTTP queries finish, with loading indicators for templates. Views depending on template results for filtering, sorting, grouping, calculations, calendars, or nested rows show the structure first and display accurate rows after evaluation. Sorting reuses the current successful snapshot, including external-query templates, while changed row inputs and explicit refresh still trigger evaluation. Opening a template cell editor only reads its source; closing before the source loads does not save the displayed query result as the column template."
 				}
 			]
 		},

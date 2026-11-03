@@ -113,6 +113,19 @@ func (e *Execution) CachedTemplate(scope, identity, inputs string) (string, bool
 	return content, true
 }
 
+// SetPreserveHTTPResults 仅供排序等展示操作复用外部依赖模板的当前快照。
+func (e *Execution) SetPreserveHTTPResults(preserve bool) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.preserveHTTPResults = preserve
+}
+
+func (e *Execution) PreserveHTTPResults() bool {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	return e.automaticRefresh && e.preserveHTTPResults
+}
+
 func (e *Execution) StoreTemplate(scope, identity, inputs, content string) {
 	e.mu.Lock()
 	failed := e.approvalsFailed

@@ -2223,6 +2223,8 @@ The field types (`keyType`) are:
 
 Ordinary HTTP template parsing or evaluation errors are returned in the affected field while the database remains available; cancellation, notebook locking, and execution limits still terminate rendering.
 
+`deferHTTPTemplates` defaults to `false`. Set it to `true` to receive a first view without executing HTTP templates; `pendingHTTPTemplates` contains field IDs awaiting evaluation. Templates in the same database are deferred together. Views whose filtering, sorting, grouping, calculations, calendar, or nested layout require template results return structure without provisional rows. Request again without this flag for final results and normal network confirmation. `preserveHTTPResults` defaults to `false`; with `automaticRefresh: true`, presentation operations such as sorting can reuse the current successful template snapshot even when the template reads external blocks or SQL results. Source, row-input, permission, and cache boundaries still apply; this flag alone does not override manual refresh.
+
 * Parameters
 
   ```json

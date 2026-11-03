@@ -1165,6 +1165,7 @@ interface IAVItemHierarchy {
 }
 
 interface IAV {
+    pendingHTTPTemplates?: string[];
     subItems?: IAVSubItemsConfig;
     id: string;
     name: string;

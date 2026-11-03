@@ -14,6 +14,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -637,9 +638,13 @@ var renderAttributeView = contractHandler(apicontract.RenderAttributeView, func(
 		TemporaryFilters: avContractSlice(request.TemporaryFilters, fromContractAVViewFilter),
 		CalendarRange:    fromContractAVCalendarRange(request.CalendarRange), TemporarySort: fromContractAVViewSort(request.TemporarySort), Nested: fromContractAVNestedRequest(request.Nested),
 	}
+	if request.DeferHTTPTemplates && !readOnly {
+		options.HTTPPreview = &sql.HTTPTemplatePreview{}
+	}
 	if execution != nil {
 		options.TemplateHTTP = execution.Runtime
 		execution.Runtime.SetAutomaticRefresh(request.AutomaticRefresh)
+		execution.Runtime.SetPreserveHTTPResults(request.PreserveHTTPResults)
 	}
 	response := renderAttrView(request.BlockID, request.ID, request.ViewID, request.Query, avPage(request.Page, 1), avPage(request.PageSize, -1), avGroupPaging(request.GroupPaging), av.LayoutType(request.InitialLayout), create, request.IgnoreRows, request.TargetItemID, request.TargetGroupID, filter, readOnly, options)
 	if response.Code() == 0 && execution != nil {

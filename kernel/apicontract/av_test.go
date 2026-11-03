@@ -430,6 +430,22 @@ func TestAVParsedRequestErrors(t *testing.T) {
 	}
 }
 
+func TestAVContractHTTPPreviewRequest(t *testing.T) {
+	for _, fields := range []string{"", `,"deferHTTPTemplates":null,"preserveHTTPResults":null`, `,"deferHTTPTemplates":false,"preserveHTTPResults":false`, `,"deferHTTPTemplates":true,"preserveHTTPResults":true,"automaticRefresh":true`} {
+		request, err := RenderAttributeView.Decode(strings.NewReader(`{"id":"database"` + fields + `}`))
+		if err != nil {
+			t.Fatal(err)
+		}
+		expected := strings.Contains(fields, ":true")
+		if request.DeferHTTPTemplates != expected || request.PreserveHTTPResults != expected {
+			t.Fatalf("incorrect preview decoding: %+v", request)
+		}
+	}
+	if _, err := RenderAttributeView.Decode(strings.NewReader(`{"id":"database","deferHTTPTemplates":"yes"}`)); err == nil {
+		t.Fatal("invalid preview flag accepted")
+	}
+}
+
 func TestAVContractCalendarCreateRequest(t *testing.T) {
 	for _, test := range []struct {
 		name, field string

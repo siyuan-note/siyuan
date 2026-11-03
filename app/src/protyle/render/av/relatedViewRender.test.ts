@@ -22,6 +22,8 @@ const fixture = () => {
     let mobile = false;
     let responder: () => Promise<unknown> = async () => ({code: -1, msg: "repair configured view"});
     const imports: Record<string, unknown> = {
+        fetchAVRender: (request: unknown, signal: AbortSignal) =>
+            (imports.fetchSyncPost as (...args: unknown[]) => Promise<unknown>)("/api/av/renderAttributeView", request, undefined, false, signal),
         Constants: {}, getAVRelationHost: () => host,
         getAVSelectedItemPoints: (): [] => [],
         getPageSize: () => ({unGroupPage: 2, unGroupPageSize: 20, groupPageSize: {}}),

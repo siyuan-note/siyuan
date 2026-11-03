@@ -39,6 +39,7 @@ type GroupViewRenderSource struct {
 
 // AttributeViewRenderContext 收集一次属性视图渲染期间产生的模板错误。
 type AttributeViewRenderContext struct {
+	HTTPPreview                *HTTPTemplatePreview
 	TemplateHTTP               *templatehttp.Execution
 	TemplateHTTPSourceScope    func(owner, avID, keyID, slot, content string) string
 	templateErrors             map[string]*attributeViewTemplateRenderError
@@ -1118,6 +1119,16 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 		}
 	}
 	clearAttributeViewRenderedContents(collection, keys)
+	if renderContext != nil && renderContext.HTTPPreview.Prepare(attrView) {
+		for _, item := range collection.GetItems() {
+			for _, value := range item.GetValues() {
+				if value.Template != nil {
+					value.Template.Content = ""
+				}
+			}
+		}
+		return
+	}
 	if !existTemplateField {
 		return
 	}
@@ -1211,15 +1222,16 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 				if execution != nil {
 					inputs, cacheable = templateInputSignature(tpl, data)
 				}
+				snapshot := inputs != ""
 				inputs = httpScope + "\x00" + templateContent + "\x00" + inputs
 				identity := av.GetAVBoxID(attrView.ID) + "\x00" + attrView.ID + "\x00" + templateKey.ID + "\x00" + slot + "\x00" + item.GetID()
 				var reused bool
-				if execution != nil && cacheable {
+				if execution != nil && snapshot && (cacheable || execution.PreserveHTTPResults()) {
 					content, reused = execution.CachedTemplate(httpScope, identity, inputs)
 				}
 				if !reused {
 					content, renderErr = executeTemplateData(tpl, data, execution)
-					if execution != nil && cacheable && renderErr == nil {
+					if execution != nil && snapshot && renderErr == nil {
 						execution.StoreTemplate(httpScope, identity, inputs, content)
 					}
 				}

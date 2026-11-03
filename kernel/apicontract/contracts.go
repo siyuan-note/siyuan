@@ -1666,6 +1666,9 @@ var RenderHistoryAttributeView = define[RenderHistoryAttributeViewRequest, AVArc
 // 无效上下文、未知配置版本和发布读取角色均拒绝访问，不回退到完整数据库。
 // HTTP 模板字段的普通解析、求值错误作为字段内容返回，并定向提示发起窗口；取消、锁定和执行超限仍终止请求。
 // automaticRefresh 默认 false；true 时仅复用来源、行及模板输入未变的成功内存结果，不扩大读取权限。
+// preserveHTTPResults 默认 false；配合 automaticRefresh 用于排序等展示操作，复用外部依赖模板的当前快照。
+// deferHTTPTemplates 默认 false；true 时不执行联网模板，返回 pendingHTTPTemplates 字段 ID 供首屏显示加载状态。
+// 同库模板一并延后；依赖模板的筛选、排序、分组、统计、日历和嵌套视图仅返回结构，完成查询后重新请求最终结果。
 var RenderAttributeView = define[RenderAttributeViewRequest, AVRenderResult]("renderAttributeView", "/api/av/renderAttributeView", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, FastJSON: true}, "POST")
 var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalendarUndatedData]("getAttributeViewCalendarUndated", "/api/av/getAttributeViewCalendarUndated", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 

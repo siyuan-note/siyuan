@@ -87,7 +87,7 @@ export const isCurrentAVRender = (blockElement: HTMLElement, token: symbol) => {
 };
 
 const getLocalAVLocateData = (data: IAV | undefined, request: IAVLocateRequest) => {
-    if (!data || (request.viewID && request.viewID !== data.viewID)) {
+    if (!data || data.pendingHTTPTemplates?.length || (request.viewID && request.viewID !== data.viewID)) {
         return;
     }
     const findTarget = (view: IAVTable | IAVGallery | IAVKanban, groupID = "") => {
@@ -256,7 +256,7 @@ export const applyAVRenderContext = (blockElement: HTMLElement, data: IAV) => {
 };
 
 export const persistAVLocateView = (blockElement: HTMLElement, protyle: IProtyle, data: IAV) => {
-    if (window.siyuan.isPublish) {
+    if (window.siyuan.isPublish || data.pendingHTTPTemplates?.length) {
         return false;
     }
     const request = getAVLocateRequest(blockElement);
@@ -303,6 +303,9 @@ export const failAVRender = (blockElement: HTMLElement, response: IWebSocketData
 export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData: {
     virtualData: { [key: string]: IAVVirtualData },
 }) => {
+    if (data.pendingHTTPTemplates?.length) {
+        return;
+    }
     renderedAVData.set(blockElement, data);
     const request = getAVLocateRequest(blockElement);
     if (!blockElement.isConnected || !request || !data.target || data.target.itemID !== request.itemID) {
@@ -362,6 +365,9 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
 };
 
 export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, data: IAV) => {
+    if (data.pendingHTTPTemplates?.length) {
+        return;
+    }
     const request = getAVLocateRequest(blockElement);
     if (!request) {
         return;

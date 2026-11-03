@@ -351,6 +351,7 @@ func renderNestedAttributeView(attrView *av.AttributeView, view *av.View, query 
 		return nil, err
 	}
 	context := sql.NewAttributeViewRenderContext()
+	context.HTTPPreview = options.HTTPPreview
 	context.TemplateHTTP = options.TemplateHTTP
 	context.TemplateHTTPSourceScope = templateHTTPDatabaseSourceScope(options.TemplateHTTP)
 	defer func() {

@@ -502,9 +502,9 @@ export type AVRelativeDate = { "count": number; "direction": number; "unit": num
 
 export type AVRelativeDateInput = { "count"?: number | null; "direction"?: number | null; "unit"?: number | null; };
 
-export type AVRenderData = { "colorOrder": Array<string> | null; "contextFilter": AVAttributeViewContextFilter | null; "contextFilterFields": Array<AVAttributeViewContextFilterField | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "subItems"?: AVSubItemsConfig; "target"?: AVAttributeViewRenderTarget; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "list" | "gallery" | "kanban" | "calendar"; "views": Array<AVViewData | null> | null; };
+export type AVRenderData = { "colorOrder": Array<string> | null; "contextFilter": AVAttributeViewContextFilter | null; "contextFilterFields": Array<AVAttributeViewContextFilterField | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "pendingHTTPTemplates"?: Array<string>; "subItems"?: AVSubItemsConfig; "target"?: AVAttributeViewRenderTarget; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "list" | "gallery" | "kanban" | "calendar"; "views": Array<AVViewData | null> | null; };
 
-export type AVRenderResult = (AVRenderData & { "error"?: never; }) | (AVViewNotFound & { "colorOrder"?: never; "contextFilter"?: never; "contextFilterFields"?: never; "customColors"?: never; "defaultTemplateID"?: never; "id"?: never; "isMirror"?: never; "name"?: never; "newItemTemplates"?: never; "subItems"?: never; "target"?: never; "usedCustomColorIndexes"?: never; "view"?: never; "viewID"?: never; "viewType"?: never; "views"?: never; });
+export type AVRenderResult = (AVRenderData & { "error"?: never; }) | (AVViewNotFound & { "colorOrder"?: never; "contextFilter"?: never; "contextFilterFields"?: never; "customColors"?: never; "defaultTemplateID"?: never; "id"?: never; "isMirror"?: never; "name"?: never; "newItemTemplates"?: never; "pendingHTTPTemplates"?: never; "subItems"?: never; "target"?: never; "usedCustomColorIndexes"?: never; "view"?: never; "viewID"?: never; "viewType"?: never; "views"?: never; });
 
 export type AVRollup = { "calc": AVRollupCalc | null; "filters"?: Array<AVViewFilter | null>; "keyID": string; "relationKeyID": string; };
 
@@ -1906,7 +1906,7 @@ export type RenameRiffDeckRequestInput = { "deckID": string; "name": string; };
 
 export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 
-export type RenderAttributeViewRequestInput = { "automaticRefresh"?: boolean | null; "blockID"?: string | null; "calendarRange"?: AVCalendarRangeInput | null; "createIfNotExist"?: boolean | null; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "ignoreRows"?: boolean | null; "initialLayout"?: string | null; "nested"?: AVNestedRequestInput | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "relationContext"?: AVRelationContextInput | null; "targetGroupID"?: string | null; "targetItemID"?: string | null; "temporaryFilters"?: Array<AVViewFilterInput | null> | null; "temporarySort"?: AVViewSortInput | null; "viewID"?: string | null; };
+export type RenderAttributeViewRequestInput = { "automaticRefresh"?: boolean | null; "blockID"?: string | null; "calendarRange"?: AVCalendarRangeInput | null; "createIfNotExist"?: boolean | null; "deferHTTPTemplates"?: boolean | null; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "ignoreRows"?: boolean | null; "initialLayout"?: string | null; "nested"?: AVNestedRequestInput | null; "page"?: number | null; "pageSize"?: number | null; "preserveHTTPResults"?: boolean | null; "query"?: string | null; "relationContext"?: AVRelationContextInput | null; "targetGroupID"?: string | null; "targetItemID"?: string | null; "temporaryFilters"?: Array<AVViewFilterInput | null> | null; "temporarySort"?: AVViewSortInput | null; "viewID"?: string | null; };
 
 export type RenderHistoryAttributeViewRequestInput = { "blockID"?: string | null; "calendarRange"?: AVCalendarRangeInput | null; "carrierViewID"?: string | null; "created": string; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "nested"?: AVNestedRequestInput | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "viewID"?: string | null; };
 
@@ -4367,6 +4367,9 @@ export interface APIPOSTRoutes {
      * 无效上下文、未知配置版本和发布读取角色均拒绝访问，不回退到完整数据库。
      * HTTP 模板字段的普通解析、求值错误作为字段内容返回，并定向提示发起窗口；取消、锁定和执行超限仍终止请求。
      * automaticRefresh 默认 false；true 时仅复用来源、行及模板输入未变的成功内存结果，不扩大读取权限。
+     * preserveHTTPResults 默认 false；配合 automaticRefresh 用于排序等展示操作，复用外部依赖模板的当前快照。
+     * deferHTTPTemplates 默认 false；true 时不执行联网模板，返回 pendingHTTPTemplates 字段 ID 供首屏显示加载状态。
+     * 同库模板一并延后；依赖模板的筛选、排序、分组、统计、日历和嵌套视图仅返回结构，完成查询后重新请求最终结果。
      */
     "/api/av/renderAttributeView": {
         request: RenderAttributeViewRequestInput;

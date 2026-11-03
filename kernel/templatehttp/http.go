@@ -90,6 +90,7 @@ type Execution struct {
 	deniedScopes           map[string]bool
 	batchRequests          bool
 	automaticRefresh       bool
+	preserveHTTPResults    bool
 	templateGeneration     uint64
 	pendingTemplates       map[[32]byte]pendingTemplateResult
 	pendingTemplateBytes   int

@@ -12154,6 +12154,12 @@
             }
           ]
         },
+        "pendingHTTPTemplates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "subItems": {
           "$ref": "#/$defs/AVSubItemsConfig"
         },
@@ -39882,6 +39888,16 @@
             }
           ]
         },
+        "deferHTTPTemplates": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "groupPaging": {
           "anyOf": [
             {
@@ -39949,6 +39965,16 @@
           "anyOf": [
             {
               "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "preserveHTTPResults": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

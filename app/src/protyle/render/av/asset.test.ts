@@ -10,6 +10,9 @@ import {updateAVCachedCellValue} from "./cellValue";
 import * as uploadResult from "../../upload/uploadResult";
 import * as viewType from "./viewType";
 import * as insertPosition from "../../upload/insertPosition";
+import * as escape from "../../../util/escape";
+import * as image from "../../../util/image";
+import * as imageURL from "../../../util/imageURL";
 
 const pathNames = {} as typeof import("../../../util/pathName");
 runInNewContext(ts.transpileModule(readFileSync(path.join(__dirname, "../../../util/pathName.ts"), "utf8"), {
@@ -20,10 +23,10 @@ runInNewContext(ts.transpileModule(readFileSync(path.join(__dirname, "../../../u
 });
 
 // 使用完整资源消费者，控制上传完成与虚拟行移除的顺序，记录实际生成的事务。
-const createHarness = (layout = "table") => {
+const createHarness = (layout = "table", assetContent = "original.png") => {
     const column = {id: "assets", type: "mAsset"} as IAVColumn;
     const cell = {id: "value", value: {id: "value", type: "mAsset", mAsset: [
-        {content: "original.png", name: "original", type: "image"},
+        {content: assetContent, name: "original", type: "image"},
     ]}} as IAVCell;
     const data = {view: {id: "view", columns: [column], rows: [{id: "row", cells: [cell]}]}} as unknown as IAV;
     let rendered = true;
@@ -54,6 +57,9 @@ const createHarness = (layout = "table") => {
         "./col": {getColId: () => "assets"},
         "./row": {getFieldIdByCellElement: () => "row"},
         "./batchValue": {getAVBatchEditMode: () => "replace"},
+        "../../../util/escape": escape,
+        "../../../util/image": image,
+        "../../../util/imageURL": imageURL,
         "../../../util/pathName": pathNames,
         "../../../constants": {Constants: {SIYUAN_ASSETS_IMAGE: [".png"]}},
         "../../../dialog/message": {showMessage: () => {}},
@@ -101,7 +107,7 @@ const createHarness = (layout = "table") => {
             api.dragUpload([{path: "image.png", size: 5}], {} as IProtyle, element as unknown as HTMLElement);
         }
     };
-    return {start, data, column, cell, operations, hide: () => { rendered = false; },
+    return {start, data, column, cell, operations, api, element, hide: () => { rendered = false; },
         complete: (name: string) => pending.shift()("", {status: "success", succFiles: [
             {index: 0, name, path: name},
         ]})};
@@ -160,4 +166,14 @@ describe("database resource upload consumers", () => {
             });
         }
     }
+});
+
+describe("database asset menu", () => {
+    it("escapes quote-bearing image sources", () => {
+        const harness = createHarness("table", "assets/poc.png?x=1\" onerror=\"require('child_process')\"");
+        const html = harness.api.getAssetHTML([harness.element as unknown as HTMLElement]);
+
+        assert.equal(html.includes(' onerror="'), false);
+        assert.match(html, /src="assets\/poc\.png\?x=1&quot; onerror=&quot;/);
+    });
 });

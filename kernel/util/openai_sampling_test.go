@@ -18,6 +18,80 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
+func TestOpenAIChatTemperature(t *testing.T) {
+	for _, streaming := range []bool{false, true} {
+		for _, model := range []string{"test-model", "MiniMax-M3"} {
+			t.Run(fmt.Sprintf("stream=%v/model=%s", streaming, model), func(t *testing.T) {
+				var payload map[string]any
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					if r.URL.Path != "/v1/chat/completions" {
+						t.Errorf("unexpected path: %s", r.URL.Path)
+					}
+					payload = nil
+					if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+						t.Error(err)
+					}
+					if streaming {
+						w.Header().Set("Content-Type", "text/event-stream")
+						fmt.Fprint(w, "data: {\"choices\":[{\"delta\":{\"content\":\"ok\"}}]}\n\ndata: [DONE]\n\n")
+					} else {
+						w.Header().Set("Content-Type", "application/json")
+						fmt.Fprint(w, `{"choices":[{"message":{"role":"assistant","content":"ok"}}]}`)
+					}
+				}))
+				defer server.Close()
+				client := NewAIClientWithModel("test", server.URL+"/v1", model)
+				for _, tc := range []struct {
+					temperature float32
+					explicit    bool
+				}{
+					{temperature: 0, explicit: true},
+					{temperature: 0.7, explicit: true},
+					{temperature: 0, explicit: false},
+				} {
+					ctx := context.Background()
+					if tc.explicit {
+						ctx = ContextWithOpenAIChatTemperature(ctx, tc.temperature)
+					}
+					request := openai.ChatCompletionRequest{
+						Model: model, Temperature: tc.temperature, TopP: 0.8, MaxCompletionTokens: 128,
+						Messages: []openai.ChatCompletionMessage{{Role: "user", Content: "hello"}},
+					}
+					if streaming {
+						stream, err := CreateOpenAICompletionStream(ctx, client, OpenAIProtocolChatCompletions, request, nil)
+						if err != nil {
+							t.Fatal(err)
+						}
+						for {
+							_, err = stream.Recv()
+							if errors.Is(err, io.EOF) {
+								break
+							}
+							if err != nil {
+								t.Fatal(err)
+							}
+						}
+						stream.Close()
+					} else if _, err := CreateOpenAICompletion(ctx, client, OpenAIProtocolChatCompletions, request, nil); err != nil {
+						t.Fatal(err)
+					}
+					value, present := payload["temperature"].(float64)
+					if present != tc.explicit || present && float32(value) != tc.temperature {
+						t.Fatalf("temperature changed: explicit=%v temperature=%v payload=%#v", tc.explicit, tc.temperature, payload)
+					}
+					if payload["top_p"] != float64(0.8) || payload["max_completion_tokens"] != float64(128) ||
+						payload["model"] != model || payload["stream"] != streaming {
+						t.Fatalf("unrelated request fields changed: %#v", payload)
+					}
+					if model == "MiniMax-M3" && payload["reasoning_split"] != true {
+						t.Fatalf("model extras lost: %#v", payload)
+					}
+				}
+			})
+		}
+	}
+}
+
 func TestOpenAIResponsesSamplingCompatibility(t *testing.T) {
 	for _, streaming := range []bool{false, true} {
 		for _, tc := range []struct {

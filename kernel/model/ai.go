@@ -190,6 +190,7 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 	}
 	streamCtx, cancel := context.WithCancel(ctx)
 	streamCtx = util.ContextWithOpenAIResponsesBaseURL(streamCtx, prov.BaseURL)
+	streamCtx = util.ContextWithOpenAIChatTemperature(streamCtx, req.Temperature)
 	requestTimeout := time.Duration(prov.RequestTimeout) * time.Second
 	requestTimer, requestTimerDone := startAIEditorCancelTimer(requestTimeout, cancel)
 	client := NewAIProviderClient(prov, m.Name)

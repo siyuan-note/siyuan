@@ -2724,6 +2724,7 @@ func createProtocolStreamWithRetry(ctx context.Context, client *util.AIClient, p
 		}
 
 		streamCtx, streamCancel := context.WithCancel(ctx)
+		streamCtx = util.ContextWithOpenAIChatTemperature(streamCtx, req.Temperature)
 		requestTimer, requestTimerDone := startCancelTimer(requestTimeout, streamCancel)
 		stream, err := util.CreateOpenAICompletionStream(streamCtx, client, protocol, req, responseInput)
 		requestTimedOut := stopCancelTimer(requestTimer, requestTimerDone)

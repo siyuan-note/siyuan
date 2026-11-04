@@ -72,9 +72,12 @@ test("a file request is routed to the editor before remote mode rejects the inst
     assert.deepEqual(started, []);
 });
 
-test("a normal launch from a Markdown-only process restores workspace startup checks", async t => {
-    for (const scenario of ["existing", "explicit", "environment", "first", "missing", "crash"] as const) {
-        await t.test(scenario, async (t: any) => {
+test("normal launches and macOS activation from a Markdown-only process restore workspace startup checks", async t => {
+    const scenarios = ["existing", "explicit", "environment", "first", "missing", "crash"] as const;
+    const entries = ["second-instance", "activate"] as const;
+    for (const {scenario, entry} of scenarios.flatMap(scenario => entries.map(entry => ({scenario, entry})))) {
+        if (entry === "activate" && scenario === "explicit") continue;
+        await t.test(entry + ": " + scenario, async (t: any) => {
             runtime.resetRuntimeState();
             resetElectronStub();
             const savedPaths = {...runtime.paths};
@@ -92,10 +95,20 @@ test("a normal launch from a Markdown-only process restores workspace startup ch
             if (scenario === "crash") fs.writeFileSync(runtime.paths.appCrashMarkerPath,
                 JSON.stringify({reason: "crashed", workspaceDir: workspace}));
             runtime.state.markdown.startup = true;
+            const markdownWindows = {
+                open: async () => {throw new Error("activation must not create another Markdown editor");},
+                handleLaunch: async () => true,
+                hasWindows: () => true, hasPendingWork: () => false, owns: () => false, focus: () => undefined,
+                prepareQuit: async () => true, closeAll: async () => true, cancelQuit: () => undefined,
+            };
+            runtime.state.markdown.windows = markdownWindows;
             runtime.setStartupSnapshot({...runtime.state.startup, firstOpen: scenario === "first"});
             const snapshot = runtime.state.startup;
             const windows = [];
             const listeners = new Map();
+            let ready = false;
+            const app = Object.assign(new EventEmitter(), {isReady: () => ready,
+                getPreferredSystemLanguages: () => ["en"], getPath: () => directory});
             class BrowserWindow extends EventEmitter {
                 destroyed = false;
                 webContents = {id: 99};
@@ -110,7 +123,8 @@ test("a normal launch from a Markdown-only process restores workspace startup ch
                 isMinimized() {return false;}
                 destroy() {this.destroyed = true; this.emit("closed");}
             }
-            mockElectron(t, {BrowserWindow: BrowserWindow as unknown as typeof import("electron").BrowserWindow,
+            mockElectron(t, {app: app as unknown as import("electron").App,
+                BrowserWindow: BrowserWindow as unknown as typeof import("electron").BrowserWindow,
                 ipcMain: {on: (channel, callback) => listeners.set(channel, callback),
                     removeListener: (channel, callback) => {if (listeners.get(channel) === callback) listeners.delete(channel);}} as unknown as import("electron").IpcMain,
                 screen: {getPrimaryDisplay: () => ({size: {width: 1000}, workAreaSize: {height: 800}})}});
@@ -127,13 +141,22 @@ test("a normal launch from a Markdown-only process restores workspace startup ch
             const requests: Parameters<InitKernel>[0][] = [];
             const opened = [];
             const {queueSecondInstance, startSecondInstance} = secondInstance();
+            const {registerAppLifecycle} = require("./appLifecycle");
+            registerAppLifecycle({initMainWindow: () => undefined, settingsWindowPolicy: () => undefined});
+            app.emit("activate", {});
+            assert.equal(requests.length, 0, "the initial file launch does not start a kernel");
+            assert.equal(windows.length, 0, "the initial file launch does not open workspace selection");
+            ready = true;
             startSecondInstance({initKernel: async request => {requests.push(request); return 6806;},
                 initMainWindow: port => {opened.push(port);}});
             const argv = ["siyuan", ...(scenario === "explicit" ? ["--workspace=" + workspace] : [])];
-            queueSecondInstance({} as ElectronEvent, argv);
+            const launch = () => entry === "activate" ? app.emit("activate", {}) :
+                queueSecondInstance({} as ElectronEvent, argv);
+            launch();
             await Promise.resolve();
             assert.equal(runtime.state.startup, snapshot, "deferred workspace checks preserve the initial startup snapshot");
             assert.equal(runtime.state.markdown.startup, true);
+            assert.equal(runtime.state.markdown.windows, markdownWindows);
             if (scenario === "existing" || scenario === "explicit" || scenario === "environment") {
                 assert.equal(requests.length, 1);
                 assert.equal(requests[0].workspace, scenario === "environment" ? process.env.SIYUAN_WORKSPACE_PATH : workspace);
@@ -149,11 +172,11 @@ test("a normal launch from a Markdown-only process restores workspace startup ch
                     assert.equal(windows[0].query.workspace, workspace);
                     assert.ok(fs.existsSync(runtime.paths.appCrashMarkerPath));
                 }
-                queueSecondInstance({} as ElectronEvent, argv);
+                launch();
                 assert.equal(windows.length, 1, "repeated normal launches focus the existing workspace selection");
                 windows[0].destroy();
                 assert.equal(listeners.size, 0, "closing the selection releases its request handler");
-                queueSecondInstance({} as ElectronEvent, argv);
+                launch();
                 assert.equal(windows.length, 2, "a canceled workspace selection can be reopened");
                 const choose = listeners.values().next().value;
                 choose({sender: {}}, {workspace, lang: "en"});

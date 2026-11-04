@@ -8,7 +8,7 @@ import {promisify} from "node:util";
 import {createSourceFile, isArrowFunction, isBlock, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (sourceCode: string, css: string, cleanupSource: string, tabsSource: string,
-                            tableSource: string, cellCommitSource: string, tableSnapshots: boolean) => {
+                            tableSource: string, cellCommitSource: string, tableSnapshots: boolean, imageSnapshots: boolean) => {
     const check = require("node:assert/strict");
     const lute = Lute.New();
     lute.SetProtyleWYSIWYG(true);
@@ -163,7 +163,7 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
                         state.focusedText = target?.textContent || "";
                     },
                     getBlockHTML: () => wysiwyg.innerHTML,
-                    getMarkdown: () => wysiwyg.textContent,
+                    getMarkdown: () => imageSnapshots ? lute.BlockDOM2StdMd(wysiwyg.innerHTML).trim() : wysiwyg.textContent,
                     destroy: () => {
                         destroyTabsRender(wysiwyg);
                         observer.disconnect();
@@ -266,6 +266,103 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             },
         }}},
     } as unknown as typeof window.siyuan;
+
+    if (imageSnapshots) {
+        for (const resized of [false, true]) {
+            const current = create('<div data-node-id="image-body" data-type="NodeParagraph"><span data-type="img" class="img">' +
+                '<span class="protyle-image-container" style="width: 180px;"><img src="assets/image.png" alt="description"></span></span></div>');
+            const image = current.wysiwyg.querySelector("img");
+            image.closest(".img").classList.add("img--select", "img--drag");
+            image.parentElement.classList.add("protyle-image-container--compact");
+            image.parentElement.insertAdjacentHTML("beforeend", '<span class="protyle-image-resize"><span class="touch-resize-active"></span></span>');
+            if (resized) {
+                image.parentElement.style.width = "140px";
+            }
+            check.equal(await current.editor.finish(), true);
+            check.equal(current.state.saves.length, resized ? 1 : 0, "image UI changes alone do not create a content save");
+            check.equal(current.element.querySelector(".img--select, .img--drag, .protyle-image-resize, .protyle-image-container--compact"), null);
+            check.equal(current.element.querySelector("img").parentElement.style.width, resized ? "140px" : "180px");
+            await current.remove();
+        }
+        const imageHTML = (caption: string) => {
+            const source = document.createElement("div");
+            source.innerHTML = lute.Md2BlockDOM(`Before ![description](assets/image.png "${caption}") After`);
+            const image = source.querySelector("img");
+            image.parentElement.classList.add("protyle-image-container");
+            image.parentElement.style.width = "280px";
+            const after = document.createElement("span");
+            after.className = "image-after";
+            after.textContent = "After";
+            source.querySelector('[contenteditable="true"]').lastChild.replaceWith(after);
+            return source.innerHTML;
+        };
+        const setImageFontSize = (root: HTMLElement, size: string) => {
+            root.querySelectorAll<HTMLElement>(".img__name, .protyle-action__title, .img__alt")
+                .forEach(caption => caption.style.setProperty("--protyle-image-font-size", size));
+        };
+        for (const caption of ["", "Caption"]) {
+            for (const resized of [false, true]) {
+                const current = create(imageHTML(caption));
+                setImageFontSize(current.element, "8px");
+                setImageFontSize(current.wysiwyg, "28px");
+                if (resized) {
+                    current.wysiwyg.querySelector<HTMLElement>(".protyle-image-container").style.width = "90px";
+                }
+                check.equal(await current.editor.finish(), true);
+                check.equal(current.state.saves.length, resized ? 1 : 0,
+                    "different visible and hidden caption sizes must not create a save or block resizing");
+                check.equal(current.state.messages.length, 0);
+                check.equal(current.element.querySelector<HTMLElement>(".protyle-image-container").style.width,
+                    resized ? "90px" : "280px");
+                check.equal(current.element.querySelector(".protyle-action__title").textContent, caption);
+                await current.remove();
+            }
+            const current = create(imageHTML(caption));
+            setImageFontSize(current.wysiwyg, "28px");
+            current.wysiwyg.querySelector(".image-after").textContent = "First edit";
+            window.dispatchEvent(new Event("blur"));
+            await until(() => current.state.saves.length === 1);
+            setImageFontSize(current.element, "8px");
+            setImageFontSize(current.wysiwyg, "9px");
+            current.wysiwyg.querySelector<HTMLElement>(".protyle-image-container").style.width = "90px";
+            current.wysiwyg.querySelector(".image-after").textContent = "Second edit";
+            check.equal(await current.editor.finish(), true, "layout changes after a save cannot reject the following save");
+            check.equal(current.state.saves.length, 2);
+            check.equal(current.state.messages.length, 0);
+            check.equal(current.element.querySelector(".image-after").textContent, "Second edit");
+            check.equal(current.element.querySelector<HTMLElement>(".protyle-image-container").style.width, "90px");
+            check.ok(current.state.saves.every(html => !html.includes("--protyle-image-font-size")));
+            await current.remove();
+        }
+        for (const change of ["width", "text", "caption", "style"]) {
+            const current = create(imageHTML("Caption"));
+            setImageFontSize(current.element, "8px");
+            setImageFontSize(current.wysiwyg, "28px");
+            if (change === "width") {
+                current.element.querySelector<HTMLElement>(".protyle-image-container").style.width = "180px";
+            } else if (change === "text") {
+                current.element.querySelector(".image-after").textContent = "External text";
+            } else if (change === "caption") {
+                current.element.querySelector(".protyle-action__title span").textContent = "External caption";
+            } else {
+                current.element.querySelector<HTMLElement>(".protyle-action__title").style.color = "red";
+            }
+            const source = current.element.innerHTML;
+            current.wysiwyg.querySelector(".image-after").textContent = "Unsaved local text";
+            check.equal(await current.editor.finish(), false, `external ${change} changes must still reject stale saves`);
+            check.equal(current.state.saves.length, 0);
+            check.equal(current.element.innerHTML, source);
+            check.equal(current.state.messages.length, 1);
+            const recovery = document.createElement("div");
+            recovery.innerHTML = current.state.messages[0];
+            const recoveredMarkdown = recovery.querySelector("pre").textContent;
+            check.ok(recoveredMarkdown.includes("Unsaved local text"), "recovery preserves rejected local content");
+            check.ok(recoveredMarkdown.includes('![description](assets/image.png "Caption")'),
+                "recovery preserves the image path, alt text and caption through the real Markdown conversion");
+            await current.remove();
+        }
+        return "List mindmap image snapshot cases passed";
+    }
 
     // 单元格编辑器的工具栏和搜索样式只属于运行时，节点快照始终读取单元格源内容。
     for (const rich of tableSnapshots ? [false, true] : []) {
@@ -605,22 +702,6 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
     imageEditor.editor.pasteClipboard({files: images});
     check.equal(imageEditor.state.uploads.length, 1, "closed editors do not accept another upload");
     await imageEditor.remove();
-    for (const resized of [false, true]) {
-        const current = create('<div data-node-id="image-body" data-type="NodeParagraph"><span data-type="img" class="img">' +
-            '<span class="protyle-image-container" style="width: 180px;"><img src="assets/image.png" alt="description"></span></span></div>');
-        const image = current.wysiwyg.querySelector("img");
-        image.closest(".img").classList.add("img--select", "img--drag");
-        image.parentElement.classList.add("protyle-image-container--compact");
-        image.parentElement.insertAdjacentHTML("beforeend", '<span class="protyle-image-resize"><span class="touch-resize-active"></span></span>');
-        if (resized) {
-            image.parentElement.style.width = "140px";
-        }
-        check.equal(await current.editor.finish(), true);
-        check.equal(current.state.saves.length, resized ? 1 : 0, "image UI changes alone do not create a content save");
-        check.equal(current.element.querySelector(".img--select, .img--drag, .protyle-image-resize, .protyle-image-container--compact"), null);
-        check.equal(current.element.querySelector("img").parentElement.style.width, resized ? "140px" : "180px");
-        await current.remove();
-    }
     // 关闭等待内层编辑结束时启动上传，也不能提前销毁外层编辑器。
     const uploadingEditor = create();
     const nestedGate = gate();
@@ -1247,7 +1328,7 @@ test("mindmap editor overlays retain direct ownership outside the transformed co
     }
 });
 
-const runBrowserCases = async (tableSnapshots: boolean) => {
+const runBrowserCases = async (tableSnapshots: boolean, imageSnapshots = false) => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-view-editor-test-"));
     const script = path.join(temporary, "run.cjs");
     const source = transpileModule(["../../wysiwyg/codeBlockEnter.ts", "editor.ts"]
@@ -1302,7 +1383,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         const result = await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(cleanupSource)}, ${JSON.stringify(tabsSource)}, ${JSON.stringify(tableSource)}, ${JSON.stringify(cellCommitSource)}, ${tableSnapshots})`)});
+        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(cleanupSource)}, ${JSON.stringify(tabsSource)}, ${JSON.stringify(tableSource)}, ${JSON.stringify(cellCommitSource)}, ${tableSnapshots}, ${imageSnapshots})`)});
         console.log(result);
         win.destroy();
         app.exit(0);
@@ -1318,7 +1399,8 @@ app.whenReady().then(async () => {
     try {
         const executable = require("electron") as unknown as string;
         const result = await promisify(execFile)(executable, [script], {env, timeout: 40000, windowsHide: true});
-        assert.ok(result.stdout.includes(tableSnapshots ? "List mindmap table snapshot cases passed" :
+        assert.ok(result.stdout.includes(imageSnapshots ? "List mindmap image snapshot cases passed" :
+            tableSnapshots ? "List mindmap table snapshot cases passed" :
             "List mindmap editor lifecycle cases passed"));
     } finally {
         rmSync(temporary, {recursive: true, force: true});
@@ -1334,3 +1416,8 @@ test("list mindmap table snapshots preserve cell sources across autosave, finish
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, () => runBrowserCases(true));
+
+test("list mindmap image snapshots ignore display sizing while preserving real source conflicts", {
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    timeout: 45000,
+}, () => runBrowserCases(false, true));

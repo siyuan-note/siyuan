@@ -1125,7 +1125,24 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     snapshotImage.parentElement.classList.add("protyle-image-container--compact");
     snapshotImage.parentElement.insertAdjacentHTML("beforeend", '<span class="protyle-image-resize">' +
         '<span class="protyle-block-resize touch-resize-active" data-resize-axis="both"></span></span>');
+    const captions = imageSnapshot.querySelectorAll<HTMLElement>(".img__name, .protyle-action__title, .img__alt");
+    check.ok(captions.length > 0);
+    for (const fontSize of ["28px", "8px"]) {
+        captions.forEach(caption => caption.style.setProperty("--protyle-image-font-size", fontSize));
+        check.equal(api.cleanListMindmapHTML(imageSnapshot.innerHTML), cleanImage);
+        check.ok(Array.from(captions).every(caption => caption.style.getPropertyValue("--protyle-image-font-size") === fontSize),
+            "snapshot cleanup must not alter live image captions");
+    }
     check.equal(api.cleanListMindmapHTML(imageSnapshot.innerHTML), cleanImage);
+    captions[0].style.color = "red";
+    const styledImage = document.createElement("div");
+    styledImage.innerHTML = api.cleanListMindmapHTML(imageSnapshot.innerHTML);
+    check.equal(styledImage.querySelector<HTMLElement>(".img__name, .protyle-action__title, .img__alt").style.color, "red",
+        "only the derived font size is removed from caption styles");
+    check.equal(api.cleanListMindmapHTML(styledImage.innerHTML), styledImage.innerHTML, "image cleanup is idempotent");
+    snapshotImage.parentElement.style.width = "90px";
+    check.notEqual(api.cleanListMindmapHTML(imageSnapshot.innerHTML), styledImage.innerHTML,
+        "persisted image width changes still alter the source snapshot");
     for (const state of ["img--select", "img--drag"]) {
         check.equal(api.cleanListMindmapHTML(`<span class="img ${state}"><img src="assets/image.png"></span>`),
             '<span class="img"><img src="assets/image.png"></span>');

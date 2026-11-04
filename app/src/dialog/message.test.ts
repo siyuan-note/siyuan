@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 
-const cases = async (source: string) => {
+const cases = async (source: string, styles: string[], themes: string[]) => {
     const check = require("node:assert/strict");
     let ownsKernel = true;
     let finish: () => void;
@@ -71,14 +71,63 @@ const cases = async (source: string) => {
         "replacing an existing notification reuses its element");
     check.equal(message.querySelector('[data-id="select-all-tip"]'), selectAllTip);
     check.equal(selectAllTip.textContent, "Loading...");
+    const recovery = "1![image](assets/" + "long-image-path-".repeat(80) + ".png)2\n  Keep indentation\n\nLast line";
+    const pre = document.createElement("pre");
+    pre.textContent = recovery;
+    api.showMessage("Content changed" + pre.outerHTML, 0, "error", "recovery");
+    await tick();
+    const notificationHTML = message.querySelector('[data-id="recovery"]').outerHTML;
+    for (const css of styles) {
+        for (const width of [320, 1024]) {
+            const frame = document.createElement("iframe");
+            frame.style.width = width + "px";
+            frame.style.height = "600px";
+            document.body.append(frame);
+            const doc = frame.contentDocument;
+            const style = doc.createElement("style");
+            style.textContent = css;
+            doc.head.append(style);
+            const theme = doc.createElement("style");
+            doc.head.append(theme);
+            doc.body.innerHTML = '<div class="b3-snackbars b3-snackbars--show">' + notificationHTML + "</div>";
+            for (const themeCSS of themes) {
+                theme.textContent = themeCSS;
+                for (const fontSize of [14, 24]) {
+                    doc.body.style.setProperty("--b3-font-size", fontSize + "px");
+                    const content = doc.querySelector<HTMLElement>(".b3-snackbar__content");
+                    const restored = content.querySelector("pre");
+                    const computed = frame.contentWindow.getComputedStyle(restored);
+                    check.equal(computed.whiteSpace, "pre-wrap");
+                    check.equal(computed.overflowWrap, "anywhere");
+                    check.equal(restored.textContent, recovery, "wrapping cannot truncate recovery text or collapse line breaks");
+                    const range = doc.createRange();
+                    range.selectNodeContents(restored);
+                    const selection = frame.contentWindow.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    check.equal(selection.toString(), recovery, "the complete recovery Markdown remains selectable");
+                    check.ok(content.scrollWidth <= content.clientWidth + 1,
+                        `recovery content must fit its notification at ${width}px and ${fontSize}px font size`);
+                    check.ok(content.getBoundingClientRect().left >= 0);
+                    check.ok(content.getBoundingClientRect().right <= width);
+                }
+            }
+            frame.remove();
+        }
+    }
     return "update-message-ok";
 };
 
-test("update notifications support one-off download, retries and remote frontend restrictions", {timeout: 30000}, async () => {
+test("notifications support update retries and preserve wrapped recovery text on desktop and mobile", {timeout: 30000}, async () => {
     const source = transpileModule(readFileSync("src/dialog/message.ts", "utf8")
         .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;
+    const sass = require("sass") as typeof import("sass");
+    const styles = ["base", "mobile"].map(name => sass.compile(`src/assets/scss/${name}.scss`, {
+        logger: sass.Logger.silent,
+    }).css);
+    const themes = ["daylight", "midnight"].map(name => readFileSync(`appearance/themes/${name}/theme.css`, "utf8"));
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-update-message-"));
     const script = path.join(directory, "main.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -88,7 +137,8 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("about:blank");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
-        "const __name = value => value; (" + cases.toString() + ")(" + JSON.stringify(source) + ")")}));
+        "const __name = value => value; (" + cases.toString() + ")(" + JSON.stringify(source) + ", " + JSON.stringify(styles) +
+        ", " + JSON.stringify(themes) + ")")}));
         app.exit(0);
     } catch (error) { console.error(error); app.exit(1); }
 });`);

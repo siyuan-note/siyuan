@@ -357,6 +357,15 @@ const cleanListMindmapDOM = (root: Element | DocumentFragment) => {
     root.querySelectorAll(".img--select, .img--drag, .protyle-image-container--compact").forEach(element => {
         element.classList.remove("img--select", "img--drag", "protyle-image-container--compact");
     });
+    // 说明字号取决于当前显示宽度，隐藏源节点和编辑器的布局差异不能成为正文冲突。
+    root.querySelectorAll<HTMLElement>(".img .img__name, .img .protyle-action__title, .img .img__alt").forEach(element => {
+        if (element.style.getPropertyValue("--protyle-image-font-size")) {
+            element.style.removeProperty("--protyle-image-font-size");
+            if (element.style.length === 0) {
+                element.removeAttribute("style");
+            }
+        }
+    });
     // 页签导航和面板标识由渲染器生成，不参与正文比较或脑图节点事务。
     root.querySelectorAll(".tabs-header, .tabs-divider, .tabs-attributes").forEach(element => element.remove());
     root.querySelectorAll('[data-type="NodeTabs"], [data-type="NodeTabItem"]').forEach(element => {

@@ -101,6 +101,11 @@ html[data-frontend="browser-desktop"] body:not(.body--toolbar-hide):not(.body--w
     ul {
       margin-left: 16px;
     }
+
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
   }
 
   &__close {

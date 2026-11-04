@@ -56,7 +56,124 @@ test("all six packaging configurations retain platform-appropriate non-default M
             assert.equal(entries[0].role, "Editor");
             assert.equal(entries[0].rank, "Alternate");
             assert.equal(entries[0].mimeType, "text/markdown");
+            assert.equal(entries[0].icon, platform === "mac" ? "src/assets/markdown.icns" : undefined);
         }
+    }
+});
+
+const icnsFrames = file => {
+    const icon = fs.readFileSync(path.join(project, "src/assets", file));
+    assert.equal(icon.toString("ascii", 0, 4), "icns");
+    assert.equal(icon.readUInt32BE(4), icon.length);
+    const frames = new Map();
+    let offset = 8;
+    while (offset < icon.length) {
+        assert.ok(offset + 8 <= icon.length, `${file}: complete chunk header`);
+        const type = icon.toString("ascii", offset, offset + 4);
+        const length = icon.readUInt32BE(offset + 4);
+        assert.ok(length > 8 && offset + length <= icon.length, `${file}: valid ${type} chunk`);
+        assert.ok(!frames.has(type), `${file}: unique ${type} chunk`);
+        frames.set(type, icon.subarray(offset + 8, offset + length));
+        offset += length;
+    }
+    assert.equal(offset, icon.length);
+    return frames;
+};
+
+test("macOS Markdown icon covers standard and Retina sizes with the approved transparent design and application colors", async () => {
+    const frames = icnsFrames("markdown.icns");
+    const sizes = new Map([["icp4", 16], ["icp5", 32], ["icp6", 64], ["ic07", 128], ["ic08", 256],
+        ["ic09", 512], ["ic10", 1024], ["ic11", 32], ["ic12", 64], ["ic13", 256], ["ic14", 512]]);
+    assert.deepEqual([...frames.keys()], [...sizes.keys()]);
+    const application = await sharp(icnsFrames("icon.icns").get("ic09")).ensureAlpha().raw().toBuffer();
+    const colors = new Map();
+    for (let offset = 0; offset < application.length; offset += 4) {
+        if (application[offset + 3] !== 255) continue;
+        const color = application.subarray(offset, offset + 3).toString("hex");
+        colors.set(color, (colors.get(color) || 0) + 1);
+    }
+    const palette = [...colors].sort((left, right) => right[1] - left[1]).slice(0, 3).map(([color]) => color);
+    assert.deepEqual(palette, ["ffffff", "da3838", "3b3f42"]);
+    const windows = fs.readFileSync(path.join(project, "src/assets/markdown.ico"));
+    const windowsFrames = new Map(Array.from({length: windows.readUInt16LE(4)}, (_, index) => {
+        const entry = 6 + index * 16;
+        const start = windows.readUInt32LE(entry + 12);
+        return [windows[entry] || 256, windows.subarray(start, start + windows.readUInt32LE(entry + 8))];
+    }));
+    for (const [type, png] of frames) {
+        const size = sizes.get(type);
+        const {data, info} = await sharp(png).ensureAlpha().raw().toBuffer({resolveWithObject: true});
+        assert.equal(info.width, size, type);
+        assert.equal(info.height, size, type);
+        assert.equal(info.channels, 4, type);
+        const present = new Set();
+        let transparent = false;
+        let antialiased = false;
+        for (let offset = 0; offset < data.length; offset += 4) {
+            const alpha = data[offset + 3];
+            transparent ||= alpha === 0;
+            antialiased ||= alpha > 0 && alpha < 255;
+            if (alpha === 255) present.add(data.subarray(offset, offset + 3).toString("hex"));
+        }
+        assert.ok(transparent && palette.every(color => present.has(color)), `${type}: transparent background and macOS colors`);
+        if (size > 16) assert.ok(antialiased, `${type}: antialiased edges`);
+        if (!windowsFrames.has(size)) continue;
+        const approved = await sharp(windowsFrames.get(size)).ensureAlpha().raw().toBuffer();
+        for (let offset = 0; offset < data.length; offset += 4) {
+            assert.equal(data[offset + 3], approved[offset + 3], `${type}: approved alpha at ${offset / 4}`);
+            for (let channel = 0; channel < 3; channel++) {
+                // 半透明边缘在预乘和取消预乘时存在量化舍入。
+                assert.ok(Math.abs(data[offset + channel] - approved[offset + channel]) * data[offset + 3] <= 3 * 255,
+                    `${type}: only application color adaptation at ${offset / 4}`);
+            }
+        }
+    }
+});
+
+test("both macOS packages write and copy the Markdown document icon without replacing the app icon or handler rank", async () => {
+    const {MacPackager} = builderRequire("app-builder-lib");
+    const {createMacApp} = require(path.join(library, "electron/electronMac.js"));
+    const {savePlistFile, parsePlistFile} = require(path.join(library, "util/plist.js"));
+    const output = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-markdown-mac-"));
+    try {
+        for (const [name, arch] of [["electron-builder-darwin.yml", "x64"], ["electron-builder-darwin-arm64.yml", "arm64"]]) {
+            const config = await getConfig(project, path.join(project, name), null);
+            const packager = new MacPackager({
+                config,
+                projectDir: project,
+                buildResourcesDir: path.join(project, "build"),
+                metadata: JSON.parse(fs.readFileSync(path.join(project, "package.json"), "utf8")),
+                framework: {distMacOsAppName: "Electron.app"},
+            });
+            const destination = path.join(output, arch);
+            const contents = path.join(destination, "Electron.app/Contents");
+            const helper = path.join(contents, "Frameworks/Electron Helper.app/Contents");
+            fs.mkdirSync(path.join(contents, "Resources"), {recursive: true});
+            for (const directory of [contents, helper]) {
+                fs.mkdirSync(path.join(directory, "MacOS"), {recursive: true});
+                fs.writeFileSync(path.join(directory, "MacOS", directory === contents ? "Electron" : "Electron Helper"), "");
+                await savePlistFile(path.join(directory, "Info.plist"), {CFBundleExecutable: "Electron"});
+            }
+            await createMacApp(packager, destination, null, false);
+            const builtContents = path.join(destination, "SiYuan.app/Contents");
+            const plist = await parsePlistFile(path.join(builtContents, "Info.plist"));
+            assert.deepEqual(plist.CFBundleDocumentTypes, [{
+                CFBundleTypeExtensions: ["md", "markdown"],
+                CFBundleTypeName: "SiYuan Markdown",
+                CFBundleTypeRole: "Editor",
+                LSHandlerRank: "Alternate",
+                CFBundleTypeIconFile: "markdown.icns",
+            }], name);
+            assert.equal(plist.CFBundleIconFile, "icon.icns", name);
+            assert.equal(config.mac.icon, "src/assets/icon.icns", name);
+            assert.equal(config.mac.target[0].arch, arch, name);
+            for (const icon of ["markdown.icns", "icon.icns"]) {
+                assert.deepEqual(fs.readFileSync(path.join(builtContents, "Resources", icon)),
+                    fs.readFileSync(path.join(project, "src/assets", icon)), `${name}: ${icon}`);
+            }
+        }
+    } finally {
+        fs.rmSync(output, {recursive: true, force: true});
     }
 });
 

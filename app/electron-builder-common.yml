@@ -1,11 +1,14 @@
 # Windows registers Open With in nsis/installer.nsh without changing defaults.
-mac:
-  fileAssociations: &markdownAssociations
-    - ext: ["md", "markdown"]
+linux:
+  fileAssociations:
+    - &markdownAssociation
+      ext: ["md", "markdown"]
       name: "SiYuan Markdown"
       description: "Markdown document"
       mimeType: "text/markdown"
       role: "Editor"
       rank: "Alternate"
-linux:
-  fileAssociations: *markdownAssociations
+mac:
+  fileAssociations:
+    - <<: *markdownAssociation
+      icon: "src/assets/markdown.icns"

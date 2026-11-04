@@ -129,7 +129,7 @@ const genAVRollupHTML = (value: IAVCellValue) => {
     return html;
 };
 
-export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = "", renderTemplate?: string) => {
+export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = "", renderTemplate?: string, relationLimit = Infinity) => {
     if (hasAVRenderTemplateResult(value, renderTemplate)) {
         const storedValue = cloneAVCellValueSnapshot(value);
         return `${value.type === "block" ? renderAVBlockIcon(value) : ""}<div class="fn__flex-1 av__celltext--template" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(storedValue)))}" placeholder="${window.siyuan.languages.empty}">${getAVTemplateHTML(value.renderedContent || "")}</div>`;
@@ -211,14 +211,22 @@ ${value.isDetached || !value.block.id ? `<button type="button" data-type="av-bin
 <span class="fn__space"></span>
 <a ${value.email.content ? `href="mailto:${escapeAttr(value.email.content)}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
             break;
-        case "relation":
+        case "relation": {
+            let count = 0;
             value?.relation?.contents?.forEach((item, index) => {
-                html += genAVRelationHTML(item, value.relation.blockIDs[index]);
+                if (!item?.block) {
+                    return;
+                }
+                if (count < relationLimit) {
+                    html += genAVRelationHTML(item, value.relation.blockIDs[index]);
+                }
+                count++;
             });
-            if (html && html.endsWith(", ")) {
-                html = html.substring(0, html.length - 2);
+            if (count > relationLimit) {
+                html += `<button type="button" class="b3-button av__button" data-type="av-relation-show-all">${window.siyuan.languages.showAll}</button>`;
             }
             break;
+        }
         case "rollup":
             value?.rollup?.contents?.forEach((item) => {
                 const rollupText = (usesAVRollupCellRenderer(item.type) || item.type === "checkbox") ?
@@ -270,6 +278,6 @@ data-options="${options.selectOptions ? escapeAttr(JSON.stringify(options.select
 data-date-format="${escapeAttr(options.dateFormat || "")}"
 ${options.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${hasOwnPlaceholder ? "" : `placeholder="${window.siyuan.languages.empty}"`}
-class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${isAVTimestampType(value.type) ? " custom-attr__avvalue--readonly" : ""}${checkClass}">${genAVValueHTML(value, options.dateFormat, options.renderTemplate)}</div>
+class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${isAVTimestampType(value.type) ? " custom-attr__avvalue--readonly" : ""}${checkClass}">${genAVValueHTML(value, options.dateFormat, options.renderTemplate, 5)}</div>
 </div>`;
 };

@@ -26,6 +26,7 @@ import {preserveAVBindingRange} from "./binding";
 import {
     createEmptyAVValue,
     genAVAttributeRowHTML,
+    genAVValueHTML,
     getAVTemplateInteractiveElement,
     isAVTemplateLink
 } from "./attributeValue";
@@ -401,6 +402,16 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 event.preventDefault();
             });
             element.addEventListener("click", (event) => {
+                const showAllElement = (event.target as HTMLElement).closest<HTMLElement>('[data-type="av-relation-show-all"]');
+                if (showAllElement?.parentElement.matches('.custom-attr__avvalue[data-type="relation"]')) {
+                    const cellElement = showAllElement.parentElement;
+                    const value = JSON.parse(decodeURIComponent(cellElement.dataset.cellValue)) as IAVCellValue;
+                    cellElement.dataset.relationExpanded = "true";
+                    cellElement.innerHTML = genAVValueHTML(value);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 const visibilityElement = (event.target as HTMLElement).closest<HTMLElement>('[data-type="toggle-panel-visibility"]');
                 if (visibilityElement) {
                     const databaseElement = visibilityElement.closest<HTMLElement>("[data-av-id]");

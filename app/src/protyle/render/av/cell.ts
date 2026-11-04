@@ -1423,7 +1423,7 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
                 }
             } else {
                 cellElement.innerHTML = genAVValueHTML(value, cellElement.dataset.dateFormat as TAVDateFormat,
-                    renderTemplate);
+                    renderTemplate, cellElement.dataset.relationExpanded === "true" ? Infinity : 5);
                 renderAVRichTextElements(cellElement);
             }
         }

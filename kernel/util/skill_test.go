@@ -12,8 +12,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
+	"os/user"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"sort"
 	"strings"
 	"testing"
@@ -115,6 +118,66 @@ func TestDiscoverUserSkillsReportsState(t *testing.T) {
 	}
 	if got := DiscoverUserSkills([]string{"external", "shared"}); !reflect.DeepEqual(got, want) {
 		t.Fatalf("DiscoverUserSkills() = %#v, want %#v", got, want)
+	}
+}
+
+func denySkillSourceRead(t *testing.T, path string) {
+	t.Helper()
+	if runtime.GOOS == "windows" {
+		current, err := user.Current()
+		if err != nil {
+			t.Fatal(err)
+		}
+		sid := "*" + current.Uid
+		if output, err := exec.Command("icacls", path, "/deny", sid+":(R)").CombinedOutput(); err != nil {
+			t.Fatalf("deny read: %s: %v", output, err)
+		}
+		t.Cleanup(func() {
+			if output, err := exec.Command("icacls", path, "/remove:d", sid).CombinedOutput(); err != nil {
+				t.Errorf("restore read: %s: %v", output, err)
+			}
+		})
+	} else {
+		if err := os.Chmod(path, 0000); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { _ = os.Chmod(path, 0644) })
+	}
+	if _, err := os.ReadFile(path); !os.IsPermission(err) {
+		t.Skipf("read permission cannot be denied in this environment: %v", err)
+	}
+}
+
+func TestDiscoverSkillsSkipsUnreadableSources(t *testing.T) {
+	workspaceRoot, userRoot := setSkillTestRoots(t)
+	for _, root := range []string{workspaceRoot, userRoot} {
+		writeSkill(t, root, "a-unreadable", "Unreadable", "description", "body")
+		writeSkill(t, root, "z-readable", "Readable", "description", "body")
+		denySkillSourceRead(t, filepath.Join(root, "a-unreadable", "SKILL.md"))
+		if got := readSkillRecords(root); len(got) != 1 || got[0].Info.Name != "Readable" {
+			t.Fatalf("readSkillRecords(%s) = %#v", root, got)
+		}
+	}
+	if got := DiscoverUserSkills([]string{"a-unreadable", "z-readable"}); len(got) != 1 || got[0].ID != "z-readable" {
+		t.Fatalf("DiscoverUserSkills() = %#v", got)
+	}
+	if loaded, err := LoadSkill("Readable", []string{"a-unreadable", "z-readable"}); err != nil || loaded.Content != "body" {
+		t.Fatalf("LoadSkill() = %#v, %v", loaded, err)
+	}
+}
+
+func TestInstallSkillsSkipsUnreadableSources(t *testing.T) {
+	workspaceRoot, _ := setSkillTestRoots(t)
+	root := t.TempDir()
+	writeSkill(t, root, "a-unreadable", "Unreadable", "description", "body")
+	writeSkill(t, root, "z-readable", "Readable", "description", "body")
+	denySkillSourceRead(t, filepath.Join(root, "a-unreadable", "SKILL.md"))
+	result, err := installSkillDirs([]string{"a-unreadable", "z-readable"}, root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := readSkillRecords(workspaceRoot); len(got) != 1 || got[0].Info.Name != "Readable" {
+		t.Fatalf("installed skills = %#v, result = %#v", got, result)
 	}
 }
 

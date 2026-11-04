@@ -78,6 +78,9 @@ func UserSkillsDir() string {
 func readSkillRecords(root string) []skillRecord {
 	entries, err := os.ReadDir(root)
 	if err != nil {
+		if !errors.Is(err, os.ErrNotExist) {
+			logging.LogWarnf("read skill directory [%s] failed: %s", root, err)
+		}
 		return nil
 	}
 
@@ -94,8 +97,11 @@ func readSkillRecords(root string) []skillRecord {
 		}
 		dirName := e.Name()
 		skillMdPath := filepath.Join(root, dirName, "SKILL.md")
-		b, err := filelock.ReadFile(skillMdPath)
+		b, err := readSkillSource(skillMdPath)
 		if err != nil {
+			if !errors.Is(err, os.ErrNotExist) {
+				logging.LogWarnf("read SKILL.md [%s] failed: %s", skillMdPath, err)
+			}
 			continue
 		}
 		content := string(b)
@@ -120,6 +126,13 @@ func readSkillRecords(root string) []skillRecord {
 		})
 	}
 	return records
+}
+
+func readSkillSource(path string) ([]byte, error) {
+	filelock.Lock(path)
+	defer filelock.Unlock(path)
+	// 技能源文件不可读时交由调用方处理，避免可选技能导致内核退出。
+	return os.ReadFile(path)
 }
 
 func skillKey(name string) string {
@@ -922,7 +935,7 @@ func installSkillDirs(relDirs []string, root string, source ...SkillInstallation
 			continue
 		}
 		skillMdPath := filepath.Join(srcDir, "SKILL.md")
-		b, err := filelock.ReadFile(skillMdPath)
+		b, err := readSkillSource(skillMdPath)
 		if err != nil {
 			logging.LogWarnf("read SKILL.md [%s] failed: %s", skillMdPath, err)
 			continue

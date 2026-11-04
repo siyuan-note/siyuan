@@ -4,6 +4,7 @@ const os = require("node:os");
 const path = require("node:path");
 const {createRequire} = require("node:module");
 const {test} = require("node:test");
+const sharp = require("sharp");
 
 const project = path.resolve(__dirname, "..");
 const installer = fs.readFileSync(path.join(project, "nsis/installer.nsh"), "utf8");
@@ -83,6 +84,72 @@ test("Markdown document icon has 32-bit entries for Explorer display sizes", () 
     assert.equal(end, icon.length);
     assert.deepEqual(sizes.sort((a, b) => a - b), [16, 20, 24, 32, 48, 64, 128, 256]);
     assert.notDeepEqual(icon, fs.readFileSync(path.join(project, "src/assets/icon.ico")));
+});
+
+test("Markdown icon frames use the application red and keep small MD labels legible", async () => {
+    const frames = async file => {
+        const icon = fs.readFileSync(path.join(project, "src/assets", file));
+        return Promise.all(Array.from({length: icon.readUInt16LE(4)}, async (_, index) => {
+            const entry = 6 + index * 16;
+            const size = icon[entry] || 256;
+            const offset = icon.readUInt32LE(entry + 12);
+            const length = icon.readUInt32LE(entry + 8);
+            const {data, info} = await sharp(icon.subarray(offset, offset + length)).ensureAlpha().raw()
+                .toBuffer({resolveWithObject: true});
+            assert.equal(info.width, size);
+            assert.equal(info.height, size);
+            assert.equal(info.channels, 4);
+            return {size, data};
+        }));
+    };
+    const redCounts = data => {
+        const colors = new Map();
+        for (let offset = 0; offset < data.length; offset += 4) {
+            if (data[offset + 3] !== 255 || data[offset] <= data[offset + 1] * 2 ||
+                data[offset] <= data[offset + 2] * 2) continue;
+            const color = data.subarray(offset, offset + 3).toString("hex");
+            colors.set(color, (colors.get(color) || 0) + 1);
+        }
+        return [...colors].sort((left, right) => right[1] - left[1]);
+    };
+    const [application] = await frames("icon.ico");
+    const applicationRed = redCounts(application.data)[0][0];
+    const labelRegions = new Map([
+        [16, {left: 3, top: 7, right: 14, bottom: 14, width: 10, height: 6}],
+        [20, {left: 5, top: 11, right: 17, bottom: 16, width: 10, height: 6}],
+        [24, {left: 8, top: 14, right: 20, bottom: 19, width: 12, height: 6}],
+        [32, {left: 13, top: 20, right: 28, bottom: 26, width: 14, height: 7}],
+    ]);
+    for (const {size, data} of await frames("markdown.ico")) {
+        assert.equal(redCounts(data)[0][0], applicationRed, `${size}px: application red`);
+        let transparent = false;
+        let antialiased = false;
+        let gray = false;
+        let white = false;
+        for (let offset = 0; offset < data.length; offset += 4) {
+            const alpha = data[offset + 3];
+            transparent ||= alpha === 0;
+            antialiased ||= alpha > 0 && alpha < 255;
+            gray ||= alpha === 255 && data.subarray(offset, offset + 3).equals(Buffer.from([59, 62, 67]));
+            white ||= alpha === 255 && data.subarray(offset, offset + 3).equals(Buffer.from([255, 255, 255]));
+        }
+        assert.ok(transparent && gray && white, `${size}px: transparent background and contrasting label`);
+        if (size > 16) assert.ok(antialiased, `${size}px: antialiased edges`);
+        const region = labelRegions.get(size);
+        if (!region) continue;
+        const points = [];
+        for (let y = region.top; y <= region.bottom; y++) {
+            for (let x = region.left; x <= region.right; x++) {
+                const offset = (y * size + x) * 4;
+                if (data[offset + 3] > 220 && Math.max(...data.subarray(offset, offset + 3)) < 160) {
+                    points.push([x, y]);
+                }
+            }
+        }
+        const width = Math.max(...points.map(point => point[0])) - Math.min(...points.map(point => point[0])) + 1;
+        const height = Math.max(...points.map(point => point[1])) - Math.min(...points.map(point => point[1])) + 1;
+        assert.ok(width >= region.width && height >= region.height, `${size}px: readable native-size MD glyphs`);
+    }
 });
 
 test("both Windows installers copy the document icon to its registered path without replacing the app icon", async () => {

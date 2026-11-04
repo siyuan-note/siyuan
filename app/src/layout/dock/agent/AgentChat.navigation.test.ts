@@ -79,7 +79,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     const first = markers[0].getBoundingClientRect();
     check.ok(first.height >= 8, "markers have a usable click height");
     await move(first.left + first.width / 2, first.top + first.height / 2);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    check.equal(getComputedStyle(tip).animationName, "none", "navigation previews appear without a delayed animation");
     check.equal(rail.getBoundingClientRect().width, initialWidth, "hover never expands the clickable rail");
     check.ok(initialWidth <= 24);
     check.equal(chat.messagesContainer.scrollTop, 0, "hover never jumps");
@@ -87,6 +87,14 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     check.equal(tip.textContent, chat.entries[0].content, "preview preserves literal HTML, quotes and percent sequences");
     check.equal(tip.children.length, 0, "message content cannot create interactive preview elements");
     check.equal(getComputedStyle(tip).pointerEvents, "none", "preview cannot intercept clicks");
+    const next = markers[1].getBoundingClientRect();
+    check.ok(Math.abs(first.bottom - next.top) < 0.1, "adjacent hit targets have no gap");
+    for (let y = first.top + first.height / 2; y < next.bottom; y++) {
+        await move(first.left + first.width / 2, y);
+        check.equal(tip.classList.contains("fn__none"), false, "preview stays visible between lines");
+        check.equal(tip.textContent, y < next.top ? chat.entries[0].content : "Second question");
+    }
+    await move(first.left + first.width / 2, first.top + first.height / 2);
     const preview = tip.getBoundingClientRect();
     const copy = document.getElementById("copy");
     copy.style.left = `${preview.left - wrap.getBoundingClientRect().left + 5}px`;
@@ -103,7 +111,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     const second = markers[1].getBoundingClientRect();
     await move(second.left + 10, second.top + 4);
     check.equal(tip.textContent, "Second question", "hover updates only the selected message preview");
-    await click(second.left + 10, second.top + 4);
+    await click(second.left + 10, second.top + 0.5);
     await new Promise(resolve => setTimeout(resolve, 800));
     check.ok(chat.messagesContainer.scrollTop > 0, "clicking a marker scrolls to its message");
     check.ok(chat.messagesContainer.querySelector('[data-message-id="second"]').classList.contains("agent-chat__msg--jumped"));
@@ -150,6 +158,16 @@ const markerPaintFixture = async (css: string) => {
         }),
     };
 };
+
+test("agent navigation fills marker gaps and shows previews immediately", () => {
+    const css = compile(path.resolve(__dirname, "../../../assets/scss/business/_ai_agent.scss"), {
+        logger: Logger.silent,
+    }).css;
+    const rule = (selector: string) => css.match(new RegExp(`${selector} \\{([^}]+)\\}`))?.[1] || "";
+    assert.doesNotMatch(rule("\\.agent-chat__nav-rail"), /\bgap\s*:/);
+    assert.match(rule("\\.agent-chat__nav-rail-marker"), /padding: calc\(3px \+ var\(--nav-gap, 0px\) \/ 2\) 5px/);
+    assert.match(rule("\\.tooltip--agent-nav"), /animation: none/);
+});
 
 test("agent navigation keeps previews outside its click targets, paints short lines at every zoom and stays hidden on mobile", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,

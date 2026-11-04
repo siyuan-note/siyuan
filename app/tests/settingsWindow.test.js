@@ -212,6 +212,7 @@ const runCases = async (sources) => {
     const pluginSettings = {};
     new Function("Plugin", "exports", sources.pluginSettings)(Plugin, pluginSettings);
     const settingInterface = loadRendererModule(sources.settingInterface, {electron: {ipcRenderer}});
+    const reopenedTabs = [];
     const breadcrumbRegistry = loadRendererModule(sources.breadcrumbRegistry, {});
     breadcrumbRegistry.breadcrumbButtonRegistry.set("owner", {
         id: "button", title: "Owner button", icon: "iconFile", callback() {},
@@ -232,6 +233,11 @@ const runCases = async (sources) => {
         "../bazaar/openPath": bazaarPath,
         "../tabs/compactMode": {isCompactModeEnabled: () => false},
         "./interface": settingInterface,
+        "../index": {openSetting: (app, tab) => {
+            assert.equal(app, window.siyuan.ws.app);
+            reopenedTabs.push(tab);
+            settingInterface.prepareSettingDialog();
+        }},
     });
     const {Setting} = loadRendererModule(sources.setting, {
         "../dialog/mobileDialog": {MobileDialog},
@@ -469,6 +475,20 @@ const runCases = async (sources) => {
     await native.openNativeSettings(window.siyuan.ws.app, {tab: "editor"});
     await ipcRenderer.invoke("test-settings-wait");
     assert.equal(await ipcRenderer.invoke("test-settings-other-dialog-closed"), true);
+    const currentToken = await ipcRenderer.invoke("test-settings-token");
+    const currentHost = await new Promise(resolve => {
+        window.dispatchEvent(new CustomEvent("siyuan-settings-host-" + currentToken, {detail: resolve}));
+    });
+    await currentHost.reopenSettings(false);
+    await wait();
+    assert.equal(window.siyuan.config.system.settingsWindow, false);
+    assert.deepEqual(reopenedTabs, ["app"]);
+    assert.equal(await ipcRenderer.invoke("test-settings-window-count"), 0);
+    assert.equal((await ipcRenderer.invoke("test-settings-commands")).at(-1), "show-owner");
+    await currentHost.reopenSettings(true);
+    assert.deepEqual(reopenedTabs, ["app"], "a closed host cannot reopen settings");
+    await native.openNativeSettings(window.siyuan.ws.app, {tab: "app"});
+    await ipcRenderer.invoke("test-settings-wait");
 };
 
 if (process.versions.electron && process.type === "browser") {

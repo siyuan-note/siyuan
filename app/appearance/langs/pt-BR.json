@@ -571,7 +571,7 @@
 	"pinWindow": "Manter janela no topo",
 	"unpinWindow": "Deixar de manter janela no topo",
 	"settingsWindowMode": "Abrir configurações em uma janela independente",
-	"settingsWindowModeTip": "Aplica-se na próxima abertura das configurações; os plugins determinam como abrir suas próprias configurações",
+	"settingsWindowModeTip": "Reabre imediatamente as configurações do aplicativo após a mudança; os plugins determinam como abrir suas próprias configurações",
 	"settingsPendingSaveError": "Não foi possível salvar as alterações pendentes no editor. Tente novamente",
 	"blockTypeParentChange": "Esta conversão alteraria a estrutura ou o layout do bloco externo",
 	"attributePanelVisibility": "Visibilidade do campo no painel do banco de dados",

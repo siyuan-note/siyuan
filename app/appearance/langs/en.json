@@ -571,7 +571,7 @@
 	"pinWindow": "Keep window on top",
 	"unpinWindow": "Stop keeping window on top",
 	"settingsWindowMode": "Open settings in a separate window",
-	"settingsWindowModeTip": "Applies the next time settings are opened; plugins determine how their own settings open",
+	"settingsWindowModeTip": "Immediately reopens app settings after switching; plugins determine how their own settings open",
 	"settingsPendingSaveError": "Could not save pending editor changes. Please try again",
 	"blockTypeParentChange": "This conversion would change the outer block structure or layout",
 	"attributePanelVisibility": "Database panel field visibility",

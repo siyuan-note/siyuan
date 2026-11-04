@@ -571,7 +571,7 @@
 	"pinWindow": "Garder la fenêtre au premier plan",
 	"unpinWindow": "Ne plus garder la fenêtre au premier plan",
 	"settingsWindowMode": "Ouvrir les paramètres dans une fenêtre indépendante",
-	"settingsWindowModeTip": "S’applique à la prochaine ouverture des paramètres ; les extensions décident comment ouvrir leurs propres paramètres",
+	"settingsWindowModeTip": "Rouvre immédiatement les paramètres de l’application après le changement ; les extensions décident comment ouvrir leurs propres paramètres",
 	"settingsPendingSaveError": "Impossible d'enregistrer les modifications en attente dans l'éditeur. Veuillez réessayer",
 	"blockTypeParentChange": "Cette conversion modifierait la structure ou la disposition du bloc extérieur",
 	"attributePanelVisibility": "Visibilité du champ dans le panneau de la base de données",

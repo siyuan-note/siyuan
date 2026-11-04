@@ -571,7 +571,7 @@
 	"pinWindow": "Pencereyi her zaman üstte tut",
 	"unpinWindow": "Pencereyi her zaman üstte tutmayı bırak",
 	"settingsWindowMode": "Ayarları ayrı bir pencerede aç",
-	"settingsWindowModeTip": "Ayarlar bir sonraki açılışta uygulanır; eklentiler kendi ayarlarının nasıl açılacağını belirler",
+	"settingsWindowModeTip": "Değiştirdikten hemen sonra uygulama ayarlarını yeniden açar; eklentiler kendi ayarlarının nasıl açılacağını belirler",
 	"settingsPendingSaveError": "Düzenleyicide bekleyen değişiklikler kaydedilemedi. Lütfen tekrar deneyin",
 	"blockTypeParentChange": "Bu dönüştürme dış bloğun yapısını veya düzenini değiştirir",
 	"attributePanelVisibility": "Veritabanı panelindeki alan görünürlüğü",

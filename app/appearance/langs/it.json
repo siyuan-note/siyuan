@@ -571,7 +571,7 @@
 	"pinWindow": "Mantieni la finestra in primo piano",
 	"unpinWindow": "Non mantenere più la finestra in primo piano",
 	"settingsWindowMode": "Apri le impostazioni in una finestra separata",
-	"settingsWindowModeTip": "Si applica alla prossima apertura delle impostazioni; i plugin decidono come aprire le proprie impostazioni",
+	"settingsWindowModeTip": "Riapre subito le impostazioni dell’app dopo il cambio; i plugin decidono come aprire le proprie impostazioni",
 	"settingsPendingSaveError": "Impossibile salvare le modifiche in sospeso nell'editor. Riprova",
 	"blockTypeParentChange": "Questa conversione modificherebbe la struttura o la disposizione del blocco esterno",
 	"attributePanelVisibility": "Visibilità del campo nel pannello del database",

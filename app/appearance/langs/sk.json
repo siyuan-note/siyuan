@@ -571,7 +571,7 @@
 	"pinWindow": "Ponechať okno navrchu",
 	"unpinWindow": "Zrušiť ponechanie okna navrchu",
 	"settingsWindowMode": "Otvárať nastavenia v samostatnom okne",
-	"settingsWindowModeTip": "Platí pri ďalšom otvorení nastavení; doplnky určujú spôsob otvorenia svojich vlastných nastavení",
+	"settingsWindowModeTip": "Po prepnutí ihneď znova otvorí nastavenia aplikácie; doplnky určujú spôsob otvorenia svojich vlastných nastavení",
 	"settingsPendingSaveError": "Nepodarilo sa uložiť čakajúce zmeny v editore. Skúste to znova",
 	"blockTypeParentChange": "Táto konverzia by zmenila štruktúru alebo rozloženie vonkajšieho bloku",
 	"attributePanelVisibility": "Viditeľnosť poľa na paneli databázy",

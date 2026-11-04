@@ -1417,7 +1417,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", turn this switch on to open settings in an independent window that can be moved, resized, and minimized; the change applies the next time settings are opened. You can also open settings with the configured shortcut from a detached document window."
+					"Data": ", turn this switch on to open settings in an independent window that can be moved, resized, and minimized; switching immediately reopens app settings in the selected mode. You can also open settings with the configured shortcut from a detached document window."
 				}
 			]
 		},

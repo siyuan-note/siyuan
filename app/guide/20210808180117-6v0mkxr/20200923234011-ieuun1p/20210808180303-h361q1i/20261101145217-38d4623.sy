@@ -34,21 +34,12 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On the Windows, macOS, and Linux desktop apps, choose "
+					"Data": "On the Windows, macOS, and Linux desktop apps, launch SiYuan with "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Main Menu"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Markdown editor"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--markdown"
 				},
 				{
 					"Type": "NodeText",

@@ -34,25 +34,16 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 Windows、macOS 和 Linux 桌面端，通过 "
+					"Data": "在 Windows、macOS 和 Linux 桌面端，启动思源时传入 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "主菜单"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--markdown"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Markdown 编辑器"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 打开独立窗口，无需打开工作空间或启动本地内核。独立窗口打开期间，仍可正常启动思源，进入工作空间主界面。"
+					"Data": " 参数可打开独立窗口，无需打开工作空间或启动本地内核。独立窗口打开期间，仍可正常启动思源，进入工作空间主界面。"
 				}
 			]
 		},

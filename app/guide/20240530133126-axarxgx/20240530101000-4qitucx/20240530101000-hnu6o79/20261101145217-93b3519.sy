@@ -34,25 +34,16 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Windows、macOS、Linux のデスクトップ版では、"
+					"Data": "Windows、macOS、Linux のデスクトップ版では、思源の起動時に "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "メインメニュー"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--markdown"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Markdown エディタ"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " から独立したウィンドウを開けます。ワークスペースを開いたり、ローカルカーネルを起動したりする必要はありません。独立したウィンドウを開いている間も、通常の方法で思源を起動してワークスペースのメイン画面を開けます。"
+					"Data": " を指定すると独立したウィンドウを開けます。ワークスペースを開いたり、ローカルカーネルを起動したりする必要はありません。独立したウィンドウを開いている間も、通常の方法で思源を起動してワークスペースのメイン画面を開けます。"
 				}
 			]
 		},

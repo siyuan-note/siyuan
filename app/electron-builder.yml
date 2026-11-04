@@ -25,6 +25,8 @@ win:
   extraResources:
     - from: "kernel"
       to: "kernel"
+    - from: "src/assets/markdown.ico"
+      to: "markdown.ico"
   requestedExecutionLevel: "asInvoker"
   signtoolOptions:
     #certificateSubjectName: "Yunnan Liandi Technology Co., Ltd."

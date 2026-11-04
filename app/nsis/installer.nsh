@@ -7,7 +7,7 @@ Caption "${PRODUCT_NAME} ${VERSION}"
 !macro RegisterMarkdownOpenWith
     # 只加入打开方式，不修改扩展名默认值或用户的 UserChoice。
     WriteRegStr SHELL_CONTEXT "Software\Classes\${MARKDOWN_PROG_ID}" "" "SiYuan Markdown"
-    WriteRegStr SHELL_CONTEXT "Software\Classes\${MARKDOWN_PROG_ID}\DefaultIcon" "" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}",0'
+    WriteRegStr SHELL_CONTEXT "Software\Classes\${MARKDOWN_PROG_ID}\DefaultIcon" "" '"$INSTDIR\resources\markdown.ico",0'
     WriteRegStr SHELL_CONTEXT "Software\Classes\${MARKDOWN_PROG_ID}\shell\open\command" "" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" --markdown "%1"'
     WriteRegNone SHELL_CONTEXT "Software\Classes\.md\OpenWithProgids" "${MARKDOWN_PROG_ID}"
     WriteRegNone SHELL_CONTEXT "Software\Classes\.markdown\OpenWithProgids" "${MARKDOWN_PROG_ID}"

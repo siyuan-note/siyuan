@@ -4,6 +4,53 @@ import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities"
 import {progressLoading} from "./progress";
 import {fetchPost} from "../util/fetch";
 
+const formatMessageActions = (content: HTMLElement) => {
+    const selector = 'button, input[type="button"], input[type="submit"], input[type="reset"], a.b3-button, [role="button"]';
+    const parents = new Set(Array.from(content.querySelectorAll<HTMLElement>(selector), button => button.parentElement));
+    parents.forEach(parent => {
+        // 表单控件和语义容器保留原来的结构、焦点顺序及禁用范围。
+        if (!["DIV", "SPAN", "P", "FORM", "SECTION", "ARTICLE", "ASIDE", "HEADER", "FOOTER", "MAIN", "NAV"].includes(parent.tagName) ||
+            parent.closest("fieldset, label, details, table, [contenteditable]") ||
+            parent.querySelector('input:not([type="button"]):not([type="submit"]):not([type="reset"]), select, textarea')) {
+            return;
+        }
+        const buttons = Array.from(parent.children).filter(item => item.matches(selector));
+        const bodyNodes = Array.from(parent.childNodes).filter(node => {
+            if (node instanceof HTMLElement && node.className === "fn__space") {
+                node.remove();
+                return false;
+            }
+            return !buttons.includes(node as Element);
+        });
+        const hasBody = bodyNodes.some(node => node.nodeType !== Node.TEXT_NODE || node.textContent.trim());
+        if (hasBody) {
+            let body = bodyNodes.find(node => node instanceof HTMLElement &&
+                node.classList.contains("b3-snackbar__body")) as HTMLElement;
+            if (body) {
+                const index = bodyNodes.indexOf(body);
+                body.prepend(...bodyNodes.slice(0, index));
+                body.append(...bodyNodes.slice(index + 1));
+            } else {
+                body = document.createElement(["P", "SPAN"].includes(parent.tagName) ? "span" : "div");
+                body.className = "b3-snackbar__body";
+                body.append(...bodyNodes);
+            }
+            if (parent.firstChild !== body) {
+                parent.prepend(body);
+            }
+        } else {
+            bodyNodes.forEach(node => node.remove());
+        }
+        parent.classList.add("b3-snackbar__actions");
+        buttons.forEach(button => {
+            button.classList.add("b3-snackbar__action");
+            if (button.classList.contains("b3-button")) {
+                button.classList.add("b3-button--wrap");
+            }
+        });
+    });
+};
+
 export const initMessage = () => {
     const messageElement = document.getElementById("message");
     messageElement.innerHTML = '<div class="fn__flex-1"></div>';
@@ -89,6 +136,7 @@ id="tempMessage"></div>`);
 data-timeout="${timeout}" 
 data-type="${type}" 
 data-message-id="${safeMessageId || ""}">${safeMessage}</div>`);
+        formatMessageActions(tempMessages.lastElementChild as HTMLElement);
         return;
     }
     const id = safeMessageId || genUUID();
@@ -97,6 +145,7 @@ data-message-id="${safeMessageId || ""}">${safeMessage}</div>`);
     if (existElement) {
         window.clearTimeout(parseInt(existElement.getAttribute("data-timeoutid")));
         existElement.innerHTML = `<div data-type="textMenu" class="b3-snackbar__content${timeout === 0 ? " b3-snackbar__content--close" : ""}">${messageVersion}</div>${timeout === 0 ? '<svg class="b3-snackbar__close"><use xlink:href="#iconCloseRound"></use></svg>' : ""}`;
+        formatMessageActions(existElement.firstElementChild as HTMLElement);
         if (type === "error") {
             existElement.classList.add("b3-snackbar--error");
         } else {
@@ -123,6 +172,7 @@ data-message-id="${safeMessageId || ""}">${safeMessage}</div>`);
     messagesElement.parentElement.classList.add("b3-snackbars--show");
     messagesElement.parentElement.style.zIndex = (++window.siyuan.zIndex).toString();
     messagesElement.insertAdjacentHTML("afterbegin", messageHTML + "</div>");
+    formatMessageActions(messagesElement.firstElementChild.firstElementChild as HTMLElement);
     setTimeout(() => {
         messagesElement.querySelectorAll(".b3-snackbar--hide").forEach(item => {
             item.classList.remove("b3-snackbar--hide");

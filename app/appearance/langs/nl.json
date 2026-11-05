@@ -3370,7 +3370,7 @@
 		"153": "Gedownload: %d bestanden, %d chunks, %s bytes",
 		"154": "Maximaal 12 momentopnamen in cloud",
 		"155": "Cloud sync-map gereset naar main",
-		"156": "Schermvergrendelingswachtwoord verificatie mislukt; <button onclick=\"window.location.reload()\">ververs</button> of heropen",
+		"156": "Schermvergrendelingswachtwoord verificatie mislukt; ververs of heropen <button type=\"button\" class=\"b3-button b3-button--white\" onclick=\"window.location.reload()\">ververs</button>",
 		"157": "Sleutel niet herkend; controleer sleutelreeks",
 		"158": "Data-repo indexeren; gegevens doorlopen %s",
 		"159": "Data-repo indexeren; laatste bestand ophalen %v/%v",

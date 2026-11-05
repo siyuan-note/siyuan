@@ -3370,7 +3370,7 @@
 		"153": "Downloaded files %d, chunks %d, received bytes %s",
 		"154": "The cloud can only support backup up to 12 snapshots",
 		"155": "Cloud sync directory has been reset to [main]",
-		"156": "Lock screen password authentication failed, please <button onclick=\"window.location.reload()\">refresh</button> or reopen",
+		"156": "Lock screen password authentication failed, please refresh or reopen <button type=\"button\" class=\"b3-button b3-button--white\" onclick=\"window.location.reload()\">refresh</button>",
 		"157": "The key is not recognized, please confirm that the copied key string is correct",
 		"158": "Indexing data repo, walking data %s",
 		"159": "Indexing data repo, getting the latest file %v/%v",

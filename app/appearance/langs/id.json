@@ -3370,7 +3370,7 @@
 		"153": "File yang diunduh %d, potongan %d, byte yang diterima %s",
 		"154": "Cloud hanya dapat mendukung hingga 12 snapshot",
 		"155": "Direktori sinkronisasi cloud telah direset ke [main]",
-		"156": "Otentikasi kata sandi kunci layar gagal, harap <button onclick=\"window.location.reload()\">muat ulang</button> atau buka kembali",
+		"156": "Otentikasi kata sandi kunci layar gagal, harap muat ulang atau buka kembali <button type=\"button\" class=\"b3-button b3-button--white\" onclick=\"window.location.reload()\">muat ulang</button>",
 		"157": "Kunci tidak dikenali, harap konfirmasi bahwa string kunci yang disalin benar",
 		"158": "Mengindeks repositori data, berjalan data %s",
 		"159": "Mengindeks repositori data, mendapatkan file terbaru %v/%v",

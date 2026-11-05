@@ -3370,7 +3370,7 @@
 		"153": "Stiahnuté súbory %d, časti %d, bajty %s",
 		"154": "Cloud podporuje max 12 záloh snímok",
 		"155": "Cloudový adresár resetovaný na [main]",
-		"156": "Autentifikácia hesla zámku obrazovky zlyhala, <button onclick=\"window.location.reload()\">obnovte</button> alebo znova otvorte",
+		"156": "Autentifikácia hesla zámku obrazovky zlyhala, obnovte alebo znova otvorte <button type=\"button\" class=\"b3-button b3-button--white\" onclick=\"window.location.reload()\">obnovte</button>",
 		"157": "Kľúč nerozpoznaný",
 		"158": "Indexujem sklad, prechádzam %s",
 		"159": "Indexujem sklad, získavam súbor %v/%v",

@@ -3370,7 +3370,7 @@
 		"153": "Preuzeto fajlova %d, delova %d, bajtova %s",
 		"154": "Oblak može da čuva najviše 12 snimaka",
 		"155": "Direktorijum za sinhronizaciju u oblaku je vraćen na [main]",
-		"156": "Provera lozinke za zaključan ekran nije uspela, <button onclick=\"window.location.reload()\">osvežite</button> ili ponovo otvorite",
+		"156": "Provera lozinke za zaključan ekran nije uspela, osvežite ili ponovo otvorite <button type=\"button\" class=\"b3-button b3-button--white\" onclick=\"window.location.reload()\">osvežite</button>",
 		"157": "Ključ nije prepoznat, proverite da li je kopiran ispravno",
 		"158": "Indeksiranje riznice podataka, obilazak podataka %s",
 		"159": "Indeksiranje riznice podataka, učitavanje najnovijeg fajla %v/%v",

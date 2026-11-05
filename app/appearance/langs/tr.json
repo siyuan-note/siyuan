@@ -3370,7 +3370,7 @@
 		"153": "İndirilen dosyalar %d, parçalar %d, alınan veri %s",
 		"154": "Bulut en fazla 12 yedek anlık görüntüyü destekler",
 		"155": "Bulut senkron klasörü [main] olarak sıfırlandı",
-		"156": "Ekran kilidi şifresi kimlik doğrulaması başarısız, lütfen <button onclick=\"window.location.reload()\">yenile</button> veya yeniden aç",
+		"156": "Ekran kilidi şifresi kimlik doğrulaması başarısız, lütfen yenile veya yeniden aç <button type=\"button\" class=\"b3-button b3-button--white\" onclick=\"window.location.reload()\">yenile</button>",
 		"157": "Anahtar tanınmadı, kopyalanan anahtarın doğru olduğundan emin ol",
 		"158": "Veri deposu indeksleniyor, veriler taranıyor %s",
 		"159": "Veri deposu indeksleniyor, en son dosya alınıyor %v/%v",

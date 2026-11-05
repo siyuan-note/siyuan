@@ -3370,7 +3370,7 @@
 		"153": "Arquivos baixados %d, partes %d, bytes recebidos %s",
 		"154": "A nuvem só suporta backup de até 12 snapshots",
 		"155": "Diretório de sincronização na nuvem foi redefinido para [main]",
-		"156": "Falha na autenticação da senha de bloqueio de tela, por favor <button onclick=\"window.location.reload()\">atualize</button> ou reabra",
+		"156": "Falha na autenticação da senha de bloqueio de tela, por favor atualize ou reabra <button type=\"button\" class=\"b3-button b3-button--white\" onclick=\"window.location.reload()\">atualize</button>",
 		"157": "A chave não é reconhecida, por favor confirme se a string de chave copiada está correta",
 		"158": "Indexando repositório de dados, percorrendo dados %s",
 		"159": "Indexando repositório de dados, obtendo o arquivo mais recente %v/%v",

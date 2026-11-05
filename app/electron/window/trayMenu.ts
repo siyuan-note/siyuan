@@ -3,7 +3,7 @@ import {state} from "../shared/runtime";
 import {hasTray} from "../shared/traySupport";
 import {hideWindow} from "./windowVisibility";
 import type {BrowserWindow, Tray} from "electron";
-import {Channel} from "../shared/channels";
+import {requestWindowClose} from "./closeRecovery";
 type TrayMenuLabels = Record<string, string>;
 
 // 显示/隐藏切换同时刷新菜单文案，托盘标签依赖窗口的可见状态与置顶状态。
@@ -44,11 +44,11 @@ const resetTrayMenu = (tray: Tray, lang: TrayMenuLabels, mainWindow: BrowserWind
     }, {
         label: lang.resetWindow, type: "checkbox", click: (v: {checked: boolean}) => {
             state.exit.resetWindowStateOnRestart = v.checked;
-            mainWindow.webContents.send(Channel.SIYUAN_SAVE_CLOSE, true);
+            requestWindowClose(mainWindow, true);
         },
     }, {
         label: lang.quit, click: () => {
-            mainWindow.webContents.send(Channel.SIYUAN_SAVE_CLOSE, true);
+            requestWindowClose(mainWindow, true);
         },
     },];
 

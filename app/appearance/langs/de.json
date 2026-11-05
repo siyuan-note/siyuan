@@ -1,4 +1,5 @@
 {
+	"windowCloseTimeout": "Das Fenster reagiert nicht auf die Schließanforderung. Ohne Speichern ausstehender Bearbeitungen beenden? Ungespeicherte Änderungen können verloren gehen",
 	"markdownOutlineUnavailable": "Die Gliederung ist nur bei breitem Fenster im Sofortdarstellungs- oder WYSIWYG-Modus verfügbar",
 	"showFloatingStatusBar": "Ausgeblendete Statusleiste beim Darüberfahren anzeigen",
 	"changelogUnavailable": "Das Änderungsprotokoll konnte nicht geladen werden. Diese Version auf GitHub ansehen oder später erneut versuchen",

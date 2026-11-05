@@ -1,4 +1,5 @@
 {
+	"windowCloseTimeout": "窗口未响应关闭请求。是否退出并放弃界面中尚未保存的编辑？未保存的编辑可能丢失",
 	"markdownOutlineUnavailable": "大纲仅在宽屏即时渲染或所见即所得模式下可用",
 	"showFloatingStatusBar": "悬停显示隐藏的状态栏",
 	"changelogUnavailable": "无法加载更新日志，可在 GitHub 查看该版本，或稍后重试",

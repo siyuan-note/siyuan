@@ -20,6 +20,7 @@ import * as contextMenu from "./contextMenu";
 import * as windowNavigation from "./windowNavigation";
 import * as appMenu from "./appMenu";
 import * as previousKernelExit from "../kernel/previousKernelExit";
+import {installWindowCloseRecovery, requestWindowClose} from "./closeRecovery";
 import {createRefererFilter} from "./refererFilter";
 import type {
     BrowserWindow,
@@ -365,7 +366,7 @@ const installCloseBehavior = (currentWindow: BrowserWindow, kernelTarget: Kernel
             return;
         }
         if (currentWindow && !currentWindow.isDestroyed()) {
-            currentWindow.webContents.send(Channel.SIYUAN_SAVE_CLOSE, false);
+            requestWindowClose(currentWindow, false);
         }
         event.preventDefault();
     });
@@ -445,6 +446,7 @@ const createMainWindow = ({
         installCloseBehavior(currentWindow, launch.kernelTarget, {
             installNavigationPolicy, getWindowPathname, exitWorkspace,
         });
+        installWindowCloseRecovery(currentWindow, {scheduleTimer, cancelTimer});
         // 窗口进入账本后即可清除这次启动记录。
         addWorkspace({
             browserWindow: currentWindow,

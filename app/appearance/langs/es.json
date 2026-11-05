@@ -1,4 +1,5 @@
 {
+	"windowCloseTimeout": "La ventana no responde a la solicitud de cierre. ¿Salir sin guardar los cambios pendientes de la interfaz? Los cambios sin guardar podrían perderse",
 	"markdownOutlineUnavailable": "El esquema solo está disponible en los modos de renderizado instantáneo o WYSIWYG con una ventana ancha",
 	"showFloatingStatusBar": "Mostrar la barra de estado oculta al pasar el cursor",
 	"changelogUnavailable": "No se pudo cargar el registro de cambios. Consulta esta versión en GitHub o inténtalo de nuevo más tarde",

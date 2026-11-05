@@ -1,4 +1,5 @@
 {
+	"windowCloseTimeout": "The window is not responding to the close request. Exit without saving pending interface edits? Unsaved edits may be lost",
 	"markdownOutlineUnavailable": "Outline is only available in instant rendering or WYSIWYG mode with a wide window",
 	"showFloatingStatusBar": "Show hidden status bar on hover",
 	"changelogUnavailable": "Unable to load the changelog. View this release on GitHub or try again later",

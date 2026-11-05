@@ -1,4 +1,5 @@
 {
+	"windowCloseTimeout": "視窗未回應關閉請求。是否結束並放棄介面中尚未儲存的編輯？未儲存的編輯可能遺失",
 	"markdownOutlineUnavailable": "大綱僅在寬螢幕即時渲染或所見即所得模式下可用",
 	"showFloatingStatusBar": "懸停顯示隱藏的狀態列",
 	"changelogUnavailable": "無法載入更新日誌，可在 GitHub 查看該版本，或稍後重試",

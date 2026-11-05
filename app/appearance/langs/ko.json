@@ -1,4 +1,5 @@
 {
+	"windowCloseTimeout": "창이 닫기 요청에 응답하지 않습니다. 화면의 대기 중인 편집 내용을 저장하지 않고 종료할까요? 저장하지 않은 편집 내용이 손실될 수 있습니다",
 	"markdownOutlineUnavailable": "개요는 창이 넓을 때 즉시 렌더링 또는 WYSIWYG 모드에서만 사용할 수 있습니다",
 	"showFloatingStatusBar": "마우스를 올리면 숨겨진 상태 표시줄 표시",
 	"changelogUnavailable": "변경 로그를 불러올 수 없습니다. GitHub에서 이 버전을 확인하거나 나중에 다시 시도하세요",

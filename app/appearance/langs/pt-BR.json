@@ -1,4 +1,5 @@
 {
+	"windowCloseTimeout": "A janela não responde à solicitação de fechamento. Sair sem salvar as edições pendentes da interface? Edições não salvas podem ser perdidas",
 	"markdownOutlineUnavailable": "A estrutura só está disponível nos modos de renderização instantânea ou WYSIWYG com uma janela larga",
 	"showFloatingStatusBar": "Mostrar a barra de status oculta ao passar o cursor",
 	"changelogUnavailable": "Não foi possível carregar o registro de alterações. Veja esta versão no GitHub ou tente novamente mais tarde",

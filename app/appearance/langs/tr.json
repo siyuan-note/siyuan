@@ -1,4 +1,5 @@
 {
+	"windowCloseTimeout": "Pencere kapatma isteğine yanıt vermiyor. Arayüzdeki bekleyen düzenlemeler kaydedilmeden çıkılsın mı? Kaydedilmemiş düzenlemeler kaybolabilir",
 	"markdownOutlineUnavailable": "Anahat yalnızca geniş bir pencerede anında işleme veya WYSIWYG modunda kullanılabilir",
 	"showFloatingStatusBar": "Üzerine gelindiğinde gizli durum çubuğunu göster",
 	"changelogUnavailable": "Değişiklik günlüğü yüklenemedi. Bu sürümü GitHub'da görüntüleyin veya daha sonra tekrar deneyin",

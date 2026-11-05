@@ -26,6 +26,7 @@ import type {
 } from "electron";
 import type {InitMainWindow} from "../shared/types";
 import {Channel} from "../shared/channels";
+import {requestWindowClose} from "../window/closeRecovery";
 
 type AppLifecycleOptions = {
     initMainWindow: InitMainWindow;
@@ -186,7 +187,7 @@ const handleBeforeQuit = (event: ElectronEvent): void => {
         }
         if (item.browserWindow && !item.browserWindow.isDestroyed()) {
             event.preventDefault();
-            item.browserWindow.webContents.send(Channel.SIYUAN_SAVE_CLOSE, true);
+            requestWindowClose(item.browserWindow, true);
         }
     });
 };

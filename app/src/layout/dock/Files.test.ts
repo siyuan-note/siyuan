@@ -19,7 +19,7 @@ interface IAdapter {
     docTree: Partial<DocTreeController>;
     parentDocClick: {cancel: () => void};
     getOpenPaths: () => void;
-    selectItem: (box: string, path: string, data?: IFileTreeList, save?: boolean, select?: boolean) => Promise<HTMLElement>;
+    selectItem: (box: string, path: string, data?: IFileTreeList, save?: boolean, select?: boolean, ignoreUnavailable?: boolean) => Promise<HTMLElement>;
     getLeaf: (row: Element, notebook: string, refresh?: boolean) => void;
     setCurrent: (row: HTMLElement, scroll?: boolean) => void;
     toggleLeaf: (row: Element, notebook: string) => Promise<void>;
@@ -79,8 +79,22 @@ test("public tree selection mounts a far document even when selection is unchang
     release();
     assert.equal(await selected, row);
     assert.equal(JSON.stringify(calls), JSON.stringify([
-        ["locate", "box", "target", {select: false, scroll: false}], "save", ["mount", item.occurrenceKey],
+        ["locate", "box", "target", {select: false, scroll: false, ignoreUnavailable: false}], "save", ["mount", item.occurrenceKey],
     ]));
+});
+
+test("automatic tree selection can ignore unavailable documents without changing manual selection", async () => {
+    for (const automatic of [false, true]) {
+        const adapter = createAdapter();
+        const calls: unknown[] = [];
+        adapter.docTree = {
+            locate: async (_box, _id, options) => { calls.push(options); return undefined; },
+            findItem: () => undefined,
+        };
+        adapter.getOpenPaths = () => {};
+        assert.equal(await adapter.selectItem("box", "/hidden.sy", undefined, true, true, automatic), undefined);
+        assert.equal(JSON.stringify(calls), JSON.stringify([{select: true, scroll: true, ignoreUnavailable: automatic}]));
+    }
 });
 
 test("notebook arrows read the directory before deciding whether to create a document", async () => {

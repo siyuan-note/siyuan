@@ -69,6 +69,25 @@ test("history restoration and preview tab switches do not create history entries
     assert.equal(records.length, 0);
 });
 
+test("opening a document automatically locates it without reporting an unavailable tree item", () => {
+    const {context, protyle, update} = setup();
+    const calls: unknown[][] = [];
+    class Files {
+        docTree = {getSelectedItems: () => [] as {notebookId: string, path: string}[]};
+        selectItem(...args: unknown[]) { calls.push(args); }
+    }
+    const files = new Files();
+    context.Files = Files;
+    context.getDockByType = () => ({data: {file: files}});
+    context.window.siyuan.config.fileTree.alwaysSelectOpenedFile = true;
+    Object.assign(protyle, {notebookId: "box"});
+    update(false);
+    assert.deepEqual(calls, [["box", "/document.sy", undefined, true, true, true]]);
+    files.docTree.getSelectedItems = () => [{notebookId: "box", path: protyle.path}];
+    update(false);
+    assert.equal(calls.length, 1);
+});
+
 test("a saved title selection records the document without resolving it as a body block", () => {
     const {records, protyle, block, update} = setup();
     const title = {contains: (node: unknown) => node === block};

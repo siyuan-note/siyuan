@@ -769,7 +769,7 @@ export const updatePanelByEditor = (options: {
             if (fileModel instanceof Files) {
                 const selected = fileModel.docTree.getSelectedItems();
                 if (!selected.some(item => item.notebookId === options.protyle.notebookId && item.path === options.protyle.path)) {
-                    void fileModel.selectItem(options.protyle.notebookId, options.protyle.path);
+                    void fileModel.selectItem(options.protyle.notebookId, options.protyle.path, undefined, true, true, true);
                 }
             }
         }

@@ -1121,10 +1121,10 @@ export class Files extends Model {
     }
 
     public async selectItem(notebookId: string, filePath: string, data?: IFileTreeList,
-                            setStorage = true, isSetCurrent = true): Promise<HTMLElement> {
+                            setStorage = true, isSetCurrent = true, ignoreUnavailable = false): Promise<HTMLElement> {
         const id = filePath === "/" ? notebookId : filePath.split("/").filter(Boolean).pop()?.replace(/\.sy$/, "");
         if (!id) { return; }
-        const pending = this.docTree.locate(notebookId, id, {select: isSetCurrent, scroll: isSetCurrent});
+        const pending = this.docTree.locate(notebookId, id, {select: isSetCurrent, scroll: isSetCurrent, ignoreUnavailable});
         const interaction = this.docTree.interactionVersion;
         await pending;
         if (interaction !== this.docTree.interactionVersion) { return; }

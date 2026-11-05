@@ -3255,7 +3255,7 @@ func (tx *Transaction) commit() (err error) {
 			return ErrBoxNotFound
 		}
 		box.setSortByConf(path.Dir(tree.Path), tree.ID)
-		PushCreate(box, tree.Path, nil)
+		PushCreate(box, tree.Path, map[string]any{"listDocTree": tree.Root.IALAttr(DocHiddenAttr) != "true"})
 	}
 
 	crossTreeMoveRefRefreshes := append([]crossTreeMoveRefRefresh(nil), tx.crossTreeMoveRefRefreshes...)
@@ -3398,7 +3398,7 @@ func (tx *Transaction) compensateCreatedDocCommit(attemptedRemovedDocs []*parse.
 		}
 		if box := Conf.Box(tree.Box); nil != box {
 			box.setSortByConf(path.Dir(tree.Path), tree.ID)
-			PushCreate(box, tree.Path, nil)
+			PushCreate(box, tree.Path, map[string]any{"listDocTree": tree.Root.IALAttr(DocHiddenAttr) != "true"})
 		}
 	}
 	if nil != tx.templateDocTreeRootSnapshot {

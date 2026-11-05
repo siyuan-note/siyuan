@@ -29,6 +29,8 @@ export const progressLoading = (data: IWebSocketData, id = "progress", action?: 
     if (!progressElement) {
         progressElement = document.createElement("div");
         progressElement.id = id;
+        progressElement.className = "b3-dialog";
+        progressElement.setAttribute("data-prevent-swipe", "true");
         progressElement.style.zIndex = String(++window.siyuan.zIndex);
         document.body.appendChild(progressElement);
     }

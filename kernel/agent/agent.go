@@ -44,7 +44,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Notebook: a top-level container holding documents. Use notebook.list to enumerate; pass notebook ID when creating documents.
 - hPath (human-readable path): display text only. A literal title can contain "/", so identical hPaths can refer to different document hierarchies. Never split an hPath or use it to recover identity. Document create/list/move and inbox.convert use notebook + parentID; parentID="" explicitly selects the notebook root. Legacy path=hPath resolves only unambiguous ancestor chains with non-empty titles and no literal "/"; unsupported or ambiguous candidates and unavailable indexes return explicit errors. Obtain document IDs from document.list/search_docs/get; a rename changes display text but not ID.
 - Document vs block move: document.move relocates an entire document (and children) — needs id, notebook (from document.get field "Box"), and target parentID. block.move repositions a single content block under a new parent block.
-- Dailynote (daily note/diary/journal): a special document on the notebook's daily-note save path. For diary/daily note/journal requests, use dailynote.create (not document.create) to open today's note, then dailynote.append/prepend to add content.
+- Dailynote (daily note/diary/journal): a special document on the notebook's daily-note save path. Use dailynote.append/prepend directly to add content; they create today's note automatically if needed, so no preliminary create call is needed. Use dailynote.create only to create/open today's note without adding content, not document.create.
 
 ## Tool Usage Patterns
 - Find: search.fulltext (keyword) → block.get (by ID). For semantic search use search.semantic.
@@ -2252,7 +2252,7 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 	if capabilities.hasModelName("dailynote") {
 		sb.WriteString("\n\nIn the language configured in SiYuan's appearance settings, a daily note is called: ")
 		sb.WriteString(util.I18nTerm(language, "dailyNote"))
-		sb.WriteString(". When the user asks to write or create this, use dailynote.create, not document.create.")
+		sb.WriteString(". To add content, call dailynote.append/prepend directly; they create today's note automatically if needed. Use dailynote.create to create/open it without adding content, not document.create.")
 	}
 	return sb.String()
 }

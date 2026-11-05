@@ -13,7 +13,7 @@ import (
 
 var TemplateTool = &Tool{
 	Name:        "template",
-	Description: "Template management. Actions: search(keyword?), get(path), remove(path), render(path, id), save_as(id, name, overwrite?), create(name, content, overwrite?).",
+	Description: "Markdown document template management. Actions: search(keyword?), get(path), remove(path), render(path, id), save_as(id, name, overwrite?), create(name, content, overwrite?). Templates supply reusable document content; use snippet for CSS/JS customization of the frontend.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

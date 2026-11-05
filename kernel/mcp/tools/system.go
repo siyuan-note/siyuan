@@ -13,7 +13,7 @@ import (
 
 var SystemTool = &Tool{
 	Name:        "system",
-	Description: "System info. Actions: version(), current_time(), workspace().",
+	Description: "System info. Actions: version(), current_time() returns RFC3339 text with a timezone offset, workspace() returns the current workspace path, version and container. Use workspace.info for directory validity and workspace.list for registered workspace paths.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

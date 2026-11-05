@@ -37,7 +37,7 @@ var BazaarTool = &Tool{
 			"limit":                     {Type: "integer", Description: "Page size for list, installed or updates; default 20, range 1-50"},
 			"enabled":                   {Type: "boolean", Description: "installed plugins only: filter configured enable state before pagination. Missing registration means false. This is not a live runtime status; global switches, compatibility and frontend loading can prevent execution"},
 			"packageName":               {Type: "string", Description: "Exact package name for readme, install, uninstall, update, enable or disable"},
-			"frontend":                  {Type: "string", Enum: []string{"desktop", "desktop-window", "mobile", "browser-desktop", "browser-mobile"}},
+			"frontend":                  {Type: "string", Description: "Target SiYuan client for compatibility checks: desktop=desktop app, desktop-window=detached app window, mobile=mobile app, browser-desktop=desktop browser, browser-mobile=mobile browser. Required for install, install_local, update, update_all and enable; use the client where the package will run, not the kernel host", Enum: []string{"desktop", "desktop-window", "mobile", "browser-desktop", "browser-mobile"}},
 			"path":                      {Type: "string", Description: "Workspace-relative ZIP archive for install_local; do not unzip it first"},
 			"taskId":                    {Type: "string", Description: "Host-issued approved plugin development task ID; required for all managed project actions and managed artifact installation"},
 			"sourcePath":                {Type: "string", Description: "project_status only: inspect this workspace-relative candidate source directory before plan approval; read-only, no import"},

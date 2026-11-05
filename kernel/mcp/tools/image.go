@@ -27,7 +27,7 @@ var ImageTool = &Tool{
 	Name:  "image",
 	Title: "Document images",
 	Description: "List and understand local images referenced by a SiYuan document, or generate an image asset. " +
-		"Use list before analyze. analyze only attaches the selected image to the current Agent model; it does not return a separate analysis or accept a question parameter. Answer the user's image question after inspecting the attachment. " +
+		"Use list before analyze. analyze only attaches the selected image to the current Agent model; it does not return a separate analysis. Answer the user's image question after inspecting the attachment. " +
 		"generate creates a reusable image asset in the target document's notebook.",
 	InputSchema: ToolSchema{
 		Type: "object",
@@ -35,7 +35,7 @@ var ImageTool = &Tool{
 			"action":       {Type: "string", Enum: []string{"list", "analyze", "generate"}},
 			"documentID":   {Type: "string", Description: "Document or descendant block ID used to resolve the target document and notebook"},
 			"assetPath":    {Type: "string", Description: "Local assets/... path returned by list; required for analyze"},
-			"detail":       {Type: "string", Enum: []string{"auto", "low", "high"}},
+			"detail":       {Type: "string", Description: "analyze only: image detail requested from the current Agent model; auto lets the provider choose, low requests lower detail, high requests higher detail. Omitted defaults to auto; actual support and token cost depend on the provider", Enum: []string{"auto", "low", "high"}},
 			"prompt":       {Type: "string", Description: "Prompt describing the image to generate"},
 			"size":         {Type: "string", Description: "Provider-supported image size, such as 1024x1024"},
 			"quality":      {Type: "string", Description: "Provider-supported image quality"},

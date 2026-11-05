@@ -33,7 +33,7 @@ var HTTPRequestTool = &Tool{
 			"url": {Type: "string", Description: "The request URL (must start with http:// or https://)"},
 			"headers": {
 				Type:        "object",
-				Description: "Optional request headers, e.g. {\"Authorization\":\"Bearer ...\", \"Content-Type\":\"application/json\"}.",
+				Description: "Optional request headers, e.g. {\"Authorization\":\"Bearer ...\", \"Content-Type\":\"application/json\"}. Values must be strings, numbers or booleans; numbers and booleans are converted to text. Null, arrays and nested objects reject the entire request before sending.",
 				Properties:  map[string]Property{},
 			},
 			"body": {Type: "string", Description: "Optional request body for post/put/patch."},

@@ -13,7 +13,7 @@ import (
 
 var WorkspaceTool = &Tool{
 	Name:        "workspace",
-	Description: "Workspace management. Actions: list(), info() (path, version, valid).",
+	Description: "Workspace management. Actions: list() returns registered workspace paths, info() returns the current workspace path, version and directory validity. system.workspace returns the current path and version plus the runtime container instead of validity; use system for version or current time.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

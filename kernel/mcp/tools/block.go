@@ -21,6 +21,8 @@ var BlockTool = &Tool{
 	Description: `Block operations, including native Tabs (NodeTabs/NodeTabItem) and Mindmap (NodeMindmap/NodeMindmapItem).
 Actions: get(id), get_kramdown(id), get_children(id), tree_stat(id, by document), dom(id), insert(data, dataType, parentID?, nextID?, previousID?), append(data, dataType, parentID) / prepend(...) add a NEW child and return its ID — use after block.update when both modifying and adding, update(id, data, dataType, lockType?) replaces ONE block only (no append), delete(id), move(id, parentID, previousID?), breadcrumb(id), batch_get(ids) / batch_kramdown(ids) where ids is comma-separated.
 
+Use get for individual block content and get_kramdown for document body or stored block Markdown; get on a document root returns its title, not its body. Use document for document lifecycle and metadata, sql.query for structured discovery or statistics, and export for export-formatted output. Pass the owning notebook for encrypted content; alternative tools are not a way to bypass scope checks or authorization.
+
 Block placement:
 - Headings (h1-h6) are leaf blocks; content shown below a heading is its following siblings, not its children. To place a block below a heading, use the heading ID (or the last block currently below it) as previousID, never as parentID.
 - A list-item must have a NodeList parent and cannot directly contain another list-item. To nest lists, create a NodeList inside the outer list-item, then add list-items to the inner list.

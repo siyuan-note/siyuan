@@ -11,9 +11,9 @@ var QuestionTool = &Tool{
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"workflow": {Type: "object", Description: "Reserved official plugin workflow; actual consent is recorded only from the user's answer", Properties: map[string]Property{
-				"action":         {Type: "string", Enum: []string{"choose", "plan", "recover", "cancel"}},
-				"taskId":         {Type: "string", Description: "Server taskId returned by choose; required for plan/cancel"},
+			"workflow": {Type: "object", Description: "Official plugin workflow; use questions=[] for server-supplied confirmations. Actual consent is recorded only from the user's answer", Properties: map[string]Property{
+				"action":         {Type: "string", Description: "choose asks whether to use the official plugin workflow; plan asks approval for a frozen proposal after loading the official skill; recover asks recovery-only approval for the most recently approved plan, allowing restore_project or the same interrupted prepare_project without authorizing new source edits; cancel pauses the task and revokes approvals without rolling back changes. Recovery requires the same loaded skill and a previously approved plan. None authorize installation or enabling", Enum: []string{"choose", "plan", "recover", "cancel"}},
+				"taskId":         {Type: "string", Description: "Server taskId returned by choose; required for plan/recover/cancel"},
 				"newTask":        {Type: "boolean", Description: "choose only: a separate plugin requested by the user"},
 				"reconsider":     {Type: "boolean", Description: "choose only: the user explicitly changed the earlier workflow choice"},
 				"proposal":       {Type: "string", Description: "Short complete proposal, at most 2000 characters"},

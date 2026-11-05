@@ -15,7 +15,7 @@ import (
 
 var AttrTool = &Tool{
 	Name:        "attr",
-	Description: "Block custom-attribute operations. Actions: get(id), set(id, attrs object), batch-get(ids comma-separated).",
+	Description: "Block custom-attribute operations. Actions: get(id), set(id, attrs object), batch-get(ids comma-separated). Set a document's tags attribute to replace that document's comma-separated tag list; read its current attributes first when adding/removing selected tags, and call set separately for each target document. Use tag.rename/remove for workspace-wide changes to a tag label, not selected-document edits. Inline body tags are content: edit them with block tools.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

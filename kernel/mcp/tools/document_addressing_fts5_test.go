@@ -9,6 +9,7 @@ package tools
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
@@ -76,12 +77,15 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 	if err := treenode.SetDocumentMetadataState(box.ID, "ready"); err != nil {
 		t.Fatal(err)
 	}
-	createFixture := func(parent *parse.Tree, title string) *parse.Tree {
+	createFixture := func(parent *parse.Tree, title string, hidden ...bool) *parse.Tree {
 		id, folder, hPath := ast.NewNodeID(), "/", ""
 		if parent != nil {
 			folder, hPath = strings.TrimSuffix(parent.Path, ".sy"), parent.HPath
 		}
 		tree := treenode.NewTree(box.ID, path.Join(folder, id+".sy"), hPath+"/"+title, title)
+		if len(hidden) > 0 && hidden[0] {
+			tree.Root.SetIALAttr(model.DocHiddenAttr, "true")
+		}
 		if err := os.MkdirAll(filepath.Dir(filepath.Join(util.DataDir, box.ID, tree.Path)), 0755); err != nil {
 			t.Fatal(err)
 		}
@@ -268,4 +272,30 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 		!strings.Contains(result.Content[0].Text, "pathAmbiguous") {
 		t.Fatalf("inbox reached cloud conversion before rejecting the legacy path: %+v, %v", result, err)
 	}
+	t.Run("list truncation", func(t *testing.T) {
+		listParent := createFixture(nil, "Limited listing")
+		createFixture(listParent, "Hidden child", true)
+		for count := 0; count <= 129; count++ {
+			if count > 0 {
+				createFixture(listParent, fmt.Sprintf("Child %03d", count))
+			}
+			if count != 0 && count < 127 {
+				continue
+			}
+			result, err := documentList(map[string]any{"notebook": box.ID, "parentID": listParent.ID})
+			if err != nil || result.IsError {
+				t.Fatalf("list %d documents: %+v, %v", count, result, err)
+			}
+			text := result.Content[0].Text
+			if got := strings.Count(text, "\n- "); got != min(count, 128) {
+				t.Fatalf("list %d returned %d documents", count, got)
+			}
+			if truncated := strings.Contains(text, "Truncated:"); truncated != (count > 128) {
+				t.Fatalf("list %d reported truncation incorrectly: %s", count, text)
+			}
+			if count > 128 && !strings.Contains(text, "showing 128 of 129 visible direct child documents (limit: 128)") {
+				t.Fatalf("missing exact truncation information: %s", text)
+			}
+		}
+	})
 }

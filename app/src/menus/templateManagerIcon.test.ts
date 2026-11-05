@@ -15,8 +15,3 @@ test("template management uses the grid icon on desktop and mobile", () => {
     const icons = readFileSync(path.resolve(__dirname, "../../appearance/icons/litheness/icon.js"), "utf8");
     assert.match(icons, /id="iconLayoutGrid"/);
 });
-
-test("the mobile Markdown entry uses the Markdown icon", () => {
-    const source = readFileSync(path.resolve(__dirname, "../mobile/menu/mainMenu.ts"), "utf8");
-    assert.match(source, /id: "menuMarkdownEditor",\s*icon: "iconMarkdown"/);
-});

@@ -57,25 +57,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 Android、iOS 和 HarmonyOS 移动端，通过 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "主菜单"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Markdown 编辑器"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 打开独立编辑页面。系统文件管理器提供 Markdown 文件的打开方式时，也可以选择思源。文档访问权限由系统选择器授予，部分文件提供方仅授予临时权限，重启后可能需要重新选择文件。"
+					"Data": "在 Android、iOS 和 HarmonyOS 移动端，系统文件管理器提供 Markdown 文件的打开方式时，可以选择思源打开独立编辑页面。文档访问权限由系统选择器授予，部分文件提供方仅授予临时权限，重启后可能需要重新选择文件。"
 				}
 			]
 		},

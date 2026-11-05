@@ -57,25 +57,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On Android, iOS, and HarmonyOS, choose "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Main Menu"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Markdown editor"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to open the independent editor page. You can also choose SiYuan when a system file manager offers Open With for Markdown files. Document access comes from the system picker; some providers grant access only temporarily, so you may need to select the file again after restarting."
+					"Data": "On Android, iOS, and HarmonyOS, choose SiYuan when a system file manager offers Open With for Markdown files to open the independent editor page. Document access comes from the system picker; some providers grant access only temporarily, so you may need to select the file again after restarting."
 				}
 			]
 		},

@@ -3,7 +3,8 @@ import * as assert from "node:assert/strict";
 import {isMarkdownDisplayResource, remoteMarkdownImageURL} from "./resourcePolicy";
 
 test("remote image URLs accept HTTP images without granting access to native resources or other schemes", () => {
-    for (const reference of ["https://img.shields.io/pypi/v/example.svg?label=release", "http://example.com/photo.png", "https://example.com/a.png#part"]) {
+    for (const reference of ["https://img.shields.io/pypi/v/example.svg?label=release", "https://img.shields.io/badge/release-stable-green.svg",
+        "http://example.com/photo.png", "https://example.com/a.png#part"]) {
         assert.equal(remoteMarkdownImageURL(reference), reference);
     }
     assert.equal(remoteMarkdownImageURL("//example.com/badge.svg"), "https://example.com/badge.svg");
@@ -24,6 +25,8 @@ test("custom-scheme images belong to the current session origin and exact resour
 
 test("mobile HTTPS images require the fixed native origin and the current session identity", () => {
     const page = "https://siyuan-markdown.local/stage/build/markdown/index.html";
+    assert.equal(remoteMarkdownImageURL("https://siyuan-markdown.local/resource/session-b/token"), undefined,
+        "native resources cannot bypass session ownership as network images");
     assert.equal(isMarkdownDisplayResource("https://siyuan-markdown.local/resource/session-a/token", page, "session-a"), true);
     for (const resource of ["https://siyuan-markdown.local/resource/session-b/token", "https://siyuan-markdown.local/resource/session-a/../secret",
         "https://siyuan-markdown.local:8080/resource/session-a/token", "https://user@siyuan-markdown.local/resource/session-a/token",

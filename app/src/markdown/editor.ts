@@ -37,11 +37,12 @@ interface VditorInstance {
     vditor: {
         currentMode: MarkdownEditorMode;
         lute: Record<string, (...args: string[]) => string> & {GetEmojis(): Record<string, string>};
-        options: {hint: {emoji: Record<string, string>}};
+        options: {hint: {emoji: Record<string, string>}; outline: {enable: boolean}};
         ir: VditorSurface;
         wysiwyg: VditorSurface;
         sv: VditorSurface;
         toolbar: {element: HTMLElement};
+        outline: {element: HTMLElement; toggle(vditor: unknown, show: boolean, focus: boolean): void};
         undo: {addToUndoStack(vditor: unknown): void};
         hint?: {timeId?: number};
         preview?: {render(vditor: unknown): void};
@@ -66,15 +67,23 @@ export interface MarkdownEditorOptions {
     lang?: string;
     theme?: "light" | "dark";
     mobile?: boolean;
+    outline?: boolean;
     onEdit(snapshot: MarkdownEditorSnapshot): void;
     onEditPending?(pending: boolean): void;
     onContentTooLarge?(): void;
     onModeChange?(mode: MarkdownEditorMode, origin: "user" | "automatic"): void;
     onSourceOnlyChange?(sourceOnly: boolean): void;
     onHistoryChange?(state: {canUndo: boolean; canRedo: boolean}): void;
+    onOutlineChange?(state: MarkdownOutlineState): void;
     onLink?(url: string): void;
     resolveResource?: MarkdownResourceResolver;
     onResourceUnavailable?(): void;
+}
+
+export interface MarkdownOutlineState {
+    enabled: boolean;
+    visible: boolean;
+    available: boolean;
 }
 
 export interface MarkdownEditor {
@@ -82,6 +91,7 @@ export interface MarkdownEditor {
     setValue(value: string): void;
     setMode(mode: MarkdownEditorMode): void;
     setTheme(theme: "light" | "dark"): void;
+    setOutline(enabled: boolean): void;
     undo(): void;
     redo(): void;
     refreshResources(): void;
@@ -166,6 +176,23 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     };
     let emittedHistory = {canUndo: false, canRedo: false};
     let finishInitialPreview: () => void;
+    let outlineEnabled = options.outline ?? false;
+    let emittedOutline: MarkdownOutlineState;
+    const syncOutline = () => {
+        if (destroyed || !ready) return;
+        // Vditor 的源码模式与小于 520px 的窗口不展示大纲，保留开关意图供恢复时使用。
+        const available = instance.getCurrentMode() !== "sv" && element.ownerDocument.defaultView.innerWidth >= 520;
+        const visible = outlineEnabled && available;
+        instance.vditor.options.outline.enable = outlineEnabled;
+        if ((instance.vditor.outline.element.style.display === "block") !== visible) {
+            instance.vditor.outline.toggle(instance.vditor, visible, false);
+        }
+        const state = {enabled: outlineEnabled, visible, available};
+        if (emittedOutline && emittedOutline.enabled === state.enabled && emittedOutline.visible === state.visible &&
+            emittedOutline.available === state.available) return;
+        emittedOutline = state;
+        options.onOutlineChange?.(state);
+    };
     const notifyHistory = () => {
         if (destroyed) return;
         const state = {canUndo: canHistory("undo"), canRedo: canHistory("redo")};
@@ -200,6 +227,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         rendered = instance.getValue();
         cachedInput = undefined;
         userPending = false;
+        syncOutline();
         if (changed) {
             // 切换模式后立即记录基线，首笔输入不能抢在延迟快照之前覆盖它。
             instance.vditor.undo.addToUndoStack(instance.vditor);
@@ -477,6 +505,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         observer.disconnect();
         historyObserver.disconnect();
         popoverObserver?.disconnect();
+        element.ownerDocument.defaultView.removeEventListener("resize", syncOutline);
         policy.destroy();
         listeners.forEach(([type, handler]) => element.removeEventListener(type, handler, true));
         if (instance?.vditor) instance.destroy();
@@ -496,6 +525,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 value: "", mode, cdn: options.cdn, _lutePath: options.lutePath,
                 lang: markdownEditorLanguage(options.lang), theme: dark ? "dark" : "classic",
                 cache: {enable: false}, undoDelay: 250, height: "100%", minHeight: 0,
+                outline: {enable: outlineEnabled, position: "left"},
                 toolbar: ["headings", "bold", "italic", "link", "list", "undo", "redo", "edit-mode"],
                 preview: {mode: recoverySourceOnly ? "editor" : "both", actions: [], delay: 150, markdown: {sanitize: true},
                     theme: {current: dark ? "dark" : "light"}, hljs: {style: dark ? "github-dark" : "github"},
@@ -518,6 +548,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                     try {
                         if (destroyed) return;
                         if (instance.version !== "4.0.2-alpha.0") throw new Error("Unsupported Markdown editor version");
+                        if (element.id) instance.vditor.outline.element.id = `${element.id}-outline`;
                         // 内部控件提供模式与快捷键入口，历史操作由标题行调用同一套撤销记录。
                         instance.vditor.toolbar.element.hidden = true;
                         if (popoverObserver && instance.vditor.wysiwyg.popover) {
@@ -544,6 +575,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                             finishInitialPreview = () => {clearTimeout(timeout); resolve();};
                         }
                         setValue(options.initialValue);
+                        syncOutline();
                         notifyHistory();
                         if (recoverySourceOnly) {
                             options.onModeChange?.("sv", "automatic");
@@ -564,6 +596,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         }
     });
 
+    element.ownerDocument.defaultView.addEventListener("resize", syncOutline);
     return {
         flush,
         setValue,
@@ -582,6 +615,11 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         },
         setTheme(theme) {
             if (!destroyed) instance.setTheme(theme === "dark" ? "dark" : "classic", theme, theme === "dark" ? "github-dark" : "github");
+        },
+        setOutline(enabled) {
+            if (destroyed || !ready || isComposing()) return;
+            outlineEnabled = enabled;
+            syncOutline();
         },
         undo() {runHistory("undo");},
         redo() {runHistory("redo");},

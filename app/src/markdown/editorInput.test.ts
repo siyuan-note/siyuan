@@ -7,7 +7,7 @@ import type {MarkdownEditorMode} from "./editor";
 import type {MarkdownEditorSnapshot} from "./contracts";
 
 class TestElement {
-    ownerDocument: {defaultView: {navigator: {userAgent: string}}};
+    ownerDocument: {defaultView: {navigator: {userAgent: string}; innerWidth: number; addEventListener(): void; removeEventListener(): void}};
     parent?: TestElement;
     listeners = new Map<string, Array<(event: object) => void>>();
     selectors = new Map<string, TestElement>();
@@ -48,7 +48,7 @@ const createHarness = async (mode: MarkdownEditorMode = "wysiwyg") => {
         now = end;
     };
     const root = new TestElement();
-    root.ownerDocument = {defaultView: {navigator: {userAgent: "test"}}};
+    root.ownerDocument = {defaultView: {navigator: {userAgent: "test"}, innerWidth: 1100, addEventListener() {}, removeEventListener() {}}};
     const surfaces = Object.fromEntries(["ir", "wysiwyg", "sv"].map(name => {
         const element = new TestElement();
         element.parent = root;
@@ -66,8 +66,9 @@ const createHarness = async (mode: MarkdownEditorMode = "wysiwyg") => {
         vditor: {
             ...surfaces,
             lute: {GetEmojis: () => ({})},
-            options: {hint: {emoji: {}}},
+            options: {hint: {emoji: {}}, outline: {enable: false}},
             toolbar: {element: new TestElement()},
+            outline: {element: {style: {display: "none"}}, toggle() {}},
             undo: {addToUndoStack: () => historyBaselines++},
         },
         getCurrentMode: () => currentMode,

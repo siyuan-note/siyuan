@@ -1,4 +1,5 @@
 {
+	"markdownOutlineUnavailable": "Anahat yalnızca geniş bir pencerede anında işleme veya WYSIWYG modunda kullanılabilir",
 	"showFloatingStatusBar": "Üzerine gelindiğinde gizli durum çubuğunu göster",
 	"changelogUnavailable": "Değişiklik günlüğü yüklenemedi. Bu sürümü GitHub'da görüntüleyin veya daha sonra tekrar deneyin",
 	"templateHTTPUnsafeTarget": "Şablon hedefi genel olmayan bir adrese çözümlendi ve engellendi; nedeni vekil sunucunun Fake-IP modu olabilir. Bu alan adını Fake-IP dışında tutun veya gerçek IP döndüren DNS kullanın",

@@ -1,4 +1,5 @@
 {
+	"markdownOutlineUnavailable": "De documentstructuur is alleen beschikbaar in de modus voor directe weergave of WYSIWYG met een breed venster",
 	"showFloatingStatusBar": "Verborgen statusbalk tonen bij aanwijzen",
 	"changelogUnavailable": "Het wijzigingslogboek kan niet worden geladen. Bekijk deze versie op GitHub of probeer het later opnieuw",
 	"templateHTTPUnsafeTarget": "Het sjabloondoel wordt omgezet naar een niet-openbaar adres en is geblokkeerd; de Fake-IP-modus van de proxy kan de oorzaak zijn. Sluit dit domein uit van Fake-IP of gebruik DNS met echte IP-adressen",

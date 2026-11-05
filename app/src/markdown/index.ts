@@ -41,6 +41,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     let themeSequence = 0;
     let editPending = false;
     let history = {canUndo: false, canRedo: false};
+    let outline = {enabled: false, visible: false, available: false};
     let sourceOnly = false;
     let disposed = false;
     let tree: MarkdownTree = undefined;
@@ -59,6 +60,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     document.body.classList.add(`body--${platforms[bootstrap.platform] ?? bootstrap.platform}`);
     root.innerHTML = `<header class="markdown-header">
     <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-tree-toggle" id="markdownTreeToggle"><svg aria-hidden="true"><use href="#iconPanelLeft"></use></svg></button>
+    <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-outline-toggle" id="markdownOutlineToggle" aria-expanded="false" aria-controls="markdownEditor-outline" disabled><svg aria-hidden="true"><use href="#iconOutline"></use></svg></button>
     <button type="button" class="markdown-heading" id="markdownFiles" data-drawer-toggle="true"><span id="markdownName" class="markdown-name"></span></button>
     <div class="markdown-header__drag" aria-hidden="true"></div>
     <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-history" id="markdownUndo" disabled><svg aria-hidden="true"><use href="#iconUndo"></use></svg></button>
@@ -124,7 +126,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     control("markdownEditor").inert = true;
     control("markdownMoreButton").setAttribute("aria-label", text("more"));
     control("markdownMoreButton").setAttribute("title", text("more"));
-    for (const [id, label] of [["markdownUndo", "undo"], ["markdownRedo", "redo"]]) {
+    for (const [id, label] of [["markdownUndo", "undo"], ["markdownRedo", "redo"], ["markdownOutlineToggle", "outline"]]) {
         control(id).setAttribute("aria-label", text(label));
         control(id).setAttribute("title", text(label));
         control(id).addEventListener("mousedown", event => event.preventDefault());
@@ -242,6 +244,10 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control<HTMLButtonElement>("markdownRevealFile").disabled = frozen || !state.target;
         control<HTMLButtonElement>("markdownUndo").disabled = frozen || state.composing || !history.canUndo;
         control<HTMLButtonElement>("markdownRedo").disabled = frozen || state.composing || !history.canRedo;
+        const outlineToggle = control<HTMLButtonElement>("markdownOutlineToggle");
+        outlineToggle.disabled = frozen || state.composing || !outline.available;
+        outlineToggle.setAttribute("aria-expanded", String(outline.visible));
+        outlineToggle.title = text(outline.available ? "outline" : "markdownOutlineUnavailable");
         control<HTMLButtonElement>("markdownSaveAs").disabled = frozen || state.composing || state.problem?.kind === "indeterminate";
         control<HTMLButtonElement>("markdownInsertImage").disabled = frozen || state.composing || state.problem?.kind === "indeterminate";
         modeChoice?.setDisabled(frozen || state.composing);
@@ -300,6 +306,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         activeMode = preferences.mode;
         modeChoice?.setValue(activeMode);
         history = {canUndo: false, canRedo: false};
+        outline = {...outline, visible: false, available: false};
         control("markdownRecoveryPanel").hidden = true;
         control("markdownRecovery").setAttribute("aria-expanded", "false");
         control("markdownRecoveryList").replaceChildren();
@@ -317,8 +324,10 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                 element: control("markdownEditor"), initialValue: next.content, sessionId: next.sessionId, mode: preferences.mode,
                 cdn: new URL("./vditor", location.href).href, lang: next.lang,
                 mobile: ["android", "ios", "harmony"].includes(next.platform),
+                outline: outline.enabled,
                 theme: preferences.theme === "dark" || (preferences.theme === "system" && systemDark) ? "dark" : "light",
                 onHistoryChange(state) {if (!current()) return; history = state; render(documentSession.getState());},
+                onOutlineChange(state) {if (!current()) return; outline = state; render(documentSession.getState());},
                 resolveResource: async reference => {
                     if (!current()) return undefined;
                     const result = await bridge.resolveResource(reference);
@@ -444,6 +453,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     action("markdownSave", save);
     action("markdownUndo", () => editor.undo());
     action("markdownRedo", () => editor.redo());
+    action("markdownOutlineToggle", () => editor.setOutline(!outline.enabled));
     action("markdownSaveAs", saveAs);
     action("markdownInsertImage", async () => {
         if (frozen || editor.flush().composing) return;

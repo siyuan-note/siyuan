@@ -27,6 +27,98 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     const check: typeof assert = require("node:assert/strict");
     const api = (window as unknown as {MarkdownEditorTest: typeof import("./editor") & typeof import("./resourcePolicy")}).MarkdownEditorTest;
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
+    const outlineStyle = document.createElement("link");
+    outlineStyle.rel = "stylesheet";
+    outlineStyle.href = `${cdn}/dist/index.css`;
+    await new Promise<void>((resolve, reject) => {
+        outlineStyle.onload = () => resolve();
+        outlineStyle.onerror = () => reject(new Error("Could not load Vditor outline test styles"));
+        document.head.append(outlineStyle);
+    });
+    for (const mode of ["ir", "wysiwyg"] as const) {
+        const wrapper = document.createElement("div");
+        wrapper.style.height = "360px";
+        const element = document.createElement("div");
+        wrapper.append(element);
+        document.body.append(wrapper);
+        const source = "# Heading\n\n## Child\n\n### Leaf\n\n" + "Paragraph\n\n".repeat(35) + "# Last\n";
+        const states: Array<import("./editor").MarkdownOutlineState> = [];
+        const editor = await api.createMarkdownEditor({element, initialValue: source, mode, cdn, lutePath,
+            onEdit: () => {}, onOutlineChange: state => states.push(state)});
+        const panel = element.querySelector<HTMLElement>(".vditor-outline");
+        check.deepEqual(states.at(-1), {enabled: false, visible: false, available: true});
+        editor.setOutline(true);
+        check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
+        check.ok(panel.querySelector("ul ul ul"), "outline retains nested heading levels");
+        const fold = panel.querySelector<HTMLElement>(".vditor-outline__action");
+        fold.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        check.equal((fold.parentElement.nextElementSibling as HTMLElement).style.display, "none");
+        fold.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        check.equal((fold.parentElement.nextElementSibling as HTMLElement).style.display, "block");
+        const last = Array.from(panel.querySelectorAll<HTMLElement>("[data-target-id]")).find(item => item.textContent === "Last");
+        last.click();
+        const scrollSurface = element.querySelector<HTMLElement>(`.vditor-${mode} .vditor-reset`);
+        check.ok(scrollSurface.clientHeight > 0 && scrollSurface.scrollHeight > scrollSurface.clientHeight,
+            "outline navigation fixture has a constrained scrollable editor");
+        check.ok(scrollSurface.scrollTop > 0, "outline navigation scrolls to the selected heading");
+        check.deepEqual(editor.flush(), {content: source, edited: false, composing: false});
+        editor.setMode("sv");
+        check.deepEqual(states.at(-1), {enabled: true, visible: false, available: false});
+        editor.setMode(mode);
+        check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
+        const width = Object.getOwnPropertyDescriptor(window, "innerWidth");
+        try {
+            Object.defineProperty(window, "innerWidth", {configurable: true, value: 519});
+            window.dispatchEvent(new Event("resize"));
+            check.deepEqual(states.at(-1), {enabled: true, visible: false, available: false});
+            Object.defineProperty(window, "innerWidth", {configurable: true, value: 520});
+            window.dispatchEvent(new Event("resize"));
+            check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
+        } finally {
+            Object.defineProperty(window, "innerWidth", width);
+        }
+        const surface = element.querySelector<HTMLElement>(`.vditor-${mode} .vditor-reset`);
+        const heading = surface.querySelector("h1");
+        const headingText = heading.lastChild;
+        surface.focus();
+        const range = document.createRange();
+        range.selectNodeContents(headingText);
+        range.collapse(false);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+        surface.dispatchEvent(new InputEvent("beforeinput", {bubbles: true, inputType: "insertText", data: "Typed heading"}));
+        headingText.textContent = "Typed heading";
+        range.selectNodeContents(headingText);
+        range.collapse(false);
+        surface.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", data: "Typed heading"}));
+        await new Promise(resolve => setTimeout(resolve, 400));
+        check.ok(panel.textContent.includes("Typed heading"), "native heading input refreshes the outline");
+        check.ok(editor.flush().content.includes("# Typed heading"));
+        check.equal(editor.flush().edited, true);
+        surface.dispatchEvent(new InputEvent("beforeinput", {bubbles: true, inputType: "deleteContentBackward"}));
+        surface.querySelector("h1").remove();
+        range.selectNodeContents(surface.querySelector("h2"));
+        range.collapse(false);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+        surface.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "deleteContentBackward"}));
+        await new Promise(resolve => setTimeout(resolve, 400));
+        check.equal(panel.textContent.includes("Typed heading"), false, "deleted headings disappear after native input");
+        editor.setValue("# Renamed\n\n## Updated child\n");
+        check.ok(panel.textContent.includes("Renamed"));
+        check.ok(panel.textContent.includes("Updated child"));
+        check.equal(panel.textContent.includes("Last"), false);
+        editor.setValue("No headings\n");
+        check.equal(panel.querySelector(".vditor-outline__content").textContent, "");
+        editor.setOutline(false);
+        check.deepEqual(states.at(-1), {enabled: false, visible: false, available: true});
+        const stateCount = states.length;
+        editor.destroy();
+        window.dispatchEvent(new Event("resize"));
+        check.equal(states.length, stateCount, "destroy removes the outline resize listener");
+        wrapper.remove();
+    }
+    outlineStyle.remove();
     for (const mobile of [false, true]) {
         const element = document.createElement("div");
         document.body.append(element);

@@ -55,6 +55,7 @@ const setup = () => {
         let bootstrap, editor, session, autoSave, pendingSwitch, switchTask, pendingFileAction;
         let disposed = false, initializationClosing = false, documentGeneration = 0, targetGeneration = 0;
         let actionMessage = "", resourceUnavailable = false, editPending = false, sourceOnly = false, history;
+        let outline = {enabled: false, visible: false, available: false};
         let preferences = {mode: "ir", theme: "light"}, systemDark = false, preparing = false, prepared = false;
         let activeMode = preferences.mode;
         let switching = true, frozen = true, exitSequence = 0;
@@ -63,7 +64,7 @@ const setup = () => {
         return {initializeDocument, completeSwitch, command, runAction, waitActions: () => pendingFileAction,
             pending(value) {pendingSwitch = value;}, task(value) {switchTask = value;},
             dispose() {disposed = true; documentGeneration++;},
-            state: () => ({editor, session, pendingSwitch, frozen, documentGeneration, history, resourceUnavailable, preferences, activeMode})};
+            state: () => ({editor, session, pendingSwitch, frozen, documentGeneration, history, outline, resourceUnavailable, preferences, activeMode})};
     `, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const lifecycle = new Function("deps", `with (deps) { ${body} }`)(deps);
     return {lifecycle, callbacks, editors, renders, responses, bridge, resolveResource, preferenceWrites, openedLinks,
@@ -72,9 +73,9 @@ const setup = () => {
 const snapshot = (sessionId: string) => ({sessionId, content: sessionId + "\n", lang: "en", preferences: {mode: "ir", theme: "light"}});
 
 test("the Markdown footer stays hidden during normal editing and saving but exposes actionable problems", () => {
-    const controls = new Map<string, {textContent: string; hidden: boolean; dataset: Record<string, string>}>();
+    const controls = new Map<string, {textContent: string; hidden: boolean; dataset: Record<string, string>; setAttribute(): void}>();
     const control = (name: string) => {
-        if (!controls.has(name)) controls.set(name, {textContent: "", hidden: false, dataset: {}});
+        if (!controls.has(name)) controls.set(name, {textContent: "", hidden: false, dataset: {}, setAttribute() {}});
         return controls.get(name);
     };
     const deps = {control, document: {title: ""}, text: (key: string) => key,
@@ -84,6 +85,7 @@ test("the Markdown footer stays hidden during normal editing and saving but expo
         let disposed = false, actionMessage = "", editPending = false, pendingSwitch, frozen = false;
         let resourceUnavailable = false, sourceOnly = false, targetGeneration = 0;
         const history = {canUndo: false, canRedo: false}, bootstrap = {recovered: false};
+        const outline = {enabled: false, visible: false, available: false};
         ${section("    const render =", "    const reportError =")}
         return (state, pending = false, message = "", switching = false) => {
             editPending = pending; actionMessage = message; pendingSwitch = switching;
@@ -111,6 +113,19 @@ test("the Markdown footer stays hidden during normal editing and saving but expo
     assert.equal(control("markdownFooter").hidden, false);
     render(state);
     assert.equal(control("markdownFooter").hidden, true, "resolving the problem hides the footer");
+});
+
+test("outline intent survives document recreation and ignores callbacks from the replaced editor", async () => {
+    const {lifecycle, callbacks, preferenceWrites} = setup();
+    await lifecycle.initializeDocument(snapshot("a"));
+    callbacks[0].onOutlineChange({enabled: true, visible: true, available: true});
+    await lifecycle.initializeDocument(snapshot("b"));
+    assert.equal(callbacks[1].outline, true);
+    assert.deepEqual(lifecycle.state().outline, {enabled: true, visible: false, available: false});
+    callbacks[0].onOutlineChange({enabled: false, visible: false, available: true});
+    assert.equal(lifecycle.state().outline.enabled, true);
+    callbacks[1].onOutlineChange({enabled: true, visible: false, available: false});
+    assert.deepEqual(preferenceWrites, [], "outline state is local to the open window");
 });
 
 test("automatic source fallback stays local while explicit mode choices become the next document's preference", async () => {

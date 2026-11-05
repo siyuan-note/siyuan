@@ -106,6 +106,7 @@ button {
 
   .markdown-heading:not(.markdown-heading--label),
   .markdown-tree-toggle,
+  .markdown-outline-toggle,
   .markdown-history,
   .markdown-more,
   .markdown-caption {
@@ -118,7 +119,7 @@ button {
   }
 
   &[data-window-controls="mac"] .markdown-caption-placeholder {
-    width: 60px;
+    width: 68px;
   }
 
   &[data-fullscreen="true"] .markdown-caption-placeholder {
@@ -141,13 +142,15 @@ button {
 }
 
 .markdown-history,
-.markdown-tree-toggle {
+.markdown-tree-toggle,
+.markdown-outline-toggle {
   min-width: 28px;
   min-height: 28px;
   justify-content: center;
 }
 
-.markdown-tree-toggle {
+.markdown-tree-toggle,
+.markdown-outline-toggle {
   > svg {
     width: 16px;
     height: 16px;
@@ -183,6 +186,7 @@ button {
 .markdown-more summary:focus-visible,
 .markdown-history:focus-visible,
 .markdown-tree-toggle:focus-visible,
+.markdown-outline-toggle:focus-visible,
 .markdown-menu button:focus-visible,
 .markdown-choice:focus-visible {
   outline: 1px solid var(--b3-theme-primary);
@@ -435,6 +439,10 @@ button {
   display: none;
 }
 
+.markdown-editor .vditor-outline {
+  max-width: 40%;
+}
+
 .markdown-editor .vditor-reset,
 .markdown-editor .vditor-sv {
   font-size: var(--markdown-font-size);
@@ -540,6 +548,7 @@ button {
 
   .markdown-app .b3-button,
   .markdown-tree-toggle,
+  .markdown-outline-toggle,
   .markdown-heading,
   .markdown-menu .b3-menu__item {
     min-height: 44px;
@@ -547,6 +556,7 @@ button {
 
   .markdown-more__button,
   .markdown-tree-toggle,
+  .markdown-outline-toggle,
   .markdown-history,
   .markdown-menu__info {
     width: 44px;

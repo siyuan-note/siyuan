@@ -123,6 +123,9 @@ const browserCases = async (languages: Record<string, string>) => {
             const initial = await api.mountMarkdownApplication(bridge);
             await checkTheme(mode, dark);
             check.equal(document.querySelector(".vditor-toolbar").getBoundingClientRect().height, 0);
+            check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").disabled, mode === "sv");
+            check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").title,
+                mode === "sv" ? languages.markdownOutlineUnavailable : languages.outline);
             if (mode === "ir") await ipcRenderer.invoke("markdown-screenshot", `initial-${startup.theme}`);
             if (startup.theme === "system") {
                 onCommand({id: `light-${mode}`, type: "theme", dark: false});
@@ -163,7 +166,34 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(revealedFiles, 1, "the file manager action invokes the desktop capability");
     check.equal(document.querySelector(".markdown-tree__heading"), null);
     check.deepEqual(Array.from(document.querySelectorAll<HTMLElement>(".markdown-header button, .markdown-header select, .markdown-header summary"))
-        .filter(element => element.checkVisibility()).map(element => element.id), ["markdownTreeToggle", "markdownFiles", "markdownUndo", "markdownRedo", "markdownMoreButton"]);
+        .filter(element => element.checkVisibility()).map(element => element.id), ["markdownTreeToggle", "markdownOutlineToggle", "markdownFiles", "markdownUndo", "markdownRedo", "markdownMoreButton"]);
+    const outlineToggle = document.querySelector<HTMLButtonElement>("#markdownOutlineToggle");
+    const outlinePanel = document.querySelector<HTMLElement>(".vditor-outline");
+    check.equal(outlineToggle.title, languages.outline);
+    check.equal(outlineToggle.querySelector("use").getAttribute("href"), "#iconOutline");
+    check.equal(outlineToggle.getAttribute("aria-controls"), outlinePanel.id);
+    check.equal(outlineToggle.getAttribute("aria-expanded"), "false");
+    outlineToggle.click(); await tick();
+    check.equal(outlineToggle.getAttribute("aria-expanded"), "true");
+    check.equal(outlinePanel.checkVisibility(), true);
+    check.ok(outlinePanel.textContent.includes("写作与预览"));
+    check.equal(application.editor.flush().edited, false, "opening the outline does not edit the document");
+    await ipcRenderer.invoke("markdown-resize", 701, 850); await tick();
+    const contentBounds = document.querySelector(".vditor-content").getBoundingClientRect();
+    const outlineBounds = outlinePanel.getBoundingClientRect();
+    const editorBoundsWithOutline = document.querySelector(".vditor-ir").getBoundingClientRect();
+    check.ok(outlineBounds.width <= contentBounds.width * .4 + 1, "outline stays bounded with the file tree open");
+    check.ok(editorBoundsWithOutline.width > 0 && editorBoundsWithOutline.right <= contentBounds.right + 1);
+    await ipcRenderer.invoke("markdown-resize", 360, 800); await tick();
+    check.equal(outlineToggle.disabled, true);
+    check.equal(outlineToggle.title, languages.markdownOutlineUnavailable);
+    check.equal(outlineToggle.getAttribute("aria-expanded"), "false");
+    check.equal(outlinePanel.checkVisibility(), false);
+    await ipcRenderer.invoke("markdown-resize", 1100, 850); await tick();
+    check.equal(outlineToggle.disabled, false);
+    check.equal(outlineToggle.getAttribute("aria-expanded"), "true");
+    outlineToggle.click(); await tick();
+    check.equal(outlinePanel.checkVisibility(), false);
     const panelToggle = document.querySelector<HTMLButtonElement>("#markdownTreeToggle");
     check.equal(panelToggle.title, languages.markdownFiles);
     check.equal(panelToggle.querySelector("use").getAttribute("href"), "#iconPanelLeft");
@@ -253,7 +283,7 @@ const browserCases = async (languages: Record<string, string>) => {
             openMore(); await tick();
             await ipcRenderer.invoke("markdown-pointer-click", "#markdownResourcesInfo"); await tick();
             check.equal(document.querySelector("#markdownResourcesInfo").getAttribute("aria-expanded"), "true");
-            for (const id of ["markdownTreeToggle", "markdownMoreButton", "markdownUndo", "markdownRedo", "markdownResourcesInfo", "markdownRecoveryInfo"]) {
+            for (const id of ["markdownTreeToggle", "markdownOutlineToggle", "markdownMoreButton", "markdownUndo", "markdownRedo", "markdownResourcesInfo", "markdownRecoveryInfo"]) {
                 const button = document.getElementById(id);
                 const bounds = button.getBoundingClientRect();
                 const icon = button.querySelector("svg").getBoundingClientRect();
@@ -940,8 +970,16 @@ const browserCases = async (languages: Record<string, string>) => {
         check.equal(getComputedStyle(header).getPropertyValue("-webkit-app-region"), "drag");
         check.equal(getComputedStyle(document.getElementById("markdownFiles")).getPropertyValue("-webkit-app-region"), "drag", "desktop filename remains a draggable label");
         check.equal(getComputedStyle(document.getElementById("markdownTreeToggle")).getPropertyValue("-webkit-app-region"), "no-drag");
+        check.equal(getComputedStyle(document.getElementById("markdownOutlineToggle")).getPropertyValue("-webkit-app-region"), "no-drag");
         check.equal(placeholder === header.firstElementChild, platform === "darwin");
         check.equal(header.getBoundingClientRect().height, 32);
+        if (platform === "darwin") {
+            check.equal(placeholder.getBoundingClientRect().width, 68);
+            const toggle = document.getElementById("markdownOutlineToggle");
+            const title = document.getElementById("markdownFiles");
+            check.equal(title.getBoundingClientRect().left + parseFloat(getComputedStyle(title).paddingLeft) - toggle.getBoundingClientRect().right, 10);
+            check.equal(document.getElementById("markdownTreeToggle").getBoundingClientRect().left - header.getBoundingClientRect().left, 78);
+        }
         if (platform === "win32") check.ok(overlays.some(value => value.height === 32 && value.symbolColor.length > 0));
         if (platform === "linux") {
             for (const button of root.querySelectorAll<HTMLButtonElement>(".markdown-caption__button")) button.click();

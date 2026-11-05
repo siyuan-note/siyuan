@@ -198,9 +198,14 @@ class MarkdownDiskService {
             if (entry.state === "indeterminate") throw new Error("Markdown write outcome is unresolved");
             entry.pending++;
             reading = true;
-            const snapshot = await this.snapshot(entry.descriptor);
-            if (snapshot.identity !== entry.descriptor.identity) {
-                throw diskError("identity-changed", "Markdown target was replaced outside this session");
+            const descriptor = entry.descriptor;
+            const snapshot = await this.snapshot(descriptor);
+            if (snapshot.identity !== descriptor.identity) {
+                if (this.queues.has(entry.handle) || entry.descriptor !== descriptor) {
+                    throw diskError("io", "Markdown target is busy while reloading");
+                }
+                // 同路径原子保存可以重载，保存基线仍由会话确认，旧正文不能直接覆盖新文件。
+                this.registry.update(entry, {...snapshot, baseline: descriptor.baseline});
             }
             const decoded = decodeMarkdown(snapshot.bytes!);
             // 读取结果是否成为新基线由会话版本校验决定，此处不推进宿主保存基线。

@@ -1,4 +1,5 @@
 {
+	"markdownFolderEmpty": "目前資料夾為空",
 	"globalBreadcrumb": "全域導覽路徑",
 	"globalBreadcrumbTip": "將筆記本、文件和區塊路徑合併顯示在同一條導覽路徑中",
 	"windowCloseTimeout": "視窗未回應關閉請求。是否結束並放棄介面中尚未儲存的編輯？未儲存的編輯可能遺失",

@@ -64,7 +64,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     root.innerHTML = `<header class="markdown-header">
     <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-tree-toggle" id="markdownTreeToggle"><svg aria-hidden="true"><use href="#iconPanelLeft"></use></svg></button>
     <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-outline-toggle" id="markdownOutlineToggle" aria-expanded="false" aria-controls="markdownEditor-outline" disabled><svg aria-hidden="true"><use href="#iconOutline"></use></svg></button>
-    <button type="button" class="markdown-heading" id="markdownFiles" data-drawer-toggle="true"><span id="markdownName" class="markdown-name"></span></button>
+    <div class="markdown-heading" id="markdownFiles"><span id="markdownName" class="markdown-name"></span></div>
     <div class="markdown-header__drag" aria-hidden="true"></div>
     <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-history" id="markdownUndo" disabled><svg aria-hidden="true"><use href="#iconUndo"></use></svg></button>
     <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--inset markdown-history" id="markdownRedo" disabled><svg aria-hidden="true"><use href="#iconRedo"></use></svg></button>
@@ -714,7 +714,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         switchTask = completeSwitch().catch(() => {reportError(); return false;}).finally(() => {switchTask = undefined;});
     });
     tree = createMarkdownTree({
-        element: control("markdownTree"), toggles: [control<HTMLButtonElement>("markdownTreeToggle"), control<HTMLButtonElement>("markdownFiles")],
+        element: control("markdownTree"), toggles: [control<HTMLButtonElement>("markdownTreeToggle")],
         bridge: bridge.tree, text,
         mobile: ["android", "ios", "harmony"].includes(bootstrap.platform), onOpen: openTreeFile,
         onError() {actionMessage = text("markdownFolderError"); render(session.getState());},

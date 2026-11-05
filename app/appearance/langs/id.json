@@ -1,4 +1,5 @@
 {
+	"markdownFolderEmpty": "Folder ini kosong",
 	"globalBreadcrumb": "Jejak navigasi global",
 	"globalBreadcrumbTip": "Tampilkan jalur buku catatan, dokumen, dan blok dalam satu jejak navigasi",
 	"windowCloseTimeout": "Jendela tidak merespons permintaan penutupan. Keluar tanpa menyimpan suntingan antarmuka yang tertunda? Suntingan yang belum disimpan dapat hilang",

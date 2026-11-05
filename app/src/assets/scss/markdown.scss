@@ -59,27 +59,9 @@ button {
   align-items: center;
   flex: 0 1 auto;
   min-width: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: start;
-  border-radius: var(--b3-border-radius);
   box-sizing: border-box;
   padding: 2px 6px;
   min-height: 28px;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background: var(--b3-list-hover);
-  }
-
-  &:focus-visible {
-    outline: 1px solid var(--b3-theme-primary);
-  }
-
-}
-
-.markdown-heading--label {
   cursor: default;
   -webkit-app-region: drag;
 }
@@ -106,7 +88,6 @@ button {
     user-select: none;
   }
 
-  .markdown-heading:not(.markdown-heading--label),
   .markdown-tree-toggle,
   .markdown-outline-toggle,
   .markdown-history,

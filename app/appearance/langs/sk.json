@@ -1,4 +1,5 @@
 {
+	"markdownFolderEmpty": "Tento priečinok je prázdny",
 	"globalBreadcrumb": "Globálna navigačná cesta",
 	"globalBreadcrumbTip": "Zobraziť cesty zápisníka, dokumentov a blokov v jednej navigačnej ceste",
 	"windowCloseTimeout": "Okno nereaguje na požiadavku na zatvorenie. Ukončiť bez uloženia čakajúcich úprav v rozhraní? Neuložené úpravy sa môžu stratiť",

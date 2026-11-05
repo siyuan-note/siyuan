@@ -1,4 +1,5 @@
 {
+	"markdownFolderEmpty": "Esta carpeta está vacía",
 	"globalBreadcrumb": "Ruta de navegación global",
 	"globalBreadcrumbTip": "Mostrar las rutas del cuaderno, los documentos y los bloques en una sola ruta de navegación",
 	"windowCloseTimeout": "La ventana no responde a la solicitud de cierre. ¿Salir sin guardar los cambios pendientes de la interfaz? Los cambios sin guardar podrían perderse",

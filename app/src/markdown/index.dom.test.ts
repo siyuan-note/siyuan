@@ -180,7 +180,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, true, "successful actions without session updates clear stale error DOM");
     check.equal(document.querySelector(".markdown-tree__heading"), null);
     check.deepEqual(Array.from(document.querySelectorAll<HTMLElement>(".markdown-header button, .markdown-header select, .markdown-header summary"))
-        .filter(element => element.checkVisibility()).map(element => element.id), ["markdownTreeToggle", "markdownOutlineToggle", "markdownFiles", "markdownUndo", "markdownRedo", "markdownMoreButton"]);
+        .filter(element => element.checkVisibility()).map(element => element.id), ["markdownTreeToggle", "markdownOutlineToggle", "markdownUndo", "markdownRedo", "markdownMoreButton"]);
     const outlineToggle = document.querySelector<HTMLButtonElement>("#markdownOutlineToggle");
     const outlinePanel = document.querySelector<HTMLElement>(".vditor-outline");
     check.equal(outlineToggle.dataset.tooltip, languages.outline);
@@ -250,7 +250,8 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "dedicated panel button collapses the tree");
     check.equal(document.querySelector("#markdownFiles").getAttribute("aria-expanded"), null);
     check.equal(document.querySelector("#markdownFiles").getAttribute("aria-label"), null, "desktop filename retains its visible accessible name");
-    check.equal(document.querySelector<HTMLButtonElement>("#markdownFiles").disabled, true, "desktop filename is a non-action label");
+    check.equal(document.querySelector("#markdownFiles").tagName, "DIV", "filename is a non-action label");
+    check.equal(document.querySelector<HTMLElement>("#markdownFiles").tabIndex, -1);
     (document.querySelector("#markdownFiles") as HTMLElement).click(); await tick();
     check.equal(panelToggle.getAttribute("aria-expanded"), "false", "desktop filename cannot toggle the tree");
     panelToggle.click(); await tick();
@@ -606,7 +607,8 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelector(".markdown-header").getBoundingClientRect().height, 48, "touch header removes extra padding around touch targets");
     check.equal(document.querySelector(".markdown-footer").getBoundingClientRect().height, 0, "touch saved documents have no resting footer");
     check.ok(document.querySelector("#markdownFiles").getBoundingClientRect().height >= 44);
-    check.equal(document.querySelector<HTMLButtonElement>("#markdownFiles").disabled, false, "drawer filename remains interactive");
+    check.equal(document.querySelector("#markdownFiles").getAttribute("aria-controls"), null, "mobile filename is not a drawer control");
+    check.equal(document.querySelector<HTMLElement>("#markdownFiles").tabIndex, -1);
     check.ok(document.querySelector("#markdownTreeToggle").getBoundingClientRect().height >= 44);
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "narrow tree starts as a collapsed drawer");
     await ipcRenderer.invoke("markdown-screenshot", "narrow-recovery");
@@ -618,8 +620,10 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true);
     check.equal(document.activeElement, panelToggle, "Escape returns focus to the panel button that opened the drawer");
     (document.querySelector("#markdownFiles") as HTMLElement).click(); await tick();
+    check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "mobile filename cannot toggle the drawer");
+    panelToggle.click(); await tick();
     panelToggle.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true})); panelToggle.click(); await tick();
-    check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "switching toggle buttons closes the drawer with one click");
+    check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "a second panel-button click closes the drawer");
     panelToggle.click(); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, false);
     check.equal((document.querySelector("#markdownEditor") as HTMLElement).inert, true, "drawer mask also excludes the editor from keyboard focus");
@@ -665,6 +669,32 @@ const browserCases = async (languages: Record<string, string>) => {
     await ipcRenderer.invoke("markdown-screenshot", "keyboard-menu");
     moreButton.click();
 
+    document.querySelector<HTMLElement>(".vditor-ir .vditor-reset").focus();
+    panelToggle.click();
+    const keyboardOpening = treePanel.getAnimations()[0];
+    check.ok(keyboardOpening, "opening from the focused editor starts a drawer transition");
+    keyboardOpening.pause(); keyboardOpening.currentTime = 60;
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    const keyboardTransform = getComputedStyle(treePanel).transform;
+    await ipcRenderer.invoke("markdown-resize", 390, 800); await tick();
+    check.ok(treePanel.getAnimations().includes(keyboardOpening), "keyboard dismissal does not cancel the drawer transition");
+    check.equal(getComputedStyle(treePanel).transform, keyboardTransform);
+    keyboardOpening.finish(); await tick();
+    panelToggle.click();
+    const keyboardClosing = treePanel.getAnimations()[0];
+    keyboardClosing.pause(); keyboardClosing.currentTime = 60;
+    await ipcRenderer.invoke("markdown-resize", 390, 360); await tick();
+    check.ok(treePanel.getAnimations().includes(keyboardClosing), "height changes also preserve the closing transition");
+    keyboardClosing.finish(); await tick();
+    check.equal(treePanel.hidden, true);
+    panelToggle.click();
+    const widthOpening = treePanel.getAnimations()[0];
+    widthOpening.pause(); widthOpening.currentTime = 60;
+    await ipcRenderer.invoke("markdown-resize", 400, 360); await tick();
+    check.equal(treePanel.getAnimations().length, 0, "width changes settle the drawer at its responsive layout");
+    check.equal(treePanel.hidden, false);
+    panelToggle.click(); await tick();
+
     application.editor.setMode("sv");
     const racingTextarea = document.querySelector<HTMLTextAreaElement>("textarea.vditor-sv");
     const beforeRace = application.session.getState();
@@ -706,7 +736,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal((document.querySelector("#markdownEditor") as HTMLElement).inert, true);
     check.equal(more.open, false); check.equal(more.inert, true);
     check.equal(panelToggle.disabled, false, "view controls stay available while document operations are frozen");
-    check.equal(document.querySelector<HTMLButtonElement>("#markdownFiles").disabled, false);
+    check.equal(document.querySelector("#markdownFiles").tagName, "DIV");
     panelToggle.click(); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).inert, true);
     panelToggle.click(); await tick();
@@ -900,7 +930,7 @@ const browserCases = async (languages: Record<string, string>) => {
     let chosen: import("./treeContracts").MarkdownTreeState | {kind: "cancelled"} = {kind: "cancelled"};
     const savedViews: import("./treeContracts").MarkdownTreeView[] = [];
     const testTree = api.createMarkdownTree({
-        element: document.querySelector("#markdownTree"), toggles: [document.querySelector("#markdownTreeToggle"), document.querySelector("#markdownFiles")],
+        element: document.querySelector("#markdownTree"), toggles: [document.querySelector("#markdownTreeToggle")],
         mobile: false, text: key => languages[key] ?? key, onError: () => {throw new Error("Unexpected tree error");}, onOpen: async () => true,
         bridge: {...bridge.tree, state: async () => treeState, chooseRoot: async () => chosen,
             saveView: async view => {savedViews.push(view);}, list: async location => {
@@ -957,7 +987,7 @@ const browserCases = async (languages: Record<string, string>) => {
     testTree.destroy();
     check.ok(savedViews.length > 0);
     treeState = {...treeState, visible: false};
-    const raceTree = api.createMarkdownTree({element: document.querySelector("#markdownTree"), toggles: [document.querySelector("#markdownTreeToggle"), document.querySelector("#markdownFiles")],
+    const raceTree = api.createMarkdownTree({element: document.querySelector("#markdownTree"), toggles: [document.querySelector("#markdownTreeToggle")],
         mobile: false, text: key => languages[key] ?? key, onError: () => {}, onOpen: async () => true, bridge: treeBridgeForRace});
     await tick();
     const choosing = raceTree.chooseRoot();
@@ -968,6 +998,33 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, false, "choosing a folder shows the tree even when its change notification arrives first");
     check.equal(document.querySelector(".markdown-tree__viewport").getAttribute("data-tooltip"), "Chosen");
     check.equal(document.querySelectorAll("#markdownTree [data-row]").length, 0, "an empty root has no redundant collapsible row");
+    const emptyNotice = document.querySelector<HTMLElement>(".markdown-tree__notice");
+    check.equal(emptyNotice.hidden, false);
+    check.equal(emptyNotice.textContent, languages.markdownFolderEmpty);
+    await ipcRenderer.invoke("markdown-screenshot", "empty-folder");
+    treeBridgeForRace.list = () => new Promise(resolve => {finishList = resolve;});
+    const pendingEmptyRefresh = raceTree.refresh();
+    await tick();
+    check.equal(emptyNotice.hidden, true, "a pending listing does not claim that the folder is empty");
+    finishList({kind: "listed", rootId: treeState.rootId, generation: treeState.generation, nodeId: treeState.rootId,
+        entries: [{id: "arrived", name: "Arrived.md", kind: "file"}]});
+    await pendingEmptyRefresh;
+    check.equal(emptyNotice.hidden, true, "a newly populated folder clears the empty notice");
+    treeBridgeForRace.list = async () => ({kind: "blocked", error: {code: "permission", recoverable: true}});
+    await raceTree.refresh();
+    check.equal(emptyNotice.hidden, true, "listing errors do not masquerade as an empty folder");
+    check.ok(document.querySelector("#markdownTree").textContent.includes(languages.markdownFolderError));
+    treeBridgeForRace.list = async location => ({kind: "listed", ...location, entries: []});
+    await raceTree.refresh();
+    check.equal(emptyNotice.hidden, false, "a successful retry can establish that the folder is empty");
+    await ipcRenderer.invoke("markdown-resize", 390, 800); await tick();
+    document.querySelector<HTMLButtonElement>("#markdownTreeToggle").click(); await tick();
+    check.ok(emptyNotice.checkVisibility(), "the empty-folder notice is also visible in the mobile drawer");
+    await ipcRenderer.invoke("markdown-screenshot", "empty-folder-mobile");
+    await ipcRenderer.invoke("markdown-resize", 1100, 850); await tick();
+    treeState = {kind: "permission-required", generation: 5, expanded: [], width: 240, visible: true};
+    await raceTree.refresh();
+    check.equal(emptyNotice.textContent, languages.markdownFolderPermission, "permission guidance replaces the empty notice");
     raceTree.destroy();
     bridge.tree.chooseRoot = choiceBridge;
 
@@ -1047,6 +1104,8 @@ const browserCases = async (languages: Record<string, string>) => {
         bridge.bootstrap = async () => ({...bootstrap, platform, sessionId: `${platform}-small`, content: "# Small mobile document\n", preferences: {...storedPreferences}});
         const mobileSmall = await api.mountMarkdownApplication(bridge);
         check.equal(document.querySelector('#markdownMode [aria-checked="true"]').getAttribute("data-value"), "wysiwyg");
+        check.equal(document.querySelector("#markdownFiles").tagName, "DIV", `${platform} filename is display-only`);
+        check.equal(document.querySelector("#markdownFiles").getAttribute("aria-controls"), null);
         mobileSmall.destroy();
     }
     document.body.className = desktopBody;

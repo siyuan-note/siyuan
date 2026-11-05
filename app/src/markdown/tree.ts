@@ -83,20 +83,7 @@ export const createMarkdownTree = (options: {
             if (sibling !== element) (sibling as HTMLElement).inert = frozen || drawer() && visible;
         }
         for (const toggle of toggles) {
-            const labelOnly = toggle.dataset.drawerToggle === "true" && !drawer();
-            toggle.disabled = labelOnly;
-            toggle.tabIndex = labelOnly ? -1 : 0;
-            toggle.classList.toggle("markdown-heading--label", labelOnly);
-            if (labelOnly) {
-                toggle.removeAttribute("aria-label");
-                toggle.removeAttribute("aria-controls");
-                toggle.removeAttribute("aria-expanded");
-            } else {
-                toggle.setAttribute("aria-label", text("markdownFiles"));
-                toggle.setAttribute("aria-controls", element.id);
-                toggle.setAttribute("aria-expanded", String(visible));
-            }
-            toggle.dataset.tooltip = labelOnly ? (state.rootName ?? "") : text("markdownFiles");
+            toggle.setAttribute("aria-expanded", String(visible));
         }
         resize.hidden = drawer();
         resize.setAttribute("aria-valuenow", String(width));
@@ -174,6 +161,9 @@ export const createMarkdownTree = (options: {
             if (errors.has(state.rootId)) rows.push({depth: 0, parent: state.rootId, message: errors.get(state.rootId), retry: true});
             else if (!children.has(state.rootId)) rows.push({depth: 0, message: text("loading")});
             else children.get(state.rootId).forEach(child => visit(child, 0));
+            notice.textContent = !pending.has(state.rootId) && !errors.has(state.rootId) &&
+                children.get(state.rootId)?.length === 0 ? text("markdownFolderEmpty") : "";
+            notice.hidden = !notice.textContent;
         }
         if (!rows.some(row => row.node?.id === focused)) {
             focused = rows.find(row => row.node?.id === selected)?.node?.id ?? rows.find(row => row.node)?.node?.id;
@@ -430,7 +420,13 @@ export const createMarkdownTree = (options: {
     const resizeObserver = new ResizeObserver(() => {updateVisibility(); renderWindow();});
     resizeObserver.observe(viewport);
     narrow.addEventListener("change", () => {updateVisibility(false, true); renderWindow(); if (shown()) void refresh();}, {signal});
-    window.addEventListener("resize", () => updateVisibility(false, true), {signal, capture: true});
+    let viewportWidth = window.innerWidth;
+    window.addEventListener("resize", () => {
+        const widthChanged = viewportWidth !== window.innerWidth;
+        viewportWidth = window.innerWidth;
+        // 软键盘收起只改变高度，抽屉过渡继续播放；宽度变化时收敛到新的布局。
+        updateVisibility(false, widthChanged || !drawer());
+    }, {signal, capture: true});
     updateVisibility();
     const ready = refresh();
     return {

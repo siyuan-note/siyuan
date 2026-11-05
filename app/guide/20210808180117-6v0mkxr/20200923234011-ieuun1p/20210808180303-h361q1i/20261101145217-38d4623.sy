@@ -287,7 +287,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Opening A.md uses its containing folder as the default file-tree root. The tree shows real folders and .md or .markdown files, loading each folder when expanded. Folders appear first, followed by filenames in natural order, so file2.md comes before file10.md. Folders expand and collapse with a smooth transition that respects the system’s reduced motion setting. Empty folders have no placeholder child row."
+					"Data": "Opening A.md uses its containing folder as the default file-tree root. The tree shows real folders and .md or .markdown files, loading each folder when expanded. Folders appear first, followed by filenames in natural order, so file2.md comes before file10.md. Folders expand and collapse with a smooth transition that respects the system’s reduced motion setting. Empty subfolders have no placeholder child row. When the selected root has no folders or Markdown files to display, the panel shows an empty-folder message."
 				}
 			]
 		},
@@ -319,7 +319,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " on macOS. When opened from a workspace, both panel shortcuts follow that workspace’s bindings; check the button tooltips for the current keys. Without a source workspace, the defaults apply. Both panels open and close with smooth transitions that respect the system’s reduced-motion setting. The filename toggles the panel only in the mobile or narrow-screen drawer layout; it is not clickable in the desktop sidebar layout. Drag the desktop sidebar divider to adjust its width. If a mobile provider grants access to only one file, select its containing folder when asked to enable the tree. Cancelling folder authorization leaves the current document editable. Tree access does not authorize local images."
+					"Data": " on macOS. When opened from a workspace, both panel shortcuts follow that workspace’s bindings; check the button tooltips for the current keys. Without a source workspace, the defaults apply. Both panels open and close with smooth transitions that respect the system’s reduced-motion setting. The filename is a display label on every platform; use the file panel button to toggle the tree. Drag the desktop sidebar divider to adjust its width. If a mobile provider grants access to only one file, select its containing folder when asked to enable the tree. Cancelling folder authorization leaves the current document editable. Tree access does not authorize local images."
 				}
 			]
 		},

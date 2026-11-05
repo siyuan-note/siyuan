@@ -1,4 +1,5 @@
 {
+	"markdownFolderEmpty": "Ten folder jest pusty",
 	"globalBreadcrumb": "Globalna ścieżka nawigacji",
 	"globalBreadcrumbTip": "Wyświetlaj ścieżki notatnika, dokumentów i bloków w jednej ścieżce nawigacji",
 	"windowCloseTimeout": "Okno nie odpowiada na żądanie zamknięcia. Wyjść bez zapisywania oczekujących zmian w interfejsie? Niezapisane zmiany mogą zostać utracone",

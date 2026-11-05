@@ -1,4 +1,5 @@
 {
+	"markdownFolderEmpty": "Bu klasör boş",
 	"globalBreadcrumb": "Genel gezinme yolu",
 	"globalBreadcrumbTip": "Not defteri, belge ve blok yollarını tek bir gezinme yolunda göster",
 	"windowCloseTimeout": "Pencere kapatma isteğine yanıt vermiyor. Arayüzdeki bekleyen düzenlemeler kaydedilmeden çıkılsın mı? Kaydedilmemiş düzenlemeler kaybolabilir",

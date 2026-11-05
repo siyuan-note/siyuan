@@ -1,4 +1,5 @@
 {
+	"markdownFolderEmpty": "Deze map is leeg",
 	"globalBreadcrumb": "Globaal kruimelpad",
 	"globalBreadcrumbTip": "Toon notitieboek-, document- en blokpaden in één kruimelpad",
 	"windowCloseTimeout": "Het venster reageert niet op het sluitverzoek. Afsluiten zonder openstaande bewerkingen op te slaan? Niet-opgeslagen bewerkingen kunnen verloren gaan",

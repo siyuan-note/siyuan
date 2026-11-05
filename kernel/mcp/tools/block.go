@@ -21,7 +21,13 @@ var BlockTool = &Tool{
 	Description: `Block operations, including native Tabs (NodeTabs/NodeTabItem) and Mindmap (NodeMindmap/NodeMindmapItem).
 Actions: get(id), get_kramdown(id), get_children(id), tree_stat(id, by document), dom(id), insert(data, dataType, parentID?, nextID?, previousID?), append(data, dataType, parentID) / prepend(...) add a NEW child and return its ID — use after block.update when both modifying and adding, update(id, data, dataType, lockType?) replaces ONE block only (no append), delete(id), move(id, parentID, previousID?), breadcrumb(id), batch_get(ids) / batch_kramdown(ids) where ids is comma-separated.
 
-Use get for individual block content and get_kramdown for document body or stored block Markdown; get on a document root returns its title, not its body. Use document for document lifecycle and metadata, sql.query for structured discovery or statistics, and export for export-formatted output. Pass the owning notebook for encrypted content; alternative tools are not a way to bypass scope checks or authorization.
+Use document for document lifecycle and metadata, sql.query for structured discovery or statistics, and export for export-formatted output. Pass the owning notebook for encrypted content; alternative tools are not a way to bypass scope checks or authorization.
+
+Reading content:
+- Read referenced or bare block IDs with get/get_kramdown before answering about their content; anchor text is only a preview. get returns at most 5120 characters per Content/Markdown field, with ... on truncation; a document root returns its title, not its body. Use get_kramdown for complete block or document-body Markdown.
+- get_children lists block IDs with previews truncated to 200 characters and followed by ... when truncated. Read the relevant IDs with get/get_kramdown before quoting or reasoning from their content; traverse nested containers when the whole document is needed.
+- batch_get returns only metadata (name, rootID, refCount), not block content. Use batch_kramdown for multiple content reads and inspect each result for missing blocks.
+- Before update, read the current ordinary block with get_kramdown, or use dom for native structured containers. data is the complete replacement, not a delta; preserve content, IDs and metadata outside the requested edit. lockType protects the block type, not its content.
 
 Block placement:
 - Headings (h1-h6) are leaf blocks; content shown below a heading is its following siblings, not its children. To place a block below a heading, use the heading ID (or the last block currently below it) as previousID, never as parentID.
@@ -49,7 +55,7 @@ Structural reads and updates:
 			"notebook": {Type: "string", Description: "Notebook ID that owns the target blocks; required for encrypted notebooks"},
 			"id":       {Type: "string", Description: "Block ID"},
 			"ids":      {Type: "string", Description: "Comma-separated block IDs (for batch_get, batch_kramdown)"},
-			"data": {Type: "string", Description: `Content in markdown or block DOM. Prefer markdown for ordinary blocks. Use insert/append/prepend to create native containers.
+			"data": {Type: "string", Description: `Content in markdown or block DOM. For update, provide the complete replacement after reading current content with get_kramdown or dom, preserving unrelated content and metadata; this is not an append or delta. Prefer markdown for ordinary blocks. Use insert/append/prepend to create native containers.
 
 Native Tabs Markdown (dataType=markdown):
 ::: tabs

@@ -3675,6 +3675,7 @@
 		"461": "Chaque élément ne peut avoir qu’un seul parent ; vérifiez les relations de [%s]",
 		"462": "La synchronisation reste en pause. Vérifiez les données restaurées, puis réactivez-la dans Paramètres - Compte et synchronisation",
 		"463": "La source de synchronisation a changé ; cliquez sur Synchroniser et choisissez un envoi ou une restauration",
-		"464": "La source ou les données ont changé après l’aperçu ; cliquez sur Synchroniser pour vérifier à nouveau"
+		"464": "La source ou les données ont changé après l’aperçu ; cliquez sur Synchroniser pour vérifier à nouveau",
+		"465": "Certaines ressources ou captures historiques dépendent encore de la source de synchronisation initiale. Reconnectez-vous avec le compte, la région cloud et les paramètres de synchronisation initiaux, passez à Tout télécharger, puis réessayez"
 	}
 }

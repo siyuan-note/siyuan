@@ -5,6 +5,8 @@
 package model
 
 import (
+	"bytes"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -29,11 +31,17 @@ func testCloudAssetSourceAllowsOriginalAccountAfterLogout(t *testing.T, logout f
 	originalConf := Conf
 	originalData, originalRepo, originalConfDir := util.DataDir, util.RepoDir, util.ConfDir
 	originalHistory, originalTemp, originalRegion := util.HistoryDir, util.TempDir, util.CurrentCloudRegion
+	originalLangs := util.Langs
+	originalStatusBar := util.StatusBarCfg.Load()
 	t.Cleanup(func() {
 		Conf = originalConf
 		util.DataDir, util.RepoDir, util.ConfDir = originalData, originalRepo, originalConfDir
 		util.HistoryDir, util.TempDir, util.CurrentCloudRegion = originalHistory, originalTemp, originalRegion
+		util.Langs = originalLangs
+		util.StatusBarCfg.Store(originalStatusBar)
 	})
+	util.Langs = map[string]map[int]string{"en": {377: "Download all first", 465: "Sign in to the original source first"}}
+	util.StatusBarCfg.Store(&util.StatusBar{MsgDataSyncDisabled: true})
 	base := t.TempDir()
 	remote := filepath.Join(base, "cloud")
 	key := []byte("0123456789abcdef0123456789abcdef")
@@ -114,30 +122,74 @@ func testCloudAssetSourceAllowsOriginalAccountAfterLogout(t *testing.T, logout f
 	if err = validateCloudUserAssetSource(&conf.User{UserId: "different-owner"}); !IsCloudAssetSourceChange(err) {
 		t.Fatalf("different account accepted despite undownloaded data: %v", err)
 	}
+	if err.Error() != Conf.Language(465) {
+		t.Fatalf("account mismatch did not explain how to sign in: %v", err)
+	}
+	var incomplete *incompleteAssetDownloadsError
+	if !errors.As(err, &incomplete) || incomplete.Error() != Conf.Language(377) {
+		t.Fatalf("source guidance discarded the incomplete-data cause: %v", err)
+	}
 	if snapshots, _, _, snapshotErr := GetRepoSnapshots(1); snapshotErr != nil || len(snapshots) == 0 {
 		t.Fatalf("local snapshots unavailable after logout: %v, %v", snapshots, snapshotErr)
 	}
 	if err = checkAssetDownloadAccess(); err == nil {
 		t.Fatal("cloud asset downloads accepted without a cloud session")
 	}
-	_, code, _ := Login("different-owner", "unused-password", "", 1)
-	if code == 0 || Conf.CloudRegion != 0 || util.CurrentCloudRegion != 0 {
-		t.Fatalf("cross-region login changed the source: code=%d, region=%d", code, util.CurrentCloudRegion)
+	_, code, msg := Login("different-owner", "unused-password", "", 1)
+	if code == 0 || msg != Conf.Language(465) || Conf.CloudRegion != 0 || util.CurrentCloudRegion != 0 {
+		t.Fatalf("cross-region login changed the source or omitted guidance: code=%d, region=%d, msg=%s", code, util.CurrentCloudRegion, msg)
 	}
 	if err = DeactivateUser(); err == nil {
 		t.Fatal("account deactivation accepted despite undownloaded data")
 	}
+	state, err := os.ReadFile(assetDownloadStatePath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	corruptState := append([]byte(nil), state...)
+	corruptState[len(corruptState)-1] ^= 1
+	if err = os.WriteFile(assetDownloadStatePath(), corruptState, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = validateCloudUserAssetSource(owner); !IsCloudAssetSourceChange(err) || !errors.Is(err, dejavu.ErrAssetDownloadState) || err.Error() == Conf.Language(465) {
+		t.Fatalf("corrupt state was confused with an account mismatch: %v", err)
+	}
+	if remaining, readErr := os.ReadFile(assetDownloadStatePath()); readErr != nil || !bytes.Equal(remaining, corruptState) {
+		t.Fatal("authentication changed corrupt recovery state")
+	}
+	if err = os.WriteFile(assetDownloadStatePath(), state, 0600); err != nil {
+		t.Fatal(err)
+	}
 	if err = os.Rename(assetDownloadStatePath(), assetDownloadStatePath()+".saved"); err != nil {
 		t.Fatal(err)
 	}
-	if err = validateCloudUserAssetSource(owner); !IsCloudAssetSourceChange(err) {
+	if err = validateCloudUserAssetSource(owner); !IsCloudAssetSourceChange(err) || !errors.Is(err, dejavu.ErrAssetDownloadState) || err.Error() == Conf.Language(465) {
 		t.Fatalf("missing asset state was accepted during authentication: %v", err)
 	}
-	_, code, _ = Login("different-owner", "unused-password", "", 1)
-	if code == 0 || Conf.CloudRegion != 0 || util.CurrentCloudRegion != 0 {
+	_, code, msg = Login("different-owner", "unused-password", "", 1)
+	if code == 0 || msg == Conf.Language(465) || Conf.CloudRegion != 0 || util.CurrentCloudRegion != 0 {
 		t.Fatalf("cross-region login discarded a source with missing state: code=%d", code)
 	}
 	if _, err = os.Stat(filepath.Join(util.RepoDir, "asset-downloads-v1")); err != nil {
 		t.Fatalf("missing-state protection removed the repository marker: %v", err)
+	}
+	if err = os.Rename(assetDownloadStatePath()+".saved", assetDownloadStatePath()); err != nil {
+		t.Fatal(err)
+	}
+	if err = partial.EnsureFileChunks(deferred[0], nil); err != nil {
+		t.Fatal(err)
+	}
+	Conf.Sync.Load().Enabled = false
+	if err = SetSyncAssetDownloadMode(0); err != nil {
+		t.Fatalf("complete local chunks cannot leave on-demand mode after logout: %v", err)
+	}
+	if Conf.GetUser() != nil || Conf.Sync.Load().Enabled || Conf.Sync.Load().AssetDownloadMode != 0 {
+		t.Fatal("local completion changed the session or sync state")
+	}
+	if data, readErr := os.ReadFile(filepath.Join(util.DataDir, "assets", "remote.bin")); readErr != nil || string(data) != "remote asset" {
+		t.Fatalf("offline completion failed to materialize cloud asset: %q, %v", data, readErr)
+	}
+	if err = validateCloudUserAssetSource(&conf.User{UserId: "different-owner"}); err != nil {
+		t.Fatalf("complete local repository still blocks another account: %v", err)
 	}
 }

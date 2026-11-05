@@ -3675,6 +3675,7 @@
 		"461": "Jeder Eintrag kann nur einen übergeordneten Eintrag haben; prüfe die Beziehungen für [%s]",
 		"462": "Die Synchronisierung bleibt pausiert. Prüfen Sie die wiederhergestellten Daten und aktivieren Sie sie unter Einstellungen - Konto und Synchronisierung erneut",
 		"463": "Die Synchronisationsquelle wurde geändert; klicken Sie auf Synchronisieren und wählen Sie Hochladen oder Wiederherstellen",
-		"464": "Quelle oder Daten wurden nach der Vorschau geändert; klicken Sie auf Synchronisieren, um erneut zu prüfen"
+		"464": "Quelle oder Daten wurden nach der Vorschau geändert; klicken Sie auf Synchronisieren, um erneut zu prüfen",
+		"465": "Einige Ressourcen oder historische Schnappschüsse benötigen noch die ursprüngliche Synchronisierungsquelle. Melden Sie sich mit dem ursprünglichen Konto, der ursprünglichen Cloud-Region und den ursprünglichen Synchronisierungseinstellungen erneut an, wechseln Sie zu Alle herunterladen und versuchen Sie es erneut"
 	}
 }

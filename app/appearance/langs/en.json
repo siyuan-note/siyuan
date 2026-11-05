@@ -3675,6 +3675,7 @@
 		"461": "Each item can have only one parent; check the relations for [%s]",
 		"462": "Sync remains paused. After checking the restored data, re-enable it in Settings - Account & Sync",
 		"463": "The sync source changed; click Sync and choose upload or restore before continuing",
-		"464": "The source or data changed after preview; click Sync to review again"
+		"464": "The source or data changed after preview; click Sync to review again",
+		"465": "Some assets or historical snapshots still depend on the original sync source. Sign in again using the original account, cloud region, and sync settings, then switch to Download all and try again"
 	}
 }

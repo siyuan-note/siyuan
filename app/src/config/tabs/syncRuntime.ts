@@ -1,6 +1,7 @@
 import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {config as configApi} from "../util/configApi";
 import {fetchSyncPost} from "../../util/fetch";
+import {escapeHtml} from "../../util/escape";
 import {processSync} from "../../dialog/processSystem";
 import {progressLoading} from "../../dialog/progress";
 import {updateAccountPanelVisibility} from "./accountUi";
@@ -90,7 +91,8 @@ const setSyncAssetDownloadMode = async (mode: Config.ISync["assetDownloadMode"])
         await configApi.set("sync.assetDownloadMode", mode);
     } catch (error) {
         console.warn("[config] failed to update asset download mode", error);
-        showMessage(window.siyuan.languages.syncAssetDownloadModeFailed, 5000, "error");
+        showMessage(error instanceof Error && error.message ? escapeHtml(error.message) :
+            window.siyuan.languages.syncAssetDownloadModeFailed, 7000, "error");
     } finally {
         window.clearTimeout(progressTimeout);
         if (messageId) {

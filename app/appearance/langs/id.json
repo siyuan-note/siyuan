@@ -3675,6 +3675,7 @@
 		"461": "Setiap item hanya boleh memiliki satu induk; periksa relasi untuk [%s]",
 		"462": "Sinkronisasi tetap dijeda. Periksa data yang dipulihkan, lalu aktifkan kembali di Pengaturan - Akun dan Sinkronisasi",
 		"463": "Sumber sinkronisasi berubah; klik Sinkronkan dan pilih unggah atau pulihkan untuk melanjutkan",
-		"464": "Sumber atau data berubah setelah pratinjau; klik Sinkronkan untuk meninjau kembali"
+		"464": "Sumber atau data berubah setelah pratinjau; klik Sinkronkan untuk meninjau kembali",
+		"465": "Beberapa aset atau snapshot historis masih bergantung pada sumber sinkronisasi awal. Masuk kembali menggunakan akun, wilayah cloud, dan pengaturan sinkronisasi awal, lalu beralih ke Unduh semua dan coba lagi"
 	}
 }

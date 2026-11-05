@@ -3675,6 +3675,7 @@
 		"461": "Elk item kan maar één ouder hebben; controleer de relaties voor [%s]",
 		"462": "Synchronisatie blijft gepauzeerd. Controleer de herstelde gegevens en schakel deze weer in via Instellingen - Account en synchronisatie",
 		"463": "De synchronisatiebron is gewijzigd; klik op Synchroniseren en kies uploaden of herstellen",
-		"464": "De bron of gegevens zijn na het voorbeeld gewijzigd; klik op Synchroniseren om opnieuw te controleren"
+		"464": "De bron of gegevens zijn na het voorbeeld gewijzigd; klik op Synchroniseren om opnieuw te controleren",
+		"465": "Sommige bestanden of historische momentopnamen zijn nog afhankelijk van de oorspronkelijke synchronisatiebron. Meld u opnieuw aan met het oorspronkelijke account, de cloudregio en de synchronisatie-instellingen, schakel over naar Alles downloaden en probeer het opnieuw"
 	}
 }

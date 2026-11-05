@@ -3675,6 +3675,7 @@
 		"461": "Ogni elemento può avere un solo padre; controlla le relazioni di [%s]",
 		"462": "La sincronizzazione resta in pausa. Controlla i dati ripristinati e riattivala in Impostazioni - Account e sincronizzazione",
 		"463": "La sorgente di sincronizzazione è cambiata; fai clic su Sincronizza e scegli caricamento o ripristino",
-		"464": "La sorgente o i dati sono cambiati dopo l’anteprima; fai clic su Sincronizza per verificarli di nuovo"
+		"464": "La sorgente o i dati sono cambiati dopo l’anteprima; fai clic su Sincronizza per verificarli di nuovo",
+		"465": "Alcune risorse o istantanee storiche dipendono ancora dalla fonte di sincronizzazione originale. Accedi di nuovo con l’account, la regione cloud e le impostazioni di sincronizzazione originali, passa a Scarica tutto e riprova"
 	}
 }

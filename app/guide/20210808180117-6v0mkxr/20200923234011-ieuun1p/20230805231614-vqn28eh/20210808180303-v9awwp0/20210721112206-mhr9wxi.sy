@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261103163507"
+		"updated": "20261105042900"
 	},
 	"Children": [
 		{
@@ -589,7 +589,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260905184908-022q2es",
-				"updated": "20260905191024"
+				"updated": "20261105042900"
 			},
 			"Children": [
 				{
@@ -700,12 +700,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905184908-1wxzlh9",
-				"updated": "20260905184908"
+				"updated": "20261105042900"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before changing the sync target, resetting the data repository, or opening this workspace with an older version, switch to Download all and finish downloading to preserve access to assets that are not yet stored locally."
+					"Data": "Before changing the sync target, resetting the data repository, or opening this workspace with an older version, switch to Download all and finish downloading to preserve access to assets that are not yet stored locally. After signing out, if only the account or cloud region was selected incorrectly and the other sync settings are unchanged, sign in to the original account in its original cloud region, then switch to Download all. If the download state is valid and all chunks needed by current assets and retained snapshots are already local, you can also switch while signed out or with sync disabled. If the cloud directory or repository key has changed, or the asset download state is missing or damaged, preserve the workspace and original backups. Do not delete the state file or repository marker to bypass the checks; signing in alone cannot repair these states."
 				}
 			]
 		},

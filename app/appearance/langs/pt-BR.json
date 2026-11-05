@@ -3675,6 +3675,7 @@
 		"461": "Cada item pode ter apenas um pai; verifique as relações de [%s]",
 		"462": "A sincronização permanece pausada. Verifique os dados restaurados e reative-a em Configurações - Conta e sincronização",
 		"463": "A origem da sincronização mudou; clique em Sincronizar e escolha enviar ou restaurar",
-		"464": "A origem ou os dados mudaram após a prévia; clique em Sincronizar para verificar novamente"
+		"464": "A origem ou os dados mudaram após a prévia; clique em Sincronizar para verificar novamente",
+		"465": "Alguns recursos ou snapshots históricos ainda dependem da origem de sincronização original. Entre novamente com a conta, a região da nuvem e as configurações de sincronização originais, mude para Baixar todos e tente novamente"
 	}
 }

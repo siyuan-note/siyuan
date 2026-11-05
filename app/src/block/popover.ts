@@ -88,6 +88,26 @@ export const initBlockPopover = (app: App) => {
     document.addEventListener("pointerdown", cancelOnPress, {capture: true, passive: true});
     document.addEventListener("mousedown", cancelOnPress, {capture: true, passive: true});
     document.addEventListener("contextmenu", cancelOnPress, {capture: true, passive: true});
+    /// #if !MOBILE
+    document.addEventListener("click", (event: MouseEvent & {target: HTMLElement}) => {
+        if (!isTouchHoverInput() || event.button !== 0 || !(event.target instanceof Element) ||
+            !window.siyuan.config || !window.siyuan.menus) {
+            return;
+        }
+        const counter = hasClosestByClassName(event.target, "protyle-attr--refcount") ||
+            hasClosestByClassName(event.target, "counter");
+        if (!counter || (!counter.classList.contains("protyle-attr--refcount") &&
+            counter.parentElement?.getAttribute("data-type") !== "navigation-file")) {
+            return;
+        }
+        if (getTarget(event, false)) {
+            event.preventDefault();
+            event.stopPropagation();
+            cancelPopoverTimers();
+            showPopover(app);
+        }
+    }, {capture: true});
+    /// #endif
     document.addEventListener("pointermove", (event: PointerEvent & {target: HTMLElement}) => {
         const moved = pointerX !== event.clientX || pointerY !== event.clientY;
         pointerX = event.clientX;

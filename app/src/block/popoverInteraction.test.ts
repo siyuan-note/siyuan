@@ -199,6 +199,36 @@ test("touch-generated mouseover does not schedule hover timers and cancels pendi
     assert.ok(h.pendingTimers() > 0);
 });
 
+test("touch clicks open title, block and document tree backlinks and consume navigation", async () => {
+    for (const kind of ["title", "block", "tree"]) {
+        const h = createHarness();
+        h.setTouch(true);
+        const block = h.element({"data-node-id": kind, "data-type": "navigation-file"});
+        const parent = kind === "tree" ? block : h.element({}, [], block);
+        const count = h.element({}, ["popover__block", kind === "tree" ? "counter" : "protyle-attr--refcount"], parent);
+        let prevented = false;
+        let stopped = false;
+        h.fire("click", count, {preventDefault: () => { prevented = true; },
+            stopPropagation: () => { stopped = true; }});
+        assert.equal(prevented, true);
+        assert.equal(stopped, true);
+        assert.equal(h.requests[0].data.id, kind);
+        h.requests[0].resolve({code: 0, data: {rootID: "document", box: "notebook"}});
+        await h.advance();
+        assert.equal(h.panels[0].backlink.blockId, kind);
+    }
+});
+
+test("mouse clicks and unrelated touch counters preserve their click handlers", () => {
+    const h = createHarness();
+    const count = h.element({}, ["popover__block", "protyle-attr--refcount"]);
+    h.fire("click", count);
+    h.setTouch(true);
+    h.fire("click", h.element({}, ["counter"]));
+    h.fire("click", count, {button: 2});
+    assert.equal(h.requests.length, 0);
+});
+
 test("touching an interactive tooltip preserves its content and cancels hover timers", () => {
     const h = createHarness();
     h.fire("mouseover");

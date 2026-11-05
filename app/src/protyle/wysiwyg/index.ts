@@ -5574,8 +5574,14 @@ export class WYSIWYG {
                 // https://github.com/siyuan-note/siyuan/issues/14481
                 const inlineMathElement = hasClosestByAttribute(newRange.startContainer, "data-type", "inline-math");
                 if (newRange.collapsed && inlineMathElement) {
-                    newRange.setEndAfter(inlineMathElement);
-                    newRange.collapse(false);
+                    // 点击公式左侧空白时，浏览器可能将光标落在公式内部。
+                    if (event.detail > 0 && event.clientX < inlineMathElement.getBoundingClientRect().left) {
+                        newRange.setStartBefore(inlineMathElement);
+                        newRange.collapse(true);
+                    } else {
+                        newRange.setEndAfter(inlineMathElement);
+                        newRange.collapse(false);
+                    }
                     focusByRange(newRange);
                 } else if (!newRange.collapsed) {
                     // 划选停在公式内部时补齐边界，保留完整公式及原有选区方向。

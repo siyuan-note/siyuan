@@ -1067,6 +1067,15 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         return;
     }
     const isCrossBlockRange = blockRanges.length > 1 && blockRanges[0].blockElement === blockElement;
+    const tempElement = document.createElement("template");
+    if (html.includes("NodeList")) tempElement.innerHTML = html;
+    const pastedType = tempElement.content.firstElementChild?.getAttribute("data-type");
+    const selectedList = !range.collapsed && (pastedType === "NodeList" || pastedType === "NodeListItem") ?
+        hasClosestByAttribute(range.commonAncestorContainer, "data-type", "NodeList") : undefined;
+    const selectedListOldHTML = selectedList && protyle.wysiwyg.element.contains(selectedList) ?
+        selectedList.outerHTML : undefined;
+    const selectedListUndoContext = selectedListOldHTML ?
+        getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
     // 序号重排会更新整个列表项，撤销快照必须在跨块删除前保存。
     const orderedListItemOldHTML = new Map<string, string>();
     if (isCrossBlockRange) {
@@ -1315,8 +1324,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         });
         processCrossBlockData();
     }
-    const tempElement = document.createElement("template");
-
     // https://github.com/siyuan-note/siyuan/issues/14162 & https://github.com/siyuan-note/siyuan/issues/14965
     if (/^\s*&gt;|\*|-|\+|\d*.|\[ \]|[x]/.test(html) &&
         getTextWithoutSemanticMarkers(editableElement).split(Constants.ZWSP).join("") !== "") {
@@ -1743,5 +1750,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             }
         });
     });
+    if (isListPaste && selectedList && selectedListOldHTML && selectedList.isConnected && selectedList.contains(lastElement)) {
+        // 同一列表内的覆盖同时改变列表项、子列表和序号，按列表提交可避免撤销先访问已删除的子块。
+        const listID = selectedList.getAttribute("data-node-id");
+        transaction(protyle, [{action: "update", id: listID, data: selectedList.outerHTML}], [{
+            action: "update", id: listID, data: selectedListOldHTML,
+            context: crossBlockUndoFocusContext || selectedListUndoContext || undoContext,
+        }], transactionOptions);
+        return;
+    }
     transaction(protyle, doOperation, undoOperation, transactionOptions);
 };

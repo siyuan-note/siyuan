@@ -140,11 +140,11 @@ func TestExportFootnotesRejectCrossCryptoBoundary(t *testing.T) {
 	var order []string
 	refs := map[string]*refAsFootnotes{}
 	depth := 0
-	collectFootnotesDefs0(source, source.Root, &order, refs, &depth, nil)
+	collectFootnotesDefs0(source, source.Root, &order, refs, &depth, nil, nil)
 	if len(order) != 1 || order[0] != target.Root.FirstChild.ID {
 		t.Fatalf("collected references beyond the crypto boundary: %v", order)
 	}
-	defs, err := resolveFootnotesDefs(&order, refs, source, map[string]bool{}, "", "", true)
+	defs, err := resolveFootnotesDefs(&order, refs, source, map[string]bool{}, "", "", true, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -56,5 +56,5 @@ func collectMarkdownExportReferences(tree *parse.Tree, refs *markdownExportRefer
 	var order []string
 	footnotes := map[string]*refAsFootnotes{}
 	depth := 0
-	collectFootnotesDefs0(tree, tree.Root, &order, footnotes, &depth, refs)
+	collectFootnotesDefs0(tree, tree.Root, &order, footnotes, &depth, refs, nil)
 }

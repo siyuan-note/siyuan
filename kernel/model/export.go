@@ -3576,8 +3576,18 @@ func exportMarkdownRelativePath(currentDocDir, href string) string {
 	return filepath.ToSlash(relative)
 }
 
+func firstEmbedBlockAccessChecker(checkers []EmbedBlockAccessChecker) EmbedBlockAccessChecker {
+	for _, checker := range checkers {
+		if nil != checker {
+			return checker
+		}
+	}
+	return nil
+}
+
 func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree, err error) {
 	luteEngine := NewLute()
+	accessChecker := firstEmbedBlockAccessChecker(exportOpts.AccessCheckers)
 	cloned := *tree
 	cloned.Root = cloneRenderNode(tree.Root)
 	ret = &cloned
@@ -3613,7 +3623,7 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 	refFootnotesByID := make(map[string]*refAsFootnotes)
 	if 4 == exportOpts.Config.BlockRefMode {
 		depth = 0
-		collectFootnotesDefs0(ret, ret.Root, &refFootnoteOrder, refFootnotesByID, &depth, exportOpts.References)
+		collectFootnotesDefs0(ret, ret.Root, &refFootnoteOrder, refFootnotesByID, &depth, exportOpts.References, accessChecker)
 	}
 
 	currentTreeNodeIDs := map[string]bool{}
@@ -3675,6 +3685,16 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 			return ast.WalkContinue
 		}
 
+		defID, _, _ := treenode.GetBlockRef(n)
+		if "" != defID && nil != accessChecker && !currentTreeNodeIDs[defID] && !accessChecker(defID) {
+			// 不可访问的块引用降级为公开文档中已存储的锚文本，避免加载受保护目标。
+			if anchorText := util.UnescapeHTML(n.TextMarkTextContent); "" != anchorText {
+				n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(anchorText)})
+			}
+			unlinks = append(unlinks, n)
+			return ast.WalkSkipChildren
+		}
+
 		// 处理引用节点
 		defID, linkText := getExportBlockRefLinkText(n, exportOpts.Config.BlockRefTextLeft, exportOpts.Config.BlockRefTextRight, tree.Box)
 
@@ -3730,7 +3750,7 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 	if 4 == exportOpts.Config.BlockRefMode { // 脚注+锚点哈希
 		unlinks = nil
 		var footnotesErr error
-		footnotesDefBlock, footnotesErr = resolveFootnotesDefs(&refFootnoteOrder, refFootnotesByID, ret, currentTreeNodeIDs, exportOpts.Config.BlockRefTextLeft, exportOpts.Config.BlockRefTextRight, exportOpts.RichTableCells)
+		footnotesDefBlock, footnotesErr = resolveFootnotesDefs(&refFootnoteOrder, refFootnotesByID, ret, currentTreeNodeIDs, exportOpts.Config.BlockRefTextLeft, exportOpts.Config.BlockRefTextRight, exportOpts.RichTableCells, accessChecker)
 		if nil != footnotesErr {
 			return nil, footnotesErr
 		}
@@ -4291,7 +4311,7 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 	return ret, nil
 }
 
-func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, currentTree *parse.Tree, currentTreeNodeIDs map[string]bool, blockRefTextLeft, blockRefTextRight string, richTableCells bool) (footnotesDefBlock *ast.Node, err error) {
+func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, currentTree *parse.Tree, currentTreeNodeIDs map[string]bool, blockRefTextLeft, blockRefTextRight string, richTableCells bool, accessChecker EmbedBlockAccessChecker) (footnotesDefBlock *ast.Node, err error) {
 	if 1 > len(*refFootnoteOrder) {
 		return nil, nil
 	}
@@ -4370,6 +4390,13 @@ func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[strin
 								n.TextMarkAHref = "#" + defID
 								return ast.WalkSkipChildren
 							}
+						}
+						if nil != accessChecker && !isNodeInTree(defID, currentTree) && !accessChecker(defID) {
+							// 嵌套的不可访问引用同样降级为已存锚文本，不保留块 ID。
+							if anchorText := util.UnescapeHTML(n.TextMarkTextContent); "" != anchorText {
+								n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(anchorText)})
+							}
+							unlinks = append(unlinks, n)
 						}
 					}
 					return ast.WalkSkipChildren
@@ -4480,9 +4507,12 @@ func blockLink2Ref(currentTree *parse.Tree) {
 	})
 }
 
-func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences) {
+func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences, accessChecker EmbedBlockAccessChecker) {
 	*depth++
 	if 4096 < *depth {
+		return
+	}
+	if nil != accessChecker && !accessChecker(id) {
 		return
 	}
 	t, err := loadExportRelatedTree(id, currentTree.Box)
@@ -4495,16 +4525,16 @@ func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *
 		logging.LogErrorf("not found node [%s] in tree [%s]", id, t.Root.ID)
 		return
 	}
-	collectFootnotesDefs0(currentTree, node, refFootnoteOrder, refFootnotesByID, depth, references)
+	collectFootnotesDefs0(currentTree, node, refFootnoteOrder, refFootnotesByID, depth, references, accessChecker)
 	if ast.NodeHeading == node.Type {
 		children := treenode.HeadingChildren(node)
 		for _, c := range children {
-			collectFootnotesDefs0(currentTree, c, refFootnoteOrder, refFootnotesByID, depth, references)
+			collectFootnotesDefs0(currentTree, c, refFootnoteOrder, refFootnotesByID, depth, references, accessChecker)
 		}
 	}
 }
 
-func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences) {
+func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences, accessChecker EmbedBlockAccessChecker) {
 	confEditorSnapshot := Conf.LoadEditor()
 
 	if references.contains(defID, currentTree.Box) {
@@ -4521,6 +4551,9 @@ func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string,
 		// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
 		return
 	}
+	if nil != accessChecker && !accessChecker(defID) {
+		return
+	}
 	if confEditorSnapshot.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(anchorText) {
 		anchorText = gulu.Str.SubStr(anchorText, confEditorSnapshot.BlockRefDynamicAnchorTextMaxLen) + "..."
 	}
@@ -4529,10 +4562,10 @@ func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string,
 		refNum:        strconv.Itoa(len(*refFootnoteOrder)),
 		refAnchorText: anchorText,
 	}
-	collectFootnotesDefs(currentTree, defID, refFootnoteOrder, refFootnotesByID, depth, references)
+	collectFootnotesDefs(currentTree, defID, refFootnoteOrder, refFootnotesByID, depth, references, accessChecker)
 }
 
-func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences) {
+func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences, accessChecker EmbedBlockAccessChecker) {
 	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -4540,10 +4573,13 @@ func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteO
 
 		if treenode.IsBlockRef(n) {
 			defID, refText, _ := treenode.GetBlockRef(n)
-			addRefFootnoteAndRecurse(currentTree, defID, refText, refFootnoteOrder, refFootnotesByID, depth, references)
+			addRefFootnoteAndRecurse(currentTree, defID, refText, refFootnoteOrder, refFootnotesByID, depth, references, accessChecker)
 			return ast.WalkSkipChildren
 		} else if treenode.IsBlockLink(n) {
 			defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+			if nil != accessChecker && !accessChecker(defID) {
+				return ast.WalkSkipChildren
+			}
 			anchorText := n.TextMarkTextContent
 			if "" == anchorText {
 				if IsEncryptedBox(currentTree.Box) {
@@ -4552,7 +4588,7 @@ func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteO
 					anchorText = sql.GetRefText(defID)
 				}
 			}
-			addRefFootnoteAndRecurse(currentTree, defID, anchorText, refFootnoteOrder, refFootnotesByID, depth, references)
+			addRefFootnoteAndRecurse(currentTree, defID, anchorText, refFootnoteOrder, refFootnotesByID, depth, references, accessChecker)
 			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue

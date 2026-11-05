@@ -14,6 +14,12 @@ import (
 var ImportTool = &Tool{
 	Name:        "import",
 	Description: "Import operations (absolute local paths). Actions: md(notebook, path, targetPath?), sy(notebook, path, targetPath?) — .sy.zip, data(path) — full backup zip.",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"md":   {LocalWrite: true},
+		"sy":   {LocalWrite: true},
+		"data": {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

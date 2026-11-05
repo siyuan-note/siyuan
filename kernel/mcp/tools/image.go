@@ -44,6 +44,9 @@ var ImageTool = &Tool{
 		Required: []string{"action", "documentID"},
 	},
 	EffectScope: EffectScopeMixed,
+	ResolveEffects: deferredAssetEffects(map[string]ToolEffects{
+		"analyze": {LocalRead: true, DataEgress: true, ExternalCost: true},
+	}),
 	ActionEffects: map[string]ToolEffects{
 		"list":     {LocalRead: true},
 		"analyze":  {LocalRead: true, DataEgress: true, ExternalCost: true},

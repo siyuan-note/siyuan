@@ -131,6 +131,12 @@ func TestPDFToolWorkflow(t *testing.T) {
 }
 
 func TestPDFToolPermissionsAndSchema(t *testing.T) {
+	previousConf, previousConfDir, previousRepoDir := model.Conf, util.ConfDir, util.RepoDir
+	t.Cleanup(func() { model.Conf, util.ConfDir, util.RepoDir = previousConf, previousConfDir, previousRepoDir })
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.Repo.Store(conf.NewRepo())
+	util.ConfDir, util.RepoDir = t.TempDir(), t.TempDir()
 	tool := GetTool("pdf")
 	if tool == nil || tool.BoxLeaseResolver == nil {
 		t.Fatal("PDF tool or notebook lease resolver missing")

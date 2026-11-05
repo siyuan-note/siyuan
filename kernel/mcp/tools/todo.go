@@ -15,6 +15,10 @@ var TodoWriteTool = &Tool{
 	Name:        "todo_write",
 	Description: "Maintain a session task list (each call replaces the list). todos[]: each {content, status: pending|in_progress|completed|cancelled}.",
 	AgentOnly:   true,
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"": {},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

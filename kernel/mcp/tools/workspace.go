@@ -14,6 +14,11 @@ import (
 var WorkspaceTool = &Tool{
 	Name:        "workspace",
 	Description: "Workspace management. Actions: list() returns registered workspace paths, info() returns the current workspace path, version and directory validity. system.workspace returns the current path and version plus the runtime container instead of validity; use system for version or current time.",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"list": {LocalRead: true},
+		"info": {LocalRead: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

@@ -15,6 +15,12 @@ import (
 var TagTool = &Tool{
 	Name:        "tag",
 	Description: "Tag management. Actions: list(keyword?), rename(old, new), remove(label). rename/remove affect matching document tags and inline tags across the workspace, not a selected document. For selected documents, read and update each document's tags attribute with attr.get/set; for inline body tags, use block tools.",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"list":   {LocalRead: true},
+		"rename": {LocalWrite: true},
+		"remove": {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

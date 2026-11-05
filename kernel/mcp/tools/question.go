@@ -8,6 +8,10 @@ var QuestionTool = &Tool{
 	Name:        "question",
 	Description: "Ask the user questions to clarify needs/preferences (do NOT use for plain-text option lists). questions[]: each {header, question, options[] {label, description}, multiple?, custom?}. For official plugin development use workflow.action=choose with questions=[]; the server supplies the exact Yes/No question. After successful official skill load, workflow.action=plan freezes and displays the proposed scope for confirmation. Workflow answers never authorize installation or enabling.",
 	AgentOnly:   true,
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"": {},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

@@ -48,6 +48,23 @@ Native container structure and operations:
 Structural reads and updates:
 - get/get_kramdown/batch_kramdown return Markdown for reading, which flattens tabs and renders mindmaps as lists; use dom before editing these containers. Never rebuild these containers from their reading Markdown.
 - Preserve all existing data-node-id values and attributes, including active tabs and mindmap metadata. Update with dataType=dom and lockType=true unless the user explicitly requests a type conversion.`,
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"get":            {LocalRead: true},
+		"get_kramdown":   {LocalRead: true},
+		"get_children":   {LocalRead: true},
+		"tree_stat":      {LocalRead: true},
+		"dom":            {LocalRead: true},
+		"breadcrumb":     {LocalRead: true},
+		"batch_get":      {LocalRead: true},
+		"batch_kramdown": {LocalRead: true},
+		"insert":         {LocalWrite: true},
+		"append":         {LocalWrite: true},
+		"prepend":        {LocalWrite: true},
+		"update":         {LocalWrite: true},
+		"delete":         {LocalWrite: true},
+		"move":           {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

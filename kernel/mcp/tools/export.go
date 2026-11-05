@@ -13,6 +13,20 @@ import (
 var ExportTool = &Tool{
 	Name:        "export",
 	Description: "Export operations. Actions: md(id), html(id), preview(id), docx(id, output directory), sy(id) → .sy.zip, md-zip(id), data() → full workspace backup. Use for export-formatted content or export files; prefer block.get/get_kramdown for reading current document/block content. md/html/preview return text, not files. Only docx uses output; other actions ignore it.",
+	EffectScope: EffectScopeLocal,
+	ResolveEffects: deferredAssetEffects(map[string]ToolEffects{
+		"html": {LocalRead: true}, "docx": {LocalWrite: true}, "sy": {LocalWrite: true},
+		"md-zip": {LocalWrite: true}, "data": {LocalWrite: true},
+	}),
+	ActionEffects: map[string]ToolEffects{
+		"md":      {LocalRead: true},
+		"html":    {LocalRead: true},
+		"preview": {LocalRead: true},
+		"docx":    {LocalWrite: true},
+		"sy":      {LocalWrite: true},
+		"md-zip":  {LocalWrite: true},
+		"data":    {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

@@ -14,6 +14,10 @@ import (
 var OutlineTool = &Tool{
 	Name:        "outline",
 	Description: "Document outline (heading tree). Action: get(id).",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"get": {LocalRead: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

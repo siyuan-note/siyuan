@@ -1361,6 +1361,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					if toolInputErr == nil {
 						toolInputErr = preflightCapabilitySnapshot(registration, action)
 					}
+					approvedEffects := capabilityEffects(registration, action)
 					if toolInputErr == nil {
 						requiresConfirm, forcedConfirm = capabilityConfirmRequirement(
 							registration, action, args, permissionController.allowSession.Load(), nil)
@@ -1371,9 +1372,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						confirmChannelsMu.Lock()
 						confirmChannels[confirmID] = &confirmWaiter{sessionID: sessionID, ch: ch2}
 						confirmChannelsMu.Unlock()
-						effects := capabilityEffects(registration, action)
 						sendCriticalEvent(ctx, ch, AgentEvent{
-							Type: "confirm", Name: tc.Function.Name, Arguments: confirmationArgs, ConfirmID: confirmID, Effects: effects,
+							Type: "confirm", Name: tc.Function.Name, Arguments: confirmationArgs, ConfirmID: confirmID, Effects: approvedEffects,
 							ForcedConfirm: forcedConfirm, CapabilityID: registration.ID,
 						})
 						var rejectionMsg string
@@ -1488,6 +1488,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						// 用户确认期间能力可能被禁用、卸载或重新注册，快照和执行前必须复核同一份注册。
 						toolInputErr = validateCapabilityCall(ctx, registration, args)
 					}
+					if toolInputErr == nil {
+						toolInputErr = validateCapabilityEffects(registration, action, approvedEffects)
+					}
 
 					if toolInputErr == nil && !snapshotCreated && needsCapabilitySnapshot(registration, action) {
 						id, err := kernelModel.IndexRepo("AI agent auto snapshot")
@@ -1559,6 +1562,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					var modelAttachments []mcptools.ModelAttachment
 					isErr := false
 					executionUnknown := false
+					if toolInputErr == nil {
+						toolInputErr = validateCapabilityEffects(registration, action, approvedEffects)
+					}
 					if toolInputErr != nil {
 						resultStr = toolInputErr.Error()
 						isErr = true
@@ -1836,7 +1842,20 @@ func capabilityEffects(registration *capabilityRegistration, action string) mcpt
 		return effects
 	}
 	effects, _ := registration.Tool.EffectsFor(action)
+	if needsCapabilitySnapshot(registration, action) {
+		effects = mcptools.EffectsWithSyncAssets(effects)
+	}
 	return effects
+}
+
+func validateCapabilityEffects(registration *capabilityRegistration, action string, approved mcptools.ToolEffects) error {
+	current := capabilityEffects(registration, action)
+	// 等待确认或准备快照期间配置可能改变，新增写入、外发或费用不能沿用旧确认。
+	if current.LocalWrite && !approved.LocalWrite || current.DataEgress && !approved.DataEgress ||
+		current.ExternalCost && !approved.ExternalCost {
+		return errors.New("Tool effects changed before execution; request confirmation again with the current configuration")
+	}
+	return nil
 }
 
 func capabilityConfirmRequirement(registration *capabilityRegistration, action string, args map[string]any,
@@ -1930,6 +1949,10 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 
 func needsLocalSnapshot(toolName, action string) bool {
 	tool := mcptools.GetTool(toolName)
+	// 创建快照本身就是恢复点，无需在它之前再创建一份相同的数据快照。
+	if tool != nil && tool.CapabilityID == "native/backend/repo" && action == "create" {
+		return false
+	}
 	if effects, ok := tool.EffectsFor(action); ok {
 		return effects.LocalWrite
 	}

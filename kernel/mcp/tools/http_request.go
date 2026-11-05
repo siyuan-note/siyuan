@@ -16,12 +16,19 @@ import (
 
 // HTTPRequestTool 通用 HTTP 调用工具，供智能体访问需要鉴权的 REST API（如微信读书网关）。
 // 与 web_fetch 的区别：支持自定义 method/headers/body，且文本类响应（含 JSON）原样返回而非转 Markdown。
-// 用 action 承载 method（get/post/put/delete/patch），从而零改动复用 agent 的确认机制——
-// GET 命中 safeActions["get"] 免确认，POST 等写操作触发 UI 确认 + 写前快照。
+// 请求可能发送敏感参数、调用付费接口或将二进制响应保存到工作区，所有方法均声明这些潜在效果。
 var HTTPRequestTool = &Tool{
 	Name:        "http_request",
 	Description: "Send an HTTP request to a REST API and return the raw text response (JSON is kept as-is). action (HTTP method): get (default)/post/put/delete/patch. url (http/https), headers (object), body (string). Use this instead of web_fetch when you need POST, custom headers (e.g. Authorization), or raw JSON responses.",
-	EffectScope: EffectScopeExternal,
+	EffectScope: EffectScopeMixed,
+	ActionEffects: map[string]ToolEffects{
+		"":       {LocalWrite: true, DataEgress: true, ExternalCost: true},
+		"get":    {LocalWrite: true, DataEgress: true, ExternalCost: true},
+		"post":   {LocalWrite: true, DataEgress: true, ExternalCost: true},
+		"put":    {LocalWrite: true, DataEgress: true, ExternalCost: true},
+		"delete": {LocalWrite: true, DataEgress: true, ExternalCost: true},
+		"patch":  {LocalWrite: true, DataEgress: true, ExternalCost: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

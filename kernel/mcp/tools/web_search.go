@@ -13,6 +13,7 @@ import (
 var WebSearchTool = &Tool{
 	Name:        "web_search",
 	Description: "Search the web using the configured provider (Exa or DeepSeek). Returns links and summaries; use web_fetch for page content. Query is sent externally; authenticated Exa and DeepSeek requests may incur charges.",
+	EffectScope: EffectScopeExternal,
 	ResolveEffects: func(string) (ToolEffects, bool) {
 		config := webToolConfig()
 		if (config.SearchProvider == "exa" || config.SearchProvider == "") && config.ExaAPIKey != "" {

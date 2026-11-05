@@ -11,9 +11,16 @@ import (
 )
 
 var WebFetchTool = &Tool{
-	Name:           "web_fetch",
-	Description:    "Fetch a public page using the configured provider (direct HTTP or DeepSeek), as markdown (default) or text. No browser session is used. DeepSeek receives the target URL, charges per successful request, and returns page content only; direct HTTP also downloads files. For client-rendered pages, use native/frontend/web_page_fetch when available in the desktop Electron app.",
-	ResolveEffects: func(string) (ToolEffects, bool) { return webToolEffects(webToolConfig().FetchProvider) },
+	Name:        "web_fetch",
+	Description: "Fetch a public page using the configured provider (direct HTTP or DeepSeek), as markdown (default) or text. No browser session is used. DeepSeek receives the target URL, charges per successful request, and returns page content only; direct HTTP also downloads files. For client-rendered pages, use native/frontend/web_page_fetch when available in the desktop Electron app.",
+	EffectScope: EffectScopeMixed,
+	ResolveEffects: func(string) (ToolEffects, bool) {
+		provider := webToolConfig().FetchProvider
+		effects, declared := webToolEffects(provider)
+		// 直接抓取会根据响应类型将文件写入 data/import，确认前无法确定响应类型。
+		effects.LocalWrite = provider == "direct" || provider == ""
+		return effects, declared
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

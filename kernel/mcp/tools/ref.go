@@ -14,6 +14,12 @@ import (
 var RefTool = &Tool{
 	Name:        "ref",
 	Description: "Reference/backlink operations. Actions: backlinks(id, keyword?, sort?), mentions(id, keyword?, sort?), refresh(id).",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"backlinks": {LocalRead: true},
+		"mentions":  {LocalRead: true},
+		"refresh":   {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

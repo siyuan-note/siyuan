@@ -19,9 +19,10 @@ import (
 const maxHTMLAssetContentSize = 2 * 1024 * 1024
 
 var AssetTool = &Tool{
-	Name:        "asset",
-	Description: "Document attachment management; use asset rather than file to write workspace assets. Actions: upload(id, files=comma-separated absolute paths), create_html(id, html, name?, parentID?, previousID?, nextID?), unused(), clean(path?), stat(path). create_html writes an HTML asset and inserts a sandboxed IFrame block in one operation. clean with a nonempty path removes that unused asset; omitting path or passing an empty path removes all unused assets. Use unused to inspect candidates and perform all-unused cleanup only when the user explicitly requests it.",
-	EffectScope: EffectScopeLocal,
+	Name:           "asset",
+	Description:    "Document attachment management; use asset rather than file to write workspace assets. Actions: upload(id, files=comma-separated absolute paths), create_html(id, html, name?, parentID?, previousID?, nextID?), unused(), clean(path?), stat(path). create_html writes an HTML asset and inserts a sandboxed IFrame block in one operation. clean with a nonempty path removes that unused asset; omitting path or passing an empty path removes all unused assets. Use unused to inspect candidates and perform all-unused cleanup only when the user explicitly requests it.",
+	EffectScope:    EffectScopeLocal,
+	ResolveEffects: deferredAssetEffects(map[string]ToolEffects{"clean": {LocalWrite: true}}),
 	ActionEffects: map[string]ToolEffects{
 		"upload":      {LocalWrite: true},
 		"create_html": {LocalWrite: true},

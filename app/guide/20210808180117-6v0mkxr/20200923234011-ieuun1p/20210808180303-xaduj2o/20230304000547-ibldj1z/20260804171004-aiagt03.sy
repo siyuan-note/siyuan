@@ -704,7 +704,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Read and search operations usually run immediately. Operations that create, modify, move, delete, or import data display a confirmation card that identifies possible local writes, data egress, and external charges."
+					"Data": "Local-only reads and searches usually run immediately. Operations that create, modify, move, delete or import data, or send network requests, display confirmation cards according to capability settings. The cards identify possible local writes, data egress and external charges. Online search, web fetching, the cloud inbox and online Bazaar queries send requests externally; direct web fetching and HTTP requests may also save downloads in the workspace. A cost flag means a paid service may be involved, not that every call necessarily incurs a charge. Downloading on-demand assets or preparing a snapshot before a write may also contact the sync provider and write local resources. If local writes, data egress or charges are added after confirmation, the call is stopped and must be confirmed again with the current configuration."
 				}
 			]
 		},

@@ -14,6 +14,13 @@ import (
 var BookmarkTool = &Tool{
 	Name:        "bookmark",
 	Description: "Bookmark management. Actions: list(), labels(), remove(label), rename(old, new).",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"list":   {LocalRead: true},
+		"labels": {LocalRead: true},
+		"remove": {LocalWrite: true},
+		"rename": {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

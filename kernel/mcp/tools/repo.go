@@ -16,6 +16,26 @@ import (
 var RepoTool = &Tool{
 	Name:        "repo",
 	Description: "Repository (data snapshot) operations, distinct from automatic document versions accessed through history and history paths. Actions: list(tag?, page=1), create(memo?), tag(id, name), untag(name), checkout(id), diff(left, right), search(keyword, page?), purge(), file_get(id), file_rollback(id), file_open(id), file_export(id). list returns snapshot IDs for tag/checkout/diff; search and diff return repository file IDs for file_* actions, not live block IDs or history paths. file_get reads stored file content and its path (documents are .sy JSON); file_open returns a title and preview content (document block DOM or fallback text), without opening an editor. file_rollback restores that file into current data. file_export writes a temporary export and returns its download path: documents become <title>.sy.zip, other files retain their basename. Ordinary exports use /export/repo/; encrypted notebook exports use a notebook-scoped managed path. Use the returned path rather than constructing one.",
+	EffectScope: EffectScopeLocal,
+	ResolveEffects: syncAssetEffects(map[string]ToolEffects{
+		"create": {LocalWrite: true}, "checkout": {LocalWrite: true},
+		"file_get": {LocalRead: true}, "file_open": {LocalRead: true, LocalWrite: true},
+		"file_rollback": {LocalWrite: true}, "file_export": {LocalWrite: true},
+	}),
+	ActionEffects: map[string]ToolEffects{
+		"list":          {LocalRead: true},
+		"diff":          {LocalRead: true},
+		"search":        {LocalRead: true},
+		"file_get":      {LocalRead: true},
+		"file_open":     {LocalRead: true, LocalWrite: true},
+		"create":        {LocalWrite: true},
+		"tag":           {LocalWrite: true},
+		"untag":         {LocalWrite: true},
+		"checkout":      {LocalWrite: true},
+		"purge":         {LocalWrite: true},
+		"file_rollback": {LocalWrite: true},
+		"file_export":   {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

@@ -20,7 +20,7 @@ const maxHTMLAssetContentSize = 2 * 1024 * 1024
 
 var AssetTool = &Tool{
 	Name:        "asset",
-	Description: "Asset management. Actions: upload(id, files=comma-separated absolute paths), create_html(id, html, name?, parentID?, previousID?, nextID?), unused(), clean(path?), stat(path). create_html writes an HTML asset and inserts a sandboxed IFrame block in one operation.",
+	Description: "Document attachment management; use asset rather than file to write workspace assets. Actions: upload(id, files=comma-separated absolute paths), create_html(id, html, name?, parentID?, previousID?, nextID?), unused(), clean(path?), stat(path). create_html writes an HTML asset and inserts a sandboxed IFrame block in one operation. clean with a nonempty path removes that unused asset; omitting path or passing an empty path removes all unused assets. Use unused to inspect candidates and perform all-unused cleanup only when the user explicitly requests it.",
 	EffectScope: EffectScopeLocal,
 	ActionEffects: map[string]ToolEffects{
 		"upload":      {LocalWrite: true},
@@ -41,7 +41,7 @@ var AssetTool = &Tool{
 			"parentID":   {Type: "string", Description: "Parent block ID (for create_html, defaults to the document ID)"},
 			"previousID": {Type: "string", Description: "Previous sibling block ID (for create_html)"},
 			"nextID":     {Type: "string", Description: "Next sibling block ID (for create_html)"},
-			"path":       {Type: "string", Description: "Single unused asset path to remove, relative to data directory (for clean, optional). Use as returned by the unused action, e.g. assets/image/xxx.png."},
+			"path":       {Type: "string", Description: "Asset path relative to data directory (for stat, or a single unused asset for clean). Use as returned by unused, e.g. assets/image/xxx.png. For clean, an omitted or empty path removes all unused assets; use only for explicitly requested all-unused cleanup"},
 		},
 		Required: []string{"action"},
 	},

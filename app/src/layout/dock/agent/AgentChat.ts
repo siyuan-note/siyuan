@@ -38,7 +38,6 @@ import {
 import {
     bindAgentMessageEvents,
     copyAgentText,
-    createThinkingCardElement,
     postRender,
     renderQuestionCardHTML,
     renderRetryCardHTML,
@@ -153,6 +152,11 @@ type AgentToolCall = {
     result?: string;
 };
 
+type AgentToolCallView = {
+    element: HTMLElement;
+    startedAt: number;
+};
+
 type AgentThinkingStep = {
     reasoning: string;
     reasoningContent: string;
@@ -177,14 +181,14 @@ type AgentSessionRunViewState = {
     contextLimit: number;
     requestStartTime: number;
     currentToolCalls: AgentToolCall[];
-    toolCallStartedAt: Map<string, number>;
+    renderedToolCalls: WeakMap<AgentToolCall, AgentToolCallView>;
     currentThinkingText: string;
     currentThinkingReasoning: string;
     currentThinkingReasoningContent: string;
     currentThinkingSteps: AgentThinkingStep[];
     currentThinkingDuration: number;
     pendingConfirms: SessionEntry[];
-    renderedToolNames: Record<string, boolean>;
+    currentToolLine: HTMLElement | null;
     hasInterveningCard: boolean;
     lastStepToolCount: number;
     permissionMode: AgentPermissionMode;
@@ -247,7 +251,7 @@ export class AgentChat extends Model {
     private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
     private currentToolCalls: AgentToolCall[] = [];
-    private toolCallStartedAt = new Map<string, number>();
+    private renderedToolCalls = new WeakMap<AgentToolCall, AgentToolCallView>();
     private abortController: AbortController | null = null;
     private sessionRuns = new AgentSessionRuns<PendingAgentInteraction, ISSEResult, AgentSessionRunViewState>();
     private sessionViewChange = Promise.resolve();
@@ -263,7 +267,7 @@ export class AgentChat extends Model {
     // 当前请求的思考耗时（秒）。持久化为 entry.duration，"已思考"文本不落盘。
     private currentThinkingDuration = 0;
     private pendingConfirms: SessionEntry[] = [];
-    private renderedToolNames: Record<string, boolean> = {};
+    private currentToolLine: HTMLElement | null = null;
     private hasInterveningCard = false;
     private modelSelect: HTMLButtonElement;
     private groupedModelPicker?: IGroupedModelPicker;
@@ -1336,14 +1340,14 @@ export class AgentChat extends Model {
             contextLimit: this.contextLimit,
             requestStartTime: this.requestStartTime,
             currentToolCalls: this.currentToolCalls,
-            toolCallStartedAt: this.toolCallStartedAt,
+            renderedToolCalls: this.renderedToolCalls,
             currentThinkingText: this.currentThinkingText,
             currentThinkingReasoning: this.currentThinkingReasoning,
             currentThinkingReasoningContent: this.currentThinkingReasoningContent,
             currentThinkingSteps: this.currentThinkingSteps,
             currentThinkingDuration: this.currentThinkingDuration,
             pendingConfirms: this.pendingConfirms,
-            renderedToolNames: this.renderedToolNames,
+            currentToolLine: this.currentToolLine,
             hasInterveningCard: this.hasInterveningCard,
             lastStepToolCount: this.lastStepToolCount,
             permissionMode: this.permissionMode,
@@ -1392,14 +1396,14 @@ export class AgentChat extends Model {
         this.contextLimit = state.contextLimit;
         this.requestStartTime = state.requestStartTime;
         this.currentToolCalls = state.currentToolCalls;
-        this.toolCallStartedAt = state.toolCallStartedAt;
+        this.renderedToolCalls = state.renderedToolCalls;
         this.currentThinkingText = state.currentThinkingText;
         this.currentThinkingReasoning = state.currentThinkingReasoning;
         this.currentThinkingReasoningContent = state.currentThinkingReasoningContent;
         this.currentThinkingSteps = state.currentThinkingSteps;
         this.currentThinkingDuration = state.currentThinkingDuration;
         this.pendingConfirms = state.pendingConfirms;
-        this.renderedToolNames = state.renderedToolNames;
+        this.currentToolLine = state.currentToolLine;
         this.hasInterveningCard = state.hasInterveningCard;
         this.lastStepToolCount = state.lastStepToolCount;
         this.applyPermissionMode(state.permissionMode);
@@ -1597,7 +1601,7 @@ export class AgentChat extends Model {
             this.currentThinkingReasoningContent = "";
             this.currentThinkingDuration = 0;
             this.lastStepToolCount = 0;
-            this.renderedToolNames = {};
+            this.currentToolLine = null;
             this.hasInterveningCard = false;
         }
         this.entries = newEntries;
@@ -1877,9 +1881,9 @@ export class AgentChat extends Model {
         this.currentThinkingReasoningContent = "";
         this.currentThinkingDuration = 0;
         this.requestStartTime = 0;
-        this.toolCallStartedAt = new Map<string, number>();
+        this.renderedToolCalls = new WeakMap<AgentToolCall, AgentToolCallView>();
         this.lastStepToolCount = 0;
-        this.renderedToolNames = {};
+        this.currentToolLine = null;
         this.hasInterveningCard = false;
         this.contextTokens = session.contextTokens ?? 0;
         this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
@@ -2308,14 +2312,14 @@ export class AgentChat extends Model {
         this.contextCachedTokens = 0;
         this.contextLimit = 0;
         this.currentToolCalls = [];
-        this.toolCallStartedAt = new Map<string, number>();
+        this.renderedToolCalls = new WeakMap<AgentToolCall, AgentToolCallView>();
         this.currentThinkingText = "";
         this.currentThinkingReasoning = "";
         this.currentThinkingReasoningContent = "";
         this.currentThinkingDuration = 0;
         this.requestStartTime = 0;
         this.lastStepToolCount = 0;
-        this.renderedToolNames = {};
+        this.currentToolLine = null;
         this.hasInterveningCard = false;
         if (this.tokenDisplayEl) {
             this.tokenDisplayEl.classList.add("fn__none");
@@ -2678,13 +2682,16 @@ export class AgentChat extends Model {
                     this.appendThinking(event.reasoning, event.roundID || "");
                     break;
                 case "tool_call":
-                    this.currentToolCalls.push({
-                        id: event.callID,
-                        name: event.name,
-                        roundID: event.roundID || this.currentRoundID || undefined,
-                        arguments: event.arguments,
-                    });
-                    this.appendToolCall(event.name);
+                    {
+                        const toolCall: AgentToolCall = {
+                            id: event.callID,
+                            name: event.name,
+                            roundID: event.roundID || this.currentRoundID || undefined,
+                            arguments: event.arguments,
+                        };
+                        this.currentToolCalls.push(toolCall);
+                        this.appendToolCall(toolCall);
+                    }
                     break;
                 case "confirm":
                     this.setToolCallRunning(event.name, false);
@@ -2699,9 +2706,9 @@ export class AgentChat extends Model {
                             item.result === undefined && (event.callID ? item.id === event.callID : item.name === event.name));
                         if (toolCall) {
                             toolCall.result = event.result;
+                            this.finishToolCall(toolCall);
                         }
                     }
-                    this.finishToolCall(event.name);
                     this.appendToolResult(event.name, event.result);
                     break;
                 case "done":
@@ -3087,65 +3094,53 @@ export class AgentChat extends Model {
         }
     }
 
-    private appendToolCall(name: string) {
-        const body = this.messagesContainer.querySelector(
-            ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body"
-        ) as HTMLElement;
-        if (!body) {
-            return;
-        }
-        this.toolCallStartedAt.set(name, Date.now());
-        if (this.renderedToolNames[name]) {
-            this.setToolCallRunning(name, true);
-            return;
-        }
+    private getActiveThinkingCard(): HTMLElement | null {
+        const cards = this.messagesContainer.querySelectorAll<HTMLElement>(
+            ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
+        );
+        return cards[cards.length - 1] || null;
+    }
 
-        this.renderedToolNames[name] = true;
+    private appendToolCall(toolCall: AgentToolCall) {
+        const body = this.getActiveThinkingCard()?.querySelector<HTMLElement>(".agent-chat__thinking-body");
+        if (!body || this.renderedToolCalls.has(toolCall)) {
+            return;
+        }
         updateThinkingBody(body, () => {
-            const lastElement = body.lastElementChild as HTMLElement;
-            if (lastElement?.classList.contains("agent-chat__thinking-tools-line")) {
-                const toolElement = document.createElement("span");
-                toolElement.className = "agent-chat__thinking-tool agent-chat__thinking-tool--running";
-                toolElement.textContent = name;
-                lastElement.appendChild(toolElement);
-            } else {
-                body.insertAdjacentHTML("beforeend", renderToolsLineHTML([{name, running: true}]));
+            if (this.currentToolLine?.parentElement !== body || this.currentToolLine !== body.lastElementChild) {
+                body.insertAdjacentHTML("beforeend", renderToolsLineHTML([]));
+                this.currentToolLine = body.lastElementChild as HTMLElement;
             }
+            const toolElement = document.createElement("span");
+            toolElement.className = "agent-chat__thinking-tool";
+            toolElement.classList.toggle("agent-chat__thinking-tool--running", toolCall.result === undefined);
+            toolElement.textContent = toolCall.name;
+            this.currentToolLine.appendChild(toolElement);
+            this.renderedToolCalls.set(toolCall, {element: toolElement, startedAt: Date.now()});
         });
         this.scrollToBottom();
     }
 
     private setToolCallRunning(name: string, running: boolean) {
-        const selector = running
-            ? ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-tool"
-            : ".agent-chat__thinking-tool--running";
-        const toolElements = this.messagesContainer.querySelectorAll(selector);
-        for (let i = toolElements.length - 1; i >= 0; i--) {
-            const toolElement = toolElements[i];
-            if (toolElement.textContent === name) {
-                toolElement.classList.toggle("agent-chat__thinking-tool--running", running);
-                if (running) {
-                    return;
-                }
+        // 确认事件没有调用 ID，对应最近收到且尚未返回结果的同名调用。
+        for (let i = this.currentToolCalls.length - 1; i >= 0; i--) {
+            const toolCall = this.currentToolCalls[i];
+            if (toolCall.name === name && toolCall.result === undefined) {
+                this.renderedToolCalls.get(toolCall)?.element.classList.toggle("agent-chat__thinking-tool--running", running);
+                return;
             }
         }
     }
 
-    private finishToolCall(name: string) {
-        const stillRunning = this.currentToolCalls.some((item) => item.name === name && item.result === undefined);
-        if (stillRunning) {
+    private finishToolCall(toolCall: AgentToolCall) {
+        const view = this.renderedToolCalls.get(toolCall);
+        if (!view) {
             return;
         }
-        const sessionID = this.sessionId;
-        const startedAt = this.toolCallStartedAt.get(name);
-        const remaining = startedAt ? Math.max(600 - (Date.now() - startedAt), 0) : 0;
+        const remaining = Math.max(600 - (Date.now() - view.startedAt), 0);
         window.setTimeout(() => {
-            if (this.sessionId !== sessionID || this.toolCallStartedAt.get(name) !== startedAt ||
-                this.currentToolCalls.some((item) => item.name === name && item.result === undefined)) {
-                return;
-            }
-            this.setToolCallRunning(name, false);
-            this.toolCallStartedAt.delete(name);
+            // 保存调用与元素的对应关系，切换会话后仍只更新该次调用的标记。
+            view.element.classList.remove("agent-chat__thinking-tool--running");
         }, remaining);
     }
 
@@ -3198,7 +3193,7 @@ export class AgentChat extends Model {
         this.currentToolCalls = [];
         this.currentRoundID = "";
         this.lastStepToolCount = 0;
-        this.renderedToolNames = {};
+        this.currentToolLine = null;
         this.currentThinkingDuration = 0;
         this.requestStartTime = Date.now();
     }
@@ -3208,8 +3203,8 @@ export class AgentChat extends Model {
         this.flushReasoningUpdate();
         this.collectCurrentThinkingStep();
         this.finishVisibleRound();
-        // 工具名只在当前思考步骤内去重，新步骤仍需显示同名工具调用。
-        this.renderedToolNames = {};
+        // 即使当前步骤没有 reasoning，工具调用也独立成行。
+        this.currentToolLine = null;
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
         this.currentThinkingReasoningContent = "";
@@ -3218,24 +3213,8 @@ export class AgentChat extends Model {
 
         this.currentThinkingText = text;
 
-        let detailLines = "";
-        if (reasoning === "processing" && this.currentToolCalls.length > this.lastStepToolCount) {
-            const newTools: Array<{ name: string; running: boolean }> = [];
-            for (let i = this.lastStepToolCount; i < this.currentToolCalls.length; i++) {
-                const tc = this.currentToolCalls[i];
-                if (!this.renderedToolNames[tc.name]) {
-                    this.renderedToolNames[tc.name] = true;
-                    const running = tc.result === undefined;
-                    if (running) {
-                        this.toolCallStartedAt.set(tc.name, Date.now());
-                    }
-                    newTools.push({name: tc.name, running});
-                }
-            }
-            if (newTools.length > 0) {
-                detailLines += renderToolsLineHTML(newTools);
-            }
-        }
+        const pendingTools = reasoning === "processing"
+            ? this.currentToolCalls.slice(this.lastStepToolCount) : [];
 
         if (reasoning === "processing" && this.hasInterveningCard) {
             // 与 finishActiveThinking 对齐：先把本张思考卡片的耗时算出来，
@@ -3270,7 +3249,7 @@ export class AgentChat extends Model {
             this.currentThinkingSteps = [];
             this.currentThinkingEntryId = "";
             // 卡片边界：一张思考卡片已落盘，下一张卡片独立显示工具。
-            this.renderedToolNames = {};
+            this.currentToolLine = null;
             // Flush tool calls as assistant entry
             if (this.currentToolCalls.length > 0) {
                 this.entries.push({
@@ -3295,16 +3274,14 @@ export class AgentChat extends Model {
             this.hasInterveningCard = false;
         }
 
-        const existingCard = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)") as HTMLElement;
+        const existingCard = this.getActiveThinkingCard();
         const existingBody = existingCard?.querySelector(".agent-chat__thinking-body");
         if (existingBody) {
             const textEl = existingCard.querySelector(".agent-chat__thinking-text");
             if (textEl) {
                 textEl.textContent = text;
             }
-            if (detailLines) {
-                existingBody.innerHTML += detailLines;
-            }
+            pendingTools.forEach(toolCall => this.appendToolCall(toolCall));
             this.scrollToBottom();
             this.startThinkingTimer();
             return;
@@ -3313,9 +3290,7 @@ export class AgentChat extends Model {
             existingCard.remove();
         }
 
-        const bodyHTML = '<div class="agent-chat__thinking-body">' +
-            detailLines +
-            "</div>";
+        const bodyHTML = '<div class="agent-chat__thinking-body"></div>';
 
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--thinking";
@@ -3337,6 +3312,7 @@ export class AgentChat extends Model {
 
         bindThinkingCardToggle(el, () => this.anchorThinkingCard(el));
         this.insertBeforeAI(el);
+        pendingTools.forEach(toolCall => this.appendToolCall(toolCall));
         this.scrollToBottom();
         this.observeStickTarget(el);
         this.startThinkingTimer();
@@ -3345,11 +3321,10 @@ export class AgentChat extends Model {
     private appendReasoning(token: string) {
         const isNewRound = this.currentThinkingReasoningContent.length === 0;
         this.currentThinkingReasoningContent += token;
-        const thinkingElems = this.messagesContainer.querySelectorAll(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body");
-        if (thinkingElems.length === 0) {
+        const thinking = this.getActiveThinkingCard()?.querySelector<HTMLElement>(".agent-chat__thinking-body");
+        if (!thinking) {
             return;
         }
-        const thinking = thinkingElems[thinkingElems.length - 1];
         // 新轮次立即创建 reasoning 元素（保证多轮顺序），文本内容用 RAF 合并追加（减少 reflow）。
         if (isNewRound) {
             const reasoningEl = document.createElement("div");
@@ -3532,7 +3507,7 @@ export class AgentChat extends Model {
         this.currentToolCalls = [];
         this.currentRoundID = "";
         this.lastStepToolCount = 0;
-        this.renderedToolNames = {};
+        this.currentToolLine = null;
         this.hasInterveningCard = false;
         this.currentThinkingSteps = [];
         this.currentThinkingText = "";
@@ -3670,7 +3645,7 @@ export class AgentChat extends Model {
         this.currentToolCalls = [];
         this.currentRoundID = "";
         this.lastStepToolCount = 0;
-        this.renderedToolNames = {};
+        this.currentToolLine = null;
         if (this.requestStartTime) {
             this.requestStartTime = 0;
         }
@@ -3746,8 +3721,8 @@ export class AgentChat extends Model {
         }
         this.currentThinkingSteps = [];
         this.currentThinkingEntryId = "";
-        // 卡片边界：与 appendThinking 的 hasInterveningCard 分支一致，重置工具名去重表。
-        this.renderedToolNames = {};
+        // 工具行属于当前思考卡片，后续步骤使用新的分组。
+        this.currentToolLine = null;
     }
 
     private tryGenerateTitle() {
@@ -3820,7 +3795,7 @@ export class AgentChat extends Model {
     private appendRetry(attempt: number, maxRetries: number) {
         this.finishActiveThinking();
         this.currentThinkingSteps = [];
-        this.renderedToolNames = {};
+        this.currentToolLine = null;
         this.clearThinking();
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--retry";
@@ -3946,7 +3921,7 @@ export class AgentChat extends Model {
         this.currentToolCalls = [];
         this.currentRoundID = "";
         this.lastStepToolCount = 0;
-        this.renderedToolNames = {};
+        this.currentToolLine = null;
         if (this.requestStartTime) {
             this.requestStartTime = 0;
         }
@@ -4328,20 +4303,6 @@ export class AgentChat extends Model {
         return true;
     }
 
-    private renderSingleThinkingCard(step: {
-        reasoning: string;
-        text: string;
-        toolNames?: string[];
-        reasoningContent: string
-    }) {
-        if (!hasAgentThinkingStepDetails(step)) {
-            return;
-        }
-        const el = createThinkingCardElement(step);
-        bindThinkingCardToggle(el, () => this.anchorThinkingCard(el));
-        this.messagesContainer.appendChild(el);
-    }
-
     private renderMergedThinkingCard(steps: Array<{
         reasoning: string;
         reasoningContent: string;
@@ -4362,8 +4323,7 @@ export class AgentChat extends Model {
             if (step.reasoningContent) {
                 detail += '<div class="agent-chat__thinking-reasoning-text">' + escapeHtml(step.reasoningContent) + "</div>";
             }
-            // 工具行放在该步 reasoning 之后，对齐实时流式渲染中
-            // 「reasoning/content 先到、工具行在下一轮 thinking 时补到末尾」的实际呈现。
+            // 每步的工具行紧随该步 reasoning，与实时调用到达时的分组和顺序一致。
             const names = toolGroups[i];
             if (names.length > 0) {
                 detail += renderToolsLineHTML(names.map(name => ({name})));

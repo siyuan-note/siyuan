@@ -145,44 +145,6 @@ export const renderToolsLineHTML = (newTools: Array<{ name: string; running?: bo
     return detailLines;
 };
 
-// createThinkingCardElement 用于流式过程中的单个思考卡片。
-// 工具调用只接收名字列表（arguments/result 在 assistant entry 存一份）；
-// 标题文本由调用方传入（已通过 i18n 从 duration 生成）。
-export const createThinkingCardElement = (step: {
-    reasoning: string;
-    text: string;
-    toolNames?: string[];
-    reasoningContent: string
-}): HTMLElement => {
-    let detail = "";
-    if (step.toolNames && step.toolNames.length > 0) {
-        detail += '<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">Tool calls:</span>';
-        for (let j = 0; j < step.toolNames.length; j++) {
-            detail += '<span class="agent-chat__thinking-tool">' + escapeHtml(step.toolNames[j]) + "</span>";
-        }
-        detail += "</div>";
-    }
-    if (step.reasoningContent) {
-        detail += "<div>" + escapeHtml(step.reasoningContent) + "</div>";
-    }
-
-    const el = document.createElement("div");
-    el.className = "agent-chat__msg agent-chat__msg--thinking agent-chat__msg--thinking-done";
-    el.innerHTML = '<div class="agent-chat__thinking-card">' +
-        '<div class="agent-chat__thinking-header">' +
-        '<span class="agent-chat__thinking-arrow">' +
-        '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
-        '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
-        "</span>" +
-        '<span class="agent-chat__thinking-text">' + escapeHtml(step.text) + "</span>" +
-        "</div>" +
-        '<div class="agent-chat__thinking-body">' +
-        detail +
-        "</div>" +
-        "</div>";
-    return el;
-};
-
 // 为容器内所有代码块（pre）和公式块（div[data-subtype=math]）注入复制按钮。
 export const addCopyButtons = (container: HTMLElement): void => {
     // 代码块复制 code 文本；公式块复制 data-content（KaTeX 渲染前的原始 LaTeX）。

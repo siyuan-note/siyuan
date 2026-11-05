@@ -28,3 +28,23 @@ test("menu event detail factories run only for subscribed plugins and preserve t
     exports.emitOpenMenu({type: "open-menu-doctree", detail: eager});
     assert.equal(received[1], eager);
 });
+
+test("a menu replaced by its plugin event does not receive stale plugin entries", () => {
+    const exports = {} as typeof import("./EventBus");
+    let current = true;
+    const appended: unknown[] = [];
+    runInNewContext(transpileModule(readFileSync("src/plugin/EventBus.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+    }).outputText, {exports, window: {siyuan: {languages: {}, menus: {menu: {append: (item: unknown) => appended.push(item)}}}},
+        require: (name: string) => name === "./EventBusCore" ? {
+            hasPluginSubscriber: () => true,
+            emitToPlugins: (_type: string, detail: {menu: {menus: unknown[]}}) => {
+                detail.menu.menus.push({id: "plugin-action"});
+                current = false;
+            },
+        } : {subMenu: class {menus: unknown[] = [];}, MenuItem: class {element = {};}}
+    });
+    const result = exports.emitOpenMenu({type: "open-menu-doctree", detail: {}, isCurrent: () => current});
+    assert.equal(result.length, 1);
+    assert.equal(appended.length, 0);
+});

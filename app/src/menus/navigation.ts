@@ -43,11 +43,11 @@ import {emitOpenMenu} from "../plugin/EventBus";
 import {isPhablet, saveExportFile} from "../protyle/util/compatibility";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
 import {addBlocksToDatabase} from "../protyle/render/av/addToDatabase";
-import {getDocTreeActionItems, getDocTreeTopPaths} from "./navigationSelection";
+import {getDocTreeActionItems, getDocTreeDeleteItems, getDocTreeTopPaths} from "./navigationSelection";
 import {getConfiguredChildrenSortMode} from "../util/fileTreeSort";
 import {getHostCapabilities} from "../util/hostCapabilities";
 /// #if MOBILE
-import {openEmojiPanel} from "../emoji";
+import {openEmojiPanel, unicode2Emoji} from "../emoji";
 import {openMobileFileById, openMobileFileByIdInNewTab} from "../mobile/editor";
 /// #endif
 
@@ -101,7 +101,19 @@ const getMenuSelection = (liElement: Element) => {
     return {controller, selected, items, elements, version: controller?.selectionVersion, target: liElement as HTMLElement};
 };
 
-const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App) => {
+interface IDocTreeMenuContext {
+    items: IDocTreeMenuItem[];
+    elements: () => NodeListOf<HTMLElement>;
+    target: HTMLElement;
+    position?: IPosition;
+    isCurrent?: () => boolean;
+    controller?: ReturnType<typeof getDocTreeController>;
+    selected?: IDocTreeItem[];
+    version?: number;
+    treeElement?: HTMLElement;
+}
+
+const initMultiMenu = (selection: IDocTreeMenuContext, app: App) => {
     const selectedItems = getDocTreeActionItems(selection.items);
     const docCount = selection.items.filter(item => item.kind === "document").length;
     const type = docCount === selection.items.length ? "docs" : docCount === 0 ? "notebooks" : "items";
@@ -119,9 +131,9 @@ const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App)
                 }
                 let files;
                 /// #if MOBILE
-                files = window.siyuan.mobile.docks.file;
+                files = window.siyuan.mobile?.docks?.file;
                 /// #else
-                files = (getDockByType("file").data["file"] as Files);
+                files = (getDockByType("file")?.data["file"] as Files);
                 /// #endif
                 for (const item of selectedItems) {
                     const notebookId = item.notebookId;
@@ -254,6 +266,7 @@ const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App)
         }
         emitOpenMenu({
             type: "open-menu-doctree",
+            isCurrent: selection.isCurrent,
             detail: () => ({elements: selection.elements(), type: "notebooks", items}),
             separatorPosition: "top",
         });
@@ -261,24 +274,28 @@ const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App)
     }
     if (type === "items") {
         window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_ITEMS);
+        const deleteItems = getDocTreeDeleteItems(selectedItems);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "delete",
+            ignore: window.siyuan.config.readonly || deleteItems.some(item => item.kind === "document" && item.id === item.notebookId),
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
             click: () => {
-                deleteDocTreeItems(selectedItems);
+                deleteDocTreeItems(deleteItems);
             }
         }).element);
         emitOpenMenu({
             type: "open-menu-doctree",
+            isCurrent: selection.isCurrent,
             detail: () => ({elements: selection.elements(), type: "items", items}),
             separatorPosition: "top",
         });
         return window.siyuan.menus.menu;
     }
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_DOCS);
-    const notebookId = selectedItems[0].notebookId;
+    const encryptedNotebookId = selectedItems.find(item => isEncryptedBox(item.notebookId))?.notebookId;
+    const hasBoxDoc = selectedItems.some(item => item.id === item.notebookId);
     const blockIDs = Array.from(new Set(selectedItems.map(item => item.id)));
 
     if (blockIDs.length > 0) {
@@ -289,6 +306,7 @@ const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App)
             icon: "iconCopy",
             submenu: copySubMenu(blockIDs).concat([{
                 id: "duplicate",
+                ignore: window.siyuan.config.readonly || hasBoxDoc,
                 iconHTML: "",
                 label: window.siyuan.languages.duplicateCopy,
                 accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
@@ -303,11 +321,14 @@ const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App)
         }).element);
     }
 
-    window.siyuan.menus.menu.append(movePathToMenu(getDocTreeTopPaths(selectedItems), selectedItems.map(item => item.notebookId)));
+    if (!window.siyuan.config.readonly && !hasBoxDoc) {
+        window.siyuan.menus.menu.append(movePathToMenu(getDocTreeTopPaths(selectedItems), selectedItems.map(item => item.notebookId)));
+    }
 
     if (blockIDs.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "addToDatabase",
+            ignore: window.siyuan.config.readonly,
             label: window.siyuan.languages.addToDatabase,
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
@@ -319,13 +340,14 @@ const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App)
                         addBlocksToDatabase(blockIDs, target);
                     }
                 } else {
-                    addBlocksToDatabase(blockIDs, selection.target);
+                    addBlocksToDatabase(blockIDs, selection.target, selection.position);
                 }
             }
         }).element);
     }
     window.siyuan.menus.menu.append(new MenuItem({
         id: "delete",
+        ignore: window.siyuan.config.readonly || hasBoxDoc,
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         accelerator: "⌦",
@@ -357,7 +379,7 @@ const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App)
         }
     }
     window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
-    if (!window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
+    if (!window.siyuan.config.readonly && !encryptedNotebookId) {
         const riffCardMenu = [{
             id: "quickMakeCard",
             iconHTML: "",
@@ -414,7 +436,7 @@ const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App)
                 label: "SiYuan .sy.zip",
                 icon: "iconSiYuan",
                 click: () => {
-                    confirmEncryptedExport(notebookId, () => {
+                    confirmEncryptedExport(encryptedNotebookId, () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportSYs", {
                             ids: blockIDs,
@@ -428,13 +450,14 @@ const initMultiMenu = (selection: ReturnType<typeof getMenuSelection>, app: App)
                 label: "Markdown .zip",
                 icon: "iconMarkdown",
                 click: () => {
-                    confirmEncryptedExport(notebookId, () => exportMarkdownZip({ids: blockIDs}));
+                    confirmEncryptedExport(encryptedNotebookId, () => exportMarkdownZip({ids: blockIDs}));
                 }
             }]
         }).element);
     }
     emitOpenMenu({
         type: "open-menu-doctree",
+        isCurrent: selection.isCurrent,
         detail: () => ({
             elements: selection.elements(),
             type,
@@ -455,12 +478,16 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     if (selection.items.length > 1) {
         return initMultiMenu(selection, app);
     }
+    return initNotebookMenu(app, {...selection, treeElement: liElement}, getDocTreeItem(liElement));
+};
+
+const initNotebookMenu = (app: App, selection: IDocTreeMenuContext, item: IDocTreeItem) => {
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOK);
-    const notebookId = getDocTreeItem(liElement).notebookId;
+    const notebookId = item.notebookId;
     const name = getNotebookName(notebookId);
-    const boxDocID = liElement.getAttribute("data-node-id");
+    const boxDocID = window.siyuan.config.fileTree.boxDocEnabled ? notebookId : undefined;
     if (boxDocID && window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 &&
-        getDocTreeItem(liElement).subFileCount > 0) {
+        item.subFileCount > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "openDocument",
             label: window.siyuan.languages.openDocument,
@@ -485,17 +512,21 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             label: window.siyuan.languages.changeIcon,
             icon: "iconEmoji",
             click: () => {
-                const iconElement = liElement.querySelector<HTMLElement>(".b3-list-item__icon");
-                if (!iconElement) {
-                    return;
+                const iconElement = selection.treeElement?.querySelector<HTMLElement>(".b3-list-item__icon");
+                const rect = (iconElement || selection.target).getBoundingClientRect();
+                let image = iconElement?.querySelector<HTMLElement>("img");
+                const icon = window.siyuan.notebooks.find(notebook => notebook.id === notebookId)?.icon;
+                if (!iconElement && icon) {
+                    const preview = document.createElement("span");
+                    preview.innerHTML = unicode2Emoji(icon);
+                    image = preview.querySelector<HTMLElement>("img");
                 }
-                const rect = iconElement.getBoundingClientRect();
-                openEmojiPanel(notebookId, "notebook", {
+                openEmojiPanel(notebookId, "notebook", selection.position || {
                     x: rect.left,
                     y: rect.bottom,
                     h: rect.height,
                     w: rect.width,
-                }, undefined, iconElement.querySelector<HTMLElement>("img"));
+                }, undefined, image);
             }
         }).element);
         /// #endif
@@ -517,7 +548,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 });
             }
         }).element);
-        if (window.siyuan.config.fileTree.boxDocEnabled && liElement.getAttribute("data-node-id") &&
+        if (window.siyuan.config.fileTree.boxDocEnabled && boxDocID &&
             !isEncryptedBox(notebookId)) {
             const pinned = pinnedDocIDs.has(notebookId);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -527,7 +558,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 click: () => { updatePinnedDocs([notebookId], pinned ? "unpin" : "pin"); },
             }).element);
         }
-        const subMenu = sortMenu("notebook", getDocTreeItem(liElement).notebook?.sortMode, (sort) => {
+        const subMenu = sortMenu("notebook", item.notebook?.sortMode, (sort) => {
             if (sort === null) {
                 return;
             }
@@ -539,9 +570,9 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 }
                 let files;
                 /// #if MOBILE
-                files = window.siyuan.mobile.docks.file;
+                files = window.siyuan.mobile?.docks?.file;
                 /// #else
-                files = (getDockByType("file").data["file"] as Files);
+                files = (getDockByType("file")?.data["file"] as Files);
                 /// #endif
                 const notebook = window.siyuan.notebooks.find((item) => item.id === notebookId);
                 if (notebook) {
@@ -729,6 +760,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     }
     emitOpenMenu({
         type: "open-menu-doctree",
+        isCurrent: selection.isCurrent,
         detail: () => ({
             elements: selection.elements(),
             type: "notebook",
@@ -737,6 +769,37 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
         separatorPosition: "top",
     });
     return window.siyuan.menus.menu;
+};
+
+export const initDocTreeMenu = (app: App, options: {
+    items: IDocTreeItem[],
+    elements: () => NodeListOf<HTMLElement>,
+    target: HTMLElement,
+    position?: IPosition,
+    isCurrent?: () => boolean,
+}) => {
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_MORE);
+    const selection: IDocTreeMenuContext = {
+        ...options,
+        items: options.items.map(item => ({...item, sortMode: item.notebook?.sortMode})),
+    };
+    if (options.items.length > 1) {
+        return initMultiMenu(selection, app);
+    }
+    const item = options.items[0];
+    if (item.kind === "notebook") {
+        return initNotebookMenu(app, selection, item);
+    }
+    return initDocumentMenu(app, {
+        ...item,
+        name: item.name,
+        customSort: item.effectiveSortMode === 6,
+        target: options.target,
+        elements: options.elements,
+        position: options.position,
+        skipRemove: true,
+        isCurrent: options.isCurrent,
+    });
 };
 
 export const initFileMenu = (app: App, notebookId: string, pathString: string, liElement: Element) => {
@@ -753,7 +816,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         id: selection.items[0].id,
         notebookId,
         path: pathString,
-        name: getDisplayName(getDocTreeItem(liElement).name, false, true),
+        name: getDocTreeItem(liElement).name,
         subFileCount: getDocTreeItem(liElement).subFileCount,
         childrenSortMode: getConfiguredChildrenSortMode(liElement),
         customSort: getDocTreeItem(liElement).effectiveSortMode === 6,
@@ -775,11 +838,15 @@ export const initDocumentMenu = (app: App, options: {
     elements: NodeListOf<HTMLElement> | (() => NodeListOf<HTMLElement>),
     treeElement?: Element,
     position?: IPosition,
+    isCurrent?: () => boolean,
     readonlyHistory?: boolean,
+    skipRemove?: boolean,
 }) => {
     const {id, notebookId, path: pathString, name, subFileCount} = options;
     const isBoxDoc = id === notebookId;
-    window.siyuan.menus.menu.remove();
+    if (!options.skipRemove) {
+        window.siyuan.menus.menu.remove();
+    }
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_MORE);
     /// #if MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
@@ -940,7 +1007,7 @@ export const initDocumentMenu = (app: App, options: {
 
                 let files;
                 /// #if MOBILE
-                files = window.siyuan.mobile.docks.file;
+                files = window.siyuan.mobile?.docks?.file;
                 /// #else
                 files = (getDockByType("file")?.data["file"] as Files);
                 /// #endif
@@ -1060,8 +1127,10 @@ export const initDocumentMenu = (app: App, options: {
     }
     genImportMenu(notebookId, isBoxDoc ? "/" : pathString);
     window.siyuan.menus.menu.append(exportMd(id));
+    window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_DOC);
     emitOpenMenu({
         type: "open-menu-doctree",
+        isCurrent: options.isCurrent,
         detail: () => ({
             elements: typeof options.elements === "function" ? options.elements() : options.elements,
             type: "doc",
@@ -1069,7 +1138,6 @@ export const initDocumentMenu = (app: App, options: {
         }),
         separatorPosition: "top",
     });
-    window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_DOC);
     return window.siyuan.menus.menu;
 };
 
@@ -1080,7 +1148,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
     const reloadDocTree = () => {
         let files;
         /// #if MOBILE
-        files = window.siyuan.mobile.docks.file;
+        files = window.siyuan.mobile?.docks?.file;
         /// #else
         files = (getDockByType("file")?.data["file"] as Files);
         /// #endif

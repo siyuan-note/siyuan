@@ -435,6 +435,7 @@ export class Menu {
 
     public closeSheet() {
         this.sheetClosing = true;
+        this.data = undefined;
         this.finishSheetTouch();
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
@@ -724,12 +725,12 @@ export class Menu {
         updateMenuItemGroupClasses(this.element.lastElementChild);
     }
 
-    public popup(options: IPosition) {
+    public popup(options: IPosition, isCurrent?: () => boolean) {
         this.resetMouseScroll();
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         if (isMobile()) {
-            this.fullscreen("bottom");
+            this.fullscreen("bottom", undefined, {isCurrent});
             return;
         }
         applyMenuConfig(this.element);
@@ -742,6 +743,9 @@ export class Menu {
             from: this.element.getAttribute("data-from"),
             mode: "popup",
         });
+        if (isCurrent && !isCurrent()) {
+            return;
+        }
         window.addEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, {passive: false});
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
@@ -875,7 +879,7 @@ export class Menu {
     }
 
     public fullscreen(position: "bottom" | "all" = "all", restoreKeyboard?: () => void,
-                      options: {preserveKeyboard?: boolean} = {}) {
+                      options: {preserveKeyboard?: boolean, isCurrent?: () => boolean} = {}) {
         this.sheetClosing = false;
         this.finishSheetTouch();
         this.cancelSheetOpen?.();
@@ -892,6 +896,9 @@ export class Menu {
             from: this.element.getAttribute("data-from"),
             mode: "fullscreen",
         });
+        if (options.isCurrent && !options.isCurrent()) {
+            return;
+        }
         if (!isMobile()) {
             this.element.classList.add("b3-menu--fullscreen");
             this.element.style.zIndex = (++window.siyuan.zIndex).toString();

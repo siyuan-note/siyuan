@@ -38,6 +38,7 @@ import {openEmojiPanel} from "../emoji";
 import {openAssetPicker} from "../asset/picker";
 import {adjustEditorFontSize, setEditorFontSize} from "../util/editorFontSize";
 import {insertEditorContent, IInsertContentOptions} from "./insertContent";
+import {openDocTreeMenu} from "./openDocTreeMenu";
 /// #if !MOBILE
 import {isDockPanelVisible, toggleDockPanel} from "../layout/dock/panel";
 /// #endif
@@ -446,6 +447,7 @@ const createAPI = () => ({
     saveLayout,
     globalCommand,
     expandDocTree,
+    openDocTreeMenu,
     openEmoji,
     openAssetPicker,
     toggleLeftDock,

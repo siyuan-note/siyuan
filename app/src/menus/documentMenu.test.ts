@@ -7,15 +7,25 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {getEntryCatalogChildren} from "../config/entryVisibility/catalog";
 import * as navigationSelection from "./navigationSelection";
 import type {DocTreeController} from "../layout/dock/docTree/DocTreeController";
+import type {IDocTreeItem} from "../layout/dock/docTree/types";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeController>, subscribed = true) => {
+const menuTarget = (id: string, notebookId = "notebook", kind: "document" | "notebook" = "document"): IDocTreeItem => ({
+    id, notebookId, kind, path: kind === "notebook" ? "/" : `/${id}.sy`, name: id,
+    subFileCount: 0, childrenSortMode: null, effectiveSortMode: 6, parentID: "", occurrenceKey: `${kind}:${id}`,
+    depth: 0, index: 0, setSize: 1,
+});
+
+const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeController>, subscribed = true, encrypted: string[] = []) => {
     const exports = {} as typeof import("./navigation");
     const items: IMenu[] = [];
     const requests: {url: string, data: unknown}[] = [];
+    const renames: Parameters<typeof import("./commonMenuItem").renameMenu>[0][] = [];
     const histories: Parameters<typeof import("../history/doc").openDocHistory>[0][] = [];
     const databases: unknown[][] = [];
+    const confirmations: unknown[][] = [];
+    const icons: unknown[][] = [];
     const deletions: string[][] = [];
     const treeDeletions: unknown[][] = [];
     const moves: unknown[] = [];
@@ -37,16 +47,23 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
                 "./commonMenuItem": {copySubMenu: () => [{id: "copyID"}], exportMd: () => ({id: "export"}),
                     movePathToMenu: (paths: string[], notebooks: string[]) => {
                         moves.push({paths, notebooks}); return {id: "move"};
-                    }, renameMenu: () => ({id: "rename"})},
-                "../util/pathName": {pathPosix: () => posix, isEncryptedBox: () => false,
+                    }, renameMenu: (options: typeof renames[number]) => { renames.push(options); return {id: "rename"}; }},
+                "../util/pathName": {pathPosix: () => posix, isEncryptedBox: (id: string) => encrypted.includes(id),
                     getNotebookName: (id: string) => id,
                     getDisplayName: (name: string) => name.replace(/\.sy$/, "")},
                 "../util/pinnedDocs": {pinnedDocIDs: new Set()},
                 "../util/fetch": {fetchPost: (url: string, data: unknown, callback?: (response: unknown) => void) => {
                     requests.push({url, data}); callback?.({code: 0, data: {ial: {}}});
                 }},
+                "../config/util/resourceConfig": {
+                    saveNotebookConf: (_id: string, _config: unknown, callback: (response: unknown) => void) => callback({code: 0}),
+                    saveNotebookConfSync: async () => ({code: 0}),
+                },
+                "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (...args: unknown[]) => confirmations.push(args)},
+                "../emoji": {openEmojiPanel: (...args: unknown[]) => icons.push(args)},
+                "../config/encryptedAssets": {canCleanEncryptedNotebookAssets: () => false},
                 "../util/contractFormData": {ContractFormData: class {}},
-                "../constants": {Constants: {MENU_DOC_TREE_MORE: "doctree", MENU_FROM_DOC_TREE_MORE_DOC: "doc"}},
+                "../constants": {Constants: {MENU_DOC_TREE_MORE: "doctree", MENU_FROM_DOC_TREE_MORE_DOC: "doc", HELP_PATH: {}}},
                 "../util/newFile": {newFileInTree: (...args: unknown[]) => created.push(args)},
                 "../protyle/util/hasClosest": {hasClosestByTag: (row: {tree: unknown}) => row.tree},
                 "../editor/deleteFile": {deleteFile: (...args: string[]) => deletions.push(args),
@@ -68,7 +85,7 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
             };
             return dependencies[name] || {};
         },
-        window: {siyuan: {menus: {menu}, languages: {}, mobile: {docks: {}},
+        window: {siyuan: {notebooks: [], menus: {menu}, languages: {}, mobile: {docks: {}},
             config: {readonly, fileTree: {parentDocTitleClickMode: 1}, flashcard: {deck: true},
                 keymap: {general: keymap, editor: {general: keymap}}}}},
     });
@@ -85,8 +102,106 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
         assert.ok(item, id);
         return item.click(null, null);
     };
-    return {exports, open, click, options, items, requests, histories, databases, deletions, treeDeletions, moves, events, created, menuAttributes};
+    return {exports, open, click, options, items, requests, renames, histories, databases, confirmations, icons, deletions, treeDeletions, moves, events, created, menuAttributes};
 };
+
+for (const mobile of [false, true]) {
+    test(`shared menus preserve all five event kinds without touching tree selection (${mobile ? "mobile" : "desktop"})`, () => {
+        const notebook = menuTarget("notebook", "notebook", "notebook");
+        const otherNotebook = menuTarget("other", "other", "notebook");
+        const doc = menuTarget("doc");
+        const cases = [[doc], [doc, menuTarget("peer")], [notebook], [notebook, otherNotebook], [notebook, doc]];
+        for (const [index, selected] of cases.entries()) {
+            const f = setup(mobile, false, {
+                getItemFromElement: () => { throw new Error("Plugin menus cannot read the official selection"); },
+            });
+            const elements = [] as unknown as NodeListOf<HTMLElement>;
+            f.exports.initDocTreeMenu({} as never, {items: selected, elements: () => elements, target: {} as HTMLElement});
+            assert.equal((f.events[0].detail as unknown as {type: string}).type, ["doc", "docs", "notebook", "notebooks", "items"][index]);
+            assert.equal(f.events[0].detail.elements, elements);
+            assert.equal(f.events[0].detail.items.length, selected.length);
+            assert.ok(!f.items.some(item => item.id === "multiSelect"));
+        }
+    });
+
+    test(`shared multi-document database menu retains the supplied anchor and position (${mobile ? "mobile" : "desktop"})`, async () => {
+        const f = setup(mobile);
+        f.exports.initDocTreeMenu({} as never, {items: [menuTarget("doc"), menuTarget("peer")],
+            elements: () => f.options.elements as NodeListOf<HTMLElement>, target: f.options.target, position: f.options.position});
+        await f.click("addToDatabase");
+        assert.equal(f.databases[0][1], f.options.target);
+        assert.equal(f.databases[0][2], f.options.position);
+    });
+}
+
+test("readonly shared document and mixed menus hide mutation actions", () => {
+    for (const selected of [[menuTarget("doc"), menuTarget("peer")], [menuTarget("doc"), menuTarget("notebook", "notebook", "notebook")]]) {
+        const f = setup(false, true);
+        f.exports.initDocTreeMenu({} as never, {items: selected, elements: () => [] as unknown as NodeListOf<HTMLElement>, target: f.options.target});
+        assert.ok(!f.items.some(item => ["move", "delete", "addToDatabase", "riffCard", "pinDoc"].includes(item.id)));
+        const copy = f.items.find(item => item.id === "copy");
+        assert.ok(!copy || (copy.submenu as IMenu[]).filter(item => item.id === "duplicate").every(item => item.ignore));
+    }
+});
+
+test("a notebook document disables whole-selection move, delete and duplicate", () => {
+    const f = setup();
+    f.exports.initDocTreeMenu({} as never, {items: [menuTarget("doc"), menuTarget("notebook")],
+        elements: () => [] as unknown as NodeListOf<HTMLElement>, target: f.options.target});
+    assert.ok(!f.items.some(item => ["move", "delete"].includes(item.id)));
+    const copy = f.items.find(item => item.id === "copy").submenu as IMenu[];
+    assert.equal(copy.find(item => item.id === "duplicate").ignore, true);
+});
+
+test("mixed deletion is covered by selected notebooks while events keep every target", () => {
+    const f = setup();
+    f.exports.initDocTreeMenu({} as never, {items: [menuTarget("notebook"), menuTarget("notebook", "notebook", "notebook"), menuTarget("doc")],
+        elements: () => [] as unknown as NodeListOf<HTMLElement>, target: f.options.target});
+    f.click("delete");
+    assert.equal(f.events[0].detail.items.length, 3);
+    assert.equal(f.treeDeletions[0].length, 1);
+    assert.equal((f.treeDeletions[0][0] as IDocTreeItem).kind, "notebook");
+    const uncovered = setup();
+    uncovered.exports.initDocTreeMenu({} as never, {items: [menuTarget("notebook"), menuTarget("other", "other", "notebook")],
+        elements: () => [] as unknown as NodeListOf<HTMLElement>, target: uncovered.options.target});
+    assert.ok(!uncovered.items.some(item => item.id === "delete"));
+});
+
+test("cross-notebook flashcard and export permissions inspect every document", () => {
+    for (const encryptedFirst of [false, true]) {
+        const f = setup(false, false, undefined, true, ["encrypted"]);
+        const selected = [menuTarget("doc"), menuTarget("secret", "encrypted")];
+        if (encryptedFirst) selected.reverse();
+        f.exports.initDocTreeMenu({} as never, {items: selected,
+            elements: () => [] as unknown as NodeListOf<HTMLElement>, target: f.options.target});
+        assert.ok(!f.items.some(item => ["riffCard", "pinDoc"].includes(item.id)));
+        const exports = f.items.find(item => item.id === "export").submenu as IMenu[];
+        exports.find(item => item.id === "exportMarkdown").click(null, null);
+        assert.equal(f.confirmations.length, 1);
+        assert.equal(f.requests.length, 0);
+    }
+});
+
+test("shared notebook sorting tolerates an absent desktop or mobile file dock", async () => {
+    for (const mobile of [false, true]) {
+        for (const count of [1, 2]) {
+            const f = setup(mobile);
+            f.exports.initDocTreeMenu({} as never, {items: Array.from({length: count}, (_, index) => menuTarget(`box${index}`, `box${index}`, "notebook")),
+                elements: () => [] as unknown as NodeListOf<HTMLElement>, target: f.options.target});
+            const sort = f.items.find(item => item.id === "sort").submenu as IMenu[];
+            await sort.find(item => item.id === "fileNameASC").click(null, null);
+        }
+    }
+});
+
+test("mobile notebook icon menu uses the API position and internal anchor", () => {
+    const f = setup(true);
+    const target = {getBoundingClientRect: () => ({left: 1, bottom: 2, width: 3, height: 4})} as HTMLElement;
+    f.exports.initDocTreeMenu({} as never, {items: [menuTarget("notebook", "notebook", "notebook")],
+        elements: () => [] as unknown as NodeListOf<HTMLElement>, target, position: f.options.position});
+    f.click("changeIcon");
+    assert.equal(f.icons[0][2], f.options.position);
+});
 
 for (const mobile of [false, true]) {
     test(`complete document menu uses explicit document targets without a tree row (${mobile ? "mobile" : "desktop"})`, () => {
@@ -162,7 +277,7 @@ test("notebook documents do not expose regular document deletion, moving, renami
 });
 
 test("document tree adapter preserves its real selection in plugin events", () => {
-    const item: Partial<import("../layout/dock/docTree/types").IDocTreeItem> = {id: "doc", notebookId: "notebook", path: "/doc.sy", name: "Document.sy", kind: "document", subFileCount: 2, childrenSortMode: null, effectiveSortMode: 0, occurrenceKey: "doc"};
+    const item: Partial<import("../layout/dock/docTree/types").IDocTreeItem> = {id: "doc", notebookId: "notebook", path: "/doc.sy", name: "Document", kind: "document", subFileCount: 2, childrenSortMode: null, effectiveSortMode: 0, occurrenceKey: "doc"};
     const row = {} as HTMLElement;
     const rows = [row] as unknown as NodeListOf<HTMLElement>;
     const controller = {getItemFromElement: () => item, getSelectedItems: () => [item], getSelectionElements: () => rows} as unknown as Partial<DocTreeController>;
@@ -170,6 +285,29 @@ test("document tree adapter preserves its real selection in plugin events", () =
     exports.initFileMenu({} as Parameters<typeof exports.initFileMenu>[0], "notebook", "/doc.sy", row as unknown as Element);
     assert.equal(events[0].detail.elements, rows);
     assert.equal(events[0].detail.items[0].id, options.id);
+});
+
+test("plugin and official document menus preserve raw titles in rename and history", () => {
+    for (const name of ["report.sy", "folder/report.sy", "folder/report", "/report.sy"]) {
+        for (const mobile of [false, true]) {
+            for (const plugin of [false, true]) {
+                const item = {...menuTarget("doc"), name};
+                const row = {} as HTMLElement;
+                const rows = [row] as unknown as NodeListOf<HTMLElement>;
+                const controller = {getItemFromElement: () => item, getSelectedItems: () => [item],
+                    getSelectionElements: () => rows} as unknown as Partial<DocTreeController>;
+                const f = setup(mobile, false, controller);
+                if (plugin) {
+                    f.exports.initDocTreeMenu({} as never, {items: [item], elements: () => rows, target: row});
+                } else {
+                    f.exports.initFileMenu({} as never, item.notebookId, item.path, row);
+                }
+                assert.equal(f.renames[0].name, name);
+                f.click("fileHistory");
+                assert.equal(f.histories[0].pathString, name);
+            }
+        }
+    }
 });
 
 test("large virtual selections build native menus from complete metadata without DOM snapshots", () => {

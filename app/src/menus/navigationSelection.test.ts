@@ -5,6 +5,7 @@ import test from "node:test";
 import {
     getDocTreeDeleteTargets,
     getDocTreeActionItems,
+    getDocTreeDeleteItems,
     getDocTreeTopPaths,
     getDocTreeMenuItems,
     getDocTreeMenuType,
@@ -88,6 +89,22 @@ test("document actions deduplicate occurrences while retaining same IDs in diffe
     const duplicate = {...first, occurrenceKey: "two"};
     const other = {...first, notebookId: "second"};
     assert.deepEqual(getDocTreeActionItems([first, duplicate, other]), [duplicate, other]);
+});
+
+test("notebook and notebook document identities remain distinct regardless of input order", () => {
+    const notebook = {id: "box", notebookId: "box", kind: "notebook"};
+    const document = {...notebook, kind: "document"};
+    for (const items of [[notebook, document], [document, notebook]]) {
+        assert.deepEqual(getDocTreeActionItems(items), items);
+        assert.deepEqual(getDocTreeDeleteItems(items), [notebook]);
+    }
+});
+
+test("notebook deletion covers its selected documents without dropping another notebook's documents", () => {
+    const notebook = {id: "box", notebookId: "box", kind: "notebook"};
+    const covered = {id: "doc", notebookId: "box", kind: "document"};
+    const other = {...covered, notebookId: "other"};
+    assert.deepEqual(getDocTreeDeleteItems([covered, other, notebook, notebook]), [other, notebook]);
 });
 
 test("moving selected documents excludes nested descendants while preserving the remaining selection order", () => {

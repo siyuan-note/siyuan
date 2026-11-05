@@ -84,11 +84,11 @@ const runCases = async (sources, appDirectory) => {
         "../highlightRender": {highlightRender: () => {}},
         "../mathRender": {mathRender: () => {}},
         "./richTextEditorPosition": {positionAVRichTextEditor: () => {}},
+        "./richTextEditorLute": {createAVRichTextEditorLute: () => ({}), configureAVRichTextEditorLute() {}},
         "./virtualScroll": {getAVData: element => dataByElement.get(element)},
         "../../util/outlineBlock": {updateOutlineCurrentBlock: () => {}},
         "./richText": {
             getAVTextSource: value => ({kind: "plain", content: value.text.content}),
-            getAVRichTextLute: () => ({}),
             serializeAVRichTextBlockDOM: content => ({markdown: content, plainText: content}),
             createAVRichTextValue: (content, _plainText, value) => ({...value, text: {...value.text, content}}),
         },

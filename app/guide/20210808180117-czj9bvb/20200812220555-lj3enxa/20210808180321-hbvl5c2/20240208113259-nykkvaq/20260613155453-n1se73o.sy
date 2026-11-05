@@ -1768,7 +1768,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "编辑方式：在单元格中输入文本，使用 "
+									"Data": "编辑方式：新输入遵循全局 Markdown 行内语法设置，关闭语法不改变已有富文本格式。在单元格中输入文本，使用 "
 								},
 								{
 									"Type": "NodeTextMark",

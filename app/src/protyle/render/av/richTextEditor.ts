@@ -17,10 +17,9 @@ import {getAVHostBlockID, getAVHostIdentity} from "./host";
 import {AV_CELL_EDITOR_CLOSE_EVENT} from "./cellEditor";
 import {updateOutlineCurrentBlock} from "../../util/outlineBlock";
 import {focusBlock} from "../../util/selection";
+import {configureAVRichTextEditorLute, createAVRichTextEditorLute} from "./richTextEditorLute";
 import {
-    configureAVRichTextLute,
     createAVRichTextValue,
-    getAVRichTextLute,
     getAVRichTextBlockDOM,
     getAVRichTextUnsupportedPasteBlocks,
     getAVTextSource,
@@ -155,13 +154,13 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         runtimeCapabilities: {
             upload: false,
             websocket: false,
-            lute: getAVRichTextLute(),
+            lute: createAVRichTextEditorLute(),
             lockedOptions: {toolbar, hint},
             pluginExtensions: false,
             customBlockRender: false,
             sanitizeBlockDOM: sanitizeAVRichTextBlockDOM,
             getUnsupportedPasteBlocks: getAVRichTextUnsupportedPasteBlocks,
-            restoreLuteMarkdownSyntax: configureAVRichTextLute,
+            restoreLuteMarkdownSyntax: configureAVRichTextEditorLute,
         },
         afterSetContent: (protyle, element) => {
             mathRender(element);

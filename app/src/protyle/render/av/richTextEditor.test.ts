@@ -96,6 +96,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         "../../lite/fragmentEditor": {mountProtyleLiteFragment: () => fragment},
         "../../toolbar/defaults": {getDefaultToolbar: (): unknown[] => []},
         "./richTextEditorPosition": {positionAVRichTextEditor: () => {}},
+        "./richTextEditorLute": {createAVRichTextEditorLute: () => ({}), configureAVRichTextEditorLute: () => {}},
         "./editorSession": {beginAVEditorSession: () => () => lifecycle.push("end-session")},
         "../../util/outlineBlock": {updateOutlineCurrentBlock: () => {}},
         "../../util/selection": {focusBlock: (element: unknown) => {
@@ -104,7 +105,6 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         }},
         "./richText": {
             getAVTextSource: () => ({kind: "plain", content: "initial"}),
-            getAVRichTextLute: () => ({}),
             serializeAVRichTextBlockDOM: (markdown: string) => ({markdown, plainText: markdown}),
             createAVRichTextValue: (markdown: string) => ({type: "text", text: {content: markdown}}),
         },

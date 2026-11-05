@@ -294,7 +294,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         button.id = `${state.instance}-tab-${index}`;
                         const title = getTabTitle(item);
                         const label = title?.textContent || controller.options.label || "Tab";
-                        if (title?.textContent) {
+                        if (title && (title.textContent || title.querySelector("img.emoji"))) {
                             const clone = title.cloneNode(true) as HTMLElement;
                             clone.className = "tabs-tab-label";
                             clone.removeAttribute("contenteditable");

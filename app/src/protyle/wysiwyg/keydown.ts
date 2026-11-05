@@ -462,6 +462,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (calloutTitleElement && !event.isComposing && !blockSelectionModeElement) {
+            const getTitleLength = () => {
+                const titleRange = range.cloneRange();
+                titleRange.selectNodeContents(calloutTitleElement);
+                return getSelectionOffset(calloutTitleElement, nodeElement, titleRange).end;
+            };
             if (matchHotKey("⌘A", event)) {
                 range.selectNodeContents(calloutTitleElement);
                 focusByRange(range);
@@ -480,7 +485,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (event.key === "Backspace" || event.key === "Delete") {
                 const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
                 if (range.collapsed && ((event.key === "Backspace" && offset.start === 0) ||
-                    (event.key === "Delete" && offset.end === calloutTitleElement.textContent.length))) {
+                    (event.key === "Delete" && offset.end === getTitleLength()))) {
                     event.preventDefault();
                 }
                 event.stopPropagation();
@@ -494,7 +499,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     !event.altKey && !event.shiftKey && isNotCtrl(event)) {
                     const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
                     if (event.key === "ArrowLeft" && offset.start === 0 ||
-                        event.key === "ArrowRight" && offset.end === calloutTitleElement.textContent.length) {
+                        event.key === "ArrowRight" && offset.end === getTitleLength()) {
                         event.preventDefault();
                     }
                 }

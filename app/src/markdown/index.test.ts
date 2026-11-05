@@ -17,12 +17,13 @@ const setup = () => {
     const editors: Array<{destroyed: boolean; destroy(): void}> = [];
     const responses: boolean[] = [];
     const preferenceWrites: unknown[] = [];
+    const openedLinks: string[] = [];
     let failEditor = false;
     let resolveResource: (value: string) => void;
     const resource = new Promise<string>(resolve => {resolveResource = resolve;});
     const element = {className: "", inert: true, textContent: "", replaceChildren() {}, setAttribute() {}};
     const bridge = {
-        host: {}, resolveResource: () => resource, openLink: async () => {},
+        host: {}, resolveResource: () => resource, openLink: async (url: string) => {openedLinks.push(url);},
         preferences: async (patch: Partial<import("./bridge").MarkdownPreferences>) => {preferenceWrites.push({...patch});},
         tree: {commitOpen: async () => snapshot("b")}, bootstrap: async () => snapshot("b"),
         respond: async (_id: string, accepted: boolean) => {responses.push(accepted);},
@@ -65,7 +66,7 @@ const setup = () => {
             state: () => ({editor, session, pendingSwitch, frozen, documentGeneration, history, resourceUnavailable, preferences, activeMode})};
     `, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const lifecycle = new Function("deps", `with (deps) { ${body} }`)(deps);
-    return {lifecycle, callbacks, editors, renders, responses, bridge, resolveResource, preferenceWrites,
+    return {lifecycle, callbacks, editors, renders, responses, bridge, resolveResource, preferenceWrites, openedLinks,
         failEditor(value: boolean) {failEditor = value;}};
 };
 const snapshot = (sessionId: string) => ({sessionId, content: sessionId + "\n", lang: "en", preferences: {mode: "ir", theme: "light"}});
@@ -130,6 +131,19 @@ test("automatic source fallback stays local while explicit mode choices become t
     callbacks[1].onModeChange("sv", "user");
     assert.equal(lifecycle.state().preferences.mode, "wysiwyg", "a stale editor cannot replace the current preference");
     assert.equal(preferenceWrites.length, 1);
+});
+
+test("only the active Markdown editor forwards clicked links to the system host", async () => {
+    const {lifecycle, callbacks, openedLinks} = setup();
+    await lifecycle.initializeDocument(snapshot("first"));
+    callbacks[0].onLink("https://example.com/first");
+    await lifecycle.initializeDocument(snapshot("second"));
+    callbacks[0].onLink("https://example.com/stale");
+    callbacks[1].onLink("https://example.com/second");
+    assert.deepEqual(openedLinks, ["https://example.com/first", "https://example.com/second"]);
+    lifecycle.dispose();
+    callbacks[1].onLink("https://example.com/closed");
+    assert.equal(openedLinks.length, 2);
 });
 
 test("document replacement invalidates old editor callbacks, resources and session renders", async () => {

@@ -1,6 +1,7 @@
 import type {MarkdownEditorSnapshot} from "./contracts";
 import {MARKDOWN_DOCUMENT_BYTES, MARKDOWN_RENDER_BYTES, MARKDOWN_RECOVERY_BYTES, markdownByteLength} from "./limits";
-import {createMarkdownResourcePolicy, isExternalMarkdownLink, isRelativeMarkdownResource, MarkdownResourceResolver} from "./resourcePolicy";
+import {markdownLinkDestination} from "./link";
+import {createMarkdownResourcePolicy, isRelativeMarkdownResource, MarkdownResourceResolver} from "./resourcePolicy";
 
 export type MarkdownEditorMode = "ir" | "wysiwyg" | "sv";
 
@@ -310,8 +311,8 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     };
 
     const followLink = (link: Element) => {
-        const destination = policy.originalAttribute(link, "href");
-        if (destination && isExternalMarkdownLink(destination)) options.onLink?.(destination);
+        const destination = markdownLinkDestination(link, policy.originalAttribute);
+        if (destination) options.onLink?.(destination);
     };
 
     // 输入监听只登记意图，合并序列化开销；关闭与另存为可同步 flush 最新已提交内容。

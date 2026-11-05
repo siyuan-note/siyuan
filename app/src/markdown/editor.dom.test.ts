@@ -189,6 +189,18 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
                 getSelection().removeAllRanges();
                 getSelection().addRange(range);
             };
+            editor.setValue("[Example](https://example.com/path?q=1#part)\n\nOutside\n");
+            await new Promise(resolve => setTimeout(resolve, 350));
+            placeCaret(richSurface.lastElementChild);
+            const renderedLink = richSurface.querySelector<HTMLElement>(mode === "ir" ? '[data-type="a"]' : "a");
+            check.ok(renderedLink, `rendered link in ${mode}`);
+            const linksBefore = links.length;
+            renderedLink.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+            check.equal(links.length, linksBefore + 1, `one external open request in ${mode}`);
+            check.equal(links.at(-1), "https://example.com/path?q=1#part");
+            check.equal(editor.flush().edited, false, `opening a link does not edit ${mode}`);
+            editor.setValue(keyboardSource);
+            await new Promise(resolve => setTimeout(resolve, 350));
             let nativeInputs = 0;
             const countInput = () => nativeInputs++;
             richSurface.addEventListener("input", countInput);
@@ -375,7 +387,7 @@ test("Vditor 4.0.2-alpha.0 adapter preserves content and isolates programmatic, 
     const compile = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const bundle = compile("identity.ts") + "\n" + compile("limits.ts") + "\n" + compile("resourcePolicy.ts") + "\n" + compile("editor.ts") +
+    const bundle = compile("identity.ts") + "\n" + compile("limits.ts") + "\n" + compile("resourcePolicy.ts") + "\n" + compile("link.ts") + "\n" + compile("editor.ts") +
         "\nwindow.MarkdownEditorTest = {createMarkdownEditor, createMarkdownResourcePolicy};";
     const html = path.join(temporary, "index.html");
     writeFileSync(html, '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" ' +

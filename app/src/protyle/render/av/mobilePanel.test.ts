@@ -51,7 +51,7 @@ const createPanel = () => {
     runInNewContext(compiled, {
         exports,
         require: () => ({waitForSheetViewport: () => () => {}, getVisibleSheetViewport,
-            escapeAttr: (value: string) => value || "", getSheetActionsHTML: () => "actions",
+            escapeAttr: (value: string) => value || "",
             setSheetExpanded: (_menu: unknown, expanded: boolean) => {
                 if (expanded) {
                     classes.add("b3-menu--expanded");
@@ -133,14 +133,16 @@ test("canceling an upward gesture restores the half-height database panel", () =
     assert.ok(Math.abs(parseFloat(panel.menu.style.height) - 448) < .01);
 });
 
-test("the expand button toggles full height without closing the panel", () => {
+test("database panel redraws keep the back control and never inject expansion controls", () => {
     const panel = createPanel();
-    panel.click("sheet-expand");
-    assert.equal(panel.classes.has("b3-menu--expanded"), true);
+    panel.drag(false, -120, true);
+    panel.end(-120);
     panel.rerender();
     assert.equal(panel.classes.has("b3-menu--expanded"), true);
-    panel.click("sheet-expand");
-    assert.equal(panel.classes.has("b3-menu--expanded"), false);
+    for (const html of panel.menu.insertedHTML) {
+        assert.match(html, /data-type="sheet-back"/);
+        assert.doesNotMatch(html, /sheet-expand|b3-menu__actions/);
+    }
     assert.equal(panel.closes(), 0);
 });
 

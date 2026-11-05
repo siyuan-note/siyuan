@@ -280,7 +280,6 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState) => {
     const preview = state.pending ? window.siyuan.languages.syncSourcePreview.replace(/\$\{(\w+)\}/g,
         (_match: string, key: string) => escapeHtml(String(values[key]))) : "";
     const manualDialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: window.siyuan.languages.chooseSyncDirection,
         content: `<div class="b3-dialog__content">
     ${preview ? `<div class="b3-label">${preview}</div>` : ""}
@@ -347,7 +346,6 @@ const setSync = (key?: string, dialog?: MobileDialog) => {
             dialog.element.querySelector(".b3-dialog__body").innerHTML = listHTML;
         } else {
             dialog = new MobileDialog({
-                mobileSheet: {expandable: true},
                 title: "🗂️ " + window.siyuan.languages.cloudSyncDir,
                 content: listHTML,
                 width: isMobile() ? "92vw" : "520px",
@@ -388,7 +386,6 @@ const setSync = (key?: string, dialog?: MobileDialog) => {
 
 export const setKey = (isSync: boolean, cb?: () => void) => {
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: "🔑 " + window.siyuan.languages.syncConfGuide1,
         content: `<div class="b3-dialog__content ft__center">
     <img style="width: 260px" src="/stage/images/sync-guide.svg"/>

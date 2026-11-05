@@ -16,7 +16,7 @@ export const openNotebookArchiveDialog = async (refresh: () => void) => {
     }
     const lang = window.siyuan.languages;
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true, beforeClose: () => !busy},
+        mobileSheet: {beforeClose: () => !busy},
         title: lang.archiveEncryptedNotebooks,
         width: isMobile() ? "92vw" : "560px",
         content: `<div class="b3-dialog__content">
@@ -106,7 +106,7 @@ export const openNotebookArchiveDialog = async (refresh: () => void) => {
 export const openNotebookArchiveImportDialog = (refresh: () => void) => {
     const lang = window.siyuan.languages;
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true, beforeClose: (): boolean => !button.disabled},
+        mobileSheet: {beforeClose: (): boolean => !button.disabled},
         title: lang.restoreEncryptedNotebooks,
         width: isMobile() ? "92vw" : "560px",
         content: `<div class="b3-dialog__content">

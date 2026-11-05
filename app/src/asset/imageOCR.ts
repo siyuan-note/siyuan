@@ -37,7 +37,6 @@ export const openImageOCR = (path: string) => {
     let originalText = "";
     const controller = new AbortController();
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: window.siyuan.languages.ocrResult,
         transparent: true,
         disableClose: true,

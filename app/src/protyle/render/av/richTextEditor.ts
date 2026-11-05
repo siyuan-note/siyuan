@@ -113,7 +113,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         title: window.siyuan.languages.text,
         content,
         containerClassName: "mobile-av-richtext-sheet",
-        mobileSheet: {expandable: true, beforeClose: () => saveMobile()},
+        mobileSheet: {beforeClose: () => saveMobile()},
         destroyCallback: () => cleanup(),
     }) : undefined;
     const maskElement = dialog?.element || document.createElement("div");

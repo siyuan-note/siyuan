@@ -49,7 +49,6 @@ export const makeCard = (app: App, ids: string[]) => {
             html += genCardItem(item);
         });
         const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
             positionId: Constants.DIALOG_MAKECARD,
             width: isMobile() ? "92vw" : "50vw",
             height: "70vh",

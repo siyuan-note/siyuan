@@ -11,7 +11,6 @@ import {showMessage} from "./message";
 export type MobileDialogCloseReason = "confirm" | "cancel" | "scrim" | "drag" | "back" | "escape" | "programmatic" | "invalidate";
 export type MobileSheetOptions = {
     mode?: MobileSheetMode,
-    expandable?: boolean,
     beforeClose?: (reason: MobileDialogCloseReason) => boolean | Promise<boolean>
 };
 const passive = (reason: MobileDialogCloseReason) => ["scrim", "drag", "back", "escape"].includes(reason);
@@ -81,7 +80,7 @@ const createMobileDialogClass = () => {
                 this.ready = true;
                 this.focusTask?.();
                 this.focusTask = undefined;
-            }, {mode: this.sheetOptions.mode, expandable: this.sheetOptions.expandable,
+            }, {mode: this.sheetOptions.mode,
                 canStart: () => !this.pending && !this.checking && !this.disposed && this.topmost()});
             const click = (event: MouseEvent) => {
                 const target = event.target as HTMLElement;

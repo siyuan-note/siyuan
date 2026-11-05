@@ -46,7 +46,6 @@ export const openOCRImportModelsDialog = (options: {
     let busy = false;
     let closed = false;
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: languages.ocrImportModelsTitle,
         width: isMobile() ? "92vw" : "520px",
         destroyCallback: () => {

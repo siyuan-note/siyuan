@@ -268,7 +268,6 @@ const showDeactivateConfirm = (callback: () => void) => {
 
 const openAccountDeactivateAuthDialog = () => {
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: "⚠️ " + window.siyuan.languages.deactivateUser,
         width: isMobile() ? "92vw" : "520px",
         content: `<div class="config-account--auth">${genAccountAuthHTML("deactivate")}</div>`,

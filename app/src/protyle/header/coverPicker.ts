@@ -11,7 +11,6 @@ export const openCoverPicker = (options: {
     destroyCallback?: () => void;
 }) => {
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: window.siyuan.languages.builtIn,
         content: `<div class="b3-cards" style="padding:16px;justify-content:center;align-items:center;min-height:200px">
     <span class="b3-loading" aria-hidden="true"></span>

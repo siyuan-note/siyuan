@@ -22,7 +22,6 @@ export const openEncryptedAssetsCleanup = (notebook: string) => {
     let disposed = false;
     let items: AssetUnusedItem[] = [];
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: `${escapeHtml(getNotebookName(notebook))} - ${lang.cleanUnusedAssets}`,
         width: isMobile() ? "92vw" : "720px",
         height: "72vh",

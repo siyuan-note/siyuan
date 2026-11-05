@@ -50,7 +50,6 @@ export const openMemoryManager = () => {
         });
     };
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: `<span class="fn__flex"><span class="fn__flex-1">${escapeHtml(lang.aiMemorySummary)}</span><button type="button" class="block__icon block__icon--show" data-memory-more aria-label="${escapeHtml(lang.more)}" aria-haspopup="menu"><svg><use xlink:href="#iconMore"></use></svg></button></span>`,
         width: isMobile() ? "94vw" : "860px",
         content: `<div class="b3-dialog__content memory-manager">

@@ -107,18 +107,10 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     await settle();
     const title = common.firstElementChild;
     const titleLabel = title.querySelector(".b3-menu__label").getBoundingClientRect();
-    const titleActions = title.querySelector(".b3-menu__actions").getBoundingClientRect();
-    check.ok(titleLabel.right <= titleActions.left);
-    check.ok(titleActions.right <= innerWidth);
+    check.ok(titleLabel.right <= innerWidth);
+    check.equal(title.querySelector(".b3-menu__actions"), null);
+    check.equal(common.querySelector('[data-type="sheet-expand"]'), null);
     common.dispatchEvent(new CustomEvent("click", {detail: "back"}));
-    await settle();
-    const expand = common.querySelector<HTMLButtonElement>('[data-type="sheet-expand"]');
-    expand.click();
-    await settle();
-    check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight) < 1);
-    check.equal(expand.getAttribute("aria-expanded"), "true");
-    check.ok(expand.getBoundingClientRect().width > 20);
-    expand.click();
     await settle();
     check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight * .56) < 1);
 
@@ -139,9 +131,19 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     const back = menu.querySelector<HTMLButtonElement>('[data-type="sheet-back"]');
     check.equal(back.classList.contains("fn__none"), false);
     check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight * .56) < 1);
-    menu.querySelector<HTMLButtonElement>('[data-type="sheet-expand"]').click();
+    check.equal(menu.querySelector('[data-type="sheet-expand"]'), null);
+    const touch = (type: string, y: number) => {
+        const event = new Event(type, {bubbles: true, cancelable: true});
+        Object.assign(event, {touches: [{clientX: 80, clientY: y}], changedTouches: [{clientX: 80, clientY: y}]});
+        menu.firstElementChild.dispatchEvent(event);
+    };
+    touch("touchstart", menu.getBoundingClientRect().top + 8);
+    touch("touchmove", 0);
+    touch("touchend", 0);
     await settle();
     check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight) < 1);
+    // 等待拖动后的点击抑制结束，再测试业务返回入口。
+    await new Promise(resolve => setTimeout(resolve, 320));
     const input = menu.querySelector("input");
     input.focus();
     input.value = "Changed";
@@ -166,11 +168,6 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     viewport.dispatchEvent(new Event("resize"));
     await settle();
     check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight) < 1);
-    const touch = (type: string, y: number) => {
-        const event = new Event(type, {bubbles: true, cancelable: true});
-        Object.assign(event, {touches: [{clientX: 80, clientY: y}], changedTouches: [{clientX: 80, clientY: y}]});
-        menu.firstElementChild.dispatchEvent(event);
-    };
     touch("touchstart", 100);
     touch("touchmove", 280);
     touch("touchend", 280);

@@ -566,7 +566,6 @@ const setRelation = (pdf: any) => {
         configItem.ids = [];
     }
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: window.siyuan.languages.relation,
         content: `<div class="b3-dialog__content">
     <div class="fn__flex">

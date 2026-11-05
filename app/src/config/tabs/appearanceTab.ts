@@ -1212,7 +1212,7 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
             return true;
         };
         const dialog = new MobileDialog({
-            mobileSheet: {expandable: true, beforeClose: save},
+            mobileSheet: {beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
             title: "🔇 " + window.siyuan.languages.appearance18,
@@ -1274,7 +1274,7 @@ const mountAppearanceSetNotifications = (root: HTMLElement) => {
             return true;
         };
         const dialog = new MobileDialog({
-            mobileSheet: {expandable: true, beforeClose: save},
+            mobileSheet: {beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
             title: "🔔 " + window.siyuan.languages.notifications,

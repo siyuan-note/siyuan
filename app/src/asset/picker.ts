@@ -25,7 +25,6 @@ export const openAssetPicker = (options: AssetPickerOptions = {}): Promise<Asset
         let requestID = 0;
         let controller: AbortController;
         const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
             title: window.siyuan.languages.assets,
             content: `<div class="asset-picker${isMobile() ? " asset-picker--mobile" : ""}">
     <div class="asset-picker__search"><input class="b3-text-field fn__block" type="search" spellcheck="false"></div>

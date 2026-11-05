@@ -304,7 +304,7 @@ const checkMobileSafeArea = async (safeTop, width, height) => {
         document.documentElement.dataset.frontend = frontend;
         document.body.className = "body--" + platform;
         const dialog = window.qaAVMobileDialog({content: '<div class="av__richtext-editor av__richtext-editor--sheet"><div class="av__richtext-host">Text</div></div><div class="b3-dialog__action"><button class="b3-button b3-button--text">Confirm</button></div>',
-            containerClassName: "mobile-av-richtext-sheet", mobileSheet: {mode: "expanded", expandable: true}});
+            containerClassName: "mobile-av-richtext-sheet", mobileSheet: {mode: "expanded"}});
         await new Promise(resolve => setTimeout(resolve, 180));
         const panel = dialog.element.querySelector(".mobile-sheet-panel");
         const confirm = dialog.element.querySelector(".b3-button");

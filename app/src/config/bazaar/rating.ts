@@ -581,7 +581,7 @@ export const openRatingDialog = (controller: TBazaarController, bazaarType: TBaz
 </button>`;
     }).join("");
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true, beforeClose: () => !submitting},
+        mobileSheet: {beforeClose: () => !submitting},
         title: window.siyuan.languages.bazaarRatePackage,
         content: `<div class="b3-dialog__content">
 <div class="config-bazaar__rating-picker" role="radiogroup" aria-label="${escapeAttr(window.siyuan.languages.bazaarYourRating)}">${buttons}</div>

@@ -7,7 +7,7 @@ export const openAgentInstructions = () => {
         const revision = response.data.revision;
         let saving = false;
         const dialog = mobileInputDialog({
-            mobileSheet: {expandable: true, beforeClose: () => !saving},
+            mobileSheet: {beforeClose: () => !saving},
             title: window.siyuan.languages.agentInstructions,
             value: response.data.content,
             multiline: true,

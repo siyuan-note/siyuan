@@ -232,7 +232,7 @@ export const openMobileReference = async (protyle: IProtyle, blockId: string) =>
             dialog.element.classList.toggle("mobile-reference-dialog--compact", viewport.bottom - viewport.top < 400);
             restoreScroll();
         };
-        const disposeSheet = bindBottomSheetDialog(dialog, () => dialog.close(), resize, undefined, {mode: "standard", expandable: true,
+        const disposeSheet = bindBottomSheetDialog(dialog, () => dialog.close(), resize, undefined, {mode: "standard",
             canStart: () => !dialog.isClosePending()});
     } catch (error) {
         showMessage(escapeHtml(String(error)));

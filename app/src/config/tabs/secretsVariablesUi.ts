@@ -298,7 +298,6 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
         : "";
 
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: titleKey,
         width: mobile ? "92vw" : "520px",
         content: `<div class="b3-dialog__content">

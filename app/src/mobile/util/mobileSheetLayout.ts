@@ -69,7 +69,7 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
     };
     const chromeObserver = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(resize);
     const observeChrome = () => sheet.querySelectorAll<HTMLElement>(":scope > .b3-dialog__header, :scope > .b3-menu__title, " +
-        ":scope > .mobile-sheet-actions, :scope > .b3-dialog__body > .b3-dialog__action")
+        ":scope > .b3-dialog__body > .b3-dialog__action")
         .forEach(element => chromeObserver?.observe(element));
     if (chromeObserver) observeChrome();
     const contentObserver = new MutationObserver(() => {

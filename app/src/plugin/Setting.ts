@@ -70,7 +70,6 @@ export class Setting {
         }
         const windowRoot = isSettingsWindow() && window.siyuan.dialogs.length === 0;
         const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
             title: name,
             content: `<div class="b3-dialog__content">
 </div>

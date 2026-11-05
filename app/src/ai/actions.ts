@@ -20,7 +20,6 @@ interface IAIEditorAction {
 
 const editDialog = (item: IAIEditorAction) => {
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: window.siyuan.languages.update,
         content: `<div class="b3-dialog__content">
     <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.memo}">
@@ -71,7 +70,6 @@ const editDialog = (item: IAIEditorAction) => {
 
 const customDialog = (protyle: IProtyle, elements: HTMLElement[], range?: Range) => {
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: window.siyuan.languages.aiCustomAction,
         content: `<div class="b3-dialog__content">
     <input class="b3-text-field fn__block" value="" placeholder="${window.siyuan.languages.memo}">

@@ -363,7 +363,6 @@ export const newEncryptedNotebook = () => {
             return;
         }
         const dialog = new Dialog({
-            mobileSheet: {expandable: true},
             title: window.siyuan.languages.newEncryptedNotebook,
             content: `<div class="b3-dialog__content">
     <input placeholder="${window.siyuan.languages.notebookName}" class="b3-text-field fn__block">

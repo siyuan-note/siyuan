@@ -118,7 +118,7 @@ const openSnippetDialog = (oldSnippets: ISnippet[], revision: string, draft = ol
     });
     let discard = false;
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true, beforeClose: async () => {
+        mobileSheet: {beforeClose: async () => {
             if (discard || completedSnippetSaves.has(dialog)) return true;
             if (savingSnippets.has(dialog)) return false;
             const snippets = readSnippetDraft(dialog);

@@ -262,7 +262,7 @@ export const openDocHistory = (options: {
     </div>
 </div>`;
     const dialog = new MobileDialog({
-        mobileSheet: {mode: "expanded", expandable: true},
+        mobileSheet: {mode: "expanded"},
         title: escapeHtml(options.pathString),
         content: contentHTML,
         width: isMobile() ? "100vw" : "90vw",

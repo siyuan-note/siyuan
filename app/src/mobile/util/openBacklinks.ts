@@ -70,6 +70,6 @@ export const openMobileBacklinks = async (protyle: IProtyle, blockId: string) =>
     };
     dialog.register();
     const unregisterPanel = registerMobileBacklinkPanel(panel);
-    const disposeSheet = bindBottomSheetDialog(dialog, () => dialog.close(), undefined, undefined, {mode: "standard", expandable: true,
+    const disposeSheet = bindBottomSheetDialog(dialog, () => dialog.close(), undefined, undefined, {mode: "standard",
             canStart: () => !dialog.isClosePending()});
 };

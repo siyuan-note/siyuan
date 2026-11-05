@@ -122,7 +122,7 @@ const mountOIDCButton = (root: HTMLElement) => {
         const escape = (value: string) => escapeHtmlTextAndAttr(value);
         let destroyOIDCDialog: () => void = (): undefined => undefined;
         const dialog = new MobileDialog({
-            mobileSheet: {expandable: true, beforeClose: () => !validationActivating},
+            mobileSheet: {beforeClose: () => !validationActivating},
             title: window.siyuan.languages.oidcLogin,
             content: `<div class="b3-dialog__content" id="oidcConfigForm">
     <label class="b3-label b3-label--inner fn__flex">
@@ -949,7 +949,6 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
 
 const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) => {
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: "🔐 " + window.siyuan.languages.setMasterPassword,
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
@@ -1007,7 +1006,6 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
 
 const openChangeMasterPasswordDialog = (onChanged?: () => void) => {
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: "🔐 " + window.siyuan.languages.changeMasterPassword,
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.oldMasterPassword}" class="b3-text-field fn__block">

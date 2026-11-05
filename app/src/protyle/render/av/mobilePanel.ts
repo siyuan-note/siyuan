@@ -1,6 +1,6 @@
 import {updateMenuItemGroupClasses} from "../../../menus/menuGroup";
 import {getVisibleSheetViewport, waitForSheetViewport} from "../../../menus/sheetOpen";
-import {getSheetActionsHTML, setSheetExpanded} from "../../../menus/sheetActions";
+import {setSheetExpanded} from "../../../menus/sheetActions";
 import {escapeAttr} from "../../../util/escape";
 
 export const getMobileAVPanelBackTarget = (menuElement: HTMLElement) =>
@@ -23,11 +23,10 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
         menuElement.style.setProperty("--b3-menu-sheet-bottom", viewport.bottomOffset + "px");
     };
     const updateContent = () => {
-        // 独立标题栏保留返回、展开和关闭入口，内容重绘不改变编辑控件及其事件绑定。
+        // 独立标题栏保留返回入口和拖动抓手，内容重绘不改变编辑控件及其事件绑定。
         if (!menuElement.firstElementChild?.classList.contains("b3-menu__title--actions")) {
             menuElement.insertAdjacentHTML("afterbegin", `<div class="b3-menu__title b3-menu__title--root b3-menu__title--actions">
     <button type="button" class="block__icon block__icon--show block__icon--touch ariaLabel fn__none" data-type="sheet-back" aria-label="${escapeAttr(window.siyuan.languages.back)}"><svg><use xlink:href="#iconLeft"></use></svg></button>
-    ${getSheetActionsHTML()}
 </div>`);
         }
         // 保留原有节点和事件绑定，标题的返回操作仍由数据库面板处理
@@ -50,7 +49,6 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
             visibleItems[visibleItems.length - 1]?.classList.add("b3-menu__item--group-last");
         });
         menuElement.querySelector('[data-type="sheet-back"]')?.classList.toggle("fn__none", !getMobileAVPanelBackTarget(menuElement));
-        setSheetExpanded(menuElement, menuElement.classList.contains("b3-menu--expanded"));
     };
     const contentObserver = new MutationObserver(() => {
         // 分组类更新不再次触发自身，页面替换和显隐切换都需要重新分组
@@ -189,10 +187,7 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
         }
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (action === "sheet-expand") {
-            setSheetExpanded(menuElement, !menuElement.classList.contains("b3-menu--expanded"));
-            updateHeight();
-        } else if (action === "sheet-back") {
+        if (action === "sheet-back") {
             panelElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         }
     }, true);

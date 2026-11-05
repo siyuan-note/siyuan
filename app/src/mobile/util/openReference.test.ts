@@ -67,7 +67,9 @@ class ElementMock extends EventTargetMock {
     closest(): ElementMock | null { return this.matches() ? this : this.parentElement?.closest() || null; }
     hasAttribute(name: string) { return this.attributes.has(name); }
     removeAttribute(name: string) { this.attributes.delete(name); }
-    querySelector(selector: string) { return this.children.get(selector); }
+    querySelector(selector: string): ElementMock | undefined {
+        return this.children.get(selector) || Array.from(this.children.values()).map(child => child.querySelector(selector)).find(Boolean);
+    }
     querySelectorAll(selector: string): ElementMock[] {
         return selector === "[data-node-id], [data-av-host]" ? Array.from(this.children.values()).flatMap(child =>
             [...child.dataset.nodeId || child.dataset.avHost ? [child] : [], ...child.querySelectorAll(selector)]) : [];
@@ -188,8 +190,6 @@ const setup = (readonly = false, deferSheetOpen = false) => {
             dragOptions.set(element, options);
             return () => { disposedBindings++; };
         }},
-        "../../menus/sheetActions": {getSheetActionsHTML: () => "sheet-expand",
-            setSheetExpanded: (element: ElementMock, expanded: boolean) => element.classList.toggle("b3-menu--expanded", expanded)},
         "../../menus/sheetOpen": {waitForSheetViewport: (options: {open: () => void}) => {
             if (!deferSheetOpen) {
                 options.open();
@@ -268,6 +268,41 @@ test("bottom sheet readiness runs after reveal and is cancelled on dismissal or 
         fixture.finishSheetOpen();
         assert.equal(opened, 1);
         if (reason === "dismiss") cleanup();
+    }
+});
+
+test("drawers omit expansion controls while preserving mode, business footers and viewport cleanup", () => {
+    for (const mode of ["standard", "expanded"] as const) {
+        for (const existingFooter of [false, true]) {
+            const fixture = setup(false, true);
+            const dialog = new fixture.Dialog({});
+            const sheet = dialog.element.querySelector(".b3-dialog__container");
+            const footer = new ElementMock();
+            if (existingFooter) sheet.children.set(":scope > .b3-dialog__body > .b3-dialog__action", footer);
+            let opened = 0;
+            const dispose = fixture.bindBottomSheetDialog(dialog as any, async () => {}, undefined, () => { opened++; }, {mode});
+            assert.equal(sheet.style.height, mode === "expanded" ? "800px" : "auto");
+            assert.equal(fixture.canDrag(dialog), true);
+            assert.equal(sheet.querySelector('[data-type="sheet-expand"]'), undefined);
+            assert.equal(sheet.children.has("actions"), false);
+            assert.equal(footer.children.size, 0);
+            assert.equal(footer.isConnected, true);
+            dispose.setMode("standard");
+            assert.equal(sheet.style.height, "auto");
+            dispose.setMode("expanded");
+            assert.equal(sheet.style.height, "800px");
+            fixture.viewport.bottom = 400;
+            fixture.window.visualViewport.dispatch("resize");
+            assert.equal(sheet.style.height, "400px");
+            dispose();
+            fixture.finishSheetOpen();
+            assert.equal(opened, 0);
+            assert.equal(fixture.window.listenerCount(), 0);
+            assert.equal(fixture.window.visualViewport.listenerCount(), 0);
+            assert.equal(fixture.disposedBindings(), 1);
+            assert.equal(sheet.children.get("handle").isConnected, false);
+            assert.equal(footer.isConnected, true);
+        }
     }
 });
 
@@ -650,13 +685,8 @@ test("viewport changes preserve the original scroll and all resize listeners are
     assert.ok(Math.abs(parseFloat(dialog.element.querySelector(".b3-dialog__container").style.maxHeight) - 448) < .001);
     assert.equal(container.style.height, "800px");
     const sheet = dialog.element.querySelector(".b3-dialog__container");
-    const expand = sheet.children.get("actions").querySelector('[data-type="sheet-expand"]');
-    expand.dispatch("click");
-    assert.equal(sheet.style.height, "800px");
-    assert.equal(dialog.element.classList.contains("b3-menu--expanded"), true);
-    expand.dispatch("click");
-    assert.equal(sheet.style.height, "auto");
-    assert.equal(dialog.element.classList.contains("b3-menu--expanded"), false);
+    assert.equal(sheet.querySelector('[data-type="sheet-expand"]'), undefined);
+    assert.equal(sheet.children.has("actions"), false);
     assert.equal(fixture.window.listenerCount(), 2);
     assert.equal(fixture.window.visualViewport.listenerCount(), 2);
     fixture.viewport.top = 90;

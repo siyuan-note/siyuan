@@ -27,7 +27,7 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
         unreadable: lang.automationCollectionReasonUnreadable,
     };
     const tab = (attribute: string, value: string, label: string) => `<div class="item item--full" ${attribute}="${value}" role="tab" tabindex="0" aria-selected="false"><span class="fn__flex-1"></span><span class="item__text">${escapeHtml(label)}</span><span class="fn__flex-1"></span></div>`;
-    const dialog = new MobileDialog({mobileSheet: {expandable: true}, title: lang.automationCollectionManage, width: isMobile() ? "92vw" : "760px",
+    const dialog = new MobileDialog({title: lang.automationCollectionManage, width: isMobile() ? "92vw" : "760px",
         content: `<div class="layout-tab-bar fn__flex av__collection-tabs" role="tablist" aria-label="${escapeAttr(lang.automationCollectionManage)}">${tab("data-collection-view", "rules", lang.automationCollectionRules)}${tab("data-collection-view", "entries", lang.automationCollectionEntries)}</div>
 <div class="b3-dialog__content av__collection-preview av__collection-manager">
 <label class="av__automation-control fn__none" data-rule-control><span>${lang.automationRule}</span><select class="b3-select fn__block" data-collection-rule></select></label>

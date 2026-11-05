@@ -754,7 +754,6 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         : JSON.stringify(initialServer.headers, null, 2);
 
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: isNew ? window.siyuan.languages.addAiMcpServer : window.siyuan.languages.aiMcpServerSettings,
         width: isMobile() ? "92vw" : "520px",
         height: "80vh",

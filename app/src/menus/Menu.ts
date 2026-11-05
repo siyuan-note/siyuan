@@ -5,7 +5,7 @@ import {getAnchoredMenuPosition} from "./menuPosition";
 import {bindMenuMouseScroll} from "./menuMouseScroll";
 import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGroup";
 import {getVisibleSheetViewport, waitForSheetViewport} from "./sheetOpen";
-import {getSheetActionsHTML, setSheetExpanded} from "./sheetActions";
+import {setSheetExpanded} from "./sheetActions";
 import {getMobileSheetBounds, moveSheetGesture, SheetGesture} from "../mobile/util/mobileSheetGesture";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
@@ -134,16 +134,6 @@ export class Menu {
             }
             const target = event.target as Element;
             if (isMobile()) {
-                const sheetAction = target.closest<HTMLElement>(".b3-menu__actions [data-type]")?.dataset.type;
-                if (sheetAction) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    if (sheetAction === "sheet-expand") {
-                        setSheetExpanded(this.element, !this.element.classList.contains("b3-menu--expanded"));
-                        this.setSheetHeight();
-                    }
-                    return;
-                }
                 const titleElement = hasClosestByClassName(target, "b3-menu__title");
                 const isSystemBack = typeof event.detail === "string" && event.detail === "back";
                 if ((titleElement && !titleElement.classList.contains("b3-menu__title--root")) || isSystemBack) {
@@ -243,9 +233,6 @@ export class Menu {
     }
 
     private canDragSheet(target: HTMLElement) {
-        if (target.closest(".b3-menu__actions")) {
-            return false;
-        }
         // 文件选择框覆盖上传菜单项，允许从该区域开始下拉关闭菜单。
         if (target.closest("input:not([type=\"file\"]), textarea, select, [contenteditable=\"true\"]")) {
             return false;
@@ -688,8 +675,6 @@ export class Menu {
         this.removeScrollEvent();
         this.element.firstElementChild.classList.add("fn__none");
         this.element.firstElementChild.classList.remove("b3-menu__title--root");
-        this.element.firstElementChild.classList.remove("b3-menu__title--actions");
-        this.element.firstElementChild.querySelector(".b3-menu__actions")?.remove();
         (this.element.firstElementChild.querySelector(".b3-menu__label") as HTMLElement).innerHTML =
             window.siyuan.languages.back;
         this.element.lastElementChild.innerHTML = "";
@@ -699,7 +684,6 @@ export class Menu {
         setPopoverMenuOpen(this.element, false);
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet", "b3-menu--fit", "b3-menu--expanded");
         this.element.removeAttribute("data-sheet-expandable");
-        this.element.removeAttribute("data-sheet-actions");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
         this.element.removeAttribute("data-from");    // 标识菜单入口
@@ -927,13 +911,6 @@ export class Menu {
         this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")
             .forEach(updateMenuItemGroupClasses);
         this.element.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
-        if (this.element.getAttribute("data-sheet-expandable") === "true" &&
-            this.element.getAttribute("data-sheet-actions") !== "false") {
-            this.element.firstElementChild.classList.add("b3-menu__title--actions");
-            if (!this.element.firstElementChild.querySelector(".b3-menu__actions")) {
-                this.element.firstElementChild.insertAdjacentHTML("beforeend", getSheetActionsHTML());
-            }
-        }
         // 拖动后的偏好高度在键盘和旋转期间只裁限显示，关闭后再清除。
         this.startTrackingSheetViewport();
         this.element.style.transform = "translateY(100%)";

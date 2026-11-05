@@ -40,7 +40,6 @@ export const exportImage = (id: string, copyOnly = false) => {
     }
     let stopObservingLayout: () => void;
     const exportDialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         disableAnimation: true,
         destroyCallback() {
             stopObservingLayout?.();

@@ -20,12 +20,7 @@ const runCases = sources => {
             this.element.className = "mobile-bottom-sheet-dialog";
             this.element.innerHTML = `<div class="b3-dialog__body">${options.content}</div>`;
             document.body.append(this.element);
-            if (options.mobileSheet?.expandable) {
-                const expand = document.createElement("div");
-                expand.className = "fn__flex-1";
-                expand.innerHTML = '<button data-type="sheet-expand">Expand</button>';
-                this.element.querySelector(".b3-dialog__action").prepend(expand);
-            }
+
         }
         focusWhenReady() {}
         bindInput() {}
@@ -82,12 +77,10 @@ const runCases = sources => {
         }
     }
     const danger = confirmDialog("Delete", "Text", undefined, undefined, true,
-        {label: "Extra", callback() {}}, undefined, {mobileSheet: {expandable: true}});
+        {label: "Extra", callback() {}});
     const buttons = geometry(danger, 390, true);
     check(getComputedStyle(buttons[2]).color === "rgb(255, 51, 68)", "danger remains red");
-    const expand = danger.element.querySelector("[data-type=sheet-expand]");
-    check(!expand.closest(".mobile-sheet-action-group"), "expand is outside equal-width actions");
-    check(expand.getBoundingClientRect().bottom <= buttons[0].getBoundingClientRect().top, "expand does not consume action width");
+    check(danger.element.querySelector("[data-type=sheet-expand]") === null, "no expansion control is injected");
     danger.element.remove();
     const extra = inputDialog({title: "Name", value: "", onConfirm() {}, actions: [{text: "Extra", onClick() {}}]});
     geometry(extra, 390, true);
@@ -162,6 +155,7 @@ if (require.main === module && process.versions.electron && process.type === "br
                 catch (error) { return error.stack; }
             })()`);
             assert.equal(error, undefined);
+            console.log("Mobile dialog button cases passed");
         } catch (error) { console.error(error); code = 1; }
         finally { win.destroy(); app.exit(code); }
     });
@@ -173,7 +167,10 @@ if (require.main === module && process.versions.electron && process.type === "br
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-mobile-buttons-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
-        try { await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 60000}); }
+        try {
+            const result = await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 60000});
+            assert.match(result.stdout, /Mobile dialog button cases passed/);
+        }
         finally { fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100}); }
     });
 }

@@ -17,6 +17,7 @@ const setup = (mobile = true) => {
     let disposals = 0;
     let bindings = 0;
     let mode: string;
+    let sheetOptions: {mode?: string};
     let keyboard = 0;
     const document = {activeElement: undefined as unknown};
     const window = {siyuan: {dialogs: [] as any[], languages: {settingsPendingSaveError: "failed"}}};
@@ -35,8 +36,10 @@ const setup = (mobile = true) => {
         bindInput(input: {focus: () => void}) { input.focus(); }
     }
     const dependencies = {Dialog: Base, isMobile: () => mobile,
-        bindBottomSheetDialog: (_dialog: any, _close: any, _resize: any, open: () => void, options: {canStart: () => boolean}) => {
+        bindBottomSheetDialog: (_dialog: any, _close: any, _resize: any, open: () => void,
+            options: {canStart: () => boolean, mode?: string}) => {
             drag = _close; canDrag = options.canStart;
+            sheetOptions = options;
             bindings++; opened = open; resized = _resize;
             const dispose = () => { disposals++; };
             dispose.freeze = () => { freezes++; };
@@ -46,7 +49,7 @@ const setup = (mobile = true) => {
         scrollInputIntoView: () => { scrolled++; }, callMobileAppShowKeyboard: () => { keyboard++; }, setSheetExpanded() {}, Constants: {TIMEOUT_INPUT: 10}, isNotCtrl: () => true, showMessage() {}};
     const exports: any = {};
     runInNewContext(source, {exports, require: () => dependencies, window, document, console: {error() {}}});
-    return {...exports, window, document, Base, drag: () => drag(), canDrag: () => canDrag(), resize: () => resized(), open: () => opened(), stats: () => ({freezes, disposals, bindings, mode, keyboard, scrolled})};
+    return {...exports, window, document, Base, drag: () => drag(), canDrag: () => canDrag(), resize: () => resized(), open: () => opened(), stats: () => ({freezes, disposals, bindings, mode, keyboard, scrolled, sheetOptions})};
 };
 test("explicit mobile geometry binds once; desktop is untouched", () => {
     const mobile = setup();
@@ -56,10 +59,17 @@ test("explicit mobile geometry binds once; desktop is untouched", () => {
     assert.equal(mobile.stats().mode, "expanded");
     assert.equal(mobile.stats().bindings, 1);
     const desktop = setup(false);
-    const original = {content: "", height: "350px", disableClose: true};
+    const original = {content: "", height: "350px", disableClose: true,
+        mobileSheet: {mode: "expanded"}};
     const desktopDialog = new desktop.MobileDialog(original);
     assert.equal(desktopDialog.options, original);
     assert.equal(desktop.stats().bindings, 0);
+});
+test("mobile sheets preserve their initial mode and drag eligibility", () => {
+    const mobile = setup();
+    new mobile.MobileDialog({content: "", mobileSheet: {mode: "expanded"}});
+    assert.equal(mobile.stats().sheetOptions.mode, "expanded");
+    assert.equal(mobile.canDrag(), true);
 });
 test("pending false and rejection retain input; only explicit true closes and disposes once", async () => {
     const f = setup();

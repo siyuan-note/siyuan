@@ -336,7 +336,6 @@ export const openNewItemTemplateDialog = (options: {
     }
     let defaultTemplateID = options.data.defaultTemplateID || "";
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: isMobile() ? undefined : window.siyuan.languages.itemTemplate,
         width: isMobile() ? "100vw" : "820px",
         height: isMobile() ? "60vh" : "70vh",

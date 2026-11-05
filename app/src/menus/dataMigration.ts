@@ -104,7 +104,6 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
 </button>` : "";
     /// #endif
     const dialog = new Dialog({
-        mobileSheet: {expandable: true},
         title: window.siyuan.languages.dataMigration,
         content: `<div class="b3-dialog__content">
     <div class="b3-label__text">SiYuan</div>
@@ -187,7 +186,6 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
             return;
         }
         const targetDialog = new Dialog({
-            mobileSheet: {expandable: true},
             title: window.siyuan.languages.targetNotebook,
             content: `<div class="b3-dialog__content">
     <select class="b3-select fn__block">${notebookOptions}</select>

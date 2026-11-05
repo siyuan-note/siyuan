@@ -44,10 +44,10 @@ const runCases = async appDirectory => {
     };
     const {MobileDialog} = load("dialog/mobileDialog");
     window.shortViewportDialogModule = {MobileDialog};
-    const dialog = new MobileDialog({title: "Text", mobileSheet: {expandable: true},
+    const dialog = new MobileDialog({title: "Text",
         content: '<div class="b3-dialog__content"><div style="height:1800px">Long content</div></div><div class="b3-dialog__action"><button class="b3-button" data-confirm>Confirm</button></div>'});
     await wait();
-    assert.equal(dialog.element.querySelectorAll("[data-type=sheet-expand]").length, 1);
+    assert.equal(dialog.element.querySelectorAll("[data-type=sheet-expand]").length, 0);
     assert.equal(dialog.element.querySelectorAll("[data-type=sheet-close]").length, 0);
     assert.equal(dialog.element.querySelector(".b3-dialog__close"), null);
     const actions = dialog.element.querySelector(".b3-dialog__action");
@@ -64,17 +64,16 @@ const runCases = async appDirectory => {
     assert.ok(Math.abs(actions.getBoundingClientRect().bottom - panel.getBoundingClientRect().bottom) < 1);
     dialog.destroy();
     await wait();
-    const sheet = new MobileDialog({title: "Panel", content: "Content", mobileSheet: {expandable: true}});
+    const sheet = new MobileDialog({title: "Panel", content: "Content"});
     await wait();
-    assert.equal(getComputedStyle(sheet.element.querySelector(".mobile-sheet-actions > div")).display, "flex");
-    const expand = sheet.element.querySelector("[data-type=sheet-expand]").getBoundingClientRect();
+    assert.equal(sheet.element.querySelector(".mobile-sheet-actions"), null);
+    assert.equal(sheet.element.querySelector("[data-type=sheet-expand]"), null);
     assert.equal(sheet.element.querySelector("[data-type=sheet-close]"), null);
     assert.equal(sheet.element.querySelector(".b3-dialog__close"), null);
-    assert.ok(expand.height > 0);
+    assert.equal(sheet.element.querySelector(".b3-dialog__action"), null);
     sheet.setSheetMode("expanded");
     await wait();
-    assert.ok(Math.abs(sheet.element.querySelector(".mobile-sheet-actions").getBoundingClientRect().bottom -
-        sheet.element.querySelector("[role=dialog]").getBoundingClientRect().bottom) < 1);
+    assert.ok(Math.abs(sheet.element.querySelector("[role=dialog]").getBoundingClientRect().height - innerHeight) < 1);
     sheet.destroy();
     await wait();
     const root = document.createElement("div");
@@ -177,12 +176,12 @@ const runCases = async appDirectory => {
     for (const color of ["rgb(245, 245, 245)", "rgb(30, 30, 30)"]) {
         document.body.style.setProperty("--b3-theme-surface", color);
         for (const withActions of [true, false]) {
-            const nativeSheet = new MobileDialog({title: "Sync direction", mobileSheet: {expandable: true},
+            const nativeSheet = new MobileDialog({title: "Sync direction",
                 content: `<div class="b3-dialog__content"><div style="height:${withActions ? 80 : 1800}px">Choices</div></div>` +
                     (withActions ? '<div class="b3-dialog__action"><button class="b3-button">Confirm</button></div>' : "")});
             await wait();
             const panel = nativeSheet.element.querySelector(".mobile-sheet-panel");
-            const footer = panel.querySelector(".b3-dialog__action, .mobile-sheet-actions");
+            const footer = panel.querySelector(".b3-dialog__action");
             for (const mode of ["standard", "expanded"]) {
                 for (const inset of [0, 24, 32, 15.75, 0]) {
                     document.documentElement.style.setProperty("--android-navigation-bar-height", `${inset}px`);
@@ -190,8 +189,12 @@ const runCases = async appDirectory => {
                     const box = panel.getBoundingClientRect();
                     assert.ok(Math.abs(box.bottom - innerHeight) < 1, "drawer background reaches the viewport bottom");
                     assert.equal(getComputedStyle(panel).backgroundColor, color);
-                    assert.ok(Math.abs(footer.getBoundingClientRect().bottom - (innerHeight - inset)) < 1,
-                        "drawer buttons stay above the gesture area without double compensation");
+                    if (withActions) {
+                        assert.ok(Math.abs(footer.getBoundingClientRect().bottom - (innerHeight - inset)) < 1,
+                            "drawer buttons stay above the gesture area without double compensation");
+                    } else {
+                        assert.equal(footer, null, "content-only drawers never get an empty footer");
+                    }
                     assert.equal(getComputedStyle(nativeSheet.element.querySelector(".b3-dialog")).paddingBottom, "0px");
                     if (inset > 0) {
                         assert.equal(document.elementFromPoint(innerWidth / 2, innerHeight - inset / 2), panel,
@@ -288,6 +291,7 @@ if (process.versions.electron && process.type === "browser") {
                 catch (error) { return error.stack; }
             })()`);
             assert.equal(shortError, undefined);
+            console.log("Mobile dialog layout cases passed");
         } catch (error) { console.error(error); code = 1; }
         finally { win.destroy(); app.exit(code); }
     });
@@ -299,7 +303,10 @@ if (process.versions.electron && process.type === "browser") {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-mobile-dialog-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
-        try { await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 60000}); }
+        try {
+            const result = await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 60000});
+            assert.match(result.stdout, /Mobile dialog layout cases passed/);
+        }
         finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});

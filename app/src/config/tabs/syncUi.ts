@@ -476,7 +476,6 @@ const openSyncProviderConfigDialog = (root: Element) => {
     let rulesVersion = 0;
     let rulesTimer: ReturnType<typeof setTimeout>;
     const dialog = new MobileDialog({
-        mobileSheet: {expandable: true},
         title: `${L.syncConfig} - ${def.configKey === "s3" ? "S3" : def.configKey === "webdav" ? "WebDAV" : L.localFileSystem}`,
         width: isMobile() ? "92vw" : "680px",
         containerClassName: "config-sync-dialog",

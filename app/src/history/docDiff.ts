@@ -106,7 +106,7 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
     };
 
     const dialog = new MobileDialog({
-        mobileSheet: {mode: "expanded", expandable: true},
+        mobileSheet: {mode: "expanded"},
         title: window.siyuan.languages.compare,
         content: `<div class="history__doc-compare fn__flex-column">
     <div class="history__action">

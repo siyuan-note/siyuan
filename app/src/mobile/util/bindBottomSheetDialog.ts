@@ -4,7 +4,7 @@ import {waitForSheetViewport} from "../../menus/sheetOpen";
 import type {MobileSheetMode} from "./mobileSheetLayout";
 
 export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void | boolean>, afterResize?: () => void,
-                                     afterOpen?: () => void, layoutOptions?: {mode?: MobileSheetMode, expandable?: boolean, canStart?: () => boolean}) => {
+                                     afterOpen?: () => void, layoutOptions?: {mode?: MobileSheetMode, canStart?: () => boolean}) => {
     dialog.element.classList.add("mobile-bottom-sheet-dialog");
     const sheet = dialog.element.querySelector<HTMLElement>(".b3-dialog__container");
     sheet.querySelector(".b3-dialog__close")?.remove();
@@ -16,38 +16,6 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     const dragState: {cancel?: () => void} = {};
     const layout = (require("./mobileSheetLayout") as typeof import("./mobileSheetLayout")).bindMobileSheetLayout(dialog.element.querySelector<HTMLElement>(".b3-dialog"),
         sheet, {...layoutOptions, onResize: afterResize, onGeometryChange: () => dragState.cancel?.()});
-    let mode = layoutOptions?.mode || "standard";
-    let actions: HTMLElement;
-    let disposeActions: () => void;
-    const setMode = (next: MobileSheetMode) => {
-        mode = next;
-        layout.setMode(next);
-        if (actions) {
-            (require("../../menus/sheetActions") as typeof import("../../menus/sheetActions"))
-                .setSheetExpanded(dialog.element, next === "expanded");
-        }
-    };
-    if (layoutOptions?.expandable || mode === "expanded") {
-        const {getSheetActionsHTML, getSheetExpandButtonHTML} = require("../../menus/sheetActions") as typeof import("../../menus/sheetActions");
-        actions = sheet.querySelector<HTMLElement>(":scope > .b3-dialog__body > .b3-dialog__action");
-        if (actions) {
-            const expand = document.createElement("div");
-            expand.className = "fn__flex-1";
-            expand.innerHTML = getSheetExpandButtonHTML();
-            actions.prepend(expand);
-            disposeActions = () => expand.remove();
-        } else {
-            actions = document.createElement("div");
-            actions.className = "mobile-sheet-actions";
-            actions.innerHTML = getSheetActionsHTML(true);
-            sheet.append(actions);
-            disposeActions = () => actions.remove();
-        }
-        actions.querySelector('[data-type="sheet-expand"]').addEventListener("click", () => {
-            setMode(mode === "expanded" ? "standard" : "expanded");
-        });
-        setMode(mode);
-    }
     // 底部面板由抓手调整高度，不参与通用对话框的移动和缩放。
     sheet.querySelector(".b3-dialog__header")?.classList.remove("resize__move");
     sheet.querySelectorAll(":scope > .resize__rd, :scope > .resize__ld, :scope > .resize__lt, :scope > .resize__rt, " +
@@ -101,12 +69,7 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
         grip: handle,
         getBounds: layout.getBounds,
         resize: height => {
-            mode = "standard";
             layout.setPreferredHeight(height);
-            if (actions) {
-                (require("../../menus/sheetActions") as typeof import("../../menus/sheetActions"))
-                    .setSheetExpanded(dialog.element, false);
-            }
         },
         canStart: () => {
             const body = sheet.querySelector<HTMLElement>(":scope > .b3-dialog__body");
@@ -124,9 +87,8 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
         observer.disconnect();
         disposeDrag();
         handle.remove();
-        disposeActions?.();
     };
     dispose.freeze = () => layout.freeze();
-    dispose.setMode = setMode;
+    dispose.setMode = layout.setMode;
     return dispose;
 };

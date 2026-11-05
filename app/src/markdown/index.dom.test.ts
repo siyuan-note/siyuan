@@ -306,6 +306,15 @@ const browserCases = async (languages: Record<string, string>) => {
     document.getElementById("markdownTheme").dispatchEvent(new PointerEvent("pointerleave", {pointerType: "mouse"}));
     await new Promise(resolve => setTimeout(resolve, 260));
     check.equal(document.getElementById("markdownTheme").getAttribute("aria-expanded"), "true", "keyboard focus keeps its submenu open after the mouse leaves");
+    const fontItem = document.getElementById("markdownFont");
+    fontItem.dispatchEvent(new PointerEvent("pointerenter", {pointerType: "mouse"}));
+    await new Promise(resolve => setTimeout(resolve, 260));
+    check.equal(fontItem.getAttribute("aria-expanded"), "true", "hover switches to a sibling despite retained keyboard focus");
+    check.equal(document.getElementById("markdownTheme").getAttribute("aria-expanded"), "false", "the focused sibling no longer covers the hovered submenu");
+    document.getElementById("markdownTheme").dispatchEvent(new PointerEvent("pointerenter", {pointerType: "mouse"}));
+    await new Promise(resolve => setTimeout(resolve, 260));
+    document.getElementById("markdownTheme").focus();
+    document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
     document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
     check.equal(document.activeElement.id, "markdownTheme");
     check.equal(appearanceItem.getAttribute("aria-expanded"), "true", "Escape closes only the innermost submenu");

@@ -1,5 +1,7 @@
 import {getAnchoredMenuPosition} from "../menus/menuPosition";
 
+const activeSubmenus = new WeakMap<HTMLElement, () => void>();
+
 export const createMarkdownSubmenu = (options: {
     element: HTMLElement;
     label: string;
@@ -28,6 +30,9 @@ export const createMarkdownSubmenu = (options: {
     };
     const close = () => {
         cancelHover();
+        if (element.parentElement && activeSubmenus.get(element.parentElement) === close) {
+            activeSubmenus.delete(element.parentElement);
+        }
         element.classList.remove("b3-menu__item--show");
         element.setAttribute("aria-expanded", "false");
         options.onClose?.();
@@ -35,6 +40,11 @@ export const createMarkdownSubmenu = (options: {
     const open = () => {
         cancelHover();
         if (disabled) return;
+        if (element.parentElement) {
+            const previous = activeSubmenus.get(element.parentElement);
+            if (previous !== close) previous?.();
+            activeSubmenus.set(element.parentElement, close);
+        }
         element.classList.add("b3-menu__item--show");
         element.setAttribute("aria-expanded", "true");
         const anchor = element.getBoundingClientRect();

@@ -5,11 +5,15 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {createSourceFile, isIfStatement, Node, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isIfStatement, isMethodDeclaration, Node, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = (source: string) => {
     const check = require("node:assert/strict");
-    const api = new Function(source + "\nreturn {tabsRender, destroyTabsRender, titleKeydown};")();
+    const focused: Element[] = [];
+    const api = new Function("focusBlock", "hideElements", source +
+        "\nreturn {tabsRender, destroyTabsRender, titleKeydown, TitleHint};")(
+        (element: Element) => focused.push(element),
+        (_types: string[], protyle: IProtyle) => protyle.hint.element.classList.add("fn__none"));
     const editor = document.createElement("div");
     editor.className = "protyle-wysiwyg";
     document.body.append(editor);
@@ -37,7 +41,9 @@ const browserCases = (source: string) => {
                     range.collapse(true);
                     for (const key of ["Delete", "Backspace", "ArrowLeft", "ArrowRight"]) {
                         const event = new KeyboardEvent("keydown", {key, cancelable: true});
-                        api.titleKeydown(title, editor, range, event);
+                        api.titleKeydown(title, editor, range, event, {
+                            hint: {element: {classList: {contains: () => true}}},
+                        });
                         const boundary = key === "Backspace" || key === "ArrowLeft" ?
                             index === 0 : index === title.childNodes.length;
                         check.equal(event.defaultPrevented, boundary, `${titleHTML}: ${key} at ${index}`);
@@ -55,6 +61,59 @@ const browserCases = (source: string) => {
                 api.destroyTabsRender(editor);
             }
         }
+        for (const titleClass of ["callout-title", "callout-title tab-item-title"]) {
+            editor.innerHTML = `<div class="${titleClass}" contenteditable="true">/</div>`;
+            const title = editor.firstElementChild;
+            const range = document.createRange();
+            range.selectNodeContents(title);
+            range.collapse(false);
+            const hint = new api.TitleHint();
+            hint.element = document.createElement("div");
+            hint.element.innerHTML = '<div><button class="b3-list-item b3-list-item--focus" data-value="first">First</button>' +
+                '<button class="b3-list-item" data-value="second">Second</button></div>';
+            editor.append(hint.element);
+            const filled: string[] = [];
+            hint.fill = (value: string) => filled.push(value);
+            const protyle = {hint};
+            const dispatch = (key: string, modifiers: KeyboardEventInit = {}) => {
+                const event = new KeyboardEvent("keydown", {key, cancelable: true, ...modifiers});
+                api.titleKeydown(title, editor, range, event, protyle);
+                return event;
+            };
+            check.equal(dispatch("ArrowDown").defaultPrevented, true);
+            check.equal(hint.element.querySelector(".b3-list-item--focus").dataset.value, "second");
+            check.equal(dispatch("Enter").defaultPrevented, true);
+            check.deepEqual(filled, ["second"]);
+            check.equal(focused.length, 0);
+            check.equal(dispatch("ArrowUp").defaultPrevented, true);
+            check.equal(hint.element.querySelector(".b3-list-item--focus").dataset.value, "first");
+            for (const modifiers of [{altKey: true}, {shiftKey: true}, {isComposing: true}]) {
+                dispatch("Enter", modifiers);
+                check.deepEqual(filled, ["second"]);
+            }
+            focused.length = 0;
+            dispatch("ArrowLeft");
+            check.equal(hint.element.classList.contains("fn__none"), true);
+            dispatch("Enter");
+            check.deepEqual(filled, ["second"]);
+            check.equal(focused.length, 1);
+            focused.length = 0;
+            hint.element.classList.remove("fn__none");
+            hint.element.innerHTML = '<div class="emojis"><button data-unicode="custom.svg"></button></div>';
+            const moved: string[] = [];
+            let deactivated = 0;
+            hint.emojiPanel = {
+                getCurrentElement: () => hint.element.querySelector("button"),
+                moveSelection: (key: string) => moved.push(key),
+                deactivate: () => deactivated++,
+            };
+            dispatch("ArrowRight");
+            check.deepEqual(moved, ["ArrowRight"]);
+            dispatch("Enter");
+            check.deepEqual(filled, ["second", "custom.svg"]);
+            check.equal(deactivated, 1);
+            check.equal(focused.length, 0);
+        }
     } finally {
         api.destroyTabsRender(editor);
         editor.remove();
@@ -62,7 +121,7 @@ const browserCases = (source: string) => {
     return "tabs-emoji-ok";
 };
 
-test("tab titles preserve custom emoji and protect only actual editing boundaries", {
+test("titles prioritize hint selection and preserve custom emoji and editing boundaries", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -74,20 +133,36 @@ test("tab titles preserve custom emoji and protect only actual editing boundarie
     const visit = (node: Node) => {
         if (isIfStatement(node) && node.expression.getText(ast) ===
             "calloutTitleElement && !event.isComposing && !blockSelectionModeElement") {
-            handler = node.thenStatement.getText(ast);
+            handler = node.getText(ast);
         }
         node.forEachChild(visit);
     };
     visit(ast);
     assert.ok(handler);
-    const source = ["src/util/escape.ts", "src/protyle/util/selectionOffsets.ts",
+    const hintAst = createSourceFile("hint.ts", readFileSync("src/protyle/hint/index.ts", "utf8"), ScriptTarget.ES2021, true);
+    let select: string;
+    const visitHint = (node: Node) => {
+        if (isMethodDeclaration(node) && node.name.getText(hintAst) === "select") {
+            select = node.getText(hintAst);
+        }
+        node.forEachChild(visitHint);
+    };
+    visitHint(hintAst);
+    assert.ok(select);
+    const source = ["src/util/escape.ts", "src/util/upDownHint.ts", "src/protyle/util/selectionOffsets.ts",
         "src/protyle/render/tabsState.ts", "src/protyle/render/tabsDrag.ts",
         "src/protyle/render/tabsAttributes.ts", "src/protyle/render/tabsVisibility.ts",
         "src/protyle/render/tabsRender.ts"]
         .map(file => compile(readFileSync(file, "utf8"))).join("\n") + compile(`
         const matchHotKey = () => false;
-        const isNotCtrl = () => true;
-        const titleKeydown = (calloutTitleElement, nodeElement, range, event) => ${handler};`);
+        const isNotCtrl = event => !event.ctrlKey && !event.metaKey;
+        const isOnlyMeta = event => event.ctrlKey || event.metaKey;
+        const Constants = {ZWSP: "\\u200b"};
+        class TitleHint {${select}}
+        const titleKeydown = (calloutTitleElement, nodeElement, range, event, protyle) => {
+            const blockSelectionModeElement = undefined;
+            ${handler}
+        };`);
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-tabs-emoji-"));
     const script = path.join(directory, "main.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");

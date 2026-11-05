@@ -124,7 +124,8 @@ const cases = async (source) => {
             a.querySelector(".tab-item-content").insertAdjacentHTML("beforeend", lute.Md2BlockDOM(
                 "::: tabs\n@tab Inner A\n\nInner body A\n@tab Inner B\n\nInner body B\n:::\n"));
             const protyle = {element, wysiwyg: {element: root}, disabled: readonly, options: {action: []},
-                toolbar: {isMultiSelectMode: () => false}, block: {id: "doc", rootID: "doc", showAll: false}};
+                toolbar: {isMultiSelectMode: () => false}, hint: {element: {classList: {contains: () => true}}},
+                block: {id: "doc", rootID: "doc", showAll: false}};
             tabs.setAttribute("tabs-position", position);
             tabs.setAttribute("tabs-active-id", b.dataset.nodeId);
             const fullGroup = tabs.outerHTML;

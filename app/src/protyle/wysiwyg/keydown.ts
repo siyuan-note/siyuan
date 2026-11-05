@@ -462,6 +462,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (calloutTitleElement && !event.isComposing && !blockSelectionModeElement) {
+            if (!event.altKey && !event.shiftKey &&
+                ((event.key.startsWith("Arrow") && isNotCtrl(event)) || event.key === "Enter") &&
+                !protyle.hint.element.classList.contains("fn__none") && protyle.hint.select(event, protyle)) {
+                return;
+            }
             const getTitleLength = () => {
                 const titleRange = range.cloneRange();
                 titleRange.selectNodeContents(calloutTitleElement);

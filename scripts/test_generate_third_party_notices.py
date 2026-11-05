@@ -15,7 +15,7 @@ class MarkdownNoticesTests(unittest.TestCase):
         updated = notices.update_markdown_notices(existing, section)
         self.assertTrue(updated.startswith(existing))
         self.assertEqual(notices.update_markdown_notices(updated, section), updated)
-        for required in ("vditor 4.0.2-alpha.0", "diff-match-patch 1.0.5", "SIL OPEN FONT LICENSE",
+        for required in ("vditor 4.0.2-alpha.1", "diff-match-patch 1.0.5", "SIL OPEN FONT LICENSE",
                          "MathJax Consortium", "Copyright (c) 2009-2010, Design Science"):
             self.assertIn(required, updated)
 

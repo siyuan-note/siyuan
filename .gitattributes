@@ -9,5 +9,3 @@ app/stage/protyle/** linguist-vendored
 *.go   text eol=lf
 /kernel/memory/testdata/*.md text eol=lf
 /scripts/docker-onnx-build.sh text eol=lf
-# 依赖补丁的空行上下文包含格式所需的空格。
-app/patches/*.patch -whitespace

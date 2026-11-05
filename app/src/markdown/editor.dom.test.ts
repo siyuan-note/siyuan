@@ -471,7 +471,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     return "Markdown editor DOM cases passed";
 };
 
-test("Vditor 4.0.2-alpha.0 adapter preserves content and isolates programmatic, input, composition and preview events", {
+test("Vditor 4.0.2-alpha.1 adapter preserves content and isolates programmatic, input, composition and preview events", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

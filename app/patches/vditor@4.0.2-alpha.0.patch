@@ -1,0 +1,155 @@
+diff --git a/dist/index.js b/dist/index.js
+index ddc7b0dc5ae81abd5796d05d7a3cff2492d51789..4a6b262fdab85b128f5c852a534044407ec12c86 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -10391,9 +10391,73 @@ var exitEmptyListItem = function (liElement) {
+     }
+     return paragraphElement;
+ };
++var isEmptyParagraph = function (element) {
++    if (element.getAttribute("contenteditable") === "false" || element.hasAttribute("data-type") ||
++        element.textContent.split(constants/* Constants.ZWSP */.g.ZWSP).join("").replace(/\r\n|\r|\n/g, "") !== "") {
++        return false;
++    }
++    // 多个换行仍占据可见空行，不能将整段作为单个占位符删除。
++    if ((element.textContent.match(/\r\n|\r|\n/g) || []).length + element.querySelectorAll("br").length > 1) {
++        return false;
++    }
++    // 仅忽略空的行内格式与占位符，保留没有文本的媒体、控件和自定义节点。
++    return Array.from(element.querySelectorAll("*")).every(function (child) {
++        return /^(BR|WBR|SPAN|B|STRONG|EM|I|S|STRIKE|U|A|SMALL|SUB|SUP|CODE)$/.test(child.tagName) &&
++            !child.hasAttribute("data-type") && child.getAttribute("contenteditable") !== "false";
++    });
++};
++var setListStart = function (element, range) {
++    for (var i = 0; i < element.childNodes.length; i++) {
++        var node = element.childNodes[i];
++        if (node.nodeType === 3) {
++            // 任务框后的一个空格属于列表标记，光标应落在正文前。
++            var offset = node.previousSibling && node.previousSibling.nodeName === "INPUT" &&
++                node.textContent.startsWith(" ") ? 1 : 0;
++            if (node.textContent.length > offset) {
++                range.setStart(node, offset);
++                return;
++            }
++        }
++        else if (node.nodeType === 1) {
++            var child = node;
++            if ((child.tagName === "INPUT" && child.getAttribute("type") === "checkbox") ||
++                child.classList.contains("vditor-ir__marker")) {
++                continue;
++            }
++            if (child.childNodes.length > 0 && child.tagName !== "UL" && child.tagName !== "OL" &&
++                child.getAttribute("contenteditable") !== "false" &&
++                (!child.hasAttribute("data-type") || /^(strong|em|s|a|code|mark)$/.test(child.getAttribute("data-type"))) &&
++                !child.classList.contains("vditor-ir__preview") &&
++                !child.classList.contains("vditor-wysiwyg__preview")) {
++                setListStart(child, range);
++            }
++            else {
++                range.setStartBefore(child);
++            }
++            return;
++        }
++    }
++    range.selectNodeContents(element);
++    range.collapse(false);
++};
+ var fixList = function (range, vditor, pElement, event) {
+     var startContainer = range.startContainer;
+     var liElement = (0,hasClosest/* hasClosestByMatchTag */.lG)(startContainer, "LI");
++    if (event.key === "Delete" && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
++        range.collapsed && !liElement && pElement && pElement.tagName === "P" && pElement.contains(startContainer) &&
++        isEmptyParagraph(pElement)) {
++        var listElement = pElement.nextSibling;
++        if (listElement && (listElement.nodeName === "UL" || listElement.nodeName === "OL") &&
++            listElement.firstElementChild && listElement.firstElementChild.tagName === "LI") {
++            setListStart(listElement.firstElementChild, range);
++            range.collapse(true);
++            pElement.remove();
++            (0,selection/* setSelectionFocus */.Hc)(range);
++            execAfterRender(vditor);
++            event.preventDefault();
++            return true;
++        }
++    }
+     if (liElement) {
+         if (!(0,compatibility/* isCtrl */.yl)(event) && !event.altKey && event.key === "Enter" &&
+             // fix li 中有多个 P 时，在第一个 P 中换行会在下方生成新的 li
+diff --git a/src/ts/util/fixBrowserBehavior.ts b/src/ts/util/fixBrowserBehavior.ts
+index 2d9b94c97acc856eb6ae930940abcee458c2f5a5..e4ff2e6691d8f0f0d778f3bb717d36ac076b8395 100644
+--- a/src/ts/util/fixBrowserBehavior.ts
++++ b/src/ts/util/fixBrowserBehavior.ts
+@@ -551,9 +551,72 @@ export const exitEmptyListItem = (liElement: HTMLElement) => {
+     return paragraphElement;
+ };
+ 
++const isEmptyParagraph = (element: HTMLElement) => {
++    if (element.getAttribute("contenteditable") === "false" || element.hasAttribute("data-type") ||
++        element.textContent.split(Constants.ZWSP).join("").replace(/\r\n|\r|\n/g, "") !== "") {
++        return false;
++    }
++    // 多个换行仍占据可见空行，不能将整段作为单个占位符删除。
++    if ((element.textContent.match(/\r\n|\r|\n/g) || []).length + element.querySelectorAll("br").length > 1) {
++        return false;
++    }
++    // 仅忽略空的行内格式与占位符，保留没有文本的媒体、控件和自定义节点。
++    return Array.from(element.querySelectorAll("*")).every((child) =>
++        /^(BR|WBR|SPAN|B|STRONG|EM|I|S|STRIKE|U|A|SMALL|SUB|SUP|CODE)$/.test(child.tagName) &&
++        !child.hasAttribute("data-type") && child.getAttribute("contenteditable") !== "false");
++};
++
++const setListStart = (element: HTMLElement, range: Range) => {
++    for (let i = 0; i < element.childNodes.length; i++) {
++        const node = element.childNodes[i];
++        if (node.nodeType === 3) {
++            // 任务框后的一个空格属于列表标记，光标应落在正文前。
++            const offset = node.previousSibling && node.previousSibling.nodeName === "INPUT" &&
++                node.textContent.startsWith(" ") ? 1 : 0;
++            if (node.textContent.length > offset) {
++                range.setStart(node, offset);
++                return;
++            }
++        } else if (node.nodeType === 1) {
++            const child = node as HTMLElement;
++            if ((child.tagName === "INPUT" && child.getAttribute("type") === "checkbox") ||
++                child.classList.contains("vditor-ir__marker")) {
++                continue;
++            }
++            if (child.childNodes.length > 0 && child.tagName !== "UL" && child.tagName !== "OL" &&
++                child.getAttribute("contenteditable") !== "false" &&
++                (!child.hasAttribute("data-type") || /^(strong|em|s|a|code|mark)$/.test(child.getAttribute("data-type"))) &&
++                !child.classList.contains("vditor-ir__preview") &&
++                !child.classList.contains("vditor-wysiwyg__preview")) {
++                setListStart(child, range);
++            } else {
++                range.setStartBefore(child);
++            }
++            return;
++        }
++    }
++    range.selectNodeContents(element);
++    range.collapse(false);
++};
++
+ export const fixList = (range: Range, vditor: IVditor, pElement: HTMLElement | false, event: KeyboardEvent) => {
+     const startContainer = range.startContainer;
+     const liElement = hasClosestByMatchTag(startContainer, "LI");
++    if (event.key === "Delete" && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
++        range.collapsed && !liElement && pElement && pElement.tagName === "P" && pElement.contains(startContainer) &&
++        isEmptyParagraph(pElement)) {
++        const listElement = pElement.nextSibling as HTMLElement;
++        if (listElement && (listElement.nodeName === "UL" || listElement.nodeName === "OL") &&
++            listElement.firstElementChild && listElement.firstElementChild.tagName === "LI") {
++            setListStart(listElement.firstElementChild as HTMLElement, range);
++            range.collapse(true);
++            pElement.remove();
++            setSelectionFocus(range);
++            execAfterRender(vditor);
++            event.preventDefault();
++            return true;
++        }
++    }
+     if (liElement) {
+         if (!isCtrl(event) && !event.altKey && event.key === "Enter" &&
+             // fix li 中有多个 P 时，在第一个 P 中换行会在下方生成新的 li

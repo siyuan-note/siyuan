@@ -17,3 +17,7 @@ overrides:
   # 故强制统一到 4.0.3 消除多版本碎片化,修复 electron-builder 打包时的 "Cannot read properties of
   # undefined (reading 'ReadWrite')" 错误。
   '@electron/get': 4.0.3
+patchedDependencies:
+  # 列表前空段落 Delete 修复；升级到包含此提交的版本后移除补丁。
+  # https://github.com/Vanessa219/vditor/commit/2ae3845e6faebba916baa13e11ccd6a1f9b00cd0
+  vditor@4.0.2-alpha.0: patches/vditor@4.0.2-alpha.0.patch

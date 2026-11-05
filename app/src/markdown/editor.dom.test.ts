@@ -177,6 +177,74 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         check.equal(edits.length, afterReload);
         if (mode !== "sv") {
             editor.setMode(mode);
+            const keyboardSource = "- first\n- second\n";
+            editor.setValue(keyboardSource);
+            await new Promise(resolve => setTimeout(resolve, 350));
+            const richSurface = element.querySelector<HTMLElement>(`.vditor-${mode} pre[contenteditable="true"]`);
+            const placeCaret = (target: Element) => {
+                const range = document.createRange();
+                range.selectNodeContents(target);
+                range.collapse(true);
+                richSurface.focus();
+                getSelection().removeAllRanges();
+                getSelection().addRange(range);
+            };
+            let nativeInputs = 0;
+            const countInput = () => nativeInputs++;
+            richSurface.addEventListener("input", countInput);
+            placeCaret(richSurface.querySelector("li"));
+            const backspace = new KeyboardEvent("keydown", {key: "Backspace", bubbles: true, cancelable: true});
+            richSurface.dispatchEvent(backspace);
+            check.equal(backspace.defaultPrevented, true, `Vditor handles list Backspace in ${mode}`);
+            check.equal(nativeInputs, 0, "a handled key does not produce a native input event");
+            const keyboardEdit = editor.flush();
+            check.equal(keyboardEdit.edited, true, `keyboard command flush in ${mode}`);
+            check.match(keyboardEdit.content, /^first\n+[-*+] second\n$/);
+            await new Promise(resolve => setTimeout(resolve, 350));
+            check.equal(edits.at(-1).content, keyboardEdit.content, `delayed keyboard snapshot in ${mode}`);
+            editor.undo(); await tick();
+            check.equal(editor.flush().content, keyboardSource, `keyboard undo in ${mode}`);
+            editor.redo(); await tick();
+            check.equal(editor.flush().content, keyboardEdit.content, `keyboard redo in ${mode}`);
+
+            editor.setValue(keyboardSource);
+            await new Promise(resolve => setTimeout(resolve, 350));
+            placeCaret(richSurface.querySelectorAll("li")[1]);
+            const indent = new KeyboardEvent("keydown", {key: "Tab", bubbles: true, cancelable: true});
+            richSurface.dispatchEvent(indent);
+            check.equal(indent.defaultPrevented, true);
+            check.equal(richSurface.querySelectorAll("li li").length, 1);
+            const indented = editor.flush();
+            check.equal(indented.edited, true);
+            check.notEqual(indented.content, keyboardSource);
+            editor.setMode("sv");
+            check.equal(editor.flush().content, indented.content, "mode switching preserves a command before its callback");
+
+            editor.setMode(mode);
+            editor.setValue("- [ ] first\n");
+            await new Promise(resolve => setTimeout(resolve, 350));
+            placeCaret(richSurface.querySelector("li"));
+            richSurface.dispatchEvent(new KeyboardEvent("keydown", {key: "J", code: "KeyJ", ctrlKey: true,
+                shiftKey: true, bubbles: true, cancelable: true}));
+            check.ok(richSurface.querySelector<HTMLInputElement>("input").checked, `task keyboard command in ${mode}`);
+            check.match(editor.flush().content, /\[[xX]\]/);
+            editor.setValue(keyboardSource);
+            await new Promise(resolve => setTimeout(resolve, 350));
+            const emptyParagraph = document.createElement("p");
+            emptyParagraph.setAttribute("data-block", "0");
+            emptyParagraph.append(document.createElement("br"));
+            richSurface.prepend(emptyParagraph);
+            const originalList = richSurface.querySelector("ul");
+            placeCaret(emptyParagraph);
+            const deleteKey = new KeyboardEvent("keydown", {key: "Delete", bubbles: true, cancelable: true});
+            richSurface.dispatchEvent(deleteKey);
+            check.equal(deleteKey.defaultPrevented, true, `empty paragraph Delete handled in ${mode}`);
+            check.equal(richSurface.firstElementChild, originalList, "the existing list is retained");
+            check.equal(originalList.querySelectorAll("li").length, 2, "Delete keeps both list items");
+            check.equal(editor.flush().content, keyboardSource);
+            richSurface.removeEventListener("input", countInput);
+
+            editor.setMode(mode);
             editor.setValue("");
             editor.focus();
             document.execCommand("insertText", false, ":do");

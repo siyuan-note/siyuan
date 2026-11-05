@@ -165,6 +165,9 @@ settings:
 overrides:
   '@electron/get': 4.0.3
 
+patchedDependencies:
+  vditor@4.0.2-alpha.0: 91ab79f9fe4d4f4d112cfb5f1b6db653d81717dad0f8ef3018fb75d4c99c4751
+
 importers:
 
   .:
@@ -289,7 +292,7 @@ importers:
         version: 0.12.5
       vditor:
         specifier: 4.0.2-alpha.0
-        version: 4.0.2-alpha.0
+        version: 4.0.2-alpha.0(patch_hash=91ab79f9fe4d4f4d112cfb5f1b6db653d81717dad0f8ef3018fb75d4c99c4751)
       webpack:
         specifier: ^5.104.1
         version: 5.106.2(clean-css@5.3.3)(esbuild@0.28.1)(html-minifier-terser@6.1.0)(postcss@8.5.29)(webpack-cli@7.2.3)
@@ -6156,7 +6159,7 @@ snapshots:
 
   utila@0.4.0: {}
 
-  vditor@4.0.2-alpha.0:
+  vditor@4.0.2-alpha.0(patch_hash=91ab79f9fe4d4f4d112cfb5f1b6db653d81717dad0f8ef3018fb75d4c99c4751):
     dependencies:
       diff-match-patch: 1.0.5
 

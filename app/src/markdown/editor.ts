@@ -387,7 +387,10 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                     syncMode();
                 }
             });
-        } else if ((keyboard.ctrlKey || keyboard.metaKey) && /^(?:[biklmuyz]|Enter)$/i.test(keyboard.key)) {
+        } else if (!keyboard.isComposing && (keyboard.key.length === 1 ||
+            /^(?:Backspace|Delete|Enter|Tab|Arrow(?:Left|Right|Up|Down))$/.test(keyboard.key))) {
+            // Vditor 的按键命令可能直接改写正文并阻止原生 input，方向键也可能插入空段落。
+            // 提前登记输入意图，正文是否改变仍由 flush 与渲染基线比较决定。
             markUserInput();
         }
     });

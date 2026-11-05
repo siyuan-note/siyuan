@@ -45,7 +45,7 @@ export const setStartupLanguage = (language: string) =>
     window.dispatchEvent(new CustomEvent("siyuan-startup-language", {detail: language}));
 
 export const reportStartupError = (error: unknown) => {
-    console.error("Mobile startup failed:", error);
+    console.error("SiYuan startup failed:", error);
     window.dispatchEvent(new CustomEvent("siyuan-startup-error", {detail: error}));
 };
 
@@ -170,8 +170,10 @@ export const installStartupError = (target: Window, version: string, timeout = 3
         if (event.target !== target) {
             const element = event.target as HTMLScriptElement;
             // 只有主程序资源属于启动必需项，图片和扩展资源失败不终止启动。
-            if (element?.tagName !== "SCRIPT" || !element.src.includes("/stage/build/mobile/")) return;
-            fail(new Error(new URL(element.src, target.location.href).pathname));
+            if (element?.tagName !== "SCRIPT") return;
+            const resource = new URL(element.src, target.location.href);
+            if (!/\/stage\/build\/(?:app|desktop|mobile)\//.test(resource.pathname)) return;
+            fail(new Error(resource.pathname));
         } else {
             if (suppressedErrors > 0) return;
             fail(event.error || `${event.message}\n${event.filename}:${event.lineno}:${event.colno}`);

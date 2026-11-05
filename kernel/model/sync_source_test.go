@@ -108,7 +108,7 @@ func TestSyncSourceLegacySwitchBackupAndPreview(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Simulate a workspace last synchronized by a released version without the binding.
-	if err = os.Remove(filepath.Join(repo.Path, "refs", "latest-sync-source")); err != nil {
+	if err = os.Remove(filepath.Join(repo.Path, "sync-source.json")); err != nil {
 		t.Fatal(err)
 	}
 	if err = os.WriteFile(filepath.Join(util.DataDir, "new.txt"), []byte("local content"), 0644); err != nil {
@@ -174,5 +174,43 @@ func TestSyncSourceLegacySwitchBackupAndPreview(t *testing.T) {
 	state, err = GetSyncSourceState()
 	if err != nil || state.Pending {
 		t.Fatalf("successful choice did not clear pending state: %v %v", state, err)
+	}
+}
+
+func TestPurgeRepoMigratesSyncSourceBinding(t *testing.T) {
+	_, repo, _ := prepareAssetDownloadRepoTest(t)
+	if err := repo.EnsureAllAssets(nil); err != nil {
+		t.Fatal(err)
+	}
+	id, _, err := repo.AssetDownloadChanges()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = repo.AcknowledgeAssetDownloadChanges(id); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(repo.Path, "sync-source.json")
+	before, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	legacyPath := filepath.Join(repo.Path, "refs", "latest-sync-source")
+	if err = os.Rename(path, legacyPath); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 2; i++ {
+		if err = PurgeRepo(); err != nil {
+			t.Fatalf("purge after binding migration: %v", err)
+		}
+	}
+	after, err := os.ReadFile(path)
+	if err != nil || string(after) != string(before) {
+		t.Fatalf("purge changed sync source: %q %v", after, err)
+	}
+	if _, err = os.Stat(legacyPath); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("legacy sync source remains: %v", err)
+	}
+	if changed, err := repo.SyncSourceChanged(); err != nil || changed {
+		t.Fatalf("migration changed source identity: %v %v", changed, err)
 	}
 }

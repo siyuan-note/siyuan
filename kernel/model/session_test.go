@@ -87,17 +87,27 @@ func TestAuthByAPITokenThrottle(t *testing.T) {
 
 func TestIsLocalRequest(t *testing.T) {
 	tests := []struct {
-		name         string
-		remoteAddr   string
-		forwardedFor string
-		wantLocal    bool
+		name           string
+		remoteAddr     string
+		forwardedFor   string
+		forwardedHost  string
+		forwardedProto string
+		xRealIP        string
+		forwarded      string
+		localProxy     bool
+		wantLocal      bool
 	}{
 		{name: "direct loopback", remoteAddr: "127.0.0.1:1234", wantLocal: true},
 		{name: "direct remote", remoteAddr: "192.0.2.10:1234", wantLocal: false},
 		{name: "direct remote with spoofed forwarding", remoteAddr: "192.0.2.10:1234", forwardedFor: "127.0.0.1", wantLocal: false},
-		{name: "local proxy for local client", remoteAddr: "127.0.0.1:1234", forwardedFor: "127.0.0.1", wantLocal: true},
-		{name: "local proxy for remote client", remoteAddr: "127.0.0.1:1234", forwardedFor: "192.0.2.10", wantLocal: false},
-		{name: "local proxy with spoofed chain", remoteAddr: "127.0.0.1:1234", forwardedFor: "127.0.0.1, 192.0.2.10", wantLocal: false},
+		{name: "local proxy for local client", remoteAddr: "127.0.0.1:1234", forwardedFor: "127.0.0.1", localProxy: true, wantLocal: true},
+		{name: "unmarked local proxy for local client", remoteAddr: "127.0.0.1:1234", forwardedFor: "127.0.0.1", wantLocal: false},
+		{name: "local proxy for remote client", remoteAddr: "127.0.0.1:1234", forwardedFor: "192.0.2.10", localProxy: true, wantLocal: false},
+		{name: "local proxy with spoofed chain", remoteAddr: "127.0.0.1:1234", forwardedFor: "127.0.0.1, 192.0.2.10", localProxy: true, wantLocal: false},
+		{name: "local request with forwarded host", remoteAddr: "127.0.0.1:1234", forwardedHost: "localhost:6806", wantLocal: false},
+		{name: "local request with forwarded proto", remoteAddr: "127.0.0.1:1234", forwardedProto: "https", wantLocal: false},
+		{name: "local request with x-real-ip", remoteAddr: "127.0.0.1:1234", xRealIP: "127.0.0.1", wantLocal: false},
+		{name: "local request with forwarded", remoteAddr: "127.0.0.1:1234", forwarded: "for=127.0.0.1", wantLocal: false},
 	}
 
 	for _, test := range tests {
@@ -106,6 +116,7 @@ func TestIsLocalRequest(t *testing.T) {
 			if err := engine.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {
 				t.Fatal(err)
 			}
+			engine.ForwardedByClientIP = true
 			engine.RemoteIPHeaders = []string{"X-Forwarded-For"}
 			engine.GET("/", func(c *gin.Context) {
 				if IsLocalRequest(c) {
@@ -117,8 +128,23 @@ func TestIsLocalRequest(t *testing.T) {
 
 			request := httptest.NewRequest(http.MethodGet, "/", nil)
 			request.RemoteAddr = test.remoteAddr
+			if test.localProxy {
+				request.Header.Set(util.LocalProxyHeader, util.LocalProxyToken)
+			}
 			if test.forwardedFor != "" {
 				request.Header.Set("X-Forwarded-For", test.forwardedFor)
+			}
+			if test.forwardedHost != "" {
+				request.Header.Set("X-Forwarded-Host", test.forwardedHost)
+			}
+			if test.forwardedProto != "" {
+				request.Header.Set("X-Forwarded-Proto", test.forwardedProto)
+			}
+			if test.xRealIP != "" {
+				request.Header.Set("X-Real-IP", test.xRealIP)
+			}
+			if test.forwarded != "" {
+				request.Header.Set("Forwarded", test.forwarded)
 			}
 			recorder := httptest.NewRecorder()
 			engine.ServeHTTP(recorder, request)
@@ -131,6 +157,87 @@ func TestIsLocalRequest(t *testing.T) {
 				t.Fatalf("status = %d, want %d", recorder.Code, wantStatus)
 			}
 		})
+	}
+}
+
+// TestCheckAuthForwardedHeadersNotLocal 验证经第三方反代转发的请求不能凭伪造的
+// X-Forwarded-For 获得本机免认证权限，内置 fixed-port 代理仍按真实客户端地址判断。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-gmcm-mggw-8759
+func TestCheckAuthForwardedHeadersNotLocal(t *testing.T) {
+	originalConf, originalWorkspaceDir := Conf, util.WorkspaceDir
+	Conf = NewAppConf()
+	util.WorkspaceDir = "test-workspace"
+	t.Cleanup(func() {
+		Conf = originalConf
+		util.WorkspaceDir = originalWorkspaceDir
+	})
+
+	engine := gin.New()
+	if err := engine.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {
+		t.Fatal(err)
+	}
+	engine.ForwardedByClientIP = true
+	engine.RemoteIPHeaders = []string{"X-Forwarded-For"}
+	engine.Use(ginSessions.Sessions("siyuan", cookie.NewStore([]byte("test-session-cookie-key"))))
+	engine.GET("/history/*path", CheckAuth, CheckAdminRole, func(c *gin.Context) { c.Status(http.StatusNoContent) })
+	engine.POST("/api/system/exit", CheckAuth, func(c *gin.Context) { c.Status(http.StatusNoContent) })
+	engine.GET("/api/system/getWorkspaceInfo", CheckAuth, func(c *gin.Context) { c.Status(http.StatusNoContent) })
+	engine.GET("/assets/icon.png", CheckAuth, func(c *gin.Context) { c.Status(http.StatusNoContent) })
+
+	newRequest := func(method, path, host, forwardedFor string, localProxy bool) int {
+		request := httptest.NewRequest(method, path, nil)
+		request.Host = host
+		request.RemoteAddr = "127.0.0.1:443"
+		if "" != forwardedFor {
+			request.Header.Set("X-Forwarded-For", forwardedFor)
+		}
+		if localProxy {
+			request.Header.Set(util.LocalProxyHeader, util.LocalProxyToken)
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, request)
+		return recorder.Code
+	}
+
+	history := "/history/snap/blocks/note.sy"
+	if code := newRequest(http.MethodGet, history, "localhost:6806", "127.0.0.1", false); http.StatusUnauthorized != code {
+		t.Fatalf("spoofed forwarded history = %d, want %d", code, http.StatusUnauthorized)
+	}
+	if code := newRequest(http.MethodGet, history, "localhost:6806", "127.0.0.1", true); http.StatusNoContent != code {
+		t.Fatalf("local proxy history = %d, want %d", code, http.StatusNoContent)
+	}
+	if code := newRequest(http.MethodGet, history, "workspace.example.test", "198.51.100.7", false); http.StatusUnauthorized != code {
+		t.Fatalf("public host history = %d, want %d", code, http.StatusUnauthorized)
+	}
+	spoofedHost := httptest.NewRequest(http.MethodGet, history, nil)
+	spoofedHost.Host = "localhost:6806"
+	spoofedHost.RemoteAddr = "127.0.0.1:443"
+	spoofedHost.Header.Set("X-Forwarded-Host", "localhost:6806")
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, spoofedHost)
+	if http.StatusUnauthorized != recorder.Code {
+		t.Fatalf("spoofed forwarded host history = %d, want %d", recorder.Code, http.StatusUnauthorized)
+	}
+
+	Conf.AccessAuthCode = "configured"
+	for _, test := range []struct {
+		name, method, path string
+	}{
+		{"system exit", http.MethodPost, "/api/system/exit"},
+		{"workspace info", http.MethodGet, "/api/system/getWorkspaceInfo"},
+		{"asset", http.MethodGet, "/assets/icon.png"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if code := newRequest(test.method, test.path, "localhost:6806", "127.0.0.1", false); http.StatusUnauthorized != code {
+				t.Fatalf("spoofed forwarded request = %d, want %d", code, http.StatusUnauthorized)
+			}
+			if code := newRequest(test.method, test.path, "localhost:6806", "127.0.0.1", true); http.StatusNoContent != code {
+				t.Fatalf("local proxy request = %d, want %d", code, http.StatusNoContent)
+			}
+		})
+	}
+	if code := newRequest(http.MethodGet, history, "localhost:6806", "127.0.0.1", true); http.StatusUnauthorized != code {
+		t.Fatalf("password-protected local proxy history = %d, want %d", code, http.StatusUnauthorized)
 	}
 }
 

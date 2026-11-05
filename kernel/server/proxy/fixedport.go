@@ -70,6 +70,8 @@ func newFixedPortReverseProxy(target *url.URL) *httputil.ReverseProxy {
 			request.SetURL(target)
 			request.Out.Host = request.In.Host
 			request.SetXForwarded()
+			// 第三方无法得知该进程内标记，内核仅凭它放行内置代理追加的客户端地址。
+			request.Out.Header.Set(util.LocalProxyHeader, util.LocalProxyToken)
 
 			// 反代以 HTTPS 回源内核，内核据此会把明文客户端的连接误判为 TLS，
 			// 因此显式标记客户端侧的真实连接方式；调用方伪造的同名头部一律清除。

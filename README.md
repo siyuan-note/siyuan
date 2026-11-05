@@ -292,6 +292,7 @@ Use an NGINX reverse proxy to hide port 6806. Please note:
 
 - Configure the WebSocket reverse proxy for `/ws`
 - Preserve the original `Host` header, including the port, for both regular requests and `/ws`. In NGINX, configure `proxy_set_header Host $http_host;` in both proxy locations. Using `$host` drops non-standard ports (such as `8443`), which can cause Origin validation to fail, leaving the page stuck on the logo with repeated reloads, API responses of `401`, or failed WebSocket connections
+- Set `proxy_set_header X-Forwarded-For $remote_addr;` in both proxy locations so the kernel receives the actual client address. Do not pass a caller-supplied `X-Forwarded-For` through unchanged, otherwise a remote client may be treated as a local administrator
 
 #### Note
 

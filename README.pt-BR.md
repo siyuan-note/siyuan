@@ -291,6 +291,7 @@ Use um proxy reverso NGINX para ocultar a porta 6806. Observe os seguintes ponto
 
 - Configure o proxy reverso de WebSocket para `/ws`
 - Preserve o cabeçalho `Host` original, incluindo a porta, tanto nas requisições comuns quanto em `/ws`. No NGINX, configure `proxy_set_header Host $http_host;` nos dois blocos `location` do proxy. O uso de `$host` remove portas não padrão (como `8443`), o que pode causar falha na validação de Origin, deixando a página parada no logotipo com recarregamentos repetidos, respostas `401` da API ou falhas nas conexões WebSocket
+- Configure `proxy_set_header X-Forwarded-For $remote_addr;` nos dois blocos `location` do proxy para que o kernel receba o endereço real do cliente. Não repasse o cabeçalho `X-Forwarded-For` enviado pelo chamador sem alteração, caso contrário um cliente remoto pode ser tratado como administrador local
 
 #### Observações
 

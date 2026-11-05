@@ -471,10 +471,23 @@ func authByAPIToken(c *gin.Context, source, token string) (handled bool) {
 	return true
 }
 
-// IsLocalRequest 判断请求是否由本机客户端直接发起或经可信本机代理转发。
+// IsLocalRequest 判断请求是否由本机客户端直接发起或经内置 fixed-port 代理转发。
 func IsLocalRequest(c *gin.Context) bool {
-	// 仅当直接连接和可信代理解析出的原始客户端均为环回地址时，才视为本机请求。
-	return util.IsLocalHost(c.Request.RemoteAddr) && util.IsLocalHostname(c.ClientIP())
+	if !util.IsLocalHost(c.Request.RemoteAddr) {
+		return false
+	}
+
+	// 内置 fixed-port 代理会覆盖标记并追加真实客户端地址，仍需校验解析出的客户端为环回地址。
+	if util.IsLocalProxyRequest(c.Request) {
+		return util.IsLocalHostname(c.ClientIP())
+	}
+
+	// 第三方反向代理可能原样转发调用方伪造的转发头，带这类头的请求不能按本机请求放行。
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-gmcm-mggw-8759
+	if util.HasForwardedHeaders(c.Request) {
+		return false
+	}
+	return true
 }
 
 // isLocalHostRequestAllowed 判断本机放行请求是否可信任：

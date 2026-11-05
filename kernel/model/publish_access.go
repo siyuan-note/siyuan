@@ -528,10 +528,9 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 	return false
 }
 
-func checkAssetPathAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, assetPath, boxID string) bool {
-	publishIgnore := GetDisablePublishAccess(publishAccess)
+func newPublishAccessItemFilter(c *gin.Context, publishAccess PublishAccess) attributeViewItemFilter {
 	itemAccessCache := map[*av.AttributeView]map[string]bool{}
-	itemFilter := func(attrView *av.AttributeView, itemID string) bool {
+	return func(attrView *av.AttributeView, itemID string) bool {
 		itemAccess := itemAccessCache[attrView]
 		if nil == itemAccess {
 			itemAccess = map[string]bool{}
@@ -545,6 +544,11 @@ func checkAssetPathAccessableByPublishAccess(c *gin.Context, publishAccess Publi
 		itemAccess[itemID] = accessable
 		return accessable
 	}
+}
+
+func checkAssetPathAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, assetPath, boxID string) bool {
+	publishIgnore := GetDisablePublishAccess(publishAccess)
+	itemFilter := newPublishAccessItemFilter(c, publishAccess)
 	for _, bt := range treenode.GetBlockTreesByType("d") {
 		if "" != boxID && bt.BoxID != boxID {
 			continue
@@ -1721,9 +1725,15 @@ func FilterLocalStorageByPublishAccess(localStorage map[string]any) (ret map[str
 	return
 }
 
+// DocAssetsForPublishAccess 返回发布读者可见的文档资源，属性视图行按其绑定文档的发布访问过滤。
+func DocAssetsForPublishAccess(c *gin.Context, publishAccess PublishAccess, rootID string, retainQueryStr bool) ([]string, error) {
+	return docAssets(rootID, retainQueryStr, newPublishAccessItemFilter(c, publishAccess))
+}
+
 func FilterAssetContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, assetContent []*AssetContent) (ret []*AssetContent) {
 	publishInvisible := GetInvisiblePublishAccess(publishAccess)
 	publishDisable := GetDisablePublishAccess(publishAccess)
+	itemFilter := newPublishAccessItemFilter(c, publishAccess)
 	validAssets := []string{}
 	bts := treenode.GetBlockTreesByType("d")
 	for _, bt := range bts {
@@ -1731,7 +1741,7 @@ func FilterAssetContentByPublishAccess(c *gin.Context, publishAccess PublishAcce
 		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) &&
 			CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) &&
 			(password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
-			assets, err := DocAssets(bt.ID, false)
+			assets, err := docAssets(bt.ID, false, itemFilter)
 			if err == nil {
 				validAssets = append(validAssets, assets...)
 			}

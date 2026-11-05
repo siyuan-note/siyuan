@@ -13,7 +13,7 @@ import (
 
 var ImportTool = &Tool{
 	Name:        "import",
-	Description: "Import operations (absolute local paths). Actions: md(notebook, path, targetPath?), sy(notebook, path, targetPath?) — .sy.zip, data(path) — full backup zip.",
+	Description: "Import operations (absolute local paths). Actions: md(notebook, path, targetPath?), sy(notebook, path, targetPath?) — .sy.zip, data(path) — restore a full data backup zip into the current workspace, overwriting existing files at matching paths while retaining files absent from the backup. data is destructive: use only when the user explicitly requests restoring a backup and approves overwriting current data.",
 	EffectScope: EffectScopeLocal,
 	ActionEffects: map[string]ToolEffects{
 		"md":   {LocalWrite: true},

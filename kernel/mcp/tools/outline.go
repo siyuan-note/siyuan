@@ -5,6 +5,7 @@
 package tools
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -52,12 +53,15 @@ func outlineGet(args map[string]any) (CallToolResult, error) {
 	}
 
 	paths, err := model.Outline(id, false)
+	if errors.Is(err, model.ErrTreeNotFound) {
+		return blockToolError("document not found: " + id)
+	}
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "outline failed: " + err.Error()}}, IsError: true}, nil
 	}
 
 	if len(paths) == 0 {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document not found or has no headings"}}, IsError: true}, nil
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document has no headings"}}}, nil
 	}
 
 	var sb strings.Builder

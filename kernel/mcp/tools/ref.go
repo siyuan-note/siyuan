@@ -97,6 +97,13 @@ func refMentions(args map[string]any) (CallToolResult, error) {
 
 func refRefresh(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
+	if id == "" {
+		return blockToolError("id is required")
+	}
+	model.FlushTxQueue()
+	if _, err := loadExistingToolBlock(id); err != nil {
+		return blockToolError(err.Error())
+	}
 	model.RefreshBacklink(id)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "backlink refreshed for: " + id}}}, nil
 }

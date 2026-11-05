@@ -223,8 +223,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownStatus").textContent = actionMessage || text(state.recoveryError ? markdownErrorKey(state.recoveryError) :
             state.problem?.kind === "indeterminate" ? "markdownUncertain" : state.problem?.kind === "blocked" ? markdownErrorKey(state.problem.error) : statusKey);
         control("markdownStatus").dataset.status = actionMessage || state.recoveryError ? "blocked" : pendingStatus ? "dirty" : state.status;
-        control("markdownFooter").hidden = !actionMessage && !state.recoveryError && !state.problem && !pendingSwitch &&
-            !pendingStatus && (state.status === "saved" || !statusKey);
+        control("markdownFooter").hidden = !actionMessage && !state.recoveryError && !state.problem && !pendingSwitch;
         const notices = [
             state.target && !state.target.capabilities.persistentPermission ? text("markdownTemporaryPermission") : "",
             resourceUnavailable ? text("markdownResourceUnavailable") : "",

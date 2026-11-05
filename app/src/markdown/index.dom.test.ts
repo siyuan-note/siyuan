@@ -415,7 +415,7 @@ const browserCases = async (languages: Record<string, string>) => {
     textarea.value += "\nA committed edit\n";
     textarea.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", data: "A committed edit"}));
     check.equal(document.querySelector("#markdownStatus").textContent, languages.markdownUnsaved, "pending serialization is immediately shown as unsaved");
-    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, false, "pending edits show their status");
+    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, true, "pending edits do not flash the footer");
     document.dispatchEvent(new KeyboardEvent("keydown", {key: "s", ctrlKey: true, bubbles: true, cancelable: true}));
     await tick();
     check.ok(writes.at(-1).content.includes("A committed edit"));

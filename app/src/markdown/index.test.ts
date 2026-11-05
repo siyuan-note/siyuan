@@ -70,6 +70,48 @@ const setup = () => {
 };
 const snapshot = (sessionId: string) => ({sessionId, content: sessionId + "\n", lang: "en", preferences: {mode: "ir", theme: "light"}});
 
+test("the Markdown footer stays hidden during normal editing and saving but exposes actionable problems", () => {
+    const controls = new Map<string, {textContent: string; hidden: boolean; dataset: Record<string, string>}>();
+    const control = (name: string) => {
+        if (!controls.has(name)) controls.set(name, {textContent: "", hidden: false, dataset: {}});
+        return controls.get(name);
+    };
+    const deps = {control, document: {title: ""}, text: (key: string) => key,
+        markdownErrorKey: (error: {code: string}) => error.code,
+        bridge: {state: async () => {}}, modeChoice: {setDisabled() {}}};
+    const body = transpileModule(`
+        let disposed = false, actionMessage = "", editPending = false, pendingSwitch, frozen = false;
+        let resourceUnavailable = false, sourceOnly = false, targetGeneration = 0;
+        const history = {canUndo: false, canRedo: false}, bootstrap = {recovered: false};
+        ${section("    const render =", "    const reportError =")}
+        return (state, pending = false, message = "", switching = false) => {
+            editPending = pending; actionMessage = message; pendingSwitch = switching;
+            render(state);
+        };
+    `, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
+    const render = new Function("deps", `with (deps) { ${body} }`)(deps);
+    const state = {status: "saved", targetGeneration: 0, revision: 1, draftRevision: 1, hasUnsavedChanges: false};
+    for (const status of ["view", "draft", "dirty", "saving", "saved"]) {
+        for (const pending of [false, true]) {
+            render({...state, status}, pending);
+            assert.equal(control("markdownFooter").hidden, true, `${status}, pending=${pending}`);
+        }
+    }
+    for (const problem of [{kind: "blocked", error: {code: "io", recoverable: true}},
+        {kind: "indeterminate", error: {code: "io"}}, {kind: "conflict", baseline: "old"}]) {
+        render({...state, status: problem.kind === "conflict" ? "conflict" : "blocked", problem});
+        assert.equal(control("markdownFooter").hidden, false, problem.kind);
+    }
+    render({...state, recoveryError: {code: "io"}});
+    assert.equal(control("markdownFooter").hidden, false);
+    render(state, false, "markdownTooLarge");
+    assert.equal(control("markdownFooter").hidden, false);
+    render(state, false, "", true);
+    assert.equal(control("markdownFooter").hidden, false);
+    render(state);
+    assert.equal(control("markdownFooter").hidden, true, "resolving the problem hides the footer");
+});
+
 test("automatic source fallback stays local while explicit mode choices become the next document's preference", async () => {
     const {lifecycle, callbacks, preferenceWrites} = setup();
     await lifecycle.initializeDocument(snapshot("large"));

@@ -380,7 +380,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to request an immediate save; a new document must first be saved to a chosen location. The status bar is hidden when the file is saved or a new blank document has no status to report. It appears for unsaved content, saving, drafts, read-only files, conflicts, and failures."
+					"Data": " to request an immediate save; a new document must first be saved to a chosen location. The bottom status bar stays hidden during ordinary editing and saving; automatic saving continues normally. It appears only when conflicts, failures, recovery errors, or other problems need attention or action."
 				}
 			]
 		},
@@ -394,7 +394,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On Android, Save As uses the system file picker to choose a location and filename. On iOS and HarmonyOS, choose a destination folder first, then enter the filename. Successful saves show “Saved to file”. Cloud synchronization is managed by the corresponding cloud drive. When the app enters the background, it attempts to persist the latest committed input and save pending changes. If the system terminates the process, only content already persisted can be recovered. On iOS, Markdown scenes and the workspace share one app process; a process crash or termination affects both."
+					"Data": "On Android, Save As uses the system file picker to choose a location and filename. On iOS and HarmonyOS, choose a destination folder first, then enter the filename. The status bar remains hidden after a successful save. Cloud synchronization is managed by the corresponding cloud drive. When the app enters the background, it attempts to persist the latest committed input and save pending changes. If the system terminates the process, only content already persisted can be recovered. On iOS, Markdown scenes and the workspace share one app process; a process crash or termination affects both."
 				}
 			]
 		},

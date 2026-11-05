@@ -18,6 +18,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
@@ -172,6 +173,7 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 	}
 	Conf.OCR.Load().Auto = true
 	testAutomaticOCRUnsupportedLogging(t, path, provider)
+	testAutomaticOCRPermanentFailure(t, path, provider)
 	autoOCRAssets()
 	if !provider.called || !strings.Contains(util.GetAssetText(path), "nativeocrkeyword") {
 		t.Fatalf("headless automatic OCR did not save text: called=%v text=%q", provider.called, util.GetAssetText(path))
@@ -344,11 +346,9 @@ func testAutomaticOCRUnsupportedLogging(t *testing.T, path string, provider *ocr
 	previousLogPath := logging.LogPath
 	logging.SetLogPath(logPath)
 	defer logging.SetLogPath(previousLogPath)
-	value := Conf.GetOCR()
-	key := fmt.Sprintf("%s:%s:%s:%s:%s", value.Provider, value.Model, value.AIModelID, value.ReasoningEffort, path)
-	defer ocrRetry.Delete(key)
+	defer ocrRetry.reset()
 	for _, unsupported := range []bool{true, false} {
-		ocrRetry.Delete(key)
+		ocrRetry.reset()
 		provider.called = false
 		provider.err = errors.New("webp: invalid format")
 		if unsupported {
@@ -365,6 +365,67 @@ func testAutomaticOCRUnsupportedLogging(t *testing.T, path string, provider *ocr
 		if warned := strings.Contains(string(data), "automatic OCR [provider="); warned == unsupported {
 			t.Fatalf("unsupported=%v, unexpected automatic OCR warning: %s", unsupported, data)
 		}
+	}
+	provider.err = nil
+}
+
+func testAutomaticOCRPermanentFailure(t *testing.T, path string, provider *ocrFixtureProvider) {
+	t.Helper()
+	defer ocrRetry.reset()
+	absPath := filepath.Join(util.DataDir, path)
+	updated := time.Now().Truncate(time.Second).Add(100 * time.Millisecond)
+	if err := os.Chtimes(absPath, updated, updated); err != nil {
+		t.Fatal(err)
+	}
+	cache.LoadAssets()
+	logPath := filepath.Join(t.TempDir(), "ocr.log")
+	previousLogPath := logging.LogPath
+	logging.SetLogPath(logPath)
+	defer logging.SetLogPath(previousLogPath)
+	provider.err = fmt.Errorf("%w: OCR image exceeds 24 million pixels", ocr.ErrPermanent)
+	provider.called = false
+	autoOCRAssets()
+	if !provider.called || util.ExistsAssetText(path) || !HasOCRFailure(path) {
+		t.Fatal("permanent failure did not retain an editable failure without OCR text")
+	}
+	provider.called = false
+	autoOCRAssets()
+	if provider.called {
+		t.Fatal("automatic OCR retried a permanent failure")
+	}
+	ocrRetry = automaticOCRRetryCache{}
+	autoOCRAssets()
+	if provider.called {
+		t.Fatal("automatic OCR retried a permanent failure after cache reload")
+	}
+	data, err := os.ReadFile(logPath)
+	if err != nil || strings.Count(string(data), "automatic OCR [provider=") != 1 {
+		t.Fatalf("permanent failure warning was not logged once: %s, %v", data, err)
+	}
+	if _, _, err = OCRAsset(context.Background(), path); !provider.called || !errors.Is(err, ocr.ErrPermanent) {
+		t.Fatal("manual OCR could not retry a permanent failure")
+	}
+	provider.called = false
+	updated = updated.Add(time.Millisecond)
+	if err = os.Chtimes(absPath, updated, updated); err != nil {
+		t.Fatal(err)
+	}
+	cache.LoadAssets()
+	autoOCRAssets()
+	if !provider.called {
+		t.Fatal("image replaced within the same second retained its previous permanent failure")
+	}
+	provider.called = false
+	if err = os.WriteFile(absPath, []byte("replacement with a different size"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Chtimes(absPath, updated, updated); err != nil {
+		t.Fatal(err)
+	}
+	cache.LoadAssets()
+	autoOCRAssets()
+	if !provider.called {
+		t.Fatal("image replaced while preserving its timestamp retained its previous permanent failure")
 	}
 	provider.err = nil
 }

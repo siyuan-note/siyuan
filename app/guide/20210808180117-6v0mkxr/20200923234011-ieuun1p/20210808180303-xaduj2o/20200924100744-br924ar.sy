@@ -1613,7 +1613,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When automatic OCR is enabled, the kernel processes images that have no existing OCR result. Extracted text is used by search to locate images by their text."
+					"Data": "When automatic OCR is enabled, the kernel processes images that have no existing OCR result. Extracted text is used by search to locate images by their text. Images that exceed size or pixel limits, or have an unsupported format, are skipped after a permanent failure, including after restarting the kernel. Replacing the image, changing recognition settings, or turning automatic OCR off and on allows another attempt. Manual recognition can always retry. Temporary failures are retried after ten minutes."
 				}
 			]
 		},

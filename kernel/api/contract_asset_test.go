@@ -30,12 +30,15 @@ import (
 
 func setupAssetContractWorkspace(t *testing.T) string {
 	t.Helper()
-	previousConf, previousData, previousWorkspace := model.Conf, util.DataDir, util.WorkspaceDir
+	previousConf, previousData, previousWorkspace, previousTemp := model.Conf, util.DataDir, util.WorkspaceDir, util.TempDir
 	model.Conf = model.NewAppConf()
 	model.Conf.Sync.Store(conf.NewSync())
 	util.WorkspaceDir = t.TempDir()
+	util.TempDir = t.TempDir()
 	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
-	t.Cleanup(func() { model.Conf, util.DataDir, util.WorkspaceDir = previousConf, previousData, previousWorkspace })
+	t.Cleanup(func() {
+		model.Conf, util.DataDir, util.WorkspaceDir, util.TempDir = previousConf, previousData, previousWorkspace, previousTemp
+	})
 	dir := filepath.Join(util.DataDir, "assets")
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		t.Fatal(err)

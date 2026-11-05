@@ -7,9 +7,12 @@ package ocr
 import (
 	"bytes"
 	"context"
+	"encoding/binary"
 	"encoding/hex"
 	"errors"
+	"hash/crc32"
 	"image"
+	"image/png"
 	"os"
 	"path/filepath"
 	"testing"
@@ -63,6 +66,41 @@ func TestPaddleImageFormatClassification(t *testing.T) {
 			data, readErr := os.ReadFile(path)
 			if readErr != nil || !bytes.Equal(data, test.data) {
 				t.Fatalf("recognition modified source image: %v", readErr)
+			}
+		})
+	}
+}
+
+func TestPaddleImageLimitsArePermanent(t *testing.T) {
+	var pngData bytes.Buffer
+	if err := png.Encode(&pngData, image.NewRGBA(image.Rect(0, 0, 1, 1))); err != nil {
+		t.Fatal(err)
+	}
+	oversized := pngData.Bytes()
+	binary.BigEndian.PutUint32(oversized[16:20], 8000)
+	binary.BigEndian.PutUint32(oversized[20:24], 6000)
+	binary.BigEndian.PutUint32(oversized[29:33], crc32.ChecksumIEEE(oversized[12:29]))
+	for _, limit := range []string{"pixels", "bytes"} {
+		t.Run(limit, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "image.png")
+			if err := os.WriteFile(path, oversized, 0600); err != nil {
+				t.Fatal(err)
+			}
+			if limit == "bytes" {
+				if err := os.Truncate(path, 32*1024*1024+1); err != nil {
+					t.Fatal(err)
+				}
+			}
+			for _, worker := range []bool{false, true} {
+				var err error
+				if worker {
+					_, err = runWorker(context.Background(), PaddleConfig{Worker: filepath.Join(t.TempDir(), "missing-worker")}, path)
+				} else {
+					_, err = decodeImage(path)
+				}
+				if !errors.Is(err, ErrPermanent) || errors.Is(err, ErrUnsupportedImage) {
+					t.Fatalf("worker=%v, incorrect image limit classification: %v", worker, err)
+				}
 			}
 		})
 	}

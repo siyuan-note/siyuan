@@ -358,6 +358,31 @@
     cursor: default;
   }
 
+  &__node-width-handle {
+    position: absolute;
+    top: 25%;
+    bottom: 25%;
+    width: 10px;
+    cursor: ew-resize;
+    touch-action: none;
+    z-index: 1;
+
+    &[data-width-side="left"] {
+      left: -5px;
+      border-left: 2px solid var(--b3-theme-primary);
+    }
+
+    &[data-width-side="right"] {
+      right: -5px;
+      border-right: 2px solid var(--b3-theme-primary);
+    }
+  }
+
+  &__node--editing > &__node-width-handle,
+  &__node--hide-controls > &__node-width-handle {
+    display: none;
+  }
+
   &__node {
     position: absolute;
     min-width: 32px;
@@ -1137,6 +1162,20 @@
 }
 
 @media (any-pointer: coarse) {
+  .mindmap-view__node-width-handle {
+    top: 0;
+    bottom: 0;
+    width: 24px;
+
+    &[data-width-side="left"] {
+      left: -12px;
+    }
+
+    &[data-width-side="right"] {
+      right: -12px;
+    }
+  }
+
   .mindmap-view__route-endpoint {
     width: 28px;
     height: 28px;
@@ -1152,6 +1191,7 @@
     min-height: 0;
 
     &__toolbar,
+    &__node-width-handle,
     &__resize,
     &__inspector,
     &__tooltip,

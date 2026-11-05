@@ -59,7 +59,7 @@ const browserCases = async (source: string, css: string) => {
                 const rect = element.getBoundingClientRect();
                 const clip = outer.getBoundingClientRect();
                 check.equal(element.hidden, false, `${stage}: ${element.className} stays open`);
-                check.equal(getComputedStyle(element).visibility, "visible");
+                check.equal(getComputedStyle(element).visibility, "visible", `${stage}: ${element.className}; mobile=${mobile}; scale=${scale}`);
                 check.ok(rect.top >= clip.top - 1 && rect.bottom <= clip.bottom + 1,
                     `vertical bounds ${rect.top}..${rect.bottom} within ${clip.top}..${clip.bottom}`);
                 check.ok(rect.left >= clip.left - 1 && rect.right <= clip.right + 1);
@@ -288,6 +288,97 @@ const browserCases = async (source: string, css: string) => {
             await settle();
             visible(inspector);
             check.equal(holder.innerHTML, original, "overlay placement never modifies document data");
+            outer.style.height = "480px";
+            outer.scrollTop = 0;
+            host.style.setProperty("--mindmap-view-height", "300px");
+            view.setInteractionActive(true);
+            select();
+            await settle();
+            view.fit();
+            await settle();
+            const commits: {id: string, width: number}[][] = [];
+            view.options.onNodeWidths = async (widths: {id: string, width: number}[], expected: string) => {
+                check.equal(expected, JSON.stringify(widths.map(({id}) => ({id, width: model.metadata.nodes[id]?.width || 0}))));
+                commits.push(widths);
+                widths.forEach(({id, width}) => model.metadata.nodes[id] = {...model.metadata.nodes[id], width});
+                view.update(model);
+                return true;
+            };
+            for (const side of ["left", "right"]) {
+                const handle = node().querySelector<HTMLElement>(`[data-width-side="${side}"]`);
+                check.equal(handle.hidden, false);
+                const rect = handle.getBoundingClientRect();
+                const initial = node().offsetWidth;
+                const beforeDrag = node().getBoundingClientRect();
+                const nodeScale = node().getBoundingClientRect().width / initial;
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                const delta = side === "left" ? -40 : 40;
+                if (!mobile) {
+                    await pointerInput("mouseMove", x, y);
+                    await pointerInput("mouseDown", x, y, "left");
+                    check.equal(view.pointer?.width?.direction, side === "left" ? -1 : 1,
+                        JSON.stringify({side, html: handle.outerHTML, rect: rect.toJSON(), hit: document.elementFromPoint(x, y)?.outerHTML,
+                            left: getComputedStyle(handle).left, right: getComputedStyle(handle).right}));
+                    check.ok(Math.abs(view.pointer.startX - x) < 2, JSON.stringify({x, pointer: view.pointer}));
+                    await pointerInput("mouseMove", x + delta, y, "left");
+                    check.ok(view.pointer.width.value > initial, JSON.stringify({x, delta, pointer: view.pointer}));
+                    check.equal(commits.length, side === "left" ? 0 : 1, "dragging only previews");
+                    await pointerInput("mouseUp", x + delta, y, "left");
+                } else {
+                    handle.setPointerCapture = () => {};
+                    const event = (type: string, clientX: number) => new PointerEvent(type, {
+                        bubbles: true, pointerId: 23, pointerType: "touch", isPrimary: true,
+                        button: 0, clientX, clientY: y,
+                    });
+                    handle.dispatchEvent(event("pointerdown", x));
+                    handle.dispatchEvent(event("pointermove", x + delta));
+                    check.ok(view.pointer?.width, "touch resizes without entering node movement or panning");
+                    handle.dispatchEvent(event("pointerup", x + delta));
+                }
+                await settle();
+                const afterDrag = node().getBoundingClientRect();
+                check.ok(Math.abs((side === "left" ? afterDrag.right - beforeDrag.right : afterDrag.left - beforeDrag.left)) < 2,
+                    "the opposite node edge stays fixed after committing");
+                check.equal(commits.at(-1)[0].width, Math.max(32, Math.round(initial + 40 / nodeScale)),
+                    JSON.stringify({side, mobile, scale, initial, nodeScale, commits}));
+                check.equal(view.pointer, undefined);
+            }
+            check.equal(commits.length, 2, "each drag commits once");
+            for (const cancel of ["Escape", "pointercancel", "lostpointercapture", "blur", "update", "print"]) {
+                view.setInteractionActive(true);
+                const handle = node().querySelector<HTMLElement>('[data-width-side="right"]');
+                handle.setPointerCapture = () => {};
+                const originalWidth = node().style.width;
+                handle.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerId: 24,
+                    pointerType: mobile ? "touch" : "mouse", isPrimary: true, button: 0, clientX: 100}));
+                handle.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerId: 24, clientX: -1000}));
+                check.equal(node().style.width, "32px", "width is clamped");
+                if (cancel === "Escape") {
+                    host.dispatchEvent(new KeyboardEvent("keydown", {bubbles: true, key: "Escape"}));
+                } else if (cancel === "blur") {
+                    window.dispatchEvent(new Event("blur"));
+                } else if (cancel === "update") {
+                    view.update(model);
+                } else if (cancel === "print") {
+                    window.dispatchEvent(new Event("beforeprint"));
+                    window.dispatchEvent(new Event("afterprint"));
+                } else {
+                    handle.dispatchEvent(new PointerEvent(cancel, {bubbles: true, pointerId: 24}));
+                }
+                check.equal(node().style.width, originalWidth, cancel);
+                await settle();
+                check.equal(commits.length, 2, "cancellation never persists a preview");
+            }
+            view.setReadOnly(true);
+            check.ok(Array.from(node().querySelectorAll<HTMLElement>(".mindmap-view__node-width-handle")).every(handle => handle.hidden));
+            view.setReadOnly(false);
+            view.setInteractionActive(true);
+            view.options.onNodeWidths = async () => true;
+            delete model.metadata.nodes[model.root.children[0].id].width;
+            view.update(model);
+            select();
+            await settle();
             view.queueInspectorLayout(true);
             view.destroy();
             await settle();
@@ -299,7 +390,7 @@ const browserCases = async (source: string, css: string) => {
     return "Mindmap inspector cases passed";
 };
 
-test("mindmap inspectors follow clipped viewports and reveal short maps only after selection", {
+test("mindmap node widths support mouse and touch drags, cancellation and clipped inspectors", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

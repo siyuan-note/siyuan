@@ -2439,6 +2439,20 @@
 			"HeadingLevel": 3
 		},
 		{
+			"ID": "20261105113000-0e7c2f1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105113000-0e7c2f1",
+				"updated": "20261105113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select a single node outside text editing, then drag its left or right edge handle to adjust its width with a mouse or touch. Dragging previews the result; releasing saves one undoable change. Press Esc or cancel the pointer operation to restore the original width. Read-only and locked views hide these handles. The bottom width panel still supports precise values and restoring automatic width."
+				}
+			]
+		},
+		{
 			"ID": "20261022181804-c0rm54w",
 			"Type": "NodeParagraph",
 			"Properties": {

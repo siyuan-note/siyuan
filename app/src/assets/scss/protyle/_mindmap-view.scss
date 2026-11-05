@@ -366,15 +366,20 @@
     cursor: ew-resize;
     touch-action: none;
     z-index: 1;
+    color: var(--b3-theme-on-surface-light);
+
+    &:hover {
+      color: var(--b3-theme-on-surface);
+    }
 
     &[data-width-side="left"] {
       left: -5px;
-      border-left: 2px solid var(--b3-theme-primary);
+      border-left: 2px solid currentColor;
     }
 
     &[data-width-side="right"] {
       right: -5px;
-      border-right: 2px solid var(--b3-theme-primary);
+      border-right: 2px solid currentColor;
     }
   }
 

@@ -110,6 +110,9 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureBlocksDocIndexes(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document indexes failed: %s", err)
 			}
+			if err := ensureSearchMetadataIndex(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create search metadata index failed: %s", err)
+			}
 			if err := ensureRefsDefIndexes(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create refs definition indexes failed: %s", err)
 			}
@@ -200,6 +203,9 @@ func initDBTables() {
 
 	if err = ensureBlocksDocIndexes(db); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document indexes failed: %s", err)
+	}
+	if err = ensureSearchMetadataIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create search metadata index failed: %s", err)
 	}
 	if err = ensureRecentUpdatedBlocksIndexes(db); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create recent updated block indexes failed: %s", err)
@@ -2148,6 +2154,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		}
 	}
 	if err = ensureBlocksDocIndexes(boxDB); err != nil {
+		return
+	}
+	if err = ensureSearchMetadataIndex(boxDB); err != nil {
 		return
 	}
 	if err = ensureRecentUpdatedBlocksIndexes(boxDB); err != nil {

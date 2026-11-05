@@ -2984,10 +2984,14 @@ func buildDocumentSearchStatement(rawQuery string, keywords []string, typeFilter
 	blockLikeFilter := buildSearchDocumentLikeFilter(contentField, keywords)
 	docContentField := "MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END)"
 	docMatchScore := buildDocumentMatchScore(docContentField, keywords)
+	candidateFilter := ""
+	if candidates := buildDocumentSearchCandidates(keywords, typeFilter, searchHPath); candidates != "" {
+		candidateFilter = " AND root_id IN (" + candidates + ")"
+	}
 	dMatchStmt := "SELECT root_id, " + docContentField + " AS docContent, " +
 		"CASE WHEN " + contentDocumentLikeFilter + " THEN 0 ELSE 1 END AS matchSource, " +
 		docMatchScore + " AS docMatchScore, MAX(created) AS docCreated, MAX(updated) AS docUpdated" +
-		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter + candidateFilter +
 		" GROUP BY root_id HAVING " + documentLikeFilter
 	limit := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	pagedDocsStmt := "SELECT root_id AS docRootID, docContent, matchSource, docMatchScore, docCreated, docUpdated FROM docBlocks" +

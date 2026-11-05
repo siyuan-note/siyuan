@@ -45,7 +45,7 @@ const setup = () => {
             return editor;
         },
         control: () => element, root: element, text: (key: string) => key,
-        render: (state: unknown) => renders.push(state), reportError: () => {}, scheduleAutoSave: () => {},
+        render: (state: unknown) => renders.push(state), scheduleAutoSave: () => {},
         modeChoice: {setValue() {}}, tree: {syncSelection: async () => {}, refresh: async () => {}},
         windowChrome: undefined as undefined, checkpointBackground: async () => {throw new Error("Unready editor must not checkpoint");},
         applyTheme: async () => {}, protectExit: async () => {throw new Error("Unready editor must not close");},
@@ -58,13 +58,14 @@ const setup = () => {
         let outline = {enabled: false, visible: false, available: false};
         let preferences = {mode: "ir", theme: "light"}, systemDark = false, preparing = false, prepared = false;
         let activeMode = preferences.mode;
-        let switching = true, frozen = true, exitSequence = 0;
+        let switching = true, frozen = true, exitSequence = 0, switchFailed = false;
         const freeze = value => {frozen = value;};
+        ${section("    const reportError =", "    const scheduleAutoSave =")}
         ${initialize}\n${complete}\n${command}\n${actions}
         return {initializeDocument, completeSwitch, command, runAction, waitActions: () => pendingFileAction,
             pending(value) {pendingSwitch = value;}, task(value) {switchTask = value;},
             dispose() {disposed = true; documentGeneration++;},
-            state: () => ({editor, session, pendingSwitch, frozen, documentGeneration, history, outline, resourceUnavailable, preferences, activeMode})};
+            state: () => ({editor, session, pendingSwitch, frozen, documentGeneration, history, outline, resourceUnavailable, preferences, activeMode, actionMessage, switchFailed})};
     `, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const lifecycle = new Function("deps", `with (deps) { ${body} }`)(deps);
     return {lifecycle, callbacks, editors, renders, responses, bridge, resolveResource, preferenceWrites, openedLinks,
@@ -72,7 +73,7 @@ const setup = () => {
 };
 const snapshot = (sessionId: string) => ({sessionId, content: sessionId + "\n", lang: "en", preferences: {mode: "ir", theme: "light"}});
 
-test("the Markdown footer stays hidden during normal editing and saving but exposes actionable problems", () => {
+test("the Markdown footer stays hidden during normal editing, saving and switching but exposes actionable problems", () => {
     const controls = new Map<string, {textContent: string; hidden: boolean; dataset: Record<string, string>; setAttribute(): void}>();
     const control = (name: string) => {
         if (!controls.has(name)) controls.set(name, {textContent: "", hidden: false, dataset: {}, setAttribute() {}});
@@ -82,13 +83,13 @@ test("the Markdown footer stays hidden during normal editing and saving but expo
         markdownErrorKey: (error: {code: string}) => error.code,
         bridge: {state: async () => {}}, modeChoice: {setDisabled() {}}};
     const body = transpileModule(`
-        let disposed = false, actionMessage = "", editPending = false, pendingSwitch, frozen = false;
+        let disposed = false, actionMessage = "", editPending = false, pendingSwitch, frozen = false, switchFailed = false;
         let resourceUnavailable = false, sourceOnly = false, targetGeneration = 0;
         const history = {canUndo: false, canRedo: false}, bootstrap = {recovered: false};
         const outline = {enabled: false, visible: false, available: false};
         ${section("    const render =", "    const reportError =")}
-        return (state, pending = false, message = "", switching = false) => {
-            editPending = pending; actionMessage = message; pendingSwitch = switching;
+        return (state, pending = false, message = "", switching = false, failed = false) => {
+            editPending = pending; actionMessage = message; pendingSwitch = switching; switchFailed = failed;
             render(state);
         };
     `, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
@@ -96,8 +97,11 @@ test("the Markdown footer stays hidden during normal editing and saving but expo
     const state = {status: "saved", targetGeneration: 0, revision: 1, draftRevision: 1, hasUnsavedChanges: false};
     for (const status of ["view", "draft", "dirty", "saving", "saved"]) {
         for (const pending of [false, true]) {
-            render({...state, status}, pending);
-            assert.equal(control("markdownFooter").hidden, true, `${status}, pending=${pending}`);
+            for (const switching of [false, true]) {
+                render({...state, status}, pending, "", switching);
+                assert.equal(control("markdownFooter").hidden, true, `${status}, pending=${pending}, switching=${switching}`);
+                assert.equal(control("markdownRetry").hidden, true, "a pending switch alone cannot expose retry");
+            }
         }
     }
     for (const problem of [{kind: "blocked", error: {code: "io", recoverable: true}},
@@ -109,10 +113,29 @@ test("the Markdown footer stays hidden during normal editing and saving but expo
     assert.equal(control("markdownFooter").hidden, false);
     render(state, false, "markdownTooLarge");
     assert.equal(control("markdownFooter").hidden, false);
-    render(state, false, "", true);
-    assert.equal(control("markdownFooter").hidden, false);
+    for (const message of ["markdownError", "markdownLoadError"]) {
+        render(state, false, message, true, true);
+        assert.equal(control("markdownFooter").hidden, false, "failed switches expose the error");
+        assert.equal(control("markdownRetry").hidden, false, "failed switches remain retryable");
+    }
+    render(state, false, "markdownFolderError", true);
+    assert.equal(control("markdownFooter").hidden, false, "tree errors remain visible during a successful document switch");
+    assert.equal(control("markdownRetry").hidden, true, "tree errors cannot offer document-switch retry");
+    for (const problem of [{kind: "blocked", error: {code: "io", recoverable: true}},
+        {kind: "indeterminate", error: {code: "io"}}, {kind: "conflict", baseline: "old"}]) {
+        const closed = {...state, status: "closed", lifecycle: "closed", problem, recoveryError: {code: "io"}};
+        render(closed);
+        assert.equal(control("markdownFooter").hidden, true, "released sessions cannot leave an error footer behind");
+        assert.equal(control("markdownRetry").hidden, true);
+        assert.equal(control("markdownReload").hidden, true);
+        assert.equal(control("markdownOverwrite").hidden, true);
+        render(closed, false, "markdownError", true, true);
+        assert.equal(control("markdownFooter").hidden, false, "a failed switch still exposes its own error after release");
+        assert.equal(control("markdownRetry").hidden, false);
+    }
     render(state);
     assert.equal(control("markdownFooter").hidden, true, "resolving the problem hides the footer");
+    assert.equal(control("markdownRetry").hidden, true);
 });
 
 test("outline intent survives document recreation and ignores callbacks from the replaced editor", async () => {
@@ -121,7 +144,7 @@ test("outline intent survives document recreation and ignores callbacks from the
     callbacks[0].onOutlineChange({enabled: true, visible: true, available: true});
     await lifecycle.initializeDocument(snapshot("b"));
     assert.equal(callbacks[1].outline, true);
-    assert.deepEqual(lifecycle.state().outline, {enabled: true, visible: false, available: false});
+    assert.deepEqual(lifecycle.state().outline, {enabled: true, visible: true, available: true}, "document replacement retains the header state until the new editor reports its capability");
     callbacks[0].onOutlineChange({enabled: false, visible: false, available: true});
     assert.equal(lifecycle.state().outline.enabled, true);
     callbacks[1].onOutlineChange({enabled: true, visible: false, available: false});
@@ -139,6 +162,7 @@ test("automatic source fallback stays local while explicit mode choices become t
     assert.equal(callbacks[1].mode, "ir");
     assert.equal(lifecycle.state().activeMode, "ir");
     callbacks[1].onModeChange("wysiwyg", "user");
+    await new Promise(resolve => setImmediate(resolve));
     assert.equal(lifecycle.state().preferences.mode, "wysiwyg");
     assert.deepEqual(preferenceWrites, [{mode: "wysiwyg"}]);
     await lifecycle.initializeDocument(snapshot("next"));
@@ -189,11 +213,13 @@ test("committed document initialization failure keeps retry and refuses close/ba
     const fixture = setup();
     const {lifecycle, callbacks, renders, responses} = fixture;
     await lifecycle.initializeDocument(snapshot("a"));
+    callbacks[0].onOutlineChange({enabled: true, visible: true, available: true});
     lifecycle.pending({ticket: "ticket-b", sessionId: "b"});
     fixture.failEditor(true);
     assert.equal(await lifecycle.completeSwitch(), false);
     assert.equal(lifecycle.state().pendingSwitch.sessionId, "b");
     assert.equal(lifecycle.state().frozen, true);
+    assert.deepEqual(lifecycle.state().outline, {enabled: true, visible: false, available: false}, "failed initialization cannot leave an enabled outline for a missing editor");
     const before = renders.length;
     callbacks[1].onEdit({content: "failed editor"});
     assert.equal(renders.length, before, "failed initialization callbacks are invalidated");
@@ -227,6 +253,7 @@ test("unconfirmed commit never replaces the current document and waiting lifecyc
 
 test("document actions drain every outstanding task before switching or closing", async () => {
     const {lifecycle} = setup();
+    await lifecycle.initializeDocument(snapshot("a"));
     let first: () => void;
     let second: () => void;
     const pendingFirst = new Promise<void>(resolve => {first = resolve;});
@@ -242,4 +269,48 @@ test("document actions drain every outstanding task before switching or closing"
     await waiting;
     assert.equal(drained, true);
     assert.equal(lifecycle.waitActions(), undefined);
+});
+
+test("action retries refresh the footer while stale document failures cannot affect a new document", async () => {
+    const {lifecycle, renders} = setup();
+    await lifecycle.initializeDocument(snapshot("a"));
+    lifecycle.runAction(async () => {throw new Error("Failed action");}, true);
+    await lifecycle.waitActions();
+    assert.equal(lifecycle.state().actionMessage, "markdownError");
+    const before = renders.length;
+    lifecycle.runAction(async () => {}, true);
+    assert.equal(lifecycle.state().actionMessage, "");
+    assert.equal(renders.length, before + 1, "retrying immediately refreshes stale error text");
+    await lifecycle.waitActions();
+
+    let fail: (error: Error) => void;
+    lifecycle.runAction(() => new Promise((_resolve, reject) => {fail = reject;}), true);
+    await new Promise(resolve => setImmediate(resolve));
+    const pending = lifecycle.waitActions();
+    await lifecycle.initializeDocument(snapshot("b"));
+    fail(new Error("Late document failure"));
+    await pending;
+    assert.equal(lifecycle.state().actionMessage, "");
+});
+
+test("window actions still report errors after document replacement but never after disposal", async () => {
+    const {lifecycle, renders} = setup();
+    await lifecycle.initializeDocument(snapshot("a"));
+    let fail: (error: Error) => void;
+    lifecycle.runAction(() => new Promise((_resolve, reject) => {fail = reject;}), true, true);
+    await new Promise(resolve => setImmediate(resolve));
+    const pending = lifecycle.waitActions();
+    await lifecycle.initializeDocument(snapshot("b"));
+    fail(new Error("Window preference storage failed"));
+    await pending;
+    assert.equal(lifecycle.state().actionMessage, "markdownError", "window-wide failures must not disappear on navigation");
+
+    lifecycle.runAction(() => new Promise((_resolve, reject) => {fail = reject;}), true, true);
+    await new Promise(resolve => setImmediate(resolve));
+    const closing = lifecycle.waitActions();
+    lifecycle.dispose();
+    const before = renders.length;
+    fail(new Error("Failure after disposal"));
+    await closing;
+    assert.equal(renders.length, before);
 });

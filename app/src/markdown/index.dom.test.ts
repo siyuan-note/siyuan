@@ -164,6 +164,14 @@ const browserCases = async (languages: Record<string, string>) => {
     menuAction("markdownRevealFile");
     await tick();
     check.equal(revealedFiles, 1, "the file manager action invokes the desktop capability");
+    const revealFile = bridge.revealFile;
+    bridge.revealFile = async () => {throw new Error("File manager unavailable");};
+    menuAction("markdownRevealFile"); await tick();
+    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, false);
+    check.equal(document.querySelector<HTMLButtonElement>("#markdownRetry").hidden, true, "ordinary action failures cannot retry a file write");
+    bridge.revealFile = revealFile;
+    menuAction("markdownRevealFile"); await tick();
+    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, true, "successful actions without session updates clear stale error DOM");
     check.equal(document.querySelector(".markdown-tree__heading"), null);
     check.deepEqual(Array.from(document.querySelectorAll<HTMLElement>(".markdown-header button, .markdown-header select, .markdown-header summary"))
         .filter(element => element.checkVisibility()).map(element => element.id), ["markdownTreeToggle", "markdownOutlineToggle", "markdownFiles", "markdownUndo", "markdownRedo", "markdownMoreButton"]);
@@ -770,7 +778,35 @@ const browserCases = async (languages: Record<string, string>) => {
     loseCommitReply = false;
     failWrite = false;
     const secondEditor = switchingApp.editor;
-    selectFile("original"); await tick(); await tick();
+    secondEditor.setOutline(true);
+    const switchingOutline = document.querySelector<HTMLButtonElement>("#markdownOutlineToggle");
+    const outlineOpacity = getComputedStyle(switchingOutline).opacity;
+    const immediateRecoveries = bridge.recoveries;
+    let failRecoveries: (error: Error) => void;
+    bridge.recoveries = () => new Promise((_resolve, reject) => {failRecoveries = reject;});
+    document.querySelector<HTMLButtonElement>("#markdownMoreButton").click();
+    document.querySelector<HTMLButtonElement>("#markdownRecovery").click(); await tick();
+    let finishSelection: () => void;
+    const selectionReady = new Promise<void>(resolve => {finishSelection = resolve;});
+    const immediateTreeState = bridge.tree.state;
+    bridge.tree.state = async () => {await selectionReady; return immediateTreeState();};
+    selectFile("original"); await tick();
+    check.equal(document.querySelector("#markdownName").textContent, "A.md");
+    check.equal((document.querySelector("#markdownEditor") as HTMLElement).inert, true, "the new editor waits for tree selection");
+    check.equal(switchingOutline.disabled, false, "transient switching cannot dim an available outline button");
+    check.equal(switchingOutline.getAttribute("aria-disabled"), "true", "the stable outline button still reports its temporary interaction lock");
+    check.equal(switchingOutline.getAttribute("aria-expanded"), "true", "same-mode switches preserve the outline selection");
+    check.equal(getComputedStyle(switchingOutline).opacity, outlineOpacity);
+    switchingOutline.click();
+    check.equal(switchingOutline.getAttribute("aria-expanded"), "true", "switching cannot toggle the new editor's outline early");
+    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, true, "normal pending switches cannot flash a saved status");
+    check.equal(document.querySelector<HTMLButtonElement>("#markdownRetry").hidden, true, "normal pending switches have nothing to retry");
+    finishSelection(); bridge.tree.state = immediateTreeState;
+    await tick(); await tick();
+    failRecoveries(new Error("Old recovery listing failed")); await tick();
+    bridge.recoveries = immediateRecoveries;
+    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, true, "old document callbacks cannot pollute the new file's footer");
+    check.equal(switchingOutline.getAttribute("aria-disabled"), "false");
     check.equal(switchingApp.editor.flush().content, "A\n", "A → B → A changes only the active document");
     shellSelectors.forEach((selector, index) => check.equal(document.querySelector(selector), shellNodes[index]));
     check.notEqual(switchingApp.editor, secondEditor);
@@ -796,6 +832,8 @@ const browserCases = async (languages: Record<string, string>) => {
     (document.querySelector("#markdownRetry") as HTMLButtonElement).click(); await tick(); await tick();
     check.equal(unknownSwitch.editor.flush().content, "Recovered B\n");
     check.equal((document.querySelector("#markdownEditor") as HTMLElement).inert, false);
+    check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, true, "successful switch recovery hides the error footer");
+    check.equal(document.querySelector<HTMLButtonElement>("#markdownRetry").hidden, true);
     unknownSwitch.destroy();
 
     let treeState: import("./treeContracts").MarkdownTreeState = {kind: "ready", rootId: "old-root", generation: 1,

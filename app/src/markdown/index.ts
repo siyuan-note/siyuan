@@ -52,6 +52,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     let switching = false;
     let switchTask: Promise<boolean>;
     let pendingSwitch: {ticket: string; sessionId: string};
+    let switchFailed = false;
     let documentGeneration = 0;
     const control = <T extends HTMLElement>(id: string) => root.querySelector<T>(`#${id}`);
 
@@ -212,6 +213,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
 
     const render = (state: MarkdownSessionState) => {
         if (disposed) return;
+        const problem = state.lifecycle === "closed" ? undefined : state.problem;
+        const recoveryError = state.lifecycle === "closed" ? undefined : state.recoveryError;
         const statusKeys: Record<MarkdownSessionState["status"], string> = {
             view: "markdownReadOnly", draft: "markdownDraft", dirty: "markdownUnsaved", saving: "markdownSaving",
             saved: "markdownSaved", conflict: "markdownConflict", blocked: "markdownError", closed: "close",
@@ -222,22 +225,22 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         const statusKey = !editPending && state.status === "draft" && !state.hasUnsavedChanges ? "" :
             pendingStatus || state.status === "draft" && state.draftRevision < state.revision ? "markdownUnsaved" :
             statusKeys[state.status];
-        control("markdownStatus").textContent = actionMessage || text(state.recoveryError ? markdownErrorKey(state.recoveryError) :
-            state.problem?.kind === "indeterminate" ? "markdownUncertain" : state.problem?.kind === "blocked" ? markdownErrorKey(state.problem.error) : statusKey);
-        control("markdownStatus").dataset.status = actionMessage || state.recoveryError ? "blocked" : pendingStatus ? "dirty" : state.status;
-        control("markdownFooter").hidden = !actionMessage && !state.recoveryError && !state.problem && !pendingSwitch;
+        control("markdownStatus").textContent = actionMessage || text(recoveryError ? markdownErrorKey(recoveryError) :
+            problem?.kind === "indeterminate" ? "markdownUncertain" : problem?.kind === "blocked" ? markdownErrorKey(problem.error) : statusKey);
+        control("markdownStatus").dataset.status = actionMessage || recoveryError ? "blocked" : pendingStatus ? "dirty" : state.status;
+        control("markdownFooter").hidden = !actionMessage && !recoveryError && !problem;
         const notices = [
             state.target && !state.target.capabilities.persistentPermission ? text("markdownTemporaryPermission") : "",
             resourceUnavailable ? text("markdownResourceUnavailable") : "",
             sourceOnly ? text("markdownSourceOnly") : "",
             bootstrap.recovered ? text("markdownRecovered") : ""];
         control("markdownNotice").textContent = notices.filter(Boolean).join(" · ");
-        control<HTMLButtonElement>("markdownRetry").hidden = !pendingSwitch && state.problem?.kind !== "indeterminate" &&
-            (state.problem?.kind !== "blocked" || !state.problem.error.recoverable);
-        control<HTMLButtonElement>("markdownReload").hidden = state.problem?.kind !== "conflict";
+        control<HTMLButtonElement>("markdownRetry").hidden = pendingSwitch ? !switchFailed : problem?.kind !== "indeterminate" &&
+            (problem?.kind !== "blocked" || !problem.error.recoverable);
+        control<HTMLButtonElement>("markdownReload").hidden = problem?.kind !== "conflict";
         const overwrite = control<HTMLButtonElement>("markdownOverwrite");
-        overwrite.hidden = state.problem?.kind !== "conflict";
-        overwrite.disabled = frozen || state.problem?.kind !== "conflict" || !state.problem.baseline ||
+        overwrite.hidden = problem?.kind !== "conflict";
+        overwrite.disabled = frozen || problem?.kind !== "conflict" || !problem.baseline ||
             state.problemTargetHandle !== state.target?.handle;
         control<HTMLButtonElement>("markdownSave").disabled = frozen || state.composing;
         control<HTMLButtonElement>("markdownRevealFile").hidden = !bridge.revealFile;
@@ -245,11 +248,12 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control<HTMLButtonElement>("markdownUndo").disabled = frozen || state.composing || !history.canUndo;
         control<HTMLButtonElement>("markdownRedo").disabled = frozen || state.composing || !history.canRedo;
         const outlineToggle = control<HTMLButtonElement>("markdownOutlineToggle");
-        outlineToggle.disabled = frozen || state.composing || !outline.available;
+        outlineToggle.disabled = state.composing || !outline.available;
+        outlineToggle.setAttribute("aria-disabled", String(frozen || outlineToggle.disabled));
         outlineToggle.setAttribute("aria-expanded", String(outline.visible));
         outlineToggle.title = text(outline.available ? "outline" : "markdownOutlineUnavailable");
-        control<HTMLButtonElement>("markdownSaveAs").disabled = frozen || state.composing || state.problem?.kind === "indeterminate";
-        control<HTMLButtonElement>("markdownInsertImage").disabled = frozen || state.composing || state.problem?.kind === "indeterminate";
+        control<HTMLButtonElement>("markdownSaveAs").disabled = frozen || state.composing || problem?.kind === "indeterminate";
+        control<HTMLButtonElement>("markdownInsertImage").disabled = frozen || state.composing || problem?.kind === "indeterminate";
         modeChoice?.setDisabled(frozen || state.composing);
         if (targetGeneration !== state.targetGeneration) {
             targetGeneration = state.targetGeneration;
@@ -266,12 +270,16 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         actionMessage = text("markdownError");
         if (session) render(session.getState());
     };
+    const documentError = () => {
+        const generation = documentGeneration;
+        return () => {if (!disposed && generation === documentGeneration) reportError();};
+    };
     const scheduleAutoSave = () => {
         clearTimeout(autoSave);
         const state = session?.getState();
         if (disposed || frozen || editPending || !state || state.lifecycle !== "open" ||
             state.composing || state.problem || !state.target?.writable || !state.hasUnsavedChanges) return;
-        autoSave = setTimeout(() => {void session.save().catch(reportError);}, 250);
+        autoSave = setTimeout(() => {void session.save().catch(documentError());}, 250);
     };
     const freeze = (value: boolean) => {
         if (disposed) return;
@@ -306,7 +314,6 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         activeMode = preferences.mode;
         modeChoice?.setValue(activeMode);
         history = {canUndo: false, canRedo: false};
-        outline = {...outline, visible: false, available: false};
         control("markdownRecoveryPanel").hidden = true;
         control("markdownRecovery").setAttribute("aria-expanded", "false");
         control("markdownRecoveryList").replaceChildren();
@@ -360,7 +367,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                     modeChoice?.setValue(mode);
                     if (origin === "user" && preferences.mode !== mode) {
                         preferences = {...preferences, mode};
-                        void bridge.preferences({mode}).catch(reportError);
+                        runAction(() => bridge.preferences({mode}), false, true);
                     }
                 },
                 onEdit(snapshot) {
@@ -379,8 +386,10 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         } catch (error) {
             if (current()) {
                 documentGeneration++;
+                outline = {...outline, visible: false, available: false};
                 element.className = "markdown-editor";
                 element.textContent = text("markdownLoadError");
+                render(documentSession.getState());
             }
             throw error;
         } finally {
@@ -430,8 +439,10 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         if (!state.target || !state.target.writable) await saveAs();
         else await session.flush(editor);
     };
-    const runAction = (run: () => void | Promise<unknown>, fileAction = false) => {
-        const task = Promise.resolve().then(run).catch(reportError);
+    const runAction = (run: () => void | Promise<unknown>, fileAction = false, windowAction = false) => {
+        actionMessage = "";
+        render(session.getState());
+        const task = Promise.resolve().then(run).catch(windowAction ? reportError : documentError());
         if (fileAction) {
             const pending = Promise.all([pendingFileAction, task]);
             pendingFileAction = pending;
@@ -442,8 +453,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control(id).addEventListener("click", () => {
             if (frozen) return;
             closeMore();
-            actionMessage = "";
-            runAction(run, ["markdownSave", "markdownSaveAs", "markdownInsertImage", "markdownRetry", "markdownReload", "markdownOverwrite", "markdownResources"].includes(id));
+            runAction(run, ["markdownSave", "markdownSaveAs", "markdownInsertImage", "markdownRetry", "markdownReload", "markdownOverwrite", "markdownResources"].includes(id),
+                ["markdownNew", "markdownOpen", "markdownOpenFolder"].includes(id));
         });
     };
     action("markdownNew", () => bridge.newDocument());
@@ -524,12 +535,15 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             const buttons = document.createElement("div");
             buttons.className = "markdown-recovery__actions";
             for (const [key, callback] of [["markdownRecovery", () => bridge.recover(recovery.id)],
-                ["delete", async () => { await bridge.discardRecovery(recovery.id); await showRecoveries(); }]] as const) {
+                ["delete", async () => {
+                    await bridge.discardRecovery(recovery.id);
+                    if (!disposed && generation === documentGeneration) await showRecoveries();
+                }]] as const) {
                 const button = document.createElement("button");
                 button.type = "button";
                 button.className = "b3-button b3-button--text";
                 button.textContent = text(key);
-                button.addEventListener("click", () => { void callback().catch(reportError); });
+                button.addEventListener("click", () => {if (!frozen) runAction(callback, false, true);});
                 buttons.append(button);
             }
             row.append(title, time, buttons);
@@ -553,7 +567,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                               patch: (value: string) => Partial<Pick<MarkdownPreferences, "theme" | "fontSize">>) => createMarkdownChoice({
         element: control(id), label: text(label), values: values.map(([value, label]) => ({value, label: text(label)})), value,
         icon: {markdownTheme: "iconMode", markdownFont: "iconFont"}[id],
-        onChange(value) {if (!frozen) {closeMore(); void updatePreferences(patch(value)).catch(reportError);}},
+        onChange(value) {if (!frozen) {closeMore(); runAction(() => updatePreferences(patch(value)), false, true);}},
     });
     appearanceMenu = createMarkdownSubmenu({
         element: control("markdownPreferences"), label: text("appearance"), icon: "iconTheme",
@@ -602,6 +616,9 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     };
     const completeSwitch = async (): Promise<boolean> => {
         const candidate = pendingSwitch;
+        switchFailed = false;
+        actionMessage = "";
+        render(session.getState());
         let next: MarkdownBootstrap;
         try {
             // 绑定交换可重试；回执丢失时由宿主快照确认新会话，不能恢复已释放的旧编辑器。
@@ -613,8 +630,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             if (next.sessionId !== candidate.sessionId) throw new Error("Markdown switch is unconfirmed");
         } catch {
             if (disposed) return false;
+            switchFailed = true;
             actionMessage = text("markdownError"); render(session.getState());
-            control<HTMLButtonElement>("markdownRetry").hidden = false;
             control("markdownProblemActions").inert = false;
             return false;
         }
@@ -632,9 +649,9 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             return true;
         } catch {
             if (!disposed) {
+                switchFailed = true;
                 actionMessage = text("markdownLoadError");
                 render(session.getState());
-                control<HTMLButtonElement>("markdownRetry").hidden = false;
                 control("markdownProblemActions").inert = false;
             }
             return false;
@@ -686,12 +703,14 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     });
     tree.freeze(frozen);
     const checkpointBackground = async (message: MarkdownCommand, draftOnly = false) => {
+        const reportCurrentError = documentError();
         let accepted = false;
         try {
             clearTimeout(autoSave);
             accepted = draftOnly ? await session.checkpoint(editor) : await session.flush(editor);
-            if (draftOnly && accepted) void session.save().catch(reportError);
+            if (draftOnly && accepted) void session.save().catch(reportCurrentError);
         }
+        catch {reportCurrentError();}
         finally {await bridge.respond(message.id, accepted);}
     };
     const command = async (message: MarkdownCommand) => {
@@ -735,14 +754,17 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             const generation = documentGeneration;
             const currentSession = session;
             const currentEditor = editor;
-            if (!frozen && !editPending && await currentSession.reload() && !disposed && generation === documentGeneration) {
+            if (!frozen && !editPending && await currentSession.reload().catch(documentError()) && !disposed && generation === documentGeneration) {
                 currentEditor.setValue(currentSession.getState().content);
             }
             return;
         }
         let accepted = false;
+        const reportCurrentError = documentError();
         try {
             accepted = await protectExit(message.type);
+        } catch {
+            reportCurrentError();
         } finally {
             await bridge.respond(message.id, accepted);
         }
@@ -758,7 +780,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         closeMore();
         const run = event.key.toLowerCase() === "n" ? () => bridge.newDocument() :
             event.key.toLowerCase() === "o" ? () => bridge.openDocument() : event.shiftKey ? () => saveAs() : save;
-        runAction(async () => { await run(); }, event.key.toLowerCase() === "s");
+        runAction(async () => { await run(); }, event.key.toLowerCase() === "s", event.key.toLowerCase() !== "s");
     };
     document.addEventListener("keydown", shortcut, true);
     render(session.getState());

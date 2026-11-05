@@ -248,17 +248,69 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
         check.equal(richEditor.saved, saved);
         check.notEqual(fingerprint(draft), saved);
     }
+    const hideElements = new Function(sources[6] + "\nreturn hideElements;")();
+    for (const mobile of [false, true]) {
+        for (const draft of [false, true]) {
+            const host = document.createElement("div");
+            host.innerHTML = '<div class="protyle-wysiwyg">' + paragraph("<strong>Selected</strong> title") +
+                '</div><div class="protyle-toolbar"><button>Bold</button></div><div class="protyle-util">Menu</div>';
+            root.appendChild(host);
+            const titleWysiwyg = host.querySelector<HTMLElement>(".protyle-wysiwyg");
+            const toolbar = host.querySelector<HTMLElement>(".protyle-toolbar");
+            const subElement = host.querySelector<HTMLElement>(".protyle-util");
+            const protyle = {block: {}, undo: {}, toolbar: {element: toolbar, subElement}};
+            const fragment = {protyle, wysiwyg: titleWysiwyg, getBlockHTML: () => titleWysiwyg.innerHTML,
+                instance: {enable() {}, disable() {}}, destroy() {}};
+            const dependencies = {
+                isMobile: () => mobile, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
+                hintRef: () => {}, hintTag: () => {},
+                getDocumentTitleLute: () => lute, getAgentLute: () => lute,
+                prepareDocumentTitleInitialDOM: (html: string) => html,
+                prepareDocumentTitleBlockDOM: prepare, getDocumentTitleUnsupportedPasteBlocks: unsupported,
+                getDocumentTitleDOMFingerprint: fingerprint, mountProtyleLiteFragment: () => fragment,
+                setMobileToolbarUndo: () => {}, hideElements,
+            };
+            const MountedEditor = new Function(...Object.keys(dependencies), sources[3] + "\nreturn DocumentTitleEditor;")(
+                ...Object.values(dependencies));
+            const ownerElement = document.createElement("div");
+            ownerElement.classList.toggle("document-title-dialog", draft);
+            const mounted = new MountedEditor({element: ownerElement, block: {rootID: "document"}}, host,
+                {blockDOM: titleWysiwyg.innerHTML, revision: "revision"}, () => {}, () => {});
+            const editable = mounted.editable as HTMLElement;
+            const range = document.createRange();
+            range.selectNodeContents(editable.querySelector("strong"));
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+            let escaped = false;
+            const onMouseDown = () => { escaped = true; };
+            root.addEventListener("mousedown", onMouseDown);
+            toolbar.style.display = "block";
+            editable.querySelector("strong").dispatchEvent(new MouseEvent("mousedown", {bubbles: true}));
+            check.equal(toolbar.classList.contains("fn__none"), true, "title presses dismiss the selection toolbar locally");
+            check.equal(toolbar.style.display, "", "dismissal clears the toolbar display override");
+            check.equal(escaped, false, "title presses stay isolated from the owner editor");
+            check.equal(getSelection().toString(), "Selected", "dismissal preserves the range for the ensuing selection gesture");
+            toolbar.classList.remove("fn__none");
+            toolbar.querySelector("button").dispatchEvent(new MouseEvent("mousedown", {bubbles: true}));
+            check.equal(toolbar.classList.contains("fn__none"), false, "format buttons keep the toolbar available");
+            check.equal(getSelection().toString(), "Selected", "format buttons retain their selection");
+            check.equal(subElement.classList.contains("fn__none"), false, "selection dismissal does not close formatting menus");
+            root.removeEventListener("mousedown", onMouseDown);
+            mounted.destroy();
+            host.remove();
+        }
+    }
     root.remove();
     style.remove();
     return "Document title DOM cases passed";
 };
 
-test("native document title DOM preserves inline content, alignment, parsing, placeholders and readonly sync handoff", {
+test("native document title DOM preserves content, layout, readonly handoff and local toolbar dismissal", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
     const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts", "documentTitleEditor.ts",
-        "Title.ts", "../util/disabledWYSIWYG.ts"].map(file =>
+        "Title.ts", "../util/disabledWYSIWYG.ts", "../ui/hideElements.ts"].map(file =>
         transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);

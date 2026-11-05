@@ -34114,6 +34114,19 @@
         "frontend": {
           "type": "string"
         },
+        "names": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "settingsWindow": {
           "type": "boolean"
         }

@@ -605,6 +605,8 @@ var HTML2BlockDOM = define[HTMLClipboardRequest, HTMLClipboardData]("html2BlockD
 
 var WPSPresentation2BlockDOM = define[WPSPresentationRequest, WPSPresentationData]("wpsPresentation2BlockDOM", "/api/lute/wpsPresentation2BlockDOM", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 
+// names 省略或为 null 时返回全部符合条件的插件；空数组返回空列表，其他值按安装名称精确筛选并去重。
+// 名称筛选保留插件启用、信任、前端兼容、发布权限及 settingsWindow 声明检查。
 var LoadPetals = define[LoadPetalsRequest, []*Petal]("loadPetals", "/api/petal/loadPetals", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 var SetPetalEnabled = define[SetPetalEnabledRequest, *Petal]("setPetalEnabled", "/api/petal/setPetalEnabled", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

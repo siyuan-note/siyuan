@@ -14,6 +14,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -63,7 +64,7 @@ func TestAPIContractPetalSettingsWindow(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(dir, "plugin.json"), manifest, 0644); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(filepath.Join(dir, "index.js"), []byte("module.exports = class {};"), 0644); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, "index.js"), []byte("module.exports = class {};/*"+strings.Repeat("x", 64*1024)+"*/"), 0644); err != nil {
 			t.Fatal(err)
 		}
 		if _, err := model.SetPetalEnabled(name, true); err != nil {
@@ -72,13 +73,24 @@ func TestAPIContractPetalSettingsWindow(t *testing.T) {
 	}
 	engine := gin.New()
 	engine.POST("/api/petal/loadPetals", loadPetals)
+	var fullBytes, selectedBytes int
 	for _, item := range []struct {
-		body  string
-		count int
+		body     string
+		names    []string
+		settings bool
 	}{
-		{`{"frontend":"desktop"}`, 2},
-		{`{"frontend":"desktop","settingsWindow":false}`, 2},
-		{`{"frontend":"desktop","settingsWindow":true}`, 1},
+		{`{"frontend":"desktop"}`, []string{"legacy", "opted"}, false},
+		{`{"frontend":"desktop","settingsWindow":false}`, []string{"legacy", "opted"}, false},
+		{`{"frontend":"desktop","settingsWindow":true}`, []string{"opted"}, true},
+		{`{"frontend":"desktop","names":null}`, []string{"legacy", "opted"}, false},
+		{`{"frontend":"desktop","names":[]}`, nil, false},
+		{`{"frontend":"desktop","names":["legacy"]}`, []string{"legacy"}, false},
+		{`{"frontend":"desktop","names":["opted","opted","missing"]}`, []string{"opted"}, false},
+		{`{"frontend":"desktop","names":["../opted","","Opted"," opted"]}`, nil, false},
+		{`{"frontend":"desktop","settingsWindow":true,"names":["legacy"]}`, nil, true},
+		{`{"frontend":"desktop","settingsWindow":true,"names":[]}`, nil, true},
+		{`{"frontend":"desktop","settingsWindow":true,"names":null}`, []string{"opted"}, true},
+		{`{"frontend":"desktop","settingsWindow":true,"names":["opted","legacy"]}`, []string{"opted"}, true},
 	} {
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/petal/loadPetals", strings.NewReader(item.body)))
@@ -90,11 +102,49 @@ func TestAPIContractPetalSettingsWindow(t *testing.T) {
 		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
 			t.Fatal(err)
 		}
-		if response.Code != 0 || len(response.Data) != item.count {
-			t.Fatalf("unexpected plugin response: %s", recorder.Body.String())
+		names := make([]string, 0, len(response.Data))
+		for _, petal := range response.Data {
+			names = append(names, petal.Name)
+			if petal.SettingsWindow != item.settings {
+				t.Fatalf("unexpected settings opt-in proof: %s", recorder.Body.String())
+			}
 		}
-		if item.count == 1 && (response.Data[0].Name != "opted" || !response.Data[0].SettingsWindow) {
-			t.Fatal("opt-in proof missing")
+		slices.Sort(names)
+		if response.Code != 0 || response.Data == nil || !slices.Equal(names, item.names) {
+			t.Fatalf("unexpected plugin response for %s: code=%d names=%v", item.body, response.Code, names)
 		}
+		switch item.body {
+		case `{"frontend":"desktop"}`:
+			fullBytes = recorder.Body.Len()
+		case `{"frontend":"desktop","names":["legacy"]}`:
+			selectedBytes = recorder.Body.Len()
+		}
+	}
+	if selectedBytes == 0 || selectedBytes*4 >= fullBytes*3 {
+		t.Fatalf("single-plugin payload did not shrink: full=%d selected=%d bytes", fullBytes, selectedBytes)
+	}
+	t.Logf("synthetic uncompressed HTTP JSON, two 64 KiB plugins: full=%d selected=%d bytes (%.2f%%)",
+		fullBytes, selectedBytes, 100*float64(selectedBytes)/float64(fullBytes))
+}
+
+func TestAPIContractPetalInvalidNames(t *testing.T) {
+	engine := gin.New()
+	engine.POST("/api/petal/loadPetals", loadPetals)
+	for _, names := range []string{`"opted"`, `true`, `1`, `{}`, `[null]`, `[1]`, `[true]`, `[["opted"]]`, `["opted",{}]`} {
+		t.Run(names, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			body := `{"frontend":"desktop","names":` + names + `}`
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/petal/loadPetals", strings.NewReader(body)))
+			requireAPIContract(t, "POST", "/api/petal/loadPetals", recorder)
+			var response struct {
+				Code int `json:"code"`
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+				t.Fatal(err)
+			}
+			if response.Code != -1 {
+				t.Fatalf("invalid names accepted: %s", recorder.Body.String())
+			}
+		})
 	}
 }

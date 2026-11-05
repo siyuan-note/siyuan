@@ -1614,7 +1614,7 @@ export type LivePhotoPreviewRequestInput = { "id": string; };
 
 export type LivePhotoPreviewSession = { "color": LivePhotoColor; "encode": boolean; "frames": Array<LivePhotoFrameTime> | null; "height": number; "id": string; "width": number; };
 
-export type LoadPetalsRequestInput = { "frontend": string; "settingsWindow"?: boolean; };
+export type LoadPetalsRequestInput = { "frontend": string; "names"?: Array<string> | null; "settingsWindow"?: boolean; };
 
 export type LoadedPlugin = { "methods": Array<PluginRPCMethod | null> | null; "name": string; "state": string; "stateCode": number; };
 
@@ -6943,6 +6943,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * names 省略或为 null 时返回全部符合条件的插件；空数组返回空列表，其他值按安装名称精确筛选并去重。
+     * 名称筛选保留插件启用、信任、前端兼容、发布权限及 settingsWindow 声明检查。
+     */
     "/api/petal/loadPetals": {
         request: LoadPetalsRequestInput;
         response: { "code": 0; "data": Array<Petal | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

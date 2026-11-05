@@ -60,10 +60,10 @@ func TestSetPetalPublishEnabled(t *testing.T) {
 	if len(packages) != 1 || packages[0].UserDisabledInPublish == nil || !*packages[0].UserDisabledInPublish {
 		t.Fatal("installed plugin data should include the user publish preference")
 	}
-	if petals := LoadPetals("", false); len(petals) != 1 || petals[0].Name != "example" {
+	if petals := LoadPetals("", false, nil); len(petals) != 1 || petals[0].Name != "example" {
 		t.Fatal("user publish preference should not disable the plugin outside publish")
 	}
-	if petals := LoadPetals("", true); len(petals) != 0 {
+	if petals := LoadPetals("", true, nil); len(petals) != 0 {
 		t.Fatal("user-disabled plugin should not load in publish")
 	}
 	if petals := LoadKernelPetals(); len(petals) != 1 || petals[0].Name != "example" {

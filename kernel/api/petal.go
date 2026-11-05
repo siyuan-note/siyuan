@@ -18,9 +18,9 @@ var loadPetals = contractHandler(apicontract.LoadPetals, func(c *gin.Context, re
 	}
 	var values []*model.Petal
 	if request.SettingsWindow {
-		values = model.LoadSettingsWindowPetals(request.Frontend, model.IsReadOnlyRoleContext(c))
+		values = model.LoadSettingsWindowPetals(request.Frontend, model.IsReadOnlyRoleContext(c), request.Names)
 	} else {
-		values = model.LoadPetals(request.Frontend, model.IsReadOnlyRoleContext(c))
+		values = model.LoadPetals(request.Frontend, model.IsReadOnlyRoleContext(c), request.Names)
 	}
 	var result []*apicontract.Petal
 	if values != nil {

@@ -22,6 +22,7 @@ import {SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "../../protyle/toolbar/subEle
 import {initHoverInput} from "../../util/hoverInput";
 import {bindGutterPointerLeave} from "./gutterPointerLeave";
 import {isInIOS} from "../../protyle/util/compatibility";
+import {scrollDraggedAVColumn} from "./avColumnDragScroll";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`.toLowerCase();
 
@@ -103,6 +104,9 @@ export const initWindowEvent = (app: App) => {
         hideTooltip();
     }, true);
     window.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
+        if (scrollDraggedAVColumn(event)) {
+            return;
+        }
         const isDocumentTab = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENT_TAB);
         const tabBarElement = hasClosestByClassName(event.target, "layout-tab-bar");
         if (!tabBarElement && event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK)) {
@@ -220,6 +224,7 @@ export const initWindowEvent = (app: App) => {
         clearDragTipGhost();
         window.siyuan.dragTitle = "";
     });
+    window.addEventListener("drop", stopScrollAnimation, true);
     window.addEventListener("dragleave", () => {
         stopScrollAnimation();
     });

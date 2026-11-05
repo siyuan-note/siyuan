@@ -77,9 +77,9 @@
 
   &__page {
     position: absolute;
-    left: 50%;
+    left: -8px;
     bottom: 12%;
-    transform: translateX(-50%);
+    transform: translateX(-100%);
     display: flex;
     flex-direction: column;
     gap: 8px;

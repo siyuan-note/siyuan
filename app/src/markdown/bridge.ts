@@ -41,6 +41,7 @@ export interface MarkdownBridge {
     bootstrap(): Promise<MarkdownBootstrap>;
     newDocument(): Promise<void>;
     openDocument(): Promise<void>;
+    revealFile?(): Promise<void>;
     chooseSaveAs(format: MarkdownFormat): Promise<{kind: "selected"; target: MarkdownTarget} | {kind: "cancelled" | "occupied" | "blocked"}>;
     cancelSaveAs(handle: string): Promise<void>;
     authorizeResources(): Promise<boolean>;

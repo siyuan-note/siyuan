@@ -333,7 +333,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Expanded folders and the desktop panel width are remembered. Directory changes and returning focus refresh the tree. If a directory contains too many entries, choose a smaller folder. This panel is for navigation; it does not rename, delete, or reorganize files by dragging."
+					"Data": "Expanded folders and the desktop panel width are remembered. Directory changes and returning focus refresh the tree. If a directory contains too many entries, choose a smaller folder. This panel is for navigation; it does not rename, delete, or reorganize files by dragging. On desktop, the menu also lets you reveal the current saved file in the system file manager."
 				}
 			]
 		},

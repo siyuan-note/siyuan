@@ -67,13 +67,14 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
     }
     let receive;
     const opens = [];
+    const reveals = [];
     const dialog = {showMessageBox: async () => ({response: 0}), showOpenDialog: async () => ({canceled: true}), showSaveDialog: async () => ({canceled: true})};
     const host = new MarkdownDesktopHost({directory: path.join(directory, "config", "recovery")});
     let emptied = 0;
     const manager = createMarkdownWindows({app: {getLocale: () => "en"}, BrowserWindow,
         nativeTheme: Object.assign(new EventEmitter(), {shouldUseDarkColors: options.dark ?? false}),
         ipcMain: {handle: (_channel, callback) => { receive = callback; }}, dialog,
-        shell: {openExternal: async url => opens.push(url)}, rootDirectory: appDirectory,
+        shell: {openExternal: async url => opens.push(url), showItemInFolder: file => reveals.push(file)}, rootDirectory: appDirectory,
         configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++,
         // 标题栏按钮区由主进程注入，Markdown 模块不直接依赖 window 目录。
         windowControls,
@@ -91,8 +92,20 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
         assert.equal(path.dirname(path.resolve(directory)), path.resolve(os.tmpdir()));
         await fs.rm(directory, {recursive: true, force: true, maxRetries: 3});
     });
-    return {directory, build, manager, host, windows, call, dialog, opens, emptied: () => emptied};
+    return {directory, build, manager, host, windows, call, dialog, opens, reveals, emptied: () => emptied};
 };
+
+test("revealing a file uses only the current authorized target and ignores renderer paths", async t => {
+    const {directory, manager, call, reveals} = await fixture(t);
+    const unsaved = await manager.open();
+    await call(unsaved, "reveal-file", "untrusted.md");
+    assert.deepEqual(reveals, []);
+    const file = path.join(directory, "reveal.md");
+    await fs.writeFile(file, "# File\n");
+    const window = await manager.open(file);
+    await call(window, "reveal-file", "untrusted.md");
+    assert.deepEqual(reveals, [await fs.realpath(file)]);
+});
 
 test("Markdown scheme registration grants only required local browser capabilities", () => {
     let registered;

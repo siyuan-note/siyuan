@@ -36,6 +36,7 @@ const bridge: MarkdownBridge = {
     bootstrap: () => invoke("bootstrap"),
     newDocument: () => invoke("new"),
     openDocument: () => invoke("open"),
+    revealFile: () => invoke("reveal-file"),
     chooseSaveAs: format => invoke("save-as", format),
     cancelSaveAs: handle => invoke("cancel-save-as", handle),
     authorizeResources: () => invoke("authorize-resources"),

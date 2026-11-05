@@ -28,7 +28,7 @@ type MarkdownDevTools = {
 };
 export type MarkdownWindowsOptions = {
     app: Pick<App, "getLocale">; BrowserWindow: typeof ElectronWindow; ipcMain: Pick<IpcMain, "handle">;
-    dialog: Dialog; shell: Pick<Shell, "openExternal">; protocol?: Protocol; nativeTheme?: NativeTheme;
+    dialog: Dialog; shell: Pick<Shell, "openExternal" | "showItemInFolder">; protocol?: Protocol; nativeTheme?: NativeTheme;
     rootDirectory: string; configDirectory: string; lang?: string | (() => string); platform?: NodeJS.Platform;
     onEmpty?: () => void; host?: MarkdownDesktopHost; windowControls: MarkdownWindowControls; devTools: MarkdownDevTools;
 };
@@ -516,6 +516,11 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             return result;
         }
         switch (action) {
+            case "reveal-file": {
+                const target = currentTarget(record);
+                if (target) shell.showItemInFolder(target.descriptor.path);
+                return;
+            }
             case "window-state": return {maximized: record.window.isMaximized?.() || false, fullscreen: record.window.isFullScreen?.() || false};
             case "window-control": {
                 if (typeof payload !== "string" || !["minimize", "maximize", "close"].includes(payload)) throw new Error("Markdown window request rejected");

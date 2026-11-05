@@ -69,6 +69,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             <button type="button" class="b3-menu__item" id="markdownNew"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconAddDoc"></use></svg><span class="b3-menu__label" data-label="new"></span></button>
             <button type="button" class="b3-menu__item" id="markdownOpen"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconFileText"></use></svg><span class="b3-menu__label" data-label="openBy"></span></button>
             <button type="button" class="b3-menu__item" id="markdownOpenFolder"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconFolder"></use></svg><span class="b3-menu__label" data-label="markdownOpenFolder"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownRevealFile" hidden><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconFolder"></use></svg><span class="b3-menu__label" data-label="showInFolder"></span></button>
             <button type="button" class="b3-menu__item" id="markdownSave"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconSave"></use></svg><span class="b3-menu__label" data-label="save"></span></button>
             <button type="button" class="b3-menu__item" id="markdownSaveAs"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconDownloadAssets"></use></svg><span class="b3-menu__label" data-label="saveAs"></span></button>
             <hr class="b3-menu__separator">
@@ -238,6 +239,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         overwrite.disabled = frozen || state.problem?.kind !== "conflict" || !state.problem.baseline ||
             state.problemTargetHandle !== state.target?.handle;
         control<HTMLButtonElement>("markdownSave").disabled = frozen || state.composing;
+        control<HTMLButtonElement>("markdownRevealFile").hidden = !bridge.revealFile;
+        control<HTMLButtonElement>("markdownRevealFile").disabled = frozen || !state.target;
         control<HTMLButtonElement>("markdownUndo").disabled = frozen || state.composing || !history.canUndo;
         control<HTMLButtonElement>("markdownRedo").disabled = frozen || state.composing || !history.canRedo;
         control<HTMLButtonElement>("markdownSaveAs").disabled = frozen || state.composing || state.problem?.kind === "indeterminate";
@@ -438,6 +441,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     action("markdownNew", () => bridge.newDocument());
     action("markdownOpen", () => bridge.openDocument());
     action("markdownOpenFolder", () => tree.chooseRoot());
+    action("markdownRevealFile", () => bridge.revealFile?.());
     action("markdownSave", save);
     action("markdownUndo", () => editor.undo());
     action("markdownRedo", () => editor.redo());

@@ -24,6 +24,7 @@ const browserCases = async (languages: Record<string, string>) => {
     const responses: boolean[] = [];
     let newDocuments = 0;
     let openedDocuments = 0;
+    let revealedFiles = 0;
     let closeConfirmations = 0;
     let cancelledCandidates = 0;
     let failWrite = false;
@@ -60,6 +61,7 @@ const browserCases = async (languages: Record<string, string>) => {
         bootstrap: async () => ({sessionId: "ui-session", content, target, preferences: {...storedPreferences},
             languages, lang: "zh-CN", platform: "win32", dark: false}),
         newDocument: async () => { newDocuments++; }, openDocument: async () => {openedDocuments++;},
+        revealFile: async () => {revealedFiles++;},
         chooseSaveAs: async () => ({kind: "selected", target: {...target, handle: "copy", identity: "copy", displayName: "README-copy.md"}}),
         cancelSaveAs: async () => {cancelledCandidates++;}, authorizeResources: async () => true, resolveResource: async () => undefined,
         insertImage: async () => ({kind: "inserted", reference: "images/example%20photo.png"}),
@@ -156,6 +158,9 @@ const browserCases = async (languages: Record<string, string>) => {
     await tick();
     check.equal(document.querySelector("#markdownName").textContent, "README.md");
     check.equal(document.title, "README.md");
+    menuAction("markdownRevealFile");
+    await tick();
+    check.equal(revealedFiles, 1, "the file manager action invokes the desktop capability");
     check.equal(document.querySelector(".markdown-tree__heading"), null);
     check.deepEqual(Array.from(document.querySelectorAll<HTMLElement>(".markdown-header button, .markdown-header select, .markdown-header summary"))
         .filter(element => element.checkVisibility()).map(element => element.id), ["markdownTreeToggle", "markdownFiles", "markdownUndo", "markdownRedo", "markdownMoreButton"]);

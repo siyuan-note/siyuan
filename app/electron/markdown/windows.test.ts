@@ -31,6 +31,7 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
             this.webContents.id = ++id;
             this.webContents.mainFrame = {url: ""};
             this.webContents.send = (channel, message) => this.webContents.emit("send", channel, message);
+            this.webContents.setIgnoreMenuShortcuts = value => {this.ignoreMenuShortcuts = value;};
             this.webContents.setWindowOpenHandler = callback => { this.webContents.openHandler = callback; };
             this.webContents.session = {
                 setPermissionRequestHandler: callback => { this.permissionRequest = callback; },
@@ -105,6 +106,73 @@ test("revealing a file uses only the current authorized target and ignores rende
     const window = await manager.open(file);
     await call(window, "reveal-file", "untrusted.md");
     assert.deepEqual(reveals, [await fs.realpath(file)]);
+});
+
+test("sidebar shortcuts follow their opening workspace and update without changing unrelated windows", async t => {
+    const {manager, call} = await fixture(t, {platform: "win32"});
+    const first = {fileTree: ["⌥3", "⇧⌘J"], outline: ["⌥4"]};
+    const second = {fileTree: ["⌥5"], outline: []};
+    manager.updateKeymap("workspace-a", first);
+    manager.updateKeymap("workspace-b", second);
+    const a = await manager.open(undefined, undefined, "workspace-a");
+    const b = await manager.open(undefined, undefined, "workspace-b");
+    const standalone = await manager.open();
+    assert.deepEqual((await call(a, "bootstrap")).keymap, first);
+    assert.deepEqual((await call(b, "bootstrap")).keymap, second);
+    assert.deepEqual((await call(standalone, "bootstrap")).keymap, {fileTree: ["⌥1"], outline: ["⌥2"]});
+    const events = [];
+    for (const [id, window] of [["a", a], ["b", b], ["standalone", standalone]]) {
+        window.webContents.on("send", (_channel, message) => {if (message.type === "keymap") events.push({id, keymap: message.keymap});});
+    }
+    const update = {fileTree: [], outline: ["⌥8"]};
+    manager.updateKeymap("workspace-a", update);
+    manager.updateKeymap("workspace-a", update);
+    b.emit("focus");
+    assert.deepEqual(events, [{id: "a", keymap: update}]);
+    assert.deepEqual((await call(a, "bootstrap")).keymap, update);
+    assert.deepEqual((await call(b, "bootstrap")).keymap, second);
+    manager.updateKeymap("workspace-a", {fileTree: "invalid", outline: []});
+    assert.deepEqual((await call(a, "bootstrap")).keymap, update);
+});
+
+test("documents opened or created from a Markdown window inherit its shortcut source", async t => {
+    const {manager, windows, call, dialog, directory} = await fixture(t, {platform: "darwin"});
+    const keymap = {fileTree: ["⌥1"], outline: []};
+    manager.updateKeymap("source", keymap);
+    const parent = await manager.open(undefined, undefined, "source");
+    await call(parent, "new");
+    assert.deepEqual((await call(windows.at(-1), "bootstrap")).keymap, keymap);
+    const file = path.join(directory, "another.md");
+    await fs.writeFile(file, "# another");
+    dialog.showOpenDialog = async () => ({canceled: false, filePaths: [file]});
+    await call(parent, "open");
+    assert.deepEqual((await call(windows.at(-1), "bootstrap")).keymap, keymap);
+    const standalone = await manager.open();
+    assert.deepEqual((await call(standalone, "bootstrap")).keymap, {fileTree: ["⌃1"], outline: ["⌃2"]});
+});
+
+test("native menus are suppressed only for configured panel shortcuts and restored after release", async t => {
+    const {manager} = await fixture(t, {platform: "darwin"});
+    manager.updateKeymap("source", {fileTree: ["⌘Z"], outline: []});
+    const window = await manager.open(undefined, undefined, "source");
+    const key = {type: "keyDown", key: "z", code: "KeyZ", meta: true, control: false, alt: false,
+        shift: false, isAutoRepeat: false, isComposing: false};
+    const send = overrides => window.webContents.emit("before-input-event", {
+        preventDefault: () => assert.fail("Native suppression must still deliver the sidebar event to the renderer"),
+    }, {...key, ...overrides});
+    send({});
+    assert.equal(window.ignoreMenuShortcuts, true);
+    send({isAutoRepeat: true});
+    assert.equal(window.ignoreMenuShortcuts, true);
+    send({type: "keyUp"});
+    assert.equal(window.ignoreMenuShortcuts, false);
+    send({isComposing: true});
+    assert.equal(window.ignoreMenuShortcuts, false);
+    send({key: "q", code: "KeyQ"});
+    assert.equal(window.ignoreMenuShortcuts, false);
+    manager.updateKeymap("source", {fileTree: [], outline: []});
+    send({});
+    assert.equal(window.ignoreMenuShortcuts, false);
 });
 
 test("Markdown scheme registration grants only required local browser capabilities", () => {

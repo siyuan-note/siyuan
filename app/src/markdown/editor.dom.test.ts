@@ -46,13 +46,28 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         const editor = await api.createMarkdownEditor({element, initialValue: source, mode, cdn, lutePath,
             onEdit: () => {}, onOutlineChange: state => states.push(state)});
         const panel = element.querySelector<HTMLElement>(".vditor-outline");
+        const finishOutline = async () => {
+            panel.getAnimations().forEach(animation => animation.finish());
+            await new Promise(resolve => setTimeout(resolve, 30));
+        };
         check.deepEqual(states.at(-1), {enabled: false, visible: false, available: true});
         editor.setOutline(true);
+        await finishOutline();
         check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
         check.ok(panel.querySelector("ul ul ul"), "outline retains nested heading levels");
         const fold = panel.querySelector<HTMLElement>(".vditor-outline__action");
         fold.dispatchEvent(new MouseEvent("click", {bubbles: true}));
         check.equal((fold.parentElement.nextElementSibling as HTMLElement).style.display, "none");
+        editor.setOutline(false);
+        const reversingClose = panel.getAnimations()[0];
+        reversingClose.pause(); reversingClose.currentTime = 60;
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        editor.setOutline(true);
+        check.equal(panel.querySelector(".vditor-outline__action"), fold, "rapid reversal reuses native outline nodes");
+        check.equal((fold.parentElement.nextElementSibling as HTMLElement).style.display, "none",
+            "rapid reversal preserves folded headings");
+        await finishOutline();
+        check.equal(panel.querySelector(".vditor-outline__action"), fold, "animation completion does not rebuild headings");
         fold.dispatchEvent(new MouseEvent("click", {bubbles: true}));
         check.equal((fold.parentElement.nextElementSibling as HTMLElement).style.display, "block");
         const last = Array.from(panel.querySelectorAll<HTMLElement>("[data-target-id]")).find(item => item.textContent === "Last");
@@ -62,6 +77,25 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
             "outline navigation fixture has a constrained scrollable editor");
         check.ok(scrollSurface.scrollTop > 0, "outline navigation scrolls to the selected heading");
         check.deepEqual(editor.flush(), {content: source, edited: false, composing: false});
+        wrapper.style.width = "460px";
+        panel.style.maxWidth = "40%";
+        window.dispatchEvent(new Event("resize"));
+        check.ok(panel.getBoundingClientRect().width < 200, "responsive outline fixture starts constrained");
+        editor.setOutline(false); await finishOutline();
+        editor.setOutline(true);
+        const growingParent = panel.getAnimations()[0];
+        growingParent.pause(); growingParent.currentTime = 60;
+        wrapper.style.width = "700px";
+        growingParent.currentTime = 199.99;
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        const beforeGrowingFinish = panel.getBoundingClientRect().width;
+        await finishOutline();
+        check.ok(Math.abs(panel.getBoundingClientRect().width - beforeGrowingFinish) < 1,
+            "a growing editor does not add width when the outline animation ends");
+        check.ok(panel.getBoundingClientRect().width > 240);
+        wrapper.style.width = "";
+        panel.style.maxWidth = "";
+        window.dispatchEvent(new Event("resize"));
         editor.setMode("sv");
         check.deepEqual(states.at(-1), {enabled: true, visible: false, available: false});
         editor.setMode(mode);
@@ -80,6 +114,10 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         const surface = element.querySelector<HTMLElement>(`.vditor-${mode} .vditor-reset`);
         const heading = surface.querySelector("h1");
         const headingText = heading.lastChild;
+        editor.setOutline(false);
+        const editingClose = panel.getAnimations()[0];
+        editingClose.pause(); editingClose.currentTime = 60;
+        await new Promise(resolve => requestAnimationFrame(resolve));
         surface.focus();
         const range = document.createRange();
         range.selectNodeContents(headingText);
@@ -91,6 +129,8 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         range.selectNodeContents(headingText);
         range.collapse(false);
         surface.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", data: "Typed heading"}));
+        editor.setOutline(true);
+        check.ok(panel.textContent.includes("Typed heading"), "reversal after native input refreshes changed headings immediately");
         await new Promise(resolve => setTimeout(resolve, 400));
         check.ok(panel.textContent.includes("Typed heading"), "native heading input refreshes the outline");
         check.ok(editor.flush().content.includes("# Typed heading"));
@@ -104,7 +144,9 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         surface.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "deleteContentBackward"}));
         await new Promise(resolve => setTimeout(resolve, 400));
         check.equal(panel.textContent.includes("Typed heading"), false, "deleted headings disappear after native input");
+        editor.setOutline(false);
         editor.setValue("# Renamed\n\n## Updated child\n");
+        editor.setOutline(true);
         check.ok(panel.textContent.includes("Renamed"));
         check.ok(panel.textContent.includes("Updated child"));
         check.equal(panel.textContent.includes("Last"), false);
@@ -479,7 +521,7 @@ test("Vditor 4.0.2-alpha.1 adapter preserves content and isolates programmatic, 
     const compile = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const bundle = compile("identity.ts") + "\n" + compile("limits.ts") + "\n" + compile("resourcePolicy.ts") + "\n" + compile("link.ts") + "\n" + compile("editor.ts") +
+    const bundle = compile("identity.ts") + "\n" + compile("limits.ts") + "\n" + compile("resourcePolicy.ts") + "\n" + compile("link.ts") + "\n" + compile("panelAnimation.ts") + "\n" + compile("editor.ts") +
         "\nwindow.MarkdownEditorTest = {createMarkdownEditor, createMarkdownResourcePolicy};";
     const html = path.join(temporary, "index.html");
     writeFileSync(html, '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" ' +

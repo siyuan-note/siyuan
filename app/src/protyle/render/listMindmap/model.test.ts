@@ -569,7 +569,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const inputTransactions: {forward: IOperation[], backward: IOperation[]}[] = [];
     const inputAPI = new Function("Constants", "dayjs", "transaction", "hideElements", "mathRender", "highlightRender",
         "normalizeInlineFontFamilyStyle", "getBlockquoteContext", "revealTabsForTarget",
-        "updateTransaction", "isMac", "isOnlyMeta", "isNotCtrl", "isMobile", inputSource +
+        "updateTransaction", "isMac", "isInIOS", "isOnlyMeta", "isNotCtrl", "isMobile", inputSource +
         "; return {input, configureListItemInput, listShortcut, ListHint};")(
         {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing", KEYCODELIST: {76: "L", 74: "J"}}, () => ({format: () => "20260922120000"}),
         (_protyle: IProtyle, forward: IOperation[], backward: IOperation[]) => inputTransactions.push({forward, backward}),
@@ -577,7 +577,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         (_protyle: IProtyle, block: HTMLElement, before: string) => {
             inputTransactions.push({forward: [{action: "update", id: block.dataset.nodeId, data: block.outerHTML}],
                 backward: [{action: "update", id: block.dataset.nodeId, data: before}]});
-        }, () => false, (event: KeyboardEvent) => event.ctrlKey && !event.metaKey,
+        }, () => false, () => false, (event: KeyboardEvent) => event.ctrlKey && !event.metaKey,
         (event: KeyboardEvent) => !event.ctrlKey && !event.metaKey, () => false);
     window.siyuan = {config: {editor: {markdown: {}}, keymap: {editor: {insert: {
         list: {custom: "⌘J"}, "ordered-list": {custom: "⇧⌘J"}, check: {custom: "⌘L"}, quote: {custom: ""},
@@ -5925,7 +5925,7 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
             compilerOptions: {target: typescript.ScriptTarget.ES2021},
         }).outputText;
     const inputModules = ["../../../util/escape.ts", "../../util/normalizeText.ts", "../../runtimeCapabilities.ts",
-        "../../../util/keymapBindings.ts", "../../util/hotKey.ts",
+        "../../../util/keymapBindings.ts", "../../../util/shortcut.ts", "../../util/hotKey.ts",
         "../../util/longTextWrap.ts", "../../util/inlineElementBoundary.ts", "../../util/inlineElementMarker.ts",
         "../../util/hasClosest.ts", "../../wysiwyg/getBlock.ts", "../../util/selection.ts",
         "../../wysiwyg/taskListMarker.ts", "../../wysiwyg/turnIntoList.ts", "../../wysiwyg/input.ts"];

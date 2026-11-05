@@ -15,6 +15,7 @@ const markdownEditors = () => require("./markdownEditors");
 // 只实现接线实际访问的成员，其余窗口能力由用例按需覆盖。
 const managerStub = (overrides: Partial<MarkdownWindows> = {}): MarkdownWindows => ({
     open: async () => undefined,
+    updateKeymap: () => undefined,
     handleLaunch: async () => true,
     hasWindows: () => false,
     hasPendingWork: () => false,

@@ -1,3 +1,4 @@
+import {createDockKeymapDefaults} from "../../util/dockKeymap";
 import {config as configApi} from "../../config/util/configApi";
 import {keymapPayload} from "../../config/keymapPayload";
 import {mergeKeymapDefault} from "../../util/keymapBindings";
@@ -116,11 +117,7 @@ const clearDisallowedKeymap = () => {
 
 export const correctHotkey = (app: App) => {
     if (!["darwin", "ios"].includes(window.siyuan.config.system.os)) {
-        ["fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
-            "graphView", "globalGraph", "riffCard"].forEach(key => {
-            Constants.SIYUAN_KEYMAP.general[key].custom = Constants.SIYUAN_KEYMAP.general[key].default =
-                Constants.SIYUAN_KEYMAP.general[key].default.replace("⌃", "⌥");
-        });
+        Object.assign(Constants.SIYUAN_KEYMAP.general, createDockKeymapDefaults(window.siyuan.config.system.os));
         Constants.SIYUAN_KEYMAP.editor.general.redo.custom = Constants.SIYUAN_KEYMAP.editor.general.redo.default = "⌘Y";
         Constants.SIYUAN_KEYMAP.editor.general.selectToPageStart.custom =
             Constants.SIYUAN_KEYMAP.editor.general.selectToPageStart.default = "⇧⌘Home";

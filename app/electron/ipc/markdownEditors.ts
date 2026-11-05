@@ -6,14 +6,20 @@ import {getWindowKernelTarget, isWindowInitialized} from "../window/windowRegist
 import {isMarkdownBusy, openMarkdownEditor, openMarkdownAsset} from "../startup/markdownEditors";
 import {normalizeMarkdownAsset, verifyMarkdownAssetPath} from "./markdownAsset";
 import type {IpcMainEvent, IpcMainInvokeEvent} from "electron";
+import type {Workspace} from "../shared/types";
 import {Channel} from "../shared/channels";
+import {readSidebarKeymap} from "../../src/util/dockKeymap";
+
+const shortcutSource = (workspace: Workspace): string => workspace.kernelTarget.mode === "remote" ?
+    "remote:" + workspace.kernelTarget.origin : workspace.workspaceDir ? "local:" + workspace.workspaceDir :
+        "window:" + workspace.webContentsId;
 
 // Both entry points require a live workspace main frame. Asset paths are resolved separately below.
-const authorizedWorkspace = (event: IpcMainEvent | IpcMainInvokeEvent) => {
+const authorizedWorkspace = (event: IpcMainEvent | IpcMainInvokeEvent, sync = false) => {
     const target = getWindowKernelTarget(event.sender.id);
     if (!target || event.senderFrame !== event.sender.mainFrame || !isWindowInitialized(event.sender.id) ||
         !state.workspaces.some(workspace => workspace.webContentsId === event.sender.id) ||
-        state.exit.updateInstall || isSystemShuttingDown() || isMarkdownBusy()) {
+        (!sync && (state.exit.updateInstall || isSystemShuttingDown() || isMarkdownBusy()))) {
         return;
     }
     try {
@@ -29,7 +35,8 @@ const authorizedWorkspace = (event: IpcMainEvent | IpcMainInvokeEvent) => {
 };
 
 const handleOpenMarkdown = (event: IpcMainEvent): void => {
-    if (authorizedWorkspace(event)) openMarkdownEditor();
+    const workspace = authorizedWorkspace(event);
+    if (workspace) openMarkdownEditor(shortcutSource(workspace));
 };
 
 const handleOpenAsset = async (event: IpcMainInvokeEvent, value: unknown): Promise<boolean> => {
@@ -49,7 +56,7 @@ const handleOpenAsset = async (event: IpcMainInvokeEvent, value: unknown): Promi
         const file = await verifyMarkdownAssetPath(directory, result.data);
         if (authorizedWorkspace(event) !== workspace || workspace.kernelTarget.mode !== "local" ||
             workspace.kernelTarget.origin !== origin || workspace.workspaceDir !== directory) return false;
-        await openMarkdownAsset(file);
+        await openMarkdownAsset(file, shortcutSource(workspace));
         return true;
     } catch {
         writeLog("open local Markdown asset failed");
@@ -60,6 +67,11 @@ const handleOpenAsset = async (event: IpcMainInvokeEvent, value: unknown): Promi
 const registerMarkdownIpc = (): void => {
     electron.ipcMain.on(Channel.SIYUAN_OPEN_MARKDOWN, handleOpenMarkdown);
     electron.ipcMain.handle(Channel.SIYUAN_OPEN_MARKDOWN, handleOpenAsset);
+    electron.ipcMain.on(Channel.SIYUAN_SYNC_MARKDOWN_KEYMAP, (event, value) => {
+        const workspace = authorizedWorkspace(event, true);
+        const keymap = readSidebarKeymap(value);
+        if (workspace && keymap) state.markdown.windows?.updateKeymap(shortcutSource(workspace), keymap);
+    });
 };
 
 export {registerMarkdownIpc};

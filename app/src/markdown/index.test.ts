@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import * as path from "node:path";
 import {test} from "node:test";
 import {transpileModule, ScriptTarget} from "typescript";
+import {markdownErrorKey} from "./errors";
 
 const source = readFileSync(path.join(__dirname, "index.ts"), "utf8");
 const section = (start: string, end: string) => source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start)));
@@ -35,6 +36,7 @@ const setup = () => {
         invalidateReload() {}
     }
     const deps = {
+        sidebarShortcuts: {update() {}}, updateSidebarShortcutHints() {},
         MarkdownSession: Session, bridge, renders, callbacks, URL, clearTimeout,
         location: {href: "https://editor.invalid/"},
         createMarkdownEditor: async (options: Record<string, (...args: any[]) => any>) => {
@@ -80,7 +82,8 @@ test("the Markdown footer stays hidden during normal editing, saving and switchi
         return controls.get(name);
     };
     const deps = {control, document: {title: ""}, text: (key: string) => key,
-        markdownErrorKey: (error: {code: string}) => error.code,
+        updateSidebarShortcutHints() {},
+        markdownErrorKey,
         bridge: {state: async () => {}}, modeChoice: {setDisabled() {}}};
     const body = transpileModule(`
         let disposed = false, actionMessage = "", editPending = false, pendingSwitch, frozen = false, switchFailed = false;
@@ -88,21 +91,35 @@ test("the Markdown footer stays hidden during normal editing, saving and switchi
         const history = {canUndo: false, canRedo: false}, bootstrap = {recovered: false};
         const outline = {enabled: false, visible: false, available: false};
         ${section("    const render =", "    const reportError =")}
-        return (state, pending = false, message = "", switching = false, failed = false) => {
+        return (state, pending = false, message = "", switching = false, failed = false, notices = {}) => {
             editPending = pending; actionMessage = message; pendingSwitch = switching; switchFailed = failed;
+            resourceUnavailable = Boolean(notices.resourceUnavailable); sourceOnly = Boolean(notices.sourceOnly);
+            bootstrap.recovered = Boolean(notices.recovered);
             render(state);
         };
     `, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const render = new Function("deps", `with (deps) { ${body} }`)(deps);
-    const state = {status: "saved", targetGeneration: 0, revision: 1, draftRevision: 1, hasUnsavedChanges: false};
+    const state = {status: "saved", targetGeneration: 0, revision: 1, draftRevision: 1, hasUnsavedChanges: false,
+        target: {handle: "file", displayName: "example.md", capabilities: {persistentPermission: false}}};
     for (const status of ["view", "draft", "dirty", "saving", "saved"]) {
         for (const pending of [false, true]) {
             for (const switching of [false, true]) {
                 render({...state, status}, pending, "", switching);
                 assert.equal(control("markdownFooter").hidden, true, `${status}, pending=${pending}, switching=${switching}`);
                 assert.equal(control("markdownRetry").hidden, true, "a pending switch alone cannot expose retry");
+                assert.equal(control("markdownNotice").textContent, "", "temporary access alone does not need a menu notice");
             }
         }
+    }
+    render({...state, status: "blocked", problem: {kind: "blocked", error: {code: "permission", recoverable: true}}});
+    assert.equal(control("markdownFooter").hidden, false, "a real permission failure remains visible");
+    assert.equal(control("markdownStatus").textContent, "markdownPermissionDenied");
+    assert.equal(control("markdownRetry").hidden, false, "recoverable permission failures retain retry");
+    assert.equal(control("markdownNotice").textContent, "");
+    for (const [notice, key] of [["resourceUnavailable", "markdownResourceUnavailable"],
+        ["sourceOnly", "markdownSourceOnly"], ["recovered", "markdownRecovered"]]) {
+        render(state, false, "", false, false, {[notice]: true});
+        assert.equal(control("markdownNotice").textContent, key, "other contextual notices remain available");
     }
     for (const problem of [{kind: "blocked", error: {code: "io", recoverable: true}},
         {kind: "indeterminate", error: {code: "io"}}, {kind: "conflict", baseline: "old"}]) {

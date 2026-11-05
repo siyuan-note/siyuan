@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261105055849"
+		"updated": "20261105091714"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-3a481f4",
-				"updated": "20261105055849"
+				"updated": "20261105091714"
 			},
 			"Children": [
 				{
@@ -125,12 +125,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261105055849-39489b5",
-				"updated": "20261105055849"
+				"updated": "20261105091714"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use the outline button next to the file panel button at the top left to show or hide the heading outline. It updates as you edit; expand or collapse nested headings and click a heading to jump to it. The outline is available in instant rendering and WYSIWYG modes when the window is at least 520 pixels wide. In source/split view or narrower windows, it is hidden and the button is disabled with an explanatory tooltip. Whether the outline is enabled is retained across documents only in the current window."
+					"Data": "Use the outline button next to the file panel button at the top left to show or hide the heading outline. The default shortcut is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt+2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on Windows/Linux and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Control+2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS; check the button tooltip for any custom binding. It updates as you edit; expand or collapse nested headings and click a heading to jump to it. The outline is available in instant rendering and WYSIWYG modes when the window is at least 520 pixels wide. In source/split view or narrower windows, it is hidden and the button is disabled with an explanatory tooltip. Whether the outline is enabled is retained across documents only in the current window."
 				}
 			]
 		},
@@ -268,7 +286,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101171827-eb329f4",
-				"updated": "20261102140506"
+				"updated": "20261105091714"
 			},
 			"Children": [
 				{
@@ -296,12 +314,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101171827-4756559",
-				"updated": "20261102172500"
+				"updated": "20261105091714"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use the file panel button at the top left to show or hide the sidebar on desktop or the file drawer on mobile. The filename toggles the panel only in the mobile or narrow-screen drawer layout; it is not clickable in the desktop sidebar layout. Drag the desktop sidebar divider to adjust its width. If a mobile provider grants access to only one file, select its containing folder when asked to enable the tree. Cancelling folder authorization leaves the current document editable. Tree access does not authorize local images."
+					"Data": "Use the file panel button at the top left to show or hide the sidebar on desktop or the file drawer on mobile. The default shortcut is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt+1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on Windows/Linux and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Control+1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS. When opened from a workspace, both panel shortcuts follow that workspace’s bindings; check the button tooltips for the current keys. Without a source workspace, the defaults apply. Both panels open and close with smooth transitions that respect the system’s reduced-motion setting. The filename toggles the panel only in the mobile or narrow-screen drawer layout; it is not clickable in the desktop sidebar layout. Drag the desktop sidebar divider to adjust its width. If a mobile provider grants access to only one file, select its containing folder when asked to enable the tree. Cancelling folder authorization leaves the current document editable. Tree access does not authorize local images."
 				}
 			]
 		},

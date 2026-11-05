@@ -1,6 +1,7 @@
 import type {MarkdownEditorSnapshot} from "./contracts";
 import {MARKDOWN_DOCUMENT_BYTES, MARKDOWN_RENDER_BYTES, MARKDOWN_RECOVERY_BYTES, markdownByteLength} from "./limits";
 import {markdownLinkDestination} from "./link";
+import {createMarkdownPanelAnimation} from "./panelAnimation";
 import {createMarkdownResourcePolicy, isRelativeMarkdownResource, MarkdownResourceResolver} from "./resourcePolicy";
 
 export type MarkdownEditorMode = "ir" | "wysiwyg" | "sv";
@@ -42,7 +43,7 @@ interface VditorInstance {
         wysiwyg: VditorSurface;
         sv: VditorSurface;
         toolbar: {element: HTMLElement};
-        outline: {element: HTMLElement; toggle(vditor: unknown, show: boolean, focus: boolean): void};
+        outline: {element: HTMLElement; toggle(vditor: unknown, show: boolean, focus: boolean): void; render?(vditor: unknown): string};
         undo: {addToUndoStack(vditor: unknown): void};
         hint?: {timeId?: number};
         preview?: {render(vditor: unknown): void};
@@ -178,21 +179,23 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     let finishInitialPreview: () => void;
     let outlineEnabled = options.outline ?? false;
     let emittedOutline: MarkdownOutlineState;
-    const syncOutline = () => {
+    let closingOutlineVersion: {input: number; generation: number};
+    let outlineAnimation: ReturnType<typeof createMarkdownPanelAnimation>;
+    const syncOutline = (animate = false, force = false) => {
         if (destroyed || !ready) return;
         // Vditor 的源码模式与小于 520px 的窗口不展示大纲，保留开关意图供恢复时使用。
         const available = instance.getCurrentMode() !== "sv" && element.ownerDocument.defaultView.innerWidth >= 520;
         const visible = outlineEnabled && available;
         instance.vditor.options.outline.enable = outlineEnabled;
-        if ((instance.vditor.outline.element.style.display === "block") !== visible) {
-            instance.vditor.outline.toggle(instance.vditor, visible, false);
-        }
+        outlineAnimation?.setVisible(visible, {animate, force});
+        instance.vditor.outline.element.inert = !visible;
         const state = {enabled: outlineEnabled, visible, available};
         if (emittedOutline && emittedOutline.enabled === state.enabled && emittedOutline.visible === state.visible &&
             emittedOutline.available === state.available) return;
         emittedOutline = state;
         options.onOutlineChange?.(state);
     };
+    const resizeOutline = () => syncOutline(false, true);
     const notifyHistory = () => {
         if (destroyed) return;
         const state = {canUndo: canHistory("undo"), canRedo: canHistory("redo")};
@@ -227,7 +230,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         rendered = instance.getValue();
         cachedInput = undefined;
         userPending = false;
-        syncOutline();
+        syncOutline(false, changed);
         if (changed) {
             // 切换模式后立即记录基线，首笔输入不能抢在延迟快照之前覆盖它。
             instance.vditor.undo.addToUndoStack(instance.vditor);
@@ -271,6 +274,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     const activateSource = () => {
         updateSourceOnly(true);
         if (instance.getCurrentMode() === "sv") return;
+        syncOutline(false, true);
         const wasProgrammatic = programmatic;
         programmatic = true;
         try {
@@ -411,6 +415,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 event.stopImmediatePropagation();
                 return;
             }
+            syncOutline(false, true);
             queueMicrotask(() => {
                 if (!destroyed && ready) {
                     syncMode();
@@ -445,6 +450,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 event.stopImmediatePropagation();
                 return;
             }
+            syncOutline(false, true);
             queueMicrotask(() => {
                 if (destroyed || !ready) return;
                 syncMode();
@@ -505,7 +511,8 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         observer.disconnect();
         historyObserver.disconnect();
         popoverObserver?.disconnect();
-        element.ownerDocument.defaultView.removeEventListener("resize", syncOutline);
+        element.ownerDocument.defaultView.removeEventListener("resize", resizeOutline, true);
+        outlineAnimation?.destroy();
         policy.destroy();
         listeners.forEach(([type, handler]) => element.removeEventListener(type, handler, true));
         if (instance?.vditor) instance.destroy();
@@ -549,6 +556,24 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                         if (destroyed) return;
                         if (instance.version !== "4.0.2-alpha.1") throw new Error("Unsupported Markdown editor version");
                         if (element.id) instance.vditor.outline.element.id = `${element.id}-outline`;
+                        outlineAnimation = createMarkdownPanelAnimation({
+                            element: instance.vditor.outline.element,
+                            applyVisible(visible, {reversing}) {
+                                const outline = instance.vditor.outline;
+                                if ((outline.element.style.display === "block") !== visible) {
+                                    const render = outline.render;
+                                    if (!visible) closingOutlineVersion = userPending ? undefined : {input: inputVersion, generation};
+                                    const reuse = visible && reversing && render && closingOutlineVersion?.input === inputVersion &&
+                                        closingOutlineVersion.generation === generation;
+                                    // 退场途中恢复时复用标题节点和折叠状态，原生 toggle 仍计算编辑区边距。
+                                    if (reuse) outline.render = () => "";
+                                    try {outline.toggle(instance.vditor, visible, false);}
+                                    finally {if (reuse) outline.render = render;}
+                                    if (visible) closingOutlineVersion = undefined;
+                                }
+                            },
+                            styleTargets: () => [{element: activeSurface().element, properties: ["padding-left", "padding-right"]}],
+                        });
                         // 内部控件提供模式与快捷键入口，历史操作由标题行调用同一套撤销记录。
                         instance.vditor.toolbar.element.hidden = true;
                         if (popoverObserver && instance.vditor.wysiwyg.popover) {
@@ -596,13 +621,15 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         }
     });
 
-    element.ownerDocument.defaultView.addEventListener("resize", syncOutline);
+    // 先收敛过渡，Vditor 随后的 resize 计算才能读取最终面板宽度。
+    element.ownerDocument.defaultView.addEventListener("resize", resizeOutline, true);
     return {
         flush,
         setValue,
         setMode(nextMode) {
             if (destroyed || isComposing()) return;
             if (!allowModeSwitch(nextMode)) return;
+            syncOutline(false, true);
             if (instance.getCurrentMode() === nextMode) {options.onModeChange?.(nextMode, "user"); return;}
             const button = element.querySelector<HTMLButtonElement>(`button[data-mode="${nextMode}"]`);
             if (!button) throw new Error("Markdown editor mode unavailable");
@@ -619,7 +646,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         setOutline(enabled) {
             if (destroyed || !ready || isComposing()) return;
             outlineEnabled = enabled;
-            syncOutline();
+            syncOutline(true);
         },
         undo() {runHistory("undo");},
         redo() {runHistory("redo");},

@@ -49,6 +49,7 @@ import {requestResponsiveDockLayout} from "./dock/responsive";
 import {stickyRow} from "../protyle/render/av/row";
 import {flushSettingSaves, settingSaveFailures} from "../config/setting/pending";
 import {clearReloadSnapshot, consumeReloadSnapshot, removeLayoutScroll, saveReloadSnapshot} from "./reloadSnapshot";
+import {syncMarkdownKeymap} from "../markdown/keymapSync";
 
 const isBuiltInCustomModel = (type: string) => {
     return type === "siyuan-card" || type === "siyuan-database-row";
@@ -274,6 +275,7 @@ export const saveLayout = () => {
             };
             layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, breakObj);
             window.siyuan.config.uiLayout = layoutJSON;
+            syncMarkdownKeymap();
         }
     }
     if (Object.keys(breakObj).length > 0 && saveCount < 10) {
@@ -645,6 +647,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     const snapshot = consumeReloadSnapshot();
     if (snapshot) {
         window.siyuan.config.uiLayout = snapshot;
+        syncMarkdownKeymap();
         document.querySelector("#barDock use")?.setAttribute("xlink:href", snapshot.hideDock ? "#iconDock" : "#iconHideDock");
         document.querySelector("#barDock")?.setAttribute("aria-label", getDockBarToggleTip());
     }

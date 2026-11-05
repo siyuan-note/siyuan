@@ -46,6 +46,7 @@ const sources = () => {
     return {
         contextMenu,
         taskShortcut: extract("util/keymapBindings.ts", ["getKeymapBindings", "normalizeShortcutKey"]) +
+            extract("util/shortcut.ts", ["matchShortcut"]) +
             extract("protyle/util/hotKey.ts", ["matchHotKey"]) +
             extract("protyle/util/hasClosest.ts", ["hasClosestByAttribute"]) +
             compile(`const handleTaskShortcut = (protyle, range, event) => {${shortcutStatements.join("\n")}};`),
@@ -357,10 +358,10 @@ const cases = async source => {
 
     // 快捷键复用真实任务事务，验证双态、四态、自定义绑定及只读状态。
     const listKeys = {checkToggle: {custom: "⇧⌘L"}, taskCompletionToggle: {custom: "⇧⌘K"}};
-    const handleTaskShortcut = new Function("window", "Constants", "isMac", "isNotCtrl", "isOnlyMeta",
+    const handleTaskShortcut = new Function("window", "Constants", "isMac", "isInIOS",
         "toggleTaskListItem", "cycleTaskListItemStatus", source.taskShortcut + "; return handleTaskShortcut;")(
         {siyuan: {config: {keymap: {editor: {list: listKeys}}}}}, {KEYCODELIST: {75: "K", 76: "L"}},
-        () => false, event => !event.ctrlKey && !event.metaKey, event => event.ctrlKey && !event.metaKey,
+        () => false, () => false,
         api.toggleTaskListItem, api.cycleTaskListItemStatus);
     const pressTaskKey = (keyCode = 75, startContainer = taskItem.querySelector("[contenteditable]").firstChild) => {
         const event = new KeyboardEvent("keydown", {keyCode, ctrlKey: true, shiftKey: true, cancelable: true});

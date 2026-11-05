@@ -47,6 +47,7 @@ const sources = () => {
         globalKeyboard: compile(parse(sourceFile("boot/globalEvent/keydown.ts").text,
             {MOBILE: false, BROWSER: true}, false, true)),
         keymap: compile(sourceFile("util/keymapBindings.ts").text),
+        shortcut: compile(sourceFile("util/shortcut.ts").text),
         hotkey: compile(sourceFile("protyle/util/hotKey.ts").text),
         escape: compile(`function editorEscape(protyle, event, range, isCrossBlock, nodeElement) {
             const blockSelectionModeElement = undefined;
@@ -212,8 +213,10 @@ const cases = async compiled => {
     const menuBindings = new Function("window", "Constants", "toggleMenu", compiled.menu +
         "\nreturn {workspaceMenu, bindMenuKeydown};")(window, menuConstants, load(compiled.menuToggle, {}).toggleMenu);
     const keymap = load(compiled.keymap, {});
+    const shortcut = load(compiled.shortcut, {"./keymapBindings": keymap});
     const hotkey = load(compiled.hotkey, {"../../util/keymapBindings": keymap, "../../constants": {Constants: menuConstants},
-        "./compatibility": {isNotCtrl: event => !event.ctrlKey && !event.metaKey, isMac: () => false,
+        "../../util/shortcut": shortcut,
+        "./compatibility": {isNotCtrl: event => !event.ctrlKey && !event.metaKey, isMac: () => false, isInIOS: () => false,
             isOnlyMeta: event => event.ctrlKey && !event.metaKey}});
     const globalKeyboard = load(compiled.globalKeyboard, {"../../menus/Menu": menuBindings,
         "../../menus/workspace": menuBindings, "../../protyle/util/hotKey": hotkey,

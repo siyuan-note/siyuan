@@ -99,6 +99,9 @@ const createHarness = async (mode: MarkdownEditorMode = "wysiwyg") => {
             MARKDOWN_RENDER_BYTES: 256 * 1024,
             MARKDOWN_RECOVERY_BYTES: 16 * 1024 * 1024,
             markdownByteLength: (content: string) => Buffer.byteLength(content),
+            createMarkdownPanelAnimation: (options: {applyVisible(visible: boolean, context: {reversing: boolean}): void}) => ({
+                setVisible(visible: boolean) {options.applyVisible(visible, {reversing: false});}, destroy() {},
+            }),
             createMarkdownResourcePolicy: () => ({sanitize: (html: string) => html, restore: (html: string) => html,
                 hydrate() {}, reset() {}, destroy() {}}),
         }),

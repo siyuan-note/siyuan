@@ -122,18 +122,18 @@ const closeMarkdownEditors = async (): Promise<boolean> =>
 const cancelMarkdownQuit = (): void => state.markdown.lifecycle?.cancel();
 
 // 从桌面主菜单新建一个独立 Markdown 编辑窗口。
-const openMarkdownEditor = (): void => {
+const openMarkdownEditor = (source?: string): void => {
     const windows = state.markdown.windows;
     if (!windows) {
         return;
     }
-    void windows.open().catch((error: unknown) => writeLog("open Markdown editor failed: " + errorMessage(error)));
+    void windows.open(undefined, undefined, source).catch((error: unknown) => writeLog("open Markdown editor failed: " + errorMessage(error)));
 };
 
 // Called only after the IPC asset resolver has authorized a local workspace asset.
-const openMarkdownAsset = async (file: ExpectedMarkdownFile): Promise<void> => {
+const openMarkdownAsset = async (file: ExpectedMarkdownFile, source?: string): Promise<void> => {
     if (!state.markdown.windows) throw new Error("Markdown editor is unavailable");
-    await state.markdown.windows.open(file.path, file);
+    await state.markdown.windows.open(file.path, file, source);
 };
 
 /** 正在执行一次 Markdown 退出协调。 */

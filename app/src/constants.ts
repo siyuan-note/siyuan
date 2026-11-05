@@ -1,3 +1,5 @@
+import {createDockKeymapDefaults} from "./util/dockKeymap";
+
 declare const SIYUAN_VERSION: string;
 declare const NODE_ENV: string;
 
@@ -49,6 +51,7 @@ export abstract class Constants {
     public static readonly SIYUAN_INSTALL_UPDATE: string = "siyuan-install-update";
     public static readonly SIYUAN_HOTKEY: string = "siyuan-hotkey";
     public static readonly SIYUAN_SYNC_APP_MENU: string = "siyuan-sync-app-menu";
+    public static readonly SIYUAN_SYNC_MARKDOWN_KEYMAP: string = "siyuan-sync-markdown-keymap";
     public static readonly SIYUAN_INIT: string = "siyuan-init";
     public static readonly SIYUAN_READY_TO_SHOW: string = "siyuan-ready-to-show";
     public static readonly SIYUAN_SEND_WINDOWS: string = "siyuan-send-windows"; // 主窗口和各新窗口之间的通信
@@ -530,16 +533,7 @@ export abstract class Constants {
             closeTab: {default: "⌘W", custom: "⌘W"},
             agentChat: {default: "", custom: ""},
             agentSend: {default: "⌘↩", custom: "⌘↩"},
-            fileTree: {default: "⌃1", custom: "⌃1"},
-            outline: {default: "⌃2", custom: "⌃2"},
-            bookmark: {default: "⌃3", custom: "⌃3"},
-            tag: {default: "⌃4", custom: "⌃4"},
-            dailyNote: {default: "⌃5", custom: "⌃5"},
-            inbox: {default: "⌃6", custom: "⌃6"},
-            backlinks: {default: "⌃7", custom: "⌃7"},
-            graphView: {default: "⌃8", custom: "⌃8"},
-            globalGraph: {default: "⌃9", custom: "⌃9"},
-            riffCard: {default: "⌃0", custom: "⌃0"},
+            ...createDockKeymapDefaults("darwin"),
             config: {default: "⌥P", custom: "⌥P"},
             dataHistory: {default: "⌥H", custom: "⌥H"},
             toggleWin: {default: "⌥M", custom: "⌥M"},

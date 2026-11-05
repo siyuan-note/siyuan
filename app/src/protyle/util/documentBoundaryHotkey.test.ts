@@ -3,6 +3,7 @@ import {test} from "node:test";
 import {ScriptTarget} from "typescript";
 import {loadModule as loadSharedModule} from "../../testSupport/loadModule";
 import * as keymapBindings from "../../util/keymapBindings";
+import * as shortcut from "../../util/shortcut";
 
 const loadModule = (path: string, globals: Record<string, unknown>, dependencies: Record<string, object>) =>
     loadSharedModule<any>(path, {...globals, require: (name: string) => dependencies[name] || {}}, ScriptTarget.ES2021);
@@ -18,9 +19,11 @@ const fixture = (mac = false) => {
     }}};
     const hotKey = loadModule("src/protyle/util/hotKey.ts", {window}, {
         "../../util/keymapBindings": keymapBindings,
+        "../../util/shortcut": shortcut,
         "../../constants": {Constants: {KEYCODELIST: {36: "Home", 35: "End", 65: "A"}}},
         "./compatibility": {
             isMac: () => mac,
+            isInIOS: () => false,
             isNotCtrl: (event: KeyboardEvent) => !event.ctrlKey && !event.metaKey,
             isOnlyMeta: (event: KeyboardEvent) => mac ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey,
         },

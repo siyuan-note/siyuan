@@ -31,6 +31,7 @@ import {initWindowEvent} from "./globalEvent/event";
 import {sendGlobalShortcut} from "./globalEvent/globalShortcut";
 import {closeWindow} from "../window/closeWin";
 import {correctHotkey, syncAppMenuShortcuts} from "./globalEvent/commonHotkey";
+import {syncMarkdownKeymap} from "../markdown/keymapSync";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
 import {processSiYuanUri} from "../util/uri";
 import {getAllEditor} from "../layout/getAll";
@@ -159,6 +160,7 @@ export const initWindow = async (app: App) => {
     /// #if !BROWSER
     // 主窗口和独立窗口都先同步本地化菜单，不依赖后续异步窗口状态查询。
     syncAppMenuShortcuts();
+    syncMarkdownKeymap(true);
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setSpellCheckerLanguages",
         languages: window.siyuan.config.editor.spellcheckLanguages

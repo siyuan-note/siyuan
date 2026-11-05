@@ -26,6 +26,7 @@ const fixture = (options: {detached?: boolean; readonly?: boolean; fail?: boolea
         exports: api, window, Event: class {}, console,
         document: {querySelector: () => ({getAttribute: () => "#iconDock", setAttribute: () => {}})},
         getDockBarToggleTip: () => "Dock",
+        syncMarkdownKeymap: () => {},
         getSettingsWindowHost: (): undefined => undefined, getAllEditor: () => [{protyle: {}}],
         saveScroll: async () => { events.push("shared scroll"); },
         withFetchTimeout: (callback: () => Promise<void>) => callback(),

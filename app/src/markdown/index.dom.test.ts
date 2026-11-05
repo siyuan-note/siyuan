@@ -13,10 +13,10 @@ const browserCases = async (languages: Record<string, string>) => {
     const {ipcRenderer} = require("electron");
     const api = (window as unknown as {MarkdownApplicationTest: typeof import("./index") & Pick<typeof import("./limits"), "MARKDOWN_RENDER_BYTES"> &
         {createMarkdownTree: typeof import("./tree").createMarkdownTree}}).MarkdownApplicationTest;
-    const tick = () => new Promise(resolve => setTimeout(resolve, 180));
+    const tick = () => new Promise(resolve => setTimeout(resolve, 240));
     const original = "# Markdown 编辑器\n\n直接编辑外部文档，文件保留在原位置。\n\n## 写作与预览\n\n- 自动保存到当前文件\n- 支持 **即时渲染**、所见即所得和分屏预览\n- 关闭前保留恢复草稿\n\n| 项目 | 状态 |\n| --- | --- |\n| 本地文档 | 已保存 |\n| 相对图片 | 按目录授权访问 |\n\n> 界面沿用思源的颜色、字体与基础控件。\n";
     const format = {bom: false, newline: "\n" as const};
-    const capabilities = {persistentPermission: true, conditionalWrite: false, atomicReplace: true, coordinatedAccess: false};
+    const capabilities = {persistentPermission: false, conditionalWrite: false, atomicReplace: true, coordinatedAccess: false};
     let target: import("./contracts").MarkdownTarget = {handle: "original", identity: "original", displayName: "README.md", baseline: "original", writable: true, format, capabilities};
     let content = original;
     const writes: Array<{content: string; target: {handle: string}}> = [];
@@ -124,7 +124,7 @@ const browserCases = async (languages: Record<string, string>) => {
             await checkTheme(mode, dark);
             check.equal(document.querySelector(".vditor-toolbar").getBoundingClientRect().height, 0);
             check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").disabled, mode === "sv");
-            check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").title,
+            check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").dataset.tooltip,
                 mode === "sv" ? languages.markdownOutlineUnavailable : languages.outline);
             if (mode === "ir") await ipcRenderer.invoke("markdown-screenshot", `initial-${startup.theme}`);
             if (startup.theme === "system") {
@@ -161,6 +161,12 @@ const browserCases = async (languages: Record<string, string>) => {
     await tick();
     check.equal(document.querySelector("#markdownName").textContent, "README.md");
     check.equal(document.title, "README.md");
+    openMore();
+    check.equal(document.querySelector("#markdownNotice").textContent, "", "temporary file access does not add a standing menu warning");
+    check.equal(document.querySelector("#markdownNotice").checkVisibility(), false, "an empty notice has no visible menu row");
+    check.equal(document.querySelector("#markdownRevealFile use").getAttribute("href"), "#iconFocus");
+    check.equal(document.querySelector("#markdownRevealFile .b3-menu__label").textContent, languages.showInFolder);
+    check.ok(document.querySelector("#markdownActions #markdownRevealFile"), "file location remains in the More menu");
     menuAction("markdownRevealFile");
     await tick();
     check.equal(revealedFiles, 1, "the file manager action invokes the desktop capability");
@@ -177,15 +183,38 @@ const browserCases = async (languages: Record<string, string>) => {
         .filter(element => element.checkVisibility()).map(element => element.id), ["markdownTreeToggle", "markdownOutlineToggle", "markdownFiles", "markdownUndo", "markdownRedo", "markdownMoreButton"]);
     const outlineToggle = document.querySelector<HTMLButtonElement>("#markdownOutlineToggle");
     const outlinePanel = document.querySelector<HTMLElement>(".vditor-outline");
-    check.equal(outlineToggle.title, languages.outline);
+    check.equal(outlineToggle.dataset.tooltip, languages.outline);
     check.equal(outlineToggle.querySelector("use").getAttribute("href"), "#iconOutline");
     check.equal(outlineToggle.getAttribute("aria-controls"), outlinePanel.id);
     check.equal(outlineToggle.getAttribute("aria-expanded"), "false");
+    outlineToggle.click(); await Promise.resolve();
+    const outlineOpening = outlinePanel.getAnimations()[0];
+    check.equal(outlineOpening.effect.getTiming().duration, 200);
+    outlineOpening.pause(); outlineOpening.currentTime = 60;
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    const openingWidth = outlinePanel.getBoundingClientRect().width;
+    check.ok(openingWidth > 0 && openingWidth < 251, "outline reveals an intermediate width");
+    outlineToggle.click(); await Promise.resolve();
+    check.equal(outlinePanel.inert, true, "closing outline immediately stops accepting focus and clicks");
+    check.ok(outlinePanel.getBoundingClientRect().width > 0, "rapid reversal starts from the currently painted width");
     outlineToggle.click(); await tick();
     check.equal(outlineToggle.getAttribute("aria-expanded"), "true");
     check.equal(outlinePanel.checkVisibility(), true);
     check.ok(outlinePanel.textContent.includes("写作与预览"));
     check.equal(application.editor.flush().edited, false, "opening the outline does not edit the document");
+    await ipcRenderer.invoke("markdown-resize", 1600, 850); await tick();
+    const surfaceWithOutline = document.querySelector<HTMLElement>(".vditor-ir .vditor-reset");
+    const oldPadding = parseFloat(getComputedStyle(surfaceWithOutline).paddingLeft);
+    outlineToggle.click(); await Promise.resolve();
+    const paddingAnimation = surfaceWithOutline.getAnimations()[0];
+    check.ok(paddingAnimation, "wide editor padding moves with the outline instead of jumping");
+    paddingAnimation.pause(); paddingAnimation.currentTime = 80;
+    const panelClosing = outlinePanel.getAnimations()[0];
+    panelClosing.pause(); panelClosing.currentTime = 80;
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    check.ok(parseFloat(getComputedStyle(surfaceWithOutline).paddingLeft) > oldPadding);
+    paddingAnimation.finish(); panelClosing.finish(); await tick();
+    outlineToggle.click(); await tick();
     await ipcRenderer.invoke("markdown-resize", 701, 850); await tick();
     const contentBounds = document.querySelector(".vditor-content").getBoundingClientRect();
     const outlineBounds = outlinePanel.getBoundingClientRect();
@@ -194,7 +223,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.ok(editorBoundsWithOutline.width > 0 && editorBoundsWithOutline.right <= contentBounds.right + 1);
     await ipcRenderer.invoke("markdown-resize", 360, 800); await tick();
     check.equal(outlineToggle.disabled, true);
-    check.equal(outlineToggle.title, languages.markdownOutlineUnavailable);
+    check.equal(outlineToggle.dataset.tooltip, languages.markdownOutlineUnavailable);
     check.equal(outlineToggle.getAttribute("aria-expanded"), "false");
     check.equal(outlinePanel.checkVisibility(), false);
     await ipcRenderer.invoke("markdown-resize", 1100, 850); await tick();
@@ -203,13 +232,21 @@ const browserCases = async (languages: Record<string, string>) => {
     outlineToggle.click(); await tick();
     check.equal(outlinePanel.checkVisibility(), false);
     const panelToggle = document.querySelector<HTMLButtonElement>("#markdownTreeToggle");
-    check.equal(panelToggle.title, languages.markdownFiles);
+    check.equal(panelToggle.dataset.tooltip, languages.markdownFiles);
     check.equal(panelToggle.querySelector("use").getAttribute("href"), "#iconPanelLeft");
     for (const id of ["markdownTreeToggle"]) {
         check.equal(document.getElementById(id).getAttribute("aria-controls"), "markdownTree");
         check.equal(document.getElementById(id).getAttribute("aria-expanded"), "true");
     }
-    await ipcRenderer.invoke("markdown-pointer-click", "#markdownTreeToggle"); await tick();
+    await ipcRenderer.invoke("markdown-pointer-click", "#markdownTreeToggle");
+    const treePanel = document.querySelector<HTMLElement>("#markdownTree");
+    const treeClosing = treePanel.getAnimations()[0];
+    check.equal(treeClosing.effect.getTiming().duration, 200);
+    treeClosing.pause(); treeClosing.currentTime = 60;
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    check.ok(treePanel.getBoundingClientRect().width > 0 && treePanel.getBoundingClientRect().width < 200);
+    check.equal(treePanel.inert, true);
+    treeClosing.finish(); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "dedicated panel button collapses the tree");
     check.equal(document.querySelector("#markdownFiles").getAttribute("aria-expanded"), null);
     check.equal(document.querySelector("#markdownFiles").getAttribute("aria-label"), null, "desktop filename retains its visible accessible name");
@@ -217,6 +254,25 @@ const browserCases = async (languages: Record<string, string>) => {
     (document.querySelector("#markdownFiles") as HTMLElement).click(); await tick();
     check.equal(panelToggle.getAttribute("aria-expanded"), "false", "desktop filename cannot toggle the tree");
     panelToggle.click(); await tick();
+    check.equal(panelToggle.dataset.tooltipShortcut, "Alt+1");
+    check.equal(outlineToggle.dataset.tooltipShortcut, "Alt+2");
+    const pressSidebar = async (digit: string) => {
+        document.querySelector<HTMLElement>(".vditor-ir .vditor-reset").focus();
+        await ipcRenderer.invoke("markdown-sidebar-key", digit);
+        await tick();
+    };
+    await pressSidebar("1"); check.equal(panelToggle.getAttribute("aria-expanded"), "false");
+    await pressSidebar("1"); check.equal(panelToggle.getAttribute("aria-expanded"), "true");
+    await pressSidebar("2"); check.equal(outlineToggle.getAttribute("aria-expanded"), "true");
+    onCommand({id: "custom-sidebar", type: "keymap", keymap: {fileTree: ["⌥3"], outline: ["⌥4"]}});
+    check.equal(panelToggle.dataset.tooltipShortcut, "Alt+3");
+    check.equal(outlineToggle.dataset.tooltipShortcut, "Alt+4");
+    await pressSidebar("1"); check.equal(panelToggle.getAttribute("aria-expanded"), "true", "superseded binding no longer toggles");
+    await pressSidebar("3"); check.equal(panelToggle.getAttribute("aria-expanded"), "false");
+    await pressSidebar("3"); check.equal(panelToggle.getAttribute("aria-expanded"), "true");
+    await pressSidebar("4"); check.equal(outlineToggle.getAttribute("aria-expanded"), "false");
+    onCommand({id: "restore-sidebar", type: "keymap", keymap: {fileTree: ["⌥1"], outline: ["⌥2"]}});
+    check.equal(application.editor.flush().edited, false, "sidebar shortcuts are not inserted into the editor");
     check.equal(document.querySelector<HTMLButtonElement>("#markdownUndo").disabled, true);
     check.equal(document.querySelector<HTMLButtonElement>("#markdownRedo").disabled, true);
     check.equal(document.querySelector(".markdown-footer .markdown-policy"), null);
@@ -385,7 +441,7 @@ const browserCases = async (languages: Record<string, string>) => {
         info.focus(); info.click();
         check.equal(explanation.hidden, false, "contextual explanations can be opened without hover");
         check.equal(info.getAttribute("aria-expanded"), "true");
-        check.ok(info.title.length > 0);
+        check.ok(info.dataset.tooltip.length > 0);
         check.equal(more.open, true, "reading an explanation does not execute its adjacent action");
         info.click();
         check.equal(explanation.hidden, true);
@@ -558,11 +614,11 @@ const browserCases = async (languages: Record<string, string>) => {
     await tick();
     await ipcRenderer.invoke("markdown-screenshot", "narrow");
     panelToggle.focus(); panelToggle.click(); await tick();
-    document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true})); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true);
     check.equal(document.activeElement, panelToggle, "Escape returns focus to the panel button that opened the drawer");
     (document.querySelector("#markdownFiles") as HTMLElement).click(); await tick();
-    panelToggle.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true})); panelToggle.click();
+    panelToggle.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true})); panelToggle.click(); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true, "switching toggle buttons closes the drawer with one click");
     panelToggle.click(); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, false);
@@ -890,7 +946,7 @@ const browserCases = async (languages: Record<string, string>) => {
     chosen = {kind: "cancelled"};
     await testTree.chooseRoot();
     check.equal(treeLists, listsBeforeCancel, "cancelled directory authorization never enumerates a parent");
-    document.querySelector<HTMLButtonElement>("#markdownTreeToggle").click();
+    document.querySelector<HTMLButtonElement>("#markdownTreeToggle").click(); await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, true);
     let finishChoose: (value: import("./treeContracts").MarkdownTreeState) => void;
     const choiceBridge = bridge.tree.chooseRoot;
@@ -910,7 +966,7 @@ const browserCases = async (languages: Record<string, string>) => {
     finishChoose(treeState);
     await choosing; await tick();
     check.equal((document.querySelector("#markdownTree") as HTMLElement).hidden, false, "choosing a folder shows the tree even when its change notification arrives first");
-    check.equal(document.querySelector(".markdown-tree__viewport").getAttribute("title"), "Chosen");
+    check.equal(document.querySelector(".markdown-tree__viewport").getAttribute("data-tooltip"), "Chosen");
     check.equal(document.querySelectorAll("#markdownTree [data-row]").length, 0, "an empty root has no redundant collapsible row");
     raceTree.destroy();
     bridge.tree.chooseRoot = choiceBridge;
@@ -1030,7 +1086,7 @@ const browserCases = async (languages: Record<string, string>) => {
         check.equal(getComputedStyle(placeholder).display, "none");
         if (platform === "linux") {
             const maximize = root.querySelector<HTMLButtonElement>('[data-action="maximize"]');
-            check.equal(maximize.title, languages.restore);
+            check.equal(maximize.dataset.tooltip, languages.restore);
             check.equal(maximize.querySelector("use").getAttribute("href"), "#iconRestore");
             onCommand({id: "chrome-cancel", type: "cancel-quit"}); await tick();
         }
@@ -1066,14 +1122,14 @@ const browserCases = async (languages: Record<string, string>) => {
 
 test("Markdown file tree and compact menus preserve edits across switching, stale replies and safe exit", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 45000,
+    timeout: 80000,
 }, async () => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-markdown-ui-test-"));
     const artifacts = mkdtempSync(path.join(tmpdir(), "siyuan-markdown-ui-screenshots-"));
     const compileSource = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "link.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "index.ts"].map(compileSource).join("\n") +
+    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "index.ts"].map(compileSource).join("\n") +
         "\nwindow.MarkdownApplicationTest = {mountMarkdownApplication, createMarkdownTree, MARKDOWN_RENDER_BYTES}; void 0;";
     const style = compile(path.resolve(__dirname, "../assets/scss/markdown.scss")).css;
     const template = readFileSync(path.resolve(__dirname, "../assets/template/markdown/index.tpl"), "utf8")
@@ -1112,6 +1168,10 @@ app.whenReady().then(async () => {
         await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mousePressed",...point,button:"left",buttons:1,clickCount:1});
         await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mouseReleased",...point,button:"left",buttons:0,clickCount:1});
     });
+    ipcMain.handle("markdown-sidebar-key", (_event, digit) => {
+        win.webContents.sendInputEvent({type: "keyDown", keyCode: digit, modifiers: ["alt"]});
+        win.webContents.sendInputEvent({type: "keyUp", keyCode: digit, modifiers: ["alt"]});
+    });
     ipcMain.handle("markdown-pointer-move", async (_event, x, y) => {
         await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mouseMoved",x:Math.round(x),y:Math.round(y),pointerType:"mouse"});
         await new Promise(resolve=>setTimeout(resolve,12));
@@ -1122,7 +1182,7 @@ app.whenReady().then(async () => {
         win.webContents.debugger.attach("1.3");
         await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled", {enabled:true});
         await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {features:[{name:"prefers-reduced-motion",value:"no-preference"}]});
-        await win.webContents.executeJavaScript(${JSON.stringify("window.SIYUAN_VERSION='test';globalThis.Vditor=require(" + JSON.stringify(path.resolve(__dirname, "../../node_modules/vditor")) + ");void 0;")});
+        await win.webContents.executeJavaScript(${JSON.stringify("window.SIYUAN_VERSION='test';window.NODE_ENV='test';globalThis.Vditor=require(" + JSON.stringify(path.resolve(__dirname, "../../node_modules/vditor")) + ");void 0;")});
         await win.webContents.executeJavaScript(${JSON.stringify(source)});
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(`const __name = value => value; (${browserCases.toString()})(${JSON.stringify(languages)})`)}));
         win.destroy();server.close();app.exit(0);
@@ -1131,7 +1191,7 @@ app.whenReady().then(async () => {
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
-        const result = await promisify(execFile)(require("electron") as unknown as string, [script], {env, timeout: 40000, windowsHide: true});
+        const result = await promisify(execFile)(require("electron") as unknown as string, [script], {env, timeout: 75000, windowsHide: true});
         assert.match(result.stdout, /Markdown application DOM cases passed/);
         console.log(`Markdown UI screenshots: ${artifacts}`);
     } finally {

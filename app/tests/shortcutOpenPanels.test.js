@@ -138,10 +138,11 @@ test("native shortcut sources open panels without toggling while menu commands r
 
 test("Ctrl+E and Alt+0 keep their dialogs open through the actual global keydown branches", async () => {
     const keymap = evaluate(sourceFile("util/keymapBindings.ts").text, {});
+    const shortcut = evaluate(sourceFile("util/shortcut.ts").text, {require: () => keymap});
     const Constants = {DIALOG_RECENTDOCS: "recent", DIALOG_OPENCARD: "card", KEYCODELIST: {69: "E", 48: "0"}};
     const {matchHotKey} = evaluate(sourceFile("protyle/util/hotKey.ts").text, {
-        require: name => name.endsWith("keymapBindings") ? keymap : name.endsWith("constants") ? {Constants} : {
-            isMac: () => false, isNotCtrl: event => !event.ctrlKey && !event.metaKey,
+        require: name => name.endsWith("shortcut") ? shortcut : name.endsWith("keymapBindings") ? keymap : name.endsWith("constants") ? {Constants} : {
+            isMac: () => false, isInIOS: () => false, isNotCtrl: event => !event.ctrlKey && !event.metaKey,
             isOnlyMeta: event => event.ctrlKey && !event.metaKey,
         },
     });

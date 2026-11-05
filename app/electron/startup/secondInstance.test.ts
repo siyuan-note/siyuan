@@ -48,6 +48,7 @@ test("a file request is routed to the editor before remote mode rejects the inst
     // 窗口管理器只记录收到的启动参数，本用例只关心路由是否发生。
     runtime.state.markdown.windows = {
         open: async () => undefined,
+        updateKeymap: () => undefined,
         handleLaunch: async (argv: string[], cwd: string) => { launches.push({argv, cwd}); return true; },
         hasWindows: () => false, hasPendingWork: () => false, owns: () => false, focus: () => undefined,
         prepareQuit: async () => true, closeAll: async () => true, cancelQuit: () => undefined,
@@ -97,6 +98,7 @@ test("normal launches and macOS activation from a Markdown-only process restore 
             runtime.state.markdown.startup = true;
             const markdownWindows = {
                 open: async () => {throw new Error("activation must not create another Markdown editor");},
+                updateKeymap: () => undefined,
                 handleLaunch: async () => true,
                 hasWindows: () => true, hasPendingWork: () => false, owns: () => false, focus: () => undefined,
                 prepareQuit: async () => true, closeAll: async () => true, cancelQuit: () => undefined,

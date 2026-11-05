@@ -1,7 +1,9 @@
 @use "component/button";
 @use "component/menu";
+@use "component/tooltips";
 @use "business/block";
 @use "util/scroll";
+@use "util/keyframes";
 
 html,
 body {
@@ -437,6 +439,11 @@ button {
 
 .markdown-editor > .vditor-toolbar {
   display: none;
+}
+
+.markdown-app[data-tooltips] .vditor-tooltipped::before,
+.markdown-app[data-tooltips] .vditor-tooltipped::after {
+  content: none;
 }
 
 .markdown-editor .vditor-outline {

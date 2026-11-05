@@ -1,3 +1,4 @@
+import * as dockKeymap from "../util/dockKeymap";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import * as path from "node:path";
@@ -25,7 +26,7 @@ const loadAsset = (flags: Flags) => {
         return exports;
     };
     const pathName = load("src/util/pathName.ts", {"./mergePathSegments": mergePathSegments, "./escape": escape});
-    const constants = load("src/constants.ts");
+    const constants = load("src/constants.ts", {"./util/dockKeymap": dockKeymap});
     const assetModule = load("src/asset/index.ts", {
         "../util/pathName": pathName,
         "../util/escape": escape,

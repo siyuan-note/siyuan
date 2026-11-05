@@ -9,6 +9,8 @@ import {createMarkdownTree, MarkdownTree} from "./tree";
 import {MarkdownTreeLocation} from "./treeContracts";
 import {createMarkdownChoice, createMarkdownSubmenu, MarkdownChoice} from "./choiceMenu";
 import {createMarkdownWindowChrome} from "./windowChrome";
+import {createMarkdownTooltips} from "./tooltip";
+import {createMarkdownSidebarShortcuts} from "./shortcuts";
 
 declare const SIYUAN_VERSION: string;
 (window as unknown as {SIYUAN_VERSION: string}).SIYUAN_VERSION = SIYUAN_VERSION;
@@ -72,7 +74,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             <button type="button" class="b3-menu__item" id="markdownNew"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconAddDoc"></use></svg><span class="b3-menu__label" data-label="new"></span></button>
             <button type="button" class="b3-menu__item" id="markdownOpen"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconFileText"></use></svg><span class="b3-menu__label" data-label="openBy"></span></button>
             <button type="button" class="b3-menu__item" id="markdownOpenFolder"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconFolder"></use></svg><span class="b3-menu__label" data-label="markdownOpenFolder"></span></button>
-            <button type="button" class="b3-menu__item" id="markdownRevealFile" hidden><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconFolder"></use></svg><span class="b3-menu__label" data-label="showInFolder"></span></button>
+            <button type="button" class="b3-menu__item" id="markdownRevealFile" hidden><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconFocus"></use></svg><span class="b3-menu__label" data-label="showInFolder"></span></button>
             <button type="button" class="b3-menu__item" id="markdownSave"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconSave"></use></svg><span class="b3-menu__label" data-label="save"></span></button>
             <button type="button" class="b3-menu__item" id="markdownSaveAs"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconDownloadAssets"></use></svg><span class="b3-menu__label" data-label="saveAs"></span></button>
             <hr class="b3-menu__separator">
@@ -94,6 +96,18 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
 <footer class="markdown-footer" id="markdownFooter" hidden>
     <div class="markdown-status"><span id="markdownStatus" role="status" aria-live="polite"></span><span class="markdown-status__actions" id="markdownProblemActions"><button type="button" class="b3-button b3-button--text" id="markdownRetry" data-label="retry" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownReload" data-label="markdownReload" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownOverwrite" data-label="markdownOverwrite" hidden></button></span></div>
 </footer>`;
+    let tooltips: ReturnType<typeof createMarkdownTooltips>;
+    const sidebarShortcuts = createMarkdownSidebarShortcuts({
+        platform: bootstrap.platform, keymap: bootstrap.keymap,
+        canToggle: key => Boolean(editor) && !disposed && !frozen && !switching &&
+            (key === "fileTree" || outline.available),
+        isComposing: () => Boolean(session?.getState().composing),
+        toggle(key) {control<HTMLButtonElement>(key === "fileTree" ? "markdownTreeToggle" : "markdownOutlineToggle").click();},
+    });
+    const updateSidebarShortcutHints = () => {
+        control("markdownTreeToggle").dataset.tooltipShortcut = sidebarShortcuts.label("fileTree");
+        control("markdownOutlineToggle").dataset.tooltipShortcut = outline.available ? sidebarShortcuts.label("outline") : "";
+    };
     root.querySelectorAll<HTMLElement>("[data-label]").forEach(element => { element.textContent = text(element.dataset.label); });
     // Contextual explanations remain available to keyboard and touch users, not only hover.
     for (const [id, label, explanation] of [["markdownResources", "markdownResources", "markdownPreviewPolicy"],
@@ -105,7 +119,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         info.type = "button";
         info.className = "block__icon block__icon--show block__icon--tap block__icon--inset markdown-menu__info";
         info.id = `${id}Info`;
-        info.title = text(explanation);
+        info.dataset.tooltip = text(explanation);
         info.setAttribute("aria-label", `${text(label)}: ${text("about")}`);
         info.setAttribute("aria-expanded", "false");
         info.setAttribute("aria-controls", `${id}Explanation`);
@@ -126,10 +140,10 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     header.inert = true;
     control("markdownEditor").inert = true;
     control("markdownMoreButton").setAttribute("aria-label", text("more"));
-    control("markdownMoreButton").setAttribute("title", text("more"));
+    control("markdownMoreButton").dataset.tooltip = text("more");
     for (const [id, label] of [["markdownUndo", "undo"], ["markdownRedo", "redo"], ["markdownOutlineToggle", "outline"]]) {
         control(id).setAttribute("aria-label", text(label));
-        control(id).setAttribute("title", text(label));
+        control(id).dataset.tooltip = text(label);
         control(id).addEventListener("mousedown", event => event.preventDefault());
     }
     const more = control<HTMLDetailsElement>("markdownMore");
@@ -161,12 +175,14 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     document.addEventListener("focusin", dismissMore);
     document.addEventListener("keydown", menuKey, true);
     const removeMenuListeners = () => {
+        tooltips?.destroy();
         document.removeEventListener("keydown", menuKey, true);
         document.removeEventListener("pointerdown", dismissMore);
         document.removeEventListener("focusin", dismissMore);
     };
     let initializationClosing = false;
     const initializationCommand = async (message: MarkdownCommand) => {
+        if (message.type === "keymap") {sidebarShortcuts.update(message.keymap); updateSidebarShortcutHints(); return;}
         let accepted = false;
         if (message.type === "cancel-quit") {preparing = false; prepared = false; frozen = false; return;}
         if (message.type === "prepare-quit") {preparing = true; prepared = true; frozen = true; accepted = true;}
@@ -230,7 +246,6 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownStatus").dataset.status = actionMessage || recoveryError ? "blocked" : pendingStatus ? "dirty" : state.status;
         control("markdownFooter").hidden = !actionMessage && !recoveryError && !problem;
         const notices = [
-            state.target && !state.target.capabilities.persistentPermission ? text("markdownTemporaryPermission") : "",
             resourceUnavailable ? text("markdownResourceUnavailable") : "",
             sourceOnly ? text("markdownSourceOnly") : "",
             bootstrap.recovered ? text("markdownRecovered") : ""];
@@ -251,7 +266,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         outlineToggle.disabled = state.composing || !outline.available;
         outlineToggle.setAttribute("aria-disabled", String(frozen || outlineToggle.disabled));
         outlineToggle.setAttribute("aria-expanded", String(outline.visible));
-        outlineToggle.title = text(outline.available ? "outline" : "markdownOutlineUnavailable");
+        outlineToggle.dataset.tooltip = text(outline.available ? "outline" : "markdownOutlineUnavailable");
+        updateSidebarShortcutHints();
         control<HTMLButtonElement>("markdownSaveAs").disabled = frozen || state.composing || problem?.kind === "indeterminate";
         control<HTMLButtonElement>("markdownInsertImage").disabled = frozen || state.composing || problem?.kind === "indeterminate";
         modeChoice?.setDisabled(frozen || state.composing);
@@ -401,6 +417,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             typeof MutationObserver !== "function" || typeof ResizeObserver !== "function" || typeof globalThis.crypto?.getRandomValues !== "function") {
             throw new Error("Required Markdown WebView capabilities are unavailable");
         }
+        tooltips = createMarkdownTooltips(root);
         await applyTheme();
         if (initializationClosing) throw new Error("Markdown initialization was closed");
         await initializeDocument(bootstrap);
@@ -409,6 +426,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     } catch (error) {
         control("markdownEditor").textContent = text("markdownLoadError");
         control("markdownEditor").setAttribute("aria-busy", "false");
+        tooltips?.destroy();
         throw error;
     }
 
@@ -714,6 +732,10 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         finally {await bridge.respond(message.id, accepted);}
     };
     const command = async (message: MarkdownCommand) => {
+        if (message.type === "keymap") {
+            if (!disposed) {sidebarShortcuts.update(message.keymap); updateSidebarShortcutHints();}
+            return;
+        }
         if (message.type === "window-state") {windowChrome?.update(message.windowState); return;}
         // 候选云文件读取可能很慢；进入后台仍先保护当前文档的已提交输入。
         if (message.type === "background" && switchTask && !pendingSwitch && session.getState().lifecycle === "open") {
@@ -772,6 +794,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     unsubscribeInitialization();
     const unsubscribe = bridge.onCommand(message => { void command(message).catch(reportError); });
     const shortcut = (event: KeyboardEvent) => {
+        if (sidebarShortcuts.handle(event)) return;
         const modifier = bootstrap.platform === "darwin" || bootstrap.platform === "ios" ? event.metaKey : event.ctrlKey;
         if (!modifier || event.altKey || event.isComposing || !/^[nos]$/i.test(event.key)) return;
         event.preventDefault();

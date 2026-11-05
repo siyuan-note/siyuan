@@ -658,7 +658,7 @@ func createDocContract(c *gin.Context, request apicontract.FileTreeCreateRequest
 	title := request.Title
 	md := request.MD
 	sorts := append([]string(nil), request.Sorts...)
-	tree, err := model.CreateDocByMd(notebook, p, title, md, sorts, fileTreeCreateContext(request.FileTreeCreateOptions))
+	tree, err := model.CreateDocByMdSync(notebook, p, title, md, sorts, fileTreeCreateContext(request.FileTreeCreateOptions))
 	if err != nil {
 		return apicontract.FailureWithTimeout[apicontract.FileTreeCreateData](-1, err.Error(), 7000)
 	}

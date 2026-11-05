@@ -1233,6 +1233,9 @@ var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDo
 // 源快照经过认证读取且不执行修复写回；运行期失败时清理新建文档并恢复排序，属运行时补偿，
 // 不保证进程崩溃时的事务原子性。
 var DuplicateDocTree = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDocTree", "/api/filetree/duplicateDocTree", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按存储路径创建文档，路径以 / 开头、以 .sy 结尾，每一层均为有效块 ID。
+// 非法路径在事务前拒绝；同步等待创建事务，失败返回 -1，不返回未成功创建的文档 ID。
 var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // CreateDailyNote 省略 date、传空串或 null 时，按当天的命名和路径模板复用或创建，与日记按钮、快捷键一致。

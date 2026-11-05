@@ -5755,6 +5755,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 按存储路径创建文档，路径以 / 开头、以 .sy 结尾，每一层均为有效块 ID。
+     * 非法路径在事务前拒绝；同步等待创建事务，失败返回 -1，不返回未成功创建的文档 ID。
+     */
     "/api/filetree/createDoc": {
         request: FileTreeCreateRequestInput;
         response: { "code": 0; "data": FileTreeCreateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

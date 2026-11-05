@@ -683,7 +683,8 @@ test("viewport changes preserve the original scroll and all resize listeners are
     assert.equal(dialog.options.height, undefined);
     assert.equal(dialog.element.querySelector(".b3-dialog__container").style.height, "auto");
     assert.ok(Math.abs(parseFloat(dialog.element.querySelector(".b3-dialog__container").style.maxHeight) - 448) < .001);
-    assert.equal(container.style.height, "800px");
+    assert.equal(container.style.bottom, "0px");
+    assert.equal(container.style.height, "auto");
     const sheet = dialog.element.querySelector(".b3-dialog__container");
     assert.equal(sheet.querySelector('[data-type="sheet-expand"]'), undefined);
     assert.equal(sheet.children.has("actions"), false);

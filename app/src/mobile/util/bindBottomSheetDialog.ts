@@ -32,7 +32,12 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     let opening = false;
     const updateOpen = () => {
         if (!dialog.element.classList.contains("b3-dialog--open")) {
-            if (dialog.element.dataset.dialogClosing === "true") layout.freeze();
+            if (dialog.element.dataset.dialogClosing === "true") {
+                layout.freeze();
+                // 退出样式接管拖动位移，保留从当前绘制位置向下滑出的过渡。
+                sheet.style.transition = "";
+                sheet.style.transform = "";
+            }
             cancelOpen?.();
             return;
         }

@@ -45,7 +45,10 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
         const bottom = toolbar && !toolbar.classList.contains("fn__none") ?
             Math.min(viewport.bottom, toolbar.getBoundingClientRect().top) : viewport.bottom;
         overlay.style.top = `${viewport.top}px`;
-        overlay.style.height = `${Math.max(0, bottom - viewport.top)}px`;
+        // 整个视口可用时直接贴住布局底边，避免整数高度截断设备像素后露出背景。
+        const fullViewport = bottom === window.innerHeight;
+        overlay.style.bottom = fullViewport ? "0px" : "auto";
+        overlay.style.height = fullViewport ? "auto" : `${Math.max(0, bottom - viewport.top)}px`;
         if (!frozen) {
             const size = window.siyuan.mobile.size;
             const direction = isMobileLandscape() ? size.landscape : size.portrait;

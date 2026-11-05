@@ -97,10 +97,11 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         host = new ElementMock();
         confirm = new ElementMock();
         destroyed = false;
-        viewport = {style: {top: "", height: ""}, isConnected: true, classList: {add() {}}};
+        viewport = {style: {top: "", bottom: "", height: ""}, isConnected: true, classList: {add() {}}};
         sheet = {style: {height: "", maxHeight: ""}, classList: {add() {}, toggle() {}}, getBoundingClientRect: () => ({height:
             Math.min(parseFloat(this.sheet.style.height) || 180, parseFloat(this.sheet.style.maxHeight) || Infinity,
-                parseFloat(this.viewport.style.height))})};
+                this.viewport.style.height === "auto" ? window.innerHeight - (parseFloat(this.viewport.style.top) || 0) -
+                    (parseFloat(this.viewport.style.bottom) || 0) : parseFloat(this.viewport.style.height))})};
         classes = new Set<string>();
         element = {dataset: {}, isConnected: true, classList: {add: (name: string) => this.classes.add(name)},
             querySelector: (selector: string) => selector === ".b3-dialog" ? this.viewport :
@@ -368,7 +369,8 @@ test("mobile title drawer follows keyboard viewport changes and keeps failed dra
     assert.equal(dialog.options.containerClassName, "mobile-document-title-sheet");
     assert.equal(dialog.options.hideCloseIcon, true);
     assert.ok(dialog.classes.has("mobile-document-title-dialog"));
-    assert.equal(dialog.viewport.style.height, "800px");
+    assert.equal(dialog.viewport.style.bottom, "0px");
+    assert.equal(dialog.viewport.style.height, "auto");
     state.viewport.top = 50;
     state.viewport.bottom = 350;
     state.window.innerHeight = 300;
@@ -435,7 +437,8 @@ test("mobile title height remains fixed while its closing keyboard viewport reco
     state.viewport.bottom = 900;
     state.resizeSheet();
     assert.equal(dialog.sheet.style.height, `${height}px`);
-    assert.equal(dialog.viewport.style.height, "900px");
+    assert.equal(dialog.viewport.style.bottom, "0px");
+    assert.equal(dialog.viewport.style.height, "auto");
     state.finishDestroy();
     assert.equal(state.sheetDisposals(), 1);
 });

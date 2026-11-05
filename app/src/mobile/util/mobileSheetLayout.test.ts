@@ -32,7 +32,7 @@ const setup = () => {
         return {add: (value: string) => values.add(value), contains: (value: string) => values.has(value),
             toggle: (value: string, enabled: boolean) => enabled ? values.add(value) : values.delete(value)};
     };
-    const overlay = {isConnected: true, classList: classes(), style: {top: "", height: ""}, paddingTop: 0, paddingBottom: 0};
+    const overlay = {isConnected: true, classList: classes(), style: {top: "", bottom: "", height: ""}, paddingTop: 0, paddingBottom: 0};
     const sheet = {querySelector: () => ({style: {flex: ""}, querySelector: (): null => null,
         getBoundingClientRect: () => ({height: sheet.contentHeight - sheet.chromeHeight})}), classList: classes(), style: {height: "", maxHeight: ""}, contentHeight: 120, chromeHeight: 40,
         getBoundingClientRect: () => ({height: Math.min(sheet.style.height === "auto" ? sheet.contentHeight :
@@ -73,6 +73,30 @@ test("standard sheets use natural content height below a shared full-viewport up
     assert.equal(s.sheet.getBoundingClientRect().height, 300);
     s.sheet.contentHeight = 120;
     assert.equal(s.sheet.getBoundingClientRect().height, 120, "the keyboard never expands short content");
+});
+
+test("unclipped sheets anchor to the CSS viewport bottom instead of rounding its height", () => {
+    const s = setup();
+    assert.equal(s.overlay.style.bottom, "0px");
+    assert.equal(s.overlay.style.height, "auto");
+    s.viewport.top = 20.25;
+    s.layout.resize();
+    assert.equal(s.overlay.style.top, "20.25px");
+    assert.equal(s.overlay.style.bottom, "0px");
+    s.viewport.bottom = 350.25;
+    s.layout.resize();
+    assert.equal(s.overlay.style.bottom, "auto");
+    assert.equal(s.overlay.style.height, "330px");
+    s.viewport.bottom = s.window.innerHeight;
+    s.toolbar.hidden = false;
+    s.toolbar.top = 752.5;
+    s.resizeToolbar();
+    assert.equal(s.overlay.style.bottom, "auto");
+    assert.equal(s.overlay.style.height, "732.25px");
+    s.toolbar.hidden = true;
+    s.resizeToolbar();
+    assert.equal(s.overlay.style.bottom, "0px");
+    assert.equal(s.overlay.style.height, "auto");
 });
 
 test("toolbar, visible offset and safe areas clip the upper limit once", () => {
@@ -127,7 +151,8 @@ test("exit freezes actual clipped height while viewport updates continue", () =>
     assert.equal(s.sheet.style.height, "250px");
     s.viewport.bottom = 800;
     s.emit("visual:resize");
-    assert.equal(s.overlay.style.height, "800px");
+    assert.equal(s.overlay.style.bottom, "0px");
+    assert.equal(s.overlay.style.height, "auto");
     assert.equal(s.sheet.style.height, "250px");
     assert.equal(s.sheet.style.maxHeight, "250px");
 });

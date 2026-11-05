@@ -1,4 +1,6 @@
 {
+	"globalBreadcrumb": "全局面包屑",
+	"globalBreadcrumbTip": "将笔记本、文档和块路径合并显示在一条面包屑中",
 	"windowCloseTimeout": "窗口未响应关闭请求。是否退出并放弃界面中尚未保存的编辑？未保存的编辑可能丢失",
 	"markdownOutlineUnavailable": "大纲仅在宽屏即时渲染或所见即所得模式下可用",
 	"showFloatingStatusBar": "悬停显示隐藏的状态栏",

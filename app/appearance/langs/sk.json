@@ -1,4 +1,6 @@
 {
+	"globalBreadcrumb": "Globálna navigačná cesta",
+	"globalBreadcrumbTip": "Zobraziť cesty zápisníka, dokumentov a blokov v jednej navigačnej ceste",
 	"windowCloseTimeout": "Okno nereaguje na požiadavku na zatvorenie. Ukončiť bez uloženia čakajúcich úprav v rozhraní? Neuložené úpravy sa môžu stratiť",
 	"markdownOutlineUnavailable": "Osnova je dostupná iba v režime okamžitého vykresľovania alebo WYSIWYG v širokom okne",
 	"showFloatingStatusBar": "Zobraziť skrytý stavový riadok pri ukázaní myšou",

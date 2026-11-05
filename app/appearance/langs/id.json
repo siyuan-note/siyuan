@@ -1,4 +1,6 @@
 {
+	"globalBreadcrumb": "Jejak navigasi global",
+	"globalBreadcrumbTip": "Tampilkan jalur buku catatan, dokumen, dan blok dalam satu jejak navigasi",
 	"windowCloseTimeout": "Jendela tidak merespons permintaan penutupan. Keluar tanpa menyimpan suntingan antarmuka yang tertunda? Suntingan yang belum disimpan dapat hilang",
 	"markdownOutlineUnavailable": "Kerangka hanya tersedia dalam mode render instan atau WYSIWYG dengan jendela lebar",
 	"showFloatingStatusBar": "Tampilkan bilah status tersembunyi saat penunjuk diarahkan",

@@ -1,4 +1,6 @@
 {
+	"globalBreadcrumb": "Genel gezinme yolu",
+	"globalBreadcrumbTip": "Not defteri, belge ve blok yollarını tek bir gezinme yolunda göster",
 	"windowCloseTimeout": "Pencere kapatma isteğine yanıt vermiyor. Arayüzdeki bekleyen düzenlemeler kaydedilmeden çıkılsın mı? Kaydedilmemiş düzenlemeler kaybolabilir",
 	"markdownOutlineUnavailable": "Anahat yalnızca geniş bir pencerede anında işleme veya WYSIWYG modunda kullanılabilir",
 	"showFloatingStatusBar": "Üzerine gelindiğinde gizli durum çubuğunu göster",

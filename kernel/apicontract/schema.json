@@ -44673,6 +44673,16 @@
             }
           ]
         },
+        "globalBreadcrumb": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "hashTagSearch": {
           "anyOf": [
             {
@@ -48936,6 +48946,9 @@
         "generateHistoryInterval": {
           "type": "integer"
         },
+        "globalBreadcrumb": {
+          "type": "boolean"
+        },
         "hashTagSearch": {
           "anyOf": [
             {
@@ -49087,6 +49100,7 @@
         "fontWeight",
         "fullWidth",
         "generateHistoryInterval",
+        "globalBreadcrumb",
         "hashTagSearch",
         "headingEmbedMode",
         "headingNumber",
@@ -49679,6 +49693,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "globalBreadcrumb": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

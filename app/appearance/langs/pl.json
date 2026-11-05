@@ -1,4 +1,6 @@
 {
+	"globalBreadcrumb": "Globalna ścieżka nawigacji",
+	"globalBreadcrumbTip": "Wyświetlaj ścieżki notatnika, dokumentów i bloków w jednej ścieżce nawigacji",
 	"windowCloseTimeout": "Okno nie odpowiada na żądanie zamknięcia. Wyjść bez zapisywania oczekujących zmian w interfejsie? Niezapisane zmiany mogą zostać utracone",
 	"markdownOutlineUnavailable": "Konspekt jest dostępny tylko w trybie renderowania natychmiastowego lub WYSIWYG w szerokim oknie",
 	"showFloatingStatusBar": "Pokazuj ukryty pasek stanu po najechaniu kursorem",

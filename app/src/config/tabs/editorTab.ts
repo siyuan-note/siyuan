@@ -79,6 +79,10 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.showPageScrollButtons,
         desc: window.siyuan.languages.showPageScrollButtonsTip,
     });
+    group.switch("editor.globalBreadcrumb", {
+        title: window.siyuan.languages.globalBreadcrumb,
+        desc: window.siyuan.languages.globalBreadcrumbTip,
+    });
     group.number("editor.dynamicLoadBlocks", {
         title: window.siyuan.languages.dynamicLoadBlocks,
         desc: window.siyuan.languages.dynamicLoadBlocksTip,

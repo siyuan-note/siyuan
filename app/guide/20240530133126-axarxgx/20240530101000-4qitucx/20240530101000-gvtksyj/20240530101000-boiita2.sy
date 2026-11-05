@@ -7,7 +7,7 @@
 		"id": "20240530101000-boiita2",
 		"title": "コンテンツブロックのナビゲーション",
 		"type": "doc",
-		"updated": "20261030083650"
+		"updated": "20261105155201"
 	},
 	"Children": [
 		{
@@ -146,7 +146,7 @@
 			"Properties": {
 				"ID": "20240530101000-2blohkj",
 				"id": "20240530101000-2orq4in",
-				"updated": "20260809232000"
+				"updated": "20261105155201"
 			},
 			"Children": [
 				{
@@ -224,6 +224,81 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-d8xei44",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261105154152-d8xei44",
+				"updated": "20261105155201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "グローバルパンくずリスト"
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-jolsubz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105154152-jolsubz",
+				"updated": "20261105154152"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "動作"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "グローバルパンくずリスト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にすると、デスクトップ版のエディタ上部で、現在のドキュメントとブロックの階層の前にノートブックと親ドキュメントが加わり、一つのパンくずリストに表示されます。この設定は初期状態では無効です。モバイル版のパンくずメニューにも同じ階層が表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-3htu0cb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105154152-3htu0cb",
+				"updated": "20261105155201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版では、親ドキュメントをクリックすると開き、ノートブックや親ドキュメントの横にある矢印から子ドキュメントを選択できます。モバイル版では、親ドキュメントをタップすると子ドキュメントが表示され、「開く」を選ぶと親ドキュメント自体を開きます。子ドキュメントがない場合は直接開きます。既存のブロック間の移動方法は変わりません。"
 				}
 			]
 		},

@@ -1,4 +1,6 @@
 {
+	"globalBreadcrumb": "グローバルパンくずリスト",
+	"globalBreadcrumbTip": "ノートブック、ドキュメント、ブロックの階層を一つのパンくずリストに表示",
 	"windowCloseTimeout": "ウィンドウが終了要求に応答していません。画面上の未保存の編集を破棄して終了しますか？未保存の編集は失われる可能性があります",
 	"markdownOutlineUnavailable": "アウトラインは幅の広いウィンドウの即時レンダリングまたは WYSIWYG モードでのみ使用できます",
 	"showFloatingStatusBar": "マウスを合わせると非表示のステータスバーを表示",

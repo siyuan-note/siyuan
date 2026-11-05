@@ -1,4 +1,6 @@
 {
+	"globalBreadcrumb": "Globaler Navigationspfad",
+	"globalBreadcrumbTip": "Notizbuch-, Dokument- und Blockpfade in einem gemeinsamen Navigationspfad anzeigen",
 	"windowCloseTimeout": "Das Fenster reagiert nicht auf die Schließanforderung. Ohne Speichern ausstehender Bearbeitungen beenden? Ungespeicherte Änderungen können verloren gehen",
 	"markdownOutlineUnavailable": "Die Gliederung ist nur bei breitem Fenster im Sofortdarstellungs- oder WYSIWYG-Modus verfügbar",
 	"showFloatingStatusBar": "Ausgeblendete Statusleiste beim Darüberfahren anzeigen",

@@ -48,6 +48,7 @@ const runtime = createSectionRuntime<Config.IEditor>({
             setTitleAutoDirection(document.getElementById("toolbarName"), next.autoDirection);
             /// #endif
             getAllEditor().forEach(({protyle}) => {
+                if (old.globalBreadcrumb !== next.globalBreadcrumb) protyle.breadcrumb?.render(protyle, true);
                 if (old.blockGutterMode !== next.blockGutterMode) protyle.gutter?.element.classList.add("fn__none");
                 if (old.keepLoadedContent !== next.keepLoadedContent) protyle.scroll.keepLoadedContent = next.keepLoadedContent;
                 protyle.databaseAttributePanel?.updateDisplayConfig();

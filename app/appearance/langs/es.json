@@ -3679,6 +3679,8 @@
 		"463": "La fuente de sincronización cambió; pulse Sincronizar y elija subir o restaurar para continuar",
 		"464": "La fuente o los datos cambiaron después de la vista previa; pulse Sincronizar para revisarlos",
 		"465": "Algunos recursos o instantáneas históricas aún dependen del origen de sincronización original. Vuelva a iniciar sesión con la cuenta, región de la nube y ajustes de sincronización originales, cambie a Descargar todos e inténtelo de nuevo",
-		"466": "OCR automático con IA pausado para %s; se reintentará en 10 minutos. Revisa la cuenta del proveedor y la configuración del modelo: %s"
+		"466": "OCR automático con IA pausado para %s; se reintentará en 10 minutos. Revisa la cuenta del proveedor y la configuración del modelo: %s",
+		"467": "La respuesta en streaming se interrumpió porque el cliente no pudo seguir el ritmo; vuelva a abrir la sesión para recuperar el contenido disponible",
+		"468": "La respuesta se interrumpió; vuelva a abrir la sesión para recuperar el contenido disponible"
 	}
 }

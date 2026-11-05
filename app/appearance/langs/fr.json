@@ -3679,6 +3679,8 @@
 		"463": "La source de synchronisation a changé ; cliquez sur Synchroniser et choisissez un envoi ou une restauration",
 		"464": "La source ou les données ont changé après l’aperçu ; cliquez sur Synchroniser pour vérifier à nouveau",
 		"465": "Certaines ressources ou captures historiques dépendent encore de la source de synchronisation initiale. Reconnectez-vous avec le compte, la région cloud et les paramètres de synchronisation initiaux, passez à Tout télécharger, puis réessayez",
-		"466": "OCR automatique par IA suspendue pour %s ; nouvel essai dans 10 minutes. Vérifiez le compte du fournisseur et les paramètres du modèle : %s"
+		"466": "OCR automatique par IA suspendue pour %s ; nouvel essai dans 10 minutes. Vérifiez le compte du fournisseur et les paramètres du modèle : %s",
+		"467": "La réponse en streaming a été interrompue car le client ne pouvait pas suivre le rythme ; rouvrez la session pour récupérer le contenu disponible",
+		"468": "La réponse a été interrompue ; rouvrez la session pour récupérer le contenu disponible"
 	}
 }

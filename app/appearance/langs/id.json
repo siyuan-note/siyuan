@@ -3679,6 +3679,8 @@
 		"463": "Sumber sinkronisasi berubah; klik Sinkronkan dan pilih unggah atau pulihkan untuk melanjutkan",
 		"464": "Sumber atau data berubah setelah pratinjau; klik Sinkronkan untuk meninjau kembali",
 		"465": "Beberapa aset atau snapshot historis masih bergantung pada sumber sinkronisasi awal. Masuk kembali menggunakan akun, wilayah cloud, dan pengaturan sinkronisasi awal, lalu beralih ke Unduh semua dan coba lagi",
-		"466": "OCR AI otomatis dijeda untuk %s; mencoba lagi dalam 10 menit. Periksa akun penyedia dan pengaturan model: %s"
+		"466": "OCR AI otomatis dijeda untuk %s; mencoba lagi dalam 10 menit. Periksa akun penyedia dan pengaturan model: %s",
+		"467": "Respons streaming terputus karena klien tidak dapat mengimbangi laju penerimaan; buka kembali sesi untuk memulihkan keluaran yang tersedia",
+		"468": "Respons terputus; buka kembali sesi untuk memulihkan keluaran yang tersedia"
 	}
 }

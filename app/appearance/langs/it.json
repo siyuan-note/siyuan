@@ -3679,6 +3679,8 @@
 		"463": "La sorgente di sincronizzazione è cambiata; fai clic su Sincronizza e scegli caricamento o ripristino",
 		"464": "La sorgente o i dati sono cambiati dopo l’anteprima; fai clic su Sincronizza per verificarli di nuovo",
 		"465": "Alcune risorse o istantanee storiche dipendono ancora dalla fonte di sincronizzazione originale. Accedi di nuovo con l’account, la regione cloud e le impostazioni di sincronizzazione originali, passa a Scarica tutto e riprova",
-		"466": "OCR automatico con IA sospeso per %s; nuovo tentativo tra 10 minuti. Controlla l’account del fornitore e le impostazioni del modello: %s"
+		"466": "OCR automatico con IA sospeso per %s; nuovo tentativo tra 10 minuti. Controlla l’account del fornitore e le impostazioni del modello: %s",
+		"467": "La risposta in streaming è stata interrotta perché il client non riusciva a tenere il passo; riapri la sessione per recuperare il contenuto disponibile",
+		"468": "La risposta è stata interrotta; riapri la sessione per recuperare il contenuto disponibile"
 	}
 }

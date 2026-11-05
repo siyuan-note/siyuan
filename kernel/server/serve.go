@@ -24,7 +24,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -336,12 +335,6 @@ func newSessionStore(cookieKey string) (cookie.Store, error) {
 		SameSite: http.SameSiteLaxMode, // 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
 	})
 	return store, nil
-}
-
-func gzipMiddleware() gin.HandlerFunc {
-	return gzip.Gzip(gzip.DefaultCompression,
-		gzip.WithExcludedExtensions([]string{".png", ".gif", ".jpeg", ".jpg", ".webp", ".avif", ".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac", ".gz"}),
-		gzip.WithExcludedPathsRegexs([]string{`(?i)\.hei[cf]$`}))
 }
 
 func rewritePortJSON(pid, port string) {

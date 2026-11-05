@@ -3679,6 +3679,8 @@
 		"463": "A origem da sincronização mudou; clique em Sincronizar e escolha enviar ou restaurar",
 		"464": "A origem ou os dados mudaram após a prévia; clique em Sincronizar para verificar novamente",
 		"465": "Alguns recursos ou snapshots históricos ainda dependem da origem de sincronização original. Entre novamente com a conta, a região da nuvem e as configurações de sincronização originais, mude para Baixar todos e tente novamente",
-		"466": "OCR automático com IA pausado para %s; nova tentativa em 10 minutos. Verifique a conta do provedor e as configurações do modelo: %s"
+		"466": "OCR automático com IA pausado para %s; nova tentativa em 10 minutos. Verifique a conta do provedor e as configurações do modelo: %s",
+		"467": "A resposta em streaming foi interrompida porque o cliente não conseguiu acompanhar o ritmo; reabra a sessão para recuperar o conteúdo disponível",
+		"468": "A resposta foi interrompida; reabra a sessão para recuperar o conteúdo disponível"
 	}
 }

@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261102193434"
+		"updated": "20261105133947"
 	},
 	"Children": [
 		{
@@ -317,7 +317,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-iffmsq0",
-				"updated": "20261027140312"
+				"updated": "20261105133947"
 			},
 			"Children": [
 				{
@@ -538,7 +538,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-x813t3f",
-				"updated": "20261027140312"
+				"updated": "20261105133947"
 			},
 			"Children": [
 				{
@@ -552,7 +552,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170040-oce2o3k",
-				"updated": "20260816114944"
+				"updated": "20261105133947"
 			},
 			"Children": [
 				{
@@ -588,7 +588,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "While the agent is running, select the stop button to interrupt the current task. Results are generally more reliable when the goal, scope, and destination are explicit."
+					"Data": "While the agent is running, select the stop button to interrupt the current task. Automatic retries keep and continue the same thinking card. Stopping keeps already-visible output while the server finishes saving and recovery, but does not undo completed actions. A slow connection may interrupt generation; reopen the session to recover saved content. Results are generally more reliable when the goal, scope, and destination are explicit."
 				}
 			]
 		},

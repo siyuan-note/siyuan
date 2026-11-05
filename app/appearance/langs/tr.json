@@ -3679,6 +3679,8 @@
 		"463": "Eşitleme kaynağı değişti; Eşitle’ye tıklayıp yüklemeyi veya geri yüklemeyi seçin",
 		"464": "Önizlemeden sonra kaynak veya veriler değişti; yeniden incelemek için Eşitle’ye tıklayın",
 		"465": "Bazı kaynaklar veya geçmiş anlık görüntüler hâlâ özgün eşitleme kaynağına bağlı. Özgün hesap, bulut bölgesi ve eşitleme ayarlarıyla yeniden oturum açın, ardından Tümünü indir seçeneğine geçip tekrar deneyin",
-		"466": "%s için otomatik AI OCR duraklatıldı; 10 dakika sonra yeniden denenecek. Sağlayıcı hesabını ve model ayarlarını kontrol edin: %s"
+		"466": "%s için otomatik AI OCR duraklatıldı; 10 dakika sonra yeniden denenecek. Sağlayıcı hesabını ve model ayarlarını kontrol edin: %s",
+		"467": "İstemci verileri yeterince hızlı alamadığı için akış yanıtı kesildi; mevcut çıktıyı kurtarmak için oturumu yeniden açın",
+		"468": "Yanıt kesildi; mevcut çıktıyı kurtarmak için oturumu yeniden açın"
 	}
 }

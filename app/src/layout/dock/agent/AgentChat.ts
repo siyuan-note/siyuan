@@ -1576,6 +1576,10 @@ export class AgentChat extends Model {
         if (!session) {
             return;
         }
+        if (this.pendingRecoverySessionIDs.has(targetSessionId) && session.agentRunning) {
+            this.updateSessionRunLock(session);
+            return;
+        }
         const newEntries = this.buildEntriesFromSession(session);
         if (!forceRender && this.entriesEqual(newEntries, this.entries)) {
             // 内容未变，仅更新元数据（标题等）。
@@ -1647,6 +1651,9 @@ export class AgentChat extends Model {
                 }
                 if (session) {
                     this.updateSessionRunLock(session);
+                }
+                if (session?.agentRunning) {
+                    continue;
                 }
                 if (!session?.recoveryTurnID) {
                     if (session && !session.agentRunning) {
@@ -2770,6 +2777,7 @@ export class AgentChat extends Model {
             this.setStreaming(false);
             const sessionID = this.sessionId;
             const turnID = this.currentTurnID;
+            this.pendingRecoverySessionIDs.add(sessionID);
             try {
                 await this.reloadFromDisk(true);
             } catch (reloadError) {
@@ -2790,6 +2798,7 @@ export class AgentChat extends Model {
         this.setStreaming(false);
         const sessionID = this.sessionId;
         const turnID = this.currentTurnID;
+        this.pendingRecoverySessionIDs.add(sessionID);
         try {
             await this.reloadFromDisk(true);
         } catch (reloadError) {
@@ -3793,16 +3802,11 @@ export class AgentChat extends Model {
     }
 
     private appendRetry(attempt: number, maxRetries: number) {
-        this.finishActiveThinking();
-        this.currentThinkingSteps = [];
-        this.currentToolLine = null;
-        this.clearThinking();
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--retry";
         el.innerHTML = renderRetryCardHTML(attempt, maxRetries);
         this.insertBeforeAI(el);
         this.scrollToBottom();
-        this.hasInterveningCard = true;
     }
 
     private appendSnapshotInfo(snapshotID: string, entryId?: string) {
@@ -3855,6 +3859,7 @@ export class AgentChat extends Model {
 
     private async stopGeneration() {
         const sessionID = this.sessionId;
+        this.pendingRecoverySessionIDs.add(sessionID);
         const sessionRun = this.sessionRuns.get(sessionID);
         if (sessionRun?.detached) {
             this.sessionRuns.abort(sessionID);
@@ -3930,11 +3935,6 @@ export class AgentChat extends Model {
         const turnID = this.currentTurnID;
         // abort 只中断前端连接；外部工具可能仍在返回途中。不能在这里直接保存并清除 runtime，
         // 等后端写完 interrupted 检查点后再恢复并提交。turn 事件可能尚未到达，因此空 ID 也要轮询。
-        try {
-            await this.reloadFromDisk(true);
-        } catch (e) {
-            console.error("reload agent session after stop failed:", e);
-        }
         if (this.sessionId === sessionID) {
             void this.recoverInterruptedTurn(sessionID, turnID);
         }
@@ -4155,6 +4155,7 @@ export class AgentChat extends Model {
         this.finishActiveThinking();
         this.flushThinkingStep();
         const timestamp = Date.now();
+        const assistantEntryID = this.currentAssistantEntryId || SessionStore.newSessionId();
         if (this.currentAIElement) {
             if (content.trim()) {
                 this.finalizeStreamingBody(content, timestamp, false);
@@ -4167,9 +4168,18 @@ export class AgentChat extends Model {
             this.appendPersistedAssistant(
                 content,
                 timestamp,
-                this.currentAssistantEntryId || SessionStore.newSessionId(),
+                assistantEntryID,
                 false,
             );
+        }
+        if (content.trim()) {
+            this.entries.push({
+                id: assistantEntryID,
+                type: "assistant",
+                content,
+                roundID: roundID || this.currentRoundID || undefined,
+                timestamp,
+            });
         }
         this.currentAssistantEntryId = "";
         this.currentContent = "";

@@ -230,3 +230,45 @@ test("a late recovery read cannot unlock or commit a different foreground sessio
     assert.equal(chat.mirrorLocked, true);
     assert.equal(chat.pendingRecoverySessionIDs.has("first"), true);
 });
+
+test("stop preserves the visible partial reply until the backend completes recovery", async () => {
+    let loads = 0;
+    const {chat} = createChat(async () => { loads++; return session({agentRunning: true}); });
+    Object.assign(chat, {
+        sessionId: "first", currentContent: "Visible partial", fullContent: "Visible partial",
+        currentAIElement: {}, currentAssistantEntryId: "partial", currentRoundID: "round",
+        currentToolCalls: [], currentTurnID: "turn",
+        recoverInterruptedTurn: async () => {},
+    });
+    await chat.stopGeneration();
+    assert.equal(loads, 0);
+    assert.equal(chat.entries[0].content, "Visible partial");
+    assert.equal(chat.pendingRecoverySessionIDs.has("first"), true);
+    chat.renderLoadedSession = () => assert.fail("running checkpoint must not replace the visible partial reply");
+    await chat.reloadFromDisk(true);
+    assert.equal(loads, 1);
+    assert.equal(chat.entries[0].content, "Visible partial");
+});
+
+test("recovery waits for finalization before reloading or committing", async () => {
+    let loads = 0;
+    const {chat} = createChat(async () => {
+        loads++;
+        return session({agentRunning: loads < 3, recoveryTurnID: "turn", recoveryState: "interrupted"});
+    });
+    chat.sessionId = "first";
+    chat.currentTurnID = "turn";
+    chat.isStreaming = false;
+    let reloads = 0;
+    let commits = 0;
+    chat.reloadFromDisk = async () => {
+        assert.equal(loads, 3);
+        reloads++;
+        chat.recoveryCommitTurnIDs.set("first", "turn");
+    };
+    chat.saveSession = async () => { commits++; };
+    await chat.recoverInterruptedTurn("first", "turn");
+    assert.equal(reloads, 1);
+    assert.equal(commits, 1);
+    assert.equal(chat.pendingRecoverySessionIDs.has("first"), false);
+});

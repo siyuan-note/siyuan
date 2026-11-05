@@ -3117,6 +3117,8 @@ export interface APIPOSTRoutes {
     /**
      * gemini-interactions 使用 store=false 和本地会话历史，nativeContent 版本 1 保留完整原生步骤及思考签名。
      * 未知原生版本保留原会话并报错；缺失终止事件、失败或不完整的响应不会执行工具调用。
+     * 流式事件按序发送；消费停滞会取消生成，待工具结果和运行时检查点收尾后发送 interrupted。
+     * 同轮重试保留原 thinking 轮次；上下文压缩的 thinking 事件携带该轮 roundID。
      */
     "/api/ai/agent/chat": {
         request: AIAgentChatRequestInput;

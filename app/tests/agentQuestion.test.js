@@ -61,6 +61,7 @@ const runCases = async sources => {
             const chat = Object.create(AgentChat.prototype);
             Object.assign(chat, {
                 host: {mobile}, sessionId: session.id, sessionErrors: new Map(),
+                pendingRecoverySessionIDs: new Set(),
                 messagesContainer: document.createElement("div"),
                 isScrolledToBottom: () => true,
             });

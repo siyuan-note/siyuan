@@ -3679,6 +3679,8 @@
 		"463": "The sync source changed; click Sync and choose upload or restore before continuing",
 		"464": "The source or data changed after preview; click Sync to review again",
 		"465": "Some assets or historical snapshots still depend on the original sync source. Sign in again using the original account, cloud region, and sync settings, then switch to Download all and try again",
-		"466": "Automatic AI OCR paused for %s; retrying in 10 minutes. Check the provider account and model settings: %s"
+		"466": "Automatic AI OCR paused for %s; retrying in 10 minutes. Check the provider account and model settings: %s",
+		"467": "The streaming response was interrupted because the client could not keep up; reopen the session to recover available output",
+		"468": "The response was interrupted; reopen the session to recover available output"
 	}
 }

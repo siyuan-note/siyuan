@@ -9,6 +9,7 @@ import {createSourceFile, isClassDeclaration, ModuleKind, ScriptTarget, transpil
 
 const browserCases = async (sources: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
+    window.siyuan = {languages: {}} as typeof window.siyuan;
     const noop = () => {};
     const escapeHtml = (value: string) => {
         const span = document.createElement("span");
@@ -17,7 +18,10 @@ const browserCases = async (sources: Record<string, string>) => {
     };
     const load = (source: string) => {
         const module = {exports: {} as Record<string, any>};
-        new Function("require", "module", "exports", source)(() => ({escapeHtml}), module, module.exports);
+        new Function("require", "module", "exports", source)(() => ({
+            escapeHtml,
+            escapeHtmlTextAndAttr: (value: string) => escapeHtml(value).replaceAll('"', "&quot;"),
+        }), module, module.exports);
         return module.exports;
     };
     const history = load(sources.history);
@@ -31,6 +35,8 @@ const browserCases = async (sources: Record<string, string>) => {
         SessionStore: {newSessionId: () => `entry-${++id}`},
         escapeHtml,
         renderToolsLineHTML: renderer.renderToolsLineHTML,
+        renderRetryCardHTML: renderer.renderRetryCardHTML,
+        renderQuestionCardHTML: renderer.renderQuestionCardHTML,
         getAgentThinkingToolGroups: history.getAgentThinkingToolGroups,
         hasAgentThinkingStepDetails: history.hasAgentThinkingStepDetails,
         updateThinkingBody: thinking.updateThinkingBody,
@@ -81,6 +87,14 @@ const browserCases = async (sources: Record<string, string>) => {
             updateTokenDisplay: noop,
             rebuildNavMarkers: noop,
             slimToolCallsForPersistence: (calls: unknown[]) => calls,
+            finishActiveThinking: noop,
+            flushThinkingStep: noop,
+            finalizeStreamingBody: (content: string) => { chat.currentAIElement.textContent = content; },
+            appendPersistedAssistant: (content: string) => {
+                const element = document.createElement("div");
+                element.textContent = content;
+                chat.messagesContainer.appendChild(element);
+            },
         });
         return chat;
     };
@@ -110,6 +124,39 @@ const browserCases = async (sources: Record<string, string>) => {
     };
 
     for (const mobile of [false, true]) {
+        const retrying = createChat(mobile);
+        retrying.appendThinking("analyzing", "retry-round");
+        retrying.appendReasoning("before ");
+        retrying.flushReasoningUpdate();
+        const retryCard = retrying.getActiveThinkingCard();
+        await call(retrying, "before-retry");
+        retrying.appendRetry(1, 2);
+        retrying.appendRetry(2, 2);
+        retrying.appendReasoning("after");
+        await call(retrying, "after-retry");
+        check.equal(retrying.getActiveThinkingCard(), retryCard);
+        check.equal(retrying.currentRoundID, "retry-round");
+        check.equal(retrying.hasInterveningCard, false);
+        check.deepEqual(compareReload(retrying), [["before after", ["block", "block"]]]);
+
+        for (const streamingElement of [false, true]) {
+            const questioning = createChat(mobile);
+            questioning.currentContent = "Body before question";
+            questioning.currentAssistantEntryId = "question-body";
+            questioning.currentRoundID = "question-round";
+            if (streamingElement) {
+                questioning.currentAIElement = document.createElement("div");
+                questioning.messagesContainer.appendChild(questioning.currentAIElement);
+            }
+            questioning.appendQuestion("question", {questions: [{question: "Choose", options: [{label: "Yes"}]}]});
+            check.deepEqual(questioning.entries.map((entry: any) => entry.type), ["assistant", "question"]);
+            check.equal(questioning.entries[0].content, "Body before question");
+            check.equal(questioning.entries[0].roundID, "question-round");
+            check.equal(questioning.entries[0].id, "question-body");
+            check.equal(questioning.currentContent, "");
+            check.equal(questioning.messagesContainer.firstElementChild.textContent, "Body before question");
+        }
+
         const chat = createChat(mobile);
         chat.appendThinking("processing", "round-1");
         await call(chat, "a");
@@ -200,7 +247,7 @@ test("thinking tools preserve round grouping, duplicate calls and running state 
     assert.ok(declaration && isClassDeclaration(declaration));
     const names = new Set(["handleSSEEvent", "getActiveThinkingCard", "appendToolCall", "setToolCallRunning",
         "finishToolCall", "appendThinking", "appendReasoning", "flushReasoningUpdate", "collectCurrentThinkingStep",
-        "renderMergedThinkingCard", "captureRunViewState", "captureRunView", "restoreRunView"]);
+        "renderMergedThinkingCard", "captureRunViewState", "captureRunView", "restoreRunView", "appendRetry", "appendQuestion"]);
     const methods = declaration.members.filter(item => names.has(item.name?.getText(source))).map(item => item.getText(source));
     assert.equal(methods.length, names.size);
     const compile = (content: string) => transpileModule(content, {

@@ -294,24 +294,6 @@ func BrowserCapabilityResult(callID string, result string, structuredContent any
 	}
 }
 
-func sendEvent(ch chan<- AgentEvent, ev AgentEvent) {
-	// 仍用非阻塞发送，避免 SSE 消费端卡住时拖死 agent 主循环；缓冲已加大以降低背压概率。
-	// 仅在确实丢弃（背压）时记日志，便于诊断长会话偶发丢字。
-	select {
-	case ch <- ev:
-	default:
-		logging.LogWarnf("agent event dropped (type=%s): SSE consumer too slow", ev.Type)
-	}
-}
-
-func sendCriticalEvent(ctx context.Context, ch chan<- AgentEvent, ev AgentEvent) {
-	select {
-	case ch <- ev:
-	case <-ctx.Done():
-	case <-time.After(5 * time.Second):
-	}
-}
-
 func wrapToolOutput(result string) string {
 	return "[tool_output]\n" + result + "\n[/tool_output]"
 }
@@ -499,8 +481,19 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 	confAIReadSnapshot := kernelModel.Conf.LoadAI()
 
 	ch := make(chan AgentEvent, 256)
+	workCtx, cancel := context.WithCancelCause(ctx)
+	output := relayAgentEvents(workCtx, cancel, ch, EventDeliveryTimeout, func(cause error) string {
+		if errors.Is(cause, ErrSessionTimeout) {
+			return kernelModel.Conf.Language(379)
+		}
+		if errors.Is(cause, errSlowConsumer) {
+			return kernelModel.Conf.Language(467)
+		}
+		return kernelModel.Conf.Language(468)
+	})
 
 	go func() {
+		ctx := workCtx
 		defer close(ch)
 		defer func() {
 			if ctx.Err() != nil && sessionID != "" {
@@ -517,7 +510,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		// 每次用户发起对话只读取一次，工具轮次和压缩重建共享这份指令快照。
 		instructions, instructionsErr := util.ReadAgentInstructions()
 		if instructionsErr != nil {
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: util.AgentInstructionsError(instructionsErr, language)})
+			sendEvent(ctx, ch, AgentEvent{Type: "error", Error: util.AgentInstructionsError(instructionsErr, language)})
 			return
 		}
 
@@ -541,7 +534,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		permissionController, err := registerSessionPermissionController(sessionID)
 		if err != nil {
 			logging.LogErrorf("load agent session permission failed: %s", err)
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+			sendEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 			return
 		}
 		defer unregisterSessionPermissionController(sessionID, permissionController)
@@ -561,7 +554,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		ctx = mcptools.ContextWithMCPDiscovery(ctx, mcpState.discover)
 		capabilities, capabilityErr := mcpState.build(frontendCapabilities)
 		if capabilityErr != nil {
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
+			sendEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
 			return
 		}
 		var messages []openai.ChatCompletionMessage
@@ -610,7 +603,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						if lastUserIdx >= 0 {
 							truncated = truncated[:lastUserIdx]
 						} else if userEntryID != "" {
-							sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+							sendEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 							return
 						}
 					} else {
@@ -685,7 +678,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		}
 		if err := beginRuntimeTurn(sessionID, turn); err != nil {
 			logging.LogErrorf("begin agent runtime failed: %s", err)
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+			sendEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 			return
 		}
 		// turn 是恢复协议的身份锚点，且此时事件通道仍为空。直接写入缓冲区，确保请求刚被取消时
@@ -765,7 +758,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			return fmt.Sprintf(kernelModel.Conf.Language(417), getAgentRequestErrorMessage(err, requestMessages))
 		}
 
-		compactContext := func(requestTools []openai.Tool, force bool) (bool, error) {
+		compactContext := func(requestTools []openai.Tool, force bool, roundID string) (bool, error) {
 			if contextLimit <= 0 {
 				if !force {
 					return false, nil
@@ -844,7 +837,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			defer cancelCompaction()
 			compactionCtx = context.WithValue(compactionCtx, compactionRequestBudgetKey{}, &compactionRequests)
 
-			sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "compacting context"})
+			sendEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "compacting context", RoundID: roundID})
 			var nextCompaction *runtimeCompaction
 			var compactionStateErr error
 			if nativeResponsesCompaction {
@@ -933,9 +926,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 
 			roundID := fmt.Sprintf("%s_%d", turn.TurnID, modelRound)
 			if modelRound == 0 {
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "analyzing", RoundID: roundID})
+				sendEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "analyzing", RoundID: roundID})
 			} else {
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "processing", RoundID: roundID})
+				sendEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "processing", RoundID: roundID})
 			}
 			modelRound++
 
@@ -944,7 +937,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				if !saveTurn("interrupted") {
 					return
 				}
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
+				sendEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
 				return
 			}
 			requestTools := roundCapabilities.definitions
@@ -964,13 +957,13 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				messages[0].Content = buildSystemPrompt(language, roundCapabilities, instructions.Content)
 			}
 
-			_, compactErr := compactContext(requestTools, false)
+			_, compactErr := compactContext(requestTools, false, roundID)
 			if compactErr != nil {
 				logging.LogErrorf("agent context compaction failed: %s", compactErr)
 				if !saveTurn("interrupted") {
 					return
 				}
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: compactionErrorMessage(compactErr)})
+				sendEvent(ctx, ch, AgentEvent{Type: "error", Error: compactionErrorMessage(compactErr)})
 				return
 			}
 
@@ -1010,7 +1003,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 			if streamErr != nil {
 				if isContextOverflow(streamErr) && !overflowRetryPending {
-					compacted, err := compactContext(requestTools, true)
+					compacted, err := compactContext(requestTools, true, roundID)
 					if err == nil && compacted {
 						overflowRetryPending = true
 						continue
@@ -1020,7 +1013,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						if !saveTurn("interrupted") {
 							return
 						}
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: compactionErrorMessage(err)})
+						sendEvent(ctx, ch, AgentEvent{Type: "error", Error: compactionErrorMessage(err)})
 						return
 					}
 				}
@@ -1029,10 +1022,10 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					return
 				}
 				if isContextOverflow(streamErr) {
-					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(352)})
+					sendEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(352)})
 					return
 				}
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentRequestErrorMessage(streamErr, requestMessages)})
+				sendEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentRequestErrorMessage(streamErr, requestMessages)})
 				return
 			}
 			overflowRetryPending = false
@@ -1050,7 +1043,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				}
 				contentBuilder.WriteString(token)
 				if !toolRoundLimitReached {
-					sendEvent(ch, AgentEvent{Type: "content", Token: token})
+					sendEvent(ctx, ch, AgentEvent{Type: "content", Token: token})
 				}
 			}
 			writeReasoning := func(token string) {
@@ -1059,7 +1052,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				}
 				reasoningBuilder.WriteString(token)
 				if !toolRoundLimitReached {
-					sendEvent(ch, AgentEvent{Type: "reasoning", Token: token})
+					sendEvent(ctx, ch, AgentEvent{Type: "reasoning", Token: token})
 				}
 			}
 			writeTaggedContent := func(token string) {
@@ -1124,7 +1117,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					stream.Close()
 					roundCancel()
 					if finalized {
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentRequestErrorMessage(recvErr, messages)})
+						sendEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentRequestErrorMessage(recvErr, messages)})
 					}
 					return
 				}
@@ -1205,10 +1198,10 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					responseOutputTokens = 0
 				} else {
 					if reasoningBuilder.Len() > 0 {
-						sendEvent(ch, AgentEvent{Type: "reasoning", Token: reasoningBuilder.String()})
+						sendEvent(ctx, ch, AgentEvent{Type: "reasoning", Token: reasoningBuilder.String()})
 					}
 					if contentBuilder.Len() > 0 {
-						sendEvent(ch, AgentEvent{Type: "content", Token: contentBuilder.String()})
+						sendEvent(ctx, ch, AgentEvent{Type: "content", Token: contentBuilder.String()})
 					}
 				}
 			}
@@ -1237,12 +1230,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				if !saveTurn("interrupted") {
 					return
 				}
-				sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
+				sendEvent(ctx, ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
 				errMsg := kernelModel.Conf.Language(297)
 				if toolRoundLimitReached {
 					errMsg = kernelModel.Conf.Language(440)
 				}
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
+				sendEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
 				return
 			}
 
@@ -1298,7 +1291,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					for j := start; j < len(aggregatedToolCalls); j++ {
 						checkpointMsgs[assistantIdx].ToolCalls[j].Result = result
 						checkpointMsgs[assistantIdx].ToolCalls[j].State = "skipped"
-						sendEvent(ch, AgentEvent{
+						sendEvent(ctx, ch, AgentEvent{
 							Type:       "tool_result",
 							Name:       aggregatedToolCalls[j].Function.Name,
 							RoundID:    roundID,
@@ -1321,7 +1314,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						action, _ = a.(string)
 					}
 
-					sendEvent(ch, AgentEvent{
+					sendEvent(ctx, ch, AgentEvent{
 						Type:       "tool_call",
 						Name:       tc.Function.Name,
 						RoundID:    roundID,
@@ -1372,7 +1365,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						confirmChannelsMu.Lock()
 						confirmChannels[confirmID] = &confirmWaiter{sessionID: sessionID, ch: ch2}
 						confirmChannelsMu.Unlock()
-						sendCriticalEvent(ctx, ch, AgentEvent{
+						sendEvent(ctx, ch, AgentEvent{
 							Type: "confirm", Name: tc.Function.Name, Arguments: confirmationArgs, ConfirmID: confirmID, Effects: approvedEffects,
 							ForcedConfirm: forcedConfirm, CapabilityID: registration.ID,
 						})
@@ -1399,7 +1392,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 								Content:    wrapToolOutput(cancelMsg),
 								ToolCallID: tc.ID,
 							})
-							sendEvent(ch, AgentEvent{
+							sendEvent(ctx, ch, AgentEvent{
 								Type:       "tool_result",
 								Name:       tc.Function.Name,
 								RoundID:    roundID,
@@ -1415,7 +1408,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 									Content:    wrapToolOutput(cancelMsg),
 									ToolCallID: aggregatedToolCalls[j].ID,
 								})
-								sendEvent(ch, AgentEvent{
+								sendEvent(ctx, ch, AgentEvent{
 									Type:       "tool_result",
 									Name:       aggregatedToolCalls[j].Function.Name,
 									RoundID:    roundID,
@@ -1434,7 +1427,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							}
 							timedOut = true
 							rejectionMsg = "Confirmation timed out, operation skipped automatically"
-							sendEvent(ch, AgentEvent{
+							sendEvent(ctx, ch, AgentEvent{
 								Type:       "tool_result",
 								Name:       tc.Function.Name,
 								RoundID:    roundID,
@@ -1446,7 +1439,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						if timedOut || !result.approved {
 							if rejectionMsg == "" {
 								rejectionMsg = "User rejected this operation"
-								sendEvent(ch, AgentEvent{
+								sendEvent(ctx, ch, AgentEvent{
 									Type:       "tool_result",
 									Name:       tc.Function.Name,
 									RoundID:    roundID,
@@ -1468,12 +1461,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						}
 
 						if result.always {
-							sendCriticalEvent(ctx, ch, AgentEvent{
+							sendEvent(ctx, ch, AgentEvent{
 								Type: AgentEventPermission, PermissionMode: AgentPermissionAllowSession,
 							})
 						}
 						// 确认卡片会结束当前思考状态，工具执行前重新通知前端显示“思考中”。
-						sendCriticalEvent(ctx, ch, AgentEvent{
+						sendEvent(ctx, ch, AgentEvent{
 							Type: "thinking", Reasoning: "processing", RoundID: roundID,
 						})
 					}
@@ -1516,7 +1509,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							if !saveTurn("interrupted") {
 								return
 							}
-							sendEvent(ch, AgentEvent{
+							sendEvent(ctx, ch, AgentEvent{
 								Type:       "tool_result",
 								Name:       tc.Function.Name,
 								RoundID:    roundID,
@@ -1524,7 +1517,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 								Result:     abortMsg,
 							})
 							for j := i + 1; j < len(aggregatedToolCalls); j++ {
-								sendEvent(ch, AgentEvent{
+								sendEvent(ctx, ch, AgentEvent{
 									Type:       "tool_result",
 									Name:       aggregatedToolCalls[j].Function.Name,
 									RoundID:    roundID,
@@ -1532,7 +1525,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 									Result:     abortMsg,
 								})
 							}
-							sendCriticalEvent(ctx, ch, AgentEvent{
+							sendEvent(ctx, ch, AgentEvent{
 								Type:  "error",
 								Error: "auto snapshot failed, operation aborted: " + err.Error(),
 							})
@@ -1540,7 +1533,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						}
 						snapshotIDs = append(snapshotIDs, id)
 						snapshotCreated = true
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "snapshot", RoundID: roundID, SnapshotID: id})
+						sendEvent(ctx, ch, AgentEvent{Type: "snapshot", RoundID: roundID, SnapshotID: id})
 					}
 
 					if toolInputErr == nil {
@@ -1605,7 +1598,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					resultStr = util.TruncateToolOutput(resultStr, sessionID)
 					resultStr = wrapToolOutput(resultStr)
 
-					sendEvent(ch, AgentEvent{
+					sendEvent(ctx, ch, AgentEvent{
 						Type:       "tool_result",
 						Name:       tc.Function.Name,
 						RoundID:    roundID,
@@ -1630,7 +1623,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						return
 					}
 					if executionUnknown {
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: rawResult})
+						sendEvent(ctx, ch, AgentEvent{Type: "error", Error: rawResult})
 						return
 					}
 
@@ -1661,7 +1654,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					if !saveTurn("interrupted") {
 						return
 					}
-					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
+					sendEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
 					return
 				}
 
@@ -1703,17 +1696,17 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				return
 			}
 
-			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
+			sendEvent(ctx, ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
 			if toolRoundLimitReached {
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(440)})
+				sendEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(440)})
 				return
 			}
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
+			sendEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
 			return
 		}
 	}()
 
-	return ch
+	return output
 }
 
 func GenerateTitle(client *util.AIClient, apiBaseURL, protocol, model, userMsg, language string) string {
@@ -2002,7 +1995,7 @@ func waitForQuestion(ctx context.Context, args map[string]any, questionID, round
 	}
 	questionChannelsMu.Unlock()
 
-	sendCriticalEvent(ctx, ch, AgentEvent{
+	sendEvent(ctx, ch, AgentEvent{
 		Type:       "question",
 		QuestionID: questionID,
 		RoundID:    roundID,
@@ -2112,7 +2105,7 @@ func handleBrowserCapability(ctx context.Context, tc openai.ToolCall, registrati
 	browserCapabilityChannels[callID] = ch2
 	browserCapabilityChannelsMu.Unlock()
 
-	sendCriticalEvent(ctx, ch, AgentEvent{
+	sendEvent(ctx, ch, AgentEvent{
 		Type:         "browser_capability_call",
 		CallID:       callID,
 		Name:         tc.Function.Name,
@@ -2749,7 +2742,7 @@ func createProtocolStreamWithRetry(ctx context.Context, client *util.AIClient, p
 				return nil, openai.ChatCompletionStreamResponse{}, nil, ctx.Err()
 			case <-time.After(delay):
 			}
-			sendEvent(ch, AgentEvent{Type: "retry", RetryAttempt: attempt, RetryMax: maxRetries})
+			sendEvent(ctx, ch, AgentEvent{Type: "retry", RetryAttempt: attempt, RetryMax: maxRetries})
 		}
 
 		streamCtx, streamCancel := context.WithCancel(ctx)

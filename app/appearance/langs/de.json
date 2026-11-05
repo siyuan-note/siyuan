@@ -3679,6 +3679,8 @@
 		"463": "Die Synchronisationsquelle wurde geändert; klicken Sie auf Synchronisieren und wählen Sie Hochladen oder Wiederherstellen",
 		"464": "Quelle oder Daten wurden nach der Vorschau geändert; klicken Sie auf Synchronisieren, um erneut zu prüfen",
 		"465": "Einige Ressourcen oder historische Schnappschüsse benötigen noch die ursprüngliche Synchronisierungsquelle. Melden Sie sich mit dem ursprünglichen Konto, der ursprünglichen Cloud-Region und den ursprünglichen Synchronisierungseinstellungen erneut an, wechseln Sie zu Alle herunterladen und versuchen Sie es erneut",
-		"466": "Automatische KI-OCR für %s pausiert; erneuter Versuch in 10 Minuten. Anbieterkonto und Modelleinstellungen prüfen: %s"
+		"466": "Automatische KI-OCR für %s pausiert; erneuter Versuch in 10 Minuten. Anbieterkonto und Modelleinstellungen prüfen: %s",
+		"467": "Die Streaming-Antwort wurde unterbrochen, weil der Client nicht mithalten konnte; öffnen Sie die Sitzung erneut, um verfügbare Ausgaben wiederherzustellen",
+		"468": "Die Antwort wurde unterbrochen; öffnen Sie die Sitzung erneut, um verfügbare Ausgaben wiederherzustellen"
 	}
 }

@@ -3677,6 +3677,7 @@
 		"462": "La sincronización sigue pausada. Compruebe los datos restaurados y vuelva a activarla en Ajustes - Cuenta y sincronización",
 		"463": "La fuente de sincronización cambió; pulse Sincronizar y elija subir o restaurar para continuar",
 		"464": "La fuente o los datos cambiaron después de la vista previa; pulse Sincronizar para revisarlos",
-		"465": "Algunos recursos o instantáneas históricas aún dependen del origen de sincronización original. Vuelva a iniciar sesión con la cuenta, región de la nube y ajustes de sincronización originales, cambie a Descargar todos e inténtelo de nuevo"
+		"465": "Algunos recursos o instantáneas históricas aún dependen del origen de sincronización original. Vuelva a iniciar sesión con la cuenta, región de la nube y ajustes de sincronización originales, cambie a Descargar todos e inténtelo de nuevo",
+		"466": "OCR automático con IA pausado para %s; se reintentará en 10 minutos. Revisa la cuenta del proveedor y la configuración del modelo: %s"
 	}
 }

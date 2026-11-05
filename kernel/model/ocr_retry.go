@@ -6,14 +6,18 @@ package model
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -34,11 +38,39 @@ type automaticOCRAssetVersion struct {
 
 type automaticOCRRetryCache struct {
 	sync.Mutex
-	filename   string
-	config     string
-	generation uint64
-	entries    map[string]automaticOCRRetryEntry
-	dirty      bool
+	filename           string
+	config             string
+	generation         uint64
+	entries            map[string]automaticOCRRetryEntry
+	dirty              bool
+	providerConfig     string
+	providerRetryAfter time.Time
+	providerNotified   bool
+}
+
+func automaticOCRProviderConfig(value conf.OCR) string {
+	if value.Provider != "ai" {
+		return ""
+	}
+	provider, model := getOCRAIModel(value)
+	data, _ := json.Marshal([]any{provider, model})
+	return fmt.Sprintf("%x", sha256.Sum256(data))
+}
+
+func automaticOCRProviderFailure(err error) bool {
+	var apiErr *openai.APIError
+	var requestErr *openai.RequestError
+	status := 0
+	if errors.As(err, &apiErr) {
+		status = apiErr.HTTPStatusCode
+	} else if errors.As(err, &requestErr) {
+		status = requestErr.HTTPStatusCode
+	}
+	switch status {
+	case http.StatusUnauthorized, http.StatusPaymentRequired, http.StatusForbidden, http.StatusNotFound:
+		return true
+	}
+	return false
 }
 
 type automaticOCRRetryFile struct {
@@ -68,6 +100,7 @@ func (c *automaticOCRRetryCache) loadLocked() {
 	}
 	c.filename, c.config = filename, ""
 	c.entries = map[string]automaticOCRRetryEntry{}
+	c.providerConfig, c.providerRetryAfter, c.providerNotified = "", time.Time{}, false
 	c.generation++
 	c.dirty = false
 	data, err := os.ReadFile(filename)
@@ -116,6 +149,7 @@ func (c *automaticOCRRetryCache) reset() {
 	c.loadLocked()
 	c.entries = map[string]automaticOCRRetryEntry{}
 	c.config = ""
+	c.providerConfig, c.providerRetryAfter, c.providerNotified = "", time.Time{}, false
 	c.generation++
 	c.dirty = true
 	c.saveLocked()
@@ -126,6 +160,11 @@ func (c *automaticOCRRetryCache) prepare(value conf.OCR, assets map[string]*cach
 	defer c.Unlock()
 	c.loadLocked()
 	config := automaticOCRRetryConfig(value)
+	providerConfig := automaticOCRProviderConfig(value)
+	if c.config != config || c.providerConfig != providerConfig {
+		c.providerConfig, c.providerRetryAfter, c.providerNotified = providerConfig, time.Time{}, false
+		c.generation++
+	}
 	if c.config != config {
 		c.config = config
 		c.entries = map[string]automaticOCRRetryEntry{}
@@ -146,7 +185,7 @@ func (c *automaticOCRRetryCache) prepare(value conf.OCR, assets map[string]*cach
 func (c *automaticOCRRetryCache) ready(generation uint64, asset *cache.Asset, version automaticOCRAssetVersion, now time.Time) bool {
 	c.Lock()
 	defer c.Unlock()
-	if c.generation != generation {
+	if c.generation != generation || now.Before(c.providerRetryAfter) {
 		return false
 	}
 	entry, exists := c.entries[asset.Path]
@@ -161,7 +200,15 @@ func (c *automaticOCRRetryCache) record(generation uint64, asset *cache.Asset, v
 		return false
 	}
 	previous, exists := c.entries[asset.Path]
+	if c.providerConfig != "" && automaticOCRProviderFailure(err) {
+		// 账户及模型配置错误共用冷却，避免轮换图片继续请求；充值后仍可自动探测恢复。
+		c.providerRetryAfter = now.Add(10 * time.Minute)
+		notify := !c.providerNotified
+		c.providerNotified = true
+		return notify
+	}
 	if err == nil {
+		c.providerRetryAfter, c.providerNotified = time.Time{}, false
 		delete(c.entries, asset.Path)
 	} else {
 		entry := automaticOCRRetryEntry{Updated: asset.Updated, Version: version}

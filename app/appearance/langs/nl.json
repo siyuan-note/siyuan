@@ -3677,6 +3677,7 @@
 		"462": "Synchronisatie blijft gepauzeerd. Controleer de herstelde gegevens en schakel deze weer in via Instellingen - Account en synchronisatie",
 		"463": "De synchronisatiebron is gewijzigd; klik op Synchroniseren en kies uploaden of herstellen",
 		"464": "De bron of gegevens zijn na het voorbeeld gewijzigd; klik op Synchroniseren om opnieuw te controleren",
-		"465": "Sommige bestanden of historische momentopnamen zijn nog afhankelijk van de oorspronkelijke synchronisatiebron. Meld u opnieuw aan met het oorspronkelijke account, de cloudregio en de synchronisatie-instellingen, schakel over naar Alles downloaden en probeer het opnieuw"
+		"465": "Sommige bestanden of historische momentopnamen zijn nog afhankelijk van de oorspronkelijke synchronisatiebron. Meld u opnieuw aan met het oorspronkelijke account, de cloudregio en de synchronisatie-instellingen, schakel over naar Alles downloaden en probeer het opnieuw",
+		"466": "Automatische AI-OCR gepauzeerd voor %s; nieuwe poging over 10 minuten. Controleer het provideraccount en de modelinstellingen: %s"
 	}
 }

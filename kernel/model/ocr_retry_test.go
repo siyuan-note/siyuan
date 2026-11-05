@@ -7,17 +7,90 @@ package model
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/ocr"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAutomaticOCRProviderCooldown(t *testing.T) {
+	previousConf := Conf
+	if Conf == nil {
+		Conf = &AppConf{}
+	}
+	t.Cleanup(func() { Conf = previousConf })
+	previousTempDir, previousAI := util.TempDir, Conf.AI.Load()
+	util.TempDir = t.TempDir()
+	t.Cleanup(func() { util.TempDir = previousTempDir; Conf.AI.Store(previousAI) })
+	provider := &conf.Provider{ID: "ocr", Enabled: true, APIKey: "secret", Models: []*conf.Model{{ID: "vision", Name: "vision", Enabled: true}}}
+	Conf.AI.Store(&conf.AI{Providers: []*conf.Provider{provider}})
+	value := conf.OCR{Provider: "ai", AIModelID: "vision", Auto: true}
+	asset := &cache.Asset{Path: "assets/provider-test.png", Updated: 1}
+	other := &cache.Asset{Path: "assets/provider-other.png", Updated: 2}
+	assets := map[string]*cache.Asset{asset.Path: asset, other.Path: other}
+	version := automaticOCRAssetVersion{Size: 42}
+	now := time.Now()
+	for _, status := range []int{401, 402, 403, 404} {
+		t.Run(fmt.Sprint(status), func(t *testing.T) {
+			var retries automaticOCRRetryCache
+			generation := retries.prepare(value, assets)
+			err := fmt.Errorf("OCR: %w", &openai.APIError{HTTPStatusCode: status, Message: "account unavailable"})
+			if !retries.record(generation, asset, version, err, now) {
+				t.Fatal("first provider failure did not request notification")
+			}
+			if retries.ready(generation, other, version, now.Add(9*time.Minute)) || !retries.ready(generation, other, version, now.Add(10*time.Minute)) {
+				t.Fatal("provider cooldown did not cover other images or expire")
+			}
+			if retries.record(generation, other, version, err, now.Add(10*time.Minute)) {
+				t.Fatal("ongoing provider failure repeated its notification")
+			}
+			if len(retries.entries) != 0 {
+				t.Fatal("provider failure created an asset failure")
+			}
+			var reloaded automaticOCRRetryCache
+			loaded := reloaded.prepare(value, assets)
+			if !reloaded.ready(loaded, asset, version, now) {
+				t.Fatal("provider cooldown survived restart")
+			}
+			retries.record(generation, other, version, nil, now.Add(20*time.Minute))
+			if !retries.ready(generation, asset, version, now.Add(20*time.Minute)) || !retries.record(generation, asset, version, err, now.Add(21*time.Minute)) {
+				t.Fatal("recovery did not reset provider notification")
+			}
+			provider.APIKey += "changed"
+			oldGeneration := generation
+			generation = retries.prepare(value, assets)
+			if !retries.ready(generation, asset, version, now) || retries.record(oldGeneration, asset, version, err, now) {
+				t.Fatal("credential change retained cooldown or accepted stale failure")
+			}
+			retries.record(generation, asset, version, err, now)
+			retries.reset()
+			generation = retries.prepare(value, assets)
+			if !retries.ready(generation, other, version, now) {
+				t.Fatal("OCR settings reset retained provider cooldown")
+			}
+			data, readErr := os.ReadFile(filepath.Join(util.TempDir, "ocr-retry.json"))
+			if readErr != nil || strings.Contains(string(data), "secret") || strings.Contains(string(data), asset.Path) {
+				t.Fatalf("provider credentials or failure persisted: %s, %v", data, readErr)
+			}
+		})
+	}
+	for _, status := range []int{400, 408, 429, 500, 503} {
+		if automaticOCRProviderFailure(&openai.APIError{HTTPStatusCode: status}) {
+			t.Fatalf("HTTP %d was treated as an account failure", status)
+		}
+	}
+	if !automaticOCRProviderFailure(&openai.RequestError{HTTPStatusCode: 402}) || automaticOCRProviderFailure(context.Canceled) {
+		t.Fatal("unexpected request error classification")
+	}
+}
 
 func TestAutomaticOCRRetryCache(t *testing.T) {
 	previousTempDir := util.TempDir

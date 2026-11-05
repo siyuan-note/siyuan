@@ -3677,6 +3677,7 @@
 		"462": "Synchronizacja pozostaje wstrzymana. Sprawdź przywrócone dane i włącz ją ponownie w Ustawienia - Konto i synchronizacja",
 		"463": "Źródło synchronizacji zmieniło się; kliknij Synchronizuj i wybierz przesłanie lub przywrócenie",
 		"464": "Źródło lub dane zmieniły się po podglądzie; kliknij Synchronizuj, aby sprawdzić ponownie",
-		"465": "Niektóre zasoby lub historyczne migawki nadal zależą od pierwotnego źródła synchronizacji. Zaloguj się ponownie przy użyciu pierwotnego konta, regionu chmury i ustawień synchronizacji, przełącz na Pobierz wszystkie i spróbuj ponownie"
+		"465": "Niektóre zasoby lub historyczne migawki nadal zależą od pierwotnego źródła synchronizacji. Zaloguj się ponownie przy użyciu pierwotnego konta, regionu chmury i ustawień synchronizacji, przełącz na Pobierz wszystkie i spróbuj ponownie",
+		"466": "Automatyczny OCR AI wstrzymany dla %s; ponowna próba za 10 minut. Sprawdź konto dostawcy i ustawienia modelu: %s"
 	}
 }

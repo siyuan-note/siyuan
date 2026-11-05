@@ -3677,6 +3677,7 @@
 		"462": "Sync remains paused. After checking the restored data, re-enable it in Settings - Account & Sync",
 		"463": "The sync source changed; click Sync and choose upload or restore before continuing",
 		"464": "The source or data changed after preview; click Sync to review again",
-		"465": "Some assets or historical snapshots still depend on the original sync source. Sign in again using the original account, cloud region, and sync settings, then switch to Download all and try again"
+		"465": "Some assets or historical snapshots still depend on the original sync source. Sign in again using the original account, cloud region, and sync settings, then switch to Download all and try again",
+		"466": "Automatic AI OCR paused for %s; retrying in 10 minutes. Check the provider account and model settings: %s"
 	}
 }

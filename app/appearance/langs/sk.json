@@ -3677,6 +3677,7 @@
 		"462": "Synchronizácia zostáva pozastavená. Skontrolujte obnovené údaje a znova ju zapnite v Nastavenia - Účet a synchronizácia",
 		"463": "Zdroj synchronizácie sa zmenil; kliknite na Synchronizovať a vyberte odoslanie alebo obnovenie",
 		"464": "Zdroj alebo údaje sa po náhľade zmenili; kliknite na Synchronizovať a skontrolujte ich znova",
-		"465": "Niektoré zdroje alebo historické snímky stále závisia od pôvodného zdroja synchronizácie. Prihláste sa znova pomocou pôvodného účtu, oblasti cloudu a nastavení synchronizácie, prepnite na Stiahnuť všetky a skúste to znova"
+		"465": "Niektoré zdroje alebo historické snímky stále závisia od pôvodného zdroja synchronizácie. Prihláste sa znova pomocou pôvodného účtu, oblasti cloudu a nastavení synchronizácie, prepnite na Stiahnuť všetky a skúste to znova",
+		"466": "Automatické AI OCR pozastavené pre %s; ďalší pokus o 10 minút. Skontrolujte účet poskytovateľa a nastavenia modelu: %s"
 	}
 }

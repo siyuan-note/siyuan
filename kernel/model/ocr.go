@@ -7,6 +7,8 @@ package model
 import (
 	"context"
 	"errors"
+	"fmt"
+	"html"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -332,6 +334,16 @@ func autoOCRAssets() {
 		if _, _, err = ocrAsset(ctx, asset.Path, value, true); err != nil {
 			if ocrRetry.record(generation, asset, version, err, time.Now()) && !errors.Is(err, ocr.ErrUnsupportedImage) {
 				logging.LogWarnf("automatic OCR [provider=%s, path=%s] failed: %s", value.Provider, asset.Path, err)
+				if value.Provider == "ai" && automaticOCRProviderFailure(err) {
+					provider, _ := getOCRAIModel(value)
+					if provider != nil {
+						name := provider.DisplayName
+						if name == "" {
+							name = provider.ID
+						}
+						util.PushErrMsg(html.EscapeString(fmt.Sprintf(Conf.Language(466), name, err)), 0)
+					}
+				}
 			}
 		} else {
 			ocrRetry.record(generation, asset, version, nil, time.Now())

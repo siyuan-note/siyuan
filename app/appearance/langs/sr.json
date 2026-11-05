@@ -3677,6 +3677,7 @@
 		"462": "Синхронизација остаје паузирана. Проверите враћене податке и поново је укључите у Подешавања - Налог и синхронизација",
 		"463": "Извор синхронизације је промењен; кликните на Синхронизуј и изаберите отпремање или враћање",
 		"464": "Извор или подаци су промењени после прегледа; кликните на Синхронизуј да их поново проверите",
-		"465": "Neki resursi ili istorijski snimci i dalje zavise od prvobitnog izvora sinhronizacije. Ponovo se prijavite koristeći prvobitni nalog, region oblaka i podešavanja sinhronizacije, pređite na Preuzmi sve i pokušajte ponovo"
+		"465": "Neki resursi ili istorijski snimci i dalje zavise od prvobitnog izvora sinhronizacije. Ponovo se prijavite koristeći prvobitni nalog, region oblaka i podešavanja sinhronizacije, pređite na Preuzmi sve i pokušajte ponovo",
+		"466": "Аутоматски AI OCR је паузиран за %s; поновни покушај за 10 минута. Проверите налог добављача и подешавања модела: %s"
 	}
 }

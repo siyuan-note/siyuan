@@ -123,7 +123,7 @@ export class Setting {
                 if (["INPUT", "TEXTAREA"].includes(actionElement.tagName)) {
                     dialog.bindInput(actionElement as HTMLInputElement, () => {
                         btnsElement[1].dispatchEvent(new CustomEvent("click"));
-                    }, actionElement.tagName === "INPUT");
+                    }, actionElement.tagName === "INPUT", false);
                 }
                 if (item.direction === "row") {
                     contentElement.lastElementChild.lastElementChild.insertAdjacentElement("beforeend", actionElement);
@@ -138,7 +138,6 @@ export class Setting {
                 }
             }
         });
-        dialog.focusWhenReady(() => contentElement.querySelector<HTMLElement>("input, textarea"));
         const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();

@@ -32,7 +32,7 @@ const setup = (mobile = true) => {
             this.element.dataset.dialogClosing = "true";
             this.options.destroyCallback?.(options);
         }
-        bindInput() {}
+        bindInput(input: {focus: () => void}) { input.focus(); }
     }
     const dependencies = {Dialog: Base, isMobile: () => mobile,
         bindBottomSheetDialog: (_dialog: any, _close: any, _resize: any, open: () => void, options: {canStart: () => boolean}) => {
@@ -165,6 +165,58 @@ test("focus waits for reveal, latest initial target wins, close and nested dialo
     dialog.focusWhenReady(() => input);
     assert.equal(focused, 1);
 });
+
+for (const mobile of [false, true]) {
+    test(`${mobile ? "mobile" : "desktop"} input binding can retain keyboard handling without initial focus`, () => {
+        const f = setup(mobile);
+        const dialog = new f.MobileDialog({content: ""});
+        let focused = 0;
+        let confirmed = 0;
+        let keydown: (event: any) => void;
+        const input = {isConnected: true, closest: (): null => null, focus: () => focused++,
+            addEventListener: (_type: string, callback: typeof keydown) => { keydown = callback; }};
+        dialog.bindInput(input, () => confirmed++, true, false);
+        assert.equal(focused, 0);
+        if (mobile) f.open();
+        assert.equal(focused, 0, "sheet reveal must not schedule input focus");
+        input.focus();
+        assert.equal(focused, 1, "explicit user focus remains available");
+        const send = (options: Record<string, unknown>) => {
+            const event = {key: "Enter", timeStamp: 100, defaultPrevented: false,
+                preventDefault() { this.defaultPrevented = true; }, stopPropagation() {}, ...options};
+            keydown(event);
+            return event;
+        };
+        for (const options of [{isComposing: true}, {keyCode: 229}, {repeat: true}, {shiftKey: true}]) {
+            assert.equal(send(options).defaultPrevented, false);
+        }
+        assert.equal(confirmed, 0);
+        assert.equal(send({}).defaultPrevented, true);
+        send({timeStamp: 105});
+        assert.equal(confirmed, 1, "duplicate Enter must remain debounced");
+        send({timeStamp: 120});
+        assert.equal(confirmed, 2);
+        const textarea = {...input};
+        dialog.bindInput(textarea, () => confirmed++, false, false);
+        assert.equal(send({timeStamp: 140}).defaultPrevented, false, "textarea Enter remains a newline");
+        assert.equal(confirmed, 2);
+        send({key: "Escape", isComposing: true});
+        assert.equal(dialog.element.dataset.dialogClosing, undefined);
+        assert.equal(send({key: "Escape"}).defaultPrevented, true);
+        assert.equal(dialog.element.dataset.dialogClosing, "true");
+    });
+
+    test(`${mobile ? "mobile" : "desktop"} default input binding still focuses the input`, () => {
+        const f = setup(mobile);
+        const dialog = new f.MobileDialog({content: ""});
+        let focused = 0;
+        const input = {isConnected: true, closest: (): null => null, focus: () => focused++, addEventListener() {}};
+        dialog.bindInput(input);
+        assert.equal(focused, mobile ? 0 : 1);
+        if (mobile) f.open();
+        assert.equal(focused, 1);
+    });
+}
 
 test("the adapter module can load before the cyclic Dialog module exports its base class", () => {
     const exports: any = {};

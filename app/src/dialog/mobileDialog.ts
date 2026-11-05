@@ -27,6 +27,7 @@ export interface MobileDialog extends Dialog {
     invalidate(options?: IObject): void;
     runPending(task: () => Promise<boolean>, options?: {close?: boolean, disableButtons?: boolean}): Promise<boolean>;
     focusWhenReady(target: () => HTMLElement, options?: {select?: boolean, showKeyboard?: boolean}): void;
+    bindInput(input: HTMLInputElement | HTMLTextAreaElement, enter?: () => void, bindEnter?: boolean, focus?: boolean): void;
     setSheetMode(mode: MobileSheetMode): void;
 }
 
@@ -237,12 +238,12 @@ const createMobileDialogClass = () => {
             this.disposeSheet?.setMode(mode);
         }
 
-        public bindInput(input: HTMLInputElement | HTMLTextAreaElement, enter?: () => void, bindEnter = true) {
-            if (!this.mobile) {
+        public bindInput(input: HTMLInputElement | HTMLTextAreaElement, enter?: () => void, bindEnter = true, focus = true) {
+            if (!this.mobile && focus) {
                 super.bindInput(input, enter, bindEnter);
                 return;
             }
-            this.focusWhenReady(() => input);
+            if (focus) this.focusWhenReady(() => input);
             let timestamp: number;
             input.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing || event.keyCode === 229) return;

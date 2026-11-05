@@ -344,6 +344,7 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const fill = Hint.prototype.fill;
     const fragment = {wysiwyg, protyle, hintElement, getBlockHTML: () => wysiwyg.innerHTML};
     const keyDependencies = {...dependencies, host, cell, table: cell.closest("table"), fragment, owner: protyle, signal: new AbortController().signal,
+        addEditorEventListener: host.addEventListener.bind(host),
         captureBeforeChange: () => {}, composing: false, matchHotKey: () => false, finish: () => {},
         fixTable: () => { calls.navigated++; }};
     new Function(...Object.keys(keyDependencies), keydownSource)(...Object.values(keyDependencies));
@@ -845,8 +846,9 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const hintSource = compile(read("../../block/superBlock.ts") +
         "\nconst isProtyleListItemFragment = () => false; class Hint {" + fill + "}");
     const editor = read("../render/tableCellRichEditor.ts");
-    const start = editor.indexOf('host.addEventListener("keydown", event => {');
+    const start = editor.indexOf('addEditorEventListener("keydown", event => {');
     const end = editor.indexOf("}, {capture: true, signal});", start) + "}, {capture: true, signal});".length;
+    assert.ok(start >= 0 && end > start);
     const keydownSource = compile(editor.substring(start, end));
     const copySource = ["../../menus/menuToggle.ts", "normalizeText.ts", "../wysiwyg/codeBlockUtil.ts", "../wysiwyg/codeBlock.ts", "../lite/codeActions.ts"]
         .map(file => compile(read(file))).join("\n") +

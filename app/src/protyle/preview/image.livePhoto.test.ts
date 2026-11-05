@@ -7,17 +7,19 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
 import {transpileModule, ModuleKind, ScriptTarget} from "typescript";
+import {compileString} from "sass";
 
 test("image gallery counts entries and releases Live Photos on navigation and slideshow", async () => {
     const root = realpathSync(tmpdir());
     const temporary = mkdtempSync(path.join(root, "siyuan-live-photo-gallery-"));
+    const css = compileString(readFileSync("src/assets/scss/viewerjs/_viewer.scss", "utf8")).css;
     const server = createServer((request, response) => {
         if (request.url?.startsWith("/stage/protyle/js/viewerjs/viewer.js")) {
             response.writeHead(200, {"Content-Type": "text/javascript"});
             response.end(readFileSync("stage/protyle/js/viewerjs/viewer.js"));
         } else {
             response.writeHead(200, {"Content-Type": "text/html"});
-            response.end(`<!doctype html><title>Gallery verification</title><body><script>${readFileSync("appearance/icons/litheness/icon.js", "utf8")}</script>`);
+            response.end(`<!doctype html><title>Gallery verification</title><style>${css}</style><body><script>${readFileSync("appearance/icons/litheness/icon.js", "utf8")}</script>`);
         }
     });
     try {
@@ -29,13 +31,14 @@ test("image gallery counts entries and releases Live Photos on navigation and sl
         }).outputText;
         const browserCase = `(async () => {
             const starts = [];
+            const copiedURLs = [];
             let stopped = 0;
             let phase = "playing";
             const closed = [];
             const active = {playing:false,converting:false};
             const image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
             const entries = [{src:image,video:"assets/first.mov"},{src:image,video:"assets/second.mov"},{src:image}];
-            window.siyuan = {languages:{livePhoto:"Live Photo",previous:"Previous",next:"Next"}};
+            window.siyuan = {languages:{livePhoto:"Live Photo",previous:"Previous",next:"Next",copy:"Copy",imageURL:"image URL"}};
             const exports = {};
             const require = () => ({
                 Constants:{PROTYLE_CDN:"/stage/protyle"},
@@ -50,6 +53,7 @@ test("image gallery counts entries and releases Live Photos on navigation and sl
                     return () => {stopped++;closed.push(current);active[current]=false;};
                 },
                 isEncryptedBox: () => false,
+                writeText: text => copiedURLs.push(text),
             });
             ${source}
             const wait = async predicate => {
@@ -65,6 +69,14 @@ test("image gallery counts entries and releases Live Photos on navigation and sl
                 }
             };
             checkCount("2/3");
+            const copyURL=viewer.toolbar.querySelector(".viewer-copy-url");
+            if(copyURL?.getAttribute("aria-label")!=="Copy image URL"){throw new Error("Copy image URL action missing");}
+            const copyIcon=copyURL.querySelector("svg").getBoundingClientRect();
+            if(copyIcon.width!==12 || copyIcon.height!==24){throw new Error("Copy image URL icon size mismatch");}
+            copyURL.click();
+            copyURL.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));
+            copyURL.dispatchEvent(new KeyboardEvent("keydown",{key:" ",bubbles:true}));
+            if(copiedURLs.length!==3 || copiedURLs.some(value=>value!==image)){throw new Error("Copy image URL mismatch");}
             const button=viewer.toolbar.querySelector(".viewer-live-photo");
             if (!button || button.classList.contains("fn__none")) {throw new Error("Live Photo action missing");}
             const icon=button.querySelector("use");

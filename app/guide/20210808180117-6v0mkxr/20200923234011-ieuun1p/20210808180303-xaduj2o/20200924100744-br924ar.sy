@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261105210000"
+		"updated": "20261105133656"
 	},
 	"Children": [
 		{
@@ -493,6 +493,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Hover over an image to see its file name, format, loaded original dimensions, title, and tooltip text, even if it has no title. Local workspace images also show file size when available. File size is omitted for remote and encrypted notebook images."
+				}
+			]
+		},
+		{
+			"ID": "20261105133656-ez7ztx2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105133656-ez7ztx2",
+				"updated": "20261105133656"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the image preview for a document or database, select Copy image URL in the bottom toolbar to copy the current image address. Local assets keep their assets/... path so you can search for them in documents and databases."
 				}
 			]
 		},

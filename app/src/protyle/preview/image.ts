@@ -5,6 +5,7 @@ import {isBrowserRenderableImagePath} from "../../util/imageURL";
 import {copyPNGByLink, writeAssetToClipboard} from "../../menus/util";
 import {isEncryptedBox} from "../../util/pathName";
 import {createLivePhotoPlayer} from "./livePhoto";
+import {writeText} from "../util/compatibility";
 
 const getCopyFileMenu = (src: string) => {
     try {
@@ -27,10 +28,12 @@ export const previewImages = (srcList: Array<string | {src: string, video?: stri
     addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.14.0`, "protyleViewerScript").then(() => {
         const imagesElement = document.createElement("ul");
         let html = "";
+        const imageSources: string[] = [];
         let initialViewIndex = -1;
         srcList.forEach((source, index: number) => {
             const item = typeof source === "string" ? source : source.src;
             if (item) {
+                imageSources.push(item);
                 html += `<li><img src="${encodeURI(item)}"></li>`;
                 if (currentSrc && initialViewIndex === -1 && (currentSrc.endsWith(encodeURI(item)) || currentSrc.endsWith(item)) &&
                     (currentVideo === undefined || (typeof source === "string" ? "" : source.video || "") === currentVideo)) {
@@ -72,6 +75,30 @@ export const previewImages = (srcList: Array<string | {src: string, video?: stri
             navigation: true,
             transition: false,
             ready: () => {
+                const copyURLElement = document.createElement("li");
+                copyURLElement.className = "viewer-copy-url ariaLabel";
+                copyURLElement.tabIndex = 0;
+                copyURLElement.setAttribute("role", "button");
+                copyURLElement.setAttribute("aria-label", window.siyuan.languages.copy + " " + window.siyuan.languages.imageURL);
+                copyURLElement.setAttribute("data-position", "north");
+                copyURLElement.innerHTML = '<svg><use xlink:href="#iconLink"></use></svg>';
+                const copyURL = () => {
+                    if (viewer.viewed && viewer.image) {
+                        writeText(imageSources[currentIndex]);
+                    }
+                };
+                copyURLElement.addEventListener("click", event => {
+                    event.stopPropagation();
+                    copyURL();
+                });
+                copyURLElement.addEventListener("keydown", event => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        copyURL();
+                    }
+                });
+                viewer.toolbar.querySelector("ul").append(copyURLElement);
                 if (srcList.some(source => typeof source !== "string" && source.video)) {
                     liveButton = document.createElement("li");
                     liveButton.className = "viewer-live-photo ariaLabel fn__none";

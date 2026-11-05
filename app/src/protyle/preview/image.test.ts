@@ -29,6 +29,8 @@ test("image preview initializes its toolbar when ready is dispatched on the sour
         }];
     }));
     const copied: string[] = [];
+    const copiedURLs: string[] = [];
+    const customButtons: Array<EventTarget & {className: string, attributes: Map<string, string>}> = [];
     const copiedFiles: string[] = [];
     let supportsFiles = true;
     const sourceElement = Object.assign(new EventTarget(), {childElementCount: 2});
@@ -40,6 +42,9 @@ test("image preview initializes its toolbar when ready is dispatched on the sour
         public image = {src: "blob:first"};
         public toolbar = {
             querySelector: (selector: string) => {
+                if (selector === "ul") {
+                    return {append: (button: typeof customButtons[number]) => customButtons.push(button)};
+                }
                 assert.ok(buttons.has(selector));
                 return buttons.get(selector);
             },
@@ -78,17 +83,41 @@ test("image preview initializes its toolbar when ready is dispatched on the sour
             Constants: {PROTYLE_CDN: ""},
             addScript: () => Promise.resolve(),
             copyPNGByLink: (src: string) => copied.push(src),
+            writeText: (src: string) => copiedURLs.push(src),
             writeAssetToClipboard: (src: string) => ({ignore: !supportsFiles, click: () => copiedFiles.push(src)}),
             isEncryptedBox: (box: string) => box === "encrypted",
         }),
-        document: {createElement: () => sourceElement},
+        document: {createElement: (tag: string) => {
+            if (tag === "ul") {
+                return sourceElement;
+            }
+            const attributes = new Map<string, string>();
+            return Object.assign(new EventTarget(), {attributes, setAttribute: (name: string, value: string) => attributes.set(name, value)});
+        }},
         window: previewWindow,
         Viewer: TestViewer,
         URL,
     });
-    exports.previewImages(["blob:first", "blob:second"]);
+    exports.previewImages(["assets/first image.png?box=encrypted", "https://example.com/second.png?size=2#image"]);
     await Promise.resolve();
     const instance = previewWindow.siyuan.viewer;
+    const copyURLButton = customButtons.find(button => button.className.includes("viewer-copy-url"));
+    assert.equal(copyURLButton.attributes.get("role"), "button");
+    assert.equal(copyURLButton.attributes.get("aria-label"), languages.copy + " " + languages.imageURL);
+    copyURLButton.dispatchEvent(new Event("click"));
+    instance.options.view({detail: {index: 1}});
+    for (const key of ["Enter", " "]) {
+        const event = Object.assign(new Event("keydown", {cancelable: true}), {key});
+        copyURLButton.dispatchEvent(event);
+        assert.equal(event.defaultPrevented, true);
+    }
+    assert.deepEqual(copiedURLs, ["assets/first image.png?box=encrypted",
+        "https://example.com/second.png?size=2#image", "https://example.com/second.png?size=2#image"]);
+    instance.viewed = false;
+    copyURLButton.dispatchEvent(new Event("click"));
+    assert.equal(copiedURLs.length, 3);
+    instance.viewed = true;
+    instance.options.view({detail: {index: 0}});
     const title = () => instance.options.title[1]({alt: "photo.png"}, {naturalWidth: 640, naturalHeight: 480});
     assert.equal(title(), "1/2 photo [640 × 480]");
     instance.options.view({detail: {index: 1}});

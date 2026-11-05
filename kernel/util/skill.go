@@ -442,7 +442,7 @@ func SaveSkill(name, content string) error {
 		return err
 	}
 	skillMdPath := filepath.Join(skillDir, "SKILL.md")
-	return filelock.WriteFile(skillMdPath, []byte(content))
+	return WriteUserFile(skillMdPath, []byte(content))
 }
 
 func RemoveSkill(name string) error {
@@ -973,7 +973,7 @@ func installSkillDirs(relDirs []string, root string, source ...SkillInstallation
 				return nil, err
 			}
 		}
-		if err := filelock.Copy(srcDir, destDir); err != nil {
+		if err := CopyUserFile(srcDir, destDir); err != nil {
 			return nil, fmt.Errorf("install skill %s failed: %s", name, err)
 		}
 		if len(source) > 0 {
@@ -1016,7 +1016,7 @@ func installFromSingleSkillMD(data []byte, source ...SkillInstallation) (*Instal
 	if err != nil {
 		return nil, err
 	}
-	if err := filelock.WriteFile(filepath.Join(dir, "SKILL.md"), data); err != nil {
+	if err := WriteUserFile(filepath.Join(dir, "SKILL.md"), data); err != nil {
 		return nil, err
 	}
 	if len(source) > 0 {

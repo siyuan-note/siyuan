@@ -18,6 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/sys/windows"
 )
 
 // 目录联接（junction）无需管理员权限即可创建，是 Windows 上对符号链接漏洞的同源变体，
@@ -79,5 +80,39 @@ func TestGetFileJunctionBoundary(t *testing.T) {
 	}
 	if recorder.Body.String() != string(content) {
 		t.Fatalf("unexpected junction target content: %q", recorder.Body.String())
+	}
+}
+
+func TestAPIContractGetFileReturnsExternalJunctionLockError(t *testing.T) {
+	previousWorkspace, previousData := util.WorkspaceDir, util.DataDir
+	util.WorkspaceDir = t.TempDir()
+	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
+	t.Cleanup(func() { util.WorkspaceDir, util.DataDir = previousWorkspace, previousData })
+	external := t.TempDir()
+	target := filepath.Join(external, "locked.txt")
+	if err := os.WriteFile(target, []byte("original"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(util.WorkspaceDir, "external")
+	if output, err := exec.Command("cmd", "/d", "/c", "mklink", "/J", link, external).CombinedOutput(); err != nil {
+		t.Skipf("junction creation not supported: %s: %s", err, output)
+	}
+	p, err := windows.UTF16PtrFromString(target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	handle, err := windows.CreateFile(p, windows.GENERIC_READ, 0, nil, windows.OPEN_EXISTING, windows.FILE_ATTRIBUTE_NORMAL, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer windows.CloseHandle(handle)
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator) })
+	engine.POST("/api/file/getFile", getFile)
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/file/getFile", strings.NewReader(`{"path":"external/locked.txt"}`)))
+	requireAPIContract(t, "POST", "/api/file/getFile", recorder)
+	if recorder.Code != http.StatusAccepted || !strings.Contains(recorder.Body.String(), `"code":500`) {
+		t.Fatalf("external lock must return a file error: %d %s", recorder.Code, recorder.Body.String())
 	}
 }

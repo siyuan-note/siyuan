@@ -103,7 +103,7 @@ func exportNotebooksSYBundle(ids []string) (zipPath string) {
 		archiveName := boxPaths[box.ID] + ".sy.zip"
 		archivePath := path.Join("notebooks", archiveName)
 		stagedPath := filepath.Join(workDir, archiveName)
-		if err = filelock.Copy(innerPath, stagedPath); nil != err {
+		if err = util.CopyUserFile(innerPath, stagedPath); nil != err {
 			logging.LogErrorf("stage exported notebook archive failed: %s", err)
 			return ""
 		}
@@ -329,7 +329,7 @@ func inspectSYNotebookArchive(zipPath string) (ret *inspectedSYNotebook, err err
 	hasNotebookMetadata := filelock.IsExist(confPath)
 	if hasNotebookMetadata {
 		boxConf := conf.NewBoxConf()
-		confData, readConfErr := filelock.ReadFile(confPath)
+		confData, readConfErr := util.ReadUserFile(confPath)
 		if nil != readConfErr || gulu.JSON.UnmarshalJSON(confData, boxConf) != nil {
 			return nil, errors.New(Conf.Language(199))
 		}
@@ -341,7 +341,7 @@ func inspectSYNotebookArchive(zipPath string) (ret *inspectedSYNotebook, err err
 	if filelock.IsExist(boxDocPath) {
 		hasNotebookMetadata = true
 		meta := &boxDocMeta{}
-		metaData, readMetaErr := filelock.ReadFile(boxDocPath)
+		metaData, readMetaErr := util.ReadUserFile(boxDocPath)
 		if nil != readMetaErr || gulu.JSON.UnmarshalJSON(metaData, meta) != nil || meta.Spec != boxDocMetaSpec || !ast.IsNodeIDPattern(meta.BoxDocID) {
 			return nil, errors.New(Conf.Language(199))
 		}
@@ -359,7 +359,7 @@ func inspectSYNotebookArchive(zipPath string) (ret *inspectedSYNotebook, err err
 			return nil
 		}
 		syCount++
-		data, readTreeErr := filelock.ReadFile(currentPath)
+		data, readTreeErr := util.ReadUserFile(currentPath)
 		if nil != readTreeErr {
 			return readTreeErr
 		}

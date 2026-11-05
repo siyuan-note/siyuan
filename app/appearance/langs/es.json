@@ -1,4 +1,5 @@
 {
+	"showFloatingStatusBar": "Mostrar la barra de estado oculta al pasar el cursor",
 	"changelogUnavailable": "No se pudo cargar el registro de cambios. Consulta esta versión en GitHub o inténtalo de nuevo más tarde",
 	"templateHTTPUnsafeTarget": "El destino de la plantilla se resuelve en una dirección no pública y se ha bloqueado; puede deberse al modo Fake-IP del proxy. Excluye este dominio de Fake-IP o usa DNS con IP reales",
 	"pdfLinearizedYes": "Sí",

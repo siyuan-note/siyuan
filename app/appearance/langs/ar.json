@@ -1,4 +1,5 @@
 {
+	"showFloatingStatusBar": "إظهار شريط الحالة المخفي عند تمرير المؤشر",
 	"changelogUnavailable": "تعذر تحميل سجل التغييرات. اعرض هذا الإصدار على GitHub أو حاول مرة أخرى لاحقًا",
 	"templateHTTPUnsafeTarget": "تم حظر وجهة القالب لأنها حُلّت إلى عنوان غير عام؛ قد يكون السبب وضع Fake-IP في الوكيل. استثنِ هذا النطاق من Fake-IP أو استخدم DNS يعيد عنوان IP الحقيقي",
 	"pdfLinearizedYes": "نعم",

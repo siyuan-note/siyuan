@@ -1,5 +1,6 @@
 import {toggleMenu} from "../menus/menuToggle";
 /// #if !MOBILE
+import {syncStatusBarVisibility} from "./statusHover";
 import {getDockByType} from "./tabUtil";
 import {applyStatusBarEntryVisibility} from "../config/entryVisibility/runtime";
 import {getDockBarToggleTip, toggleDockBar} from "./dock/util";
@@ -132,9 +133,10 @@ export const initStatus = (isWindow = false) => {
             target = target.parentElement;
         }
     });
-    if (window.siyuan.config.appearance.hideStatusBar) {
-        document.getElementById("status").classList.add("fn__none");
-    }
+    syncStatusBarVisibility();
+    document.getElementById("status").addEventListener("mouseleave", () => {
+        document.getElementById("status").classList.remove("status--floating-open");
+    });
     /// #endif
 };
 

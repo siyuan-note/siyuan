@@ -17988,6 +17988,9 @@
             }
           ]
         },
+        "showFloatingStatusBar": {
+          "type": "boolean"
+        },
         "statusBar": {
           "anyOf": [
             {
@@ -18036,6 +18039,7 @@
         "outlineKeepCurrentExpand",
         "pdfTheme",
         "showFloatingDockBar",
+        "showFloatingStatusBar",
         "statusBar",
         "themeDark",
         "themeJS",
@@ -43755,6 +43759,16 @@
             }
           ]
         },
+        "showFloatingStatusBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "statusBar": {
           "anyOf": [
             {
@@ -47168,6 +47182,9 @@
             }
           ]
         },
+        "showFloatingStatusBar": {
+          "type": "boolean"
+        },
         "statusBar": {
           "anyOf": [
             {
@@ -47216,6 +47233,7 @@
         "outlineKeepCurrentExpand",
         "pdfTheme",
         "showFloatingDockBar",
+        "showFloatingStatusBar",
         "statusBar",
         "themeDark",
         "themeJS",
@@ -47540,6 +47558,16 @@
           ]
         },
         "showFloatingDockBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showFloatingStatusBar": {
           "anyOf": [
             {
               "type": "boolean"

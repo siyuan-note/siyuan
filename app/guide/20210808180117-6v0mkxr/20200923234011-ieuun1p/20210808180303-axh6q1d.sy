@@ -122,6 +122,71 @@
 					"Data": "Built-in light and dark themes support compact mode. With community themes, the effect depends on the theme's layout styles; some areas may retain their original spacing."
 				}
 			]
+		},
+		{
+			"ID": "20261105114500-55128df",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261105114500-55128df",
+				"updated": "20261105114500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Floating status bar"
+				}
+			]
+		},
+		{
+			"ID": "20261105114500-5b60db9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105114500-5b60db9",
+				"updated": "20261105114500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After hiding the bottom status bar, enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Interface"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Show hidden status bar on hover"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to show it temporarily by moving the mouse to the bottom-right corner. It stays open while the pointer is over the bar and hides when the pointer leaves. This desktop option is off by default and takes effect immediately."
+				}
+			]
 		}
 	]
 }

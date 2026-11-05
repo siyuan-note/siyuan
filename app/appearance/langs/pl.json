@@ -1,4 +1,5 @@
 {
+	"showFloatingStatusBar": "Pokazuj ukryty pasek stanu po najechaniu kursorem",
 	"changelogUnavailable": "Nie można wczytać dziennika zmian. Zobacz to wydanie na GitHubie lub spróbuj ponownie później",
 	"templateHTTPUnsafeTarget": "Cel szablonu wskazuje adres niepubliczny i został zablokowany; przyczyną może być tryb Fake-IP serwera proxy. Wyklucz tę domenę z Fake-IP lub użyj DNS zwracającego rzeczywiste adresy IP",
 	"pdfLinearizedYes": "Tak",

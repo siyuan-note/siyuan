@@ -1,4 +1,5 @@
 {
+	"showFloatingStatusBar": "Zobraziť skrytý stavový riadok pri ukázaní myšou",
 	"changelogUnavailable": "Nepodarilo sa načítať zoznam zmien. Pozrite si túto verziu na GitHube alebo to skúste znova neskôr",
 	"templateHTTPUnsafeTarget": "Cieľ šablóny sa prekladá na neverejnú adresu a bol zablokovaný; príčinou môže byť režim Fake-IP servera proxy. Vylúčte túto doménu z Fake-IP alebo použite DNS so skutočnými IP adresami",
 	"pdfLinearizedYes": "Áno",

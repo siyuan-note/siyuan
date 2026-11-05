@@ -5,6 +5,7 @@ import {getColIndex} from "../../protyle/util/table";
 import {isContainerGutterBridge} from "../../protyle/gutter/container";
 import {renderGutterOnHover} from "../../protyle/gutter/hover";
 import {setDockBarPointerOver} from "../../layout/dock/barVisibility";
+import {updateStatusBarHover} from "../../layout/statusHover";
 
 export const getTableResizeBounds = (tableElement: HTMLTableElement) => {
     const captionElement = tableElement.querySelector("caption");
@@ -57,6 +58,7 @@ const getRightBlock = (element: HTMLElement, x: number, y: number) => {
 };
 
 export const windowMouseMove = (event: MouseEvent) => {
+    updateStatusBarHover(event.clientX, event.clientY, event.buttons);
     if (document.body.classList.contains("body--blur") || document.getElementById("progress")) {
         // 非激活状态下不执行 https://ld246.com/article/1693474547631
         return;
@@ -105,7 +107,7 @@ export const windowMouseMove = (event: MouseEvent) => {
             docks.forEach(dock => dock.clearDockHoverTimeout());
         } else {
             const toolbarHeight = document.getElementById("toolbar").clientHeight;
-            const statusHeight = document.getElementById("status").clientHeight;
+            const statusHeight = window.siyuan.config.appearance.hideStatusBar ? 0 : document.getElementById("status").clientHeight;
             const inYRange = event.clientY > toolbarHeight && event.clientY < window.innerHeight - statusHeight;
             const canTrigger = !hasClosestByClassName(target, "layout--float") &&
                 !hasClosestByClassName(target, "protyle-toolbar") &&

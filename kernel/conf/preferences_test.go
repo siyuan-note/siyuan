@@ -17,7 +17,7 @@ func TestPreferenceDefaultsAndNormalization(t *testing.T) {
 			t.Fatal(err)
 		}
 		NormalizeAppearance(appearance, false)
-		if appearance.CompactMode || appearance.MenuMouseScroll || appearance.OutlineKeepCurrentExpand ||
+		if appearance.ShowFloatingStatusBar || appearance.CompactMode || appearance.MenuMouseScroll || appearance.OutlineKeepCurrentExpand ||
 			!reflect.DeepEqual(appearance.PDFTheme, NewPDFTheme()) || !reflect.DeepEqual(appearance.MobileBars, NewMobileBars()) {
 			t.Fatalf("unexpected preference defaults: %+v", appearance)
 		}
@@ -51,6 +51,9 @@ func TestPreferenceDefaultsAndNormalization(t *testing.T) {
 	// 新工作空间默认启用菜单鼠标滚动，已有工作空间缺少该字段时保持解析后的 false。
 	if !NewAppearance().MenuMouseScroll || (&Appearance{}).MenuMouseScroll {
 		t.Fatal("menu mouse scroll default changed")
+	}
+	if NewAppearance().ShowFloatingStatusBar {
+		t.Fatal("floating status bar must default to disabled")
 	}
 }
 

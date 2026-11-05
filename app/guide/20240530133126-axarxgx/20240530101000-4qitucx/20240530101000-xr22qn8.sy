@@ -121,6 +121,71 @@
 					"Data": "標準のライトテーマとダークテーマはコンパクトモードに対応しています。コミュニティテーマでの表示はテーマ独自のレイアウトによって異なり、一部の間隔が元のままになる場合があります。"
 				}
 			]
+		},
+		{
+			"ID": "20261105114500-dc5c38a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261105114500-dc5c38a",
+				"updated": "20261105114500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "フローティングステータスバー"
+				}
+			]
+		},
+		{
+			"ID": "20261105114500-fba23e8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105114500-fba23e8",
+				"updated": "20261105114500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "下部のステータスバーを非表示にした後、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "インターフェース"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "マウスを合わせると非表示のステータスバーを表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にすると、マウスをウィンドウの右下隅に移動して一時的に表示できます。ポインターがバー上にある間は表示を保ち、離れると閉じます。デスクトップ画面用の設定で、初期設定では無効です。切り替えるとすぐに反映されます。"
+				}
+			]
 		}
 	]
 }

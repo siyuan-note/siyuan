@@ -482,6 +482,7 @@ type SettingAppearance struct {
 	CloseButtonBehavior      int                       `json:"closeButtonBehavior" api:"optional,nullable"`
 	HideToolbar              bool                      `json:"hideToolbar" api:"optional,nullable"`
 	HideStatusBar            bool                      `json:"hideStatusBar" api:"optional,nullable"`
+	ShowFloatingStatusBar    bool                      `json:"showFloatingStatusBar" api:"optional,nullable"`
 	StatusBar                *SettingStatusBar         `json:"statusBar" api:"optional,nullable"`
 	Notifications            *SettingNotifications     `json:"notifications" api:"optional,nullable"`
 	EntryVisibility          *SettingEntryVisibility   `json:"entryVisibility" api:"optional,nullable"`

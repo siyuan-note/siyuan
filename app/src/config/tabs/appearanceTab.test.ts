@@ -50,6 +50,8 @@ for (const mobile of [true, false]) {
                     slots.push(args[0] as typeof slots[number]);
                 } else if (method === "switch") {
                     switches.push({id: args[0] as string, spec: args[1] as typeof switches[number]["spec"]});
+                } else if (method === "stack" && (args[0] as {key: string}).key === "statusBar") {
+                    (args[1] as (stack: unknown) => void)(group);
                 }
             },
         });
@@ -69,6 +71,7 @@ for (const mobile of [true, false]) {
         assert.equal(switches.some(item => item.id === "pageScrollButtons" || item.id === "editor.pageScrollButtons"), false);
         assert.equal(switches.some(item => item.id === "compactMode"), !mobile);
         assert.equal(switches.some(item => item.id === "appearance.showFloatingDockBar"), !mobile);
+        assert.equal(switches.some(item => item.id === "appearance.showFloatingStatusBar"), !mobile);
         if (!mobile) {
             const toolbarIndex = switches.findIndex(item => item.id === "appearance.hideToolbar");
             assert.equal(switches[toolbarIndex + 1].id, "appearance.showFloatingDockBar");

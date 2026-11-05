@@ -376,6 +376,7 @@ declare namespace Config {
          * Whether to hide status bar
          */
         hideStatusBar: boolean;
+        showFloatingStatusBar?: boolean;
         /**
          * The name of the icon currently in use
          */

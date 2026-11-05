@@ -949,6 +949,7 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.appearance16,
             window.siyuan.languages.appearance17,
             window.siyuan.languages.appearance18,
+            window.siyuan.languages.showFloatingStatusBar,
         ],
         afterMount: mountAppearanceSetStatusBar,
     }, (stack) => {
@@ -956,6 +957,11 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         stack.switch("appearance.hideStatusBar", {
             desc: window.siyuan.languages.appearance17,
         });
+        /// #if !MOBILE
+        stack.switch("appearance.showFloatingStatusBar", {
+            desc: window.siyuan.languages.showFloatingStatusBar,
+        });
+        /// #endif
         stack.desc(window.siyuan.languages.appearance18);
         stack.button({
             id: "statusBarSetting",

@@ -40,6 +40,7 @@ const browserCases = async (source: string, css: string, themes: string[], langu
                             for (const state of [undefined, false, true]) {
                                 menu.innerHTML = `<div class="b3-menu__items"><textarea data-type="${slot === "template" ? "updateTemplate" : "updateRenderTemplate"}"></textarea>${exports.templateHTTPPermissionHTML(slot)}<button class="b3-menu__item" data-next>Next</button></div>`;
                                 const textarea = menu.querySelector("textarea");
+                                textarea.value = '.action{httpGet "https://example.com"}';
                                 textarea.style.width = "100%";
                                 textarea.style.boxSizing = "border-box";
                                 const button = menu.querySelector<HTMLButtonElement>("[data-http-permission]");

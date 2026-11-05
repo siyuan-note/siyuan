@@ -1981,7 +1981,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Saved file templates whose source the kernel can verify, and database field templates, can offer “Always allow this template to access the network”. Permission is stored locally for the template source and content version in the current workspace, not limited to the current target document or unlocked notebook. It is not included in built-in export or sync. Editing, copying, or importing requires confirmation again. Referenced child template files require their own permission and do not inherit the parent's. Template management shows permission status. Use a template's more menu to revoke its permission, or the “Revoke all template network permissions” button at the top to revoke all permissions, including database permissions. Database field template settings also show the status and allow revocation."
+					"Data": "Saved file templates whose source the kernel can verify, and database field templates, can offer “Always allow this template to access the network”. Permission is stored locally for the template source and content version in the current workspace, not limited to the current target document or unlocked notebook. It is not included in built-in export or sync. Editing, copying, or importing requires confirmation again. Referenced child template files require their own permission and do not inherit the parent's. Template management shows permission status. Use a template's more menu to revoke its permission, or the “Revoke all template network permissions” button at the top to revoke all permissions, including database permissions. Database field template settings show the network permission status and revocation action when the source contains httpGet."
 				}
 			]
 		},

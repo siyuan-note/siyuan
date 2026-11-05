@@ -121,9 +121,8 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     const document = element.ownerDocument;
     const dark = options.theme === "dark";
     if (factory === createVditor) {
-        // Vditor 4.0.1 reads getItem before testing cache.enable and treats null
-        // from storage-disabled native WebViews as an available Storage object.
-        // This independent page has no browser storage; make that explicit.
+        // Vditor 在检查 cache.enable 前读取 getItem，并将禁用存储的原生 WebView 返回的 null 当作可用存储。
+        // 独立页面没有浏览器存储，需要显式标记为不可用。
         Object.defineProperty(document.defaultView, "localStorage", {value: undefined, configurable: true});
     }
     const policy = createMarkdownResourcePolicy(document, options.resolveResource, options.onResourceUnavailable, options.sessionId);
@@ -514,7 +513,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 after: () => queueMicrotask(() => {
                     try {
                         if (destroyed) return;
-                        if (instance.version !== "4.0.1") throw new Error("Unsupported Markdown editor version");
+                        if (instance.version !== "4.0.2-alpha.0") throw new Error("Unsupported Markdown editor version");
                         // 内部控件提供模式与快捷键入口，历史操作由标题行调用同一套撤销记录。
                         instance.vditor.toolbar.element.hidden = true;
                         if (popoverObserver && instance.vditor.wysiwyg.popover) {

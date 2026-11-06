@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "Kan het afbeeldingsadres niet kopiëren",
+	"copyImageURL": "Afbeeldingsadres kopiëren",
 	"markdownFolderEmpty": "Geen Markdown-bestanden om weer te geven in deze map",
 	"globalBreadcrumb": "Globaal kruimelpad",
 	"globalBreadcrumbTip": "Toon notitieboek-, document- en blokpaden in één kruimelpad",

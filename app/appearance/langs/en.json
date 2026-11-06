@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "Unable to copy the image address",
+	"copyImageURL": "Copy image URL",
 	"markdownFolderEmpty": "No Markdown files to display in this folder",
 	"globalBreadcrumb": "Global breadcrumb",
 	"globalBreadcrumbTip": "Show notebook, document, and block paths in one breadcrumb",

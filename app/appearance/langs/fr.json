@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "Impossible de copier l'adresse de l'image",
+	"copyImageURL": "Copier l'adresse de l'image",
 	"markdownFolderEmpty": "Aucun fichier Markdown à afficher dans ce dossier",
 	"globalBreadcrumb": "Fil d’Ariane global",
 	"globalBreadcrumbTip": "Afficher les chemins du carnet, des documents et des blocs dans un seul fil d’Ariane",

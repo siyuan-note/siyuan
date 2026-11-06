@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "Tidak dapat menyalin alamat gambar",
+	"copyImageURL": "Salin URL gambar",
 	"markdownFolderEmpty": "Tidak ada file Markdown yang dapat ditampilkan di folder ini",
 	"globalBreadcrumb": "Jejak navigasi global",
 	"globalBreadcrumbTip": "Tampilkan jalur buku catatan, dokumen, dan blok dalam satu jejak navigasi",

@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "無法複製圖片位址",
+	"copyImageURL": "複製圖片位址",
 	"markdownFolderEmpty": "目前資料夾沒有可顯示的 Markdown 檔案",
 	"globalBreadcrumb": "全域導覽路徑",
 	"globalBreadcrumbTip": "將筆記本、文件和區塊路徑合併顯示在同一條導覽路徑中",

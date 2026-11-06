@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "Die Bildadresse konnte nicht kopiert werden",
+	"copyImageURL": "Bildadresse kopieren",
 	"markdownFolderEmpty": "In diesem Ordner gibt es keine Markdown-Dateien zum Anzeigen",
 	"globalBreadcrumb": "Globaler Navigationspfad",
 	"globalBreadcrumbTip": "Notizbuch-, Dokument- und Blockpfade in einem gemeinsamen Navigationspfad anzeigen",

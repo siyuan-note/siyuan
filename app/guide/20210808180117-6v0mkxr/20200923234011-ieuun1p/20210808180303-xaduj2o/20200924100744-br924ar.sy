@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261105133656"
+		"updated": "20261106023628"
 	},
 	"Children": [
 		{
@@ -132,7 +132,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-v2rmiaq",
-				"updated": "20261024164212"
+				"updated": "20261106023628"
 			},
 			"Children": [
 				{
@@ -501,12 +501,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261105133656-ez7ztx2",
-				"updated": "20261105133656"
+				"updated": "20261106023628"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the image preview for a document or database, select Copy image URL in the bottom toolbar to copy the current image address. Local assets keep their assets/... path so you can search for them in documents and databases."
+					"Data": "In the image preview for a document or database, select Copy image URL in the bottom toolbar to copy the current image address. Copied appears after a successful copy. If copying fails, a clipboard error message appears instead. Local assets keep their assets/... path so you can search for them in documents and databases."
 				}
 			]
 		},

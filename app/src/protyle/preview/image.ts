@@ -5,7 +5,9 @@ import {isBrowserRenderableImagePath} from "../../util/imageURL";
 import {copyPNGByLink, writeAssetToClipboard} from "../../menus/util";
 import {isEncryptedBox} from "../../util/pathName";
 import {createLivePhotoPlayer} from "./livePhoto";
-import {writeText} from "../util/compatibility";
+import {writeClipboardData} from "../util/compatibility";
+import {showMessage} from "../../dialog/message";
+import {getZIndex} from "../../util/zIndex";
 
 const getCopyFileMenu = (src: string) => {
     try {
@@ -75,17 +77,26 @@ export const previewImages = (srcList: Array<string | {src: string, video?: stri
             navigation: true,
             transition: false,
             ready: () => {
+                window.siyuan.zIndex = Math.max(window.siyuan.zIndex + 1, getZIndex(viewer.viewer));
+                viewer.viewer.style.zIndex = window.siyuan.zIndex.toString();
                 const copyURLElement = document.createElement("li");
                 copyURLElement.className = "viewer-copy-url ariaLabel";
                 copyURLElement.tabIndex = 0;
                 copyURLElement.setAttribute("role", "button");
-                copyURLElement.setAttribute("aria-label", window.siyuan.languages.copy + " " + window.siyuan.languages.imageURL);
+                copyURLElement.setAttribute("aria-label", window.siyuan.languages.copyImageURL);
                 copyURLElement.setAttribute("data-position", "north");
                 copyURLElement.innerHTML = '<svg><use xlink:href="#iconLink"></use></svg>';
-                const copyURL = () => {
-                    if (viewer.viewed && viewer.image) {
-                        writeText(imageSources[currentIndex]);
+                const copyURL = async () => {
+                    if (!viewer.viewed || !viewer.image) {
+                        return;
                     }
+                    const result = await writeClipboardData({textPlain: imageSources[currentIndex]})
+                        .catch(() => ({status: "failed"}));
+                    if (result.status === "failed") {
+                        showMessage(window.siyuan.languages.copyImageURLFailed, 7000, "error");
+                        return;
+                    }
+                    showMessage(window.siyuan.languages.copied);
                 };
                 copyURLElement.addEventListener("click", event => {
                     event.stopPropagation();

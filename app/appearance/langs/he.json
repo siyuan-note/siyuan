@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "לא ניתן להעתיק את כתובת התמונה",
+	"copyImageURL": "העתקת כתובת התמונה",
 	"markdownFolderEmpty": "אין קובצי Markdown להצגה בתיקייה זו",
 	"globalBreadcrumb": "נתיב ניווט כללי",
 	"globalBreadcrumbTip": "הצגת נתיבי המחברת, המסמכים והבלוקים בנתיב ניווט אחד",

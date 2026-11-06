@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "ไม่สามารถคัดลอก URL ของรูปภาพได้",
+	"copyImageURL": "คัดลอก URL รูปภาพ",
 	"markdownFolderEmpty": "ไม่มีไฟล์ Markdown ที่สามารถแสดงได้ในโฟลเดอร์นี้",
 	"globalBreadcrumb": "เส้นทางนำทางส่วนกลาง",
 	"globalBreadcrumbTip": "แสดงเส้นทางสมุดบันทึก เอกสาร และบล็อกในเส้นทางนำทางเดียวกัน",

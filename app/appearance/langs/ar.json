@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "تعذر نسخ عنوان الصورة",
+	"copyImageURL": "نسخ عنوان الصورة",
 	"markdownFolderEmpty": "لا توجد ملفات Markdown قابلة للعرض في هذا المجلد",
 	"globalBreadcrumb": "مسار التنقل العام",
 	"globalBreadcrumbTip": "عرض مسارات دفتر الملاحظات والمستندات والكتل في مسار تنقل واحد",

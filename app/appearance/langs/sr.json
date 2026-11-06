@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "Није могуће копирати адресу слике",
+	"copyImageURL": "Копирај адресу слике",
 	"markdownFolderEmpty": "У овој фасцикли нема Markdown датотека за приказ",
 	"globalBreadcrumb": "Глобална путања навигације",
 	"globalBreadcrumbTip": "Прикажи путање бележнице, докумената и блокова у једној путањи навигације",

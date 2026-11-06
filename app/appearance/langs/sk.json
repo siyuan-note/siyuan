@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "Nepodarilo sa skopírovať adresu obrázka",
+	"copyImageURL": "Kopírovať adresu obrázka",
 	"markdownFolderEmpty": "V tomto priečinku nie sú žiadne súbory Markdown na zobrazenie",
 	"globalBreadcrumb": "Globálna navigačná cesta",
 	"globalBreadcrumbTip": "Zobraziť cesty zápisníka, dokumentov a blokov v jednej navigačnej ceste",

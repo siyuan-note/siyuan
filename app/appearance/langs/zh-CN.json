@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "无法复制图片地址",
+	"copyImageURL": "复制图片地址",
 	"markdownFolderEmpty": "当前文件夹没有可显示的 Markdown 文件",
 	"globalBreadcrumb": "全局面包屑",
 	"globalBreadcrumbTip": "将笔记本、文档和块路径合并显示在一条面包屑中",

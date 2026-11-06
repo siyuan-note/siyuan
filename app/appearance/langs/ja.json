@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "画像の URL をコピーできませんでした",
+	"copyImageURL": "画像の URL をコピー",
 	"markdownFolderEmpty": "このフォルダーには表示できる Markdown ファイルがありません",
 	"globalBreadcrumb": "グローバルパンくずリスト",
 	"globalBreadcrumbTip": "ノートブック、ドキュメント、ブロックの階層を一つのパンくずリストに表示",

@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "Não foi possível copiar o endereço da imagem",
+	"copyImageURL": "Copiar endereço da imagem",
 	"markdownFolderEmpty": "Não há arquivos Markdown para exibir nesta pasta",
 	"globalBreadcrumb": "Caminho de navegação global",
 	"globalBreadcrumbTip": "Mostrar os caminhos do caderno, dos documentos e dos blocos em um único caminho de navegação",

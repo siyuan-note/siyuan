@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "이미지 주소를 복사할 수 없습니다",
+	"copyImageURL": "이미지 주소 복사",
 	"markdownFolderEmpty": "이 폴더에는 표시할 Markdown 파일이 없습니다",
 	"globalBreadcrumb": "전역 탐색 경로",
 	"globalBreadcrumbTip": "노트북, 문서 및 블록 경로를 하나의 탐색 경로로 표시",

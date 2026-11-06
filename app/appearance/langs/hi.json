@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "चित्र का URL कॉपी नहीं किया जा सका",
+	"copyImageURL": "चित्र का URL कॉपी करें",
 	"markdownFolderEmpty": "इस फ़ोल्डर में दिखाने के लिए कोई Markdown फ़ाइल नहीं है",
 	"globalBreadcrumb": "वैश्विक ब्रेडक्रंब",
 	"globalBreadcrumbTip": "नोटबुक, दस्तावेज़ और ब्लॉक के पथ एक ही ब्रेडक्रंब में दिखाएँ",

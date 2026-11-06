@@ -1,4 +1,6 @@
 {
+	"copyImageURLFailed": "Görsel adresi kopyalanamadı",
+	"copyImageURL": "Görsel adresini kopyala",
 	"markdownFolderEmpty": "Bu klasörde görüntülenecek Markdown dosyası yok",
 	"globalBreadcrumb": "Genel gezinme yolu",
 	"globalBreadcrumbTip": "Not defteri, belge ve blok yollarını tek bir gezinme yolunda göster",

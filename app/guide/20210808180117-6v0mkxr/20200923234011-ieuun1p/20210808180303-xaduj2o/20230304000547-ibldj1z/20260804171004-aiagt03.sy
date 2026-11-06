@@ -938,7 +938,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to search for and select installed skills."
+					"Data": " to search for and select installed skills when the slash menu is enabled. On mobile, the slash menu is disabled by default. You can select skills from the keyboard toolbar's plus panel regardless of the slash menu setting."
 				}
 			]
 		},

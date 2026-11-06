@@ -33,7 +33,11 @@ const setup = () => {
     const frames = new Map<number, FrameRequestCallback>();
     let frameID = 0;
     const listeners = new Map<string, {callback: (event: unknown) => void, capture: boolean}>();
-    const viewport = {getBoundingClientRect: () => new Rect(150, 50, 450, 300)};
+    const viewport = {left: 150, right: 600,
+        getBoundingClientRect: () => new Rect(viewport.left, 50, viewport.right - viewport.left, 300)};
+    const body = {unfreeze: false, classList: {contains: (name: string) => name === "av__body--unfreeze" && body.unfreeze}};
+    const frozen = {active: false, left: 150, right: 330,
+        getBoundingClientRect: () => new Rect(frozen.left, 100, frozen.right - frozen.left, 40)};
     const scroll = {
         isConnected: true, scrollLeft: 200, scrollTop: 0, scrollWidth: 1400, clientWidth: 600,
         getBoundingClientRect: () => new Rect(100, 90, 600, 200),
@@ -42,14 +46,15 @@ const setup = () => {
     const header = {
         isConnected: true,
         getBoundingClientRect: () => new Rect(-100, 100, 1400, 40),
+        querySelector: (selector: string) => selector === ".av__colsticky--freeze" && frozen.active ? frozen : null,
         closest: (selector: string): unknown => selector === ".av__scroll" ? scroll :
-            selector === ".protyle-content" ? viewport : null,
+            selector === ".protyle-content" ? viewport : selector === ".av__body" ? body : null,
     };
     const source = {isConnected: true, closest: () => header};
     const target = {closest: (selector: string) => selector === ".av__row--header" ? header : null};
     const window = {innerWidth: 1000, innerHeight: 600, siyuan: {dragElement: source, dragTitle: ""},
         addEventListener: (name: string, callback: (event: unknown) => void, capture = false) => listeners.set(name, {callback, capture})};
-    const Constants = {SIYUAN_DROP_GUTTER: "gutter-", ZWSP: "|", SIZE_SCROLL_TB: 32,
+    const Constants = {SIYUAN_DROP_GUTTER: "gutter-", ZWSP: "|", SIZE_SCROLL_TB: 24,
         SIYUAN_DROP_DOCUMENT_TAB: "document-tab", SIYUAN_DROP_BLOCK: "block", SIYUAN_DROP_TAB: "tab", SIYUAN_DROP_FILE: "file"};
     const scrollAPI = {} as typeof import("./dragover");
     runInNewContext(scrollCode, {exports: scrollAPI, require: () => ({Constants}),
@@ -74,8 +79,72 @@ const setup = () => {
     });
     const drag = (x: number, y = 120, eventTarget: unknown = target, types?: string[]) =>
         listeners.get("dragover").callback(event(x, y, eventTarget, types));
-    return {scroll, header, viewport, source, target, window, frames, listeners, event, drag, tick, columnAPI, scrollAPI};
+    return {scroll, header, viewport, body, frozen, source, target, window, frames, listeners, event, drag, tick, columnAPI, scrollAPI};
 };
+
+test("database column dragging scrolls at the frozen boundary and stops inside frozen columns", () => {
+    const f = setup();
+    f.frozen.active = true;
+    f.drag(335);
+    f.tick();
+    assert.ok(f.scroll.scrollLeft < 200);
+    const afterLeft = f.scroll.scrollLeft;
+    f.tick();
+    assert.ok(f.scroll.scrollLeft < afterLeft, "a stationary pointer continues to scroll at the frozen boundary");
+    f.drag(350);
+    assert.equal(f.frames.size, 1);
+    f.drag(355);
+    assert.equal(f.frames.size, 0, "leaving the edge band stops scrolling");
+    const beforeRight = f.scroll.scrollLeft;
+    f.drag(590);
+    f.tick();
+    assert.ok(f.scroll.scrollLeft > beforeRight);
+    f.drag(320);
+    assert.equal(f.frames.size, 0, "sorting inside frozen columns does not scroll the hidden columns");
+    f.drag(155);
+    assert.equal(f.frames.size, 0);
+});
+
+test("temporarily unfrozen database columns use the full visible viewport", () => {
+    const f = setup();
+    f.frozen.active = true;
+    f.drag(335);
+    assert.equal(f.frames.size, 1);
+    f.body.unfreeze = true;
+    f.drag(335);
+    assert.equal(f.frames.size, 0);
+    f.drag(155);
+    f.tick();
+    assert.ok(f.scroll.scrollLeft < 200);
+    f.body.unfreeze = false;
+    f.drag(155);
+    assert.equal(f.frames.size, 0);
+    f.frozen.right = 390;
+    f.drag(395);
+    assert.equal(f.frames.size, 1, "the active boundary follows the current frozen width");
+});
+
+test("frozen column scrolling respects clipped viewports and the current header", () => {
+    const f = setup();
+    f.frozen.active = true;
+    f.frozen.right = 650;
+    f.drag(590);
+    assert.equal(f.frames.size, 0, "no scrolling when frozen columns cover the visible viewport");
+    f.frozen.right = 130;
+    f.drag(155);
+    f.tick();
+    assert.ok(f.scroll.scrollLeft < 200, "fully clipped frozen columns do not move the visible left edge");
+    f.frozen.right = 330;
+    f.drag(335);
+    assert.equal(f.frames.size, 1);
+    f.drag(335, 120, {closest: () => ({})});
+    assert.equal(f.frames.size, 0);
+    f.viewport.left = 400;
+    f.drag(405);
+    assert.equal(f.frames.size, 1);
+    f.drag(335);
+    assert.equal(f.frames.size, 0);
+});
 
 test("database column dragging scrolls both visible horizontal edges and stops in the center", () => {
     const f = setup();

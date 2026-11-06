@@ -302,8 +302,26 @@ const getRangeListItemElements = (editorElement: HTMLElement, range: Range) => {
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     let forwardBlockRemovalPending = false;
+    let forwardBlockRemovalComplete: Promise<boolean>;
     bindVerticalNavigationReset(editorElement);
     editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
+        if (forwardBlockRemovalPending && event.key === "Enter" && !event.isComposing) {
+            event.preventDefault();
+            event.stopPropagation();
+            // 合并完成并恢复光标后执行回车，避免分割即将被异步删除的段落。
+            try {
+                await forwardBlockRemovalComplete;
+            } catch {
+                return;
+            }
+            if (editorElement.isConnected && !protyle.disabled) {
+                editorElement.dispatchEvent(new KeyboardEvent("keydown", {
+                    key: event.key, code: event.code, keyCode: event.keyCode, bubbles: true, cancelable: true,
+                    shiftKey: event.shiftKey, ctrlKey: event.ctrlKey, altKey: event.altKey, metaKey: event.metaKey,
+                }));
+            }
+            return;
+        }
         if (event.target.localName === "protyle-html" || event.target.localName === "input") {
             event.stopPropagation();
             return;
@@ -1492,8 +1510,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     event.preventDefault();
                                     forwardBlockRemovalPending = true;
                                     try {
-                                        await removeBlock(protyle, nextBlockElement, nextRange, "Delete",
+                                        forwardBlockRemovalComplete = removeBlock(protyle, nextBlockElement, nextRange, "Delete",
                                             false, false, undoFocusContext);
+                                        await forwardBlockRemovalComplete;
                                     } finally {
                                         forwardBlockRemovalPending = false;
                                         if (caretElement.isConnected) {

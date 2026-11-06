@@ -442,6 +442,10 @@ button {
   font-family: var(--b3-font-family-code);
 }
 
+.markdown-editor .vditor-reset table code:not(.hljs):not(.highlight-chroma) {
+  white-space: pre;
+}
+
 // 先按标题字号计算实际行高，让小字号的 H1-H6 标识继承同一行高。
 .markdown-editor .vditor-ir .vditor-reset > h1,
 .markdown-editor .vditor-ir .vditor-reset > h2,

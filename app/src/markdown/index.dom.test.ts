@@ -115,13 +115,42 @@ const browserCases = async (languages: Record<string, string>) => {
         }
     };
     const themeBootstrap = bridge.bootstrap;
+    const attribution = "\n| `File` | Author | License | Source |\n| --- | --- | --- | --- |\n" +
+        "| `02-风景/Landscape-Arnisee-region-640px.jpg` | Simon Koopmann | CC BY-SA 2.5 | Commons |\n" +
+        "| `03-城市/City-of-London-skyline-from-Lond-1024px.jpg` | David Illif with image-alignment and Photoshoping by User:Co | CC BY-SA 4.0 | Commons |\n";
+    const checkTableWidths = (mode: import("./editor").MarkdownEditorMode) => {
+        const surface = document.querySelector(mode === "sv" ? ".vditor-preview .vditor-reset" : `.vditor-${mode} .vditor-reset`);
+        const table = surface.querySelectorAll<HTMLTableElement>("table")[1];
+        check.ok(table, `attribution table rendered in ${mode}`);
+        for (const code of table.querySelectorAll("code")) {
+            const style = getComputedStyle(code);
+            check.ok(code.getBoundingClientRect().height <= parseFloat(style.lineHeight) + parseFloat(style.fontSize),
+                `${mode} table columns accommodate inline code without wrapping it into a tall column`);
+        }
+        check.ok(table.getBoundingClientRect().right <= surface.getBoundingClientRect().right + 1,
+            `${mode} wide table stays within the editor`);
+        check.ok(document.documentElement.scrollWidth <= window.innerWidth,
+            `${mode} wide table does not overflow the page`);
+        table.scrollLeft = 20;
+        check.ok(table.scrollLeft > 0, `${mode} wide table content remains horizontally reachable`);
+    };
     for (const startup of [{theme: "dark", systemDark: false}, {theme: "system", systemDark: true}, {theme: "light", systemDark: true}] as const) {
         const dark = startup.theme !== "light";
         for (const mode of ["ir", "wysiwyg", "sv"] as const) {
-            bridge.bootstrap = async () => ({...await themeBootstrap(), content: original + '\nInline `code`\n\n```js\nconst answer = "readable";\n```\n',
+            bridge.bootstrap = async () => ({...await themeBootstrap(), content: original + '\nInline `code`\n\n```js\nconst answer = "readable";\n```\n' + attribution,
                 preferences: {...storedPreferences, mode, theme: startup.theme}, dark: startup.systemDark});
             const initial = await api.mountMarkdownApplication(bridge);
             await checkTheme(mode, dark);
+            checkTableWidths(mode);
+            if (startup.theme === "dark") {
+                await ipcRenderer.invoke("markdown-resize", 360, 800);
+                document.getElementById("markdownApp").style.setProperty("--markdown-font-size", "32px");
+                await tick();
+                checkTableWidths(mode);
+                document.getElementById("markdownApp").style.removeProperty("--markdown-font-size");
+                await ipcRenderer.invoke("markdown-resize", 1100, 850);
+                await tick();
+            }
             check.equal(document.querySelector(".vditor-toolbar").getBoundingClientRect().height, 0);
             check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").disabled, mode === "sv");
             check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").dataset.tooltip,

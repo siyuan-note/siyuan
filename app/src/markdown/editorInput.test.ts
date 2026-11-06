@@ -62,7 +62,7 @@ const createHarness = async (mode: MarkdownEditorMode = "wysiwyg") => {
     const pending: boolean[] = [];
     const normalize = (content: string) => content.replace(/^- {2,}/gm, "- ");
     const instance = {
-        version: "4.0.2-alpha.1",
+        version: "4.0.2-alpha.2",
         vditor: {
             ...surfaces,
             lute: {GetEmojis: () => ({})},
@@ -114,6 +114,7 @@ const createHarness = async (mode: MarkdownEditorMode = "wysiwyg") => {
     });
     const original = "-    first\n- second\n";
     const factory = (_element: HTMLElement, options: Record<string, unknown>) => {
+        assert.equal(options.undoDelay, 0, "each completed edit has its own undo boundary");
         settings = options as unknown as typeof settings;
         queueMicrotask(settings.after);
         return instance;

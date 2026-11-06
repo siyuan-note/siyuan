@@ -35,6 +35,37 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         outlineStyle.onerror = () => reject(new Error("Could not load Vditor outline test styles"));
         document.head.append(outlineStyle);
     });
+    for (const mode of ["ir", "wysiwyg", "sv"] as const) {
+        const element = document.createElement("div");
+        element.style.height = "360px";
+        document.body.append(element);
+        const editor = await api.createMarkdownEditor({element, initialValue: "start", mode, cdn, lutePath,
+            onEdit: () => {}});
+        editor.focus();
+        const surface = element.querySelector<HTMLElement>(mode === "sv" ? "textarea" : `.vditor-${mode} .vditor-reset`);
+        if (surface instanceof HTMLTextAreaElement) surface.setSelectionRange(surface.value.length, surface.value.length);
+        else {
+            const range = document.createRange();
+            range.selectNodeContents(surface.lastElementChild);
+            range.collapse(false);
+            getSelection().removeAllRanges(); getSelection().addRange(range);
+        }
+        for (const character of "abc") {
+            await require("electron").ipcRenderer.invoke("markdown-undo-input", character);
+        }
+        await tick();
+        for (const expected of ["startab", "starta", "start"]) {
+            editor.undo();
+            await tick();
+            check.equal(editor.flush().content.trimEnd(), expected, `rapid input undo in ${mode}`);
+        }
+        for (const expected of ["starta", "startab", "startabc"]) {
+            editor.redo();
+            await tick();
+            check.equal(editor.flush().content.trimEnd(), expected, `rapid input redo in ${mode}`);
+        }
+        editor.destroy(); element.remove();
+    }
     for (const mode of ["ir", "wysiwyg"] as const) {
         const wrapper = document.createElement("div");
         wrapper.style.height = "360px";
@@ -513,7 +544,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     return "Markdown editor DOM cases passed";
 };
 
-test("Vditor 4.0.2-alpha.1 adapter preserves content and isolates programmatic, input, composition and preview events", {
+test("Vditor 4.0.2-alpha.2 adapter preserves content and isolates programmatic, input, composition and preview events", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -530,7 +561,7 @@ test("Vditor 4.0.2-alpha.1 adapter preserves content and isolates programmatic, 
     const script = path.join(temporary, "run.cjs");
     const cdn = pathToFileURL(path.resolve(__dirname, "../../node_modules/vditor")).href;
     const lutePath = pathToFileURL(path.resolve(__dirname, "../../stage/protyle/js/lute/lute.min.js")).href;
-    writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+    writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
@@ -548,6 +579,7 @@ app.whenReady().then(async () => {
     await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
     const imagesOrigin = "http://127.0.0.1:"+server.address().port;
     const win = new BrowserWindow({show:false, width:1000, height:720, webPreferences:{nodeIntegration:true, contextIsolation:false, offscreen:true}});
+    ipcMain.handle("markdown-undo-input", (_event, text) => win.webContents.debugger.sendCommand("Input.insertText", {text}));
     const external = [];
     win.webContents.session.webRequest.onBeforeRequest({urls:["http://*/*","https://*/*"]}, (details, callback) => {
         if (details.resourceType !== "image") external.push(details.url);
@@ -555,6 +587,8 @@ app.whenReady().then(async () => {
     });
     try {
         await win.loadFile(${JSON.stringify(html)});
+        win.webContents.debugger.attach("1.3");
+        await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled", {enabled: true});
         await win.webContents.executeJavaScript(${JSON.stringify("globalThis.Vditor = require(" + JSON.stringify(path.resolve(__dirname, "../../node_modules/vditor")) + "); void 0;")});
         await win.webContents.executeJavaScript(${JSON.stringify(bundle + "\nvoid 0;")});
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(

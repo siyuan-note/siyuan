@@ -322,8 +322,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
             scheduled = false;
             if (expectedGeneration === generation) notify();
         };
-        // Vditor commits its undo/input snapshot after 250 ms. Reuse that text
-        // instead of serializing the whole DOM again on every keystroke.
+        // 复用 Vditor 输入回调提供的文本，避免保存通知再次序列化全文。
         notificationTimer = setTimeout(deliver, 300);
         if (!maximumNotificationTimer) maximumNotificationTimer = setTimeout(deliver, 1000);
     };
@@ -531,7 +530,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
             instance = factory(element, {
                 value: "", mode, cdn: options.cdn, _lutePath: options.lutePath,
                 lang: markdownEditorLanguage(options.lang), theme: dark ? "dark" : "classic",
-                cache: {enable: false}, undoDelay: 250, height: "100%", minHeight: 0,
+                cache: {enable: false}, undoDelay: 0, height: "100%", minHeight: 0,
                 outline: {enable: outlineEnabled, position: "left"},
                 toolbar: ["headings", "bold", "italic", "link", "list", "undo", "redo", "edit-mode"],
                 preview: {mode: recoverySourceOnly ? "editor" : "both", actions: [], delay: 150, markdown: {sanitize: true},
@@ -554,7 +553,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 after: () => queueMicrotask(() => {
                     try {
                         if (destroyed) return;
-                        if (instance.version !== "4.0.2-alpha.1") throw new Error("Unsupported Markdown editor version");
+                        if (instance.version !== "4.0.2-alpha.2") throw new Error("Unsupported Markdown editor version");
                         if (element.id) instance.vditor.outline.element.id = `${element.id}-outline`;
                         outlineAnimation = createMarkdownPanelAnimation({
                             element: instance.vditor.outline.element,

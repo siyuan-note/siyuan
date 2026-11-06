@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261105091714"
+		"updated": "20261106121753"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-3a481f4",
-				"updated": "20261105091714"
+				"updated": "20261106121753"
 			},
 			"Children": [
 				{
@@ -99,6 +99,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " (macOS)."
+				}
+			]
+		},
+		{
+			"ID": "20261106121753-bd50c0d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106121753-bd50c0d",
+				"updated": "20261106121753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Undo and Redo apply to individual completed edits. Rapidly typed characters can be undone separately, while text committed by an input method is undone as one edit."
 				}
 			]
 		},

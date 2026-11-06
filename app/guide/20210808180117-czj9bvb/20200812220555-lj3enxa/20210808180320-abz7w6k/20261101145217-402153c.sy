@@ -6,7 +6,7 @@
 		"id": "20261101145217-402153c",
 		"title": "独立 Markdown 编辑器",
 		"type": "doc",
-		"updated": "20261105091714"
+		"updated": "20261106121753"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-9478b69",
-				"updated": "20261105091714"
+				"updated": "20261106121753"
 			},
 			"Children": [
 				{
@@ -99,6 +99,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261106121753-4c0bbea",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106121753-4c0bbea",
+				"updated": "20261106121753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "撤销和重做按每次已完成的编辑操作进行。快速连续输入的字符可分别撤销，输入法一次确认的文字作为一次编辑撤销。"
 				}
 			]
 		},

@@ -404,15 +404,14 @@ const browserCases = async (languages: Record<string, string>) => {
     document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
     check.equal(document.activeElement.getAttribute("data-value"), "system");
     document.getElementById("markdownTheme").dispatchEvent(new PointerEvent("pointerleave", {pointerType: "mouse"}));
-    await new Promise(resolve => setTimeout(resolve, 260));
-    check.equal(document.getElementById("markdownTheme").getAttribute("aria-expanded"), "true", "keyboard focus keeps its submenu open after the mouse leaves");
+    check.equal(document.getElementById("markdownTheme").getAttribute("aria-expanded"), "true", "mouse leave preserves the submenu currently used by the keyboard");
     const fontItem = document.getElementById("markdownFont");
     fontItem.dispatchEvent(new PointerEvent("pointerenter", {pointerType: "mouse"}));
-    await new Promise(resolve => setTimeout(resolve, 260));
-    check.equal(fontItem.getAttribute("aria-expanded"), "true", "hover switches to a sibling despite retained keyboard focus");
+    check.equal(fontItem.getAttribute("aria-expanded"), "true", "hover immediately switches to a sibling despite retained keyboard focus");
     check.equal(document.getElementById("markdownTheme").getAttribute("aria-expanded"), "false", "the focused sibling no longer covers the hovered submenu");
+    fontItem.dispatchEvent(new PointerEvent("pointerleave", {pointerType: "mouse"}));
+    check.equal(fontItem.getAttribute("aria-expanded"), "false", "mouse leave immediately closes the hovered submenu");
     document.getElementById("markdownTheme").dispatchEvent(new PointerEvent("pointerenter", {pointerType: "mouse"}));
-    await new Promise(resolve => setTimeout(resolve, 260));
     document.getElementById("markdownTheme").focus();
     document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
     document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
@@ -472,13 +471,13 @@ const browserCases = async (languages: Record<string, string>) => {
         await ipcRenderer.invoke("markdown-pointer-move", 10, 60);
         const appearanceBounds = appearanceItem.getBoundingClientRect();
         await ipcRenderer.invoke("markdown-pointer-move", appearanceBounds.x + appearanceBounds.width / 2, appearanceBounds.y + appearanceBounds.height / 2);
-        await new Promise(resolve => setTimeout(resolve, 260));
+        check.equal(appearanceItem.getAttribute("aria-expanded"), "true", "real mouse hover immediately opens the appearance submenu");
         const item = document.getElementById(id);
         const itemBounds = item.getBoundingClientRect();
         const previousValue = item.querySelector<HTMLElement>('[aria-checked="true"]').dataset.value;
         const start = {x: itemBounds.x + itemBounds.width / 2, y: itemBounds.y + itemBounds.height / 2};
         await ipcRenderer.invoke("markdown-pointer-move", start.x, start.y);
-        await new Promise(resolve => setTimeout(resolve, 260));
+        check.equal(item.getAttribute("aria-expanded"), "true", "real mouse hover immediately opens the choice submenu");
         const submenu = item.querySelector<HTMLElement>(":scope > .markdown-choice__menu");
         const bounds = submenu.getBoundingClientRect();
         check.ok(bounds.right <= itemBounds.left + 1, "third-level menu inherits the leftward expansion direction");
@@ -490,11 +489,9 @@ const browserCases = async (languages: Record<string, string>) => {
         const selector = `#${id} [data-value="${value}"]`;
         const target = document.querySelector(selector).getBoundingClientRect();
         const end = {x: target.x + target.width / 2, y: target.y + target.height / 2};
-        for (let step = 1; step <= 8; step++) {
-            await ipcRenderer.invoke("markdown-pointer-move", start.x + (end.x - start.x) * step / 8, start.y + (end.y - start.y) * step / 8);
-        }
-        await new Promise(resolve => setTimeout(resolve, 260));
-        check.equal(item.getAttribute("aria-expanded"), "true", "diagonal pointer travel keeps the intended submenu open");
+        await ipcRenderer.invoke("markdown-pointer-move", end.x, start.y);
+        await ipcRenderer.invoke("markdown-pointer-move", end.x, end.y);
+        check.equal(item.getAttribute("aria-expanded"), "true", "moving into the submenu keeps it open");
         await ipcRenderer.invoke("markdown-pointer-click", selector);
         await tick();
         check.equal(more.open, false, "a pointer selection closes the complete menu chain");

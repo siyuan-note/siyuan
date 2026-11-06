@@ -12,8 +12,6 @@ export const createMarkdownSubmenu = (options: {
     const events = new AbortController();
     const {signal} = events;
     let disabled = false;
-    let openTimer: ReturnType<typeof setTimeout>;
-    let closeTimer: ReturnType<typeof setTimeout>;
     const children = Array.from(element.childNodes);
     element.className = "b3-menu__item markdown-choice";
     element.tabIndex = 0;
@@ -24,12 +22,7 @@ export const createMarkdownSubmenu = (options: {
     element.querySelector(".b3-menu__label").textContent = options.label;
     const menu = element.querySelector<HTMLElement>(".b3-menu__submenu");
     menu.append(...children);
-    const cancelHover = () => {
-        clearTimeout(openTimer);
-        clearTimeout(closeTimer);
-    };
     const close = () => {
-        cancelHover();
         if (element.parentElement && activeSubmenus.get(element.parentElement) === close) {
             activeSubmenus.delete(element.parentElement);
         }
@@ -38,7 +31,6 @@ export const createMarkdownSubmenu = (options: {
         options.onClose?.();
     };
     const open = () => {
-        cancelHover();
         if (disabled) return;
         if (element.parentElement) {
             const previous = activeSubmenus.get(element.parentElement);
@@ -71,16 +63,12 @@ export const createMarkdownSubmenu = (options: {
     }, {signal});
     element.addEventListener("pointerenter", event => {
         if (event.pointerType !== "mouse") return;
-        cancelHover();
-        // 穿过相邻项进入子菜单时，给鼠标留出移动时间。
-        const sibling = element.parentElement?.querySelector(":scope > .markdown-choice.b3-menu__item--show");
-        if (sibling && sibling !== element) openTimer = setTimeout(open, 220); else open();
+        open();
     }, {signal});
     element.addEventListener("pointerleave", event => {
         if (event.pointerType !== "mouse") return;
-        cancelHover();
         if (menu.contains(document.activeElement)) return;
-        closeTimer = setTimeout(close, 220);
+        close();
     }, {signal});
     element.addEventListener("keydown", event => {
         const buttons = Array.from(menu.children) as HTMLElement[];
@@ -101,7 +89,7 @@ export const createMarkdownSubmenu = (options: {
     }, {signal});
     document.addEventListener("pointerdown", event => {if (!element.contains(event.target as Node)) close();}, {signal});
     document.addEventListener("focusin", event => {
-        if (element.contains(event.target as Node)) cancelHover(); else close();
+        if (!element.contains(event.target as Node)) close();
     }, {signal});
     window.addEventListener("resize", close, {signal});
     element.closest(".markdown-menu")?.addEventListener("scroll", close, {signal});

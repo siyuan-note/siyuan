@@ -1,3 +1,5 @@
+@use "block";
+
 .av__lunar-editor {
   width: 340px;
   max-width: 100%;
@@ -654,6 +656,8 @@
     }
 
     > .block__icon {
+      @extend .block__icon--inset;
+      --b3-icon-background-inset: 4px;
       min-height: 32px;
     }
 

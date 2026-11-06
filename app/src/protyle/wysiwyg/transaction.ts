@@ -38,6 +38,7 @@ import {disabledProtyle, enableProtyle} from "../util/onGet";
 import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {avRender, refreshAV} from "../render/av/render";
+import {queueDatabaseRowRefreshForOperations} from "../render/av/databaseRowRefresh";
 import {removeFoldHeading} from "../util/heading";
 import {cancelSB, genEmptyElement, genSBElement, refreshSbResize} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
@@ -728,7 +729,9 @@ const promiseTransaction = (options: {
             items.forEach((item, index) => {
                 const result = transactions[index];
                 if (result) {
-                    item.callback(getEditorTransaction(result));
+                    const transaction = getEditorTransaction(result);
+                    item.callback(transaction);
+                    queueDatabaseRowRefreshForOperations(protyle.id, transaction.doOperations);
                 }
             });
         };

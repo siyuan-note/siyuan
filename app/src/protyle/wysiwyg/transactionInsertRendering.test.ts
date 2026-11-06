@@ -199,7 +199,7 @@ const fixture = (containerType: ContainerType = "editor") => {
         },
     };
     const api = loadModule<typeof import("./transaction")>("src/protyle/wysiwyg/transaction.ts", {
-        require: () => dependencies,
+        require: () => ({...dependencies, queueDatabaseRowRefreshForOperations() {}}),
         window: {siyuan: {config: {fileTree: {}, sync: {provider: 0}}}},
         getSelection: () => ({rangeCount: 0}),
     }, ScriptTarget.ES2021);

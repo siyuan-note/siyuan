@@ -1,5 +1,8 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {runInNewContext} from "node:vm";
+import {createSourceFile, forEachChild, isVariableDeclaration, ScriptTarget, transpileModule, type Node} from "typescript";
 import {
     queueDatabaseRowRefresh,
     queueDatabaseRowRefreshForOperations,
@@ -9,6 +12,36 @@ import {
 const waitForRefresh = () => new Promise((resolve) => setTimeout(resolve, 150));
 
 describe("database row refresh", () => {
+    it("refreshes the initiating panel after the binding transaction is acknowledged", async () => {
+        const source = createSourceFile("transaction.ts", readFileSync("src/protyle/wysiwyg/transaction.ts", "utf8"), ScriptTarget.ES2022, true);
+        let code: string;
+        const visit = (node: Node) => {
+            if (isVariableDeclaration(node) && node.name.getText(source) === "applied") {
+                code = node.initializer.getText(source);
+            }
+            forEachChild(node, visit);
+        };
+        visit(source);
+        assert.ok(code);
+        let acknowledged = 0;
+        let refreshed = 0;
+        const dispose = registerDatabaseRowRefresh("initiator", {getAVID: () => "database", refresh: () => {
+            assert.equal(acknowledged, 1);
+            refreshed++;
+        }});
+        try {
+            const applied = runInNewContext(transpileModule("(" + code + ")", {compilerOptions: {target: ScriptTarget.ES2022}}).outputText, {
+                items: [{callback: () => { acknowledged++; }}], protyle: {id: "initiator"},
+                getEditorTransaction: (value: unknown) => value, queueDatabaseRowRefreshForOperations,
+            });
+            applied({data: []});
+            await waitForRefresh();
+            assert.equal(refreshed, 0);
+            applied({data: [{doOperations: [{action: "replaceAttrViewBlock", avID: "database", previousID: "item", nextID: "document"}]}]});
+            await waitForRefresh();
+            assert.equal(refreshed, 1);
+        } finally { dispose(); }
+    });
     it("refreshes every open panel for a binding transaction and its undo", async () => {
         const counts = [0, 0, 0];
         const unregister = counts.map((_value, index) => registerDatabaseRowRefresh(`binding-${index}`, {

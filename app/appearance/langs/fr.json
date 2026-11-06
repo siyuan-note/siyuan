@@ -1,5 +1,5 @@
 {
-	"markdownFolderEmpty": "Ce dossier est vide",
+	"markdownFolderEmpty": "Aucun fichier Markdown à afficher dans ce dossier",
 	"globalBreadcrumb": "Fil d’Ariane global",
 	"globalBreadcrumbTip": "Afficher les chemins du carnet, des documents et des blocs dans un seul fil d’Ariane",
 	"windowCloseTimeout": "La fenêtre ne répond pas à la demande de fermeture. Quitter sans enregistrer les modifications en attente ? Les modifications non enregistrées peuvent être perdues",

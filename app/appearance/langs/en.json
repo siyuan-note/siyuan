@@ -1,5 +1,5 @@
 {
-	"markdownFolderEmpty": "This folder is empty",
+	"markdownFolderEmpty": "No Markdown files to display in this folder",
 	"globalBreadcrumb": "Global breadcrumb",
 	"globalBreadcrumbTip": "Show notebook, document, and block paths in one breadcrumb",
 	"windowCloseTimeout": "The window is not responding to the close request. Exit without saving pending interface edits? Unsaved edits may be lost",

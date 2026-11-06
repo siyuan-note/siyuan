@@ -1,5 +1,5 @@
 {
-	"markdownFolderEmpty": "このフォルダーは空です",
+	"markdownFolderEmpty": "このフォルダーには表示できる Markdown ファイルがありません",
 	"globalBreadcrumb": "グローバルパンくずリスト",
 	"globalBreadcrumbTip": "ノートブック、ドキュメント、ブロックの階層を一つのパンくずリストに表示",
 	"windowCloseTimeout": "ウィンドウが終了要求に応答していません。画面上の未保存の編集を破棄して終了しますか？未保存の編集は失われる可能性があります",

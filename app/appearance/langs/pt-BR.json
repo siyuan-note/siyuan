@@ -1,5 +1,5 @@
 {
-	"markdownFolderEmpty": "Esta pasta está vazia",
+	"markdownFolderEmpty": "Não há arquivos Markdown para exibir nesta pasta",
 	"globalBreadcrumb": "Caminho de navegação global",
 	"globalBreadcrumbTip": "Mostrar os caminhos do caderno, dos documentos e dos blocos em um único caminho de navegação",
 	"windowCloseTimeout": "A janela não responde à solicitação de fechamento. Sair sem salvar as edições pendentes da interface? Edições não salvas podem ser perdidas",

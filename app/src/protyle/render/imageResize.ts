@@ -12,7 +12,9 @@ export const getImageResizeWidth = (width: number, height: number, deltaX: numbe
 };
 
 export const bindImageResize = (root: HTMLElement) => {
-    const images = new Map<HTMLImageElement, {frame: HTMLElement, container: HTMLElement}>();
+    const images = new Map<HTMLImageElement, {
+        frame: HTMLElement, container: HTMLElement, captions: HTMLElement[], captionText: string[],
+    }>();
     const pending = new Set<HTMLImageElement>();
     let positionFrame = 0;
     const schedulePosition = (image: HTMLImageElement) => {
@@ -58,9 +60,20 @@ export const bindImageResize = (root: HTMLElement) => {
         if (container.parentElement?.getAttribute("data-type") !== "img") {
             return;
         }
+        const captions = Array.from(container.querySelectorAll<HTMLElement>(":scope > .protyle-action__title, :scope > .img__alt"));
+        const previous = images.get(image);
+        if (previous?.container === container && container.classList.contains("protyle-image-container") &&
+            previous.frame.parentElement === container &&
+            previous.frame.className === "protyle-action__drag protyle-image-resize" &&
+            previous.frame.contentEditable === "false" && previous.frame.childElementCount === 3 &&
+            captions.length === previous.captions.length && captions.every((caption, index) =>
+                caption === previous.captions[index] && caption.textContent === previous.captionText[index])) {
+            schedulePosition(image);
+            return;
+        }
         container.classList.add("protyle-image-container");
         let firstCaption = true;
-        container.querySelectorAll<HTMLElement>(":scope > .protyle-action__title, :scope > .img__alt").forEach(caption => {
+        captions.forEach(caption => {
             const visible = !!caption.textContent;
             caption.classList.toggle("protyle-image-caption", visible && firstCaption);
             if (visible) {
@@ -88,7 +101,6 @@ export const bindImageResize = (root: HTMLElement) => {
             handle.setAttribute("data-prevent-swipe", "true");
             frame.appendChild(handle);
         }
-        const previous = images.get(image);
         if (!previous) {
             resizeObserver.observe(image);
         }
@@ -98,7 +110,7 @@ export const bindImageResize = (root: HTMLElement) => {
             }
             resizeObserver.observe(container);
         }
-        images.set(image, {frame, container});
+        images.set(image, {frame, container, captions, captionText: captions.map(caption => caption.textContent)});
         schedulePosition(image);
     };
     const collectImages = (element: Element, collected: Set<HTMLImageElement>) => {

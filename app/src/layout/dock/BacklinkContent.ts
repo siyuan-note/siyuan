@@ -65,6 +65,7 @@ import {
     type IBacklinkReadingAnchor,
     restoreBacklinkReadingAnchor,
 } from "./backlinkReadingAnchor";
+import {BacklinkContextBatch} from "./backlinkContextBatch";
 
 interface IBacklinkItemRecord {
     revision: string,
@@ -180,6 +181,7 @@ export class BacklinkContent extends Model {
     private restoringReadingAnchors: [boolean, boolean] = [false, false];
     private readingAnchorScrollEpochs: [number, number] = [0, 0];
     private readingAnchorRenderGeneration = 0;
+    private contextBatch = new BacklinkContextBatch();
     private bottomLayoutScroll?: BottomBacklinkScroll;
     private ownerScrollListener?: () => void;
     private onlyBacklinks: boolean;
@@ -1309,41 +1311,62 @@ export class BacklinkContent extends Model {
             }
             // 收到有效内容后再保护当前视口，等待请求期间仍允许用户正常滚动。
             finishScroll = manualBottomExpand ? this.beginBottomScroll() : undefined;
-            record.contextDirty = false;
-            record.contextRevision = response.data.revision;
-            record.editor?.protyle.element.setAttribute("data-backlink-revision", response.data.revision);
+            if (!record.editor || response.data.unchanged) {
+                record.contextDirty = false;
+                record.contextRevision = response.data.revision;
+                record.editor?.protyle.element.setAttribute("data-backlink-revision", response.data.revision);
+            }
             if (!response.data.unchanged) {
                 const backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
                 if (record.editor) {
                     const editor = record.editor;
-                    const scrollAnchor = this.captureReadingAnchor(isMention);
-                    const scrollEpoch = this.getReadingAnchorScrollEpoch(isMention);
-                    const anchorQueryKey = this.renderedQueryKey;
-                    editor.protyle.options.backlinkData = backlinkData;
-                    viewPromises.push(renderBacklink(editor.protyle, backlinkData).then(() => {
-                        if (manualBottomExpand) {
-                            return;
-                        }
-                        window.requestAnimationFrame(() => {
+                    record.contextDirty = true;
+                    viewPromises.push(this.contextBatch.enqueue({
+                        key: manualBottomExpand ? 2 : this.getReadingAnchorIndex(isMention),
+                        isCurrent: () => {
                             if (this.destroyed || blockId !== this.blockId ||
                                 viewStateGeneration !== this.viewStateGeneration ||
                                 contextRequestVersion !== this.contextRequestVersions[index] ||
                                 requestGeneration !== record.requestGeneration || record.editor !== editor ||
-                                !editor.protyle.element.isConnected || editor.protyle.element.classList.contains("fn__none") ||
-                                scrollEpoch !== this.getReadingAnchorScrollEpoch(isMention) ||
-                                anchorQueryKey !== this.renderedQueryKey || anchorQueryKey !== this.listQueryKey) {
-                                return;
+                                !editor.protyle.element.isConnected || editor.protyle.element.classList.contains("fn__none")) {
+                                return false;
                             }
-                            if (scrollAnchor) {
-                                this.restoreReadingAnchor(scrollAnchor);
-                            } else {
-                                this.restorePersistedReadingAnchor(isMention, docId);
+                            if (editor.protyle.element.contains(document.activeElement) || hasAVEditorSession(editor.protyle.element)) {
+                                record.contextDirty = true;
+                                this.dirty = true;
+                                this.pendingRootIDs.add(docId);
+                                return false;
                             }
-                        });
+                            return true;
+                        },
+                        capture: () => {
+                            const scrollAnchor = manualBottomExpand ? undefined : this.captureReadingAnchor(isMention);
+                            const scrollEpoch = this.getReadingAnchorScrollEpoch(isMention);
+                            const anchorQueryKey = this.renderedQueryKey;
+                            return () => {
+                                if (manualBottomExpand || scrollEpoch !== this.getReadingAnchorScrollEpoch(isMention) ||
+                                    anchorQueryKey !== this.renderedQueryKey || anchorQueryKey !== this.listQueryKey) {
+                                    return;
+                                }
+                                if (scrollAnchor) {
+                                    this.restoreReadingAnchor(scrollAnchor);
+                                } else {
+                                    this.restorePersistedReadingAnchor(isMention);
+                                }
+                            };
+                        },
+                        render: () => {
+                            record.contextDirty = false;
+                            record.contextRevision = response.data.revision;
+                            editor.protyle.element.setAttribute("data-backlink-revision", response.data.revision);
+                            editor.protyle.options.backlinkData = backlinkData;
+                            const promise = renderBacklink(editor.protyle, backlinkData);
+                            searchMarkRender(editor.protyle, response.data.keywords, undefined, undefined, {
+                                excludeSelector: ".protyle-breadcrumb__bar[data-backlink-id]"
+                            });
+                            return promise;
+                        },
                     }));
-                    searchMarkRender(editor.protyle, response.data.keywords, undefined, undefined, {
-                        excludeSelector: ".protyle-breadcrumb__bar[data-backlink-id]"
-                    });
                 } else {
                     const editorElement = document.createElement("div");
                     editorElement.style.minHeight = "auto";
@@ -1741,6 +1764,7 @@ export class BacklinkContent extends Model {
     }
 
     private clearReadingAnchorTimers() {
+        this.contextBatch.clear();
         this.readingAnchorTimers.forEach(timer => {
             if (timer) {
                 window.clearTimeout(timer);

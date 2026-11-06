@@ -29,7 +29,7 @@ test("release changelogs always pass through a static HTML and HTTP resource pol
         "../util/hostCapabilities": {sanitizeKernelHTML: () => { throw new Error("local-kernel bypass used for online content"); }},
         "../util/fetchTimeout": {withFetchTimeout: (request: () => unknown) => request()},
         "../util/escape": {escapeHtml: (value: string) => value},
-    })[name], document: {createElement: () => ({innerHTML: "", content: {querySelectorAll: () => []}})},
+    })[name], document: {createElement: () => ({innerHTML: "", content: {querySelectorAll: (): HTMLElement[] => []}})},
     window: {siyuan: {config: {system: {kernelVersion: "3.8.10-alpha.5"}}, languages: {}},
         DOMPurify: {sanitize: (html: string, options: typeof policy) => { received = html; policy = options; return "sanitized"; }}}});
     await exports.openChangelog(true);

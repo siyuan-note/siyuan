@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -90,6 +91,37 @@ func TestResetTreeTitleAndHPath(t *testing.T) {
 					t.Fatalf("unexpected document path: %q", tree.Path)
 				}
 			})
+		}
+	}
+}
+
+func TestDuplicateRichTitleSuffixLiteralDOM(t *testing.T) {
+	for _, suffix := range []string{" (Duplicated 2026-11-06 07:30:58)", " (Conflicted 2026-11-06 07:30:58)", " (<tag> & text)"} {
+		tree := treenode.NewTree("box", "/20261004000001-doc0001.sy", "/Original", "Original")
+		paragraph := &ast.Node{Type: ast.NodeParagraph}
+		paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "em", TextMarkTextContent: "Original"})
+		if err := treenode.SetDocumentTitleParagraph(tree.Root, paragraph); err != nil {
+			t.Fatal(err)
+		}
+		if err := appendDuplicateDocumentTitle(tree.Root, suffix); err != nil {
+			t.Fatal(err)
+		}
+		paragraph, err := treenode.DocumentTitleParagraph(tree.Root)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := treenode.DocumentTitleText(paragraph); got != "Original"+suffix {
+			t.Fatalf("literal suffix changed: %q", got)
+		}
+		engine := util.NewLute()
+		fragment := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: engine.ParseOptions}}
+		fragment.Root.AppendChild(paragraph)
+		dom := engine.Tree2BlockDOM(fragment, engine.RenderOptions, engine.ParseOptions)
+		if strings.Contains(dom, `data-type="backslash"`) || strings.Contains(dom, "<tag>") {
+			t.Fatalf("suffix escaped or interpreted as HTML: %s", dom)
+		}
+		if !strings.Contains(dom, `data-type="em"`) {
+			t.Fatalf("title formatting lost: %s", dom)
 		}
 	}
 }

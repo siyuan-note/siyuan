@@ -612,6 +612,8 @@ export class Menu {
 
     private removeScrollEvent() {
         window.removeEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, false);
+        this.element.removeEventListener("touchmove", this.preventDefault, false);
+        this.getFullscreenScrim()?.removeEventListener("touchmove", this.preventDefault, false);
     }
 
     public remove(isKeyEvent = false) {
@@ -918,7 +920,11 @@ export class Menu {
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.firstElementChild.classList.remove("fn__none");
         this.element.classList.remove("fn__none");
-        window.addEventListener("touchmove", this.preventDefault, {passive: false});
+        const scrimElement = this.getFullscreenScrim();
+        // 遮罩覆盖菜单外区域，局部监听避免长文档在开关菜单时重建整页触摸区域。
+        (scrimElement ? [this.element, scrimElement] : [window]).forEach(element => {
+            element.addEventListener("touchmove", this.preventDefault, {passive: false});
+        });
         this.setSheetHeight();
         void this.element.offsetHeight;
         if (this.preserveSheetKeyboard) {

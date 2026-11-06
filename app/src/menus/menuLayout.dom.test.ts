@@ -24,7 +24,6 @@ const browserCases = async (sources: Record<string, string>, css: string,
         "protyle/util/compatibility": {getEventName: () => "click", isInMobileApp: () => mobileApp, isPhablet: () => false,
             updateHotkeyTip: (value: string) => value},
         "util/functions": {isMobile: () => mobile},
-        "util/zIndex": {isScrollAboveMenu: () => false},
         "layout/getTopBarHeight": {getTopBarHeight: () => 32},
         constants: {Constants: {TIMEOUT_DBLCLICK: 10, ATTRIBUTE_MENU_KEYMAP: "data-keymap",
             CUSTOM_SY_EMBED_BREADCRUMB_PARENT_PATH: "custom-sy-embed-breadcrumb-parent-path"}},
@@ -853,6 +852,48 @@ const browserCases = async (sources: Record<string, string>, css: string,
     check.equal(sheetResets, 1, "Closing cancels the pending layout update");
     sheet.element.remove();
 
+    const scrim = document.createElement("div");
+    scrim.id = "commonMenuScrim";
+    scrim.className = "b3-menu__scrim fn__none";
+    const background = document.createElement("div");
+    const overlay = document.createElement("div");
+    document.body.append(scrim, background, overlay);
+    const touchMove = (target: Element) => {
+        const event = new Event("touchmove", {bubbles: true, cancelable: true});
+        target.dispatchEvent(event);
+        return event.defaultPrevented;
+    };
+    const localSheet = createMenu();
+    localSheet.addItem({label: "Parent", submenu: [{label: "Child"}]});
+    localSheet.fullscreen("bottom", undefined, {preserveKeyboard: true});
+    await settle();
+    check.equal(touchMove(background), false, "Sheet scroll guards do not cover the underlying document tree");
+    check.equal(touchMove(scrim), true, "The scrim blocks background scrolling");
+    check.equal(touchMove(localSheet.element.lastElementChild), false, "Sheet items remain scrollable");
+    check.equal(touchMove(localSheet.element.querySelector(".b3-menu__submenu")), false,
+        "Nested menu items retain their scrolling");
+    overlay.style.zIndex = String(window.siyuan.zIndex + 1);
+    check.equal(touchMove(overlay), false, "Overlays above the sheet retain their scrolling");
+    localSheet.remove();
+    check.equal(touchMove(scrim), false, "Removing a sheet releases its scrim scroll guard");
+    addItems(localSheet, 2);
+    localSheet.fullscreen("bottom", () => {}, {preserveKeyboard: true});
+    localSheet.closeSheet();
+    check.equal(touchMove(scrim), false, "Keyboard restoration releases scroll guards immediately");
+    localSheet.element.remove();
+    scrim.remove();
+
+    const unmaskedSheet = createMenu();
+    unmaskedSheet.element.id = "independentSheet";
+    addItems(unmaskedSheet, 2);
+    unmaskedSheet.fullscreen("bottom", undefined, {preserveKeyboard: true});
+    check.equal(touchMove(background), true, "Sheets without a scrim still block background scrolling");
+    check.equal(touchMove(unmaskedSheet.element.lastElementChild), false);
+    dispose(unmaskedSheet);
+    check.equal(touchMove(background), false, "Unmasked sheets release the window scroll guard when removed");
+    background.remove();
+    overlay.remove();
+
     const mobileCommon = createMenu();
     const mobileCalendar = createCalendarMenu();
     await settle();
@@ -886,7 +927,7 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     timeout: 45000,
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture",
-        "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel", "protyle/render/av/renderData",
+        "util/setPosition", "util/zIndex", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel", "protyle/render/av/renderData",
         "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated", "protyle/gutter/embedBreadcrumbMenu",
         "layout/dock/agent/AgentSessionPanel", "protyle/render/listMindmap/appearance"].map(name => [name,
         transpileModule(readFileSync(path.join(__dirname, "..", name.endsWith(".js") ? name : name + ".ts"), "utf8"), {

@@ -115,6 +115,12 @@ test("lite slash menu only offers uploads when an upload implementation is avail
     assert.deepEqual(resolve(items, {lite: true, canUpload: true}), items);
 });
 
+test("document-backed lite slash menus can enable document creation without enabling other document commands", () => {
+    const items = [entry("newFileRef"), entry("newSubDocRef"), entry("template"), entry("insertImgURL")];
+    assert.deepEqual(resolve(items, {lite: true, allowCreateRef: true}), [items[0], items[3]]);
+    assert.deepEqual(resolve(items, {lite: true}), [items[3]]);
+});
+
 test("lite slash menu requires plugin opt-in even when its ID matches a built-in entry", () => {
     const hidden = {...entry("plugin:first:bold"), id: "bold"};
     const disabled = {...entry("plugin:second:bold"), id: "bold", showInLite: false};

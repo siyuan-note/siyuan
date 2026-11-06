@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261103001257"
+		"updated": "20261106130000"
 	},
 	"Children": [
 		{
@@ -5157,12 +5157,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260909090723-b3zszao",
-				"updated": "20260909090723"
+				"updated": "20261106130000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "セルは手動で変換せずに段落、見出し、リスト、引用、コード、数式を編集できます。既存の文字列に含まれる Markdown 記号はそのまま保持されます。"
+					"Data": "セルは手動で変換せずに段落、見出し、リスト、引用、コード、数式を編集できます。既存の文字列に含まれる Markdown 記号はそのまま保持されます。スラッシュメニューまたはプラスメニューから、画像の挿入、文書の新規作成と参照、インラインスタイルの設定ができます。"
 				}
 			]
 		},

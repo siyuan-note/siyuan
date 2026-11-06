@@ -14,6 +14,7 @@ import * as escape from "../../../util/escape";
 import * as image from "../../../util/image";
 import * as imageURL from "../../../util/imageURL";
 import * as host from "./host";
+import * as panelTarget from "./panelTarget";
 
 const pathNames = {} as typeof import("../../../util/pathName");
 runInNewContext(ts.transpileModule(readFileSync(path.join(__dirname, "../../../util/pathName.ts"), "utf8"), {
@@ -54,6 +55,7 @@ const createHarness = (layout = "table", assetContent = "original.png") => {
         "./viewType": viewType,
         "./selectionState": selectionState,
         "./assetUploadTarget": assetUploadTarget,
+        "./panelTarget": panelTarget,
         "../../upload/uploadResult": uploadResult,
         "../../upload/insertPosition": insertPosition,
         "./virtualScroll": {getAVData: () => data},

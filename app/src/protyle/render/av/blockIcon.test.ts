@@ -55,6 +55,7 @@ const createHarness = (layout: TAVView = "table", detached = true, icon?: string
         }},
         "../../util/hasClosest": {hasClosestByClassName: () => false},
         "./virtualScroll": {getAVData: () => data, getAVPrimaryCell: () => cell},
+        "./columnWindow": {ensureAVColumnWindow: () => {}},
         "../../../util/fetch": {fetchSyncPost: async (path: string) => ({code: 0,
             data: path.endsWith("getAttributeViewKeysByID") ? [{relation: {avID: "related"}}] : [{
                 avID: "related", blockIDs: ["related-database"],

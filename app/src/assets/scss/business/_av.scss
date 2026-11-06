@@ -991,6 +991,16 @@
     pointer-events: none;
   }
 
+  &__column-spacer {
+    align-self: stretch;
+    border: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+  }
+
   &__row {
     display: flex;
     border-bottom: 1px solid var(--b3-theme-surface-lighter);

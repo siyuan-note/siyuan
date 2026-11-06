@@ -4,7 +4,7 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
-import {clampGroupTableVirtualData} from "./groupTableVirtual";
+import {clampGroupTableVirtualData, getTableRowBudget, GROUP_TABLE_INITIAL_ROW_BUDGET} from "./groupTableVirtual";
 import {isAVCellPanelForBlock, setAVCellPanelTarget} from "./panelTarget";
 import {getAVCellSelection, refreshAVCellSelection, setAVCellSelection} from "./selectionState";
 
@@ -22,6 +22,7 @@ const setup = (avType: "table" | "list") => {
     const attributes = new Map<string, string>();
     const render = runInNewContext(compiled + "\ngetTableHTMLs;", {
         clampGroupTableVirtualData,
+        getTableRowBudget, GROUP_TABLE_INITIAL_ROW_BUDGET,
         getRowHTML: ({rowIndex}: {rowIndex: number}) => { mounted.push(rowIndex); return "<div></div>"; },
         Constants: {ATTRIBUTE_V_SCROLL: "data-v-scroll"},
         window: {siyuan: {languages: {}}},

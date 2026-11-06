@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import {test} from "node:test";
 import {compileModule, evaluateModule} from "../../../testSupport/loadModule";
 import {getAVColumnResizeWidth, updateAVTableColumnWidths} from "./columnWidth";
+import * as columnWindow from "./columnWindow";
 
 const compiled = compileModule("src/protyle/render/av/relatedViewColumnWidth.ts");
 
@@ -44,9 +45,10 @@ const fixture = () => {
     const widths: import("./relatedViewColumnWidth").TRelatedAVColumnWidths = {};
     const api = evaluateModule<typeof import("./relatedViewColumnWidth")>(compiled, {window,
         require: (id: string) => ({
+            "./columnWindow": columnWindow,
             "./columnWidth": {getAVColumnResizeWidth, updateAVTableColumnWidths},
             "./frozenColumns": {updateFrozenColumns: () => { frozen++; }},
-            "./virtualScroll": {getAVData: () => data},
+            "./virtualScroll": {getAVData: () => data, invalidateAVTableRowHeights: () => {}},
         })[id] || {},
     });
     const event = (clientX = 10, pointerId = 1, button = 0) => ({target: handle, clientX, pointerId, button,

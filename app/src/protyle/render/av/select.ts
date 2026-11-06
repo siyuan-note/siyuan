@@ -10,7 +10,7 @@ import {bindEditEvent, getColId, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
 import {isCustomAttr} from "./blockAttr";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
-import {genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements} from "./cell";
+import {genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements, type IAVCellInputElements} from "./cell";
 import dayjs from "dayjs";
 import {getFieldsByData} from "./view";
 import {getFieldIdByCellElement} from "./row";
@@ -90,6 +90,9 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     if (!target) {
         return;
     }
+    const resolveInput = (cellElements as IAVCellInputElements).resolveAVCellInput;
+    const inputTarget = resolveInput?.();
+    if (resolveInput && !inputTarget) return;
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     const colId = getColId(cellElements[0], viewType);
     const doOperations: IOperation[] = [];
@@ -98,11 +101,14 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     const avID = blockElement.getAttribute("data-av-id");
     const batchMode = getAVBatchEditMode(cellElements[0]);
     cellElements.forEach((item, elementIndex) => {
-        const rowID = getFieldIdByCellElement(item, viewType);
+        const selectedCell = inputTarget?.cells[elementIndex];
+        const rowID = selectedCell?.rowID || getFieldIdByCellElement(item, viewType);
         if (!rowID) {
             return;
         }
-        if (!blockElement.contains(item)) {
+        if (selectedCell) {
+            item = inputTarget.elements[elementIndex];
+        } else if (!blockElement.contains(item)) {
             if (isTableLikeView(viewType)) {
                 item = cellElements[elementIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
@@ -110,7 +116,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
                 item = cellElements[elementIndex] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`)) as HTMLElement;
             }
         }
-        const cellValue: IAVCellValue = batchMode === "replace" ?
+        const cellValue: IAVCellValue = selectedCell ? selectedCell.cell.value : batchMode === "replace" ?
             cellValues[elementIndex] :
             getAVBatchSourceValue(item, cellValues[elementIndex]);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
@@ -144,7 +150,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
             avID,
             data: oldValue
         });
-        if (!item.classList.contains("custom-attr__avvalue")) {
+        if (item && !item.classList.contains("custom-attr__avvalue")) {
             updateAttrViewCellAnimation(item, cellValue);
         }
         updateAttrViewCellInOtherElements(protyle, avID, rowID, colId, cellValue, item);
@@ -187,8 +193,33 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     let desc = optionElement.dataset.desc;
     let color = optionElement.dataset.color;
     const fields = getFieldsByData(data);
+    const resolveInput = (cellElements as IAVCellInputElements)?.resolveAVCellInput;
+    const isCurrentInput = () => !resolveInput || !!resolveInput();
+    const updateCells = (update: (value: IAVCellValue) => void) => {
+        const inputTarget = resolveInput?.();
+        if (resolveInput && !inputTarget) return;
+        cellElements.forEach((originalElement, index) => {
+            const selectedCell = inputTarget?.cells[index];
+            const rowID = selectedCell?.rowID || getFieldIdByCellElement(originalElement, viewType);
+            let cellElement = selectedCell ? inputTarget.elements[index] : originalElement;
+            if (!selectedCell && !blockElement.contains(cellElement)) {
+                cellElement = (isTableLikeView(viewType) || isCustomAttr ?
+                    blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${colId}"]`) ||
+                    blockElement.querySelector(`.fn__flex-1[data-col-id="${colId}"]`) :
+                    blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${colId}"]`)) as HTMLElement;
+            }
+            if (cellElement) cellElements[index] = cellElement;
+            const value = selectedCell ? selectedCell.cell.value : cellValues[index];
+            update(value);
+            cellValues[index] = value;
+            if (cellElement && !cellElement.classList.contains("custom-attr__avvalue")) {
+                updateAttrViewCellAnimation(cellElement, value);
+            }
+            updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId, value, cellElement);
+        });
+    };
     const menu = new Menu(Constants.MENU_AV_COL_OPTION, () => {
-        if ((name === inputElement.value && desc === descElement.value) || !inputElement.value) {
+        if (!isCurrentInput() || (name === inputElement.value && desc === descElement.value) || !inputElement.value) {
             return;
         }
         // cell 不判断重名 https://github.com/siyuan-note/siyuan/issues/11484
@@ -246,27 +277,13 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
             bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
         } else {
-            cellElements.forEach((cellElement: HTMLElement, index) => {
-                const rowID = getFieldIdByCellElement(cellElement, viewType);
-                if (!blockElement.contains(cellElement)) {
-                    if (isTableLikeView(viewType) || isCustomAttr) {
-                        cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                            blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
-                    } else {
-                        cellElement = cellElements[index] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
-                    }
-                }
-
-                cellValues[index].mSelect.find((item) => {
+            updateCells(value => {
+                value.mSelect.find((item) => {
                     if (item.content === name) {
                         item.content = inputElement.value;
                         return true;
                     }
                 });
-                if (!cellElement.classList.contains("custom-attr__avvalue")) {
-                    updateAttrViewCellAnimation(cellElement, cellValues[index]);
-                }
-                updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId, cellValues[index], cellElement);
             });
             menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
             bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
@@ -336,6 +353,7 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
         icon: "iconTrashcan",
         click() {
             mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
+                if (!isCurrentInput()) return;
                 let colOptions: { name: string, color: string }[] = [];
                 fields.find(column => {
                     if (column.id === colId) {
@@ -374,27 +392,13 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
                     menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
                     bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
                 } else {
-                    cellElements.forEach((cellElement: HTMLElement, index) => {
-                        const rowID = getFieldIdByCellElement(cellElement, viewType);
-                        if (!blockElement.contains(cellElement)) {
-                            if (isTableLikeView(viewType) || isCustomAttr) {
-                                cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                                    blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
-                            } else {
-                                cellElement = cellElements[index] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
-                            }
-                        }
-                        cellValues[index].mSelect.find((item, selectIndex) => {
+                    updateCells(value => {
+                        value.mSelect.find((item, selectIndex) => {
                             if (item.content === newName) {
-                                cellValues[index].mSelect.splice(selectIndex, 1);
+                                value.mSelect.splice(selectIndex, 1);
                                 return true;
                             }
                         });
-                        if (!cellElement.classList.contains("custom-attr__avvalue")) {
-                            updateAttrViewCellAnimation(cellElement, cellValues[index]);
-                        }
-                        updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId,
-                            cellValues[index], cellElement);
                     });
                     menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
                     bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
@@ -417,6 +421,7 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
         bind(element) {
             element.classList.add("b3-menu__custom", "av__option-custom");
             element.addEventListener("click", (event) => {
+                if (!isCurrentInput()) return;
                 const colorTarget = (event.target as HTMLElement).closest<HTMLElement>("button");
                 if (colorTarget?.dataset.type === AV_MANAGE_CUSTOM_COLORS_TYPE) {
                     menu.close();
@@ -480,17 +485,8 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
                         menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
                         bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
                     } else {
-                        cellElements.forEach((cellElement: HTMLElement, cellIndex) => {
-                            const rowID = getFieldIdByCellElement(cellElement, viewType);
-                            if (!blockElement.contains(cellElement)) {
-                                if (isTableLikeView(viewType) || isCustomAttr) {
-                                    cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                                        blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
-                                } else {
-                                    cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
-                                }
-                            }
-                            cellValues[cellIndex].mSelect.find((item) => {
+                        updateCells(value => {
+                            value.mSelect.find((item) => {
                                 if (item.content === name) {
                                     item.content = inputElement.value;
                                     item.color = newColor;
@@ -498,11 +494,6 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
                                     return true;
                                 }
                             });
-                            if (!cellElement.classList.contains("custom-attr__avvalue")) {
-                                updateAttrViewCellAnimation(cellElement, cellValues[cellIndex]);
-                            }
-                            updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId,
-                                cellValues[cellIndex], cellElement);
                         });
                         menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
                         bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
@@ -580,6 +571,9 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
 };
 
 export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], currentElement: HTMLElement, menuElement: HTMLElement, blockElement: Element) => {
+    const resolveInput = (cellElements as IAVCellInputElements).resolveAVCellInput;
+    const inputTarget = resolveInput?.();
+    if (resolveInput && !inputTarget) return;
     if (getAVRelationHost(blockElement) && currentElement.querySelector(".b3-menu__accelerator")) {
         showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
         return;
@@ -602,7 +596,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     }
 
     const nodeElement = hasClosestBlock(cellElements[0]);
-    if (!nodeElement) {
+    if (!nodeElement && !inputTarget?.cells.length) {
         cellElements.forEach((item, index) => {
             const rowID = getFieldIdByCellElement(item, data.viewType);
             if (isTableLikeView(data.viewType) || isCustomAttr(item)) {
@@ -633,11 +627,13 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     let mSelectValue: IAVCellSelectValue[];
     const batchMode = getAVBatchEditMode(cellElements[0]);
     cellElements.forEach((item, index) => {
-        const rowID = getFieldIdByCellElement(item, data.viewType);
+        const selectedCell = inputTarget?.cells[index];
+        const rowID = selectedCell?.rowID || getFieldIdByCellElement(item, data.viewType);
         if (!rowID) {
             return;
         }
-        const cellValue: IAVCellValue = batchMode === "replace" ?
+        if (selectedCell) item = inputTarget.elements[index];
+        const cellValue: IAVCellValue = selectedCell ? selectedCell.cell.value : batchMode === "replace" ?
             cellValues[index] :
             getAVBatchSourceValue(item, cellValues[index]);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
@@ -699,7 +695,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
             avID: data.id,
             data: oldValue
         });
-        if (!item.classList.contains("custom-attr__avvalue")) {
+        if (item && !item.classList.contains("custom-attr__avvalue")) {
             updateAttrViewCellAnimation(item, cellValue);
         }
         updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId, cellValue, item);

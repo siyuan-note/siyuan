@@ -17,7 +17,12 @@ for (const {mobile, related} of [false, true].flatMap(mobile =>
     [false, true].map(related => ({mobile, related})))) {
     const scenario = related ? "stay within the related host" : "preserve their source group";
     test(`database image preview entries ${scenario} (${mobile ? "mobile" : "desktop"})`, () => {
-        const document = new DOMFixture();
+        const document = Object.assign(new DOMFixture(), {
+            querySelector: (selector: string): null => {
+                assert.equal(selector, ".av__panel > .b3-menu");
+                return null;
+            },
+        });
         const block = document.createElement("div");
         block.innerHTML = `<span data-type="av-search"> Alpha </span>
 <div class="av__body" data-group-id="first"><div class="av__cell"><img class="av__cellassetimg" src="assets/first.png"></div></div>
@@ -64,6 +69,10 @@ for (const {mobile, related} of [false, true].flatMap(mobile =>
             getAVTemplateInteractiveElement: (): null => null,
             isOnlyMeta: () => false,
             removeCompressURL: (src: string) => src,
+            getAVBatchEditMode: () => "replace",
+            genCellValueByElement: (type: TAVCol, cell: DOMElement): IAVCellValue => ({type,
+                mAsset: [{type: "image", name: "", content: cell.querySelector("img").getAttribute("src")}],
+            }),
             isBrowserRenderableImagePath: () => true,
             openMenu: (): unknown[] => [],
             previewAttrViewImages: (...args: unknown[]) => previews.push(args),

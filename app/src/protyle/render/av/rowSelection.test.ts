@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import * as groupTableVirtual from "./groupTableVirtual";
 
 const createClassList = () => {
     const values = new Set<string>();
@@ -29,6 +30,8 @@ const createSelection = (viewType: TAVView, virtual: boolean) => {
         };
     });
     const dependencies: Record<string, unknown> = {
+        "./columnWindow": {initAVColumnWindow: () => {}},
+        "./groupTableVirtual": groupTableVirtual,
         "../../../constants": {Constants: {ATTRIBUTE_V_SCROLL: "data-v-scroll"}},
         "./viewType": {isTableLikeView: (value: string) => value === "table" || value === "list"},
         "../../util/hasClosest": {hasClosestByClassName: (element: {closest: () => unknown}) => element.closest()},

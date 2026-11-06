@@ -31,7 +31,9 @@ import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
-import {getAVData, getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll";
+import {getAVData, getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, invalidateAVTableRowHeights, setAVData} from "./virtualScroll";
+import {updateAVTableColumnPresentation, updateAVTableShowIcon} from "./columnPresentation";
+import {disposeAVColumnWindow, prepareAVColumnWindow} from "./columnWindow";
 import {
     applyAVRenderContext,
     beginAVRender,
@@ -64,6 +66,8 @@ import {renderAVRichTextElements} from "./richText";
 import {
     clampGroupTableVirtualData,
     getGroupTableRenderPlan,
+    getGroupedTableRowBudget,
+    getTableRowBudget,
     getUninitializedGroupRowCounts,
     GROUP_TABLE_ESTIMATED_ROW_HEIGHT,
     GROUP_TABLE_INITIAL_ROW_BUDGET,
@@ -214,9 +218,10 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
 const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualData,
                        reserveVirtualHeight = false) => {
     virtualData = clampGroupTableVirtualData(virtualData, data.rows.length);
-    if (data.nested) {
-        if (data.rows.length > 100) {
-            virtualData = virtualData || {renderedStart: 0, renderedEnd: 99, topSpacerHeight: 0};
+    const rowBudget = e.dataset.avType === "table" ? getTableRowBudget(data) : GROUP_TABLE_INITIAL_ROW_BUDGET;
+    if (data.nested || rowBudget < GROUP_TABLE_INITIAL_ROW_BUDGET) {
+        if (data.rows.length > rowBudget) {
+            virtualData = virtualData || {renderedStart: 0, renderedEnd: rowBudget - 1, topSpacerHeight: 0};
             reserveVirtualHeight = true;
         }
     }
@@ -353,7 +358,8 @@ const renderGroupTable = (options: ITableOptions) => {
     const isSearching = searchInputElement && document.activeElement === searchInputElement;
     const query = searchInputElement?.textContent || "";
 
-    const plan = getGroupTableRenderPlan(options.data.view.groups as IAVTable[], options.resetData.virtualData);
+    const plan = getGroupTableRenderPlan(options.data.view.groups as IAVTable[], options.resetData.virtualData,
+        options.data.viewType === "table" ? undefined : GROUP_TABLE_INITIAL_ROW_BUDGET);
     options.blockElement.toggleAttribute(Constants.ATTRIBUTE_V_SCROLL, plan.virtualized);
     let avBodyHTML = "";
     options.data.view.groups.forEach((group: IAVTable) => {
@@ -419,7 +425,9 @@ export const initUnfoldedGroupTables = (blockElement: HTMLElement, protyle: IPro
         count + bodyElement.querySelectorAll(".av__row[data-id]").length, 0);
     const groups = uninitializedBodies.map(bodyElement =>
         data.view.groups.find(group => group.id === bodyElement.dataset.groupId) as IAVTable).filter(Boolean);
-    const rowCounts = getUninitializedGroupRowCounts(groups, initializedRowCount);
+    const rowBudget = data.viewType === "table" ? getGroupedTableRowBudget(data.view.groups as IAVTable[]) :
+        GROUP_TABLE_INITIAL_ROW_BUDGET;
+    const rowCounts = getUninitializedGroupRowCounts(groups, initializedRowCount, rowBudget);
     const totalLoadedRows = bodies.reduce((count, bodyElement) => {
         const group = data.view.groups.find(item => item.id === bodyElement.dataset.groupId) as IAVTable;
         return count + (group?.rows?.length || 0);
@@ -438,7 +446,7 @@ export const initUnfoldedGroupTables = (blockElement: HTMLElement, protyle: IPro
         bodyElement.innerHTML = getTableHTMLs(group, blockElement, virtualData, true);
     });
     blockElement.toggleAttribute(Constants.ATTRIBUTE_V_SCROLL,
-        totalLoadedRows > GROUP_TABLE_INITIAL_ROW_BUDGET || bodies.some(bodyElement =>
+        totalLoadedRows > rowBudget || bodies.some(bodyElement =>
             bodyElement.querySelector(".av__spacer")));
     renderAVRichTextElements(blockElement);
     updateFrozenColumns(blockElement);
@@ -615,6 +623,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             e.classList.add("av--touch");
         }
         const renderToken = inheritedRenderToken || beginAVRender(e);
+        disposeAVColumnWindow(e);
 
         if (e.getAttribute("data-av-type") === "gallery") {
             await renderGallery({blockElement: e, protyle, cb, renderAll, data: avData, automaticRefresh, renderToken});
@@ -1018,6 +1027,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         const widths = operation.action === "setAttrViewColWidth" ?
             {[operation.id]: operation.data} : operation.data as Record<string, string>;
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
+            prepareAVColumnWindow(item);
             const data = getAVData(item);
             if (data && isTableLikeView(data.viewType)) {
                 // 折叠分组和虚拟滚动从缓存创建单元格，列宽需同步更新到全部分组。
@@ -1032,11 +1042,17 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 });
             });
             updateFrozenColumns(item);
+            invalidateAVTableRowHeights(item);
         });
         return;
     }
     if (operation.action === "setAttrViewColAlign") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
+            prepareAVColumnWindow(item);
+            const data = getAVData(item);
+            if (data && isTableLikeView(data.viewType)) {
+                updateAVTableColumnPresentation(data.view as IAVTable, {align: operation.data as TAVAlign}, operation.id);
+            }
             item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"], .av__calendar-field[data-col-id="${operation.id}"]`).forEach((cellElement: HTMLElement) => {
                 cellElement.dataset.align = operation.data;
             });
@@ -1068,9 +1084,15 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewWrapField") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
+            prepareAVColumnWindow(item);
+            const data = getAVData(item);
+            if (data && isTableLikeView(data.viewType)) {
+                updateAVTableColumnPresentation(data.view as IAVTable, {wrap: operation.data});
+            }
             item.querySelectorAll(".av__cell, .av__calendar-field").forEach(fieldItem => {
                 fieldItem.setAttribute("data-wrap", operation.data.toString());
             });
+            invalidateAVTableRowHeights(item);
         });
         return;
     }
@@ -1124,6 +1146,11 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewShowIcon") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
+            prepareAVColumnWindow(item);
+            const data = getAVData(item);
+            if (data && isTableLikeView(data.viewType)) {
+                updateAVTableShowIcon(data.view as IAVTable, operation.data);
+            }
             item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__calendar-field[data-dtype="block"] .b3-menu__avemoji').forEach(cellItem => {
                 cellItem.classList.toggle("fn__none", !operation.data);
             });
@@ -1135,9 +1162,15 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewColWrap") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
+            prepareAVColumnWindow(item);
+            const data = getAVData(item);
+            if (data && isTableLikeView(data.viewType)) {
+                updateAVTableColumnPresentation(data.view as IAVTable, {wrap: operation.data}, operation.id);
+            }
             item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"],.av__calendar-field[data-field-id="${operation.id}"]`).forEach(cellItem => {
                 cellItem.setAttribute("data-wrap", operation.data.toString());
             });
+            invalidateAVTableRowHeights(item);
         });
         return;
     }

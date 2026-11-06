@@ -1,4 +1,7 @@
 import {MobileDialog} from "../../../dialog/mobileDialog";
+import {prepareAVColumnWindow} from "./columnWindow";
+import {insertAVTableColumn} from "./columnPresentation";
+import {getTablePinIndex} from "./groupTableVirtual";
 import {bindTemplateHTTPPermission, templateHTTPPermissionHTML} from "../../../template/httpPermission";
 import {hasAVCapability, isAVReadonlyType, isAVSelectType, isAVTimestampType} from "./capabilities";
 import {isTableLikeView} from "./viewType";
@@ -795,6 +798,16 @@ export const addAttrViewColAnimation = (options: {
     const colData = options.data ? getFieldsByData(options.data).find(item => item.id === options.id) : undefined;
     const dateFormat = options.dateFormat ?? colData?.dateFormat ?? getDefaultDateFormat(options.type);
     const insertTableColumn = (blockElement: Element) => {
+        prepareAVColumnWindow(blockElement as HTMLElement);
+        const data = getAVData(blockElement as HTMLElement);
+        if (data && isTableLikeView(data.viewType)) {
+            const column = {...colData, id: options.id, name: options.name, type: options.type,
+                icon: options.icon || "", dateFormat, width: "200px", wrap: false, hidden: false, pin: false} as IAVColumn;
+            insertAVTableColumn(data.view as IAVTable, column, options.previousID, rowID => ({
+                id: "", color: "", bgColor: "", valueType: options.type,
+                value: createEmptyAVValue(options.id, options.type, rowID),
+            }));
+        }
         blockElement.querySelectorAll(".av__row").forEach((item) => {
             let previousElement;
             if (options.previousID) {
@@ -820,7 +833,16 @@ export const addAttrViewColAnimation = (options: {
 data-wrap="false" data-dtype="${escapeAttr(options.type)}" data-date-format="${escapeAttr(dateFormat)}" data-align="" style="width: 200px">${renderCell(value,
                     parseInt(item.getAttribute("data-index")) || 0)}</div>`;
             }
-            previousElement.insertAdjacentHTML("afterend", html);
+            const sticky = previousElement.parentElement;
+            if (sticky.classList.contains("av__colsticky") && sticky.lastElementChild === previousElement) {
+                sticky.insertAdjacentHTML("afterend", html);
+            } else {
+                previousElement.insertAdjacentHTML("afterend", html);
+            }
+            if (data && item.classList.contains("av__row--header")) {
+                const icons = item.querySelector<HTMLElement>(":scope > .block__icons");
+                if (icons) icons.dataset.pinindex = getTablePinIndex(data.view as IAVTable).toString();
+            }
         });
     };
     if (options.blockElement.classList.contains("av")) {

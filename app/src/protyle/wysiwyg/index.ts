@@ -221,12 +221,14 @@ import {shouldRunAVKeyupFallback} from "../render/av/verticalNavigation";
 import {applyAVDragSelection, clearAVDragSelection, isAVDragSelectSupported} from "../render/av/dragSelect";
 import {
     selectAVCellRange,
+    selectAVDragFillRange,
     selectAVItemRange,
     setAVCellAnchor,
     setAVDragItemAnchor,
     setAVItemAnchor,
 } from "../render/av/rangeSelect";
 import {getAVColumnResizeWidth} from "../render/av/columnWidth";
+import {prepareAVColumnWindow} from "../render/av/columnWindow";
 import {
     clampBlockDragSelectY,
     getBlockDragSelectBlock,
@@ -1318,6 +1320,9 @@ export class WYSIWYG {
             const customElement = hasClosestByClassName(target, "protyle-custom");
             // 富文本预览以 b3-typography 作为渲染边界，先回到单元格再查找数据库块。
             let nodeElement = hasClosestBlock(avCellElement || target) as HTMLElement;
+            if (nodeElement?.classList.contains("av")) {
+                prepareAVColumnWindow(nodeElement);
+            }
             let clickedTableNode = !customElement && nodeElement && nodeElement.dataset.type === "NodeTable" ?
                 nodeElement : undefined;
             if (!nodeElement && !customElement) {
@@ -1872,6 +1877,8 @@ export class WYSIWYG {
                 let lastOriginCellElement: HTMLElement;
                 const originCellIds: string[] = [];
                 const stableOriginCells = getAVSelectedCells(nodeElement);
+                const dragFillViewID = nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
+                const dragFillAVID = nodeElement.dataset.avId;
                 if (stableOriginCells.length > 0) {
                     stableOriginCells.forEach(item => {
                         if (!originData[item.rowID]) {
@@ -1895,8 +1902,9 @@ export class WYSIWYG {
                         }
                     });
                 }
-                const dragFillCellIndex = getPositionByCellElement(lastOriginCellElement);
-                const firstCellIndex = getPositionByCellElement(bodyElement.querySelector(".av__cell--active"));
+                const dragFillCellIndex = stableOriginCells.length === 0 ? getPositionByCellElement(lastOriginCellElement) : undefined;
+                const firstCellIndex = stableOriginCells.length === 0 ?
+                    getPositionByCellElement(bodyElement.querySelector(".av__cell--active")) : undefined;
                 let moveAVCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
@@ -1906,6 +1914,11 @@ export class WYSIWYG {
                     }
                     moveAVCellElement = tempCellElement;
                     if (moveAVCellElement && moveAVCellElement.dataset.id) {
+                        if (stableOriginCells.length > 0) {
+                            lastCellElement = selectAVDragFillRange(nodeElement, stableOriginCells, moveAVCellElement) ?
+                                moveAVCellElement : undefined;
+                            return;
+                        }
                         const newIndex = getPositionByCellElement(moveAVCellElement);
                         bodyElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                             if (!originCellIds.includes(item.dataset.id)) {
@@ -1938,8 +1951,10 @@ export class WYSIWYG {
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
-                    if (lastCellElement) {
-                        selectAVCellRange(nodeElement, lastCellElement);
+                    if (lastCellElement && nodeElement.isConnected && nodeElement.dataset.avId === dragFillAVID &&
+                        nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) === dragFillViewID &&
+                        (stableOriginCells.length > 0 ? selectAVDragFillRange(nodeElement, stableOriginCells, lastCellElement) :
+                            selectAVCellRange(nodeElement, lastCellElement))) {
                         dragFillCellsValue(protyle, nodeElement, originData, originCellIds, lastOriginCellElement);
                         addDragFill(lastCellElement);
                     }

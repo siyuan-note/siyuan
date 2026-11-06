@@ -24,6 +24,7 @@ import {setSelectMenuPosition} from "./selectPosition";
 import {getAVHostIdentity, getAVRelationHost} from "./host";
 import {showMessage} from "../../../dialog/message";
 import {isAVRenderData} from "./renderData";
+import {captureAVCellInput, type IAVCellInputElements} from "./cell";
 
 export const openMenuPanel = (options: IOpenAVPanelOptions) => {
     const relationHost = getAVRelationHost(options.blockElement);
@@ -45,6 +46,10 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
         options.destroyCallback?.();
         return;
     }
+    if (options.cellElements?.length && ["select", "date", "asset", "relation"].includes(options.type)) {
+        captureAVCellInput(options.protyle, options.blockElement as HTMLElement, options.cellElements);
+    }
+    const resolveInput = (options.cellElements as IAVCellInputElements)?.resolveAVCellInput;
     let anchorRect = options.anchorRect;
     const getAnchorRect = () => {
         const rect = options.anchorElement?.getBoundingClientRect();
@@ -73,7 +78,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
     let relationDataRetryCount = 0;
     // 接收视图数据并构建面板 DOM、绑定事件。fetch 回调与 options.data 复用两条路径都走这里
     const renderData = async (responseData: IAV) => {
-        if (!isCurrentRelationHost()) return;
+        if (!isCurrentRelationHost() || resolveInput && !resolveInput()) return;
         const response = {data: responseData} as IWebSocketData;
         avPanelElement = document.querySelector(".av__panel");
         if (avPanelElement) {
@@ -157,7 +162,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         if (options.cellElements?.length) {
-            setAVCellPanelTarget(avPanelElement, options.blockElement);
+            setAVCellPanelTarget(avPanelElement, options.blockElement, options.cellElements);
         }
         applyAVColorPalette(avPanelElement as HTMLElement, getAVCustomColors());
         let closeCB: () => void;

@@ -6,14 +6,20 @@ const os = require("node:os");
 const browserCases = sources => {
     const check = require("node:assert/strict");
     const frames = [];
+    const flushFrames = () => {
+        let count = 0;
+        while (frames.length && count++ < 100) frames.shift()();
+        check.equal(frames.length, 0, "viewport filling converges without another user scroll");
+    };
     const Constants = {ATTRIBUTE_V_SCROLL: "data-v-scroll"};
     window.siyuan = {languages: {}};
-    const getRowHTML = ({row, rowIndex}) => `<div class="av__row" data-id="${row.id}" data-index="${rowIndex}"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div><div class="av__cell">${row.id}</div></div>`;
+    const getRowHTML = ({row, rowIndex, data}) => `<div class="av__row" data-id="${row.id}" data-index="${rowIndex}"${row.height ? ` style="height:${row.height}px;line-height:${row.height > 30 ? 23 : 19}px"` : ""}><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>${(data.columns.length ? data.columns : [{id: "title"}]).map(column => `<div class="av__cell" data-col-id="${column.id}" style="width:${column.width || "200px"}">${row.id}</div>`).join("")}</div>`;
     const dependencies = {
         "../../../constants": {Constants},
         "./row": {getRowHTML},
         "./richText": {renderAVRichTextElements() {}},
         "./backlinkScroll": {getBacklinkScrollElement: () => null},
+        "./columnWindow": {initAVColumnWindow() {}, updateAVColumnWindow() {}},
     };
     const load = name => {
         if (!dependencies[name]) {
@@ -26,12 +32,20 @@ const browserCases = sources => {
         return dependencies[name];
     };
     const virtual = load("./virtualScroll");
-    const renderTable = new Function("clampGroupTableVirtualData", "getRowHTML", "Constants", sources.render +
-        "\nreturn getTableHTMLs;")(load("./groupTableVirtual").clampGroupTableVirtualData, getRowHTML, Constants);
+    const renderDependencies = {
+        ...load("./groupTableVirtual"), getRowHTML, Constants,
+        escapeAttr: value => String(value || ""), escapeHtml: value => String(value || ""),
+        getColIconByType: () => "iconText", getCalcValue: () => "",
+    };
+    const renderTable = new Function(...Object.keys(renderDependencies), sources.render +
+        "\nreturn getTableHTMLs;")(...Object.values(renderDependencies));
     const getPageSize = new Function(sources.paging + "\nreturn getPageSize;")();
     const style = document.createElement("style");
     style.textContent = `html,body {margin:0} .viewport {height:300px;overflow:auto;overflow-anchor:none}
-        .av__row, .av__row--util {height:30px} .av__row {display:flex} svg {width:10px;height:10px} .fn__none {display:none}`;
+        .av__row, .av__row--util, .av__row--footer {height:30px} .av__row, .av__row--footer {display:flex}
+        .av__row {box-sizing:border-box;border-bottom:1px solid black;line-height:19px}
+        .av__cell {box-sizing:border-box;padding:5px 0} .av__cell, .av__calc {flex-shrink:0}
+        svg {width:10px;height:10px} .fn__none {display:none}`;
     document.head.append(style);
     for (const avType of ["table", "list"]) {
         for (const pageSize of [50, 100]) {
@@ -56,11 +70,11 @@ const browserCases = sources => {
                 oldBody.replaceWith(body);
                 check.ok(body.querySelectorAll(".av__row[data-id]").length <= 100);
                 virtual.initVirtualScroll({protyle, blockElement: block, data: {viewType: avType, view}, selectedItemPoints});
-                while (frames.length) frames.shift()();
+                flushFrames();
             };
-            const avClick = new Function("getAVTemplateInteractiveElement", "isOnlyMeta", "hasClosestBlock",
+            const avClick = new Function("prepareAVColumnWindow", "getAVTemplateInteractiveElement", "isOnlyMeta", "hasClosestBlock",
                 "hasClosestByClassName", "avRender", "isMobile", "isCardCoverPositioning", sources.action + "\nreturn avClick;")(
-                () => null, () => false, element => element.closest(".av"),
+                () => {}, () => null, () => false, element => element.closest(".av"),
                 (element, name) => element.closest("." + name), render, () => false, () => false);
             let clickError;
             block.addEventListener("click", event => {
@@ -111,12 +125,99 @@ const browserCases = sources => {
             check.deepEqual(virtual.getAVSelectedItemPoints(block), []);
         }
     }
+    for (const [rowCount, columnCount, tall] of [[60, 35, ""], [100, 22, ""], [60, 35, "first"],
+        [60, 35, "later"], [60, 35, "initial"]]) {
+        document.body.innerHTML = "<div class=\"viewport\"><div class=\"av\" data-av-type=\"table\"><div class=\"av__scroll\"><div class=\"av__body\" data-group-id=\"\"></div></div></div></div>";
+        const contentElement = document.querySelector(".viewport");
+        const block = document.querySelector(".av");
+        const body = block.querySelector(".av__body");
+        const view = {
+            columns: Array.from({length: columnCount}, (_, index) => ({id: `col-${index}`, width: "200px"})),
+            rows: Array.from({length: rowCount}, (_, index) => ({id: `wide-${index}`,
+                height: tall ? (tall === "first" && index === 0 || tall === "later" && index === 49 ||
+                    tall === "initial" && index < 25) ? 580 : 34 : 30})),
+            rowCount, pageSize: 100,
+        };
+        body.innerHTML = renderTable(view, block);
+        check.equal(block.getAttribute(Constants.ATTRIBUTE_V_SCROLL), "true");
+        check.equal(body.querySelectorAll(".av__row[data-id]").length, Math.floor(900 / columnCount));
+        virtual.initVirtualScroll({protyle: {contentElement}, blockElement: block, data: {viewType: "table", view}});
+        flushFrames();
+        let height = contentElement.scrollHeight;
+        check.ok(height >= rowCount * 30, "bottom spacers preserve access to every loaded row");
+        if (tall === "first") {
+            check.ok(height < 3000, "a tall first row must not inflate every unseen row");
+            contentElement.scrollTop = 150;
+            virtual.trimAVRowsSync(block, contentElement.getBoundingClientRect());
+            check.ok(body.querySelector('[data-id="wide-0"]'), "an intersecting tall row stays mounted");
+        }
+        for (const top of [height, 0, height / 2, height, 0]) {
+            contentElement.scrollTop = top;
+            virtual.trimAVRowsSync(block, contentElement.getBoundingClientRect());
+            flushFrames();
+            if (tall !== "later") {
+                check.ok(Math.abs(contentElement.scrollHeight - height) < 1, "measured scroll range stays stable");
+            }
+            height = contentElement.scrollHeight;
+            const rect = contentElement.getBoundingClientRect();
+            const mounted = [...body.querySelectorAll(".av__row[data-id]")];
+            check.ok(mounted.some(row => row.getBoundingClientRect().bottom > rect.top &&
+                row.getBoundingClientRect().top < rect.bottom), "jumping through spacers mounts visible rows");
+            check.ok(mounted.length <= Math.floor(900 / columnCount), "the window stays within the initial cell budget");
+        }
+        check.ok(body.querySelector('[data-id="wide-0"]'));
+        contentElement.scrollTop = height;
+        virtual.trimAVRowsSync(block, contentElement.getBoundingClientRect());
+        flushFrames();
+        check.ok(body.querySelector(`[data-id="wide-${rowCount - 1}"]`));
+        check.equal(view.rows.length, rowCount);
+        check.equal(body.querySelectorAll(".av__cell--header").length, columnCount);
+        if (rowCount === 100) {
+            // 恢复窗口首行落在视口内时没有滚动方向，续帧仍须向上补齐并停止。
+            body.innerHTML = renderTable(view, block,
+                {renderedStart: 50, renderedEnd: 58, topSpacerHeight: 1500}, true);
+            contentElement.scrollTop = 1430;
+            virtual.initVirtualScroll({protyle: {contentElement}, blockElement: block,
+                data: {viewType: "table", view}});
+            flushFrames();
+            const viewport = contentElement.getBoundingClientRect();
+            const first = body.querySelector(".av__row[data-id]");
+            check.ok(Number(first.dataset.index) < 50, "stationary frames prepend missing rows");
+            check.ok(first.getBoundingClientRect().top <= viewport.top, "the upper viewport gap is filled");
+            check.equal(frames.length, 0, "stationary gap filling terminates");
+        }
+    }
+    {
+        document.body.innerHTML = '<div class="viewport"><div class="av" data-av-type="table"><div class="av__scroll"></div></div></div>';
+        const contentElement = document.querySelector(".viewport");
+        const block = document.querySelector(".av");
+        const columns = Array.from({length: 35}, (_, index) => ({id: `col-${index}`, width: "200px"}));
+        const groups = ["first", "second"].map(id => ({id, groupHidden: 0, columns,
+            rows: Array.from({length: 30}, (_, index) => ({id: `${id}-${index}`,
+                height: id === "second" && index === 0 ? 580 : 34})), rowCount: 30, pageSize: 100}));
+        const plan = load("./groupTableVirtual").getGroupTableRenderPlan(groups);
+        check.deepEqual(plan.renderedRowCounts, {first: 24, second: 1});
+        block.querySelector(".av__scroll").innerHTML = groups.map(group =>
+            `<div class="av__body" data-group-id="${group.id}">${renderTable(group, block, plan.virtualData[group.id], true)}</div>`).join("");
+        virtual.initVirtualScroll({protyle: {contentElement}, blockElement: block,
+            data: {viewType: "table", view: {columns, rows: [], groups}}});
+        flushFrames();
+        const second = block.querySelector('[data-group-id="second"]');
+        check.ok(parseFloat(second.querySelector(".av__spacer--bottom").style.height) < 1100,
+            "one tall sample must not inflate the remaining group");
+        const height = contentElement.scrollHeight;
+        contentElement.scrollTop = height;
+        virtual.trimAVRowsSync(block, contentElement.getBoundingClientRect());
+        flushFrames();
+        check.ok(second.querySelector('[data-id="second-29"]'));
+        check.ok(Math.abs(contentElement.scrollHeight - height) < 1);
+    }
     return "Database table virtual scrolling passed";
 };
 
 const runElectron = async () => {
     const {app, BrowserWindow} = require("electron");
-    app.setPath("userData", process.argv[2]);
+    app.setPath("userData", process.argv.at(-1));
     app.commandLine.appendSwitch("disable-gpu");
     await app.whenReady();
     const ts = require("typescript");
@@ -130,7 +231,7 @@ const runElectron = async () => {
             compilerOptions: {target: ts.ScriptTarget.ES2022},
         }).outputText;
     };
-    const sources = Object.fromEntries(["virtualScroll", "selectionState", "groupTableVirtual", "viewType",
+    const sources = Object.fromEntries(["virtualScroll", "selectionState", "groupTableVirtual", "tableRowHeights", "viewType",
         "capabilities", "capabilities.generated"].map(name => ["./" + name,
         ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"), {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},

@@ -1,4 +1,5 @@
 import {isTableLikeView} from "./viewType";
+import {prepareAVColumnWindow} from "./columnWindow";
 import {Constants} from "../../../constants";
 import {applyPublishAVFolds, getPublishAVView, setPublishAVView} from "./publishState";
 import {applyReadonlyAVFolds} from "./readonlyState";
@@ -385,6 +386,7 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         return;
     }
     const groupQuery = data.target.groupID ? `.av__body[data-group-id="${data.target.groupID}"]` : ".av__body";
+    prepareAVColumnWindow(blockElement);
     const bodyElement = blockElement.querySelector(groupQuery) as HTMLElement;
     if (bodyElement?.classList.contains("fn__none")) {
         bodyElement.classList.remove("fn__none");
@@ -459,11 +461,17 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         }
     }
     if (isTableLikeView(data.viewType) && request.keyID) {
-        const scroller = blockElement.querySelector<HTMLElement>(".av__scroll");
+        const scroller = targetElement.closest<HTMLElement>(".av__scroll") ||
+            blockElement.querySelector<HTMLElement>(".av__scroll");
         const rect = scroller?.getBoundingClientRect();
         const targetRect = targetElement.getBoundingClientRect();
-        if (scroller && (targetRect.left < rect.left || targetRect.right > rect.right)) {
-            scroller.scrollLeft += targetRect.left - rect.left;
+        const row = targetElement.closest<HTMLElement>(".av__row");
+        const sticky = row?.querySelector<HTMLElement>(".av__colsticky");
+        const frozen = sticky && !row.parentElement.classList.contains("av__body--unfreeze");
+        const left = frozen ? sticky.getBoundingClientRect().right : rect?.left;
+        if (scroller && !(frozen && sticky.contains(targetElement)) &&
+            (targetRect.left < left || targetRect.right > rect.right)) {
+            scroller.scrollLeft += targetRect.left - left;
         }
     }
     if (request.highlight) {

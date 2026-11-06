@@ -297,6 +297,7 @@ const openInput = (positionByMenu = false) => {
         getAVHostIdentity, getAVRelationHost,
         exports, isTableLikeView: () => true, hasClosestBlock: () => block, hasClosestByClassName: (): null => null,
         getComputedStyle: () => ({}), getStoredCellValueByElement: (): undefined => undefined,
+        createCellInputTarget: () => () => ({cells: [] as import("./selectionState").IAVSelectedCell[]}),
         escapeAttr: (value: string) => value,
         AV_CELL_EDITOR_CLOSE_EVENT: "close", callMobileAppShowKeyboard: () => {},
         window: {siyuan: {menus: {menu: {remove: () => {}}}, zIndex: 0}},

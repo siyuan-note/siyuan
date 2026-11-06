@@ -8,7 +8,7 @@ import {fetchWithDocumentSelection} from "../../../util/documentSelectionRequest
 import type {AVRelationItemPreview, AVRelationItemCellInput} from "../../../types/api";
 import {escapeAttr, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
-import {genCellValueByElement, getCellValueText, renderCell, updateCellsValue} from "./cell";
+import {genCellValueByElement, getCellValueText, renderCell, updateCellsValue, type IAVCellInputElements} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
@@ -542,12 +542,14 @@ const genRelationLoaderHTML = (loading: boolean, visible = loading) => {
 
 const getRelationCellScope = (protyle: IProtyle, nodeElement: HTMLElement, cellElements: HTMLElement[]) => {
     const host = getAVRelationHost(nodeElement);
-    if (!host && !nodeElement.dataset.avHost) return {context: undefined, isCurrent: () => true};
+    const resolveInput = (cellElements as IAVCellInputElements).resolveAVCellInput;
+    const isCurrentInput = () => !resolveInput || !!resolveInput();
+    if (!host && !nodeElement.dataset.avHost) return {context: undefined, isCurrent: isCurrentInput};
     const sourceItemIDs = [...new Set(cellElements.map(cell =>
         getFieldIdByCellElement(cell, nodeElement.getAttribute("data-av-type") as TAVView)))];
     return {
         context: host ? {relationContext: {...host.relationContext}, sourceItemIDs} : undefined,
-        isCurrent: () => !!host && !!sourceItemIDs.length && sourceItemIDs.every(Boolean) &&
+        isCurrent: () => isCurrentInput() && !!host && !!sourceItemIDs.length && sourceItemIDs.every(Boolean) &&
             getAVRelationHost(nodeElement) === host && canEditAVHost(nodeElement, protyle),
     };
 };
@@ -1094,7 +1096,7 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
     // 移动端菜单顶部会插入抓手标题，关联面板根节点按类名定位
     const relationElement = menuElement.querySelector(".av__relation") as HTMLElement;
 
-    if (!nodeElement.contains(cellElements[0])) {
+    if (!(cellElements as IAVCellInputElements).resolveAVCellInput && !nodeElement.contains(cellElements[0])) {
         const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
         const rowID = getFieldIdByCellElement(cellElements[0], viewType);
         if (isTableLikeView(viewType)) {

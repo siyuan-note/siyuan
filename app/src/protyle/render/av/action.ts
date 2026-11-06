@@ -1,4 +1,6 @@
 import {isTableLikeView} from "./viewType";
+import {prepareAVColumnWindow} from "./columnWindow";
+import {removeAVTableColumn} from "./columnPresentation";
 import {navigateSubItems} from "./subItemsNavigation";
 import {locateRequests} from "./locateState";
 import {clearSubItemsViewportAnchor} from "./subItemsState";
@@ -28,6 +30,7 @@ import {addCol, getColIconByType, getColNameByType, showColMenu} from "./col";
 import {deleteRow, duplicateRows, insertRows, selectRow, setPageSize, updateHeader} from "./row";
 import {
     getAVPrimaryCell,
+    getAVData,
     getAVSelectedItemIDs,
     getAVSelectedItemInfos,
     getAVSelectedItemPoints,
@@ -406,6 +409,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (!blockElement) {
         return false;
     }
+    prepareAVColumnWindow(blockElement);
     if (hasClosestByClassName(event.target, "av__title")) {
         clearSelect(["av"], blockElement);
     }
@@ -922,6 +926,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
     if (!blockElement) {
         return false;
     }
+    prepareAVColumnWindow(blockElement);
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
     const editable = canUpdateDatabaseRow(protyle);
     if (rowElement && isTableLikeView(avType)) {
@@ -1604,7 +1609,29 @@ export const updateAttrViewColAnimation = (protyle: IProtyle, avID: string, colI
 
 export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {
     const avID = blockElement.getAttribute("data-av-id");
+    const prepare = (block: HTMLElement) => {
+        prepareAVColumnWindow(block);
+        block.querySelectorAll<HTMLElement>(`.av__row--header .av__cell[data-col-id="${id}"]`).forEach(headerCell => {
+            if (!headerCell.parentElement.classList.contains("av__colsticky--freeze")) return;
+            const icons = headerCell.closest(".av__row--header").querySelector<HTMLElement>(".block__icons");
+            if (headerCell.dataset.freeze === "true") {
+                headerCell.closest(".av__body").querySelectorAll(".av__colsticky--freeze").forEach(sticky => {
+                    sticky.after(...Array.from(sticky.children).filter(child =>
+                        child.classList.contains("av__cell") || child.classList.contains("av__calc")));
+                    sticky.classList.remove("av__colsticky--freeze");
+                });
+                if (icons) icons.dataset.pinindex = "-1";
+            } else if (icons) {
+                icons.dataset.pinindex = (parseInt(icons.dataset.pinindex) - 1).toString();
+            }
+        });
+        const data = getAVData(block);
+        if (data && isTableLikeView(data.viewType)) {
+            removeAVTableColumn(data.view as IAVTable, id);
+        }
+    };
     if (avID) {
+        document.querySelectorAll<HTMLElement>(`.av[data-av-id="${avID}"]`).forEach(prepare);
         document.querySelectorAll(`.av[data-av-id="${avID}"] .av__cell[data-col-id="${id}"]`).forEach(item => {
             item.remove();
         });
@@ -1612,6 +1639,7 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
             item.remove();
         });
     } else {
+        prepare(blockElement as HTMLElement);
         blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
             item.remove();
         });

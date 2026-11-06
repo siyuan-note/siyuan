@@ -5,6 +5,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as escape from "../../../util/escape";
 import * as dateFormat from "./dateFormat";
+import * as columnWindow from "./columnWindow";
 
 // 列头动画只调用转义工具和菜单入口，其余依赖以抛错代理隔离，新增依赖或意外调用都应立即使测试失败。
 const loadColModule = () => {
@@ -18,6 +19,8 @@ const loadColModule = () => {
         },
     });
     const modules: Record<string, unknown> = {
+        "./columnWindow": columnWindow,
+        "./virtualScroll": {getAVData: (): IAV | undefined => undefined},
         "../../../util/escape": escape,
         "./dateFormat": dateFormat,
         "./openMenuPanel": {openMenuPanel: (): void => {}},
@@ -37,6 +40,7 @@ const loadColModule = () => {
 const insertHeaderCellHTML = (name: string, overrides: Record<string, unknown> = {}) => {
     const inserted: string[] = [];
     const previousCell = {
+        parentElement: {classList: {contains: () => false}},
         insertAdjacentHTML: (position: string, html: string) => {
             assert.equal(position, "afterend");
             inserted.push(html);

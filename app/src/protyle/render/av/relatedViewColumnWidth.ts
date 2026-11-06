@@ -1,11 +1,13 @@
 import {getAVColumnResizeWidth, updateAVTableColumnWidths} from "./columnWidth";
 import {updateFrozenColumns} from "./frozenColumns";
-import {getAVData} from "./virtualScroll";
+import {getAVData, invalidateAVTableRowHeights} from "./virtualScroll";
+import {prepareAVColumnWindow} from "./columnWindow";
 
 export type TRelatedAVColumnWidths = Record<string, Record<string, string>>;
 
 export const applyRelatedAVColumnWidths = (element: HTMLElement, widths: Record<string, string>, data = getAVData(element)) => {
     if (!data || data.viewType !== "table" || !widths) return;
+    prepareAVColumnWindow(element);
     // 同步分组缓存，保证虚拟滚动和展开分组使用当前面板的列宽。
     updateAVTableColumnWidths(data.view as IAVTable, widths);
     element.querySelectorAll<HTMLElement>(".av__row [data-col-id], .av__row--footer [data-col-id]").forEach(cell => {
@@ -13,6 +15,7 @@ export const applyRelatedAVColumnWidths = (element: HTMLElement, widths: Record<
         if (width) cell.style.width = width;
     });
     updateFrozenColumns(element);
+    invalidateAVTableRowHeights(element);
 };
 
 export const startRelatedAVColumnResize = (event: PointerEvent, element: HTMLElement,

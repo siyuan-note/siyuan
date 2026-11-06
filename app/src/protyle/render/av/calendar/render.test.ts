@@ -405,7 +405,7 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
             calendar: {dateKeyID: "date"}, calendarRange: range,
             columns: [{id: "date", type: "date"}], rows: [],
         }} as unknown as IAV;
-        const protyle = {disabled: true, options: {}, element: {getAttribute: (): null => null},
+        const protyle = {disabled: true, options: {}, element: {getAttribute: (): null => null, contains: () => false},
             wysiwyg: {element: {style: {}, setAttribute() {},
                 querySelectorAll: (selector: string) => selector === '.av[data-av-type="calendar"]' ? [block] : []}},
         } as unknown as IProtyle;

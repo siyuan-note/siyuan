@@ -310,6 +310,9 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         },
     });
     unRefEdit.resize();
+    [edit, unRefEdit].forEach(editor => {
+        editor.protyle.element.tabIndex = -1;
+    });
     if (closeCB) {
         if (data.layout === 1) {
             if (data.col) {

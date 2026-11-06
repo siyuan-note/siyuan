@@ -27,7 +27,7 @@ for (const enable of [false, true]) {
             const protyle = {
                 id: "readonly-editor",
                 disabled: enable,
-                element: {getAttribute: (): null => null},
+                element: {getAttribute: (): null => null, contains: () => false},
                 databaseAttributePanel: {updateReadonly: changeLayout},
                 wysiwyg: {
                     tableControl: {clear: () => tableClears++},
@@ -47,7 +47,7 @@ for (const enable of [false, true]) {
             const exports: {enable?: () => void, disable?: () => void} = {};
             runInNewContext(code + "\nexports.enable = () => enableProtyle(protyle);" +
                 "\nexports.disable = () => disabledProtyle(protyle);", {
-                exports, protyle,
+                exports, protyle, document: {activeElement: null},
                 window: {siyuan: {mobile: {editor: {protyle: current ? protyle : {}}}, menus: {menu: {remove() {}}}}},
                 pauseMobileBarsScroll: () => {
                     pauses++;

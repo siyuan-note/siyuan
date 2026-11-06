@@ -36,6 +36,7 @@ import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid, isInHarmony, isIPad, isMac, isPhablet, updateHotkeyTip} from "../util/compatibility";
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {getGlobalBreadcrumb, isBreadcrumbNotebookAvailable, type GlobalBreadcrumb} from "./globalPath";
+import {getBreadcrumbCustomIcon} from "./icon";
 import {listIndent, listOutdent} from "../wysiwyg/list";
 import {improveBreadcrumbAppearance} from "./appearance";
 import {getCloudURL} from "../../config/util/about";
@@ -501,6 +502,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         const items: IMenu[] = files.filter(Boolean).map(file => ({
             id: file.id,
             icon: file.subFileCount > 0 ? "iconFolder" : "iconFile",
+            iconHTML: getBreadcrumbCustomIcon(file.icon, "b3-menu__icon protyle-breadcrumb__graphic"),
             label: getDocDisplayName(file.name, file.titleEmpty, true),
             current: currentPathIDs.has(file.id),
             click: isMobile() && file.subFileCount > 0 ? undefined : () => this.openDocument(protyle, file.id, notebook, rootID),
@@ -842,6 +844,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                         menu.addItem({
                             current: isCurrent,
                             icon: item.globalType === "notebook" ? "iconNotebook" : getIconByType(item.type, item.subType),
+                            iconHTML: global ? getBreadcrumbCustomIcon(item.icon, "b3-menu__icon protyle-breadcrumb__graphic") : undefined,
                             label: item.name,
                             click: item.globalType ? undefined : () => zoomOut({protyle, id: item.id}),
                             loadSubmenu: item.globalType ? async () => {
@@ -1398,7 +1401,10 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                 }
                 const attributes = item.globalType === "notebook" ? 'data-global-type="notebook"' :
                     `data-node-id="${item.id}"${item.globalType ? ' data-global-type="document"' : ""}`;
-                const icon = item.globalType === "notebook" ?
+                const customIcon = global && getBreadcrumbCustomIcon(item.icon, "protyle-breadcrumb__graphic");
+                const icon = customIcon ? (item.globalType === "notebook" ? customIcon :
+                    `<span class="popover__block protyle-breadcrumb__graphic" data-id="${item.id}">${customIcon}</span>`) :
+                    item.globalType === "notebook" ?
                     '<svg><use xlink:href="#iconNotebook"></use></svg>' :
                     `<svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
                 if (index === 0 && !global && !protyle.options.render.breadcrumbDocName) {

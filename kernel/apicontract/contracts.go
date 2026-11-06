@@ -1164,6 +1164,8 @@ var GetHPathByID = define[FileTreeIDRequest, string]("getHPathByID", "/api/filet
 // GetDocPaths 在指定笔记本内按文档 ID 读取结构化祖先链，要求管理员权限，加密响应保留操作租约。
 // ids 必须包含 1 至 128 项，按首次出现顺序去重；缺失、其他笔记本或内容块身份列入 missingIDs。
 // 文档标题、segments 与 revision 来自同一快照，displayPath 仅用于显示，不能反向解析身份。
+// includeIcons 默认为 false；为 true 时，icons 按文档及祖先 ID 返回原始图标值，无图标时为空字符串。
+// 图标独立于路径 revision，读取源文件失败时返回错误；未启用时省略 icons 且不读取源文件。
 // 索引未就绪返回 indexUnavailable，源格式和认证错误不能伪装成缺失；批量结果不承诺全局快照。
 var GetDocPaths = define[GetDocPathsRequest, DocumentPathsResult]("getDocPaths", "/api/filetree/getDocPaths", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 

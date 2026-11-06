@@ -18,7 +18,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
     const opened: string[] = [];
     const requested: string[] = [];
     const style = document.createElement("style");
-    style.textContent = css + ".fn__none{display:none!important}svg{width:16px;height:16px}";
+    style.textContent = css + ".fn__none{display:none!important}svg{width:16px;height:16px}.b3-menu__item{font-size:20px}";
     document.head.append(style);
     let closed = 0;
     const menuElement = document.createElement("div");
@@ -39,14 +39,18 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
     const escape = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
     const escapeExports: any = {};
     new Function("exports", sources.escape)(escapeExports);
+    const iconValue: any = {};
+    new Function("exports", "require", sources.iconValue)(iconValue, () => escapeExports);
+    const icon: any = {};
+    new Function("exports", "require", sources.icon)(icon, () => iconValue);
     const appearance: any = {};
     new Function("exports", "require", sources.appearance)(appearance, () => ({hasClosestByAttribute: (): null => null}));
     const blocks = [{id: root, name: "Current", type: "NodeDocument"},
         {id: leaf, name: "Block", type: "NodeParagraph"}];
     const pathItems = [
-        {id: notebook, name: escape("Notebook & <literal>"), type: "NodeNotebook", globalType: "notebook"},
-        {id: ancestor, name: escape("Parent / & <literal>"), type: "NodeDocument", globalType: "document"},
-        {id: root, name: escape('Current <img src=x onerror="alert(1)"> & 日本語'), type: "NodeDocument"},
+        {id: notebook, name: escape("Notebook & <literal>"), type: "NodeNotebook", globalType: "notebook", icon: "1f4d2"},
+        {id: ancestor, name: escape("Parent / & <literal>"), type: "NodeDocument", globalType: "document", icon: "custom.png"},
+        {id: root, name: escape('Current <img src=x onerror="alert(1)"> & 日本語'), type: "NodeDocument", icon: "1f600"},
         blocks[1],
     ];
     let globalResult = async () => pathItems;
@@ -63,7 +67,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         addItem(item: IMenu) { menuElement.append(new MenuItem(item, menu as any).element); }
     }
     const dependency: Record<string, any> = {
-        ...escapeExports, ...appearance,
+        ...escapeExports, ...appearance, ...icon,
         Constants: new Proxy({}, {get: (_target, key) => String(key)}),
         isMobile: () => mobile, isMac: () => false, isIPad: () => false, isInAndroid: () => false,
         isInHarmony: () => false, updateHotkeyTip: (value: string) => value,
@@ -89,8 +93,8 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         },
         fetchSyncPost: async (_url: string, request: {parentID: string}) => {
             requested.push(request.parentID);
-            const files = request.parentID === ancestor ? [{id: folder, name: "Folder & <safe>", subFileCount: 1},
-                {id: leaf, name: "Leaf", subFileCount: 0}] : [{id: leaf, name: "Leaf", subFileCount: 0}];
+            const files = request.parentID === ancestor ? [{id: folder, name: "Folder & <safe>", subFileCount: 1, icon: "1f4c1"},
+                {id: leaf, name: "Leaf", subFileCount: 0, icon: "leaf.png"}] : [{id: leaf, name: "Leaf", subFileCount: 0, icon: "leaf.png"}];
             return {code: 0, data: {files, total: files.length, revision: "v1", stale: false}};
         },
     };
@@ -107,6 +111,10 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         await breadcrumb.genMobileMenu(protyle);
         await callbackWork;
         const parent = menuElement.children[1] as HTMLElement;
+        check.match(menuElement.children[0].querySelector(".protyle-breadcrumb__graphic").textContent, /📒/);
+        check.ok(parent.querySelector("img.protyle-breadcrumb__graphic"));
+        check.equal(getComputedStyle(parent.querySelector(".protyle-breadcrumb__graphic")).objectFit, "contain");
+        check.equal(getComputedStyle(menuElement.children[0].querySelector(".protyle-breadcrumb__graphic")).fontSize, "16px");
         check.equal(parent.querySelector(".b3-menu__label").textContent, "Parent / & <literal>");
         parent.querySelector(".b3-menu__icon--small").dispatchEvent(new MouseEvent("click", {bubbles: true}));
         await new Promise(resolve => setTimeout(resolve, 0));
@@ -117,6 +125,8 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         check.equal(children.firstElementChild.textContent, "openBy");
         const folderElement = children.children[1] as HTMLElement;
         check.equal(folderElement.querySelector(".b3-menu__label").textContent, "Folder & <safe>");
+        check.match(folderElement.querySelector(".protyle-breadcrumb__graphic").textContent, /📁/);
+        check.ok(children.children[2].querySelector("img.protyle-breadcrumb__graphic"));
         folderElement.querySelector(".b3-menu__icon--small").dispatchEvent(new MouseEvent("click", {bubbles: true}));
         await new Promise(resolve => setTimeout(resolve, 0));
         check.deepEqual(requested, [ancestor, folder]);
@@ -155,7 +165,13 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         check.equal(breadcrumb.element.querySelectorAll(`[data-node-id="${root}"]`).length, 1);
         check.equal(breadcrumb.element.querySelector(`[data-node-id="${root}"] .protyle-breadcrumb__text`).textContent,
             'Current <img src=x onerror="alert(1)"> & 日本語');
-        check.equal(breadcrumb.element.querySelector("img, script"), null);
+        check.equal(breadcrumb.element.querySelector("script, img[onerror]"), null);
+        const ancestorIcon = breadcrumb.element.querySelector(`[data-node-id="${ancestor}"] .popover__block`) as HTMLElement;
+        check.equal(ancestorIcon.getAttribute("data-id"), ancestor);
+        check.ok(ancestorIcon.querySelector("img"));
+        check.equal(getComputedStyle(ancestorIcon.querySelector("img")).objectFit, "contain");
+        check.equal(getComputedStyle(ancestorIcon).width, "16px");
+        check.equal(getComputedStyle(breadcrumb.element.querySelector(`[data-node-id="${root}"] .protyle-breadcrumb__graphic`)).fontSize, "16px");
         const calls: {id: string, keyboard: boolean, parentID: string | undefined}[] = [];
         breadcrumb.openChildrenMenu = (_protyle: unknown, id: string, _position: unknown, keyboard: boolean,
                                        parentID: string | undefined) => calls.push({id, keyboard, parentID});
@@ -170,7 +186,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         ]);
         check.equal(calls[2].keyboard, true);
         check.equal(calls[3].keyboard, true);
-        items[1].click();
+        (ancestorIcon.querySelector("img") as HTMLElement).click();
         check.deepEqual(opened, [ancestor]);
         const previousFocus = document.createElement("input");
         document.body.append(previousFocus);
@@ -186,6 +202,10 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         items[2].dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
         check.equal(document.activeElement, previousFocus);
 
+        Object.assign(pathItems[1], {icon: ""});
+        await render();
+        check.equal(breadcrumb.element.querySelector(`[data-node-id="${ancestor}"] img`), null);
+        check.ok(breadcrumb.element.querySelector(`[data-node-id="${ancestor}"] svg`));
         globalResult = async () => [pathItems[0], ...Array.from({length: 12}, (_, index) => ({
             ...pathItems[1], id: `${ancestor}-${index}`, name: escape(`Long parent ${index} / 日本語 & literal title`),
         })), ...pathItems.slice(2)];
@@ -225,6 +245,8 @@ for (const mobile of [true, false]) {
             breadcrumb: parse(readFileSync(path.join(__dirname, "index.ts"), "utf8"),
                 {MOBILE: mobile, BROWSER: true}, false, true, "index.ts"),
             escape: readFileSync(path.join(__dirname, "../../util/escape.ts"), "utf8"),
+            icon: readFileSync(path.join(__dirname, "icon.ts"), "utf8"),
+            iconValue: readFileSync(path.join(__dirname, "../../emoji/iconValue.ts"), "utf8"),
             appearance: readFileSync(path.join(__dirname, "appearance.ts"), "utf8"),
         };
         for (const key of Object.keys(sources) as (keyof typeof sources)[]) {
@@ -245,6 +267,7 @@ app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
     try {
         await win.loadURL("about:blank");
+        await win.webContents.executeJavaScript(${JSON.stringify(readFileSync(path.join(__dirname, "../../../stage/protyle/js/lute/lute.min.js"), "utf8"))});
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(source)}));
         win.destroy(); app.exit(0);
     } catch (error) { console.error(error); win.destroy(); app.exit(1); }

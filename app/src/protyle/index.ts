@@ -18,6 +18,7 @@ import {Toolbar} from "./toolbar";
 import {Gutter} from "./gutter";
 import {setAutoDirection} from "./render/autoDirection";
 import {Breadcrumb} from "./breadcrumb";
+import {updateNotebookBreadcrumbIcon} from "./breadcrumb/iconRefresh";
 import {
     onTransaction,
     transaction,
@@ -285,6 +286,9 @@ export class Protyle {
                             break;
                         case "transactions":
                             this.onTransaction(data);
+                            break;
+                        case "notebookIconChanged":
+                            updateNotebookBreadcrumbIcon(data.data.boxID, data.data.icon);
                             break;
                         case "readonly":
                             window.siyuan.config.editor.readOnly = data.data;

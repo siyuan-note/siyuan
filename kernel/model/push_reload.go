@@ -235,10 +235,13 @@ func refreshBoxDocInfoByBoxID(boxID string) {
 }
 
 func pushNotebookIconChanged(boxID, icon string) {
-	util.BroadcastByType("filetree", "notebookIconChanged", 0, "", map[string]any{
+	data := map[string]any{
 		"boxID": boxID,
 		"icon":  icon,
-	})
+	}
+	util.BroadcastByType("filetree", "notebookIconChanged", 0, "", data)
+	util.BroadcastByType("protyle", "notebookIconChanged", 0, "", data)
+	util.BroadcastByType("main", "notebookIconChanged", 0, "", data)
 }
 
 func refreshDocInfo0(tree *parse.Tree, size uint64) {

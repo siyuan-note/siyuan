@@ -648,10 +648,12 @@ Reads document metadata by ID. Requires administrator access and an opened, unlo
 
     * `notebook`: Notebook ID
     * `ids`: Array of 1 to 128 valid document IDs; duplicates are removed in first-occurrence order
+    * `includeIcons`: Optional boolean, default `false`; `true` reads icons for the returned documents and their ancestors
 * Return value
 
     * `data.documents`: Array of document metadata objects described in [creation results](#create-a-document-by-parent-id), in request order
     * `data.missingIDs`: IDs that are missing, belong to another notebook, or identify content blocks
+    * `data.icons`: Optional map from document or ancestor ID to its raw stored icon, or an empty string when unset. Omitted unless `includeIcons` is `true`; icons do not affect path revisions. Source read failures return an error without recreating missing documents
     * Either array may be empty; unavailable or inconsistent metadata returns an error rather than a missing result
     * Each document is read consistently; the batch does not promise a single snapshot
 

@@ -1,4 +1,5 @@
 import {renderDocTreeRow, renderDocTreeRowHTML} from "../../layout/dock/docTree/row";
+import {updateNotebookBreadcrumbIcon} from "../../protyle/breadcrumb/iconRefresh";
 import {getDocTreeItem, isEncryptedDocTreeItem, notebookTreeItem} from "../../layout/dock/docTree/rowData";
 import {DocTreeController, getActiveDocTreeController} from "../../layout/dock/docTree/DocTreeController";
 import {refreshImportedDocTree} from "../../layout/dock/docTree/importRefresh";
@@ -502,6 +503,7 @@ export class MobileFiles extends Model {
             getDocTreeItem(this.touchDragState?.selectedElement)?.notebookId === notebook) {
             this.cancelTouchDrag?.();
         }
+        if (data.cmd === "notebookIconChanged") updateNotebookBreadcrumbIcon(data.data.boxID, data.data.icon);
         this.pinnedDocs?.onFileTreeMessage(data);
         this.docTree?.handleMessage(data);
         if (["reloadFiletree", "boxDocFeatureChanged", "notebookIconChanged", "reloadNotebookInfo", "mount", "createnotebook", "closeBox", "removeBox", "renamenotebook"].includes(data.cmd)) {

@@ -484,6 +484,19 @@
     text-overflow: ellipsis;
   }
 
+  &__graphic {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    font-variant-emoji: emoji;
+    font-size: 16px;
+    line-height: 16px;
+    object-fit: contain;
+  }
+
   &__item {
     cursor: pointer;
     display: flex;

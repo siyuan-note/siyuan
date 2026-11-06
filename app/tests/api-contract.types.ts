@@ -6,6 +6,21 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchSyncPost("/api/filetree/getDocPaths", {notebook: "notebook", ids: ["document"]});
+fetchSyncPost("/api/filetree/getDocPaths", {notebook: "notebook", ids: ["document"], includeIcons: true});
+// @ts-expect-error 图标开关不能为 null。
+fetchSyncPost("/api/filetree/getDocPaths", {notebook: "notebook", ids: ["document"], includeIcons: null});
+// @ts-expect-error 图标开关只接受布尔值。
+fetchSyncPost("/api/filetree/getDocPaths", {notebook: "notebook", ids: ["document"], includeIcons: "true"});
+declare const iconPathsResponse: APIPOSTRoutes["/api/filetree/getDocPaths"]["response"];
+if (iconPathsResponse.code === 0 && iconPathsResponse.data && !iconPathsResponse.data.reason) {
+    const icons: Record<string, string> | undefined = iconPathsResponse.data.icons;
+    // @ts-expect-error 图标映射可能被省略。
+    const requiredIcons: Record<string, string> = iconPathsResponse.data.icons;
+    void icons;
+    void requiredIcons;
+}
+
 fetchSyncPost("/api/petal/loadPetals", {frontend: "browser-desktop"});
 fetchSyncPost("/api/petal/loadPetals", {frontend: "desktop", names: null});
 fetchSyncPost("/api/petal/loadPetals", {frontend: "desktop", names: []});

@@ -304,6 +304,12 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 				t.Fatal(err)
 			}
 		}
+		if t.Name() == "TestContractDocumentPathsNotebookResponseLease" {
+			tree.Root.SetIALAttr("icon", "REVIEW-SECRET-ICON")
+			if _, err = filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+		}
 	}
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()
@@ -385,7 +391,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		args = map[string]any{"notebook": boxIDs[0], "purpose": "document", "id": ast.NewNodeID(), "title": "REVIEW-SECRET-TITLE"}
 	case "TestContractDocumentPathsNotebookResponseLease":
 		endpoint, typedQuery = "/api/filetree/getDocPaths", true
-		args = map[string]any{"notebook": boxIDs[0], "ids": []string{boxIDs[0]}}
+		args = map[string]any{"notebook": boxIDs[0], "ids": []string{boxIDs[0]}, "includeIcons": true}
 	case "TestContractResolveDocumentPathNotebookResponseLease":
 		endpoint, typedQuery = "/api/filetree/resolveDocPath", true
 		args = map[string]any{"notebook": boxIDs[0], "start": map[string]any{"kind": "document", "id": boxIDs[0]}, "segments": []string{}}
@@ -466,6 +472,11 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	case body = <-writer.ready:
 	case <-time.After(5 * time.Second):
 		t.Fatal("response never reached writer")
+	}
+	if t.Name() == "TestContractDocumentPathsNotebookResponseLease" && !strings.Contains(string(body), "REVIEW-SECRET-ICON") {
+		releaseWriter.Do(func() { close(writer.proceed) })
+		<-responseDone
+		t.Fatalf("notebook document icon was omitted: %s", body)
 	}
 	if (!typedQuery || t.Name() == "TestContractGetDocNotebookResponseLease") && strings.Count(string(body), "REVIEW-SECRET-CONTENT") != count {
 		releaseWriter.Do(func() { close(writer.proceed) })

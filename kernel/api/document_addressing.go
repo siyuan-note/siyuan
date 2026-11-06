@@ -93,14 +93,14 @@ var getDocPaths = contractHandler(apicontract.GetDocPaths, func(c *gin.Context, 
 	if err := holdEncryptedBoxRequest(c, request.Notebook); err != nil {
 		return apicontract.Failure[apicontract.DocumentPathsResult](-1, err.Error())
 	}
-	documents, missing, err := model.GetDocPaths(request.Notebook, request.IDs)
+	documents, missing, icons, err := model.GetDocPathsWithIcons(request.Notebook, request.IDs, request.IncludeIcons)
 	if err != nil {
 		if failure, ok := documentAddressingFailure(err); ok {
 			return apicontract.GetDocPaths.FailureWithData(-1, err.Error(), apicontract.NewDocumentPathsFailure(failure))
 		}
 		return apicontract.Failure[apicontract.DocumentPathsResult](-1, err.Error())
 	}
-	data := apicontract.DocumentPathsData{Documents: []apicontract.DocumentPath{}, MissingIDs: missing}
+	data := apicontract.DocumentPathsData{Documents: []apicontract.DocumentPath{}, MissingIDs: missing, Icons: icons}
 	for _, document := range documents {
 		data.Documents = append(data.Documents, documentPathContract(document))
 	}

@@ -1,4 +1,5 @@
 import {renderDocTreeRow, renderDocTreeRowHTML} from "./docTree/row";
+import {updateNotebookBreadcrumbIcon} from "../../protyle/breadcrumb/iconRefresh";
 import {getDocTreeItem, isEncryptedDocTreeItem, notebookTreeItem} from "./docTree/rowData";
 import {DocTreeController, getActiveDocTreeController} from "./docTree/DocTreeController";
 import {refreshImportedDocTree} from "./docTree/importRefresh";
@@ -966,6 +967,7 @@ export class Files extends Model {
 
     private handleMsgCallback(data: IWebSocketData) {
         if (!data || this.disposed) { return; }
+        if (data.cmd === "notebookIconChanged") updateNotebookBreadcrumbIcon(data.data.boxID, data.data.icon);
         const notebook = typeof data.data === "string" ? data.data : data.data?.box?.id || data.data?.box || data.data?.id;
         if (["closeBox", "removeBox"].includes(data.cmd) &&
             this.dragSelection?.items.some(item => item.notebookId === notebook)) {

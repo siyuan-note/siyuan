@@ -11,6 +11,10 @@ import {applySettingTask} from "../config/setting/taskBlocker";
 import {notifyOCRChanged} from "../config/ocrRuntime";
 
 export const processMessage = (response: IWebSocketData) => {
+    if (response.cmd === "notebookIconChanged") {
+        const {updateNotebookBreadcrumbIcon}: typeof import("../protyle/breadcrumb/iconRefresh") = require("../protyle/breadcrumb/iconRefresh");
+        updateNotebookBreadcrumbIcon(response.data.boxID, response.data.icon);
+    }
     if (response.cmd === "closeBox" || response.cmd === "removeBox") {
         const {clearTemplateHTTPConfirmations}: typeof import("../template/httpConfirmHandoff") = require("../template/httpConfirmHandoff");
         clearTemplateHTTPConfirmations();

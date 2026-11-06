@@ -10,12 +10,16 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -100,6 +104,108 @@ func TestAPIContractDocumentPaths(t *testing.T) {
 		if !bytes.Contains(response, []byte(`"code":-1`)) {
 			t.Fatalf("invalid IDs accepted: %s", response)
 		}
+	}
+}
+
+func TestAPIContractDocumentPathIcons(t *testing.T) {
+	box := documentPathAPIWorkspace(t)
+	parent := treenode.NewTree(box, "/20261023010000-parent1.sy", "/A", "A")
+	child := treenode.NewTree(box, "/20261023010000-parent1/20261023010001-child01.sy", "/A/B", "B")
+	parent.Root.SetIALAttr("icon", "1f600")
+	child.Root.SetIALAttr("icon", "custom-icon.svg")
+	for _, tree := range []*parse.Tree{parent, child} {
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
+	}
+	if err := treenode.SetDocumentMetadataState(box, "ready"); err != nil {
+		t.Fatal(err)
+	}
+	const missing = "20261023010002-missing"
+	payload := map[string]interface{}{"notebook": box, "ids": []string{child.ID, missing, child.ID}}
+	read := func() ([]byte, apicontract.DocumentPathsData) {
+		t.Helper()
+		response := documentPathAPIRequest(t, "/api/filetree/getDocPaths", getDocPaths, payload)
+		var result struct {
+			Code int
+			Data apicontract.DocumentPathsData
+		}
+		if err := json.Unmarshal(response, &result); err != nil || result.Code != 0 {
+			t.Fatalf("read failed: %s, %v", response, err)
+		}
+		return response, result.Data
+	}
+	response, baseline := read()
+	if bytes.Contains(response, []byte(`"icons"`)) {
+		t.Fatalf("default includes icons: %s", response)
+	}
+	payload["includeIcons"] = false
+	response, _ = read()
+	if bytes.Contains(response, []byte(`"icons"`)) {
+		t.Fatalf("false includes icons: %s", response)
+	}
+	payload["includeIcons"] = true
+	_, current := read()
+	if !reflect.DeepEqual(current.Documents, baseline.Documents) || !reflect.DeepEqual(current.MissingIDs, baseline.MissingIDs) ||
+		len(current.Icons) != 2 || current.Icons[parent.ID] != "1f600" || current.Icons[child.ID] != "custom-icon.svg" {
+		t.Fatalf("icons changed path order, revisions or missing IDs: %+v", current)
+	}
+	payload["ids"] = []string{child.ID, missing, parent.ID, child.ID, parent.ID}
+	_, current = read()
+	if len(current.Documents) != 2 || current.Documents[0].ID != child.ID || current.Documents[1].ID != parent.ID || len(current.Icons) != 2 {
+		t.Fatalf("icon query changed request order or deduplication: %+v", current)
+	}
+	payload["ids"] = []string{child.ID, missing, child.ID}
+	child.Root.SetIALAttr("icon", "")
+	if _, err := filesys.WriteTree(child); err != nil {
+		t.Fatal(err)
+	}
+	_, current = read()
+	if value, ok := current.Icons[child.ID]; !ok || value != "" || !reflect.DeepEqual(current.Documents, baseline.Documents) {
+		t.Fatalf("empty icon or revisions changed: %+v", current)
+	}
+	for _, invalid := range []interface{}{nil, "true", 1, []bool{true}} {
+		payload["includeIcons"] = invalid
+		response = documentPathAPIRequest(t, "/api/filetree/getDocPaths", getDocPaths, payload)
+		if !bytes.Contains(response, []byte(`"code":-1`)) {
+			t.Fatalf("invalid includeIcons accepted: %s", response)
+		}
+	}
+	payload["includeIcons"] = true
+	filename := filepath.Join(util.DataDir, box, child.Path)
+	parentSource, err := os.ReadFile(filepath.Join(util.DataDir, box, parent.Path))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filename, parentSource, 0600); err != nil {
+		t.Fatal(err)
+	}
+	response = documentPathAPIRequest(t, "/api/filetree/getDocPaths", getDocPaths, payload)
+	if !bytes.Contains(response, []byte(`"reason":"indexUnavailable"`)) {
+		t.Fatalf("mismatched source identity accepted: %s", response)
+	}
+	if err := os.Remove(filename); err != nil {
+		t.Fatal(err)
+	}
+	response = documentPathAPIRequest(t, "/api/filetree/getDocPaths", getDocPaths, payload)
+	if !bytes.Contains(response, []byte(`"reason":"indexUnavailable"`)) {
+		t.Fatalf("missing source accepted: %s", response)
+	}
+	if _, err := os.Stat(filename); !os.IsNotExist(err) {
+		t.Fatalf("missing source recreated: %v", err)
+	}
+	delete(payload, "includeIcons")
+	read()
+	boxConf := conf.NewBoxConf()
+	boxConf.Name, boxConf.Closed = "Documents", true
+	if err := (&model.Box{ID: box}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	payload["includeIcons"] = true
+	response = documentPathAPIRequest(t, "/api/filetree/getDocPaths", getDocPaths, payload)
+	if !bytes.Contains(response, []byte(`"code":-1`)) || bytes.Contains(response, []byte(`"icons"`)) {
+		t.Fatalf("closed notebook exposed icons: %s", response)
 	}
 }
 

@@ -55,6 +55,9 @@ export const initWindowWithLoading = async (render: () => Promise<void>, finaliz
         finalizeLayout?.();
     });
     document.getElementById("windowAppearanceStyle")?.remove();
-    document.getElementById("loading")?.remove();
+    const loading = document.getElementById("loading");
+    if (!loading?.classList.contains("startup-error")) {
+        loading?.remove();
+    }
     document.body.removeAttribute("aria-busy");
 };

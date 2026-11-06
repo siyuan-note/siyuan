@@ -1,8 +1,14 @@
 import {getDocTreeItem} from "../layout/dock/docTree/rowData";
 export type TDocTreeMenuType = "doc" | "docs" | "notebook" | "notebooks" | "items";
 
-export const getDocTreeActionItems = <T extends {id: string, notebookId: string}>(items: readonly T[]): T[] =>
-    Array.from(new Map(items.map(item => [JSON.stringify([item.notebookId, item.id]), item])).values());
+export const getDocTreeActionItems = <T extends {id: string, notebookId: string, kind?: string}>(items: readonly T[]): T[] =>
+    Array.from(new Map(items.map(item => [JSON.stringify([item.kind, item.notebookId, item.id]), item])).values());
+
+export const getDocTreeDeleteItems = <T extends {id: string, notebookId: string, kind: string}>(items: readonly T[]): T[] => {
+    const selected = getDocTreeActionItems(items);
+    const notebooks = new Set(selected.filter(item => item.kind === "notebook").map(item => item.notebookId));
+    return selected.filter(item => item.kind === "notebook" || !notebooks.has(item.notebookId));
+};
 
 export const getDocTreeTopPaths = (items: readonly {notebookId: string, path: string, kind: string}[]) => {
     const sorted = items.filter(item => item.kind === "document").slice().sort((a, b) =>

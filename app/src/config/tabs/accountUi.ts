@@ -1,8 +1,8 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {Dialog} from "../../dialog";
 import {isInIOS} from "../../protyle/util/compatibility";
 import {isMobile} from "../../util/functions";
 import {processSync} from "../../dialog/processSystem";
@@ -263,11 +263,11 @@ const bindAccountMainEvent = (accountSettingsRoot: Element) => {
 };
 
 const showDeactivateConfirm = (callback: () => void) => {
-    confirmDialog("⚠️ " + window.siyuan.languages.deactivateUser, window.siyuan.languages.deactivateUserTip, callback);
+    mobileConfirmDialog("⚠️ " + window.siyuan.languages.deactivateUser, window.siyuan.languages.deactivateUserTip, callback);
 };
 
 const openAccountDeactivateAuthDialog = () => {
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         title: "⚠️ " + window.siyuan.languages.deactivateUser,
         width: isMobile() ? "92vw" : "520px",
         content: `<div class="config-account--auth">${genAccountAuthHTML("deactivate")}</div>`,
@@ -308,7 +308,7 @@ const bindAccountPaymentEvent = (accountSettingsRoot: Element) => {
             if (0 !== response.code) {
                 activationCodeInput.value = "";
             }
-            confirmDialog(window.siyuan.languages.activationCode, response.msg, () => {
+            mobileConfirmDialog(window.siyuan.languages.activationCode, response.msg, () => {
                 if (response.code === 0) {
                     fetchPost("/api/account/useActivationcode", {data: activationCodeInput.value}, () => {
                         accountSettingsRoot.querySelector("#refresh")?.dispatchEvent(new CustomEvent("click"));

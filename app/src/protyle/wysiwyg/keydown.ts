@@ -302,8 +302,26 @@ const getRangeListItemElements = (editorElement: HTMLElement, range: Range) => {
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     let forwardBlockRemovalPending = false;
+    let forwardBlockRemovalComplete: Promise<boolean>;
     bindVerticalNavigationReset(editorElement);
     editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
+        if (forwardBlockRemovalPending && event.key === "Enter" && !event.isComposing) {
+            event.preventDefault();
+            event.stopPropagation();
+            // 合并完成并恢复光标后执行回车，避免分割即将被异步删除的段落。
+            try {
+                await forwardBlockRemovalComplete;
+            } catch {
+                return;
+            }
+            if (editorElement.isConnected && !protyle.disabled) {
+                editorElement.dispatchEvent(new KeyboardEvent("keydown", {
+                    key: event.key, code: event.code, keyCode: event.keyCode, bubbles: true, cancelable: true,
+                    shiftKey: event.shiftKey, ctrlKey: event.ctrlKey, altKey: event.altKey, metaKey: event.metaKey,
+                }));
+            }
+            return;
+        }
         if (event.target.localName === "protyle-html" || event.target.localName === "input") {
             event.stopPropagation();
             return;
@@ -462,6 +480,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (calloutTitleElement && !event.isComposing && !blockSelectionModeElement) {
+            if (!event.altKey && !event.shiftKey &&
+                ((event.key.startsWith("Arrow") && isNotCtrl(event)) || event.key === "Enter") &&
+                !protyle.hint.element.classList.contains("fn__none") && protyle.hint.select(event, protyle)) {
+                return;
+            }
+            const getTitleLength = () => {
+                const titleRange = range.cloneRange();
+                titleRange.selectNodeContents(calloutTitleElement);
+                return getSelectionOffset(calloutTitleElement, nodeElement, titleRange).end;
+            };
             if (matchHotKey("⌘A", event)) {
                 range.selectNodeContents(calloutTitleElement);
                 focusByRange(range);
@@ -480,7 +508,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (event.key === "Backspace" || event.key === "Delete") {
                 const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
                 if (range.collapsed && ((event.key === "Backspace" && offset.start === 0) ||
-                    (event.key === "Delete" && offset.end === calloutTitleElement.textContent.length))) {
+                    (event.key === "Delete" && offset.end === getTitleLength()))) {
                     event.preventDefault();
                 }
                 event.stopPropagation();
@@ -494,7 +522,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     !event.altKey && !event.shiftKey && isNotCtrl(event)) {
                     const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
                     if (event.key === "ArrowLeft" && offset.start === 0 ||
-                        event.key === "ArrowRight" && offset.end === calloutTitleElement.textContent.length) {
+                        event.key === "ArrowRight" && offset.end === getTitleLength()) {
                         event.preventDefault();
                     }
                 }
@@ -1482,8 +1510,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     event.preventDefault();
                                     forwardBlockRemovalPending = true;
                                     try {
-                                        await removeBlock(protyle, nextBlockElement, nextRange, "Delete",
+                                        forwardBlockRemovalComplete = removeBlock(protyle, nextBlockElement, nextRange, "Delete",
                                             false, false, undoFocusContext);
+                                        await forwardBlockRemovalComplete;
                                     } finally {
                                         forwardBlockRemovalPending = false;
                                         if (caretElement.isConnected) {

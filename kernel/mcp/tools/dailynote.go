@@ -13,7 +13,13 @@ import (
 
 var DailynoteTool = &Tool{
 	Name:        "dailynote",
-	Description: "Daily note operations. Actions: create(notebook) — create/open today's note, append(notebook, data, dataType?) / prepend(...) add a block.",
+	Description: "Daily note operations. Actions: create(notebook) — create/open today's note, append(notebook, data, dataType?) / prepend(...) add a block to today's note. append/prepend create today's note automatically if it does not exist; no preliminary create call is needed.",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"create":  {LocalWrite: true},
+		"append":  {LocalWrite: true},
+		"prepend": {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

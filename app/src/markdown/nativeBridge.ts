@@ -41,7 +41,7 @@ export const createNativeMarkdownBridge = (target: NativeEnvironment | Window): 
     };
     const command = (value: MarkdownCommand) => {
         if (!value || typeof value.id !== "string" ||
-            !["close", "prepare-quit", "cancel-quit", "external-change", "theme", "background", "tree-change"].includes(value.type)) return;
+            !["close", "prepare-quit", "cancel-quit", "external-change", "theme", "background", "tree-change", "keymap"].includes(value.type)) return;
         if (!listeners.size) {
             // 退出可在离线编辑器初始化完成前到达；初始化完成后仍必须回执。
             if (earlyCommands.length < 32) earlyCommands.push(value);

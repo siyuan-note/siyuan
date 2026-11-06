@@ -37,7 +37,7 @@ func RecordHistorySourceWrites(view *AttributeView, record SourceWriteRecorder) 
 }
 
 func recordSourceWrites(view *AttributeView, active func() bool, record SourceWriteRecorder, recovery bool) func() {
-	_, box := FindAttributeViewPath(view.ID)
+	_, box := view.StoragePath()
 	key := box + "/" + view.ID
 	sourceWriteRecorders.Store(key, &sourceWriteRecord{active: active, record: record, recovery: recovery})
 	return func() { sourceWriteRecorders.Delete(key) }

@@ -1169,6 +1169,7 @@ interface IAVItemHierarchy {
 }
 
 interface IAV {
+    pendingHTTPTemplates?: string[];
     subItems?: IAVSubItemsConfig;
     id: string;
     name: string;
@@ -1236,8 +1237,10 @@ interface IAVNewItemTemplate {
     saveLocation?: IAVNewItemSaveLocation;
     contentTemplatePath?: string;
     hideInFileTree?: boolean;
-    /** 创建后分屏打开条目；省略时保留旧行为（仅日历自动打开），false 表示不打开。 */
+    /** 创建后打开条目；省略时仅日历自动打开，false 表示不打开。 */
     openAfterCreate?: boolean;
+    /** 自动打开时使用当前分屏；省略或 false 时向右分屏打开。 */
+    openInCurrentTab?: boolean;
 }
 
 /** 单字段条件颜色规则按顺序匹配，默认背景同样占据优先级。 */
@@ -1597,6 +1600,11 @@ interface IAVCellAssetValue {
 }
 
 interface IAVColumnRelation {
+    detailView?: {
+        spec: number;
+        enabled: boolean;
+        viewID: string;
+    };
     avID?: string;
     backKeyID?: string;
     isTwoWay?: boolean;

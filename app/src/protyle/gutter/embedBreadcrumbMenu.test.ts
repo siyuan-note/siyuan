@@ -1,3 +1,4 @@
+import * as dockKeymap from "../../util/dockKeymap";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -8,7 +9,7 @@ test("breadcrumb submenus persist overrides and delete attributes when returning
     const constants = {} as typeof import("../../constants");
     runInNewContext(transpileModule(readFileSync("src/constants.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
-    }).outputText, {exports: constants, SIYUAN_VERSION: "test", NODE_ENV: "test"});
+    }).outputText, {exports: constants, SIYUAN_VERSION: "test", NODE_ENV: "test", require: () => dockKeymap});
     const attributes = new Map<string, string>([["data-node-id", "embed"]]);
     const nodeElement = {
         getAttribute: (name: string) => attributes.get(name) ?? null,

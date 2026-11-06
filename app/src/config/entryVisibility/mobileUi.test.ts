@@ -57,7 +57,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
                 "util/functions": {isMobile: () => mobile},
                 "util/hostCapabilities": {getHostCapabilities: () => ({importExport: false})},
                 "util/genID": {genUUID: () => "new"},
-                "dialog/confirmDialog": {confirmDialog: (_title: string, _text: string, callback: () => void) => callback()},
+                "dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _text: string, callback: () => void) => callback()},
                 "dialog/message": {showMessage: noop},
                 "protyle/util/compatibility": {isInMobileApp: () => true,
                     isIPad: () => false, isInAndroid: () => false, isInHarmony: () => false},

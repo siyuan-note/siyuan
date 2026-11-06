@@ -1,4 +1,4 @@
-import {confirmDialog} from "../../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {genNotebookOption} from "../../menus/onGetnotebookconf";
 import {fetchPost} from "../../util/fetch";
 import {editorConfigApi} from "./editorRuntime";
@@ -284,7 +284,7 @@ const registerFileManagementGroup = (tab: SettingTabBuilder) => {
 </div>`,
         afterMount: (root) => {
             root.querySelector("#clearHistory")?.addEventListener("click", () => {
-                confirmDialog(
+                mobileConfirmDialog(
                     window.siyuan.languages.clearHistory,
                     window.siyuan.languages.confirmClearHistory,
                     () => {

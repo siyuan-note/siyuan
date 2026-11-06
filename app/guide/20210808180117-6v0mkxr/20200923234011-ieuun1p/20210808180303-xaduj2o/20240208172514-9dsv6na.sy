@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261102214741"
+		"updated": "20261106090000"
 	},
 	"Children": [
 		{
@@ -3354,21 +3354,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261025205717-wu88xyc",
-				"updated": "20261025205717"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In an entry template, enable "
+					"Data": "In an entry template, choose "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Open item in split view after creation"
+					"TextMarkTextContent": "Open item after creation"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to open each new bound or unbound entry on the right after creating it from a database view. A bound document focuses its title when available; otherwise, the primary key is focused. Unbound entries focus the primary key. Mobile uses the existing page or dialog."
+					"Data": " to select Do not open (default), Open in the current pane, or Split Right. Bound and unbound entries are supported. Bound documents focus the editable title when available; other entries focus the primary key. Mobile uses the existing page or dialog for both opening options."
 				}
 			]
 		},
@@ -3377,12 +3377,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261025205717-d3xd5xk",
-				"updated": "20261025205717"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "New templates have this option off. Turn it off to stop automatic opening. Existing templates retain their previous behavior until you change this switch, including automatic opening in calendars. Empty entries created without a template keep the view’s existing behavior; to configure them, create an empty unbound-entry template and make it the default."
+					"Data": "Existing templates retain their opening behavior until you change this selection. Empty creation without a template follows the view’s behavior; use a default empty unbound-entry template to configure it."
 				}
 			]
 		},
@@ -3567,6 +3567,91 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-p6dmwp4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261103024717-p6dmwp4",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Related database views in entry details"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-lbrh01e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-lbrh01e",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable “Show related table” in a relation field’s configuration and use “Related database view” to select an existing table view in the related database. When creating or changing the relation target, configure the related table in the same menu and click “Confirm” to save both settings together. This field-level setting applies to every entry, including new entries. Disabling the display does not delete relations or target entries."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-qzavrxh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-qzavrxh",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The related table appears at the bottom of the database properties in entry details, before the body when one exists. Document-bound, content-block-bound and detached entries are supported. When a block belongs to multiple databases, tabs select the active database by default. Turn off “Display multiple databases in tabs” to display each database’s properties and related tables together in separate groups. Membership stays separate for each source database, entry and relation field."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-qvz73ar",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-qvz73ar",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The table contains only entries already linked through the current entry’s relation field, further limited by the selected view’s filters. One-way relations do not require a reverse relation field. The target view’s column layout is shared; the current entry’s membership restriction is never saved into shared filters. Search, “Sort in this panel” and “Additional filters in this panel” apply only to the current panel."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-fnh8dej",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-fnh8dej",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Editing a target field changes the real entry and updates its other references. “Remove association” removes only the current entry’s relation in the current field; it does not delete the target entry. “Add existing entry” follows the relation candidate filters. “Create and link entry” uses the target database’s creation rules, creating a detached entry when no default template is configured."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-a6ld1fe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-a6ld1fe",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "An empty relation displays an empty table. An invalid field or target view, or a locked database, displays an unavailable state instead of the unfiltered database. This feature initially supports tables and does not recursively expand further related tables inside them. History and snapshot previews do not expand live related views."
 				}
 			]
 		},
@@ -4220,7 +4305,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5051,7 +5136,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261015141042-fm4qoja",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5065,7 +5150,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-6bomil1",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5234,12 +5319,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261026103001-47dxurt",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Reference sources use the same grouping rules as backlinks, including list items, blockquotes, super blocks, callouts, and document or heading propagation from a first paragraph containing only block references. Type and attribute conditions apply to the final grouped block; tag conditions apply to the reference source. The tag collection target option does not apply while a reference target is set. Clear the reference target to return to ordinary collection. Removing a reference preserves existing entries and fields; preview collection management to collect older matches. Reference targets require automation format 8; formats 1–7 remain readable, and older clients reject format 8 without rewriting the database."
+					"Data": "Reference sources use the same grouping rules as backlinks, including list items, blockquotes, super blocks, callouts, and document or heading propagation from a first paragraph containing only block references. Type and attribute conditions apply to the final grouped block; tag conditions apply to the reference source. The tag collection target option does not apply while a reference target is set. Clear the reference target to return to ordinary collection. Deleting body block references can also remove automatically collected entries after confirmation, as described below. Preview collection management to collect older matches. Reference targets require automation format 8; formats 1–7 remain readable, and older clients reject format 8 without rewriting the database."
 				}
 			]
 		},
@@ -5290,7 +5375,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-jv7dnxb",
-				"updated": "20261102195537"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5417,12 +5502,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261102195537-zlurrk5",
-				"updated": "20261102214741"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Deleting tags from the body, document tags, or the tag panel checks whether automatically collected entries stop matching. If entries are affected, one dialog lists the databases and entry counts. Affected databases are selected by default. Confirming with Also remove selected entries deletes the tags and removes the selected entries and their field values. Deselect a database to keep its entries, or choose Delete tags only to keep all database entries. The source content is kept; undo restores the tags, original entries, and field values together. Manually added entries and entries still matching another enabled rule are kept. Renaming a tag does not open this dialog."
+					"Data": "Deleting body block references, or tags from the body, document tags, or the tag panel, checks whether automatically collected entries no longer match any enabled collection rule. If entries are affected, one dialog lists the databases and entry counts, even when tags and references are deleted together. Affected databases are selected by default. Confirming with Also remove selected entries deletes the tags or references and removes the selected entries and their field values. Deselect a database to keep its entries and fields. Depending on the deleted content, Delete tags only, Delete references only, or Delete tags and references only keeps all database entries and fields. Canceling abandons the deletion. The source content is kept; undo restores the tags or references, original entries, and field values together. Manually added entries and entries still matching through another reference to the same target or another enabled rule are kept. Renaming a tag or changing only reference anchor text does not open this dialog."
 				}
 			]
 		},
@@ -5682,7 +5767,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". In nested table display, use the control before the first visible field to expand or collapse children; its position follows field order and visibility. In lists, the control appears before the primary field. Item icons stay in the primary field. Gallery, kanban, and calendar views remain flat; item properties expose and edit the relations."
+					"Data": ". In nested table display, use the control before the first visible field to expand or collapse children; its position follows field order and visibility. In lists, the control appears before the primary field. Items without children show a non-interactive gray dot in place of the expansion button, keeping items at the same level aligned. Item icons stay in the primary field. Gallery, kanban, and calendar views remain flat; item properties expose and edit the relations."
 				}
 			]
 		},

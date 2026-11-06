@@ -45,7 +45,8 @@ const setup = (encrypted = ["box"], conflicts = ["box"], commitWait = Promise.re
             },
             querySelectorAll: () => this.modes,
         };
-        constructor(public options: {content: string, width: string, destroyCallback: () => void, beforeClose?: () => boolean}) {
+        constructor(public options: {content: string, width: string,
+            destroyCallback: () => void, beforeClose?: () => boolean}) {
             for (const name of ["password", "password-label", "import", "cancel", "confirm"]) {
                 this.controls.set(`[data-type="${name}"]`, new Control());
             }
@@ -66,7 +67,7 @@ const setup = (encrypted = ["box"], conflicts = ["box"], commitWait = Promise.re
         needsDataImportPassword: (plan: {encrypted: string[], conflicts: string[]}, mode: string) => boolean;
     };
     const dependencies = {
-        Dialog: MockDialog,
+        MobileDialog: MockDialog,
         ContractFormData: class {},
         escapeHtml: (value: string) => value.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
         isMobile: () => true,

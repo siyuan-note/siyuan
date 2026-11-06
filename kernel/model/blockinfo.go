@@ -305,6 +305,14 @@ func GetDOMText(dom string) (ret string) {
 	return
 }
 
+// GetDOMTextWithoutOCRAssets 供发布读者使用，不返回资源的 OCR 文本，避免读取未发布资源的 OCR 缓存。
+func GetDOMTextWithoutOCRAssets(dom string) (ret string) {
+	luteEngine := NewLute()
+	tree := luteEngine.BlockDOM2Tree(dom)
+	ret = renderBlockTextWithoutOCRAssets(tree.Root.FirstChild, nil, true)
+	return
+}
+
 func getBlockRefText(id string, tree *parse.Tree) (ret string) {
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {

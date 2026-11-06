@@ -3,6 +3,8 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {AVTableRowHeights} from "./tableRowHeights";
+import * as groupTableVirtual from "./groupTableVirtual";
 
 for (const viewType of ["table", "list"] as const) {
     test(`${viewType} nested virtual windows reserve every unmounted row at the measured height`, () => {
@@ -12,7 +14,8 @@ for (const viewType of ["table", "list"] as const) {
         }));
         const body = {
             dataset: {groupId: ""}, closest: () => block,
-            querySelectorAll: (): HTMLElement[] => [],
+            querySelectorAll: (selector: string): HTMLElement[] => selector === ".av__row[data-id]" ?
+                rows as unknown as HTMLElement[] : [],
             querySelector: (selector: string): unknown => {
                 if (selector === ".av__row[data-id]") return rows[0];
                 if (selector === ".av__row--util") return {previousElementSibling: rows.at(-1)};
@@ -30,9 +33,12 @@ for (const viewType of ["table", "list"] as const) {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
         }).outputText, {exports, requestAnimationFrame: () => 1,
             require: (name: string) => ({
+                "./columnWindow": {initAVColumnWindow: () => {}},
+                "./groupTableVirtual": groupTableVirtual,
                 "../../../constants": {Constants: {ATTRIBUTE_V_SCROLL: "data-v-scroll"}},
                 "./viewType": {isTableLikeView: (type: string) => type === "table" || type === "list"},
                 "./backlinkScroll": {getBacklinkScrollElement: (): null => null},
+                "./tableRowHeights": {AVTableRowHeights},
                 "./selectionState": {reconcileAVSelectedItemIDs: () => new Set<string>()},
             }[name] || {}),
         });

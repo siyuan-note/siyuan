@@ -9,7 +9,7 @@ const {MarkdownDesktopHost} = require("./host");
 const {windowControls} = require("../fixtures/windowControlsStub.cjs");
 const {isDevToolsShortcut, toggleDevTools} = require("../window/devToolsDock");
 
-const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boolean} = {}) => {
+const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boolean; theme?: string; dark?: boolean} = {}) => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-windows-"));
     const appDirectory = path.join(directory, "app");
     const build = path.join(appDirectory, "stage", "build", "markdown");
@@ -17,6 +17,10 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
     await fs.writeFile(path.join(build, "index.html"), "<!doctype html><title>Markdown</title>");
     await fs.mkdir(path.join(appDirectory, "appearance", "langs"), {recursive: true});
     await fs.writeFile(path.join(appDirectory, "appearance", "langs", "en.json"), JSON.stringify({markdownEditor: "Markdown editor", untitled: "Untitled"}));
+    if (options.theme) {
+        await fs.mkdir(path.join(directory, "config"), {recursive: true});
+        await fs.writeFile(path.join(directory, "config", "preferences.json"), JSON.stringify({version: 1, mode: "ir", fontSize: 16, theme: options.theme}));
+    }
     const windows = [];
     let id = 0;
     class BrowserWindow extends EventEmitter {
@@ -27,6 +31,7 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
             this.webContents.id = ++id;
             this.webContents.mainFrame = {url: ""};
             this.webContents.send = (channel, message) => this.webContents.emit("send", channel, message);
+            this.webContents.setIgnoreMenuShortcuts = value => {this.ignoreMenuShortcuts = value;};
             this.webContents.setWindowOpenHandler = callback => { this.webContents.openHandler = callback; };
             this.webContents.session = {
                 setPermissionRequestHandler: callback => { this.permissionRequest = callback; },
@@ -63,12 +68,14 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
     }
     let receive;
     const opens = [];
+    const reveals = [];
     const dialog = {showMessageBox: async () => ({response: 0}), showOpenDialog: async () => ({canceled: true}), showSaveDialog: async () => ({canceled: true})};
     const host = new MarkdownDesktopHost({directory: path.join(directory, "config", "recovery")});
     let emptied = 0;
     const manager = createMarkdownWindows({app: {getLocale: () => "en"}, BrowserWindow,
+        nativeTheme: Object.assign(new EventEmitter(), {shouldUseDarkColors: options.dark ?? false}),
         ipcMain: {handle: (_channel, callback) => { receive = callback; }}, dialog,
-        shell: {openExternal: async url => opens.push(url)}, rootDirectory: appDirectory,
+        shell: {openExternal: async url => opens.push(url), showItemInFolder: file => reveals.push(file)}, rootDirectory: appDirectory,
         configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++,
         // 标题栏按钮区由主进程注入，Markdown 模块不直接依赖 window 目录。
         windowControls,
@@ -86,8 +93,87 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
         assert.equal(path.dirname(path.resolve(directory)), path.resolve(os.tmpdir()));
         await fs.rm(directory, {recursive: true, force: true, maxRetries: 3});
     });
-    return {directory, build, manager, host, windows, call, dialog, opens, emptied: () => emptied};
+    return {directory, build, manager, host, windows, call, dialog, opens, reveals, emptied: () => emptied};
 };
+
+test("revealing a file uses only the current authorized target and ignores renderer paths", async t => {
+    const {directory, manager, call, reveals} = await fixture(t);
+    const unsaved = await manager.open();
+    await call(unsaved, "reveal-file", "untrusted.md");
+    assert.deepEqual(reveals, []);
+    const file = path.join(directory, "reveal.md");
+    await fs.writeFile(file, "# File\n");
+    const window = await manager.open(file);
+    await call(window, "reveal-file", "untrusted.md");
+    assert.deepEqual(reveals, [await fs.realpath(file)]);
+});
+
+test("sidebar shortcuts follow their opening workspace and update without changing unrelated windows", async t => {
+    const {manager, call} = await fixture(t, {platform: "win32"});
+    const first = {fileTree: ["⌥3", "⇧⌘J"], outline: ["⌥4"]};
+    const second = {fileTree: ["⌥5"], outline: []};
+    manager.updateKeymap("workspace-a", first);
+    manager.updateKeymap("workspace-b", second);
+    const a = await manager.open(undefined, undefined, "workspace-a");
+    const b = await manager.open(undefined, undefined, "workspace-b");
+    const standalone = await manager.open();
+    assert.deepEqual((await call(a, "bootstrap")).keymap, first);
+    assert.deepEqual((await call(b, "bootstrap")).keymap, second);
+    assert.deepEqual((await call(standalone, "bootstrap")).keymap, {fileTree: ["⌥1"], outline: ["⌥2"]});
+    const events = [];
+    for (const [id, window] of [["a", a], ["b", b], ["standalone", standalone]]) {
+        window.webContents.on("send", (_channel, message) => {if (message.type === "keymap") events.push({id, keymap: message.keymap});});
+    }
+    const update = {fileTree: [], outline: ["⌥8"]};
+    manager.updateKeymap("workspace-a", update);
+    manager.updateKeymap("workspace-a", update);
+    b.emit("focus");
+    assert.deepEqual(events, [{id: "a", keymap: update}]);
+    assert.deepEqual((await call(a, "bootstrap")).keymap, update);
+    assert.deepEqual((await call(b, "bootstrap")).keymap, second);
+    manager.updateKeymap("workspace-a", {fileTree: "invalid", outline: []});
+    assert.deepEqual((await call(a, "bootstrap")).keymap, update);
+});
+
+test("documents opened or created from a Markdown window inherit its shortcut source", async t => {
+    const {manager, windows, call, dialog, directory} = await fixture(t, {platform: "darwin"});
+    const keymap = {fileTree: ["⌥1"], outline: []};
+    manager.updateKeymap("source", keymap);
+    const parent = await manager.open(undefined, undefined, "source");
+    await call(parent, "new");
+    assert.deepEqual((await call(windows.at(-1), "bootstrap")).keymap, keymap);
+    const file = path.join(directory, "another.md");
+    await fs.writeFile(file, "# another");
+    dialog.showOpenDialog = async () => ({canceled: false, filePaths: [file]});
+    await call(parent, "open");
+    assert.deepEqual((await call(windows.at(-1), "bootstrap")).keymap, keymap);
+    const standalone = await manager.open();
+    assert.deepEqual((await call(standalone, "bootstrap")).keymap, {fileTree: ["⌃1"], outline: ["⌃2"]});
+});
+
+test("native menus are suppressed only for configured panel shortcuts and restored after release", async t => {
+    const {manager} = await fixture(t, {platform: "darwin"});
+    manager.updateKeymap("source", {fileTree: ["⌘Z"], outline: []});
+    const window = await manager.open(undefined, undefined, "source");
+    const key = {type: "keyDown", key: "z", code: "KeyZ", meta: true, control: false, alt: false,
+        shift: false, isAutoRepeat: false, isComposing: false};
+    const send = overrides => window.webContents.emit("before-input-event", {
+        preventDefault: () => assert.fail("Native suppression must still deliver the sidebar event to the renderer"),
+    }, {...key, ...overrides});
+    send({});
+    assert.equal(window.ignoreMenuShortcuts, true);
+    send({isAutoRepeat: true});
+    assert.equal(window.ignoreMenuShortcuts, true);
+    send({type: "keyUp"});
+    assert.equal(window.ignoreMenuShortcuts, false);
+    send({isComposing: true});
+    assert.equal(window.ignoreMenuShortcuts, false);
+    send({key: "q", code: "KeyQ"});
+    assert.equal(window.ignoreMenuShortcuts, false);
+    manager.updateKeymap("source", {fileTree: [], outline: []});
+    send({});
+    assert.equal(window.ignoreMenuShortcuts, false);
+});
 
 test("Markdown scheme registration grants only required local browser capabilities", () => {
     let registered;
@@ -95,6 +181,85 @@ test("Markdown scheme registration grants only required local browser capabiliti
     assert.equal(registered.length, 1);
     assert.equal(registered[0].scheme, "siyuan-markdown");
     assert.deepEqual(registered[0].privileges, {standard: true, secure: true, supportFetchAPI: true, corsEnabled: true});
+});
+
+test("file watching reports consecutive external saves including a return to the opening content", async t => {
+    const {directory, manager, call} = await fixture(t);
+    const file = path.join(directory, "watched.md");
+    await fs.writeFile(file, "# Original\n");
+    const window = await manager.open(file);
+    const initial = await call(window, "bootstrap");
+    let target = initial.target;
+    let revision = 0;
+    for (const content of ["# Original1\n", "# Original\n", "# Third version\n"]) {
+        const changed = new Promise<void>((resolve, reject) => {
+            const timer = setTimeout(() => {window.webContents.off("send", receive); reject(new Error("External save was not reported"));}, 2500);
+            const receive = (_channel, message) => {
+                if (message.type !== "external-change") return;
+                clearTimeout(timer);
+                window.webContents.off("send", receive);
+                resolve();
+            };
+            window.webContents.on("send", receive);
+        });
+        await fs.writeFile(file, content);
+        await changed;
+        const result = await call(window, "host:read", {sessionId: initial.sessionId, operationId: initial.sessionId + ":read:" + ++revision,
+            targetGeneration: 0, target});
+        assert.equal(result.kind, "read");
+        assert.equal(result.content, content);
+        assert.notEqual(result.target.baseline, target.baseline);
+        target = result.target;
+    }
+    assert.equal(await fs.readFile(file, "utf8"), "# Third version\n");
+});
+
+test("initial window and served page use the effective theme before rendering", async t => {
+    for (const [theme, systemDark, expectedDark] of [["dark", false, true], ["light", true, false], ["system", true, true], ["system", false, false]] as const) {
+        await t.test(`${theme}, system dark ${systemDark}`, async t => {
+            const {build, manager} = await fixture(t, {theme, dark: systemDark});
+            const html = '<!doctype html><link id="markdownThemeStyle" rel="stylesheet" href="./appearance/themes/daylight/theme.css">';
+            await fs.writeFile(path.join(build, "index.html"), html);
+            await fs.writeFile(path.join(build, "unchanged.js"), 'const theme = "./appearance/themes/daylight/theme.css";');
+            const window = await manager.open();
+            assert.equal(window.options.backgroundColor, expectedDark ? "#1e1e1e" : "#fff");
+            const response = await window.request(new Request(window.url));
+            assert.equal(response.status, 200);
+            assert.equal(await response.text(), expectedDark ? html.replace("/daylight/", "/midnight/") : html);
+            assert.match(response.headers.get("Content-Security-Policy"), /script-src 'self'/);
+            const script = await window.request(new Request(new URL("unchanged.js", window.url)));
+            assert.match(await script.text(), /daylight/);
+        });
+    }
+});
+
+test("invalid startup preferences show an error without allocating an editor session", async t => {
+    const {directory, manager, dialog, windows, host} = await fixture(t);
+    await fs.mkdir(path.join(directory, "config"), {recursive: true});
+    await fs.writeFile(path.join(directory, "config", "preferences.json"), "invalid");
+    let errors = 0;
+    dialog.showMessageBox = async () => {errors++; return {response: 0};};
+    await manager.open();
+    assert.equal(errors, 1);
+    assert.equal(windows.length, 0);
+    assert.equal(host.sessions.size, 0);
+});
+
+test("invalid preferences during recovery keep the migrated durable draft available", async t => {
+    const {directory, manager, host, call, windows} = await fixture(t);
+    const window = await manager.open();
+    const {sessionId} = await call(window, "bootstrap");
+    await call(window, "host:putDraft", {sessionId, operationId: sessionId + ":test:1", targetGeneration: 0,
+        revision: 1, content: "recoverable content", format: {bom: false, newline: "\n"}});
+    window.webContents.emit("render-process-gone");
+    const controller = await manager.open();
+    await fs.writeFile(path.join(directory, "config", "preferences.json"), "invalid");
+    await call(controller, "recover", sessionId);
+    assert.equal(windows.length, 2);
+    const {records} = await host.listRecoveries();
+    assert.equal(records.length, 1);
+    assert.notEqual(records[0].watermark.sessionId, sessionId);
+    assert.equal((await host.recovery.read(records[0].watermark.sessionId)).draft.content, "recoverable content");
 });
 
 test("file launches with reordered switches reuse one window and never add an untitled editor", async t => {
@@ -220,7 +385,7 @@ test("DevTools shortcuts toggle only the receiving window and ignore repeats and
     }
 });
 
-test("static protocol rejects traversal, cross-session resources and all external requests", async t => {
+test("static protocol confines local resources and network access permits only HTTP image GET requests", async t => {
     const {directory, manager} = await fixture(t);
     const window = await manager.open();
     const origin = new URL(window.url);
@@ -230,6 +395,7 @@ test("static protocol rejects traversal, cross-session resources and all externa
     assert.match(await response.text(), /Markdown/);
     assert.match(response.headers.get("content-security-policy"), /frame-src 'none'/);
     assert.equal(response.headers.get("content-security-policy").includes("unsafe-eval"), false);
+    assert.match(response.headers.get("content-security-policy"), /img-src [^;]*http: https:/);
     await fs.writeFile(path.join(directory, "private.txt"), "secret");
     for (const url of [base + "/..%2f..%2fprivate.txt", window.url.replace(origin.hostname, "foreign"),
         "file:///private.txt", "https://example.com/file", base + "/resource/missing"]) {
@@ -244,6 +410,20 @@ test("static protocol rejects traversal, cross-session resources and all externa
     let cancelled;
     window.network({url: window.url}, result => { cancelled = result.cancel; });
     assert.equal(cancelled, false);
+    for (const url of ["https://example.com/badge.svg?label=release", "http://example.com/photo.png"]) {
+        window.network({url, resourceType: "image", method: "GET"}, result => {cancelled = result.cancel;});
+        assert.equal(cancelled, false);
+        for (const resourceType of ["script", "xhr", "subFrame", "media", "mainFrame"]) {
+            window.network({url, resourceType, method: "GET"}, result => {cancelled = result.cancel;});
+            assert.equal(cancelled, true, resourceType);
+        }
+    }
+    for (const url of ["file:///private.png", "https://user:password@example.com/a.png", "https://siyuan-markdown.local/resource/foreign/token"]) {
+        window.network({url, resourceType: "image", method: "GET"}, result => {cancelled = result.cancel;});
+        assert.equal(cancelled, true);
+    }
+    window.network({url: "https://example.com/a.png", resourceType: "image", method: "POST"}, result => {cancelled = result.cancel;});
+    assert.equal(cancelled, true);
 });
 
 test("Markdown Lute URL serves only the single installed shared runtime with the page CSP", async t => {

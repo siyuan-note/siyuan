@@ -1,7 +1,7 @@
 {
   "name": "SiYuan",
   "desktopName": "org.b3log.siyuan",
-  "version": "3.8.10-alpha.4",
+  "version": "3.8.10-alpha.6",
   "description": "From thought to insight, with agents",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron-dist/main.js",
@@ -107,7 +107,7 @@
     "tsx": "^4.23.15",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "unzipper": "0.12.5",
-    "vditor": "4.0.1",
+    "vditor": "4.0.2-alpha.3",
     "webpack": "^5.104.1",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^7.2.3"

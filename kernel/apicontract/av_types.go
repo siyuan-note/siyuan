@@ -262,10 +262,18 @@ type AVSelectOption struct {
 }
 
 type AVRelation struct {
-	AvID             string          `json:"avID" api:"optional,nullable"`
-	IsTwoWay         bool            `json:"isTwoWay" api:"optional,nullable"`
-	BackKeyID        string          `json:"backKeyID" api:"optional,nullable"`
-	CandidateFilters []*AVViewFilter `json:"candidateFilters,omitempty" api:"optional,nullable"`
+	DetailView       *AVRelationDetailView `json:"detailView,omitempty" api:"optional,nullable"`
+	AvID             string                `json:"avID" api:"optional,nullable"`
+	IsTwoWay         bool                  `json:"isTwoWay" api:"optional,nullable"`
+	BackKeyID        string                `json:"backKeyID" api:"optional,nullable"`
+	CandidateFilters []*AVViewFilter       `json:"candidateFilters,omitempty" api:"optional,nullable"`
+}
+
+// AVRelationDetailView 引用目标数据库的已有表格；未知 spec 保留在存储中但不能启用。
+type AVRelationDetailView struct {
+	Spec    int    `json:"spec"`
+	Enabled bool   `json:"enabled"`
+	ViewID  string `json:"viewID"`
 }
 
 type AVRollup struct {
@@ -456,9 +464,11 @@ type AVNewItemTemplate struct {
 	SaveLocation        *AVNewItemSaveLocation          `json:"saveLocation,omitempty" api:"optional,nullable"`
 	ContentTemplatePath string                          `json:"contentTemplatePath,omitempty" api:"optional,nullable"`
 	HideInFileTree      bool                            `json:"hideInFileTree,omitempty" api:"optional,nullable"`
-	// 创建后是否由交互客户端分屏打开绑定或游离条目。省略或 null 时仅日历条目自动打开；false 禁止自动打开。
+	// 创建后是否由交互客户端打开绑定或游离条目。省略或 null 时仅日历条目自动打开；false 禁止自动打开。
 	// 该配置随模板保存，API 调用本身不会打开界面；移动端使用已有的页面或弹层。
 	OpenAfterCreate *bool `json:"openAfterCreate,omitempty" api:"optional,nullable"`
+	// 自动打开时使用当前分屏；false 或省略时向右分屏打开。
+	OpenInCurrentTab bool `json:"openInCurrentTab,omitempty" api:"optional,nullable"`
 }
 
 type AVNewItemFieldValue struct {
@@ -627,6 +637,8 @@ type AVAvSearchResult struct {
 }
 
 type AVBlockAttributeViewKeys struct {
+	// NotebookID 来自已验证的实际载体、绑定块或加密域；普通无载体未绑定条目可为空。
+	NotebookID    string                         `json:"notebookID,omitempty" api:"optional,nullable"`
 	AvID          string                         `json:"avID" api:"optional,nullable"`
 	AvName        string                         `json:"avName" api:"optional,nullable"`
 	CustomColors  []*AVAttributeViewCustomColor  `json:"customColors" api:"optional,nullable"`
@@ -708,6 +720,8 @@ type AVCreateAttributeViewItemResult struct {
 	Warnings   []string `json:"warnings,omitempty" api:"optional,nullable"`
 	// 返回实际使用模板的自动打开偏好；省略时交互客户端按仅日历条目自动打开处理。此字段不会触发服务端界面操作。
 	OpenAfterCreate *bool `json:"openAfterCreate,omitempty" api:"optional,nullable"`
+	// 自动打开时使用当前分屏；false 或省略时向右分屏打开。
+	OpenInCurrentTab bool `json:"openInCurrentTab,omitempty" api:"optional,nullable"`
 }
 
 type AVCreateAttributeViewItemDocsResult struct {

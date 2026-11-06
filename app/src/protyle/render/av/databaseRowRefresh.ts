@@ -1,3 +1,5 @@
+import {notifyAVHostRefresh} from "./host";
+
 interface IDatabaseRowRefreshRegistration {
     getAVID: () => string;
     refresh: () => void;
@@ -28,6 +30,7 @@ export const registerDatabaseRowRefresh = (protyleID: string, options: {
 };
 
 export const queueDatabaseRowRefresh = (protyleID: string, avID: string) => {
+    notifyAVHostRefresh(protyleID, avID);
     const registration = refreshRegistrations.get(protyleID);
     if (!registration || registration.getAVID() !== avID) {
         return;

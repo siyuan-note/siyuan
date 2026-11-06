@@ -6,21 +6,25 @@ import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const source = createSourceFile("protyle.ts", readFileSync(join(__dirname, "protyle.ts"), "utf8"), ScriptTarget.Latest);
-const declaration = source.statements.find(node => isVariableStatement(node) &&
-    node.declarationList.declarations.some(item => item.name.getText(source) === "renderAssetList"));
-assert.ok(declaration);
+const declarations = ["renderAssetPreview", "renderAssetList"].map(name => {
+    const declaration = source.statements.find(node => isVariableStatement(node) &&
+        node.declarationList.declarations.some(item => item.name.getText(source) === name));
+    assert.ok(declaration);
+    return declaration.getText(source);
+}).join("\n");
 
 const fixture = (mobile: boolean) => {
-    const code = declaration.getText(source).replace(
+    const code = declarations.replace(
         /\/\/\/ #if MOBILE\s*([\s\S]*?)\/\/\/ #else\s*([\s\S]*?)\/\/\/ #endif/g,
         (_match, mobileCode, desktopCode) => mobile ? mobileCode : desktopCode,
     );
     const calls: string[] = [];
+    const previews: string[] = [];
     let current = true;
     const responses: Array<(response: {data: Array<{path: string, hName: string}>}) => void> = [];
     const input = {select: () => calls.push("select")};
     const list = {innerHTML: ""};
-    const preview = {innerHTML: ""};
+    const preview = {innerHTML: "", dataset: {} as Record<string, string>};
     const element = {querySelector: (selector: string) => selector === "input" ? input :
         selector === ".b3-list" ? list : preview};
     const render = runInNewContext(transpileModule(code + "\nrenderAssetList;", {
@@ -28,7 +32,7 @@ const fixture = (mobile: boolean) => {
     }).outputText, {
         isMobile: () => mobile,
         fetchPost: (_url: string, _data: unknown, callback: typeof responses[number]) => responses.push(callback),
-        renderAssetsPreview: (path: string) => path,
+        renderAssetsPreview: (path: string) => { previews.push(path); return path; },
         window: {siyuan: {languages: {emptyContent: "Empty"}, menus: {menu: {
             fullscreen: () => calls.push("fullscreen"), popup: () => calls.push("popup"),
         }}}},
@@ -36,7 +40,7 @@ const fixture = (mobile: boolean) => {
     const session = {isCurrent: () => current, show: (show: () => void) => show()};
     const search = (query: string, initial = false) => render(element, query, {}, [], session, initial);
     const respond = (items = [{path: "assets/example.png", hName: "example.png"}]) => responses.shift()({data: items});
-    return {calls, input, list, preview, search, respond, close: () => { current = false; }};
+    return {calls, previews, input, list, preview, search, respond, close: () => { current = false; }};
 };
 
 test("mobile asset searches update results without reopening the sheet or stealing input focus", () => {
@@ -69,3 +73,20 @@ test("desktop asset searches keep popup positioning and empty-query selection", 
     assert.deepEqual(f.calls, ["popup", "select", "popup", "popup", "select"]);
     assert.equal(f.preview.innerHTML, "assets/example.png");
 });
+
+for (const mobile of [false, true]) {
+    test(`asset previews reuse the same resource and reset after empty results (mobile=${mobile})`, () => {
+        const f = fixture(mobile);
+        f.search("", true);
+        f.respond();
+        f.search("example");
+        f.respond();
+        assert.deepEqual(f.previews, ["assets/example.png"]);
+        f.search("empty");
+        f.respond([]);
+        assert.equal(f.preview.innerHTML, "Empty");
+        f.search("example");
+        f.respond();
+        assert.deepEqual(f.previews, ["assets/example.png", "assets/example.png"]);
+    });
+}

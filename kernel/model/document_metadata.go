@@ -90,6 +90,10 @@ func recoverOpenedDocumentMetadata() {
 			continue
 		}
 		if err := recoverDocumentMetadata(box.ID); err != nil {
+			if errors.Is(err, treenode.ErrDocumentMetadataUnavailable) {
+				indexBox(box.ID)
+				continue
+			}
 			logging.LogErrorf("recover document metadata [%s] failed: %s", box.ID, err)
 		}
 	}

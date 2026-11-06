@@ -26,6 +26,7 @@ const fixture = (geometryAvailable = true) => {
     }
     let dialog: any;
     const dependencies = {
+        clearReloadSnapshot: () => {},
         Layout,
         Constants: {LOCAL_LAYOUTS: "layouts", LOCAL_FILESPATHS: "paths",
             SIYUAN_WINDOW_WORKSPACE_GET_OPEN: "siyuan-window-workspace-get-open"},

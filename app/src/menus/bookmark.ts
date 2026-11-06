@@ -1,8 +1,8 @@
 import {toggleMenu} from "./menuToggle";
 import {MenuItem} from "./Menu";
-import {openInputDialog} from "../dialog/inputDialog";
-import {fetchPost} from "../util/fetch";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {escapeHtml} from "../util/escape";
 import {copySubMenu} from "./commonMenuItem";
 import {Bookmark} from "../layout/dock/Bookmark";
@@ -25,13 +25,15 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
                         const dialog = openInputDialog({
                             title: window.siyuan.languages.rename,
                             value: oldBookmark,
-                            onConfirm: (value, dialog) => {
-                                fetchPost("/api/bookmark/renameBookmark", {
+                            awaitConfirm: true,
+                            onConfirm: async (value, dialog) => {
+                                const response = await fetchSyncPost("/api/bookmark/renameBookmark", {
                                     oldBookmark,
                                     newBookmark: value
-                                }, () => {
-                                    dialog.destroy();
                                 });
+                                if (response.code !== 0) return false;
+                                dialog.destroy();
+                                return true;
                             },
                         });
                         dialog.element.setAttribute("data-key", Constants.DIALOG_RENAMEBOOKMARK);

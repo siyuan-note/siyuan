@@ -21,7 +21,7 @@ const runElectron = async () => {
             section("        const buildExportConfig =", "        const reserveEmbeddedAssetSpace =")
                 .replaceAll("${currentWindowId}", "0")
                 .replaceAll("${toScriptLiteral(`${window.siyuan.languages.export} PDF`)}", '"Export PDF"') +
-            section("            const isPaged =", "            exportConfig.filePaths =");
+            section("            const isPaged =", "            exportConfig.filePath =");
         const css = require("sass").compile(path.join(__dirname, "../src/assets/scss/export.scss")).css;
         const desktopCSS = section("        body {", "        ${await setInlineStyle(false, servePath)}");
         const mobileStart = source.indexOf("css: `@page") + "css: `".length;

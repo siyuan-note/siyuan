@@ -121,7 +121,7 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     const search = () => menuElement.querySelector<HTMLInputElement>('[data-type="font-family-search"]');
     const swipeDown = async () => {
         const rect = menuElement.firstElementChild.getBoundingClientRect();
-        await require("electron").ipcRenderer.invoke("font-swipe", rect.left + rect.width / 2, rect.top + rect.height / 2);
+        await require("electron").ipcRenderer.invoke("font-swipe", rect.left + rect.width / 2, rect.top + rect.height / 2, innerHeight - 1);
         await settle();
     };
     for (const theme of themes) {
@@ -263,21 +263,22 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     search().dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     check.equal(document.activeElement, button, "desktop Escape returns focus to the dropdown");
     check.ok(menuElement.classList.contains("fn__none"));
-    check.equal(menuElement.hasAttribute("data-sheet-actions"), false, "closing clears the font-only action preference");
     mobile = true;
     menuElement.setAttribute("data-sheet-expandable", "true");
     menu.addItem({label: "Other menu"});
     menu.fullscreen("bottom");
     await settle();
-    check.ok(menuElement.querySelector('[data-type="sheet-expand"]'), "other expandable menus keep their fullscreen button");
-    await tap(menuElement.querySelector('[data-type="sheet-close"]'));
+    check.equal(menuElement.querySelector('[data-type="sheet-expand"]'), null, "all drawers omit fullscreen buttons");
+    check.equal(menuElement.querySelector('[data-type="sheet-close"]'), null);
+    menuElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+    await settle();
     check.ok(menuElement.classList.contains("fn__none"));
     return "Font menu touch and layout cases passed";
 };
 
 test("font menus show loading for list requests and previews while retaining mobile and desktop interactions", {timeout: 45000}, async () => {
     const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
-        "menus/menuToggle", "plugin/Menu", "util/setPosition", "protyle/util/hasClosest", "protyle/toolbar/fontFamilyMenu",
+        "mobile/util/mobileSheetGesture", "menus/menuToggle", "plugin/Menu", "util/setPosition", "protyle/util/hasClosest", "protyle/toolbar/fontFamilyMenu",
         "protyle/toolbar/fontFamilyCore", "util/systemFontCore", "util/fontPreview", "util/escape", "util/upDownHint"];
     const sources = Object.fromEntries(names.map(name => [name, transpileModule(readFileSync(path.join(__dirname, "../..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
@@ -315,9 +316,9 @@ app.whenReady().then(async () => {
         await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchStart", touchPoints:[{x,y}]});
         await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchEnd", touchPoints:[]});
     });
-    ipcMain.handle("font-swipe", async (_event, x, y) => {
+    ipcMain.handle("font-swipe", async (_event, x, y, endY) => {
         await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchStart", touchPoints:[{x,y}]});
-        await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchMove", touchPoints:[{x,y:y+150}]});
+        await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchMove", touchPoints:[{x,y:endY}]});
         await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchEnd", touchPoints:[]});
     });
     ipcMain.handle("font-resize", (_event, height) => win.setContentSize(420, height));

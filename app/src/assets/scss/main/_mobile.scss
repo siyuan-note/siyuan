@@ -33,6 +33,21 @@ html[data-frontend="mobile"] body.body--android {
     z-index: 5;
   }
 
+  .mobile-bottom-sheet-dialog .b3-dialog,
+  .mobile-sheet-layout {
+    padding-bottom: 0;
+  }
+
+  // 安全区由面板内部预留，背景随面板铺到手势区，按钮仍位于手势条上方。
+  .mobile-bottom-sheet,
+  .mobile-sheet-panel {
+    padding-bottom: var(--android-navigation-bar-height, 0px);
+  }
+
+  .sync-checkout__panel.mobile-sheet-panel {
+    padding-bottom: calc(24px + var(--android-navigation-bar-height, 0px));
+  }
+
   .side-panel > .b3-list--mobile {
     > [data-type="sidebar-bookmark"] > .bookmarkList::after,
     > [data-type="sidebar-tag"] > .tagList::after,
@@ -1939,6 +1954,33 @@ body.mobile-topbar--merged {
 }
 
 .mobile-bottom-sheet-dialog {
+  .mobile-sheet-action-bar {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    flex-shrink: 1;
+    min-height: 0;
+    overflow-y: auto;
+    align-items: stretch;
+    padding-inline: 16px;
+    gap: 12px;
+  }
+
+  .mobile-sheet-action-group {
+    display: grid;
+    flex-shrink: 0;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+    gap: 12px;
+    width: 100%;
+
+    > .b3-button {
+      min-width: 0;
+    }
+
+    &--stacked {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
   .b3-dialog__scrim {
     background-color: transparent;
   }
@@ -1999,6 +2041,47 @@ body.mobile-topbar--merged {
   padding: var(--mobile-top-safe-area) env(safe-area-inset-right) var(--mobile-bottom-bar-safe-area) env(safe-area-inset-left);
 }
 
+.mobile-bottom-sheet-dialog .mobile-sheet-panel--compact {
+  > .b3-dialog__header {
+    display: none;
+  }
+
+  .b3-dialog__content {
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+// 横屏输入法占满屏幕时，让有限的高度留给输入区和底部操作。
+@media (max-height: 160px) {
+  .mobile-bottom-sheet-dialog .b3-dialog__header {
+    display: none;
+  }
+
+  .mobile-bottom-sheet-dialog .b3-dialog__content {
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+.mobile-sheet-layout--standalone {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  > .mobile-sheet-panel {
+    position: relative;
+    inset: auto;
+    transform: none;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+  }
+}
+
 .mobile-sheet-panel {
   min-height: 0;
   overflow: auto;
@@ -2009,9 +2092,23 @@ body.mobile-topbar--merged {
 
   > .b3-dialog__body {
     min-height: 0;
-    overflow: auto;
-    flex: 0 1 auto;
+    overflow: hidden;
+    flex: 1 1 auto;
   }
+}
+
+.tag-rename__suggestions {
+  min-width: 0;
+  max-height: 30vh;
+  overflow: auto;
+}
+
+.mobile-av-richtext-sheet .av__richtext-editor--sheet {
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  max-height: none;
+  flex: 1;
 }
 
 .mobile-document-title-dialog {
@@ -2328,9 +2425,10 @@ body.mobile-topbar--merged {
       display: inline-flex;
     }
 
-    .av__row-more {
-      display: none;
-    }
+  }
+
+  .av:not([data-av-host]) .av__cell[data-dtype="block"]:not(.av__cell--header) .av__row-actions .av__row-more {
+    display: none;
   }
 }
 

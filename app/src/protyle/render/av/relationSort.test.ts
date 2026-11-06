@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {transpileModule, ScriptTarget} from "typescript";
+import {getAVHostBlockID} from "./host";
 
 it("keeps the footer loader hidden while refreshing existing candidates", () => {
     const source = readFileSync(join(__dirname, "relation.ts"), "utf8");
@@ -19,7 +20,10 @@ it("keeps the footer loader hidden while refreshing existing candidates", () => 
             getSelectedItems: (): {id: string}[] => [],
             setLoading: (show: boolean) => loading.push(show),
             relationElement: {dataset: {}, getAttribute: () => "database"},
-            options: {blockElement: {getAttribute: () => "carrier"}},
+            options: {blockElement: {dataset: {nodeId: "carrier"}, getAttribute: () => "carrier"}},
+            getAVHostBlockID,
+            sourceIsCurrent: () => true,
+            cellScope: {context: undefined as undefined},
             RELATION_PAGE_SIZE: 16,
             fetchPost: () => ({finally() {}}),
         };

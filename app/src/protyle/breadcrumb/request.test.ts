@@ -15,10 +15,12 @@ const fixture = () => {
     const exports: any = {};
     runInNewContext(compiled, {
         exports,
+        window: {siyuan: {config: {editor: {globalBreadcrumb: false}}}},
         require: () => ({
             waitForPendingTransactions: () => pending,
             refreshUndoButtons: (): void => undefined,
             improveBreadcrumbAppearance: (): void => undefined,
+            getGlobalBreadcrumb: async (blocks: unknown) => blocks,
             fetchPost: (_url: string, data: any, callback: (response: any) => void) => {
                 requests.push({data, callback});
             },
@@ -73,8 +75,8 @@ test("late breadcrumb responses cannot overwrite a newer selection", async () =>
     f.commit();
     await f.breadcrumb.render(f.protyle, true, f.block("first-copy"));
     await f.breadcrumb.render(f.protyle, true, f.block("second-copy"));
-    f.requests[0].callback({data: []});
+    await f.requests[0].callback({data: []});
     assert.equal(f.breadcrumb.element.innerHTML, "previous");
-    f.requests[1].callback({data: []});
+    await f.requests[1].callback({data: []});
     assert.equal(f.breadcrumb.element.innerHTML, "");
 });

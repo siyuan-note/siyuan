@@ -105,6 +105,7 @@ const cases = async (source, fullSource, css) => {
         getHorizontalSuperBlockChild: noop, getEmbedGutterOperationContext: noop, isInEmbedBlock: noop,
         isInAVBlock: noop, hasViewFoldContext: noop, getGutterFixedContainerRect: noop,
         isMobile: () => mobile, isWindow: noop, isTabGutterBridge: noop, isMac: noop,
+        updateStatusBarHover: noop,
         getAllModels: () => ({editor: [{editor: {protyle}}], backlink: []}), getAllEditor: () => [{protyle}],
         isGutterInsertStateMatched: (count, insert) => count === (insert ? 4 : 0),
         getBlockTypeName: type => type, getIconByType: () => "iconTest",

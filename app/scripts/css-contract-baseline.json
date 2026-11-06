@@ -735,6 +735,12 @@
         "src/layout/dock/Tag.ts"
       ]
     },
+    "vditor-ir__marker--link": {
+      "reason": "Vditor 即时渲染链接标记的协议类，样式由依赖包 dist/index.css 提供",
+      "references": [
+        "src/markdown/link.ts"
+      ]
+    },
     "window-controls__item--disabled": {
       "reason": "现有最小化事件的禁用标识检查；是否保留外部设置该状态的接口需另行确认",
       "references": [

@@ -37,6 +37,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     const requests: string[] = [];
     const never = () => new Promise<void>(() => {});
     const dependencies = {...api, Constants: {PROTYLE_CDN: "cdn"},
+        getAVRelationHost: (): undefined => undefined,
         addStyle: () => {}, addScript: (url: string) => { requests.push(url); return never(); },
         loadECharts: () => { requests.push("echarts"); return never(); },
     };

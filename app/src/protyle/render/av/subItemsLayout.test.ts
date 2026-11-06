@@ -42,10 +42,10 @@ const getRowsHTML = () => {
     const {getRowHTML} = load<typeof import("./row")>("row");
     const result = ["table", "list"].map(type => {
         const data = {columns: [{id: "title", type: "block", width: "340px", wrap: true, align: "left"}], showIcon: false} as IAVTable;
-        const rows = [0, 2].map(depth => getRowHTML({type: type as TAVView, data, rowIndex: depth, row: {
-            id: `${type}-${depth}`, hierarchy: {depth, expanded: false, childCount: 2, context: false},
+        const rows = [0, 2].flatMap(depth => [false, true].map(leaf => getRowHTML({type: type as TAVView, data, rowIndex: depth, row: {
+            id: `${type}-${leaf ? "leaf-" : ""}${depth}`, hierarchy: {depth, expanded: false, childCount: leaf ? 0 : 2, context: false},
             cells: [{id: "value", valueType: "block", value: {type: "block", isDetached: true, block: {content: "Title"}}}],
-        } as IAVRow})).join("");
+        } as IAVRow}))).join("");
         const footer = "<div class=\"av__row--util\"><div class=\"av__colsticky\"><button class=\"b3-button av__button\" data-type=\"av-add-bottom\"><span>Add entry</span></button><span class=\"fn__space\"></span><span class=\"ft__on-surface av__sub-items-count\">2 roots, 5 matches</span></div></div>";
         return `<div class="av" data-av-type="${type}" data-sub-items-nested><div class="av__container"><div class="av__scroll"><div class="av__body" data-group-id="">${rows}${footer}</div></div></div></div>`;
     }).join("");
@@ -68,9 +68,9 @@ const getRowsHTML = () => {
 const checkLayout = (mobile: boolean, clickCode: string) => {
     const check = require("node:assert/strict");
     const navigated: HTMLElement[] = [];
-    const click = new Function("getAVTemplateInteractiveElement", "isOnlyMeta", "hasClosestByClassName",
+    const click = new Function("prepareAVColumnWindow", "getAVTemplateInteractiveElement", "isOnlyMeta", "hasClosestByClassName",
         "hasClosestBlock", "navigateSubItems", "isCardCoverPositioning", clickCode + "\nreturn avClick;")(
-        (): null => null, () => false, (element: HTMLElement, name: string) => element.closest("." + name),
+        () => {}, (): null => null, () => false, (element: HTMLElement, name: string) => element.closest("." + name),
         (element: HTMLElement) => element.closest(".av"), (element: HTMLElement) => { navigated.push(element); return true; },
         () => false);
     for (const type of ["table", "list"]) {
@@ -87,6 +87,24 @@ const checkLayout = (mobile: boolean, clickCode: string) => {
                 const text = range.getBoundingClientRect();
                 check.ok(Math.abs((text.top + text.bottom - label.top - label.bottom) / 2) <= 1,
                     `count and add-entry text must be vertically centered at ${fontSize}px`);
+            }
+            for (const depth of [0, 2]) {
+                const parent = block.querySelector(`[data-id="${type}-${depth}"]`);
+                const leaf = block.querySelector(`[data-id="${type}-leaf-${depth}"]`);
+                const slot = leaf.querySelector<HTMLElement>(".av__sub-items-space");
+                const marker = slot.querySelector("svg").getBoundingClientRect();
+                const arrow = parent.querySelector(".av__sub-items button svg").getBoundingClientRect();
+                const bounds = slot.getBoundingClientRect();
+                check.equal(bounds.width, 24);
+                check.equal(bounds.height, 24);
+                check.equal((marker.left + marker.right) / 2, (arrow.left + arrow.right) / 2);
+                check.equal((marker.top + marker.bottom) / 2, (bounds.top + bounds.bottom) / 2);
+                check.equal(leaf.querySelector(".av__celltext").getBoundingClientRect().left,
+                    parent.querySelector(".av__celltext").getBoundingClientRect().left);
+                check.equal(slot.getAttribute("aria-hidden"), "true");
+                check.equal(slot.querySelector("button, [tabindex], [data-type]"), null);
+                check.equal(getComputedStyle(slot).pointerEvents, "none");
+                check.equal(getComputedStyle(slot).color, getComputedStyle(count).color);
             }
         }
         document.body.style.fontSize = "16px";
@@ -165,7 +183,7 @@ const checkLayout = (mobile: boolean, clickCode: string) => {
     return "sub-items-layout-ok";
 };
 
-const testLayout = (stylesheet: string) => test(`${stylesheet} table/list tree titles retain controls, indentation and drop feedback while counts match footer buttons`, {timeout: 30000}, async () => {
+const testLayout = (stylesheet: string) => test(`${stylesheet} table/list tree titles align leaf markers and retain controls, indentation, drop feedback and footer counts`, {timeout: 30000}, async () => {
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-sub-items-layout-"));
     const css = sass.compile(`src/assets/scss/${stylesheet}.scss`, {style: "compressed", silenceDeprecations: ["legacy-js-api"]}).css;
     const html = `<style>:root{--b3-theme-primary:blue;--b3-theme-primary-lightest:#eef;--b3-border-color:#ccc}body{width:390px}.av{width:390px}</style><style>${css}</style><div class="protyle-wysiwyg">${getRowsHTML()}</div>`;

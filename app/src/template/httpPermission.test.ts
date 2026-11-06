@@ -63,9 +63,10 @@ test("AV permission controls reject stale results after editing or menu destruct
     const state = fixture();
     const listeners: Record<string, (event?: unknown) => void> = {};
     const label = {textContent: ""};
-    const button = {isConnected: true, disabled: false, querySelector: () => label,
+    const button = {isConnected: true, disabled: false, classList: {toggle: () => {}}, querySelector: () => label,
         addEventListener: (name: string, callback: () => void) => {listeners[name] = callback;}};
-    const textarea = {addEventListener: (name: string, callback: () => void) => {listeners[name] = callback;}};
+    const textarea = {value: '.action{httpGet "https://example.com"}',
+        addEventListener: (name: string, callback: () => void) => {listeners[name] = callback;}};
     const element = {querySelector: (selector: string) => selector.startsWith("[data-http") ? button : textarea};
     state.exports.bindTemplateHTTPPermission(element, {kind: "av", avID: "a", keyID: "k", slot: "template"});
     listeners.input();
@@ -78,6 +79,31 @@ test("AV permission controls reject stale results after editing or menu destruct
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(label.textContent, "unknown");
     assert.equal(state.cleared(), 1);
+});
+
+test("AV permission controls follow HTTP usage in either editable template slot", () => {
+    for (const slot of ["template", "renderTemplate"]) {
+        const state = fixture();
+        const listeners: Record<string, () => void> = {};
+        let hidden = false;
+        const button = {disabled: false, classList: {toggle: (name: string, value: boolean) => {
+            assert.equal(name, "fn__none");
+            hidden = value;
+        }}, querySelector: () => ({textContent: ""}), addEventListener: () => {}};
+        const textarea = {value: "", addEventListener: (name: string, callback: () => void) => {
+            listeners[name] = callback;
+        }};
+        const element = {querySelector: (selector: string) => selector.startsWith("[data-http") ? button : textarea};
+        state.exports.bindTemplateHTTPPermission(element, {kind: "av", avID: "a", keyID: "k", slot});
+        assert.equal(hidden, true);
+        assert.equal(state.requests.length, 0);
+        for (const [value, expected] of [[".action{now}", true], ['.action{httpGet "https://example.com"}', false],
+            ["", true]] as const) {
+            textarea.value = value;
+            listeners.input();
+            assert.equal(hidden, expected);
+        }
+    }
 });
 
 test("manager and database use existing surfaces and distinguish template slots", () => {

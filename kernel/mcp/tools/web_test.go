@@ -19,26 +19,26 @@ func TestWebToolProvidersAndEffects(t *testing.T) {
 	model.Conf = model.NewAppConf()
 	model.Conf.AI.Store(conf.NewAI())
 	for _, tool := range []*Tool{WebSearchTool, WebFetchTool} {
-		if _, declared := tool.EffectsFor(""); declared {
-			t.Fatal("default provider confirmation behavior changed")
+		if effects, declared := tool.EffectsFor(""); !declared || !effects.DataEgress || effects.ExternalCost || effects.LocalWrite != (tool == WebFetchTool) {
+			t.Fatalf("default provider effects are incomplete: %+v", effects)
 		}
 	}
 	model.Conf.AI.Load().Web.ExaAPIKey = "exa-key"
 	if effects, declared := WebSearchTool.EffectsFor(""); !declared || !effects.DataEgress || !effects.ExternalCost || effects.LocalWrite {
 		t.Fatal("authenticated Exa search effects not declared")
 	}
-	if _, declared := WebFetchTool.EffectsFor(""); declared {
+	if effects, declared := WebFetchTool.EffectsFor(""); !declared || effects.ExternalCost || !effects.LocalWrite {
 		t.Fatal("Exa credentials changed direct fetch effects")
 	}
 	model.Conf.AI.Load().Web.ExaAPIKey = ""
-	if _, declared := WebSearchTool.EffectsFor(""); declared {
-		t.Fatal("clearing Exa credentials did not restore anonymous search effects")
+	if effects, declared := WebSearchTool.EffectsFor(""); !declared || !effects.DataEgress || effects.ExternalCost {
+		t.Fatal("anonymous search must declare egress without authenticated billing")
 	}
 	model.Conf.AI.Load().Web.SearchProvider = "deepseek"
 	if effects, declared := WebSearchTool.EffectsFor(""); !declared || !effects.DataEgress || !effects.ExternalCost || effects.LocalWrite {
 		t.Fatal("DeepSeek search effects not declared")
 	}
-	if _, declared := WebFetchTool.EffectsFor(""); declared {
+	if effects, declared := WebFetchTool.EffectsFor(""); !declared || effects.ExternalCost || !effects.LocalWrite {
 		t.Fatal("search provider unexpectedly changed fetch provider")
 	}
 	model.Conf.AI.Load().Web.FetchProvider = "deepseek"

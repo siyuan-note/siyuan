@@ -12,8 +12,13 @@ const fixture = () => {
         {isConnected: true, closest: (): Element => null, getAttribute: (name: string) => name === "data-av-type" ? "table" : "NodeAttributeView"},
     ];
     let finish: (success: boolean) => void;
+    let finishSave: (response: unknown) => void;
+    const undo: IOperation[][] = [];
+    const requests: {transactions: {collectionRemovalSourceVersions?: Record<string, string>}[]}[] = [];
     const dependencies = {
+        prepareAVHostTransaction: (_protyle: unknown, operations?: IOperation[]) => operations,
         getTagRemovalChanges: (): [] => [],
+        hasReferenceRemoval: () => false,
         getEditorTransaction,
         Constants: {},
         queueTransaction,
@@ -36,6 +41,7 @@ const fixture = () => {
         countBlockWord: (): void => undefined,
         handleViewFoldSourceOperation: () => false,
         queueHeadingNumberRefresh: (): void => undefined,
+        queueDatabaseRowRefreshForOperations: (): void => undefined,
         refreshHeadingFoldIndicators: (): void => undefined,
         applyViewFoldStates: (): void => undefined,
         fetchPost: (_url: string, data: {transactions: unknown[]}, callback: (response: unknown) => void) =>
@@ -47,10 +53,14 @@ const fixture = () => {
                     resolve();
                 };
             }),
+        fetchSyncPost: (_url: string, request: typeof requests[number]) => {
+            requests.push(request);
+            return new Promise(resolve => { finishSave = resolve; });
+        },
     };
     const exports = loadModule<any>("src/protyle/wysiwyg/transaction.ts", {
         require: () => dependencies,
-        window: {siyuan: {config: {sync: {provider: 0}}}},
+        window: {siyuan: {config: {sync: {provider: 0}, fileTree: {}}, languages: {transactionSaveUnconfirmed: "Unconfirmed save"}}},
         getSelection: () => ({rangeCount: 0}),
     }, ScriptTarget.ES2021);
     const element = {
@@ -59,12 +69,56 @@ const fixture = () => {
             carriers.filter(item => item.isConnected) : [],
         querySelector: () => carriers[0],
     };
-    const protyle = {wysiwyg: {element}, options: {}} as unknown as IProtyle;
+    const protyle = {wysiwyg: {element}, options: {}, undo: {add: (operations: IOperation[]) => undo.push(operations)}} as unknown as IProtyle;
     const insert = () => exports.transaction(protyle, [{
         action: "insert", id: "carrier", previousID: "paragraph", data: '<div data-type="NodeAttributeView"></div>',
     }]);
-    return {protyle, carriers, rendered, insert, finish: (success: boolean) => finish(success)};
+    const save = (collectionRemovalSourceVersions?: Record<string, string>) => exports.transaction(protyle, [{action: "updateAttrViewCell", id: "value", avID: "av",
+        keyID: "key", rowID: "row", data: {type: "text", text: {content: "saved"}}}], [],
+    {awaitResponse: true, skipSync: true, collectionRemovalSourceVersions}) as Promise<void>;
+    return {protyle, carriers, rendered, insert, save, undo, requests, finishSave: (response: unknown) => finishSave(response),
+        finish: (success: boolean) => finish(success)};
 };
+
+test("awaited database saves wait for acknowledgement and record undo only after success", async () => {
+    const f = fixture();
+    let completed = false;
+    const saving = f.save().then(() => { completed = true; });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(completed, false);
+    assert.equal(f.undo.length, 0);
+    f.finishSave({code: 0, data: [{doOperations: []}]});
+    await saving;
+    assert.equal(completed, true);
+    assert.equal(f.undo.length, 1);
+});
+
+test("source-removal document versions reach the transaction request independently of cleanup operations", async () => {
+    const f = fixture();
+    const versions = {root: "authenticated-source-version"};
+    const pending = f.save(versions);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(f.requests[0].transactions[0].collectionRemovalSourceVersions, versions);
+    f.finishSave({code: 0, data: [{doOperations: []}]});
+    await pending;
+});
+
+test("awaited database saves reject failed and malformed acknowledgements and permit retry", async () => {
+    for (const response of [{code: -1, msg: "Save failed"}, {code: 0, data: {closeTimeout: 1}}, {code: 0, data: [] as unknown[]}]) {
+        const f = fixture();
+        const saving = f.save();
+        const rejected = assert.rejects(saving);
+        await new Promise(resolve => setImmediate(resolve));
+        f.finishSave(response);
+        await rejected;
+        assert.equal(f.undo.length, 0);
+        const retry = f.save();
+        await new Promise(resolve => setImmediate(resolve));
+        f.finishSave({code: 0, data: [{doOperations: []}]});
+        await retry;
+        assert.equal(f.undo.length, 1);
+    }
+});
 
 test("本地模板数据库及其副本在插入事务成功后才渲染", async () => {
     const f = fixture();

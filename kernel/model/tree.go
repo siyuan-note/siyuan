@@ -7,6 +7,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"html"
 	"io/fs"
 	"os"
 	"path"
@@ -106,7 +107,7 @@ func appendDuplicateDocumentTitle(root *ast.Node, suffix string) error {
 	if err != nil {
 		return err
 	}
-	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(suffix)})
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: html.EscapeString(suffix)})
 	return treenode.SetDocumentTitleParagraph(root, paragraph)
 }
 

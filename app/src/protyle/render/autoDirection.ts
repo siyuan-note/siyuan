@@ -54,94 +54,125 @@ export const setAutoDirection = (root: HTMLElement, enabled: boolean) => {
             element.dir = direction;
         }
     };
-    const getExplicitDirection = (element: HTMLElement) => {
+    const getExplicitDirection = (element: HTMLElement, cache: Map<HTMLElement, string>) => {
+        const ancestors: HTMLElement[] = [];
+        let direction = "auto";
         for (let current = element; current; current = current.parentElement) {
+            if (cache.has(current)) {
+                direction = cache.get(current);
+                break;
+            }
+            ancestors.push(current);
             if (current.style.direction) {
-                return getComputedStyle(current).direction;
+                direction = getComputedStyle(current).direction;
+                break;
             }
             if (current.dir !== current.getAttribute(directionAttribute) &&
                 (current.dir === "ltr" || current.dir === "rtl")) {
-                return current.dir;
+                direction = current.dir;
+                break;
             }
             if (current === root) {
                 break;
             }
         }
-        return "auto";
+        ancestors.forEach(ancestor => cache.set(ancestor, direction));
+        return direction;
     };
-    const updateList = (item: HTMLElement) => {
-        if (!root.contains(item)) {
-            return;
-        }
-        if (item.closest(excludedSelector)) {
-            clearDirection(item);
-            managed.delete(item);
-            return;
-        }
-        if (item.tagName === "LI" && item.parentElement?.matches("ul, ol")) {
-            const list = item.parentElement;
-            managed.add(list);
-            if (list.getAttribute(directionAttribute) !== "list") {
-                list.setAttribute(directionAttribute, "list");
+    const update = (scopes: Set<HTMLElement>) => {
+        const topScopes = Array.from(scopes).filter(scope => {
+            if (!root.contains(scope)) return false;
+            if (scope === root) return true;
+            for (let parent = scope.parentElement; parent; parent = parent.parentElement) {
+                if (scopes.has(parent)) return false;
+                if (parent === root) break;
             }
-        }
-        if (item.dir && item.dir !== "auto" && item.dir !== item.getAttribute(directionAttribute)) {
-            item.removeAttribute(directionAttribute);
-            item.removeAttribute(listDirectionAttribute);
-            managed.delete(item);
-            return;
-        }
-        let direction = getExplicitDirection(item);
-        if (direction === "auto") {
-            // 只读取本项的首个正文区域，避免子列表文字或任务图标决定父项方向。
-            const content = Array.from(item.children).find(child =>
-                !child.matches('.protyle-action, .protyle-attr, [data-type="NodeList"], ul, ol, input'));
-            const text = content?.matches(textSelector) ? content : content?.querySelector<HTMLElement>(textSelector);
-            if (text && text.closest(listSelector) === item) {
-                direction = getComputedStyle(text).direction;
-            }
-        }
-        applyDirection(item, direction);
-        const layoutDirection = direction === "auto" ? getComputedStyle(item).direction : direction;
-        if (item.getAttribute(listDirectionAttribute) !== layoutDirection) {
-            item.setAttribute(listDirectionAttribute, layoutDirection);
-        }
-    };
-    const update = (scope: HTMLElement) => {
+            return true;
+        });
         if (!enabled) {
-            scope.querySelectorAll<HTMLElement>(`[${directionAttribute}]`).forEach(clearDirection);
-            clearDirection(scope);
+            topScopes.forEach(scope => {
+                scope.querySelectorAll<HTMLElement>(`[${directionAttribute}]`).forEach(clearDirection);
+                clearDirection(scope);
+            });
             return;
         }
-        const elements = Array.from(scope.querySelectorAll<HTMLElement>(textSelector));
-        if (scope.matches(textSelector)) {
-            elements.push(scope);
-        }
+        const elements = new Set<HTMLElement>();
+        const items = new Set<HTMLElement>();
+        topScopes.forEach(scope => {
+            scope.querySelectorAll<HTMLElement>(textSelector).forEach(element => elements.add(element));
+            if (scope.matches(textSelector)) elements.add(scope);
+            scope.querySelectorAll<HTMLElement>(listSelector).forEach(item => items.add(item));
+            const owner = scope.closest<HTMLElement>(listSelector);
+            if (owner) items.add(owner);
+        });
+        const textDirections = new Map<HTMLElement, string>();
+        const textCache = new Map<HTMLElement, string>();
+        const cleanup: (() => void)[] = [];
         elements.forEach(element => {
-            if (!root.contains(element)) {
-                return;
-            }
             if (element.closest(excludedSelector)) {
-                clearDirection(element);
-                managed.delete(element);
+                cleanup.push(() => {
+                    clearDirection(element);
+                    managed.delete(element);
+                });
             } else if (!element.dir || element.dir === "auto" ||
                 element.dir === element.getAttribute(directionAttribute)) {
-                const direction = getExplicitDirection(element);
-                applyDirection(element, direction);
+                textDirections.set(element, getExplicitDirection(element, textCache));
             } else {
-                element.removeAttribute(directionAttribute);
-                managed.delete(element);
+                cleanup.push(() => {
+                    element.removeAttribute(directionAttribute);
+                    managed.delete(element);
+                });
             }
         });
-        // 先更新子项，原生 HTML 列表的自动判定即可跳过具有独立方向的子列表项。
-        const items = Array.from(scope.querySelectorAll<HTMLElement>(listSelector)).reverse();
-        const owner = scope.closest<HTMLElement>(listSelector);
-        if (owner) {
-            items.push(owner);
-        }
-        items.forEach(updateList);
+        cleanup.forEach(clear => clear());
+        // 正文方向统一写入后再读取列表布局，避免每个列表项都触发一次样式重算。
+        textDirections.forEach((direction, element) => applyDirection(element, direction));
+        const automaticItems = Array.from(items).filter(item => {
+            if (item.closest(excludedSelector)) {
+                clearDirection(item);
+                managed.delete(item);
+                return false;
+            }
+            if (item.tagName === "LI" && item.parentElement?.matches("ul, ol")) {
+                const list = item.parentElement;
+                managed.add(list);
+                if (list.getAttribute(directionAttribute) !== "list") {
+                    list.setAttribute(directionAttribute, "list");
+                }
+            }
+            if (item.dir && item.dir !== "auto" && item.dir !== item.getAttribute(directionAttribute)) {
+                item.removeAttribute(directionAttribute);
+                item.removeAttribute(listDirectionAttribute);
+                managed.delete(item);
+                return false;
+            }
+            return true;
+        });
+        const listCache = new Map<HTMLElement, string>();
+        const listDirections = automaticItems.map(item => {
+            let direction = getExplicitDirection(item, listCache);
+            if (direction === "auto") {
+                // 只读取本项的首个正文区域，避免子列表文字或任务图标决定父项方向。
+                const content = Array.from(item.children).find(child =>
+                    !child.matches('.protyle-action, .protyle-attr, [data-type="NodeList"], ul, ol, input'));
+                const text = content?.matches(textSelector) ? content : content?.querySelector<HTMLElement>(textSelector);
+                if (text && text.closest(listSelector) === item) {
+                    direction = getComputedStyle(text).direction;
+                }
+            }
+            return {item, direction};
+        });
+        listDirections.forEach(({item, direction}) => applyDirection(item, direction));
+        // 无正文的原生列表项依赖子项的 dir 排除规则，统一写入后再读取浏览器的判定。
+        const layouts = listDirections.map(({item, direction}) => ({item,
+            direction: direction === "auto" ? getComputedStyle(item).direction : direction}));
+        layouts.forEach(({item, direction}) => {
+            if (item.getAttribute(listDirectionAttribute) !== direction) {
+                item.setAttribute(listDirectionAttribute, direction);
+            }
+        });
     };
-    update(root);
+    update(new Set([root]));
     // 浏览器判定文字方向，内容变化时只同步受影响列表项的布局。
     const observer = new MutationObserver(records => {
         const scopes = new Set<HTMLElement>();
@@ -180,7 +211,7 @@ export const setAutoDirection = (root: HTMLElement, enabled: boolean) => {
                 });
             }
         });
-        scopes.forEach(update);
+        update(scopes);
     });
     observer.observe(root, {
         subtree: true, childList: true, attributes: true, characterData: enabled,

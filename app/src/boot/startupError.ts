@@ -1,4 +1,5 @@
 import bundledLanguages from "../../appearance/boot/startup-languages.json";
+import {finishStartupReads, getStartupReadDiagnostic} from "./startupRead";
 
 const stageKeys = {
     page: "startupStagePage",
@@ -45,11 +46,14 @@ export const setStartupLanguage = (language: string) =>
     window.dispatchEvent(new CustomEvent("siyuan-startup-language", {detail: language}));
 
 export const reportStartupError = (error: unknown) => {
-    console.error("Mobile startup failed:", error);
+    console.error("SiYuan startup failed:", error);
     window.dispatchEvent(new CustomEvent("siyuan-startup-error", {detail: error}));
 };
 
-export const completeStartup = () => window.dispatchEvent(new Event("siyuan-startup-ready"));
+export const completeStartup = () => {
+    finishStartupReads();
+    window.dispatchEvent(new Event("siyuan-startup-ready"));
+};
 
 // 启动回调自行接住异步错误，不改变通用请求工具的回调语义。
 export const guardStartup = <T>(callback: (value: T) => unknown) => (value: T) => {
@@ -153,7 +157,7 @@ export const installStartupError = (target: Window, version: string, timeout = 3
     const armTimeout = () => {
         target.clearTimeout(timer);
         if (!ready && !failure && !document.hidden) {
-            timer = target.setTimeout(() => fail(languages[language].startupTimeout), timeout);
+            timer = target.setTimeout(() => fail(`${languages[language].startupTimeout}\n${getStartupReadDiagnostic()}`), timeout);
         }
     };
     const setStage = (event: CustomEvent<TStartupStage>) => {
@@ -170,8 +174,10 @@ export const installStartupError = (target: Window, version: string, timeout = 3
         if (event.target !== target) {
             const element = event.target as HTMLScriptElement;
             // 只有主程序资源属于启动必需项，图片和扩展资源失败不终止启动。
-            if (element?.tagName !== "SCRIPT" || !element.src.includes("/stage/build/mobile/")) return;
-            fail(new Error(new URL(element.src, target.location.href).pathname));
+            if (element?.tagName !== "SCRIPT") return;
+            const resource = new URL(element.src, target.location.href);
+            if (!/\/stage\/build\/(?:app|desktop|mobile)\//.test(resource.pathname)) return;
+            fail(new Error(resource.pathname));
         } else {
             if (suppressedErrors > 0) return;
             fail(event.error || `${event.message}\n${event.filename}:${event.lineno}:${event.colno}`);

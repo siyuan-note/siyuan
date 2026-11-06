@@ -1,7 +1,7 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {renderMemoryOverview} from "./overview";
 import {showMessage} from "../../dialog/message";
-import {Dialog} from "../../dialog";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {fetchSyncPost} from "../../util/fetch";
 import {escapeHtmlTextAndAttr as escapeHtml} from "../../util/escape";
 import {genUUID} from "../../util/genID";
@@ -49,7 +49,7 @@ export const openMemoryManager = () => {
             }
         });
     };
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         title: `<span class="fn__flex"><span class="fn__flex-1">${escapeHtml(lang.aiMemorySummary)}</span><button type="button" class="block__icon block__icon--show" data-memory-more aria-label="${escapeHtml(lang.more)}" aria-haspopup="menu"><svg><use xlink:href="#iconMore"></use></svg></button></span>`,
         width: isMobile() ? "94vw" : "860px",
         content: `<div class="b3-dialog__content memory-manager">
@@ -61,7 +61,7 @@ export const openMemoryManager = () => {
         beforeClose: () => {
             if (submitting || clearing) { return false; }
             if (!taskDirty) { return true; }
-            confirmDialog(lang.aiMemory, lang.discardUnsavedChanges, () => { taskDirty = false; dialog.destroy(); });
+            mobileConfirmDialog(lang.aiMemory, lang.discardUnsavedChanges, () => { taskDirty = false; dialog.destroy(); });
             return false;
         },
         destroyCallback: () => {
@@ -332,7 +332,7 @@ export const openMemoryManager = () => {
         })();
     });
     const clearMemory = async () => {
-        if (closed || isReadOnly() || submitting || clearing) { return; }
+        if (closed || isReadOnly() || submitting || clearing) { return false; }
         const resumeDiscovery = discovering;
         clearing = true;
         taskGeneration++;
@@ -387,6 +387,7 @@ export const openMemoryManager = () => {
                 void refreshOverview();
             }
         }
+        return cleared;
     };
     more.addEventListener("mousedown", event => event.stopPropagation());
     more.addEventListener("touchstart", event => event.stopPropagation());
@@ -398,7 +399,8 @@ export const openMemoryManager = () => {
                 icon: "iconTrashcan", warning: true, label: lang.aiMemoryClearAndDisable,
                 click: () => {
                     if (closed || isReadOnly() || submitting || clearing) { return; }
-                    confirmDialog(lang.aiMemoryClearAndDisable, escapeHtml(lang.aiMemoryClearAndDisableConfirm), () => { void clearMemory(); });
+                    mobileConfirmDialog(lang.aiMemoryClearAndDisable, escapeHtml(lang.aiMemoryClearAndDisableConfirm),
+                        clearMemory, undefined, true, undefined, undefined, {awaitConfirm: true});
                 },
             }).element);
             const rect = more.getBoundingClientRect();

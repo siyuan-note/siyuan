@@ -6,7 +6,7 @@
 		"id": "20230106104821-9nfphwm",
 		"title": "Workspace",
 		"type": "doc",
-		"updated": "20261030093418"
+		"updated": "20261105180144"
 	},
 	"Children": [
 		{
@@ -35,6 +35,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "The workspace is used to save data, history, configuration and files needed at runtime."
+				}
+			]
+		},
+		{
+			"ID": "20261105180144-g4e87db",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105180144-g4e87db",
+				"updated": "20261105180144"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop, if a close or quit request remains unfinished for 15 seconds and the interface is still unresponsive after another second, a system dialog offers to keep waiting or exit. Exiting may lose interface edits that have not reached the kernel. The local kernel must accept a normal exit before the window closes; failure keeps the window available for retry. Closing a remote connection leaves the remote kernel running. This recovery also covers tray and application quit requests; responsive windows keep their normal save, confirmation, and sync flow."
 				}
 			]
 		},
@@ -171,6 +185,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "--workspace=&quot;Absolute-path-of-the-workspace&quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace &quot;Absolute-path-of-the-workspace&quot;"
 								},
 								{
 									"Type": "NodeText",

@@ -1,11 +1,11 @@
 import type {BlockQueryRequestInput} from "../types/api";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {getDisplayName, getNotebookName, isEncryptedBox} from "../util/pathName";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {Constants} from "../constants";
 import {checkBlockRef, getBlockRefWarningHTML} from "../util/checkBlockRef";
-import {getDocTreeActionItems} from "../menus/navigationSelection";
+import {getDocTreeDeleteItems} from "../menus/navigationSelection";
 import {getDocTreeItem} from "../layout/dock/docTree/rowData";
 
 export const deleteFile = async (notebookId: string, pathString: string) => {
@@ -85,7 +85,10 @@ export const deleteFiles = (liElements: Element[]) => deleteDocTreeItems(liEleme
 export const deleteDocTreeItems = async (selected: readonly {
     id: string, notebookId: string, path: string, kind: string, name: string,
 }[]) => {
-    const items = getDocTreeActionItems(selected);
+    const items = getDocTreeDeleteItems(selected);
+    if (items.some(item => item.kind === "document" && item.id === item.notebookId)) {
+        return;
+    }
     if (items.length === 1) {
         const itemNotebookId = items[0].notebookId;
         if (itemNotebookId) {

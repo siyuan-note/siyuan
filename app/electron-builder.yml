@@ -25,6 +25,8 @@ win:
   extraResources:
     - from: "kernel"
       to: "kernel"
+    - from: "src/assets/markdown.ico"
+      to: "markdown.ico"
   requestedExecutionLevel: "asInvoker"
   signtoolOptions:
     #certificateSubjectName: "Yunnan Liandi Technology Co., Ltd."
@@ -50,6 +52,7 @@ nsis:
 extraResources:
   - from: "changelogs"
     to: "changelogs"
+    filter: ["v${version}/**"]
   - from: "stage"
     to: "stage"
     filter: ["**/*", "!ocr/runtime/**/*"]

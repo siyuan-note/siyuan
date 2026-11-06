@@ -18,6 +18,28 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestAPIContractCreateDocRejectsInvalidStoragePaths(t *testing.T) {
+	box := documentPathAPIWorkspace(t)
+	const id = "20261105120000-abcdefg"
+	for _, p := range []string{"/tmp-av-probe", "/" + id, id + ".sy", "/invalid/" + id + ".sy", "/../" + id + ".sy"} {
+		response := documentPathAPIRequest(t, "/api/filetree/createDoc", createDoc,
+			map[string]string{"notebook": box, "path": p, "title": "Title", "md": "Body"})
+		var result struct {
+			Code int
+			Msg  string
+			Data json.RawMessage
+		}
+		if err := json.Unmarshal(response, &result); err != nil || result.Code != -1 ||
+			!bytes.Contains([]byte(result.Msg), []byte("invalid document path")) || bytes.Contains(result.Data, []byte(`"id"`)) {
+			t.Fatalf("invalid path %q returned %s: %v", p, response, err)
+		}
+	}
+	entries, err := os.ReadDir(filepath.Join(util.DataDir, box))
+	if err != nil || len(entries) != 1 || entries[0].Name() != ".siyuan" {
+		t.Fatal("invalid paths wrote document sources", entries, err)
+	}
+}
+
 func TestAPIContractLegacyDocumentPaths(t *testing.T) {
 	box := documentPathAPIWorkspace(t)
 	parent := treenode.NewTree(box, "/20261026000001-parent1.sy", "/A", "A")

@@ -1,5 +1,7 @@
 import {getAnchoredMenuPosition} from "../menus/menuPosition";
 
+const activeSubmenus = new WeakMap<HTMLElement, () => void>();
+
 export const createMarkdownSubmenu = (options: {
     element: HTMLElement;
     label: string;
@@ -21,33 +23,53 @@ export const createMarkdownSubmenu = (options: {
     const menu = element.querySelector<HTMLElement>(".b3-menu__submenu");
     menu.append(...children);
     const close = () => {
+        if (element.parentElement && activeSubmenus.get(element.parentElement) === close) {
+            activeSubmenus.delete(element.parentElement);
+        }
         element.classList.remove("b3-menu__item--show");
         element.setAttribute("aria-expanded", "false");
         options.onClose?.();
     };
     const open = () => {
         if (disabled) return;
+        if (element.parentElement) {
+            const previous = activeSubmenus.get(element.parentElement);
+            if (previous !== close) previous?.();
+            activeSubmenus.set(element.parentElement, close);
+        }
         element.classList.add("b3-menu__item--show");
         element.setAttribute("aria-expanded", "true");
         const anchor = element.getBoundingClientRect();
-        // scrollHeight excludes borders; include them in the border-box height to
-        // avoid an always-visible scrollbar. Clear a previous viewport constraint.
+        // 按边框盒计算高度，避免内容完整显示时仍出现滚动条。
         menu.style.maxHeight = "none";
         const bounds = menu.getBoundingClientRect();
         const border = menu.offsetHeight - menu.clientHeight;
-        const position = getAnchoredMenuPosition(anchor.top, 0, Math.ceil(menu.scrollHeight + border), innerHeight - 8, 8);
+        const firstItem = menu.firstElementChild?.getBoundingClientRect();
+        const top = Math.max(8, anchor.top - (firstItem ? firstItem.top - bounds.top : 0));
+        const position = getAnchoredMenuPosition(top, 0, Math.ceil(menu.scrollHeight + border), innerHeight - 8, 8);
         menu.style.top = `${Math.max(8, position.top)}px`;
         menu.style.maxHeight = `${position.height}px`;
-        const right = anchor.right;
-        const left = right + bounds.width <= innerWidth - 8 ? right : anchor.left - bounds.width;
+        const parentMenu = element.parentElement?.closest<HTMLElement>(".markdown-choice__menu");
+        const parentItem = parentMenu?.parentElement;
+        const preferLeft = parentItem && parentMenu.getBoundingClientRect().left < parentItem.getBoundingClientRect().left;
+        const fitsLeft = anchor.left - bounds.width >= 8;
+        const fitsRight = anchor.right + bounds.width <= innerWidth - 8;
+        const left = preferLeft && fitsLeft || !fitsRight ? anchor.left - bounds.width : anchor.right;
         menu.style.left = `${Math.max(8, Math.min(innerWidth - bounds.width - 8, left))}px`;
     };
     element.addEventListener("click", event => {
         if (menu.contains(event.target as Node)) return;
         if (element.getAttribute("aria-expanded") === "true") close(); else open();
     }, {signal});
-    element.addEventListener("pointerenter", event => {if (event.pointerType === "mouse") open();}, {signal});
-    element.addEventListener("pointerleave", event => {if (event.pointerType === "mouse") close();}, {signal});
+    element.addEventListener("pointerenter", event => {
+        if (event.pointerType !== "mouse") return;
+        open();
+    }, {signal});
+    element.addEventListener("pointerleave", event => {
+        if (event.pointerType !== "mouse") return;
+        if (menu.contains(document.activeElement)) return;
+        close();
+    }, {signal});
     element.addEventListener("keydown", event => {
         const buttons = Array.from(menu.children) as HTMLElement[];
         const index = buttons.indexOf(document.activeElement as HTMLElement);
@@ -66,7 +88,9 @@ export const createMarkdownSubmenu = (options: {
         event.preventDefault(); event.stopPropagation();
     }, {signal});
     document.addEventListener("pointerdown", event => {if (!element.contains(event.target as Node)) close();}, {signal});
-    document.addEventListener("focusin", event => {if (!element.contains(event.target as Node)) close();}, {signal});
+    document.addEventListener("focusin", event => {
+        if (!element.contains(event.target as Node)) close();
+    }, {signal});
     window.addEventListener("resize", close, {signal});
     element.closest(".markdown-menu")?.addEventListener("scroll", close, {signal});
     return {

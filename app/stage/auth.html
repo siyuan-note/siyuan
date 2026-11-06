@@ -772,7 +772,12 @@
     const lockScreenWallpaperState = loadLockScreenWallpaper();
 
     window.showKeyboardToolbar = function () {}
-    window.hideKeyboardToolbar = function () {}
+    // 认证页使用原生输入框，收起键盘时保留焦点，避免 Android 禁用 WebView 的触摸聚焦。
+    // 返回值与移动端 KeyboardHideResult.PreserveSelection 一致。
+    window.hideKeyboardToolbar = function () { return 1; }
+    if (window.JSAndroid && window.JSAndroid.setWebViewFocusable) {
+        window.JSAndroid.setWebViewFocusable(true);
+    }
 
     const exitApp = () => {
         try {

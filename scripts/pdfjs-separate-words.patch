@@ -1,6 +1,35 @@
 # 适用于 PDF.js v6.4.299（d0991a0d5）。后续升级时需迁移并运行 PDF 标注交互测试。
 # 在对应版本的 PDF.js 源码目录中使用 git apply 应用本补丁，再运行 gulp minified-legacy。
 # 同步生成的 pdf.min.mjs 和 pdf.worker.min.mjs；仅在思源文字层中启用 separateWords。
+--- a/src/display/display_utils.js
++++ b/src/display/display_utils.js
+@@ -456,8 +456,14 @@ function setLayerDimensions(
+     const { pageWidth, pageHeight } = viewport.rawDims;
+     const { style } = div;
+
+-    const widthStr = `round(down, var(--total-scale-factor) * ${pageWidth}px, var(--scale-round-x))`,
+-      heightStr = `round(down, var(--total-scale-factor) * ${pageHeight}px, var(--scale-round-y))`;
++    // 旧版 WebView 使用可解析的尺寸，页面、文字层和标注层共享缩放比例。
++    const round = typeof CSS !== "undefined" && CSS.supports("width", "round(down, 1px, 1px)");
++    const widthStr = round
++      ? `round(down, var(--total-scale-factor) * ${pageWidth}px, var(--scale-round-x))`
++      : `calc(var(--total-scale-factor) * ${pageWidth}px)`,
++      heightStr = round
++        ? `round(down, var(--total-scale-factor) * ${pageHeight}px, var(--scale-round-y))`
++        : `calc(var(--total-scale-factor) * ${pageHeight}px)`;
+
+     if (!mustFlip || viewport.rotation % 180 === 0) {
+       style.width = widthStr;
+--- a/gulpfile.mjs
++++ b/gulpfile.mjs
+@@ -99,6 +99,6 @@
+ const ENV_TARGETS = [
+   "last 2 versions",
+-  "Chrome >= 125",
++  "Chrome >= 92",
+   "Firefox ESR",
+   "Safari >= 18",
+   "Node >= 22",
 --- a/src/display/api.js
 +++ b/src/display/api.js
 @@ -1147,6 +1147,7 @@

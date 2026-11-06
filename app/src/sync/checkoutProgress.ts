@@ -7,6 +7,8 @@ import {waitForSyncReloads} from "../util/reloadSync";
 import {flushPendingEditorSaves, getEditorSaveFailureVersion} from "../protyle/util/editorSave";
 import type {SyncCheckoutState} from "../types/api";
 import {getProgressContentHTML, updateProgressContent} from "../dialog/progress";
+import {isMobile} from "../util/functions";
+import {bindMobileSheetLayout} from "../mobile/util/mobileSheetLayout";
 
 type CheckoutState = SyncCheckoutState & {compact: boolean; expanded: boolean};
 let state: CheckoutState | undefined;
@@ -19,6 +21,13 @@ let refreshing: string;
 let refreshTail = Promise.resolve();
 let statePoll: number;
 let kernelID: string;
+let sheetLayout: ReturnType<typeof bindMobileSheetLayout> | undefined;
+
+const removeProgress = () => {
+    sheetLayout?.dispose();
+    sheetLayout = undefined;
+    document.getElementById("sync-checkout-progress")?.remove();
+};
 
 const blockEditing = (event: Event) => {
     const root = document.getElementById("sync-checkout-progress");
@@ -51,7 +60,7 @@ const clear = () => {
     refreshing = undefined;
     window.clearInterval(statePoll);
     statePoll = undefined;
-    document.getElementById("sync-checkout-progress")?.remove();
+    removeProgress();
     setEditingGuard(false);
     if (previousFocus?.isConnected) previousFocus.focus();
     previousFocus = undefined;
@@ -60,7 +69,7 @@ const clear = () => {
 const render = () => {
     if (!state) return;
     if (!state.blocking && !state.expanded) {
-        document.getElementById("sync-checkout-progress")?.remove();
+        removeProgress();
         setEditingGuard(false);
         return;
     }
@@ -80,6 +89,9 @@ const render = () => {
         <button class="b3-button b3-button--cancel b3-button--wrap" data-action="cancel">${escapeHtml(window.siyuan.languages.cancel)}</button>
     </div>
 </div>`;
+        if (isMobile()) {
+            sheetLayout = bindMobileSheetLayout(root, root.querySelector<HTMLElement>(".sync-checkout__panel"), {standalone: true});
+        }
         root.querySelector('[data-action="toggle"]').addEventListener("click", () => {
             if (!state.blocking) state.expanded = false;
             else state.compact = !state.compact;
@@ -115,7 +127,7 @@ const render = () => {
     root.classList.toggle("sync-checkout--background", !state.blocking);
     root.classList.toggle("sync-checkout--compact", state.compact || !state.blocking);
     root.querySelector(".sync-checkout__notice").classList.toggle("fn__none", !state.blocking || state.compact);
-    updateProgressContent(root, state.compact ? window.siyuan.languages._kernel[81] : state.message,
+    updateProgressContent(root, state.compact && state.total > 0 ? window.siyuan.languages._kernel[81] : state.message,
         state.current, state.total, "percent");
     root.querySelector('[data-action="toggle"] span').textContent = state.compact ?
         window.siyuan.languages.expand : window.siyuan.languages.collapseSyncDetails;

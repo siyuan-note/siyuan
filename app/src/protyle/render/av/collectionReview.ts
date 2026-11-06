@@ -1,6 +1,6 @@
+import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../../../dialog/mobileDialog";
 import type {AVBlockCollectionMatch, AVCollectionReview, AVCollectionReviewItem} from "../../../types/api";
-import {Dialog} from "../../../dialog";
-import {confirmDialog} from "../../../dialog/confirmDialog";
 import {fetchSyncPost} from "../../../util/fetch";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {isMobile} from "../../../util/functions";
@@ -27,7 +27,7 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
         unreadable: lang.automationCollectionReasonUnreadable,
     };
     const tab = (attribute: string, value: string, label: string) => `<div class="item item--full" ${attribute}="${value}" role="tab" tabindex="0" aria-selected="false"><span class="fn__flex-1"></span><span class="item__text">${escapeHtml(label)}</span><span class="fn__flex-1"></span></div>`;
-    const dialog = new Dialog({title: lang.automationCollectionManage, width: isMobile() ? "92vw" : "760px",
+    const dialog = new MobileDialog({title: lang.automationCollectionManage, width: isMobile() ? "92vw" : "760px",
         content: `<div class="layout-tab-bar fn__flex av__collection-tabs" role="tablist" aria-label="${escapeAttr(lang.automationCollectionManage)}">${tab("data-collection-view", "rules", lang.automationCollectionRules)}${tab("data-collection-view", "entries", lang.automationCollectionEntries)}</div>
 <div class="b3-dialog__content av__collection-preview av__collection-manager">
 <label class="av__automation-control fn__none" data-rule-control><span>${lang.automationRule}</span><select class="b3-select fn__block" data-collection-rule></select></label>
@@ -122,17 +122,21 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
         busy = false;
         updateActions();
     };
-    const perform = async (operations: IOperation[], undo: IOperation[]) => {
-        transaction(protyle, operations, undo);
-        await waitForPendingTransactions(protyle);
+    const perform = async (operations: IOperation[], undo: IOperation[], onCommitted?: () => void) => {
+        await transaction(protyle, operations, undo, {awaitResponse: true});
+        onCommitted?.();
         if (root.isConnected) { await load(); }
     };
     const confirmRemoval = (title: string, text: string, operations: IOperation[], undo: IOperation[]) => {
         busy = true;
         updateActions();
-        confirmDialog(title, text, async () => {
-            if (root.isConnected) { await perform(operations, undo); }
-        }, () => { busy = false; updateActions(); }, true, undefined, lang.confirm);
+        let committed = false;
+        mobileConfirmDialog(title, text, async () => {
+            if (!root.isConnected) return true;
+            if (committed) await load();
+            else await perform(operations, undo, () => { committed = true; });
+            return true;
+        }, () => { busy = false; updateActions(); }, true, undefined, lang.confirm, {awaitConfirm: true});
     };
     root.addEventListener("click", event => {
         const button = (event.target as Element).closest<HTMLElement>("[data-collection-view], [data-collection-status], [data-remove-item]");
@@ -179,11 +183,19 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
     });
     collect.addEventListener("click", async () => {
         if (busy || !matches.some(item => !item.collected)) { return; }
-        busy = true;
-        updateActions();
-        const operation: IOperation = {action: "collectAttrViewBlocks", avID, blockID,
-            data: {ruleID: ruleSelect.value, blockIDs: matches.filter(item => !item.collected).map(item => item.id)}};
-        await perform([operation], [operation]);
+        await dialog.runPending(async () => {
+            busy = true;
+            updateActions();
+            try {
+                const operation: IOperation = {action: "collectAttrViewBlocks", avID, blockID,
+                    data: {ruleID: ruleSelect.value, blockIDs: matches.filter(item => !item.collected).map(item => item.id)}};
+                await perform([operation], [operation]);
+                return true;
+            } finally {
+                busy = false;
+                updateActions();
+            }
+        }, {close: false, disableButtons: false});
     });
     host.addEventListener("click", event => {
         const link = (event.target as Element).closest<HTMLAnchorElement>("a[href]");

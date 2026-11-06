@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261102172700"
+		"updated": "20261106132257"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-3a481f4",
-				"updated": "20261102140506"
+				"updated": "20261106132257"
 			},
 			"Children": [
 				{
@@ -29,30 +29,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-925aeca",
-				"updated": "20261101145217"
+				"updated": "20261103211019"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On the Windows, macOS, and Linux desktop apps, choose "
+					"Data": "On the Windows, macOS, and Linux desktop apps, launch SiYuan with "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Main Menu"
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--markdown"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Markdown editor"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to open an independent window. It works without opening a workspace or starting a local kernel."
+					"Data": " to open an independent window. It works without opening a workspace or starting a local kernel. While this window is open, you can also start SiYuan normally to open the workspace interface."
 				}
 			]
 		},
@@ -66,25 +57,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On Android, iOS, and HarmonyOS, choose "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Main Menu"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Markdown editor"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to open the independent editor page. You can also choose SiYuan when a system file manager offers Open With for Markdown files. Document access comes from the system picker; some providers grant access only temporarily, so you may need to select the file again after restarting."
+					"Data": "On Android, iOS, and HarmonyOS, choose SiYuan when a system file manager offers Open With for Markdown files to open the independent editor page. Document access comes from the system picker; some providers grant access only temporarily, so you may need to select the file again after restarting."
 				}
 			]
 		},
@@ -93,12 +66,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101154840-193b541",
-				"updated": "20261102172500"
+				"updated": "20261105055849"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The window title shows the current filename, or Untitled for a new document that has not been saved. Its header shows a file panel button, the filename, Undo, Redo, and the "
+					"Data": "The window title shows the current filename, or Untitled for a new document that has not been saved. Its header shows a file panel button, an outline button, the filename, Undo, Redo, and the "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -126,6 +99,66 @@
 				{
 					"Type": "NodeText",
 					"Data": " (macOS)."
+				}
+			]
+		},
+		{
+			"ID": "20261106121753-bd50c0d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106121753-bd50c0d",
+				"updated": "20261106121753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Undo and Redo apply to individual completed edits. Rapidly typed characters can be undone separately, while text committed by an input method is undone as one edit."
+				}
+			]
+		},
+		{
+			"ID": "20261106132257-c3241d1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106132257-c3241d1",
+				"updated": "20261106132257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Code blocks retain syntax highlighting while editing in instant rendering and WYSIWYG modes. Language suggestions close when you click or tap elsewhere."
+				}
+			]
+		},
+		{
+			"ID": "20261105055849-39489b5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105055849-39489b5",
+				"updated": "20261105091714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use the outline button next to the file panel button at the top left to show or hide the heading outline. The default shortcut is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt+2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on Windows/Linux and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Control+2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS; check the button tooltip for any custom binding. It updates as you edit; expand or collapse nested headings and click a heading to jump to it. The outline is available in instant rendering and WYSIWYG modes when the window is at least 520 pixels wide. In source/split view or narrower windows, it is hidden and the button is disabled with an explanatory tooltip. Whether the outline is enabled is retained across documents only in the current window."
 				}
 			]
 		},
@@ -263,7 +296,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101171827-eb329f4",
-				"updated": "20261102140506"
+				"updated": "20261105091714"
 			},
 			"Children": [
 				{
@@ -282,7 +315,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Opening A.md uses its containing folder as the default file-tree root. The tree shows real folders and .md or .markdown files, loading each folder when expanded. Folders appear first, followed by filenames in natural order, so file2.md comes before file10.md. Folders expand and collapse with a smooth transition that respects the system’s reduced motion setting. Empty folders have no placeholder child row."
+					"Data": "Opening A.md uses its containing folder as the default file-tree root. The tree shows real folders and .md or .markdown files, loading each folder when expanded. Folders appear first, followed by filenames in natural order, so file2.md comes before file10.md. Folders expand and collapse with a smooth transition that respects the system’s reduced motion setting. Empty subfolders have no placeholder child row. When the selected root has no folders or Markdown files to display, the panel shows “No Markdown files to display in this folder”."
 				}
 			]
 		},
@@ -291,12 +324,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101171827-4756559",
-				"updated": "20261102172500"
+				"updated": "20261105091714"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use the file panel button at the top left to show or hide the sidebar on desktop or the file drawer on mobile. The filename toggles the panel only in the mobile or narrow-screen drawer layout; it is not clickable in the desktop sidebar layout. Drag the desktop sidebar divider to adjust its width. If a mobile provider grants access to only one file, select its containing folder when asked to enable the tree. Cancelling folder authorization leaves the current document editable. Tree access does not authorize local images."
+					"Data": "Use the file panel button at the top left to show or hide the sidebar on desktop or the file drawer on mobile. The default shortcut is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt+1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on Windows/Linux and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Control+1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS. When opened from a workspace, both panel shortcuts follow that workspace’s bindings; check the button tooltips for the current keys. Without a source workspace, the defaults apply. Both panels open and close with smooth transitions that respect the system’s reduced-motion setting. The filename is a display label on every platform; use the file panel button to toggle the tree. Drag the desktop sidebar divider to adjust its width. If a mobile provider grants access to only one file, select its containing folder when asked to enable the tree. Cancelling folder authorization leaves the current document editable. Tree access does not authorize local images."
 				}
 			]
 		},
@@ -342,7 +393,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Expanded folders and the desktop panel width are remembered. Directory changes and returning focus refresh the tree. If a directory contains too many entries, choose a smaller folder. This panel is for navigation; it does not rename, delete, or reorganize files by dragging."
+					"Data": "Expanded folders and the desktop panel width are remembered. Directory changes and returning focus refresh the tree. If a directory contains too many entries, choose a smaller folder. This panel is for navigation; it does not rename, delete, or reorganize files by dragging. On desktop, the menu also lets you reveal the current saved file in the system file manager."
 				}
 			]
 		},
@@ -352,7 +403,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-73f343e",
-				"updated": "20261101174206"
+				"updated": "20261103224054"
 			},
 			"Children": [
 				{
@@ -366,7 +417,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-d4abb18",
-				"updated": "20261101145217"
+				"updated": "20261103224054"
 			},
 			"Children": [
 				{
@@ -389,7 +440,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to request an immediate save; a new document must first be saved to a chosen location. The status bar distinguishes saved content, unsaved content, conflicts, and failures. Only saved content has been confirmed in the target file."
+					"Data": " to request an immediate save; a new document must first be saved to a chosen location. The bottom status bar stays hidden during ordinary editing and saving; automatic saving continues normally. It appears only when conflicts, failures, recovery errors, or other problems need attention or action."
 				}
 			]
 		},
@@ -403,7 +454,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On Android, Save As uses the system file picker to choose a location and filename. On iOS and HarmonyOS, choose a destination folder first, then enter the filename. Successful saves show “Saved to file”. Cloud synchronization is managed by the corresponding cloud drive. When the app enters the background, it attempts to persist the latest committed input and save pending changes. If the system terminates the process, only content already persisted can be recovered. On iOS, Markdown scenes and the workspace share one app process; a process crash or termination affects both."
+					"Data": "On Android, Save As uses the system file picker to choose a location and filename. On iOS and HarmonyOS, choose a destination folder first, then enter the filename. The status bar remains hidden after a successful save. Cloud synchronization is managed by the corresponding cloud drive. When the app enters the background, it attempts to persist the latest committed input and save pending changes. If the system terminates the process, only content already persisted can be recovered. On iOS, Markdown scenes and the workspace share one app process; a process crash or termination affects both."
 				}
 			]
 		},
@@ -455,7 +506,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-94c2a68",
-				"updated": "20261101145217"
+				"updated": "20261103141758"
 			},
 			"Children": [
 				{
@@ -533,12 +584,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-84cf6d4",
-				"updated": "20261101145217"
+				"updated": "20261103141758"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Remote images, audio, video, embedded pages, scripts, and remote diagram services are blocked. There is no switch to enable network media. Ordinary HTTP, HTTPS, and email links open through the system only after you click them. Math uses local resources; dynamic diagram source is shown as code."
+					"Data": "HTTP and HTTPS images, including SVG badges, are displayed directly without folder authorization. Protocol-relative image URLs use HTTPS. Image loading does not change the Markdown links. Audio, video, embedded pages, scripts, and remote diagram services remain blocked. Ordinary HTTP, HTTPS, and email links open through the system only after you click them. Math uses local resources; dynamic diagram source is shown as code."
 				}
 			]
 		},
@@ -548,7 +599,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-881e5bd",
-				"updated": "20261101145217"
+				"updated": "20261103213209"
 			},
 			"Children": [
 				{
@@ -594,12 +645,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-3530d93",
-				"updated": "20261101153939"
+				"updated": "20261103213209"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Recovery drafts are stored unencrypted on this device in the Markdown editor’s private directory, outside the workspace. They are not protected by encrypted notebooks and are not included in SiYuan sync. Desktop OS backups or other backup software may include this directory. Mobile apps exclude their private Markdown directory from system backup; the original files you select remain subject to their file provider’s own backup and synchronization behavior."
+					"Data": "On mobile devices, drafts use home/.config/siyuan/markdown/recovery/, where home is the app’s existing home directory. Editing preferences and file tree state are stored in its parent directory. Recovery drafts are stored unencrypted on this device in the Markdown editor’s private directory, outside the workspace. They are not protected by encrypted notebooks and are not included in SiYuan sync. Desktop OS backups or other backup software may include this directory. Mobile apps exclude their private Markdown directory from system backup; the original files you select remain subject to their file provider’s own backup and synchronization behavior."
 				}
 			]
 		},
@@ -608,12 +659,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-945689a",
-				"updated": "20261101175356"
+				"updated": "20261103203708"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Files up to 8 MiB of UTF-8 data can be opened and saved. Above 64 KiB, the editor automatically uses source editing with preview disabled; rich modes become available again after reducing the content below that threshold. The file budget includes BOM and encoded newlines. Recovery content has a separate 16 MiB limit per draft, with 256 MiB and 1024 records in total. A recovery draft above the file limit remains available for copying or reducing, but cannot be written back until it fits. Reaching a limit reports a failure without deleting unrecovered drafts; they do not expire automatically."
+					"Data": "Files up to 8 MiB of UTF-8 data can be opened and saved. Above 256 KiB, the editor automatically uses source editing with preview disabled; rich modes become available again after reducing the content below that threshold. Automatic fallback affects only the current document and does not change the preferred editing mode; only explicit mode selections are remembered. The file budget includes BOM and encoded newlines. Recovery content has a separate 16 MiB limit per draft, with 256 MiB and 1024 records in total. A recovery draft above the file limit remains available for copying or reducing, but cannot be written back until it fits. Reaching a limit reports a failure without deleting unrecovered drafts; they do not expire automatically."
 				}
 			]
 		},

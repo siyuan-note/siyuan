@@ -6,7 +6,7 @@
 		"id": "20200813131152-0wk5akh",
 		"title": "在内容块中遨游",
 		"type": "doc",
-		"updated": "20261030083650"
+		"updated": "20261105155201"
 	},
 	"Children": [
 		{
@@ -134,7 +134,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210428224949-wtjqkhb",
-				"updated": "20260809232000"
+				"updated": "20261105155201"
 			},
 			"Children": [
 				{
@@ -220,6 +220,85 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-l3bqa4t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261105154152-l3bqa4t",
+				"updated": "20261105155201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全局面包屑"
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-9iki5ux",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105154152-9iki5ux",
+				"updated": "20261105154152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "启用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行为"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "全局面包屑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后，桌面端编辑器顶部会在当前文档及其块路径前显示笔记本和父文档，合并为一条面包屑。此设置默认关闭。移动端的面包屑菜单会显示相同的层级。"
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-gvz6mus",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105154152-gvz6mus",
+				"updated": "20261105155201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端点击父文档可打开该文档，通过笔记本或父文档旁的箭头可选择子文档。移动端点击父文档会显示子文档，选择「打开」可打开父文档本身；没有子文档的文档会直接打开。现有的块导航方式保持不变。"
 				}
 			]
 		},

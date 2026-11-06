@@ -123,10 +123,10 @@ const getLifecycleManager = (app: App) => {
     return manager;
 };
 
-const fetchPluginData = async () => {
+const fetchPluginData = async (names?: string[]) => {
     const settingsWindow = isSettingsWindow();
     const response = await fetchSyncPost("/api/petal/loadPetals", {
-        frontend: getFrontend(), ...(settingsWindow ? {settingsWindow: true} : {}),
+        frontend: getFrontend(), ...(names ? {names} : {}), ...(settingsWindow ? {settingsWindow: true} : {}),
     });
     if (settingsWindow && response.code !== 0) {
         throw new Error(response.msg || "Could not read settings plugins");
@@ -137,10 +137,11 @@ const fetchPluginData = async () => {
     return items;
 };
 
-const createPluginDataLoader = () => {
+const createPluginDataLoader = (names: string[]) => {
+    const requestedNames = Array.from(new Set(names));
     let promise: Promise<IPluginData[]>;
     return (name: string) => {
-        promise ??= fetchPluginData();
+        promise ??= fetchPluginData(requestedNames);
         return promise.then(items => items.find(item => item.name === name));
     };
 };
@@ -153,7 +154,7 @@ export const loadPlugins = async (app: App, names?: string[], init = true) => {
     let tasks: Promise<void>[];
     let shouldStart = true;
     if (names) {
-        const loadPluginData = createPluginDataLoader();
+        const loadPluginData = createPluginDataLoader(names);
         tasks = Array.from(new Set(names)).map(name => manager.requestLoad(name, () => loadPluginData(name)));
     } else {
         const batch = manager.beginLoadBatch(!manager.isStarted());
@@ -202,7 +203,9 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
     }
     manager.start();
     await manager.requestLoad(item.name, async () => item);
+    /// #if !MOBILE
     saveLayout();
+    /// #endif
     getAllEditor().forEach(editor => {
         editor.protyle.toolbar.update(editor.protyle);
     });
@@ -405,7 +408,7 @@ export const reloadPlugin = async (app: App, data: IPluginReloadData = {}) => {
         !uninstallNames.has(name) && !unloadNames.has(name)));
     const dataChangeNames = new Set((data.dataChangePlugins || []).filter(name =>
         !uninstallNames.has(name) && !unloadNames.has(name) && !reloadNames.has(name)));
-    const loadPluginData = createPluginDataLoader();
+    const loadPluginData = createPluginDataLoader([...reloadNames, ...dataChangeNames]);
     const tasks: Promise<void>[] = [];
     uninstallNames.forEach(name => tasks.push(manager.requestUninstall(name)));
     unloadNames.forEach(name => tasks.push(manager.requestUnload(name)));

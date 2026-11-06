@@ -3,12 +3,14 @@ import {updateDockHotkeys} from "../../layout/dock/util";
 import {syncAppMenuShortcuts} from "../../boot/globalEvent/commonHotkey";
 import {isSettingsWindow} from "../setting/windowContext";
 import {getAllEditor} from "../../layout/getAll";
+import {syncMarkdownKeymap} from "../../markdown/keymapSync";
 
 export const applyKeymap = (data: Config.IKeymap) => {
     window.siyuan.config.keymap = data;
     if (isSettingsWindow()) {
         return;
     }
+    syncMarkdownKeymap();
     sendUnregisterGlobalShortcut(window.siyuan.ws.app);
     window.siyuan.ws.app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {

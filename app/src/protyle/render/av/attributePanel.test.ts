@@ -16,7 +16,7 @@ const setup = (database = "", item = "") => {
         targetID: "document",
         hasDatabase: (id: string) => id === database,
         hasItem: (id: string) => !!id && id === item,
-        refresh: () => { refreshed++; },
+        refresh: (automaticRefresh: boolean) => { assert.equal(automaticRefresh, true); refreshed++; },
     });
     return {panel, refreshed: () => refreshed};
 };

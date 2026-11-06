@@ -115,6 +115,9 @@ func TestAPIContractExtensionCopy(t *testing.T) {
 }
 
 func TestAPIContractExtensionSymAuthentication(t *testing.T) {
+	previousMarkdown := util.MarkdownSettings.Load()
+	util.MarkdownSettings.Store(util.NewMarkdown())
+	t.Cleanup(func() { util.MarkdownSettings.Store(previousMarkdown) })
 	const serverMarkdown = "# Server article\n\n    sample code\n\nInline $x$.\n\n![source](https://example.invalid/original.png)"
 	for _, test := range []struct {
 		name, href, clipType, contentType, body string

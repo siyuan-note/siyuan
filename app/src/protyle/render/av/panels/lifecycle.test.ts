@@ -29,10 +29,13 @@ const createPanel = (mobile = false) => {
             querySelector: () => ({textContent: "", getBoundingClientRect: () => ({right: 300, bottom: 40, height: 20})})} as unknown as Element,
         destroyCallback: () => calls.push("destroy")};
     const dependencies = new Proxy({
+        getAVRelationHost: (): undefined => undefined,
+        getAVHostIdentity: (element: HTMLElement) => element.getAttribute("data-node-id"),
+        isAVRenderData: (data: {view?: unknown}) => !!data?.view,
         getPageSize: () => ({}), getFieldsByData: (data: IAV & {fields: IAVColumn[]}) => data.fields,
         fetchPost: (url: string, data: {ignoreRows: boolean}, callback: (response: unknown) => void) => {
             requests.push({url, data});
-            callback({data: {id: "av", viewType: "table", fields: [], view: {rows: []}}});
+            callback({code: 0, data: {id: "av", viewType: "table", fields: [], view: {rows: []}}});
         },
         escapeAttr: (value: string) => value, isMobile: () => mobile,
         getMobileAVPanelBackTarget: () => backTarget,
@@ -69,7 +72,7 @@ const createPanel = (mobile = false) => {
 };
 
 for (const mobile of [false, true]) {
-    for (const type of ["select", "date"] as const) {
+    for (const type of ["select", "date", "edit"] as const) {
         test(`${type} editors load metadata without moving the cell panel on resize (${mobile ? "mobile" : "desktop"})`, () => {
             const h = createPanel(mobile);
             h.options.type = type;

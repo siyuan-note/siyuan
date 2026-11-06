@@ -25,8 +25,8 @@ func PerformBlockOperation(operation *Operation) (transactions []*Transaction, e
 	}
 
 	switch operation.Action {
-	case "appendInsert", "insert":
-		if operation.Action == "appendInsert" || operation.PreviousID == "" && operation.NextID == "" {
+	case "appendInsert", "prependInsert", "insert":
+		if operation.Action != "insert" || operation.PreviousID == "" && operation.NextID == "" {
 			if err = treenode.CheckContainerParent(operation.ParentID); err != nil {
 				return nil, err
 			}

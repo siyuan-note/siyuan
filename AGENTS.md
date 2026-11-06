@@ -97,6 +97,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 ### i18n
 - Add new keys at the top of every `langs/*.json` object (reference `en.json`), except `_kernel`: append at the end with the next numeric key. Indent with one tab/level, no spaces. Translate each language; do not copy identical text across languages
+- Use complete translation keys for user-facing phrases; do not concatenate translated words to form a label or sentence. If composition is necessary, use a complete translatable template and verify word order, spacing, punctuation and placeholders in every supported language
 - Ellipses are three ASCII periods (`...`), never `…`/`……`. Setting-description tips and user-facing errors have no terminal period/equivalent (`.`, `。`, `।`); preserve inter-sentence punctuation, including `_kernel` errors
 - Use `ld246.com` only in `zh-CN.json`, `liuyun.io` elsewhere
 - In `zh-TW` and the Traditional Chinese guide, Block is `區塊` (also `子區塊`, `程式碼區塊`, `區塊 ID`), never `塊`; count with `個區塊`. Block Reference is `區塊引用`, Blockquote `引述區塊`; retain unrelated terms such as `分塊` (chunks) and `覈取方塊` (Checkbox)

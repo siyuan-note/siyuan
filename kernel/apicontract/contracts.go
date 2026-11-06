@@ -614,6 +614,8 @@ var HTML2BlockDOM = define[HTMLClipboardRequest, HTMLClipboardData]("html2BlockD
 
 var WPSPresentation2BlockDOM = define[WPSPresentationRequest, WPSPresentationData]("wpsPresentation2BlockDOM", "/api/lute/wpsPresentation2BlockDOM", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 
+// names 省略或为 null 时返回全部符合条件的插件；空数组返回空列表，其他值按安装名称精确筛选并去重。
+// 名称筛选保留插件启用、信任、前端兼容、发布权限及 settingsWindow 声明检查。
 var LoadPetals = define[LoadPetalsRequest, []*Petal]("loadPetals", "/api/petal/loadPetals", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 var SetPetalEnabled = define[SetPetalEnabledRequest, *Petal]("setPetalEnabled", "/api/petal/setPetalEnabled", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1242,6 +1244,9 @@ var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDo
 // 源快照经过认证读取且不执行修复写回；运行期失败时清理新建文档并恢复排序，属运行时补偿，
 // 不保证进程崩溃时的事务原子性。
 var DuplicateDocTree = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDocTree", "/api/filetree/duplicateDocTree", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按存储路径创建文档，路径以 / 开头、以 .sy 结尾，每一层均为有效块 ID。
+// 非法路径在事务前拒绝；同步等待创建事务，失败返回 -1，不返回未成功创建的文档 ID。
 var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // CreateDailyNote 省略 date、传空串或 null 时，按当天的命名和路径模板复用或创建，与日记按钮、快捷键一致。
@@ -1639,6 +1644,12 @@ var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollect
 // 包括逐字改名后实际移除的标签所涉及的条目；手动条目及仍匹配启用规则的条目保留。
 var PreviewTagRemoval = define[TagRemovalPreviewRequest, []*TagRemovalCollection]("previewTagRemoval", "/api/tag/previewTagRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
+// PreviewCollectionRemoval 只读投影整笔编辑，预览删除标签或引用后失配的自动收集条目。
+// 返回按数据库分组的候选与源版本；源版本在仅删除来源时也随事务的 collectionRemovalSourceVersions 提交。
+// 选择移出的条目以 automaticOnly 的 cleanupAttrViewBlocks 加入原事务。
+// 保留手动、仍符合其他启用规则和未知状态的条目；支持加密笔记本的认证与隔离。
+var PreviewCollectionRemoval = define[CollectionRemovalPreviewRequest, *CollectionRemovalPreview]("previewCollectionRemoval", "/api/av/previewCollectionRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
 // 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。
 var RemoveTagWithCollections = define[RemoveTagWithCollectionsRequest, Null]("removeTagWithCollections", "/api/tag/removeTagWithCollections", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
 
@@ -1649,11 +1660,13 @@ var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPaste
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
-// true 表示创建后分屏打开，false 表示不打开，省略时仅日历条目自动打开。API 本身不触发界面操作。
+// true 表示创建后打开，false 表示不打开，省略时仅日历自动打开。
+// openInCurrentTab 为 true 时在当前分屏打开，否则向右分屏打开。API 本身不触发界面操作。
 // 保存位置重名时返回未写入的 data.ambiguity 和 notebook；selection 固定解析时间、模板版本及文档身份。
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 
 // 关联新建遇到保存位置歧义时返回未写入的候选，selection 续接原预览时间，创建与关联共用一次撤销。
+// relationContext 指定关联明细来源时，只接受该来源条目，事务内追加新关系而非覆盖 cells 中的旧关系数组。
 var CreateAttributeViewRelationItem = define[CreateAttributeViewRelationItemRequest, AVCreateItemResult]("createAttributeViewRelationItem", "/api/av/createAttributeViewRelationItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 
 // Markdown 新建沿用条目模板与正文规则；位置歧义在写入前返回候选，可用 selection 继续。
@@ -1669,6 +1682,14 @@ var RenderHistoryAttributeView = define[RenderHistoryAttributeViewRequest, AVArc
 // temporarySort 可选，省略或 null 时使用已保存的排序；指定时以单字段规则覆盖本次渲染排序，先排序再分页。
 // 临时排序的 order 必须为 ASC 或 DESC；字段缺失或不支持排序时恢复已保存规则。
 // 临时排序不创建或保存数据库，不改变载体默认视图；支持现有 valueSource 和 dateEndpoint 语义。
+// relationContext 从来源关联字段推导目标，成员范围在筛选、分组、统计、分页和定位前生效，支持游离条目。
+// 关联明细仅支持表格，不保存临时排序或 temporaryFilters；后者与目标视图已有筛选相交。
+// 无效上下文、未知配置版本和发布读取角色均拒绝访问，不回退到完整数据库。
+// HTTP 模板字段的普通解析、求值错误作为字段内容返回，并定向提示发起窗口；取消、锁定和执行超限仍终止请求。
+// automaticRefresh 默认 false；true 时仅复用来源、行及模板输入未变的成功内存结果，不扩大读取权限。
+// preserveHTTPResults 默认 false；配合 automaticRefresh 用于排序等展示操作，复用外部依赖模板的当前快照。
+// deferHTTPTemplates 默认 false；true 时不执行联网模板，返回 pendingHTTPTemplates 字段 ID 供首屏显示加载状态。
+// 同库模板一并延后；依赖模板的筛选、排序、分组、统计、日历和嵌套视图仅返回结构，完成查询后重新请求最终结果。
 var RenderAttributeView = define[RenderAttributeViewRequest, AVRenderResult]("renderAttributeView", "/api/av/renderAttributeView", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, FastJSON: true}, "POST")
 var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalendarUndatedData]("getAttributeViewCalendarUndated", "/api/av/getAttributeViewCalendarUndated", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1676,6 +1697,11 @@ var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalenda
 // groupID 可选，省略、null 或空字符串时保留整个视图行为；指定时仅返回该分组图片，分组不存在则报错。
 // 分组先按组内手动顺序排列，再应用视图排序；同一单元格按资源顺序返回，不受分页或虚拟滚动限制。
 var GetCurrentAttrViewImages = define[GetCurrentAttrViewImagesRequest, []string]("getCurrentAttrViewImages", "/api/av/getCurrentAttrViewImages", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 获取条目或绑定块的属性字段；支持与 renderTemplate 相同的 HTTP 执行请求头，确认只发送到发起窗口。
+// 无执行请求头或发布读取时不启用联网；条目成员范围、载体权限和加密笔记本访问边界保持有效。
+// 当前来源版本的模板许可可复用；取消、窗口断开或笔记本锁定后丢弃结果。
+// automaticRefresh 默认 false；true 时复用输入未变的字段结果，锁定或撤销许可会清除缓存。
 var GetAttributeViewKeys = define[GetAttributeViewKeysRequest, []*AVBlockAttributeViewKeys]("getAttributeViewKeys", "/api/av/getAttributeViewKeys", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewSearchTarget = define[GetAttributeViewSearchTargetRequest, *AVAttributeViewSearchTarget]("getAttributeViewSearchTarget", "/api/av/getAttributeViewSearchTarget", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewBacklinks = define[GetAttributeViewBacklinksRequest, *AVAttributeViewBacklinks]("getAttributeViewBacklinks", "/api/av/getAttributeViewBacklinks", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1783,6 +1809,8 @@ var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/ed
 
 // gemini-interactions 使用 store=false 和本地会话历史，nativeContent 版本 1 保留完整原生步骤及思考签名。
 // 未知原生版本保留原会话并报错；缺失终止事件、失败或不完整的响应不会执行工具调用。
+// 流式事件按序发送；消费停滞会取消生成，待工具结果和运行时检查点收尾后发送 interrupted。
+// 同轮重试保留原 thinking 轮次；上下文压缩的 thinking 事件携带该轮 roundID。
 var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, aiAgentSSEOptions(), "POST")
 var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", PublicAccess, NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
 
@@ -1933,6 +1961,7 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 // 自动收集只添加条目，原文失配及规则变更均保留已有条目和字段，再次匹配不会重新初始化。
 // setAttrViewAutomations 新增范围最多包含 32 个去重后的笔记本或文档；既有超限规则可保留或删减，撤销重做不截断原范围。
 // cleanupAttrViewBlocks 按全部启用收集规则复查已确认条目及绑定，仅移出明确失配条目，并支持撤销。
+// 来源删除预览的 sourceVersions 随 collectionRemovalSourceVersions 提交；含源版本的请求限单笔事务，并同步返回提交结果。
 // 规则的 notifyOnSuccess 缺省或 null 为开启，仅实际变更且事务成功提交后通知，同一事务合并；错误提示不受其控制。
 // 手动收集及清理、无变化、撤销重放和失败回滚不发送成功通知。
 // addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。

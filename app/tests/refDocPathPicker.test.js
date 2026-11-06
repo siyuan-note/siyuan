@@ -18,6 +18,11 @@ const runCases = async (sources, mobile) => {
     let id = 0;
     const deps = {
         genUUID: () => String(++id), isAbove: () => false, moveResize() {}, isMobile: () => mobile,
+        isNotCtrl: () => true, scrollInputIntoView() {},
+        bindBottomSheetDialog: (_dialog, _close, _resize, opened) => {
+            queueMicrotask(() => opened?.());
+            return Object.assign(() => {}, {freeze() {}});
+        },
         Constants: {LOCAL_MOVE_PATH: "move", TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0},
         getFileTreeDefaultIconAttr: () => "", getFileTreeIconHTML: () => "",
         escapeHtml: text => text, escapeAriaLabel: text => text, updateHotkeyTip: text => text,
@@ -39,6 +44,7 @@ const runCases = async (sources, mobile) => {
         return exports;
     };
     Object.assign(deps, load("dialog/index"));
+    Object.assign(deps, load("dialog/mobileDialog"));
     const {movePathTo} = load("util/pathName");
     for (const source of ["plain", "secret"]) {
         for (const confirmBy of ["click", "enter", "cancel"]) {
@@ -49,7 +55,7 @@ const runCases = async (sources, mobile) => {
                 cb: (...args) => calls.push(args), restoreFocus: () => restored++});
             const dialog = window.siyuan.dialogs[0];
             const container = dialog.element.querySelector(".b3-dialog__container");
-            check.equal(container.style.width, mobile ? "92vw" : "50vw");
+            check.equal(container.style.width, mobile ? "100vw" : "50vw");
             const expected = source === "secret" ? ["secret"] : ["plain", "other"];
             const boxes = selector => Array.from(dialog.element.querySelectorAll(selector)).map(item => item.dataset.box);
             check.deepEqual(boxes("#foldTree li"), expected);
@@ -91,7 +97,7 @@ if (process.versions.electron && process.type === "browser") {
             for (const mobile of [false, true]) {
                 await win.loadURL("data:text/html,<html><body></body></html>");
                 const sources = {};
-                for (const name of ["util/pathName", "dialog/index"]) {
+                for (const name of ["util/pathName", "dialog/index", "dialog/mobileDialog"]) {
                     sources[name] = ts.transpileModule(preprocess(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
                         {MOBILE: mobile, BROWSER: true}, false, true), {
                         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},

@@ -108,6 +108,13 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
     hosts.set(token, {key, dispose});
     const host: ISettingsWindowHost = {
         app, title, isActive, dispose: close,
+        reopenSettings: async settingsWindow => {
+            const {openSetting} = await import("../index");
+            if (!isActive()) return;
+            window.siyuan.config.system.settingsWindow = settingsWindow;
+            openSetting(app, "app");
+            ipcRenderer.send(Constants.SIYUAN_CMD, "show");
+        },
         exportLayout: options => { assertActive(); return exportLayout(options); },
         suspendLayoutSaving: () => { assertActive(); return suspendLayoutSaving(); },
         reload: () => { assertActive(); return reloadUI(); },

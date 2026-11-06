@@ -9,6 +9,22 @@ import (
 	"testing"
 )
 
+func TestEditorGlobalBreadcrumbDefaults(t *testing.T) {
+	if NewEditor().GlobalBreadcrumb {
+		t.Fatal("global breadcrumb must default to disabled")
+	}
+	for _, input := range []string{`{}`, `{"globalBreadcrumb":null}`, `{"globalBreadcrumb":true}`, `{"globalBreadcrumb":false}`} {
+		var editor Editor
+		if err := json.Unmarshal([]byte(input), &editor); err != nil {
+			t.Fatal(err)
+		}
+		NormalizeEditor(&editor)
+		if editor.GlobalBreadcrumb != (input == `{"globalBreadcrumb":true}`) {
+			t.Fatalf("unexpected global breadcrumb preference for %s", input)
+		}
+	}
+}
+
 func TestEditorEmbedBreadcrumbParentPathDefaults(t *testing.T) {
 	for _, input := range []string{`{}`, `{"embedBlockBreadcrumbParentPath":null}`, `{"embedBlockBreadcrumbParentPath":true}`, `{"embedBlockBreadcrumbParentPath":false}`} {
 		var editor Editor

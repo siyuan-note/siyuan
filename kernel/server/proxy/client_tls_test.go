@@ -30,6 +30,7 @@ func TestReverseProxyLoginSessionRoundTrip(t *testing.T) {
 	previousWrongAuthCount := util.WrongAuthCount
 	model.Conf = model.NewAppConf()
 	model.Conf.AccessAuthCode = "test-access-code"
+	model.Conf.CookieKey = "test-cookie-key"
 	util.SSL = false
 	util.WrongAuthCount = 0
 	t.Cleanup(func() {

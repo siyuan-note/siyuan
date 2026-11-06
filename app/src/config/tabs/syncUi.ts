@@ -1,9 +1,10 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {config as configApi} from "../util/configApi";
 import {showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {ContractFormData} from "../../util/contractFormData";
 import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {isInIOS, saveExportFile} from "../../protyle/util/compatibility";
 import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {getCloudURL} from "../util/about";
@@ -474,7 +475,7 @@ const openSyncProviderConfigDialog = (root: Element) => {
     let closed = false;
     let rulesVersion = 0;
     let rulesTimer: ReturnType<typeof setTimeout>;
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         title: `${L.syncConfig} - ${def.configKey === "s3" ? "S3" : def.configKey === "webdav" ? "WebDAV" : L.localFileSystem}`,
         width: isMobile() ? "92vw" : "680px",
         containerClassName: "config-sync-dialog",
@@ -566,7 +567,7 @@ const openSyncProviderConfigDialog = (root: Element) => {
             destroy();
         } else {
             confirming = true;
-            confirmDialog(L.confirm, L.discardUnsavedChanges, () => destroy(), () => { confirming = false; });
+            mobileConfirmDialog(L.confirm, L.discardUnsavedChanges, () => destroy(), () => { confirming = false; });
         }
     };
     const refresh = () => {
@@ -689,7 +690,7 @@ const openSyncProviderConfigDialog = (root: Element) => {
             return;
         }
         confirming = true;
-        confirmDialog(L.clearSyncConfig, L.clearSyncConfigConfirm, () => {
+        mobileConfirmDialog(L.clearSyncConfig, L.clearSyncConfigConfirm, () => {
             confirming = false;
             if (window.siyuan.config.readonly) {
                 return;

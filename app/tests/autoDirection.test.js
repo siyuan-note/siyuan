@@ -291,9 +291,73 @@ const runListCases = async () => {
     assert.equal(getComputedStyle(nativeItems[2]).direction, "ltr");
     assert.equal(getComputedStyle(nativeItems[0]).marginLeft, "0px");
     assert.equal(getComputedStyle(nativeItems[2]).marginRight, "0px");
+    preview.innerHTML = "<ul><li>123<ul><li><p>שלום</p></li></ul></li><li><span>שלום</span></li></ul>";
+    await settle();
+    const fallbackItems = preview.querySelectorAll("li");
+    assert.equal(fallbackItems[0].dir, "auto");
+    assert.equal(fallbackItems[0].getAttribute("data-auto-list-direction"), "ltr");
+    assert.equal(getComputedStyle(fallbackItems[1]).direction, "rtl");
+    assert.equal(fallbackItems[2].dir, "auto");
+    assert.equal(fallbackItems[2].getAttribute("data-auto-list-direction"), "rtl");
+    preview.dir = "rtl";
+    await settle();
+    fallbackItems.forEach(item => assert.equal(getComputedStyle(item).direction, "rtl"));
+    preview.removeAttribute("dir");
+    await settle();
+    assert.equal(fallbackItems[0].getAttribute("data-auto-list-direction"), "ltr");
     setAutoDirection(preview, false);
     assert.equal(preview.querySelector("[data-auto-direction]"), null);
     destroyAutoDirection(preview);
+};
+
+const runBatchedDirectionCases = async (kind, insert) => {
+    const assert = require("node:assert/strict");
+    const settle = () => new Promise(resolve => setTimeout(resolve, 0));
+    const {setAutoDirection, destroyAutoDirection} = window.direction;
+    document.body.innerHTML = '<div class="protyle"><div class="protyle-wysiwyg"></div></div>';
+    const root = document.querySelector(".protyle-wysiwyg");
+    const lute = window.Lute.New();
+    lute.SetProtyleWYSIWYG(true);
+    const list = kind === "list" || kind === "nested";
+    const source = Array.from({length: 200}, (_, index) =>
+        (kind === "nested" ? "  ".repeat(index % 4) : "") +
+        (list ? "- " : "") + (index % 2 ? "English" : "שלום")).join(list ? "\n" : "\n\n");
+    const html = lute.Md2BlockDOM(source);
+    if (kind === "explicit") root.style.direction = "ltr";
+    if (!insert) root.innerHTML = html;
+    const originalGetComputedStyle = window.getComputedStyle;
+    let ancestorReads = 0;
+    window.getComputedStyle = (element, ...args) => {
+        if (element === root) ancestorReads++;
+        return originalGetComputedStyle.call(window, element, ...args);
+    };
+    try {
+        setAutoDirection(root, true);
+        if (insert) {
+            const content = document.createElement("template");
+            content.innerHTML = html;
+            // 同一批中分别插入多个节点，覆盖彼此独立及重叠的观察范围。
+            root.append(...content.content.childNodes);
+        }
+        await settle();
+    } finally {
+        window.getComputedStyle = originalGetComputedStyle;
+    }
+    assert.ok(ancestorReads <= 2, `${ancestorReads} repeated ancestor style reads`);
+    const targets = Array.from(root.querySelectorAll(list ? '[data-type="NodeListItem"]' :
+        '[data-type="NodeParagraph"] > div[contenteditable]:not(.protyle-attr)'));
+    assert.equal(targets.length, 200);
+    targets.forEach((element, index) => assert.equal(getComputedStyle(element).direction,
+        kind === "explicit" || index % 2 ? "ltr" : "rtl"));
+    if (kind === "explicit") root.style.direction = "";
+    root.dir = "rtl";
+    await settle();
+    targets.forEach(element => assert.equal(getComputedStyle(element).direction, "rtl"));
+    root.removeAttribute("dir");
+    await settle();
+    targets.forEach((element, index) => assert.equal(getComputedStyle(element).direction, index % 2 ? "ltr" : "rtl"));
+    assert.equal(lute.BlockDOM2StdMd(root.innerHTML), lute.BlockDOM2StdMd(html));
+    destroyAutoDirection(root);
 };
 
 const runManualDirectionCases = async (staticExport) => {
@@ -453,6 +517,20 @@ const runElectron = async () => {
         }).outputText;
         await win.webContents.executeJavaScript(`(() => {const exports = {}; ${dragSource}; window.listDrag = exports;})()`);
         await win.webContents.executeJavaScript(`(${runListCases.toString()})()`);
+        win.webContents.debugger.attach("1.3");
+        await win.webContents.debugger.sendCommand("Performance.enable");
+        const styleCount = async () => (await win.webContents.debugger.sendCommand("Performance.getMetrics"))
+            .metrics.find(metric => metric.name === "RecalcStyleCount").value;
+        for (const kind of ["paragraph", "explicit", "list", "nested"]) {
+            for (const insert of [false, true]) {
+                const before = await styleCount();
+                await win.webContents.executeJavaScript(`(${runBatchedDirectionCases.toString()})(${JSON.stringify(kind)}, ${insert})`);
+                const count = await styleCount() - before;
+                assert.ok(count < 20, `${kind}, insert=${insert}: ${count} style recalculations`);
+                console.log(`Batched direction ${kind}, insert=${insert}: ${count} style recalculations`);
+            }
+        }
+        win.webContents.debugger.detach();
         const transactionSource = ts.createSourceFile("transaction.ts", readFileSync(
             path.join(__dirname, "../src/protyle/wysiwyg/transaction.ts"), "utf8"), ts.ScriptTarget.Latest, true);
         const batch = transactionSource.statements.find(statement => ts.isVariableStatement(statement) &&
@@ -496,7 +574,7 @@ if (process.versions.electron && process.type === "browser") {
         require("electron").app.exit(1);
     });
 } else {
-    require("node:test").it("detects text direction while preserving manual settings, content and structural layout", {
+    require("node:test").it("batches automatic direction updates while preserving manual settings, content and structural layout", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,
     }, async () => {

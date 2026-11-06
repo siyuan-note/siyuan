@@ -341,6 +341,14 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	diagnostic.Stage("prepare database automations")
 	timing.Stage("automations")
+	if err = tx.validateCollectionRemovalSources(); err != nil {
+		tx.rollback()
+		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+	}
+	if err = tx.prepareRelationDetailOperations(); err != nil {
+		tx.rollback()
+		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+	}
 	if err = tx.prepareAttributeViewAutomations(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
@@ -360,6 +368,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	if !isLargeInsert {
 		for operationIndex := 0; operationIndex < len(tx.DoOperations); operationIndex++ {
 			op := tx.DoOperations[operationIndex]
+			if err = tx.validateAttributeViewRelationCellOperation(op); err != nil {
+				tx.rollback()
+				return &TxErr{code: TxErrHandleAttributeView, id: op.AvID, msg: err.Error()}
+			}
 			diagnostic.Stage("execute " + op.Action)
 			if isLargeDelete && "delete" == op.Action {
 				continue
@@ -421,6 +433,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewContextFilter(op)
 			case "setAttrViewColRelationFilters":
 				ret = tx.doSetAttrViewColRelationFilters(op)
+			case "setAttrViewRelationDetail":
+				ret = tx.doSetAttrViewRelationDetail(op)
+			case "updateAttrViewRelationItems":
+				ret = tx.doUpdateAttrViewRelationItems(op)
 			case "setAttrViewColRollupFilters":
 				ret = tx.doSetAttrViewColRollupFilters(op)
 			case "setAttrViewSorts":
@@ -1105,6 +1121,12 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	} else if changed {
 		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
 	}
+	if err = tx.validateBlockWriteIDs(subTree.Root, tree, nil); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: operation.ParentID}
+	}
+	if tx.fromAPI {
+		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+	}
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
 	// subTree.Box 此时尚未设置，用目标树所在 box 作为 srcBox
 	tx.degradeCrossBoundaryBlockRefs(subTree.Root, tree.Box)
@@ -1209,6 +1231,12 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, treenode.GetNodeInTree(tree, operation.ParentID)); insertErr != nil {
 		return &TxErr{code: TxErrCodeReloadUI, msg: insertErr.Error(), id: operation.ParentID}
 	} else if changed {
+		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+	}
+	if err = tx.validateBlockWriteIDs(subTree.Root, tree, nil); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: operation.ParentID}
+	}
+	if tx.fromAPI {
 		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
 	}
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
@@ -1871,6 +1899,12 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
 	}
 	subTree.Box, subTree.Path = tree.Box, tree.Path
+	if err := tx.validateBlockWriteIDs(subTree.Root, tree, nil); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: operation.ParentID}
+	}
+	if tx.fromAPI {
+		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+	}
 	tx.processGlobalAssets(subTree)
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
 	tx.degradeCrossBoundaryBlockRefs(subTree.Root, subTree.Box)
@@ -2101,6 +2135,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	if resolveErr != nil {
 		logging.LogErrorf("resolve updated block [%s] failed: %s", id, resolveErr)
 		return &TxErr{code: TxErrCodePushMsg, msg: resolveErr.Error(), id: id}
+	}
+	if err = tx.validateBlockWriteIDs(updatedNode, tree, oldNode); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: id}
 	}
 	if ast.NodeTable == oldNode.Type && ast.NodeTable == updatedNode.Type &&
 		(treenode.HasTableCellRich(oldNode) || "1" == oldNode.IALAttr(treenode.TableCellRichTableAttribute)) &&
@@ -2655,16 +2692,20 @@ func (tx *Transaction) normalizeListItemFolds() (ret *TxErr) {
 }
 
 type Operation struct {
-	Action     string   `json:"action"`
-	Data       any      `json:"data"`
-	ID         string   `json:"id"`
-	RootID     string   `json:"rootID"` // 思源内部暂时没有用到 https://github.com/siyuan-note/siyuan/issues/17179#issuecomment-4051604916
-	ParentID   string   `json:"parentID"`
-	PreviousID string   `json:"previousID"`
-	NextID     string   `json:"nextID"`
-	RetData    any      `json:"retData"`
-	BlockIDs   []string `json:"blockIDs"` // move/append 时为随折叠标题移动的顶层块，闪卡操作时为目标块
-	BlockID    string   `json:"blockID"`
+	relationDetailConfig     *attributeViewRelationDetailSnapshot
+	relationDetailConfigUndo bool
+	relationDetailContext    *AttributeViewRelationContext
+	RelationContext          *AttributeViewRelationContext `json:"relationContext,omitempty"`
+	Action                   string                        `json:"action"`
+	Data                     any                           `json:"data"`
+	ID                       string                        `json:"id"`
+	RootID                   string                        `json:"rootID"` // 思源内部暂时没有用到 https://github.com/siyuan-note/siyuan/issues/17179#issuecomment-4051604916
+	ParentID                 string                        `json:"parentID"`
+	PreviousID               string                        `json:"previousID"`
+	NextID                   string                        `json:"nextID"`
+	RetData                  any                           `json:"retData"`
+	BlockIDs                 []string                      `json:"blockIDs"` // move/append 时为随折叠标题移动的顶层块，闪卡操作时为目标块
+	BlockID                  string                        `json:"blockID"`
 
 	DeckID                        string      `json:"deckID"` // 用于添加/删除闪卡
 	Tree                          *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
@@ -2677,7 +2718,12 @@ type Operation struct {
 	listConversionUndo            bool
 	attributeViewItems            *attributeViewItemsSnapshot
 	attributeViewCreatedSubItems  *attributeViewCreatedSubItemsSnapshot
+	attributeViewRelationSubItems *attributeViewRelationSubItemsSnapshot
+	attributeViewRelationSubUndo  bool
 	attributeViewFields           *attributeViewFieldsSnapshot
+	relationCellContext           *AttributeViewRelationCellContext
+	relationCellReplay            *attributeViewRelationCellReplay
+	relationCellReplayUndo        bool
 	attributeViewFieldUndo        bool
 	attributeViewAutomation       bool
 	attributeViewCollectionRuleID string
@@ -2827,10 +2873,11 @@ type transactionCompletion struct {
 }
 
 type Transaction struct {
-	Timestamp             int64        `json:"timestamp"`
-	DoOperations          []*Operation `json:"doOperations"`
-	UndoOperations        []*Operation `json:"undoOperations"`
-	TemplateDocTreePlanID string       `json:"templateDocTreePlanID,omitempty"`
+	CollectionRemovalSourceVersions map[string]string `json:"collectionRemovalSourceVersions,omitempty"`
+	Timestamp                       int64             `json:"timestamp"`
+	DoOperations                    []*Operation      `json:"doOperations"`
+	UndoOperations                  []*Operation      `json:"undoOperations"`
+	TemplateDocTreePlanID           string            `json:"templateDocTreePlanID,omitempty"`
 
 	trees          map[string]*parse.Tree // 事务中变更的树
 	nodes          map[string]*ast.Node   // 事务中变更的节点
@@ -2856,6 +2903,7 @@ type Transaction struct {
 	writeTransactionTree          func(*parse.Tree) error
 	documentTitleWrite            *documentTitleWriteState
 	tagRemovalSources             map[string][]byte
+	collectionRemovalVersions     map[string]string
 	blockSwapOriginalTrees        []*parse.Tree
 	sourceJournal                 *documentSourceJournal
 	sourceLeases                  map[string]bool
@@ -2875,6 +2923,8 @@ type Transaction struct {
 	pushAutomationMessage         func(string, int) string
 	attributeViewCollections      *attributeViewCollectionState
 	attributeViewItemCreation     bool
+	attributeViewStorageContexts  map[string]string
+	relationDetailUndoUsed        map[*Operation]bool
 	invalidatedAvHistory          map[string]bool
 
 	fromAPI  bool // 用户主动修改（HTTP、CLI、MCP 等）；允许自动化，撤销日志仍需具备 UndoOperations
@@ -2950,6 +3000,11 @@ func (tx *Transaction) WaitForCommit() {
 }
 
 func (tx *Transaction) begin() (err error) {
+	if err = tx.prepareCollectionRemovalVersions(); err != nil {
+		return err
+	}
+	tx.attributeViewStorageContexts = nil
+	tx.relationDetailUndoUsed = nil
 	tx.sourceJournal, tx.sourceLeases = nil, nil
 	tx.sourceMirrors, tx.sourceBlockAttrs = nil, nil
 	tx.sourceDatabaseBefore = nil
@@ -3196,7 +3251,10 @@ func (tx *Transaction) commit() (err error) {
 
 	tx.relatedAvIDs = gulu.Str.RemoveDuplicatedElem(tx.relatedAvIDs)
 	for _, avID := range tx.relatedAvIDs {
-		destAv, _ := av.ParseAttributeView(avID)
+		destAv, parseErr := tx.parseAttributeViewForOperation(avID, "")
+		if _, scoped := tx.attributeViewStorageContexts[avID]; scoped && parseErr != nil {
+			return parseErr
+		}
 		if nil == destAv {
 			continue
 		}
@@ -3205,7 +3263,7 @@ func (tx *Transaction) commit() (err error) {
 			return err
 		}
 		regenAttrViewGroups(destAv)
-		if saveErr := av.SaveAttributeView(destAv); saveErr != nil && tx.attributeViewAutomations != nil {
+		if saveErr := av.SaveAttributeView(destAv); saveErr != nil && (tx.attributeViewAutomations != nil || tx.attributeViewStorageContexts != nil) {
 			return saveErr
 		}
 		ReloadAttrView(avID)
@@ -3227,7 +3285,7 @@ func (tx *Transaction) commit() (err error) {
 			return ErrBoxNotFound
 		}
 		box.setSortByConf(path.Dir(tree.Path), tree.ID)
-		PushCreate(box, tree.Path, nil)
+		PushCreate(box, tree.Path, map[string]any{"listDocTree": tree.Root.IALAttr(DocHiddenAttr) != "true"})
 	}
 
 	crossTreeMoveRefRefreshes := append([]crossTreeMoveRefRefresh(nil), tx.crossTreeMoveRefRefreshes...)
@@ -3268,6 +3326,7 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.mindmapSummarySiblings = nil
 	tx.relatedAvIDs = nil
 	tx.tagRemovalSources = nil
+	tx.collectionRemovalVersions = nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocBoxes, tx.attemptedTemplateCreatedDocs = nil, nil
@@ -3289,6 +3348,7 @@ func (tx *Transaction) releaseCommittedResources() {
 func (tx *Transaction) rollback() {
 	tx.indexChanges = nil
 	tx.tagRemovalSources = nil
+	tx.collectionRemovalVersions = nil
 	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.rollbackCollectionCreatedTrees()
@@ -3370,7 +3430,7 @@ func (tx *Transaction) compensateCreatedDocCommit(attemptedRemovedDocs []*parse.
 		}
 		if box := Conf.Box(tree.Box); nil != box {
 			box.setSortByConf(path.Dir(tree.Path), tree.ID)
-			PushCreate(box, tree.Path, nil)
+			PushCreate(box, tree.Path, map[string]any{"listDocTree": tree.Root.IALAttr(DocHiddenAttr) != "true"})
 		}
 	}
 	if nil != tx.templateDocTreeRootSnapshot {

@@ -7,7 +7,7 @@
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
 		"type": "doc",
-		"updated": "20261024163013"
+		"updated": "20261103094358"
 	},
 	"Children": [
 		{
@@ -842,6 +842,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " also trigger the \"Good\" rating. Ratings directly affect the review interval for each card — higher ratings extend the time before the next review, and lower ratings shorten it. The system uses the FSRS algorithm to automatically optimize each user's review schedule based on their rating history."
+				}
+			]
+		},
+		{
+			"ID": "20261103094358-8b81f5d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103094358-8b81f5d",
+				"updated": "20261103094358"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, switching cards, changing pages or the review scope, submitting a rating, and setting due dates, resetting or removing cards wait for the current edits to be saved. If saving fails, the current card and draft remain available. Retry the action after the connection recovers."
 				}
 			]
 		},

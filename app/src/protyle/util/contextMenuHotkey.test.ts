@@ -1,3 +1,5 @@
+import * as dockKeymap from "../../util/dockKeymap";
+import * as shortcut from "../../util/shortcut";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -15,7 +17,7 @@ const evaluate = (source: string, globals: Record<string, unknown>) => {
 };
 
 const constants = evaluate(readFileSync("src/constants.ts", "utf8"), {
-    SIYUAN_VERSION: "test", NODE_ENV: "test",
+    SIYUAN_VERSION: "test", NODE_ENV: "test", require: () => dockKeymap,
 }).Constants;
 
 const loadFunction = (path: string, name: string, globals: Record<string, unknown>) => {
@@ -36,10 +38,10 @@ const menuPaths = [
 for (const mac of [false, true]) {
     const {matchHotKey} = evaluate(readFileSync("src/protyle/util/hotKey.ts", "utf8"), {
         require: (name: string) => name.endsWith("compatibility") ? {
-            isMac: () => mac,
+            isMac: () => mac, isInIOS: () => false,
             isOnlyMeta: (event: KeyboardEvent) => mac ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey,
             isNotCtrl: (event: KeyboardEvent) => !event.ctrlKey && !event.metaKey,
-        } : name.endsWith("constants") ? {Constants: constants} : bindings,
+        } : name.endsWith("constants") ? {Constants: constants} : name.endsWith("shortcut") ? shortcut : bindings,
     });
     for (const path of menuPaths) {
         test(`context menu respects defaults, rebindings and unbinding: ${path}, mac=${mac}`, async () => {

@@ -43,7 +43,9 @@ func archiveDocumentSource(j *documentSourceJournal) error {
 	if exists, err := archivedDocumentSource(j); exists || err != nil {
 		return err
 	}
+	documentSourceJournalLock.RLock()
 	data, err := os.ReadFile(j.filename())
+	documentSourceJournalLock.RUnlock()
 	if err != nil {
 		return err
 	}

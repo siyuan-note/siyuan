@@ -1,8 +1,8 @@
+import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
 import {fetchPost} from "../../../util/fetch";
 import type {ChatGPTAccount} from "../../../types/api";
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import {showMessage} from "../../../dialog/message";
-import {confirmDialog} from "../../../dialog/confirmDialog";
 import {genConfigItemMainHtml} from "../../render/fragments";
 import {openByMobile} from "../../../editor/openLink";
 import {isInMobileApp, saveExportFile} from "../../../protyle/util/compatibility";
@@ -213,7 +213,7 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider,
                 const selected = profiles.find(item => item.id === accountID);
                 if (!selected) { return; }
                 const confirmed = await new Promise<boolean>(resolve => {
-                    confirmDialog(L.deleteOpConfirm, L.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(accountLabel(selected))),
+                    mobileConfirmDialog(L.deleteOpConfirm, L.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(accountLabel(selected))),
                         () => resolve(true), () => resolve(false), true);
                 });
                 if (!confirmed || disposed) { return; }

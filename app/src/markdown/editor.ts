@@ -1,6 +1,8 @@
 import type {MarkdownEditorSnapshot} from "./contracts";
 import {MARKDOWN_DOCUMENT_BYTES, MARKDOWN_RENDER_BYTES, MARKDOWN_RECOVERY_BYTES, markdownByteLength} from "./limits";
-import {createMarkdownResourcePolicy, isExternalMarkdownLink, isRelativeMarkdownResource, MarkdownResourceResolver} from "./resourcePolicy";
+import {markdownLinkDestination} from "./link";
+import {createMarkdownPanelAnimation} from "./panelAnimation";
+import {createMarkdownResourcePolicy, isRelativeMarkdownResource, MarkdownResourceResolver} from "./resourcePolicy";
 
 export type MarkdownEditorMode = "ir" | "wysiwyg" | "sv";
 
@@ -10,8 +12,21 @@ export const markdownUnicodeEmojiHints = (emojis: Record<string, string>): Recor
     Object.fromEntries(Object.entries(emojis).filter(([, value]) =>
         /^(?:\p{Extended_Pictographic}|\p{Emoji_Component})+$/u.test(value)));
 
+const popoverHotkeys = new Set([
+    "⌥Enter", "Alt+Enter", "⌘=", "Ctrl+=", "⌘-", "Ctrl+-",
+    "⇧⌘=", "⇧⌘+", "Ctrl+Shift++", "⇧⌘-", "⇧⌘_", "Ctrl+Shift+_",
+    ...["L", "C", "R", "F", "G", "U", "D", "X"].flatMap(key => [`⇧⌘${key}`, `Ctrl+Shift+${key}`]),
+]);
+
+export const markdownPopoverLabel = (label: string): string => {
+    const start = label.lastIndexOf("<");
+    return start > 0 && label.endsWith(">") && popoverHotkeys.has(label.slice(start + 1, -1)) ?
+        label.slice(0, start) : label;
+};
+
 interface VditorSurface {
     element: HTMLElement;
+    popover?: HTMLElement;
     composingLock?: boolean;
     processTimeoutId?: number;
     afterRenderTimeoutId?: number;
@@ -23,11 +38,12 @@ interface VditorInstance {
     vditor: {
         currentMode: MarkdownEditorMode;
         lute: Record<string, (...args: string[]) => string> & {GetEmojis(): Record<string, string>};
-        options: {hint: {emoji: Record<string, string>}};
+        options: {hint: {emoji: Record<string, string>}; outline: {enable: boolean}};
         ir: VditorSurface;
         wysiwyg: VditorSurface;
         sv: VditorSurface;
         toolbar: {element: HTMLElement};
+        outline: {element: HTMLElement; toggle(vditor: unknown, show: boolean, focus: boolean): void; render?(vditor: unknown): string};
         undo: {addToUndoStack(vditor: unknown): void};
         hint?: {timeId?: number};
         preview?: {render(vditor: unknown): void};
@@ -51,15 +67,24 @@ export interface MarkdownEditorOptions {
     lutePath?: string;
     lang?: string;
     theme?: "light" | "dark";
+    mobile?: boolean;
+    outline?: boolean;
     onEdit(snapshot: MarkdownEditorSnapshot): void;
     onEditPending?(pending: boolean): void;
     onContentTooLarge?(): void;
-    onModeChange?(mode: MarkdownEditorMode): void;
+    onModeChange?(mode: MarkdownEditorMode, origin: "user" | "automatic"): void;
     onSourceOnlyChange?(sourceOnly: boolean): void;
     onHistoryChange?(state: {canUndo: boolean; canRedo: boolean}): void;
+    onOutlineChange?(state: MarkdownOutlineState): void;
     onLink?(url: string): void;
     resolveResource?: MarkdownResourceResolver;
     onResourceUnavailable?(): void;
+}
+
+export interface MarkdownOutlineState {
+    enabled: boolean;
+    visible: boolean;
+    available: boolean;
 }
 
 export interface MarkdownEditor {
@@ -67,6 +92,7 @@ export interface MarkdownEditor {
     setValue(value: string): void;
     setMode(mode: MarkdownEditorMode): void;
     setTheme(theme: "light" | "dark"): void;
+    setOutline(enabled: boolean): void;
     undo(): void;
     redo(): void;
     refreshResources(): void;
@@ -107,9 +133,8 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     const document = element.ownerDocument;
     const dark = options.theme === "dark";
     if (factory === createVditor) {
-        // Vditor 4.0.1 reads getItem before testing cache.enable and treats null
-        // from storage-disabled native WebViews as an available Storage object.
-        // This independent page has no browser storage; make that explicit.
+        // Vditor 在检查 cache.enable 前读取 getItem，并将禁用存储的原生 WebView 返回的 null 当作可用存储。
+        // 独立页面没有浏览器存储，需要显式标记为不可用。
         Object.defineProperty(document.defaultView, "localStorage", {value: undefined, configurable: true});
     }
     const policy = createMarkdownResourcePolicy(document, options.resolveResource, options.onResourceUnavailable, options.sessionId);
@@ -152,6 +177,25 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     };
     let emittedHistory = {canUndo: false, canRedo: false};
     let finishInitialPreview: () => void;
+    let outlineEnabled = options.outline ?? false;
+    let emittedOutline: MarkdownOutlineState;
+    let closingOutlineVersion: {input: number; generation: number};
+    let outlineAnimation: ReturnType<typeof createMarkdownPanelAnimation>;
+    const syncOutline = (animate = false, force = false) => {
+        if (destroyed || !ready) return;
+        // Vditor 的源码模式与小于 520px 的窗口不展示大纲，保留开关意图供恢复时使用。
+        const available = instance.getCurrentMode() !== "sv" && element.ownerDocument.defaultView.innerWidth >= 520;
+        const visible = outlineEnabled && available;
+        instance.vditor.options.outline.enable = outlineEnabled;
+        outlineAnimation?.setVisible(visible, {animate, force});
+        instance.vditor.outline.element.inert = !visible;
+        const state = {enabled: outlineEnabled, visible, available};
+        if (emittedOutline && emittedOutline.enabled === state.enabled && emittedOutline.visible === state.visible &&
+            emittedOutline.available === state.available) return;
+        emittedOutline = state;
+        options.onOutlineChange?.(state);
+    };
+    const resizeOutline = () => syncOutline(false, true);
     const notifyHistory = () => {
         if (destroyed) return;
         const state = {canUndo: canHistory("undo"), canRedo: canHistory("redo")};
@@ -160,6 +204,18 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         options.onHistoryChange?.(state);
     };
     const historyObserver = new MutationObserver(notifyHistory);
+    const normalizePopoverLabels = () => {
+        // 只处理编辑器生成的浮动控件，正文属性、输入值和快捷键事件均保持原样。
+        instance?.vditor.wysiwyg.popover?.querySelectorAll("[aria-label], [placeholder]").forEach(control => {
+            for (const attribute of ["aria-label", "placeholder"]) {
+                const value = control.getAttribute(attribute);
+                if (value === null) continue;
+                const label = markdownPopoverLabel(value);
+                if (label !== value) control.setAttribute(attribute, label);
+            }
+        });
+    };
+    const popoverObserver = options.mobile ? new MutationObserver(normalizePopoverLabels) : undefined;
     const runHistory = (action: "undo" | "redo") => {
         if (destroyed || !ready || isComposing() || !canHistory(action)) return;
         const type = document.defaultView.navigator.userAgent.includes("iPhone") ? "touchstart" : "click";
@@ -167,17 +223,18 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     };
 
     const activeSurface = () => instance?.vditor[instance.getCurrentMode()];
-    const syncMode = () => {
+    const syncMode = (origin: "user" | "automatic" = "user") => {
         const next = instance.getCurrentMode();
         const changed = mode !== next;
         mode = next;
         rendered = instance.getValue();
         cachedInput = undefined;
         userPending = false;
+        syncOutline(false, changed);
         if (changed) {
             // 切换模式后立即记录基线，首笔输入不能抢在延迟快照之前覆盖它。
             instance.vditor.undo.addToUndoStack(instance.vditor);
-            options.onModeChange?.(next);
+            options.onModeChange?.(next, origin);
         }
     };
     const inEditor = (event: Event) => event.target instanceof Node &&
@@ -217,13 +274,14 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     const activateSource = () => {
         updateSourceOnly(true);
         if (instance.getCurrentMode() === "sv") return;
+        syncOutline(false, true);
         const wasProgrammatic = programmatic;
         programmatic = true;
         try {
             const button = element.querySelector<HTMLButtonElement>('button[data-mode="sv"]');
             const type = document.defaultView.navigator.userAgent.includes("iPhone") ? "touchstart" : "click";
             button.dispatchEvent(new Event(type, {bubbles: true, cancelable: true}));
-            syncMode();
+            syncMode("automatic");
         } finally {programmatic = wasProgrammatic;}
     };
 
@@ -247,7 +305,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
             instance.setPreviewMode("editor");
             return true;
         }
-        options.onModeChange?.(instance.getCurrentMode());
+        options.onModeChange?.(instance.getCurrentMode(), "automatic");
         options.onSourceOnlyChange?.(true);
         return false;
     };
@@ -264,8 +322,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
             scheduled = false;
             if (expectedGeneration === generation) notify();
         };
-        // Vditor commits its undo/input snapshot after 250 ms. Reuse that text
-        // instead of serializing the whole DOM again on every keystroke.
+        // 复用 Vditor 输入回调提供的文本，避免保存通知再次序列化全文。
         notificationTimer = setTimeout(deliver, 300);
         if (!maximumNotificationTimer) maximumNotificationTimer = setTimeout(deliver, 1000);
     };
@@ -285,8 +342,8 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     };
 
     const followLink = (link: Element) => {
-        const destination = policy.originalAttribute(link, "href");
-        if (destination && isExternalMarkdownLink(destination)) options.onLink?.(destination);
+        const destination = markdownLinkDestination(link, policy.originalAttribute);
+        if (destination) options.onLink?.(destination);
     };
 
     // 输入监听只登记意图，合并序列化开销；关闭与另存为可同步 flush 最新已提交内容。
@@ -357,12 +414,16 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 event.stopImmediatePropagation();
                 return;
             }
+            syncOutline(false, true);
             queueMicrotask(() => {
                 if (!destroyed && ready) {
                     syncMode();
                 }
             });
-        } else if ((keyboard.ctrlKey || keyboard.metaKey) && /^(?:[biklmuyz]|Enter)$/i.test(keyboard.key)) {
+        } else if (!keyboard.isComposing && (keyboard.key.length === 1 ||
+            /^(?:Backspace|Delete|Enter|Tab|Arrow(?:Left|Right|Up|Down))$/.test(keyboard.key))) {
+            // Vditor 的按键命令可能直接改写正文并阻止原生 input，方向键也可能插入空段落。
+            // 提前登记输入意图，正文是否改变仍由 flush 与渲染基线比较决定。
             markUserInput();
         }
     });
@@ -388,6 +449,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 event.stopImmediatePropagation();
                 return;
             }
+            syncOutline(false, true);
             queueMicrotask(() => {
                 if (destroyed || !ready) return;
                 syncMode();
@@ -447,6 +509,9 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         clearInternalTimers();
         observer.disconnect();
         historyObserver.disconnect();
+        popoverObserver?.disconnect();
+        element.ownerDocument.defaultView.removeEventListener("resize", resizeOutline, true);
+        outlineAnimation?.destroy();
         policy.destroy();
         listeners.forEach(([type, handler]) => element.removeEventListener(type, handler, true));
         if (instance?.vditor) instance.destroy();
@@ -465,7 +530,8 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
             instance = factory(element, {
                 value: "", mode, cdn: options.cdn, _lutePath: options.lutePath,
                 lang: markdownEditorLanguage(options.lang), theme: dark ? "dark" : "classic",
-                cache: {enable: false}, undoDelay: 250, height: "100%", minHeight: 0,
+                cache: {enable: false}, undoDelay: 0, height: "100%", minHeight: 0,
+                outline: {enable: outlineEnabled, position: "left"},
                 toolbar: ["headings", "bold", "italic", "link", "list", "undo", "redo", "edit-mode"],
                 preview: {mode: recoverySourceOnly ? "editor" : "both", actions: [], delay: 150, markdown: {sanitize: true},
                     theme: {current: dark ? "dark" : "light"}, hljs: {style: dark ? "github-dark" : "github"},
@@ -487,9 +553,33 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 after: () => queueMicrotask(() => {
                     try {
                         if (destroyed) return;
-                        if (instance.version !== "4.0.1") throw new Error("Unsupported Markdown editor version");
+                        if (instance.version !== "4.0.2-alpha.3") throw new Error("Unsupported Markdown editor version");
+                        if (element.id) instance.vditor.outline.element.id = `${element.id}-outline`;
+                        outlineAnimation = createMarkdownPanelAnimation({
+                            element: instance.vditor.outline.element,
+                            applyVisible(visible, {reversing}) {
+                                const outline = instance.vditor.outline;
+                                if ((outline.element.style.display === "block") !== visible) {
+                                    const render = outline.render;
+                                    if (!visible) closingOutlineVersion = userPending ? undefined : {input: inputVersion, generation};
+                                    const reuse = visible && reversing && render && closingOutlineVersion?.input === inputVersion &&
+                                        closingOutlineVersion.generation === generation;
+                                    // 退场途中恢复时复用标题节点和折叠状态，原生 toggle 仍计算编辑区边距。
+                                    if (reuse) outline.render = () => "";
+                                    try {outline.toggle(instance.vditor, visible, false);}
+                                    finally {if (reuse) outline.render = render;}
+                                    if (visible) closingOutlineVersion = undefined;
+                                }
+                            },
+                            styleTargets: () => [{element: activeSurface().element, properties: ["padding-left", "padding-right"]}],
+                        });
                         // 内部控件提供模式与快捷键入口，历史操作由标题行调用同一套撤销记录。
                         instance.vditor.toolbar.element.hidden = true;
+                        if (popoverObserver && instance.vditor.wysiwyg.popover) {
+                            popoverObserver.observe(instance.vditor.wysiwyg.popover, {childList: true, subtree: true,
+                                attributes: true, attributeFilter: ["aria-label", "placeholder"]});
+                            normalizePopoverLabels();
+                        }
                         historyObserver.observe(instance.vditor.toolbar.element, {subtree: true, attributes: true, attributeFilter: ["class"]});
                         const lute = instance.vditor.lute;
                         const getEmojis = lute.GetEmojis.bind(lute);
@@ -509,9 +599,10 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                             finishInitialPreview = () => {clearTimeout(timeout); resolve();};
                         }
                         setValue(options.initialValue);
+                        syncOutline();
                         notifyHistory();
                         if (recoverySourceOnly) {
-                            options.onModeChange?.("sv");
+                            options.onModeChange?.("sv", "automatic");
                             options.onSourceOnlyChange?.(true);
                         }
                         if (!finishInitialPreview) {clearTimeout(timeout); resolve();}
@@ -529,13 +620,16 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         }
     });
 
+    // 先收敛过渡，Vditor 随后的 resize 计算才能读取最终面板宽度。
+    element.ownerDocument.defaultView.addEventListener("resize", resizeOutline, true);
     return {
         flush,
         setValue,
         setMode(nextMode) {
             if (destroyed || isComposing()) return;
             if (!allowModeSwitch(nextMode)) return;
-            if (instance.getCurrentMode() === nextMode) return;
+            syncOutline(false, true);
+            if (instance.getCurrentMode() === nextMode) {options.onModeChange?.(nextMode, "user"); return;}
             const button = element.querySelector<HTMLButtonElement>(`button[data-mode="${nextMode}"]`);
             if (!button) throw new Error("Markdown editor mode unavailable");
             programmatic = true;
@@ -547,6 +641,11 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         },
         setTheme(theme) {
             if (!destroyed) instance.setTheme(theme === "dark" ? "dark" : "classic", theme, theme === "dark" ? "github-dark" : "github");
+        },
+        setOutline(enabled) {
+            if (destroyed || !ready || isComposing()) return;
+            outlineEnabled = enabled;
+            syncOutline(true);
         },
         undo() {runHistory("undo");},
         redo() {runHistory("redo");},

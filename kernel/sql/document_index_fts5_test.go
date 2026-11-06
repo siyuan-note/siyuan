@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestDocumentPartialIndexesMigration(t *testing.T) {
+func TestDocumentSearchPartialIndexesMigration(t *testing.T) {
 	for _, encrypted := range []bool{false, true} {
 		t.Run(fmt.Sprintf("encryptedSchema=%t", encrypted), func(t *testing.T) {
 			database := newDeletePathTestDB(t, encrypted)
@@ -27,11 +27,16 @@ func TestDocumentPartialIndexesMigration(t *testing.T) {
 			}
 			execDeletePathTestSQL(t, database, "INSERT INTO blocks (id, root_id, content, type) VALUES "+
 				"('root', 'root', 'document', 'd'), ('child', 'root', 'paragraph', 'p'), ('unknown', 'root', 'unknown', NULL)")
+			execDeletePathTestSQL(t, database, "UPDATE blocks SET name = 'named' WHERE id = 'root'")
 			before := deletePathTestIDs(t, database, "SELECT id || ':' || content FROM blocks ORDER BY rowid")
 			execDeletePathTestSQL(t, database, "DROP INDEX idx_blocks_doc_root_id")
+			execDeletePathTestSQL(t, database, "DROP INDEX idx_blocks_search_metadata_root_id")
 			// 在已有表上补建索引，重复运行不得改变文档内容。
 			for range 2 {
 				if err := ensureBlocksDocIndexes(database); err != nil {
+					t.Fatal(err)
+				}
+				if err := ensureSearchMetadataIndex(database); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -46,6 +51,16 @@ func TestDocumentPartialIndexesMigration(t *testing.T) {
 				}
 			}
 			assertDocuments([]string{"root"})
+			assertMetadata := func(want []string) {
+				t.Helper()
+				statement := "SELECT id FROM blocks INDEXED BY idx_blocks_search_metadata_root_id WHERE " + BlockSearchMetadataPredicate + " ORDER BY id"
+				if got := deletePathTestIDs(t, database, statement); !reflect.DeepEqual(got, want) {
+					t.Fatalf("indexed metadata: got %v, want %v", got, want)
+				}
+			}
+			assertMetadata([]string{"root"})
+			execDeletePathTestSQL(t, database, "UPDATE blocks SET name = ''; UPDATE blocks SET tag = '#tag#' WHERE id = 'child'")
+			assertMetadata([]string{"child"})
 			execDeletePathTestSQL(t, database, "UPDATE blocks SET type = 'd', root_id = 'child' WHERE id = 'child'")
 			assertDocuments([]string{"child", "root"})
 			var indexedRoot string
@@ -56,6 +71,7 @@ func TestDocumentPartialIndexesMigration(t *testing.T) {
 			assertDocuments([]string{"child"})
 			execDeletePathTestSQL(t, database, "DELETE FROM blocks WHERE id = 'child'")
 			assertDocuments(nil)
+			assertMetadata(nil)
 		})
 	}
 }

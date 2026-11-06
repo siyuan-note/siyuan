@@ -268,10 +268,10 @@ export class Protyle {
                         case "refreshAttributeView":
                             Array.from(this.protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${data.data.id}"]`)).forEach((item: HTMLElement) => {
                                 item.removeAttribute("data-render");
-                                avRender(item, this.protyle);
+                                avRender(item, this.protyle, undefined, true, undefined, true);
                             });
                             if (this.protyle.databaseAttributePanel?.hasDatabase(data.data.id)) {
-                                this.protyle.databaseAttributePanel.refresh();
+                                this.protyle.databaseAttributePanel.refresh(true);
                             }
                             queueDatabaseRowRefresh(this.protyle.id, data.data.id);
                             break;
@@ -322,6 +322,9 @@ export class Protyle {
                             }
                             break;
                         case "renamenotebook":
+                            if (window.siyuan.config.editor.globalBreadcrumb && this.protyle.notebookId === data.data.box) {
+                                this.protyle.breadcrumb?.render(this.protyle, true);
+                            }
                             /// #if !MOBILE
                             forSearchByEditor(this, (config, element) => {
                                 void refreshSearchPathAfterNotebookRename({
@@ -338,6 +341,10 @@ export class Protyle {
                             /// #endif
                             break;
                         case "rename":
+                            if (window.siyuan.config.editor.globalBreadcrumb && (this.protyle.block.rootID === data.data.id ||
+                                this.protyle.path?.split("/").includes(data.data.id))) {
+                                this.protyle.breadcrumb?.render(this.protyle, true);
+                            }
                             if (this.protyle.path === data.data.path) {
                                 if (this.protyle.model) {
                                     this.protyle.model.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
@@ -394,6 +401,7 @@ export class Protyle {
                                 } else {
                                     this.protyle.element.removeAttribute("data-notebook-id");
                                 }
+                                if (window.siyuan.config.editor.globalBreadcrumb) this.protyle.breadcrumb?.render(this.protyle, true);
                             }
                             /// #if !MOBILE
                             forSearchByEditor(this, (_config, element) => {

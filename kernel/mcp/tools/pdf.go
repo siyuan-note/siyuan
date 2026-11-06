@@ -40,6 +40,10 @@ var PDFTool = &Tool{
 		}}},
 	}},
 	EffectScope: EffectScopeMixed,
+	ResolveEffects: deferredAssetEffects(map[string]ToolEffects{
+		"list": {LocalRead: true}, "preview": {LocalRead: true, DataEgress: true, ExternalCost: true},
+		"extract": {LocalRead: true, LocalWrite: true},
+	}),
 	ActionEffects: map[string]ToolEffects{
 		"list":    {LocalRead: true},
 		"preview": {LocalRead: true, DataEgress: true, ExternalCost: true},

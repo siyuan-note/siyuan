@@ -74,7 +74,7 @@ require (
 	github.com/sashabaranov/go-openai v1.42.0
 	github.com/shirou/gopsutil/v4 v4.26.7
 	github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17
-	github.com/siyuan-note/dejavu v0.0.0-20261102032142-932636c7d362
+	github.com/siyuan-note/dejavu v0.0.0-20261106061425-1995b7fa5671
 	github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044
 	github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce
 	github.com/siyuan-note/filelock v0.0.0-20261025032826-1ff24a81dda9
@@ -103,7 +103,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.9-0.20261031100920-fe1271137d85
+require github.com/88250/lute v1.7.9-0.20261106040730-9df84d26c39e
 
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect

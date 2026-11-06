@@ -57,11 +57,15 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		}
 		return apicontract.Failure[apicontract.AVRenderResult](-1, message)
 	}
-	contextFilter, err := model.GetAttributeViewContextFilter(attrView, blockID)
+	contextBlockID := blockID
+	if options.RelationContext != nil {
+		contextBlockID = ""
+	}
+	contextFilter, err := model.GetAttributeViewContextFilter(attrView, contextBlockID)
 	if err != nil {
 		return apicontract.Failure[apicontract.AVRenderResult](-1, err.Error())
 	}
-	data := apicontract.AVRenderData{AVArchiveRenderData: avArchiveRenderData(attrView, view), ContextFilter: toContractAVAttributeViewContextFilter(contextFilter), ContextFilterFields: avContractSlice(model.GetAttributeViewContextFilterFields(attrView, blockID), toContractAVAttributeViewContextFilterField), Target: toContractAVAttributeViewRenderTarget(target)}
+	data := apicontract.AVRenderData{AVArchiveRenderData: avArchiveRenderData(attrView, view), ContextFilter: toContractAVAttributeViewContextFilter(contextFilter), ContextFilterFields: avContractSlice(model.GetAttributeViewContextFilterFields(attrView, contextBlockID), toContractAVAttributeViewContextFilterField), Target: toContractAVAttributeViewRenderTarget(target)}
 	if filter != nil {
 		view = filter(view)
 		if calendar, ok := view.(*av.Calendar); ok {
@@ -89,6 +93,7 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		data.ContextFilter = nil
 		data.ContextFilterFields = []*apicontract.AVAttributeViewContextFilterField{}
 	}
+	data.PendingHTTPTemplates = options.HTTPPreview.Pending()
 	return apicontract.Success(apicontract.NewAVRenderResult(data))
 }
 

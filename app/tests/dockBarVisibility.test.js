@@ -54,7 +54,7 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
         layout: {layout: {children: [outer, bottom]}, centerLayout: center}};
     const bar = load("barVisibility");
     const dependencies = {
-        ...bar, ...load("panelVisibility"),
+        ...bar, ...load("panelVisibility"), ...load("statusHover"),
         Constants: {TIMEOUT_DOCK_TOGGLE: 20, TIMEOUT_TRANSITION: 20, ATTRIBUTE_DOCK_WIDTH: "data-width"},
         bindPanelTransitionGuard() {}, isTouchHoverInput: () => false,
         isWindow: () => false, isAbove: (a, b) => Number(a.style.zIndex) > Number(b.style.zIndex),
@@ -570,6 +570,7 @@ if (process.versions.electron && process.type === "browser") {
             const sources = Object.fromEntries([
                 ["barVisibility", "layout/dock/barVisibility"], ["panelVisibility", "layout/dock/panelVisibility"],
                 ["index", "layout/dock/index"], ["mousemove", "boot/globalEvent/mousemove"],
+                ["statusHover", "layout/statusHover"],
             ].map(([name, file]) => [name, transpileModule(readFileSync(path.join(__dirname, `../src/${file}.ts`), "utf8"), {
                 compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
             }).outputText]));

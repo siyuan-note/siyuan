@@ -24,7 +24,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -336,12 +335,6 @@ func newSessionStore(cookieKey string) (cookie.Store, error) {
 		SameSite: http.SameSiteLaxMode, // 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
 	})
 	return store, nil
-}
-
-func gzipMiddleware() gin.HandlerFunc {
-	return gzip.Gzip(gzip.DefaultCompression,
-		gzip.WithExcludedExtensions([]string{".png", ".gif", ".jpeg", ".jpg", ".webp", ".avif", ".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac", ".gz"}),
-		gzip.WithExcludedPathsRegexs([]string{`(?i)\.hei[cf]$`}))
 }
 
 func rewritePortJSON(pid, port string) {
@@ -1840,15 +1833,19 @@ func serveDebug(ginServer *gin.Engine) {
 }
 
 // isLocalWebSocketRequest 判断未设置锁屏密码时的 WebSocket 握手是否来自本机可信来源。
-// 与 HTTP 接口的放行策略保持一致：直接对端、转发来源、Host 与 Origin 都必须指向本机，
-// 避免远程客户端绕过锁屏密码接入推送通道。
+// 与 HTTP 接口的放行策略保持一致：直接对端、Host 与 Origin 都必须指向本机，
+// 只有内置 fixed-port 代理带进程内标记时才采信其追加的客户端地址。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-gmcm-mggw-8759
 func isLocalWebSocketRequest(r *http.Request) bool {
 	if !util.IsLocalHost(r.RemoteAddr) {
 		return false
 	}
+	if util.HasForwardedHeaders(r) && !util.IsLocalProxyRequest(r) {
+		return false
+	}
 	if forwardedFor := r.Header.Get("X-Forwarded-For"); "" != forwardedFor {
-		clientIP, _, _ := strings.Cut(forwardedFor, ",")
-		if !util.IsLocalHostname(strings.TrimSpace(clientIP)) {
+		// 从右向左跳过环回代理，取首个真实客户端地址，兼容内置代理叠加其他本机代理。
+		if !util.IsLocalHostname(forwardedClientIP(forwardedFor)) {
 			return false
 		}
 	}
@@ -1859,6 +1856,21 @@ func isLocalWebSocketRequest(r *http.Request) bool {
 		return false
 	}
 	return isLocalHostHeader(r.Host)
+}
+
+// forwardedClientIP 从 X-Forwarded-For 右侧取首个非环回地址，全部为环回时取最左侧地址。
+func forwardedClientIP(forwardedFor string) string {
+	items := strings.Split(forwardedFor, ",")
+	for i := len(items) - 1; 0 <= i; i-- {
+		ip := strings.TrimSpace(items[i])
+		if "" == ip {
+			return ""
+		}
+		if 0 == i || !util.IsLocalHostname(ip) {
+			return ip
+		}
+	}
+	return ""
 }
 
 // isLocalHostHeader 判断 Host 头是否指向本机，允许 Host 省略端口。

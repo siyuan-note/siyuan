@@ -50,6 +50,8 @@ for (const mobile of [true, false]) {
                     slots.push(args[0] as typeof slots[number]);
                 } else if (method === "switch") {
                     switches.push({id: args[0] as string, spec: args[1] as typeof switches[number]["spec"]});
+                } else if (method === "stack" && (args[0] as {key: string}).key === "statusBar") {
+                    (args[1] as (stack: unknown) => void)(group);
                 }
             },
         });
@@ -69,6 +71,7 @@ for (const mobile of [true, false]) {
         assert.equal(switches.some(item => item.id === "pageScrollButtons" || item.id === "editor.pageScrollButtons"), false);
         assert.equal(switches.some(item => item.id === "compactMode"), !mobile);
         assert.equal(switches.some(item => item.id === "appearance.showFloatingDockBar"), !mobile);
+        assert.equal(switches.some(item => item.id === "appearance.showFloatingStatusBar"), !mobile);
         if (!mobile) {
             const toolbarIndex = switches.findIndex(item => item.id === "appearance.hideToolbar");
             assert.equal(switches[toolbarIndex + 1].id, "appearance.showFloatingDockBar");
@@ -99,6 +102,67 @@ for (const mobile of [true, false]) {
         windowContext.siyuan.isPublish = true;
         colors.afterMount(root);
         buttons.forEach(button => assert.equal(button.disabled, true));
+    });
+}
+
+for (const field of ["statusBar", "notifications"] as const) {
+    test(`${field} mobile close waits for persistence and preserves a failed draft`, async () => {
+        const statusKeys = ["msgTaskDatabaseIndexCommitDisabled", "msgTaskAssetDatabaseIndexCommitDisabled",
+            "msgTaskHistoryDatabaseIndexCommitDisabled", "msgTaskHistoryGenerateFileDisabled", "msgDataSyncDisabled"];
+        const notificationKeys = ["docTreeMaxList", "tagMaxList", "workspaceNotSSD", "browserCompatibility",
+            "selectAllTip", "selectAllIncompleteTip", "formatPainterTip"];
+        const keys = field === "statusBar" ? statusKeys : notificationKeys;
+        const config = {statusBar: Object.fromEntries(statusKeys.map(key => [key, false])),
+            notifications: Object.fromEntries(notificationKeys.map(key => [key, true]))};
+        const inputs = new Map(keys.map(key => [key, {checked: true}]));
+        let open: () => void;
+        let options: {mobileSheet: {beforeClose: () => Promise<boolean>}; destroyCallback: () => void};
+        let writes = 0;
+        let release: () => void;
+        let fail = true;
+        const exports: Record<string, (root: unknown) => void> = {};
+        const source = readFileSync("src/config/tabs/appearanceTab.ts", "utf8") +
+            "\nexports.mountStatus = mountAppearanceSetStatusBar; exports.mountNotifications = mountAppearanceSetNotifications;";
+        runInNewContext(transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText, {
+            exports, CSS: {escape: (value: string) => value},
+            window: {siyuan: {config: {appearance: config}, languages: new Proxy({}, {get: () => ({})})}},
+            require: (name: string) => name === "../../dialog/mobileDialog" ? {
+                MobileDialog: class {
+                    element = {querySelector: (selector: string) => inputs.get(selector.slice(1))};
+                    constructor(value: typeof options) { options = value; }
+                },
+            } : name === "../../util/functions" ? {
+                isMobile: () => true,
+                objEquals: (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b),
+            } : name === "./appearanceRuntime" ? {appearanceConfigApi: {
+                patch: async (key: typeof field, value: Record<string, boolean>) => {
+                    writes++;
+                    await new Promise<void>(resolve => { release = resolve; });
+                    if (fail) throw new Error("save failed");
+                    config[key] = value;
+                },
+            }} : name === "../render/fragments" ? {genListSwitchItemHtml: () => ""} : {},
+        });
+        exports[field === "statusBar" ? "mountStatus" : "mountNotifications"]({querySelector: () => ({
+            addEventListener: (_event: string, callback: () => void) => { open = callback; },
+        })});
+        open();
+        assert.equal(await options.mobileSheet.beforeClose(), true);
+        assert.equal(writes, 0, "unchanged close does not write");
+        inputs.get(keys[0]).checked = !inputs.get(keys[0]).checked;
+        const failed = options.mobileSheet.beforeClose();
+        assert.equal(writes, 1);
+        release();
+        await assert.rejects(failed, /save failed/);
+        assert.equal(config[field][keys[0]], field !== "statusBar");
+        assert.equal(inputs.get(keys[0]).checked, false);
+        fail = false;
+        const retry = options.mobileSheet.beforeClose();
+        release();
+        assert.equal(await retry, true);
+        assert.equal(config[field][keys[0]], field === "statusBar");
+        options.destroyCallback();
+        assert.equal(writes, 2, "mobile destroy does not issue another save");
     });
 }
 

@@ -64,6 +64,7 @@ const fixture = (location: "editor" | "popover" | "backlink") => {
         "../../protyle/util/hasClosest": {hasClosestBlock: () => container},
         "../../protyle/gutter/container": {isContainerGutterBridge},
         "../../protyle/gutter/hover": {renderGutterOnHover},
+        "../../layout/statusHover": {updateStatusBarHover() {}},
     };
     const api: {windowMouseMove: (event: MouseEvent) => void} = {windowMouseMove: () => {}};
     runInNewContext(source, {
@@ -126,6 +127,7 @@ test("editable embedded tables expose column resize handles while readonly and c
                 };
                 const target = {nodeType: 1, classList: {contains: () => false}};
                 const dependencies = {
+                    updateStatusBarHover() {},
                     hasClosestByClassName: (_element: unknown, name: string) => {
                         if (name === "table") {
                             return block;

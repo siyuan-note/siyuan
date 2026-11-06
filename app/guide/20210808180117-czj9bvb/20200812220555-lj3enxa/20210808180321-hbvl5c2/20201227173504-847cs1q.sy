@@ -952,6 +952,52 @@
 						"id": "20260921003419-qnv6oha",
 						"updated": "20260921003419"
 					}
+				},
+				{
+					"ID": "20261105165001-xffitem",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261105165001-xffpara",
+							"Type": "NodeParagraph",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在两处代理配置中设置 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "proxy_set_header X-Forwarded-For $remote_addr;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，让内核获取真实客户端地址。不要原样透传调用方提供的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "X-Forwarded-For"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，否则远程客户端可能被误判为本机管理员"
+								}
+							],
+							"Properties": {
+								"id": "20261105165001-xffpara",
+								"updated": "20261105165001"
+							}
+						}
+					],
+					"Properties": {
+						"id": "20261105165001-xffitem",
+						"updated": "20261105165001"
+					}
 				}
 			]
 		},

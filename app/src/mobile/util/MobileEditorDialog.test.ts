@@ -164,3 +164,19 @@ test("security discard does not revive a sheet or report a stale save failure", 
     assert.deepEqual(fixture.messages, []);
     assert.equal(fixture.closeMobileEditorSheets(), undefined);
 });
+
+
+test("pending state is visible synchronously before asynchronous close preparation and resets on failure", async () => {
+    const fixture = setup();
+    const dialog = fixture.dialog();
+    const pending = deferred();
+    dialog.beforeClose = () => pending.promise;
+    assert.equal(dialog.isClosePending(), false);
+    const closing = dialog.close();
+    assert.equal(dialog.isClosePending(), true);
+    pending.reject(new Error("offline"));
+    await assert.rejects(closing, /offline/);
+    assert.equal(dialog.isClosePending(), false);
+    dialog.discard();
+    assert.equal(dialog.isClosePending(), true);
+});

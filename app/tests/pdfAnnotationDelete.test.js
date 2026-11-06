@@ -33,7 +33,7 @@ const setup = (file = "http://localhost/assets/document.pdf") => {
             return [{remove: () => { removed++; }}];
         },
         fetchPost: (url, data, callback) => { requests.push({url, data, callback}); },
-        confirmDialog: (title, text, confirm, cancel, isDelete) => { confirmations.push({title, text, confirm, cancel, isDelete}); },
+        mobileConfirmDialog: (title, text, confirm, cancel, isDelete) => { confirmations.push({title, text, confirm, cancel, isDelete}); },
     });
     removeAnno(pdf, element, "annotation");
     return {requests, confirmations, saves, config, pdf, element, removed: () => removed, replaceViewer: () => { registered = {}; }};

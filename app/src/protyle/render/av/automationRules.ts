@@ -47,8 +47,12 @@ ${rule.id === currentID ? '<svg class="b3-menu__checked"><use xlink:href="#iconS
                 const submenu = row.querySelector<HTMLElement>(".b3-menu__submenu");
                 const open = submenu.style.display !== "block";
                 list.querySelectorAll<HTMLElement>(".b3-menu__submenu").forEach(item => item.style.display = "none");
+                if (!isMobile()) {
+                    list.querySelectorAll<HTMLElement>("[data-id]").forEach(item => item.classList.add("b3-list-item--hide-action"));
+                    if (open) { row.classList.remove("b3-list-item--hide-action"); }
+                }
                 submenu.style.display = open ? "block" : "none";
-                menu.showSubMenu(submenu);
+                if (open) { menu.showSubMenu(submenu); }
             } else if (clicked.closest("[data-rename]")) {
                 if (row.querySelector("input")) { return; }
                 const rule = rules.find(item => item.id === id);

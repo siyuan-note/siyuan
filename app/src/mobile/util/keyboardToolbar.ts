@@ -88,9 +88,10 @@ import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
 import {isMobileLandscape} from "./orientation";
 import {restoreGutterBySelection} from "../../protyle/gutter/restore";
 import {isGutterTouchDragging} from "../../protyle/ui/gutterVisibility";
-import {getFrequentSlashButtons, mountLiteSlashMenu, prependFrequentSlashButtons} from "./liteSlashMenu";
+import {getLiteSlashMenuHTML, getFrequentSlashButtons, mountLiteSlashMenu, prependFrequentSlashButtons} from "./liteSlashMenu";
 import {getPluginSlashEntryKey, SLASH_MENU_ROOT_PATH} from "../../config/entryVisibility/catalog";
 import {hintSlash} from "../../protyle/hint/extend";
+import {isTitleSlashContext} from "../../protyle/hint/titleSlash";
 import {getFrequentSlashItems} from "../../protyle/hint/frequentSlashStorage";
 import {finishTableCellEditing, getTableCellRichContext, prepareTableCellMenuItems} from "../../protyle/util/tableCellRichContext";
 import {insertEmptyBlock} from "../../block/util";
@@ -744,6 +745,14 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     if (protyle.lite) {
         // 轻量编辑器沿用自己的插入候选，保留单元格内容限制和智能体技能入口。
         unmountLiteSlashMenu = mountLiteSlashMenu(protyle, toolbarElement.querySelector(".keyboard__util"));
+        return;
+    }
+    if (isTitleSlashContext(protyle)) {
+        const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
+        const items = hintSlash("", protyle, false, {visibilityRoot: SLASH_MENU_ROOT_PATH});
+        utilElement.innerHTML = getLiteSlashMenuHTML(items);
+        const buttons = getFrequentSlashButtons(utilElement, items.map(item => item.entryKey));
+        prependFrequentSlashButtons(utilElement, getFrequentSlashItems(buttons, button => button.dataset.slashEntryKey));
         return;
     }
     let pluginHTML = "";

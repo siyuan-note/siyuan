@@ -525,7 +525,7 @@ func recreateTreeWithSteps(tree *parse.Tree, absPath string, original []byte, st
 			cache.RemoveTreeDataInBox(prepared.ID, prepared.Box)
 			cache.RemoveDocIALInBox(prepared.Path, prepared.Box)
 			treenode.RemoveBlockTreesByRootID(prepared.Box, prepared.ID)
-			if removeErr := os.Remove(j.filename()); removeErr != nil {
+			if removeErr := j.remove(); removeErr != nil {
 				err = errors.Join(err, removeErr)
 			}
 		}
@@ -591,7 +591,7 @@ func recreateTreeWithSteps(tree *parse.Tree, absPath string, original []byte, st
 		return treenode.ReplaceBlockTree(current)
 	})
 	if err == nil {
-		err = os.Remove(j.filename())
+		err = j.remove()
 	}
 	return err
 }

@@ -1,4 +1,5 @@
 import {matchHotKey} from "../util/hotKey";
+import {copyTextByType} from "../toolbar/util";
 
 const inlineInsertKeys = new Set([
     "appearance", "bold", "clearInline", "inline-code", "inline-math", "italic", "kbd", "link", "mark",
@@ -20,4 +21,21 @@ export const isDocumentTitleBlockHotkey = (event: KeyboardEvent) => {
         ...blockGeneralKeys.map(name => editor.general[name]),
     ];
     return shortcuts.some(shortcut => shortcut && matchHotKey(shortcut, event));
+};
+
+export const copyDocumentTitleTarget = (event: KeyboardEvent, id: string) => {
+    const general = window.siyuan.config.keymap.editor.general;
+    const shortcuts: [typeof general.copyBlockRef, "ref" | "blockEmbed" | "protocol" | "protocolMd" | "id" | "hPath"][] = [
+        [general.copyBlockRef, "ref"], [general.copyBlockEmbed, "blockEmbed"],
+        [general.copyProtocol, "protocol"], [general.copyProtocolInMd, "protocolMd"],
+        [general.copyID, "id"], [general.copyHPath, "hPath"],
+    ];
+    const shortcut = shortcuts.find(([key]) => key && matchHotKey(key, event));
+    if (!shortcut) {
+        return false;
+    }
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    void copyTextByType([id], shortcut[1]);
+    return true;
 };

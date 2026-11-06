@@ -15,6 +15,7 @@ import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "./viewVisibility";
 import {isNotEditBlock} from "../../wysiwyg/getBlock";
 import {countFilterLeaves} from "./filterTree";
 import {isMobile} from "../../../util/functions";
+import {copyBlockSelection} from "../../util/blockClipboard";
 
 export const setAVBlockVisibleViewIDs = (
     protyle: IProtyle,
@@ -50,21 +51,24 @@ const copyViewMirror = (blockElement: Element, viewID: string) => {
     const oldViewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
     blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, viewID);
     blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, viewID);
-    if (isNotEditBlock(blockElement)) {
-        focusBlock(blockElement);
-    } else {
-        focusByRange(getEditorRange(blockElement));
-    }
-    document.execCommand("copy");
-    if (null === oldVisibleViewIDs) {
-        blockElement.removeAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS);
-    } else {
-        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, oldVisibleViewIDs);
-    }
-    if (null === oldViewID) {
-        blockElement.removeAttribute(Constants.CUSTOM_SY_AV_VIEW);
-    } else {
-        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, oldViewID);
+    try {
+        if (isNotEditBlock(blockElement)) {
+            focusBlock(blockElement);
+        } else {
+            focusByRange(getEditorRange(blockElement));
+        }
+        copyBlockSelection(blockElement);
+    } finally {
+        if (null === oldVisibleViewIDs) {
+            blockElement.removeAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS);
+        } else {
+            blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, oldVisibleViewIDs);
+        }
+        if (null === oldViewID) {
+            blockElement.removeAttribute(Constants.CUSTOM_SY_AV_VIEW);
+        } else {
+            blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, oldViewID);
+        }
     }
 };
 

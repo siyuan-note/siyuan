@@ -31,7 +31,7 @@ export const createTemplateHTTPPermissionIndicator = (allowed?: boolean) => {
 };
 
 export const templateHTTPPermissionHTML = (slot: "template" | "renderTemplate") =>
-    `<button class="b3-menu__item b3-menu__item--wrap" data-http-permission="${slot}">
+    `<button class="b3-menu__item b3-menu__item--wrap fn__none" data-http-permission="${slot}">
 <span class="b3-menu__label fn__flex-column"><span class="fn__block">${window.siyuan.languages.templateHTTPRevoke}</span>
 <span class="b3-label__text fn__block" data-http-permission-status>${templateHTTPPermissionLabel()}</span></span></button>`;
 
@@ -42,6 +42,11 @@ export const bindTemplateHTTPPermission = (element: HTMLElement,
     const textarea = element.querySelector<HTMLTextAreaElement>(`[data-type="${source.slot === "template" ?
         "updateTemplate" : "updateRenderTemplate"}"]`);
     const label = button.querySelector("[data-http-permission-status]");
+    const updateVisibility = () => {
+        const visible = Boolean(textarea?.value.includes("httpGet"));
+        button.classList.toggle("fn__none", !visible);
+        return visible;
+    };
     let version = 0;
     const refresh = async (action: "get" | "revoke") => {
         const current = ++version;
@@ -66,6 +71,9 @@ export const bindTemplateHTTPPermission = (element: HTMLElement,
         version++;
         label.textContent = templateHTTPPermissionLabel();
         button.disabled = false;
+        updateVisibility();
     });
-    void refresh("get");
+    if (updateVisibility()) {
+        void refresh("get");
+    }
 };

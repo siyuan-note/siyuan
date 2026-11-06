@@ -19,6 +19,12 @@ import (
 var InboxTool = &Tool{
 	Name:        "inbox",
 	Description: "Inbox management (cloud-clipped web pages, messages, and audio/video/file attachments; requires subscription). Actions: list(page=1), get(id), convert(ids, notebook, parentID=notebook root by default, remove_after=true) — converts one or more shorthands into local documents, deleting the cloud originals on success. Use parentID=\"\" for root. Legacy path requires a unique ancestor chain with non-empty titles and no literal slash; conflicts or unavailable indexes return explicit errors.",
+	EffectScope: EffectScopeMixed,
+	ActionEffects: map[string]ToolEffects{
+		"list":    {DataEgress: true, ExternalCost: true},
+		"get":     {DataEgress: true, ExternalCost: true},
+		"convert": {LocalWrite: true, DataEgress: true, ExternalCost: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

@@ -6,15 +6,68 @@ package model
 
 import (
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestSyncSourcePreviewThroughWriteAdmission(t *testing.T) {
+	_, repo, _ := prepareAssetDownloadRepoTest(t)
+	if err := repo.EnsureAllAssets(nil); err != nil {
+		t.Fatal(err)
+	}
+	id, _, err := repo.AssetDownloadChanges()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = repo.AcknowledgeAssetDownloadChanges(id); err != nil {
+		t.Fatal(err)
+	}
+	previousReadonly := util.ReadOnly
+	util.ReadOnly = false
+	t.Cleanup(func() { util.ReadOnly = previousReadonly })
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) { c.Set(RoleContextKey, RoleAdministrator) }, CheckReadonly)
+	engine.POST("/api/sync/setCloudSyncDir", func(c *gin.Context) {
+		if err := SetCloudSyncDir("other"); err != nil {
+			t.Errorf("source change failed through write admission: %s", err)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		c.Status(http.StatusNoContent)
+	})
+	engine.POST("/api/sync/getSyncSourceState", func(c *gin.Context) {
+		state, previewErr := GetSyncSourceState()
+		if previewErr != nil {
+			t.Errorf("preview failed through write admission: %s", previewErr)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		if state.Source == "" || state.LocalID == "" || state.LocalFiles == 0 || state.Pending || state.CloudID != "" {
+			t.Errorf("unexpected empty-source preview: %+v", state)
+		}
+		c.Status(http.StatusNoContent)
+	})
+	for _, path := range []string{"/api/sync/setCloudSyncDir", "/api/sync/getSyncSourceState"} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, path, nil))
+		if recorder.Code != http.StatusNoContent {
+			t.Fatalf("%s response: %d %s", path, recorder.Code, recorder.Body.String())
+		}
+	}
+	if !dataImportAccess.TryLock() {
+		t.Fatal("preview retained write admission after completing")
+	}
+	dataImportAccess.Unlock()
+}
 
 func TestSyncSourceIdentity(t *testing.T) {
 	c := &cloud.Conf{Dir: "main", Server: "server", UserID: "user", S3: &cloud.ConfS3{Endpoint: "https://s3", Bucket: "notes"},
@@ -55,7 +108,7 @@ func TestSyncSourceLegacySwitchBackupAndPreview(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Simulate a workspace last synchronized by a released version without the binding.
-	if err = os.Remove(filepath.Join(repo.Path, "refs", "latest-sync-source")); err != nil {
+	if err = os.Remove(filepath.Join(repo.Path, "sync-source.json")); err != nil {
 		t.Fatal(err)
 	}
 	if err = os.WriteFile(filepath.Join(util.DataDir, "new.txt"), []byte("local content"), 0644); err != nil {
@@ -121,5 +174,43 @@ func TestSyncSourceLegacySwitchBackupAndPreview(t *testing.T) {
 	state, err = GetSyncSourceState()
 	if err != nil || state.Pending {
 		t.Fatalf("successful choice did not clear pending state: %v %v", state, err)
+	}
+}
+
+func TestPurgeRepoMigratesSyncSourceBinding(t *testing.T) {
+	_, repo, _ := prepareAssetDownloadRepoTest(t)
+	if err := repo.EnsureAllAssets(nil); err != nil {
+		t.Fatal(err)
+	}
+	id, _, err := repo.AssetDownloadChanges()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = repo.AcknowledgeAssetDownloadChanges(id); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(repo.Path, "sync-source.json")
+	before, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	legacyPath := filepath.Join(repo.Path, "refs", "latest-sync-source")
+	if err = os.Rename(path, legacyPath); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 2; i++ {
+		if err = PurgeRepo(); err != nil {
+			t.Fatalf("purge after binding migration: %v", err)
+		}
+	}
+	after, err := os.ReadFile(path)
+	if err != nil || string(after) != string(before) {
+		t.Fatalf("purge changed sync source: %q %v", after, err)
+	}
+	if _, err = os.Stat(legacyPath); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("legacy sync source remains: %v", err)
+	}
+	if changed, err := repo.SyncSourceChanged(); err != nil || changed {
+		t.Fatalf("migration changed source identity: %v %v", changed, err)
 	}
 }

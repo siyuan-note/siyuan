@@ -1,6 +1,7 @@
 import type {MarkdownFormat, MarkdownHost, MarkdownTarget} from "./contracts";
 import type {MarkdownSessionState} from "./session";
 import type {MarkdownTreeBridge} from "./treeContracts";
+import type {SidebarKeymap} from "../util/dockKeymap";
 
 export interface MarkdownPreferences {
     mode: "ir" | "wysiwyg" | "sv";
@@ -19,12 +20,14 @@ export interface MarkdownBootstrap {
     lang: string;
     platform: string;
     dark: boolean;
+    keymap?: SidebarKeymap;
 }
 
 export interface MarkdownCommand {
     id: string;
-    type: "close" | "prepare-quit" | "cancel-quit" | "external-change" | "theme" | "background" | "tree-change" | "window-state";
+    type: "close" | "prepare-quit" | "cancel-quit" | "external-change" | "theme" | "background" | "tree-change" | "window-state" | "keymap";
     dark?: boolean;
+    keymap?: SidebarKeymap;
     windowState?: MarkdownWindowState;
 }
 
@@ -41,6 +44,7 @@ export interface MarkdownBridge {
     bootstrap(): Promise<MarkdownBootstrap>;
     newDocument(): Promise<void>;
     openDocument(): Promise<void>;
+    revealFile?(): Promise<void>;
     chooseSaveAs(format: MarkdownFormat): Promise<{kind: "selected"; target: MarkdownTarget} | {kind: "cancelled" | "occupied" | "blocked"}>;
     cancelSaveAs(handle: string): Promise<void>;
     authorizeResources(): Promise<boolean>;

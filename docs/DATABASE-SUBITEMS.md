@@ -38,7 +38,7 @@ Disabling sub-items for the database restores flat display in all views and pres
 
 ### Creating and moving items
 
-Table views show indentation and expansion controls before the first visible field, following field order and visibility; list views show these controls before the primary field. Item icons stay in the primary field. The item menu provides `Add sub-item`, `Change parent`, and `Promote one level`. The parent selector excludes the current item and its descendants, and supports clearing the parent to move the item to the root level.
+Table views show indentation and expansion controls before the first visible field, following field order and visibility; list views show these controls before the primary field. Items without children show a non-interactive gray dot in place of the expansion button, keeping items at the same level aligned. Item icons stay in the primary field. The item menu provides `Add sub-item`, `Change parent`, and `Promote one level`. The parent selector excludes the current item and its descendants, and supports clearing the parent to move the item to the root level.
 
 | Operation | Result |
 |---|---|

@@ -87,6 +87,71 @@ describe("Harmony clipboard bridge", () => {
     });
 });
 
+const createPlainTextHarness = (writeText: ((text: string) => Promise<void>) | undefined, execCommand: () => boolean) => {
+    const textElement = {value: "", style: {}, focus() {}, select() {}};
+    const attached = new Set<unknown>();
+    const module = {exports: {}};
+    runInNewContext(source, {
+        module, exports: module.exports, console: {log() {}},
+        require: () => ({}),
+        window: {siyuan: {config: {system: {container: "std"}}}},
+        navigator: {clipboard: writeText ? {writeText} : undefined},
+        getSelection: () => ({rangeCount: 0}),
+        document: {
+            createElement: () => textElement,
+            execCommand,
+            body: {appendChild: (node: unknown) => attached.add(node), removeChild: (node: unknown) => attached.delete(node)},
+        },
+    });
+    return {api: module.exports as typeof import("./compatibility"), textElement, attached};
+};
+
+describe("plain text clipboard completion", () => {
+    const textPlain = "assets/example image.png?box=encrypted&width=640#image";
+
+    it("waits for the browser clipboard promise before returning success", async () => {
+        let finish: () => void;
+        let completed = false;
+        const harness = createPlainTextHarness(async value => {
+            assert.equal(value, textPlain);
+            await new Promise<void>(resolve => {finish = resolve;});
+        }, () => {throw new Error("Fallback must not run");});
+        const result = harness.api.writeClipboardData({textPlain}).then(value => {
+            completed = true;
+            return value;
+        });
+        await Promise.resolve();
+        assert.equal(completed, false);
+        finish();
+        assert.equal((await result).status, "plain");
+        assert.equal(harness.attached.size, 0);
+    });
+
+    for (const copied of [false, true]) {
+        it(`reports ${copied ? "success" : "failure"} according to the fallback result after browser rejection`, async () => {
+            const harness = createPlainTextHarness(async () => {throw new Error("Permission denied");}, () => copied);
+            assert.equal((await harness.api.writeClipboardData({textPlain})).status, copied ? "plain" : "failed");
+            assert.equal(harness.textElement.value, textPlain);
+            assert.equal(harness.attached.size, 0);
+        });
+
+        it(`reports ${copied ? "success" : "failure"} according to the fallback result without the browser clipboard API`, async () => {
+            const harness = createPlainTextHarness(undefined, () => copied);
+            assert.equal((await harness.api.writeClipboardData({textPlain})).status, copied ? "plain" : "failed");
+            assert.equal(harness.textElement.value, textPlain);
+            assert.equal(harness.attached.size, 0);
+        });
+    }
+
+    it("reports failure and removes the fallback textarea when both clipboard APIs throw", async () => {
+        const harness = createPlainTextHarness(async () => {throw new Error("Clipboard unavailable");}, () => {
+            throw new Error("Copy unavailable");
+        });
+        assert.equal((await harness.api.writeClipboardData({textPlain})).status, "failed");
+        assert.equal(harness.attached.size, 0);
+    });
+});
+
 const createPlatformHarness = (clientNavigator: {userAgent: string; platform: string; maxTouchPoints: number},
                                options: {browser?: boolean; container?: string} = {}) => {
     const classes = new Set<string>();

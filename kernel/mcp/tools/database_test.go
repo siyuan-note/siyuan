@@ -195,7 +195,7 @@ func TestDatabasePreviousKeyIDDefaultsToViewEnd(t *testing.T) {
 }
 
 func TestDatabaseActionEffects(t *testing.T) {
-	for _, action := range []string{"create", "key_add", "key_update", "key_set_template", "key_remove", "item_add", "item_remove", "item_update", "clean"} {
+	for _, action := range []string{"create", "key_add", "key_update", "key_set_template", "key_remove", "item_add", "item_remove", "item_update", "items_add", "items_update", "clean"} {
 		effects, ok := DatabaseTool.EffectsFor(action)
 		if !ok || !effects.LocalWrite {
 			t.Fatalf("database action [%s] should declare a local write", action)

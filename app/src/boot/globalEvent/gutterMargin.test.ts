@@ -43,6 +43,7 @@ const fixture = (paddingLeft: string, hasBlock = true) => {
         },
         getComputedStyle: () => ({paddingLeft}),
         require: () => ({
+            updateStatusBarHover() {},
             isContainerGutterBridge,
             renderGutterOnHover,
             hasClosestBlock: (target: unknown) => target,

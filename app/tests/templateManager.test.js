@@ -42,20 +42,31 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
         append(element) {menuElement.append(element);},
         popup() {menuElement.classList.remove("fn__none");},
     };
-    class Dialog {
+    let dialogID = 0;
+    const dialogDependencies = {
+        "../util/genID": {genUUID: () => String(++dialogID)},
+        "../util/zIndex": {isAbove: () => false, getZIndex: () => 0},
+        "./moveResize": {moveResize() {}},
+        "../util/functions": {isMobile: () => mobile},
+        "../protyle/util/compatibility": {isNotCtrl: () => true},
+        "../constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
+        "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
+    };
+    const dialogExports = {};
+    new Function("require", "exports", sources.dialog)(name => {
+        assert.ok(dialogDependencies[name], name);
+        return dialogDependencies[name];
+    }, dialogExports);
+    class Dialog extends dialogExports.Dialog {
         constructor(options) {
+            super(options);
             this.options = options;
-            this.element = document.createElement("div");
-            this.element.style.width = options.width || "400px";
-            this.element.style.height = options.height || "auto";
-            this.element.innerHTML = options.content;
-            document.body.append(this.element);
             dialogs.push(this);
         }
-        destroy() {this.element.remove(); this.options.destroyCallback?.();}
     }
     const languages = JSON.parse(sources.languages);
-    window.siyuan = {languages, dialogs: [], storage: {}, mobile: {}, ws: {app: {}}, config: {system: {dataDir: "/workspace/data"}}, menus: {menu}};
+    window.siyuan = {languages, dialogs: [], zIndex: 0, storage: {}, mobile: {}, ws: {app: {}}, config: {system: {dataDir: "/workspace/data"}}, menus: {menu}};
+    const mobileRuntime = new Function("Dialog", "mobile", "return " + sources.mobileRuntime)(Dialog, mobile);
     if (!legacyMobile) {
         window.siyuan.mobile.tabs = {open: async id => {
             opened.push(id);
@@ -64,7 +75,8 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
     }
     const stubs = {
         "dialog": {Dialog},
-        "dialog/inputDialog": {openInputDialog(options) {
+        "dialog/mobileDialog": mobileRuntime,
+        "dialog/mobileInputDialog": {mobileInputDialog(options) {
             const prompt = new Dialog({content: "<input>"});
             prompt.element.querySelector("input").value = options.value;
             confirmInput = value => {
@@ -73,7 +85,7 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
             };
             return prompt;
         }},
-        "dialog/confirmDialog": {confirmDialog: (title, text, callback) => confirmations.push({title, text, callback})},
+        "dialog/mobileConfirmDialog": {mobileConfirmDialog: (title, text, callback) => confirmations.push({title, text, callback})},
         "dialog/message": {showMessage() {}},
         "util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: true})},
         "util/functions": {isMobile: () => mobile, isBrowser: () => false},
@@ -331,6 +343,11 @@ if (process.versions.electron && process.type === "browser") {
             for (const [mobile, legacyMobile] of [[false, false], [true, false], [true, true]]) {
                 await win.loadURL("data:text/html,<html><body></body></html>");
                 const sources = {
+                    mobileRuntime: require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource(),
+                    dialog: require("./fixtures/anchoredInputRuntime.cjs").withAnchoredInputRuntime(ts.transpileModule(
+                        fs.readFileSync(path.join(__dirname, "../src/dialog/index.ts"), "utf8"), {
+                            compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+                        }).outputText),
                     icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                     languages: fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"),
                 };

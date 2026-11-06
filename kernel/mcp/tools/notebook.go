@@ -17,6 +17,17 @@ import (
 var NotebookTool = &Tool{
 	Name:        "notebook",
 	Description: "Notebook management. Actions: list(), open(id), close(id), create(name), rename(id, name), remove(id), set_icon(id, icon), random_icon(id?).",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"list":        {LocalRead: true},
+		"open":        {LocalWrite: true},
+		"close":       {LocalWrite: true},
+		"create":      {LocalWrite: true},
+		"rename":      {LocalWrite: true},
+		"remove":      {LocalWrite: true},
+		"set_icon":    {LocalWrite: true},
+		"random_icon": {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

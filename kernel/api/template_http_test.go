@@ -56,6 +56,24 @@ func TestAPIContractTemplateHTTPBackgroundDoesNotPrompt(t *testing.T) {
 	}
 }
 
+func TestAPIContractAttributePanelHTTPRejectsInvalidExecution(t *testing.T) {
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator); c.Next() })
+	engine.POST("/api/av/getAttributeViewKeys", getAttributeViewKeys)
+	request := httptest.NewRequest("POST", "/api/av/getAttributeViewKeys", strings.NewReader(`{"id":"20261030000000-doc0001"}`))
+	request.Header.Set("X-Siyuan-Template-Execution", "short")
+	response := httptest.NewRecorder()
+	engine.ServeHTTP(response, request)
+	requireAPIContract(t, "POST", "/api/av/getAttributeViewKeys", response)
+	var envelope struct {
+		Code int
+		Msg  string
+	}
+	if err := json.Unmarshal(response.Body.Bytes(), &envelope); err != nil || envelope.Code != -1 || envelope.Msg != "invalid template execution" {
+		t.Fatalf("attribute panel ignored the execution controls: %s %v", response.Body.String(), err)
+	}
+}
+
 func TestAPIContractTemplateHTTPPermissionDoesNotGrant(t *testing.T) {
 	previousConf := model.Conf
 	model.Conf = &model.AppConf{Lang: "en"}

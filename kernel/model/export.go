@@ -120,7 +120,7 @@ func ExportCodeBlock(blockID string) (filePath string, err error) {
 		code.Tokens = bytes.ReplaceAll(code.Tokens, []byte(editor.Zwj+"```"), []byte("```"))
 
 		writePath := filepath.Join(exportFolder, name)
-		if writeErr := filelock.WriteFile(writePath, code.Tokens); writeErr != nil {
+		if writeErr := util.WriteUserFile(writePath, code.Tokens); writeErr != nil {
 			return writeErr
 		}
 
@@ -552,7 +552,7 @@ func ExportSystemLog() (zipPath string) {
 	appLog := filepath.Join(util.HomeDir, ".config", "siyuan", "app.log")
 	if gulu.File.IsExist(appLog) {
 		to := filepath.Join(exportFolder, "app.log")
-		if err := filelock.Copy(appLog, to); err != nil {
+		if err := util.CopyUserFile(appLog, to); err != nil {
 			logging.LogErrorf("copy app log from [%s] to [%s] failed: %s", err, appLog, to)
 		}
 	}
@@ -560,7 +560,7 @@ func ExportSystemLog() (zipPath string) {
 	kernelLog := filepath.Join(util.HomeDir, ".config", "siyuan", "kernel.log")
 	if gulu.File.IsExist(kernelLog) {
 		to := filepath.Join(exportFolder, "kernel.log")
-		if err := filelock.Copy(kernelLog, to); err != nil {
+		if err := util.CopyUserFile(kernelLog, to); err != nil {
 			logging.LogErrorf("copy kernel log from [%s] to [%s] failed: %s", err, kernelLog, to)
 		}
 	}
@@ -568,7 +568,7 @@ func ExportSystemLog() (zipPath string) {
 	siyuanLog := filepath.Join(util.TempDir, "siyuan.log")
 	if gulu.File.IsExist(siyuanLog) {
 		to := filepath.Join(exportFolder, "siyuan.log")
-		if err := filelock.Copy(siyuanLog, to); err != nil {
+		if err := util.CopyUserFile(siyuanLog, to); err != nil {
 			logging.LogErrorf("copy kernel log from [%s] to [%s] failed: %s", err, siyuanLog, to)
 		}
 	}
@@ -576,7 +576,7 @@ func ExportSystemLog() (zipPath string) {
 	mobileLog := filepath.Join(util.TempDir, "mobile.log")
 	if gulu.File.IsExist(mobileLog) {
 		to := filepath.Join(exportFolder, "mobile.log")
-		if err := filelock.Copy(mobileLog, to); err != nil {
+		if err := util.CopyUserFile(mobileLog, to); err != nil {
 			logging.LogErrorf("copy mobile log from [%s] to [%s] failed: %s", err, mobileLog, to)
 		}
 	}
@@ -744,7 +744,7 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 
 	targetZipPath := filepath.Join(exportFolder, name)
 	zipAbsPath := filepath.Join(util.TempDir, "export", name)
-	err = filelock.Copy(zipAbsPath, targetZipPath)
+	err = util.CopyUserFile(zipAbsPath, targetZipPath)
 	if err != nil {
 		logging.LogErrorf("copy export zip from [%s] to [%s] failed: %s", zipAbsPath, targetZipPath, err)
 		return
@@ -787,7 +787,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	}
 
 	data := filepath.Join(util.WorkspaceDir, "data")
-	if err = filelock.Copy(data, exportFolder); err != nil {
+	if err = util.CopyUserFile(data, exportFolder); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", data, baseFolderName, err)
 		err = fmt.Errorf(Conf.Language(14), err.Error())
 		return
@@ -1192,13 +1192,13 @@ func ExportDocx(id, savePath string, removeAssets, merge bool, mergeHeadingOptio
 
 		fullPath = filepath.Join(savePath, name+".docx")
 		fullPath = util.GetUniqueFilename(fullPath)
-		if copyErr := filelock.Copy(tmpDocxPath, fullPath); copyErr != nil {
+		if copyErr := util.CopyUserFile(tmpDocxPath, fullPath); copyErr != nil {
 			logging.LogErrorf("export docx failed: %s", copyErr)
 			return fmt.Errorf(Conf.Language(14), copyErr)
 		}
 
 		if tmpAssets := filepath.Join(tmpDir, "assets"); !removeAssets && gulu.File.IsDir(tmpAssets) {
-			if copyErr := filelock.Copy(tmpAssets, filepath.Join(savePath, "assets")); copyErr != nil {
+			if copyErr := util.CopyUserFile(tmpAssets, filepath.Join(savePath, "assets")); copyErr != nil {
 				logging.LogErrorf("export docx failed: %s", copyErr)
 				return fmt.Errorf(Conf.Language(14), copyErr)
 			}
@@ -1311,7 +1311,7 @@ func exportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptio
 		for _, src := range srcs {
 			from := filepath.Join(util.WorkingDir, src)
 			to := filepath.Join(savePath, src)
-			if err := filelock.Copy(from, to); err != nil {
+			if err := util.CopyUserFile(from, to); err != nil {
 				logging.LogWarnf("copy stage from [%s] to [%s] failed: %s", from, savePath, err)
 			}
 		}
@@ -1329,7 +1329,7 @@ func exportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptio
 		for _, emoji := range emojis {
 			from := filepath.Join(util.DataDir, emoji)
 			to := filepath.Join(savePath, emoji)
-			if err := filelock.Copy(from, to); err != nil {
+			if err := util.CopyUserFile(from, to); err != nil {
 				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, err)
 			}
 		}
@@ -1508,7 +1508,7 @@ func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 			for _, src := range srcs {
 				from := filepath.Join(util.WorkingDir, src)
 				to := filepath.Join(savePath, src)
-				if err := filelock.Copy(from, to); err != nil {
+				if err := util.CopyUserFile(from, to); err != nil {
 					logging.LogErrorf("copy stage from [%s] to [%s] failed: %s", from, savePath, err)
 					return err
 				}
@@ -1527,7 +1527,7 @@ func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 			for _, emoji := range emojis {
 				from := filepath.Join(util.DataDir, emoji)
 				to := filepath.Join(savePath, emoji)
-				if err := filelock.Copy(from, to); err != nil {
+				if err := util.CopyUserFile(from, to); err != nil {
 					logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, err)
 				}
 			}
@@ -2115,7 +2115,7 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 				continue
 			}
 			embedPath = filepath.Join(pdfAssetsDir, gulu.Rand.String(7)+"-"+filepath.Base(AssetPathWithoutQuery(sourceURI)))
-			if writeErr := filelock.WriteFile(embedPath, plain); nil != writeErr {
+			if writeErr := util.WriteUserFile(embedPath, plain); nil != writeErr {
 				logging.LogWarnf("write temp embedded asset [%s] failed: %s", embedPath, writeErr)
 				if exported != nil {
 					return writeErr
@@ -2846,7 +2846,7 @@ func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths [
 		}
 		sourceBoxDocMetaPath := boxDocMetaPath(boxID)
 		if filelock.IsExist(sourceBoxDocMetaPath) {
-			if copyErr := filelock.Copy(sourceBoxDocMetaPath, filepath.Join(confDir, boxDocMetaName)); copyErr != nil {
+			if copyErr := util.CopyUserFile(sourceBoxDocMetaPath, filepath.Join(confDir, boxDocMetaName)); copyErr != nil {
 				logging.LogErrorf("copy export notebook document metadata failed: %s", copyErr)
 				return
 			}
@@ -3000,7 +3000,7 @@ func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths [
 		for _, emoji := range emojis {
 			from := filepath.Join(util.DataDir, emoji)
 			to := filepath.Join(exportDir, emoji)
-			if copyErr := filelock.Copy(from, to); copyErr != nil {
+			if copyErr := util.CopyUserFile(from, to); copyErr != nil {
 				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, copyErr)
 			}
 		}
@@ -3576,8 +3576,18 @@ func exportMarkdownRelativePath(currentDocDir, href string) string {
 	return filepath.ToSlash(relative)
 }
 
+func firstEmbedBlockAccessChecker(checkers []EmbedBlockAccessChecker) EmbedBlockAccessChecker {
+	for _, checker := range checkers {
+		if nil != checker {
+			return checker
+		}
+	}
+	return nil
+}
+
 func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree, err error) {
 	luteEngine := NewLute()
+	accessChecker := firstEmbedBlockAccessChecker(exportOpts.AccessCheckers)
 	cloned := *tree
 	cloned.Root = cloneRenderNode(tree.Root)
 	ret = &cloned
@@ -3613,7 +3623,7 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 	refFootnotesByID := make(map[string]*refAsFootnotes)
 	if 4 == exportOpts.Config.BlockRefMode {
 		depth = 0
-		collectFootnotesDefs0(ret, ret.Root, &refFootnoteOrder, refFootnotesByID, &depth, exportOpts.References)
+		collectFootnotesDefs0(ret, ret.Root, &refFootnoteOrder, refFootnotesByID, &depth, exportOpts.References, accessChecker)
 	}
 
 	currentTreeNodeIDs := map[string]bool{}
@@ -3675,6 +3685,16 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 			return ast.WalkContinue
 		}
 
+		defID, _, _ := treenode.GetBlockRef(n)
+		if "" != defID && nil != accessChecker && !currentTreeNodeIDs[defID] && !accessChecker(defID) {
+			// 不可访问的块引用降级为公开文档中已存储的锚文本，避免加载受保护目标。
+			if anchorText := util.UnescapeHTML(n.TextMarkTextContent); "" != anchorText {
+				n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(anchorText)})
+			}
+			unlinks = append(unlinks, n)
+			return ast.WalkSkipChildren
+		}
+
 		// 处理引用节点
 		defID, linkText := getExportBlockRefLinkText(n, exportOpts.Config.BlockRefTextLeft, exportOpts.Config.BlockRefTextRight, tree.Box)
 
@@ -3730,7 +3750,7 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 	if 4 == exportOpts.Config.BlockRefMode { // 脚注+锚点哈希
 		unlinks = nil
 		var footnotesErr error
-		footnotesDefBlock, footnotesErr = resolveFootnotesDefs(&refFootnoteOrder, refFootnotesByID, ret, currentTreeNodeIDs, exportOpts.Config.BlockRefTextLeft, exportOpts.Config.BlockRefTextRight, exportOpts.RichTableCells)
+		footnotesDefBlock, footnotesErr = resolveFootnotesDefs(&refFootnoteOrder, refFootnotesByID, ret, currentTreeNodeIDs, exportOpts.Config.BlockRefTextLeft, exportOpts.Config.BlockRefTextRight, exportOpts.RichTableCells, accessChecker)
 		if nil != footnotesErr {
 			return nil, footnotesErr
 		}
@@ -4291,7 +4311,7 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 	return ret, nil
 }
 
-func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, currentTree *parse.Tree, currentTreeNodeIDs map[string]bool, blockRefTextLeft, blockRefTextRight string, richTableCells bool) (footnotesDefBlock *ast.Node, err error) {
+func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, currentTree *parse.Tree, currentTreeNodeIDs map[string]bool, blockRefTextLeft, blockRefTextRight string, richTableCells bool, accessChecker EmbedBlockAccessChecker) (footnotesDefBlock *ast.Node, err error) {
 	if 1 > len(*refFootnoteOrder) {
 		return nil, nil
 	}
@@ -4370,6 +4390,13 @@ func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[strin
 								n.TextMarkAHref = "#" + defID
 								return ast.WalkSkipChildren
 							}
+						}
+						if nil != accessChecker && !isNodeInTree(defID, currentTree) && !accessChecker(defID) {
+							// 嵌套的不可访问引用同样降级为已存锚文本，不保留块 ID。
+							if anchorText := util.UnescapeHTML(n.TextMarkTextContent); "" != anchorText {
+								n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(anchorText)})
+							}
+							unlinks = append(unlinks, n)
 						}
 					}
 					return ast.WalkSkipChildren
@@ -4480,9 +4507,12 @@ func blockLink2Ref(currentTree *parse.Tree) {
 	})
 }
 
-func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences) {
+func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences, accessChecker EmbedBlockAccessChecker) {
 	*depth++
 	if 4096 < *depth {
+		return
+	}
+	if nil != accessChecker && !accessChecker(id) {
 		return
 	}
 	t, err := loadExportRelatedTree(id, currentTree.Box)
@@ -4495,16 +4525,16 @@ func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *
 		logging.LogErrorf("not found node [%s] in tree [%s]", id, t.Root.ID)
 		return
 	}
-	collectFootnotesDefs0(currentTree, node, refFootnoteOrder, refFootnotesByID, depth, references)
+	collectFootnotesDefs0(currentTree, node, refFootnoteOrder, refFootnotesByID, depth, references, accessChecker)
 	if ast.NodeHeading == node.Type {
 		children := treenode.HeadingChildren(node)
 		for _, c := range children {
-			collectFootnotesDefs0(currentTree, c, refFootnoteOrder, refFootnotesByID, depth, references)
+			collectFootnotesDefs0(currentTree, c, refFootnoteOrder, refFootnotesByID, depth, references, accessChecker)
 		}
 	}
 }
 
-func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences) {
+func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences, accessChecker EmbedBlockAccessChecker) {
 	confEditorSnapshot := Conf.LoadEditor()
 
 	if references.contains(defID, currentTree.Box) {
@@ -4521,6 +4551,9 @@ func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string,
 		// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
 		return
 	}
+	if nil != accessChecker && !accessChecker(defID) {
+		return
+	}
 	if confEditorSnapshot.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(anchorText) {
 		anchorText = gulu.Str.SubStr(anchorText, confEditorSnapshot.BlockRefDynamicAnchorTextMaxLen) + "..."
 	}
@@ -4529,10 +4562,10 @@ func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string,
 		refNum:        strconv.Itoa(len(*refFootnoteOrder)),
 		refAnchorText: anchorText,
 	}
-	collectFootnotesDefs(currentTree, defID, refFootnoteOrder, refFootnotesByID, depth, references)
+	collectFootnotesDefs(currentTree, defID, refFootnoteOrder, refFootnotesByID, depth, references, accessChecker)
 }
 
-func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences) {
+func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int, references *markdownExportReferences, accessChecker EmbedBlockAccessChecker) {
 	treenode.WalkWithInlineTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -4540,10 +4573,13 @@ func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteO
 
 		if treenode.IsBlockRef(n) {
 			defID, refText, _ := treenode.GetBlockRef(n)
-			addRefFootnoteAndRecurse(currentTree, defID, refText, refFootnoteOrder, refFootnotesByID, depth, references)
+			addRefFootnoteAndRecurse(currentTree, defID, refText, refFootnoteOrder, refFootnotesByID, depth, references, accessChecker)
 			return ast.WalkSkipChildren
 		} else if treenode.IsBlockLink(n) {
 			defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+			if nil != accessChecker && !accessChecker(defID) {
+				return ast.WalkSkipChildren
+			}
 			anchorText := n.TextMarkTextContent
 			if "" == anchorText {
 				if IsEncryptedBox(currentTree.Box) {
@@ -4552,7 +4588,7 @@ func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteO
 					anchorText = sql.GetRefText(defID)
 				}
 			}
-			addRefFootnoteAndRecurse(currentTree, defID, anchorText, refFootnoteOrder, refFootnotesByID, depth, references)
+			addRefFootnoteAndRecurse(currentTree, defID, anchorText, refFootnoteOrder, refFootnotesByID, depth, references, accessChecker)
 			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue

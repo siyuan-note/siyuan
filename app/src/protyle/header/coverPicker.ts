@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {Dialog} from "../../dialog";
 import {showMessage} from "../../dialog/message";
 import {isMobile} from "../../util/functions";
@@ -9,7 +10,7 @@ export const openCoverPicker = (options: {
     fallback?: (dialog: Dialog) => void;
     destroyCallback?: () => void;
 }) => {
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         title: window.siyuan.languages.builtIn,
         content: `<div class="b3-cards" style="padding:16px;justify-content:center;align-items:center;min-height:200px">
     <span class="b3-loading" aria-hidden="true"></span>

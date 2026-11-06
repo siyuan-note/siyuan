@@ -86,13 +86,14 @@ test("mobile frequent group clones supported buttons and preserves the original 
 });
 
 for (const iosPhotos of [false, true]) {
-    test(`full mobile slash panel preserves eligible commands with iOS photos ${iosPhotos}`, () => {
+    test(`full mobile slash panel preserves body and title candidates with iOS photos ${iosPhotos}`, () => {
         const filename = path.join(__dirname, "keyboardToolbar.ts");
         const file = createSourceFile(filename, readFileSync(filename, "utf8"), ScriptTarget.Latest, true);
         const source = file.statements.filter(statement => isVariableStatement(statement) &&
             statement.declarationList.declarations.some(declaration =>
                 ["getSlashItem", "renderSlashMenu"].includes(declaration.name.getText(file))))
             .map(statement => statement.getText(file)).join("\n");
+        let inTitle = false;
         let mounted = 0;
         let boundUploads = 0;
         let eligibilityCalls = 0;
@@ -116,6 +117,9 @@ for (const iosPhotos of [false, true]) {
             SLASH_MENU_ROOT_PATH: "editor.slash.menu",
             getHostCapabilities: () => ({widgets: false, remoteKernel: true}),
             isDisabledFeature: () => true,
+            isTitleSlashContext: () => inTitle,
+            getLiteSlashMenuHTML: (items: {entryKey: string}[]) => items.map(item =>
+                `<button data-slash-entry-key="${item.entryKey}"></button>`).join(""),
             isInAndroid: () => false,
             canPickIOSPhotos: () => iosPhotos,
             isBuiltinInlineStyleVisible: () => false,
@@ -123,13 +127,16 @@ for (const iosPhotos of [false, true]) {
             escapeHtml: (value: string) => value,
             getFrequentSlashButtons,
             getFrequentSlashItems: (buttons: HTMLButtonElement[], getKey: (button: HTMLButtonElement) => string) =>
-                rankFrequentSlashItems(buttons, getKey, {heading1: 100, code: 1, insertHTMLFile: 99}),
+                rankFrequentSlashItems(buttons, getKey, {heading1: 100, code: 1, insertHTMLFile: 99, bold: 2}),
             hintSlash: (key: string, editor: unknown, hideConfiguredCreate: boolean, options: {visibilityRoot: string}) => {
                 eligibilityCalls++;
                 assert.equal(key, "");
                 assert.equal(editor, protyle);
                 assert.equal(hideConfiguredCreate, false);
                 assert.equal(options.visibilityRoot, "editor.slash.menu");
+                if (inTitle) {
+                    return [{entryKey: "ref", html: "Reference"}, {entryKey: "bold", html: "Bold"}];
+                }
                 return [{entryKey: "code", html: "Code"}, {entryKey: "insertHTMLFile", html: "HTML upload"},
                     {entryKey: "separator_1", html: "separator"}];
             },
@@ -155,6 +162,13 @@ for (const iosPhotos of [false, true]) {
         render(protyle, root);
         assert.equal(mounted, 1);
         assert.equal(eligibilityCalls, 1);
+        assert.equal(boundUploads, 1);
+        protyle.lite = false;
+        inTitle = true;
+        render(protyle, root);
+        assert.equal(eligibilityCalls, 2);
+        assert.deepEqual(util.querySelectorAll().map(button => button.dataset.slashEntryKey), ["ref", "bold"]);
+        assert.deepEqual(frequentButtons.map(button => button.dataset.slashEntryKey), ["bold"]);
         assert.equal(boundUploads, 1);
     });
 }
@@ -185,7 +199,7 @@ test("mobile lite renderer preserves stable keys, separate uploads, original ord
                 keys.join(",") === "insertAsset,code,insertAsset,insertHTMLFile,",
                 result.firstElementChild.className === "keyboard__slash-block",
                 result.querySelectorAll('.b3-menu__separator[role="separator"]').length === 1,
-                result.querySelectorAll('.keyboard__slash-title').length === 1,
+                result.querySelectorAll('.keyboard__slash-title').length === 0,
                 result.querySelectorAll('input[type="file"]').length === 3,
                 result.querySelectorAll('input[data-upload-mode="html-iframe"]').length === 1,
                 !result.querySelector('[data-id="custom"]').hasAttribute("data-slash-entry-key"),
@@ -194,6 +208,9 @@ test("mobile lite renderer preserves stable keys, separate uploads, original ord
             result.innerHTML = getLiteSlashMenuHTML(original);
             checks.push(!result.querySelector('.b3-menu__separator'));
             checks.push(Array.from(result.querySelectorAll("button"), button => button.dataset.slashEntryKey || "").join(",") === "code,insertAsset,insertHTMLFile,");
+            prependFrequentSlashButtons(result, [result.querySelector('button[data-slash-entry-key="code"]')]);
+            checks.push(!result.querySelector('.keyboard__slash-title'));
+            checks.push(result.querySelector('.b3-menu__separator').nextElementSibling.className === 'keyboard__slash-block');
             document.body.setAttribute("data-results", checks.join(","));
             result.innerHTML = saved;
         </script></body>`, "utf8");
@@ -201,7 +218,7 @@ test("mobile lite renderer preserves stable keys, separate uploads, original ord
             "--dump-dom", `--user-data-dir=${path.join(directory, "profile")}`, `file://${html}`],
         {encoding: "utf8", timeout: 30000, env: {...process.env, HOME: directory, XDG_CONFIG_HOME: directory}});
         assert.equal(result.status, 0, result.error?.message || result.stderr);
-        assert.match(result.stdout, /data-results="true,true,true,true,true,true,true,true,true"/);
+        assert.match(result.stdout, /data-results="true,true,true,true,true,true,true,true,true,true,true"/);
     } finally {
         rmSync(directory, {recursive: true, force: true});
     }

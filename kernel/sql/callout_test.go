@@ -58,7 +58,7 @@ func TestCalloutMarkdownTitleIndex(t *testing.T) {
 		t.Fatal("expected a callout parsed from Markdown")
 	}
 	refs, _ := refsFromTree(tree)
-	if len(refs) != 1 || refs[0].BlockID != callout.ID || !strings.Contains(nodeStaticContent(callout, nil, false, false, false, false), "Title") {
+	if len(refs) != 1 || refs[0].BlockID != callout.ID || !strings.Contains(nodeStaticContent(callout, nil, false, false, false, false, true), "Title") {
 		t.Fatalf("parsed callout title was not indexed: %+v", refs)
 	}
 }

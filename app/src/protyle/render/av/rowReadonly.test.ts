@@ -50,7 +50,7 @@ const createPanel = (mobile: boolean) => {
         "../../../layout/dock/Custom": {Custom},
         "../protyle": {Protyle},
         "../../index": {Protyle},
-        "../../../dialog": {Dialog: class { public element = {querySelector: () => element}; }},
+        "../../../dialog/mobileDialog": {MobileDialog: class { public element = {querySelector: () => element}; }},
         "../protyle/ui/padding": {getEditorHorizontalPadding: () => ({left: 0, right: 0})},
         "../../../layout/util": {saveLayout() {}},
         "./databaseRowNavigation": {getDatabaseRowNavigation: (): undefined => undefined, mountDatabaseRowNavigation() {}},

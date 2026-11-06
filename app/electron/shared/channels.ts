@@ -19,6 +19,7 @@ const Channel = {
     SIYUAN_OPEN_URL: "siyuan-open-url",
     SIYUAN_OPEN_FILE: "siyuan-open-file",
     SIYUAN_OPEN_MARKDOWN: "siyuan-open-markdown",
+    SIYUAN_SYNC_MARKDOWN_KEYMAP: "siyuan-sync-markdown-keymap",
     SIYUAN_OPEN_SETTING: "siyuan-open-setting",
     SIYUAN_OPEN_HELP: "siyuan-open-help",
 

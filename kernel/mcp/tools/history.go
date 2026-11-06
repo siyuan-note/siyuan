@@ -15,7 +15,15 @@ import (
 
 var HistoryTool = &Tool{
 	Name:        "history",
-	Description: "Document history operations. Actions: list(query?, notebook?, op?, type?, page?), search(query, notebook?, op?, type?, page?), get(path), rollback(path), clear().",
+	Description: "Document history operations. Actions: list(query?, notebook?, op?, type?, page?), search(query, notebook?, op?, type?, page?), get(path), rollback(path), clear(). Use get with a history path from list/search for document history. Use repo.file_get/file_open with repository file IDs for data-snapshot content; history paths and repository file IDs are not interchangeable. rollback restores the entire document from the selected history version, overwriting its current content, not an individual block.",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"list":     {LocalRead: true},
+		"search":   {LocalRead: true},
+		"get":      {LocalRead: true},
+		"rollback": {LocalWrite: true},
+		"clear":    {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

@@ -133,7 +133,7 @@ const browserCases = async (sources: Record<string, string>, libraries: Record<s
     }
     const dependencies: Record<string, unknown> = {
         "./imageLayout": layout, "./imageFonts": fonts,
-        "../../dialog": {Dialog: ExportDialog},
+        "../../dialog/mobileDialog": {MobileDialog: ExportDialog},
         "../../dialog/message": {showMessage: (text: string) => messages.push(text), hideMessage: () => {}},
         "../../util/fetch": {fetchPost: (url: string, data: {file: File}, callback: (response: unknown) => void) => {
             if (url === "/api/export/exportPreviewHTML") {

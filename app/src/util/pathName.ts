@@ -1,7 +1,7 @@
 import {toggleMenu} from "../menus/menuToggle";
 import * as path from "path";
-import {fetchPost} from "./fetch";
-import {Dialog} from "../dialog";
+import {fetchPost, fetchSyncPost} from "./fetch";
+import {MobileDialog as Dialog} from "../dialog/mobileDialog";
 import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "./escape";
 import {genFileTreeDocAriaLabel} from "./fileTreeTooltip";
 import {isMobile} from "./functions";
@@ -251,15 +251,16 @@ export const isMoveTargetAllowed = (sourceNotebookIds: string[] = [], targetNote
 };
 
 export const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string) => {
-    fetchPost("/api/filetree/moveDocs", {
+    return fetchSyncPost("/api/filetree/moveDocs", {
         toNotebook,
         fromPaths,
         toPath,
-    });
+    }).then(response => response.code === 0);
 };
 
 export const movePathTo = (options: {
-    cb: (toPath: string[], toNotebook: string[]) => void,
+    cb: (toPath: string[], toNotebook: string[]) => void | boolean | Promise<void | boolean>,
+    awaitConfirm?: boolean,
     validate?: (toPath: string[], toNotebook: string[]) => boolean,
     paths?: string[],
     range?: Range,
@@ -358,6 +359,10 @@ export const movePathTo = (options: {
         const paths = items.map(item => item.path);
         const notebooks = items.map(item => item.notebook);
         if (!options.validate || options.validate(paths, notebooks)) {
+            if (options.awaitConfirm) {
+                void dialog.runPending(async () => await options.cb(paths, notebooks) === true);
+                return;
+            }
             options.cb(paths, notebooks);
             dialog.destroy();
         }

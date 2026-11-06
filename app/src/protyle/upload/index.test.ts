@@ -82,6 +82,13 @@ const createHarness = (failLocalUpload = false) => {
                 yes();
             }
         }},
+        "../../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _msg: string, yes: () => void) => {
+            if (delayConfirmation) {
+                confirm = yes;
+            } else {
+                yes();
+            }
+        }},
         "../../util/fetch": {fetchSyncPost: (_url: string, data: {id: string}) =>
             new Promise(resolve => requests.push({id: data.id, respond: () => resolve(localResponse)}))},
         "./pluginEvent": {prepareAssetUpload: ({input}: {input: IAssetUploadInput}) => {

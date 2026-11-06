@@ -7,6 +7,7 @@ import {ModuleKind, transpileModule} from "typescript";
 import {escapeHtml} from "../util/escape";
 
 const {parse} = require("ifdef-loader/preprocessor");
+const tick = () => new Promise<void>(resolve => setImmediate(resolve));
 
 type ListResponse = {
     code: number;
@@ -26,30 +27,44 @@ const loadSyncGuide = (mobile: boolean, provider: number, activeCheckout = false
         s3: {endpoint: "https://s3.example.com", accessKey: "test-key", secretKey: "test-secret",
             bucket: "notes.backup", region: "us-east-1"},
     };
-    const requests: {url: string, data: {name?: string; sync?: {cloudName: unknown}}, reply: (response: ListResponse) => void}[] = [];
+    const requests: {url: string, data: {name?: string; sync?: {cloudName: unknown}}, reply: (response: ListResponse) => void,
+        reject?: (error: Error) => void}[] = [];
+    const messages: string[] = [];
+    let confirmCreate: (value: string) => Promise<boolean>;
+    const confirmations: (() => Promise<boolean>)[] = [];
     const moduleExports = {} as {
         renderSyncCloudList: (element: Element, reload: boolean, cb: (ready: boolean) => void) => void;
         bindSyncCloudListEvent: (element: Element, cb?: (ready: boolean) => void) => void;
         refreshSyncCloudDirBlock: (root: Element) => void;
         syncGuide: () => void;
+        addCloudName: (element: Element, cb: (ready: boolean) => void) => void;
     };
     runInNewContext(code, {
         exports: moduleExports,
-        window: {siyuan: {config: {sync}, languages: {emptyContent: "Empty", cloudConfigTip: "Configure storage"}}},
+        window: {siyuan: {config: {sync}, languages: {emptyContent: "Empty", cloudConfigTip: "Configure storage",
+            loadingError: "Loading failed", retry: "Retry"}}},
         require: (name: string) => {
+            if (name === "../dialog/message") return {showMessage: (message: string) => messages.push(message)};
+            if (name === "../constants") return {Constants: {DIALOG_SYNCADDCLOUDDIR: "add-cloud"}};
+            if (name === "../dialog/mobileInputDialog") return {mobileInputDialog: (options: {onConfirm: typeof confirmCreate}) => {
+                confirmCreate = options.onConfirm;
+                return {element: {setAttribute() {}}};
+            }};
+            if (name === "../dialog/mobileConfirmDialog") return {mobileConfirmDialog: (_title: string, _text: string,
+                confirm: () => Promise<boolean>) => {confirmations.push(confirm);}};
             if (name === "./checkoutProgress") return {openSyncCheckoutProgress: () => activeCheckout};
             if (name === "../config/util/configApi") {
-                return {config: {set: (_path: string, value: unknown, applied?: () => void) => {
-                    requests.push({url: "/api/setting/patch", data: {sync: {cloudName: value}}, reply: (response: ListResponse) => {
-                        if (response.code === 0) { sync.cloudName = String(value); applied?.(); }
+                return {config: {set: (_path: string, value: unknown, applied?: () => void) => new Promise<void>((resolve, reject) => {
+                    requests.push({url: "/api/setting/patch", data: {sync: {cloudName: value}}, reject, reply: (response: ListResponse) => {
+                        if (response.code === 0) { sync.cloudName = String(value); applied?.(); resolve(); }
+                        else reject(new Error(response.msg));
                     }});
-                    return Promise.resolve();
-                }}};
+                })}};
             }
             if (name === "../util/fetch") {
-                return {fetchPost: (url: string, data: {name?: string}, reply: (response: ListResponse) => void) => {
-                    requests.push({url, data, reply});
-                }};
+                return {fetchSyncPost: (url: string, data: {name?: string}) => new Promise((reply, reject) => {
+                    requests.push({url, data, reply, reject});
+                })};
             }
             if (name === "../util/hostCapabilities") {
                 return {sanitizeKernelHTML: (html: string) => html};
@@ -79,6 +94,11 @@ const loadSyncGuide = (mobile: boolean, provider: number, activeCheckout = false
     const configButton = {classList: createClassList(configButtonClasses)};
     const block = {querySelector: (selector: string) => selector === '[data-action="config"]' ? configButton : null};
     const elementList = {
+        isConnected: true,
+        attributes: new Map<string, string>(),
+        hasAttribute: (name: string) => elementList.attributes.has(name),
+        setAttribute: (name: string, value: string) => elementList.attributes.set(name, value),
+        removeAttribute: (name: string) => elementList.attributes.delete(name),
         innerHTML: "",
         querySelector: (selector: string) => selector === "ul" && /<ul\b/.test(elementList.innerHTML) ? {} : null,
         classList: createClassList(listClasses),
@@ -92,8 +112,17 @@ const loadSyncGuide = (mobile: boolean, provider: number, activeCheckout = false
             selector === "#syncCloudList" ? list : null,
     } as unknown as Element;
     const readiness: boolean[] = [];
+    const dispatch = (type: string) => {
+        moduleExports.bindSyncCloudListEvent(list, ready => readiness.push(ready));
+        click({target: {
+            isEqualNode: () => false,
+            getAttribute: (name: string) => name === "data-type" ? type : "chosen",
+            parentElement: {getAttribute: () => "chosen"},
+        }, preventDefault() {}, stopPropagation() {}} as unknown as Event);
+    };
     return {
-        ...moduleExports, list, elementList, listClasses, configButtonClasses, requests, sync, readiness,
+        ...moduleExports, list, elementList, listClasses, configButtonClasses, requests, sync, readiness, messages,
+        dispatch, confirmCreate: (value: string) => confirmCreate(value), confirmations,
         render: () => moduleExports.renderSyncCloudList(list, true, (ready) => readiness.push(ready)),
         refreshCloudDir: () => moduleExports.refreshSyncCloudDirBlock(root),
         select: () => {
@@ -116,6 +145,91 @@ const listResponse = (cloudName: string, checkedSyncDir: string): ListResponse =
 });
 
 for (const mobile of [false, true]) {
+    for (const failure of ["response", "configuration", "network"]) {
+        test(`failed directory reads offer retry without leaving a spinner (${failure}, mobile=${mobile})`, async () => {
+            const guide = loadSyncGuide(mobile, 0);
+            guide.render();
+            if (failure === "response") guide.requests[0].reply({code: -1, msg: "Read failed"});
+            else if (failure === "configuration") guide.requests[0].reply({code: 1, msg: "Read failed"});
+            else guide.requests[0].reject(new Error("Read failed"));
+            await tick();
+            assert.doesNotMatch(guide.list.innerHTML, /b3-loading/);
+            assert.match(guide.list.innerHTML, /Read failed/);
+            assert.match(guide.list.innerHTML, /data-type="retryCloud"/);
+            if (failure === "configuration") assert.match(guide.list.innerHTML, /Configure storage/);
+            guide.dispatch("retryCloud");
+            guide.requests[1].reply(listResponse("work", "work"));
+            await tick();
+            assert.match(guide.list.innerHTML, /type="radio" name="cloudName" checked/);
+        });
+    }
+
+    test(`failed directory changes keep the list and serialize retries (mobile=${mobile})`, async () => {
+        const guide = loadSyncGuide(mobile, 0);
+        guide.render();
+        guide.requests[0].reply(listResponse("work", "work"));
+        await tick();
+        const previous = guide.list.innerHTML;
+        guide.dispatch("selectCloud");
+        guide.dispatch("selectCloud");
+        assert.equal(guide.readiness.at(-1), false, "enabling waits for the target change to finish");
+        assert.equal(guide.requests.length, 2);
+        assert.equal(guide.list.innerHTML, previous);
+        assert.equal(guide.elementList.attributes.get("aria-busy"), "true");
+        guide.requests[1].reply({code: -1, msg: "Selection failed"});
+        await tick();
+        assert.equal(guide.sync.cloudName, "work");
+        assert.equal(guide.list.innerHTML, previous);
+        assert.equal(guide.elementList.attributes.has("inert"), false);
+        assert.deepEqual(guide.messages, ["Selection failed"]);
+        assert.equal(guide.readiness.at(-1), true, "failure restores readiness for the confirmed target");
+        guide.dispatch("selectCloud");
+        guide.requests[2].reply({code: 0});
+        await tick();
+        assert.equal(guide.sync.cloudName, "chosen");
+        assert.equal(guide.requests[3].url, "/api/sync/listCloudSyncDir");
+    });
+
+    test(`failed directory creation and deletion keep the parent list (mobile=${mobile})`, async () => {
+        const guide = loadSyncGuide(mobile, 0);
+        guide.render();
+        guide.requests[0].reply(listResponse("work", "work"));
+        await tick();
+        const previous = guide.list.innerHTML;
+        guide.addCloudName(guide.list, ready => guide.readiness.push(ready));
+        const first = guide.confirmCreate("chosen");
+        assert.equal(await guide.confirmCreate("chosen"), false);
+        assert.equal(guide.requests.length, 2);
+        assert.equal(guide.list.innerHTML, previous);
+        guide.requests[1].reply({code: -1});
+        assert.equal(await first, false);
+        assert.equal(guide.list.innerHTML, previous);
+        guide.dispatch("removeCloud");
+        const removal = guide.confirmations[0]();
+        guide.requests[2].reply({code: -1});
+        assert.equal(await removal, false);
+        assert.equal(guide.list.innerHTML, previous);
+        assert.equal(guide.sync.cloudName, "work");
+    });
+
+    test(`older or detached directory responses do not overwrite current contents (mobile=${mobile})`, async () => {
+        const guide = loadSyncGuide(mobile, 0);
+        guide.render();
+        guide.render();
+        guide.requests[1].reply(listResponse("new", "new"));
+        await tick();
+        const latest = guide.list.innerHTML;
+        guide.requests[0].reply(listResponse("old", "old"));
+        await tick();
+        assert.equal(guide.list.innerHTML, latest);
+        guide.render();
+        guide.elementList.isConnected = false;
+        const detached = guide.list.innerHTML;
+        guide.requests[2].reply({code: -1, msg: "Late failure"});
+        await tick();
+        assert.equal(guide.list.innerHTML, detached);
+    });
+
     test(`the sync control opens current checkout details without starting another sync (mobile=${mobile})`, () => {
         const guide = loadSyncGuide(mobile, 2, true);
         guide.syncGuide();
@@ -176,10 +290,11 @@ for (const mobile of [false, true]) {
     });
 
     for (const provider of [0, 3, 4]) {
-        test(`directory selection remains available (provider=${provider}, mobile=${mobile})`, () => {
+        test(`directory selection remains available (provider=${provider}, mobile=${mobile})`, async () => {
             const guide = loadSyncGuide(mobile, provider);
             guide.render();
             guide.requests[0].reply(listResponse("work", "work"));
+            await tick();
             assert.match(guide.list.innerHTML, /type="radio" name="cloudName" checked/);
             assert.match(guide.list.innerHTML, /data-type="selectCloud"/);
             assert.equal(guide.list.innerHTML.includes("data-type=\"removeCloud\""), provider !== 3);
@@ -193,10 +308,11 @@ for (const mobile of [false, true]) {
             assert.equal(guide.requests[2].url, "/api/sync/listCloudSyncDir");
         });
 
-        test(`the guide requires a selected directory (provider=${provider}, mobile=${mobile})`, () => {
+        test(`the guide requires a selected directory (provider=${provider}, mobile=${mobile})`, async () => {
             const guide = loadSyncGuide(mobile, provider);
             guide.render();
             guide.requests[0].reply(listResponse("main", "work"));
+            await tick();
             assert.deepEqual(guide.readiness, [false, false]);
         });
     }
@@ -214,13 +330,14 @@ for (const mobile of [false, true]) {
         });
     }
 
-    test(`a pending listing cannot overwrite the UI after switching provider (mobile=${mobile})`, () => {
+    test(`a pending listing cannot overwrite the UI after switching provider (mobile=${mobile})`, async () => {
         const guide = loadSyncGuide(mobile, 0);
         guide.render();
         guide.sync.provider = 2;
         guide.render();
         const bucketHTML = guide.list.innerHTML;
         guide.requests[0].reply(listResponse("work", "work"));
+        await tick();
         assert.equal(guide.list.innerHTML, bucketHTML);
         assert.match(guide.list.innerHTML, /notes\.backup/);
         assert.deepEqual(guide.readiness, [false, true]);

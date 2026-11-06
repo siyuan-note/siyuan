@@ -11,6 +11,34 @@ import (
 	"testing"
 )
 
+func TestAVAutomaticTemplateRefreshContract(t *testing.T) {
+	for _, test := range []struct {
+		body      string
+		automatic bool
+	}{
+		{`{"id":"database"}`, false}, {`{"id":"database","automaticRefresh":null}`, false},
+		{`{"id":"database","automaticRefresh":false}`, false}, {`{"id":"database","automaticRefresh":true}`, true},
+	} {
+		render, err := RenderAttributeView.Decode(strings.NewReader(test.body))
+		if err != nil || render.AutomaticRefresh != test.automatic {
+			t.Fatal(render, err)
+		}
+		keys, err := GetAttributeViewKeys.Decode(strings.NewReader(test.body))
+		if err != nil || keys.AutomaticRefresh != test.automatic {
+			t.Fatal(keys, err)
+		}
+	}
+	for _, value := range []string{`"true"`, `1`, `{}`} {
+		body := `{"id":"database","automaticRefresh":` + value + `}`
+		if _, err := RenderAttributeView.Decode(strings.NewReader(body)); err == nil {
+			t.Fatal("invalid render refresh accepted", body)
+		}
+		if _, err := GetAttributeViewKeys.Decode(strings.NewReader(body)); err == nil {
+			t.Fatal("invalid keys refresh accepted", body)
+		}
+	}
+}
+
 func TestAVNewItemTemplateOpenAfterCreateContract(t *testing.T) {
 	endpoint := Endpoint[AVNewItemTemplate, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
 	for _, test := range []struct {
@@ -399,6 +427,22 @@ func TestAVParsedRequestErrors(t *testing.T) {
 	keys, err := GetAttributeViewKeysByID.Decode(strings.NewReader(`{"avID":"av","keyIDs":[null]}`))
 	if err != nil || keys.KeyIDsError == nil {
 		t.Fatalf("key ID validation was not deferred: %+v %v", keys, err)
+	}
+}
+
+func TestAVContractHTTPPreviewRequest(t *testing.T) {
+	for _, fields := range []string{"", `,"deferHTTPTemplates":null,"preserveHTTPResults":null`, `,"deferHTTPTemplates":false,"preserveHTTPResults":false`, `,"deferHTTPTemplates":true,"preserveHTTPResults":true,"automaticRefresh":true`} {
+		request, err := RenderAttributeView.Decode(strings.NewReader(`{"id":"database"` + fields + `}`))
+		if err != nil {
+			t.Fatal(err)
+		}
+		expected := strings.Contains(fields, ":true")
+		if request.DeferHTTPTemplates != expected || request.PreserveHTTPResults != expected {
+			t.Fatalf("incorrect preview decoding: %+v", request)
+		}
+	}
+	if _, err := RenderAttributeView.Decode(strings.NewReader(`{"id":"database","deferHTTPTemplates":"yes"}`)); err == nil {
+		t.Fatal("invalid preview flag accepted")
 	}
 }
 

@@ -21,19 +21,36 @@ const browserCases = async (sources: string[], luteSource: string) => {
     document.body.append(root);
     const protyle = {lute, wysiwyg: {element: root}, block: {showAll: false}, disabled: false} as unknown as IProtyle;
     let transactions: Array<{doOperations: IOperation[], undoOperations: IOperation[]}> = [];
-    let inputOptions: Parameters<typeof import("../../dialog/inputDialog").openInputDialog>[0];
+    let inputOptions: Parameters<typeof import("../../dialog/mobileInputDialog").mobileInputDialog>[0];
     let destroyed = false;
+    let pending: Promise<boolean>;
+    let pendingBusy = false;
+    let failTransaction = false;
+    let delayTransaction = false;
+    let releaseTransaction: () => void;
     let selectedBlocks: HTMLElement[] = [];
     let rangeBlocks: HTMLElement[] = [];
-    const dialog = {destroy: () => {
+    const dialog = {runPending: (task: () => Promise<boolean>) => {
+        if (pendingBusy || destroyed) return Promise.resolve(false);
+        pendingBusy = true;
+        pending = task().then(success => { if (success) dialog.destroy(); return success; })
+            .finally(() => { pendingBusy = false; });
+        void pending.catch(() => {});
+        return pending;
+    }, invalidate: () => dialog.destroy(), destroy: () => {
         destroyed = true;
         inputOptions.destroyCallback?.();
     }} as Parameters<typeof inputOptions.onConfirm>[1];
     const identity = (html: string) => html;
     const dependencies = {
         Constants: {ATTRIBUTE_EDITING: "data-editing", ZWSP: "\u200b"},
-        transaction: (_protyle: IProtyle, doOperations: IOperation[], undoOperations: IOperation[]) => {
+        transaction: (_protyle: IProtyle, doOperations: IOperation[], undoOperations: IOperation[],
+                      options?: {awaitResponse?: boolean}) => {
             transactions.push({doOperations, undoOperations});
+            if (options?.awaitResponse) {
+                if (failTransaction) return Promise.reject(new Error("save failed"));
+                if (delayTransaction) return new Promise<void>(resolve => { releaseTransaction = resolve; });
+            }
         },
         getContenteditableElement: (element: Element) => element.querySelector('[contenteditable="true"]'),
         isListMindmapListConversion: () => false,
@@ -60,7 +77,7 @@ const browserCases = async (sources: string[], luteSource: string) => {
         focusByWbr: () => root.querySelector("wbr")?.remove(),
         getEditorRange: () => document.createRange(),
         blockRender: () => {}, processRender: () => {}, highlightRender: () => {}, avRender: () => {},
-        openInputDialog: (options: typeof inputOptions) => {
+        mobileInputDialog: (options: typeof inputOptions) => {
             inputOptions = options;
             destroyed = false;
             return dialog;
@@ -149,7 +166,7 @@ const browserCases = async (sources: string[], luteSource: string) => {
     menus().find(item => item.id === "calloutCustom").click(null, null);
     const customType = 'CUSTOM <type> " &';
     inputOptions.onConfirm(`  ${customType}  `, dialog);
-    await Promise.resolve();
+    await pending;
     check.equal(destroyed, true);
     check.equal((root.firstElementChild as HTMLElement).dataset.subtype, customType);
     check.equal(root.querySelector(".callout-title").textContent, "Note");
@@ -166,7 +183,7 @@ const browserCases = async (sources: string[], luteSource: string) => {
             protyle.disabled = true;
         }
         inputOptions.onConfirm("CUSTOM", dialog);
-        await Promise.resolve();
+        await pending;
         check.equal(transactions.length, 0);
         check.equal(block.dataset.type, "NodeBlockquote");
     }
@@ -180,9 +197,48 @@ const browserCases = async (sources: string[], luteSource: string) => {
     menus().find(item => item.id === "calloutCustom").click(null, null);
     check.equal(inputOptions.value, "WARNING");
     inputOptions.onConfirm("CUSTOM", dialog);
+    await pending;
     check.equal(root.querySelector(".callout-title").textContent, "My title");
     check.equal(root.querySelector(".callout-icon").textContent, icon);
     check.equal((root.firstElementChild as HTMLElement).dataset.subtype, "CUSTOM");
+
+    for (const markdown of ["> [!NOTE]\n> content\n", "> content\n"]) {
+        const source = setup(markdown);
+        const originalHTML = source.outerHTML;
+        menus().find(item => item.id === "calloutCustom").click(null, null);
+        failTransaction = true;
+        inputOptions.onConfirm("RETRY", dialog);
+        await check.rejects(pending, /save failed/);
+        check.equal(destroyed, false);
+        check.equal(source.outerHTML, originalHTML, "failed saves preserve the source, including quote conversion");
+        failTransaction = false;
+        delayTransaction = true;
+        inputOptions.onConfirm("RETRY", dialog);
+        inputOptions.onConfirm("RETRY", dialog);
+        check.equal(transactions.length, 2, "one failed attempt and one pending retry");
+        check.equal(destroyed, false);
+        check.equal(source.dataset.type, markdown.includes("[!NOTE]") ? "NodeCallout" : "NodeBlockquote");
+        check.notEqual(source.dataset.subtype, "RETRY");
+        releaseTransaction();
+        await pending;
+        check.equal(destroyed, true);
+        check.equal((root.firstElementChild as HTMLElement).dataset.subtype, "RETRY");
+        delayTransaction = false;
+    }
+
+    const replacedQuote = setup("> replacement\n");
+    menus().find(item => item.id === "calloutCustom").click(null, null);
+    delayTransaction = true;
+    inputOptions.onConfirm("REPLACED", dialog);
+    const acknowledged = document.createElement("template");
+    acknowledged.innerHTML = transactions[0].doOperations[0].data as string;
+    replacedQuote.replaceWith(acknowledged.content.firstElementChild);
+    releaseTransaction();
+    await pending;
+    check.equal(destroyed, true, "an acknowledged replacement closes without touching its detached source");
+    check.equal((root.firstElementChild as HTMLElement).dataset.subtype, "REPLACED");
+    check.equal(root.childElementCount, 1);
+    delayTransaction = false;
 
     const shortcut = async (preset: typeof presets.CALLOUT_PRESETS[number], target: HTMLElement) => {
         const range = document.createRange();

@@ -17,13 +17,13 @@ const sqlQueryDefaultLimit = 100
 
 var SQLTool = &Tool{
 	Name:        "sql",
-	Description: "Read-only SQL on SiYuan's database. Actions: schema() for table definitions, type codes, hierarchy, search examples and native SQL embed create/read/update guidance; query(stmt) for statistics, arbitrary projections and structural searches. Results include raw structured rows and verified block links. Results default to at most 100 rows; use explicit LIMIT and OFFSET for pagination. For the frontend SQL search interface or dynamic document embeds, use SELECT b.* FROM blocks b to return complete block rows; ordinary search filters do not apply to SQL. Create or update document embeds through block tools, not SQL writes.",
+	Description: "Read-only SQL on SiYuan's database. Actions: schema() for table definitions, type codes, hierarchy, search examples and native SQL embed create/read/update guidance; query(stmt) for statistics, arbitrary projections and structural searches. Results include raw structured rows and verified block links. Results default to at most 100 rows; use explicit LIMIT and OFFSET for pagination. For the frontend SQL search interface or dynamic document embeds, use SELECT b.* FROM blocks b to return complete block rows; ordinary search filters do not apply to SQL. Create or update document embeds through block tools, not SQL writes. Use block.get or block.get_kramdown to read specific blocks before answering about their content, rather than substituting SQL projections. Never switch to SQL to bypass block-tool notebook scope, ambiguity or access errors; pass the owning notebook for encrypted queries.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
 			"action":   {Type: "string", Description: "Operation", Enum: []string{"query", "schema"}},
 			"stmt":     {Type: "string", Description: "SQL SELECT statement. Results default to at most 100 rows; use LIMIT and OFFSET for pagination"},
-			"notebook": {Type: "string", Description: "Optional notebook ID used to query an encrypted notebook"},
+			"notebook": {Type: "string", Description: "Owning notebook ID required for encrypted queries; the notebook must be unlocked. Omit for the normal notebook database. Selects the database, not a SQL row filter"},
 		},
 		Required: []string{"action"},
 	},

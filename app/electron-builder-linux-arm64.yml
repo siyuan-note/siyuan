@@ -63,6 +63,7 @@ rpm:
 extraResources:
   - from: "changelogs"
     to: "changelogs"
+    filter: ["v${version}/**"]
   - from: "stage"
     to: "stage"
     filter: ["**/*", "!ocr/runtime/**/*"]

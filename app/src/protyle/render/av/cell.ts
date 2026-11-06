@@ -1,8 +1,10 @@
 import {hasAVScalarContent, isAVDateType, isAVReadonlyType, isAVRichTextType, isAVSelectType, isAVTextType, isAVTimestampType, usesAVRollupCellRenderer} from "./capabilities";
 import {isTableLikeView} from "./viewType";
+import {ensureAVColumnWindow} from "./columnWindow";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
-import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestByClassName} from "../../util/hasClosest";
+import {canEditAVHost, getAVHost as hasClosestBlock, getAVHostIdentity, getAVRelationHost} from "./host";
 import {openMenuPanel} from "./openMenuPanel";
 import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
@@ -43,7 +45,7 @@ import {
     updateAVCachedCellValue,
 } from "./cellValue";
 import {setPosition} from "../../../util/setPosition";
-import {getAVSelectedCells, IAVSelectedCell, updateAVSelectedCellValue} from "./selectionState";
+import {getAVSelectedCells, IAVSelectedCell, resolveAVSelectedCell, updateAVSelectedCellValue} from "./selectionState";
 import {getAVColorStyle} from "./color";
 import {
     getAVBatchDisplayValue,
@@ -78,6 +80,11 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
     const relationElement = target.closest<HTMLElement>(".av__cell--relation");
     const relationValue = relationElement?.dataset.relationValue ?
         JSON.parse(decodeURIComponent(relationElement.dataset.relationValue)) as IAVCellValue : undefined;
+    const hostElement = hasClosestBlock(target);
+    if (hostElement && getAVRelationHost(hostElement) && relationValue) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        return;
+    }
     if (relationValue?.isDetached) {
         return openAVRelationIcon(protyle, target, relationElement, relationValue);
     }
@@ -85,6 +92,10 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
     const value = cellElement ? genCellValueByElement("block", cellElement) : undefined;
     const blockID = value ? value.block?.id : target.nextElementSibling?.getAttribute("data-id");
     const isDetached = value?.isDetached === true;
+    if (hostElement && getAVRelationHost(hostElement) && !isDetached) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        return;
+    }
     if (!isDetached && !blockID) {
         return;
     }
@@ -512,9 +523,13 @@ export const genCellValue = (colType: TAVCol, value: string | any, dateFormat: T
 };
 
 export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Element, onlyHeight = true) => {
+    const columnID = cellElement.getAttribute("data-col-id");
+    if (columnID) {
+        ensureAVColumnWindow(blockElement, columnID);
+    }
     const cellRect = cellElement.getBoundingClientRect();
     if (!onlyHeight) {
-        const avScrollElement = blockElement.querySelector(".av__scroll");
+        const avScrollElement = cellElement.closest(".av__scroll") || blockElement.querySelector(".av__scroll");
         const rowElement = hasClosestByClassName(cellElement, "av__row");
         if (avScrollElement && rowElement) {
             const stickyElement = rowElement.querySelector(".av__colsticky");
@@ -632,6 +647,105 @@ const getStableTextCells = (cellElements: HTMLElement[], blockElement: HTMLEleme
     return stableCells;
 };
 
+const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
+                               cellElements: HTMLElement[], type: TAVCol) => {
+    const avID = blockElement.dataset.avId;
+    const hostID = getAVHostIdentity(blockElement);
+    const rootID = protyle.block.rootID;
+    const ownerElement = getAVCellEditorOwner(blockElement);
+    const viewType = blockElement.dataset.avType as TAVView;
+    const initialData = getAVData(blockElement);
+    const viewID = initialData?.viewID || initialData?.view.id;
+    const viewAttribute = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
+    const relationHost = getAVRelationHost(blockElement);
+    const relationViewID = relationHost?.viewID;
+    const relationBlockID = relationHost?.sourceBlockID;
+    const relationContext = relationHost ? {...relationHost.relationContext} : undefined;
+    const targets = cellElements.map(element => ({
+        element,
+        rowID: getFieldIdByCellElement(element, viewType),
+        colID: getColId(element, viewType),
+        groupID: element.closest<HTMLElement>(".av__body")?.dataset.groupId || "",
+        isBatch: Boolean(element.dataset.avBatchOriginalValue),
+    }));
+    const resolveCell = (view: IAVView, target: typeof targets[number], root = true): IAVSelectedCell | undefined => {
+        if (target.isBatch || (target.groupID ? view.id === target.groupID : root && !view.groups?.length)) {
+            const columns = (view as IAVTable).columns || (view as IAVGallery).fields || [];
+            const rows: Array<IAVRow | IAVGalleryItem> = (view as IAVTable).rows || (view as IAVGallery).cards || [];
+            const colIndex = columns.findIndex(column => column.id === target.colID && column.type === type);
+            const rowIndex = rows.findIndex(row => row.id === target.rowID);
+            const row = rows[rowIndex];
+            const cell = row && ("cells" in row ? row.cells : row.values)[colIndex];
+            if (cell) {
+                return {
+                    groupID: target.groupID, rowID: target.rowID, colID: target.colID, rowIndex, colIndex,
+                    cell: {...cell, value: cloneAVCellValueSnapshot(cell.value)}, column: columns[colIndex],
+                };
+            }
+        }
+        for (const group of view.groups || []) {
+            const cell = resolveCell(group, target, false);
+            if (cell) return cell;
+        }
+    };
+    return () => {
+        const currentRelationHost = getAVRelationHost(blockElement);
+        if (!blockElement.isConnected || !ownerElement.contains(blockElement) ||
+            blockElement.dataset.avId !== avID || getAVHostIdentity(blockElement) !== hostID ||
+            blockElement.dataset.avType !== viewType || protyle.block.rootID !== rootID ||
+            blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) !== viewAttribute ||
+            currentRelationHost !== relationHost || currentRelationHost?.viewID !== relationViewID ||
+            currentRelationHost?.sourceBlockID !== relationBlockID ||
+            currentRelationHost?.relationContext.sourceAvID !== relationContext?.sourceAvID ||
+            currentRelationHost?.relationContext.sourceItemID !== relationContext?.sourceItemID ||
+            currentRelationHost?.relationContext.relationKeyID !== relationContext?.relationKeyID ||
+            !canEditAVHost(blockElement, protyle)) {
+            return;
+        }
+        const data = getAVData(blockElement);
+        if (initialData && (!data || (data.viewID || data.view.id) !== viewID)) return;
+        const cells: IAVSelectedCell[] = [];
+        for (const target of targets) {
+            if (!target.rowID || !target.colID) return;
+            if (data) {
+                // 从当前模型读取撤销值和块绑定，行卸载及字段重排不会改变原编辑目标。
+                const cell = resolveCell(data.view, target);
+                if (!cell) return;
+                cells.push(cell);
+            } else if (!blockElement.contains(target.element) ||
+                getFieldIdByCellElement(target.element, viewType) !== target.rowID ||
+                getColId(target.element, viewType) !== target.colID ||
+                (target.element.dataset.dtype || target.element.dataset.type) !== type) {
+                return;
+            }
+        }
+        // 批量代理保存显示值供销毁回调同步，普通单元格的显示更新只绑定当前挂载的原分组条目。
+        return {cells, elements: targets.map(target => {
+            if (!data || target.isBatch) return target.element;
+            const group = target.groupID ? `.av__body[data-group-id="${escapeAttr(target.groupID)}"] ` : "";
+            return blockElement.querySelector<HTMLElement>(`${group}` +
+                `.${isTableLikeView(viewType) ? "av__row" : "av__gallery-item"}[data-id="${target.rowID}"] ` +
+                `.av__cell[${isTableLikeView(viewType) ? "data-col-id" : "data-field-id"}="${target.colID}"]`);
+        })};
+    };
+};
+
+export interface IAVCellInputElements extends Array<HTMLElement> {
+    resolveAVCellInput?: ReturnType<typeof createCellInputTarget>;
+    assetPanelValues?: IAVCellAssetValue[];
+}
+
+export const captureAVCellInput = (protyle: IProtyle, blockElement: HTMLElement,
+                                   cellElements: IAVCellInputElements) => {
+    const element = cellElements[0];
+    const type = (element.dataset.dtype || element.dataset.type) as TAVCol || getTypeByCellElement(element);
+    // 面板各入口共享同一集合；解析器保留打开时的标识，不能被重绘后的选区或节点替换覆盖。
+    Object.defineProperty(cellElements, "resolveAVCellInput", {
+        configurable: true,
+        value: createCellInputTarget(protyle, blockElement, cellElements, type),
+    });
+};
+
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol, options?: {
     scrollIntoView?: boolean;
     data?: IAV;
@@ -656,6 +770,11 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         options?.destroyCallback?.();
         return;
     }
+    if (type === "template" && getAVRelationHost(blockElement)) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        options?.destroyCallback?.();
+        return;
+    }
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     let cellRect = cellElements[0].getBoundingClientRect();
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
@@ -669,7 +788,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (type === "location") {
         const ownerElement = getAVCellEditorOwner(blockElement);
         const avID = blockElement.dataset.avId;
-        const blockID = blockElement.dataset.nodeId;
+        const blockID = getAVHostIdentity(blockElement);
         const rootID = protyle.block.rootID;
         const locationCells: IAVSelectedCell[] = cellElements.map(element => {
             const value = cloneAVCellValueSnapshot(genCellValueByElement("location", element));
@@ -685,7 +804,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         });
         const isCurrentTarget = () => {
             if (!blockElement.isConnected || !ownerElement.contains(blockElement) ||
-                blockElement.dataset.avId !== avID || blockElement.dataset.nodeId !== blockID ||
+                blockElement.dataset.avId !== avID || getAVHostIdentity(blockElement) !== blockID ||
                 protyle.block.rootID !== rootID) {
                 return false;
             }
@@ -709,7 +828,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 }
                 const batchCells = cellElements[0].dataset.avBatchOriginalValue ? cellElements : undefined;
                 await updateCellsValue(protyle, blockElement, value, batchCells, undefined, undefined,
-                    false, false, false, locationCells);
+                    false, false, false, locationCells, true, true);
             },
             onDestroy: options?.destroyCallback,
         });
@@ -729,9 +848,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 anchorElement: cellElements[0],
                 value: stableCells[0].cell.value,
                 stableCells,
-                onSave: (value, nodeElement, selectedCells) => {
-                    updateCellsValue(protyle, nodeElement, value, undefined, undefined, undefined,
-                        false, false, false, selectedCells);
+                onSave: async (value, nodeElement, selectedCells) => {
+                    await updateCellsValue(protyle, nodeElement, value, undefined, undefined, undefined,
+                        false, false, false, selectedCells, true, true);
                 },
                 onDestroy: options?.destroyCallback,
             });
@@ -831,12 +950,13 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (!options?.keepMenuOpen) {
         window.siyuan.menus.menu.remove();
     }
-    document.body.insertAdjacentHTML("beforeend", `<div class="av__mask" data-av-block-id="${escapeAttr(blockElement.dataset.nodeId)}" style="z-index: ${++window.siyuan.zIndex}">
+    const inputTarget = type === "template" ? undefined : createCellInputTarget(protyle, blockElement, cellElements, type);
+    document.body.insertAdjacentHTML("beforeend", `<div class="av__mask" data-av-block-id="${escapeAttr(getAVHostIdentity(blockElement))}" style="z-index: ${++window.siyuan.zIndex}">
     ${html}
     </div>`);
     const avMaskElement = document.querySelector(".av__mask");
     avMaskElement.addEventListener(AV_CELL_EDITOR_CLOSE_EVENT, () => {
-        updateCellValueByInput(protyle, type, blockElement, cellElements, false);
+        updateCellValueByInput(protyle, type, blockElement, cellElements, false, inputTarget);
         avMaskElement.remove();
     }, {once: true});
     if (options?.destroyCallback) {
@@ -851,6 +971,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {
+        let getInputAnchor = () => cellElements[0];
         if (options?.positionByMenu) {
             setPosition(inputElement, cellRect.left, cellRect.bottom, cellRect.height);
         } else {
@@ -861,7 +982,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             const anchorSelector = anchorRow && fieldID ?
                 `${groupID ? `.av__body[data-group-id="${escapeAttr(groupID)}"] ` : ""}` +
                 `.${anchorRow.classList.contains("av__row") ? "av__row" : "av__gallery-item"}[data-id="${anchorRow.dataset.id}"] .av__cell[${fieldAttr}="${fieldID}"]` : "";
-            bindAnchoredInputPosition(inputElement, () => {
+            getInputAnchor = () => {
                 if (!cellElements[0].isConnected && anchorSelector && blockElement.isConnected) {
                     // 行重绘后按原分组、行和字段重新绑定，输入内容继续保留在同一个编辑框中。
                     const anchor = blockElement.querySelector<HTMLElement>(anchorSelector);
@@ -870,7 +991,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                     }
                 }
                 return cellElements[0];
-            }, contentElement || undefined);
+            };
+            bindAnchoredInputPosition(inputElement, getInputAnchor, contentElement || undefined);
         }
         if (isAVRichTextType(type)) {
             const storedContent = type === "template" ? undefined :
@@ -887,35 +1009,35 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         inputElement.focus();
         callMobileAppShowKeyboard();
         if (type === "template") {
+            inputElement.value = "";
+            inputElement.disabled = true;
             fetchPost("/api/av/renderAttributeView", {
                 id: blockElement.dataset.avId,
                 blockID: blockElement.dataset.nodeId,
+                ignoreRows: true,
             }, (response) => {
-                if (!isAVRenderData(response.data)) {
+                if (!avMaskElement.isConnected || response.code !== 0 || !isAVRenderData(response.data)) {
                     return;
                 }
                 getFieldsByData(response.data).find((item: IAVColumn) => {
                     if (item.id === getColId(cellElements[0], viewType)) {
                         inputElement.value = item.template;
                         inputElement.dataset.template = item.template;
+                        inputElement.disabled = false;
+                        inputElement.focus();
+                        inputElement.select();
                         return true;
                     }
                 });
             });
         }
-        if (type === "block" && !cellElements[0].dataset.avId) {
+        if (type === "block" && !cellElements[0].dataset.avId && !getAVRelationHost(blockElement)) {
             inputElement.addEventListener("input", (event: InputEvent) => {
                 if (Constants.BLOCK_HINT_KEYS.includes(inputElement.value.substring(0, 2))) {
+                    const anchor = getInputAnchor();
+                    if (!anchor?.isConnected || !blockElement.contains(anchor) || !inputTarget()) return;
                     protyle.toolbar.range = document.createRange();
-                    if (cellElements[0] && !blockElement.contains(cellElements[0])) {
-                        const rowID = getFieldIdByCellElement(cellElements[0], viewType);
-                        if (isTableLikeView(viewType)) {
-                            cellElements[0] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`)) as HTMLElement;
-                        } else {
-                            cellElements[0] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElements[0].dataset.fieldId}"]`)) as HTMLElement;
-                        }
-                    }
-                    protyle.toolbar.range.selectNodeContents(cellElements[0].lastChild);
+                    protyle.toolbar.range.selectNodeContents(anchor.lastChild);
                     focusByRange(protyle.toolbar.range);
                     if (isTableLikeView(viewType)) {
                         cellElements[0].classList.add("av__cell--select");
@@ -943,8 +1065,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             }
             if (event.key === "Escape" || event.key === "Tab" ||
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
-                updateCellValueByInput(protyle, type, blockElement, cellElements);
-                if (event.key === "Tab") {
+                updateCellValueByInput(protyle, type, blockElement, cellElements, true, inputTarget);
+                if (event.key === "Tab" && !getAVRelationHost(blockElement)) {
                     protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {
                         shiftKey: event.shiftKey,
                         ctrlKey: event.ctrlKey,
@@ -963,7 +1085,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const removeAvMask = (event: Event) => {
         if ((event.target as HTMLElement).classList.contains("av__mask")
             && document.activeElement.tagName !== "TEXTAREA" && document.activeElement.tagName !== "INPUT") {
-            updateCellValueByInput(protyle, type, blockElement, cellElements);
+            updateCellValueByInput(protyle, type, blockElement, cellElements, true, inputTarget);
             avMaskElement?.remove();
             if (options?.keepMenuOpen) {
                 window.siyuan.menus.menu.remove();
@@ -987,9 +1109,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
 };
 
 const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: HTMLElement, cellElements: HTMLElement[],
-                                restoreFocus = true) => {
+                                restoreFocus = true, inputTarget?: ReturnType<typeof createCellInputTarget>) => {
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
-    if (isTableLikeView(viewType) && !cellElements[0].dataset.avId) {
+    if (!inputTarget && isTableLikeView(viewType) && !cellElements[0].dataset.avId) {
         const rowElement = hasClosestByClassName(cellElements[0], "av__row");
         if (!rowElement) {
             return;
@@ -1003,7 +1125,8 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
     if (type === "template") {
         const colId = getColId(cellElements[0], viewType);
         const textElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
-        if (textElement.value !== textElement.dataset.template && !blockElement.getAttribute("data-loading")) {
+        if (textElement.dataset.template !== undefined && !textElement.disabled &&
+            textElement.value !== textElement.dataset.template && !blockElement.getAttribute("data-loading")) {
             transaction(protyle, [{
                 action: "updateAttrViewColTemplate",
                 id: colId,
@@ -1031,9 +1154,20 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
             }
             return;
         }
-        updateCellsValue(protyle, blockElement, type === "checkbox" ? {
+        const target = inputTarget?.();
+        if (inputTarget && !target) {
+            avMaskElement?.remove();
+            return;
+        }
+        const value = type === "checkbox" ? {
             checked: !genCellValueByElement(type, cellElements[0]).checkbox?.checked
-        } : inputElement.value, cellElements);
+        } : inputElement.value;
+        if (target) {
+            updateCellsValue(protyle, blockElement, value, target.elements, undefined, undefined,
+                false, false, false, target.cells);
+        } else {
+            updateCellsValue(protyle, blockElement, value, cellElements);
+        }
     }
     if (isTableLikeView(viewType) &&
         // 兼容新增行后台隐藏
@@ -1054,9 +1188,19 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
 export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLElement, value?: any,
                                        cElements?: HTMLElement[], columns?: IAVColumn[], html?: string, getOperations = false,
                                        forceOperation = false, replaceSelectValues = false,
-                                       stableCells?: IAVSelectedCell[], updateElements = true) => {
+                                       stableCells?: IAVSelectedCell[], updateElements = true, awaitSave = false) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
+    const updateSavedElements: Array<() => void> = [];
+    const resolveInput = (cElements as IAVCellInputElements)?.resolveAVCellInput;
+    const inputTarget = resolveInput?.();
+    if (resolveInput && !inputTarget) {
+        return getOperations ? {doOperations, undoOperations} : {text: "", json: [] as IAVCellValue[][]};
+    }
+    if (inputTarget) {
+        stableCells = inputTarget.cells;
+        cElements = inputTarget.elements;
+    }
 
     const avID = nodeElement.dataset.avId;
     const id = nodeElement.dataset.nodeId;
@@ -1064,7 +1208,10 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
     const json: IAVCellValue[][] = [];
     let cellElements: Element[] = [];
     let selectedCells: IAVSelectedCell[] = [];
-    if (cElements?.length > 0) {
+    if (stableCells?.length > 0) {
+        selectedCells = stableCells;
+        cellElements = cElements || [];
+    } else if (cElements?.length > 0) {
         cellElements = cElements;
     } else {
         selectedCells = stableCells || getAVSelectedCells(nodeElement);
@@ -1080,12 +1227,12 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         }
     }
     const sources: Array<{ element?: HTMLElement, selectedCell?: IAVSelectedCell }> = selectedCells.length > 0 ?
-        selectedCells.map(selectedCell => ({selectedCell})) :
+        selectedCells.map((selectedCell, index) => ({selectedCell, element: cellElements[index] as HTMLElement})) :
         cellElements.map((element: HTMLElement) => ({element}));
     if (sources.length === 0) {
         return {text: "", json};
     }
-    const isCustomAttr = sources[0].element ?
+    const isCustomAttr = !getAVRelationHost(nodeElement) && sources[0].element ?
         Boolean(hasClosestByClassName(sources[0].element, "custom-attr")) : false;
     const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
     let batchDisplayValue: IAVCellValue;
@@ -1097,7 +1244,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         if (!rowID) {
             continue;
         }
-        if (item && !nodeElement.contains(item)) {
+        if (item && !source.selectedCell && !nodeElement.contains(item)) {
             if (isTableLikeView(viewType)) {
                 item = source.element = (nodeElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     nodeElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
@@ -1120,7 +1267,8 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         const colId = source.selectedCell?.colID || (item ? getColId(item, viewType) : "");
         const renderedOldValue = source.selectedCell?.cell.value ||
             (item ? genCellValueByElement(type, item) : undefined);
-        const sourceOldValue = item && renderedOldValue ? getAVBatchSourceValue(item, renderedOldValue) : renderedOldValue;
+        const sourceOldValue = !source.selectedCell && item && renderedOldValue ?
+            getAVBatchSourceValue(item, renderedOldValue) : renderedOldValue;
         if (!colId || !sourceOldValue) {
             continue;
         }
@@ -1271,6 +1419,10 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 return;
             }
             column = response.data?.[0];
+            if (resolveInput && !resolveInput()) {
+                return getOperations ? {doOperations: [] as IOperation[], undoOperations: [] as IOperation[]} :
+                    {text: "", json: [] as IAVCellValue[][]};
+            }
         }
         let cellValue: IAVCellValue;
         if (typeof newValue === "object" && newValue.type) {
@@ -1328,12 +1480,16 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 rowID,
                 data: oldValue
             }));
-            if (updateElements) {
+            const update = () => {
                 if (!isCustomAttr && item) {
                     updateAttrViewCellAnimation(item, cellValue);
                 }
                 updateAttrViewCellInOtherElements(protyle, avID, rowID, colId, cellValue, item);
                 updateAVSelectedCellValue(nodeElement, rowID, colId, cellValue);
+            };
+            if (updateElements) {
+                if (awaitSave) updateSavedElements.push(update);
+                else update();
             }
         }
     }
@@ -1354,13 +1510,19 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             id,
             data: nodeElement.getAttribute("updated"),
         });
-        transaction(protyle, doOperations, undoOperations);
+        if (awaitSave) {
+            await transaction(protyle, doOperations, undoOperations, {awaitResponse: true});
+            if (nodeElement.isConnected) updateSavedElements.forEach(update => update());
+        } else {
+            transaction(protyle, doOperations, undoOperations);
+        }
     }
     return {text: text.substring(0, text.length - 2), json};
 };
 
 export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: string, rowID: string, colID: string,
                                                   value: IAVCellValue, sourceElement?: HTMLElement) => {
+    const sourceWasMounted = sourceElement?.isConnected !== false;
     const updateCustomAttr = (cellElement: HTMLElement) => {
         const renderTemplate = cellElement.dataset.renderTemplate;
         const preserveTemplateDisplay = Boolean(renderTemplate?.trim()) &&
@@ -1391,7 +1553,7 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
                 }
             } else {
                 cellElement.innerHTML = genAVValueHTML(value, cellElement.dataset.dateFormat as TAVDateFormat,
-                    renderTemplate);
+                    renderTemplate, cellElement.dataset.relationExpanded === "true" ? Infinity : 5);
                 renderAVRichTextElements(cellElement);
             }
         }
@@ -1421,12 +1583,14 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
             updateAVCachedCellValue(data.view, rowID, colID, value);
         }
         updateAVSelectedCellValue(item, rowID, colID, value);
+        // 列窗口保留卸载的节点；先恢复目标列再更新内容，避免横滚后显示旧值。
+        ensureAVColumnWindow(item, colID, rowID);
         item.querySelectorAll<HTMLElement>(
             `.av__row[data-id="${rowID}"] .av__cell[data-col-id="${colID}"], ` +
             `.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${colID}"]` +
             (value.type === "checkbox" ? `, .av__calendar-item[data-id="${rowID}"] .av__calendar-field[data-col-id="${colID}"]` : "")
         ).forEach(cellElement => {
-            if (cellElement === sourceElement) {
+            if (cellElement === sourceElement && sourceWasMounted) {
                 return;
             }
             if (value.id) {
@@ -1543,7 +1707,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
             if (item.type === "image" && isBrowserRenderableImagePath(item.content)) {
-                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" src="${getCompressURL(encodeURI(item.content))}">`;
+                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" src="${escapeAttr(getCompressURL(item.content))}">`;
             } else {
                 text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAriaLabel(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${escapeHtml(item.name || item.content)}</span>`;
             }
@@ -1720,6 +1884,54 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
     [key: string]: IAVCellValue[]
 }, originCellIds: string[], activeElement: Element) => {
     nodeElement.querySelector(".av__drag-fill")?.remove();
+    const selectedCells = getAVSelectedCells(nodeElement);
+    if (selectedCells.length > 0) {
+        const data = getAVData(nodeElement);
+        if (!data || !canEditAVHost(nodeElement, protyle)) return;
+        const originKeys = Object.keys(originData);
+        const targetRows = new Map<string, IAVSelectedCell[]>();
+        selectedCells.forEach(cell => {
+            if ((cell.cell.id && originCellIds.includes(cell.cell.id)) || originData[cell.rowID]) return;
+            const key = `${cell.groupID}:${cell.rowID}`;
+            const cells = targetRows.get(key) || [];
+            cells.push(cell);
+            targetRows.set(key, cells);
+        });
+        const doOperations: IOperation[] = [];
+        const undoOperations: IOperation[] = [];
+        Array.from(targetRows.values()).forEach((cells, rowIndex) => {
+            cells.forEach((selectedCell, colIndex) => {
+                const originValues = originData[originKeys[rowIndex % originKeys.length]];
+                const originValue = originValues?.some(value => value.keyID) ?
+                    originValues.find(value => value.keyID === selectedCell.colID) : originValues?.[colIndex];
+                const target = resolveAVSelectedCell(data, selectedCell);
+                if (!originValue || !target || originValue.type !== target.column.type ||
+                    isAVReadonlyType(target.column.type) ||
+                    (target.column.type === "block" && !target.cell.value.isDetached)) {
+                    return;
+                }
+                const oldValue = cloneAVCellValueSnapshot(target.cell.value);
+                const value = genAVDragFillValue(originValue, {
+                    id: target.cell.id, keyID: target.colID, blockID: target.rowID,
+                });
+                if (value.type === "block") {
+                    value.isDetached = true;
+                    delete value.block.id;
+                }
+                const operation = {avID: nodeElement.dataset.avId, valueID: target.cell.id,
+                    keyID: target.colID, rowID: target.rowID};
+                doOperations.push(createAVCellUpdateOperation({...operation, data: value}));
+                undoOperations.push(createAVCellUpdateOperation({...operation, data: oldValue}));
+                // 范围可以跨越未挂载的行列，先同步模型，再更新当前显示的同一条目。
+                updateAVCachedCellValue(data.view, target.rowID, target.colID, value);
+                updateAttrViewCellInOtherElements(protyle, nodeElement.dataset.avId, target.rowID, target.colID, value);
+                updateAVSelectedCellValue(nodeElement, target.rowID, target.colID, value);
+            });
+        });
+        focusBlock(nodeElement);
+        if (doOperations.length > 0) transaction(protyle, doOperations, undoOperations);
+        return;
+    }
     const newData: { [key: string]: Array<IAVCellValue & { colId?: string, element?: HTMLElement }> } = {};
     nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
         if (originCellIds.includes(item.dataset.id)) {

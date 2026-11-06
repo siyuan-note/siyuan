@@ -6,7 +6,7 @@ import {test} from "node:test";
 const {MarkdownDiskService} = require("./disk");
 
 const setup = async (t, fileSystem?: typeof fs) => {
-    const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-"));
+    const directory = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-")));
     t.after(() => fs.rm(directory, {recursive: true, force: true}));
     const service = new MarkdownDiskService({fileSystem,
         ...(fileSystem?.rename && fileSystem.rename !== fs.rename ? {replace: fileSystem.rename} : {})});
@@ -136,7 +136,7 @@ test("external reload does not advance the accepted baseline and can be accepted
     assert.equal((await service.write(request(loaded.target, "accepted"))).kind, "committed");
 });
 
-test("replacement changes identity even when external replacement contains identical bytes", async t => {
+test("same-path replacement can reload while stale writes remain protected even for identical bytes", async t => {
     const {service, file} = await setup(t);
     await fs.writeFile(file("source.md"), "same");
     const opened = await service.authorizeOpen("a", file("source.md"));
@@ -146,9 +146,13 @@ test("replacement changes identity even when external replacement contains ident
     assert.equal(result.kind, "blocked");
     assert.equal(result.error.code, "identity-changed");
     const loaded = await service.read({sessionId: "a", target: opened.target});
-    assert.equal(loaded.kind, "blocked");
-    assert.equal(loaded.error.code, "identity-changed");
+    assert.equal(loaded.kind, "read");
+    assert.equal(loaded.target.identity, opened.target.identity);
+    assert.notEqual(loaded.target.baseline, opened.target.baseline);
+    assert.equal(service.registry.get("a", opened.target.handle).descriptor.baseline, opened.target.baseline);
+    assert.equal((await service.write(request(opened.target, "stale"))).kind, "conflict");
     assert.equal(await fs.readFile(file("source.md"), "utf8"), "same");
+    assert.equal((await service.write(request(loaded.target, "accepted"))).kind, "committed");
 });
 
 test("save writes UTF-8 BOM and selected newlines through atomic replacement", async t => {

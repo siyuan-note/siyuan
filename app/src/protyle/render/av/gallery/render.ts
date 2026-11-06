@@ -1,7 +1,8 @@
 import {afterRenderCards, captureAVCardRenderState, getAVCardHTML} from "../cardLayout";
+import {fetchAVRender, AVAutomaticRefresh} from "../httpRender";
 import {guardTemplateHTTPRequest} from "../../../../template/http";
 import type {IAVCardRenderOptions} from "../renderState";
-import {escapeHtmlTextAndAttr} from "../../../../util/escape";
+import {escapeAttr, escapeHtmlTextAndAttr} from "../../../../util/escape";
 import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
 import {getSubItemsRequest, reconcileSubItems, restoreSubItemsView} from "../subItemsState";
@@ -32,7 +33,7 @@ const renderGroupGallery = (options: IAVCardRenderOptions) => {
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
             avBodyHTML += `${getGroupTitleHTML(group, group.cardCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${options.resetData.virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body${group.groupFolded ? " fn__none" : ""}">${getAVCardHTML("gallery", group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
+<div data-group-id="${escapeAttr(group.id)}" data-page-size="${group.pageSize}" data-dtype="${escapeAttr(group.groupKey.type)}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${options.resetData.virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body${group.groupFolded ? " fn__none" : ""}">${getAVCardHTML("gallery", group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
         }
     });
     if (options.renderAll) {
@@ -55,8 +56,10 @@ export const renderGallery = async (options: {
     cb?: (data: IAV) => void,
     renderAll: boolean,
     data?: IAV,
+    automaticRefresh?: AVAutomaticRefresh,
+    renderToken?: symbol,
 }) => {
-    const renderToken = beginAVRender(options.blockElement);
+    const renderToken = options.renderToken || beginAVRender(options.blockElement);
     const resetData = captureAVCardRenderState(options, "gallery");
     const virtualData = resetData.virtualData;
     if (options.blockElement.firstElementChild.innerHTML === "") {
@@ -94,14 +97,18 @@ export const renderGallery = async (options: {
             ...common, ...paging, created, carrierViewID,
         }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
             ...common, ...paging, snapshot, carrierViewID,
-        }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
+        }, undefined, false) : fetchAVRender({
             ...common, ...paging,
+            automaticRefresh: !!options.automaticRefresh,
+            preserveHTTPResults: options.automaticRefresh === "presentation",
             initialLayout: options.blockElement.getAttribute("data-av-type"),
             createIfNotExist: !window.siyuan.isPublish && !standalone,
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
             temporarySort: getReadonlyAVSortRequest(options.blockElement, options.protyle, common.viewID),
-        }, undefined, false, requestGuard.signal)).finally(requestGuard.dispose);
+        }, requestGuard.signal, options.blockElement, () => isCurrentAVRender(options.blockElement, renderToken),
+        preview => avRender(options.blockElement, options.protyle, undefined, true, preview,
+            options.automaticRefresh, renderToken))).finally(requestGuard.dispose);
         if (!isCurrentAVRender(options.blockElement, renderToken)) {
             return;
         }
@@ -128,16 +135,16 @@ export const renderGallery = async (options: {
     reconcileSubItems(options.blockElement, options.protyle, data, resetData.query.trim());
     prepareAVLocate(options.blockElement, data, resetData);
     if (isTableLikeView(data.viewType) || data.viewType === "calendar") {
-        avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
+        await avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data, options.automaticRefresh, renderToken);
         return;
     }
     if (data.viewType === "kanban") {
-        renderKanban({
+        await renderKanban({
             blockElement: options.blockElement,
             protyle: options.protyle,
             cb: options.cb,
             renderAll: options.renderAll,
-            data
+            data, automaticRefresh: options.automaticRefresh, renderToken,
         });
         return;
     }

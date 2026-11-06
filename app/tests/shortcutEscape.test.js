@@ -47,12 +47,15 @@ const sources = () => {
         globalKeyboard: compile(parse(sourceFile("boot/globalEvent/keydown.ts").text,
             {MOBILE: false, BROWSER: true}, false, true)),
         keymap: compile(sourceFile("util/keymapBindings.ts").text),
+        shortcut: compile(sourceFile("util/shortcut.ts").text),
         hotkey: compile(sourceFile("protyle/util/hotKey.ts").text),
         escape: compile(`function editorEscape(protyle, event, range, isCrossBlock, nodeElement) {
             const blockSelectionModeElement = undefined;
             ${escape.getText(keyboard)}
         }` + sourceFile("protyle/toolbar/subElementLifecycle.ts").text.replaceAll("export ", "")),
         card: compile(`const openCardByData = ${openCard.getText(card)};`),
+        secondaryEditors: compile(sourceFile("mobile/util/secondaryEditors.ts").text),
+        editorSave: compile(sourceFile("protyle/util/editorSave.ts").text),
         menuToggle: compile(sourceFile("menus/menuToggle.ts").text),
         menu: compile(`async function workspaceMenu(app, rect, openOnly = false, target) {
             ${workspaceMenu.body.statements[0].getText(workspace)}
@@ -97,6 +100,7 @@ const cases = async compiled => {
         return exports;
     };
     const lifecycle = load(compiled.lifecycle, {});
+    const secondaryEditors = load(compiled.secondaryEditors, {"../../protyle/util/editorSave": load(compiled.editorSave, {})});
     const selectionMode = {clearBlockSelectionMode: root => {
         root.querySelectorAll(".selected-block").forEach(item => item.classList.remove("selected-block"));
     }};
@@ -164,7 +168,7 @@ const cases = async compiled => {
         }
         const root = protyle.wysiwyg.element;
         const first = root.firstElementChild;
-        const editor = {protyle, resize() {}, destroy() {}};
+        const editor = {protyle, resize() {}, destroy() {}, isUploading: () => false, async flushPendingTransactions() {}};
         class Dialog {
             constructor() {
                 this.element = document.createElement("div");
@@ -176,11 +180,14 @@ const cases = async compiled => {
                 this.destroyed = false;
             }
             destroy() {this.destroyed = true;}
+            focusWhenReady(target) {target()?.focus();}
         }
         const focusByRange = range => {getSelection().removeAllRanges(); getSelection().addRange(range);};
-        const openCard = new Function("window", "Dialog", "Constants", "genCardHTML", "isMobile", "bindCardEvent",
-            "focusByRange", "updateCardHV", compiled.card + "\nreturn openCardByData;")(
-            window, Dialog, Constants, () => "", () => mobile, async () => editor, focusByRange, () => {});
+        const openCard = new Function("window", "MobileDialog", "Constants", "genCardHTML", "isMobile", "bindCardEvent",
+            "focusByRange", "updateCardHV", "createMobileSecondaryEditorCloseGuard", "registerMobileSecondaryEditor",
+            compiled.card + "\nreturn openCardByData;")(
+            window, Dialog, Constants, () => "", () => mobile, async () => editor, focusByRange, () => {},
+            secondaryEditors.createMobileSecondaryEditorCloseGuard, secondaryEditors.registerMobileSecondaryEditor);
         window.siyuan.dialogs = [];
         await openCard({plugins: []}, {}, "all");
         const dialog = window.siyuan.dialogs[0];
@@ -199,14 +206,17 @@ const cases = async compiled => {
         check.equal(dialog.destroyed, false);
         check.equal(document.activeElement, dialog.element.querySelector(".card__action button"));
         check.equal(first.classList.contains("selected-block"), false);
+        secondaryEditors.unregisterMobileSecondaryEditor(editor);
     }
     // 快捷键将焦点移到可操作菜单项，方向键不再被编辑器截获。
     const menuConstants = {MENU_BAR_WORKSPACE: "workspace", KEYCODELIST: {38: "↑", 40: "↓", 220: "\\"}};
     const menuBindings = new Function("window", "Constants", "toggleMenu", compiled.menu +
         "\nreturn {workspaceMenu, bindMenuKeydown};")(window, menuConstants, load(compiled.menuToggle, {}).toggleMenu);
     const keymap = load(compiled.keymap, {});
+    const shortcut = load(compiled.shortcut, {"./keymapBindings": keymap});
     const hotkey = load(compiled.hotkey, {"../../util/keymapBindings": keymap, "../../constants": {Constants: menuConstants},
-        "./compatibility": {isNotCtrl: event => !event.ctrlKey && !event.metaKey, isMac: () => false,
+        "../../util/shortcut": shortcut,
+        "./compatibility": {isNotCtrl: event => !event.ctrlKey && !event.metaKey, isMac: () => false, isInIOS: () => false,
             isOnlyMeta: event => event.ctrlKey && !event.metaKey}});
     const globalKeyboard = load(compiled.globalKeyboard, {"../../menus/Menu": menuBindings,
         "../../menus/workspace": menuBindings, "../../protyle/util/hotKey": hotkey,

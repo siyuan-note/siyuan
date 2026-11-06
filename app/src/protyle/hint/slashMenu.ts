@@ -17,6 +17,7 @@ interface IResolveSlashMenuOptions {
     visible: (entryKey: string) => boolean;
     lite?: boolean;
     canUpload?: boolean;
+    allowCreateRef?: boolean;
 }
 
 const isSeparator = (item?: TSlashMenuItem) => item?.html === "separator";
@@ -88,6 +89,7 @@ export const resolveSlashMenuItems = (items: TSlashMenuItem[], options: IResolve
     const orderedItems = reorderEntrySlots(uniqueItems, options.order, (item) => item.entryKey);
     const visibleItems = orderedItems.filter((item) => (!options.lite || isSeparator(item) ||
         (item.entryKey === item.id ? LITE_SLASH_IDS.has(item.id) ||
+            (options.allowCreateRef && item.id === "newFileRef") ||
             (options.canUpload && ["insertAsset", "insertIOSPhotos", "insertHTMLFile"].includes(item.id)) : item.showInLite === true)) &&
         options.visible(item.entryKey) &&
         !(options.hideConfiguredCreate && item.entryKey === "newFileRef"));

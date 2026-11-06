@@ -163,6 +163,39 @@ test("main windows close their own boot windows in either frontend readiness ord
     }
 });
 
+test("main close, tray quit and application quit share the recovery timer", (t: any) => {
+    const {context, ipcMain, timers} = mainWindowSetup(t);
+    context.initMainWindow(6806);
+    const window = context.workspaces[0].browserWindow;
+    Object.assign(window.webContents, {isDestroyed: () => false,
+        getURL: () => "https://127.0.0.1:6806/stage/build/app/"});
+    ipcMain.emit("siyuan-ready-to-show", {sender: window.webContents});
+    let prevented = false;
+    window.emit("close", {preventDefault: () => { prevented = true; }});
+    assert.equal(prevented, true);
+    assert.equal(timers.size, 1);
+    let menu: electron.MenuItemConstructorOptions[] = [];
+    mockElectron(t, {Menu: {buildFromTemplate: template => { menu = template; return {}; }}});
+    Object.assign(window, {isVisible: () => true, isAlwaysOnTop: () => false});
+    const {resetTrayMenu} = require("./trayMenu") as typeof import("./trayMenu");
+    resetTrayMenu({setContextMenu() {}} as unknown as electron.Tray,
+        {quit: "quit"}, window);
+    const quit = menu.find(item => item.label === "quit");
+    assert.ok(quit?.click);
+    quit.click({} as electron.MenuItem, {} as ElectronBrowserWindow, {} as electron.KeyboardEvent);
+    assert.equal(timers.size, 1);
+    assert.deepEqual(window.messages.slice(-2), [["siyuan-save-close", false], ["siyuan-save-close", true]]);
+    const {registerAppLifecycle} = require("../startup/appLifecycle") as typeof import("../startup/appLifecycle");
+    const appEvents = new EventEmitter();
+    mockElectron(t, {app: Object.assign(appEvents, {getPreferredSystemLanguages: () => ["en"]}) as unknown as App});
+    registerAppLifecycle({initMainWindow: () => {}, settingsWindowPolicy: () => undefined});
+    appEvents.emit("before-quit", {preventDefault() {}});
+    assert.equal(timers.size, 1);
+    assert.deepEqual(window.messages.at(-1), ["siyuan-save-close", true]);
+    window.destroy();
+    assert.equal(timers.size, 0);
+});
+
 test("main window timeout and closure clean up their own boot windows and readiness listeners", (t) => {
     const {context, ipcMain, timers, Window} = mainWindowSetup(t);
     const boots = [new Window(), new Window()];

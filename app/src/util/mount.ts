@@ -1,10 +1,10 @@
-import {openInputDialog} from "../dialog/inputDialog";
+import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "./functions";
 import {fetchPost, fetchSyncPost} from "./fetch";
 import {ContractFormData} from "./contractFormData";
-import {Dialog} from "../dialog";
+import {MobileDialog as Dialog} from "../dialog/mobileDialog";
 import {getOpenNotebookCount} from "./pathName";
 import {normalizeNotebookName, validateName} from "../editor/rename";
 import {escapeHtml} from "../util/escape";
@@ -187,6 +187,13 @@ export const newNotebook = () => {
             return false;
         }
         name = normalizeNotebookName(name);
+        if (isMobile()) {
+            void dialog.runPending(async () => {
+                const response = await fetchSyncPost("/api/notebook/createNotebook", {name});
+                return response.code === 0;
+            });
+            return;
+        }
         fetchPost("/api/notebook/createNotebook", {
             name
         });
@@ -202,7 +209,18 @@ export const newNotebook = () => {
             notebookNameElement.value = name;
         }
         if (!validateName(name)) {
-            notebookNameElement.focus();
+            dialog.focusWhenReady(() => notebookNameElement);
+            return;
+        }
+        if (isMobile()) {
+            let notebookID: string;
+            void dialog.runPending(async () => {
+                const response = await fetchSyncPost("/api/notebook/createNotebook", {name: normalizeNotebookName(name)});
+                notebookID = response.code === 0 ? response.data?.notebook?.id : undefined;
+                return !!notebookID;
+            }).then(success => {
+                if (success) callback(notebookID);
+            });
             return;
         }
         fetchPost("/api/notebook/createNotebook", {name: normalizeNotebookName(name)}, (response) => {
@@ -378,6 +396,14 @@ export const newEncryptedNotebook = () => {
                 showMessage(window.siyuan.languages.masterPassword);
                 return false;
             }
+            if (isMobile()) {
+                return dialog.runPending(async () => {
+                    const response = await fetchSyncPost("/api/notebook/createEncryptedNotebook", {
+                        name: normalizeNotebookName(name), password,
+                    });
+                    return response.code === 0;
+                });
+            }
             btnsElement[1].disabled = true;
             const response = await fetchSyncPost("/api/notebook/createEncryptedNotebook", {
                 name: normalizeNotebookName(name),
@@ -406,6 +432,7 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
         type: "password",
         placeholder: window.siyuan.languages.masterPassword,
         description: window.siyuan.languages.encryptedNotebookRiskTip,
+        awaitConfirm: true,
         onConfirm: async (password, dialog) => {
             const inputElement = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
             const confirmElement = dialog.element.querySelector<HTMLButtonElement>("[data-input-confirm]");
@@ -420,10 +447,13 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
             });
             if (response.code === 0) {
                 dialog.destroy();
+                return true;
             } else {
                 confirmElement.disabled = false;
                 inputElement.value = "";
-                inputElement.focus();
+                if (isMobile()) dialog.focusWhenReady(() => inputElement);
+                else inputElement.focus();
+                return false;
             }
         },
     });

@@ -22,7 +22,7 @@ const runElectron = async () => {
             section("        const buildExportConfig =", "        const reserveEmbeddedAssetSpace =")
                 .replaceAll("${currentWindowId}", "0")
                 .replaceAll("${toScriptLiteral(`${window.siyuan.languages.export} PDF`)}", '"Export PDF"') +
-            section("            const isPaged =", "            exportConfig.filePaths =");
+            section("            const isPaged =", "            exportConfig.filePath =");
         const css = require("sass").compile(path.join(__dirname, "../src/assets/scss/export.scss")).css;
         for (const landscape of [false, true]) {
             for (const scale of [0.5, 1, 1.5]) {

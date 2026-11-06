@@ -77,9 +77,10 @@ type AVArchiveRenderData struct {
 }
 type AVRenderData struct {
 	AVArchiveRenderData
-	ContextFilter       *AVAttributeViewContextFilter        `json:"contextFilter"`
-	ContextFilterFields []*AVAttributeViewContextFilterField `json:"contextFilterFields"`
-	Target              *AVAttributeViewRenderTarget         `json:"target,omitempty"`
+	PendingHTTPTemplates []string                             `json:"pendingHTTPTemplates,omitempty"`
+	ContextFilter        *AVAttributeViewContextFilter        `json:"contextFilter"`
+	ContextFilterFields  []*AVAttributeViewContextFilterField `json:"contextFilterFields"`
+	Target               *AVAttributeViewRenderTarget         `json:"target,omitempty"`
 }
 type AVViewNotFound struct {
 	Error string `json:"error" api:"const=\"viewNotFound\""`

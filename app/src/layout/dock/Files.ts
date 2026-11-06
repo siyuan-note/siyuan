@@ -1,6 +1,7 @@
 import {renderDocTreeRow, renderDocTreeRowHTML} from "./docTree/row";
 import {getDocTreeItem, isEncryptedDocTreeItem, notebookTreeItem} from "./docTree/rowData";
 import {DocTreeController, getActiveDocTreeController} from "./docTree/DocTreeController";
+import {refreshImportedDocTree} from "./docTree/importRefresh";
 import type {IDocTreeItem} from "./docTree/types";
 import {createDocTreeSelectionProgress} from "./docTree/selectionProgress";
 import {config as configApi} from "../../config/util/configApi";
@@ -1073,8 +1074,7 @@ export class Files extends Model {
 
     public onDocsImported(data: {notebook: string, parentPath: string, rootIDs: string[]}) {
         this.pinnedDocs?.scheduleRefresh();
-        const parentID = data.parentPath.split("/").filter(Boolean).pop()?.replace(/\.sy$/, "") || "";
-        void this.docTree.reload({notebook: data.notebook, parentID});
+        void refreshImportedDocTree(this.docTree, data);
     }
 
     public onDocSortModeChanged(data: IDocSortModeChanged) {
@@ -1121,10 +1121,10 @@ export class Files extends Model {
     }
 
     public async selectItem(notebookId: string, filePath: string, data?: IFileTreeList,
-                            setStorage = true, isSetCurrent = true): Promise<HTMLElement> {
+                            setStorage = true, isSetCurrent = true, ignoreUnavailable = false): Promise<HTMLElement> {
         const id = filePath === "/" ? notebookId : filePath.split("/").filter(Boolean).pop()?.replace(/\.sy$/, "");
         if (!id) { return; }
-        const pending = this.docTree.locate(notebookId, id, {select: isSetCurrent, scroll: isSetCurrent});
+        const pending = this.docTree.locate(notebookId, id, {select: isSetCurrent, scroll: isSetCurrent, ignoreUnavailable});
         const interaction = this.docTree.interactionVersion;
         await pending;
         if (interaction !== this.docTree.interactionVersion) { return; }

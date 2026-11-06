@@ -3,7 +3,7 @@ import {describe, it} from "node:test";
 import {ScriptTarget} from "typescript";
 import {loadModule} from "../../../testSupport/loadModule";
 
-const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: () => Promise<void>} = {}) => {
+const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: () => Promise<void>; save?: () => Promise<void>} = {}) => {
     const lifecycle: string[] = [];
     const masks: Array<{
         firstElementChild: ReturnType<typeof createPanel>;
@@ -18,6 +18,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
     const anchor = {isConnected: true};
     let content = "initial";
     const createPanel = () => ({
+        inert: false,
         classList: {add: () => {}},
         removeAttribute: () => {},
         querySelector: (selector: string) => selector === ".av__richtext-host" ? {dataset: {}} : null,
@@ -48,10 +49,46 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         anchorElement: anchor,
         value: {type: "text", text: {content: "initial"}},
         stableCells: [] as import("./selectionState").IAVSelectedCell[],
-        onSave: () => lifecycle.push("save"),
+        onSave: () => { lifecycle.push("save"); return settings.save?.(); },
         onDestroy: () => lifecycle.push("callback"),
     };
     const modules: Record<string, unknown> = {
+        "./host": {getAVHostIdentity: (element: typeof node) => element.dataset.nodeId,
+            getAVHostBlockID: (element: typeof node) => element.dataset.nodeId},
+        "./cellEditor": {AV_CELL_EDITOR_CLOSE_EVENT: "siyuan-av-cell-editor-close"},
+        "../../../dialog/message": {showMessage: () => lifecycle.push("save-error")},
+        "../../../dialog/mobileDialog": {MobileDialog: class {
+            element: unknown;
+            private closed = false;
+            private pending = false;
+            constructor(private settings: {mobileSheet: {beforeClose: () => Promise<boolean>}; destroyCallback: () => void}) {
+                const panel = createPanel();
+                const mask = {firstElementChild: panel, handlers: new Map<string, (event: unknown) => void>(),
+                    dataset: {}, style: {}, remove: () => lifecycle.push("remove"),
+                    querySelector: () => panel,
+                    addEventListener(name: string, handler: (event: unknown) => void) { this.handlers.set(name, handler); }};
+                masks.push(mask);
+                this.element = mask;
+            }
+            async requestClose() {
+                if (this.closed || this.pending) return false;
+                this.pending = true;
+                try {
+                    if (await this.settings.mobileSheet.beforeClose()) this.invalidate();
+                } catch {
+                    lifecycle.push("save-error");
+                } finally {
+                    this.pending = false;
+                }
+                return this.closed;
+            }
+            invalidate() {
+                if (this.closed) return;
+                this.closed = true;
+                this.settings.destroyCallback();
+            }
+            focusWhenReady() {}
+        }},
         "../../../util/functions": {isMobile: () => settings.mobile || false},
         "../../../util/escape": {escapeHtml: String},
         "../../../mobile/util/mobileAppUtil": {callMobileAppShowKeyboard: () => {}},
@@ -59,6 +96,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         "../../lite/fragmentEditor": {mountProtyleLiteFragment: () => fragment},
         "../../toolbar/defaults": {getDefaultToolbar: (): unknown[] => []},
         "./richTextEditorPosition": {positionAVRichTextEditor: () => {}},
+        "./richTextEditorLute": {createAVRichTextEditorLute: () => ({}), configureAVRichTextEditorLute: () => {}},
         "./editorSession": {beginAVEditorSession: () => () => lifecycle.push("end-session")},
         "../../util/outlineBlock": {updateOutlineCurrentBlock: () => {}},
         "../../util/selection": {focusBlock: (element: unknown) => {
@@ -67,7 +105,6 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         }},
         "./richText": {
             getAVTextSource: () => ({kind: "plain", content: "initial"}),
-            getAVRichTextLute: () => ({}),
             serializeAVRichTextBlockDOM: (markdown: string) => ({markdown, plainText: markdown}),
             createAVRichTextValue: (markdown: string) => ({type: "text", text: {content: markdown}}),
         },
@@ -108,6 +145,8 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
     }
     return {
         methods, lifecycle, owner, node, open,
+        cancel: () => masks.at(-1).handlers.get("siyuan-av-cell-editor-close")({}),
+        get inert() { return masks.at(-1).firstElementChild.inert; },
         escape: () => masks.at(-1).firstElementChild.handlers.get("keydown")({
             key: "Escape",
             preventDefault: () => lifecycle.push("prevent"),
@@ -122,6 +161,77 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
 };
 
 describe("database rich text editor Escape focus", () => {
+    for (const mobile of [false, true]) {
+        it(`cancels owned ${mobile ? "mobile" : "desktop"} rich text immediately without saving its draft`, async () => {
+            const editor = createEditor({mobile, changed: true});
+            editor.cancel();
+            await editor.settle();
+            assert.equal(editor.lifecycle.includes("save"), false);
+            assert.equal(editor.lifecycle.filter(item => item === "destroy").length, 1);
+            assert.equal(editor.lifecycle.filter(item => item === "end-session").length, 1);
+        });
+    }
+    it("keeps the mobile draft after a failed save and allows an explicit retry", async () => {
+        let fail = true;
+        const editor = createEditor({mobile: true, changed: true, save: async () => {
+            if (fail) throw new Error("save failed");
+        }});
+        editor.escape();
+        await editor.settle();
+        assert.equal(editor.lifecycle.includes("save-error"), true);
+        assert.equal(editor.lifecycle.includes("destroy"), false);
+        assert.equal(editor.inert, false);
+        fail = false;
+        editor.escape();
+        await editor.settle();
+        assert.equal(editor.lifecycle.filter(item => item === "save").length, 2);
+        assert.equal(editor.lifecycle.filter(item => item === "destroy").length, 1);
+    });
+
+    it("locks mobile editing throughout an asynchronous save and its close", async () => {
+        let resolveSave: () => void;
+        const editor = createEditor({mobile: true, changed: true,
+            save: () => new Promise<void>(resolve => resolveSave = resolve)});
+        editor.escape();
+        assert.equal(editor.inert, true);
+        await editor.settle();
+        assert.equal(editor.inert, true);
+        resolveSave();
+        await editor.settle();
+        assert.equal(editor.inert, true);
+        assert.equal(editor.lifecycle.filter(item => item === "destroy").length, 1);
+    });
+
+    it("deduplicates mobile save requests and invalidates immediately during a pending flush", async () => {
+        let flush: () => void;
+        const editor = createEditor({mobile: true, changed: true,
+            flush: () => new Promise<void>(resolve => flush = resolve)});
+        editor.escape();
+        editor.escape();
+        editor.methods.destroyAVRichTextEditor(false);
+        assert.equal(editor.lifecycle.filter(item => item === "destroy").length, 1);
+        flush();
+        await editor.settle();
+        assert.equal(editor.lifecycle.includes("save"), false);
+        assert.equal(editor.lifecycle.filter(item => item === "callback").length, 1);
+    });
+
+    it("keeps the desktop draft after a failed save and retries without destroying the editor", async () => {
+        let fail = true;
+        const editor = createEditor({changed: true, save: async () => {
+            if (fail) throw new Error("save failed");
+        }});
+        editor.clickOutside();
+        await editor.settle();
+        assert.equal(editor.lifecycle.includes("save-error"), true);
+        assert.equal(editor.lifecycle.includes("destroy"), false);
+        fail = false;
+        editor.clickOutside();
+        await editor.settle();
+        assert.equal(editor.lifecycle.filter(item => item === "save").length, 2);
+        assert.equal(editor.lifecycle.filter(item => item === "destroy").length, 1);
+    });
+
     for (const changed of [false, true]) {
         it(`restores database focus after closing ${changed ? "edited" : "unchanged"} text`, async () => {
             const editor = createEditor({changed});

@@ -419,7 +419,11 @@ func (tx *Transaction) captureSubItemsChanges(operations []*Operation, before, a
 		return nil
 	}
 	first := operations[0]
-	state := &attributeViewFieldsSnapshot{avID: first.AvID, keyID: first.AvID, blockID: first.BlockID, boxID: av.GetAVBoxID(first.AvID), changes: map[string]*attributeViewFieldChange{}}
+	state := &attributeViewFieldsSnapshot{avID: first.AvID, keyID: first.AvID, blockID: first.BlockID, changes: map[string]*attributeViewFieldChange{}}
+	state.boxID, state.storageKnown = before[first.AvID].StorageContext()
+	if !state.storageKnown {
+		_, state.boxID = before[first.AvID].StoragePath()
+	}
 	for id, original := range before {
 		updated := after[id]
 		if updated == nil {
@@ -565,8 +569,9 @@ func (tx *Transaction) updateSubItemsCells(operations []*Operation, cells []*Att
 	if !handled {
 		return false, nil
 	}
-	boxID := av.GetAVBoxID(source.ID)
-	source, err = tx.readAttributeViewForMutation(source.ID, op.BlockID, boxID)
+	_, boxID := source.StoragePath()
+	_, storageKnown := source.StorageContext()
+	source, err = tx.readAttributeViewForMutation(source.ID, op.BlockID, boxID, storageKnown)
 	if err != nil {
 		return true, err
 	}
@@ -575,7 +580,7 @@ func (tx *Transaction) updateSubItemsCells(operations []*Operation, cells []*Att
 		if kv.Key.Type != av.KeyTypeRelation || kv.Key.Relation == nil || !kv.Key.Relation.IsTwoWay || kv.Key.Relation.AvID == "" || before[kv.Key.Relation.AvID] != nil {
 			continue
 		}
-		linked, e := tx.readAttributeViewForMutation(kv.Key.Relation.AvID, op.BlockID, boxID)
+		linked, e := tx.readAttributeViewForMutation(kv.Key.Relation.AvID, op.BlockID, boxID, storageKnown)
 		if e != nil {
 			return true, e
 		}
@@ -622,7 +627,7 @@ func (tx *Transaction) updateSubItemsCells(operations []*Operation, cells []*Att
 	after := map[string]*av.AttributeView{current.ID: current}
 	for id := range before {
 		if id != current.ID {
-			after[id], err = tx.readAttributeViewForMutation(id, op.BlockID, boxID)
+			after[id], err = tx.readAttributeViewForMutation(id, op.BlockID, boxID, storageKnown)
 			if err != nil {
 				return true, err
 			}
@@ -881,7 +886,7 @@ func (tx *Transaction) duplicateAttributeViewSubtree(current *av.AttributeView, 
 
 // 整库复制重新分配字段、条目、值和视图身份，并保留绑定块与外部关联的身份。
 func remapCopiedSubItemsDatabase(source *av.AttributeView, databaseID ...string) (*av.AttributeView, error) {
-	if source.SubItems == nil {
+	if source.SubItems == nil && !source.HasRelationDetailViews() {
 		return source, nil
 	}
 	ids := newAttributeViewIdentityMap(source)
@@ -971,7 +976,7 @@ func remapAttributeViewLocalIdentities(source *av.AttributeView, ids map[string]
 		case map[string]any:
 			result := map[string]any{}
 			for key, child := range typed {
-				if key == "automations" {
+				if key == "automations" || key == "detailView" {
 					result[key] = child
 					continue
 				}

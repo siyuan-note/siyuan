@@ -259,13 +259,21 @@ func ensureAllSyncAssets() error {
 	return nil
 }
 
+type incompleteAssetDownloadsError struct {
+	message string
+}
+
+func (err *incompleteAssetDownloadsError) Error() string {
+	return err.message
+}
+
 func requireCompleteAssetDownloads() error {
 	files, err := deferredSyncAssets()
 	if err != nil {
 		return err
 	}
 	if len(files) != 0 {
-		return errors.New(Conf.Language(377))
+		return &incompleteAssetDownloadsError{message: Conf.Language(377)}
 	}
 	exists, err := assetDownloadStateExists()
 	if err != nil || !exists {
@@ -280,7 +288,7 @@ func requireCompleteAssetDownloads() error {
 		return err
 	}
 	if incomplete {
-		return errors.New(Conf.Language(377))
+		return &incompleteAssetDownloadsError{message: Conf.Language(377)}
 	}
 	return nil
 }

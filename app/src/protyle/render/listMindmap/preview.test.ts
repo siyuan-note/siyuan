@@ -331,6 +331,7 @@ test("special block previews cannot acquire document writes or lose unsupported 
         extract("../htmlRender.ts", ["htmlRender"]) + compile(readFileSync(path.join(__dirname, "../embedBreadcrumb.ts"), "utf8")) +
         extract("../blockRender.ts", ["blockRender"]) +
         extract("../chartRender.ts", ["refreshChartTheme"]) +
+        extract("../av/host.ts", ["relationHosts", "getAVRelationHost"]) +
         extract("../av/render.ts", ["avRender", "getAVElements"]) +
         extract("../../util/tableVirtualizationDOM.ts", ["TABLE_VIRTUAL_ID", "TABLE_VIRTUAL_ROWS"]) +
         extract("../../util/tableResize.ts", ["TABLE_ADD_CONTROL_GAP", "TABLE_ADD_CONTROL_THICKNESS"]) +

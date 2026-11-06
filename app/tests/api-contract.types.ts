@@ -6,6 +6,15 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchSyncPost("/api/petal/loadPetals", {frontend: "browser-desktop"});
+fetchSyncPost("/api/petal/loadPetals", {frontend: "desktop", names: null});
+fetchSyncPost("/api/petal/loadPetals", {frontend: "desktop", names: []});
+fetchSyncPost("/api/petal/loadPetals", {frontend: "desktop", names: ["sample"], settingsWindow: true});
+// @ts-expect-error 插件名称筛选必须是字符串数组或 null。
+fetchSyncPost("/api/petal/loadPetals", {frontend: "desktop", names: "sample"});
+// @ts-expect-error 插件名称数组不能包含 null。
+fetchSyncPost("/api/petal/loadPetals", {frontend: "desktop", names: [null]});
+
 fetchPost("/api/asset/getUnusedAssets", {});
 fetchPost("/api/asset/getUnusedAssets", {keyword: null});
 fetchPost("/api/asset/getUnusedAssets", {all: true});

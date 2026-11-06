@@ -16,6 +16,7 @@ export interface ISettingsWindowHost {
     dispose: () => void;
     reload: () => Promise<void>;
     resetLayout: () => Promise<void>;
+    reopenSettings: (settingsWindow: boolean) => Promise<void>;
     getDockOrderSnapshot: () => TDockOrderSnapshot;
     getEditorToolbarCatalogSnapshot: () => IToolbarCatalogEntry[];
     getBreadcrumbButtonCatalogSnapshot: () => IBreadcrumbButtonCatalogEntry[];

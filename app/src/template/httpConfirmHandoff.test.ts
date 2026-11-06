@@ -98,7 +98,7 @@ test("shared notebook close events invalidate preview tokens on desktop and mobi
         runInNewContext(transpileModule(readFileSync("src/util/processMessage.ts", "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
         }).outputText, {exports, require: (path: string) =>
-            path === "../template/httpConfirmHandoff" ? state.exports : {}});
+            path === "../template/httpConfirmHandoff" ? state.exports : {invalidateRelatedAVSecurity() {}}});
         exports.processMessage({cmd, code: 0, data: {box: "notebook"}});
         assert.equal(state.take(), undefined);
         assert.equal(state.revoked(), 1);

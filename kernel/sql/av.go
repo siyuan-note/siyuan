@@ -6,6 +6,7 @@ package sql
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
@@ -38,6 +39,7 @@ type GroupViewRenderSource struct {
 
 // AttributeViewRenderContext 收集一次属性视图渲染期间产生的模板错误。
 type AttributeViewRenderContext struct {
+	HTTPPreview                *HTTPTemplatePreview
 	TemplateHTTP               *templatehttp.Execution
 	TemplateHTTPSourceScope    func(owner, avID, keyID, slot, content string) string
 	templateErrors             map[string]*attributeViewTemplateRenderError
@@ -71,20 +73,12 @@ func (context *AttributeViewRenderContext) HasTemplateErrors() bool {
 	return context != nil && len(context.templateErrors) != 0
 }
 
-// HTTPTemplateError 将交互执行中的模板语法错误交给发起请求，避免广播到其他窗口。
+// HTTPTemplateError 仅将取消、锁定和执行预算终止提升为整个渲染失败。
 func (context *AttributeViewRenderContext) HTTPTemplateError() error {
 	if context == nil || context.TemplateHTTP == nil {
 		return nil
 	}
-	if err := context.TemplateHTTP.Err(); err != nil {
-		return err
-	}
-	for _, templateErr := range context.sortedTemplateErrors() {
-		if templateErr.httpTemplate {
-			return errors.New(templateErr.renderErr)
-		}
-	}
-	return nil
+	return context.TemplateHTTP.Err()
 }
 
 func (context *AttributeViewRenderContext) addTemplateError(attrView *av.AttributeView, templateKey *av.Key,
@@ -150,6 +144,7 @@ func (context *AttributeViewRenderContext) PushTemplateErrors() {
 	for _, templateErr := range context.sortedTemplateErrors() {
 		// 联网模板的错误留在本次执行内，避免向其他窗口广播数据范围信息。
 		if context.TemplateHTTP != nil && templateErr.httpTemplate {
+			context.TemplateHTTP.ReportTemplateError()
 			continue
 		}
 		detail := fmt.Sprintf(util.Langs[util.Lang][374], templateErr.attributeViewName, templateErr.templateFieldName,
@@ -385,6 +380,11 @@ func compileTemplateField(tplContent string, functions ...template.FuncMap) (tpl
 
 func executeTemplateField(tpl *template.Template, ial map[string]string, keyValues []*av.KeyValues,
 	storedValueCache map[*av.Value]*av.Value, executions ...*templatehttp.Execution) (ret string, err error) {
+	return executeTemplateData(tpl, templateFieldData(ial, keyValues, storedValueCache), executions...)
+}
+
+func templateFieldData(ial map[string]string, keyValues []*av.KeyValues,
+	storedValueCache map[*av.Value]*av.Value) map[string]any {
 	if "" == ial["id"] {
 		block := getBlockValue(keyValues)
 		if nil != block {
@@ -403,7 +403,6 @@ func executeTemplateField(tpl *template.Template, ial map[string]string, keyValu
 		}
 	}
 
-	buf := &bytes.Buffer{}
 	dataModel := map[string]any{} // 复制一份 IAL 以避免修改原始数据
 	for k, v := range ial {
 		dataModel[k] = v
@@ -528,6 +527,12 @@ func executeTemplateField(tpl *template.Template, ial map[string]string, keyValu
 		dataModel["id_mod_raw"].(map[string]any)[keyValue.Key.ID] = rawValue
 	}
 
+	return dataModel
+}
+
+func executeTemplateData(tpl *template.Template, dataModel map[string]any,
+	executions ...*templatehttp.Execution) (ret string, err error) {
+	buf := &bytes.Buffer{}
 	var writer io.Writer = buf
 	if len(executions) > 0 && executions[0] != nil {
 		writer = executions[0].Writer(buf)
@@ -927,10 +932,18 @@ func hasFilterConditions(filters []*av.ViewFilter) bool {
 // loadRelatedAttributeView 为历史和仓库快照渲染绑定请求级调色板，同时保持关联数据库的字段和值来源不变。
 func loadRelatedAttributeView(source *av.AttributeView, avID string, cachedAttrViews map[string]*av.AttributeView) (ret *av.AttributeView) {
 	if ret = cachedAttrViews[avID]; nil != ret {
-		return
+		if boxID, scoped := source.StorageContext(); !scoped {
+			return
+		} else if cachedBoxID, pinned := ret.StorageContext(); pinned && cachedBoxID == boxID {
+			return
+		}
 	}
 
-	ret, _ = av.ParseAttributeView(avID)
+	if boxID, scoped := source.StorageContext(); scoped {
+		ret, _ = av.ParseAttributeViewWithStorageContext(avID, boxID)
+	} else {
+		ret, _ = av.ParseAttributeView(avID)
+	}
 	if nil == ret {
 		return
 	}
@@ -1106,6 +1119,16 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 		}
 	}
 	clearAttributeViewRenderedContents(collection, keys)
+	if renderContext != nil && renderContext.HTTPPreview.Prepare(attrView) {
+		for _, item := range collection.GetItems() {
+			for _, value := range item.GetValues() {
+				if value.Template != nil {
+					value.Template.Content = ""
+				}
+			}
+		}
+		return
+	}
 	if !existTemplateField {
 		return
 	}
@@ -1141,14 +1164,17 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 		}
 		cacheKey := templateContent
 		var httpFuncs template.FuncMap
+		var httpScope string
 		if renderContext != nil && renderContext.TemplateHTTP != nil {
 			// 字段及模板槽位各自绑定来源，避免相同源码复用其他字段的许可闭包。
 			owner := av.GetAVBoxID(attrView.ID)
 			scope := owner + "\x00" + attrView.ID + "\x00" + templateKey.ID + "\x00" + slot
+			scope += fmt.Sprintf("\x00%x", sha256.Sum256([]byte(templateContent)))
 			if renderContext.TemplateHTTPSourceScope != nil && strings.Contains(templateContent, "httpGet") {
 				scope = renderContext.TemplateHTTPSourceScope(owner, attrView.ID, templateKey.ID, slot, templateContent)
 			}
-			httpFuncs = renderContext.TemplateHTTP.FuncsForScope(scope)
+			httpFuncs = renderContext.TemplateHTTP.DatabaseFuncs(scope)
+			httpScope = scope
 			cacheKey = templateKey.ID + "\x00" + slot + "\x00" + templateContent
 		}
 		for _, item := range collection.GetItems() {
@@ -1191,10 +1217,28 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 				if renderContext != nil {
 					execution = renderContext.TemplateHTTP
 				}
-				content, renderErr = executeTemplateField(tpl, ial, keyValues, storedValueCache, execution)
+				data := templateFieldData(ial, keyValues, storedValueCache)
+				inputs, cacheable := "", false
+				if execution != nil {
+					inputs, cacheable = templateInputSignature(tpl, data)
+				}
+				snapshot := inputs != ""
+				inputs = httpScope + "\x00" + templateContent + "\x00" + inputs
+				identity := av.GetAVBoxID(attrView.ID) + "\x00" + attrView.ID + "\x00" + templateKey.ID + "\x00" + slot + "\x00" + item.GetID()
+				var reused bool
+				if execution != nil && snapshot && (cacheable || execution.PreserveHTTPResults()) {
+					content, reused = execution.CachedTemplate(httpScope, identity, inputs)
+				}
+				if !reused {
+					content, renderErr = executeTemplateData(tpl, data, execution)
+					if execution != nil && snapshot && renderErr == nil {
+						execution.StoreTemplate(httpScope, identity, inputs, content)
+					}
+				}
 			}
 			if renderErr != nil && strings.Contains(templateContent, "httpGet") {
-				renderErr = errors.New("HTTP template evaluation failed")
+				renderErr = errors.New("template_error")
+				content = renderErr.Error()
 			}
 			if nil != renderErr {
 				renderContext.addTemplateError(attrView, templateKey, item, renderErr)
@@ -1577,7 +1621,9 @@ func getTemplateVars(tplContent string) ([]string, error) {
 		return nil, parseErr
 	}
 	vars := make(map[string]struct{})
-	collectVars(tpl.Tree.Root, vars)
+	for _, definition := range tpl.Templates() {
+		collectVars(definition.Tree.Root, vars)
+	}
 	var result []string
 	for v := range vars {
 		result = append(result, v)
@@ -1593,8 +1639,14 @@ func isTemplateIDModField(node parse.Node) bool {
 }
 
 func collectVars(node parse.Node, vars map[string]struct{}) {
+	if node == nil {
+		return
+	}
 	switch n := node.(type) {
 	case *parse.ListNode:
+		if n == nil {
+			return
+		}
 		for _, child := range n.Nodes {
 			collectVars(child, vars)
 		}
@@ -1641,7 +1693,27 @@ func collectVars(node parse.Node, vars map[string]struct{}) {
 		}
 	case *parse.VariableNode:
 		if len(n.Ident) > 0 {
-			vars[n.Ident[0]] = struct{}{}
+			if n.Ident[0] == "$" && len(n.Ident) > 1 {
+				collectVars(&parse.FieldNode{Ident: n.Ident[1:]}, vars)
+			} else {
+				vars[n.Ident[0]] = struct{}{}
+			}
 		}
+	case *parse.IfNode:
+		collectVars(n.Pipe, vars)
+		collectVars(n.List, vars)
+		collectVars(n.ElseList, vars)
+	case *parse.WithNode:
+		collectVars(n.Pipe, vars)
+		collectVars(n.List, vars)
+		collectVars(n.ElseList, vars)
+	case *parse.RangeNode:
+		collectVars(n.Pipe, vars)
+		collectVars(n.List, vars)
+		collectVars(n.ElseList, vars)
+	case *parse.ChainNode:
+		collectVars(n.Node, vars)
+	case *parse.TemplateNode:
+		collectVars(n.Pipe, vars)
 	}
 }

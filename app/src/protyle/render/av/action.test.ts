@@ -3,6 +3,8 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import * as host from "./host";
+import * as columnWindow from "./columnWindow";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
@@ -33,6 +35,8 @@ const setup = (mobile = true, detached = true) => {
         public close() { events.push("menu-close"); }
     }
     const dependencies: Record<string, unknown> = {
+        "./columnWindow": columnWindow,
+        "./host": {...host, getAVHost: () => block},
         "../../../plugin/Menu": {Menu},
         "../../../menus/menuToggle": {toggleMenu: (options: {target: unknown; build: () => void}) => {
             assert.equal(options.target, target);
@@ -40,8 +44,7 @@ const setup = (mobile = true, detached = true) => {
         }},
         "../../../util/functions": {isMobile: () => mobile},
         "../../util/compatibility": {isOnlyMeta: () => false},
-        "../../util/hasClosest": {hasClosestBlock: () => block,
-            hasClosestByClassName: (_element: unknown, name: string) =>
+        "../../util/hasClosest": {hasClosestByClassName: (_element: unknown, name: string) =>
                 name === "av__cell" ? cell : name === "av__row" ? row : null},
         "./attributeValue": {getAVTemplateInteractiveElement: (): null => null},
         "./cell": {

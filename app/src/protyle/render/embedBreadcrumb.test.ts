@@ -1,3 +1,4 @@
+import * as dockKeymap from "../../util/dockKeymap";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -8,7 +9,7 @@ import {getEmbedBreadcrumbPaths, resolveEmbedBreadcrumbPreference} from "./embed
 const constants = {} as typeof import("../../constants");
 runInNewContext(transpileModule(readFileSync("src/constants.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS},
-}).outputText, {exports: constants, SIYUAN_VERSION: "test", NODE_ENV: "test"});
+}).outputText, {exports: constants, SIYUAN_VERSION: "test", NODE_ENV: "test", require: () => dockKeymap});
 const attribute = constants.Constants.CUSTOM_SY_EMBED_BREADCRUMB_PARENT_PATH;
 const paths: IBreadcrumb[] = [
     {id: "document", name: "Notebook/Parent/Title / Section &lt;A&gt;", documentTitle: "Title / Section &lt;A&gt;",

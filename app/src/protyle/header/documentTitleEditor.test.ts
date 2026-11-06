@@ -108,7 +108,9 @@ test("rename construction retains local undo and toolbar history while inline ti
         const editable = {classList: {contains: () => true}, dataset: {tip: "Untitled"}};
         const localUndo = {undo: () => localUndos++, redo: () => {}, clear: () => {}};
         const fragment = {protyle: {block: {}, undo: localUndo, toolbar: {subElement}, wysiwyg: {flushPendingInput: async () => {}}},
-            wysiwyg: {querySelector: () => editable, replaceChildren: () => {}}, getBlockHTML: () => "initial", destroy: () => {},
+            wysiwyg: {querySelector: () => editable, replaceChildren: () => {},
+                addEventListener: () => {}},
+            getBlockHTML: () => "initial", destroy: () => {},
             instance: {enable: () => { disabled = false; }, disable: () => { disabled = true; }}};
         const owner = {element: {classList: {contains: () => draft}}, block: {rootID: "doc"},
             preview: {element: {classList: {contains: () => !preview}}}};

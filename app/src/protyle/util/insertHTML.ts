@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {prepareInlineElementBoundaryMutation} from "./inlineElementBoundary";
 import {
     hasClosestBlock,
@@ -58,7 +59,6 @@ import {
 import {isAVReadonlyType} from "../render/av/capabilities";
 import {getAVColumnFitWidth, getAVColumnTextMeasurer} from "../render/av/columnWidth";
 import {cloneAVCellValueSnapshot} from "../render/av/cellValue";
-import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
 import {getAVFilteredTipContext} from "../render/av/filteredTip";
@@ -253,7 +253,7 @@ const confirmAVPasteHeader = () => {
                 resolve(useHeader);
             }
         };
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
             title: window.siyuan.languages.avPasteHeaderTitle,
             content: `<div class="b3-dialog__content">
     <div class="ft__breakword">${window.siyuan.languages.avPasteHeaderTip}</div>
@@ -289,7 +289,7 @@ const confirmAVPasteHeader = () => {
             }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
-        (dialog.element.querySelector('[data-action="header"]') as HTMLButtonElement).focus();
+        dialog.focusWhenReady(() => dialog.element.querySelector<HTMLButtonElement>('[data-action="header"]'));
     });
 };
 
@@ -1067,6 +1067,15 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         return;
     }
     const isCrossBlockRange = blockRanges.length > 1 && blockRanges[0].blockElement === blockElement;
+    const tempElement = document.createElement("template");
+    if (html.includes("NodeList")) tempElement.innerHTML = html;
+    const pastedType = tempElement.content.firstElementChild?.getAttribute("data-type");
+    const selectedList = !range.collapsed && (pastedType === "NodeList" || pastedType === "NodeListItem") ?
+        hasClosestByAttribute(range.commonAncestorContainer, "data-type", "NodeList") : undefined;
+    const selectedListOldHTML = selectedList && protyle.wysiwyg.element.contains(selectedList) ?
+        selectedList.outerHTML : undefined;
+    const selectedListUndoContext = selectedListOldHTML ?
+        getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
     // 序号重排会更新整个列表项，撤销快照必须在跨块删除前保存。
     const orderedListItemOldHTML = new Map<string, string>();
     if (isCrossBlockRange) {
@@ -1315,8 +1324,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         });
         processCrossBlockData();
     }
-    const tempElement = document.createElement("template");
-
     // https://github.com/siyuan-note/siyuan/issues/14162 & https://github.com/siyuan-note/siyuan/issues/14965
     if (/^\s*&gt;|\*|-|\+|\d*.|\[ \]|[x]/.test(html) &&
         getTextWithoutSemanticMarkers(editableElement).split(Constants.ZWSP).join("") !== "") {
@@ -1355,7 +1362,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             // 粘贴带样式的行内元素到另一个行内元素中需进行切割
             const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer as HTMLElement;
             const splitElements: HTMLElement[] = [];
-            if (spanElement.tagName === "SPAN" && spanElement === (range.endContainer.nodeType === 3 ? range.endContainer.parentElement : range.endContainer) &&
+            if (spanElement.tagName === "SPAN" && !spanElement.classList.contains("callout-title") &&
+                spanElement === (range.endContainer.nodeType === 3 ? range.endContainer.parentElement : range.endContainer) &&
                 // 粘贴纯文本不需切割 https://ld246.com/article/1665556907936
                 // emoji 图片需要切割 https://github.com/siyuan-note/siyuan/issues/9370
                 tempElement.content.querySelector("span, img")
@@ -1743,5 +1751,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             }
         });
     });
+    if (isListPaste && selectedList && selectedListOldHTML && selectedList.isConnected && selectedList.contains(lastElement)) {
+        // 同一列表内的覆盖同时改变列表项、子列表和序号，按列表提交可避免撤销先访问已删除的子块。
+        const listID = selectedList.getAttribute("data-node-id");
+        transaction(protyle, [{action: "update", id: listID, data: selectedList.outerHTML}], [{
+            action: "update", id: listID, data: selectedListOldHTML,
+            context: crossBlockUndoFocusContext || selectedListUndoContext || undoContext,
+        }], transactionOptions);
+        return;
+    }
     transaction(protyle, doOperation, undoOperation, transactionOptions);
 };

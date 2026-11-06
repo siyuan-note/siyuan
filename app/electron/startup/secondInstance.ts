@@ -8,6 +8,7 @@ import {isWindowInitialized} from "../window/windowRegistry";
 import {normalizeRemoteKernelOrigin, shouldForwardRemoteDeepLink} from "../remote/remoteKernel";
 import {state, writeLog} from "../shared/runtime";
 import {routeMarkdownLaunch} from "./markdownEditors";
+import {resumeWorkspaceStartup} from "./startupBranches";
 import type {Event as ElectronEvent} from "electron";
 import type {InitKernel, InitMainWindow, Workspace} from "../shared/types";
 import {Channel} from "../shared/channels";
@@ -125,6 +126,12 @@ const handleSecondInstance = (argv: string[], handlers: SecondInstanceHandlers, 
     // 文件请求先于工作空间参数处理：同一进程可以同时管理多个轻量编辑窗口。
     // 整个 argv 交给解析器，可执行文件与应用路径不带 .md 后缀，不会被当成待打开文件。
     if (routeMarkdownLaunch(argv, workingDirectory ?? process.cwd())) {
+        return;
+    }
+
+    if (state.markdown.startup && state.workspaces.length === 0 && state.kernel.startups.size === 0 &&
+        getArgFrom(argv, "--remote") === undefined) {
+        resumeWorkspaceStartup(argv, handlers);
         return;
     }
 

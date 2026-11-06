@@ -144,6 +144,29 @@ test("background time does not consume a startup deadline", () => {
     } finally { page.dispose(); }
 });
 
+test("desktop and mobile main script failures are diagnosed without treating extension resources as startup failures", () => {
+    for (const frontend of ["app", "desktop", "mobile"]) {
+        const page = createPage();
+        try {
+            const resourceError = (tagName: string, src: string) => {
+                const event = new Event("error");
+                Object.defineProperty(event, "target", {value: {tagName, src}});
+                page.target.dispatchEvent(event);
+            };
+            for (const source of ["/plugins/example/index.js", "/appearance/themes/custom/theme.js",
+                "/outside.js?redirect=/stage/build/app/main.js"]) {
+                resourceError("SCRIPT", source);
+            }
+            resourceError("IMG", `/stage/build/${frontend}/image.png`);
+            assert.equal(page.document.documentElement.attributes.get("data-startup-state"), "loading");
+            resourceError("SCRIPT", `/stage/build/${frontend}/main.missing.js?token=private`);
+            const details = page.find(element => element.tagName === "PRE").textContent;
+            assert.match(details, new RegExp(`/stage/build/${frontend}/main.missing.js`));
+            assert.ok(!details.includes("token=private"));
+        } finally { page.dispose(); }
+    }
+});
+
 test("nested user scripts isolate synchronous global errors and restore diagnostics after exceptions", () => {
     const page = createPage();
     const report = () => page.target.dispatchEvent(Object.assign(new Event("error"), {error: new SyntaxError("snippet")}));

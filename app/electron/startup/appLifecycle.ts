@@ -11,6 +11,7 @@ import {markExpectedRendererExit} from "../window/windowLifecycle";
 import {handleWebContentsCreated} from "../window/webviewDevTools";
 import {createRenderProcessGoneHandler} from "../window/rendererCrash";
 import {beginForcedSystemShutdown, beginGracefulSystemShutdown} from "./systemShutdown";
+import {queueSecondInstance} from "./secondInstance";
 import type {NotebookSystemLock} from "../kernel/notebookSystemLock";
 import {syncAfterResume} from "../window/syncAfterResume";
 import {getRemoteSession} from "../remote/connectionManager";
@@ -25,6 +26,7 @@ import type {
 } from "electron";
 import type {InitMainWindow} from "../shared/types";
 import {Channel} from "../shared/channels";
+import {requestWindowClose} from "../window/closeRecovery";
 
 type AppLifecycleOptions = {
     initMainWindow: InitMainWindow;
@@ -45,7 +47,7 @@ const registerAppLifecycle = ({
     }
     electron.app.on("open-url", (_event, url) => void handleOpenURL(url)); // macOS 深链
     electron.app.on("open-file", handleOpenFile); // macOS 文件打开，可能早于 ready
-    electron.app.on("activate", () => handleActivate(initMainWindow));
+    electron.app.on("activate", (event) => handleActivate(initMainWindow, event));
     electron.app.on("web-contents-created", (event, contents) =>
         handleWebContentsCreated(event, contents, {settingsWindowPolicy}));
     electron.app.on("before-quit", handleBeforeQuit);
@@ -122,7 +124,17 @@ const handleOpenURL = async (url: string): Promise<void> => {
 };
 
 // Dock 激活：有工作空间就前置窗口，全部窗口都关闭时重新拉起内核与主窗口。
-const handleActivate = (initMainWindow: InitMainWindow): void => {
+const handleActivate = (initMainWindow: InitMainWindow, event: ElectronEvent): void => {
+    if (state.exit.updateInstall || isSystemShuttingDown()) {
+        return;
+    }
+    if (isMarkdownStartup() && state.workspaces.length === 0) {
+        // macOS 重新打开应用不会创建第二个进程，复用普通启动入口执行工作空间检查。
+        if (electron.app.isReady()) {
+            queueSecondInstance(event, [process.execPath]);
+        }
+        return;
+    }
     // Markdown 窗口独立于工作空间：只有它们时直接前置，不拉起内核。
     if (state.markdown.windows?.hasWindows() && state.workspaces.length === 0) {
         state.markdown.windows.focus();
@@ -141,10 +153,6 @@ const handleActivate = (initMainWindow: InitMainWindow): void => {
         }
     }
     if (electron.BrowserWindow.getAllWindows().length > 0) {
-        return;
-    }
-    if (isMarkdownStartup()) {
-        void state.markdown.windows?.open();
         return;
     }
     if (state.startup.remoteKernelTarget) {
@@ -179,7 +187,7 @@ const handleBeforeQuit = (event: ElectronEvent): void => {
         }
         if (item.browserWindow && !item.browserWindow.isDestroyed()) {
             event.preventDefault();
-            item.browserWindow.webContents.send(Channel.SIYUAN_SAVE_CLOSE, true);
+            requestWindowClose(item.browserWindow, true);
         }
     });
 };

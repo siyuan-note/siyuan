@@ -51,6 +51,8 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"setAttrViewFilters", reflect.TypeFor[[]*AVViewFilter](), reflect.TypeFor[Null]()},
 	{"setAttrViewContextFilter", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
 	{"setAttrViewColRelationFilters", reflect.TypeFor[[]*AVViewFilter](), reflect.TypeFor[Null]()},
+	{"setAttrViewRelationDetail", reflect.TypeFor[*AVRelationDetailView](), reflect.TypeFor[Null]()},
+	{"updateAttrViewRelationItems", reflect.TypeFor[AVRelationItemsChange](), reflect.TypeFor[Null]()},
 	{"setAttrViewColRollupFilters", reflect.TypeFor[[]*AVViewFilter](), reflect.TypeFor[Null]()},
 	{"setAttrViewSorts", reflect.TypeFor[[]*AVViewSort](), reflect.TypeFor[Null]()},
 	{"setAttrViewPageSize", reflect.TypeFor[float64](), reflect.TypeFor[Null]()},

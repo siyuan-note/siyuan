@@ -1,4 +1,4 @@
-import {Dialog} from "../../dialog";
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {isMobile} from "../../util/functions";
 import {setPosition} from "../../util/setPosition";
 import {fetchPost} from "../../util/fetch";
@@ -67,7 +67,7 @@ export const getPublishAccessLevel = (visible: boolean, password: string, disabl
 };
 
 export const openPublishAccessDialog = (id: string, position: IPosition, callback: (access: IPublishAccessItem) => void) => {
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         disableAnimation: true,
         transparent: true,
         hideCloseIcon: true,
@@ -95,9 +95,11 @@ export const openPublishAccessDialog = (id: string, position: IPosition, callbac
     </div>
 </div>`
     });
-    const containerElement = dialog.element.querySelector(".b3-dialog__container") as HTMLElement;
-    containerElement.style.position = "fixed";
-    setPosition(containerElement, position.x, position.y, position.h, position.w);
+    if (!isMobile()) {
+        const containerElement = dialog.element.querySelector(".b3-dialog__container") as HTMLElement;
+        containerElement.style.position = "fixed";
+        setPosition(containerElement, position.x, position.y, position.h, position.w);
+    }
     fetchPost("/api/filetree/getPublishAccess", {
         ids: [id],
     }, (response) => {

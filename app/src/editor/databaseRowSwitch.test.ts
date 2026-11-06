@@ -57,7 +57,7 @@ const createPreview = async (mobile: boolean, detached = true) => {
     let refresh: () => void;
     let navigate: (next: IDatabaseRowOpenData) => Promise<boolean>;
     let mountedRow: string;
-    const requests: {element: Body, callback: (element: Body) => void}[] = [];
+    const requests: {element: Body, callback: (element: Body) => void, automaticRefresh: boolean}[] = [];
     class Custom {
         public data: Record<string, unknown>;
         public element = root;
@@ -82,18 +82,19 @@ const createPreview = async (mobile: boolean, detached = true) => {
         "../../header/backgroundActions": {updateBackgroundActions: (protyle: {element: {dataset: {databaseRowId: string}}}) => {
             backgroundUpdates.push(protyle.element.dataset.databaseRowId);
         }},
-        "../../../dialog": {Dialog: class {
+        "../../../dialog/mobileDialog": {MobileDialog: class {
             public element = root;
             constructor(options: {destroyCallback: () => void}) { destroy = options.destroyCallback; dialogs.push(this); }
             public destroy() { hiddenOnClose = hidden; closed++; destroy(); }
         }},
         "../../../constants": {Constants: {CB_GET_ALL: "all", CB_GET_FOCUS: "focus"}},
         "../../../mobile/editor": {openMobileFileById: (_app: unknown, id: string, _action: unknown,
-                                                       _scroll: unknown, _notebook: unknown,
+                                                       _scroll: unknown, notebook: unknown,
                                                        afterOpen: (protyle: unknown) => void,
                                                        forceReload: boolean, waitForAttributes: boolean) => {
             assert.equal(forceReload, true);
             assert.equal(waitForAttributes, true);
+            assert.equal(notebook, data.notebookID);
             openedBlocks.push(id);
             return new Promise<boolean>(resolve => {
                 failBound = () => resolve(false);
@@ -134,9 +135,10 @@ const createPreview = async (mobile: boolean, detached = true) => {
                 }
                 if (name.endsWith("/blockAttr")) {
                     return {renderAVAttribute: (element: Body, id: string, _context: unknown,
-                                                callback: (element: Body) => void) => {
+                                                callback: (element: Body) => void, _row: unknown, _lifecycle: unknown,
+                                                automaticRefresh: boolean) => {
                         element.rowID = id;
-                        requests.push({element, callback});
+                        requests.push({element, callback, automaticRefresh});
                     }};
                 }
                 if (name.endsWith("/databaseRowRefresh")) {
@@ -148,6 +150,17 @@ const createPreview = async (mobile: boolean, detached = true) => {
                 if (name.endsWith("/binding")) { return {preserveAVBindingRange: () => () => {}}; }
                 if (name.endsWith("/rowReadonly")) { return {inheritDatabaseRowReadonly() {}}; }
                 if (name.endsWith("/primaryFocus")) { return {focusDatabasePrimary() {}}; }
+                if (name.endsWith("/relatedView")) {
+                    return {
+                        preserveRelatedAVViews: (previous: Body, next: Body) => {
+                            assert.equal(previous, body, "preserve related state before replacing the current body");
+                            assert.notEqual(previous, next);
+                        },
+                        syncRelatedAVViews: (element: Body) => assert.equal(element, body,
+                            "activate related views only after committing the new body"),
+                        disposeRelatedAVViews() {}, destroyRelatedAVViews() {},
+                    };
+                }
                 return modules[name] || {};
             },
         });
@@ -180,7 +193,9 @@ const createPreview = async (mobile: boolean, detached = true) => {
 for (const mobile of [false, true]) {
     test(`explicit standalone bound panels stay open on refresh (${mobile ? "mobile" : "desktop"})`, async () => {
         const preview = await createPreview(mobile, false);
+        assert.equal(preview.requests[0].automaticRefresh, false);
         preview.refresh();
+        assert.equal(preview.requests[1].automaticRefresh, true);
         preview.requests[1].element.boundID = "bound-block";
         preview.complete(1);
         assert.deepEqual(preview.openedBlocks, []);

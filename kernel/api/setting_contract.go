@@ -406,6 +406,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.KaTexMacros = value.KaTexMacros
 	result.ReadOnly = value.ReadOnly
 	result.EmbedBlockBreadcrumb = value.EmbedBlockBreadcrumb
+	result.GlobalBreadcrumb = value.GlobalBreadcrumb
 	result.EmbedBlockBreadcrumbParentPath = value.EmbedBlockBreadcrumbParentPath
 	result.ListLogicalOutdent = value.ListLogicalOutdent
 	result.ListItemDotNumberClickFocus = value.ListItemDotNumberClickFocus
@@ -655,6 +656,7 @@ func settingAppearancePayload(value *conf.Appearance) *apicontract.SettingAppear
 	result.CloseButtonBehavior = value.CloseButtonBehavior
 	result.HideToolbar = value.HideToolbar
 	result.HideStatusBar = value.HideStatusBar
+	result.ShowFloatingStatusBar = value.ShowFloatingStatusBar
 	result.StatusBar = settingStatusBarPayload(value.StatusBar)
 	result.Notifications = settingNotificationsPayload(value.Notifications)
 	result.EntryVisibility = settingEntryVisibilityPayload(value.EntryVisibility)

@@ -10,7 +10,7 @@ import {isInIOS, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {Model} from "../Model";
 import {needSubscribe} from "../../util/needSubscribe";
 import {MenuItem} from "../../menus/Menu";
-import {confirmDialog} from "../../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../../dialog/mobileConfirmDialog";
 import {normalizeDocumentTitle} from "../../editor/rename";
 import {movePathTo} from "../../util/pathName";
 import {documentCreateRequest} from "../../util/documentCreate";

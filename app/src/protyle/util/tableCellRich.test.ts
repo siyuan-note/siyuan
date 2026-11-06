@@ -49,12 +49,19 @@ const browserCases = async (source: string) => {
         cell.innerHTML = '<div class="table__cell-editor">Temporary editor UI</div>';
     });
     const liveHTML = table.outerHTML;
+    const previews = sources.map(content => {
+        const template = document.createElement("template");
+        template.innerHTML = spin('<div data-type="NodeTable" data-node-id="20261020120000-table01">' +
+            '<div contenteditable="true"><table><thead><tr><th data-sy-table-cell-rich="' +
+            api.encodeTableCellRich(content) + '"></th></tr></thead></table></div></div>');
+        return template.content.querySelector("th").innerHTML;
+    });
     const oldHTML = api.getTableBlockHTML(table);
-    check.equal(renders, 28);
+    check.equal(renders, 1, "distinct cell sources share one table conversion");
     check.equal(table.outerHTML, liveHTML, "snapshot generation must leave the active editor intact");
     check.equal(api.cleanTableCellRichHTML(oldHTML), oldHTML);
     check.equal(api.getTableBlockHTML(table), oldHTML);
-    check.equal(renders, 28, "repeated snapshots reuse each distinct source within the synchronous transaction");
+    check.equal(renders, 1, "repeated snapshots reuse each distinct source within the synchronous transaction");
     const restored = document.createElement("div");
     restored.innerHTML = oldHTML;
     check.doesNotMatch(oldHTML, /Temporary editor UI|table__cell-editor/);
@@ -63,6 +70,7 @@ const browserCases = async (source: string) => {
     Array.from(restored.querySelectorAll("th, td")).forEach((cell, index) => {
         check.equal(api.decodeTableCellRich(cell.getAttribute("data-sy-table-cell-rich")).content, sources[index]);
         check.equal(cell.getAttribute("contenteditable"), "false");
+        check.equal(cell.innerHTML, previews[index], "batch previews match independently converted cells");
     });
 
     const editor = document.createElement("div");
@@ -77,7 +85,7 @@ const browserCases = async (source: string) => {
     api.updateTableCellEditingValue(cells[0], value);
     const owner = {wysiwyg: {element: fixture}} as IProtyle;
     api.updateTransaction(owner, table, oldHTML);
-    check.equal(renders, 29, "formatting one cell only converts its changed source across do/undo cleanup");
+    check.equal(renders, 2, "formatting one cell only converts its changed source across do/undo cleanup");
     check.equal(transactions.length, 1);
     const saved = transactions[0];
     const redoHTML = saved.doOperations[0].data as string;
@@ -92,7 +100,7 @@ const browserCases = async (source: string) => {
         check.equal(api.cleanTableCellRichHTML(restored.innerHTML), html,
             "undo and redo retain the corresponding source and canonical preview");
     }
-    check.equal(renders, 29);
+    check.equal(renders, 2);
 
     const cached = document.createElement("td");
     cached.setAttribute("data-sy-table-cell-rich", cells[0].getAttribute("data-sy-table-cell-rich"));
@@ -101,12 +109,12 @@ const browserCases = async (source: string) => {
     cached.innerHTML = '<img src="assets/unrelated.png">';
     api.renderTableCellRich(cached);
     check.equal(cached.innerHTML, canonical, "DOM mutations never contaminate the cached static preview");
-    check.equal(renders, 29);
+    check.equal(renders, 2);
     await Promise.resolve();
     api.renderTableCellRich(cached);
-    check.equal(renders, 30, "source and preview cache is released at the microtask boundary");
+    check.equal(renders, 3, "source and preview cache is released at the microtask boundary");
     api.renderTableCellRich(cached);
-    check.equal(renders, 30);
+    check.equal(renders, 3);
 
     for (const encoded of ["invalid!", api.encodeTableCellRich("valid").slice(0, -1),
         btoa(JSON.stringify({spec: 2, format: "kramdown", content: "future"}))]) {
@@ -136,6 +144,17 @@ const browserCases = async (source: string) => {
     check.equal(api.cleanTableCellRichHTML(snapshot), snapshot);
     check.equal(api.decodeTableCellRich(restored.querySelector("th").getAttribute("data-sy-table-cell-rich")).content,
         value.markdown);
+    await Promise.resolve();
+    const previousRenders = renders;
+    const encoded = api.encodeTableCellRich("**duplicate**");
+    const duplicateHTML = `<table><tbody><tr><td data-sy-table-cell-rich="${encoded}">` +
+        `untrusted</td><td data-sy-table-cell-rich="${encoded}">other</td></tr></tbody></table>`;
+    restored.innerHTML = api.cleanTableCellRichHTML(duplicateHTML);
+    check.equal(renders, previousRenders + 1, "duplicate sources are converted once in the batch");
+    check.equal(restored.querySelectorAll("td")[0].innerHTML, restored.querySelectorAll("td")[1].innerHTML);
+    check.doesNotMatch(restored.innerHTML, /untrusted|other/);
+    check.throws(() => api.cleanTableCellRichHTML(duplicateHTML.replace(encoded, "invalid!")));
+    check.equal(renders, previousRenders + 1, "invalid batch sources fail before conversion");
     fixture.remove();
     return "Table cell rich snapshot cases passed";
 };

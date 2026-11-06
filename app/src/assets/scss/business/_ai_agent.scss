@@ -1153,7 +1153,6 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: var(--nav-gap, 3px);
   z-index: 6;
   padding: 4px 2px;
 }
@@ -1163,7 +1162,7 @@
   width: 10px;
   height: 2px;
   flex-shrink: 0;
-  padding: 3px 5px;
+  padding: calc(3px + var(--nav-gap, 0px) / 2) 5px;
   // Rounded corners can make content-box backgrounds paint the padding at fractional zoom.
   background-clip: content-box;
   background-color: var(--b3-theme-on-surface);
@@ -1182,6 +1181,7 @@
 }
 
 .tooltip--agent-nav {
+  animation: none;
   pointer-events: none;
   max-height: min(160px, 90vh);
   overflow: hidden;

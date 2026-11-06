@@ -21,6 +21,14 @@ var BlockTool = &Tool{
 	Description: `Block operations, including native Tabs (NodeTabs/NodeTabItem) and Mindmap (NodeMindmap/NodeMindmapItem).
 Actions: get(id), get_kramdown(id), get_children(id), tree_stat(id, by document), dom(id), insert(data, dataType, parentID?, nextID?, previousID?), append(data, dataType, parentID) / prepend(...) add a NEW child and return its ID — use after block.update when both modifying and adding, update(id, data, dataType, lockType?) replaces ONE block only (no append), delete(id), move(id, parentID, previousID?), breadcrumb(id), batch_get(ids) / batch_kramdown(ids) where ids is comma-separated.
 
+Use document for document lifecycle and metadata, sql.query for structured discovery or statistics, and export for export-formatted output. Pass the owning notebook for encrypted content; alternative tools are not a way to bypass scope checks or authorization.
+
+Reading content:
+- Read referenced or bare block IDs with get/get_kramdown before answering about their content; anchor text is only a preview. get returns at most 5120 characters per Content/Markdown field, with ... on truncation; a document root returns its title, not its body. Use get_kramdown for complete block or document-body Markdown.
+- get_children lists block IDs with previews truncated to 200 characters and followed by ... when truncated. Read the relevant IDs with get/get_kramdown before quoting or reasoning from their content; traverse nested containers when the whole document is needed.
+- batch_get returns only metadata (name, rootID, refCount), not block content. Use batch_kramdown for multiple content reads and inspect each result for missing blocks.
+- Before update, read the current ordinary block with get_kramdown, or use dom for native structured containers. data is the complete replacement, not a delta; preserve content, IDs and metadata outside the requested edit. lockType protects the block type, not its content.
+
 Block placement:
 - Headings (h1-h6) are leaf blocks; content shown below a heading is its following siblings, not its children. To place a block below a heading, use the heading ID (or the last block currently below it) as previousID, never as parentID.
 - A list-item must have a NodeList parent and cannot directly contain another list-item. To nest lists, create a NodeList inside the outer list-item, then add list-items to the inner list.
@@ -40,6 +48,23 @@ Native container structure and operations:
 Structural reads and updates:
 - get/get_kramdown/batch_kramdown return Markdown for reading, which flattens tabs and renders mindmaps as lists; use dom before editing these containers. Never rebuild these containers from their reading Markdown.
 - Preserve all existing data-node-id values and attributes, including active tabs and mindmap metadata. Update with dataType=dom and lockType=true unless the user explicitly requests a type conversion.`,
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"get":            {LocalRead: true},
+		"get_kramdown":   {LocalRead: true},
+		"get_children":   {LocalRead: true},
+		"tree_stat":      {LocalRead: true},
+		"dom":            {LocalRead: true},
+		"breadcrumb":     {LocalRead: true},
+		"batch_get":      {LocalRead: true},
+		"batch_kramdown": {LocalRead: true},
+		"insert":         {LocalWrite: true},
+		"append":         {LocalWrite: true},
+		"prepend":        {LocalWrite: true},
+		"update":         {LocalWrite: true},
+		"delete":         {LocalWrite: true},
+		"move":           {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -47,7 +72,7 @@ Structural reads and updates:
 			"notebook": {Type: "string", Description: "Notebook ID that owns the target blocks; required for encrypted notebooks"},
 			"id":       {Type: "string", Description: "Block ID"},
 			"ids":      {Type: "string", Description: "Comma-separated block IDs (for batch_get, batch_kramdown)"},
-			"data": {Type: "string", Description: `Content in markdown or block DOM. Prefer markdown for ordinary blocks. Use insert/append/prepend to create native containers.
+			"data": {Type: "string", Description: `Content in markdown or block DOM. For update, provide the complete replacement after reading current content with get_kramdown or dom, preserving unrelated content and metadata; this is not an append or delta. Prefer markdown for ordinary blocks. Use insert/append/prepend to create native containers.
 
 Native Tabs Markdown (dataType=markdown):
 ::: tabs
@@ -247,9 +272,7 @@ func blockInsert(args map[string]any) (CallToolResult, error) {
 		PreviousID: previousID,
 		NextID:     nextID,
 	}
-	transaction := &model.Transaction{DoOperations: []*model.Operation{operation}}
-
-	if err := model.PerformTxSync(transaction); err != nil {
+	if _, err := model.PerformBlockOperation(operation); err != nil {
 		return blockToolError("insert block failed: " + err.Error())
 	}
 
@@ -298,9 +321,7 @@ func blockAppend(args map[string]any) (CallToolResult, error) {
 		Data:     data,
 		ParentID: parentID,
 	}
-	transaction := &model.Transaction{DoOperations: []*model.Operation{operation}}
-
-	if err := model.PerformTxSync(transaction); err != nil {
+	if _, err := model.PerformBlockOperation(operation); err != nil {
 		return blockToolError("append block failed: " + err.Error())
 	}
 
@@ -339,9 +360,7 @@ func blockPrepend(args map[string]any) (CallToolResult, error) {
 		Data:     data,
 		ParentID: parentID,
 	}
-	transaction := &model.Transaction{DoOperations: []*model.Operation{operation}}
-
-	if err := model.PerformTxSync(transaction); err != nil {
+	if _, err := model.PerformBlockOperation(operation); err != nil {
 		return blockToolError("prepend block failed: " + err.Error())
 	}
 
@@ -457,14 +476,17 @@ func getBlockData(args map[string]any) (data, dataType string) {
 func markdownToBlockDOM(md string) (string, error) {
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
-	result, _ := luteEngine.Md2BlockDOMTree(md, true)
+	result, err := model.DataBlockDOM(md, luteEngine)
+	if err != nil {
+		return "", err
+	}
 	if result == "" {
 		return "", fmt.Errorf("empty result")
 	}
 	return result, nil
 }
 
-// prepareBlockWriteData 为原生页签和脑图 DOM 中的新块补全 ID，保留已有块的 ID 和属性。
+// 新块缺失身份时由系统生成，显式身份必须有效且在输入中唯一。
 func prepareBlockWriteData(data, dataType string) (string, error) {
 	if dataType == "markdown" {
 		return markdownToBlockDOM(data)
@@ -476,18 +498,6 @@ func prepareBlockWriteData(data, dataType string) (string, error) {
 	tree := engine.BlockDOM2Tree(data)
 	if tree == nil || tree.Root == nil {
 		return "", fmt.Errorf("parse tree failed")
-	}
-	hasNativeContainer := false
-	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
-		if entering && (node.Type == ast.NodeTabs || node.Type == ast.NodeTabItem ||
-			node.Type == ast.NodeMindmap || node.Type == ast.NodeMindmapItem) {
-			hasNativeContainer = true
-			return ast.WalkStop
-		}
-		return ast.WalkContinue
-	})
-	if !hasNativeContainer {
-		return data, nil
 	}
 	var err error
 	ids := map[string]struct{}{}

@@ -21,7 +21,8 @@ const browserCases = async (sourceCode: string) => {
         languages: {confirm: "Confirm", cancel: "Cancel", specifyPath: "Specify path", searchPlaceholder: "Search"},
         menus: {menu: {element: document.createElement("div")}}}});
     new Function("exports", "require", sourceCode)(api, (name: string) => ({
-        "../dialog": {Dialog: class {
+        "../dialog/mobileDialog": {MobileDialog: class {
+            pending = false;
             element = document.createElement("div");
             constructor(options: {title: string, content: string}) {
                 this.element.innerHTML = `<div class="b3-dialog__header">${options.title}</div>${options.content}`;
@@ -29,8 +30,18 @@ const browserCases = async (sourceCode: string) => {
                 window.siyuan.dialogs.push(this as any);
             }
             destroy() {
+                if (this.pending) return;
                 this.element.remove();
                 window.siyuan.dialogs.splice(window.siyuan.dialogs.indexOf(this as any), 1);
+            }
+            async runPending(task: () => Promise<boolean>) {
+                if (this.pending) return false;
+                this.pending = true;
+                let success = false;
+                try { success = await task(); } catch { success = false; }
+                this.pending = false;
+                if (success) this.destroy();
+                return success;
             }
         }},
         "./fetch": {fetchPost: (url: string, data: any, cb: (response: any) => void) => {
@@ -135,6 +146,29 @@ const browserCases = async (sourceCode: string) => {
         check.equal(encrypted.querySelector<HTMLElement>("[data-box]").dataset.box, "secret");
         encrypted.querySelector<HTMLButtonElement>(".b3-button--cancel").click();
         window.siyuan.storage.move.k = "";
+    }
+    for (mobile of [false, true]) {
+        let resolve: (success: boolean) => void;
+        let requests = 0;
+        api.movePathTo({flashcard: false, awaitConfirm: true, cb: () => {
+            requests++;
+            return new Promise<boolean>(done => { resolve = done; });
+        }});
+        const dialog = document.body.lastElementChild as HTMLElement;
+        const confirm = dialog.querySelector<HTMLButtonElement>(".b3-button--text");
+        confirm.click();
+        confirm.click();
+        dialog.querySelector<HTMLButtonElement>(".b3-button--cancel").click();
+        check.equal(requests, 1);
+        check.equal(dialog.isConnected, true);
+        resolve(false);
+        await tick();
+        check.equal(dialog.isConnected, true);
+        confirm.click();
+        check.equal(requests, 2);
+        resolve(true);
+        await tick();
+        check.equal(dialog.isConnected, false);
     }
     return "Path selection DOM cases passed";
 };

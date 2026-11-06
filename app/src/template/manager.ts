@@ -1,8 +1,9 @@
+import {MobileDialog} from "../dialog/mobileDialog";
 import {createTemplateHTTPPermissionIndicator, templateHTTPPermission, templateHTTPPermissionLabel} from "./httpPermission";
 import {toggleMenu} from "../menus/menuToggle";
 import {Dialog} from "../dialog";
-import {openInputDialog} from "../dialog/inputDialog";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {showMessage} from "../dialog/message";
@@ -164,7 +165,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             }
         };
         if (dirty()) {
-            confirmDialog(lang.confirm, lang.discardUnsavedChanges, proceed);
+            mobileConfirmDialog(lang.confirm, lang.discardUnsavedChanges, proceed);
         } else {
             proceed();
         }
@@ -219,14 +220,14 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             element.setAttribute("aria-disabled", String(state.ariaDisabled || element.disabled));
         });
     };
-    const run = async (action: () => Promise<void>) => {
+    const run = async (action: () => Promise<void | boolean>) => {
         if (busy || closed) {
             return;
         }
         busy = true;
         update();
         try {
-            await action();
+            return await action();
         } catch (error) {
             showMessage(escapeHtml(String(error)), 5000, "error");
         } finally {
@@ -391,35 +392,48 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             list.querySelector(".b3-list-item--focus")?.scrollIntoView({block: "nearest", inline: "nearest"});
         }
     };
-    const inputPath = (title: string, value: string, callback: (value: string) => Promise<void>, renamePath?: string) => {
+    const refreshAfterMutation = async (path: string, reveal = false) => {
+        try {
+            await reload(path, reveal);
+        } catch (error) {
+            // 操作已成功，刷新异常只提示错误，避免操作框保留旧路径和版本再次提交。
+            showMessage(escapeHtml(String(error)), 5000, "error");
+        }
+    };
+    const inputPath = (title: string, value: string, callback: (value: string) => Promise<boolean>, renamePath?: string) => {
         const nameOnly = renamePath !== undefined;
-        const prompt = openInputDialog({
+        const prompt = mobileInputDialog({
             title,
             value,
+            awaitConfirm: true,
             label: nameOnly ? lang.name : lang.savePath,
-            onConfirm: (value, prompt) => {
+            onConfirm: async (value, prompt) => {
                 const input = prompt.element.querySelector<HTMLInputElement>("input");
                 if (nameOnly) {
                     input.value = replaceFileName(value);
                 }
                 if (!input.value.trim()) {
                     input.focus();
-                    return;
+                    return false;
                 }
                 if (nameOnly && getFileRenameTarget(renamePath, input.value.trim()) === undefined) {
                     input.setCustomValidity(lang.templateNameTip);
                     input.reportValidity();
-                    return;
+                    return false;
                 }
-                prompt.destroy();
-                void run(() => callback(input.value.trim()));
+                if (!mobile) {
+                    prompt.destroy();
+                    void run(() => callback(input.value.trim()));
+                    return false;
+                }
+                return await run(() => callback(input.value.trim())) === true;
             },
         });
         const input = prompt.element.querySelector<HTMLInputElement>("input");
         input.addEventListener("input", () => input.setCustomValidity(""));
     };
     const move = ({entry, revision}: TemplateActionTarget) => {
-        const prompt = new Dialog({
+        const prompt = new MobileDialog({
             title: lang.move,
             width: "min(520px, 92vw)",
             content: `<div class="b3-dialog__content"><label>${lang.savePath}<div class="fn__hr"></div><select class="b3-select fn__block"></select></label></div>
@@ -435,15 +449,23 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
         prompt.element.querySelector("[data-action=cancel]").addEventListener("click", () => prompt.destroy());
         prompt.element.querySelector("[data-action=confirm]").addEventListener("click", () => {
             const target = (destination.value ? destination.value + "/" : "") + entry.path.split("/").pop();
-            prompt.destroy();
             if (target === entry.path) {
+                prompt.destroy();
                 return;
             }
-            void run(async () => {
+            const submit = async () => await run(async () => {
                 if (await api({action: "move", path: entry.path, target, revision})) {
-                    await reload(target, true);
+                    await refreshAfterMutation(target, true);
+                    return true;
                 }
-            });
+                return false;
+            }) === true;
+            if (mobile) {
+                void prompt.runPending(submit);
+            } else {
+                prompt.destroy();
+                void submit();
+            }
         });
     };
     const openSourceDocument = (id: string) => guard(() => {
@@ -510,19 +532,23 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             if (action === "move") {
                 move(target);
             } else if (action === "remove") {
-                confirmDialog(lang.remove, escapeHtml(entry.path) + "<br>" + lang.templateDeleteTip, () => {
-                    void run(async () => {
+                mobileConfirmDialog(lang.remove, escapeHtml(entry.path) + "<br>" + lang.templateDeleteTip, async () => {
+                    return await run(async () => {
                         if (await api({action: "remove", path: entry.path, revision})) {
-                            await reload("");
+                            await refreshAfterMutation("");
+                            return true;
                         }
-                    });
-                }, undefined, true);
+                        return false;
+                    }) === true;
+                }, undefined, true, undefined, undefined, {awaitConfirm: true});
             } else if (action === "rename") {
                 inputPath(lang.rename, entry.path.split("/").pop(), async value => {
                     const target = getFileRenameTarget(entry.path, value);
                     if (target !== entry.path && await api({action: "move", path: entry.path, target, revision})) {
-                        await reload(target, true);
+                        await refreshAfterMutation(target, true);
+                        return true;
                     }
+                    return target === entry.path;
                 }, entry.path);
             }
         });
@@ -667,12 +693,13 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             return;
         }
         if (action === "revokeAllHTTP") {
-            confirmDialog(lang.templateHTTPRevokeAll, lang.templateHTTPRevokeAllConfirm, () => {
-                void run(async () => {
+            mobileConfirmDialog(lang.templateHTTPRevokeAll, lang.templateHTTPRevokeAllConfirm, async () => {
+                return await run(async () => {
                     await templateHTTPPermission("revokeAll");
                     await refreshPermissions();
-                });
-            });
+                    return true;
+                }) === true;
+            }, undefined, false, undefined, undefined, {awaitConfirm: true});
         } else if (action === "save") {
             void run(async () => {
                 const content = useCRLF ? source.value.replace(/\n/g, "\r\n") : source.value;
@@ -720,8 +747,9 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
                             response = await api({action: "mkdir", path: value});
                         }
                         if (response) {
-                            await reload(value, true);
+                            await refreshAfterMutation(value, true);
                         }
+                        return Boolean(response);
                     });
                 }
             });

@@ -36,6 +36,7 @@ import {initSelectionStyle} from "./selectionStyle";
 import {applyCompactMode} from "../config/tabs/compactMode";
 
 let headingNumberMeasurementRefreshTimer: number;
+let pendingDefaultStyleElement: HTMLLinkElement;
 let appearanceUpdate = Promise.resolve();
 let appearanceReloadPending = false;
 const appearancePackageRevisions = new Map<string, string>();
@@ -169,21 +170,45 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     }
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
     const defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
+    if (pendingDefaultStyleElement && (!defaultStyleElement || !pendingDefaultStyleElement.isConnected ||
+        pendingDefaultStyleElement.getAttribute("href") !== defaultThemeAddress)) {
+        pendingDefaultStyleElement.onload = null;
+        pendingDefaultStyleElement.onerror = null;
+        pendingDefaultStyleElement.remove();
+        pendingDefaultStyleElement = undefined;
+    }
     if (defaultStyleElement) {
-        if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress)) {
+        if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress) && !pendingDefaultStyleElement) {
             const newStyleElement = document.createElement("link");
+            pendingDefaultStyleElement = newStyleElement;
             changedThemeStyleElements.push(newStyleElement);
             themeStylesChanged = true;
-            // 等待新样式表加载完成再移除旧样式表
-            new Promise((resolve) => {
-                newStyleElement.rel = "stylesheet";
-                newStyleElement.href = defaultThemeAddress;
-                newStyleElement.onload = resolve;
-                defaultStyleElement.parentNode.insertBefore(newStyleElement, defaultStyleElement);
-            }).then(() => {
-                defaultStyleElement.remove();
-                newStyleElement.id = "themeDefaultStyle";
-            });
+            const complete = (loaded: boolean) => {
+                newStyleElement.onload = null;
+                newStyleElement.onerror = null;
+                if (pendingDefaultStyleElement !== newStyleElement) {
+                    return;
+                }
+                pendingDefaultStyleElement = undefined;
+                const currentStyleElement = document.getElementById("themeDefaultStyle");
+                if (currentStyleElement && currentStyleElement !== defaultStyleElement) {
+                    newStyleElement.remove();
+                    return;
+                }
+                if (loaded) {
+                    defaultStyleElement.remove();
+                    newStyleElement.id = "themeDefaultStyle";
+                } else {
+                    newStyleElement.remove();
+                    console.error("load default theme stylesheet failed: " + defaultThemeAddress);
+                }
+            };
+            // 新样式表加载失败时保留旧样式表，避免界面失去基础样式。
+            newStyleElement.rel = "stylesheet";
+            newStyleElement.href = defaultThemeAddress;
+            newStyleElement.onload = () => complete(true);
+            newStyleElement.onerror = () => complete(false);
+            defaultStyleElement.parentNode.insertBefore(newStyleElement, defaultStyleElement);
         }
     } else {
         addStyle(defaultThemeAddress, "themeDefaultStyle");

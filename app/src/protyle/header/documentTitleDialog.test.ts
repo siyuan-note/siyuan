@@ -38,6 +38,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         config: {readonly: false}, isPublish: false,
         languages: {rename: "Rename", confirm: "Confirm", settingsPendingSaveError: "Save failed"},
     }};
+    let canDrag: () => boolean;
     const messages: string[] = [];
     const ready: number[] = [];
     const guards: Array<{dispose: () => void, flush: () => Promise<void>, disposed: boolean}> = [];
@@ -96,10 +97,11 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         host = new ElementMock();
         confirm = new ElementMock();
         destroyed = false;
-        viewport = {style: {top: "", height: ""}, isConnected: true, classList: {add() {}}};
-        sheet = {style: {height: "", maxHeight: ""}, classList: {add() {}}, getBoundingClientRect: () => ({height:
+        viewport = {style: {top: "", bottom: "", height: ""}, isConnected: true, classList: {add() {}}};
+        sheet = {style: {height: "", maxHeight: ""}, classList: {add() {}, toggle() {}}, getBoundingClientRect: () => ({height:
             Math.min(parseFloat(this.sheet.style.height) || 180, parseFloat(this.sheet.style.maxHeight) || Infinity,
-                parseFloat(this.viewport.style.height))})};
+                this.viewport.style.height === "auto" ? window.innerHeight - (parseFloat(this.viewport.style.top) || 0) -
+                    (parseFloat(this.viewport.style.bottom) || 0) : parseFloat(this.viewport.style.height))})};
         classes = new Set<string>();
         element = {dataset: {}, isConnected: true, classList: {add: (name: string) => this.classes.add(name)},
             querySelector: (selector: string) => selector === ".b3-dialog" ? this.viewport :
@@ -134,7 +136,8 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         isMobileLandscape: () => window.screen.orientation.type.startsWith("landscape"),
         callMobileAppShowKeyboard: () => { keyboardShows++; },
         bindBottomSheetDialog: (dialog: DialogMock, close: () => Promise<void>, resize: () => void, open: () => void,
-                               options: {mode: string}) => {
+                               options: {mode: string, canStart: () => boolean}) => {
+            canDrag = options.canStart;
             const layout = (dependencies.bindMobileSheetLayout as any)(dialog.viewport, dialog.sheet, options);
             sheetClose = close;
             sheetResize = layout.resize;
@@ -165,11 +168,12 @@ const setup = (mobile: boolean, deferDestroy = false) => {
     Object.assign(dependencies, allEditors);
     const system = load("../../window/onWindowsMsg.ts");
     Object.assign(dependencies, load("documentTitleEditor.ts"));
+    Object.assign(dependencies, load("../../mobile/util/mobileSheetGesture.ts"));
     Object.assign(dependencies, load("../../mobile/util/mobileSheetLayout.ts"));
     const titleDialog = load("documentTitleDialog.ts");
     return {window, messages, guards, instances, ready, afters, secondary, registry, allEditors, system,
         viewport, resizeListeners, closeSheet: () => sheetClose(), resizeSheet: () => sheetResize(),
-        openSheet: () => sheetOpen(), keyboardShows: () => keyboardShows,
+        canDrag: () => canDrag(), openSheet: () => sheetOpen(), keyboardShows: () => keyboardShows,
         setOpenTitle: (callback: typeof openTitle) => { openTitle = callback; },
         sheetDisposals: () => sheetDisposals,
         finishDestroy: () => destroyCallbacks.splice(0).forEach(callback => callback()),
@@ -252,7 +256,9 @@ for (const mobile of [false, true]) {
         let writes = 0;
         state.setFlush(() => { writes++; return pending.promise; });
         const dialog = state.open();
+        if (mobile) assert.equal(state.canDrag(), true);
         dialog.confirm.listeners.get("click")();
+        if (mobile) assert.equal(state.canDrag(), false);
         dialog.confirm.listeners.get("click")();
         dialog.destroy();
         if (mobile) await state.closeSheet();
@@ -363,7 +369,8 @@ test("mobile title drawer follows keyboard viewport changes and keeps failed dra
     assert.equal(dialog.options.containerClassName, "mobile-document-title-sheet");
     assert.equal(dialog.options.hideCloseIcon, true);
     assert.ok(dialog.classes.has("mobile-document-title-dialog"));
-    assert.equal(dialog.viewport.style.height, "800px");
+    assert.equal(dialog.viewport.style.bottom, "0px");
+    assert.equal(dialog.viewport.style.height, "auto");
     state.viewport.top = 50;
     state.viewport.bottom = 350;
     state.window.innerHeight = 300;
@@ -430,7 +437,8 @@ test("mobile title height remains fixed while its closing keyboard viewport reco
     state.viewport.bottom = 900;
     state.resizeSheet();
     assert.equal(dialog.sheet.style.height, `${height}px`);
-    assert.equal(dialog.viewport.style.height, "900px");
+    assert.equal(dialog.viewport.style.bottom, "0px");
+    assert.equal(dialog.viewport.style.height, "auto");
     state.finishDestroy();
     assert.equal(state.sheetDisposals(), 1);
 });
@@ -780,7 +788,7 @@ test("native mobile title drawer keeps its action above the keyboard and edits r
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
     const lifecycleSources = ["../../dialog/index.ts", "../../menus/sheetOpen.ts",
-        "../../mobile/util/mobileSheetLayout.ts", "../../mobile/util/bindBottomSheetDrag.ts", "../../mobile/util/bindBottomSheetDialog.ts",
+        "../../mobile/util/mobileSheetGesture.ts", "../../mobile/util/mobileSheetLayout.ts", "../../mobile/util/bindBottomSheetDrag.ts", "../../mobile/util/bindBottomSheetDialog.ts",
         "documentTitleDialogs.ts", "documentTitleDialog.ts"].map(file => transpileModule(
         require("ifdef-loader/preprocessor").parse(readFileSync(resolve(__dirname, file), "utf8"), {MOBILE: true, BROWSER: false}),
         {compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS}}).outputText);

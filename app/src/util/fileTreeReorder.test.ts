@@ -44,7 +44,7 @@ const fixture = (responses: any[], accept: boolean | "move" = false,
             },
             showMessage: (...args: unknown[]) => messages.push(args),
             processMessage: (response: unknown) => processed.push(response),
-            confirmDialog: (_title: string, _text: string, confirm: () => void, cancel: () => void,
+            mobileConfirmDialog: (_title: string, _text: string, confirm: () => void, cancel: () => void,
                             _isDelete: boolean, extraAction?: {callback: () => void}) => {
                 confirmations++;
                 extraActions.push(!!extraAction);

@@ -20,7 +20,8 @@ module.exports = (env, argv) => {
             path: path.resolve(__dirname, "stage/build/desktop"),
         },
         entry: {
-            "main": "./src/index.ts",
+            "startup": {import: "./src/boot/startup.ts", runtime: false},
+            "main": {import: "./src/index.ts", dependOn: "startup"},
         },
         optimization: {
             minimize: true,
@@ -124,7 +125,8 @@ module.exports = (env, argv) => {
             }),
             new HtmlWebpackPlugin({
                 inject: "head",
-                chunks: ["main"],
+                chunks: ["startup", "main"],
+                chunksSortMode: "manual",
                 filename: "index.html",
                 template: "src/assets/template/desktop/index.tpl",
             }),

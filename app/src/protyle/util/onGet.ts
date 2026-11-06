@@ -1,5 +1,6 @@
 import type {BlockQueryRequestInput} from "../../types/api";
 import {Constants} from "../../constants";
+import {syncRelatedAVEditor} from "../render/av/relatedView";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {migrateLegacyMindmapsBeforeRender} from "../render/listMindmap/migrate";
@@ -567,6 +568,7 @@ export const disabledForeverProtyle = (protyle: IProtyle) => {
 
 /** 禁用编辑器 */
 export const disabledProtyle = (protyle: IProtyle) => {
+    const hadFocus = protyle.element.contains(document.activeElement);
     const wasDisabled = protyle.disabled;
     /// #if MOBILE
     if (!wasDisabled && window.siyuan.mobile.editor?.protyle === protyle) {
@@ -581,6 +583,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
         protyle.wysiwyg.element.querySelectorAll(".table__select").forEach(item => item.removeAttribute("style"));
     }
     protyle.databaseAttributePanel?.updateReadonly();
+    syncRelatedAVEditor(protyle.id);
     protyle.title?.setReadonly?.(true);
     /// #if MOBILE
     updateMobileTitleReadonly(protyle);
@@ -589,6 +592,11 @@ export const disabledProtyle = (protyle: IProtyle) => {
         protyle.background.element.classList.remove("protyle-background--enable");
     }
     disabledWYSIWYG(protyle.wysiwyg.element);
+    // 搜索预览的只读正文无法持有焦点，交由可聚焦容器维持快捷键上下文。
+    if (hadFocus && protyle.element.hasAttribute("tabindex") &&
+        !protyle.element.contains(document.activeElement)) {
+        protyle.element.focus({preventScroll: true});
+    }
     if (!wasDisabled) {
         refreshCalendarReadonly(protyle);
     }
@@ -626,6 +634,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         protyle.wysiwyg.element.querySelectorAll(".table__select").forEach(item => item.removeAttribute("style"));
     }
     protyle.databaseAttributePanel?.updateReadonly();
+    syncRelatedAVEditor(protyle.id);
     protyle.title?.setReadonly?.(false);
     if (isMobile()) {
         /// #if MOBILE

@@ -270,7 +270,7 @@ const runCases = async source => {
             "../util/functions": {isMobile: () => mobile, isBrowser: () => true},
             "../util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: false})},
             "../protyle/util/hasClosest": {hasClosestByClassName: (element, name) => element.closest("." + name)},
-            ...Object.fromEntries(["./setting/maintenance", "../dialog/confirmDialog", "../util/fetchAppId",
+            ...Object.fromEntries(["./setting/maintenance", "../dialog/mobileConfirmDialog", "../util/fetchAppId",
                 "../layout/getAll", "path", "../editor/util", "../protyle/util/compatibility", "../dialog/message",
                 "../protyle/util/lute", "./setting/mount", "../mobile/editor", "../block/Panel"].map(name => [name, {}])),
             "../protyle": {Protyle: class {
@@ -409,8 +409,8 @@ const runCases = async source => {
     const annotationRequests = [];
     const anno = load(source.annotations, {
         ...Object.fromEntries(["../util/setPosition", "../protyle/util/hasClosest", "../protyle/util/compatibility",
-            "../config/tabs/appearancePreferences", "../protyle/util/selectionOffsets", "../constants", "../dialog",
-            "../dialog/message", "../util/functions", "../dialog/confirmDialog", "../util/escape", "filesize",
+            "../config/tabs/appearancePreferences", "../protyle/util/selectionOffsets", "../constants", "../dialog/mobileDialog",
+            "../dialog/message", "../util/functions", "../dialog/mobileConfirmDialog", "../util/escape", "filesize",
             "blueimp-md5", "./rectAnnotationResize", "./pdfRectCapture", "../protyle/upload",
             "../protyle/upload/uploadResult", "../editor/pdfAssetLink", "./pdfTextAnnotation", "./pdfCoordinates",
             "./pdfSelectionText"].map(name => [name, {}])),

@@ -100,6 +100,14 @@ html,body {display:block;height:auto;overflow:auto;font:16px sans-serif}
                             if (count === 1) {
                                 check.equal(buttons[0].dataset.type, "av-row-more", label);
                             }
+                            if (!legacy && width === 200 && align === "" && !frozen && !wrap && offset === 0) {
+                                const av = document.querySelector(".av");
+                                const more = body[0].querySelector('[data-type="av-row-more"]');
+                                check.equal(getComputedStyle(more).display, "none", label);
+                                av.dataset.avHost = "relation";
+                                check.notEqual(getComputedStyle(more).display, "none", label);
+                                av.removeAttribute("data-av-host");
+                            }
                         }
                     }
                 }

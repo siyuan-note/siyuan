@@ -28,11 +28,11 @@ const browserCases = async (source: string, luteSource: string, css: string, cas
     document.body.append(next);
     const transactions: {oldHTML: string, newHTML: string}[] = [];
     const api = new Function("dayjs", "hideTooltip", "hasClosestBlock", "updateTransaction", "TABLE_CELL_RICH_ATTRIBUTE",
-        "getAssetName", "getAssetExtension", "renameAsset", "isEncryptedBox", "callMobileAppShowKeyboard", source +
+        "getAssetName", "getAssetExtension", "renameAsset", "isEncryptedBox", "callMobileAppShowKeyboard", "isMobile", source +
         "\nreturn {bindImageTitleEditor, renderImageDisplay, getImageTitle, setImageTitle, getAnchoredInputMask};")(
         () => ({format: () => "20261010140000"}), () => {}, (element: HTMLElement) => element.closest("[data-node-id]"),
         (_protyle: IProtyle, block: HTMLElement, oldHTML: string) => transactions.push({oldHTML, newHTML: block.outerHTML}),
-        "custom-sy-cell-rich", () => "image", () => ".png", () => {}, () => false, () => {},
+        "custom-sy-cell-rich", () => "image", () => ".png", () => {}, () => false, () => {}, () => false,
     );
     const protyle = {disabled: false, toolbar: {isMultiSelectMode: () => false}};
     api.renderImageDisplay(root);

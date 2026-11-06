@@ -46,23 +46,23 @@ func TestLoadSettingsWindowPetals(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if ordinary := LoadPetals("desktop", false); len(ordinary) != 3 {
+	if ordinary := LoadPetals("desktop", false, nil); len(ordinary) != 3 {
 		t.Fatalf("ordinary loading changed: %+v", ordinary)
 	}
-	selected := LoadSettingsWindowPetals("desktop", false)
+	selected := LoadSettingsWindowPetals("desktop", false, nil)
 	if len(selected) != 1 || selected[0].Name != "opted" || !selected[0].SettingsWindow {
 		t.Fatalf("unexpected settings plugins: %+v", selected)
 	}
-	if ordinary := LoadPetals("desktop", false); len(ordinary) != 3 {
+	if ordinary := LoadPetals("desktop", false, nil); len(ordinary) != 3 {
 		t.Fatal("settings loading changed ordinary loading")
 	}
 	Conf.Bazaar.Load().PetalDisabled = true
-	if len(LoadSettingsWindowPetals("desktop", false)) != 0 {
+	if len(LoadSettingsWindowPetals("desktop", false, nil)) != 0 {
 		t.Fatal("globally disabled plugins loaded")
 	}
 	Conf.Bazaar.Load().PetalDisabled, Conf.Bazaar.Load().Trust = false, false
 	if util.Container == util.ContainerStd || util.Container == util.ContainerDocker {
-		if len(LoadSettingsWindowPetals("desktop", false)) != 0 {
+		if len(LoadSettingsWindowPetals("desktop", false, nil)) != 0 {
 			t.Fatal("untrusted plugins loaded")
 		}
 	}

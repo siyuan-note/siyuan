@@ -10,6 +10,7 @@ import {focusDatabasePrimary} from "../protyle/render/av/primaryFocus";
 import {saveLayout, setPanelFocus} from "../layout/util";
 import {preserveAVBindingRange} from "../protyle/render/av/binding";
 import {inheritDatabaseRowReadonly} from "../protyle/render/av/rowReadonly";
+import {disposeRelatedAVViews, preserveRelatedAVViews, syncRelatedAVViews} from "../protyle/render/av/relatedView";
 import {IDatabaseRowOpenData, mountDesktopDatabaseRowNavigation, switchDesktopDatabaseRowPreview} from "../protyle/render/av/openDatabaseRow";
 
 type TDatabaseRowData = Parameters<typeof newDatabaseRowModel>[0]["data"];
@@ -79,7 +80,7 @@ export const newDatabaseRowModel = (options: {
             bodyElement.style.margin = `8px ${padding.right}px 8px ${padding.left}px`;
         }
     };
-    const render = (custom: Custom) => {
+    const render = (custom: Custom, automaticRefresh = false) => {
         const previousBodyElement = custom.element.querySelector<HTMLElement>(".protyle-db-row__body");
         if (!previousBodyElement || !contextProtyle) {
             return;
@@ -95,6 +96,7 @@ export const newDatabaseRowModel = (options: {
         bodyElement.className = "custom-attr protyle-db-row__body";
         renderAVAttribute(bodyElement, data.itemID, contextProtyle, (element) => {
             if (destroyed || currentRenderVersion !== renderVersion || !previousBodyElement.isConnected) {
+                disposeRelatedAVViews(element);
                 return;
             }
             if (!element.querySelector(`[data-av-id="${data.avID}"]`)) {
@@ -120,7 +122,9 @@ export const newDatabaseRowModel = (options: {
             }
             // 保留当前内容，待属性和反链加载完成后一次替换，避免刷新期间出现空白。
             const restoreBindingRange = switching ? undefined : preserveAVBindingRange(contextProtyle, previousBodyElement);
+            preserveRelatedAVViews(previousBodyElement, element);
             previousBodyElement.replaceWith(element);
+            syncRelatedAVViews(element);
             restoreBindingRange?.(element);
             if (switching) {
                 custom.data = data;
@@ -153,7 +157,9 @@ export const newDatabaseRowModel = (options: {
                 currentElement: matchedElement,
             });
         },
-            {avID: data.avID, itemID: data.itemID, valueID: data.valueID, databaseBlockID: data.blockID});
+            {avID: data.avID, itemID: data.itemID, valueID: data.valueID, databaseBlockID: data.blockID},
+            {owner: custom.element, isCurrent: () => !destroyed && currentRenderVersion === renderVersion},
+            automaticRefresh && !switching);
     };
     const model = new Custom({
         app: options.app,
@@ -200,7 +206,7 @@ export const newDatabaseRowModel = (options: {
                     contextProtyle = editor.protyle;
                     unregisterRefresh = registerDatabaseRowRefresh(contextProtyle.id, {
                         getAVID: () => (customModel.data as typeof options.data).avID,
-                        refresh: () => render(customModel),
+                        refresh: () => render(customModel, true),
                     });
                     custom.element.append(contextProtyle.highlight.styleElement, contextProtyle.hint.element);
                     render(custom);

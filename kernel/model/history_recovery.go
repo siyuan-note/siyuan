@@ -159,7 +159,7 @@ func (recovery *attributeViewHistoryRecovery) preserveOriginal(file *documentSou
 	if err := archiveDocumentSource(backup); err != nil {
 		return err
 	}
-	return os.Remove(backup.filename())
+	return backup.remove()
 }
 
 func (recovery *attributeViewHistoryRecovery) recordTree(tree *parse.Tree, before, after []byte) error {
@@ -245,11 +245,11 @@ func (tx *Transaction) finishHistoryRecovery(result *error) {
 		*result = errors.Join(*result, rollbackErr)
 		if rollbackErr != nil {
 			util.MarkIndexFixDirty()
-		} else if err := os.Remove(recovery.journal.filename()); err != nil {
+		} else if err := recovery.journal.remove(); err != nil {
 			*result = errors.Join(*result, err)
 		}
 	} else if recovery.committed {
-		if err := os.Remove(recovery.journal.filename()); err != nil {
+		if err := recovery.journal.remove(); err != nil {
 			logging.LogWarnf("retain committed history recovery [%s]: %s", recovery.journal.ID, err)
 		}
 	}

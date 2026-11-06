@@ -24,7 +24,7 @@ export const createMarkdownWindowChrome = (options: {
             button.type = "button";
             button.className = "block__icon block__icon--show markdown-caption__button";
             button.dataset.action = action;
-            button.setAttribute("aria-label", text(label)); button.title = text(label);
+            button.setAttribute("aria-label", text(label)); button.dataset.tooltip = text(label);
             button.innerHTML = `<svg aria-hidden="true"><use href="#${icon}"></use></svg>`;
             button.addEventListener("click", () => {void bridge.control(action).catch(options.onError);}, {signal: events.signal});
             buttons.append(button);
@@ -46,7 +46,7 @@ export const createMarkdownWindowChrome = (options: {
         root.dataset.fullscreen = String(state.fullscreen);
         if (maximize) {
             const label = text(maximized ? "restore" : "max");
-            maximize.setAttribute("aria-label", label); maximize.title = label;
+            maximize.setAttribute("aria-label", label); maximize.dataset.tooltip = label;
             maximize.querySelector("use").setAttribute("href", maximized ? "#iconRestore" : "#iconMax");
         }
     };

@@ -1,5 +1,5 @@
 import {Constants} from "../../../constants";
-import {Dialog} from "../../../dialog";
+import {MobileDialog} from "../../../dialog/mobileDialog";
 import {fetchSyncPost} from "../../../util/fetch";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
@@ -10,7 +10,6 @@ import {registerSubItemsCleanup, toggleSubItems} from "./subItemsState";
 import type {Menu} from "../../../plugin/Menu";
 import {showMessage} from "../../../dialog/message";
 import {isMobile} from "../../../util/functions";
-import {bindBottomSheetDialog} from "../../../mobile/util/bindBottomSheetDialog";
 import {beginAVEditorSession} from "./editorSession";
 import {getAVFilteredTipContext} from "./filteredTip";
 import {getSubItemsInitialParentKey, getSubItemsRelationPairs, getSubItemsRelationPreview} from "./subItemsRelationPreview";
@@ -26,13 +25,13 @@ const editable = (protyle: IProtyle, blockElement: HTMLElement) => !protyle.disa
     !window.siyuan.isPublish && !protyle.options.history && blockElement.isConnected;
 
 export const reparentSubItems = (protyle: IProtyle, blockElement: HTMLElement, srcIDs: string[], parentID: string,
-                               previousID?: string, nextID?: string, groupID?: string) => {
+                               previousID?: string, nextID?: string, groupID?: string, awaitSave = false) => {
     if (!editable(protyle, blockElement)) {
         return;
     }
     const operation: IOperation = {action: "reparentAttrViewItems", ...operationContext(blockElement),
         srcIDs: [...new Set(srcIDs)], parentID, previousID, nextID, groupID, context: getAVFilteredTipContext("target", protyle)};
-    transaction(protyle, [operation], [{...operation}]);
+    return transaction(protyle, [operation], [{...operation}], awaitSave ? {awaitResponse: true} : undefined);
 };
 
 const openParentPicker = (protyle: IProtyle, blockElement: HTMLElement, srcIDs: string[], groupID: string) => {
@@ -43,34 +42,29 @@ const openParentPicker = (protyle: IProtyle, blockElement: HTMLElement, srcIDs: 
     let request = 0;
     let page = 1;
     let controller: AbortController;
-    let disposeSheet: () => void;
     const context = operationContext(blockElement);
     const endSession = beginAVEditorSession(blockElement);
     const valid = () => editable(protyle, blockElement) && blockElement.dataset.avId === context.avID && blockElement.dataset.nodeId === context.blockID &&
         blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) === context.viewID;
-    const dialog = new Dialog({title: window.siyuan.languages.avChangeParent, width: isMobile() ? "100vw" : "480px",
+    const dialog = new MobileDialog({title: window.siyuan.languages.avChangeParent, width: isMobile() ? "100vw" : "480px",
         content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" aria-label="${window.siyuan.languages.search}" placeholder="${window.siyuan.languages.search}"><div class="fn__hr"></div><div data-results></div><button class="b3-button fn__block" data-more>${window.siyuan.languages.loadMore}</button></div>`,
         destroyCallback: () => {
             request++;
             controller?.abort();
             observer?.disconnect();
-            disposeSheet?.();
             untrack?.();
             endSession();
         }});
-    const untrack = registerSubItemsCleanup(blockElement, () => dialog.destroy());
-    const observer = new MutationObserver(() => { if (!valid()) dialog.destroy(); });
+    const untrack = registerSubItemsCleanup(blockElement, () => dialog.invalidate());
+    const observer = new MutationObserver(() => { if (!valid()) dialog.invalidate(); });
     observer.observe(protyle.element, {childList: true, subtree: true});
     observer.observe(blockElement, {attributes: true, attributeFilter: ["data-av-id", "data-node-id", Constants.CUSTOM_SY_AV_VIEW]});
-    if (isMobile()) {
-        disposeSheet = bindBottomSheetDialog(dialog, async () => { dialog.destroy(); });
-    }
     const input = dialog.element.querySelector("input");
     const results = dialog.element.querySelector<HTMLElement>("[data-results]");
     const more = dialog.element.querySelector<HTMLButtonElement>("[data-more]");
     const load = async (append: boolean) => {
         if (!valid()) {
-            dialog.destroy();
+            dialog.invalidate();
             return;
         }
         controller?.abort();
@@ -110,8 +104,10 @@ const openParentPicker = (protyle: IProtyle, blockElement: HTMLElement, srcIDs: 
     results.addEventListener("click", event => {
         const target = (event.target as Element).closest<HTMLElement>("[data-parent]");
         if (target && valid()) {
-            reparentSubItems(protyle, blockElement, srcIDs, target.dataset.parent, undefined, undefined, groupID);
-            dialog.destroy();
+            void dialog.runPending(async () => {
+                await reparentSubItems(protyle, blockElement, srcIDs, target.dataset.parent, undefined, undefined, groupID, true);
+                return true;
+            });
         }
     });
     void load(false);

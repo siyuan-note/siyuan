@@ -17,6 +17,8 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     const fragmentOwners = new WeakSet<IProtyle>();
     let mobile = true;
     const enteredCells: Element[] = [];
+    const runtimeErrors: string[] = [];
+    window.addEventListener("error", event => runtimeErrors.push(event.message));
     let gutterHidden = false;
     const gutterRenderTarget = new Function("hideElements", gutterSource + "\nreturn render;")(
         () => { gutterHidden = true; });
@@ -38,10 +40,12 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         matchHotKey: (binding: {custom?: string}, event: KeyboardEvent) => !!binding?.custom &&
             binding.custom === event.key && event.ctrlKey && !event.altKey && !event.shiftKey && !event.isComposing,
         isNotCtrl: (event: KeyboardEvent) => !event.ctrlKey && !event.metaKey,
-        mathRender: noop, hideElements: (names: string[]) => {
+        mathRender: noop, hideElements: (names: string[], protyle?: IProtyle) => {
             if (names.includes("gutter")) {
                 gutterHidden = true;
             }
+            if (names.includes("toolbar")) protyle?.toolbar?.element?.classList.add("fn__none");
+            if (names.includes("util")) protyle?.toolbar?.subElement?.classList.add("fn__none");
         }, scrollCenter: noop, focusByRange,
         transaction: (_owner: IProtyle, doOperations: IOperation[], undoOperations: IOperation[]) => {
             changes.push({doOperations, undoOperations});
@@ -167,10 +171,16 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             });
             const hidden = document.createElement("div");
             hidden.className = "fn__none";
+            const toolbar = host.querySelector<HTMLElement>(".protyle-toolbar");
+            toolbar.classList.add("fn__none");
+            const subElement = document.createElement("div");
+            subElement.className = "protyle-util fn__none";
+            subElement.innerHTML = "<textarea></textarea>";
+            host.append(subElement);
             api.updateTableCellContentLayout(host, options.initialBlockHTML);
             wysiwyg.addEventListener("input", () => options.onChange());
             const protyle = {block: {}, options: {action: []},
-                toolbar: {element: hidden, subElement: hidden}, undo: {clear: noop}} as unknown as IProtyle;
+                toolbar: {element: toolbar, subElement}, undo: {clear: noop}} as unknown as IProtyle;
             fragmentOwners.add(protyle);
             return {
                 wysiwyg, hintElement: hidden,
@@ -215,6 +225,98 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
         await tick();
     };
+
+    for (const platform of [false, true]) {
+        mobile = platform;
+        for (const nesting of [0, 1, 2]) {
+            const {owner, element, table} = fixture();
+            const tabs: HTMLElement[] = [];
+            for (let depth = 0; depth < nesting; depth++) {
+                const tab = document.createElement("div");
+                tab.className = "tab-item";
+                tab.dataset.tabsHidden = "false";
+                tab.style.isolation = "isolate";
+                table.before(tab);
+                tab.append(table);
+                tabs.push(tab);
+            }
+            await open(owner, table.querySelector("th"));
+            const host = table.querySelector<HTMLElement>(".table__cell-editor");
+            const toolbar = element.querySelector<HTMLElement>(".protyle-toolbar");
+            const util = (platform ? document.body : element).querySelector<HTMLElement>(".protyle-util");
+            check.equal(toolbar.parentElement, platform ? host : element);
+            check.equal(util.parentElement, platform ? document.body : element);
+            let bubbled = 0;
+            element.addEventListener("pointerdown", () => { bubbled++; });
+            toolbar.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+            check.equal(host.isConnected, true, "toolbar pointerdown retains the active cell");
+            check.equal(bubbled, 0, "toolbar events must not enter the owning document editor");
+            if (!platform) {
+                const control = document.createElement("div");
+                control.className = "protyle-table-control";
+                control.style.cssText = "position:fixed;z-index:4;left:20px;top:20px;width:100px;height:100px";
+                element.append(control);
+                for (const overlay of [toolbar, util]) {
+                    overlay.style.cssText = "position:fixed;z-index:7;left:20px;top:20px;width:100px;height:100px";
+                    check.ok(overlay.contains(document.elementFromPoint(30, 30)),
+                        `cell overlays cover table controls: ${nesting} ${overlay.className} ${window.innerWidth}x${window.innerHeight} ${document.elementFromPoint(30, 30)?.outerHTML}`);
+                    overlay.style.display = "none";
+                }
+                util.style.display = "block";
+                const input = util.querySelector("textarea");
+                input.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+                input.focus();
+                check.equal(document.activeElement, input);
+                check.equal(host.isConnected, true, "format input remains in the active editor");
+                input.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+                document.body.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+                check.equal(host.isConnected, true, "overlay composition delays finishing");
+                input.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
+                await tick();
+                check.equal(host.isConnected, false, "composition completion releases a pending finish");
+                await open(owner, table.querySelector("th"));
+                let undoCalls = 0;
+                owner.undo = {undo: () => { undoCalls++; }} as unknown as IProtyle["undo"];
+                const undoInput = element.querySelector(".protyle-util textarea");
+                const undo = new KeyboardEvent("keydown", {key: "Ctrl+Z", ctrlKey: true, bubbles: true, cancelable: true});
+                undoInput.dispatchEvent(undo);
+                check.equal(undo.defaultPrevented, true, "overlay undo is consumed by the cell editor");
+                check.equal(undoCalls, 1, "overlay undo executes exactly once in the owner document");
+                check.equal(table.querySelector(".table__cell-editor"), null);
+                await open(owner, table.querySelector("th"));
+            }
+            if (tabs.length) {
+                const hiddenUtil = (platform ? document.body : element).querySelector<HTMLElement>(".protyle-util");
+                const hiddenInput = hiddenUtil.querySelector("textarea");
+                if (!platform) {
+                    hiddenUtil.classList.remove("fn__none");
+                    hiddenInput.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+                }
+                tabs[0].dataset.tabsHidden = "true";
+                await tick();
+                if (!platform) {
+                    check.equal(hiddenUtil.classList.contains("fn__none"), true, "hidden tabs dismiss overlays during composition");
+                    check.ok(table.querySelector(".table__cell-editor"), "composition is retained until it finishes");
+                    hiddenInput.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
+                    await tick();
+                }
+                check.equal(table.querySelector(".table__cell-editor"), null, "hiding an ancestor tab ends cell editing");
+            }
+            await finish(element);
+            check.equal(util.isConnected, false, "detached overlays are released on finish");
+            check.equal(document.querySelector(".protyle-util"), null, "no overlay survives closing its document");
+        }
+        const {owner, element, table} = fixture();
+        const layout = document.createElement("div");
+        element.before(layout);
+        layout.append(element);
+        await open(owner, table.querySelector("th"));
+        const util = (platform ? document.body : element).querySelector<HTMLElement>(".protyle-util");
+        layout.remove();
+        await tick();
+        check.equal(util.isConnected, false, "removing a document layout releases its overlays");
+        check.equal(document.querySelector(".protyle-util"), null);
+    }
 
     for (const platform of [false, true]) {
         mobile = platform;
@@ -335,7 +437,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             check.equal(changes.length, 0);
             editable.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
             await tick();
-            check.equal(changes.length, 1);
+            check.equal(changes.length, 1, "pending cell input reaches the transaction before alignment");
             editable.textContent = "pending before alignment";
             api.focusByOffset(editable, 4, 4);
             editable.dispatchEvent(new KeyboardEvent("keydown", {key: "e", ctrlKey: true, bubbles: true, cancelable: true}));
@@ -1050,9 +1152,10 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             bubbled = 0;
             const enter = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
             field.dispatchEvent(enter);
+            check.deepEqual(runtimeErrors, [], id);
             check.equal(enter.defaultPrevented, true, id);
             check.equal(bubbled, 0, id);
-            check.equal(removed, 1);
+            check.equal(removed, 1, "table insert Enter removes its menu once");
             check.equal(changes.length, 1, "Enter inserts exactly once");
             check.equal(table.querySelectorAll("tr").length, id.startsWith("insertRow") ? count + 3 : 3);
             check.equal(table.querySelector("tr").cells.length, id.startsWith("insertColumn") ? count + 3 : 3);
@@ -1085,7 +1188,8 @@ test("table cell editors preserve input and alignment, and consume table menu En
     const source = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts",
         "../../util/escape.ts", "../util/tableVirtualizationDOM.ts", "setLute.ts", "../wysiwyg/codeBlockUtil.ts", "av/richTextValue.ts", "av/richText.ts",
         "../wysiwyg/taskListMarker.ts", "../util/tableCellRichLute.ts", "../util/tableCellRichValue.ts", "../util/tableCellRich.ts",
-        "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../util/tableColumnWidth.ts", "../wysiwyg/tableVirtualization.ts",
+        "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../util/tableColumnWidth.ts",
+        "../util/tableSelection.ts", "../util/tableRowHeight.ts", "../wysiwyg/tableVirtualization.ts",
         "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/input.ts", "../wysiwyg/nativeTextMenu.ts"]
         .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource) + "\n" + compile(taskSource);
     const wysiwyg = createSourceFile("wysiwyg.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);
@@ -1152,7 +1256,7 @@ test("table cell editors preserve input and alignment, and consume table menu En
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show: false, webPreferences: {
+    const win = new BrowserWindow({show: false, width: 1000, height: 800, webPreferences: {
         nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false,
     }});
     try {

@@ -14,9 +14,12 @@ const browserCases = async (source: string) => {
     const insertItems: IHintData[] = [{id: "bold", value: "strong", html: "Bold"}];
     let inserted = "";
     let marked = "";
+    let slashEnabled = false;
     const deletions: {before: string; after: string}[] = [];
     const dependencies = {
         hintSlash: () => insertItems,
+        getConfiguredEntryVisibility: (entry: string, stopAt?: string) => entry === stopAt || slashEnabled,
+        SLASH_MENU_ROOT_PATH: "editor.slash.menu",
         getFrequentSlashItems: (): IHintData[] => [],
         getSlashEntryKey: (item: IHintData) => item.id || "",
         escapeAttr: (text: string) => {
@@ -106,10 +109,18 @@ const browserCases = async (source: string) => {
     check.equal(element.classList.contains("fn__none"), true);
     hint.enableExtend = true;
     api.hintSkill("", protyle);
+    check.equal(requests.length, 0, "disabled typed skills do not request candidates");
+    check.equal(element.classList.contains("fn__none"), true);
+    slashEnabled = true;
+    api.hintSkill("", protyle);
     requests.shift()(skills);
     check.equal(element.querySelectorAll(".b3-list-item").length, 1);
     check.equal(element.textContent.includes("Bold"), false, "typed slash remains a skill query");
     check.equal(api.isBuiltinSlashHint(api.hintSkill, "strong", protyle), false);
+    api.hintSkill("", protyle);
+    slashEnabled = false;
+    requests.shift()(skills);
+    check.equal(element.classList.contains("fn__none"), true, "disabling typed skills hides a late response");
 
     const lute = Lute.New();
     lute.SetTextMark(true);
@@ -236,7 +247,7 @@ test("agent mobile commands coexist with skills and skill names remain atomic", 
 }, async () => {
     const read = (file: string) => readFileSync(path.resolve(__dirname, file), "utf8");
     const composer = createSourceFile("composer.ts", read("AgentComposer.ts"), ScriptTarget.Latest, true);
-    const selected = new Set(["skillHintRequestIDs", "skillSlashCommands", "prepareAgentHint", "hintSkill"]);
+    const selected = new Set(["skillHintRequestIDs", "skillSlashCommands", "prepareAgentHint", "isSkillHintEnabled", "hintSkill"]);
     const composerSource = composer.statements.filter(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(declaration => selected.has(declaration.name.getText(composer))))
         .map(statement => statement.getText(composer)).join("\n");

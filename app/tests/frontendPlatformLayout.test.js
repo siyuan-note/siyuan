@@ -94,9 +94,11 @@ const browserCases = ({css, mobile, inboxDetailHTML}) => {
                     for (const showDetails of [false, true, false]) {
                         details.classList.toggle("fn__none", !showDetails);
                         inboxList.classList.toggle("fn__none", showDetails);
-                        const scroller = showDetails ? details : inboxList;
+                        const scroller = showDetails ? details.querySelector(".b3-typography") : inboxList;
                         scroller.scrollTop = scroller.scrollHeight;
-                        check.ok(scroller.scrollTop > 0, "inbox view has scrollable content");
+                        check.ok(scroller.scrollTop > 0, "inbox view has scrollable content: " + JSON.stringify({showDetails,
+                            height:scroller.clientHeight,scrollHeight:scroller.scrollHeight,overflow:getComputedStyle(scroller).overflow,
+                            parentHeight:scroller.parentElement.clientHeight,minHeight:getComputedStyle(scroller).minHeight}));
                         check.ok(Math.abs(scroller.getBoundingClientRect().bottom - innerHeight) < 1, "inbox view reaches the viewport bottom");
                         const last = scroller.querySelector(showDetails ? "img" : "li:last-child");
                         check.ok(last.getBoundingClientRect().bottom <= innerHeight - bottom + 1, "inbox list and detail content clear the gesture area");

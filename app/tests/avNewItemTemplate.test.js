@@ -17,15 +17,27 @@ const runCases = async (sources, mobile) => {
     const pending = [];
     let dialog;
     let saved;
+    let holdTransactions = false;
+    const writes = [];
     const api = load(sources.template, {
-        "../../../dialog": {Dialog: class {
+        "../../../dialog/mobileDialog": {MobileDialog: class {
+            pending = false;
             constructor(options) {
                 this.element = document.createElement("div");
                 this.element.innerHTML = options.content;
                 document.body.append(this.element);
                 dialog = {element: this.element, destroy: () => this.destroy()};
             }
-            destroy() { this.element.remove(); }
+            destroy() { if (!this.pending) this.element.remove(); }
+            async runPending(task) {
+                if (this.pending) return false;
+                this.pending = true;
+                let success = false;
+                try { success = await task(); } catch { success = false; }
+                this.pending = false;
+                if (success) this.destroy();
+                return success;
+            }
         }},
         "../../../util/functions": {isMobile: () => mobile},
         "../../../util/escape": {escapeHtml: String, escapeAttr: String},
@@ -42,12 +54,16 @@ const runCases = async (sources, mobile) => {
             return options.isValid() ? response : undefined;
         }},
         "./calendar/state": {getCalendarCreationDate: () => 123},
-        "./render": {avRender() {}},
-        "../../wysiwyg/transaction": {transaction: (_protyle, operations, undo) => { saved = {operations, undo}; }},
+        "./render": {avRender(_block, _protyle, _callback, _all, _data, automaticRefresh) {
+            assert.equal(automaticRefresh, true, "creation and template settings must preserve unrelated row results");
+        }},
+        "../../wysiwyg/transaction": {transaction: (_protyle, operations, undo, options) => {
+            assert.equal(options.awaitResponse, true);
+            saved = {operations, undo};
+            if (holdTransactions) return new Promise((resolve, reject) => writes.push({resolve, reject}));
+        }},
         "./openDatabaseRow": {openDatabaseRowByData: (_protyle, data, options) => calls.push({data, options})},
         "../../../dialog/message": {showMessage() {}},
-        "../../../mobile/util/bindBottomSheetDialog": {bindBottomSheetDialog: () => () => {}},
-        "../../../mobile/util/keyboardToolbar": {activeBlur() {}},
     });
     const block = document.createElement("div");
     Object.assign(block.dataset, {avId: "database", nodeId: "carrier", avType: "table"});
@@ -63,7 +79,7 @@ const runCases = async (sources, mobile) => {
                 const data = {id: "database", newItemTemplates: [template]};
                 api.openNewItemTemplateDialog({protyle, blockElement: block, data});
                 const checkbox = dialog.element.querySelector('[data-role="open-after-create"]');
-                assert.equal(checkbox.checked, preference ?? view === "calendar");
+                assert.equal(checkbox.value, (preference ?? view === "calendar") ? "right" : "none");
                 assert.equal(checkbox.closest('[data-role="document-options"]'), null);
                 dialog.element.querySelector('[data-role="template-name"]').value = "Renamed";
                 dialog.element.querySelector('[data-role="confirm"]').click();
@@ -74,9 +90,10 @@ const runCases = async (sources, mobile) => {
 
                 api.openNewItemTemplateDialog({protyle, blockElement: block, data});
                 const toggle = dialog.element.querySelector('[data-role="open-after-create"]');
-                toggle.click();
+                toggle.value = toggle.value === "none" ? "right" : "none";
+                toggle.dispatchEvent(new Event("change"));
                 dialog.element.querySelector('[data-role="confirm"]').click();
-                assert.equal(saved.operations[0].data.templates[0].openAfterCreate, toggle.checked);
+                assert.equal(saved.operations[0].data.templates[0].openAfterCreate, toggle.value !== "none");
                 assert.equal(template.openAfterCreate, preference, "dialog must not mutate its input");
                 dialog.destroy();
 
@@ -101,10 +118,44 @@ const runCases = async (sources, mobile) => {
         }
     }
     api.openNewItemTemplateDialog({protyle, blockElement: block, data: {id: "database"}, createNew: true});
-    assert.equal(dialog.element.querySelector('[data-role="open-after-create"]').checked, false);
+    assert.equal(dialog.element.querySelector('[data-role="open-after-create"]').value, "none");
     dialog.element.querySelector('[data-role="confirm"]').click();
     assert.equal(saved.operations[0].data.templates[0].openAfterCreate, false);
     dialog.destroy();
+    for (const targetType of ["detached", "document"]) {
+        const template = {id: "current", name: "Current", targetType, openAfterCreate: true, openInCurrentTab: true};
+        api.openNewItemTemplateDialog({protyle, blockElement: block, data: {id: "database", newItemTemplates: [template]}});
+        assert.equal(dialog.element.querySelector('[data-role="open-after-create"]').value, "current");
+        dialog.element.querySelector('[data-role="confirm"]').click();
+        assert.equal(saved.operations[0].data.templates[0].openInCurrentTab, true);
+        dialog.destroy();
+        api.createAttributeViewItem({protyle, blockElement: block, templateID: "current"});
+        pending.pop().callback({code: 0, data: {itemID: "created", blockID: "document", content: "Title",
+            isDetached: targetType === "detached", openAfterCreate: true, openInCurrentTab: true}});
+        await new Promise(resolve => setTimeout(resolve, 0));
+        assert.deepEqual(calls.at(-1).options, {currentPane: true});
+    }
+    await new Promise(resolve => setTimeout(resolve, 0));
+    holdTransactions = true;
+    api.openNewItemTemplateDialog({protyle, blockElement: block, data: {id: "database"}, createNew: true});
+    const draft = dialog.element.querySelector('[data-role="template-name"]');
+    draft.value = "Retry template";
+    const confirm = dialog.element.querySelector('[data-role="confirm"]');
+    confirm.click();
+    confirm.click();
+    dialog.destroy();
+    assert.equal(writes.length, 1, "pending template saves are deduplicated");
+    assert.equal(dialog.element.isConnected, true);
+    writes[0].reject(new Error("save failed"));
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(dialog.element.isConnected, true, "failed persistence retains the template editor");
+    assert.equal(draft.value, "Retry template");
+    confirm.click();
+    assert.equal(writes.length, 2);
+    writes[1].resolve();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(dialog.element.isConnected, false);
+    holdTransactions = false;
 
     for (const failure of ["error", "unavailable", "closed", "readonly"]) {
         const before = calls.length;

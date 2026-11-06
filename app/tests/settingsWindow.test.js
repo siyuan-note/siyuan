@@ -28,6 +28,12 @@ const rendererModules = (sources) => {
         "../util/functions": {isMobile: () => false}, "../protyle/util/compatibility": {isNotCtrl: () => true},
         "../constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
     });
+    const {MobileDialog} = loadRendererModule(sources.mobileDialog, {
+        "./index": {Dialog}, "../util/functions": {isMobile: () => false},
+        "../mobile/util/bindBottomSheetDialog": {}, "../constants": {Constants: {}},
+        "../mobile/util/mobileAppUtil": {}, "../mobile/util/visibleViewport": {},
+        "../protyle/util/compatibility": {}, "./message": {},
+    });
     const context = {isSettingsWindow: () => document.body.classList.contains("body--settings")};
     const {ipcRenderer, webFrame} = require("electron");
     const overlay = loadRendererModule(sources.overlay, {
@@ -49,13 +55,13 @@ const rendererModules = (sources) => {
     const titles = loadRendererModule(sources.titles, {
         "./escape": {}, "../constants": {Constants: {}}, "./pathName": {pathPosix: () => require("node:path").posix},
     });
-    return {Dialog, genUUID, context, fit, controls, frontend, titles};
+    return {Dialog, MobileDialog, genUUID, context, fit, controls, frontend, titles};
 };
 
 const bootChild = async (sources) => {
     const {ipcRenderer} = require("electron");
     const {waitForWindowPaint} = loadRendererModule(sources.paint, {});
-    const {Dialog, genUUID, context, fit, frontend, titles} = rendererModules(sources);
+    const {Dialog, MobileDialog, genUUID, context, fit, frontend, titles} = rendererModules(sources);
     require("node:assert/strict").equal(navigator.userAgent.startsWith("SiYuan/"), false);
     require("node:assert/strict").equal(frontend.getFrontend(), "desktop", navigator.userAgent);
     const host = await new Promise(resolve => {
@@ -100,6 +106,7 @@ const bootChild = async (sources) => {
         document.title = host.title;
         if (host.plugin) {
             const {Setting} = loadRendererModule(sources.setting, {
+                "../dialog/mobileDialog": {MobileDialog},
                 "../util/functions": {isMobile: () => false, getFrontend: frontend.getFrontend},
                 "../dialog": {Dialog}, "../config/setting/nativeWindow": {},
                 "../config/setting/windowContext": context, "../config/setting/windowDialog": fit,
@@ -176,6 +183,7 @@ const bootChild = async (sources) => {
     check.ok(pluginEvents.includes("before-hide-tooltip"));
     button.remove();
     const {Setting: NestedSetting} = loadRendererModule(sources.setting, {
+        "../dialog/mobileDialog": {MobileDialog},
         "../util/functions": {isMobile: () => false, getFrontend: frontend.getFrontend}, "../dialog": {Dialog},
         "../config/setting/nativeWindow": {}, "../config/setting/windowContext": context,
         "../config/setting/windowDialog": fit, "../util/genID": {genUUID},
@@ -194,7 +202,7 @@ const bootChild = async (sources) => {
 const runCases = async (sources) => {
     const assert = require("node:assert/strict");
     const {ipcRenderer} = require("electron");
-    const {Dialog, genUUID, context, fit, titles} = rendererModules(sources);
+    const {Dialog, MobileDialog, genUUID, context, fit, titles} = rendererModules(sources);
     window.settingsPaths = [];
     const bazaarPath = loadRendererModule(sources.bazaarPath, {
         path: require("node:path"), "../../util/pathName": {useShell: (...args) => window.settingsPaths.push(args)},
@@ -204,6 +212,7 @@ const runCases = async (sources) => {
     const pluginSettings = {};
     new Function("Plugin", "exports", sources.pluginSettings)(Plugin, pluginSettings);
     const settingInterface = loadRendererModule(sources.settingInterface, {electron: {ipcRenderer}});
+    const reopenedTabs = [];
     const breadcrumbRegistry = loadRendererModule(sources.breadcrumbRegistry, {});
     breadcrumbRegistry.breadcrumbButtonRegistry.set("owner", {
         id: "button", title: "Owner button", icon: "iconFile", callback() {},
@@ -224,8 +233,14 @@ const runCases = async (sources) => {
         "../bazaar/openPath": bazaarPath,
         "../tabs/compactMode": {isCompactModeEnabled: () => false},
         "./interface": settingInterface,
+        "../index": {openSetting: (app, tab) => {
+            assert.equal(app, window.siyuan.ws.app);
+            reopenedTabs.push(tab);
+            settingInterface.prepareSettingDialog();
+        }},
     });
     const {Setting} = loadRendererModule(sources.setting, {
+        "../dialog/mobileDialog": {MobileDialog},
         "../util/functions": {isMobile: () => false, getFrontend: () => "desktop"}, "../dialog": {Dialog},
         "../config/setting/nativeWindow": native, "../config/setting/windowContext": context,
         "../config/setting/windowDialog": fit, "../util/genID": {genUUID},
@@ -460,6 +475,20 @@ const runCases = async (sources) => {
     await native.openNativeSettings(window.siyuan.ws.app, {tab: "editor"});
     await ipcRenderer.invoke("test-settings-wait");
     assert.equal(await ipcRenderer.invoke("test-settings-other-dialog-closed"), true);
+    const currentToken = await ipcRenderer.invoke("test-settings-token");
+    const currentHost = await new Promise(resolve => {
+        window.dispatchEvent(new CustomEvent("siyuan-settings-host-" + currentToken, {detail: resolve}));
+    });
+    await currentHost.reopenSettings(false);
+    await wait();
+    assert.equal(window.siyuan.config.system.settingsWindow, false);
+    assert.deepEqual(reopenedTabs, ["app"]);
+    assert.equal(await ipcRenderer.invoke("test-settings-window-count"), 0);
+    assert.equal((await ipcRenderer.invoke("test-settings-commands")).at(-1), "show-owner");
+    await currentHost.reopenSettings(true);
+    assert.deepEqual(reopenedTabs, ["app"], "a closed host cannot reopen settings");
+    await native.openNativeSettings(window.siyuan.ws.app, {tab: "app"});
+    await ipcRenderer.invoke("test-settings-wait");
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -485,7 +514,7 @@ if (process.versions.electron && process.type === "browser") {
         const themes = Object.fromEntries(["daylight", "midnight"].map(name => [name,
             fs.readFileSync(path.join(__dirname, "../appearance/themes", name, "theme.css"), "utf8") +
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
-        for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
+        for (const [key, file] of Object.entries({dialog: "dialog/index.ts", mobileDialog: "dialog/mobileDialog.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
             breadcrumbRegistry: "plugin/breadcrumbButtonRegistry.ts",
             overlay: "boot/windowControlsOverlay.ts", color: "util/color.ts",

@@ -1,17 +1,20 @@
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../dialog/mobileDialog";
+import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
 import dayjs from "dayjs";
 import {Protyle} from "../protyle";
-import {fetchPost} from "../util/fetch";
-import {Dialog} from "../dialog";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {getDisplayName, getNotebookName} from "../util/pathName";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
-import {addLoading} from "../protyle/ui/initUI";
+import {addLoading, removeLoading} from "../protyle/ui/initUI";
 import {Constants} from "../constants";
 import {onGet} from "../protyle/util/onGet";
 import type {App} from "../index";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {runCardAction} from "./pendingAction";
+import {showMessage} from "../dialog/message";
 
 export const viewCards = (app: App, deckID: string, title: string, deckType: "Tree" | "" | "Notebook", cb?: (response: IWebSocketData) => void) => {
     let pageIndex = 1;
@@ -26,7 +29,8 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         page: pageIndex
     }, (response) => {
         pageCount = Math.max(response.data.pageCount, 1);
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
+            mobileSheet: {mode: "expanded", beforeClose: createMobileSecondaryEditorCloseGuard(() => edit)},
             hideCloseIcon: true,
             positionId: Constants.DIALOG_VIEWCARDS,
             content: `<div class="fn__flex-column" style="height: 100%">
@@ -42,10 +46,6 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         <span data-type="page" class="fn__flex-center ft__on-surface">${pageIndex}/${pageCount}</span>
         <span class="fn__space"></span>
         <span class="counter">${response.data.total}</span>
-        ${isMobile() ? `<span class="fn__space"></span>
-<div data-type="close" class="block__icon block__icon--show">
-    <svg><use xlink:href="#iconCloseRound"></use></svg>
-</div>` : ""}
     </div>
     <div class="${isMobile() ? "fn__flex-column" : "fn__flex"} fn__flex-1" style="min-height: auto">
         <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none;padding: 8px 0">
@@ -85,6 +85,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                 },
                 typewriterMode: false
             });
+            if (isMobile()) registerMobileSecondaryEditor(edit, () => dialog.invalidate());
             if (window.siyuan.mobile) {
                 window.siyuan.mobile.popEditor = edit;
             }
@@ -92,7 +93,8 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                 card: edit
             };
             edit.resize();
-            getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
+            void getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"))
+                .catch(error => showMessage(error.message));
         }
         const previousElement = dialog.element.querySelector('[data-type="previous"]');
         const nextElement = dialog.element.querySelector('[data-type="next"]');
@@ -112,7 +114,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
             }
             pageElement.textContent = `${pageIndex}/${pageCount}`;
         };
-        const renderPage = (cardsResponse: IWebSocketData, focusIndex = 0) => {
+        const renderPage = async (cardsResponse: IWebSocketData, focusIndex = 0) => {
             pageCount = Math.max(cardsResponse.data.pageCount, 1);
             counterElement.textContent = cardsResponse.data.total.toString();
             listElement.innerHTML = renderViewItem(cardsResponse.data.blocks, title, deckType);
@@ -131,10 +133,10 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                     focusElement.scrollIntoView(focusRect.top < listRect.top);
                 }
             }
-            getArticle(edit, focusElement?.dataset.id || "");
+            await getArticle(edit, focusElement?.dataset.id || "");
             updatePagination();
         };
-        const loadPage = (targetPage: number, focusIndex = 0) => {
+        const loadPage = async (targetPage: number, focusIndex = 0) => {
             if (isPageLoading || destroyed) {
                 return;
             }
@@ -143,35 +145,33 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
             pageController?.abort();
             const controller = new AbortController();
             pageController = controller;
-            fetchPost(`/api/riff/get${deckType}RiffCards`, {
-                id: deckID,
-                page: requestedPage
-            }, (cardsResponse) => {
-                if (controller.signal.aborted || destroyed) {
-                    return;
-                }
+            try {
+                const cardsResponse = await fetchSyncPost(`/api/riff/get${deckType}RiffCards`, {
+                    id: deckID, page: requestedPage,
+                }, undefined, undefined, controller.signal);
+                if (cardsResponse.code !== 0 || controller.signal.aborted || destroyed) return;
                 const responsePageCount = Math.max(cardsResponse.data.pageCount, 1);
                 if (requestedPage > responsePageCount) {
                     isPageLoading = false;
-                    loadPage(responsePageCount, focusIndex);
+                    await loadPage(responsePageCount, focusIndex);
                     return;
                 }
                 pageIndex = requestedPage;
-                renderPage(cardsResponse, focusIndex);
-            }, undefined, undefined, controller.signal).finally(() => {
+                await renderPage(cardsResponse, focusIndex);
+            } finally {
                 if (pageController === controller) {
                     pageController = undefined;
                     isPageLoading = false;
                 }
-            });
+            }
         };
         updatePagination();
         dialog.element.setAttribute("data-key", Constants.DIALOG_VIEWCARDS);
-        dialog.element.addEventListener("click", (event) => {
+        const onClick = async (event: MouseEvent) => {
             if (typeof event.detail === "string") {
                 let currentElement = listElement.querySelector(".b3-list-item--focus");
                 if (currentElement) {
-                    currentElement.classList.remove("b3-list-item--focus");
+                    const previousElement = currentElement;
                     if (event.detail === "arrowup") {
                         currentElement = currentElement.previousElementSibling || currentElement.parentElement.lastElementChild;
                     } else if (event.detail === "arrowdown") {
@@ -186,8 +186,10 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                     if (currentRect.top < parentRect.top || currentRect.bottom > parentRect.bottom) {
                         currentElement.scrollIntoView(currentRect.top < parentRect.top);
                     }
-                    getArticle(edit, currentElement.getAttribute("data-id"));
-                    currentElement.classList.add("b3-list-item--focus");
+                    if (await getArticle(edit, currentElement.getAttribute("data-id"))) {
+                        previousElement.classList.remove("b3-list-item--focus");
+                        currentElement.classList.add("b3-list-item--focus");
+                    }
                 }
                 event.stopPropagation();
                 event.preventDefault();
@@ -196,16 +198,11 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
             let target = event.target as HTMLElement;
             while (target && (dialog.element !== target)) {
                 const type = target.getAttribute("data-type");
-                if (type === "close") {
-                    dialog.destroy();
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "previous") {
+                if (type === "previous") {
                     if (isPageLoading || isRemoving || pageIndex <= 1) {
                         return;
                     }
-                    loadPage(pageIndex - 1);
+                    await loadPage(pageIndex - 1);
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -213,7 +210,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                     if (isPageLoading || isRemoving || pageIndex >= pageCount) {
                         return;
                     }
-                    loadPage(pageIndex + 1);
+                    await loadPage(pageIndex + 1);
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -230,7 +227,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                     event.preventDefault();
                     break;
                 } else if (type === "resetAll") {
-                    confirmDialog(window.siyuan.languages.reset,
+                    mobileConfirmDialog(window.siyuan.languages.reset,
                         window.siyuan.languages.resetCardTip.replace("${x}", dialog.element.querySelector(".counter").textContent), () => {
                             fetchPost("/api/riff/resetRiffCards", {
                                 type: deckType === "" ? "deck" : deckType.toLowerCase(),
@@ -249,9 +246,10 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                     if (isRemoving || isPageLoading) {
                         return;
                     }
-                    getArticle(edit, target.getAttribute("data-id"));
-                    listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
-                    target.classList.add("b3-list-item--focus");
+                    if (await getArticle(edit, target.getAttribute("data-id"))) {
+                        listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                        target.classList.add("b3-list-item--focus");
+                    }
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -262,29 +260,39 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                     isRemoving = true;
                     target.setAttribute("disabled", "disabled");
                     const focusIndex = Array.from(listElement.children).indexOf(target.parentElement);
-                    fetchPost("/api/riff/removeRiffCards", {
-                        deckID: deckType === "" ? deckID : Constants.QUICK_DECK_ID,
-                        blockIDs: [target.getAttribute("data-id")]
-                    }, (removeResponse) => {
+                    try {
+                        const removeResponse = await fetchSyncPost("/api/riff/removeRiffCards", {
+                            deckID: deckType === "" ? deckID : Constants.QUICK_DECK_ID,
+                            blockIDs: [target.getAttribute("data-id")]
+                        });
+                        if (removeResponse.code !== 0) return;
                         if (!destroyed) {
                             isRemoving = false;
-                            loadPage(pageIndex, Math.max(focusIndex, 0));
+                            await loadPage(pageIndex, Math.max(focusIndex, 0));
                         }
                         if (cb) {
                             cb(removeResponse);
                         }
-                    }).finally(() => {
+                    } finally {
                         if (isRemoving) {
                             isRemoving = false;
                             target.removeAttribute("disabled");
                         }
-                    });
+                    }
                     event.stopPropagation();
                     event.preventDefault();
                     break;
                 }
                 target = target.parentElement;
             }
+        };
+        dialog.element.addEventListener("click", event => {
+            const type = (event.target as HTMLElement).closest("[data-type]")?.getAttribute("data-type");
+            const key = typeof event.detail === "string" && ["arrowup", "arrowdown", "home", "end"].includes(event.detail);
+            if (!key && !["previous", "next", "reset", "resetAll", "card-item", "remove"].includes(type)) return;
+            event.stopPropagation();
+            event.preventDefault();
+            void runCardAction(dialog, edit, () => onClick(event)).catch(error => showMessage(error.message));
         });
     });
 };
@@ -338,39 +346,36 @@ ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 };
 
 
-const getArticle = (edit: Protyle, id: string) => {
+const getArticle = async (edit: Protyle, id: string): Promise<boolean> => {
     edit.protyle.element.dataset.loadingCardId = id || "";
     if (!id) {
+        removeLoading(edit.protyle);
         edit.protyle.element.classList.add("fn__none");
         edit.protyle.element.nextElementSibling.classList.remove("fn__none");
-        return;
+        return true;
     }
     edit.protyle.element.classList.remove("fn__none");
     edit.protyle.element.nextElementSibling.classList.add("fn__none");
     edit.protyle.scroll.lastScrollTop = 0;
     addLoading(edit.protyle);
-    fetchPost("/api/block/getDocInfo", {
-        id,
-    }, (response) => {
-        if (edit.protyle.element.dataset.loadingCardId !== id) {
-            return;
-        }
-        fetchPost("/api/filetree/getDoc", {
-            id,
-            mode: 0,
-            size: Constants.SIZE_GET_MAX,
-        }, getResponse => {
-            if (edit.protyle.element.dataset.loadingCardId !== id) {
-                return;
-            }
-            onGet({
-                updateReadonly: true,
-                data: getResponse,
-                protyle: edit.protyle,
-                action: getResponse.code === 0 && getResponse.data.rootID === getResponse.data.id ? [] : [Constants.CB_GET_ALL],
-                isValid: () => edit.protyle.element.dataset.loadingCardId === id,
-                beforeAVRender: () => edit.protyle.wysiwyg.renderCustom(response.data.ial),
-            });
-        });
-    });
+    const isCurrent = () => edit.protyle.element.isConnected && edit.protyle.element.classList.contains("protyle") &&
+        edit.protyle.element.dataset.loadingCardId === id;
+    try {
+        const response = await fetchSyncPost("/api/block/getDocInfo", {id});
+        if (response.code !== 0 || !isCurrent()) return false;
+        const getResponse = await fetchSyncPost("/api/filetree/getDoc", {id, mode: 0, size: Constants.SIZE_GET_MAX});
+        if (getResponse.code !== 0 || !isCurrent()) return false;
+        return await new Promise<boolean>(resolve => onGet({
+            updateReadonly: true,
+            data: getResponse,
+            protyle: edit.protyle,
+            action: getResponse.data.rootID === getResponse.data.id ? [] : [Constants.CB_GET_ALL],
+            isValid: isCurrent,
+            beforeAVRender: () => edit.protyle.wysiwyg.renderCustom(response.data.ial),
+            afterCB: () => resolve(true),
+            onAVRenderError: () => resolve(false),
+        }));
+    } finally {
+        if (isCurrent()) removeLoading(edit.protyle);
+    }
 };

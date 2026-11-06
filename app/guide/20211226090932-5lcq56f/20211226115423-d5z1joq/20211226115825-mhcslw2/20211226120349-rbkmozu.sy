@@ -6,7 +6,7 @@
 		"id": "20211226120349-rbkmozu",
 		"title": "在内容區塊中遨遊",
 		"type": "doc",
-		"updated": "20261030083650"
+		"updated": "20261105155201"
 	},
 	"Children": [
 		{
@@ -123,7 +123,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120415-oalx1x3",
-				"updated": "20260809232000"
+				"updated": "20261105155201"
 			},
 			"Children": [
 				{
@@ -197,6 +197,85 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-v8bjzso",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261105154152-v8bjzso",
+				"updated": "20261105155201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全域導覽路徑"
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-yb81e6w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105154152-yb81e6w",
+				"updated": "20261105154152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "啟用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "全域導覽路徑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後，桌面版編輯器頂部會在目前文件及其區塊路徑前顯示筆記本和父文件，合併為同一條導覽路徑。此設定預設關閉。行動版的導覽路徑選單會顯示相同的階層。"
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-l6qe35h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105154152-l6qe35h",
+				"updated": "20261105155201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面版點擊父文件可開啟該文件，透過筆記本或父文件旁的箭頭可選擇子文件。行動版點擊父文件會顯示子文件，選擇「打開」可開啟父文件本身；沒有子文件的文件會直接開啟。現有的區塊導覽方式保持不變。"
 				}
 			]
 		},

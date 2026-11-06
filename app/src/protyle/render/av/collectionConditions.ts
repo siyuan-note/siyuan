@@ -1,10 +1,10 @@
+import {mobileInputDialog} from "../../../dialog/mobileInputDialog";
 import type {AVAutomationBlockAttributeInput, AVAutomationBlockSourceInput} from "../../../types/api";
 import {Menu} from "../../../plugin/Menu";
 import {toggleMenu} from "../../../menus/menuToggle";
 import {bindAliasInput} from "../../../menus/aliasInput";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {isMobile} from "../../../util/functions";
-import {openInputDialog} from "../../../dialog/inputDialog";
 import {upDownHint} from "../../../util/upDownHint";
 
 export const toggleCollectionType = (types: string[], type: string) => {
@@ -121,7 +121,7 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
                         renderChips();
                     } else if ((event.target as Element).closest("[data-custom-callout]")) {
                         menu.close();
-                        openInputDialog({title: lang.callout, label: lang.type, value: "", maxLength: 256,
+                        mobileInputDialog({title: lang.callout, label: lang.type, value: "", maxLength: 256,
                             onConfirm: (value, dialog) => {
                                 const type = value.trim();
                                 if (!type || /[\r\n\t]/.test(type)) { return; }

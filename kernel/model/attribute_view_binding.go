@@ -55,7 +55,7 @@ func preflightAttributeViewCellBindings(tx *Transaction, attrView *av.AttributeV
 			if loadErr != nil {
 				return loadErr
 			}
-			if err = validateAttributeViewBinding(attrView.ID, tree); err != nil {
+			if err = tx.validateAttributeViewBinding(attrView.ID, tree); err != nil {
 				return err
 			}
 		}
@@ -84,6 +84,29 @@ func validateAttributeViewBinding(avID string, tree *parse.Tree) error {
 	}
 	avPath, boxID := av.FindAttributeViewPath(avID)
 	if avPath == "" {
+		return av.ErrAttributeViewNotFound
+	}
+	if !IsSameCryptoBoundary(boxID, tree.Box) {
+		return errors.New(Conf.Language(381))
+	}
+	return nil
+}
+
+// 已固定边界的关联详情事务不能再次通过全局 ID 映射解释绑定目标。
+func (tx *Transaction) validateAttributeViewBinding(avID string, tree *parse.Tree) error {
+	if tx != nil {
+		if boxID, scoped := tx.attributeViewStorageContexts[avID]; scoped {
+			return validateAttributeViewBindingInStorage(avID, boxID, tree)
+		}
+	}
+	return validateAttributeViewBinding(avID, tree)
+}
+
+func validateAttributeViewBindingInStorage(avID, boxID string, tree *parse.Tree) error {
+	if tree == nil {
+		return ErrBlockNotFound
+	}
+	if path, _ := av.FindAttributeViewPathInBox(avID, boxID); path == "" {
 		return av.ErrAttributeViewNotFound
 	}
 	if !IsSameCryptoBoundary(boxID, tree.Box) {

@@ -236,7 +236,7 @@ func createResponseCompaction(ctx context.Context, client *util.AIClient, reques
 				return nil, 0, 0, ctx.Err()
 			case <-time.After(delay):
 			}
-			sendEvent(ch, AgentEvent{Type: "retry", RetryAttempt: attempt, RetryMax: maxRetries})
+			sendEvent(ctx, ch, AgentEvent{Type: "retry", RetryAttempt: attempt, RetryMax: maxRetries})
 		}
 
 		requestCtx := ctx

@@ -21,6 +21,21 @@ func TestSystemPromptIncludesFrontendPluginDevelopment(t *testing.T) {
 	}
 }
 
+func TestSystemPromptDailyNoteCreationMatchesTools(t *testing.T) {
+	for _, prompt := range []string{systemPrompt, buildSystemPrompt("English", nil)} {
+		for _, want := range []string{"dailynote.append/prepend directly", "create today's note automatically", "without adding content"} {
+			if !strings.Contains(prompt, want) {
+				t.Fatalf("daily-note instructions are missing %q", want)
+			}
+		}
+		for _, obsolete := range []string{"then dailynote.append/prepend", "write or create this, use dailynote.create"} {
+			if strings.Contains(prompt, obsolete) {
+				t.Fatalf("daily-note instructions require a redundant create call: %q", obsolete)
+			}
+		}
+	}
+}
+
 func TestTurnContextStaysInUserMessage(t *testing.T) {
 	const userMessage = "summarize this"
 	references := []Reference{{ID: "ref-block", Title: "Referenced block"}}

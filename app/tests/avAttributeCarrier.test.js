@@ -19,9 +19,15 @@ const runCases = async () => {
             } else if (url.endsWith("getAttributeViewBacklinks")) {
                 callback({data: {total: 0, items: []}});
             }
+            return Promise.resolve();
         },
+        guardTemplateHTTPRequest: () => ({signal: new AbortController().signal, dispose() {}}),
         renderAVRichTextElements: () => {},
         preserveAVBindingRange: () => () => {},
+        preserveRelatedAVViews: () => {},
+        mountRelatedAVViews: () => {},
+        syncRelatedAVViews: () => {},
+        disposeRelatedAVViews: () => {},
         getColIconByType: () => "iconDatabase",
         genAVAttributeRowHTML: ({value}) => `<div data-row-id="${value.blockID}" data-col-id="${value.keyID}"></div>`,
         getPageSize: () => ({unGroupPageSize: 20, groupPageSize: {}}),
@@ -32,7 +38,7 @@ const runCases = async () => {
         dayjs: () => ({format: () => "20260909120000"}),
         transaction: (_protyle, doOperations, undoOperations) => transactions.push({doOperations, undoOperations}),
     });
-    const protyle = {};
+    const protyle = {options: {}};
     for (const detached of [true, false]) {
         const itemID = detached ? "detached-item" : "bound-item";
         const row = {avID: "database", itemID, valueID: "primary-value", databaseBlockID: "carrier-b"};
@@ -47,6 +53,9 @@ const runCases = async () => {
         let callbackCount = 0;
         const render = () => window.renderAVAttribute(element, itemID, protyle, () => callbackCount++, row);
         render();
+        for (const endpoint of ["getAttributeViewKeys", "getAttributeViewBacklinks"]) {
+            assert.equal(requests.filter(request => request.url.endsWith(endpoint)).at(-1).data.blockID, "carrier-b");
+        }
         let block = element.querySelector('[data-type="NodeAttributeView"]');
         assert.equal(block.dataset.nodeId, "carrier-b");
         assert.equal(block.dataset.attributeId, itemID);
@@ -84,6 +93,9 @@ const runCases = async () => {
         assert.equal(block.dataset.nodeId, "carrier-a");
         assert.equal(callbackCount, 2);
         assert.equal(requests.filter(request => request.url.endsWith("getAttributeViewKeys")).at(-1).data.itemID, itemID);
+        for (const endpoint of ["getAttributeViewKeys", "getAttributeViewBacklinks"]) {
+            assert.equal(requests.filter(request => request.url.endsWith(endpoint)).at(-1).data.blockID, "carrier-a");
+        }
     }
     // 普通块属性仍以真实块为上下文，不被所在数据库的其他镜像替换。
     const element = document.createElement("div");
@@ -92,7 +104,7 @@ const runCases = async () => {
     assert.equal(element.firstElementChild.dataset.nodeId, "document-block");
     assert.equal(element.firstElementChild.dataset.attributeId, "document-block");
     assert.deepEqual(requests.filter(request => request.url.endsWith("getAttributeViewKeys")).at(-1).data,
-        {id: "document-block"});
+        {id: "document-block", automaticRefresh: false});
 
     // 使用实际详情刷新函数，延迟接口完成并交错返回，检查内容连续性和过期响应。
     let lifecycle;
@@ -110,7 +122,7 @@ const runCases = async () => {
                 options.init(this);
             }
         },
-        Dialog: class {
+        MobileDialog: class {
             constructor(options) {
                 lifecycle = options;
                 this.element = document.createElement("div");
@@ -221,8 +233,8 @@ const runElectron = async () => {
             assert.equal(statements.length, names.length);
             return statements.map(statement => "export " + statement.getText(source).replace(/^export /, "")).join("\n");
         };
-        // 执行实际渲染、菜单请求和事务组装函数，仅隔离网络、富文本显示与编辑器外壳。
-        const sources = [extract("capabilities.generated"), extract("capabilities"), extract("cellValue"), extract("dragFillValue", ["rebindAVCellValue"]),
+        // 执行实际渲染、菜单请求和事务组装函数，隔离网络、富文本显示、关联视图生命周期与编辑器外壳。
+        const sources = [extract("capabilities.generated"), extract("capabilities"), extract("host"), extract("cellValue"), extract("dragFillValue", ["rebindAVCellValue"]),
             extract("attributePanelLayout"),
             extract("blockAttr", ["renderAVAttribute", "renderAttributeViewBacklinks"]),
             extract("openMenuPanel", ["openMenuPanel"]), extract("cell", ["updateCellsValue"]),

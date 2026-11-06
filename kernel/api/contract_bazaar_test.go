@@ -781,6 +781,7 @@ func TestBazaarContractAppearanceTransportCompatibility(t *testing.T) {
 		{"defaults", conf.NewAppearance()},
 		{"configured", &conf.Appearance{
 			ShowFloatingDockBar:      new(false),
+			ShowFloatingStatusBar:    true,
 			CompactMode:              true,
 			MenuMouseScroll:          true,
 			PDFTheme:                 &conf.PDFTheme{Light: "dark", Dark: "light", AnnoColor: "#abcdef"},

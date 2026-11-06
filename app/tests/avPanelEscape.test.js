@@ -18,6 +18,7 @@ const sources = mobile => {
     return {
         panel: compile(read("protyle/render/av/openMenuPanel.ts")),
         target: compile(read("protyle/render/av/panelTarget.ts")),
+        host: compile(read("protyle/render/av/host.ts")),
         keyboard: compile(read("boot/globalEvent/keydown.ts")),
         avKeyboard: compile(read("protyle/render/av/keydown.ts")),
         closest: compile(read("protyle/util/hasClosest.ts")),
@@ -38,6 +39,7 @@ const runCases = async (compiled, mobile) => {
     const target = load(compiled.target, {});
     const closest = load(compiled.closest, {});
     const selection = load(compiled.selection, {});
+    const host = load(compiled.host, {"../../util/hasClosest": closest});
     const keys = new Proxy({}, {get: () => ({})});
     const menuElement = document.createElement("div");
     menuElement.className = "fn__none";
@@ -59,6 +61,7 @@ const runCases = async (compiled, mobile) => {
         "./groups": {getPageSize: () => ({unGroupPageSize: 50, groupPageSize: {}})},
         "./view": {getFieldsByData: () => []},
         "./panelTarget": target,
+        "./host": host,
         "../../../util/escape": {escapeAttr: String},
         "../../../util/functions": {isMobile: () => mobile},
         "../../util/selection": {focusBlock},

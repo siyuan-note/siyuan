@@ -92,7 +92,7 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 		sessionsMu.Unlock()
 		return apicontract.AIAgentChat.WithHTTPStatus(apicontract.Failure[apicontract.Null](-1, "session is busy in another instance"), http.StatusConflict)
 	}
-	ctx, cancel := context.WithCancel(c.Request.Context())
+	ctx, cancel := context.WithCancelCause(c.Request.Context())
 	ctx = util.ContextWithOpenAIResponsesBaseURL(ctx, selectedProvider.BaseURL)
 	running := &runningSession{app: app}
 	runningSessions[req.SessionID] = running
@@ -110,7 +110,7 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 			contextLimit, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.BlockHTML, req.Language,
 			req.References, req.EditorContext, req.FrontendCapabilities, req.Regenerate, confirmTimeout, maxRetries,
 			req.ReasoningEffort, requestTimeout, streamIdleTimeout)
-		defer cancel()
+		defer cancel(nil)
 		streamClosed := false
 		defer func() {
 			if streamClosed {
@@ -127,11 +127,6 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 		c.Header("Content-Type", "text/event-stream")
 		c.Header("Cache-Control", "no-cache")
 		c.Header("Connection", "keep-alive")
-
-		flusher, ok := c.Writer.(http.Flusher)
-		if !ok {
-			return
-		}
 
 		deadlineTimer, deadline := newAgentSessionDeadline(model.Conf.AI.Load().Agent.SessionTimeout)
 		if deadlineTimer != nil {
@@ -150,16 +145,14 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 					return
 				}
 				recordRunningEvent(req.SessionID, running, event)
-				if err := writeSSE(c, event); err != nil {
+				if err := writeAgentSSE(c, event); err != nil {
 					return
 				}
-				flusher.Flush()
 			case <-c.Request.Context().Done():
 				return
 			case <-deadline:
-				writeSSEInterrupted(c, model.Conf.Language(379))
-				flusher.Flush()
-				return
+				cancel(agent.ErrSessionTimeout)
+				deadline = nil
 			}
 		}
 	})
@@ -201,7 +194,7 @@ func recordRunningEvent(sessionID string, running *runningSession, event agent.A
 	if event.Type == "turn" {
 		running.turnID = event.TurnID
 	}
-	if event.Type == "done" || event.Type == "error" {
+	if event.Type == "done" || event.Type == "error" || event.Type == "interrupted" {
 		running.terminal = true
 	}
 	sessionsMu.Unlock()
@@ -544,6 +537,8 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 		})
 	case "error":
 		return writeSSEEvent(c, "error", apicontract.AISSEMessage{Message: event.Error})
+	case "interrupted":
+		return writeSSEEvent(c, "interrupted", apicontract.AISSEMessage{Message: event.Error})
 	case "usage":
 		return writeSSEEvent(c, "usage", apicontract.AISSEUsage{
 			PromptTokens:     event.PromptTokens,
@@ -596,8 +591,23 @@ func writeSSEError(c *gin.Context, message string) error {
 	return writeSSEEvent(c, "error", apicontract.AISSEMessage{Message: message})
 }
 
-func writeSSEInterrupted(c *gin.Context, message string) error {
-	return writeSSEEvent(c, "interrupted", apicontract.AISSEMessage{Message: message})
+func writeAgentSSE(c *gin.Context, event agent.AgentEvent) error {
+	writer := http.ResponseWriter(c.Writer)
+	if unwrapper, ok := writer.(interface{ Unwrap() http.ResponseWriter }); ok {
+		// Gin 的 Flush 不返回底层错误，使用原始 writer 的 FlushError 识别断流。
+		writer = unwrapper.Unwrap()
+	}
+	controller := http.NewResponseController(writer)
+	if err := controller.SetWriteDeadline(time.Now().Add(agent.EventDeliveryTimeout)); err != nil &&
+		!errors.Is(err, http.ErrNotSupported) {
+		return err
+	}
+	defer controller.SetWriteDeadline(time.Time{})
+	if err := writeSSE(c, event); err != nil {
+		return err
+	}
+	c.Writer.WriteHeaderNow()
+	return controller.Flush()
 }
 
 var lsSkills = contractHandler(apicontract.AIListSkills, lsSkillsContract)

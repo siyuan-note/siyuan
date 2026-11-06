@@ -22,7 +22,9 @@ for (const hidden of [false, true]) {
         };
         button.firstElementChild.firstElementChild = icon;
         let click: (event: unknown) => void;
-        const status = {innerHTML: "", addEventListener: (_name: string, handler: typeof click) => { click = handler; }};
+        const status = {innerHTML: "", addEventListener: (name: string, handler: typeof click) => {
+            if (name === "click") click = handler;
+        }};
         const uiLayout = {hideDock: hidden};
         const key = {custom: "Alt+D"};
         const dock = {isFloating: () => false};
@@ -39,7 +41,8 @@ for (const hidden of [false, true]) {
         runInNewContext(compile("src/layout/status.ts"), {
             exports, window: {siyuan},
             document: {getElementById: () => status, querySelector: () => status},
-            require: (name: string) => name === "./dock/util" ? util : {escapeAriaLabel, applyStatusBarEntryVisibility() {}},
+            require: (name: string) => name === "./dock/util" ? util : {escapeAriaLabel,
+                applyStatusBarEntryVisibility() {}, syncStatusBarVisibility() {}},
         });
         exports.initStatus();
         const action = (isHidden: boolean) => isHidden ? "Show dock bars" : "Hide dock bars";

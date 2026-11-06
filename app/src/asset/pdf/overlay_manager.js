@@ -13,10 +13,20 @@
  * limitations under the License.
  */
 
+import { openPdfMobileOverlay } from "./mobileOverlay";
+
 class OverlayManager {
   #overlays = new WeakMap();
 
   #active = null;
+  #mobileSheet = null;
+  #closing = null;
+
+  focus(element) {
+    if (!this.#mobileSheet) return false;
+    this.#mobileSheet.dialog.focusWhenReady(() => element);
+    return true;
+  }
 
   get active() {
     return this.#active;
@@ -50,6 +60,7 @@ class OverlayManager {
    *                    opened.
    */
   async open(dialog) {
+    if (this.#closing) await this.#closing;
     if (!this.#overlays.has(dialog)) {
       throw new Error("The overlay does not exist.");
     } else if (this.#active) {
@@ -64,6 +75,12 @@ class OverlayManager {
     this.#active = dialog;
     // NOTE
     dialog.classList.add("dialog--open")
+    this.#mobileSheet = openPdfMobileOverlay(dialog, () => {
+      if (this.#active === dialog) {
+        this.#active = null;
+        this.#mobileSheet = null;
+      }
+    });
     // dialog.showModal();
   }
 
@@ -81,7 +98,16 @@ class OverlayManager {
       throw new Error("Another overlay is currently active.");
     }
     // NOTE
-    dialog.classList.remove("dialog--open")
+    if (this.#mobileSheet) {
+      if (this.#closing) return this.#closing;
+      const sheet = this.#mobileSheet;
+      this.#closing = sheet.closed;
+      sheet.dialog.destroy();
+      await sheet.closed;
+      this.#closing = null;
+    } else {
+      dialog.classList.remove("dialog--open")
+    }
     // dialog.close();
     this.#active = null;
   }

@@ -1,3 +1,4 @@
+import {mobileInputDialog} from "../../dialog/mobileInputDialog";
 import {toggleMenu} from "../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../menus/Menu";
 import {hasClosestByClassName} from "../util/hasClosest";
@@ -12,7 +13,6 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {Dialog} from "../../dialog";
-import {openInputDialog} from "../../dialog/inputDialog";
 import {Constants} from "../../constants";
 import {assetMenu} from "../../menus/protyle";
 import {previewImages} from "../preview/image";
@@ -624,7 +624,7 @@ export class Background {
     }
 
     private openLinkDialog(protyle: IProtyle) {
-        const dialog = openInputDialog({
+        const dialog = mobileInputDialog({
             title: window.siyuan.languages.link,
             value: this.imgElement.src.startsWith("data:") ? "" : this.imgElement.getAttribute("src"),
             onConfirm: (value, dialog) => {

@@ -502,6 +502,9 @@ func RenderAttributeViewWithTargetReadOnly(blockID, avID, viewID, query string, 
 
 // AttributeViewRenderOptions 仅影响本次渲染，不参与数据库持久化。
 type AttributeViewRenderOptions struct {
+	HTTPPreview      *sql.HTTPTemplatePreview
+	RelationContext  *AttributeViewRelationContext
+	TemporaryFilters []*av.ViewFilter
 	TemplateHTTP     *templatehttp.Execution
 	historicalSource bool // 仅认证历史/快照入口设置，客户端不能覆盖实时块索引的校验。
 	ItemStatuses     map[string]string
@@ -514,6 +517,13 @@ type AttributeViewRenderOptions struct {
 
 // RenderAttributeViewWithTargetOptions 在分页前应用临时排序；临时排序和只读请求均不创建或保存数据库。
 func RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, options AttributeViewRenderOptions) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	if options.RelationContext != nil {
+		waitForSyncingStorages()
+		return renderAttributeViewRelationDetail(blockID, avID, viewID, query, page, pageSize, groupPaging, ignoreRows, targetItemID, targetGroupID, options)
+	}
+	if options.TemporaryFilters != nil {
+		return nil, nil, nil, errors.New("temporary filters require a relation detail context")
+	}
 	if options.TemplateHTTP != nil {
 		defer func() {
 			if executionErr := options.TemplateHTTP.Err(); executionErr != nil {
@@ -558,7 +568,7 @@ func RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query string, p
 			return
 		}
 	} else if exactBox {
-		attrView, err = av.ParseAttributeViewInBox(avID, avBoxID)
+		attrView, err = av.ParseAttributeViewWithStorageContext(avID, avBoxID)
 	} else {
 		attrView, err = av.ParseAttributeView(avID)
 	}
@@ -664,12 +674,20 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 		err = contextErr
 		return
 	}
+	if options.HTTPPreview.Prepare(attrView) && !ignoreRows {
+		plan := planAttributeViewTemplates(attrView, view, query, false)
+		if plan == nil || len(plan.required) != 0 || options.Nested != nil {
+			// 筛选、排序、分组和日历依赖模板结果时先展示字段结构，避免临时行集被误认作最终结果。
+			ignoreRows = true
+		}
+	}
 	if options.Nested != nil && attrView.SubItems != nil && attrView.SubItems.Enabled && view.SubItemsDisplay == "nested" && (view.LayoutType == av.LayoutTypeTable || view.LayoutType == av.LayoutTypeList) {
 		return renderNestedAttributeView(attrView, view, query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, filterContext, options)
 	}
 
 	// 渲染视图
 	renderContext := sql.NewAttributeViewRenderContext()
+	renderContext.HTTPPreview = options.HTTPPreview
 	renderContext.TemplateHTTP = options.TemplateHTTP
 	renderContext.TemplateHTTPSourceScope = templateHTTPDatabaseSourceScope(options.TemplateHTTP)
 	defer func() {
@@ -683,7 +701,7 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 	}
 	defer renderContext.PushTemplateErrors()
 	var orderReuse *attributeViewOrderReuse
-	if !ignoreRows && strings.TrimSpace(query) == "" && filterContext == nil && target == nil && targetGroupID == "" {
+	if options.HTTPPreview == nil && !ignoreRows && strings.TrimSpace(query) == "" && filterContext == nil && target == nil && targetGroupID == "" && options.RelationContext == nil {
 		orderReuse = planAttributeViewOrderReuse(attrView, view, nodeID, writable)
 		if reused, found := orderReuse.renderPage(attrView, view, page, pageSize, renderContext); found {
 			timing.Count("order_cache_hit", 1)
@@ -714,6 +732,9 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 	if !ignoreRows && view.IsGroupView() {
 		// 在父视图分页前保存完整条目索引，各分组复用已经生成的字段值。
 		groupRenderSource = sql.NewGroupViewRenderSource(viewable, query)
+		if options.RelationContext != nil {
+			genAttrViewGroupsWithItems(view, attrView, groupRenderSource.GetItems())
+		}
 	}
 	renderTargetItemID := targetItemID(target)
 	if view.IsGroupView() || view.LayoutType == av.LayoutTypeKanban {

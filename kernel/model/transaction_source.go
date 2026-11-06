@@ -64,7 +64,7 @@ func (tx *Transaction) watchSourceDatabase(view *av.AttributeView) {
 	if tx == nil || view == nil || !tx.usesDocumentSourceJournal() {
 		return
 	}
-	filename, boundary := av.FindAttributeViewPath(view.ID)
+	filename, boundary := view.StoragePath()
 	key := boundary + "/" + view.ID
 	if tx.sourceDatabaseBefore == nil {
 		tx.sourceDatabaseBefore = map[string]*documentSourceFile{}
@@ -108,25 +108,35 @@ func (tx *Transaction) watchSourceDatabase(view *av.AttributeView) {
 
 // Relation configuration can save several databases without touching a document.
 // Establish the durable boundary before its first save, including old targets.
-func (tx *Transaction) prepareRelationSourceJournal(op *Operation) error {
+func (tx *Transaction) prepareRelationSourceJournal(op *Operation, contexts ...*AttributeViewRelationContext) error {
 	if !tx.usesDocumentSourceJournal() {
 		return nil
 	}
-	source, err := av.ParseAttributeView(op.AvID)
+	var source *av.AttributeView
+	var err error
+	exactContext := len(contexts) > 0 && contexts[0] != nil && contexts[0].storageKnown
+	if exactContext {
+		source, err = av.ParseAttributeViewWithStorageContext(op.AvID, contexts[0].storageBoxID)
+	} else {
+		source, err = tx.parseAttributeViewForOperation(op.AvID, op.BlockID)
+	}
 	if err != nil {
 		return err
 	}
-	_, boundary := av.FindAttributeViewPath(source.ID)
+	_, boundary := source.StoragePath()
 	ids := []string{source.ID, op.ID}
 	if key, _ := source.GetKey(op.KeyID); key != nil && key.Relation != nil && key.Relation.IsTwoWay {
 		ids = append(ids, key.Relation.AvID)
 	}
 	for _, id := range ids {
-		_, box := av.FindAttributeViewPath(id)
+		box := boundary
+		if _, scoped := tx.attributeViewStorageContexts[op.AvID]; !scoped && !exactContext {
+			_, box = av.FindAttributeViewPath(id)
+		}
 		if box != boundary {
 			return errors.New("cross-boundary database relation")
 		}
-		if _, err = tx.readAttributeViewForMutation(id, "", box); err != nil {
+		if _, err = tx.readAttributeViewForMutation(id, "", box, exactContext); err != nil {
 			return err
 		}
 	}
@@ -202,6 +212,9 @@ func (tx *Transaction) rememberDocumentSourceBytes(tree *parse.Tree, original []
 		return nil
 	}
 	if expected, ok := tx.tagRemovalSources[tree.ID]; ok && !bytes.Equal(expected, original) {
+		return util.ErrFileChanged
+	}
+	if expected, ok := tx.collectionRemovalVersions[tree.ID]; ok && expected != collectionSourceVersion(original) {
 		return util.ErrFileChanged
 	}
 	if tx.sourceLeases == nil {
@@ -354,7 +367,7 @@ func (tx *Transaction) rollbackDocumentSources() {
 		}
 	}
 	if tx.sourceRollbackErr == nil {
-		if err := os.Remove(j.filename()); err != nil {
+		if err := j.remove(); err != nil {
 			tx.sourceRollbackErr = err
 		}
 	}
@@ -369,7 +382,7 @@ func (tx *Transaction) releaseDocumentSources(committed bool) {
 	tx.sourceRelationBoundaries = nil
 	tx.sourceMirrors, tx.sourceBlockAttrs = nil, nil
 	if committed && tx.sourceJournal != nil {
-		if err := os.Remove(tx.sourceJournal.filename()); err != nil {
+		if err := tx.sourceJournal.remove(); err != nil {
 			logging.LogWarnf("retain committed transaction recovery [%s]: %s", tx.sourceJournal.ID, err)
 		}
 	}

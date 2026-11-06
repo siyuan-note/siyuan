@@ -5,7 +5,8 @@ import {getAnchoredMenuPosition} from "./menuPosition";
 import {bindMenuMouseScroll} from "./menuMouseScroll";
 import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGroup";
 import {getVisibleSheetViewport, waitForSheetViewport} from "./sheetOpen";
-import {getSheetActionsHTML, setSheetExpanded} from "./sheetActions";
+import {setSheetExpanded} from "./sheetActions";
+import {getMobileSheetBounds, moveSheetGesture, SheetGesture} from "../mobile/util/mobileSheetGesture";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
@@ -52,8 +53,14 @@ export class Menu {
     private sheetTouchStartTime: number | undefined;
     private sheetCanDrag = false;
     private sheetDragging = false;
-    private sheetCanExpand = false;
     private sheetStartHeight = 0;
+    private sheetResize: SheetGesture;
+    private sheetPreferredHeight: number;
+    private sheetTouchIdentifier: number;
+    private sheetViewport = "";
+    private sheetSafeArea: HTMLElement;
+    private sheetViewportObserver: MutationObserver;
+    private sheetClosing = false;
     private suppressSheetClick = false;
     private targetPositionFrame: number | undefined;
     private cancelSheetOpen: (() => void) | undefined;
@@ -127,18 +134,6 @@ export class Menu {
             }
             const target = event.target as Element;
             if (isMobile()) {
-                const sheetAction = target.closest<HTMLElement>(".b3-menu__actions [data-type]")?.dataset.type;
-                if (sheetAction) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    if (sheetAction === "sheet-expand") {
-                        setSheetExpanded(this.element, !this.element.classList.contains("b3-menu--expanded"));
-                        this.setSheetHeight();
-                    } else {
-                        this.closeSheet();
-                    }
-                    return;
-                }
                 const titleElement = hasClosestByClassName(target, "b3-menu__title");
                 const isSystemBack = typeof event.detail === "string" && event.detail === "back";
                 if ((titleElement && !titleElement.classList.contains("b3-menu__title--root")) || isSystemBack) {
@@ -238,9 +233,6 @@ export class Menu {
     }
 
     private canDragSheet(target: HTMLElement) {
-        if (target.closest(".b3-menu__actions")) {
-            return false;
-        }
         // 文件选择框覆盖上传菜单项，允许从该区域开始下拉关闭菜单。
         if (target.closest("input:not([type=\"file\"]), textarea, select, [contenteditable=\"true\"]")) {
             return false;
@@ -268,7 +260,8 @@ export class Menu {
     }
 
     private handleSheetTouchStart = (event: TouchEvent) => {
-        if (!this.element.classList.contains("b3-menu--sheet") || event.touches.length !== 1) {
+        if (!this.element.classList.contains("b3-menu--sheet") || event.touches.length !== 1 || !this.canInteractWithSheet()) {
+            this.handleSheetTouchCancel();
             return;
         }
         const touch = event.touches[0];
@@ -278,31 +271,59 @@ export class Menu {
         this.sheetCanDrag = this.canDragSheet(event.target as HTMLElement);
         this.sheetDragging = false;
         this.sheetStartHeight = this.element.clientHeight;
-        this.sheetCanExpand = this.element.getAttribute("data-sheet-expandable") === "true" &&
-            !this.element.classList.contains("b3-menu--expanded") &&
-            !!(event.target as HTMLElement).closest(".b3-menu__title");
+        this.sheetTouchIdentifier = touch.identifier;
+        this.sheetResize = undefined;
+        if (this.sheetCanDrag && (event.target as HTMLElement).closest(".b3-menu__title") === this.element.firstElementChild) {
+            const bounds = this.getSheetBounds();
+            this.sheetResize = {height: this.sheetStartHeight, min: Math.min(bounds.min, this.sheetStartHeight), max: bounds.max,
+                offset: 0, time: this.sheetTouchStartTime};
+        }
     };
 
     private handleSheetTouchMove = (event: TouchEvent) => {
+        if (this.sheetTouchStartY !== undefined && !this.canInteractWithSheet()) {
+            this.handleSheetTouchCancel();
+            return;
+        }
         if (!this.sheetCanDrag || typeof this.sheetTouchStartX !== "number" ||
             typeof this.sheetTouchStartY !== "number" || event.touches.length !== 1) {
+            if (this.sheetDragging && event.touches.length !== 1) this.handleSheetTouchCancel();
             return;
         }
         const touch = event.touches[0];
+        if (touch.identifier !== this.sheetTouchIdentifier) {
+            this.handleSheetTouchCancel();
+            return;
+        }
         const xDiff = touch.clientX - this.sheetTouchStartX;
         const yDiff = touch.clientY - this.sheetTouchStartY;
-        if (!this.sheetDragging && ((yDiff <= 0 && !this.sheetCanExpand) || Math.abs(xDiff) > Math.abs(yDiff))) {
+        if (this.sheetResize) {
+            if (Math.abs(xDiff) > Math.max(4, Math.abs(yDiff))) {
+                this.handleSheetTouchCancel();
+                return;
+            }
+            if (!this.sheetDragging && Math.abs(yDiff) < 4) return;
+            this.sheetDragging = true;
+            this.setSheetHeight();
+            if (!this.sheetResize) return;
+            this.element.style.transition = "none";
+            const result = moveSheetGesture(this.sheetResize, yDiff, performance.now());
+            this.sheetPreferredHeight = result.height;
+            setSheetExpanded(this.element, false);
+            this.setSheetHeight();
+            this.element.style.transform = `translateY(${result.excess}px)`;
+            const scrim = this.getFullscreenScrim();
+            if (scrim) scrim.style.opacity = Math.max(0, .2 * (1 - result.excess / Math.max(result.height, 1))).toString();
+            if (event.cancelable) event.preventDefault();
+            return;
+        }
+        if (!this.sheetDragging && (yDiff <= 0 || Math.abs(xDiff) > Math.abs(yDiff))) {
             return;
         }
         const offset = Math.max(0, yDiff);
         this.sheetDragging = true;
         this.element.style.transition = "none";
-        if (yDiff < 0) {
-            this.element.style.height = Math.min(window.innerHeight, this.sheetStartHeight - yDiff) + "px";
-            this.element.style.transform = "translateY(0px)";
-        } else {
-            this.element.style.transform = `translateY(${offset}px)`;
-        }
+        this.element.style.transform = `translateY(${offset}px)`;
         const scrimElement = this.getFullscreenScrim();
         if (scrimElement) {
             scrimElement.style.opacity = Math.max(0, .2 * (1 - offset / this.element.clientHeight)).toString();
@@ -317,29 +338,52 @@ export class Menu {
         this.sheetTouchStartY = undefined;
         this.sheetTouchStartTime = undefined;
         this.sheetCanDrag = false;
-        this.sheetCanExpand = false;
         this.sheetDragging = false;
+        this.sheetResize = undefined;
     }
 
     private handleSheetTouchEnd = (event: TouchEvent) => {
+        if (this.sheetTouchStartY !== undefined && !this.canInteractWithSheet()) {
+            this.handleSheetTouchCancel();
+            return;
+        }
         if (!this.sheetDragging || typeof this.sheetTouchStartY !== "number" ||
             typeof this.sheetTouchStartTime !== "number") {
             this.finishSheetTouch();
             return;
         }
         const touch = event.changedTouches[0];
+        if (!touch || touch.identifier !== this.sheetTouchIdentifier) {
+            this.handleSheetTouchCancel();
+            return;
+        }
         const offset = touch.clientY - this.sheetTouchStartY;
+        if (this.sheetResize) {
+            this.setSheetHeight();
+            if (!this.sheetResize) return;
+            const result = moveSheetGesture(this.sheetResize, offset, performance.now());
+            this.sheetPreferredHeight = result.height;
+            this.element.style.transition = "";
+            this.setSheetHeight();
+            this.suppressSheetClick = true;
+            window.setTimeout(() => { this.suppressSheetClick = false; }, 300);
+            this.finishSheetTouch();
+            if (result.close) {
+                this.closeSheet();
+            } else {
+                this.element.style.transform = "translateY(0px)";
+                const scrim = this.getFullscreenScrim();
+                if (scrim) scrim.style.opacity = "";
+            }
+            return;
+        }
         const duration = Math.max(performance.now() - this.sheetTouchStartTime, 1);
         const velocity = Math.abs(offset) / duration;
-        const shouldExpand = this.sheetCanExpand && (offset < -40 || (offset < -20 && velocity > .6));
         const shouldClose = offset > Math.min(120, this.element.clientHeight * .25) ||
             (offset > 20 && velocity > .6);
         this.element.style.transition = "";
         void this.element.offsetHeight;
-        if (shouldExpand) {
-            setSheetExpanded(this.element, true);
-            this.setSheetHeight();
-        } else if (shouldClose && this.element.classList.contains("b3-menu--expanded")) {
+        if (shouldClose && this.element.classList.contains("b3-menu--expanded")) {
             setSheetExpanded(this.element, false);
             this.setSheetHeight();
             this.element.style.transform = "translateY(0px)";
@@ -354,9 +398,6 @@ export class Menu {
             const scrimElement = this.getFullscreenScrim();
             if (scrimElement) {
                 scrimElement.style.opacity = "";
-            }
-            if (this.sheetCanExpand) {
-                this.setSheetHeight();
             }
         }
         this.suppressSheetClick = true;
@@ -375,14 +416,14 @@ export class Menu {
             if (scrimElement) {
                 scrimElement.style.opacity = "";
             }
-            if (this.sheetCanExpand) {
-                this.setSheetHeight();
-            }
         }
         this.finishSheetTouch();
     };
 
     public closeSheet() {
+        this.sheetClosing = true;
+        this.data = undefined;
+        this.finishSheetTouch();
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         if (!this.element.classList.contains("b3-menu--sheet")) {
@@ -440,9 +481,19 @@ export class Menu {
         const orientationSize = mobileSize.isLandscape ? mobileSize.landscape : mobileSize.portrait;
         const expanded = this.element.classList.contains("b3-menu--expanded");
         const expandable = this.element.getAttribute("data-sheet-expandable") === "true";
+        const viewport = this.getSheetViewport();
+        const viewportKey = `${window.innerWidth}:${window.innerHeight}:${viewport.height}:${viewport.bottomOffset}`;
+        if (this.sheetViewport && this.sheetViewport !== viewportKey && this.sheetTouchStartY !== undefined) this.handleSheetTouchCancel();
+        this.sheetViewport = viewportKey;
+        if (this.sheetPreferredHeight !== undefined) {
+            this.element.style.bottom = viewport.bottomOffset + "px";
+            this.element.style.maxHeight = viewport.height + "px";
+            this.element.style.height = Math.min(viewport.height, expanded ? viewport.height :
+                Math.max(this.getSheetBounds().min, this.sheetPreferredHeight)) + "px";
+            return;
+        }
         let maxHeight: number;
         if (this.preserveSheetKeyboard || expanded || expandable) {
-            const viewport = getVisibleSheetViewport(window.innerHeight, window.visualViewport);
             this.element.style.bottom = viewport.bottomOffset + "px";
             maxHeight = expanded ? viewport.height : this.preserveSheetKeyboard ? viewport.height * .9 :
                 Math.min(Math.max(window.innerHeight, orientationSize?.height1 || 0) * .56, viewport.height);
@@ -561,6 +612,8 @@ export class Menu {
 
     private removeScrollEvent() {
         window.removeEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, false);
+        this.element.removeEventListener("touchmove", this.preventDefault, false);
+        this.getFullscreenScrim()?.removeEventListener("touchmove", this.preventDefault, false);
     }
 
     public remove(isKeyEvent = false) {
@@ -605,6 +658,8 @@ export class Menu {
         // 菜单动作和菜单替换只清理状态，避免跳转或弹窗后抢回编辑焦点。
         this.restoreKeyboard = undefined;
         this.preserveSheetKeyboard = false;
+        this.sheetPreferredHeight = undefined;
+        this.sheetViewport = "";
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         const menuName = this.element.getAttribute("data-name");
@@ -622,8 +677,6 @@ export class Menu {
         this.removeScrollEvent();
         this.element.firstElementChild.classList.add("fn__none");
         this.element.firstElementChild.classList.remove("b3-menu__title--root");
-        this.element.firstElementChild.classList.remove("b3-menu__title--actions");
-        this.element.firstElementChild.querySelector(".b3-menu__actions")?.remove();
         (this.element.firstElementChild.querySelector(".b3-menu__label") as HTMLElement).innerHTML =
             window.siyuan.languages.back;
         this.element.lastElementChild.innerHTML = "";
@@ -633,7 +686,6 @@ export class Menu {
         setPopoverMenuOpen(this.element, false);
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet", "b3-menu--fit", "b3-menu--expanded");
         this.element.removeAttribute("data-sheet-expandable");
-        this.element.removeAttribute("data-sheet-actions");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
         this.element.removeAttribute("data-from");    // 标识菜单入口
@@ -659,12 +711,12 @@ export class Menu {
         updateMenuItemGroupClasses(this.element.lastElementChild);
     }
 
-    public popup(options: IPosition) {
+    public popup(options: IPosition, isCurrent?: () => boolean) {
         this.resetMouseScroll();
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         if (isMobile()) {
-            this.fullscreen("bottom");
+            this.fullscreen("bottom", undefined, {isCurrent});
             return;
         }
         applyMenuConfig(this.element);
@@ -677,6 +729,9 @@ export class Menu {
             from: this.element.getAttribute("data-from"),
             mode: "popup",
         });
+        if (isCurrent && !isCurrent()) {
+            return;
+        }
         window.addEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, {passive: false});
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
@@ -742,13 +797,27 @@ export class Menu {
 
     private startTrackingSheetViewport() {
         this.stopTrackingTargetPosition();
+        this.sheetSafeArea = document.createElement("div");
+        this.sheetSafeArea.style.cssText = "display:none;padding-top:var(--mobile-top-safe-area, env(safe-area-inset-top))";
+        document.body.append(this.sheetSafeArea);
+        const toolbar = document.getElementById("keyboardToolbar");
+        if (toolbar) {
+            this.sheetViewportObserver = new MutationObserver(this.updateTargetPosition);
+            this.sheetViewportObserver.observe(toolbar, {attributes: true, attributeFilter: ["class", "style"]});
+        }
         window.addEventListener("resize", this.updateTargetPosition);
+        window.addEventListener("orientationchange", this.updateTargetPosition);
         window.visualViewport?.addEventListener("resize", this.updateTargetPosition);
         window.visualViewport?.addEventListener("scroll", this.updateTargetPosition);
     }
 
     private stopTrackingTargetPosition() {
+        this.sheetSafeArea?.remove();
+        this.sheetSafeArea = undefined;
+        this.sheetViewportObserver?.disconnect();
+        this.sheetViewportObserver = undefined;
         window.removeEventListener("resize", this.updateTargetPosition);
+        window.removeEventListener("orientationchange", this.updateTargetPosition);
         window.visualViewport?.removeEventListener("resize", this.updateTargetPosition);
         window.visualViewport?.removeEventListener("scroll", this.updateTargetPosition);
         if (typeof this.targetPositionFrame === "number") {
@@ -757,8 +826,48 @@ export class Menu {
         }
     }
 
+    private getSheetViewport() {
+        const viewport = getVisibleSheetViewport(window.innerHeight, window.visualViewport);
+        const bottom = window.innerHeight - viewport.bottomOffset;
+        const top = bottom - viewport.height;
+        const safeTop = this.sheetSafeArea ? parseFloat(getComputedStyle(this.sheetSafeArea).paddingTop) || 0 : 0;
+        const toolbar = document.getElementById("keyboardToolbar");
+        const visibleBottom = toolbar && !toolbar.classList.contains("fn__none") ?
+            Math.min(bottom, toolbar.getBoundingClientRect().top) : bottom;
+        return {height: Math.max(0, visibleBottom - Math.max(top, safeTop)),
+            bottomOffset: Math.max(0, window.innerHeight - visibleBottom)};
+    }
+
+    private getSheetBounds() {
+        const items = this.element.lastElementChild as HTMLElement;
+        const flex = items.style.flex;
+        items.style.flex = "none";
+        const contentHeight = items.scrollHeight;
+        items.style.flex = flex;
+        const chrome = Math.max(this.element.firstElementChild.getBoundingClientRect().height,
+            (this.element.clientHeight || 0) - (items.clientHeight || 0));
+        const bounds = getMobileSheetBounds(chrome + contentHeight, chrome, this.getSheetViewport().height);
+        const size = window.siyuan.mobile.size;
+        const direction = size.isLandscape ? size.landscape : size.portrait;
+        bounds.min = Math.min(bounds.min, Math.max(chrome, Math.max(window.innerHeight, direction?.height1 || 0) * .56));
+        return bounds;
+    }
+
+    private canInteractWithSheet() {
+        if (this.sheetClosing || this.element.classList.contains("fn__none") || this.element.getAttribute("aria-busy") === "true") return false;
+        const zIndex = Number(this.element.style.zIndex) || 0;
+        if (window.siyuan.dialogs?.some(dialog => {
+            const overlay = dialog.element.querySelector<HTMLElement>(".b3-dialog");
+            return overlay && (Number(overlay.style.zIndex) || 0) > zIndex;
+        })) return false;
+        return !Array.from(document.querySelectorAll<HTMLElement>(".b3-menu--sheet")).some(menu =>
+            menu !== this.element && !menu.classList.contains("fn__none") && (Number(menu.style.zIndex) || 0) > zIndex);
+    }
+
     public fullscreen(position: "bottom" | "all" = "all", restoreKeyboard?: () => void,
-                      options: {preserveKeyboard?: boolean} = {}) {
+                      options: {preserveKeyboard?: boolean, isCurrent?: () => boolean} = {}) {
+        this.sheetClosing = false;
+        this.finishSheetTouch();
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         applyMenuConfig(this.element);
@@ -773,6 +882,9 @@ export class Menu {
             from: this.element.getAttribute("data-from"),
             mode: "fullscreen",
         });
+        if (options.isCurrent && !options.isCurrent()) {
+            return;
+        }
         if (!isMobile()) {
             this.element.classList.add("b3-menu--fullscreen");
             this.element.style.zIndex = (++window.siyuan.zIndex).toString();
@@ -801,24 +913,18 @@ export class Menu {
         this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")
             .forEach(updateMenuItemGroupClasses);
         this.element.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
-        if (this.element.getAttribute("data-sheet-expandable") === "true" &&
-            this.element.getAttribute("data-sheet-actions") !== "false") {
-            this.element.firstElementChild.classList.add("b3-menu__title--actions");
-            if (!this.element.firstElementChild.querySelector(".b3-menu__actions")) {
-                this.element.firstElementChild.insertAdjacentHTML("beforeend", getSheetActionsHTML());
-            }
-        }
-        if (this.preserveSheetKeyboard || this.element.classList.contains("b3-menu--fit") ||
-            this.element.getAttribute("data-sheet-expandable") === "true") {
-            // 输入法弹出后视口会异步收缩，持续跟踪视口才能按最终可用高度重新适配内容
-            this.startTrackingSheetViewport();
-        }
+        // 拖动后的偏好高度在键盘和旋转期间只裁限显示，关闭后再清除。
+        this.startTrackingSheetViewport();
         this.element.style.transform = "translateY(100%)";
         this.showFullscreenScrim();
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.firstElementChild.classList.remove("fn__none");
         this.element.classList.remove("fn__none");
-        window.addEventListener("touchmove", this.preventDefault, {passive: false});
+        const scrimElement = this.getFullscreenScrim();
+        // 遮罩覆盖菜单外区域，局部监听避免长文档在开关菜单时重建整页触摸区域。
+        (scrimElement ? [this.element, scrimElement] : [window]).forEach(element => {
+            element.addEventListener("touchmove", this.preventDefault, {passive: false});
+        });
         this.setSheetHeight();
         void this.element.offsetHeight;
         if (this.preserveSheetKeyboard) {

@@ -134,7 +134,7 @@ test("crypto backup import trims passwords and rejects whitespace-only input", a
     };
     const file = new Blob(["backup"], {type: "application/json"});
     const input = {files: [file], onchange: (): void => undefined, click() { this.onchange(); }};
-    let confirm: (value: string, dialog: {destroy: () => void}) => void;
+    let confirm: (value: string, dialog: {destroy: () => void}) => Promise<void>;
     const requests: FormData[] = [];
     let destroyed = 0;
     const dependencies = {
@@ -146,7 +146,10 @@ test("crypto backup import trims passwords and rejects whitespace-only input", a
             requests.push(data);
             return {code: 0};
         },
-        openInputDialog: (options: {onConfirm: typeof confirm}) => { confirm = options.onConfirm; },
+        mobileInputDialog: (options: {awaitConfirm: boolean, onConfirm: (value: string) => Promise<boolean>}) => {
+            assert.equal(options.awaitConfirm, true);
+            confirm = (value, dialog) => options.onConfirm(value).then(success => { if (success) dialog.destroy(); });
+        },
         showMessage: (): void => undefined,
     };
     const exports = {} as {mountEncryptedNotebook: (element: typeof root) => void};
@@ -159,13 +162,12 @@ test("crypto backup import trims passwords and rejects whitespace-only input", a
     exports.mountEncryptedNotebook(root);
     listeners.get("#importCryptoBackupBtn")();
     const dialog = {destroy: () => { destroyed++; }};
-    confirm("", dialog);
-    confirm("   ", dialog);
-    confirm("\t\u00a0\u3000\n", dialog);
+    await confirm("", dialog);
+    await confirm("   ", dialog);
+    await confirm("\t\u00a0\u3000\n", dialog);
     assert.equal(requests.length, 0);
     for (const password of [" password ", "\tpassword\n", "\u00a0password\u3000"]) {
-        confirm(password, dialog);
-        await Promise.resolve();
+        await confirm(password, dialog);
         assert.equal(requests[requests.length - 1].get("password"), password.trim());
         assert.ok(requests[requests.length - 1].get("file") instanceof Blob);
     }

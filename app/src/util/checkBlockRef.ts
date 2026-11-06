@@ -1,4 +1,4 @@
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {showMessage} from "../dialog/message";
 import {progressLoading} from "../dialog/progress";
 import {waitForPendingTransactions} from "../protyle/util/transactionQueue";

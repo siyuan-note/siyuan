@@ -64,13 +64,13 @@ html[data-frontend="browser-desktop"] body:not(.body--toolbar-hide):not(.body--w
   }
 
   &--error .b3-snackbar__content {
-    padding-left: 47px;
+    padding-left: 28px;
 
     &::after {
       content: "❗";
       position: absolute;
-      left: 16px;
-      top: 10px;
+      left: 8px;
+      top: 8px;
       font-size: 16px;
     }
   }
@@ -78,7 +78,7 @@ html[data-frontend="browser-desktop"] body:not(.body--toolbar-hide):not(.body--w
   &__content {
     line-height: 20px;
     border-radius: var(--b3-border-radius);
-    padding: 8px 16px;
+    padding: 8px;
     color: var(--b3-theme-on-primary);
     font-size: inherit;
     background-color: var(--b3-tooltips-background);
@@ -90,7 +90,7 @@ html[data-frontend="browser-desktop"] body:not(.body--toolbar-hide):not(.body--w
     display: inline-block;
 
     &--close {
-      padding-right: 50px;
+      padding-right: 34px;
     }
 
     a {
@@ -101,6 +101,11 @@ html[data-frontend="browser-desktop"] body:not(.body--toolbar-hide):not(.body--w
     ul {
       margin-left: 16px;
     }
+
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
   }
 
   &__close {
@@ -110,13 +115,40 @@ html[data-frontend="browser-desktop"] body:not(.body--toolbar-hide):not(.body--w
     width: 18px;
     color: var(--b3-theme-on-primary);
     transition: var(--b3-transition);
-    right: 16px;
-    top: 10px;
+    right: 8px;
+    top: 9px;
     box-sizing: border-box;
     opacity: .68;
 
     &:hover {
       opacity: 1;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+
+    &[hidden]:not([hidden="until-found" i]) {
+      display: none;
+    }
+  }
+
+  &__body {
+    flex: 0 0 100%;
+    min-width: 0;
+  }
+
+  &__action {
+    max-width: 100%;
+    min-width: 0;
+
+    &[hidden]:not([hidden="until-found" i]) {
+      display: none;
     }
   }
 }

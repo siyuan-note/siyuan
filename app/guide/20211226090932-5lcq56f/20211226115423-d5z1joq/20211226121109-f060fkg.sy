@@ -122,6 +122,71 @@
 					"Data": "內建明亮和暗黑佈景主題支援緊湊模式。社群佈景主題下的效果取決於主題本身的版面樣式，部分區域可能維持原有間距。"
 				}
 			]
+		},
+		{
+			"ID": "20261105114500-ba4a2fc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261105114500-ba4a2fc",
+				"updated": "20261105114500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "懸浮狀態列"
+				}
+			]
+		},
+		{
+			"ID": "20261105114500-cb463af",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105114500-cb463af",
+				"updated": "20261105114500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "隱藏底部狀態列後，可開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "介面"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "懸停顯示隱藏的狀態列"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，將滑鼠移到視窗右下角暫時顯示狀態列。滑鼠停留在狀態列上時保持展開，移出後收起。此選項適用於桌面介面，預設關閉，切換後立即生效。"
+				}
+			]
 		}
 	]
 }

@@ -1,7 +1,8 @@
 import {Constants} from "../constants";
+import {clearReloadSnapshot} from "../layout/reloadSnapshot";
 import {renderBazaarInstall, updateBazaarInstallProgress} from "../config/bazaar/installTask";
 import {getSettingsWindowHost} from "../config/setting/windowContext";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
@@ -12,9 +13,9 @@ import {getAllEditor, getAllModels} from "../layout/getAll";
 import {ipcRenderer} from "electron";
 /// #endif
 import {hideMessage, showMessage} from "./message";
-import {Dialog} from "./index";
+import {MobileDialog as Dialog} from "./mobileDialog";
 import {isMobile} from "../util/functions";
-import {confirmDialog} from "./confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "./mobileConfirmDialog";
 import {escapeHtml} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
@@ -214,6 +215,7 @@ const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean)
 };
 
 export const exitSiYuan = async (setCurrentWorkspace = true) => {
+    clearReloadSnapshot();
     const host = getSettingsWindowHost();
     if (host) {
         await host.exit(setCurrentWorkspace);
@@ -380,6 +382,13 @@ export const bootSync = () => {
                 dialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
+                if (isMobile()) {
+                    void dialog.runPending(async () => {
+                        const result = await fetchSyncPost("/api/sync/performBootSync", {});
+                        return result.code === 0;
+                    });
+                    return;
+                }
                 if (btnsElement[1].getAttribute("disabled")) {
                     return;
                 }

@@ -236,7 +236,7 @@ test("a synchronous storage exception reports failure and permits a later save",
     assert.equal(await saving, true);
 });
 
-test("legacy position writes start immediately even while tab and position writes are pending", async () => {
+test("legacy position writes are ordered independently of tab writes", async () => {
     const {api, requests} = loadLayout();
     const first = api.saveMobileStorage(constants.LOCAL_MOBILE_TABS, {revision: 1});
     const second = api.saveMobileStorage(constants.LOCAL_MOBILE_TABS, {revision: 2});
@@ -246,16 +246,18 @@ test("legacy position writes start immediately even while tab and position write
     const legacySecond = api.saveMobileStorage(constants.LOCAL_FILEPOSITION, positions);
     positions.document.top = 30;
     assert.deepEqual(requests.map(request => request.key), [
-        constants.LOCAL_MOBILE_TABS, constants.LOCAL_FILEPOSITION, constants.LOCAL_FILEPOSITION,
+        constants.LOCAL_MOBILE_TABS, constants.LOCAL_FILEPOSITION,
     ]);
     assert.deepEqual(clone(requests[1].value), {document: {id: "block", top: 10}});
-    assert.deepEqual(clone(requests[2].value), {document: {id: "block", top: 20}});
     requests.forEach(succeed);
-    assert.deepEqual(await Promise.all([first, legacyFirst, legacySecond]), [true, true, true]);
+    assert.deepEqual(await Promise.all([first, legacyFirst]), [true, true]);
     await flush();
     assert.equal(requests.length, 4);
+    assert.deepEqual(clone(requests[3].value), {document: {id: "block", top: 20}});
+    succeed(requests[2]);
     succeed(requests[3]);
     assert.equal(await second, true);
+    assert.equal(await legacySecond, true);
 });
 
 test("readonly and published storage saves succeed without cloning or sending data", async () => {
@@ -398,4 +400,56 @@ test("an unresponsive tab saver is bounded by the layout deadline", async () => 
     await advance(10000);
     assert.equal(await saving, false);
     assert.equal(timers.size, 0);
+});
+
+test("reset removes active, inactive and history scrolls and keeps unload saves clean", async () => {
+    const {api, state, requests} = loadLayout();
+    const tabs = tabsState();
+    tabs.tabs.push({...clone(tabs.tabs[0]), id: "inactive"});
+    state.mobile.tabs = {save: () => api.saveMobileStorage(constants.LOCAL_MOBILE_TABS, tabs)};
+    const resetting = api.resetMobileLayoutScroll();
+    await flush();
+    assert.equal(requests.length, 2);
+    const clean = clone(requests[0].value) as ReturnType<typeof tabsState>;
+    for (const tab of clean.tabs) {
+        for (const item of [tab.current, ...tab.backStack, ...tab.forwardStack]) {
+            assert.equal(item.scroll, undefined);
+        }
+    }
+    assert.deepEqual(clone(requests[1].value), {});
+    requests.forEach(succeed);
+    assert.equal(await resetting, true);
+    const unloading = api.saveMobileLayout();
+    await flush();
+    assert.deepEqual(clone(requests[2].value), clean);
+    succeed(requests[2]);
+    assert.equal(await unloading, true);
+});
+
+test("failed reset restores normal scroll saving", async () => {
+    const {api, state, requests} = loadLayout();
+    const tabs = tabsState();
+    state.mobile.tabs = {save: () => api.saveMobileStorage(constants.LOCAL_MOBILE_TABS, tabs)};
+    const resetting = api.resetMobileLayoutScroll();
+    await flush();
+    requests.forEach(request => request.resolve());
+    assert.equal(await resetting, false);
+    const saving = api.saveMobileLayout();
+    await flush();
+    assert.deepEqual(clone(requests[2].value), tabs);
+    succeed(requests[2]);
+    assert.equal(await saving, true);
+});
+
+test("reset is bounded and restores normal saves after an unresponsive saver", async () => {
+    const {api, state, requests, advance} = loadLayout(true);
+    state.mobile.tabs = {save: () => new Promise<boolean>(() => {})};
+    const resetting = api.resetMobileLayoutScroll();
+    await advance(10000);
+    assert.equal(await resetting, false);
+    const tabs = tabsState();
+    const saving = api.saveMobileStorage(constants.LOCAL_MOBILE_TABS, tabs);
+    assert.deepEqual(clone(requests.at(-1).value), tabs);
+    succeed(requests.at(-1));
+    assert.equal(await saving, true);
 });

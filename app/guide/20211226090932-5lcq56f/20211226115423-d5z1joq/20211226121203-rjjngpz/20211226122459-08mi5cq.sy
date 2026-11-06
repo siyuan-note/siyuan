@@ -914,6 +914,52 @@
 						"id": "20260921003419-sn7b4ld",
 						"updated": "20260921003419"
 					}
+				},
+				{
+					"ID": "20261105165002-xffitem",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261105165002-xffpara",
+							"Type": "NodeParagraph",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在兩處代理設定中設定 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "proxy_set_header X-Forwarded-For $remote_addr;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，讓內核取得真實用戶端位址。不要原樣透傳呼叫方提供的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "X-Forwarded-For"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，否則遠端用戶端可能被誤判為本機管理員"
+								}
+							],
+							"Properties": {
+								"id": "20261105165002-xffpara",
+								"updated": "20261105165002"
+							}
+						}
+					],
+					"Properties": {
+						"id": "20261105165002-xffitem",
+						"updated": "20261105165002"
+					}
 				}
 			]
 		},

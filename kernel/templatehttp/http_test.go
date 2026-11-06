@@ -240,7 +240,7 @@ func TestBudgetCountsCachedAndDeniedCalls(t *testing.T) {
 	e2 := New(context.Background(), "", func(context.Context, Request) bool { return false })
 	defer e2.Close()
 	for i := 0; i < maxRequests; i++ {
-		e2.Get("https://example.com/" + strings.Repeat("x", i))
+		e2.getScoped(strconv.Itoa(i), "https://example.com/"+strings.Repeat("x", i))
 	}
 	if e2.Get("https://example.com/new")["error"] != "budget_exceeded" {
 		t.Fatal("unbounded denied requests")

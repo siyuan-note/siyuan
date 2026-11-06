@@ -15,14 +15,15 @@ import (
 
 // 正文引用直接从事务快照提取，避免异步引用索引尚未更新时漏收或使用旧的块结构。
 func collectionReferenceMatches(source *av.AutomationBlockSource, tree *parse.Tree,
-	attributes []func(*ast.Node) bool) map[string]bool {
+	attributes []func(*ast.Node) bool, resolve func(string, string) *treenode.BlockTree,
+	changedSources map[string]bool) map[string]bool {
 	matched := map[string]bool{}
 	nodes := collectionNodes(tree)
 	boxID := ""
 	if IsEncryptedBox(tree.Box) {
 		boxID = tree.Box
 	}
-	target := attributeViewBindingBlockTree(source.ReferenceID, boxID)
+	target := resolve(source.ReferenceID, boxID)
 	if target == nil {
 		return matched
 	}
@@ -40,7 +41,7 @@ func collectionReferenceMatches(source *av.AutomationBlockSource, tree *parse.Tr
 		id, _, _ := treenode.GetBlockRef(node)
 		matches := id == source.ReferenceID
 		if !matches && target.Type == "d" {
-			definition := attributeViewBindingBlockTree(id, boxID)
+			definition := resolve(id, boxID)
 			matches = definition != nil && definition.RootID == source.ReferenceID
 		}
 		if block := treenode.ParentBlock(node); matches && block != nil && collectionTagsMatch(source, block) {
@@ -98,7 +99,19 @@ func collectionReferenceMatches(source *av.AutomationBlockSource, tree *parse.Tr
 			return backlinkHeadingCoveredIDs(parent, boxID, treeCache)
 		})
 	covered := map[string]bool{}
-	add := func(id string) {
+	add := func(id string, sources map[string]bool) {
+		if changedSources != nil {
+			affected := false
+			for sourceID := range sources {
+				if changedSources[sourceID] {
+					affected = true
+					break
+				}
+			}
+			if !affected {
+				return
+			}
+		}
 		if node := nodes[id]; node != nil && collectionBlockConditionsMatch(source, node, attributes) {
 			matched[id] = true
 		}
@@ -107,12 +120,41 @@ func collectionReferenceMatches(source *av.AutomationBlockSource, tree *parse.Tr
 		for id := range mapping.coveredRefIDs {
 			covered[id] = true
 		}
-		add(mapping.parent.ID)
+		add(mapping.parent.ID, mapping.coveredRefIDs)
 	}
 	for id := range refs {
 		if !covered[id] {
-			add(id)
+			add(id, map[string]bool{id: true})
 		}
 	}
 	return matched
+}
+
+// 事务内的新建、移动和删除目标以文档快照为准，已加载文档中的缺失目标不能回落到旧索引。
+func collectionReferenceResolver(trees map[string]*parse.Tree) func(string, string) *treenode.BlockTree {
+	blocks := map[string]*treenode.BlockTree{}
+	roots := map[string]bool{}
+	for _, tree := range trees {
+		if tree == nil {
+			continue
+		}
+		roots[tree.ID] = true
+		for id, node := range collectionNodes(tree) {
+			blocks[id] = &treenode.BlockTree{ID: id, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path,
+				Type: treenode.TypeAbbr(node.Type.String())}
+		}
+	}
+	return func(id, boxID string) *treenode.BlockTree {
+		if block := blocks[id]; block != nil {
+			if IsSameCryptoBoundary(boxID, block.BoxID) {
+				return block
+			}
+			return nil
+		}
+		block := attributeViewBindingBlockTree(id, boxID)
+		if block != nil && roots[block.RootID] {
+			return nil
+		}
+		return block
+	}
 }

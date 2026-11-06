@@ -1,6 +1,6 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {Constants} from "../../constants";
-import {Dialog} from "../../dialog";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isMobile} from "../../util/functions";
@@ -51,7 +51,7 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
         <span class="fn__space"></span>
         <input id="${rightId}" class="b3-text-field fn__flex-center fn__size96" value="${conf[rightId] ?? ""}">`;
 
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         title: window.siyuan.languages.export + " Markdown",
         content: `<div class="b3-dialog__content export-md__content">
     <!-- 常用 -->
@@ -177,7 +177,7 @@ export const exportMarkdownZip = async(options: IExportMdOptions) => {
             }
         };
         if (encrypted) {
-            confirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, exportMarkdown);
+            mobileConfirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, exportMarkdown);
             return;
         }
         exportMarkdown();

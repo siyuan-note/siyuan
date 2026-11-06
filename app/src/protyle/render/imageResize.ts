@@ -72,8 +72,12 @@ export const bindImageResize = (root: HTMLElement) => {
             frame = image.ownerDocument.createElement("span");
             container.appendChild(frame);
         }
-        frame.className = "protyle-action__drag protyle-image-resize";
-        frame.contentEditable = "false";
+        if (frame.className !== "protyle-action__drag protyle-image-resize") {
+            frame.className = "protyle-action__drag protyle-image-resize";
+        }
+        if (frame.contentEditable !== "false") {
+            frame.contentEditable = "false";
+        }
         for (const axis of ["width", "height", "both"]) {
             if (frame.querySelector(`[data-resize-axis="${axis}"]`)) {
                 continue;
@@ -97,13 +101,15 @@ export const bindImageResize = (root: HTMLElement) => {
         images.set(image, {frame, container});
         schedulePosition(image);
     };
-    const renderAdded = (element: Element) => {
+    const collectImages = (element: Element, collected: Set<HTMLImageElement>) => {
         if (element.matches(".img img")) {
-            render(element as HTMLImageElement);
+            collected.add(element as HTMLImageElement);
         }
-        element.querySelectorAll<HTMLImageElement>(".img img").forEach(render);
+        element.querySelectorAll<HTMLImageElement>(".img img").forEach(image => collected.add(image));
     };
     const observer = new MutationObserver(records => {
+        const added = new Set<Element>();
+        const removed = new Set<HTMLImageElement>();
         const remove = (image: HTMLImageElement) => {
             const state = images.get(image);
             if (state && !root.contains(image)) {
@@ -120,24 +126,45 @@ export const bindImageResize = (root: HTMLElement) => {
                 return;
             }
             const parent = record.target instanceof Element ? record.target.closest(".img") : null;
-            parent?.querySelectorAll<HTMLImageElement>("img").forEach(render);
+            if (parent) {
+                added.add(parent);
+            }
             record.addedNodes.forEach(node => {
                 if (node instanceof Element) {
-                    renderAdded(node);
+                    added.add(node);
                 }
             });
             record.removedNodes.forEach(node => {
                 if (node instanceof HTMLImageElement) {
-                    remove(node);
+                    removed.add(node);
                 } else if (node instanceof Element) {
-                    node.querySelectorAll<HTMLImageElement>("img").forEach(remove);
+                    node.querySelectorAll<HTMLImageElement>("img").forEach(image => removed.add(image));
                 }
             });
         });
+        const changed = new Set<HTMLImageElement>();
+        added.forEach(element => {
+            if (!root.contains(element)) {
+                return;
+            }
+            // 同批次的祖先节点已包含整个子树，图片只需扫描和初始化一次。
+            let parent = element.parentElement;
+            while (parent) {
+                if (added.has(parent)) {
+                    return;
+                }
+                parent = parent.parentElement;
+            }
+            collectImages(element, changed);
+        });
+        removed.forEach(remove);
+        changed.forEach(render);
     });
     // 在图片插入、替换和撤销后初始化派生控件，不依赖图片的具体插入入口。
     observer.observe(root, {childList: true, subtree: true});
-    renderAdded(root);
+    const initial = new Set<HTMLImageElement>();
+    collectImages(root, initial);
+    initial.forEach(render);
     return () => {
         observer.disconnect();
         resizeObserver.disconnect();

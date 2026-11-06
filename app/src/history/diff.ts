@@ -1,4 +1,5 @@
-import {fetchPost} from "../util/fetch";
+import {MobileDialog} from "../dialog/mobileDialog";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Dialog} from "../dialog";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
@@ -11,7 +12,7 @@ import type {App} from "../index";
 import {pathPosix} from "../util/pathName";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {resizeSide} from "./resizeSide";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
 import {showDocVersionDiff} from "./docDiff";
 import {pairSnapshotFilesByPath} from "./snapshotDiffCore";
 
@@ -438,7 +439,8 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
         expanded: new Set(),
     };
 
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {mode: "expanded"},
         title: window.siyuan.languages.compare,
         content: "",
         width: isMobile() ? "100vw" : "90vw",
@@ -522,11 +524,12 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                 event.stopPropagation();
                 break;
             } else if (target.getAttribute("data-type") == "rollback") {
-                confirmDialog("⚠️ " + window.siyuan.languages.rollback,
+                mobileConfirmDialog("⚠️ " + window.siyuan.languages.rollback,
                     window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(target.parentElement.dataset.title)).replace("${time}", dayjs(parseInt(target.parentElement.dataset.created)).format("YYYY-MM-DD HH:mm:ss")),
-                    () => {
-                        fetchPost("/api/repo/rollbackRepoSnapshotFile", {id: target.parentElement.dataset.id});
-                    });
+                    async () => {
+                        const response = await fetchSyncPost("/api/repo/rollbackRepoSnapshotFile", {id: target.parentElement.dataset.id});
+                        return response.code === 0;
+                    }, undefined, false, undefined, undefined, {awaitConfirm: true});
                 event.preventDefault();
                 event.stopPropagation();
                 break;

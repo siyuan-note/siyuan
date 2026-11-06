@@ -2,7 +2,7 @@ import {focusBlock, focusByOffset, focusByWbr, getEditorRange} from "../util/sel
 import {getSelectionOffset} from "../util/selectionOffsets";
 import {Constants} from "../../constants";
 import dayjs from "dayjs";
-import {transaction, turnsOneInto, updateTransaction, wrapBlockInBlockquote} from "./transaction";
+import {transaction, turnsIntoOneTransaction, turnsOneInto, updateTransaction, wrapBlockInBlockquote} from "./transaction";
 import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
 import {restoreInlineElementBoundaryHTML} from "../util/inlineElementBoundary";
@@ -42,6 +42,11 @@ interface IInputOperations {
     doOperations: IOperation[];
     undoOperations: IOperation[];
     undoContext?: Record<string, string>;
+}
+
+interface IInputSuperBlockOperations extends IInputOperations {
+    parentID: string;
+    previousID?: string;
 }
 
 const updateGutterAfterInput = (protyle: IProtyle, blockElement: HTMLElement) => {
@@ -452,6 +457,7 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
             tempElement.innerHTML = html;
         }
     }
+    let superBlockOperations: IInputSuperBlockOperations;
     if (needRender && (
             getContenteditableElement(tempElement.content.firstElementChild)?.innerHTML !== getContenteditableElement(blockElement).innerHTML ||
             // 内容删空后使用上下键，光标无法到达 https://github.com/siyuan-note/siyuan/issues/4167 https://ld246.com/article/1636256333803
@@ -479,10 +485,41 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
             // 使用 md 闭合后继续输入应为普通文本, 转义不需要添加 zwsp
             html = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
         }
+        const sourceElement = blockElement;
+        const sourceParentElement = blockElement.parentElement;
+        const sourcePreviousID = getPreviousBlockSibling(blockElement)?.getAttribute("data-node-id");
         blockElement.insertAdjacentHTML("afterend", html);
         blockElement = blockElement.nextElementSibling as HTMLElement;
         blockElement.previousElementSibling.remove();
         blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+        if (tempElement.content.childElementCount > 1 &&
+            sourceParentElement.getAttribute("data-type") === "NodeSuperBlock" &&
+            sourceParentElement.getAttribute("data-sb-layout") === "col") {
+            const selectsElement: HTMLElement[] = [];
+            let replacementElement = blockElement;
+            for (let index = 0; index < tempElement.content.childElementCount; index++) {
+                selectsElement.push(replacementElement);
+                replacementElement = replacementElement.nextElementSibling as HTMLElement;
+            }
+            const widthSourceElement = selectsElement.find(element => element.dataset.nodeId === id) || blockElement;
+            widthSourceElement.style.width = sourceElement.style.width;
+            widthSourceElement.style.flex = sourceElement.style.flex;
+            // 解析分块保持在原列中，包装与输入共用事务，并在恢复光标前完成节点移动。
+            // https://github.com/siyuan-note/siyuan/issues/21200
+            superBlockOperations = {
+                ...await turnsIntoOneTransaction({
+                    protyle,
+                    selectsElement,
+                    type: "BlocksMergeSuperBlock",
+                    level: "row",
+                    unfocus: true,
+                    getOperations: true,
+                    widthSourceElement,
+                }),
+                parentID: sourceParentElement.dataset.nodeId,
+                previousID: sourcePreviousID,
+            };
+        }
         // https://github.com/siyuan-note/siyuan/issues/8972
         if (html.split('<span data-type="inline-math" data-subtype="math"').length > 1) {
             Array.from(blockElement.querySelectorAll('[data-type="inline-math"]')).find((item: HTMLElement) => {
@@ -497,7 +534,7 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
         Array.from(tempElement.content.children).forEach((item, index) => {
             const tempId = item.getAttribute("data-node-id");
             let realElement;
-            if (tempId === id) {
+            if (tempId === blockElement.dataset.nodeId) {
                 realElement = blockElement;
             } else {
                 realElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${tempId}"]`);
@@ -576,7 +613,7 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
         protyle.hint.render(protyle);
     }
     updateGutterAfterInput(protyle, blockElement);
-    updateInput(html, protyle, id, inputOperations);
+    updateInput(html, protyle, id, inputOperations, superBlockOperations);
 };
 
 export const input = async (...args: Parameters<typeof inputBlock>) => {
@@ -592,7 +629,8 @@ export const input = async (...args: Parameters<typeof inputBlock>) => {
     }
 };
 
-const updateInput = (html: string, protyle: IProtyle, id: string, inputOperations?: IInputOperations) => {
+const updateInput = (html: string, protyle: IProtyle, id: string, inputOperations?: IInputOperations,
+                     superBlockOperations?: IInputSuperBlockOperations) => {
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
     const doOperations: IOperation[] = [];
@@ -624,8 +662,11 @@ const updateInput = (html: string, protyle: IProtyle, id: string, inputOperation
                 action: "insert",
                 data: item.outerHTML,
                 id: tempId,
-                previousID: index === 0 ? (firstElement ? getPreviousBlockSibling(firstElement)?.getAttribute("data-node-id") : undefined) : item.previousElementSibling.getAttribute("data-node-id"),
-                parentID: firstElement ? (getParentBlock(firstElement).getAttribute("data-node-id") || protyle.block.parentID) : protyle.block.parentID
+                previousID: index === 0 ? (superBlockOperations ? superBlockOperations.previousID :
+                    (firstElement ? getPreviousBlockSibling(firstElement)?.getAttribute("data-node-id") : undefined)) :
+                    item.previousElementSibling.getAttribute("data-node-id"),
+                parentID: superBlockOperations?.parentID || (firstElement ?
+                    (getParentBlock(firstElement).getAttribute("data-node-id") || protyle.block.parentID) : protyle.block.parentID)
             });
             undoOperations.push({
                 id: tempId,
@@ -636,6 +677,10 @@ const updateInput = (html: string, protyle: IProtyle, id: string, inputOperation
     if (inputOperations) {
         doOperations.push(...inputOperations.doOperations);
         undoOperations.push(...inputOperations.undoOperations);
+    }
+    if (superBlockOperations) {
+        doOperations.push(...superBlockOperations.doOperations);
+        undoOperations.unshift(...superBlockOperations.undoOperations);
     }
     transaction(protyle, doOperations, undoOperations);
 };

@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261102193434"
+		"updated": "20261106140529"
 	},
 	"Children": [
 		{
@@ -317,7 +317,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-iffmsq0",
-				"updated": "20261027140312"
+				"updated": "20261105133947"
 			},
 			"Children": [
 				{
@@ -538,7 +538,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-x813t3f",
-				"updated": "20261027140312"
+				"updated": "20261105133947"
 			},
 			"Children": [
 				{
@@ -552,7 +552,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170040-oce2o3k",
-				"updated": "20260816114944"
+				"updated": "20261105133947"
 			},
 			"Children": [
 				{
@@ -588,7 +588,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "While the agent is running, select the stop button to interrupt the current task. Results are generally more reliable when the goal, scope, and destination are explicit."
+					"Data": "While the agent is running, select the stop button to interrupt the current task. Automatic retries keep and continue the same thinking card. Stopping keeps already-visible output while the server finishes saving and recovery, but does not undo completed actions. A slow connection may interrupt generation; reopen the session to recover saved content. Results are generally more reliable when the goal, scope, and destination are explicit."
 				}
 			]
 		},
@@ -704,7 +704,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Read and search operations usually run immediately. Operations that create, modify, move, delete, or import data display a confirmation card that identifies possible local writes, data egress, and external charges."
+					"Data": "Local-only reads and searches usually run immediately. Operations that create, modify, move, delete or import data, or send network requests, display confirmation cards according to capability settings. The cards identify possible local writes, data egress and external charges. Online search, web fetching, the cloud inbox and online Bazaar queries send requests externally; direct web fetching and HTTP requests may also save downloads in the workspace. A cost flag means a paid service may be involved, not that every call necessarily incurs a charge. Downloading on-demand assets or preparing a snapshot before a write may also contact the sync provider and write local resources. If local writes, data egress or charges are added after confirmation, the call is stopped and must be confirmed again with the current configuration."
 				}
 			]
 		},
@@ -938,7 +938,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to search for and select installed skills."
+					"Data": " to search for and select installed skills when the slash menu is enabled. On mobile, the slash menu is disabled by default. You can select skills from the keyboard toolbar's plus panel regardless of the slash menu setting."
 				}
 			]
 		},
@@ -1205,6 +1205,10 @@
 				{
 					"Type": "NodeText",
 					"Data": ", preserving other existing files. Back up local changes before reinstalling."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " The installer stores installation records outside skill directories in data/storage/ai/agent/skills.json. The skill list reports the sanitized source URL, resolved repository reference and subdirectory when available, a full commit SHA only when known, installation time, SiYuan version, and a deterministic SHA-256 snapshot of all regular files and their relative paths. The digest describes the directory immediately after installation, not its current integrity or trustworthiness. For a single-file installation, sourceScope is manifest-only: the URL identifies only SKILL.md, while the digest also includes retained resources whose origin is not established by this installation. ZIP installation uses directory scope. Records follow skill directory renames and are removed on deletion; older or manually created skills without records show unknown. An interrupted replacement may leave the source unknown rather than retain an incorrect binding. Copy the entire workspace, including this record file, when migrating. These records do not enable, update, or approve a skill automatically."
 				}
 			]
 		},
@@ -1600,6 +1604,77 @@
 				{
 					"Type": "NodeText",
 					"Data": "Unlock an encrypted notebook before querying it and specify which notebook to use. Its embeds can query only content in that notebook."
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-48za467",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261106140529-48za467",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Document and database writes"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261106140529-2axxwlu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-2axxwlu",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When creating or moving documents, prefer the parent document ID to select the location. Use an empty parentID for the notebook root and provide the title separately. Do not infer document identity from display paths."
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-trtz9b7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-trtz9b7",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Let the system generate IDs for new blocks. Read existing content before updating and preserve its block IDs. Tools reject malformed IDs, duplicates and conflicts with existing blocks."
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-a7ihaxq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-a7ihaxq",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For database batches, database.items_add adds up to 100 rows with other field values supplied for each row; database.items_update updates up to 1000 cells. Each call commits in one transaction and preserves unspecified cells. Read field metadata first, provide values matching each field type, and inspect the saved values returned. Do not automatically retry additions whose execution result is unknown."
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-ho86trj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-ho86trj",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Number and date values require a number or date object. When supplying content, also specify isNotEmpty: true sets the value and false clears it. An object containing only content is not a complete cell value. Computed fields cannot be written directly."
 				}
 			]
 		},

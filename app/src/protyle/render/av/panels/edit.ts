@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../../../dialog/mobileDialog";
 import { getEditHTML, bindEditEvent, addCol, getColIconByType, getColNameByType, duplicateCol, removeCol } from "../col";
 import { formatNumber } from "../number";
 import { openEmojiPanel, unicode2Emoji } from "../../../../emoji";
@@ -6,7 +7,6 @@ import { updateAttrViewCellAnimation } from "../action";
 import { setPosition } from "../../../../util/setPosition";
 import { hasFilterForColumn, removeFiltersByColumn } from "../filter";
 import { hasClosestByClassName } from "../../../util/hasClosest";
-import { Dialog } from "../../../../dialog";
 import { Constants } from "../../../../constants";
 import type { IAVPanelDescriptor } from "./types";
 export const editPanel: IAVPanelDescriptor = {
@@ -251,7 +251,7 @@ export const editPanel: IAVPanelDescriptor = {
             });
             const isTwoWay = colData.type === "relation" && colData.relation?.isTwoWay;
             if (context.isCustomAttr || isTwoWay) {
-                const dialog = new Dialog({
+                const dialog = new MobileDialog({
                     title: isTwoWay ? window.siyuan.languages.removeColConfirm : window.siyuan.languages.deleteOpConfirm,
                     content: `<div class="b3-dialog__content">
     ${isTwoWay ? window.siyuan.languages.confirmRemoveRelationField

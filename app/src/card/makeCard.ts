@@ -1,4 +1,4 @@
-import {Dialog} from "../dialog";
+import {MobileDialog} from "../dialog/mobileDialog";
 import {showMessage} from "../dialog/message";
 import {Constants} from "../constants";
 import type {App} from "../index";
@@ -68,7 +68,7 @@ export const makeCard = (app: App, ids: string[]) => {
         ids.length > 1 ? actionHTML("basic", "iconBoth", window.siyuan.languages.flashcardDirectionBidirectional) : "",
         actionHTML("advanced", "iconSettings", window.siyuan.languages.configGroupAdvanced),
     ].join("");
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         positionId: Constants.DIALOG_MAKECARD,
         width: isMobile() ? "92vw" : "480px",
         title: window.siyuan.languages.riffCard,

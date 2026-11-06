@@ -31,6 +31,7 @@ test("slash visibility shares profile settings and only platform defaults differ
             getConfiguredEntryVisibility: api.getConfiguredEntryVisibility,
             getEntryOrder: (): string[] => [], getBuiltinSlashMenuItems: () => candidates,
             areProtylePluginExtensionsEnabled: () => false,
+            isTitleSlashContext: () => false,
             getSelection: (): undefined => undefined, Element: class {}, slashBuiltinStyleIDs: {},
         };
         const hintSlash = new Function(...Object.keys(dependencies),

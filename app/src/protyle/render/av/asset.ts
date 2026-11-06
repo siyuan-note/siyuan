@@ -11,12 +11,14 @@ import {MenuItem} from "../../../menus/Menu";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
 import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
-import {previewAttrViewImages} from "../../preview/image";
+import {previewAttrViewImages, previewImages} from "../../preview/image";
 import {showMessage} from "../../../dialog/message";
-import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestByClassName} from "../../util/hasClosest";
+import {getAVHost as hasClosestBlock, getAVHostIdentity, getAVRelationHost} from "./host";
 import {
     genCellValueByElement,
     getTypeByCellElement,
+    type IAVCellInputElements,
     updateAttrViewCellInOtherElements,
     updateCellsValue
 } from "./cell";
@@ -35,6 +37,21 @@ import {getAVSelectedCells, resolveAVSelectedCell, type IAVSelectedCell, type IA
 import {getAVData, getAVSelectedTableCells} from "./virtualScroll";
 import {getAVAssetUploadTargets} from "./assetUploadTarget";
 import {captureUploadDocument} from "../../upload/insertPosition";
+import {getAVCellPanelElements, isAVCellPanelForBlock} from "./panelTarget";
+
+export const previewAVAssetImages = (currentSrc: string, blockElement: Element, cellElement?: HTMLElement) => {
+    const relationHost = getAVRelationHost(blockElement);
+    if (relationHost || (blockElement as HTMLElement).dataset?.avHost) {
+        if (!relationHost || !blockElement.isConnected || !relationHost.active || !relationHost.available) return;
+        previewImages(Array.from(blockElement.querySelectorAll<HTMLImageElement>(".av__cellassetimg"))
+            .map(image => image.getAttribute("src")), currentSrc);
+        return;
+    }
+    previewAttrViewImages(currentSrc, blockElement.getAttribute("data-av-id"),
+        blockElement.getAttribute("data-node-id"), blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+        blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
+        cellElement?.closest<HTMLElement>(".av__body")?.dataset.groupId);
+};
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -74,14 +91,30 @@ const getVisibleAssetValues = (cellElements: HTMLElement[]) => {
     return genCellValueByElement("mAsset", cellElements[0]).mAsset || [];
 };
 
+const isAssetCellMenuCurrent = (menuElement: HTMLElement, blockElement: Element, cellElements: HTMLElement[]) => {
+    const panelElement = menuElement?.closest(".av__panel");
+    if (!menuElement?.isConnected || !panelElement?.isConnected ||
+        !isAVCellPanelForBlock(panelElement, blockElement)) return false;
+    const panelCells = getAVCellPanelElements(panelElement) as IAVCellInputElements;
+    const resolveInput = (cellElements as IAVCellInputElements).resolveAVCellInput;
+    return panelCells === cellElements || !!resolveInput && panelCells?.resolveAVCellInput === resolveInput;
+};
+
 export const getAssetHTML = (cellElements: HTMLElement[]) => {
     let html = "";
     const batchMode = getAVBatchEditMode(cellElements[0]);
-    getVisibleAssetValues(cellElements).forEach((item, index) => {
+    const values = getVisibleAssetValues(cellElements);
+    const inputElements = cellElements as IAVCellInputElements;
+    if (inputElements.assetPanelValues) {
+        inputElements.assetPanelValues.splice(0, inputElements.assetPanelValues.length, ...values.map(item => ({...item})));
+    } else {
+        inputElements.assetPanelValues = values.map(item => ({...item}));
+    }
+    values.forEach((item, index) => {
         let contentHTML;
         if (item.type === "image" && isBrowserRenderableImagePath(item.content)) {
             contentHTML = `<span data-type="openAssetItem" class="fn__flex-1 ariaLabel" aria-label="${escapeAriaLabel(item.content)}">
-    <img style="max-height: 180px;max-width: 360px;border-radius: var(--b3-border-radius);margin: 4px 0;" src="${getCompressURL(encodeURI(item.content))}"/>
+    <img style="max-height: 180px;max-width: 360px;border-radius: var(--b3-border-radius);margin: 4px 0;" src="${escapeAttr(getCompressURL(item.content))}"/>
 </span>`;
         } else {
             contentHTML = `<span data-type="openAssetItem" class="fn__ellipsis b3-menu__label ariaLabel" aria-label="${escapeAriaLabel(item.content)}" style="max-width: 360px">${escapeHtml(item.name || item.content)}</span>`;
@@ -127,29 +160,47 @@ export const updateAssetCell = (options: {
     addValue?: IAVCellAssetValue[],
     updateValue?: { index: number, value: IAVCellAssetValue }
     removeIndex?: number,
+    assetTarget?: { value: IAVCellAssetValue, occurrence: number },
     blockElement: Element,
     menuElement?: HTMLElement | null,
 }) => {
     if (options.protyle.disabled) {
         return;
     }
+    const resolveInput = (options.cellElements as IAVCellInputElements).resolveAVCellInput;
+    const inputTarget = resolveInput?.();
+    if (resolveInput && !inputTarget) return;
     const viewType = options.blockElement.getAttribute("data-av-type") as TAVView;
     const colId = options.targets?.[0]?.colID || getColId(options.cellElements[0], viewType);
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
     let mAssetValue: IAVCellAssetValue[];
     const batchMode = getAVBatchEditMode(options.cellElements[0]);
+    const panelValues = (options.cellElements as IAVCellInputElements).assetPanelValues ||
+        getVisibleAssetValues(options.cellElements);
     const batchTarget = typeof options.removeIndex === "number" ?
-        getVisibleAssetValues(options.cellElements)[options.removeIndex] : undefined;
+        panelValues[options.removeIndex] : undefined;
+    let assetIndex = options.removeIndex ?? options.updateValue?.index;
+    if (inputTarget && batchMode === "replace" && typeof assetIndex === "number") {
+        const target = options.assetTarget?.value || panelValues[assetIndex];
+        if (!target) return;
+        const matches = (asset: IAVCellAssetValue) => asset.type === target.type &&
+            asset.content === target.content && asset.name === target.name;
+        let occurrence = options.assetTarget?.occurrence ?? panelValues.slice(0, assetIndex).filter(matches).length;
+        // 面板索引只描述显示快照；相同附件按出现顺序定位，不能删除并发插入的其他附件。
+        const currentValue = inputTarget.cells[0]?.cell.value || genCellValueByElement("mAsset", inputTarget.elements[0]);
+        assetIndex = (currentValue.mAsset || []).findIndex(asset => matches(asset) && occurrence-- === 0);
+        if (assetIndex < 0) return;
+    }
     options.cellElements.forEach((item, elementIndex) => {
-        const target = options.targets?.[elementIndex];
+        const target = inputTarget?.cells[elementIndex] || options.targets?.[elementIndex];
         const rowID = target?.rowID || getFieldIdByCellElement(item, viewType);
         const data = target && getAVData(options.blockElement as HTMLElement);
-        const selectedCell = data && resolveAVSelectedCell(data, target);
+        const selectedCell = inputTarget?.cells[elementIndex] || (data && resolveAVSelectedCell(data, target));
         if (target && data && selectedCell?.column.type !== "mAsset") {
             return;
         }
-        item = resolveAssetCellElement(options.blockElement, item, target || {
+        item = inputTarget?.cells.length ? inputTarget.elements[elementIndex] : resolveAssetCellElement(options.blockElement, item, target || {
             rowID, colID: getColId(item, viewType), groupID: "",
         }, viewType);
         if (!item && !selectedCell) {
@@ -175,12 +226,12 @@ export const updateAssetCell = (options: {
             cellValue.mAsset = (cellValue.mAsset || []).concat(options.addValue);
         } else if (elementIndex === 0) {
             if (typeof options.removeIndex === "number") {
-                cellValue.mAsset.splice(options.removeIndex, 1);
+                cellValue.mAsset.splice(assetIndex, 1);
             } else if (options.addValue?.length > 0) {
                 cellValue.mAsset = cellValue.mAsset.concat(options.addValue);
             } else if (options.updateValue) {
                 cellValue.mAsset.find((assetItem, index) => {
-                    if (index === options.updateValue.index) {
+                    if (index === assetIndex) {
                         assetItem.content = options.updateValue.value.content;
                         assetItem.type = options.updateValue.value.type;
                         assetItem.name = options.updateValue.value.name;
@@ -215,6 +266,9 @@ export const updateAssetCell = (options: {
             updateAttrViewCellAnimation(item, cellValue);
         }
         updateAttrViewCellInOtherElements(options.protyle, avID, rowID, colId, cellValue, item);
+        if (inputTarget) {
+            options.cellElements[elementIndex].dataset.cellValue = encodeURIComponent(JSON.stringify(cellValue));
+        }
     });
     if (cellDoOperations.length === 0) {
         showMessage(window.siyuan.languages.uploadInsertTargetUnavailable);
@@ -229,7 +283,8 @@ export const updateAssetCell = (options: {
     const menuElement = typeof options.menuElement === "undefined" ?
         document.querySelector<HTMLElement>(".av__panel > .b3-menu") :
         options.menuElement?.isConnected ? options.menuElement : null;
-    if (menuElement && options.cellElements.every(item => options.blockElement.contains(item))) {
+    if (isAssetCellMenuCurrent(menuElement, options.blockElement, options.cellElements) &&
+        (inputTarget || options.cellElements.every(item => options.blockElement.contains(item)))) {
         menuElement.innerHTML = getAssetHTML(options.cellElements);
         bindAssetEvent({
             protyle: options.protyle,
@@ -237,8 +292,12 @@ export const updateAssetCell = (options: {
             cellElements: options.cellElements,
             blockElement: options.blockElement
         });
-        const cellRect = (options.cellElements[0].classList.contains("custom-attr__avvalue") ? options.cellElements[0] : options.protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`)).getBoundingClientRect();
+        const anchor = options.cellElements[0].classList.contains("custom-attr__avvalue") ? options.cellElements[0] :
+            options.blockElement.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`);
+        if (!anchor) return;
+        const cellRect = anchor.getBoundingClientRect();
         setTimeout(() => {
+            if (!isAssetCellMenuCurrent(menuElement, options.blockElement, options.cellElements)) return;
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
         }, Constants.TIMEOUT_LOAD);  // 等待图片加载
     }
@@ -258,8 +317,16 @@ export const editAssetItem = (options: {
     if (options.protyle.disabled) {
         return;
     }
+    const menuElement = document.querySelector<HTMLElement>(".av__panel > .b3-menu");
     const linkAddress = removeCompressURL(options.content);
     const type = options.type as "image" | "file";
+    const panelValues = (options.cellElements as IAVCellInputElements).assetPanelValues ||
+        getVisibleAssetValues(options.cellElements);
+    const assetTarget = {
+        value: {type, content: options.content, name: options.name},
+        occurrence: panelValues.slice(0, options.index).filter(asset => asset.type === type &&
+            asset.content === options.content && asset.name === options.name).length,
+    };
     const menu = new Menu(Constants.MENU_AV_ASSET_EDIT, async () => {
         if (options.protyle.disabled) {
             return;
@@ -289,6 +356,8 @@ export const editAssetItem = (options: {
             protyle: options.protyle,
             cellElements: options.cellElements,
             blockElement: options.blockElement,
+            menuElement,
+            assetTarget,
             updateValue: {
                 index: options.index,
                 value: {
@@ -396,6 +465,8 @@ export const editAssetItem = (options: {
                 protyle: options.protyle,
                 cellElements: options.cellElements,
                 blockElement: options.blockElement,
+                menuElement,
+                assetTarget,
                 removeIndex: options.index
             });
         }
@@ -421,14 +492,7 @@ export const editAssetItem = (options: {
             icon: "iconPreview",
             label: window.siyuan.languages.cardPreview,
             click() {
-                previewAttrViewImages(
-                    linkAddress,
-                    options.blockElement.getAttribute("data-av-id"),
-                    options.blockElement.getAttribute("data-node-id"),
-                    options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                    options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
-                    options.cellElements[0]?.closest<HTMLElement>(".av__body")?.dataset.groupId
-                );
+                previewAVAssetImages(linkAddress, options.blockElement, options.cellElements[0]);
             }
         });
     }
@@ -466,6 +530,7 @@ export const editAssetItem = (options: {
 
 export const addAssetLink = (protyle: IProtyle, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element,
                              assetType: "image" | "file", keepMenuOpen = false) => {
+    const menuElement = document.querySelector<HTMLElement>(".av__panel > .b3-menu");
     const menu = new Menu(Constants.MENU_AV_ASSET_EDIT, () => {
         const textElements = menu.element.querySelectorAll("textarea");
         if (assetType === "image") {
@@ -480,6 +545,7 @@ export const addAssetLink = (protyle: IProtyle, cellElements: HTMLElement[], tar
                 protyle,
                 cellElements,
                 blockElement,
+                menuElement,
                 addValue: [value]
             });
             return;
@@ -491,6 +557,7 @@ export const addAssetLink = (protyle: IProtyle, cellElements: HTMLElement[], tar
             protyle,
             cellElements,
             blockElement,
+            menuElement,
             addValue: [{
                 type: "file",
                 name: textElements[1].value,
@@ -567,26 +634,36 @@ const resolveAssetCellElement = (blockElement: Element, cellElement: HTMLElement
 
 const captureAssetCellUpload = (protyle: IProtyle, blockElement: Element, cells: HTMLElement[],
                                 menuElement: HTMLElement | null) => {
-    const cellElements = Array.from(cells);
+    const cellElements: IAVCellInputElements = Array.from(cells);
+    const resolveInput = (cells as IAVCellInputElements).resolveAVCellInput;
+    if (resolveInput) cellElements.resolveAVCellInput = resolveInput;
+    cellElements.assetPanelValues = (cells as IAVCellInputElements).assetPanelValues;
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     const avID = blockElement.getAttribute("data-av-id");
-    const blockID = blockElement.getAttribute("data-node-id");
+    const blockID = getAVHostIdentity(blockElement as HTMLElement);
+    const relationHost = getAVRelationHost(blockElement);
     const attributeID = blockElement.getAttribute("data-attribute-id");
     const ownerElement = blockElement.closest(".protyle-db-row");
-    const targets = cellElements.map(item => ({
+    const capturedCells = resolveInput?.()?.cells;
+    const targets = capturedCells?.length ? capturedCells : cellElements.map(item => ({
         rowID: getFieldIdByCellElement(item, viewType),
         colID: getColId(item, viewType),
         groupID: item.closest<HTMLElement>(".av__body")?.dataset.groupId || "",
     }));
     // 独立条目的上下文编辑器不挂载 DOM，使用可见面板并按原条目重新解析刷新后的字段。
-    const resolveBlock = () => ownerElement ? ownerElement.querySelector<HTMLElement>(
+    const resolveBlock = () => relationHost ? blockElement : ownerElement ? ownerElement.querySelector<HTMLElement>(
         `[data-av-id="${avID}"][data-node-id="${blockID}"][data-attribute-id="${attributeID}"]`) : blockElement;
     const isAvailable = () => {
+        const currentInput = resolveInput?.();
+        if (resolveInput && !currentInput) return false;
         const currentBlock = resolveBlock();
         if (protyle.disabled || !currentBlock || !document.body.contains(currentBlock) ||
             currentBlock.getAttribute("data-av-id") !== avID ||
-            currentBlock.getAttribute("data-node-id") !== blockID) {
+            getAVHostIdentity(currentBlock as HTMLElement) !== blockID) {
             return false;
+        }
+        if (currentInput?.cells.length) {
+            return currentInput.cells.some(cell => cell.column.type === "mAsset");
         }
         const data = getAVData(currentBlock as HTMLElement);
         return targets.some((target, index) => data ? resolveAVSelectedCell(data, target)?.column.type === "mAsset" :
@@ -610,23 +687,28 @@ const captureAssetCellUpload = (protyle: IProtyle, blockElement: Element, cells:
 export const captureAVAssetUploadHandler = (protyle: IProtyle, blockElement: HTMLElement) => {
     const panelElement = document.querySelector<HTMLElement>(".av__panel");
     const usePanelTarget = Boolean(panelElement?.querySelector(".b3-form__upload"));
-    const cellElements: HTMLElement[] = [];
+    let cellElements: HTMLElement[] = [];
     let stableCells: IAVSelectedCell[] = [];
 
     if (usePanelTarget) {
-        blockElement.querySelectorAll<HTMLElement>(".av__cell--active").forEach(item => {
-            if (getTypeByCellElement(item) === "mAsset") {
-                cellElements.push(item);
-            }
-        });
-        if (cellElements.length === 0) {
-            panelElement.querySelector(".b3-menu__items")?.getAttribute("data-ids")?.split(",").forEach(id => {
-                const item = blockElement.querySelector<HTMLElement>(
-                    `.av__gallery-fields [data-dtype="mAsset"][data-id="${id}"]`);
-                if (item) {
+        const panelCells = getAVCellPanelElements(panelElement);
+        if (panelCells) {
+            cellElements = isAVCellPanelForBlock(panelElement, blockElement) ? panelCells : [];
+        } else {
+            blockElement.querySelectorAll<HTMLElement>(".av__cell--active").forEach(item => {
+                if (getTypeByCellElement(item) === "mAsset") {
                     cellElements.push(item);
                 }
             });
+            if (cellElements.length === 0) {
+                panelElement.querySelector(".b3-menu__items")?.getAttribute("data-ids")?.split(",").forEach(id => {
+                    const item = blockElement.querySelector<HTMLElement>(
+                        `.av__gallery-fields [data-dtype="mAsset"][data-id="${id}"]`);
+                    if (item) {
+                        cellElements.push(item);
+                    }
+                });
+            }
         }
     } else {
         const selectedCells = getAVSelectedCells(blockElement);

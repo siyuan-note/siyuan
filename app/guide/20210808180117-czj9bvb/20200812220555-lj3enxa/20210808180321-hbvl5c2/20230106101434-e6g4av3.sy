@@ -6,7 +6,7 @@
 		"id": "20230106101434-e6g4av3",
 		"title": "工作空间",
 		"type": "doc",
-		"updated": "20261030093418"
+		"updated": "20261105180144"
 	},
 	"Children": [
 		{
@@ -35,6 +35,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "工作空间用于保存数据、历史、配置和运行时所需要的文件。"
+				}
+			]
+		},
+		{
+			"ID": "20261105180144-xp0kbf6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105180144-xp0kbf6",
+				"updated": "20261105180144"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端关闭窗口或退出应用的请求持续 15 秒未完成，且窗口在随后 1 秒内仍无响应时，会显示系统对话框，可继续等待或确认退出。退出可能丢失界面中尚未发送到内核的编辑。本机内核正常退出成功后才关闭窗口；失败时保留窗口，可再次尝试。关闭远程连接不会停止远程内核。托盘和应用退出入口同样支持此恢复方式；仍有响应的窗口继续按正常流程保存、确认和同步。"
 				}
 			]
 		},
@@ -170,6 +184,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "--workspace=&quot;工作空间绝对路径&quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace &quot;工作空间绝对路径&quot;"
 								},
 								{
 									"Type": "NodeText",

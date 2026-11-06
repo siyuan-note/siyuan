@@ -607,6 +607,7 @@ func bazaarAppearance(value *conf.Appearance) *apicontract.BazaarAppearance {
 	ret.CloseButtonBehavior = value.CloseButtonBehavior
 	ret.HideToolbar = value.HideToolbar
 	ret.HideStatusBar = value.HideStatusBar
+	ret.ShowFloatingStatusBar = value.ShowFloatingStatusBar
 	ret.StatusBar = bazaarStatusBar(value.StatusBar)
 	ret.Notifications = bazaarNotifications(value.Notifications)
 	ret.EntryVisibility = bazaarEntryVisibility(value.EntryVisibility)

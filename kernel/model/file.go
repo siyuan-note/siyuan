@@ -2139,7 +2139,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	})
 	if recovery != nil {
 		if err == nil {
-			err = os.Remove(recovery.filename())
+			err = recovery.remove()
 		} else {
 			util.MarkIndexFixDirty()
 		}
@@ -2582,6 +2582,14 @@ func ValidateCreateDoc(boxID, p, title string) error {
 
 func validateCreateDoc(boxID, p, title string, titleEmpty bool) (ret *createDocValidation, err error) {
 	p = normalizeBoxDocPath(boxID, p)
+	if !strings.HasPrefix(p, "/") || !strings.HasSuffix(p, ".sy") {
+		return nil, fmt.Errorf("invalid document path [%s]", p)
+	}
+	for id := range strings.SplitSeq(strings.TrimSuffix(strings.TrimPrefix(p, "/"), ".sy"), "/") {
+		if !ast.IsNodeIDPattern(id) {
+			return nil, fmt.Errorf("invalid document path [%s]", p)
+		}
+	}
 	title = normalizeDocumentTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299

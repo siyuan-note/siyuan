@@ -48,6 +48,11 @@ const parseMarkdownLaunch = (argv: string[], cwd: string,
             }
             continue;
         }
+        if (!positional && argument === "--workspace" && typeof argv[index + 1] === "string" &&
+            !argv[index + 1].startsWith("-")) {
+            index++;
+            continue;
+        }
         if (!positional && argument.startsWith("-")) continue;
         if (isMarkdownPath(argument)) {
             const before = files.length;

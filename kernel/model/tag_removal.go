@@ -159,7 +159,7 @@ func previewTagRemovalTrees(before, after map[string]*parse.Tree, changes []*api
 	defer tx.finishAttributeViewMutation(false)
 	for _, view := range views {
 		review := tx.newCollectionReview(view, "")
-		if review.uncertain || len(review.rules) == 0 {
+		if review.uncertain || review.bindingSensitive || len(review.rules) == 0 {
 			continue
 		}
 		group := &apicontract.TagRemovalCollection{AvID: view.ID, Name: view.Name,

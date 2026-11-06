@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {updateAVTableColumnWidths} from "./columnWidth";
+import * as columnWindow from "./columnWindow";
 
 const code = transpileModule(readFileSync("src/protyle/render/av/render.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -28,7 +29,8 @@ const setup = (rendered: boolean) => {
     let frozenUpdates = 0;
     const exports: {refreshAV?: (protyle: unknown, operation: unknown) => void} = {};
     const dependencies: Record<string, unknown> = {
-        "./virtualScroll": {getAVData: (block: unknown) => ({
+        "./columnWindow": columnWindow,
+        "./virtualScroll": {invalidateAVTableRowHeights: () => {}, getAVData: (block: unknown) => ({
             viewType: "table", view: block === blocks[0] ? view : otherView,
         })},
         "./viewType": {isTableLikeView: (type: string) => ["table", "list"].includes(type)},

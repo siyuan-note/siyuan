@@ -598,7 +598,7 @@ export class DocTreeController {
         }
     }
 
-    public async locate(notebook: string, id: string, options: {select?: boolean, scroll?: boolean, rootKey?: string} = {}, attempt = 0): Promise<HTMLElement> {
+    public async locate(notebook: string, id: string, options: {select?: boolean, scroll?: boolean, rootKey?: string, ignoreUnavailable?: boolean} = {}, attempt = 0): Promise<HTMLElement> {
         if (this.disposed) { return; }
         // 后台恢复不能替换主动定位；刷新改变源版本时，主动定位会重试整个路径。
         if (options.select === false && this.navigation?.select) { return; }
@@ -636,7 +636,7 @@ export class DocTreeController {
                 let located: Awaited<ReturnType<IDocTreeDataSource["locate"]>>;
                 try {
                     located = await this.source.locate({notebook, id}, {
-                        ignoreUnavailable: options.select === false && options.scroll === false,
+                        ignoreUnavailable: options.ignoreUnavailable || (options.select === false && options.scroll === false),
                     });
                 } catch {
                     return;

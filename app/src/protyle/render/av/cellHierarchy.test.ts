@@ -37,6 +37,7 @@ test("drag filling a first field retains hierarchy controls and the normal undo 
     const node = {dataset: {avId: "database"}, querySelector: (): null => null, querySelectorAll: () => [cell]};
     const transactions: IOperation[][][] = [];
     const fill = load("cell.ts", "dragFillCellsValue", {
+        getAVSelectedCells: (): import("./selectionState").IAVSelectedCell[] => [],
         hasClosestByClassName: () => ({dataset: {id: "child"}}), getTypeByCellElement: () => "text",
         genCellValueByElement: () => structuredClone(target), genAVDragFillValue, isAVReadonlyType,
         renderCell: (value: IAVCellValue) => `<span class="av__celltext">${value.text.content}</span>`,

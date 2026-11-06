@@ -63,6 +63,8 @@ type Tool struct {
 	BoxLeaseResolver func(args map[string]any) []string                                     `json:"-"`
 }
 
+// ToolEffects 表示动作可能产生的效果；ExternalCost 包括付费服务或存储的潜在费用，不代表每次调用都会收费。
+// 会话内的提问、任务清单和工具加载状态不属于工作空间数据写入。
 type ToolEffects struct {
 	LocalRead    bool `json:"localRead,omitempty"`
 	LocalWrite   bool `json:"localWrite,omitempty"`

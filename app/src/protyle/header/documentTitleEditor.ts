@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {Constants} from "../../constants";
 import {fetchSyncPost} from "../../util/fetch";
 import {showMessage} from "../../dialog/message";
@@ -20,12 +21,13 @@ import {matchHotKey} from "../util/hotKey";
 import {isCaretAtVerticalBoundary} from "../wysiwyg/verticalCaret";
 import {focusFirstVerticalRegion, prepareVerticalNavigation} from "../wysiwyg/verticalNavigation";
 import {enterDocumentFromTitle} from "./titleEnter";
-import {isDocumentTitleBlockHotkey} from "./documentTitleKeys";
+import {copyDocumentTitleTarget, isDocumentTitleBlockHotkey} from "./documentTitleKeys";
 import {acknowledgeDocumentTitleReload} from "../util/editorSave";
 import {buildBlockDOMClipboardData} from "../util/blockDOMClipboard";
 import {writeClipboardData} from "../util/compatibility";
 import {prepareExternalClipboardHTML} from "../util/richClipboard";
 import {isCommittedTextInput} from "../wysiwyg/compositionInput";
+import {hideElements} from "../ui/hideElements";
 import {getDocumentTitleDOMFingerprint, getDocumentTitleLute, getDocumentTitleUnsupportedPasteBlocks,
     prepareDocumentTitleBlockDOM, prepareDocumentTitleInitialDOM} from "./documentTitleDOM";
 
@@ -133,6 +135,10 @@ export class DocumentTitleEditor {
         }
         setMobileToolbarUndo(this.fragment.protyle, dialogDraft ? this.fragment.protyle : owner,
             redo => void this.undo(redo).catch((): void => {}));
+        this.fragment.wysiwyg.addEventListener("mousedown", () => {
+            // 标题事件在宿主处停止冒泡，需在编辑区内关闭选中文字的工具栏。
+            hideElements(["toolbar"], this.fragment.protyle);
+        });
         const events = ["input", "copy", "cut", "paste", "pointerdown", "pointerup", "mousedown", "mouseup",
             "click", "dblclick", "contextmenu", "dragstart", "dragover", "drop", "keyup"];
         events.forEach(type => host.addEventListener(type, event => event.stopPropagation()));
@@ -389,7 +395,7 @@ export class DocumentTitleEditor {
             void this.updateConflict?.().catch(error => console.error(error));
             return;
         }
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
             title: window.siyuan.languages.rename,
             content: `<div class="b3-dialog__content">${escapeHtml(window.siyuan.languages.documentTitleConflict)}
 <div class="fn__hr"></div><div class="ft__secondary">${escapeHtml(window.siyuan.languages.documentTitleLatest)}</div>
@@ -498,6 +504,9 @@ export class DocumentTitleEditor {
 
     private keydown(event: KeyboardEvent) {
         if (event.isComposing || this.composing || this.owner.disabled) {
+            return;
+        }
+        if (copyDocumentTitleTarget(event, this.owner.block.rootID)) {
             return;
         }
         if (matchHotKey("⌘Z", event) || matchHotKey("⇧⌘Z", event) || matchHotKey("⌘Y", event)) {

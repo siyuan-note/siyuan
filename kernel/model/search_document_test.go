@@ -12,7 +12,39 @@ import (
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 )
+
+func newDocumentSearchTestDB(t testing.TB) *gosql.DB {
+	t.Helper()
+	database := newSearchHPathTestDB(t)
+	if _, err := database.Exec("CREATE INDEX idx_blocks_search_metadata_root_id ON blocks(root_id) WHERE " + sql.BlockSearchMetadataPredicate); err != nil {
+		t.Fatal(err)
+	}
+	tokenizer := "siyuan"
+	if !Conf.LoadSearch().CaseSensitive {
+		tokenizer += " case_insensitive"
+	}
+	if !Conf.LoadSearch().HanSensitiveVal() {
+		tokenizer += " han_insensitive"
+	}
+	_, err := database.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(root_id UNINDEXED, content, name, alias, memo, ial, tag, content='blocks', content_rowid='rowid', tokenize='" + tokenizer + "')")
+	if err != nil {
+		if strings.Contains(err.Error(), "no such module: fts5") {
+			t.Skip("document search requires the fts5 build tag")
+		}
+		t.Fatal(err)
+	}
+	for _, statement := range []string{
+		"CREATE TRIGGER blocks_ai AFTER INSERT ON blocks BEGIN INSERT INTO blocks_fts(rowid, root_id, content, name, alias, memo, ial, tag) VALUES(new.rowid, new.root_id, new.content, new.name, new.alias, new.memo, new.ial, new.tag); END",
+		"CREATE TRIGGER blocks_au AFTER UPDATE ON blocks BEGIN INSERT INTO blocks_fts(blocks_fts, rowid, root_id, content, name, alias, memo, ial, tag) VALUES('delete', old.rowid, old.root_id, old.content, old.name, old.alias, old.memo, old.ial, old.tag); INSERT INTO blocks_fts(rowid, root_id, content, name, alias, memo, ial, tag) VALUES(new.rowid, new.root_id, new.content, new.name, new.alias, new.memo, new.ial, new.tag); END",
+	} {
+		if _, err = database.Exec(statement); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return database
+}
 
 func TestDocumentTypeFilterFromSettings(t *testing.T) {
 	setSearchCaseSensitive(t, false)
@@ -38,7 +70,7 @@ func TestDocumentSearchLiteralSpecialCharacters(t *testing.T) {
 			for _, pathOnly := range []bool{false, true} {
 				t.Run(fmt.Sprintf("%s/case=%t/path=%t", tc.name, sensitive, pathOnly), func(t *testing.T) {
 					setSearchCaseSensitive(t, sensitive)
-					database := newSearchHPathTestDB(t)
+					database := newDocumentSearchTestDB(t)
 					setting := "OFF"
 					if sensitive {
 						setting = "ON"
@@ -113,7 +145,7 @@ func BenchmarkDocumentSearch(b *testing.B) {
 	setSearchCaseSensitive(b, false)
 	for _, size := range []int{10000, 100000, 1000000} {
 		b.Run(fmt.Sprint(size), func(b *testing.B) {
-			database := newSearchHPathTestDB(b)
+			database := newDocumentSearchTestDB(b)
 			if _, err := database.Exec("CREATE INDEX idx_blocks_root_id ON blocks(root_id)"); err != nil {
 				b.Fatal(err)
 			}
@@ -146,15 +178,20 @@ func BenchmarkDocumentSearch(b *testing.B) {
 				b.Fatal(err)
 			}
 			statement := buildDocumentSearchStatement("alpha beta", []string{"alpha", "beta"}, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
-			b.ReportAllocs()
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
-				rows := documentSearchRows(b, database, statement, nil)
-				if len(rows) != 50 {
-					b.Fatalf("expected 50 documents matching keywords across blocks, got %d", len(rows))
-				}
+			baseline := withoutDocumentSearchCandidates(statement, []string{"alpha", "beta"}, "(type IN ('d','p'))", false)
+			for _, entry := range []struct{ name, statement string }{{"baseline", baseline}, {"indexed", statement}} {
+				b.Run(entry.name, func(b *testing.B) {
+					b.ReportAllocs()
+					b.ResetTimer()
+					for i := 0; i < b.N; i++ {
+						rows := documentSearchRows(b, database, entry.statement, nil)
+						if len(rows) != 50 {
+							b.Fatalf("expected 50 documents matching keywords across blocks, got %d", len(rows))
+						}
+					}
+					b.ReportMetric(float64(size), "blocks/op")
+				})
 			}
-			b.ReportMetric(float64(size), "blocks/op")
 		})
 	}
 }
@@ -163,7 +200,7 @@ func TestDocumentSearchPartialIndexResults(t *testing.T) {
 	for _, sensitive := range []bool{false, true} {
 		t.Run(fmt.Sprintf("case=%t", sensitive), func(t *testing.T) {
 			setSearchCaseSensitive(t, sensitive)
-			database := newSearchHPathTestDB(t)
+			database := newDocumentSearchTestDB(t)
 			for _, ddl := range []string{
 				"CREATE INDEX idx_blocks_root_id ON blocks(root_id)",
 				"CREATE INDEX idx_blocks_doc_hpath ON blocks(hpath) WHERE type = 'd'",
@@ -253,6 +290,150 @@ func TestDocumentSearchPartialIndexResults(t *testing.T) {
 				if indexed < 2 {
 					t.Fatalf("aggregation and result lookup must use the document index: %v", plan)
 				}
+			}
+		})
+	}
+}
+
+func TestDocumentSearchFTSCandidatesPreserveResults(t *testing.T) {
+	for _, sensitive := range []bool{false, true} {
+		t.Run(fmt.Sprint(sensitive), func(t *testing.T) {
+			setSearchCaseSensitive(t, sensitive)
+			Conf.LoadSearch().Name, Conf.LoadSearch().Alias, Conf.LoadSearch().Memo, Conf.LoadSearch().IAL = true, true, true, true
+			database := newDocumentSearchTestDB(t)
+			setting := "OFF"
+			if sensitive {
+				setting = "ON"
+			}
+			if _, err := database.Exec("PRAGMA case_sensitive_like = " + setting + "; CREATE INDEX idx_blocks_root_id ON blocks(root_id)"); err != nil {
+				t.Fatal(err)
+			}
+			for _, block := range [][5]string{
+				{"cross", "cross", "/Planning", "Planning", "d"},
+				{"meeting", "cross", "/Planning", "meeting", "p"},
+				{"records", "cross", "/Planning", "records", "p"},
+				{"substring", "substring", "/Alphabet", "alphabet", "d"},
+				{"fields", "fields", "/Unrelated", "cross", "d"},
+				{"ial", "ial", "/IAL", "cross", "d"},
+				{"commas", "commas", "/Comma", "Comma", "d"},
+				{"end", "commas", "/Comma", "end", "p"},
+				{"start", "commas", "/Comma", "start", "p"},
+				{"token", "commas", "/Comma", "token", "p"},
+				{"quotes", "quotes", "/Quote", "reader's choice", "d"},
+				{"path", "path", "/Ancestor/Meeting", "bodyword", "d"},
+				{"upper", "upper", "/Upper", "MEETING RECORDS", "d"},
+				{"unicode", "unicode", "/Unicode", "École notes", "d"},
+				{"literal", "literal", "/Literal", "100% snake_case C:\\notes", "d"},
+				{"han", "han", "/Han", "会议记录", "d"},
+			} {
+				insertSearchHPathTestBlock(t, database, block[0], block[1], block[2], block[3], block[4])
+			}
+			if _, err := database.Exec("UPDATE blocks SET alias = 'field' WHERE id = 'fields'"); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := database.Exec("UPDATE blocks SET ial = 'attribute' WHERE id = 'ial'"); err != nil {
+				t.Fatal(err)
+			}
+			queries := []string{"meet rec", "pha bet", "crossf ield", "end,start token", "reader's choice",
+				"Ancestor bodyword", "école notes", "100% snake_case", `C:\notes 100%`, "会议 记录", "会议  记录", "missing words", "end,start body,word", "crossattri bute"}
+			for _, query := range queries {
+				keywords := strings.Split(strings.ReplaceAll(query, "'", "''"), " ")
+				for _, hpath := range []bool{false, true} {
+					for _, filter := range []string{"(type IN ('d','p'))", "type = 'd'"} {
+						for order := 0; order <= 7; order++ {
+							for page := 1; page <= 3; page++ {
+								statement := buildDocumentSearchStatement(query, keywords, filter, " AND box = ?", " AND path LIKE ?", " AND id != 'ignored'", order, page, 2, hpath)
+								baseline := withoutDocumentSearchCandidates(statement, keywords, filter, hpath)
+								args := []any{"20260729120000-box000", "%", "20260729120000-box000", "%"}
+								want := documentSearchRows(t, database, baseline, args)
+								got := documentSearchRows(t, database, statement, args)
+								if !reflect.DeepEqual(got, want) {
+									t.Fatalf("candidate filter changed %q (path=%t, filter=%s, order=%d, page=%d): got %v, want %v", query, hpath, filter, order, page, got, want)
+								}
+							}
+						}
+					}
+				}
+			}
+			Conf.LoadSearch().IAL = false
+			statement := buildDocumentSearchStatement("meet rec", []string{"meet", "rec"}, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
+			rows := documentSearchRows(t, database, statement, nil)
+			foundCrossBlock := false
+			for _, row := range rows {
+				foundCrossBlock = foundCrossBlock || row[0] == "cross"
+			}
+			if !foundCrossBlock {
+				t.Fatalf("cross-block substring match missing: %v", rows)
+			}
+			plan := documentSearchRows(t, database, "EXPLAIN QUERY PLAN "+statement, nil)
+			if !strings.Contains(fmt.Sprint(plan), "SCAN blocks_fts VIRTUAL TABLE INDEX") ||
+				!strings.Contains(fmt.Sprint(plan), "SEARCH blocks USING INDEX idx_blocks_root_id (root_id=?)") ||
+				!strings.Contains(fmt.Sprint(plan), "idx_blocks_search_metadata_root_id") {
+				t.Fatalf("FTS candidates must drive indexed document lookup: %v", plan)
+			}
+		})
+	}
+}
+
+func withoutDocumentSearchCandidates(statement string, keywords []string, typeFilter string, hpath bool) string {
+	if candidates := buildDocumentSearchCandidates(keywords, typeFilter, hpath); candidates != "" {
+		return strings.Replace(statement, " AND root_id IN ("+candidates+")", "", 1)
+	}
+	return statement
+}
+
+func BenchmarkDocumentSearchSparseCandidates(b *testing.B) {
+	setSearchCaseSensitive(b, false)
+	for _, size := range []int{10000, 100000} {
+		b.Run(fmt.Sprint(size), func(b *testing.B) {
+			database := newDocumentSearchTestDB(b)
+			if _, err := database.Exec("CREATE INDEX idx_blocks_root_id ON blocks(root_id)"); err != nil {
+				b.Fatal(err)
+			}
+			tx, err := database.Begin()
+			if err != nil {
+				b.Fatal(err)
+			}
+			defer tx.Rollback()
+			insert, err := tx.Prepare("INSERT INTO blocks VALUES (?, '', ?, '', '20261019000000-box0001', ?, '', '', '', '', '', ?, '', '', 512, ?, '', '{: id=\"fixture\" updated=\"20261019000000\"}', 0, '20261019000000', '20261019000000')")
+			if err != nil {
+				b.Fatal(err)
+			}
+			defer insert.Close()
+			for i := range size {
+				root := fmt.Sprintf("doc-%07d", i/100)
+				id := fmt.Sprintf("block-%07d", i)
+				content, typ := strings.Repeat("普通笔记正文包含日常工作和项目安排以及其他内容 ", 8), "p"
+				if i%100 == 0 {
+					typ = "d"
+					id = root
+				}
+				if i%10000 == 1 {
+					content = "会议"
+				} else if i%10000 == 2 {
+					content = "记录"
+				}
+				if _, err = insert.Exec(id, root, "/"+root+".sy", content, typ); err != nil {
+					b.Fatal(err)
+				}
+			}
+			if err = tx.Commit(); err != nil {
+				b.Fatal(err)
+			}
+			keywords := []string{"会议", "记录"}
+			optimized := buildDocumentSearchStatement("会议 记录", keywords, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
+			baseline := withoutDocumentSearchCandidates(optimized, keywords, "(type IN ('d','p'))", false)
+			for _, entry := range []struct{ name, statement string }{{"baseline", baseline}, {"indexed", optimized}} {
+				b.Run(entry.name, func(b *testing.B) {
+					b.ReportAllocs()
+					b.ResetTimer()
+					for i := 0; i < b.N; i++ {
+						rows := documentSearchRows(b, database, entry.statement, nil)
+						if len(rows) != size/10000 {
+							b.Fatalf("unexpected matching document count: %d", len(rows))
+						}
+					}
+				})
 			}
 		})
 	}

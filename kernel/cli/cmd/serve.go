@@ -57,8 +57,8 @@ var serveCmd = &cobra.Command{
 
 		model.InitJwtKey()
 		model.InitConf()
-		go server.Serve(false, model.Conf.CookieKey)
 		model.InitAppearance()
+		go server.Serve(false, model.Conf.CookieKey)
 		sql.InitDatabase(false)
 		sql.InitHistoryDatabase(false)
 		sql.InitAssetContentDatabase(false)

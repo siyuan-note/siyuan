@@ -21,7 +21,8 @@ module.exports = (env, argv) => {
             path: path.resolve(__dirname, "stage/build/app"),
         },
         entry: {
-            "main": "./src/index.ts",
+            "startup": {import: "./src/boot/startup.ts", runtime: false},
+            "main": {import: "./src/index.ts", dependOn: "startup"},
             "window": "./src/window/index.ts",
             "settings": "./src/config/setting/window.ts",
         },
@@ -36,17 +37,17 @@ module.exports = (env, argv) => {
                     sourcemap: argv.mode !== "production",
                 }),
             ],
-            // 把 webpack runtime 提到独立小文件，避免业务码变动连带改变 vendors/common 的 chunkhash
+            // 独立窗口与设置窗口共享 runtime，主窗口使用诊断入口的 runtime。
             runtimeChunk: "single",
             splitChunks: {
-                chunks: "all",
+                // 诊断入口独立执行，主程序资源失败时仍可显示错误。
+                chunks: chunk => chunk.name !== "startup",
                 minSize: 20000,
                 cacheGroups: {
                     // MP3 编码器仅由录音 Worker 使用，单独分包可避免主界面提前加载。
                     recordMediaEncoder: {
                         test: /[\\/]node_modules[\\/]@breezystack[\\/]lamejs[\\/]/,
                         name: "record-media-encoder",
-                        chunks: "all",
                         priority: 20,
                         enforce: true,
                     },
@@ -54,14 +55,12 @@ module.exports = (env, argv) => {
                     vendors: {
                         test: /[\\/]node_modules[\\/]/,
                         name: "vendors",
-                        chunks: "all",
                         priority: 10,
                     },
                     // main 与 window 两入口共享的业务码（constants / layout / protyle / editor / plugin ...），
                     // 提取到 common chunk 以消除两入口约 90% 的重复打包
                     common: {
                         name: "common",
-                        chunks: "all",
                         minChunks: 2,
                         priority: 5,
                         reuseExistingChunk: true,
@@ -152,7 +151,8 @@ module.exports = (env, argv) => {
             }),
             new HtmlWebpackPlugin({
                 inject: "head",
-                chunks: ["main"],
+                chunks: ["startup", "main"],
+                chunksSortMode: "manual",
                 filename: "index.html",
                 template: "src/assets/template/app/index.tpl",
             }),

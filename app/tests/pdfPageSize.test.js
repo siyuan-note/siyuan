@@ -11,12 +11,17 @@ const browserCases = async (renderSource, persistSource) => {
     let html;
     let exported;
     let dialogs = 0;
+    let cancelDestination = true;
     let saved;
     const ipcRenderer = {
         invoke: async (_channel, options) => {
-            if (options.cmd === "showOpenDialog") {
+            if (options.cmd === "showSaveDialog") {
                 dialogs++;
-                return {canceled: false, filePaths: ["export"]};
+                check.equal(options.defaultPath, "Test.pdf");
+                check.deepEqual(options.filters, [{name: "PDF", extensions: ["pdf"]}]);
+                check.ok(options.properties.includes("showOverwriteConfirmation"));
+                if (cancelDestination) return {canceled: true};
+                return {canceled: false, filePath: "export.pdf"};
             }
             return 0;
         },
@@ -24,9 +29,9 @@ const browserCases = async (renderSource, persistSource) => {
     };
     const renderPDF = new Function("Constants", "ipcRenderer", "getAvailableExportPath", "getHostCapabilities",
         "getIconScript", "getSnippetCSS", "getSnippetJS", "getExportLanguages", "setInlineStyle", "getCustomFontStyle",
-        "getPluginStyle", "fetchPost", "headingPageBreakControls", renderSource + ";return renderPDF;")(
+        "getPluginStyle", "fetchPost", "headingPageBreakControls", "replaceLocalPath", renderSource + ";return renderPDF;")(
         Constants, ipcRenderer, async () => "", () => ({}), () => "", () => "", () => "", () => "{}",
-        async () => "", async () => "", async () => "", (_url, data) => html = data.content, () => "");
+        async () => "", async () => "", async () => "", (_url, data) => html = data.content, () => "", name => name);
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
     const open = async (pageSize = "A4") => {
         exported = undefined;
@@ -44,7 +49,7 @@ const browserCases = async (renderSource, persistSource) => {
             data: {name: "Test", attrs: {}, content: "<div>Body</div>"}})});
         const inline = html.match(/<script>\s*const previewElement[\s\S]*?<\/script>/)[0]
             .replace(/^<script>|<\/script>$/g, "");
-        new Function("require", inline)(() => ({ipcRenderer}));
+        new Function("require", inline)(name => name === "path" ? {join: (...parts) => parts.filter(Boolean).join("/")} : {ipcRenderer});
         await tick();
         await new Promise(resolve => setTimeout(resolve, 320));
     };
@@ -98,6 +103,13 @@ const browserCases = async (renderSource, persistSource) => {
     confirm.click();
     await tick();
     check.equal(dialogs, 1);
+    check.equal(exported, undefined);
+    check.ok(document.querySelector(".b3-button--text"), "Cancelling keeps the preview available");
+    cancelDestination = false;
+    confirm.click();
+    await tick();
+    check.equal(dialogs, 2);
+    check.equal(exported.filePath, "export.pdf");
     check.deepEqual(exported.pageSize, {width: 5, height: 7});
     check.deepEqual(exported.pdfOptions.pageSize, exported.pageSize);
     check.equal(exported.pdfOptions.landscape, true);

@@ -26,6 +26,8 @@ Unless a section explicitly says otherwise, "required" refers to canonical new w
 
 Canonical plaintext `.sy` writes use UTF-8 JSON without a byte order mark (BOM). The file-system tree and document-property readers accept one UTF-8 BOM (`EF BB BF`) at the very beginning of the plaintext, before JSON validation and parsing. For encrypted notebooks, this normalization takes place only after authenticated decryption; a BOM must not be prepended to the ciphertext. Successful tree repair or saving writes JSON without a BOM. Read-only snapshots and property queries leave the source unchanged. Malformed JSON, unsupported document specifications, and authentication failures remain errors and must preserve the original file; BOM tolerance does not bypass these checks.
 
+Only the file root is a `NodeDocument`. For compatible reads of historical files containing a `NodeDocument` inside the body, filesystem tree readers convert that nested node into a vertical `NodeSuperBlock` with the standard open/layout (`row`)/close markers. Its block ID, attributes (including the former title), existing child blocks, and their order are retained; an empty nested document receives an empty paragraph. File repair or saving persists the normalized structure through the existing authenticated write path, while read-only snapshots normalize only their in-memory tree. Header-only property queries leave the source unchanged. Reindexing replaces the matching obsolete nested-document index row without removing genuine documents or records from another source. This uses the existing super-block format and does not change the document specification or encryption envelope.
+
 ---
 
 ## 0.5 When to read/write `.sy` directly (priority order)

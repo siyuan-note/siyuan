@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261101195702"
+		"updated": "20261106130000"
 	},
 	"Children": [
 		{
@@ -2117,6 +2117,20 @@
 			]
 		},
 		{
+			"ID": "20261103001257-nrn4lps",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103001257-nrn4lps",
+				"updated": "20261103001257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端按住 Alt（macOS 上為 ⌥）點擊心智圖中的區塊引用或思源區塊連結，可在右側分割視窗開啟；按住 Shift 點擊可在下方分割視窗開啟。"
+				}
+			]
+		},
+		{
 			"ID": "20261028111611-4b5448e",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -2339,6 +2353,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "，可在底欄上方開啟節點樣式及樣式管理面板。不適用的操作會停用。"
+				}
+			]
+		},
+		{
+			"ID": "20261105113000-e3c1894",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105113000-e3c1894",
+				"updated": "20261105113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在非文字編輯狀態下選取單個節點，可用滑鼠或觸控拖曳節點左右邊緣的把手調整寬度。拖曳時預覽，放開後儲存一次可還原的修改；按 Esc 或取消指標操作可還原原始寬度。唯讀和鎖定檢視不顯示這些把手。仍可透過底部寬度面板精確輸入和還原自動寬度。"
 				}
 			]
 		},
@@ -4804,12 +4832,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908091355-rch0001",
-				"updated": "20260908091355"
+				"updated": "20261106130000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "儲存格預設支援編輯段落、標題、列表、引述、程式碼和公式，無需手動轉換。既有文字中的 Markdown 標記保持原樣，原有粗體、連結等格式也會保留。"
+					"Data": "儲存格預設支援編輯段落、標題、列表、引述、程式碼和公式，無需手動轉換。既有文字中的 Markdown 標記保持原樣，原有粗體、連結等格式也會保留。可透過斜線選單或加號選單插入圖片、新增文件並引用，以及設定行內樣式。"
 				}
 			]
 		},
@@ -4905,7 +4933,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 可恢復自動高度。列高隨文件儲存，標準 Markdown 匯出不保證保留列高。調整列高或欄寬時會取消儲存格框選，並在指標上方顯示尺寸；桌面端在分隔線上稍作停留會顯示指示線，拖曳時指示線跟隨邊界。"
+					"Data": " 可恢復自動高度。列高隨文件儲存，標準 Markdown 匯出不保證保留列高。調整列高或欄寬時會取消儲存格框選，並在指標左上方顯示尺寸；桌面端在分隔線上稍作停留會顯示指示線，拖曳時指示線跟隨邊界。"
 				}
 			]
 		},

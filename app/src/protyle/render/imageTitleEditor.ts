@@ -25,6 +25,7 @@ export const bindImageTitleEditor = (protyle: IProtyle, root: HTMLElement) => {
         hideTooltip();
         const originalTitle = getImageTitle(image);
         finishActive = openAnchoredInput({
+            mobileSheet: true,
             anchor: title,
             value: originalTitle,
             label: window.siyuan.languages.title,

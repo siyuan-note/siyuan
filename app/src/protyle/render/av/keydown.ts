@@ -18,6 +18,7 @@ import {
 import {getAVCellSelection, getAVItemSelection} from "./selectionState";
 import {isMobile} from "../../../util/functions";
 import {getAVVerticalNavigationAction} from "./verticalNavigation";
+import {prepareAVColumnWindow} from "./columnWindow";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle,
                           leaveVerticalRegion: (direction: "up" | "down") => boolean) => {
@@ -27,6 +28,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     if (event.isComposing) {
         return true;
     }
+    prepareAVColumnWindow(nodeElement);
     const treeControl = (event.target as Element)?.closest<HTMLElement>('[data-type="av-sub-items-toggle"], [data-type="av-sub-items-more"], [data-type="av-sub-items-root-page"]');
     if (treeControl) {
         if (event.key === "Enter" || event.key === " ") {

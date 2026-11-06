@@ -33,6 +33,7 @@ type Appearance struct {
 	CloseButtonBehavior      int                 `json:"closeButtonBehavior"`      // 关闭按钮行为，0：退出，1：最小化到托盘
 	HideToolbar              bool                `json:"hideToolbar"`              // 是否隐藏顶栏工具栏
 	HideStatusBar            bool                `json:"hideStatusBar"`            // 是否隐藏底部状态栏
+	ShowFloatingStatusBar    bool                `json:"showFloatingStatusBar"`    // 隐藏状态栏时在右下角悬停显示
 	StatusBar                *util.StatusBar     `json:"statusBar"`                // 底部状态栏配置
 	Notifications            *util.Notifications `json:"notifications"`            // 外观通知开关配置
 	EntryVisibility          *EntryVisibility    `json:"entryVisibility"`          // 桌面端入口可见性配置
@@ -76,26 +77,27 @@ func NewAppearance() *Appearance {
 // NewAppearanceForContainer 使用显式容器参数选择状态栏默认项。
 func NewAppearanceForContainer(mobile bool) *Appearance {
 	return &Appearance{
-		ShowFloatingDockBar: new(true),
-		LockScreenWallpaper: false,
-		MenuMouseScroll:     true,
-		PDFTheme:            NewPDFTheme(),
-		MobileBars:          NewMobileBars(),
-		GlobalFontFamilies:  []*EditorFont{},
-		Mode:                0,
-		ModeOS:              true,
-		ThemeDark:           "midnight",
-		ThemeLight:          "daylight",
-		Icon:                "litheness",
-		CodeBlockThemeLight: "github",
-		CodeBlockThemeDark:  "base16/dracula",
-		Lang:                "en",
-		CloseButtonBehavior: 0,
-		HideToolbar:         true,
-		HideStatusBar:       false,
-		StatusBar:           util.NewStatusBar(mobile),
-		Notifications:       util.NewNotifications(),
-		EntryVisibility:     NewEntryVisibility(EntryVisibilityProfileFull),
+		ShowFloatingDockBar:   new(true),
+		LockScreenWallpaper:   false,
+		MenuMouseScroll:       true,
+		PDFTheme:              NewPDFTheme(),
+		MobileBars:            NewMobileBars(),
+		GlobalFontFamilies:    []*EditorFont{},
+		Mode:                  0,
+		ModeOS:                true,
+		ThemeDark:             "midnight",
+		ThemeLight:            "daylight",
+		Icon:                  "litheness",
+		CodeBlockThemeLight:   "github",
+		CodeBlockThemeDark:    "base16/dracula",
+		Lang:                  "en",
+		CloseButtonBehavior:   0,
+		HideToolbar:           true,
+		HideStatusBar:         false,
+		ShowFloatingStatusBar: false,
+		StatusBar:             util.NewStatusBar(mobile),
+		Notifications:         util.NewNotifications(),
+		EntryVisibility:       NewEntryVisibility(EntryVisibilityProfileFull),
 	}
 }
 

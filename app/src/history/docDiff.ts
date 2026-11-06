@@ -1,5 +1,5 @@
+import {MobileDialog} from "../dialog/mobileDialog";
 import {Constants} from "../constants";
-import {Dialog} from "../dialog";
 import type {App} from "../index";
 import {Protyle} from "../protyle";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
@@ -105,7 +105,8 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
         // 初次渲染前没有需要移除的监听器。
     };
 
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {mode: "expanded"},
         title: window.siyuan.languages.compare,
         content: `<div class="history__doc-compare fn__flex-column">
     <div class="history__action">

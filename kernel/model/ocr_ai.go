@@ -22,6 +22,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/heif"
+	"github.com/siyuan-note/siyuan/kernel/ocr"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff"
@@ -198,7 +199,7 @@ func prepareAIOCRImage(ctx context.Context, data []byte) (util.PreparedImage, er
 		return util.PreparedImage{}, err
 	}
 	if len(data) > documentImageMaxBytes {
-		return util.PreparedImage{}, fmt.Errorf("image exceeds size limit: %d bytes", documentImageMaxBytes)
+		return util.PreparedImage{}, fmt.Errorf("%w: image exceeds size limit: %d bytes", ocr.ErrPermanent, documentImageMaxBytes)
 	}
 	switch mimeType := mimetype.Detect(data).String(); mimeType {
 	case "image/bmp", "image/tiff":
@@ -207,7 +208,7 @@ func prepareAIOCRImage(ctx context.Context, data []byte) (util.PreparedImage, er
 			return util.PreparedImage{}, err
 		}
 		if config.Width < 1 || config.Height < 1 || config.Width > documentImageMaxPixels/config.Height {
-			return util.PreparedImage{}, fmt.Errorf("image exceeds pixel limit: %d", documentImageMaxPixels)
+			return util.PreparedImage{}, fmt.Errorf("%w: image exceeds pixel limit: %d", ocr.ErrPermanent, documentImageMaxPixels)
 		}
 		decoded, err := imaging.Decode(bytes.NewReader(data), imaging.AutoOrientation(true))
 		if err != nil {
@@ -228,5 +229,9 @@ func prepareAIOCRImage(ctx context.Context, data []byte) (util.PreparedImage, er
 	if err := ctx.Err(); err != nil {
 		return util.PreparedImage{}, err
 	}
-	return util.PrepareModelImage(data, documentImageMaxBytes, documentImageMaxPixels, 0)
+	prepared, err := util.PrepareModelImage(data, documentImageMaxBytes, documentImageMaxPixels, 0)
+	if err != nil {
+		return util.PreparedImage{}, fmt.Errorf("%w: %w", ocr.ErrPermanent, err)
+	}
+	return prepared, nil
 }

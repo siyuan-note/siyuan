@@ -1,6 +1,6 @@
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {runSettingsMaintenance} from "./setting/maintenance";
-import {confirmDialog} from "../dialog/confirmDialog";
 import {isBrowser, isMobile} from "../util/functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -332,7 +332,7 @@ const assets = {
                     event.stopPropagation();
                     break;
                 } else if (target.id === "removeAll") {
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAll}`, () => {
+                    mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAll}`, () => {
                         void runSettingsMaintenance(() => fetchPost("/api/asset/removeUnusedAssets", {}, response => {
                             /// #if !MOBILE
                             getAllModels().asset.forEach(item => {
@@ -348,7 +348,7 @@ const assets = {
                     event.stopPropagation();
                     break;
                 } else if (target.id === "removeAVAll") {
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAllAV}`, () => {
+                    mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAllAV}`, () => {
                         void runSettingsMaintenance(() => fetchPost("/api/av/removeUnusedAttributeViews", {}, () => {
                             avListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                             avPreviewElement.innerHTML = "";
@@ -468,7 +468,7 @@ const assets = {
                     break;
                 } else if (type === "clear") {
                     const liElement = target.parentElement;
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${escapeHtml(liElement.querySelector(".b3-list-item__text").textContent)}</b>`, () => {
+                    mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${escapeHtml(liElement.querySelector(".b3-list-item__text").textContent)}</b>`, () => {
                         if (liElement.getAttribute("data-tab-type") === "unRefAV") {
                             const id = liElement.getAttribute("data-item");
                             fetchPost("/api/av/removeUnusedAttributeView", {

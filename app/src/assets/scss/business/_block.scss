@@ -1,5 +1,6 @@
 .block {
   &__popover {
+    font-size: 14px;
     background-color: var(--b3-theme-background);
     position: absolute;
     box-shadow: var(--b3-dialog-shadow);
@@ -170,6 +171,15 @@
         min-height: 44px;
         justify-content: center;
       }
+    }
+
+    &--inset {
+      box-sizing: border-box;
+      justify-content: center;
+      border: var(--b3-icon-background-inset, 0px) solid transparent;
+      border-radius: calc(var(--b3-border-radius) + var(--b3-icon-background-inset, 0px));
+      background-clip: padding-box;
+      transition-property: color, opacity, background-color;
     }
 
     &--tap {

@@ -61,6 +61,32 @@ test("real desktop session preserves BOM and CRLF and recognizes its own atomic 
     assert.equal(await session.close(), true);
 });
 
+test("external atomic saves reload clean sessions and preserve dirty edits for conflict resolution", async t => {
+    const {directory, host} = await fixture(t);
+    const file = path.join(directory, "note.md");
+    const replacement = path.join(directory, "replacement.md");
+    await fs.writeFile(file, "original");
+    const session = await open(host, file);
+    await fs.writeFile(replacement, "external");
+    await fs.rename(replacement, file);
+    assert.equal(await session.reload(), true);
+    assert.equal(session.getState().content, "external");
+    assert.equal(session.getState().status, "saved");
+    edit(session, "local draft");
+    await fs.writeFile(replacement, "new external");
+    await fs.rename(replacement, file);
+    assert.equal(await session.reload(), false);
+    assert.equal(session.getState().content, "local draft");
+    assert.equal(session.getState().status, "conflict");
+    assert.equal(await fs.readFile(file, "utf8"), "new external");
+    assert.equal(await session.reload({discardChanges: true}), true);
+    assert.equal(session.getState().content, "new external");
+    edit(session, "accepted edit");
+    await session.flush();
+    assert.equal(await fs.readFile(file, "utf8"), "accepted edit");
+    assert.equal(await session.close(), true);
+});
+
 test("two desktop windows cannot reserve or open the same Save As candidate", async t => {
     const {directory, host} = await fixture(t);
     const file = path.join(directory, "target.md");

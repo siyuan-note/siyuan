@@ -168,6 +168,31 @@ func TestDoomLoopTracksFailedQuestionCalls(t *testing.T) {
 	}
 }
 
+func TestDoomLoopTracksDocumentParents(t *testing.T) {
+	var tracker doomLoopTracker
+	args := map[string]any{"notebook": "box", "parentID": "parent-a", "path": ""}
+	for range doomLoopWarnThreshold {
+		tracker.record("document", "create", args, true)
+	}
+	if tracker.count != doomLoopWarnThreshold {
+		t.Fatalf("repeated document failure was not tracked: %#v", tracker)
+	}
+	args["parentID"] = "parent-b"
+	tracker.record("document", "create", args, true)
+	if tracker.count != 1 {
+		t.Fatalf("different parent was treated as a repeated failure: %#v", tracker)
+	}
+	args["parentID"] = ""
+	tracker.record("document", "create", args, true)
+	if tracker.count != 1 {
+		t.Fatalf("notebook root was treated as the previous parent: %#v", tracker)
+	}
+	tracker.record("document", "create", args, false)
+	if tracker.count != 0 {
+		t.Fatalf("successful document call did not reset tracker: %#v", tracker)
+	}
+}
+
 func TestResultToStringUsesStructuredContent(t *testing.T) {
 	result := resultToString(tools.CallToolResult{
 		StructuredContent: map[string]any{"status": "ok"},
@@ -303,18 +328,19 @@ func TestNeedsConfirmScopesReadOnlyActionsByToolSource(t *testing.T) {
 	if !needsConfirm("unzip", "", nil) || !needsLocalSnapshot("unzip", "") {
 		t.Fatal("actionless write tool must require confirmation and create a local snapshot")
 	}
-	if needsConfirm("web_fetch", "", nil) || needsLocalSnapshot("web_fetch", "") {
-		t.Fatal("actionless read-only tool must not require confirmation or create a snapshot")
+	if !needsConfirm("web_fetch", "", nil) || !needsLocalSnapshot("web_fetch", "") {
+		t.Fatal("direct web fetch must confirm external requests and snapshot possible downloads")
 	}
 	if needsConfirm("todo_write", "", nil) || needsLocalSnapshot("todo_write", "") {
 		t.Fatal("agent session todo updates must not require confirmation or create a repository snapshot")
 	}
-	if needsConfirm("http_request", "", nil) || needsLocalSnapshot("http_request", "") {
-		t.Fatal("http_request without an action defaults to a read-only GET")
+	if !needsConfirm("http_request", "", nil) || !needsLocalSnapshot("http_request", "") {
+		t.Fatal("default HTTP GET must confirm egress and snapshot possible downloads")
 	}
 }
 
 func TestImageToolActionEffects(t *testing.T) {
+	setupLocalToolEffectsTest(t)
 	if needsConfirm("image", "list", nil) || needsLocalSnapshot("image", "list") {
 		t.Fatal("listing document images must be a confirmation-free local read")
 	}
@@ -344,8 +370,8 @@ func TestSkillToolActionEffects(t *testing.T) {
 
 func TestBazaarToolActionEffects(t *testing.T) {
 	for _, action := range []string{"list", "installed", "updates", "readme"} {
-		if needsConfirm("bazaar", action, nil) || needsLocalSnapshot("bazaar", action) {
-			t.Errorf("read-only Bazaar action %q must not confirm or snapshot", action)
+		if needsConfirm("bazaar", action, nil) != (action != "installed") || needsLocalSnapshot("bazaar", action) {
+			t.Errorf("Bazaar query %q must confirm network requests only, without a local snapshot", action)
 		}
 	}
 	for _, action := range []string{"install", "uninstall", "update", "update_all", "install_local", "enable", "disable"} {
@@ -395,6 +421,7 @@ func TestQueryToolActionEffects(t *testing.T) {
 }
 
 func TestBrowserCapabilityEffects(t *testing.T) {
+	setupLocalToolEffectsTest(t)
 	renderedFetch := &capabilityRegistration{ID: "native/frontend/web_page_fetch", ModelName: "frontend__web_page_fetch",
 		Source: "native", Runtime: "browser", Effects: tools.ToolEffects{DataEgress: true}, EffectsDeclared: true}
 	if required, _ := capabilityConfirmRequirement(renderedFetch, "", nil, false, nil); !required || needsCapabilitySnapshot(renderedFetch, "") {

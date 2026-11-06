@@ -106,7 +106,7 @@ const runElectron = async () => {
         const {parse} = require("ifdef-loader/preprocessor");
         for (const mobile of [false, true]) {
             const files = {"./row": "render/av/row", "./action": "render/av/action",
-                "./cover": "render/av/cover", "./gallery/cardLayout": "render/av/gallery/cardLayout",
+                "./cover": "render/av/cover", "./host": "render/av/host", "./gallery/cardLayout": "render/av/gallery/cardLayout",
                 "../../util/hasClosest": "util/hasClosest"};
             const sources = Object.fromEntries(Object.entries(files).map(([name, file]) => [name,
                 ts.transpileModule(parse(readFileSync(path.join(__dirname, `../src/protyle/${file}.ts`), "utf8"),

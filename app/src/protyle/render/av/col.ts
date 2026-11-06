@@ -1,3 +1,7 @@
+import {MobileDialog} from "../../../dialog/mobileDialog";
+import {prepareAVColumnWindow} from "./columnWindow";
+import {insertAVTableColumn} from "./columnPresentation";
+import {getTablePinIndex} from "./groupTableVirtual";
 import {bindTemplateHTTPPermission, templateHTTPPermissionHTML} from "../../../template/httpPermission";
 import {hasAVCapability, isAVReadonlyType, isAVSelectType, isAVTimestampType} from "./capabilities";
 import {isTableLikeView} from "./viewType";
@@ -13,6 +17,7 @@ import {getPropertiesHTML} from "./panels/properties";
 import {getLabelByNumberFormat} from "./number";
 import {getDefaultDateFormat, getLabelByDateFormat} from "./dateFormat";
 import {bindDateCalendarMenu} from "./dateCalendarMenu";
+import {bindRelatedViewConfig, getRelatedViewConfigHTML} from "./relatedViewConfig";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
@@ -22,7 +27,6 @@ import {Constants} from "../../../constants";
 import dayjs from "dayjs";
 import {setPosition} from "../../../util/setPosition";
 import {duplicateNameAddOne, isMobile} from "../../../util/functions";
-import {Dialog} from "../../../dialog";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {getFieldsByData} from "./view";
 import {hasClosestByClassName} from "../../util/hasClosest";
@@ -199,7 +203,7 @@ export const getEditHTML = (options: {
 </div>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
     <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
-    </div>`;
+    </div>${getRelatedViewConfigHTML(colData, options.protyle)}`;
     } else if (colData.type === "rollup") {
         html += '<button class="b3-menu__separator" data-id="separator_2"></button>' +
             getRollupHTML({data: options.data, colData});
@@ -313,6 +317,9 @@ export const bindEditEvent = (options: {
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
     bindDateCalendarMenu(options.protyle, avID, colData, options.menuElement);
+    if (colData.type === "relation") {
+        void bindRelatedViewConfig(options.protyle, avID, colData, options.menuElement, options.blockID);
+    }
     (["template", "renderTemplate"] as const).forEach(slot => {
         bindTemplateHTTPPermission(options.menuElement, {kind: "av", avID, keyID: colId, slot});
     });
@@ -773,7 +780,7 @@ export const getColIconByType = (type: TAVCol) => {
     }
 };
 
-const addAttrViewColAnimation = (options: {
+export const addAttrViewColAnimation = (options: {
     blockElement: Element,
     protyle: IProtyle,
     type: TAVCol,
@@ -791,6 +798,16 @@ const addAttrViewColAnimation = (options: {
     const colData = options.data ? getFieldsByData(options.data).find(item => item.id === options.id) : undefined;
     const dateFormat = options.dateFormat ?? colData?.dateFormat ?? getDefaultDateFormat(options.type);
     const insertTableColumn = (blockElement: Element) => {
+        prepareAVColumnWindow(blockElement as HTMLElement);
+        const data = getAVData(blockElement as HTMLElement);
+        if (data && isTableLikeView(data.viewType)) {
+            const column = {...colData, id: options.id, name: options.name, type: options.type,
+                icon: options.icon || "", dateFormat, width: "200px", wrap: false, hidden: false, pin: false} as IAVColumn;
+            insertAVTableColumn(data.view as IAVTable, column, options.previousID, rowID => ({
+                id: "", color: "", bgColor: "", valueType: options.type,
+                value: createEmptyAVValue(options.id, options.type, rowID),
+            }));
+        }
         blockElement.querySelectorAll(".av__row").forEach((item) => {
             let previousElement;
             if (options.previousID) {
@@ -805,18 +822,27 @@ const addAttrViewColAnimation = (options: {
             }
             let html = "";
             if (item.classList.contains("av__row--header")) {
-                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${escapeAttr(options.icon || "")}" data-col-id="${options.id}" data-dtype="${options.type}" data-date-format="${dateFormat}" data-wrap="false" data-align="" style="width: 200px;">
+                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${escapeAttr(options.icon || "")}" data-col-id="${escapeAttr(options.id)}" data-dtype="${escapeAttr(options.type)}" data-date-format="${escapeAttr(dateFormat)}" data-wrap="false" data-align="" style="width: 200px;">
     ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
-    <span class="av__celltext fn__flex-1">${options.name}</span>
+    <span class="av__celltext fn__flex-1">${escapeHtml(options.name)}</span>
     <div class="av__widthdrag"></div>
 </div>`;
             } else {
                 const value = genCellValue(options.type, null);
-                html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${options.id}"
-data-wrap="false" data-dtype="${options.type}" data-date-format="${dateFormat}" data-align="" style="width: 200px">${renderCell(value,
+                html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${escapeAttr(options.id)}"
+data-wrap="false" data-dtype="${escapeAttr(options.type)}" data-date-format="${escapeAttr(dateFormat)}" data-align="" style="width: 200px">${renderCell(value,
                     parseInt(item.getAttribute("data-index")) || 0)}</div>`;
             }
-            previousElement.insertAdjacentHTML("afterend", html);
+            const sticky = previousElement.parentElement;
+            if (sticky.classList.contains("av__colsticky") && sticky.lastElementChild === previousElement) {
+                sticky.insertAdjacentHTML("afterend", html);
+            } else {
+                previousElement.insertAdjacentHTML("afterend", html);
+            }
+            if (data && item.classList.contains("av__row--header")) {
+                const icons = item.querySelector<HTMLElement>(":scope > .block__icons");
+                if (icons) icons.dataset.pinindex = getTablePinIndex(data.view as IAVTable).toString();
+            }
         });
     };
     if (options.blockElement.classList.contains("av")) {
@@ -1496,7 +1522,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         if (relResponse.code !== 0) {
                             return;
                         }
-                        const dialog = new Dialog({
+                        const dialog = new MobileDialog({
                             title: window.siyuan.languages.removeColConfirm,
                             content: `<div class="b3-dialog__content">
     ${window.siyuan.languages.confirmRemoveRelationField
@@ -1554,7 +1580,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                 target = target.parentElement;
                             }
                         });
-                        dialog.element.querySelector("button").focus();
+                        dialog.focusWhenReady(() => dialog.element.querySelector("button"));
                         dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
                         return;
                     }

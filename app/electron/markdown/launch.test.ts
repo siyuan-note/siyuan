@@ -34,6 +34,15 @@ test("normal workspace arguments, URLs and the development entry point never ope
         "/home/user", {startIndex: 2, platform: "linux"}), {requested: false, files: [], newDocument: false});
 });
 
+test("a separate workspace path ending in md stays a workspace while following files still open", () => {
+    assert.deepEqual(parseMarkdownLaunch(["--workspace", "/notes.md"], "/home/user", {platform: "linux"}),
+        {requested: false, files: [], newDocument: false});
+    assert.deepEqual(parseMarkdownLaunch(["--workspace", "D:\\notes.md", "a.md"], "D:\\", {platform: "win32"}),
+        {requested: true, files: ["D:\\a.md"], newDocument: false});
+    assert.deepEqual(parseMarkdownLaunch(["--workspace", "--markdown", "a.md"], "/home/user", {platform: "linux"}),
+        {requested: true, files: ["/home/user/a.md"], newDocument: false});
+});
+
 test("file URLs and option-like names after the separator stay local file selections", () => {
     assert.deepEqual(parseMarkdownLaunch(["file:///home/user/a%20b.md", "--", "--name.md"], "/home/user", {platform: "linux"}),
         {requested: true, files: ["/home/user/a b.md", "/home/user/--name.md"], newDocument: false});

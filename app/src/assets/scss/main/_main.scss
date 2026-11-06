@@ -340,6 +340,23 @@ html.window-controls-overlay {
 }
 
 .status {
+  &--floating {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    max-width: 100%;
+    visibility: hidden;
+    pointer-events: none;
+    background-color: var(--b3-theme-background);
+    border-radius: var(--b3-border-radius) 0 0 0;
+    box-shadow: var(--b3-point-shadow);
+  }
+
+  &--floating-open {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
   & > [data-entry-hidden="true"] {
     display: none !important;
   }

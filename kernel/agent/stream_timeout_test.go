@@ -6,6 +6,7 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -21,6 +22,40 @@ import (
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAgentStreamZeroTemperature(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var payload map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Error(err)
+		}
+		if payload["temperature"] != float64(0) {
+			t.Errorf("agent zero temperature lost: %#v", payload)
+		}
+		flusher := prepareTestStream(t, w)
+		writeTestStreamChunk(t, w, flusher, "ok")
+		writeTestStreamDone(t, w, flusher)
+	}))
+	defer server.Close()
+	client := util.NewAIClientWithModel("test-key", server.URL+"/v1", "test-model")
+	stream, _, cancel, err := createProtocolStreamWithRetry(context.Background(), client,
+		util.OpenAIProtocolChatCompletions, testChatRequest(), nil, 0, time.Second, time.Second,
+		noRetryDelay, make(chan AgentEvent, 1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cancel()
+	defer stream.Close()
+	for {
+		_, err = stream.Recv()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+}
 
 func TestStreamIdleTimeoutResetsAfterEachChunk(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {

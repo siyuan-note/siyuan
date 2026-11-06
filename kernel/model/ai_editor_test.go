@@ -5,6 +5,12 @@
 package model
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,6 +18,41 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAIEditorZeroTemperature(t *testing.T) {
+	cfg := setupAIMemoryTest(t)
+	cfg.Memory.Enabled = false
+	cfg.Editing.ModelID = cfg.Providers[0].Models[0].ID
+	cfg.Editing.Temperature = 0
+	cfg.Providers[0].Protocol = util.OpenAIProtocolChatCompletions
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var payload map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Error(err)
+		}
+		if payload["temperature"] != float64(0) {
+			t.Errorf("editing zero temperature lost: %#v", payload)
+		}
+		w.Header().Set("Content-Type", "text/event-stream")
+		fmt.Fprint(w, "data: {\"choices\":[{\"delta\":{\"content\":\"ok\"}}]}\n\ndata: [DONE]\n\n")
+	}))
+	defer server.Close()
+	cfg.Providers[0].BaseURL = server.URL + "/v1"
+	stream, err := NewAIEditorChatStream(context.Background(), nil, "hello", "", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stream.Close()
+	for {
+		_, err = stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+}
 
 func TestAIEditorActionsCRUD(t *testing.T) {
 	oldDataDir := util.DataDir

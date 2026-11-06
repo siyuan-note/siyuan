@@ -1,4 +1,4 @@
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {fetchSyncPost} from "./fetch";
 import {getRelativeReorderRequest} from "./fileTreeMove";
 import {showMessage} from "../dialog/message";

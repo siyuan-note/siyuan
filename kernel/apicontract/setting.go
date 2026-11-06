@@ -273,6 +273,8 @@ type SettingEditor struct {
 	KaTexMacros                     string               `json:"katexMacros" api:"optional,nullable"`
 	ReadOnly                        bool                 `json:"readOnly" api:"optional,nullable"`
 	EmbedBlockBreadcrumb            bool                 `json:"embedBlockBreadcrumb" api:"optional,nullable"`
+	// 默认关闭；开启后将笔记本、文档和块路径合并为一条面包屑。省略保留当前值，null 恢复默认。
+	GlobalBreadcrumb bool `json:"globalBreadcrumb" api:"optional,nullable"`
 	// 默认显示文档上层路径；省略保留当前值，null 恢复默认，块级显式设置优先。
 	EmbedBlockBreadcrumbParentPath *bool `json:"embedBlockBreadcrumbParentPath" api:"optional,nullable"`
 	ListLogicalOutdent             bool  `json:"listLogicalOutdent" api:"optional,nullable"`
@@ -486,6 +488,7 @@ type SettingAppearance struct {
 	CloseButtonBehavior      int                       `json:"closeButtonBehavior" api:"optional,nullable"`
 	HideToolbar              bool                      `json:"hideToolbar" api:"optional,nullable"`
 	HideStatusBar            bool                      `json:"hideStatusBar" api:"optional,nullable"`
+	ShowFloatingStatusBar    bool                      `json:"showFloatingStatusBar" api:"optional,nullable"`
 	StatusBar                *SettingStatusBar         `json:"statusBar" api:"optional,nullable"`
 	Notifications            *SettingNotifications     `json:"notifications" api:"optional,nullable"`
 	EntryVisibility          *SettingEntryVisibility   `json:"entryVisibility" api:"optional,nullable"`

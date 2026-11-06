@@ -1,3 +1,4 @@
+import {formatShortcut} from "../../util/shortcut";
 import {fetchWithAppId} from "../../util/fetchWithAppId";
 import {focusByRange} from "./selectionOffsets";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -699,31 +700,7 @@ export const updateHotkeyAfterTip = (hotkey: string, split = " ") => {
 };
 
 // Mac，Windows 快捷键展示
-export const updateHotkeyTip = (hotkey: string) => {
-    if (!hotkey) {
-        return hotkey;
-    }
-    if (isMac()) {
-        // 为 Return 字符指定文本呈现，避免 macOS 使用彩色 emoji 字形。
-        return hotkey.replace(/↩(?!\uFE0E)/g, "↩\uFE0E");
-    }
-    const keys = [];
-    if ((hotkey.indexOf("⌘") > -1 || hotkey.indexOf("⌃") > -1)) keys.push("Ctrl");
-    if (hotkey.indexOf("⇧") > -1) keys.push("Shift");
-    if (hotkey.indexOf("⌥") > -1) keys.push("Alt");
-
-    // 不能去最后一个，需匹配 F2
-    const lastKey = hotkey.replace(/[⌘⇧⌥⌃]/g, "");
-    if (lastKey) {
-        keys.push({
-            "⇥": "Tab",
-            "⌫": "Backspace",
-            "⌦": "Delete",
-            "↩": "Enter"
-        }[lastKey] || lastKey);
-    }
-    return keys.join("+");
-};
+export const updateHotkeyTip = (hotkey: string) => formatShortcut(hotkey, isMac());
 
 export const getLocalStorage = (cb: () => void, onError?: (error: unknown) => void) => {
     fetchPost("/api/storage/getLocalStorage", undefined, (response) => {

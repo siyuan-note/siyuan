@@ -10,6 +10,7 @@ import * as escape from "../../../util/escape";
 
 // checkbox 分支只依赖转义工具，其余依赖以严格代理隔离，新增依赖或意外调用都应立即使测试失败。
 const unusedDependencies = [
+    "./columnWindow",
     "./viewType", "./renderData", "../../wysiwyg/transaction", "../../util/hasClosest", "./openMenuPanel",
     "./action", "../../util/compatibility", "../../../util/fetch", "../../util/selection", "../../util/selectionOffsets",
     "dayjs", "../../../emoji", "./col", "./attributeValue", "../../../constants", "../../hint/extend",
@@ -18,7 +19,7 @@ const unusedDependencies = [
     "../../../util/setPosition", "./selectionState", "./color", "./richText", "./richTextEditor", "./virtualScroll",
     "./cellEditor", "./blockIcon", "../../../dialog/anchoredInputPosition", "./locationEditor", "../../../dialog/message",
     "../../../util/hostCapabilities", "../../../plugin/Menu", "../../../util/upDownHint", "./richTextValue",
-    "../../../emoji/fileTreeIcon", "./lunarDate", "./batchValue", "./dragFillValue",
+    "../../../emoji/fileTreeIcon", "./lunarDate", "./batchValue", "./dragFillValue", "./host",
 ];
 
 const loadModule = <T>(file: string) => {

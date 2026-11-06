@@ -167,7 +167,7 @@ test("normal editor enabling cannot unlock the plain title while its full source
     const title = Object.assign(Object.create(moduleExports.Title.prototype), {
         editElement: plain, element: {dataset: {nodeId: "document"}}, sourceRequest: 0,
     });
-    const protyle = {block: {rootID: "document"}, notebookId: "notebook", path: "/document.sy", title, disabled: false,
+    const protyle = {id: "title-editor", block: {rootID: "document"}, notebookId: "notebook", path: "/document.sy", title, disabled: false,
         element: {getAttribute: (): null => null}, wysiwyg: {element: {setAttribute: noop, style: {}, querySelectorAll: (): never[] => []}}};
     title.protyle = protyle;
     const source = readFileSync(resolve(__dirname, "../util/onGet.ts"), "utf8");
@@ -175,6 +175,7 @@ test("normal editor enabling cannot unlock the plain title while its full source
     runInNewContext(transpileModule(source.slice(source.indexOf("export const enableProtyle ="),
         source.indexOf("const focusElementById =")), {compilerOptions: {module: ModuleKind.CommonJS}}).outputText,
     {exports: enableExports, window, hideElements: noop, hideTooltip: noop,
+        syncRelatedAVEditor: (id: string) => assert.equal(id, "title-editor"),
         isMobile: () => false, isIPhone: () => false, isAndroid: () => false});
 
     const loading = title.loadSource();

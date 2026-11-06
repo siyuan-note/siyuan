@@ -7,6 +7,11 @@ import {Constants} from "../../constants";
 import {exportLayout} from "../../layout/util";
 /// #endif
 import {exitSiYuan} from "../../dialog/processSystem";
+/// #if !BROWSER && !MOBILE
+import {getSettingsOwnerApp, getSettingsWindowHost} from "../setting/windowContext";
+import {flushSettingSaves, settingSaveFailures} from "../setting/pending";
+import {showMessage} from "../../dialog/message";
+/// #endif
 
 /** 应用 / 关于 / 访问授权等 Tab 中的 system.* 设置项 save */
 export const sendAppSetting = (controlId: string, value: unknown) => {
@@ -75,9 +80,30 @@ export const sendAppSetting = (controlId: string, value: unknown) => {
         }
         case "system.settingsWindow": {
             const settingsWindow = Boolean(value) as Config.ISystem["settingsWindow"];
-            configApi.set("system.settingsWindow", settingsWindow, () => {
+            /// #if !BROWSER && !MOBILE
+            const previousFailures = settingSaveFailures();
+            /// #endif
+            const saved = configApi.set("system.settingsWindow", settingsWindow, () => {
                 window.siyuan.config.system.settingsWindow = settingsWindow;
             });
+            /// #if !BROWSER && !MOBILE
+            void saved.then(async () => {
+                await flushSettingSaves(previousFailures);
+                if (window.siyuan.config.system.settingsWindow !== settingsWindow) return;
+                const host = getSettingsWindowHost();
+                if (host) {
+                    if (host.isActive()) await host.reopenSettings(settingsWindow);
+                    return;
+                }
+                const {openSetting} = await import("../index");
+                if (window.siyuan.config.system.settingsWindow === settingsWindow) {
+                    openSetting(getSettingsOwnerApp(), "app");
+                }
+            }).catch(error => {
+                console.error("Could not switch settings interface", error);
+                showMessage(window.siyuan.languages.settingsPendingSaveError, 6000, "error");
+            });
+            /// #endif
             break;
         }
         default:

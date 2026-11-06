@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20261030043635"
+		"updated": "20261103231923"
 	},
 	"Children": [
 		{
@@ -1953,7 +1953,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Optional parameters are dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5. The timeout is in seconds, up to 10. Only GET is supported; private networks and proxies are not supported. Do not put real secrets in shareable templates: keys may be synced or shared with the template. Cross-origin redirects clear custom headers. SiYuan login credentials are not attached automatically."
+					"Data": "Optional parameters are dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5. The timeout is in seconds, up to 10. Only GET is supported; private networks and proxies are not supported. Do not put real secrets in shareable templates: keys may be synced or shared with the template. Cross-origin redirects clear custom headers. SiYuan login credentials are not attached automatically. If DNS returns a non-public address, including a proxy Fake-IP address, access is blocked. Exclude the API domain from Fake-IP or use DNS that returns real IP addresses."
 				}
 			]
 		},
@@ -1981,7 +1981,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Saved file templates whose source the kernel can verify, and database field templates, can offer “Always allow this template to access the network”. Permission is stored locally for the template source and content version in the current workspace, not limited to the current target document or unlocked notebook. It is not included in built-in export or sync. Editing, copying, or importing requires confirmation again. Referenced child template files require their own permission and do not inherit the parent's. Template management shows permission status. Use a template's more menu to revoke its permission, or the “Revoke all template network permissions” button at the top to revoke all permissions, including database permissions. Database field template settings also show the status and allow revocation."
+					"Data": "Saved file templates whose source the kernel can verify, and database field templates, can offer “Always allow this template to access the network”. Permission is stored locally for the template source and content version in the current workspace, not limited to the current target document or unlocked notebook. It is not included in built-in export or sync. Editing, copying, or importing requires confirmation again. Referenced child template files require their own permission and do not inherit the parent's. Template management shows permission status. Use a template's more menu to revoke its permission, or the “Revoke all template network permissions” button at the top to revoke all permissions, including database permissions. Database field template settings show the network permission status and revocation action when the source contains httpGet."
 				}
 			]
 		},
@@ -2004,12 +2004,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261030003500-w4kfdvd",
-				"updated": "20261030031540"
+				"updated": "20261103231923"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Identical requests are reused only within the current execution, data scope, and credentials. Database rows share limits; there is no cache between executions or scheduled refresh. Each execution allows up to 32 target requests and 1024 function calls, 1 MiB per response, 8 MiB of response bodies in total, and 8 MiB of template output in total. Total network time is limited to 30 seconds, execution to 2 minutes, and confirmation to 1 minute. Time limits are checked during network calls or output; avoid long-running loops that do neither."
+					"Data": "Identical requests are reused within the current execution, data scope, and credentials. Database requests run in batches of 32 with a 100 ms pause between batches, allowing up to 1024 target requests per execution, including redirects. Other templates allow up to 32 target requests. All executions share limits of 1024 function calls, 1 MiB per response, 8 MiB of response bodies in total, and 8 MiB of template output in total. Total network time is limited to 30 seconds, execution to 2 minutes, and confirmation to 1 minute. Time limits are checked during network calls or output; avoid long-running loops that do neither."
+				}
+			]
+		},
+		{
+			"ID": "20261103231923-go0qtln",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103231923-go0qtln",
+				"updated": "20261104010000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Denying a database template field denies subsequent requests from that field version for all rows in the current execution, without saving a permanent denial. During automatic updates, successful row results are reused when the template and its referenced inputs are unchanged. Editing unrelated fields, adding rows, or binding the primary key does not recalculate existing rows unless their template inputs change. Manual refresh or reopening evaluates templates again. Dynamic access to an entire row uses the whole row as its dependency; templates reading other blocks or SQL results recalculate conservatively. Results are held only in a bounded memory cache and are cleared when a notebook locks or permission is revoked; evicted results are recalculated. There is no scheduled refresh. On first opening, the database structure and available stored rows appear before HTTP queries finish, with loading indicators for templates. Views depending on template results for filtering, sorting, grouping, calculations, calendars, or nested rows show the structure first and display accurate rows after evaluation. Sorting reuses the current successful snapshot, including external-query templates, while changed row inputs and explicit refresh still trigger evaluation. Opening a template cell editor only reads its source; closing before the source loads does not save the displayed query result as the column template."
 				}
 			]
 		},
@@ -2023,7 +2037,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Network failures, denied access, and unsuccessful HTTP status codes return error. Use an ok branch to display fallback content. Results are not inserted if total limits are exceeded or execution is interrupted. If daily-note creation is interrupted, the created document remains and its content template is not retried automatically."
+					"Data": "Network failures, denied access, and unsuccessful HTTP status codes return error. Use an ok branch to display fallback content. Results are not inserted if total limits are exceeded or execution is interrupted. If daily-note creation is interrupted, the created document remains and its content template is not retried automatically. Database attribute panels use the same network confirmation and template permissions. Opening a field editor does not fetch data; saved changes trigger recalculation. Ordinary HTTP template parsing or evaluation errors appear in the affected field and do not prevent other fields from displaying; canceled or locked executions still discard results."
 				}
 			]
 		},

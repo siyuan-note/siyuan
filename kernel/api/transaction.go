@@ -38,10 +38,12 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 	var err error
 	convertList := false
 	setDocTitle := false
+	collectionRemoval := false
 	for _, transaction := range transactions {
 		if transaction == nil {
 			continue
 		}
+		collectionRemoval = collectionRemoval || len(transaction.CollectionRemovalSourceVersions) > 0
 		for _, operation := range transaction.DoOperations {
 			if operation != nil && operation.Action == "setDocTitle" {
 				setDocTitle = true
@@ -49,7 +51,17 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 			if operation != nil && operation.Action == "convertList" {
 				convertList = true
 			}
+			if operation != nil && operation.Action == "cleanupAttrViewBlocks" {
+				if data, ok := operation.Data.(map[string]interface{}); ok {
+					if versions, ok := data["sourceVersions"].(map[string]interface{}); ok && len(versions) > 0 {
+						collectionRemoval = true
+					}
+				}
+			}
 		}
+	}
+	if collectionRemoval && len(transactions) != 1 {
+		return apicontract.Failure[[]*apicontract.Transaction](-1, "collection removal requires a single transaction")
 	}
 	if setDocTitle {
 		if len(transactions) != 1 || len(transactions[0].DoOperations) != 1 {
@@ -85,7 +97,12 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 		transaction.MarkFromAPI() // 标记来自 HTTP 入口，供全局撤销日志捕获判别
 	}
 
-	if templateDocTreeAttached || convertList || setDocTitle {
+	if collectionRemoval {
+		// 来源版本校验失败必须返回真实错误，不能广播未提交的操作或让前端记入撤销历史。
+		if err = model.PerformTransactionSync(transactions[0]); err != nil {
+			return apicontract.Failure[[]*apicontract.Transaction](-1, util.EscapeHTML(err.Error()))
+		}
+	} else if templateDocTreeAttached || convertList || setDocTitle {
 		if err = model.PerformTxSync(transactions[0]); nil != err {
 			if errors.Is(err, model.ErrDocumentTitleConflict) {
 				return apicontract.Failure[[]*apicontract.Transaction](-409, util.EscapeHTML(err.Error()))
@@ -139,9 +156,21 @@ func holdTransactionEncryptedBoxRequests(c *gin.Context, transactions []*model.T
 		addBoxID(blockID)
 	}
 	for _, transaction := range transactions {
+		for rootID := range transaction.CollectionRemovalSourceVersions {
+			addBlockID(rootID)
+		}
 		for _, operation := range transaction.DoOperations {
 			if operation == nil {
 				continue
+			}
+			if operation.Action == "cleanupAttrViewBlocks" {
+				if data, ok := operation.Data.(map[string]interface{}); ok {
+					if versions, ok := data["sourceVersions"].(map[string]interface{}); ok {
+						for rootID := range versions {
+							addBlockID(rootID)
+						}
+					}
+				}
 			}
 			for _, id := range []string{
 				operation.ID, operation.RootID, operation.ParentID, operation.PreviousID, operation.NextID, operation.BlockID,
@@ -162,7 +191,11 @@ func holdTransactionEncryptedBoxRequests(c *gin.Context, transactions []*model.T
 			if operation.Tree != nil {
 				addBoxID(operation.Tree.Box)
 			}
-			if _, boxID := av.FindAttributeViewPath(operation.AvID); boxID != "" {
+			if boxID, scoped, err := operation.ResolveRelationDetailStorage(); err != nil {
+				return err
+			} else if scoped {
+				addBoxID(boxID)
+			} else if _, boxID := av.FindAttributeViewPath(operation.AvID); boxID != "" {
 				addBoxID(boxID)
 			}
 			for _, key := range []string{"notebook", "box", "boxID", "rootID", "blockID"} {

@@ -4,6 +4,7 @@ import {mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {test} from "node:test";
+import * as sheetGesture from "./mobileSheetGesture";
 import {runInNewContext} from "node:vm";
 import {compile} from "sass";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
@@ -14,6 +15,7 @@ const transpile = (file: string) => transpileModule(readFileSync(join(__dirname,
 const referenceSource = transpile("openReference.ts");
 const dialogSource = transpile("MobileEditorDialog.ts");
 const sheetSource = transpile("bindBottomSheetDialog.ts");
+const sheetLayoutSource = transpile("mobileSheetLayout.ts");
 const saveSource = transpile("../../protyle/util/editorSave.ts");
 const editorSessionSource = transpile("../../protyle/render/av/editorSession.ts");
 const cellEditorSource = transpile("../../protyle/render/av/cellEditor.ts");
@@ -54,13 +56,23 @@ class ElementMock extends EventTargetMock {
     };
     children = new Map<string, ElementMock>();
     cleared = false;
+    set innerHTML(value: string) {
+        if (value.includes("sheet-expand")) {
+            this.children.set('[data-type="sheet-expand"]', new ElementMock());
+        }
+    }
+    append(element: ElementMock) { this.children.set("actions", element); }
     setAttribute(name: string, value: string) { this.attributes.set(name, value); }
+    matches() { return this.hasAttribute("inert") || this.attributes.get("aria-busy") === "true"; }
+    closest(): ElementMock | null { return this.matches() ? this : this.parentElement?.closest() || null; }
     hasAttribute(name: string) { return this.attributes.has(name); }
     removeAttribute(name: string) { this.attributes.delete(name); }
-    querySelector(selector: string) { return this.children.get(selector); }
+    querySelector(selector: string): ElementMock | undefined {
+        return this.children.get(selector) || Array.from(this.children.values()).map(child => child.querySelector(selector)).find(Boolean);
+    }
     querySelectorAll(selector: string): ElementMock[] {
-        return selector === "[data-node-id]" ? Array.from(this.children.values()).flatMap(child =>
-            [...child.dataset.nodeId ? [child] : [], ...child.querySelectorAll(selector)]) : [];
+        return selector === "[data-node-id], [data-av-host]" ? Array.from(this.children.values()).flatMap(child =>
+            [...child.dataset.nodeId || child.dataset.avHost ? [child] : [], ...child.querySelectorAll(selector)]) : [];
     }
     prepend(element: ElementMock) { this.children.set("handle", element); }
     remove() { this.isConnected = false; }
@@ -82,6 +94,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
     const requests: Array<ReturnType<typeof deferred<any>> & {id: string}> = [];
     const messages: string[] = [];
     const dialogs: DialogMock[] = [];
+    const dragOptions = new Map<ElementMock, {canStart: () => boolean}>();
     const editors: ProtyleMock[] = [];
     const registered = new Map<ProtyleMock, () => void>();
     const destroyCallbacks: Array<() => void> = [];
@@ -93,19 +106,20 @@ const setup = (readonly = false, deferSheetOpen = false) => {
     let flush: (editor: ProtyleMock) => Promise<void> = () => Promise.resolve();
     let disposedBindings = 0;
     const viewport = {top: 0, bottom: 800};
-    const document = {activeElement: new ElementMock(), createElement: () => new ElementMock(),
+    const document = {activeElement: new ElementMock(), createElement: () => new ElementMock(), getElementById: (): null => null,
         querySelectorAll: (selector: string) => {
-            assert.ok([".av__mask, [data-av-location-editor]",
+            assert.ok([".av__mask, [data-av-location-editor], [data-av-richtext-editor], .av__panel",
                 ".av__mask:not(.av__richtext-mask), [data-av-location-editor]"].includes(selector));
             return cellMasks.filter(mask => mask.isConnected &&
                 (selector.startsWith(".av__mask,") || !mask.classList.contains("av__richtext-mask")));
         }};
     const window = Object.assign(new EventTargetMock(), {
         innerHeight: 800,
+        screen: {orientation: new EventTargetMock()},
         visualViewport: Object.assign(new EventTargetMock(), {offsetTop: 0, height: 800}),
         siyuan: {config: {readonly}, languages: {viewRefContent: "Reference", refExpired: "Expired", uploading: "Uploading",
             settingsPendingSaveError: "Pending save failed"},
-            menus: {menu: {remove() {}}}, mobile: {size: {isLandscape: false, portrait: {height1: 800}}}},
+            dialogs, menus: {menu: {remove() {}}}, mobile: {size: {isLandscape: false, portrait: {height1: 800}}}},
     });
     class DialogMock {
         element = new ElementMock();
@@ -116,6 +130,8 @@ const setup = (readonly = false, deferSheetOpen = false) => {
                 this.element.children.set(selector, new ElementMock());
             }
             this.element.querySelector(".b3-dialog__container").children.set(".b3-dialog__header", new ElementMock());
+            this.element.querySelector(".b3-dialog__container").children.set(":scope > .b3-dialog__body",
+                this.element.querySelector(".b3-dialog__body"));
             this.element.classList.add("b3-dialog--open");
             dialogs.push(this);
         }
@@ -144,6 +160,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
     }
     const dialogAPI = {} as typeof import("./MobileEditorDialog");
     const sheetAPI = {} as typeof import("./bindBottomSheetDialog");
+    const sheetLayoutAPI = {} as typeof import("./mobileSheetLayout");
     const saveAPI = {} as typeof import("../../protyle/util/editorSave");
     const editorSessionAPI = {} as typeof import("../../protyle/render/av/editorSession");
     const cellEditorAPI = {} as typeof import("../../protyle/render/av/cellEditor");
@@ -165,7 +182,14 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         }},
         "./MobileEditorDialog": dialogAPI,
         "./bindBottomSheetDialog": sheetAPI,
-        "./bindBottomSheetDrag": {bindBottomSheetDrag: () => () => { disposedBindings++; }},
+        "./mobileSheetLayout": sheetLayoutAPI,
+        "./mobileSheetGesture": sheetGesture,
+        "./orientation": {isMobileLandscape: () => false},
+        "./bindBottomSheetDrag": {bindBottomSheetDrag: (element: ElementMock, _scrim: unknown, _close: unknown,
+            options: {canStart: () => boolean}) => {
+            dragOptions.set(element, options);
+            return () => { disposedBindings++; };
+        }},
         "../../menus/sheetOpen": {waitForSheetViewport: (options: {open: () => void}) => {
             if (!deferSheetOpen) {
                 options.open();
@@ -186,7 +210,8 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         "../../protyle/scroll/saveScroll": {saveScroll: () => ({scrollTop: 30}),
             getDocByScroll: (options: unknown) => refreshed.push(options)},
     };
-    const globals = {window, document, console, CustomEvent, MutationObserver: class {
+    const globals = {window, document, console, CustomEvent, HTMLElement: ElementMock,
+        getComputedStyle: () => ({paddingTop: "0", paddingBottom: "0"}), MutationObserver: class {
         observe() {}
         disconnect() {}
     }, require: (name: string) => {
@@ -194,6 +219,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         return modules[name];
     }};
     runInNewContext(dialogSource, {...globals, exports: dialogAPI});
+    runInNewContext(sheetLayoutSource, {...globals, exports: sheetLayoutAPI});
     runInNewContext(sheetSource, {...globals, exports: sheetAPI});
     runInNewContext(saveSource, {...globals, exports: saveAPI});
     runInNewContext(editorSessionSource, {...globals, exports: editorSessionAPI});
@@ -212,6 +238,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         Dialog: DialogMock, finishSheetOpen: () => sheetOpeners.shift()?.(),
         source, requests, messages, editors, registered, flushes, refreshed, titleEvents, cellMasks, viewport,
         window, document, answer, open,
+        canDrag: (dialog: DialogMock) => dragOptions.get(dialog.element.querySelector(".b3-dialog__container")).canStart(),
         dialogs: dialogs as Array<DialogMock & import("./MobileEditorDialog").MobileEditorDialog>,
         setFlush: (callback: typeof flush) => { flush = callback; },
         finishDestroy: () => { destroyCallbacks.splice(0).forEach(callback => callback()); },
@@ -241,6 +268,41 @@ test("bottom sheet readiness runs after reveal and is cancelled on dismissal or 
         fixture.finishSheetOpen();
         assert.equal(opened, 1);
         if (reason === "dismiss") cleanup();
+    }
+});
+
+test("drawers omit expansion controls while preserving mode, business footers and viewport cleanup", () => {
+    for (const mode of ["standard", "expanded"] as const) {
+        for (const existingFooter of [false, true]) {
+            const fixture = setup(false, true);
+            const dialog = new fixture.Dialog({});
+            const sheet = dialog.element.querySelector(".b3-dialog__container");
+            const footer = new ElementMock();
+            if (existingFooter) sheet.children.set(":scope > .b3-dialog__body > .b3-dialog__action", footer);
+            let opened = 0;
+            const dispose = fixture.bindBottomSheetDialog(dialog as any, async () => {}, undefined, () => { opened++; }, {mode});
+            assert.equal(sheet.style.height, mode === "expanded" ? "800px" : "auto");
+            assert.equal(fixture.canDrag(dialog), true);
+            assert.equal(sheet.querySelector('[data-type="sheet-expand"]'), undefined);
+            assert.equal(sheet.children.has("actions"), false);
+            assert.equal(footer.children.size, 0);
+            assert.equal(footer.isConnected, true);
+            dispose.setMode("standard");
+            assert.equal(sheet.style.height, "auto");
+            dispose.setMode("expanded");
+            assert.equal(sheet.style.height, "800px");
+            fixture.viewport.bottom = 400;
+            fixture.window.visualViewport.dispatch("resize");
+            assert.equal(sheet.style.height, "400px");
+            dispose();
+            fixture.finishSheetOpen();
+            assert.equal(opened, 0);
+            assert.equal(fixture.window.listenerCount(), 0);
+            assert.equal(fixture.window.visualViewport.listenerCount(), 0);
+            assert.equal(fixture.disposedBindings(), 1);
+            assert.equal(sheet.children.get("handle").isConnected, false);
+            assert.equal(footer.isConnected, true);
+        }
     }
 });
 
@@ -618,9 +680,15 @@ test("viewport changes preserve the original scroll and all resize listeners are
     await fixture.open();
     const dialog = fixture.dialogs[0];
     const container = dialog.element.querySelector(".b3-dialog");
-    assert.equal(dialog.options.height, "60%");
-    assert.equal(container.style.height, "800px");
-    assert.equal(fixture.window.listenerCount(), 1);
+    assert.equal(dialog.options.height, undefined);
+    assert.equal(dialog.element.querySelector(".b3-dialog__container").style.height, "auto");
+    assert.ok(Math.abs(parseFloat(dialog.element.querySelector(".b3-dialog__container").style.maxHeight) - 448) < .001);
+    assert.equal(container.style.bottom, "0px");
+    assert.equal(container.style.height, "auto");
+    const sheet = dialog.element.querySelector(".b3-dialog__container");
+    assert.equal(sheet.querySelector('[data-type="sheet-expand"]'), undefined);
+    assert.equal(sheet.children.has("actions"), false);
+    assert.equal(fixture.window.listenerCount(), 2);
     assert.equal(fixture.window.visualViewport.listenerCount(), 2);
     fixture.viewport.top = 90;
     fixture.viewport.bottom = 440;
@@ -628,6 +696,7 @@ test("viewport changes preserve the original scroll and all resize listeners are
     fixture.window.visualViewport.dispatch("resize");
     assert.equal(container.style.top, "90px");
     assert.equal(container.style.height, "350px");
+    assert.equal(dialog.element.querySelector(".b3-dialog__container").style.maxHeight, "350px");
     assert.equal(dialog.element.classList.contains("mobile-reference-dialog--compact"), true);
     assert.equal(fixture.source.contentElement.scrollTop, 247);
     await dialog.close();
@@ -658,11 +727,11 @@ const mobileCSS = () => compile(join(__dirname, "../../assets/scss/main/_mobile.
     logger: {warn() {}, debug() {}},
 }).css;
 
-test("reference stylesheet uses the visible container percentage rather than a full-screen viewport unit", () => {
+test("reference stylesheet preserves compact headers and delegates height to the shared layout", () => {
     const css = mobileCSS();
     const referenceRule = css.match(/\.mobile-reference-dialog \.mobile-reference-sheet\s*\{([^}]+)\}/);
     assert.ok(referenceRule);
-    assert.match(referenceRule[1], /max-height:\s*60%\s*;/);
+    assert.match(css, /\.mobile-sheet-panel/);
     assert.doesNotMatch(referenceRule[1], /(?:min-)?height:\s*\d+(?:d?vh|px)\s*;/);
     assert.match(css, /\.mobile-reference-dialog--compact \.b3-dialog__header\s*\{\s*display:\s*none;/);
 });
@@ -670,7 +739,7 @@ test("reference stylesheet uses the visible container percentage rather than a f
 // Browser verification is opt-in because the regular unit suite also runs in socket-restricted environments.
 const chromium = process.env.CHROMIUM_PATH;
 
-test("reference drawer CSS caps its height at 60 percent of the visible viewport", {skip: !chromium}, () => {
+test("reference drawer CSS respects the shared full-height cap and keyboard viewport", {skip: !chromium}, () => {
     const css = mobileCSS();
     const directory = mkdtempSync(join(tmpdir(), "siyuan-reference-viewport-"));
     try {
@@ -681,9 +750,9 @@ test("reference drawer CSS caps its height at 60 percent of the visible viewport
             ${css}
             </style>
             <div class="mobile-bottom-sheet-dialog mobile-reference-dialog b3-dialog--open">
-              <div class="b3-dialog">
-                <div class="b3-dialog__container mobile-bottom-sheet mobile-reference-sheet" style="height:60%;width:100vw">
-                  <div class="b3-dialog__body">Reference content</div>
+              <div class="b3-dialog mobile-sheet-layout">
+                <div class="b3-dialog__container mobile-bottom-sheet mobile-reference-sheet mobile-sheet-panel" style="height:auto;width:100vw">
+                  <div class="b3-dialog__body"><div style="height:1000px">Reference content</div></div>
                 </div>
               </div>
             </div>
@@ -694,9 +763,11 @@ test("reference drawer CSS caps its height at 60 percent of the visible viewport
               for (const height of [800, 350, 250, 600]) {
                 container.style.height = height + 'px';
                 container.style.top = '90px';
+                const cap = Math.min(800 * .56, height);
+                sheet.style.maxHeight = cap + 'px';
                 const rect = sheet.getBoundingClientRect();
-                results.push(rect.height <= height * 0.6 + 1 && rect.height > 0 &&
-                  rect.bottom <= 90 + height + 1 && rect.top >= 90 + height * 0.4 - 1);
+                results.push(rect.height <= cap + 1 && rect.height > 0 &&
+                  rect.bottom <= 90 + height + 1 && rect.top >= 90 - 1);
               }
               document.body.setAttribute('data-results', results.join(','));
             </script>`);
@@ -708,4 +779,32 @@ test("reference drawer CSS caps its height at 60 percent of the visible viewport
     } finally {
         rmSync(directory, {recursive: true, force: true});
     }
+});
+
+
+test("direct reference binder blocks covered, inert, busy and pending-close sheets", async () => {
+    const fixture = setup();
+    await fixture.open();
+    const dialog = fixture.dialogs[0];
+    assert.equal(fixture.canDrag(dialog), true);
+    const child = new fixture.Dialog({});
+    assert.equal(fixture.canDrag(dialog), false);
+    fixture.dialogs.pop();
+    assert.ok(child);
+    const body = dialog.element.querySelector(".b3-dialog__body");
+    for (const element of [dialog.element, body]) {
+        element.setAttribute("inert", "");
+        assert.equal(fixture.canDrag(dialog), false);
+        element.removeAttribute("inert");
+        element.setAttribute("aria-busy", "true");
+        assert.equal(fixture.canDrag(dialog), false);
+        element.removeAttribute("aria-busy");
+    }
+    const pending = deferred<void>();
+    fixture.setFlush(() => pending.promise);
+    const closing = dialog.close();
+    assert.equal(fixture.canDrag(dialog), false, "pending is visible before beforeClose sets inert");
+    pending.reject(new Error("offline"));
+    await assert.rejects(closing, /offline/);
+    assert.equal(fixture.canDrag(dialog), true);
 });

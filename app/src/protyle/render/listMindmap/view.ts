@@ -83,6 +83,7 @@ export interface ListMindmapViewOptions {
 }
 
 interface PointerState {
+    width?: {id: string, original: number, initial: number, value: number, scale: number, direction: number};
     pointerId: number;
     panButton?: boolean;
     pan?: boolean;
@@ -136,8 +137,11 @@ export class ListMindmapView {
     private inspectorPanel?: {
         kind: "color" | "width", ids: string[], anchor: HTMLButtonElement,
         widths: {id: string, width: number}[], baseWidth: number, slider: number, preview: boolean,
+        hover: boolean, inside: boolean, pointer?: number,
     };
+    private inspectorPanelTimer = 0;
     private widthPending = false;
+    private widthAnchor?: {id: string, right: boolean, x: number, y: number};
     private inspectorFrame = 0;
     private revealInspectorHost = false;
     private readonly zoomLabel: HTMLSpanElement;
@@ -263,6 +267,7 @@ export class ListMindmapView {
         this.routeStatus.setAttribute("role", "status");
         options.host.append(this.toolbar, this.viewport, this.inspector, this.inspectorPopover,
             this.tooltip, this.colorProbe, this.routeStatus);
+        this.bindInspectorPanelEvents();
         this.listen(this.inspector, "scroll", () => this.closeInspectorPanel());
         this.listen(this.inspectorPopover, "mousedown", (event: MouseEvent) => {
             // 面板按钮保留输入焦点，恢复和默认操作直接替换未提交的宽度预览。
@@ -422,7 +427,7 @@ export class ListMindmapView {
             }));
         this.listen(window, "beforeprint", () => {
             this.stopFoldAnimation?.();
-            if (this.pointer?.relation) {
+            if (this.pointer?.relation || this.pointer?.width) {
                 this.cancelPointer();
             }
             this.printTransform ||= {scale: this.scale, offsetX: this.offsetX, offsetY: this.offsetY};
@@ -858,7 +863,7 @@ export class ListMindmapView {
 
     public update(model: ListMindmapModel) {
         this.stopFoldAnimation?.();
-        if (this.pointer?.relation || this.pointer?.selection || this.pointer?.touchNode) {
+        if (this.pointer?.relation || this.pointer?.selection || this.pointer?.touchNode || this.pointer?.width) {
             this.cancelPointer();
         }
         if (this.destroyed) {
@@ -909,6 +914,12 @@ export class ListMindmapView {
                 element.dataset.mindmapId = id;
                 element.setAttribute("role", "treeitem");
                 element.append(createElement("div", "mindmap-view__content"));
+                for (const side of ["left", "right"]) {
+                    const handle = createElement("span", "mindmap-view__node-width-handle");
+                    handle.dataset.widthSide = side;
+                    handle.setAttribute("aria-hidden", "true");
+                    element.append(handle);
+                }
                 const addBridge = createElement("span", "mindmap-view__add-bridge");
                 addBridge.hidden = !!this.readOnly;
                 addBridge.setAttribute("aria-hidden", "true");
@@ -1481,6 +1492,16 @@ export class ListMindmapView {
                 this.offsetX += (previous.x - current.x) * this.scale;
                 this.offsetY += (previous.y - current.y) * this.scale;
             }
+            const widthAnchor = this.widthAnchor;
+            const widthPosition = widthAnchor && this.positions.get(widthAnchor.id);
+            if (widthPosition) {
+                // 调宽时固定另一侧边缘和节点顶部，使手柄跟随指针。
+                this.offsetX = widthAnchor.x - (widthPosition.x + (widthAnchor.right ? widthPosition.width : 0)) * this.scale;
+                this.offsetY = widthAnchor.y - widthPosition.y * this.scale;
+            }
+            if (!this.pointer?.width && !this.widthPending) {
+                this.widthAnchor = undefined;
+            }
             if (this.foldAnchor && (this.folded.get(this.foldAnchor.id) ??
                 this.model.nodes.get(this.foldAnchor.id)?.collapsed) === this.foldAnchor.collapsed) {
                 this.foldAnchor = undefined;
@@ -1522,7 +1543,7 @@ export class ListMindmapView {
                             previous.bottom !== position.bottom || previous.labelX !== position.labelX ||
                             previous.labelY !== position.labelY || previous.width !== position.width || previous.height !== position.height;
                     });
-                if (changed) {
+                if (changed && !widthAnchor) {
                     const bounded = this.boundedPan(this.offsetX, this.offsetY);
                     this.offsetX = bounded.x;
                     this.offsetY = bounded.y;
@@ -2497,12 +2518,17 @@ export class ListMindmapView {
         if (!this.relationFrom) {
             this.relationPreview = undefined;
         }
+        const singleSelection = this.getSelectedIds().length === 1;
         this.nodeElements.forEach((element, id) => {
             const selected = this.selectedId === id || this.selectedIds.has(id);
             element.classList.toggle("mindmap-view__node--selected", selected);
             element.classList.toggle("mindmap-view__node--relation", this.relationFrom === id ||
                 this.relationPreview?.targetId === id);
             element.setAttribute("aria-selected", String(selected));
+            element.querySelectorAll<HTMLElement>(":scope > .mindmap-view__node-width-handle").forEach(handle => {
+                handle.hidden = !selected || !singleSelection || !!this.readOnly ||
+                    !this.options.onNodeWidths || this.widthPending || !!this.relationFrom || this.panning;
+            });
         });
         this.relationElements.forEach((element, id) => element.classList.toggle("mindmap-view__relation--selected", this.selectedRelation === id));
         const node = this.model.nodes.get(this.selectedId);
@@ -2727,6 +2753,40 @@ export class ListMindmapView {
         this.suppressLinkClick = false;
         this.suppressPanContextMenu = false;
         const target = event.target as HTMLElement;
+        const widthHandle = target.closest<HTMLElement>(".mindmap-view__node-width-handle");
+        if (widthHandle && widthHandle.closest(".mindmap-view") === this.options.host) {
+            if (event.button !== 0 || this.readOnly || this.widthPending || !this.options.onNodeWidths ||
+                this.editingId || this.panning || this.relationFrom || this.getSelectedIds().length !== 1) {
+                return;
+            }
+            const element = widthHandle.parentElement;
+            const id = element.dataset.mindmapId;
+            if (id !== this.selectedId || widthHandle.hidden) {
+                return;
+            }
+            event.preventDefault();
+            this.cancelPointer();
+            this.closeInspectorPanel();
+            this.options.host.focus({preventScroll: true});
+            this.preparePointer(event);
+            const initial = element.offsetWidth;
+            const position = this.positions.get(id);
+            this.widthAnchor = {id, right: widthHandle.dataset.widthSide === "left",
+                x: this.offsetX + (position.x + (widthHandle.dataset.widthSide === "left" ? initial : 0)) * this.scale,
+                y: this.offsetY + position.y * this.scale};
+            this.pointer = {pointerId: event.pointerId, startX: event.clientX, startY: event.clientY,
+                x: this.offsetX, y: this.offsetY, moved: false,
+                width: {id, original: this.model.metadata.nodes[id]?.width || 0, initial, value: initial,
+                    scale: element.getBoundingClientRect().width / initial,
+                    direction: widthHandle.dataset.widthSide === "left" ? -1 : 1}};
+            try {
+                this.pointerCapture = widthHandle;
+                widthHandle.setPointerCapture(event.pointerId);
+            } catch {
+                this.cancelPointer();
+            }
+            return;
+        }
         if (![0, 1, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe") ||
             this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
             return;
@@ -2912,6 +2972,13 @@ export class ListMindmapView {
             pointer.hiddenControls?.forEach(element => element.classList.add("mindmap-view__node--hide-controls"));
         }
         pointer.moved = true;
+        if (pointer.width) {
+            const drag = pointer.width;
+            drag.value = Math.max(32, Math.round(drag.initial + dx * drag.direction / drag.scale));
+            this.suppressLinkClick = true;
+            this.previewNodeWidths([{id: drag.id, width: drag.value}]);
+            return;
+        }
         if (pointer.selection) {
             const viewport = this.viewport.getBoundingClientRect();
             const left = Math.min(pointer.startX, event.clientX);
@@ -2990,7 +3057,7 @@ export class ListMindmapView {
             this.ghost = source.cloneNode(true) as HTMLDivElement;
             this.ghost.className = "mindmap-view__node mindmap-view__node--selected mindmap-view__ghost";
             this.ghost.removeAttribute("data-mindmap-id");
-            this.ghost.querySelectorAll(".mindmap-view__fold, .mindmap-view__add-child, .mindmap-view__add-bridge")
+            this.ghost.querySelectorAll(".mindmap-view__fold, .mindmap-view__add-child, .mindmap-view__add-bridge, .mindmap-view__node-width-handle")
                 .forEach(button => button.remove());
             this.world.append(this.ghost);
             source.classList.add("mindmap-view__node--dragging");
@@ -3058,6 +3125,25 @@ export class ListMindmapView {
             return;
         }
         const {id, targetId, placement, moved} = pointer;
+        if (pointer.width) {
+            const drag = pointer.width;
+            const anchor = this.widthAnchor;
+            this.cancelPointer();
+            if (moved && drag.value !== drag.initial && !this.readOnly) {
+                this.widthAnchor = anchor;
+                this.widthPending = true;
+                this.updateSelection();
+                void this.options.onNodeWidths([{id: drag.id, width: drag.value}],
+                    JSON.stringify([{id: drag.id, width: drag.original}])).catch(error => console.error(error)).finally(() => {
+                    this.widthPending = false;
+                    if (!this.destroyed) {
+                        this.previewNodeWidths(this.nodeWidths([drag.id]));
+                        this.updateSelection();
+                    }
+                });
+            }
+            return;
+        }
         if (pointer.selection && moved) {
             this.suppressLinkClick = true;
             this.cancelPointer();
@@ -3192,6 +3278,12 @@ export class ListMindmapView {
         this.clearDrop();
         const pointer = this.pointer;
         this.pointer = undefined;
+        if (pointer?.width) {
+            this.widthAnchor = undefined;
+            this.offsetX = pointer.x;
+            this.offsetY = pointer.y;
+            this.previewNodeWidths([{id: pointer.width.id, width: pointer.width.original}]);
+        }
         clearTimeout(pointer?.touchDragTimer);
         pointer?.hiddenControls?.forEach(element => element.classList.remove("mindmap-view__node--hide-controls"));
         this.selectionBox.hidden = true;
@@ -3248,6 +3340,10 @@ export class ListMindmapView {
 
     private doubleClick = (event: MouseEvent) => {
         clearTimeout(this.linkTimer);
+        if ((event.target as Element).closest(".mindmap-view__node-width-handle")) {
+            event.preventDefault();
+            return;
+        }
         if (this.relationFrom || this.multiSelect || this.panning || this.pinching) {
             return;
         }
@@ -3599,6 +3695,14 @@ export class ListMindmapView {
     };
 
     private keyDown = (event: KeyboardEvent) => {
+        if (this.pointer?.width) {
+            if (event.key === "Escape") {
+                this.cancelPointer();
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if (event.key === "Escape" && this.inspectorPanel) {
             const anchor = this.inspectorPanel.anchor;
             this.closeInspectorPanel();
@@ -3816,7 +3920,73 @@ export class ListMindmapView {
         event.stopPropagation();
     };
 
+    private bindInspectorPanelEvents() {
+        this.listen(this.inspectorPopover, "pointerenter", this.inspectorPanelEnter);
+        this.listen(this.inspectorPopover, "pointerleave", this.inspectorPanelLeave);
+        this.listen(this.inspectorPopover, "pointerdown", (event: PointerEvent) => {
+            if (event.pointerType === "mouse" && this.inspectorPanel) {
+                this.inspectorPanel.pointer = event.pointerId;
+                clearTimeout(this.inspectorPanelTimer);
+            }
+        });
+        this.listen(this.inspectorPopover, "focusin", () => clearTimeout(this.inspectorPanelTimer));
+        this.listen(this.inspectorPopover, "focusout", () => this.queueInspectorPanelClose());
+        const release = (event: PointerEvent) => {
+            const panel = this.inspectorPanel;
+            if (panel && panel.pointer === event.pointerId) {
+                panel.pointer = undefined;
+                // 捕获指针时事件目标仍是滑块或色板，以实际落点判断是否已离开面板。
+                const target = document.elementFromPoint(event.clientX, event.clientY);
+                panel.inside = this.inspectorPopover.contains(target) || panel.anchor.contains(target);
+                this.queueInspectorPanelClose();
+            }
+        };
+        this.listen(window, "pointerup", release, {capture: true});
+        this.listen(window, "pointercancel", release, {capture: true});
+        this.listen(this.inspectorPopover, "lostpointercapture", release);
+        this.listen(window, "blur", () => {
+            if (this.inspectorPanel?.hover) {
+                this.inspectorPanel.pointer = undefined;
+                this.inspectorPanel.inside = false;
+                this.queueInspectorPanelClose();
+            }
+        });
+    }
+
+    private inspectorPanelEnter = (event: PointerEvent) => {
+        if (event.pointerType === "mouse" && this.inspectorPanel) {
+            this.inspectorPanel.inside = true;
+            clearTimeout(this.inspectorPanelTimer);
+        }
+    };
+
+    private inspectorPanelLeave = (event: PointerEvent) => {
+        const panel = this.inspectorPanel;
+        if (event.pointerType !== "mouse" || !panel) {
+            return;
+        }
+        const target = event.relatedTarget instanceof Node ? event.relatedTarget : null;
+        panel.inside = this.inspectorPopover.contains(target) || panel.anchor.contains(target);
+        this.queueInspectorPanelClose();
+    };
+
+    private queueInspectorPanelClose() {
+        clearTimeout(this.inspectorPanelTimer);
+        const panel = this.inspectorPanel;
+        if (!panel?.hover || panel.inside || panel.pointer !== undefined) {
+            return;
+        }
+        // 触发按钮和面板之间有间隙，给鼠标移入面板留出时间。
+        this.inspectorPanelTimer = window.setTimeout(() => {
+            if (!this.destroyed && this.inspectorPanel === panel && panel.hover && !panel.inside &&
+                panel.pointer === undefined && !this.inspectorPopover.contains(document.activeElement)) {
+                this.closeInspectorPanel();
+            }
+        }, 200);
+    }
+
     private closeInspectorPanel() {
+        clearTimeout(this.inspectorPanelTimer);
         const panel = this.inspectorPanel;
         this.inspectorPanel = undefined;
         this.inspectorPopover.hidden = true;
@@ -3830,7 +4000,7 @@ export class ListMindmapView {
         return ids.map(id => ({id, width: this.model.metadata.nodes[id]?.width || 0}));
     }
 
-    private openInspectorPanel(kind: "color" | "width", anchor: HTMLButtonElement) {
+    private openInspectorPanel(kind: "color" | "width", anchor: HTMLButtonElement, hover = false) {
         if (this.readOnly || this.inspector.hidden || anchor.disabled) {
             return;
         }
@@ -3838,7 +4008,13 @@ export class ListMindmapView {
             this.closeInspectorPanel();
             const ids = this.getSelectedIds();
             this.inspectorPanel = {kind, ids, anchor, widths: this.nodeWidths(ids), slider: 0, preview: false,
+                hover, inside: true,
                 baseWidth: Math.max(32, this.positions.get(this.selectedId)?.width || 32)};
+        }
+        clearTimeout(this.inspectorPanelTimer);
+        this.inspectorPanel.inside = true;
+        if (!hover) {
+            this.inspectorPanel.hover = false;
         }
         anchor.setAttribute("aria-expanded", "true");
         this.renderInspectorPanel();
@@ -4430,9 +4606,10 @@ export class ListMindmapView {
             button.disabled = kind === "width" && (!this.options.onNodeWidths || this.widthPending);
             button.addEventListener("pointerenter", event => {
                 if (event.pointerType === "mouse" && !button.disabled) {
-                    this.openInspectorPanel(kind, button);
+                    this.openInspectorPanel(kind, button, true);
                 }
             });
+            button.addEventListener("pointerleave", this.inspectorPanelLeave);
             this.inspector.append(button);
             if (this.inspectorPanel?.kind === kind) {
                 this.inspectorPanel.anchor = button;
@@ -4680,6 +4857,7 @@ export class ListMindmapView {
             return;
         }
         this.destroyed = true;
+        clearTimeout(this.inspectorPanelTimer);
         cancelAnimationFrame(this.inspectorFrame);
         this.stopFoldAnimation?.();
         cancelAnimationFrame(this.drawFrame);

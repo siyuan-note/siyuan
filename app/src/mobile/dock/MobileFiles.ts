@@ -1,6 +1,7 @@
 import {renderDocTreeRow, renderDocTreeRowHTML} from "../../layout/dock/docTree/row";
 import {getDocTreeItem, isEncryptedDocTreeItem, notebookTreeItem} from "../../layout/dock/docTree/rowData";
 import {DocTreeController, getActiveDocTreeController} from "../../layout/dock/docTree/DocTreeController";
+import {refreshImportedDocTree} from "../../layout/dock/docTree/importRefresh";
 import type {IDocTreeItem} from "../../layout/dock/docTree/types";
 import {createDocTreeSelectionProgress} from "../../layout/dock/docTree/selectionProgress";
 import {saveDocTreeState, restoreDocTreeState} from "../../util/docTreeState";
@@ -26,7 +27,7 @@ import {newFileInTree} from "../../util/newFile";
 import {MenuItem} from "../../menus/Menu";
 import type {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
-import {confirmDialog} from "../../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../../dialog/mobileConfirmDialog";
 import {showMessage} from "../../dialog/message";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
@@ -677,8 +678,7 @@ export class MobileFiles extends Model {
 
     public onDocsImported(data: {notebook: string, parentPath: string, rootIDs: string[]}) {
         this.pinnedDocs.scheduleRefresh();
-        const parentID = data.parentPath.split("/").filter(Boolean).pop()?.replace(/\.sy$/, "") || "";
-        void this.docTree.reload({notebook: data.notebook, parentID});
+        void refreshImportedDocTree(this.docTree, data);
     }
 
     public onDocSortModeChanged(data: IDocSortModeChanged) {

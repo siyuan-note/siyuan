@@ -3,7 +3,7 @@ import {bindFieldLunarDates, genFieldValue, getValueInputHTML, openFieldSelectMe
 import {isAVLocationEmpty} from "./locationValue";
 import {getCalendarCreationDate} from "./calendar/state";
 import {Constants} from "../../../constants";
-import {Dialog} from "../../../dialog";
+import {MobileDialog} from "../../../dialog/mobileDialog";
 import {showMessage} from "../../../dialog/message";
 import {Menu} from "../../../plugin/Menu";
 import {MenuItem} from "../../../menus/Menu";
@@ -20,10 +20,6 @@ import {upDownHint} from "../../../util/upDownHint";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {isMobile} from "../../../util/functions";
 import {openDatabaseRowByData} from "./openDatabaseRow";
-/// #if MOBILE
-import {activeBlur} from "../../../mobile/util/keyboardToolbar";
-import {bindBottomSheetDialog} from "../../../mobile/util/bindBottomSheetDialog";
-/// #endif
 
 interface ICreatePosition {
     calendarDate?: number;
@@ -206,10 +202,11 @@ const collectTemplate = (root: HTMLElement, itemTemplate: IAVNewItemTemplate, fi
     itemTemplate.name = (root.querySelector('[data-role="template-name"]') as HTMLInputElement).value.trim();
     itemTemplate.targetType = (root.querySelector('[data-role="target-type"]') as HTMLSelectElement).value as TAVNewItemTarget;
     itemTemplate.icon = (root.querySelector('[data-role="template-icon"]') as HTMLElement).dataset.value || "";
-    const openAfterCreate = root.querySelector<HTMLInputElement>('[data-role="open-after-create"]');
+    const openAfterCreate = root.querySelector<HTMLSelectElement>('[data-role="open-after-create"]');
     // 编辑旧模板的其他配置时保留缺省值，避免改变其在日历和其他视图中的既有行为。
     if (itemTemplate.openAfterCreate !== undefined || openAfterCreate.dataset.changed === "true") {
-        itemTemplate.openAfterCreate = openAfterCreate.checked;
+        itemTemplate.openAfterCreate = openAfterCreate.value !== "none";
+        itemTemplate.openInCurrentTab = openAfterCreate.value === "current";
     }
     itemTemplate.primaryKeyTemplate = (root.querySelector('[data-role="primary-key"]') as HTMLInputElement).value;
     itemTemplate.contentTemplatePath = (root.querySelector('[data-role="content-template"]') as HTMLElement).dataset.value || "";
@@ -283,7 +280,11 @@ const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn |
     <div class="custom-attr">
         <div class="block__icons av__row">
             <div class="block__logo block__logo--icon ariaLabel" data-position="parentE" aria-label="${escapeAttr(window.siyuan.languages.newItemTemplateOpenAfterCreate)}"><svg class="block__logoicon"><use xlink:href="#iconOpen"></use></svg><span>${window.siyuan.languages.newItemTemplateOpenAfterCreate}</span></div>
-            <div class="fn__flex custom-attr__avvalue av__template-switch" style="align-items:center;justify-content:flex-end"><input class="b3-switch" data-role="open-after-create" type="checkbox" aria-label="${escapeAttr(window.siyuan.languages.newItemTemplateOpenAfterCreate)}"${(itemTemplate.openAfterCreate ?? isCalendar) ? " checked" : ""}></div>
+            <div class="fn__flex-1 custom-attr__avvalue"><select class="b3-select fn__block" data-role="open-after-create" aria-label="${escapeAttr(window.siyuan.languages.newItemTemplateOpenAfterCreate)}">
+                <option value="none"${!(itemTemplate.openAfterCreate ?? isCalendar) ? " selected" : ""}>${window.siyuan.languages.newItemTemplateNoOpen}</option>
+                <option value="current"${(itemTemplate.openAfterCreate ?? isCalendar) && itemTemplate.openInCurrentTab ? " selected" : ""}>${window.siyuan.languages.openBy}</option>
+                <option value="right"${(itemTemplate.openAfterCreate ?? isCalendar) && !itemTemplate.openInCurrentTab ? " selected" : ""}>${window.siyuan.languages.splitLR}</option>
+            </select></div>
         </div>
     </div>
     <div data-role="document-options" class="${isDocument ? "" : "fn__none"}">
@@ -339,7 +340,7 @@ export const openNewItemTemplateDialog = (options: {
         selectedIndex = 0;
     }
     let defaultTemplateID = options.data.defaultTemplateID || "";
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         title: isMobile() ? undefined : window.siyuan.languages.itemTemplate,
         width: isMobile() ? "100vw" : "820px",
         height: isMobile() ? "60vh" : "70vh",
@@ -352,22 +353,7 @@ export const openNewItemTemplateDialog = (options: {
     </div>
     <div class="b3-dialog__action"><button class="b3-button b3-button--cancel" data-role="cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text" data-role="confirm">${window.siyuan.languages.confirm}</button></div>
 </div>`,
-        destroyCallback: () => {
-            /// #if MOBILE
-            disposeSheet();
-            /// #endif
-        },
     });
-    /// #if MOBILE
-    const destroyDialog = dialog.destroy.bind(dialog);
-    dialog.destroy = (destroyOptions?: IObject) => {
-        if (dialog.element.contains(document.activeElement)) {
-            activeBlur(true);
-        }
-        destroyDialog(destroyOptions);
-    };
-    const disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
-    /// #endif
     const root = dialog.element;
     const listElement = root.querySelector('[data-role="template-list"]') as HTMLElement;
     const hostElement = root.querySelector('[data-role="editor-host"]') as HTMLElement;
@@ -385,7 +371,7 @@ export const openNewItemTemplateDialog = (options: {
         listElement.innerHTML = `<li class="b3-list-item" data-role="add-template"><svg class="b3-list-item__graphic"><use xlink:href="#iconAdd"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newTemplate}</span></li><li class="b3-menu__separator"></li>` +
             templates.map((item, index) => `<li class="b3-list-item b3-list-item--hide-action${index === selectedIndex ? " b3-list-item--focus" : ""}" data-index="${index}" draggable="true"><svg class="b3-list-item__graphic fn__grab"><use xlink:href="#iconDrag"></use></svg><span class="b3-list-item__text">${escapeHtml(item.name)}</span>${item.id === defaultTemplateID ? `<span class="b3-list-item__meta">${window.siyuan.languages.default}</span>` : ""}<span class="b3-list-item__action ariaLabel" data-menu="true" data-position="4west" data-role="template-action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span></li>`).join("");
         hostElement.innerHTML = selectedIndex < 0 ? "" : getEditorHTML(templates[selectedIndex], primaryKey, fields, options.protyle.notebookId, options.blockElement.dataset.avType === "calendar");
-        hostElement.querySelector<HTMLInputElement>('[data-role="open-after-create"]')?.addEventListener("change", event => {
+        hostElement.querySelector<HTMLSelectElement>('[data-role="open-after-create"]')?.addEventListener("change", event => {
             (event.currentTarget as HTMLElement).dataset.changed = "true";
         });
         const target = hostElement.querySelector('[data-role="target-type"]') as HTMLSelectElement;
@@ -632,22 +618,21 @@ export const openNewItemTemplateDialog = (options: {
             return;
         }
         const undoData = options.undoData || options.data;
-        transaction(options.protyle, [{
-            action: "setAttrViewNewItemTemplates",
-            avID: options.data.id,
-            blockID: options.blockElement.dataset.nodeId,
-            data: {templates, defaultTemplateID},
-        }], [{
-            action: "setAttrViewNewItemTemplates",
-            avID: options.data.id,
-            blockID: options.blockElement.dataset.nodeId,
-            data: {templates: undoData.newItemTemplates || [], defaultTemplateID: undoData.defaultTemplateID || ""},
-        }], {
-            callback: () => {
-                dialog.destroy();
-                options.blockElement.removeAttribute("data-render");
-                avRender(options.blockElement, options.protyle);
-            },
+        void dialog.runPending(async () => {
+            await transaction(options.protyle, [{
+                action: "setAttrViewNewItemTemplates",
+                avID: options.data.id,
+                blockID: options.blockElement.dataset.nodeId,
+                data: {templates, defaultTemplateID},
+            }], [{
+                action: "setAttrViewNewItemTemplates",
+                avID: options.data.id,
+                blockID: options.blockElement.dataset.nodeId,
+                data: {templates: undoData.newItemTemplates || [], defaultTemplateID: undoData.defaultTemplateID || ""},
+            }], {awaitResponse: true});
+            options.blockElement.removeAttribute("data-render");
+            avRender(options.blockElement, options.protyle, undefined, true, undefined, true);
+            return true;
         });
     });
     render();
@@ -689,7 +674,7 @@ export const createAttributeViewItem = (options: {
             showMessage(warnings.map(item => escapeHtml(item)).join("<br>"));
         }
         options.blockElement.removeAttribute("data-render");
-        avRender(options.blockElement, options.protyle);
+        avRender(options.blockElement, options.protyle, undefined, true, undefined, true);
         if (response.code === 0 && response.data && "itemID" in response.data &&
             (response.data.openAfterCreate ?? isCalendar) && options.blockElement.isConnected && !options.protyle.disabled) {
             void openDatabaseRowByData(options.protyle, {
@@ -699,7 +684,7 @@ export const createAttributeViewItem = (options: {
                 boundBlockID: response.data.blockID, isDetached: response.data.isDetached,
                 focusPrimary: true,
                 focusTitle: response.data.openAfterCreate === true && !response.data.isDetached,
-            });
+            }, response.data.openInCurrentTab ? {currentPane: true} : undefined);
         }
     }).finally(() => { delete options.blockElement.dataset.creatingItem; });
 };
@@ -738,7 +723,7 @@ export const createAttributeViewItemDocs = (options: {
             showMessage(warnings.map(item => escapeHtml(item)).join("<br>"));
         }
         options.blockElement.removeAttribute("data-render");
-        avRender(options.blockElement, options.protyle);
+        avRender(options.blockElement, options.protyle, undefined, true, undefined, true);
     }).finally(() => {
         delete options.blockElement.dataset.createDocAndBind;
     });
@@ -767,7 +752,7 @@ const saveNewItemTemplateConfig = (options: {
     }], {
         callback: () => {
             options.blockElement.removeAttribute("data-render");
-            avRender(options.blockElement, options.protyle);
+            avRender(options.blockElement, options.protyle, undefined, true, undefined, true);
         },
     });
 };

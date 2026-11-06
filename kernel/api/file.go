@@ -445,7 +445,7 @@ var getFile = contractHandler(apicontract.GetFile, func(c *gin.Context, request 
 	if info.IsDir() {
 		return apicontract.Failure[apicontract.BinaryContent](http.StatusConflict, "path is a directory")
 	}
-	data, err := filelock.ReadFile(fileAbsPath)
+	data, err := util.ReadUserFile(fileAbsPath)
 	if err != nil {
 		logging.LogErrorf("read file [%s] failed: %s", fileAbsPath, err)
 		return apicontract.Failure[apicontract.BinaryContent](http.StatusInternalServerError, err.Error())

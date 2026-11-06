@@ -15,7 +15,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestDocumentPartialIndexesEncryptedReopen(t *testing.T) {
+func TestDocumentSearchIndexesEncryptedReopen(t *testing.T) {
 	previousTemp, previousDB, previousEncrypted := util.TempDir, db, IsEncryptedBoxFn
 	util.TempDir = t.TempDir()
 	const box = "document-partial-index-test"
@@ -39,10 +39,12 @@ func TestDocumentPartialIndexesEncryptedReopen(t *testing.T) {
 	}
 	execDeletePathTestSQL(t, database, "INSERT INTO blocks (id, root_id, type, content) VALUES "+
 		"('encrypted', 'encrypted', 'd', 'private title'), ('body', 'encrypted', 'p', 'private body')")
+	execDeletePathTestSQL(t, database, "UPDATE blocks SET alias = 'private alias' WHERE id = 'encrypted'")
 	const contents = "SELECT id || ':' || content FROM blocks ORDER BY rowid"
 	want := deletePathTestIDs(t, database, contents)
-	// 保存只有路径索引的密文库，通过正式打开流程补建根文档索引。
+	// 缺少搜索部分索引的密文库通过正式打开流程补建索引。
 	execDeletePathTestSQL(t, database, "DROP INDEX idx_blocks_doc_root_id")
+	execDeletePathTestSQL(t, database, "DROP INDEX idx_blocks_search_metadata_root_id")
 	CloseEncryptedDB(box)
 	readCiphertext := func() []byte {
 		t.Helper()
@@ -78,6 +80,9 @@ func TestDocumentPartialIndexesEncryptedReopen(t *testing.T) {
 		}
 		if got := deletePathTestIDs(t, database, "SELECT id FROM blocks INDEXED BY idx_blocks_doc_root_id WHERE type = 'd'"); !reflect.DeepEqual(got, []string{"encrypted"}) {
 			t.Fatalf("encrypted document lookup: %v", got)
+		}
+		if got := deletePathTestIDs(t, database, "SELECT id FROM blocks INDEXED BY idx_blocks_search_metadata_root_id WHERE "+BlockSearchMetadataPredicate); !reflect.DeepEqual(got, []string{"encrypted"}) {
+			t.Fatalf("encrypted metadata lookup: %v", got)
 		}
 		CloseEncryptedDB(box)
 	}

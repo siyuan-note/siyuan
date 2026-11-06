@@ -4,6 +4,7 @@ interface EditorSaveRecord {
     version: number;
     failedStructure: boolean;
     disposed: boolean;
+    owners: number;
 }
 
 const editors = new Map<IProtyle, EditorSaveRecord>();
@@ -64,20 +65,35 @@ export const flushPendingEditorSaves = async (failureVersion: number) => {
 
 // 仅由需要确认保存结果后才能销毁的编辑器启用，不改变普通请求的错误处理。
 export const registerEditorSave = (protyle: IProtyle) => {
-    const record: EditorSaveRecord = {
-        pending: new Set(), results: new Map(), version: 0, failedStructure: false, disposed: false,
+    const record: EditorSaveRecord = editors.get(protyle) || {
+        pending: new Set(), results: new Map(), version: 0, failedStructure: false, disposed: false, owners: 0,
     };
+    record.owners++;
     editors.set(protyle, record);
+    let disposed = false;
     return {
-        flush: async () => {
-            while (!record.disposed && record.pending.size) {
+        flush: async (retryBlocks?: (ids: string[]) => Promise<void>) => {
+            while (!disposed && !record.disposed && record.pending.size) {
                 await Promise.all([...record.pending]);
             }
-            if (!record.disposed && (record.failedStructure || [...record.results.values()].some(result => result.failed))) {
+            if (!disposed && !record.disposed && !record.failedStructure && retryBlocks) {
+                const ids = [...record.results].filter(([key, result]) => result.failed && key.startsWith("block:"))
+                    .map(([key]) => key.substring("block:".length));
+                if (ids.length) {
+                    await retryBlocks(ids);
+                    while (!disposed && !record.disposed && record.pending.size) {
+                        await Promise.all([...record.pending]);
+                    }
+                }
+            }
+            if (!disposed && !record.disposed && (record.failedStructure || [...record.results.values()].some(result => result.failed))) {
                 throw new Error(window.siyuan.languages.settingsPendingSaveError);
             }
         },
         dispose: () => {
+            if (disposed) return;
+            disposed = true;
+            if (--record.owners) return;
             record.disposed = true;
             record.pending.clear();
             record.results.clear();

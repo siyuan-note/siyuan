@@ -3,7 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
-import {clampGroupTableVirtualData, getGroupTableRenderPlan} from "./groupTableVirtual";
+import {clampGroupTableVirtualData, getGroupTableRenderPlan, getTableRowBudget, GROUP_TABLE_INITIAL_ROW_BUDGET} from "./groupTableVirtual";
 
 const setup = () => {
     const constants = {CUSTOM_SY_AV_VIEW: "view", ATTRIBUTE_V_SCROLL: "v-scroll", DIALOG_ATTR: "attr"};
@@ -60,6 +60,7 @@ const setup = () => {
     const data = {columns: [] as IAVColumn[], rows: Array.from({length: 501}, (_, index) => ({id: `row-${index}`})), pageSize: 50,
         nested: {page: 2, pageSize: 50, rootCount: 200, matchedCount: 10000}};
     const renderTable = extract<(...args: unknown[]) => string>("getTableHTMLs", {
+        getTableRowBudget, GROUP_TABLE_INITIAL_ROW_BUDGET,
         clampGroupTableVirtualData,
         Constants: constants, getRowHTML: ({rowIndex}: {rowIndex: number}) => { mounted.push(rowIndex); return "<div></div>"; },
         window: {siyuan: {languages: {avSubItemsCounts: "${roots}/${matches}"}}}, escapeHtml: (value: string) => value,

@@ -409,7 +409,15 @@ func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
 		time.Second, 0, "", time.Second, time.Second,
 	)
 	doneSeen := false
+	compactionRoundID := ""
+	modelRoundID := ""
 	for event := range events {
+		if event.Type == "thinking" && event.Reasoning == "analyzing" {
+			modelRoundID = event.RoundID
+		}
+		if event.Type == "thinking" && event.Reasoning == "compacting context" {
+			compactionRoundID = event.RoundID
+		}
 		if event.Type == "error" {
 			t.Fatalf("agent returned an error after proactive compaction: %s", event.Error)
 		}
@@ -419,6 +427,9 @@ func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
 	}
 	if requestCount.Load() != 2 || !doneSeen {
 		t.Fatalf("unexpected compaction request flow: requests=%d, done=%v", requestCount.Load(), doneSeen)
+	}
+	if compactionRoundID == "" || compactionRoundID != modelRoundID {
+		t.Fatalf("context compaction round %q does not match model round %q", compactionRoundID, modelRoundID)
 	}
 	runtime, err := loadRuntimeState(testSessionID)
 	if err != nil {

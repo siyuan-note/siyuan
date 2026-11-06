@@ -83,12 +83,25 @@ func GetMimeTypeByExt(filePath string) (ret string) {
 }
 
 func GetMimeTypeByPath(filePath string) (m *mimetype.MIME, ok bool) {
-	f, err := filelock.OpenFile(filePath, os.O_RDONLY, 0644)
+	managed := isManagedWorkspaceFile(filePath)
+	var f *os.File
+	var err error
+	if managed {
+		f, err = filelock.OpenFile(filePath, os.O_RDONLY, 0644)
+	} else {
+		filelock.Lock(filePath)
+		defer filelock.Unlock(filePath)
+		f, err = os.Open(filePath)
+	}
 	if err != nil {
 		logging.LogErrorf("open file [%s] failed: %s", filePath, err)
 		return
 	}
-	defer filelock.CloseFile(f)
+	if managed {
+		defer filelock.CloseFile(f)
+	} else {
+		defer f.Close()
+	}
 
 	m, err = mimetype.DetectReader(f)
 	if nil != err {

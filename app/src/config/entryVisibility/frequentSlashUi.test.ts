@@ -83,7 +83,7 @@ const loadEditor = (id = "custom", initialEnabled = true, mobile = false) => {
         escapeAttr: (value: string) => value,
         escapeHtml: (value: string) => value,
         saveEntryVisibility: (value: typeof config) => { siyuan.config.appearance.entryVisibility = value; writes.push(value); },
-        confirmDialog: (_title: string, _text: string, callback: () => void) => {
+        mobileConfirmDialog: (_title: string, _text: string, callback: () => void) => {
             discardPrompts++;
             if (allowDiscard) callback();
         },

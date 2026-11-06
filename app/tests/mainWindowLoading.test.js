@@ -70,6 +70,7 @@ const runCase = async (sources, options) => {
         electron, "../constants": {Constants: constants}, "../util/functions": functions,
         "../protyle/util/compatibility": compatibility, "./windowControls": controls,
         "./globalEvent/commonHotkey": {correctHotkey() {}, syncAppMenuShortcuts() {}},
+        "../markdown/keymapSync": {syncMarkdownKeymap() {}},
         "./globalEvent/globalShortcut": {sendGlobalShortcut() {}}, "../util/ensureUILayout": {ensureUILayout() {}},
         "./globalEvent/event": {initWindowEvent() { if (!options.browser) assert.equal(registered, true); }},
         "../util/hostCapabilities": {getHostCapabilities: () => ({}), setHostConnection: () => { registered = true; }},

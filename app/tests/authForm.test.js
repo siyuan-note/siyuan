@@ -11,6 +11,13 @@ const fixtureHTML = mode => {
     const access = mode !== "oidc";
     const oidc = mode !== "password";
     return readFileSync(path.join(__dirname, "../stage/auth.html"), "utf8")
+        .replace("<head>", `<head><script>
+            window.nativeFocusable = false;
+            window.JSAndroid = {
+                setWebViewFocusable: value => { window.nativeFocusable = value; },
+                showKeyboard: () => { window.nativeFocusable = true; }
+            };
+        </script>`)
         .replace(/{{if not \.accessAuthCodeEnabled}}([\s\S]*?){{end}}/g, (_, content) => access ? "" : content)
         .replace(/{{if \.accessAuthCodeEnabled}}([\s\S]*?){{end}}/g, (_, content) => access ? content : "")
         .replace(/{{if \.oidcEnabled}}([\s\S]*?){{end}}/g, (_, content) => oidc ? content : "")
@@ -75,6 +82,27 @@ if (process.versions.electron && process.type === "browser") {
                     oidc: mode === "password" ? undefined : "button", exit: "button"});
             }
             await waitFor(() => evaluate("!document.getElementById('authPanel').inert"));
+            assert.equal(await evaluate("window.nativeFocusable"), true,
+                "authentication restores native focus disabled by the editor");
+            await evaluate(`document.getElementById("authCode").focus();
+                document.getElementById("authCode").value = "partial";
+                document.getElementById("authCode").setSelectionRange(3, 3);`);
+            for (const preserveSelection of [true, false]) {
+                // 按 Android 桥接协议处理返回值，模拟输入法切换和主动收起键盘。
+                const state = await evaluate(`(() => {
+                    const result = window.hideKeyboardToolbar(${preserveSelection});
+                    if (result !== 1) {
+                        document.activeElement.blur();
+                        window.nativeFocusable = false;
+                    }
+                    const input = document.getElementById("authCode");
+                    return {result, focusable: window.nativeFocusable,
+                        focused: document.activeElement === input,
+                        value: input.value, caret: input.selectionStart};
+                })()`);
+                assert.deepEqual(state, {result: 1, focusable: true, focused: true, value: "partial", caret: 3});
+            }
+            await evaluate('document.getElementById("authCode").value = ""');
             await evaluate("document.getElementById('authSubmit').click()");
             assert.equal(requests.length, 0, "empty input does not send credentials");
             assert.equal(await evaluate("document.querySelector('#message').firstElementChild.textContent"), "Auth code required");
@@ -118,7 +146,7 @@ if (process.versions.electron && process.type === "browser") {
         }
     });
 } else {
-    test("auth form preserves login requests, captcha and error handling", {
+    test("auth form preserves Android input focus, login requests, captcha and error handling", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 30000,
     }, async () => {

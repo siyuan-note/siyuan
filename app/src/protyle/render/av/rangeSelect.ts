@@ -8,6 +8,7 @@ import {
     resetAVRowSelect,
 } from "./virtualScroll";
 import {updateAVSelectionStatus} from "./row";
+import {ensureAVColumnWindow} from "./columnWindow";
 import {
     clearAVCellSelectionState,
     clearAVItemSelectionState,
@@ -17,6 +18,7 @@ import {
     IAVCellPoint,
     IAVSelectedCell,
     restoreAVCellSelection,
+    resolveAVSelectedCell,
     setAVCellSelection,
     setAVItemAnchorState,
     setAVItemSelectionState,
@@ -145,7 +147,31 @@ export const selectAVCellRange = (blockElement: HTMLElement, cellElement: HTMLEl
     return applyCellRange(blockElement, anchor, focus);
 };
 
+export const selectAVDragFillRange = (blockElement: HTMLElement, origin: IAVSelectedCell[], cellElement: HTMLElement) => {
+    const data = getAVData(blockElement);
+    const focus = getCellPoint(cellElement);
+    const target = data && focus && resolveAVSelectedCell(data, focus);
+    const source = data && origin.map(point => resolveAVSelectedCell(data, point));
+    if (!source?.length || source.some(cell => !cell)) {
+        return false;
+    }
+    source.sort((a, b) => a.rowIndex - b.rowIndex || a.colIndex - b.colIndex);
+    const first = source[0];
+    const last = source[source.length - 1];
+    if (!target || target.groupID !== first.groupID || target.colID !== last.colID ||
+        target.rowIndex >= first.rowIndex && target.rowIndex <= last.rowIndex) {
+        applyCellRange(blockElement, first, last);
+        return false;
+    }
+    return applyCellRange(blockElement, {
+        groupID: first.groupID,
+        rowID: target.rowIndex < first.rowIndex ? last.rowID : first.rowID,
+        colID: first.colID,
+    }, target);
+};
+
 const getRenderedCell = (blockElement: HTMLElement, point: IAVCellPoint) => {
+    ensureAVColumnWindow(blockElement, point.colID, point.rowID, point.groupID);
     const groupSelector = point.groupID ? `[data-group-id="${point.groupID}"]` : "";
     return blockElement.querySelector<HTMLElement>(
         `.av__body${groupSelector} .av__row[data-id="${point.rowID}"] .av__cell[data-col-id="${point.colID}"]`);

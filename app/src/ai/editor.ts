@@ -1,3 +1,4 @@
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
 import {fetchAIEditorSSE, IAIEditorMessage, TAIEditorSSEEvent} from "./editorSSE";
 import {genUUID} from "../util/genID";
 import {
@@ -13,7 +14,6 @@ import {processRender} from "../protyle/util/processCode";
 import {highlightRender} from "../protyle/render/highlightRender";
 import {copyPlainText, isDisabledFeature} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
-import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeAriaLabel, escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
@@ -731,7 +731,7 @@ const beginTask = (protyle: IProtyle, source: IAIEditorSource) => {
         start();
         return;
     }
-    confirmDialog(window.siyuan.languages.aiEdit, window.siyuan.languages.aiReplaceCurrentTask, start);
+    mobileConfirmDialog(window.siyuan.languages.aiEdit, window.siyuan.languages.aiReplaceCurrentTask, start);
 };
 
 export const startAIEditorAction = (protyle: IProtyle, elements: HTMLElement[], range: Range | undefined,

@@ -4,7 +4,7 @@ import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
-import {clampGroupTableVirtualData} from "./groupTableVirtual";
+import {clampGroupTableVirtualData, getTableRowBudget, GROUP_TABLE_INITIAL_ROW_BUDGET} from "./groupTableVirtual";
 
 it("folding a repeated group row restores that occurrence, preserves its viewport anchor and resets stale virtual windows", () => {
     const module = {exports: {}};
@@ -59,6 +59,7 @@ it("expanded table/list data uses the row window budget even when its root page 
     const attributes: string[] = [];
     const dependencies = {
         clampGroupTableVirtualData,
+        getTableRowBudget, GROUP_TABLE_INITIAL_ROW_BUDGET,
         getRowHTML: (options: {rowIndex: number}) => { mounted.push(options.rowIndex); return "<div></div>"; },
         Constants: {ATTRIBUTE_V_SCROLL: "v-scroll"},
         window: {siyuan: {languages: {avSubItemsCounts: "${roots}/${matches}"}}},

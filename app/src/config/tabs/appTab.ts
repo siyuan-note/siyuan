@@ -1,3 +1,6 @@
+import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {switchWorkspace, importConfiguration} from "../util/resourceConfig";
 import {config as configApi} from "../util/configApi";
 /// #if !BROWSER
@@ -7,7 +10,7 @@ import * as path from "path";
 import type {SettingTabBuilder} from "../setting/builder";
 import {confirmResetSettings} from "../setting/reset";
 import {Constants} from "../../constants";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 /// #if !MOBILE
 import {reloadUI} from "../../layout/util";
 /// #endif
@@ -15,9 +18,6 @@ import {showMessage} from "../../dialog/message";
 import {isMac, saveExportFile} from "../../protyle/util/compatibility";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 /// #if MOBILE
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {Dialog} from "../../dialog";
-import {openInputDialog} from "../../dialog/inputDialog";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {pathPosix} from "../../util/pathName";
 import {escapeAttr, escapeHtml} from "../../util/escape";
@@ -89,7 +89,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                     response.data.forEach((item: string, index: number) => {
                         selectHTML += `<option value="${escapeAttr(escapeHtml(item))}"${index === 0 ? " selected" : ""}>${escapeHtml(pathPosix().basename(item))}</option>`;
                     });
-                    const openWorkspaceDialog = new Dialog({
+                    const openWorkspaceDialog = new MobileDialog({
                         title: window.siyuan.languages.openBy,
                         content: `<div class="b3-dialog__content">
     <select class="b3-text-field fn__block">${selectHTML}</select>
@@ -111,7 +111,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                             openWorkspaceDialog.destroy();
                             return;
                         }
-                        confirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(openPath))}?`, () => {
+                        mobileConfirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(openPath))}?`, () => {
                             switchWorkspace(openPath);
                         });
                     });
@@ -120,16 +120,17 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "creatWorkspace") {
-                const createWorkspaceDialog = openInputDialog({
+                const createWorkspaceDialog = mobileInputDialog({
+                    awaitConfirm: true,
                     title: window.siyuan.languages.new,
                     value: "",
-                    onConfirm: (value, dialog) => {
-                        fetchPost("/api/system/createWorkspaceDir", {
+                    onConfirm: async (value) => {
+                        const response = await fetchSyncPost("/api/system/createWorkspaceDir", {
                             path: pathPosix().join(pathPosix().dirname(window.siyuan.config.system.workspaceDir), value),
-                        }, () => {
-                            renderWorkspaceList(workspaceDirElement);
-                            dialog.destroy();
                         });
+                        if (response.code !== 0) return false;
+                        renderWorkspaceList(workspaceDirElement);
+                        return true;
                     },
                 });
                 createWorkspaceDialog.element.setAttribute("data-key", Constants.DIALOG_CREATEWORKSPACE);
@@ -147,22 +148,23 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                     fetchPost("/api/system/removeWorkspaceDir", {path: removePath});
                     break;
                 }
-                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", () => escapeHtml(removePath)), () => {
-                    fetchPost("/api/system/removeWorkspaceDirPhysically", {path: removePath}, () => {
-                        renderWorkspaceList(workspaceDirElement);
-                    });
+                mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", () => escapeHtml(removePath)), async () => {
+                    const response = await fetchSyncPost("/api/system/removeWorkspaceDirPhysically", {path: removePath});
+                    if (response.code !== 0) return false;
+                    renderWorkspaceList(workspaceDirElement);
+                    return true;
                 }, () => {
                     fetchPost("/api/system/removeWorkspaceDir", {path: removePath}, () => {
                         renderWorkspaceList(workspaceDirElement);
                     });
-                }, true);
+                }, true, undefined, undefined, {awaitConfirm: true});
                 break;
             } else if (target.classList.contains("b3-list-item") && !target.classList.contains("b3-list-item--focus")) {
                 const workspacePath = target.getAttribute("data-path");
                 if (!workspacePath) {
                     break;
                 }
-                confirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(workspacePath))}?`, () => {
+                mobileConfirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(workspacePath))}?`, () => {
                     switchWorkspace(workspacePath);
                 });
                 event.preventDefault();

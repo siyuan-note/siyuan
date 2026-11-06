@@ -200,7 +200,7 @@ const prepareLockedNotebookEditors = (workspace: Workspace): Promise<void> =>
 const startAfterReady = (initMainWindow: InitMainWindow, launchArguments: string[]): void => {
     const startupStartedAt = Date.now();
     writeLog("app ready, preparing startup window");
-    // 独立 Markdown 窗口与工作空间互斥：轻量入口不读取崩溃记录，也不建启动页。
+    // 轻量入口只打开文件窗口；工作空间的崩溃检查与启动页等待普通启动请求。
     createMarkdownEditors();
     const appCrashInfo = isMarkdownStartup() ? undefined : readAppCrashInfo();
     writeLog("read app crash info [" + (Date.now() - startupStartedAt) + "ms since app ready]");

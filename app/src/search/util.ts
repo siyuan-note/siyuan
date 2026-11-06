@@ -310,6 +310,9 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         },
     });
     unRefEdit.resize();
+    [edit, unRefEdit].forEach(editor => {
+        editor.protyle.element.tabIndex = -1;
+    });
     if (closeCB) {
         if (data.layout === 1) {
             if (data.col) {
@@ -1076,10 +1079,13 @@ const openSearchBlockEditor = (options: {
         currentRange = null;
     }
     if (currentRange) {
-        const rangeBlockElement = hasClosestBlock(currentRange.startContainer);
+        const titleElement = options.protyle.title?.editElement;
+        const isTitleRange = titleElement?.contains(currentRange.startContainer);
+        const rangeBlockElement = isTitleRange ? titleElement : hasClosestBlock(currentRange.startContainer);
         if (rangeBlockElement) {
-            options.id = rangeBlockElement.getAttribute("data-node-id");
-            const offset = getSelectionOffset(getContenteditableElement(rangeBlockElement) || rangeBlockElement,
+            options.id = isTitleRange ? options.rootId : rangeBlockElement.getAttribute("data-node-id");
+            const offset = getSelectionOffset(isTitleRange ? titleElement :
+                (getContenteditableElement(rangeBlockElement) || rangeBlockElement),
                 null, options.protyle.highlight.ranges[options.protyle.highlight.rangeIndex]);
             const scrollAttr: IScrollAttr = {
                 rootId: options.protyle.block.rootID,

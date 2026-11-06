@@ -1,5 +1,6 @@
+import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {Dialog} from "../../dialog";
-import {openInputDialog} from "../../dialog/inputDialog";
 import {showMessage} from "../../dialog/message";
 import {fetchSyncPost} from "../../util/fetch";
 import {escapeHtml} from "../../util/escape";
@@ -13,29 +14,9 @@ import type {AISkillFileData, AISkillFileEntry, AISkillFileRequestInput} from ".
 import {openBy} from "../../editor/util";
 /// #endif
 
-// 对话框保持居中，并跟随软键盘调整后的可见区域。
-const bindSkillDialogViewport = (dialog: Dialog) => {
-    const viewport = window.visualViewport;
-    if (!isMobile() || !viewport) {
-        return;
-    }
-    const container = dialog.element.querySelector<HTMLElement>(".b3-dialog");
-    const resize = () => {
-        container.style.top = `${viewport.offsetTop}px`;
-        container.style.height = `${viewport.height}px`;
-    };
-    viewport.addEventListener("resize", resize);
-    viewport.addEventListener("scroll", resize);
-    resize();
-    return () => {
-        viewport.removeEventListener("resize", resize);
-        viewport.removeEventListener("scroll", resize);
-    };
-};
-
 const confirmSkillAction = (title: string, text: string, remove = false): Promise<boolean> => new Promise(resolve => {
     let accepted = false;
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         title,
         width: isMobile() ? "92vw" : "520px",
         content: `<div class="b3-dialog__content ft__breakword">${text}</div>
@@ -43,7 +24,6 @@ const confirmSkillAction = (title: string, text: string, remove = false): Promis
 <button class="b3-button b3-button--cancel" id="cancelDialogConfirmBtn" data-action="cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
 <button class="b3-button b3-button--${remove ? "remove" : "text"}" id="confirmDialogConfirmBtn" data-action="confirm">${window.siyuan.languages.confirm}</button></div>`,
         destroyCallback: () => {
-            disposeViewport?.();
             resolve(accepted);
         },
     });
@@ -60,8 +40,7 @@ const confirmSkillAction = (title: string, text: string, remove = false): Promis
             dialog.destroy();
         }
     });
-    const disposeViewport = bindSkillDialogViewport(dialog);
-    confirm.focus({preventScroll: true});
+    dialog.focusWhenReady(() => confirm);
 });
 
 export const openSkillManager = (settingRoot?: HTMLElement) => {
@@ -363,24 +342,43 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
         const directory = getSkillDirectory(entry);
         const title = action === "newSkill" ? lang.agentSkillNew : action === "newFile" ? lang.agentSkillNewFile :
             action === "mkdir" ? lang.agentSkillNewFolder : lang.rename;
-        const prompt = openInputDialog({
+        const prompt = mobileInputDialog({
             title,
             label: lang.name,
             value: action === "rename" ? entry.path.split("/").pop() : "",
+            awaitConfirm: mobile,
             width: isMobile() ? "92vw" : "520px",
             destroyCallback: () => {
-                disposeInputViewport?.();
                 prompting = false;
                 update();
             },
-            onConfirm: (value, inputDialog) => {
+            onConfirm: async (value, inputDialog) => {
                 const input = inputDialog.element.querySelector<HTMLInputElement>("input");
                 const name = value.trim();
                 const target = getFileRenameTarget(action === "rename" ? entry.path : "", name);
                 if (target === undefined || !isValidSkillName(name)) {
                     input.setCustomValidity(lang.agentSkillNameTip);
                     input.reportValidity();
-                    return;
+                    return false;
+                }
+                if (mobile) {
+                    let next = target;
+                    let data;
+                    if (action === "newSkill") {
+                        data = await api({action: "create", path: name});
+                        next = name + "/SKILL.md";
+                    } else if (action === "rename") {
+                        if (entry.path === target) return true;
+                        data = await api({action: "move", path: entry.path, target, revision: selectedRevision});
+                    } else {
+                        next = directory + "/" + name;
+                        data = await api(action === "mkdir" ? {action: "mkdir", path: next} :
+                            {action: "write", path: next, content: "", revision: ""});
+                    }
+                    if (!data) return false;
+                    // 写入已经成功，刷新失败不能让再次确认重复创建或重命名。
+                    void reload(next, true).catch(error => showMessage(escapeHtml(String(error)), 5000, "error"));
+                    return true;
                 }
                 prompting = false;
                 inputDialog.destroy();
@@ -408,7 +406,6 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
         });
         prompt.element.querySelector("input").addEventListener("input", event =>
             (event.target as HTMLInputElement).setCustomValidity(""));
-        const disposeInputViewport = bindSkillDialogViewport(prompt);
     };
     source.addEventListener("input", () => {
         state.text = source.value;

@@ -1,4 +1,5 @@
 import {isTableLikeView} from "./viewType";
+import {prepareAVColumnWindow} from "./columnWindow";
 import {Constants} from "../../../constants";
 import {applyPublishAVFolds, getPublishAVView, setPublishAVView} from "./publishState";
 import {applyReadonlyAVFolds} from "./readonlyState";
@@ -87,7 +88,7 @@ export const isCurrentAVRender = (blockElement: HTMLElement, token: symbol) => {
 };
 
 const getLocalAVLocateData = (data: IAV | undefined, request: IAVLocateRequest) => {
-    if (!data || (request.viewID && request.viewID !== data.viewID)) {
+    if (!data || data.pendingHTTPTemplates?.length || (request.viewID && request.viewID !== data.viewID)) {
         return;
     }
     const findTarget = (view: IAVTable | IAVGallery | IAVKanban, groupID = "") => {
@@ -256,7 +257,7 @@ export const applyAVRenderContext = (blockElement: HTMLElement, data: IAV) => {
 };
 
 export const persistAVLocateView = (blockElement: HTMLElement, protyle: IProtyle, data: IAV) => {
-    if (window.siyuan.isPublish) {
+    if (window.siyuan.isPublish || data.pendingHTTPTemplates?.length) {
         return false;
     }
     const request = getAVLocateRequest(blockElement);
@@ -303,6 +304,9 @@ export const failAVRender = (blockElement: HTMLElement, response: IWebSocketData
 export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData: {
     virtualData: { [key: string]: IAVVirtualData },
 }) => {
+    if (data.pendingHTTPTemplates?.length) {
+        return;
+    }
     renderedAVData.set(blockElement, data);
     const request = getAVLocateRequest(blockElement);
     if (!blockElement.isConnected || !request || !data.target || data.target.itemID !== request.itemID) {
@@ -362,6 +366,9 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
 };
 
 export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, data: IAV) => {
+    if (data.pendingHTTPTemplates?.length) {
+        return;
+    }
     const request = getAVLocateRequest(blockElement);
     if (!request) {
         return;
@@ -379,6 +386,7 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         return;
     }
     const groupQuery = data.target.groupID ? `.av__body[data-group-id="${data.target.groupID}"]` : ".av__body";
+    prepareAVColumnWindow(blockElement);
     const bodyElement = blockElement.querySelector(groupQuery) as HTMLElement;
     if (bodyElement?.classList.contains("fn__none")) {
         bodyElement.classList.remove("fn__none");
@@ -453,11 +461,17 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         }
     }
     if (isTableLikeView(data.viewType) && request.keyID) {
-        const scroller = blockElement.querySelector<HTMLElement>(".av__scroll");
+        const scroller = targetElement.closest<HTMLElement>(".av__scroll") ||
+            blockElement.querySelector<HTMLElement>(".av__scroll");
         const rect = scroller?.getBoundingClientRect();
         const targetRect = targetElement.getBoundingClientRect();
-        if (scroller && (targetRect.left < rect.left || targetRect.right > rect.right)) {
-            scroller.scrollLeft += targetRect.left - rect.left;
+        const row = targetElement.closest<HTMLElement>(".av__row");
+        const sticky = row?.querySelector<HTMLElement>(".av__colsticky");
+        const frozen = sticky && !row.parentElement.classList.contains("av__body--unfreeze");
+        const left = frozen ? sticky.getBoundingClientRect().right : rect?.left;
+        if (scroller && !(frozen && sticky.contains(targetElement)) &&
+            (targetRect.left < left || targetRect.right > rect.right)) {
+            scroller.scrollLeft += targetRect.left - left;
         }
     }
     if (request.highlight) {

@@ -944,6 +944,52 @@
 						"id": "20260921003419-ozfsnu8",
 						"updated": "20260921003419"
 					}
+				},
+				{
+					"ID": "20261105165000-xffitem",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261105165000-xffpara",
+							"Type": "NodeParagraph",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Set "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "proxy_set_header X-Forwarded-For $remote_addr;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in both proxy locations so the kernel receives the actual client address. Do not pass a caller-supplied "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "X-Forwarded-For"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " through unchanged, otherwise a remote client may be treated as a local administrator"
+								}
+							],
+							"Properties": {
+								"id": "20261105165000-xffpara",
+								"updated": "20261105165000"
+							}
+						}
+					],
+					"Properties": {
+						"id": "20261105165000-xffitem",
+						"updated": "20261105165000"
+					}
 				}
 			]
 		},

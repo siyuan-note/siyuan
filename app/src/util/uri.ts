@@ -21,7 +21,7 @@ import {showMessage} from "../dialog/message";
 
 const bazaarTypes = new Set<TBazaarType>(["plugins", "themes", "icons", "templates", "widgets"]);
 
-const processSiYuanUriBlocks = (app: App, uriObj: ParsedSiYuanUri): boolean => {
+const processSiYuanUriBlocks = (app: App, uriObj: ParsedSiYuanUri, event?: MouseEvent, ctrlIsPressed = false): boolean => {
     const blockInfo = parseSiYuanUriInfo(uriObj.href);
     if (blockInfo != null) {
         const {id, focus} = blockInfo;
@@ -46,6 +46,8 @@ const processSiYuanUriBlocks = (app: App, uriObj: ParsedSiYuanUri): boolean => {
                             action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
                                 [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                             zoomIn: zoomIn || focus,
+                            position: event?.shiftKey ? "bottom" : event?.altKey ? "right" : undefined,
+                            keepCursor: !event?.shiftKey && !event?.altKey && ctrlIsPressed,
                         });
                         /// #else
                         openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
@@ -165,7 +167,7 @@ const processSiYuanUriBazaar = (app: App, uriObj: ParsedSiYuanUri): boolean => {
     return false;
 };
 
-export const processSiYuanUri = (app: App, uri: string) => {
+export const processSiYuanUri = (app: App, uri: string, event?: MouseEvent, ctrlIsPressed = false) => {
     let uriObj: ParsedSiYuanUri;
     try {
         const parsedURI = new URL(uri);
@@ -178,7 +180,7 @@ export const processSiYuanUri = (app: App, uri: string) => {
     }
     switch (uriObj.hostname) {
         case "blocks":
-            return processSiYuanUriBlocks(app, uriObj);
+            return processSiYuanUriBlocks(app, uriObj, event, ctrlIsPressed);
         case "plugins":
             return processSiYuanUriPlugins(app, uriObj);
         case "bazaar":

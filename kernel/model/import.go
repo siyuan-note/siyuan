@@ -434,7 +434,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	}
 	// 全部标题源通过检查后才导入表情、创建笔记本或重新分配身份。
 	for _, syPath := range syPaths {
-		data, readErr := filelock.ReadFile(syPath)
+		data, readErr := util.ReadUserFile(syPath)
 		if readErr != nil {
 			return "", readErr
 		}
@@ -453,7 +453,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	hasImportedBoxConf := filelock.IsExist(importedConfPath)
 	var importedMetadataErr error
 	if hasImportedBoxConf {
-		confData, readErr := filelock.ReadFile(importedConfPath)
+		confData, readErr := util.ReadUserFile(importedConfPath)
 		if readErr == nil {
 			importedBoxConf = conf.NewBoxConf()
 			if unmarshalErr := gulu.JSON.UnmarshalJSON(confData, importedBoxConf); unmarshalErr != nil {
@@ -474,7 +474,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	importedBoxDocPath := filepath.Join(unzipRootPath, ".siyuan", boxDocMetaName)
 	hasImportedBoxDocMeta := filelock.IsExist(importedBoxDocPath)
 	if hasImportedBoxDocMeta {
-		metaData, readErr := filelock.ReadFile(importedBoxDocPath)
+		metaData, readErr := util.ReadUserFile(importedBoxDocPath)
 		if readErr == nil {
 			meta := &boxDocMeta{}
 			if unmarshalErr := gulu.JSON.UnmarshalJSON(metaData, meta); unmarshalErr != nil {
@@ -838,7 +838,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		// 需要先加密写入 <boxID>/storage/av/，后续 mirror/relation 操作才能正确路由
 		if !IsEncryptedBox(boxID) {
 			targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
-			if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
+			if copyErr := util.CopyUserFile(storageAvDir, targetStorageAvDir); nil != copyErr {
 				logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
 				err = copyErr
 				return
@@ -1164,7 +1164,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	if err = RevokeAllTemplateHTTPPermissions(); err != nil {
 		return
 	}
-	if err = filelock.Copy(unzipRootPath, targetDir); err != nil {
+	if err = util.CopyUserFile(unzipRootPath, targetDir); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", unzipRootPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return
@@ -1258,7 +1258,7 @@ func importSYAssets(unzipRootPath, boxID string) (assetPathMap map[string]string
 					return nil, relErr
 				}
 				sourceAssetPath := canonicalAssetReferencePath(path.Join("assets", filepath.ToSlash(relPath)))
-				data, readErr := filelock.ReadFile(assetFile)
+				data, readErr := util.ReadUserFile(assetFile)
 				if readErr != nil {
 					return nil, readErr
 				}
@@ -1270,7 +1270,7 @@ func importSYAssets(unzipRootPath, boxID string) (assetPathMap map[string]string
 
 				annotationPath := assetFile + ".sya"
 				if filelock.IsExist(annotationPath) {
-					annotationData, annotationReadErr := filelock.ReadFile(annotationPath)
+					annotationData, annotationReadErr := util.ReadUserFile(annotationPath)
 					if annotationReadErr != nil {
 						return nil, annotationReadErr
 					}
@@ -1307,7 +1307,7 @@ func importSYAssets(unzipRootPath, boxID string) (assetPathMap map[string]string
 		}); err != nil {
 			return nil, err
 		}
-		if err = filelock.Copy(assetsDir, dataAssets); err != nil {
+		if err = util.CopyUserFile(assetsDir, dataAssets); err != nil {
 			logging.LogErrorf("copy assets from [%s] to [%s] failed: %s", assetsDir, dataAssets, err)
 			return nil, err
 		}
@@ -1428,7 +1428,7 @@ func ImportData(zipPath string) (err error) {
 	if err = RevokeAllTemplateHTTPPermissions(); err != nil {
 		return
 	}
-	if err = filelock.Copy(tmpDataPath, util.DataDir); err != nil {
+	if err = util.CopyUserFile(tmpDataPath, util.DataDir); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return
@@ -1748,7 +1748,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				var name string
 				if "" == existName {
 					baseName := filepath.Base(absolutePath)
-					data, readErr := filelock.ReadFile(absolutePath)
+					data, readErr := util.ReadUserFile(absolutePath)
 					if readErr != nil {
 						logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
 						return ast.WalkContinue
@@ -1885,7 +1885,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			var name string
 			if "" == existName {
 				baseName := filepath.Base(absolutePath)
-				data, readErr := filelock.ReadFile(absolutePath)
+				data, readErr := util.ReadUserFile(absolutePath)
 				if readErr != nil {
 					logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
 					return ast.WalkContinue

@@ -1,4 +1,4 @@
-import {confirmDialog} from "../../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {showMessage} from "../../dialog/message";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {genUUID} from "../../util/genID";
@@ -774,7 +774,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     };
     const closeEditor = () => {
         if (JSON.stringify(draft) !== initialJSON) {
-            confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.discardUnsavedChanges, leaveEditor);
+            mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.discardUnsavedChanges, leaveEditor);
             return;
         }
         leaveEditor();
@@ -1121,7 +1121,7 @@ export const mountEntryVisibility = (root: HTMLElement) => {
         } else if (action === "export" && profile) {
             exportProfile(profile);
         } else if (action === "delete" && profile) {
-            confirmDialog(window.siyuan.languages.deleteOpConfirm,
+            mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm,
                 window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtml(profile.name)), () => {
                     const latest = cloneConfig();
                     latest.profiles = latest.profiles.filter((item) => item.id !== profile.id);

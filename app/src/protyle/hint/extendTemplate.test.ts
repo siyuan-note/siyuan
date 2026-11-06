@@ -37,7 +37,7 @@ const loadInsertion = () => {
         insertHTML: (value: string) => inserted.push(value),
         blockRender: () => {}, processRender: () => {}, highlightRender: () => {}, hideElements: () => {},
         genTemplateDocTreePlanHTML: () => "plan",
-        confirmDialog: (_title: string, _text: string, confirm: () => void) => confirms.push(confirm),
+        mobileConfirmDialog: (_title: string, _text: string, confirm: () => void) => confirms.push(confirm),
     });
     return {pending, inserted, focused, confirms, range, protyle, node,
         start: (token?: string) => exports.hintRenderTemplate("template", protyle, node, token),

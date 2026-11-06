@@ -251,11 +251,12 @@ func NormalizeTreeForRead(tree *parse.Tree) (err error) {
 	return normalizeValidatedTreeForRead(tree)
 }
 
-// normalizeValidatedTreeForRead 的调用方已检查源规格及树根；只调整内存中的展示投影。
+// normalizeValidatedTreeForRead 的调用方已检查源规格及树根；只规范化内存中的块树。
 func normalizeValidatedTreeForRead(tree *parse.Tree) (err error) {
 	if err = treenode.RefreshTableCellRichProjection(tree.Root); nil != err {
 		return
 	}
+	treenode.FixNestedDocumentNodes(tree.Root)
 	treenode.UpgradeSpec(tree)
 	escapeAttributeValues(tree)
 	return
@@ -270,6 +271,11 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 }
 
 func loadTreeByDataInMode(data []byte, boxID, p string, luteEngine *lute.Lute, mode int) (ret *parse.Tree, err error) {
+	return loadTreeByDataWithParentRecovery(data, boxID, p, luteEngine, mode, true)
+}
+
+func loadTreeByDataWithParentRecovery(data []byte, boxID, p string, luteEngine *lute.Lute, mode int,
+	recoverParents bool) (ret *parse.Tree, err error) {
 	ret, err = parseJSON2TreeInMode(boxID, p, data, luteEngine, mode)
 	if nil != err {
 		logging.LogErrorf("parse tree [%s] failed: %s", p, err)
@@ -312,6 +318,9 @@ func loadTreeByDataInMode(data []byte, boxID, p string, luteEngine *lute.Lute, m
 			return nil, parentErr
 		}
 		if errors.Is(parentErr, os.ErrNotExist) {
+			if !recoverParents {
+				return nil, parentErr
+			}
 			// 直接解析数据的调用也必须确认子文档仍在磁盘上，避免旧数据重建已删除的父链。
 			if err = checkTreeFile(filepath.Join(util.DataDir, boxID, p)); err != nil {
 				return nil, err
@@ -677,6 +686,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		return
 	}
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
+	treenode.FixNestedDocumentNodes(tree.Root)
 
 	if nil == tree.Root.FirstChild {
 		newP := treenode.NewParagraph("")
@@ -830,6 +840,9 @@ func fixTreeJSONDataInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lu
 		ret.ID = pathID
 		ret.Root.SetIALAttr("id", ret.ID)
 	}
+	if treenode.FixNestedDocumentNodes(ret.Root) {
+		needFix = true
+	}
 	if treenode.FixInvalidListChildren(ret.Root) {
 		needFix = true
 	}
@@ -908,6 +921,7 @@ func parseJSON2TreeInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lut
 	if err = treenode.CheckSpec(ret); nil != err {
 		return
 	}
+	treenode.FixNestedDocumentNodes(ret.Root)
 	err = treenode.RefreshTableCellRichProjection(ret.Root)
 	return
 }

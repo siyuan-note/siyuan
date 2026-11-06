@@ -19,6 +19,10 @@ export const prependFrequentSlashButtons = (container: HTMLElement, buttons: HTM
     const separator = document.createElement("div");
     separator.className = "b3-menu__separator";
     separator.setAttribute("role", "separator");
+    const title = container.firstElementChild;
+    if (title?.classList.contains("keyboard__slash-title") && !title.textContent.trim()) {
+        title.remove();
+    }
     container.prepend(group, separator);
 };
 
@@ -39,7 +43,8 @@ export const getLiteSlashMenuHTML = (items: IHintData[]) => {
             return;
         }
         if (!group) {
-            if (menu.childElementCount > 0 || !hasFrequentItems) {
+            if ((menu.childElementCount > 0 || !hasFrequentItems) &&
+                !menu.lastElementChild?.classList.contains("b3-menu__separator")) {
                 const space = document.createElement("div");
                 space.className = "keyboard__slash-title";
                 menu.appendChild(space);

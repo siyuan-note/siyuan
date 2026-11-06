@@ -26,6 +26,7 @@ import (
 
 const (
 	maxRequests          = 32
+	batchInterval        = 100 * time.Millisecond
 	maxCalls             = 1024
 	maxBody              = 1 << 20
 	maxTotalBody         = 8 << 20
@@ -77,7 +78,7 @@ func (r result) value() map[string]any {
 	return map[string]any{"ok": r.OK, "status": r.Status, "body": r.Body, "error": r.Error}
 }
 
-// Execution 的缓存只存在于本次求值，调用者必须在数据范围失效时取消 ctx。
+// Execution 管理一次求值的预算和许可，调用者必须在数据范围失效时取消 ctx。
 type Execution struct {
 	ctx                    context.Context
 	cancel                 context.CancelFunc
@@ -86,6 +87,13 @@ type Execution struct {
 	serial                 chan struct{}
 	mu                     sync.Mutex
 	cache                  map[[32]byte]result
+	deniedScopes           map[string]bool
+	batchRequests          bool
+	automaticRefresh       bool
+	preserveHTTPResults    bool
+	templateGeneration     uint64
+	pendingTemplates       map[[32]byte]pendingTemplateResult
+	pendingTemplateBytes   int
 	onError                func(string)
 	onRequestStarted       func()
 	requestGuard           func(context.Context, string) bool
@@ -106,7 +114,23 @@ type Execution struct {
 func New(ctx context.Context, scope string, confirm func(context.Context, Request) bool) *Execution {
 	ctx, cancel := context.WithTimeout(ctx, maxDuration)
 	return &Execution{ctx: ctx, cancel: cancel, scope: scope, confirm: confirm,
-		serial: make(chan struct{}, 1), cache: make(map[[32]byte]result), transport: newTransport()}
+		serial: make(chan struct{}, 1), cache: make(map[[32]byte]result), deniedScopes: make(map[string]bool),
+		templateGeneration: templateCacheGeneration(), transport: newTransport()}
+}
+
+// SetAutomaticRefresh 允许数据库事务重渲复用输入未变的字段结果。
+func (e *Execution) SetAutomaticRefresh(automatic bool) {
+	e.mu.Lock()
+	e.automaticRefresh = automatic
+	e.mu.Unlock()
+}
+
+// DatabaseFuncs 按每批 32 次调度数据库请求，共享调用、字节、输出及耗时上限。
+func (e *Execution) DatabaseFuncs(scope string) template.FuncMap {
+	e.mu.Lock()
+	e.batchRequests = true
+	e.mu.Unlock()
+	return e.FuncsForScope(scope)
 }
 
 func (e *Execution) Funcs() template.FuncMap { return e.FuncsForScope(e.scope) }
@@ -272,6 +296,11 @@ func (e *Execution) SetErrorHandler(handler func(code string)) {
 	e.mu.Unlock()
 }
 
+// ReportTemplateError 只向当前执行报告固定错误码，避免泄露模板源码或接口密钥。
+func (e *Execution) ReportTemplateError() {
+	e.preflightFailure("template_error")
+}
+
 func (e *Execution) notifyError(code string) {
 	e.mu.Lock()
 	e.approvalsFailed = true
@@ -304,6 +333,9 @@ func (e *Execution) Close() {
 	e.cancel()
 	e.mu.Lock()
 	clear(e.cache)
+	clear(e.pendingTemplates)
+	e.pendingTemplateBytes = 0
+	clear(e.deniedScopes)
 	clear(e.confirmedRequests)
 	clear(e.inheritedRequests)
 	e.mu.Unlock()
@@ -333,6 +365,12 @@ func (e *Execution) getScoped(scope, rawURL string, options ...map[string]any) m
 		e.Close()
 		return result{Error: "budget_exceeded"}.value()
 	}
+	e.mu.Lock()
+	denied := e.deniedScopes[scope]
+	e.mu.Unlock()
+	if denied {
+		return result{Error: "denied"}.value()
+	}
 	u, err := validateURL(rawURL)
 	if err != nil {
 		return e.preflightFailure("invalid_target")
@@ -356,6 +394,11 @@ func (e *Execution) getScoped(scope, rawURL string, options ...map[string]any) m
 		return e.preflightFailure("interaction_required")
 	}
 	r := e.get(scope, u, headers, timeout)
+	if r.Error == "denied" {
+		e.mu.Lock()
+		e.deniedScopes[scope] = true
+		e.mu.Unlock()
+	}
 	if r.Error == "budget_exceeded" {
 		e.notifyError(r.Error)
 		e.Close()
@@ -385,8 +428,24 @@ func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout t
 		if !e.checkRequestGuard(scope) {
 			return result{Error: "execution_ended"}
 		}
-		if e.requests >= maxRequests || e.bytes >= maxTotalBody || e.networkTime >= maxNetworkDuration {
+		requestLimit := maxRequests
+		e.mu.Lock()
+		batchRequests := e.batchRequests
+		e.mu.Unlock()
+		if batchRequests {
+			requestLimit = maxCalls
+		}
+		if e.requests >= requestLimit || e.bytes >= maxTotalBody || e.networkTime >= maxNetworkDuration {
 			return result{Error: "budget_exceeded"}
+		}
+		if batchRequests && e.requests > 0 && e.requests%maxRequests == 0 {
+			timer := time.NewTimer(batchInterval)
+			select {
+			case <-timer.C:
+			case <-e.ctx.Done():
+				timer.Stop()
+				return result{Error: "execution_ended"}
+			}
 		}
 		e.requests++
 		names := make([]string, 0, len(headers))

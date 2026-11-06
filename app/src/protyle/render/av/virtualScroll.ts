@@ -2,9 +2,11 @@ import {isTableLikeView} from "./viewType";
 import {Constants} from "../../../constants";
 import {getRowHTML} from "./row";
 import {IAVSelectedCell, reconcileAVSelectedItemIDs, restoreAVCellSelection} from "./selectionState";
-import {getGroupTableViewportWindow} from "./groupTableVirtual";
+import {getGroupTableViewportWindow, getTableBufferRatio, getTablePinIndex, getTableRowBudget, GROUP_TABLE_INITIAL_ROW_BUDGET, hasTableCellBudgetOverflow} from "./groupTableVirtual";
 import {renderAVRichTextElements} from "./richText";
 import {getBacklinkScrollElement} from "./backlinkScroll";
+import {AVTableRowHeights} from "./tableRowHeights";
+import {initAVColumnWindow, updateAVColumnWindow} from "./columnWindow";
 
 const BUFFER_RATIO = 1;
 
@@ -15,10 +17,11 @@ interface IBodyState {
     view: IAVView;
     topSpacerHeight: number;
     pinIndex?: number;
-    // 缓存的行高，避免每帧读 currentRows[0].offsetHeight（强制重排来源）。
-    // 表格行高在渲染后基本稳定，用缓存值做外推/分页计算即可，少量偏差不影响正确性。
+    // 未挂载行的高度估值；表格另外保留逐行实测值，避免长文本扩大整个滚动范围。
     rowHeight?: number;
-    // 分组和树形表格使用底部占位保持未渲染行的布局高度。
+    rowHeights?: AVTableRowHeights;
+    fillSignature?: string;
+    // 分组、树形和宽表格使用底部占位保持未渲染行的布局高度。
     reserveBottomSpacer?: boolean;
     // 选中行 ID 快照。trim 会移除/回填行 DOM，而选中高亮（av__row--select）是纯运行时状态、
     // getRowHTML 不携带，故在每次 trim 处理前从现存 DOM 同步，回填后据此恢复。
@@ -33,6 +36,31 @@ const dataStore = new WeakMap<HTMLElement, {
 const blockDataStore = new WeakMap<HTMLElement, IAV>();
 const bodyStates = new WeakMap<HTMLElement, IBodyState>();
 const trimPending = new WeakSet<HTMLElement>();
+
+const measureTableRows = (bodyEl: HTMLElement, state: IBodyState, reset = false) => {
+    const rows = Array.from(bodyEl.querySelectorAll<HTMLElement>(".av__row[data-id]"));
+    const heights = rows.map(row => row.getBoundingClientRect?.().height || row.offsetHeight || 36);
+    const sorted = heights.slice().sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)] || 36;
+    const firstCell = rows[0]?.querySelector?.<HTMLElement>(".av__cell");
+    const style = firstCell && typeof getComputedStyle === "function" ? getComputedStyle(firstCell) : undefined;
+    const normalHeight = style ? (parseFloat(style.lineHeight) || 26) + (parseFloat(style.paddingTop) || 0) +
+        (parseFloat(style.paddingBottom) || 0) + (parseFloat(style.borderTopWidth) || 0) +
+        (parseFloat(style.borderBottomWidth) || 0) + 1 : rows.length > 1 ? median : 36;
+    // 未挂载行只使用普通单行高度估值，避免一个高单元格扩大整个分组的占位。
+    state.rowHeight = Math.min(median, Math.max(normalHeight, 1));
+    if (!state.rowHeights || reset) {
+        state.rowHeights = new AVTableRowHeights((state.view as IAVTable).rows.length, state.rowHeight);
+        const beforeCount = state.renderedStart - state.dataOffset;
+        if (beforeCount > 0 && state.topSpacerHeight > 0) {
+            for (let index = 0; index < beforeCount; index++) {
+                state.rowHeights.set(index, state.topSpacerHeight / beforeCount);
+            }
+        }
+    }
+    state.rowHeights.setEstimate(state.rowHeight);
+    rows.forEach((row, index) => state.rowHeights.set(Number(row.dataset.index) - state.dataOffset, heights[index]));
+};
 
 // 测量 DOM 变更前后容器 scrollHeight 的差值，用于精确计算 gallery 多列网格中行移除/回填的实际高度（含 gap）
 const measureHeightDiff = (el: HTMLElement, mutate: () => void): number => {
@@ -59,7 +87,9 @@ const syncTableBottomSpacer = (bodyEl: HTMLElement, state: IBodyState, dataEnd: 
         spacerElement?.remove();
         return;
     }
-    const height = missingRowCount * Math.max(state.rowHeight || 36, 1);
+    const height = state.rowHeights ? state.rowHeights.offset(dataEnd - state.dataOffset + 1) -
+        state.rowHeights.offset(state.renderedEnd - state.dataOffset + 1) :
+        missingRowCount * Math.max(state.rowHeight || 36, 1);
     if (!spacerElement) {
         const utilElement = bodyEl.querySelector(".av__row--util");
         utilElement?.insertAdjacentHTML("beforebegin",
@@ -70,6 +100,76 @@ const syncTableBottomSpacer = (bodyEl: HTMLElement, state: IBodyState, dataEnd: 
     spacerElement.style.height = height + "px";
 };
 
+const syncTableTopSpacer = (bodyEl: HTMLElement, state: IBodyState) => {
+    if (!state.rowHeights) {
+        return;
+    }
+    const height = state.rowHeights.offset(state.renderedStart - state.dataOffset);
+    if (Math.abs(height - state.topSpacerHeight) < 0.01) {
+        return;
+    }
+    const firstRow = bodyEl.querySelector<HTMLElement>(".av__row[data-id]");
+    const block = bodyEl.closest<HTMLElement>(".av");
+    const scroller = getBacklinkScrollElement(block) || dataStore.get(block)?.protyle.contentElement;
+    const rowTop = firstRow?.getBoundingClientRect().top;
+    const bodyRect = bodyEl.getBoundingClientRect();
+    const viewport = scroller?.getBoundingClientRect();
+    const preserveAnchor = firstRow && viewport && bodyRect.bottom > viewport.top && bodyRect.top < viewport.bottom;
+    const spacer = bodyEl.querySelector<HTMLElement>(".av__spacer:not(.av__spacer--bottom)");
+    if (height <= 0) {
+        spacer?.remove();
+    } else if (spacer) {
+        spacer.style.height = height + "px";
+    } else {
+        firstRow?.insertAdjacentHTML("beforebegin", `<div class="av__spacer" style="height:${height}px"></div>`);
+    }
+    state.topSpacerHeight = height;
+    if (preserveAnchor) {
+        scroller.scrollTop += firstRow.getBoundingClientRect().top - rowTop;
+    }
+};
+
+export const invalidateAVTableRowHeights = (blockElement: HTMLElement) => {
+    blockElement.querySelectorAll<HTMLElement>(".av__body").forEach(bodyElement => {
+        const state = bodyStates.get(bodyElement);
+        if (!state?.reserveBottomSpacer) {
+            return;
+        }
+        measureTableRows(bodyElement, state, true);
+        syncTableBottomSpacer(bodyElement, state, state.dataOffset + (state.view as IAVTable).rows.length - 1);
+    });
+};
+
+const queueTableViewportFill = (blockElement: HTMLElement, bodyElement: HTMLElement,
+                                state: IBodyState, viewport: DOMRect) => {
+    if (!state.reserveBottomSpacer || !blockElement.isConnected) {
+        return;
+    }
+    const rows = bodyElement.querySelectorAll<HTMLElement>(".av__row[data-id]");
+    if (!rows.length) {
+        return;
+    }
+    const bodyRect = bodyElement.getBoundingClientRect();
+    if (bodyRect.bottom <= viewport.top || bodyRect.top >= viewport.bottom) {
+        return;
+    }
+    const first = rows[0].getBoundingClientRect();
+    const last = rows[rows.length - 1].getBoundingClientRect();
+    if (state.renderedStart > state.dataOffset && first.top > viewport.top ||
+        state.renderedEnd < state.dataOffset + (state.view as IAVTable).rows.length - 1 && last.bottom < viewport.bottom) {
+        const signature = [state.renderedStart, state.renderedEnd, first.top, last.bottom, viewport.top, viewport.bottom]
+            .map(value => Math.round(value * 100)).join(":");
+        if (signature === state.fillSignature) {
+            return;
+        }
+        state.fillSignature = signature;
+        // 新行实测高度可能小于估值，即使用户停止滚动，也继续补齐当前视口。
+        trimAVRows(blockElement, viewport);
+    } else {
+        state.fillSignature = undefined;
+    }
+};
+
 const rebuildTableWindow = (bodyEl: HTMLElement, state: IBodyState,
                             renderWindow: ReturnType<typeof getGroupTableViewportWindow>) => {
     const endMarker = bodyEl.querySelector(".av__spacer--bottom") || bodyEl.querySelector(".av__row--util");
@@ -77,6 +177,7 @@ const rebuildTableWindow = (bodyEl: HTMLElement, state: IBodyState,
         return false;
     }
     const rows = (state.view as IAVTable).rows;
+    state.pinIndex = getTablePinIndex(state.view as IAVTable);
     let rowsHTML = renderWindow.topSpacerHeight > 0 ?
         `<div class="av__spacer" style="height:${renderWindow.topSpacerHeight}px"></div>` : "";
     for (let i = renderWindow.renderedStart; i <= renderWindow.renderedEnd; i++) {
@@ -97,6 +198,8 @@ const rebuildTableWindow = (bodyEl: HTMLElement, state: IBodyState,
     });
     restoreAVCellSelection(bodyEl.closest(".av"));
     renderAVRichTextElements(bodyEl);
+    measureTableRows(bodyEl, state);
+    syncTableBottomSpacer(bodyEl, state, state.dataOffset + rows.length - 1);
     return true;
 };
 
@@ -134,10 +237,14 @@ export const ensureAVTableBoundaryRow = (blockElement: HTMLElement, direction: "
         const rowHeight = Math.max(state.rowHeight || 36, 1);
         const viewportHeight = (getBacklinkScrollElement(blockElement) ||
             dataStore.get(blockElement)?.protyle.contentElement)?.clientHeight || rowHeight;
-        const targetTop = (direction === "down" ? 0 : view.rows.length - 1) * rowHeight;
+        const targetIndex = direction === "down" ? 0 : view.rows.length - 1;
+        const targetTop = state.rowHeights ? state.rowHeights.offset(targetIndex) : targetIndex * rowHeight;
         if (!rebuildTableWindow(body, state, getGroupTableViewportWindow({
             dataStart, dataEnd, bodyTop: 0, headerHeight: 0, rowHeight,
             viewportTop: targetTop, viewportBottom: targetTop + viewportHeight,
+            bufferRatio: blockElement.dataset.avType === "table" && getTableBufferRatio(view) < 1 ?
+                getTableBufferRatio(view) : undefined,
+            rowHeights: state.rowHeights,
         }))) {
             return;
         }
@@ -151,9 +258,6 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         elementRect = localScroller.getBoundingClientRect();
     }
     const viewportHeight = elementRect.bottom - elementRect.top;
-    const buffer = viewportHeight * BUFFER_RATIO;
-    const topLimit = elementRect.top - buffer;
-    const bottomLimit = elementRect.bottom + buffer;
     const blockRect = blockElement.getBoundingClientRect();
 
     // AV 重渲/新增分组/局部更新未走完整 initVirtualScroll 时 dataStore 可能缺失，跳过本次 trim，
@@ -182,6 +286,13 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         if (!state) {
             return;
         }
+        if (isTableLikeView(type)) {
+            state.pinIndex = getTablePinIndex(state.view as IAVTable);
+        }
+        const bufferRatio = type === "table" ? getTableBufferRatio(state.view as IAVTable) : BUFFER_RATIO;
+        const buffer = viewportHeight * bufferRatio;
+        const topLimit = elementRect.top - buffer;
+        const bottomLimit = elementRect.bottom + buffer;
         const dataRows = isTableLikeView(type) ? (state.view as IAVTable).rows : (state.view as IAVKanban).cards;
         const dataStart = state.dataOffset;
         const dataEnd = dataStart + dataRows.length - 1;
@@ -197,12 +308,14 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         if (currentRows.length === 0) {
             return;
         }
+        if (isTableLikeView(type) && state.reserveBottomSpacer) {
+            measureTableRows(bodyEl, state);
+        }
         // 数据行数不超过 trim 有效范围（视口 + 上下 buffer）时不 trim（如看板中较短的分组），
         // 全部渲染即可，避免短列因 trim 导致 spacer 抖动或全部移除后无法回填
         const trimRange = viewportHeight + buffer * 2;
         const coversAllRows = state.renderedStart <= dataStart && state.renderedEnd >= dataEnd;
-        const windowedTable = isTableLikeView(type) &&
-            (stored.data.view.groups?.length > 0 || !!(state.view as IAVTable).nested);
+        const windowedTable = isTableLikeView(type) && state.reserveBottomSpacer;
         if (!windowedTable && coversAllRows && bodyEl.dataset.avLocateWindow !== "true" &&
             dataRows.length <= Math.ceil(trimRange / Math.max(state.rowHeight || currentRows[0].offsetHeight, 1))) {
             // 数据已经完整渲染时无需 trim，清理可能残留的 spacer。
@@ -281,7 +394,10 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 viewportTop,
                 viewportBottom,
                 rowHeight,
+                bufferRatio: bufferRatio < 1 ? bufferRatio : undefined,
+                rowHeights: state.rowHeights,
             }));
+            queueTableViewportFill(blockElement, bodyEl, state, elementRect);
             return;
         }
         // 大跨度跳转（如 Ctrl+Home）后渲染窗口与视口脱钩：spacer 把现存行整体顶出视口，
@@ -324,28 +440,29 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
             if (rect.top === firstTop) {
                 galleryColumn++;
             }
-            if (rect.top > topLimit) {
+            if ((isTableLikeView(type) ? rect.bottom : rect.top) > topLimit) {
                 if (!foundFirstVisible) {
                     foundFirstVisible = true;
                     firstVisibleIndex = parseInt(currentRows[i].getAttribute("data-index"));
                 }
             } else {
-                if (!isScrollingUp && toRemoveAbove.length + minRetainedRows < currentRows.length) {
+                if ((!isScrollingUp || windowedTable) && toRemoveAbove.length + minRetainedRows < currentRows.length) {
                     toRemoveAbove.push(currentRows[i]);
                 }
             }
             if (rect.bottom < bottomLimit) {
                 lastVisibleIndex = parseInt(currentRows[i].getAttribute("data-index"));
             } else {
-                if (isScrollingUp && toRemoveBelow.length + minRetainedRows < currentRows.length) {
+                if ((isScrollingUp || windowedTable) && (!isTableLikeView(type) || rect.top > bottomLimit) &&
+                    toRemoveBelow.length + minRetainedRows < currentRows.length) {
                     toRemoveBelow.push(currentRows[i]);
                 }
                 // 表格下滚时 top 单调递增，后续行必然都在下方，可提前结束扫描
-                if (isTableLikeView(type) && !isScrollingUp) {
+                if (isTableLikeView(type) && !isScrollingUp && !windowedTable) {
                     break;
                 }
             }
-            if (i === currentRows.length - 1 && !isScrollingUp && rect.bottom < bottomLimit) {
+            if (i === currentRows.length - 1 && (!isScrollingUp || windowedTable) && rect.bottom < bottomLimit) {
                 lastVisibleIndex = Math.min(state.renderedEnd + Math.ceil((bottomLimit - rect.bottom) / rowHeight) * galleryColumn, dataEnd);
             }
         }
@@ -363,10 +480,10 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
             }
         }
         // 需等待 galleryColumn 计算完成
-        if (isScrollingUp && firstTop > topLimit) {
+        if ((isScrollingUp || windowedTable) && firstTop > topLimit) {
             firstVisibleIndex = Math.max(dataStart, state.renderedStart - Math.ceil((firstTop - topLimit) / rowHeight) * galleryColumn);
         }
-        if (!isScrollingUp) {
+        if (!isScrollingUp || windowedTable) {
             if (toRemoveAbove.length > 0) {
                 // 计算被移除行的总高度并累加到 topSpacerHeight，保持文档总高度不变、视口不跳
                 topElement = toRemoveAbove[toRemoveAbove.length - 1].nextElementSibling as HTMLElement;
@@ -403,6 +520,14 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 }
             }
 
+        }
+        if (isScrollingUp || windowedTable) {
+            if (toRemoveBelow.length > 0) {
+                toRemoveBelow.forEach(row => row.remove());
+                state.renderedEnd = state.renderedEnd - toRemoveBelow.length;
+            }
+        }
+        if (!isScrollingUp || windowedTable) {
             if (lastVisibleIndex > state.renderedEnd) {
                 // 限制单帧渲染的新行数为一个视口，避免快速下滚时一次性拼出/插入大量 HTML，
                 // 超出部分由后续滚动帧补齐
@@ -428,13 +553,13 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 restoreSelect();
                 state.renderedEnd = lastVisibleIndex;
             }
-        } else {
-            if (toRemoveBelow.length > 0) {
-                toRemoveBelow.forEach(row => row.remove());
-                state.renderedEnd = state.renderedEnd - toRemoveBelow.length;
-            }
-
+        }
+        if (isScrollingUp || windowedTable) {
             if (typeof firstVisibleIndex === "number" && firstVisibleIndex < state.renderedStart) {
+                if (windowedTable) {
+                    firstVisibleIndex = Math.max(firstVisibleIndex,
+                        state.renderedStart - Math.ceil(viewportHeight / Math.max(rowHeight, 1)));
+                }
                 let rowsHTML = "";
                 const viewType = blockElement.getAttribute("data-av-type") as TAVView;
                 for (let i = firstVisibleIndex; i < state.renderedStart; i++) {
@@ -495,7 +620,12 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         }
         } finally {
             if (isTableLikeView(type)) {
+                if (state.reserveBottomSpacer) {
+                    measureTableRows(bodyEl, state);
+                }
                 syncTableBottomSpacer(bodyEl, state, dataEnd);
+                syncTableTopSpacer(bodyEl, state);
+                queueTableViewportFill(blockElement, bodyEl, state, elementRect);
             }
             bodyStates.set(bodyEl, state);
             renderAVRichTextElements(bodyEl);
@@ -593,6 +723,7 @@ export const ensureAVTableAdjacentRow = (rowElement: HTMLElement, direction: "pr
         return;
     }
     const row = dataRows[targetIndex - state.dataOffset];
+    state.pinIndex = getTablePinIndex(state.view as IAVTable);
     rowElement.insertAdjacentHTML(direction === "previous" ? "beforebegin" : "afterend", getRowHTML({
         data: state.view,
         row,
@@ -603,7 +734,10 @@ export const ensureAVTableAdjacentRow = (rowElement: HTMLElement, direction: "pr
     if (direction === "previous") {
         state.renderedStart = targetIndex;
         const topSpacer = bodyElement.querySelector(".av__spacer:not(.av__spacer--bottom)") as HTMLElement;
-        state.topSpacerHeight = Math.max(0, state.topSpacerHeight - Math.max(state.rowHeight || 36, 1));
+        const inserted = bodyElement.querySelector<HTMLElement>(`.av__row[data-index="${targetIndex}"]`);
+        const height = inserted?.getBoundingClientRect().height || state.rowHeight || 36;
+        state.rowHeights?.set(targetIndex - state.dataOffset, height);
+        state.topSpacerHeight = Math.max(0, state.topSpacerHeight - height);
         if (state.topSpacerHeight === 0) {
             topSpacer?.remove();
         } else if (topSpacer) {
@@ -614,6 +748,7 @@ export const ensureAVTableAdjacentRow = (rowElement: HTMLElement, direction: "pr
         syncTableBottomSpacer(bodyElement, state, dataEnd);
     }
     bodyStates.set(bodyElement, state);
+    syncTableTopSpacer(bodyElement, state);
     const newRowElement = bodyElement.querySelector<HTMLElement>(`.av__row[data-index="${targetIndex}"]`);
     if (newRowElement) {
         renderAVRichTextElements(newRowElement);
@@ -905,6 +1040,7 @@ export const trimAVRows = (blockElement: HTMLElement, elementRect: DOMRect): voi
     requestAnimationFrame(() => {
         trimPending.delete(blockElement);
         doTrim(blockElement, elementRect);
+        updateAVColumnWindow(blockElement);
     });
 };
 
@@ -915,6 +1051,7 @@ export const trimAVRowsSync = (blockElement: HTMLElement, elementRect: DOMRect):
         return;
     }
     doTrim(blockElement, elementRect);
+    updateAVColumnWindow(blockElement);
 };
 
 export const initVirtualScroll = (options: {
@@ -924,6 +1061,14 @@ export const initVirtualScroll = (options: {
     selectedItemPoints?: IAVItemPoint[],
 }): void => {
     setAVData(options.blockElement, options.data);
+    const initColumns = () => initAVColumnWindow(options.blockElement, {
+        enabled: options.data.viewType === "table" && hasTableCellBudgetOverflow(options.data.view as IAVTable),
+        onRowHeight: (row, height) => {
+            const body = row.closest<HTMLElement>(".av__body");
+            const state = body && bodyStates.get(body);
+            state?.rowHeights?.set(Number(row.dataset.index) - state.dataOffset, height);
+        },
+    });
     const virtualized = options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) === "true";
     const needsGroupedTableState = isTableLikeView(options.data.viewType) && options.data.view.groups?.length > 0;
     if (virtualized) {
@@ -936,6 +1081,7 @@ export const initVirtualScroll = (options: {
         dataStore.delete(options.blockElement);
     }
     if (!virtualized && !needsGroupedTableState) {
+        initColumns();
         return;
     }
 
@@ -1002,10 +1148,14 @@ export const initVirtualScroll = (options: {
                 view,
                 topSpacerHeight: getTopSpacerHeight(item),
                 rowHeight: firstRow.offsetHeight || 36,
-                reserveBottomSpacer: options.data.view.groups?.length > 0 || !!(view as IAVTable).nested,
+                reserveBottomSpacer: options.data.view.groups?.length > 0 || !!(view as IAVTable).nested ||
+                    options.data.viewType === "table" && getTableRowBudget(view as IAVTable) < GROUP_TABLE_INITIAL_ROW_BUDGET,
                 selectedRowIds,
             };
             bodyStates.set(item, state);
+            if (state.reserveBottomSpacer) {
+                measureTableRows(item, state);
+            }
             syncTableBottomSpacer(item, state, dataOffset + (view as IAVTable).rows.length - 1);
         } else {
             const firstItem = item.querySelector(".av__gallery-item") as HTMLElement;
@@ -1026,6 +1176,7 @@ export const initVirtualScroll = (options: {
             });
         }
     });
+    initColumns();
     if (virtualized) {
         trimAVRows(options.blockElement, options.protyle.contentElement.getBoundingClientRect());
     }

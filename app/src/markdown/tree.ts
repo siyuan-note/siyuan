@@ -1,5 +1,6 @@
 import {getDocTreeWindow} from "../layout/dock/docTree/DocTreeModel";
 import {animateMarkdownTreeRows} from "./treeAnimation";
+import {createMarkdownPanelAnimation} from "./panelAnimation";
 import type {MarkdownTreeBridge, MarkdownTreeLocation, MarkdownTreeNode, MarkdownTreeState, MarkdownTreeView} from "./treeContracts";
 
 interface TreeRow {
@@ -36,7 +37,7 @@ export const createMarkdownTree = (options: {
     for (const toggle of toggles) {
         toggle.setAttribute("aria-label", text("markdownFiles"));
         toggle.setAttribute("aria-controls", element.id);
-        toggle.title = text("markdownFiles");
+        toggle.dataset.tooltip = text("markdownFiles");
     }
     const events = new AbortController();
     const {signal} = events;
@@ -67,33 +68,22 @@ export const createMarkdownTree = (options: {
     const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: "base"});
     const location = (nodeId: string): MarkdownTreeLocation => ({rootId: state.rootId, generation: state.generation, nodeId});
     const shown = () => drawer() ? drawerOpen : desktopVisible;
+    const panelAnimation = createMarkdownPanelAnimation({element, applyVisible(visible) {element.hidden = !visible;}});
     const stopAnimation = () => {finishAnimation?.(); finishAnimation = undefined;};
     const rowHeight = () => Math.max(28, parseFloat(getComputedStyle(element).getPropertyValue("--b3-ui-list-height")) || (drawer() ? 44 : 28)) + 2;
-    const updateVisibility = () => {
+    const updateVisibility = (animate = false, force = false) => {
         const visible = shown();
         if (!visible) stopAnimation();
-        element.hidden = !visible;
         element.dataset.drawer = String(drawer());
         element.style.setProperty("--markdown-tree-width", `${width}px`);
+        panelAnimation.setVisible(visible, {animate, drawer: drawer(), force});
+        element.inert = frozen || !visible;
         element.parentElement.classList.toggle("markdown-workspace--drawer", drawer() && visible);
         for (const sibling of Array.from(element.parentElement.children)) {
             if (sibling !== element) (sibling as HTMLElement).inert = frozen || drawer() && visible;
         }
         for (const toggle of toggles) {
-            const labelOnly = toggle.dataset.drawerToggle === "true" && !drawer();
-            toggle.disabled = frozen || labelOnly;
-            toggle.tabIndex = labelOnly ? -1 : 0;
-            toggle.classList.toggle("markdown-heading--label", labelOnly);
-            if (labelOnly) {
-                toggle.removeAttribute("aria-label");
-                toggle.removeAttribute("aria-controls");
-                toggle.removeAttribute("aria-expanded");
-            } else {
-                toggle.setAttribute("aria-label", text("markdownFiles"));
-                toggle.setAttribute("aria-controls", element.id);
-                toggle.setAttribute("aria-expanded", String(visible));
-            }
-            toggle.title = labelOnly ? (state.rootName ?? "") : text("markdownFiles");
+            toggle.setAttribute("aria-expanded", String(visible));
         }
         resize.hidden = drawer();
         resize.setAttribute("aria-valuenow", String(width));
@@ -146,7 +136,8 @@ export const createMarkdownTree = (options: {
                 item.classList.toggle("markdown-tree__row--focused", node.id === focused && active);
                 item.innerHTML = `<span class="b3-list-item__toggle"><svg class="b3-list-item__arrow${expanded.has(node.id) ? " b3-list-item__arrow--open" : ""}"${directory ? "" : ' style="visibility:hidden"'}><use href="#iconRight"></use></svg></span><svg class="b3-list-item__graphic" aria-hidden="true"><use href="#${directory ? "iconFolder" : "iconMarkdown"}"></use></svg><span class="b3-list-item__text"></span>`;
                 item.querySelector(".b3-list-item__text").textContent = node.name;
-                item.title = node.name;
+                item.dataset.tooltip = node.name;
+                item.dataset.position = "east";
                 if (focused === node.id) viewport.setAttribute("aria-activedescendant", item.id);
             }
             fragment.append(item);
@@ -170,6 +161,9 @@ export const createMarkdownTree = (options: {
             if (errors.has(state.rootId)) rows.push({depth: 0, parent: state.rootId, message: errors.get(state.rootId), retry: true});
             else if (!children.has(state.rootId)) rows.push({depth: 0, message: text("loading")});
             else children.get(state.rootId).forEach(child => visit(child, 0));
+            notice.textContent = !pending.has(state.rootId) && !errors.has(state.rootId) &&
+                children.get(state.rootId)?.length === 0 ? text("markdownFolderEmpty") : "";
+            notice.hidden = !notice.textContent;
         }
         if (!rows.some(row => row.node?.id === focused)) {
             focused = rows.find(row => row.node?.id === selected)?.node?.id ?? rows.find(row => row.node)?.node?.id;
@@ -229,7 +223,7 @@ export const createMarkdownTree = (options: {
         state = next;
         if (next.rootId) expanded.add(next.rootId);
         viewport.setAttribute("aria-label", next.rootName ? `${text("markdownFiles")}: ${next.rootName}` : text("markdownFiles"));
-        viewport.title = next.rootName ?? "";
+        viewport.dataset.tooltip = next.rootName ?? "";
         notice.textContent = next.kind === "permission-required" ? text("markdownFolderPermission") :
             next.kind === "blocked" ? text("markdownFolderError") : "";
         notice.hidden = !notice.textContent;
@@ -340,7 +334,7 @@ export const createMarkdownTree = (options: {
         focused = row.node.id;
         if (row.node.kind === "directory") fold(row.node.id);
         else {
-            try {if (await options.onOpen(location(row.node.id)) && !disposed && drawer()) {drawerOpen = false; updateVisibility();}}
+            try {if (await options.onOpen(location(row.node.id)) && !disposed && drawer()) {drawerOpen = false; updateVisibility(true);}}
             catch {if (!disposed) options.onError();}
         }
     };
@@ -387,7 +381,7 @@ export const createMarkdownTree = (options: {
         else if ((position + 1) * height > viewport.scrollTop + viewport.clientHeight) viewport.scrollTop = (position + 1) * height - viewport.clientHeight;
         if (folding) updateFocus(); else renderWindow();
     }, {signal});
-    const hideDrawer = (restoreFocus = true) => {if (drawerOpen) {drawerOpen = false; updateVisibility(); if (restoreFocus) activeToggle.focus();}};
+    const hideDrawer = (restoreFocus = true) => {if (drawerOpen) {drawerOpen = false; updateVisibility(true); if (restoreFocus) activeToggle.focus();}};
     const insideToggle = (target: EventTarget) => toggles.some(toggle => toggle.contains(target as Node));
     document.addEventListener("focusin", event => {
         if (drawer() && drawerOpen && !element.contains(event.target as Node) && !insideToggle(event.target)) hideDrawer(false);
@@ -399,15 +393,16 @@ export const createMarkdownTree = (options: {
         if (event.key === "Escape" && drawer() && drawerOpen) {event.preventDefault(); hideDrawer();}
     }, {signal});
     for (const toggle of toggles) toggle.addEventListener("click", () => {
-        if (frozen || toggle.disabled) return;
+        if (toggle.disabled) return;
         activeToggle = toggle;
         if (drawer()) drawerOpen = !drawerOpen; else {desktopVisible = !desktopVisible; scheduleSave();}
-        updateVisibility(); if (shown()) {void refresh(); viewport.focus();}
+        updateVisibility(true); if (shown()) {void refresh(); viewport.focus();}
     }, {signal});
     choose.addEventListener("click", () => {void chooseRoot();}, {signal});
     let drag: {x: number; width: number};
     resize.addEventListener("pointerdown", event => {
         if (frozen || drawer()) return;
+        updateVisibility(false, true);
         event.preventDefault(); drag = {x: event.clientX, width}; resize.setPointerCapture(event.pointerId);
     }, {signal});
     resize.addEventListener("pointermove", event => {
@@ -420,11 +415,18 @@ export const createMarkdownTree = (options: {
     resize.addEventListener("pointercancel", finishDrag, {signal});
     resize.addEventListener("keydown", event => {
         if (frozen || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
-        event.preventDefault(); width = Math.max(180, Math.min(480, width + (event.key === "ArrowLeft" ? -16 : 16))); updateVisibility(); scheduleSave();
+        event.preventDefault(); width = Math.max(180, Math.min(480, width + (event.key === "ArrowLeft" ? -16 : 16))); updateVisibility(false, true); scheduleSave();
     }, {signal});
     const resizeObserver = new ResizeObserver(() => {updateVisibility(); renderWindow();});
     resizeObserver.observe(viewport);
-    narrow.addEventListener("change", () => {updateVisibility(); renderWindow(); if (shown()) void refresh();}, {signal});
+    narrow.addEventListener("change", () => {updateVisibility(false, true); renderWindow(); if (shown()) void refresh();}, {signal});
+    let viewportWidth = window.innerWidth;
+    window.addEventListener("resize", () => {
+        const widthChanged = viewportWidth !== window.innerWidth;
+        viewportWidth = window.innerWidth;
+        // 软键盘收起只改变高度，抽屉过渡继续播放；宽度变化时收敛到新的布局。
+        updateVisibility(false, widthChanged || !drawer());
+    }, {signal, capture: true});
     updateVisibility();
     const ready = refresh();
     return {
@@ -432,9 +434,10 @@ export const createMarkdownTree = (options: {
         refresh,
         syncSelection,
         chooseRoot,
-        freeze(value: boolean) {frozen = value; if (value) {interaction++; stopAnimation();} element.inert = value; toggles.forEach(toggle => {toggle.disabled = value;}); updateVisibility();},
+        freeze(value: boolean) {frozen = value; if (value) {interaction++; stopAnimation();} element.inert = value; updateVisibility();},
         destroy() {
             if (disposed) return;
+            panelAnimation.destroy();
             saveView(); disposed = true; version++; refreshSequence++; stopAnimation(); expanding.clear();
             clearTimeout(saveTimer); cancelAnimationFrame(frame); events.abort(); resizeObserver.disconnect();
             element.parentElement?.classList.remove("markdown-workspace--drawer");

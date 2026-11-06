@@ -1,8 +1,8 @@
 import {toggleMenu} from "../menus/menuToggle";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
-import {openInputDialog} from "../dialog/inputDialog";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
 import {Constants} from "../constants";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {renderAssetsPreview} from "../asset/renderAssets";
@@ -42,14 +42,24 @@ const destroyRepoPanel = (root: Element) => {
 };
 
 const openSnapshotMemo = (repoElement: Element, id?: string, memo = "", fullCheck = false) => {
-    const dialog = openInputDialog({
+    const dialog = mobileInputDialog({
         title: id ? window.siyuan.languages.editSnapshotMemo : window.siyuan.languages.snapshotMemo,
         value: memo,
         multiline: true,
         resize: "vertical",
+        awaitConfirm: isMobile(),
         placeholder: window.siyuan.languages.snapshotMemoTip,
         description: id ? window.siyuan.languages.snapshotMemoLocalTip : fullCheck ? window.siyuan.languages.fullCheckSnapshotTip : undefined,
         onConfirm: async (value, dialog) => {
+            if (isMobile()) {
+                const response = id ? await fetchSyncPost("/api/repo/setSnapshotMemo", {id, memo: value}) :
+                    await fetchSyncPost("/api/repo/createSnapshot", {memo: value, fullCheck});
+                if (response.code !== 0) return false;
+                if (id || response.data.created) {
+                    renderRepo(repoElement, id ? parseInt(repoElement.getAttribute("data-page")) || 1 : 1);
+                }
+                return Boolean(id || response.data.created || fullCheck);
+            }
             const textarea = dialog.element.querySelector("textarea");
             const button = dialog.element.querySelector<HTMLButtonElement>(".b3-button--text");
             if (button.disabled) {
@@ -711,9 +721,17 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     name = liElement.querySelector(".b3-list-item__text").textContent.trim();
                     time = dayjs(parseInt(liElement.getAttribute("data-created")) * 1000).format("YYYY-MM-DD HH:mm:ss");
                 }
-                confirmDialog("⚠️ " + window.siyuan.languages.rollback,
+                mobileConfirmDialog("⚠️ " + window.siyuan.languages.rollback,
                     window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(name)).replace("${time}", time),
-                    () => {
+                    async () => {
+                        if (isMobile()) {
+                            const endpoint = {assets: "rollbackAssetsHistory", doc: "rollbackDocHistory",
+                                av: "rollbackAttributeViewHistory", notebook: "rollbackNotebookHistory"}[dataType];
+                            const response = endpoint ? await fetchSyncPost("/api/history/" + endpoint, {
+                                historyPath: target.parentElement.getAttribute("data-path"),
+                            }) : await fetchSyncPost("/api/repo/checkoutRepo", {id: target.parentElement.getAttribute("data-id")});
+                            return response.code === 0;
+                        }
                         if (dataType === "assets") {
                             fetchPost("/api/history/rollbackAssetsHistory", {
                                 historyPath: target.parentElement.getAttribute("data-path")
@@ -735,7 +753,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                 id: target.parentElement.getAttribute("data-id")
                             });
                         }
-                    });
+                    }, undefined, false, undefined, undefined, {awaitConfirm: true});
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -983,11 +1001,17 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 break;
             } else if (type === "removeRepoTagSnapshot" || type === "removeCloudRepoTagSnapshot") {
                 const tag = target.parentElement.getAttribute("data-tag");
-                confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(tag)}</b> ?`, () => {
+                mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(tag)}</b> ?`, async () => {
+                    if (isMobile()) {
+                        const response = await fetchSyncPost("/api/repo/" + type, {tag});
+                        if (response.code !== 0) return false;
+                        renderRepo(repoElement, 1);
+                        return true;
+                    }
                     fetchPost("/api/repo/" + type, {tag}, () => {
                         renderRepo(repoElement, 1);
                     });
-                }, undefined, true);
+                }, undefined, true, undefined, undefined, {awaitConfirm: true});
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -1014,9 +1038,16 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (type === "downloadRollback" && !window.siyuan.config.readonly) {
-                confirmDialog("⚠️ " + window.siyuan.languages.downloadRollback, window.siyuan.languages.rollbackConfirm.replace("${name}", window.siyuan.languages.workspaceData)
-                    .replace("${time}", (isMobile() ? target.parentElement.parentElement : target.parentElement).querySelector("span[data-type='hCreated']").textContent.trim()), () => {
+                mobileConfirmDialog("⚠️ " + window.siyuan.languages.downloadRollback, window.siyuan.languages.rollbackConfirm.replace("${name}", window.siyuan.languages.workspaceData)
+                    .replace("${time}", (isMobile() ? target.parentElement.parentElement : target.parentElement).querySelector("span[data-type='hCreated']").textContent.trim()), async () => {
                     const repoId = target.parentElement.getAttribute("data-id");
+                    if (isMobile()) {
+                        const response = await fetchSyncPost("/api/repo/downloadCloudSnapshot", {
+                            tag: target.parentElement.getAttribute("data-tag"), id: repoId,
+                        });
+                        if (response.code !== 0) return false;
+                        return (await fetchSyncPost("/api/repo/checkoutRepo", {id: repoId})).code === 0;
+                    }
                     fetchPost("/api/repo/downloadCloudSnapshot", {
                         tag: target.parentElement.getAttribute("data-tag"),
                         id: repoId
@@ -1025,20 +1056,36 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             id: repoId
                         });
                     });
-                });
+                }, undefined, false, undefined, undefined, {awaitConfirm: true});
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "genTag") {
-                const genTagDialog = openInputDialog({
+                let taggedValue: string;
+                const submitTag = async (value: string, upload: boolean) => {
+                    const id = target.parentElement.getAttribute("data-id");
+                    if (taggedValue !== value) {
+                        if ((await fetchSyncPost("/api/repo/tagSnapshot", {id, name: value})).code !== 0) return false;
+                        taggedValue = value;
+                    }
+                    if (upload && (await fetchSyncPost("/api/repo/uploadCloudSnapshot", {tag: value, id})).code !== 0) return false;
+                    renderRepo(upload ? repoRoot : repoElement, 1);
+                    return true;
+                };
+                const genTagDialog = mobileInputDialog({
                     title: window.siyuan.languages.tagSnapshot,
                     value: dayjs().format("YYYYMMDDHHmmss"),
                     placeholder: window.siyuan.languages.tagSnapshotTip,
                     confirmText: window.siyuan.languages.tagSnapshot,
+                    awaitConfirm: isMobile(),
                     actions: [{
                         text: window.siyuan.languages.tagSnapshotUpload,
                         position: "afterConfirm",
                         onClick: (value, genTagDialog) => {
+                            if (isMobile()) {
+                                void genTagDialog.runPending(() => submitTag(value, true));
+                                return;
+                            }
                             fetchPost("/api/repo/tagSnapshot", {
                                 id: target.parentElement.getAttribute("data-id"),
                                 name: value
@@ -1054,6 +1101,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         },
                     }],
                     onConfirm: (value, genTagDialog) => {
+                        if (isMobile()) return submitTag(value, false);
                         fetchPost("/api/repo/tagSnapshot", {
                             id: target.parentElement.getAttribute("data-id"),
                             name: value
@@ -1081,7 +1129,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
-                    openInputDialog({
+                    mobileInputDialog({
                         title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
                         value: String(currentPage),
                         type: "number",
@@ -1104,7 +1152,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
-                    openInputDialog({
+                    mobileInputDialog({
                         title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
                         value: String(currentPage),
                         type: "number",

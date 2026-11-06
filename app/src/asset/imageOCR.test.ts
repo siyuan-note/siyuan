@@ -27,7 +27,8 @@ const browserCases = async (source: string, actionsSource: string, statusSource:
         });
     });
     const dependencies = {
-        Dialog: class {
+        isMobile: () => false,
+        MobileDialog: class {
             element: HTMLElement;
             constructor(options: {content: string, disableClose: boolean}) {
                 check.equal(options.disableClose, true);
@@ -37,6 +38,7 @@ const browserCases = async (source: string, actionsSource: string, statusSource:
                 dialog = {element: this.element, destroy: () => this.element.remove()};
             }
             destroy() { this.element.remove(); }
+            focusWhenReady(target: () => HTMLElement) { target()?.focus(); }
         },
         fetchPost: (_url: string, _body: {path: string}, callback: typeof receive) => { receive = callback; },
         fetchSyncPost: async (_url: string, body: {path: string, text: string}) => {

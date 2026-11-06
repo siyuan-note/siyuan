@@ -11,7 +11,7 @@ const compile = (file: string) => transpileModule(readFileSync(file, "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-test("release changelogs always pass through a static HTML and HTTP link policy", async () => {
+test("release changelogs always pass through a static HTML and HTTP resource policy", async () => {
     let policy: {ALLOWED_TAGS: string[]; ALLOWED_ATTR: string[]; ALLOWED_URI_REGEXP: RegExp;
         ALLOW_DATA_ATTR: boolean; ALLOW_ARIA_ATTR: boolean};
     let rendered = "";
@@ -29,15 +29,20 @@ test("release changelogs always pass through a static HTML and HTTP link policy"
         "../util/hostCapabilities": {sanitizeKernelHTML: () => { throw new Error("local-kernel bypass used for online content"); }},
         "../util/fetchTimeout": {withFetchTimeout: (request: () => unknown) => request()},
         "../util/escape": {escapeHtml: (value: string) => value},
-    })[name], window: {siyuan: {config: {system: {kernelVersion: "3.8.10-alpha.5"}}, languages: {}},
+    })[name], document: {createElement: () => ({innerHTML: "", content: {querySelectorAll: () => []}})},
+    window: {siyuan: {config: {system: {kernelVersion: "3.8.10-alpha.5"}}, languages: {}},
         DOMPurify: {sanitize: (html: string, options: typeof policy) => { received = html; policy = options; return "sanitized"; }}}});
     await exports.openChangelog(true);
     assert.equal(received, "<script>unsafe</script>");
     assert.equal(rendered, "sanitized");
-    for (const tag of ["script", "img", "iframe", "style", "link", "form", "input", "video", "audio", "svg"]) {
+    for (const tag of ["script", "iframe", "style", "link", "form", "input", "video", "audio", "svg"]) {
         assert.ok(!policy.ALLOWED_TAGS.includes(tag), tag);
     }
-    for (const attribute of ["src", "style", "class", "id", "onclick", "onerror"]) {
+    assert.ok(policy.ALLOWED_TAGS.includes("img"));
+    for (const attribute of ["src", "alt", "width", "height"]) {
+        assert.ok(policy.ALLOWED_ATTR.includes(attribute), attribute);
+    }
+    for (const attribute of ["srcset", "style", "class", "id", "onclick", "onerror"]) {
         assert.ok(!policy.ALLOWED_ATTR.includes(attribute), attribute);
     }
     for (const url of ["javascript:alert(1)", "siyuan://blocks/id", "command:exec", "//localhost/api", "/api/unsafe", "#route", "data:text/html,test"]) {
@@ -60,6 +65,7 @@ const setup = (shortTimeout = false) => {
         href = "";
         className = "";
         style: {marginRight?: string} = {};
+        content = {querySelectorAll: (): HTMLElement[] => []};
         replaceWith: (element: FakeElement) => void = () => undefined;
         setAttribute(name: string, value: string) { this.attributes.set(name, value); }
         getAttribute(name: string) { return this.attributes.get(name) ?? null; }
@@ -300,16 +306,29 @@ const browserCases = async (source: string, timeoutSource: string) => {
     await exports.openChangelog(true, trigger);
     check(requests.length === 1, "duplicate click is ignored");
     requests[0].resolve(success("<h2>Changes</h2><strong>Safe</strong><script>window.changelogExecuted=true</script>" +
-        '<img src="https://example.invalid/tracker" onerror="alert(1)"><iframe src="https://example.invalid"></iframe>' +
+        '<a href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml">' +
+        '<img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml" alt="Build status" width="120" height="30"' +
+        ' style="cursor:pointer;height:30px" srcset="https://example.invalid/tracker 2x" onerror="alert(1)"></a>' +
+        '<img src="http://example.invalid/badge.png" alt="HTTP badge">' +
+        '<img src="data:image/svg+xml,%3Csvg%20onload%3D%22alert(1)%22%3E%3C/svg%3E" alt="Data image">' +
+        '<img src="javascript:alert(1)"><img src="siyuan://blocks/unsafe"><img src="/api/unsafe"><img src="//localhost/api/unsafe">' +
+        '<img src="file:///tmp/unsafe"><img src="blob:https://example.invalid/unsafe">' +
+        '<iframe src="https://example.invalid"></iframe>' +
         '<a href="javascript:alert(1)">Script</a><a href="siyuan://blocks/unsafe">App</a><a href="/api/unsafe">Relative</a>' +
         '<p id="unsafe" style="background:url(https://example.invalid)" onclick="alert(1)" data-action="unsafe">Text</p>' +
         '<a href="https://github.com/siyuan-note/siyuan/issues/21189">Issue</a>'));
     await pending;
     check(dialogs.length === 1 && localSanitizes === 0, "local online content does not bypass sanitizer");
     const body = dialogs[0].element;
-    check(!body.querySelector("script,img,iframe,[onclick],[onerror],[style*=background],[data-action],#unsafe"), "unsafe HTML removed by real DOMPurify");
+    check(!body.querySelector("script,iframe,[onclick],[onerror],img[style],p[style],[srcset],[data-action],#unsafe"), "unsafe HTML removed by real DOMPurify");
+    const badge = body.querySelector<HTMLImageElement>('img[alt="Build status"]');
+    check(badge?.getAttribute("src") === "https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml", "release badge image retained");
+    check(badge?.getAttribute("width") === "120" && badge?.getAttribute("height") === "30", "image dimensions retained");
+    check(badge?.parentElement.getAttribute("href") === "https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml", "image link retained");
+    check(body.querySelectorAll("img[src]").length === 2, "only HTTP and HTTPS image sources remain");
+    check(body.querySelector('img[alt="HTTP badge"]')?.getAttribute("src") === "http://example.invalid/badge.png", "HTTP images retained");
     check(body.querySelector("strong")?.textContent === "Safe", "Markdown formatting retained");
-    check(body.querySelectorAll("a[href]").length === 1, "only HTTP links remain");
+    check(body.querySelectorAll("a[href]").length === 2, "only HTTP links remain");
     check(body.querySelector("a[href]").getAttribute("rel") === "noopener noreferrer", "outbound link isolates opener");
     check(trigger.querySelector("svg") === originalIcon && !trigger.disabled && trigger.getAttribute("aria-busy") === "false", "success restores exact original icon and state");
 
@@ -385,6 +404,12 @@ const browserCases = async (source: string, timeoutSource: string) => {
     check(dialogs.length === before, "prerelease startup stays silent");
 
     mobile = true;
+    pending = exports.openChangelog(true, button());
+    await tick();
+    requests.at(-1).resolve(success('<img src="https://img.shields.io/badge/Mobile-test-blue" alt="Mobile badge">'));
+    await pending;
+    check(dialogs.at(-1).options.width === "92vw" && dialogs.at(-1).element.querySelector("img[src]")?.getAttribute("alt") === "Mobile badge", "mobile prerelease images use the same policy");
+
     window.siyuan.config.system.kernelVersion = "3.8.9";
     pending = exports.openChangelog(true, button());
     await tick();

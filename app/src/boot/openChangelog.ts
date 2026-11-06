@@ -27,15 +27,25 @@ const getChangelog = (force: boolean, version: string) => {
     return manualRequest;
 };
 
-const sanitizeReleaseHTML = (html: string) => window.DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ["p", "br", "hr", "h1", "h2", "h3", "h4", "h5", "h6", "a", "strong", "b", "em", "i",
-        "s", "del", "u", "sub", "sup", "mark", "kbd", "pre", "code", "blockquote", "ul", "ol", "li",
-        "table", "thead", "tbody", "tr", "th", "td"],
-    ALLOWED_ATTR: ["href", "title", "colspan", "rowspan", "start"],
-    ALLOW_DATA_ATTR: false,
-    ALLOW_ARIA_ATTR: false,
-    ALLOWED_URI_REGEXP: /^https?:\/\//i,
-});
+const sanitizeReleaseHTML = (html: string) => {
+    const template = document.createElement("template");
+    const allowedURI = /^https?:\/\//i;
+    template.innerHTML = window.DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: ["p", "br", "hr", "h1", "h2", "h3", "h4", "h5", "h6", "a", "strong", "b", "em", "i",
+            "s", "del", "u", "sub", "sup", "mark", "kbd", "pre", "code", "blockquote", "ul", "ol", "li",
+            "table", "thead", "tbody", "tr", "th", "td", "img"],
+        ALLOWED_ATTR: ["href", "title", "colspan", "rowspan", "start", "src", "alt", "width", "height"],
+        ADD_URI_SAFE_ATTR: ["width", "height"],
+        ALLOW_DATA_ATTR: false,
+        ALLOW_ARIA_ATTR: false,
+        ALLOWED_URI_REGEXP: allowedURI,
+    });
+    // DOMPurify 默认允许图片使用 data URI，在插入文档前限制为 HTTP(S) 资源。
+    template.content.querySelectorAll("img[src]").forEach(image => {
+        if (!allowedURI.test(image.getAttribute("src"))) image.removeAttribute("src");
+    });
+    return template.innerHTML;
+};
 
 export const openChangelog = async (force = false, button?: HTMLButtonElement) => {
     if (button?.disabled || button?.closest('[data-dialog-closing="true"]')) return;

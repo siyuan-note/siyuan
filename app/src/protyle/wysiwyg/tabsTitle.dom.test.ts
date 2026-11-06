@@ -27,8 +27,8 @@ const browserCases = (source: string) => {
             ]) {
                 editor.innerHTML = '<div class="tabs" data-type="NodeTabs" data-node-id="tabs">' +
                     '<div class="tab-item" data-type="NodeTabItem" data-node-id="item">' +
-                    '<div class="tab-item-info"><div class="tab-item-title callout-title" contenteditable="true">' +
-                    titleHTML + '</div></div><div class="tab-item-content">Body</div></div></div>';
+                    '<div class="tab-item-info"><span class="tab-item-title callout-title" contenteditable="true">' +
+                    titleHTML + '</span></div><div class="tab-item-content">Body</div></div></div>';
                 api.tabsRender(editor, {label: "Untitled"});
                 const title = editor.querySelector<HTMLElement>(".tab-item-title");
                 const label = editor.querySelector(".tabs-tab-label");
@@ -62,7 +62,7 @@ const browserCases = (source: string) => {
             }
         }
         for (const titleClass of ["callout-title", "callout-title tab-item-title"]) {
-            editor.innerHTML = `<div class="${titleClass}" contenteditable="true">/</div>`;
+            editor.innerHTML = `<span class="${titleClass}" contenteditable="true">/</span>`;
             const title = editor.firstElementChild;
             const range = document.createRange();
             range.selectNodeContents(title);

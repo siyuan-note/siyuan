@@ -86,13 +86,14 @@ test("mobile frequent group clones supported buttons and preserves the original 
 });
 
 for (const iosPhotos of [false, true]) {
-    test(`full mobile slash panel preserves eligible commands with iOS photos ${iosPhotos}`, () => {
+    test(`full mobile slash panel preserves body and title candidates with iOS photos ${iosPhotos}`, () => {
         const filename = path.join(__dirname, "keyboardToolbar.ts");
         const file = createSourceFile(filename, readFileSync(filename, "utf8"), ScriptTarget.Latest, true);
         const source = file.statements.filter(statement => isVariableStatement(statement) &&
             statement.declarationList.declarations.some(declaration =>
                 ["getSlashItem", "renderSlashMenu"].includes(declaration.name.getText(file))))
             .map(statement => statement.getText(file)).join("\n");
+        let inTitle = false;
         let mounted = 0;
         let boundUploads = 0;
         let eligibilityCalls = 0;
@@ -116,6 +117,9 @@ for (const iosPhotos of [false, true]) {
             SLASH_MENU_ROOT_PATH: "editor.slash.menu",
             getHostCapabilities: () => ({widgets: false, remoteKernel: true}),
             isDisabledFeature: () => true,
+            isTitleSlashContext: () => inTitle,
+            getLiteSlashMenuHTML: (items: {entryKey: string}[]) => items.map(item =>
+                `<button data-slash-entry-key="${item.entryKey}"></button>`).join(""),
             isInAndroid: () => false,
             canPickIOSPhotos: () => iosPhotos,
             isBuiltinInlineStyleVisible: () => false,
@@ -123,13 +127,16 @@ for (const iosPhotos of [false, true]) {
             escapeHtml: (value: string) => value,
             getFrequentSlashButtons,
             getFrequentSlashItems: (buttons: HTMLButtonElement[], getKey: (button: HTMLButtonElement) => string) =>
-                rankFrequentSlashItems(buttons, getKey, {heading1: 100, code: 1, insertHTMLFile: 99}),
+                rankFrequentSlashItems(buttons, getKey, {heading1: 100, code: 1, insertHTMLFile: 99, bold: 2}),
             hintSlash: (key: string, editor: unknown, hideConfiguredCreate: boolean, options: {visibilityRoot: string}) => {
                 eligibilityCalls++;
                 assert.equal(key, "");
                 assert.equal(editor, protyle);
                 assert.equal(hideConfiguredCreate, false);
                 assert.equal(options.visibilityRoot, "editor.slash.menu");
+                if (inTitle) {
+                    return [{entryKey: "ref", html: "Reference"}, {entryKey: "bold", html: "Bold"}];
+                }
                 return [{entryKey: "code", html: "Code"}, {entryKey: "insertHTMLFile", html: "HTML upload"},
                     {entryKey: "separator_1", html: "separator"}];
             },
@@ -155,6 +162,13 @@ for (const iosPhotos of [false, true]) {
         render(protyle, root);
         assert.equal(mounted, 1);
         assert.equal(eligibilityCalls, 1);
+        assert.equal(boundUploads, 1);
+        protyle.lite = false;
+        inTitle = true;
+        render(protyle, root);
+        assert.equal(eligibilityCalls, 2);
+        assert.deepEqual(util.querySelectorAll().map(button => button.dataset.slashEntryKey), ["ref", "bold"]);
+        assert.deepEqual(frequentButtons.map(button => button.dataset.slashEntryKey), ["bold"]);
         assert.equal(boundUploads, 1);
     });
 }

@@ -60,6 +60,7 @@ import {countBlockWord} from "../../layout/status";
 import {genTemplateDocTreePlanHTML} from "../../template/docTree";
 import {guardTemplateHTTPRequest} from "../../template/http";
 import {getDailyNoteHints} from "./dailyNote";
+import {isTitleSlashContext, TITLE_INLINE_SLASH_IDS} from "./titleSlash";
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     infoStyle: "info",
@@ -608,6 +609,7 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
         allList.pop();
     }
     refreshSlashMenuCatalog(areProtylePluginExtensionsEnabled(protyle) ? protyle.app.plugins : []);
+    const inTitle = isTitleSlashContext(protyle);
     const selection = getSelection();
     const focus = selection?.focusNode;
     const focusElement = focus instanceof Element ? focus : focus?.parentElement;
@@ -615,7 +617,8 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
     const inTableCell = cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element;
     return resolveSlashMenuItems(allList.filter((item) => {
         const builtinStyleID = slashBuiltinStyleIDs[item.entryKey];
-        return (!inTableCell || TABLE_CELL_SLASH_IDS.has(item.id)) &&
+        return (!inTitle || (item.entryKey === item.id && TITLE_INLINE_SLASH_IDS.has(item.id))) &&
+            (!inTableCell || TABLE_CELL_SLASH_IDS.has(item.id)) &&
             getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey)) &&
             (!builtinStyleID || isBuiltinInlineStyleVisible("style1", builtinStyleID));
     }), {

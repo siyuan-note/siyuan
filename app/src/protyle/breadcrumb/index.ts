@@ -37,7 +37,7 @@ import {isInAndroid, isInHarmony, isIPad, isMac, isPhablet, updateHotkeyTip} fro
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {getGlobalBreadcrumb, isBreadcrumbNotebookAvailable, type GlobalBreadcrumb} from "./globalPath";
 import {listIndent, listOutdent} from "../wysiwyg/list";
-import {improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
+import {improveBreadcrumbAppearance} from "./appearance";
 import {getCloudURL} from "../../config/util/about";
 import {decodeHTML, escapeAttr, escapeAriaLabel, escapeHtml, escapeSearchHighlight} from "../../util/escape";
 import {refreshUndoButtons} from "../undo/globalUndo";

@@ -63,6 +63,37 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
         measuring = false;
         check.equal(reads, 24 * 4, "each image is measured once in the batch");
         check.equal(batch.querySelectorAll(".protyle-image-resize[style]").length, 24);
+        let initializations = 0;
+        let configurations = 0;
+        batch.querySelectorAll("img").forEach(image => {
+            const classes = image.parentElement.classList;
+            const add = classes.add.bind(classes);
+            classes.add = (...tokens: string[]) => {
+                if (tokens.includes("protyle-image-container")) {
+                    configurations++;
+                }
+                add(...tokens);
+            };
+        });
+        const editable = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "contentEditable");
+        batch.querySelectorAll<HTMLElement>(".protyle-image-resize").forEach(frame => {
+            Object.defineProperty(frame, "contentEditable", {
+                get: () => editable.get.call(frame),
+                set: value => {
+                    initializations++;
+                    editable.set.call(frame, value);
+                },
+            });
+        });
+        batch.querySelectorAll(".img > span").forEach(container => {
+            for (let i = 0; i < 4; i++) {
+                container.append(document.createTextNode(" "));
+            }
+        });
+        await settle();
+        check.equal(configurations, 24, "a mutation batch configures each image once");
+        check.ok(initializations <= 24, `a mutation batch initializes each image at most once: ${initializations}`);
+        check.equal(batch.querySelectorAll(".protyle-image-resize").length, 24);
         stop();
         batch.remove();
     }
@@ -553,7 +584,7 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     return "Image resize cases passed";
 };
 
-test("image handles retain selection, touch visibility, source, aspect ratio and replay compatibility", {
+test("image handles batch mutations and retain selection, touch visibility, source, aspect ratio and replay compatibility", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 60000,
 }, async () => {

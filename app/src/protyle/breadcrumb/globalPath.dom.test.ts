@@ -40,7 +40,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
     const escapeExports: any = {};
     new Function("exports", sources.escape)(escapeExports);
     const appearance: any = {};
-    new Function("exports", "hasClosestByAttribute", sources.appearance)(appearance, (): null => null);
+    new Function("exports", "require", sources.appearance)(appearance, () => ({hasClosestByAttribute: (): null => null}));
     const blocks = [{id: root, name: "Current", type: "NodeDocument"},
         {id: leaf, name: "Block", type: "NodeParagraph"}];
     const pathItems = [
@@ -140,6 +140,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         const render = async (update = true) => {
             await breadcrumb.render(protyle, update, wysiwyg.firstElementChild);
             await callbackWork;
+            await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
         };
         window.siyuan.config.editor.globalBreadcrumb = false;
         await render();
@@ -219,14 +220,12 @@ for (const mobile of [true, false]) {
     test(`global breadcrumbs support real ${mobile ? "mobile MenuItem navigation" : "desktop pointer and keyboard dispatch"}`,
         {timeout: 45000}, async () => {
         const menuSource = readFileSync(path.join(__dirname, "../../menus/Menu.ts"), "utf8");
-        const backlinkSource = readFileSync(path.join(__dirname, "../wysiwyg/renderBacklink.ts"), "utf8");
-        const appearanceStart = backlinkSource.indexOf("export const improveBreadcrumbAppearance =");
         const sources = {
             menu: menuSource.slice(menuSource.indexOf("export class MenuItem {"), menuSource.indexOf("const getActionMenu =")),
             breadcrumb: parse(readFileSync(path.join(__dirname, "index.ts"), "utf8"),
                 {MOBILE: mobile, BROWSER: true}, false, true, "index.ts"),
             escape: readFileSync(path.join(__dirname, "../../util/escape.ts"), "utf8"),
-            appearance: backlinkSource.slice(appearanceStart, backlinkSource.indexOf("\n};", appearanceStart) + 3),
+            appearance: readFileSync(path.join(__dirname, "appearance.ts"), "utf8"),
         };
         for (const key of Object.keys(sources) as (keyof typeof sources)[]) {
             sources[key] = transpileModule(sources[key], {

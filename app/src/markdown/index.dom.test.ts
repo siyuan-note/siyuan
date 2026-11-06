@@ -397,6 +397,9 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(appearanceItem.getAttribute("aria-haspopup"), "menu");
     check.equal(appearanceItem.querySelector(":scope > .b3-menu__icon--arrow use").getAttribute("href"), "#iconRight");
     appearanceItem.click();
+    const appearanceSubmenu = appearanceItem.querySelector<HTMLElement>(":scope > .b3-menu__submenu");
+    check.ok(appearanceSubmenu.scrollHeight <= appearanceSubmenu.clientHeight,
+        `appearance submenu fits: ${appearanceSubmenu.scrollHeight}/${appearanceSubmenu.clientHeight}`);
     check.equal(document.querySelector("#markdownTheme").checkVisibility(), true);
     appearanceItem.focus();
     appearanceItem.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));

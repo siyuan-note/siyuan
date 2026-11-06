@@ -162,6 +162,34 @@ test("in-place attribute replacement reattaches the live related table", () => {
     assert.equal(after.disposed, false);
 });
 
+test("adding and removing related tables preserves definition order through panel replacement", () => {
+    const f = fixture();
+    const tables = (keys: string[]) => [{avID: "source", keyValues: [
+        {key: {id: "primary", type: "block" as TAVCol}, values: [{blockID: "entry"} as IAVCellValue]},
+        ...keys.map(id => ({key: {id, name: id, type: "relation" as TAVCol, relation: {
+            avID: "target", detailView: {enabled: true, spec: 1 as const, viewID: "table"},
+        }}})),
+    ]}];
+    let source = f.panel(true);
+    f.api.mountRelatedAVViews(source, tables(["first"]), f.editor, "carrier");
+    const original = f.api.testPanels.get(source)[0];
+    for (const keys of [["first", "second"], ["first", "second", "third"], ["first", "third"], ["third", "first"]]) {
+        const destination = f.panel();
+        f.api.mountRelatedAVViews(destination, tables(keys), f.editor, "carrier");
+        f.api.preserveRelatedAVViews(source, destination);
+        const retained = f.api.testPanels.get(destination);
+        assert.deepEqual(Array.from(destination.firstElementChild.children), Array.from(retained, view => view.element),
+            "retained and newly created tables stay in the requested order before becoming visible");
+        assert.ok(retained.includes(original));
+        source.replaceWith(destination);
+        f.api.syncRelatedAVViews(destination);
+        f.flush();
+        f.observe();
+        assert.equal(original.disposed, false);
+        source = destination;
+    }
+});
+
 test("successive refreshes retain one owner while membership renders are pending", () => {
     const f = fixture();
     let source = f.panel(true);

@@ -199,14 +199,16 @@ class RelatedAVView {
             this.definition.targetAVID === definition.targetAVID && this.definition.viewID === definition.viewID;
     }
 
-    reattach(sourceElement: HTMLElement, definition: TRelatedAVDefinition, automaticRefresh = false) {
+    reattach(sourceElement: HTMLElement, definition: TRelatedAVDefinition, automaticRefresh = false,
+             replacement?: HTMLElement) {
         this.cancelColumnResize?.();
         this.sourceElement = sourceElement;
         this.definition = definition;
         const toggle = this.element.querySelector('[data-related-action="fold"]');
         toggle.setAttribute("aria-label", definition.name);
         toggle.querySelector(".block__logo").textContent = definition.name;
-        sourceElement.append(this.element);
+        if (replacement) replacement.replaceWith(this.element);
+        else sourceElement.append(this.element);
         // 属性刷新时保留已绘制的表格，旧请求失效后由当前载体获取最新关联成员。
         this.invalidate(automaticRefresh);
     }
@@ -296,8 +298,18 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
         this.element.querySelector<HTMLButtonElement>('[data-related-action="add"]').disabled = this.host.readonly();
         this.host.viewID = data.viewID;
         this.query = this.hostElement.querySelector('[data-type="av-search"]')?.textContent ?? this.query;
-        this.hostElement.querySelectorAll('[data-type="av-more"], [data-type="av-add"], [data-type="av-add-top"], [data-type="av-row-update"], [data-type="av-context-filter"], .av__new, [data-type="av-add-bottom"], [data-type="av-header-add"], [data-type="av-header-more"], .av__freeze-drag, .av__drag-fill').forEach(element => element.remove());
-        this.hostElement.querySelectorAll('[data-type="av-switcher"]:not(.av__mobile-view)').forEach(element => element.remove());
+        this.hostElement.querySelectorAll('[data-type="av-more"], [data-type="av-add"], [data-type="av-add-top"], [data-type="av-row-update"], [data-type="av-context-filter"], .av__new, [data-type="av-add-bottom"], [data-type="av-header-add"], [data-type="av-header-more"], .av__freeze-drag, .av__drag-fill, [data-type="av-switcher"]:not(.av__mobile-view)').forEach(element => {
+            const spacer = element.nextElementSibling?.classList.contains("fn__space")
+                ? element.nextElementSibling : element.previousElementSibling;
+            if (spacer?.classList.contains("fn__space")) spacer.remove();
+            element.remove();
+        });
+        this.hostElement.querySelectorAll(".av__views").forEach(toolbar => {
+            if (toolbar.lastElementChild?.classList.contains("fn__space")) toolbar.lastElementChild.remove();
+        });
+        this.hostElement.querySelectorAll(".av__row--header > .block__icons").forEach(controls => {
+            controls.classList.toggle("fn__none", controls.childElementCount === 0);
+        });
         this.hostElement.querySelectorAll<HTMLElement>('[draggable="true"]').forEach(element => element.draggable = false);
         this.hostElement.querySelectorAll<HTMLElement>(".av__title, .av__cursor").forEach(element => element.contentEditable = "false");
         this.hostElement.querySelectorAll<HTMLElement>(".layout-tab-bar .item").forEach(element => {
@@ -712,9 +724,8 @@ export const preserveRelatedAVViews = (source: HTMLElement, destination = source
         if (!retained) return next;
         remaining.delete(retained);
         const sourceElement = next.sourceElement;
-        next.element.remove();
+        retained.reattach(sourceElement, next.definition, false, next.element);
         next.dispose();
-        retained.reattach(sourceElement, next.definition);
         return retained;
     });
     remaining.forEach(view => view.dispose());

@@ -100,10 +100,22 @@ const cases = async compiled => {
         }};
     };
     const ready = element => {
-        element.innerHTML = '<div class="av__container"><button data-type="av-switcher" class="av__mobile-view">Configured</button><button data-type="av-row-update">Bind</button><button data-type="av-add-top">Group add</button><button data-type="av-load-more">More<span data-type="set-page-size">Size</span></button><div class="av__row" data-id="target-entry"><button data-type="av-row-open">Open</button><button data-type="av-row-more">Row</button></div></div>';
+        element.innerHTML = `<div class="av__container"><button data-type="av-switcher" class="av__mobile-view">Configured</button>
+<div class="av__views"><div class="layout-tab-bar"></div><div class="fn__space"></div><button data-type="av-add"></button>
+<div class="fn__flex-1"></div><button data-type="av-switcher"></button><div class="fn__space"></div>
+<button data-type="av-filter"></button><div class="fn__space"></div><button data-type="av-context-filter"></button><div class="fn__space"></div>
+<button data-type="av-sort"></button><div class="fn__space"></div><button data-type="av-search-icon"></button><div class="av__search"><div data-type="av-search"></div></div>
+<div class="fn__space"></div><button data-type="av-more"></button><div class="fn__space"></div><div class="av__new"></div></div>
+<div class="av__row av__row--header"><div class="av__cell">Primary</div><div class="block__icons">
+<button data-type="av-header-more"></button><div class="fn__space"></div><button data-type="av-header-add"></button></div></div>
+<button data-type="av-row-update">Bind</button><button data-type="av-add-top">Group add</button><button data-type="av-load-more">More<span data-type="set-page-size">Size</span></button><div class="av__row" data-id="target-entry"><button data-type="av-row-open">Open</button><button data-type="av-row-more">Row</button></div></div>`;
         const value = {viewID: "configured", views: [{id: "configured", name: "Configured", type: "table"},
             {id: "other", name: "Other", type: "table"}, {id: "gallery", type: "gallery", name: "Cards"}], view: {filters: []}};
         data.set(element, value); hostAPI.getAVRelationHost(element).rendered(value);
+        check.deepEqual([...element.querySelector(".av__views").children].map(control => control.dataset.type || control.className),
+            ["layout-tab-bar", "fn__flex-1", "av-filter", "fn__space", "av-sort", "fn__space", "av-search-icon", "av__search"]);
+        check.equal(element.querySelector(".av__row--header > .block__icons").childElementCount, 0);
+        check.equal(element.querySelector(".av__row--header > .block__icons").classList.contains("fn__none"), true);
     };
     for (const mobile of [false, true]) {
         document.body.classList.toggle("body--mobile", mobile);

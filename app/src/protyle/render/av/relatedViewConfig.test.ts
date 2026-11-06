@@ -5,6 +5,7 @@ import {escapeAriaLabel, escapeHtml} from "../../../util/escape";
 
 const compiled = compileModule("src/protyle/render/av/relatedViewConfig.ts");
 const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+const settle = () => new Promise<void>(resolve => setImmediate(resolve));
 
 class Control {
     public checked = false;
@@ -168,6 +169,8 @@ it("uses a native switch and a checked existing-table submenu without a select o
     assert.match(html, /b3-switch b3-switch--menu/);
     assert.doesNotMatch(html, /<select/);
     await h.bind();
+    assert.equal(h.targetOptions.label, "relatedDatabaseView");
+    assert.equal(h.targetOptions.accelerator, escapeHtml("First <view>"));
     assert.deepEqual(copy(h.requests), [{url: "/api/av/getAttributeView", payload: {id: "target", blockID: "source-carrier",
         relationFieldContext: {sourceAvID: "source", relationKeyID: "relation-key"}}}]);
     assert.deepEqual(copy(h.targetOptions.submenu.map(item => [item.label, item.checked])),
@@ -292,4 +295,90 @@ it("keeps history and snapshot field configuration read-only", async () => {
         h.targetOptions.submenu[1].click(undefined, undefined);
         assert.equal(h.operations.length, 0);
     }
+});
+
+it("enables new relation configuration in the same menu and stages it until confirmation", async () => {
+    for (const mobile of [false, true]) {
+        const h = setup();
+        if (mobile) h.setMobile();
+        delete h.field.relation;
+        h.source.dataset.avId = "";
+        await h.bind();
+        assert.equal(h.switchElement.disabled, true);
+        h.source.dataset.avId = "target";
+        h.source.dataset.blockId = "target-carrier";
+        h.observe();
+        await settle();
+        assert.equal(h.switchElement.disabled, false);
+        assert.deepEqual(copy(h.requests), [{url: "/api/av/getAttributeView",
+            payload: {id: "target", blockID: "target-carrier"}}]);
+        h.toggle(true);
+        assert.equal(h.operations.length, 0, "do not save detail settings before the relation exists");
+        assert.equal(h.field.relation, undefined, "do not mutate the existing field before confirmation");
+        assert.deepEqual(copy(h.api.getPendingRelatedViewConfig(h.menu as unknown as Element)),
+            {spec: 1, enabled: true, viewID: "first"});
+        h.targetOptions.submenu[1].click(undefined, undefined);
+        assert.deepEqual(copy(h.api.getPendingRelatedViewConfig(h.menu as unknown as Element)),
+            {spec: 1, enabled: true, viewID: "second"});
+        h.toggle(false);
+        h.toggle(true);
+        assert.equal(h.api.getPendingRelatedViewConfig(h.menu as unknown as Element).viewID, "second");
+        h.source.dataset.avId = "different";
+        assert.equal(h.api.getPendingRelatedViewConfig(h.menu as unknown as Element), undefined);
+    }
+});
+
+it("retargeting rejects stale view lists and clears staged configuration when returning to the original target", async () => {
+    const h = setup({spec: 1, enabled: true, viewID: "second"});
+    await h.bind();
+    const responses: Array<(value: unknown) => void> = [];
+    h.setResponse(() => new Promise(resolve => responses.push(resolve)));
+    h.source.dataset.avId = "other";
+    h.source.dataset.blockId = "other-carrier";
+    h.observe();
+    assert.equal(h.switchElement.disabled, true);
+    h.source.dataset.avId = "newest";
+    h.source.dataset.blockId = "newest-carrier";
+    h.observe();
+    responses[0]({code: 0, data: {av: {views: [{id: "stale", type: "table"}]}}});
+    await settle();
+    assert.equal(h.switchElement.disabled, true);
+    responses[1]({code: 0, data: {av: {views: [{id: "new", type: "table"}]}}});
+    await settle();
+    h.toggle(true);
+    assert.deepEqual(copy(h.api.getPendingRelatedViewConfig(h.menu as unknown as Element)),
+        {spec: 1, enabled: true, viewID: "new"});
+    assert.equal(h.operations.length, 0);
+    assert.equal(h.field.relation.detailView.viewID, "second");
+    h.source.dataset.avId = "target";
+    h.observe();
+    responses[2]({code: 0, data: {av: {views: [{id: "second", type: "table"}]}}});
+    await settle();
+    assert.equal(h.api.getPendingRelatedViewConfig(h.menu as unknown as Element), undefined);
+    assert.equal(h.switchElement.checked, true);
+    h.toggle(false);
+    assert.equal(h.operations.length, 1);
+    assert.deepEqual(h.operations[0].undo[0].data, {spec: 1, enabled: true, viewID: "second"});
+});
+
+it("rejects a previous target's submenu callback while loading and after replacement", async () => {
+    const h = setup({spec: 1, enabled: true, viewID: "second"});
+    h.setMobile();
+    await h.bind();
+    h.target.dispatch("click");
+    const previousChoice = h.mobileItems[0];
+    let resolve: (value: unknown) => void;
+    h.setResponse(() => new Promise(done => { resolve = done; }));
+    h.source.dataset.avId = "new-target";
+    h.source.dataset.blockId = "new-carrier";
+    h.observe();
+    previousChoice.click(undefined, undefined);
+    assert.equal(h.api.getPendingRelatedViewConfig(h.menu as unknown as Element), undefined);
+    resolve({code: 0, data: {av: {views: [{id: "new", type: "table"}]}}});
+    await settle();
+    previousChoice.click(undefined, undefined);
+    assert.equal(h.api.getPendingRelatedViewConfig(h.menu as unknown as Element), undefined);
+    assert.equal(h.operations.length, 0);
+    h.toggle(true);
+    assert.equal(h.api.getPendingRelatedViewConfig(h.menu as unknown as Element).viewID, "new");
 });

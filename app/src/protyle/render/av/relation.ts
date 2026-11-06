@@ -32,6 +32,7 @@ import {bindRelationLayout} from "./relationLayout";
 import {getRelationKeyboardTarget} from "./relationKeyboard";
 import {getTopBarHeight} from "../../../layout/getTopBarHeight";
 import {canEditAVHost, getAVHostBlockID, getAVRelationHost} from "./host";
+import {getPendingRelatedViewConfig} from "./relatedViewConfig";
 
 interface IAVItem {
     avID: string;
@@ -323,6 +324,11 @@ export const updateRelation = (options: {
             });
         });
     }
+    const detailView = getPendingRelatedViewConfig(options.avElement);
+    if (detailView && targetChanged) {
+        doOperations.push({action: "setAttrViewRelationDetail", avID: options.avID, keyID: colId, blockID,
+            data: detailView});
+    }
     doOperations.push({
         action: "doUpdateUpdated",
         id: blockID,
@@ -338,11 +344,11 @@ export const updateRelation = (options: {
         name: inputElement.dataset.oldValue,
         format: colData.name
     }];
+    if (targetChanged && (colData.relation.detailView || detailView)) {
+        undoOperations.push({action: "setAttrViewRelationDetail", avID: options.avID,
+            keyID: colId, data: structuredClone(colData.relation.detailView || null)});
+    }
     if (colData.relation.avID) {
-        if (targetChanged && colData.relation.detailView) {
-            undoOperations.push({action: "setAttrViewRelationDetail", avID: options.avID,
-                keyID: colId, data: structuredClone(colData.relation.detailView)});
-        }
         undoOperations.push({
             action: "setAttrViewColRelationFilters",
             avID: options.avID,

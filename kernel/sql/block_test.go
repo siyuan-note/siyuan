@@ -21,7 +21,7 @@ func TestNodeStaticContentDecodesTextMarkContent(t *testing.T) {
 		TextMarkBlockRefSubtype: "s",
 	})
 
-	content := nodeStaticContent(paragraph, nil, true, false, true, true)
+	content := nodeStaticContent(paragraph, nil, true, false, true, true, true)
 	if "123foo&bar" != content {
 		t.Fatalf("unexpected static content: %q", content)
 	}

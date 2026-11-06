@@ -99,11 +99,24 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 }
 
 func renderBlockText(node *ast.Node, excludeTypes []string, removeLineBreak bool) (ret string) {
+	return renderBlockTextWithOCRAssets(node, excludeTypes, removeLineBreak, true)
+}
+
+// renderBlockTextWithoutOCRAssets 与 renderBlockText 相同，但不读取资源的 OCR 文本。
+func renderBlockTextWithoutOCRAssets(node *ast.Node, excludeTypes []string, removeLineBreak bool) (ret string) {
+	return renderBlockTextWithOCRAssets(node, excludeTypes, removeLineBreak, false)
+}
+
+func renderBlockTextWithOCRAssets(node *ast.Node, excludeTypes []string, removeLineBreak bool, includeOCRAssets bool) (ret string) {
 	if nil == node {
 		return
 	}
 
-	ret = sql.NodeStaticContent(node, excludeTypes, false, false, false)
+	if includeOCRAssets {
+		ret = sql.NodeStaticContent(node, excludeTypes, false, false, false)
+	} else {
+		ret = sql.NodeStaticContentWithoutOCRAssets(node, excludeTypes, false, false, false)
+	}
 	ret = strings.TrimSpace(ret)
 	if removeLineBreak {
 		ret = strings.ReplaceAll(ret, "\n", "")

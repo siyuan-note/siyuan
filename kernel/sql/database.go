@@ -1020,13 +1020,13 @@ func buildBlockFromNodeWithHeadingParent(n *ast.Node, tree *parse.Tree, headingP
 		if !treenode.IsNodeOCRed(n) {
 			util.PushNodeOCRQueue(n)
 		}
-		content = nodeStaticContent(n, nil, true, indexAssetPath.Load(), true, true)
+		content = nodeStaticContent(n, nil, true, indexAssetPath.Load(), true, true, true)
 
 		fc := treenode.FirstLeafBlock(n)
 		if !treenode.IsNodeOCRed(fc) {
 			util.PushNodeOCRQueue(fc)
 		}
-		fcontent = nodeStaticContent(fc, nil, true, false, true, true)
+		fcontent = nodeStaticContent(fc, nil, true, false, true, true, true)
 
 		parentID = n.Parent.ID
 		if headingParent != nil { // 如果在标题块下方，则将标题块作为父节点
@@ -1038,7 +1038,7 @@ func buildBlockFromNodeWithHeadingParent(n *ast.Node, tree *parse.Tree, headingP
 		if !treenode.IsNodeOCRed(n) {
 			util.PushNodeOCRQueue(n)
 		}
-		content = nodeStaticContent(n, nil, true, indexAssetPath.Load(), true, true)
+		content = nodeStaticContent(n, nil, true, indexAssetPath.Load(), true, true, true)
 
 		parentID = n.Parent.ID
 		if headingParent != nil {

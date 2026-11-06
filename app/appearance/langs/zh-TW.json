@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "請先完成目前的刪除確認，再進行其他修改",
+	"referenceRemovalOnly": "僅刪除引用",
+	"sourceRemovalOnly": "僅刪除標籤和引用",
 	"newItemTemplateNoOpen": "不開啟",
 	"copyImageURLFailed": "無法複製圖片位址",
 	"copyImageURL": "複製圖片位址",

@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "Завршите тренутну потврду брисања пре него што направите другу измену",
+	"referenceRemovalOnly": "Обриши само референце",
+	"sourceRemovalOnly": "Обриши само ознаке и референце",
 	"newItemTemplateNoOpen": "Не отварај",
 	"copyImageURLFailed": "Није могуће копирати адресу слике",
 	"copyImageURL": "Копирај адресу слике",

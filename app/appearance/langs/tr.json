@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "Başka bir değişiklik yapmadan önce mevcut silme onayını tamamlayın",
+	"referenceRemovalOnly": "Yalnızca referansları sil",
+	"sourceRemovalOnly": "Yalnızca etiketleri ve referansları sil",
 	"newItemTemplateNoOpen": "Açma",
 	"copyImageURLFailed": "Görsel adresi kopyalanamadı",
 	"copyImageURL": "Görsel adresini kopyala",

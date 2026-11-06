@@ -1635,6 +1635,12 @@ var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollect
 // 包括逐字改名后实际移除的标签所涉及的条目；手动条目及仍匹配启用规则的条目保留。
 var PreviewTagRemoval = define[TagRemovalPreviewRequest, []*TagRemovalCollection]("previewTagRemoval", "/api/tag/previewTagRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
+// PreviewCollectionRemoval 只读投影整笔编辑，预览删除标签或引用后失配的自动收集条目。
+// 返回按数据库分组的候选与源版本；源版本在仅删除来源时也随事务的 collectionRemovalSourceVersions 提交。
+// 选择移出的条目以 automaticOnly 的 cleanupAttrViewBlocks 加入原事务。
+// 保留手动、仍符合其他启用规则和未知状态的条目；支持加密笔记本的认证与隔离。
+var PreviewCollectionRemoval = define[CollectionRemovalPreviewRequest, *CollectionRemovalPreview]("previewCollectionRemoval", "/api/av/previewCollectionRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
 // 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。
 var RemoveTagWithCollections = define[RemoveTagWithCollectionsRequest, Null]("removeTagWithCollections", "/api/tag/removeTagWithCollections", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
 
@@ -1946,6 +1952,7 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 // 自动收集只添加条目，原文失配及规则变更均保留已有条目和字段，再次匹配不会重新初始化。
 // setAttrViewAutomations 新增范围最多包含 32 个去重后的笔记本或文档；既有超限规则可保留或删减，撤销重做不截断原范围。
 // cleanupAttrViewBlocks 按全部启用收集规则复查已确认条目及绑定，仅移出明确失配条目，并支持撤销。
+// 来源删除预览的 sourceVersions 随 collectionRemovalSourceVersions 提交；含源版本的请求限单笔事务，并同步返回提交结果。
 // 规则的 notifyOnSuccess 缺省或 null 为开启，仅实际变更且事务成功提交后通知，同一事务合并；错误提示不受其控制。
 // 手动收集及清理、无变化、撤销重放和失败回滚不发送成功通知。
 // addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。

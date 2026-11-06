@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "请先完成当前的删除确认，再进行其他修改",
+	"referenceRemovalOnly": "仅删除引用",
+	"sourceRemovalOnly": "仅删除标签和引用",
 	"newItemTemplateNoOpen": "不打开",
 	"copyImageURLFailed": "无法复制图片地址",
 	"copyImageURL": "复制图片地址",

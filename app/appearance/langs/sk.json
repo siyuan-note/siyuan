@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "Pred ďalšou zmenou dokončite aktuálne potvrdenie odstránenia",
+	"referenceRemovalOnly": "Odstrániť iba odkazy",
+	"sourceRemovalOnly": "Odstrániť iba štítky a odkazy",
 	"newItemTemplateNoOpen": "Neotvárať",
 	"copyImageURLFailed": "Nepodarilo sa skopírovať adresu obrázka",
 	"copyImageURL": "Kopírovať adresu obrázka",

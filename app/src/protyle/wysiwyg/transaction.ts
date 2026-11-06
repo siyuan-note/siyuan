@@ -98,7 +98,7 @@ import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
-import {getTagRemovalChanges, previewTagRemoval, tagRemovalOperations} from "../util/tagRemoval";
+import {collectionRemovalOperations, getTagRemovalChanges, hasReferenceRemoval, previewCollectionRemoval} from "../util/collectionRemoval";
 import {showMessage} from "../../dialog/message";
 import {getEditorFocusRange, restoreEditorFocusRange} from "../util/editorFocus";
 import {replayListMindmap} from "../render/listMindmap/render";
@@ -275,6 +275,7 @@ const promiseTransaction = (options: {
     skipSync: boolean,
     callback?: () => void,
     templateDocTreePlanID?: string,
+    collectionRemovalSourceVersions?: Record<string, string>,
     trackedRangeInsertion?: ITrackedRangeInsertion,
     awaitResponse?: boolean,
 }) => {
@@ -650,6 +651,7 @@ const promiseTransaction = (options: {
             doOperations: options.doOperations,
             undoOperations: options.undoOperations,// 目前用于 ws 推送更新大纲
             templateDocTreePlanID: options.templateDocTreePlanID,
+            collectionRemovalSourceVersions: options.collectionRemovalSourceVersions,
         },
         callback: (responseTransaction: {doOperations: IOperation[]}) => {
             // 新增和更新的数据库载体必须在事务成功后渲染，确保内核已登记块及其笔记本归属。
@@ -2562,13 +2564,18 @@ export const turnsOneInto = async (options: {
     avRender(options.protyle.wysiwyg.element, options.protyle);
 };
 
+const pendingCollectionRemovals = new WeakMap<IProtyle, {
+    promise: Promise<void>, signature: string, callback?: () => void, trackedRangeInsertion?: ITrackedRangeInsertion,
+}>();
+
 export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoOperations?: IOperation[],
                             options?: {
                                 skipSync?: boolean,
                                 callback?: () => void,
                                 templateDocTreePlanID?: string,
                                 trackedRangeInsertion?: ITrackedRangeInsertion,
-                                tagRemovalConfirmed?: boolean,
+                                collectionRemovalConfirmed?: boolean,
+                                collectionRemovalSourceVersions?: Record<string, string>,
                                 awaitResponse?: boolean,
                             }): Promise<void> | void => {
     const hostDoOperations = prepareAVHostTransaction(protyle, doOperations);
@@ -2608,11 +2615,34 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     });
     cleanHeadingNumberOperations(doOperations);
     cleanHeadingNumberOperations(undoOperations);
-    if (protyle && !options?.tagRemovalConfirmed) {
+    if (protyle && !protyle.lite && !options?.collectionRemovalConfirmed) {
+        const existing = pendingCollectionRemovals.get(protyle);
+        if (existing) {
+            const signature = JSON.stringify([doOperations, undoOperations, options?.skipSync,
+                options?.templateDocTreePlanID, options?.collectionRemovalSourceVersions]);
+            if (existing.signature === signature && existing.callback === options?.callback &&
+                existing.trackedRangeInsertion === options?.trackedRangeInsertion) {
+                return existing.promise;
+            }
+            const message = window.siyuan.languages.sourceRemovalPending;
+            showMessage(message);
+            const rejected = Promise.reject(new DOMException(message, "InvalidStateError"));
+            void rejected.catch(() => {});
+            return rejected;
+        }
         const changes = getTagRemovalChanges(doOperations, undoOperations);
-        if (changes.length) {
+        const referencesRemoved = hasReferenceRemoval(doOperations, undoOperations);
+        if (changes.length || referencesRemoved) {
+            const signature = JSON.stringify([doOperations, undoOperations, options?.skipSync,
+                options?.templateDocTreePlanID, options?.collectionRemovalSourceVersions]);
             const wasDisabled = protyle.disabled;
-            const wasInert = protyle.element.inert;
+            const element = protyle.element;
+            const wasInert = element.inert;
+            const editor = protyle.wysiwyg.element;
+            const rootID = protyle.block.rootID;
+            const blockID = protyle.block.id;
+            const isCurrent = () => protyle.element === element && element.isConnected && protyle.wysiwyg.element === editor &&
+                protyle.block.rootID === rootID && protyle.block.id === blockID;
             const content = protyle.contentElement;
             const scrollTop = content.scrollTop;
             const overflowAnchor = content.style.getPropertyValue("overflow-anchor");
@@ -2642,48 +2672,64 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             focusContext = focusContext || operationFocus(doOperations);
             // 等待确认时阻止交互，保留数据库控件及正文的布局占位。
             selection.removeAllRanges();
-            protyle.element.inert = true;
-            void (async () => {
+            element.inert = true;
+            const pending: Promise<void> = (async () => {
                 let sourceRestored = false;
                 let entriesRemoved = false;
+                let callbackArgs: Parameters<NonNullable<typeof options.callback>> | undefined;
                 const restore = () => new Promise<void>(resolve => {
+                    if (!isCurrent()) {
+                        resolve();
+                        return;
+                    }
                     sourceRestored = true;
                     focusContext = operationFocus(undoOperations) || focusContext;
                     reloadProtyle(protyle, false, false, resolve, resolve);
                 });
                 try {
                     await waitForPendingTransactions(protyle);
-                    const groups = await previewTagRemoval(changes);
-                    if (groups === null) {
-                        await restore();
-                        return;
-                    }
-                    const cleanup = tagRemovalOperations(groups);
+                    if (!isCurrent()) throw new DOMException(window.siyuan.languages.cancel, "AbortError");
+                    const preview = await previewCollectionRemoval(doOperations, changes, referencesRemoved, isCurrent);
+                    if (!isCurrent() || preview === null) throw new DOMException(window.siyuan.languages.cancel, "AbortError");
+                    const cleanup = collectionRemovalOperations(preview.collections);
                     entriesRemoved = cleanup.length > 0;
-                    transaction(protyle, [...doOperations, ...cleanup], [...(undoOperations || []), ...cleanup],
-                        {...options, tagRemovalConfirmed: true});
-                    await waitForPendingTransactions(protyle);
+                    await transaction(protyle, [...doOperations, ...cleanup], [...(undoOperations || []), ...cleanup],
+                        {...options, collectionRemovalConfirmed: true,
+                            collectionRemovalSourceVersions: preview.sourceVersions, awaitResponse: true,
+                            callback: options?.callback ? (...args) => { callbackArgs ??= args; } : undefined});
                 } catch (error) {
-                    showMessage(error.message);
+                    if (isCurrent() && error.name !== "AbortError") showMessage(error.message);
                     await restore();
+                    throw error;
                 } finally {
-                    protyle.element.inert = wasInert;
-                    if (!wasDisabled && !wasInert) {
-                        if ((sourceRestored || entriesRemoved || !restoreEditorFocusRange(protyle.wysiwyg.element, focusRange)) && focusContext) {
-                            protyle.wysiwyg.element.focus({preventScroll: true});
-                            restoreUndoFocus(protyle, [{action: "update", id: focusContext.undoFocusId, context: focusContext}]);
+                    try {
+                        if (protyle.element === element && protyle.wysiwyg.element === editor) element.inert = wasInert;
+                        if (isCurrent() && !wasDisabled && !wasInert && !protyle.disabled) {
+                            if ((sourceRestored || entriesRemoved || !restoreEditorFocusRange(protyle.wysiwyg.element, focusRange)) && focusContext) {
+                                protyle.wysiwyg.element.focus({preventScroll: true});
+                                restoreUndoFocus(protyle, [{action: "update", id: focusContext.undoFocusId, context: focusContext}]);
+                            }
                         }
-                    }
-                    content.scrollTop = scrollTop;
-                    protyle.scroll.lastScrollTop = scrollTop;
-                    if (overflowAnchor) {
-                        content.style.setProperty("overflow-anchor", overflowAnchor, anchorPriority);
-                    } else {
-                        content.style.removeProperty("overflow-anchor");
+                        if (isCurrent()) {
+                            content.scrollTop = scrollTop;
+                            protyle.scroll.lastScrollTop = scrollTop;
+                        }
+                        if (overflowAnchor) {
+                            content.style.setProperty("overflow-anchor", overflowAnchor, anchorPriority);
+                        } else {
+                            content.style.removeProperty("overflow-anchor");
+                        }
+                    } finally {
+                        if (pendingCollectionRemovals.get(protyle)?.promise === pending) pendingCollectionRemovals.delete(protyle);
                     }
                 }
+                if (callbackArgs) options?.callback?.(...callbackArgs);
             })();
-            return;
+            pendingCollectionRemovals.set(protyle, {promise: pending, signature, callback: options?.callback,
+                trackedRangeInsertion: options?.trackedRangeInsertion});
+            // 编辑器事件通常不等待事务，调用方仍可通过原 Promise 识别取消或保存失败。
+            void pending.catch(() => {});
+            return pending;
         }
     }
     if (!protyle) {
@@ -2703,7 +2749,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             protyle.model.headElement.classList.remove("item--unupdate");
         }
         protyle.updated = true;
-        if (!options?.awaitResponse) protyle.undo.add(doOperations, undoOperations, protyle);
+        if (protyle.lite || !options?.awaitResponse) protyle.undo.add(doOperations, undoOperations, protyle);
     }
     // 本地插入和正在编辑的块保留现有 DOM，立即补充图片文件名和提示文本。
     doOperations.forEach(operation => {
@@ -2725,6 +2771,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         skipSync: options?.skipSync,
         callback: options?.callback,
         templateDocTreePlanID: options?.templateDocTreePlanID,
+        collectionRemovalSourceVersions: options?.collectionRemovalSourceVersions,
         trackedRangeInsertion: options?.trackedRangeInsertion,
         awaitResponse: options?.awaitResponse,
     });

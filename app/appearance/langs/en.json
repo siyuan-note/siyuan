@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "Finish the current deletion confirmation before making another change",
+	"referenceRemovalOnly": "Delete references only",
+	"sourceRemovalOnly": "Delete tags and references only",
 	"newItemTemplateNoOpen": "Do not open",
 	"copyImageURLFailed": "Unable to copy the image address",
 	"copyImageURL": "Copy image URL",

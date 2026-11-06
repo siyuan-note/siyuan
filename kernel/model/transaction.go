@@ -341,6 +341,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	diagnostic.Stage("prepare database automations")
 	timing.Stage("automations")
+	if err = tx.validateCollectionRemovalSources(); err != nil {
+		tx.rollback()
+		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+	}
 	if err = tx.prepareRelationDetailOperations(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
@@ -2869,10 +2873,11 @@ type transactionCompletion struct {
 }
 
 type Transaction struct {
-	Timestamp             int64        `json:"timestamp"`
-	DoOperations          []*Operation `json:"doOperations"`
-	UndoOperations        []*Operation `json:"undoOperations"`
-	TemplateDocTreePlanID string       `json:"templateDocTreePlanID,omitempty"`
+	CollectionRemovalSourceVersions map[string]string `json:"collectionRemovalSourceVersions,omitempty"`
+	Timestamp                       int64             `json:"timestamp"`
+	DoOperations                    []*Operation      `json:"doOperations"`
+	UndoOperations                  []*Operation      `json:"undoOperations"`
+	TemplateDocTreePlanID           string            `json:"templateDocTreePlanID,omitempty"`
 
 	trees          map[string]*parse.Tree // 事务中变更的树
 	nodes          map[string]*ast.Node   // 事务中变更的节点
@@ -2898,6 +2903,7 @@ type Transaction struct {
 	writeTransactionTree          func(*parse.Tree) error
 	documentTitleWrite            *documentTitleWriteState
 	tagRemovalSources             map[string][]byte
+	collectionRemovalVersions     map[string]string
 	blockSwapOriginalTrees        []*parse.Tree
 	sourceJournal                 *documentSourceJournal
 	sourceLeases                  map[string]bool
@@ -2994,6 +3000,9 @@ func (tx *Transaction) WaitForCommit() {
 }
 
 func (tx *Transaction) begin() (err error) {
+	if err = tx.prepareCollectionRemovalVersions(); err != nil {
+		return err
+	}
 	tx.attributeViewStorageContexts = nil
 	tx.relationDetailUndoUsed = nil
 	tx.sourceJournal, tx.sourceLeases = nil, nil
@@ -3317,6 +3326,7 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.mindmapSummarySiblings = nil
 	tx.relatedAvIDs = nil
 	tx.tagRemovalSources = nil
+	tx.collectionRemovalVersions = nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocBoxes, tx.attemptedTemplateCreatedDocs = nil, nil
@@ -3338,6 +3348,7 @@ func (tx *Transaction) releaseCommittedResources() {
 func (tx *Transaction) rollback() {
 	tx.indexChanges = nil
 	tx.tagRemovalSources = nil
+	tx.collectionRemovalVersions = nil
 	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.rollbackCollectionCreatedTrees()

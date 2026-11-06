@@ -14,9 +14,11 @@ const fixture = () => {
     let finish: (success: boolean) => void;
     let finishSave: (response: unknown) => void;
     const undo: IOperation[][] = [];
+    const requests: {transactions: {collectionRemovalSourceVersions?: Record<string, string>}[]}[] = [];
     const dependencies = {
         prepareAVHostTransaction: (_protyle: unknown, operations?: IOperation[]) => operations,
         getTagRemovalChanges: (): [] => [],
+        hasReferenceRemoval: () => false,
         getEditorTransaction,
         Constants: {},
         queueTransaction,
@@ -51,7 +53,10 @@ const fixture = () => {
                     resolve();
                 };
             }),
-        fetchSyncPost: () => new Promise(resolve => { finishSave = resolve; }),
+        fetchSyncPost: (_url: string, request: typeof requests[number]) => {
+            requests.push(request);
+            return new Promise(resolve => { finishSave = resolve; });
+        },
     };
     const exports = loadModule<any>("src/protyle/wysiwyg/transaction.ts", {
         require: () => dependencies,
@@ -68,10 +73,10 @@ const fixture = () => {
     const insert = () => exports.transaction(protyle, [{
         action: "insert", id: "carrier", previousID: "paragraph", data: '<div data-type="NodeAttributeView"></div>',
     }]);
-    const save = () => exports.transaction(protyle, [{action: "updateAttrViewCell", id: "value", avID: "av",
+    const save = (collectionRemovalSourceVersions?: Record<string, string>) => exports.transaction(protyle, [{action: "updateAttrViewCell", id: "value", avID: "av",
         keyID: "key", rowID: "row", data: {type: "text", text: {content: "saved"}}}], [],
-    {awaitResponse: true, skipSync: true}) as Promise<void>;
-    return {protyle, carriers, rendered, insert, save, undo, finishSave: (response: unknown) => finishSave(response),
+    {awaitResponse: true, skipSync: true, collectionRemovalSourceVersions}) as Promise<void>;
+    return {protyle, carriers, rendered, insert, save, undo, requests, finishSave: (response: unknown) => finishSave(response),
         finish: (success: boolean) => finish(success)};
 };
 
@@ -86,6 +91,16 @@ test("awaited database saves wait for acknowledgement and record undo only after
     await saving;
     assert.equal(completed, true);
     assert.equal(f.undo.length, 1);
+});
+
+test("source-removal document versions reach the transaction request independently of cleanup operations", async () => {
+    const f = fixture();
+    const versions = {root: "authenticated-source-version"};
+    const pending = f.save(versions);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(f.requests[0].transactions[0].collectionRemovalSourceVersions, versions);
+    f.finishSave({code: 0, data: [{doOperations: []}]});
+    await pending;
 });
 
 test("awaited database saves reject failed and malformed acknowledgements and permit retry", async () => {

@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "โปรดดำเนินการยืนยันการลบที่ค้างอยู่ให้เสร็จก่อนทำการเปลี่ยนแปลงอื่น",
+	"referenceRemovalOnly": "ลบเฉพาะการอ้างอิง",
+	"sourceRemovalOnly": "ลบเฉพาะแท็กและการอ้างอิง",
 	"newItemTemplateNoOpen": "ไม่เปิด",
 	"copyImageURLFailed": "ไม่สามารถคัดลอก URL ของรูปภาพได้",
 	"copyImageURL": "คัดลอก URL รูปภาพ",

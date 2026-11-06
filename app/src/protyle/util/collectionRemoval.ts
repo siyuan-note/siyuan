@@ -52,7 +52,42 @@ export const getTagRemovalChanges = (operations: IOperation[], undo: IOperation[
     return changes;
 };
 
-export const confirmTagRemoval = (groups: TagRemovalCollection[], text?: string): Promise<TagRemovalCollection[] | null> => {
+export const hasReferenceRemoval = (operations: IOperation[], undo: IOperation[]) => {
+    if (!undo?.some(operation => ["update", "insert", "appendInsert", "prependInsert"].includes(operation.action) &&
+        typeof operation.data === "string" && operation.data.includes("block-ref"))) {
+        return false;
+    }
+    const references = (items: IOperation[]) => {
+        const result = new Map<string, Set<string>>();
+        items?.forEach(operation => {
+            if (operation.action === "delete") {
+                result.delete(operation.id);
+            } else if (["update", "insert", "appendInsert", "prependInsert"].includes(operation.action) &&
+                typeof operation.data === "string") {
+                const template = document.createElement("template");
+                template.innerHTML = operation.data;
+                template.content.querySelectorAll("[data-node-id]").forEach(block => {
+                    const targets = new Set<string>();
+                    block.querySelectorAll('[data-type~="block-ref"][data-id]').forEach(reference => {
+                        if (reference.closest("[data-node-id]") === block && reference.getAttribute("data-id")) {
+                            targets.add(reference.getAttribute("data-id"));
+                        }
+                    });
+                    result.set(block.getAttribute("data-node-id"), targets);
+                });
+            }
+        });
+        return result;
+    };
+    const before = references(undo);
+    const after = references(operations);
+    // 缺少后续块内容表示整块删除，保留已有块删除确认；锚文本变化不影响来源。
+    return Array.from(before).some(([id, targets]) => after.has(id) &&
+        Array.from(targets).some(target => !after.get(id).has(target)));
+};
+
+export const confirmCollectionRemoval = (groups: TagRemovalCollection[], text?: string,
+                                         onlyLabel = window.siyuan.languages.tagRemovalOnly): Promise<TagRemovalCollection[] | null> => {
     if (!groups.length && !text) {
         return Promise.resolve([]);
     }
@@ -66,20 +101,27 @@ export const confirmTagRemoval = (groups: TagRemovalCollection[], text?: string)
                 .map(input => input.dataset.tagRemovalAv));
             resolve(groups.filter(group => selected.has(group.avID)));
         }, () => resolve(null), true,
-        groups.length ? {label: lang.tagRemovalOnly, callback: () => resolve([])} : undefined,
-        groups.length ? lang.tagRemovalWithEntries : lang.tagRemovalOnly);
+        groups.length ? {label: onlyLabel, callback: () => resolve([])} : undefined,
+        groups.length ? lang.tagRemovalWithEntries : onlyLabel);
     });
 };
 
-export const previewTagRemoval = async (changes: TagRemovalChangeInput[]) => {
-    const response = await fetchSyncPost("/api/tag/previewTagRemoval", {changes}, undefined, false);
+export const previewCollectionRemoval = async (operations: IOperation[], tagChanges: TagRemovalChangeInput[],
+                                               referencesRemoved: boolean, isCurrent = () => true) => {
+    const response = await fetchSyncPost("/api/av/previewCollectionRemoval", {operations, tagChanges}, undefined, false);
+    if (!isCurrent()) {
+        return null;
+    }
     if (response.code !== 0) {
         throw new Error(response.msg);
     }
-    return confirmTagRemoval(response.data);
+    const lang = window.siyuan.languages;
+    const collections = await confirmCollectionRemoval(response.data.collections, undefined, referencesRemoved ?
+        (tagChanges.length ? lang.sourceRemovalOnly : lang.referenceRemovalOnly) : lang.tagRemovalOnly);
+    return collections === null ? null : {collections, sourceVersions: response.data.sourceVersions};
 };
 
-export const tagRemovalOperations = (groups: TagRemovalCollection[]): IOperation[] => groups.flatMap(group => {
+export const collectionRemovalOperations = (groups: TagRemovalCollection[]): IOperation[] => groups.flatMap(group => {
     const operations: IOperation[] = [];
     for (let offset = 0; offset < group.cleanup.items.length; offset += 100) {
         operations.push({action: "cleanupAttrViewBlocks", avID: group.avID,

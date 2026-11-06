@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "Schließe die aktuelle Löschbestätigung ab, bevor du weitere Änderungen vornimmst",
+	"referenceRemovalOnly": "Nur Referenzen löschen",
+	"sourceRemovalOnly": "Nur Tags und Referenzen löschen",
 	"newItemTemplateNoOpen": "Nicht öffnen",
 	"copyImageURLFailed": "Die Bildadresse konnte nicht kopiert werden",
 	"copyImageURL": "Bildadresse kopieren",

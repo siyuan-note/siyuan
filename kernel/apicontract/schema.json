@@ -8510,6 +8510,12 @@
         },
         "ruleVersion": {
           "type": "string"
+        },
+        "sourceVersions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       },
       "required": [
@@ -8539,6 +8545,12 @@
         },
         "ruleVersion": {
           "type": "string"
+        },
+        "sourceVersions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       },
       "required": [
@@ -22543,6 +22555,84 @@
         "checkedSyncDir",
         "hSize",
         "syncDirs"
+      ],
+      "additionalProperties": false
+    },
+    "CollectionRemovalPreview": {
+      "type": "object",
+      "properties": {
+        "collections": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TagRemovalCollection"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sourceVersions": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "collections",
+        "sourceVersions"
+      ],
+      "additionalProperties": false
+    },
+    "CollectionRemovalPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "operations": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TransactionOperationRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "tagChanges": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TagRemovalChangeInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "operations"
       ],
       "additionalProperties": false
     },
@@ -58316,6 +58406,12 @@
     "Transaction": {
       "type": "object",
       "properties": {
+        "collectionRemovalSourceVersions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "doOperations": {
           "anyOf": [
             {
@@ -58822,6 +58918,12 @@
     "TransactionInput": {
       "type": "object",
       "properties": {
+        "collectionRemovalSourceVersions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "doOperations": {
           "anyOf": [
             {
@@ -142820,6 +142922,92 @@
                 "anyOf": [
                   {
                     "$ref": "#/$defs/AVValue"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/av/previewCollectionRemoval",
+      "handler": "previewCollectionRemoval",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/CollectionRemovalPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/CollectionRemovalPreview"
                   },
                   {
                     "type": "null"

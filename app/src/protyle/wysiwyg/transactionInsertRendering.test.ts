@@ -171,6 +171,7 @@ const fixture = (containerType: ContainerType = "editor") => {
     const dependencies = {
         prepareAVHostTransaction: (_protyle: unknown, operations?: IOperation[]) => operations,
         getTagRemovalChanges: (): [] => [],
+        hasReferenceRemoval: () => false,
         isUndoViewportPreserved,
         Constants: {CUSTOM_SY_AV_STATIC_TEXT: "custom-sy-av-s-text-"},
         normalizeHTMLAssetIFrameBlockDOM: identity,

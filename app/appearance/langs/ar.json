@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "أكمل تأكيد الحذف الحالي قبل إجراء أي تعديل آخر",
+	"referenceRemovalOnly": "حذف المراجع فقط",
+	"sourceRemovalOnly": "حذف الوسوم والمراجع فقط",
 	"newItemTemplateNoOpen": "عدم الفتح",
 	"copyImageURLFailed": "تعذر نسخ عنوان الصورة",
 	"copyImageURL": "نسخ عنوان الصورة",

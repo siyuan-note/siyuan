@@ -4305,7 +4305,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5136,7 +5136,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261015141042-fm4qoja",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5150,7 +5150,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-6bomil1",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5319,12 +5319,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261026103001-47dxurt",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Reference sources use the same grouping rules as backlinks, including list items, blockquotes, super blocks, callouts, and document or heading propagation from a first paragraph containing only block references. Type and attribute conditions apply to the final grouped block; tag conditions apply to the reference source. The tag collection target option does not apply while a reference target is set. Clear the reference target to return to ordinary collection. Removing a reference preserves existing entries and fields; preview collection management to collect older matches. Reference targets require automation format 8; formats 1–7 remain readable, and older clients reject format 8 without rewriting the database."
+					"Data": "Reference sources use the same grouping rules as backlinks, including list items, blockquotes, super blocks, callouts, and document or heading propagation from a first paragraph containing only block references. Type and attribute conditions apply to the final grouped block; tag conditions apply to the reference source. The tag collection target option does not apply while a reference target is set. Clear the reference target to return to ordinary collection. Deleting body block references can also remove automatically collected entries after confirmation, as described below. Preview collection management to collect older matches. Reference targets require automation format 8; formats 1–7 remain readable, and older clients reject format 8 without rewriting the database."
 				}
 			]
 		},
@@ -5375,7 +5375,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-jv7dnxb",
-				"updated": "20261102195537"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5502,12 +5502,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261102195537-zlurrk5",
-				"updated": "20261102214741"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Deleting tags from the body, document tags, or the tag panel checks whether automatically collected entries stop matching. If entries are affected, one dialog lists the databases and entry counts. Affected databases are selected by default. Confirming with Also remove selected entries deletes the tags and removes the selected entries and their field values. Deselect a database to keep its entries, or choose Delete tags only to keep all database entries. The source content is kept; undo restores the tags, original entries, and field values together. Manually added entries and entries still matching another enabled rule are kept. Renaming a tag does not open this dialog."
+					"Data": "Deleting body block references, or tags from the body, document tags, or the tag panel, checks whether automatically collected entries no longer match any enabled collection rule. If entries are affected, one dialog lists the databases and entry counts, even when tags and references are deleted together. Affected databases are selected by default. Confirming with Also remove selected entries deletes the tags or references and removes the selected entries and their field values. Deselect a database to keep its entries and fields. Depending on the deleted content, Delete tags only, Delete references only, or Delete tags and references only keeps all database entries and fields. Canceling abandons the deletion. The source content is kept; undo restores the tags or references, original entries, and field values together. Manually added entries and entries still matching through another reference to the same target or another enabled rule are kept. Renaming a tag or changing only reference anchor text does not open this dialog."
 				}
 			]
 		},

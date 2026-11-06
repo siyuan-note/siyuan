@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "다른 변경을 하기 전에 현재 삭제 확인을 완료하세요",
+	"referenceRemovalOnly": "참조만 삭제",
+	"sourceRemovalOnly": "태그와 참조만 삭제",
 	"newItemTemplateNoOpen": "열지 않음",
 	"copyImageURLFailed": "이미지 주소를 복사할 수 없습니다",
 	"copyImageURL": "이미지 주소 복사",

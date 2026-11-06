@@ -1,7 +1,7 @@
 import {toggleMenu} from "./menuToggle";
 import {MenuItem} from "./Menu";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {confirmTagRemoval} from "../protyle/util/tagRemoval";
+import {confirmCollectionRemoval} from "../protyle/util/collectionRemoval";
 import {escapeHtml} from "../util/escape";
 import {renameTag} from "../util/noRelyPCFunction";
 import {getDockByType} from "../layout/tabUtil";
@@ -31,7 +31,7 @@ export const openTagMenu = (element: HTMLElement, event: MouseEvent, labelName: 
                 click: async () => {
                     const preview = await fetchSyncPost("/api/tag/previewTagRemoval", {label: labelName});
                     if (preview.code !== 0) { return; }
-                    const collections = await confirmTagRemoval(preview.data, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`);
+                    const collections = await confirmCollectionRemoval(preview.data, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`);
                     if (collections === null) { return; }
                     fetchPost("/api/tag/removeTagWithCollections", {label: labelName, collections}, () => {
                         /// #if MOBILE

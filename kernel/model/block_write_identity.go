@@ -46,7 +46,8 @@ func (tx *Transaction) validateBlockWriteIDs(root *ast.Node, tree *parse.Tree, r
 			return ast.WalkContinue
 		}
 		if n.ID == "" {
-			n.SetIALAttr("id", ast.NewNodeID())
+			n.ID = ast.NewNodeID()
+			n.SetIALAttr("id", n.ID)
 		}
 		if !ast.IsNodeIDPattern(n.ID) {
 			err = fmt.Errorf("invalid block ID [%s]", n.ID)

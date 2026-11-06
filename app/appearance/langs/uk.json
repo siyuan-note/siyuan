@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "Завершіть поточне підтвердження видалення, перш ніж вносити інші зміни",
+	"referenceRemovalOnly": "Видалити лише посилання",
+	"sourceRemovalOnly": "Видалити лише теги й посилання",
 	"newItemTemplateNoOpen": "Не відкривати",
 	"copyImageURLFailed": "Не вдалося скопіювати адресу зображення",
 	"copyImageURL": "Копіювати адресу зображення",

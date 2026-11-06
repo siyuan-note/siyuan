@@ -271,6 +271,11 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 }
 
 func loadTreeByDataInMode(data []byte, boxID, p string, luteEngine *lute.Lute, mode int) (ret *parse.Tree, err error) {
+	return loadTreeByDataWithParentRecovery(data, boxID, p, luteEngine, mode, true)
+}
+
+func loadTreeByDataWithParentRecovery(data []byte, boxID, p string, luteEngine *lute.Lute, mode int,
+	recoverParents bool) (ret *parse.Tree, err error) {
 	ret, err = parseJSON2TreeInMode(boxID, p, data, luteEngine, mode)
 	if nil != err {
 		logging.LogErrorf("parse tree [%s] failed: %s", p, err)
@@ -313,6 +318,9 @@ func loadTreeByDataInMode(data []byte, boxID, p string, luteEngine *lute.Lute, m
 			return nil, parentErr
 		}
 		if errors.Is(parentErr, os.ErrNotExist) {
+			if !recoverParents {
+				return nil, parentErr
+			}
 			// 直接解析数据的调用也必须确认子文档仍在磁盘上，避免旧数据重建已删除的父链。
 			if err = checkTreeFile(filepath.Join(util.DataDir, boxID, p)); err != nil {
 				return nil, err

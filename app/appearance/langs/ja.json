@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "ほかの変更を行う前に、現在の削除確認を完了してください",
+	"referenceRemovalOnly": "参照のみ削除",
+	"sourceRemovalOnly": "タグと参照のみ削除",
 	"newItemTemplateNoOpen": "開かない",
 	"copyImageURLFailed": "画像の URL をコピーできませんでした",
 	"copyImageURL": "画像の URL をコピー",

@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "कोई अन्य बदलाव करने से पहले मौजूदा हटाने की पुष्टि पूरी करें",
+	"referenceRemovalOnly": "केवल संदर्भ हटाएँ",
+	"sourceRemovalOnly": "केवल टैग और संदर्भ हटाएँ",
 	"newItemTemplateNoOpen": "न खोलें",
 	"copyImageURLFailed": "चित्र का URL कॉपी नहीं किया जा सका",
 	"copyImageURL": "चित्र का URL कॉपी करें",

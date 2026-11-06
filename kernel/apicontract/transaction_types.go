@@ -102,10 +102,12 @@ type TransactionOperation struct {
 }
 
 type Transaction struct {
-	Timestamp             int64                   `json:"timestamp" api:"optional,nullable"`
-	DoOperations          []*TransactionOperation `json:"doOperations" api:"optional,nullable"`
-	UndoOperations        []*TransactionOperation `json:"undoOperations" api:"optional,nullable"`
-	TemplateDocTreePlanID string                  `json:"templateDocTreePlanID,omitempty" api:"optional,nullable"`
+	// 来源删除预览的认证字节摘要，包含仅删除来源及未选择移出条目的分支；过期时拒绝整笔编辑。
+	CollectionRemovalSourceVersions map[string]string       `json:"collectionRemovalSourceVersions,omitempty" api:"optional"`
+	Timestamp                       int64                   `json:"timestamp" api:"optional,nullable"`
+	DoOperations                    []*TransactionOperation `json:"doOperations" api:"optional,nullable"`
+	UndoOperations                  []*TransactionOperation `json:"undoOperations" api:"optional,nullable"`
+	TemplateDocTreePlanID           string                  `json:"templateDocTreePlanID,omitempty" api:"optional,nullable"`
 }
 
 type PerformTransactionsRequest struct {

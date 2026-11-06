@@ -358,9 +358,9 @@ export type AVCellUpdateInput = { "itemID"?: string | null; "keyID": string; "ro
 
 export type AVCollectBlocksInput = { "blockIDs": Array<string>; "ruleID": string; };
 
-export type AVCollectionCleanup = { "automaticOnly"?: boolean; "items": Array<AVCollectionCleanupItem | null> | null; "ruleVersion": string; };
+export type AVCollectionCleanup = { "automaticOnly"?: boolean; "items": Array<AVCollectionCleanupItem | null> | null; "ruleVersion": string; "sourceVersions"?: Record<string, string>; };
 
-export type AVCollectionCleanupInput = { "automaticOnly"?: boolean; "items": Array<AVCollectionCleanupItemInput | null>; "ruleVersion": string; };
+export type AVCollectionCleanupInput = { "automaticOnly"?: boolean; "items": Array<AVCollectionCleanupItemInput | null>; "ruleVersion": string; "sourceVersions"?: Record<string, string>; };
 
 export type AVCollectionCleanupItem = { "blockID": string; "itemID": string; };
 
@@ -963,6 +963,10 @@ export type CloudSync = { "cloudName": string; "hSize": string; "saveDir": strin
 export type CloudSyncDir = { "cloudName": string; "hSize": string; "saveDir": string; "size": number; "updated": string; };
 
 export type CloudSyncDirsData = { "checkedSyncDir": string; "hSize": string; "syncDirs": Array<CloudSyncDir | null> | null; };
+
+export type CollectionRemovalPreview = { "collections": Array<TagRemovalCollection | null> | null; "sourceVersions": Record<string, string> | null; };
+
+export type CollectionRemovalPreviewRequestInput = { "operations": Array<TransactionOperationRequest | null>; "tagChanges"?: Array<TagRemovalChangeInput | null>; };
 
 export type CommitDataImportRequestInput = { "id": string; "mode": "skip" | "overwrite"; "password"?: string; };
 
@@ -2684,7 +2688,7 @@ export type TestSyncProviderS3RequestInput = { "s3": SyncS3Input; };
 
 export type TestSyncProviderWebDAVRequestInput = { "cloudName"?: string; "webdav": SyncWebDAVInput; };
 
-export type Transaction = { "doOperations": Array<TransactionOperation | null> | null; "templateDocTreePlanID"?: string; "timestamp": number; "undoOperations": Array<TransactionOperation | null> | null; };
+export type Transaction = { "collectionRemovalSourceVersions"?: Record<string, string>; "doOperations": Array<TransactionOperation | null> | null; "templateDocTreePlanID"?: string; "timestamp": number; "undoOperations": Array<TransactionOperation | null> | null; };
 
 export type TransactionAttributeChangeInput = { "data-av-type"?: string | null; "new"?: Record<string, string> | null; "old"?: Record<string, string> | null; };
 
@@ -2712,7 +2716,7 @@ export type TransactionHistoryFailure = { "failed": true; "msg": string; };
 
 export type TransactionHistoryRequestInput = { "app"?: string; "rootID": string; "session"?: string; };
 
-export type TransactionInput = { "doOperations"?: Array<TransactionOperationRequest | null> | null; "templateDocTreePlanID"?: string | null; "timestamp"?: number | null; "undoOperations"?: Array<TransactionOperationRequest | null> | null; };
+export type TransactionInput = { "collectionRemovalSourceVersions"?: Record<string, string>; "doOperations"?: Array<TransactionOperationRequest | null> | null; "templateDocTreePlanID"?: string | null; "timestamp"?: number | null; "undoOperations"?: Array<TransactionOperationRequest | null> | null; };
 
 export type TransactionInsertedItems = { "existingItemIDs": Array<string> | null; "insertedItemIDs": Array<string> | null; };
 
@@ -4320,6 +4324,19 @@ export interface APIPOSTRoutes {
     "/api/av/previewAttributeViewTemplate": {
         request: AVAutomationTemplatePreviewRequestInput;
         response: { "code": 0; "data": AVValue | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 只读投影整笔编辑，预览删除标签或引用后失配的自动收集条目。
+     * 返回按数据库分组的候选与源版本；源版本在仅删除来源时也随事务的 collectionRemovalSourceVersions 提交。
+     * 选择移出的条目以 automaticOnly 的 cleanupAttrViewBlocks 加入原事务。
+     * 保留手动、仍符合其他启用规则和未知状态的条目；支持加密笔记本的认证与隔离。
+     */
+    "/api/av/previewCollectionRemoval": {
+        request: CollectionRemovalPreviewRequestInput;
+        response: { "code": 0; "data": CollectionRemovalPreview | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
@@ -9132,6 +9149,7 @@ export interface APIPOSTRoutes {
      * 自动收集只添加条目，原文失配及规则变更均保留已有条目和字段，再次匹配不会重新初始化。
      * setAttrViewAutomations 新增范围最多包含 32 个去重后的笔记本或文档；既有超限规则可保留或删减，撤销重做不截断原范围。
      * cleanupAttrViewBlocks 按全部启用收集规则复查已确认条目及绑定，仅移出明确失配条目，并支持撤销。
+     * 来源删除预览的 sourceVersions 随 collectionRemovalSourceVersions 提交；含源版本的请求限单笔事务，并同步返回提交结果。
      * 规则的 notifyOnSuccess 缺省或 null 为开启，仅实际变更且事务成功提交后通知，同一事务合并；错误提示不受其控制。
      * 手动收集及清理、无变化、撤销重放和失败回滚不发送成功通知。
      * addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。

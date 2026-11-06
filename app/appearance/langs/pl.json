@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "Zakończ bieżące potwierdzanie usunięcia przed wprowadzeniem kolejnej zmiany",
+	"referenceRemovalOnly": "Usuń tylko odnośniki",
+	"sourceRemovalOnly": "Usuń tylko tagi i odnośniki",
 	"newItemTemplateNoOpen": "Nie otwieraj",
 	"copyImageURLFailed": "Nie udało się skopiować adresu obrazu",
 	"copyImageURL": "Kopiuj adres obrazu",

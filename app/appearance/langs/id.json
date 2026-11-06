@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "Selesaikan konfirmasi penghapusan saat ini sebelum membuat perubahan lain",
+	"referenceRemovalOnly": "Hapus referensi saja",
+	"sourceRemovalOnly": "Hapus tag dan referensi saja",
 	"newItemTemplateNoOpen": "Jangan buka",
 	"copyImageURLFailed": "Tidak dapat menyalin alamat gambar",
 	"copyImageURL": "Salin URL gambar",

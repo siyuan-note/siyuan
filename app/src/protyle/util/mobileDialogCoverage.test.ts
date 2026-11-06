@@ -101,7 +101,7 @@ const coverage: Record<string, Record<string, number>> = {
     "protyle/util/table.ts": {
         "mobileInputDialog": 1
     },
-    "protyle/util/tagRemoval.ts": {
+    "protyle/util/collectionRemoval.ts": {
         "mobileConfirmDialog": 1
     },
     "protyle/wysiwyg/callout.ts": {

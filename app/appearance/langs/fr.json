@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "Terminez la confirmation de suppression en cours avant d’effectuer une autre modification",
+	"referenceRemovalOnly": "Supprimer uniquement les références",
+	"sourceRemovalOnly": "Supprimer uniquement les étiquettes et les références",
 	"newItemTemplateNoOpen": "Ne pas ouvrir",
 	"copyImageURLFailed": "Impossible de copier l'adresse de l'image",
 	"copyImageURL": "Copier l'adresse de l'image",

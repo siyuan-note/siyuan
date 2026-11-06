@@ -1,4 +1,7 @@
 {
+	"sourceRemovalPending": "יש להשלים את אישור המחיקה הנוכחי לפני ביצוע שינוי נוסף",
+	"referenceRemovalOnly": "מחיקת הפניות בלבד",
+	"sourceRemovalOnly": "מחיקת תגיות והפניות בלבד",
 	"newItemTemplateNoOpen": "לא לפתוח",
 	"copyImageURLFailed": "לא ניתן להעתיק את כתובת התמונה",
 	"copyImageURL": "העתקת כתובת התמונה",

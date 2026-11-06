@@ -1553,7 +1553,7 @@ export class TableControl {
         const right = left + (viewport?.width || window.innerWidth);
         const bottom = top + (viewport?.height || window.innerHeight);
         this.setPosition(this.resizeLabel,
-            Math.max(left + 4, Math.min(x + 12, right - this.resizeLabel.offsetWidth - 4)),
+            Math.max(left + 4, Math.min(x - 12 - this.resizeLabel.offsetWidth, right - this.resizeLabel.offsetWidth - 4)),
             Math.max(top + 4, Math.min(y - (this.touch ? 48 : 12) - this.resizeLabel.offsetHeight,
                 bottom - this.resizeLabel.offsetHeight - 4)));
     }

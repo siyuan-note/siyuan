@@ -1315,6 +1315,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         const label = f.touch(".protyle-table-control__size");
         const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
         check.ok(label.getBoundingClientRect().bottom <= y - (touchMode ? 47 : 11), "height values appear above the pointer");
+        check.ok(label.getBoundingClientRect().right <= x - 11, "height values appear to the left of the pointer");
         pointer(document, "pointermove", x, y + 33, 99);
         f.render();
         check.equal(guide.classList.contains("fn__none"), false, "height feedback survives rendering during drag");
@@ -1322,6 +1323,10 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         check.equal(guideRect.top + guideRect.height / 2, row.getBoundingClientRect().bottom,
             "the guide is centered on the actual row boundary");
         check.equal(label.textContent, `${Math.round(row.getBoundingClientRect().height)}px`);
+        check.ok(label.getBoundingClientRect().right <= x - 11, "height values stay left of the pointer during dragging");
+        pointer(document, "pointermove", 1, 1, 99);
+        check.ok(label.getBoundingClientRect().left >= 4 && label.getBoundingClientRect().top >= 4,
+            "desktop and touch labels remain visible near the top-left viewport corner");
         document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
         check.equal(row.getAttribute("style"), saved);
         check.equal(transactions.length, count);
@@ -1363,6 +1368,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
         check.equal(label.textContent, `${Math.round(column.getBoundingClientRect().width)}px`);
         check.ok(label.getBoundingClientRect().bottom < rect.top + 12);
+        check.ok(label.getBoundingClientRect().right <= rect.right + 20 - 11,
+            "column values appear to the left of the pointer");
         check.equal(guide.classList.contains("fn__none"), false, "dragging keeps the column guide visible");
         document.dispatchEvent(new MouseEvent("mouseup", {button: 0}));
         check.equal(transactions.length, count + 1, "desktop drag commits exactly one undoable transaction");

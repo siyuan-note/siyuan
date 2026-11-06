@@ -5201,7 +5201,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " from its menu to restore automatic height. Row heights are saved with the document; standard Markdown export does not guarantee that they are retained. Resizing a row or column clears the cell selection and shows the size above the pointer. On desktop, pausing over a divider shows a guide that follows the boundary during dragging."
+					"Data": " from its menu to restore automatic height. Row heights are saved with the document; standard Markdown export does not guarantee that they are retained. Resizing a row or column clears the cell selection and shows the size above and to the left of the pointer. On desktop, pausing over a divider shows a guide that follows the boundary during dragging."
 				}
 			]
 		},

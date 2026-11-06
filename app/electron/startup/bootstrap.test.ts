@@ -33,6 +33,7 @@ const createBootstrapFixture = (t: any, {
 
     const relaunch: unknown[] = [];
     const exits: unknown[] = [];
+    const quitLogs: string[] = [];
     const app = {
         getPath: (name: string) => name === "home" ? root : path.join(root, name),
         getAppPath: () => path.join(root, "app"),
@@ -44,7 +45,10 @@ const createBootstrapFixture = (t: any, {
         setPath: () => order.push("setPath"),
         setAppUserModelId: () => order.push("setAppUserModelId"),
         requestSingleInstanceLock: () => { order.push("requestSingleInstanceLock"); return lockAcquired; },
-        quit: () => order.push("quit"),
+        quit: () => {
+            order.push("quit");
+            quitLogs.push(fs.readFileSync(path.join(confDir, "app.log"), "utf8"));
+        },
         exit: (code?: number) => { order.push("app.exit"); exits.push(code); },
         relaunch: (options: unknown) => { order.push("relaunch"); relaunch.push(options); },
         setAsDefaultProtocolClient: () => { order.push("registerProtocol"); return true; },
@@ -79,7 +83,7 @@ const createBootstrapFixture = (t: any, {
         fs.rmSync(root, {recursive: true, force: true});
     });
 
-    return {order, relaunch, exits, confDir, root};
+    return {order, relaunch, exits, quitLogs, confDir, root};
 };
 
 const runBootstrap = async (): Promise<void> => {
@@ -113,10 +117,15 @@ test("compatibility relaunch happens before the lock is claimed", async (t) => {
         "兼容模式重启必须早于单实例锁，实际顺序: " + order.join(" > "));
 });
 
-test("a failed instance lock quits without registering the ready callback", async (t) => {
-    const {order} = createBootstrapFixture(t, {lockAcquired: false});
+test("a failed instance lock logs the reason and launch arguments before quitting", async (t) => {
+    const {order, quitLogs} = createBootstrapFixture(t, {lockAcquired: false});
+    const argumentsAtLaunch = [...process.argv, "siyuan://blocks/20261106120000-abcdefg", "--hidden"];
+    process.argv = argumentsAtLaunch.slice();
     await runBootstrap();
-    assert.ok(order.includes("quit"));
+    assert.equal(order.filter(value => value === "quit").length, 1);
+    assert.equal(quitLogs.length, 1);
+    assert.ok(quitLogs[0].includes("single instance lock not acquired, quitting; command line args " + JSON.stringify(argumentsAtLaunch)));
+    assert.deepEqual(process.argv, argumentsAtLaunch);
     assert.equal(order.includes("whenReady"), false);
     assert.equal(order.includes("registerProtocol"), false);
 });

@@ -1121,7 +1121,8 @@ export const zoomOut = (options: {
         }
     }
     const breadcrumbHLElement = options.protyle.breadcrumb?.element.querySelector(".protyle-breadcrumb__item--active");
-    if (!options.reload && breadcrumbHLElement && breadcrumbHLElement.getAttribute("data-node-id") === options.id) {
+    if (!options.reload && breadcrumbHLElement && breadcrumbHLElement.getAttribute("data-node-id") === options.id &&
+        (options.id !== options.protyle.block.rootID || !options.protyle.block.showAll)) {
         if (options.id === options.protyle.block.rootID) {
             return;
         }

@@ -28,7 +28,7 @@ test("second instance events are replayed in order once startup handlers arrive"
 
     // 就绪前：只入队，不建窗也不拉内核。
     queueSecondInstance(event, ["siyuan", "--workspace=/first"]);
-    queueSecondInstance(event, ["siyuan", "--workspace=/second"]);
+    queueSecondInstance(event, ["siyuan", "--workspace", "/second"]);
     assert.deepEqual(started, []);
 
     // 就绪后接管：积压的事件按到达顺序重放。

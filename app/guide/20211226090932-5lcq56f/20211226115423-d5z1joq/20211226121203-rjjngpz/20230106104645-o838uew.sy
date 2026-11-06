@@ -188,6 +188,15 @@
 								},
 								{
 									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace &quot;工作空間絕對路徑&quot;"
+								},
+								{
+									"Type": "NodeText",
 									"Data": "​（請使用 "
 								},
 								{

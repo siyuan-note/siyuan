@@ -200,6 +200,15 @@
 								},
 								{
 									"Type": "NodeText",
+									"Data": " または "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace &quot;ワークスペースの絶対パス&quot;"
+								},
+								{
+									"Type": "NodeText",
 									"Data": "​ (パスを囲むには"
 								},
 								{

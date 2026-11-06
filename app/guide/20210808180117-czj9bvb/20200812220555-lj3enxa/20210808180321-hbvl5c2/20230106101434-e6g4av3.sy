@@ -187,6 +187,15 @@
 								},
 								{
 									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace &quot;工作空间绝对路径&quot;"
+								},
+								{
+									"Type": "NodeText",
 									"Data": "​（请使用 "
 								},
 								{

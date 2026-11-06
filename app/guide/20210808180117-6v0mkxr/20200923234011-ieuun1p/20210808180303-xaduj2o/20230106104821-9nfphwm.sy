@@ -188,6 +188,15 @@
 								},
 								{
 									"Type": "NodeText",
+									"Data": " or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace &quot;Absolute-path-of-the-workspace&quot;"
+								},
+								{
+									"Type": "NodeText",
 									"Data": "​(Please use "
 								},
 								{

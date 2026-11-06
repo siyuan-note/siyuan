@@ -139,11 +139,11 @@ it("marks leaves at each depth without exposing an expansion control or changing
         const parent = {...leaf, hierarchy: {...leaf.hierarchy, childCount: 2}};
         const html = api.getSubItemsControlHTML(leaf, view);
         assert.match(html, /aria-hidden="true"/);
-        assert.match(html, /xlink:href="#iconMin"/);
+        assert.match(html, /xlink:href="#iconDot"/);
         assert.doesNotMatch(html, /<button|data-type=|aria-expanded=|tabindex=/);
         assert.equal(api.getSubItemsCellStyle(leaf, view), api.getSubItemsCellStyle(parent, view));
         assert.match(api.getSubItemsControlHTML(parent, view), /data-type="av-sub-items-toggle"/);
-        assert.doesNotMatch(api.getSubItemsControlHTML(parent, view), /#iconMin/);
+        assert.doesNotMatch(api.getSubItemsControlHTML(parent, view), /#iconDot/);
     }
     assert.equal(api.getSubItemsControlHTML({} as IAVRow, view), "");
 });

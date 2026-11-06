@@ -193,6 +193,6 @@ export const getSubItemsControlHTML = (row: IAVRow, data: IAVTable) => {
     const {paging, previous, next} = getSubItemsPaging(row, data);
     return `<span class="av__sub-items" style="padding-left:${hierarchy.depth * 20}px">${hierarchy.childCount ?
         `<button class="block__icon block__icon--show" data-type="av-sub-items-toggle" aria-expanded="${hierarchy.expanded}" aria-label="${window.siyuan.languages[hierarchy.expanded ? "collapse" : "expand"]}"><svg${hierarchy.expanded ? ' style="transform:rotate(90deg)"' : ""}><use xlink:href="#iconRight"></use></svg></button>` :
-        '<span class="av__sub-items-space" aria-hidden="true"><svg><use xlink:href="#iconMin"></use></svg></span>'}${hierarchy.expanded && paging ?
+        '<span class="av__sub-items-space" aria-hidden="true"><svg><use xlink:href="#iconDot"></use></svg></span>'}${hierarchy.expanded && paging ?
         `${previous ? `<button class="block__icon block__icon--show" data-type="av-sub-items-more" data-page="${paging.page - 1}" data-page-size="${paging.pageSize}" aria-label="${window.siyuan.languages.previous}"><svg><use xlink:href="#iconLeft"></use></svg></button>` : ""}${next ? `<button class="block__icon block__icon--show" data-type="av-sub-items-more" data-page="${paging.page + 1}" data-page-size="${paging.pageSize}" aria-label="${window.siyuan.languages.next}"><svg><use xlink:href="#iconRight"></use></svg></button>` : ""}` : ""}</span>`;
 };

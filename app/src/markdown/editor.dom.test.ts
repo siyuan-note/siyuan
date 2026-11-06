@@ -27,6 +27,12 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     const check: typeof assert = require("node:assert/strict");
     const api = (window as unknown as {MarkdownEditorTest: typeof import("./editor") & typeof import("./resourcePolicy")}).MarkdownEditorTest;
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
+    const waitFor = async (predicate: () => boolean, message: string) => {
+        for (let attempt = 0; attempt < 100 && !predicate(); attempt++) {
+            await new Promise(resolve => setTimeout(resolve, 20));
+        }
+        check.ok(predicate(), message);
+    };
     const outlineStyle = document.createElement("link");
     outlineStyle.rel = "stylesheet";
     outlineStyle.href = `${cdn}/dist/index.css`;
@@ -64,6 +70,63 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
             await tick();
             check.equal(editor.flush().content.trimEnd(), expected, `rapid input redo in ${mode}`);
         }
+        editor.destroy(); element.remove();
+    }
+    for (const mode of ["ir", "wysiwyg"] as const) {
+        const element = document.createElement("div");
+        element.style.height = "360px";
+        document.body.append(element);
+        const source = "```js\nconst answer = 1;\n```\n\noutside\n";
+        const editor = await api.createMarkdownEditor({element, initialValue: source, mode, cdn, lutePath,
+            onEdit: () => {}});
+        const surface = element.querySelector<HTMLElement>(`.vditor-${mode} .vditor-reset`);
+        const code = () => surface.querySelector<HTMLElement>('[data-type="code-block"] > pre > code');
+        await waitFor(() => !!code()?.querySelector(".hljs-keyword"), `initial editable code highlighting in ${mode}`);
+        check.equal(editor.flush().content, source, `highlight spans do not change Markdown in ${mode}`);
+        surface.querySelector<HTMLElement>(`.vditor-${mode}__preview`).click();
+        editor.focus();
+        const walker = document.createTreeWalker(code(), NodeFilter.SHOW_TEXT);
+        let node = walker.nextNode();
+        let offset = 6;
+        while (node && offset > node.textContent.length) {
+            offset -= node.textContent.length;
+            node = walker.nextNode();
+        }
+        const range = document.createRange();
+        range.setStart(node, offset); range.collapse(true);
+        getSelection().removeAllRanges(); getSelection().addRange(range);
+        for (const character of "new") {
+            await require("electron").ipcRenderer.invoke("markdown-undo-input", character);
+        }
+        check.equal(editor.flush().content, source.replace("answer", "newanswer"), `native typing within highlighted ${mode} code`);
+        for (const name of ["neanswer", "nanswer", "answer"]) {
+            editor.undo(); await tick();
+            check.equal(editor.flush().content, source.replace("answer", name), `highlighted code undo in ${mode}`);
+        }
+        await waitFor(() => !!code()?.querySelector(".hljs-keyword"), `highlighting after undo in ${mode}`);
+        editor.setMode("sv");
+        check.equal(editor.flush().content, source, `source switching preserves highlighted ${mode} code`);
+        editor.setMode(mode);
+        await waitFor(() => !!code()?.querySelector(".hljs-keyword"), `highlighting after mode switching in ${mode}`);
+        surface.querySelector<HTMLElement>(`.vditor-${mode}__preview`).click();
+        editor.focus();
+        if (mode === "ir") {
+            range.selectNodeContents(surface.querySelector('[data-type="code-block-info"]'));
+            getSelection().removeAllRanges(); getSelection().addRange(range);
+            document.execCommand("insertText", false, "jav");
+        } else {
+            await waitFor(() => !!element.querySelector<HTMLInputElement>(".vditor-panel .vditor-input"), "language field is available");
+            const field = element.querySelector<HTMLInputElement>(".vditor-panel .vditor-input");
+            field.focus(); field.value = "jav";
+            field.dispatchEvent(new Event("input", {bubbles: true}));
+            field.dispatchEvent(new KeyboardEvent("keyup", {key: "v", bubbles: true}));
+        }
+        const hint = Array.from(element.querySelectorAll<HTMLElement>(".vditor-hint")).find(item => item.style.display === "block");
+        check.ok(hint, `language candidates appear in ${mode}`);
+        const outside = surface.querySelector("p");
+        outside.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
+        outside.click();
+        check.equal(hint.style.display, "none", `outside pointer dismisses language candidates in ${mode}`);
         editor.destroy(); element.remove();
     }
     for (const mode of ["ir", "wysiwyg"] as const) {
@@ -544,7 +607,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     return "Markdown editor DOM cases passed";
 };
 
-test("Vditor 4.0.2-alpha.2 adapter preserves content and isolates programmatic, input, composition and preview events", {
+test("Vditor 4.0.2-alpha.3 adapter preserves content and isolates programmatic, input, composition and preview events", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

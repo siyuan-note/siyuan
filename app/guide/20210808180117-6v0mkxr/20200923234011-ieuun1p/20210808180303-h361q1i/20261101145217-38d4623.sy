@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261106121753"
+		"updated": "20261106132257"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-3a481f4",
-				"updated": "20261106121753"
+				"updated": "20261106132257"
 			},
 			"Children": [
 				{
@@ -113,6 +113,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Undo and Redo apply to individual completed edits. Rapidly typed characters can be undone separately, while text committed by an input method is undone as one edit."
+				}
+			]
+		},
+		{
+			"ID": "20261106132257-c3241d1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106132257-c3241d1",
+				"updated": "20261106132257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Code blocks retain syntax highlighting while editing in instant rendering and WYSIWYG modes. Language suggestions close when you click or tap elsewhere."
 				}
 			]
 		},

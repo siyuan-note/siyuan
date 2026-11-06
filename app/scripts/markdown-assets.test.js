@@ -114,7 +114,7 @@ test("Markdown configuration is an independent web entry included by development
     assert.equal(config.watch, false);
     assert.equal(makeConfig({}, {mode: "development"}).watch, true);
     const pkg = require("../package.json");
-    assert.equal(pkg.devDependencies.vditor, "4.0.2-alpha.2");
+    assert.equal(pkg.devDependencies.vditor, "4.0.2-alpha.3");
     assert.match(pkg.scripts.dev, /--config webpack\.markdown\.js/);
     assert.match(pkg.scripts["build:markdown"], /webpack\.markdown\.js/);
     assert.match(pkg.scripts.build, /\/build:\.\*\//);

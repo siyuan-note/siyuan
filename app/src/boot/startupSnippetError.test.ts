@@ -57,7 +57,9 @@ test("real inline snippet syntax and runtime errors preserve mobile startup and 
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;
-    const code = `(${browserCases.toString()})(${JSON.stringify(compile("src/boot/startupError.ts"))},` +
+    const startup = ["src/util/fetchTimeout.ts", "src/boot/startupRead.ts", "src/boot/startupError.ts"]
+        .map(compile).join("\n");
+    const code = `(${browserCases.toString()})(${JSON.stringify(startup)},` +
         `${JSON.stringify(compile("src/config/util/snippets.ts"))},${JSON.stringify(bundledLanguages)})`;
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-startup-snippet-"));
     const file = path.join(directory, "run.cjs");

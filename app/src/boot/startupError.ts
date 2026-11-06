@@ -1,4 +1,5 @@
 import bundledLanguages from "../../appearance/boot/startup-languages.json";
+import {finishStartupReads, getStartupReadDiagnostic} from "./startupRead";
 
 const stageKeys = {
     page: "startupStagePage",
@@ -49,7 +50,10 @@ export const reportStartupError = (error: unknown) => {
     window.dispatchEvent(new CustomEvent("siyuan-startup-error", {detail: error}));
 };
 
-export const completeStartup = () => window.dispatchEvent(new Event("siyuan-startup-ready"));
+export const completeStartup = () => {
+    finishStartupReads();
+    window.dispatchEvent(new Event("siyuan-startup-ready"));
+};
 
 // 启动回调自行接住异步错误，不改变通用请求工具的回调语义。
 export const guardStartup = <T>(callback: (value: T) => unknown) => (value: T) => {
@@ -153,7 +157,7 @@ export const installStartupError = (target: Window, version: string, timeout = 3
     const armTimeout = () => {
         target.clearTimeout(timer);
         if (!ready && !failure && !document.hidden) {
-            timer = target.setTimeout(() => fail(languages[language].startupTimeout), timeout);
+            timer = target.setTimeout(() => fail(`${languages[language].startupTimeout}\n${getStartupReadDiagnostic()}`), timeout);
         }
     };
     const setStage = (event: CustomEvent<TStartupStage>) => {

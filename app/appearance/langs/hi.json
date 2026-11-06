@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "न खोलें",
 	"copyImageURLFailed": "चित्र का URL कॉपी नहीं किया जा सका",
 	"copyImageURL": "चित्र का URL कॉपी करें",
 	"markdownFolderEmpty": "इस फ़ोल्डर में दिखाने के लिए कोई Markdown फ़ाइल नहीं है",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "सिंक अभी पूरा नहीं हुआ है। इसे छोड़कर बाहर निकलें? सिंक न किए गए बदलाव इस डिवाइस पर सहेजे रहेंगे",
 	"automationCollectionReference": "संदर्भ लक्ष्य",
 	"automationCollectionReferenceTip": "ब्लॉक ID या ब्लॉक लिंक पेस्ट करें; मुख्य सामग्री के ब्लॉक संदर्भ बैकलिंक नियमों के अनुसार समूहित होते हैं; दस्तावेज़ लक्ष्य में उसके सामग्री ब्लॉक शामिल हैं, उपदस्तावेज़ नहीं",
-	"newItemTemplateOpenAfterCreate": "बनाने के बाद आइटम को विभाजित दृश्य में खोलें",
+	"newItemTemplateOpenAfterCreate": "बनाने के बाद आइटम खोलें",
 	"deleteAll": "सभी हटाएँ",
 	"listMindmapManageNodeColors": "नोड के रंग प्रबंधित करें",
 	"listMindmapManageLineColors": "रेखाओं के रंग प्रबंधित करें",

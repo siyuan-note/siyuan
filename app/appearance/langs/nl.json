@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "Niet openen",
 	"copyImageURLFailed": "Kan het afbeeldingsadres niet kopiëren",
 	"copyImageURL": "Afbeeldingsadres kopiëren",
 	"markdownFolderEmpty": "Geen Markdown-bestanden om weer te geven in deze map",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "De synchronisatie is nog niet voltooid. Overslaan en afsluiten? Niet-gesynchroniseerde wijzigingen blijven op dit apparaat opgeslagen",
 	"automationCollectionReference": "Verwijzingsdoel",
 	"automationCollectionReferenceTip": "Plak een blok-ID of bloklink; blokverwijzingen in de tekst worden gegroepeerd volgens de teruglinkregels; een documentdoel omvat zijn inhoudsblokken, maar geen subdocumenten",
-	"newItemTemplateOpenAfterCreate": "Item na aanmaken in gesplitste weergave openen",
+	"newItemTemplateOpenAfterCreate": "Item na aanmaken openen",
 	"deleteAll": "Alles verwijderen",
 	"listMindmapManageNodeColors": "Knoopkleuren beheren",
 	"listMindmapManageLineColors": "Lijnkleuren beheren",

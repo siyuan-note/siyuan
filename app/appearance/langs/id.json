@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "Jangan buka",
 	"copyImageURLFailed": "Tidak dapat menyalin alamat gambar",
 	"copyImageURL": "Salin URL gambar",
 	"markdownFolderEmpty": "Tidak ada file Markdown yang dapat ditampilkan di folder ini",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "Sinkronisasi belum selesai. Lewati dan keluar? Perubahan yang belum disinkronkan akan tetap tersimpan di perangkat ini",
 	"automationCollectionReference": "Tujuan referensi",
 	"automationCollectionReferenceTip": "Tempel ID blok atau tautan blok; referensi blok dalam isi dikumpulkan menurut aturan tautan balik; tujuan dokumen mencakup blok isinya tanpa subdokumen",
-	"newItemTemplateOpenAfterCreate": "Buka item dalam tampilan terbagi setelah dibuat",
+	"newItemTemplateOpenAfterCreate": "Buka item setelah dibuat",
 	"deleteAll": "Hapus semua",
 	"listMindmapManageNodeColors": "Kelola warna simpul",
 	"listMindmapManageLineColors": "Kelola warna garis",

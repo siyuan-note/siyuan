@@ -26,6 +26,30 @@ const domainAPI = () => {
     return exports;
 };
 
+test("creation opens bound and detached rows in the requested pane", async () => {
+    for (const isDetached of [false, true]) {
+        for (const databaseAttrShow of [false, true]) {
+            const calls: Array<{position?: string; removeCurrentTab?: boolean}> = [];
+            const api = {} as typeof import("./openDatabaseRow");
+            const open = async (options: IOpenFileOptions) => { calls.push(options); return {}; };
+            runInNewContext(rowCode, {exports: api,
+                window: {siyuan: {config: {editor: {databaseAttrShow}}, languages: {untitled: "Untitled"}}},
+                require: (name: string) => name === "../../../editor/util" ? {openFile: open, openFileById: open} :
+                    {getDatabaseRowNavigation: (): undefined => undefined},
+            });
+            const data: IDatabaseRowOpenData = {avID: "database", databaseBlockID: "carrier", notebookID: "notebook",
+                itemID: "row", valueID: "value", title: "Entry", boundBlockID: "document", isDetached};
+            await api.openDatabaseRowByData({app: {}} as Pick<IProtyle, "app">, data, {currentPane: true});
+            assert.equal(calls[0].position, undefined);
+            assert.equal(calls[0].removeCurrentTab, false);
+            if (isDetached || !databaseAttrShow) {
+                await api.openDatabaseRowByData({app: {}} as Pick<IProtyle, "app">, data);
+                assert.equal(calls[1].position, "right");
+            }
+        }
+    }
+});
+
 // 执行条目入口和通用页签查找，覆盖已加载及布局恢复后尚未初始化的预览。
 const setup = (restored = false, notebookID = "notebook") => {
     let created = 0;

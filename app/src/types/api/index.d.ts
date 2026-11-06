@@ -380,11 +380,11 @@ export type AVContextFilterData = { "contextFilter": AVAttributeViewContextFilte
 
 export type AVCreateAttributeViewItemDocsResult = { "blockIDs": Array<string> | null; "itemIDs": Array<string> | null; "skippedItemIDs"?: Array<string>; "warnings"?: Array<string>; };
 
-export type AVCreateAttributeViewItemResult = { "blockID": string; "content": string; "isDetached": boolean; "itemID": string; "openAfterCreate"?: boolean; "warnings"?: Array<string>; };
+export type AVCreateAttributeViewItemResult = { "blockID": string; "content": string; "isDetached": boolean; "itemID": string; "openAfterCreate"?: boolean; "openInCurrentTab"?: boolean; "warnings"?: Array<string>; };
 
 export type AVCreateItemDocsResult = (AVCreateAttributeViewItemDocsResult & { "ambiguity"?: never; "notebook"?: never; "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "ambiguity"?: never; "blockIDs"?: never; "itemIDs"?: never; "notebook"?: never; "skippedItemIDs"?: never; "warnings"?: never; }) | (DocumentSelectionFailure & { "blockIDs"?: never; "itemIDs"?: never; "skippedItemIDs"?: never; "unavailableNotebook"?: never; "warnings"?: never; });
 
-export type AVCreateItemResult = (AVCreateAttributeViewItemResult & { "ambiguity"?: never; "notebook"?: never; "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "ambiguity"?: never; "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "notebook"?: never; "openAfterCreate"?: never; "warnings"?: never; }) | (DocumentSelectionFailure & { "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "openAfterCreate"?: never; "unavailableNotebook"?: never; "warnings"?: never; });
+export type AVCreateItemResult = (AVCreateAttributeViewItemResult & { "ambiguity"?: never; "notebook"?: never; "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "ambiguity"?: never; "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "notebook"?: never; "openAfterCreate"?: never; "openInCurrentTab"?: never; "warnings"?: never; }) | (DocumentSelectionFailure & { "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "openAfterCreate"?: never; "openInCurrentTab"?: never; "unavailableNotebook"?: never; "warnings"?: never; });
 
 export type AVCreated = { "includeTime": boolean; };
 
@@ -460,9 +460,9 @@ export type AVNewItemSaveLocation = { "boxID"?: string; "pathTemplate": string; 
 
 export type AVNewItemSaveLocationInput = { "boxID"?: string | null; "pathTemplate"?: string | null; };
 
-export type AVNewItemTemplate = { "contentTemplatePath"?: string; "fieldValues"?: Record<string, AVNewItemFieldValue | null>; "hideInFileTree"?: boolean; "icon"?: string; "id": string; "name": string; "openAfterCreate"?: boolean; "primaryKeyTemplate"?: string; "saveLocation"?: AVNewItemSaveLocation; "targetType": "detached" | "document"; };
+export type AVNewItemTemplate = { "contentTemplatePath"?: string; "fieldValues"?: Record<string, AVNewItemFieldValue | null>; "hideInFileTree"?: boolean; "icon"?: string; "id": string; "name": string; "openAfterCreate"?: boolean; "openInCurrentTab"?: boolean; "primaryKeyTemplate"?: string; "saveLocation"?: AVNewItemSaveLocation; "targetType": "detached" | "document"; };
 
-export type AVNewItemTemplateInput = { "contentTemplatePath"?: string | null; "fieldValues"?: Record<string, AVNewItemFieldValueInput | null> | null; "hideInFileTree"?: boolean | null; "icon"?: string | null; "id"?: string | null; "name"?: string | null; "openAfterCreate"?: boolean | null; "primaryKeyTemplate"?: string | null; "saveLocation"?: AVNewItemSaveLocationInput | null; "targetType"?: "detached" | "document"; };
+export type AVNewItemTemplateInput = { "contentTemplatePath"?: string | null; "fieldValues"?: Record<string, AVNewItemFieldValueInput | null> | null; "hideInFileTree"?: boolean | null; "icon"?: string | null; "id"?: string | null; "name"?: string | null; "openAfterCreate"?: boolean | null; "openInCurrentTab"?: boolean | null; "primaryKeyTemplate"?: string | null; "saveLocation"?: AVNewItemSaveLocationInput | null; "targetType"?: "detached" | "document"; };
 
 export type AVPasteRowsData = { "inferableKeyIDs": Array<string> | null; "view": AVTable | null; };
 
@@ -4087,7 +4087,8 @@ export interface APIPOSTRoutes {
     };
     /**
      * 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
-     * true 表示创建后分屏打开，false 表示不打开，省略时仅日历条目自动打开。API 本身不触发界面操作。
+     * true 表示创建后打开，false 表示不打开，省略时仅日历自动打开。
+     * openInCurrentTab 为 true 时在当前分屏打开，否则向右分屏打开。API 本身不触发界面操作。
      * 保存位置重名时返回未写入的 data.ambiguity 和 notebook；selection 固定解析时间、模板版本及文档身份。
      */
     "/api/av/createAttributeViewItem": {

@@ -8877,6 +8877,9 @@
         "openAfterCreate": {
           "type": "boolean"
         },
+        "openInCurrentTab": {
+          "type": "boolean"
+        },
         "warnings": {
           "type": "array",
           "items": {
@@ -11335,6 +11338,9 @@
         "openAfterCreate": {
           "type": "boolean"
         },
+        "openInCurrentTab": {
+          "type": "boolean"
+        },
         "primaryKeyTemplate": {
           "type": "string"
         },
@@ -11430,6 +11436,16 @@
           ]
         },
         "openAfterCreate": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "openInCurrentTab": {
           "anyOf": [
             {
               "type": "boolean"

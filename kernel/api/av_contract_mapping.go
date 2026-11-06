@@ -966,6 +966,7 @@ func toContractAVNewItemTemplate(value *av.NewItemTemplate) *apicontract.AVNewIt
 		ContentTemplatePath: value.ContentTemplatePath,
 		HideInFileTree:      value.HideInFileTree,
 		OpenAfterCreate:     value.OpenAfterCreate,
+		OpenInCurrentTab:    value.OpenInCurrentTab,
 	}
 }
 func toContractAVNewItemFieldValue(value *av.NewItemFieldValue) *apicontract.AVNewItemFieldValue {
@@ -1338,12 +1339,13 @@ func toContractAVCreateAttributeViewItemResult(value *model.CreateAttributeViewI
 		return nil
 	}
 	return &apicontract.AVCreateAttributeViewItemResult{
-		ItemID:          value.ItemID,
-		BlockID:         value.BlockID,
-		Content:         value.Content,
-		IsDetached:      value.IsDetached,
-		Warnings:        value.Warnings,
-		OpenAfterCreate: value.OpenAfterCreate,
+		ItemID:           value.ItemID,
+		BlockID:          value.BlockID,
+		Content:          value.Content,
+		IsDetached:       value.IsDetached,
+		Warnings:         value.Warnings,
+		OpenAfterCreate:  value.OpenAfterCreate,
+		OpenInCurrentTab: value.OpenInCurrentTab,
 	}
 }
 func toContractAVCreateAttributeViewItemDocsResult(value *model.CreateAttributeViewItemDocsResult) *apicontract.AVCreateAttributeViewItemDocsResult {

@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "Не отварај",
 	"copyImageURLFailed": "Није могуће копирати адресу слике",
 	"copyImageURL": "Копирај адресу слике",
 	"markdownFolderEmpty": "У овој фасцикли нема Markdown датотека за приказ",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "Синхронизација није завршена. Прескочити је и изаћи? Несинхронизоване измене остаће сачуване на овом уређају",
 	"automationCollectionReference": "Циљ референце",
 	"automationCollectionReferenceTip": "Налепите ID блока или везу ка блоку; референце у садржају се групишу по правилима повратних веза; документ обухвата своје блокове садржаја, без поддокумената",
-	"newItemTemplateOpenAfterCreate": "Отвори ставку у подељеном приказу након креирања",
+	"newItemTemplateOpenAfterCreate": "Отвори ставку након креирања",
 	"deleteAll": "Обриши све",
 	"listMindmapManageNodeColors": "Управљај бојама чворова",
 	"listMindmapManageLineColors": "Управљај бојама линија",

@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "Neotvárať",
 	"copyImageURLFailed": "Nepodarilo sa skopírovať adresu obrázka",
 	"copyImageURL": "Kopírovať adresu obrázka",
 	"markdownFolderEmpty": "V tomto priečinku nie sú žiadne súbory Markdown na zobrazenie",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "Synchronizácia sa ešte neskončila. Preskočiť ju a skončiť? Nesynchronizované zmeny zostanú uložené v tomto zariadení",
 	"automationCollectionReference": "Cieľ odkazu",
 	"automationCollectionReferenceTip": "Vložte ID bloku alebo odkaz na blok; odkazy v texte sa zoskupujú podľa pravidiel spätných odkazov; dokument zahŕňa svoje bloky obsahu, nie však podriadené dokumenty",
-	"newItemTemplateOpenAfterCreate": "Po vytvorení otvoriť položku v rozdelenom zobrazení",
+	"newItemTemplateOpenAfterCreate": "Otvoriť položku po vytvorení",
 	"deleteAll": "Odstrániť všetko",
 	"listMindmapManageNodeColors": "Spravovať farby uzlov",
 	"listMindmapManageLineColors": "Spravovať farby čiar",

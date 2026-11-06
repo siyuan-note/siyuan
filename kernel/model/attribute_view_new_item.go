@@ -31,13 +31,15 @@ type NewItemTemplatePreview struct {
 
 // CreateAttributeViewItemResult 描述按模板创建数据库条目的结果。
 type CreateAttributeViewItemResult struct {
-	ItemID          string       `json:"itemID"`
-	BlockID         string       `json:"blockID"`
-	Content         string       `json:"content"`
-	IsDetached      bool         `json:"isDetached"`
-	Warnings        []string     `json:"warnings,omitempty"`
-	OpenAfterCreate *bool        `json:"openAfterCreate,omitempty"`
-	Transaction     *Transaction `json:"-"`
+	ItemID          string   `json:"itemID"`
+	BlockID         string   `json:"blockID"`
+	Content         string   `json:"content"`
+	IsDetached      bool     `json:"isDetached"`
+	Warnings        []string `json:"warnings,omitempty"`
+	OpenAfterCreate *bool    `json:"openAfterCreate,omitempty"`
+	// 自动打开时使用当前分屏；false 或省略时向右分屏打开。
+	OpenInCurrentTab bool         `json:"openInCurrentTab,omitempty"`
+	Transaction      *Transaction `json:"-"`
 }
 
 // CreateAttributeViewItemMarkdown 描述通过数据库条目模板创建文档时使用的 Markdown 内容。
@@ -309,7 +311,8 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	return &CreateAttributeViewItemResult{
 		ItemID: itemID, BlockID: boundBlockID, Content: content, IsDetached: isDetached,
 		Warnings: preview.Warnings, Transaction: tx,
-		OpenAfterCreate: itemTemplate.OpenAfterCreate,
+		OpenAfterCreate:  itemTemplate.OpenAfterCreate,
+		OpenInCurrentTab: itemTemplate.OpenInCurrentTab,
 	}, nil
 }
 

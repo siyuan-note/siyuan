@@ -294,10 +294,10 @@ func assertAVContractJSONEqual(t *testing.T, want, got any) {
 func TestAVContractTransportMapping(t *testing.T) {
 	for _, preference := range []*bool{nil, new(false), new(true)} {
 		for _, target := range []av.NewItemTargetType{av.NewItemTargetDetached, av.NewItemTargetDocument} {
-			template := &av.NewItemTemplate{ID: "template", Name: "Entry", TargetType: target, OpenAfterCreate: preference}
+			template := &av.NewItemTemplate{ID: "template", Name: "Entry", TargetType: target, OpenAfterCreate: preference, OpenInCurrentTab: true}
 			assertAVContractJSONEqual(t, template, toContractAVNewItemTemplate(template))
 			result := &model.CreateAttributeViewItemResult{ItemID: "item", BlockID: "block", Content: "Entry",
-				IsDetached: target == av.NewItemTargetDetached, OpenAfterCreate: preference}
+				IsDetached: target == av.NewItemTargetDetached, OpenAfterCreate: preference, OpenInCurrentTab: true}
 			assertAVContractJSONEqual(t, result, toContractAVCreateAttributeViewItemResult(result))
 		}
 	}

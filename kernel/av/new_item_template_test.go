@@ -15,11 +15,14 @@ func TestNewItemTemplateOpenAfterCreate(t *testing.T) {
 	for _, target := range []NewItemTargetType{NewItemTargetDetached, NewItemTargetDocument} {
 		for _, preference := range []*bool{nil, new(false), new(true)} {
 			view := &AttributeView{Spec: CurrentSpec, ID: ast.NewNodeID()}
-			template := &NewItemTemplate{ID: ast.NewNodeID(), Name: "Entry", TargetType: target, OpenAfterCreate: preference}
+			template := &NewItemTemplate{ID: ast.NewNodeID(), Name: "Entry", TargetType: target, OpenAfterCreate: preference, OpenInCurrentTab: true}
 			if err := view.SetNewItemTemplates(&NewItemTemplatesConfig{Templates: []*NewItemTemplate{template}}); err != nil {
 				t.Fatal(err)
 			}
 			stored := view.NewItemTemplates[0]
+			if !stored.OpenInCurrentTab {
+				t.Fatal("current pane preference lost")
+			}
 			if preference != nil && (stored.OpenAfterCreate == preference || stored.OpenAfterCreate == nil || *stored.OpenAfterCreate != *preference) {
 				t.Fatalf("opening preference was lost or not cloned: %+v", stored)
 			}

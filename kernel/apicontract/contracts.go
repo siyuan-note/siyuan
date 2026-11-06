@@ -1645,7 +1645,8 @@ var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPaste
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 按模板创建条目；templateID 为空时创建空白游离条目。openAfterCreate 返回模板的交互偏好：
-// true 表示创建后分屏打开，false 表示不打开，省略时仅日历条目自动打开。API 本身不触发界面操作。
+// true 表示创建后打开，false 表示不打开，省略时仅日历自动打开。
+// openInCurrentTab 为 true 时在当前分屏打开，否则向右分屏打开。API 本身不触发界面操作。
 // 保存位置重名时返回未写入的 data.ambiguity 和 notebook；selection 固定解析时间、模板版本及文档身份。
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 

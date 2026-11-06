@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "Nie otwieraj",
 	"copyImageURLFailed": "Nie udało się skopiować adresu obrazu",
 	"copyImageURL": "Kopiuj adres obrazu",
 	"markdownFolderEmpty": "Brak plików Markdown do wyświetlenia w tym folderze",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "Synchronizacja nie została zakończona. Pominąć ją i wyjść? Niezsynchronizowane zmiany pozostaną zapisane na tym urządzeniu",
 	"automationCollectionReference": "Cel odwołania",
 	"automationCollectionReferenceTip": "Wklej ID bloku lub łącze do bloku; odwołania w treści są grupowane według reguł linków zwrotnych; dokument obejmuje swoje bloki treści, bez dokumentów podrzędnych",
-	"newItemTemplateOpenAfterCreate": "Otwórz element w podzielonym widoku po utworzeniu",
+	"newItemTemplateOpenAfterCreate": "Otwórz element po utworzeniu",
 	"deleteAll": "Usuń wszystko",
 	"listMindmapManageNodeColors": "Zarządzaj kolorami węzłów",
 	"listMindmapManageLineColors": "Zarządzaj kolorami linii",

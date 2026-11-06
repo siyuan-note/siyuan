@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "Не відкривати",
 	"copyImageURLFailed": "Не вдалося скопіювати адресу зображення",
 	"copyImageURL": "Копіювати адресу зображення",
 	"markdownFolderEmpty": "У цій папці немає файлів Markdown для відображення",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "Синхронізацію ще не завершено. Пропустити її та вийти? Несинхронізовані зміни залишаться збереженими на цьому пристрої",
 	"automationCollectionReference": "Ціль посилання",
 	"automationCollectionReferenceTip": "Вставте ID блоку або посилання на блок; посилання в основному тексті групуються за правилами зворотних посилань; документ охоплює свої блоки вмісту, але не дочірні документи",
-	"newItemTemplateOpenAfterCreate": "Відкривати елемент у розділеному поданні після створення",
+	"newItemTemplateOpenAfterCreate": "Відкривати елемент після створення",
 	"deleteAll": "Видалити все",
 	"listMindmapManageNodeColors": "Керувати кольорами вузлів",
 	"listMindmapManageLineColors": "Керувати кольорами ліній",

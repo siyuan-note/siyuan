@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "לא לפתוח",
 	"copyImageURLFailed": "לא ניתן להעתיק את כתובת התמונה",
 	"copyImageURL": "העתקת כתובת התמונה",
 	"markdownFolderEmpty": "אין קובצי Markdown להצגה בתיקייה זו",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "הסנכרון עדיין לא הושלם. לדלג עליו ולצאת? השינויים שלא סונכרנו יישארו שמורים במכשיר זה",
 	"automationCollectionReference": "יעד ההפניה",
 	"automationCollectionReferenceTip": "יש להדביק מזהה בלוק או קישור לבלוק; הפניות לבלוקים בגוף התוכן נאספות לפי כללי הקישורים החוזרים; יעד מסוג מסמך כולל את בלוקי התוכן שלו, ללא מסמכי משנה",
-	"newItemTemplateOpenAfterCreate": "פתיחת הפריט בתצוגה מפוצלת לאחר יצירתו",
+	"newItemTemplateOpenAfterCreate": "פתיחת הפריט לאחר יצירתו",
 	"deleteAll": "מחיקת הכול",
 	"listMindmapManageNodeColors": "ניהול צבעי צמתים",
 	"listMindmapManageLineColors": "ניהול צבעי קווים",

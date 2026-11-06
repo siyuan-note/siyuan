@@ -381,6 +381,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
     position?: string,
     keepAVPanel?: boolean,
     standalone?: boolean,
+    currentPane?: boolean,
 }) => {
     data = {...data, navigation: data.navigation || getDatabaseRowNavigation(protyle, data)};
     const title = data.title || window.siyuan.languages.untitled;
@@ -416,8 +417,8 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
         }
         const opened = await openFile({
             app: protyle.app,
-            position: options?.position || "right",
-            removeCurrentTab: options && !options.keepAVPanel ? undefined : false,
+            position: options?.currentPane ? undefined : options?.position || "right",
+            removeCurrentTab: options?.currentPane ? false : options && !options.keepAVPanel ? undefined : false,
             keepAVPanel: options?.keepAVPanel,
             custom: {
                 id: "siyuan-database-row",
@@ -441,12 +442,13 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
     if (!data.boundBlockID) {
         return false;
     }
-    if (options && !options.keepAVPanel) {
+    if (options?.currentPane || (options && !options.keepAVPanel)) {
         const opened = await openFileById({
             app: protyle.app,
             id: data.boundBlockID,
             notebookId: data.notebookID,
-            position: options.position,
+            position: options.currentPane ? undefined : options.position,
+            removeCurrentTab: options.currentPane ? false : undefined,
             zoomIn: true,
             afterOpen(model: Editor) {
                 focusDatabaseRowPreview(model, data, protyle);

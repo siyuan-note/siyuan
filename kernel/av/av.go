@@ -108,8 +108,10 @@ type NewItemTemplate struct {
 	SaveLocation        *NewItemSaveLocation          `json:"saveLocation,omitempty"`
 	ContentTemplatePath string                        `json:"contentTemplatePath,omitempty"`
 	HideInFileTree      bool                          `json:"hideInFileTree,omitempty"`
-	// nil 保留旧客户端行为；false 不自动打开，true 创建后由交互客户端分屏打开。
+	// nil 时仅日历条目自动打开；false 不自动打开，true 创建后由交互客户端打开。
 	OpenAfterCreate *bool `json:"openAfterCreate,omitempty"`
+	// 自动打开时使用当前分屏；false 或省略时向右分屏打开。
+	OpenInCurrentTab bool `json:"openInCurrentTab,omitempty"`
 }
 
 // NewItemTemplatesConfig 描述一次完整的新增条目模板配置修改。

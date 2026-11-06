@@ -473,6 +473,7 @@ func cloneNewItemTemplate(itemTemplate *NewItemTemplate) *NewItemTemplate {
 		PrimaryKeyTemplate:  itemTemplate.PrimaryKeyTemplate,
 		ContentTemplatePath: itemTemplate.ContentTemplatePath,
 		HideInFileTree:      itemTemplate.HideInFileTree,
+		OpenInCurrentTab:    itemTemplate.OpenInCurrentTab,
 	}
 	if nil != itemTemplate.OpenAfterCreate {
 		ret.OpenAfterCreate = new(*itemTemplate.OpenAfterCreate)

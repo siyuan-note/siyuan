@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "Do not open",
 	"copyImageURLFailed": "Unable to copy the image address",
 	"copyImageURL": "Copy image URL",
 	"markdownFolderEmpty": "No Markdown files to display in this folder",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "Synchronization has not finished. Skip it and exit? Unsynced changes will remain saved on this device",
 	"automationCollectionReference": "Reference target",
 	"automationCollectionReferenceTip": "Paste a block ID or block link; body block references are collected using backlink grouping; a document target includes its content blocks, excluding child documents",
-	"newItemTemplateOpenAfterCreate": "Open item in split view after creation",
+	"newItemTemplateOpenAfterCreate": "Open item after creation",
 	"deleteAll": "Delete all",
 	"listMindmapManageNodeColors": "Manage node colors",
 	"listMindmapManageLineColors": "Manage line colors",

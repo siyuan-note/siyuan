@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "不打开",
 	"copyImageURLFailed": "无法复制图片地址",
 	"copyImageURL": "复制图片地址",
 	"markdownFolderEmpty": "当前文件夹没有可显示的 Markdown 文件",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "同步尚未完成，是否跳过本次同步并退出？未同步的更改会保留在本机",
 	"automationCollectionReference": "引用目标",
 	"automationCollectionReferenceTip": "粘贴块 ID 或块链接；仅收集正文块引用，按反链规则归并；文档目标包含其内部内容块，不含子文档",
-	"newItemTemplateOpenAfterCreate": "创建后分屏打开条目",
+	"newItemTemplateOpenAfterCreate": "创建后打开条目",
 	"deleteAll": "全部删除",
 	"listMindmapManageNodeColors": "管理节点配色",
 	"listMindmapManageLineColors": "管理连线颜色",

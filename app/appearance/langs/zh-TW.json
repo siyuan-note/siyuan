@@ -1,4 +1,5 @@
 {
+	"newItemTemplateNoOpen": "不開啟",
 	"copyImageURLFailed": "無法複製圖片位址",
 	"copyImageURL": "複製圖片位址",
 	"markdownFolderEmpty": "目前資料夾沒有可顯示的 Markdown 檔案",
@@ -184,7 +185,7 @@
 	"skipExitSyncConfirm": "同步尚未完成，是否略過本次同步並結束？未同步的變更會保留在本機",
 	"automationCollectionReference": "引用目標",
 	"automationCollectionReferenceTip": "貼上區塊 ID 或區塊連結；僅收集正文區塊引用，依反鏈規則合併；文件目標包含內部內容區塊，不含子文件",
-	"newItemTemplateOpenAfterCreate": "建立後分割畫面開啟條目",
+	"newItemTemplateOpenAfterCreate": "建立後開啟條目",
 	"deleteAll": "全部刪除",
 	"listMindmapManageNodeColors": "管理節點配色",
 	"listMindmapManageLineColors": "管理連線顏色",

@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261105133947"
+		"updated": "20261106140529"
 	},
 	"Children": [
 		{
@@ -1604,6 +1604,77 @@
 				{
 					"Type": "NodeText",
 					"Data": "Unlock an encrypted notebook before querying it and specify which notebook to use. Its embeds can query only content in that notebook."
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-48za467",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261106140529-48za467",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Document and database writes"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261106140529-2axxwlu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-2axxwlu",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When creating or moving documents, prefer the parent document ID to select the location. Use an empty parentID for the notebook root and provide the title separately. Do not infer document identity from display paths."
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-trtz9b7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-trtz9b7",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Let the system generate IDs for new blocks. Read existing content before updating and preserve its block IDs. Tools reject malformed IDs, duplicates and conflicts with existing blocks."
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-a7ihaxq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-a7ihaxq",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For database batches, database.items_add adds up to 100 rows with other field values supplied for each row; database.items_update updates up to 1000 cells. Each call commits in one transaction and preserves unspecified cells. Read field metadata first, provide values matching each field type, and inspect the saved values returned. Do not automatically retry additions whose execution result is unknown."
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-ho86trj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-ho86trj",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Number and date values require a number or date object. When supplying content, also specify isNotEmpty: true sets the value and false clears it. An object containing only content is not a complete cell value. Computed fields cannot be written directly."
 				}
 			]
 		},

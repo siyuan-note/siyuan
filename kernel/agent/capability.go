@@ -308,12 +308,16 @@ func (set *capabilitySet) add(registration *capabilityRegistration) error {
 	}
 	set.ids[registration.ID] = registration
 	set.registrations[registration.ModelName] = registration
+	parameters := convertSchema(registration.InputSchema)
+	if registration.Tool != nil && (registration.Tool.Source == "native" || registration.Tool.Source == "") {
+		parameters = nativeModelSchema(parameters)
+	}
 	set.definitions = append(set.definitions, openai.Tool{
 		Type: openai.ToolTypeFunction,
 		Function: &openai.FunctionDefinition{
 			Name:        registration.ModelName,
 			Description: registration.Description,
-			Parameters:  convertSchema(registration.InputSchema),
+			Parameters:  parameters,
 		},
 	})
 	return nil

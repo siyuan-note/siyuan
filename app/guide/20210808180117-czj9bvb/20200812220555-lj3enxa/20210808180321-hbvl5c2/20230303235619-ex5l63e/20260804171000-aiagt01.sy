@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261105133947"
+		"updated": "20261106140529"
 	},
 	"Children": [
 		{
@@ -1520,6 +1520,77 @@
 				{
 					"Type": "NodeText",
 					"Data": "查询加密笔记本前需先解锁，并明确指定笔记本；其中的嵌入只能查询该笔记本的内容。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-6ralr09",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261106140529-6ralr09",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文档与数据库写入"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261106140529-umtf2qe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-umtf2qe",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "创建和移动文档时，优先使用父文档 ID 指定位置，根目录使用空的 parentID，标题单独提供。不要根据显示路径推断文档身份。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-ivz1doc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-ivz1doc",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新块的 ID 由系统生成，更新前先读取原内容并保留已有块 ID。工具会拒绝格式错误、重复或与现存块冲突的 ID。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-zm84q4k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-zm84q4k",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "批量维护数据库时，可使用 database.items_add 一次添加最多 100 行，并为每行同时提供其他字段的值；使用 database.items_update 一次更新最多 1000 个单元格。每次调用在一个事务中提交，未指定的单元格保持不变。先读取字段信息，再按字段类型填写值，并核对返回的保存结果。执行结果未知时，不要自动重试新增操作。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-cxn53mz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-cxn53mz",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数字和日期值需要对应的 number 或 date 对象；提供 content 时还需明确指定 isNotEmpty，true 表示设置值，false 表示清空。不要把仅含 content 的对象作为整个单元格值。计算字段不能直接写入。"
 				}
 			]
 		},

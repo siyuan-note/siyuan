@@ -272,9 +272,7 @@ func blockInsert(args map[string]any) (CallToolResult, error) {
 		PreviousID: previousID,
 		NextID:     nextID,
 	}
-	transaction := &model.Transaction{DoOperations: []*model.Operation{operation}}
-
-	if err := model.PerformTxSync(transaction); err != nil {
+	if _, err := model.PerformBlockOperation(operation); err != nil {
 		return blockToolError("insert block failed: " + err.Error())
 	}
 
@@ -323,9 +321,7 @@ func blockAppend(args map[string]any) (CallToolResult, error) {
 		Data:     data,
 		ParentID: parentID,
 	}
-	transaction := &model.Transaction{DoOperations: []*model.Operation{operation}}
-
-	if err := model.PerformTxSync(transaction); err != nil {
+	if _, err := model.PerformBlockOperation(operation); err != nil {
 		return blockToolError("append block failed: " + err.Error())
 	}
 
@@ -364,9 +360,7 @@ func blockPrepend(args map[string]any) (CallToolResult, error) {
 		Data:     data,
 		ParentID: parentID,
 	}
-	transaction := &model.Transaction{DoOperations: []*model.Operation{operation}}
-
-	if err := model.PerformTxSync(transaction); err != nil {
+	if _, err := model.PerformBlockOperation(operation); err != nil {
 		return blockToolError("prepend block failed: " + err.Error())
 	}
 
@@ -482,14 +476,17 @@ func getBlockData(args map[string]any) (data, dataType string) {
 func markdownToBlockDOM(md string) (string, error) {
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
-	result, _ := luteEngine.Md2BlockDOMTree(md, true)
+	result, err := model.DataBlockDOM(md, luteEngine)
+	if err != nil {
+		return "", err
+	}
 	if result == "" {
 		return "", fmt.Errorf("empty result")
 	}
 	return result, nil
 }
 
-// prepareBlockWriteData 为原生页签和脑图 DOM 中的新块补全 ID，保留已有块的 ID 和属性。
+// 新块缺失身份时由系统生成，显式身份必须有效且在输入中唯一。
 func prepareBlockWriteData(data, dataType string) (string, error) {
 	if dataType == "markdown" {
 		return markdownToBlockDOM(data)
@@ -501,18 +498,6 @@ func prepareBlockWriteData(data, dataType string) (string, error) {
 	tree := engine.BlockDOM2Tree(data)
 	if tree == nil || tree.Root == nil {
 		return "", fmt.Errorf("parse tree failed")
-	}
-	hasNativeContainer := false
-	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
-		if entering && (node.Type == ast.NodeTabs || node.Type == ast.NodeTabItem ||
-			node.Type == ast.NodeMindmap || node.Type == ast.NodeMindmapItem) {
-			hasNativeContainer = true
-			return ast.WalkStop
-		}
-		return ast.WalkContinue
-	})
-	if !hasNativeContainer {
-		return data, nil
 	}
 	var err error
 	ids := map[string]struct{}{}

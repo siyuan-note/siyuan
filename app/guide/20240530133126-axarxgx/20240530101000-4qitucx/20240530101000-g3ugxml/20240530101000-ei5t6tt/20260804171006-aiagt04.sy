@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20261105133947"
+		"updated": "20261106140529"
 	},
 	"Children": [
 		{
@@ -1547,6 +1547,77 @@
 				{
 					"Type": "NodeText",
 					"Data": "暗号化ノートブックは、ロックを解除して対象を指定してから検索してください。そのノートブック内の埋め込みは、同じノートブックの内容だけを検索できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-y3ufklr",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261106140529-y3ufklr",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文書とデータベースへの書き込み"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261106140529-uk3hrlq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-uk3hrlq",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文書の作成や移動では、親文書の ID で保存先を指定してください。ノートブックのルートには空の parentID を使い、タイトルは別に指定します。表示パスから文書の識別情報を推測しないでください。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-x4692m3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-x4692m3",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新しいブロックの ID はシステムに生成させてください。更新前に元の内容を読み取り、既存のブロック ID を保持します。形式が不正な ID、重複した ID、既存ブロックと衝突する ID はツールが拒否します。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-dhafpmo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-dhafpmo",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースの一括操作では、database.items_add で最大 100 行を追加し、各行の他のフィールド値も同時に指定できます。database.items_update では最大 1000 セルを更新できます。各呼び出しは一つのトランザクションで確定され、指定しないセルは保持されます。先にフィールド情報を読み取り、型に合った値を指定して、返された保存結果を確認してください。実行結果が不明な追加操作を自動で再試行しないでください。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-mzs1nkb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-mzs1nkb",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数値と日付には number または date オブジェクトを使います。content を指定する場合は isNotEmpty も明示し、true で値を設定、false でクリアします。content だけのオブジェクトをセル値全体として渡さないでください。計算フィールドには直接書き込めません。"
 				}
 			]
 		},

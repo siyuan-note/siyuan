@@ -1117,6 +1117,12 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	} else if changed {
 		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
 	}
+	if err = tx.validateBlockWriteIDs(subTree.Root, tree, nil); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: operation.ParentID}
+	}
+	if tx.fromAPI {
+		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+	}
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
 	// subTree.Box 此时尚未设置，用目标树所在 box 作为 srcBox
 	tx.degradeCrossBoundaryBlockRefs(subTree.Root, tree.Box)
@@ -1221,6 +1227,12 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, treenode.GetNodeInTree(tree, operation.ParentID)); insertErr != nil {
 		return &TxErr{code: TxErrCodeReloadUI, msg: insertErr.Error(), id: operation.ParentID}
 	} else if changed {
+		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+	}
+	if err = tx.validateBlockWriteIDs(subTree.Root, tree, nil); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: operation.ParentID}
+	}
+	if tx.fromAPI {
 		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
 	}
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
@@ -1883,6 +1895,12 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
 	}
 	subTree.Box, subTree.Path = tree.Box, tree.Path
+	if err := tx.validateBlockWriteIDs(subTree.Root, tree, nil); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: operation.ParentID}
+	}
+	if tx.fromAPI {
+		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+	}
 	tx.processGlobalAssets(subTree)
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
 	tx.degradeCrossBoundaryBlockRefs(subTree.Root, subTree.Box)
@@ -2113,6 +2131,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	if resolveErr != nil {
 		logging.LogErrorf("resolve updated block [%s] failed: %s", id, resolveErr)
 		return &TxErr{code: TxErrCodePushMsg, msg: resolveErr.Error(), id: id}
+	}
+	if err = tx.validateBlockWriteIDs(updatedNode, tree, oldNode); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: id}
 	}
 	if ast.NodeTable == oldNode.Type && ast.NodeTable == updatedNode.Type &&
 		(treenode.HasTableCellRich(oldNode) || "1" == oldNode.IALAttr(treenode.TableCellRichTableAttribute)) &&

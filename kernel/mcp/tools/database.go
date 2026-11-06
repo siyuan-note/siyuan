@@ -20,6 +20,7 @@ var databaseActions = []string{
 	"create", "search", "get", "render", "keys", "key_add", "key_update", "key_set_template", "key_remove", "item_add", "item_remove", "item_update",
 	"view_get", "view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_field_move", "view_visibility_set",
 	"view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set", "unused", "clean",
+	"items_add", "items_update",
 }
 
 var databaseKeyTypes = []string{
@@ -49,6 +50,8 @@ var DatabaseTool = &Tool{
 		"item_add":            {LocalWrite: true},
 		"item_remove":         {LocalWrite: true},
 		"item_update":         {LocalWrite: true},
+		"items_add":           {LocalWrite: true},
+		"items_update":        {LocalWrite: true},
 		"view_get":            {LocalRead: true},
 		"view_add":            {LocalWrite: true},
 		"view_duplicate":      {LocalWrite: true},
@@ -113,7 +116,9 @@ var DatabaseTool = &Tool{
 			"ignoreDefaultFill":  {Type: "boolean", Description: "Skip filling default values (for item_add, optional)"},
 			"itemID":             {Type: "string", Description: "Item ID (for item_update)"},
 			"itemIDs":            {Type: "array", Description: "Item IDs (for item_remove)", Items: &Property{Type: "string"}},
-			"value":              {Type: "object", Description: "Typed cell value (for item_update)"},
+			"value":              databaseCellValueProperty,
+			"items":              databaseItemsProperty,
+			"updates":            databaseUpdatesProperty,
 		},
 		Required: []string{"action"},
 	},
@@ -129,6 +134,7 @@ var DatabaseTool = &Tool{
 }
 
 func init() {
+	DatabaseTool.Description += " Batch writes: items_add(id, items) creates 1-100 rows with optional typed values in one transaction; items_update(id, updates) updates up to 1000 cells in one transaction. Prefer these actions for multi-row work. Read keys first and inspect the returned saved values."
 	register(DatabaseTool)
 }
 
@@ -159,6 +165,8 @@ func databaseHandler(args map[string]any) (CallToolResult, error) {
 		return databaseItemRemove(args)
 	case "item_update":
 		return databaseItemUpdate(args)
+	case "items_add", "items_update":
+		return databaseItemsWrite(args)
 	case "view_get", "view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_field_move", "view_visibility_set",
 		"view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set":
 		return databaseViewAction(action, args)
@@ -468,8 +476,17 @@ func databaseItemUpdate(args map[string]any) (CallToolResult, error) {
 	if id == "" || keyID == "" || itemID == "" || nil == valueData {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id, keyID, itemID and value are required"}}, IsError: true}, nil
 	}
-	if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "updateAttrViewCell", AvID: id,
-		KeyID: keyID, RowID: itemID, Data: valueData}}); err != nil {
+	err := model.PerformPreparedAttributeViewOperations(func() ([]*model.Operation, error) {
+		view, err := av.ParseAttributeView(id)
+		if err != nil {
+			return nil, err
+		}
+		if err = validateDatabaseCellValue(view, keyID, valueData); err != nil {
+			return nil, err
+		}
+		return []*model.Operation{{Action: "updateAttrViewCell", AvID: id, KeyID: keyID, RowID: itemID, Data: valueData}}, nil
+	})
+	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "update cell failed: " + err.Error()}}, IsError: true}, nil
 	}
 	view, err := av.ParseAttributeView(id)

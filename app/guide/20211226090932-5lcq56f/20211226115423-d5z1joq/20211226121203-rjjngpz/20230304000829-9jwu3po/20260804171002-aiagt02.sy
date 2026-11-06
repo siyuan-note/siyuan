@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20261105133947"
+		"updated": "20261106140529"
 	},
 	"Children": [
 		{
@@ -1520,6 +1520,77 @@
 				{
 					"Type": "NodeText",
 					"Data": "查詢加密筆記本前需先解鎖，並明確指定筆記本；其中的嵌入只能查詢該筆記本的內容。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-e32rmrx",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261106140529-e32rmrx",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件與資料庫寫入"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261106140529-5u439a4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-5u439a4",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "建立和移動文件時，優先使用父文件 ID 指定位置，根目錄使用空的 parentID，標題另外提供。不要根據顯示路徑推斷文件身分。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-mlekcfk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-mlekcfk",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新區塊的 ID 由系統產生，更新前先讀取原內容並保留已有區塊 ID。工具會拒絕格式錯誤、重複或與現存區塊衝突的 ID。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-7awftj7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-7awftj7",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "批次維護資料庫時，可使用 database.items_add 一次新增最多 100 列，並為每列同時提供其他欄位的值；使用 database.items_update 一次更新最多 1000 個儲存格。每次呼叫在一個交易中提交，未指定的儲存格保持不變。先讀取欄位資訊，再依欄位類型填寫值，並核對傳回的儲存結果。執行結果未知時，不要自動重試新增操作。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-7lgbi91",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-7lgbi91",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "數字和日期值需要對應的 number 或 date 物件；提供 content 時還需明確指定 isNotEmpty，true 表示設定值，false 表示清空。不要把僅含 content 的物件作為整個儲存格值。計算欄位不能直接寫入。"
 				}
 			]
 		},

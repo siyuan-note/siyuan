@@ -1088,6 +1088,8 @@ if (response.code === 0 && response.data) {
 
 ## 块
 
+插入、前插、追加和更新块时，会在保存前校验提交子树中所有块的 ID。缺失的 ID 由系统生成；显式指定的 ID 必须符合 `YYYYMMDDhhmmss-xxxxxxx` 格式（连字符后为七位小写字母或数字），在输入中唯一，且不与现存块冲突。更新时可以保留被替换子树中的 ID。非法写入返回错误，不保存该次修改。
+
 ### 插入块
 
 * `/api/block/insertBlock`

@@ -185,7 +185,7 @@ test("mobile lite renderer preserves stable keys, separate uploads, original ord
                 keys.join(",") === "insertAsset,code,insertAsset,insertHTMLFile,",
                 result.firstElementChild.className === "keyboard__slash-block",
                 result.querySelectorAll('.b3-menu__separator[role="separator"]').length === 1,
-                result.querySelectorAll('.keyboard__slash-title').length === 1,
+                result.querySelectorAll('.keyboard__slash-title').length === 0,
                 result.querySelectorAll('input[type="file"]').length === 3,
                 result.querySelectorAll('input[data-upload-mode="html-iframe"]').length === 1,
                 !result.querySelector('[data-id="custom"]').hasAttribute("data-slash-entry-key"),
@@ -194,6 +194,9 @@ test("mobile lite renderer preserves stable keys, separate uploads, original ord
             result.innerHTML = getLiteSlashMenuHTML(original);
             checks.push(!result.querySelector('.b3-menu__separator'));
             checks.push(Array.from(result.querySelectorAll("button"), button => button.dataset.slashEntryKey || "").join(",") === "code,insertAsset,insertHTMLFile,");
+            prependFrequentSlashButtons(result, [result.querySelector('button[data-slash-entry-key="code"]')]);
+            checks.push(!result.querySelector('.keyboard__slash-title'));
+            checks.push(result.querySelector('.b3-menu__separator').nextElementSibling.className === 'keyboard__slash-block');
             document.body.setAttribute("data-results", checks.join(","));
             result.innerHTML = saved;
         </script></body>`, "utf8");
@@ -201,7 +204,7 @@ test("mobile lite renderer preserves stable keys, separate uploads, original ord
             "--dump-dom", `--user-data-dir=${path.join(directory, "profile")}`, `file://${html}`],
         {encoding: "utf8", timeout: 30000, env: {...process.env, HOME: directory, XDG_CONFIG_HOME: directory}});
         assert.equal(result.status, 0, result.error?.message || result.stderr);
-        assert.match(result.stdout, /data-results="true,true,true,true,true,true,true,true,true"/);
+        assert.match(result.stdout, /data-results="true,true,true,true,true,true,true,true,true,true,true"/);
     } finally {
         rmSync(directory, {recursive: true, force: true});
     }

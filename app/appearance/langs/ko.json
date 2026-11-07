@@ -14,7 +14,7 @@
 	"globalBreadcrumbTip": "노트북, 문서 및 블록 경로를 하나의 탐색 경로로 표시",
 	"windowCloseTimeout": "창이 닫기 요청에 응답하지 않습니다. 화면의 대기 중인 편집 내용을 저장하지 않고 종료할까요? 저장하지 않은 편집 내용이 손실될 수 있습니다",
 	"markdownOutlineUnavailable": "개요는 창이 넓을 때 즉시 렌더링 또는 WYSIWYG 모드에서만 사용할 수 있습니다",
-	"showFloatingStatusBar": "마우스를 올리면 숨겨진 상태 표시줄 표시",
+	"showFloatingStatusBar": "창 오른쪽 아래 모서리에 마우스를 올리면 숨겨진 상태 표시줄 표시",
 	"changelogUnavailable": "변경 로그를 불러올 수 없습니다. GitHub에서 이 버전을 확인하거나 나중에 다시 시도하세요",
 	"templateHTTPUnsafeTarget": "템플릿 대상이 공용 주소가 아닌 IP로 확인되어 차단되었습니다. 프록시의 Fake-IP 모드가 원인일 수 있습니다. 해당 도메인을 Fake-IP에서 제외하거나 실제 IP를 반환하는 DNS를 사용하세요",
 	"pdfLinearizedYes": "예",

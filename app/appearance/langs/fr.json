@@ -14,7 +14,7 @@
 	"globalBreadcrumbTip": "Afficher les chemins du carnet, des documents et des blocs dans un seul fil d’Ariane",
 	"windowCloseTimeout": "La fenêtre ne répond pas à la demande de fermeture. Quitter sans enregistrer les modifications en attente ? Les modifications non enregistrées peuvent être perdues",
 	"markdownOutlineUnavailable": "Le plan est disponible uniquement en mode de rendu instantané ou WYSIWYG dans une fenêtre large",
-	"showFloatingStatusBar": "Afficher la barre d’état masquée au survol",
+	"showFloatingStatusBar": "Afficher la barre d’état masquée au survol du coin inférieur droit de la fenêtre",
 	"changelogUnavailable": "Impossible de charger le journal des modifications. Consultez cette version sur GitHub ou réessayez plus tard",
 	"templateHTTPUnsafeTarget": "La cible du modèle est résolue en une adresse non publique et a été bloquée ; le mode Fake-IP du proxy peut en être la cause. Excluez ce domaine de Fake-IP ou utilisez un DNS renvoyant les adresses IP réelles",
 	"pdfLinearizedYes": "Oui",

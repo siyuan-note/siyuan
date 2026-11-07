@@ -14,7 +14,7 @@
 	"globalBreadcrumbTip": "ノートブック、ドキュメント、ブロックの階層を一つのパンくずリストに表示",
 	"windowCloseTimeout": "ウィンドウが終了要求に応答していません。画面上の未保存の編集を破棄して終了しますか？未保存の編集は失われる可能性があります",
 	"markdownOutlineUnavailable": "アウトラインは幅の広いウィンドウの即時レンダリングまたは WYSIWYG モードでのみ使用できます",
-	"showFloatingStatusBar": "マウスを合わせると非表示のステータスバーを表示",
+	"showFloatingStatusBar": "ウィンドウ右下隅にマウスを合わせると非表示のステータスバーを表示",
 	"changelogUnavailable": "更新履歴を読み込めません。GitHub でこのバージョンを確認するか、しばらくしてから再試行してください",
 	"templateHTTPUnsafeTarget": "テンプレートの接続先が公開 IP 以外に解決されたため遮断しました。プロキシの Fake-IP モードが原因の可能性があります。このドメインを Fake-IP の対象外にするか実 IP を返す DNS を使用してください",
 	"pdfLinearizedYes": "はい",

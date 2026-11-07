@@ -14,7 +14,7 @@
 	"globalBreadcrumbTip": "將筆記本、文件和區塊路徑合併顯示在同一條導覽路徑中",
 	"windowCloseTimeout": "視窗未回應關閉請求。是否結束並放棄介面中尚未儲存的編輯？未儲存的編輯可能遺失",
 	"markdownOutlineUnavailable": "大綱僅在寬螢幕即時渲染或所見即所得模式下可用",
-	"showFloatingStatusBar": "懸停顯示隱藏的狀態列",
+	"showFloatingStatusBar": "在視窗右下角懸停顯示隱藏的狀態列",
 	"changelogUnavailable": "無法載入更新日誌，可在 GitHub 查看該版本，或稍後重試",
 	"templateHTTPUnsafeTarget": "範本目標解析為非公網位址，已阻止存取，可能與代理 Fake-IP 模式有關；請將該網域排除於 Fake-IP 之外或使用真實 IP 解析",
 	"pdfLinearizedYes": "是",

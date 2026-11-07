@@ -14,7 +14,7 @@
 	"globalBreadcrumbTip": "Mostrar os caminhos do caderno, dos documentos e dos blocos em um único caminho de navegação",
 	"windowCloseTimeout": "A janela não responde à solicitação de fechamento. Sair sem salvar as edições pendentes da interface? Edições não salvas podem ser perdidas",
 	"markdownOutlineUnavailable": "A estrutura só está disponível nos modos de renderização instantânea ou WYSIWYG com uma janela larga",
-	"showFloatingStatusBar": "Mostrar a barra de status oculta ao passar o cursor",
+	"showFloatingStatusBar": "Mostrar a barra de status oculta ao passar o cursor no canto inferior direito da janela",
 	"changelogUnavailable": "Não foi possível carregar o registro de alterações. Veja esta versão no GitHub ou tente novamente mais tarde",
 	"templateHTTPUnsafeTarget": "O destino do modelo resolve para um endereço não público e foi bloqueado; o modo Fake-IP do proxy pode ser a causa. Exclua este domínio do Fake-IP ou use DNS com IPs reais",
 	"pdfLinearizedYes": "Sim",

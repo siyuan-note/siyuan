@@ -14,7 +14,7 @@
 	"globalBreadcrumbTip": "Mostra i percorsi di taccuini, documenti e blocchi in un unico percorso di navigazione",
 	"windowCloseTimeout": "La finestra non risponde alla richiesta di chiusura. Uscire senza salvare le modifiche in sospeso? Le modifiche non salvate potrebbero andare perse",
 	"markdownOutlineUnavailable": "La struttura è disponibile solo in modalità di rendering istantaneo o WYSIWYG con una finestra ampia",
-	"showFloatingStatusBar": "Mostra la barra di stato nascosta al passaggio del puntatore",
+	"showFloatingStatusBar": "Mostra la barra di stato nascosta al passaggio del puntatore sull’angolo inferiore destro della finestra",
 	"changelogUnavailable": "Impossibile caricare il registro delle modifiche. Visualizza questa versione su GitHub o riprova più tardi",
 	"templateHTTPUnsafeTarget": "La destinazione del modello si risolve in un indirizzo non pubblico ed è stata bloccata; potrebbe dipendere dalla modalità Fake-IP del proxy. Escludi questo dominio da Fake-IP o usa un DNS con IP reali",
 	"pdfLinearizedYes": "Sì",

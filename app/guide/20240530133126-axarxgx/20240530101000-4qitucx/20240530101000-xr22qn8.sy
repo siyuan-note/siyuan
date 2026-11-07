@@ -179,7 +179,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "マウスを合わせると非表示のステータスバーを表示"
+					"TextMarkTextContent": "ウィンドウ右下隅にマウスを合わせると非表示のステータスバーを表示"
 				},
 				{
 					"Type": "NodeText",

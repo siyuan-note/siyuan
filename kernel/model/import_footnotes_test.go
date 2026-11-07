@@ -30,8 +30,29 @@ func TestMarkdownFootnotesPreserveLabelPunctuation(t *testing.T) {
 				if len(refs) != 1 || !refs[0].IsTextMarkType("em") {
 					t.Fatalf("lost reference or surrounding emphasis: %+v", refs)
 				}
-				if got, want := html.UnescapeString(tree.Root.FirstChild.Text()), "Before["+label+"] after."; got != want {
+				want := "Before[" + label + "] after."
+				if api {
+					// BlockDOM 中的上标引用两侧保留编辑器插入符边界。
+					want = "Before\u200b[" + label + "]\u200b after."
+				}
+				if got := html.UnescapeString(tree.Root.FirstChild.Text()); got != want {
 					t.Fatalf("label altered paragraph: got %q, want %q", got, want)
+				}
+				if refs[0].TextMarkTextContent != html.EscapeString("["+label+"]") ||
+					treenode.GetNodeInTree(tree, refs[0].TextMarkBlockRefID).Text() != "body" {
+					t.Fatal("changed footnote label or definition")
+				}
+				if api {
+					dom := engine.Tree2BlockDOM(tree, engine.RenderOptions, engine.ParseOptions)
+					reopened := engine.BlockDOM2Tree(engine.SpinBlockDOM(dom))
+					reopenedRefs := markdownFootnoteRefs(t, reopened)
+					if len(reopenedRefs) != 1 || !reopenedRefs[0].IsTextMarkType("em") ||
+						reopenedRefs[0].TextMarkTextContent != refs[0].TextMarkTextContent ||
+						reopenedRefs[0].TextMarkBlockRefID != refs[0].TextMarkBlockRefID ||
+						treenode.GetNodeInTree(reopened, reopenedRefs[0].TextMarkBlockRefID).Text() != "body" ||
+						html.UnescapeString(reopened.Root.FirstChild.Text()) != want {
+						t.Fatal("editing changed footnote label, boundary, emphasis or target")
+					}
 				}
 			})
 		}

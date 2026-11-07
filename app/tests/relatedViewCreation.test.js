@@ -12,10 +12,13 @@ const sources = () => {
         }).outputText]));
 };
 
-const cases = async (compiled, languages) => {
+const cases = async (compiled, languages, css) => {
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.append(style);
     const check = require("node:assert/strict");
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
-    const operations = [], requests = [];
+    const operations = [], requests = [], messages = [];
     let mobile = false;
     const common = document.createElement("div");
     document.body.append(common);
@@ -26,6 +29,7 @@ const cases = async (compiled, languages) => {
     const noop = () => {};
     const dependencies = {
         isMobile: () => mobile,
+        showMessage: message => messages.push(message),
         updateHotkeyTip: value => value.replace("⌘", "Ctrl+"), updateMenuItemGroupClasses: noop,
         fetchSyncPost: async (url, payload) => {
             requests.push({url, payload});
@@ -57,6 +61,7 @@ const cases = async (compiled, languages) => {
         const field = {id: "relation", type: "relation", name: "Related"};
         const editor = {disabled: false};
         const panel = document.createElement("div");
+        panel.style.width = "380px";
         panel.innerHTML = `<div class="b3-menu__items"><div class="b3-menu__item" data-col-id="relation"></div>
 <input data-type="name" value="Related"><button class="b3-menu__item" data-type="goSearchAV" data-av-id=""></button>
 <input data-type="colName" data-old-value="" value="Back"><input class="b3-switch" data-type="backRelation">
@@ -73,11 +78,30 @@ ${config.getRelatedViewConfigHTML(field, editor)}<button data-type="confirm">Con
         check.equal(toggle.disabled, false, "target selection enables the existing menu without reopening");
         check.deepEqual(requests.at(-1).payload, {id: "target", blockID: "target-carrier"});
         const start = operations.length;
+        const info = panel.querySelector('[data-type="relatedViewInfo"]');
+        check.equal(getComputedStyle(info).width, "16px");
+        check.equal(getComputedStyle(info).height, "16px");
+        check.equal(info.closest("button"), null, "switch help is not a button");
+        const label = info.closest("label");
+        check.ok(info.getBoundingClientRect().right <= label.getBoundingClientRect().right);
+        const beforeHelp = messages.length;
+        info.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+        check.equal(messages.length, beforeHelp + (mobile ? 1 : 0));
+        check.equal(toggle.checked, false, "help must not activate the containing label");
+        check.equal(panel.querySelector("[data-related-view-info]"), null);
+        check.equal(info.closest("label").textContent.trim(), languages._attrView.showRelatedDatabaseView);
         toggle.click();
         check.equal(toggle.checked, true);
         const selector = panel.querySelector('[data-type="relatedViewTarget"]');
         check.equal(selector.querySelector(".b3-menu__label").textContent, languages._attrView.relatedDatabaseView);
         check.equal(selector.querySelector(".b3-menu__accelerator").textContent, "Table");
+        check.equal(Array.from(selector.querySelectorAll(":scope > svg use")).find(item => item.getAttribute("xlink:href") === "#iconTable"), undefined);
+        check.ok(panel.querySelector("[data-related-view-tip]").classList.contains("fn__none"));
+        const sharedInfo = selector.querySelector('[data-type="relatedViewSharedInfo"]');
+        const sharedMessages = messages.length;
+        sharedInfo.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+        check.equal(messages.length, sharedMessages + (mobile ? 1 : 0));
+        check.equal(common.children.length, 0, "help must not open the mobile view selector");
         selector.click();
         const choices = mobile ? common.querySelectorAll(".b3-menu__item") : selector.querySelectorAll(".b3-menu__submenu .b3-menu__item");
         choices[1].click();
@@ -105,8 +129,9 @@ if (process.versions.electron && process.type === "browser") {
             offscreen: true, backgroundThrottling: false}});
         try {
             await win.loadURL("data:text/html,<html><body></body></html>");
+            const css = require("sass").compile(path.join(__dirname, "../src/assets/scss/base.scss")).css;
             const languages = JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs/en.json"), "utf8"));
-            console.log(await win.webContents.executeJavaScript(`(${cases.toString()})(${JSON.stringify(sources())}, ${JSON.stringify(languages)})`));
+            console.log(await win.webContents.executeJavaScript(`(${cases.toString()})(${JSON.stringify(sources())}, ${JSON.stringify(languages)}, ${JSON.stringify(css)})`));
             win.destroy(); app.exit(0);
         } catch (error) { console.error(error); win.destroy(); app.exit(1); }
     });

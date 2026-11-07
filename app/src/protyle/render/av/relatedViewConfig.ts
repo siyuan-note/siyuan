@@ -17,29 +17,31 @@ export const getPendingRelatedViewConfig = (element: Element) => {
     return pending?.avID === source?.dataset.avId ? pending?.value : undefined;
 };
 
+const infoHTML = (type: string, message: string) => `<svg class="b3-menu__icon ariaLabel" data-type="${type}" data-position="north" aria-label="${escapeAriaLabel(message)}"><use xlink:href="#iconInfo"></use></svg>`;
+
+const bindInfo = (element: SVGElement, message: string) => {
+    element?.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (isMobile()) showMessage(escapeHtml(message));
+    });
+};
+
 export const getRelatedViewConfigHTML = (field: IAVColumn, protyle: IProtyle) => {
     const lang = window.siyuan.languages._attrView;
     const enabled = field.relation?.detailView?.spec === 1 && field.relation.detailView.enabled;
     return `<div class="b3-menu__item b3-menu__item--wrap">
-    <button type="button" class="block__icon block__icon--show ariaLabel" data-type="relatedViewInfo" data-position="north" aria-label="${escapeAriaLabel(lang.relatedDatabaseViewInfo)}" aria-expanded="false">
-        <svg aria-hidden="true"><use xlink:href="#iconInfo"></use></svg>
-    </button>
-    <span class="fn__space"></span>
     <label class="b3-menu__label fn__flex">
-    <span class="b3-menu__label">${lang.showRelatedDatabaseView}</span>
+    <span class="b3-menu__label fn__flex">${lang.showRelatedDatabaseView}<span class="fn__space"></span>${infoHTML("relatedViewInfo", lang.relatedDatabaseViewInfo)}</span>
     <input data-type="relatedViewEnabled" type="checkbox" class="b3-switch b3-switch--menu" ${enabled ? "checked" : ""} ${isReadonly(protyle) || !field.relation?.avID ? "disabled" : ""}>
     </label>
 </div>
-<div class="b3-menu__item b3-menu__item--readonly fn__none" data-related-view-info="true">
-    <span class="b3-menu__label ft__on-surface ft__smaller ft__breakword">${escapeHtml(lang.relatedDatabaseViewInfo)}</span>
-</div>
 <button class="b3-menu__item${enabled ? "" : " fn__none"}" data-type="relatedViewTarget" disabled>
-    <svg class="b3-menu__icon"><use xlink:href="#iconTable"></use></svg>
-    <span class="b3-menu__label">${lang.relatedDatabaseView}</span>
+    <span class="b3-menu__label fn__flex">${lang.relatedDatabaseView}<span class="fn__space"></span>${infoHTML("relatedViewSharedInfo", lang.relatedDatabaseViewShared)}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<div class="b3-menu__item b3-menu__item--readonly${enabled ? "" : " fn__none"}" data-related-view-tip="true">
-    <span class="b3-menu__label ft__on-surface ft__smaller fn__flex"><span class="fn__flex-center ft__breakword">${lang.relatedDatabaseViewShared}</span></span>
+<div class="b3-menu__item b3-menu__item--readonly fn__none" data-related-view-tip="true">
+    <span class="b3-menu__label ft__on-surface ft__smaller fn__flex"><span class="fn__flex-center ft__breakword"></span></span>
 </div>`;
 };
 
@@ -55,16 +57,7 @@ export const bindRelatedViewConfig = async (protyle: IProtyle, avID: string, fie
         return;
     }
     const lang = window.siyuan.languages._attrView;
-    const infoButton = menuElement.querySelector<HTMLButtonElement>('[data-type="relatedViewInfo"]');
-    const infoElement = menuElement.querySelector<HTMLElement>("[data-related-view-info]");
-    let infoExpanded = false;
-    infoButton?.addEventListener("click", event => {
-        event.preventDefault();
-        event.stopPropagation();
-        infoExpanded = !infoExpanded;
-        infoElement?.classList.toggle("fn__none", !infoExpanded);
-        infoButton.setAttribute("aria-expanded", String(infoExpanded));
-    });
+    bindInfo(menuElement.querySelector<SVGElement>('[data-type="relatedViewInfo"]'), lang.relatedDatabaseViewInfo);
     const tipElement = menuElement.querySelector<HTMLElement>("[data-related-view-tip]");
     const sourceElement = menuElement.querySelector<HTMLElement>('[data-type="goSearchAV"]');
     const selectedTarget = () => sourceElement?.dataset.avId ?? field.relation?.avID ?? "";
@@ -124,8 +117,8 @@ export const bindRelatedViewConfig = async (protyle: IProtyle, avID: string, fie
         const message = pending ? window.siyuan.languages.loading : unavailable
             ? lang.relatedDatabaseViewUnavailable : lang.relatedDatabaseViewNoTable;
         const item = new MenuItem({
-            icon: "iconTable",
-            label: lang.relatedDatabaseView,
+            iconHTML: "",
+            label: `<span class="fn__flex">${lang.relatedDatabaseView}<span class="fn__space"></span>${infoHTML("relatedViewSharedInfo", lang.relatedDatabaseViewShared)}</span>`,
             accelerator: current ? escapeHtml(current.name || window.siyuan.languages._kernel[267]) : undefined,
             disabled: !canEdit() || pending,
             submenu: choices.length ? choices : [{type: "readonly", iconHTML: "", label: message}],
@@ -133,6 +126,7 @@ export const bindRelatedViewConfig = async (protyle: IProtyle, avID: string, fie
         targetElement.replaceWith(item.element);
         targetElement = item.element as HTMLButtonElement;
         targetElement.dataset.type = "relatedViewTarget";
+        bindInfo(targetElement.querySelector<SVGElement>('[data-type="relatedViewSharedInfo"]'), lang.relatedDatabaseViewShared);
         targetElement.classList.add("b3-menu__item--wrap");
         const viewName = targetElement.querySelector(".b3-menu__accelerator");
         if (viewName && current) {
@@ -142,9 +136,8 @@ export const bindRelatedViewConfig = async (protyle: IProtyle, avID: string, fie
         targetElement.setAttribute("aria-label", current
             ? `${lang.relatedDatabaseView} ${current.name || window.siyuan.languages._kernel[267]}` : lang.relatedDatabaseView);
         targetElement.classList.toggle("fn__none", !enabled);
-        tipElement.classList.toggle("fn__none", !enabled);
-        tipElement.querySelector(".fn__flex-center").textContent = current || pending
-            ? lang.relatedDatabaseViewShared : message;
+        tipElement.classList.toggle("fn__none", !enabled || (!!current && !pending));
+        tipElement.querySelector(".fn__flex-center").textContent = message;
         const submenu = targetElement.querySelector<HTMLElement>(".b3-menu__submenu");
         const show = () => {
             if (!canEdit() || pending) {

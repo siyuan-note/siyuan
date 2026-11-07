@@ -105,7 +105,7 @@ describe("inline format selection coverage", () => {
     });
 
     it("ignores owned word-joiner boundaries before semantic inline elements", () => {
-        for (const type of ["code", "kbd", "tag"]) {
+        for (const type of ["code", "kbd", "tag", "sup", "sub"]) {
             for (const withWbr of [false, true]) {
                 const selected = selection([
                     {text: "\u2060"}, {text: "\u2060value", types: `strong ${type}`}, {text: "\u200b"},

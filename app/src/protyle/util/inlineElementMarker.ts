@@ -13,7 +13,7 @@ export type TSemanticInlineMarkerMode = "canonical" | "legacy" | "remove";
 
 const ZERO_WIDTH_SPACE = "\u200b";
 const WORD_JOINER = "\u2060";
-const SEMANTIC_INLINE_TYPES = new Set(["code", "kbd", "tag"]);
+const SEMANTIC_INLINE_TYPES = new Set(["code", "kbd", "tag", "sup", "sub"]);
 const INTERNAL_MARKERS = new Set([ZERO_WIDTH_SPACE, WORD_JOINER, "\ufeff"]);
 
 export const hasSemanticInlineType = (type: string | null | undefined) =>
@@ -41,7 +41,7 @@ export const normalizeSemanticInternalMarkerPrefix = (text: string, mode: TSeman
 export const getInlinePlaceholder = (type: string | null | undefined) =>
     hasSemanticInlineType(type) ? WORD_JOINER : ZERO_WIDTH_SPACE;
 
-export const buildSemanticInlineHTML = (type: "code" | "kbd" | "tag", html: string, attributes = "") =>
+export const buildSemanticInlineHTML = (type: "code" | "kbd" | "tag" | "sup" | "sub", html: string, attributes = "") =>
     `${ZERO_WIDTH_SPACE}<span data-type="${type}"${attributes}>${WORD_JOINER}${html}</span>${ZERO_WIDTH_SPACE}`;
 
 export const isSemanticInlineElement = (element: Element | null | undefined): element is HTMLElement =>
@@ -196,7 +196,7 @@ export const removeSemanticInlineExternalBoundaries = (element: HTMLElement) => 
 
 const getSemanticInlineElements = (root: ParentNode) => {
     const elements = Array.from(root.querySelectorAll<HTMLElement>(
-        'span[data-type~="code"],span[data-type~="kbd"],span[data-type~="tag"]'
+        'span[data-type~="code"],span[data-type~="kbd"],span[data-type~="tag"],span[data-type~="sup"],span[data-type~="sub"]'
     ));
     if (root instanceof Element && isSemanticInlineElement(root)) {
         elements.unshift(root);

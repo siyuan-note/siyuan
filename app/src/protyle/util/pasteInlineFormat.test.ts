@@ -121,6 +121,8 @@ const browserCases = async (sources: Record<string, string>, snippets: Record<st
                 for (const sample of [
                     {html: "inline-code", type: "code", initial: false},
                     {html: "inline-code", type: "kbd", initial: false},
+                    {html: "inline-code", type: "sup", initial: false},
+                    {html: "inline-code", type: "sub", initial: false},
                     {html: '<span data-type="strong">inline-code</span>', type: "code", initial: false, keep: "strong"},
                     {html: '<span data-type="code strong">inline-code</span>', type: "strong", initial: true, keep: "code"},
                     {html: '<span data-type="kbd mark">inline-code</span>', type: "mark", initial: true, keep: "kbd"},
@@ -131,7 +133,7 @@ const browserCases = async (sources: Record<string, string>, snippets: Record<st
                         type: "code", initial: false, keep: "block-ref"})),
                 ]) {
                     const fixture = setup(sample.html);
-                    const buttons = ["code", "kbd", "strong", "mark"].map(type => `<button data-type="${type}"></button>`).join("");
+                    const buttons = ["code", "kbd", "sup", "sub", "strong", "mark"].map(type => `<button data-type="${type}"></button>`).join("");
                     fixture.toolbar.element.innerHTML = buttons;
                     mobileToolbar.querySelector(".keyboard__dynamic").innerHTML = buttons;
                     marker.normalizeSemanticInlineElements(fixture.editor);

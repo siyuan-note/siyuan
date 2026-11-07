@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261106130000"
+		"updated": "20261107150237"
 	},
 	"Children": [
 		{
@@ -35,7 +35,7 @@
 			"Properties": {
 				"ID": "20240530101000-8o1a9my",
 				"id": "20240530101000-wlqefeq",
-				"updated": "20261019194453"
+				"updated": "20261107150237"
 			},
 			"Children": [
 				{
@@ -391,7 +391,7 @@
 					"Properties": {
 						"ID": "20240530101000-qo4uspz",
 						"id": "20240530101000-m73dncp",
-						"updated": "20240530101000"
+						"updated": "20261107150237"
 					},
 					"Children": [
 						{
@@ -407,6 +407,20 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "sub",
 									"TextMarkTextContent": "下付き文字"
+								}
+							]
+						},
+						{
+							"ID": "20261107150237-a4yktvg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261107150237-a4yktvg",
+								"updated": "20261107150237"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "上付き文字と下付き文字の左右の境界では、左右の矢印キーでカーソルを内側または外側へ移動できます。境界の外側で入力または貼り付けた文字は通常の書式になります"
 								}
 							]
 						}

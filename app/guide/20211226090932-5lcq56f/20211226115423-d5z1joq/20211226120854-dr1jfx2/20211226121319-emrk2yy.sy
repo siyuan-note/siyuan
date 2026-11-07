@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261106130000"
+		"updated": "20261107150237"
 	},
 	"Children": [
 		{
@@ -32,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226122008-1e014nh",
-				"updated": "20261024163013"
+				"updated": "20261107150237"
 			},
 			"Children": [
 				{
@@ -363,7 +363,7 @@
 					},
 					"Properties": {
 						"id": "20211226122008-1i1080w",
-						"updated": "20211226122008"
+						"updated": "20261107150237"
 					},
 					"Children": [
 						{
@@ -378,6 +378,20 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "sub",
 									"TextMarkTextContent": "下標"
+								}
+							]
+						},
+						{
+							"ID": "20261107150237-rqbegzp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261107150237-rqbegzp",
+								"updated": "20261107150237"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在上下標的左右邊界處，可使用左右方向鍵將游標移入或移出；在邊界外輸入或貼上文字時使用一般文字格式"
 								}
 							]
 						}

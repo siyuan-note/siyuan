@@ -47,6 +47,8 @@ const browserCases = async (sources: Record<string, string>, entrySource: string
     const lute = boundary.protectLuteInlineElementBoundaries(Lute.New());
     lute.SetTextMark(true);
     lute.SetTag(true);
+    lute.SetSup(true);
+    lute.SetSub(true);
     lute.SetKramdownIAL(true);
     lute.SetProtyleWYSIWYG(true);
     lute.SetSpin(true);
@@ -83,7 +85,54 @@ const browserCases = async (sources: Record<string, string>, entrySource: string
         "return {enter, softEnter};")(...Object.values(dependencies));
     Object.assign(window, {siyuan: {config: {editor: {markdown: {}}}}});
 
-    for (const type of ["code", "kbd", "tag"]) {
+    for (const type of ["sup", "sub", "strong sup", "em sub"]) {
+        for (const direction of ["left", "right"] as const) {
+            for (const action of ["type", "paste"]) {
+                const editor = document.createElement("div");
+                editor.className = "protyle-wysiwyg";
+                editor.contentEditable = "true";
+                editor.innerHTML = paragraph(`<span data-type="${type}">2</span>`);
+                document.body.append(editor);
+                marker.normalizeSemanticInlineElements(editor);
+                const inline = editor.querySelector<HTMLElement>("span[data-type]");
+                const range = document.createRange();
+                range.setStart(inline.firstChild, direction === "left" ?
+                    marker.getSemanticInternalMarkerPrefixLength(inline.textContent) : inline.textContent.length);
+                range.collapse(true);
+                check.equal(marker.moveCaretAcrossSemanticMarker(range, direction), true);
+                check.equal(inline.contains(range.startContainer), false);
+                check.equal(marker.moveCaretAcrossSemanticMarker(range, direction === "left" ? "right" : "left"), true);
+                check.equal(inline.contains(range.startContainer), true);
+                check.equal(marker.moveCaretAcrossSemanticMarker(range, direction), true);
+                editor.focus();
+                focusByRange(range);
+                const before = lute.SpinBlockDOM(editor.innerHTML);
+                editor.addEventListener("beforeinput", () =>
+                    boundary.prepareInlineElementBoundaryMutation(getSelection().getRangeAt(0)));
+                editor.addEventListener("input", () => marker.normalizeSemanticInlineElements(editor));
+                if (action === "type") {
+                    await ipcRenderer.invoke("type-text", "x");
+                } else {
+                    document.execCommand("insertHTML", false, "pasted");
+                }
+                const inserted = action === "type" ? "x" : "pasted";
+                const expected = direction === "left" ? inserted + "2" : "2" + inserted;
+                check.equal(marker.getSemanticInlineVisibleText(inline), "2", `${type}/${direction}/${action}`);
+                check.equal(inline.contains(getSelection().anchorNode), false);
+                const after = lute.SpinBlockDOM(editor.innerHTML);
+                for (const [html, text] of [[before, "2"], [after, expected], [before, "2"], [after, expected]]) {
+                    editor.innerHTML = html;
+                    marker.normalizeSemanticInlineElements(editor);
+                    check.equal(marker.getTextWithoutSemanticMarkers(editor).replace(/\u200b/g, ""), text);
+                    check.equal(lute.BlockDOM2StdMd(editor.innerHTML).includes("\u2060"), false);
+                    check.equal(lute.BlockDOM2HTML(editor.innerHTML).includes("\u2060"), false);
+                }
+                editor.remove();
+            }
+        }
+    }
+
+    for (const type of ["code", "kbd", "tag", "sup", "sub", "strong sup", "em sub"]) {
         for (const action of ["text", "enter", "soft-enter"]) {
             for (const location of ["text", "parent", "wbr", "selected"]) {
                 if (action === "soft-enter" && location === "selected") {
@@ -170,7 +219,7 @@ const browserCases = async (sources: Record<string, string>, entrySource: string
     return "Inline boundary mutation cases passed";
 };
 
-test("input and line breaks preserve semantic inline boundary ownership", {
+test("arrows, input, paste and line breaks preserve semantic inline boundary ownership", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

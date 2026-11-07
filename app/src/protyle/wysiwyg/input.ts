@@ -29,6 +29,7 @@ import {nbsp2space} from "../util/normalizeText";
 import {getBlockquoteContext, isBlockquoteMarker, shouldCancelBlockquote} from "./blockquote";
 import {
     getSemanticMarkerPrefixLengthForNode,
+    hasSemanticInlineType,
     normalizeSemanticInlineElements,
     removeEmptySemanticInlineElement
 } from "../util/inlineElementMarker";
@@ -184,8 +185,7 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
         if (event.inputType === "deleteContentForward") {
             if (wbrNextElement && wbrNextElement.nodeType === 1 &&
                 getSemanticMarkerPrefixLengthForNode(wbrNextElement.firstChild) === 0) {
-                const nextType = (wbrNextElement.getAttribute("data-type") || "").split(" ");
-                if (nextType.includes("code") || nextType.includes("kbd") || nextType.includes("tag")) {
+                if (hasSemanticInlineType(wbrNextElement.getAttribute("data-type"))) {
                     wbrNextElement.insertAdjacentElement("afterbegin", wbrElement);
                 }
             }

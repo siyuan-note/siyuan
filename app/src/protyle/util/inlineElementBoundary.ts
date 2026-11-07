@@ -2,8 +2,8 @@ import {unwrapLongTextRuns} from "./longTextWrap";
 
 const INLINE_BOUNDARY_ATTRIBUTE = "data-inline-boundary";
 const INLINE_WRAP_ATTRIBUTE = "data-inline-wrap";
-const SEMANTIC_INLINE_SELECTOR = 'span[data-type~="code"],span[data-type~="tag"],span[data-type~="kbd"]';
-export const SEMANTIC_INLINE_HTML_REGEXP = /<span\b[^>]*\bdata-type=(?:"(?:[^"]* )?(?:code|kbd|tag)(?: [^"]*)?"|'(?:[^']* )?(?:code|kbd|tag)(?: [^']*)?')/iu;
+const SEMANTIC_INLINE_SELECTOR = 'span[data-type~="code"],span[data-type~="tag"],span[data-type~="kbd"],span[data-type~="sup"],span[data-type~="sub"]';
+export const SEMANTIC_INLINE_HTML_REGEXP = /<span\b[^>]*\bdata-type=(?:"(?:[^"]* )?(?:code|kbd|tag|sup|sub)(?: [^"]*)?"|'(?:[^']* )?(?:code|kbd|tag|sup|sub)(?: [^']*)?')/iu;
 const WORD_JOINER = "\u2060";
 const ZERO_WIDTH_SPACE = "\u200b";
 

@@ -112,7 +112,9 @@ class MarkdownAssetsPlugin {
             }, () => {
                 for (const file of markdownAssetFiles()) {
                     compilation.fileDependencies.add(file.source);
-                    compilation.emitAsset(file.name, new compiler.webpack.sources.RawSource(fs.readFileSync(file.source)));
+                    // 离线库的全局导出依赖原有脚本作用域，构建时保留其原始产物。
+                    compilation.emitAsset(file.name, new compiler.webpack.sources.RawSource(fs.readFileSync(file.source)),
+                        {minimized: true});
                 }
             });
         });

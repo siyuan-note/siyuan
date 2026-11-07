@@ -1338,6 +1338,8 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
             }
         });
         if (selectedItemInfos.length === 1 && avType !== "calendar") {
+            const selectedItem = selectedItemInfos[0].item;
+            const parentID = "cells" in selectedItem ? selectedItem.hierarchy?.parentID : undefined;
             if (!primaryRows[0].isDetached) {
                 menu.addSeparator({id: "separator_1"});
             }
@@ -1356,6 +1358,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                             protyle,
                             count: parseInt(inputElement.value),
                             previousID: selectedItemInfos[0].previousID,
+                            parentID,
                             groupID: selectedItemInfos[0].groupID
                         });
                         menu.close();
@@ -1367,6 +1370,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                                 protyle,
                                 count: parseInt(inputElement.value),
                                 previousID: selectedItemInfos[0].previousID,
+                                parentID,
                                 groupID: selectedItemInfos[0].groupID
                             });
                             menu.close();
@@ -1389,6 +1393,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                             protyle,
                             count: parseInt(inputElement.value),
                             previousID: selectedItemInfos[0].itemID,
+                            parentID,
                             groupID: selectedItemInfos[0].groupID
                         });
                         menu.close();
@@ -1400,6 +1405,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                                 protyle,
                                 count: parseInt(inputElement.value),
                                 previousID: selectedItemInfos[0].itemID,
+                                parentID,
                                 groupID: selectedItemInfos[0].groupID
                             });
                             menu.close();

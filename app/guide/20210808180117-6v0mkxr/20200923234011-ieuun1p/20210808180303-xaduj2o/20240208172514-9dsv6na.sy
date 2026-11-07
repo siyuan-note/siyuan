@@ -5808,7 +5808,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". Moving a parent also moves its descendants. Reparenting does not automatically change child statuses, dates, or other fields. With automatic sorting enabled, sort rules determine sibling order."
+					"Data": ". Moving a parent also moves its descendants. Reparenting does not automatically change child statuses, dates, or other fields. With automatic sorting enabled, sort rules determine sibling order. In tree display, inserting entries above or below an entry creates siblings with the same parent."
 				}
 			]
 		},

@@ -71,6 +71,7 @@ func persistClearedSyncProviderConfig(provider int) error {
 	if err = atomicWriteFile(filepath.Join(util.ConfDir, "conf.json"), data); err != nil {
 		return err
 	}
+	util.RestrictConfFilePermissions()
 	recordPersistedConf(data)
 	Conf.Sync.Store(next.Sync.Load())
 	return nil

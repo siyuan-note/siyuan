@@ -302,6 +302,8 @@ func InitConf() {
 	if err := cleanupRetiredDocumentAddressing(); err != nil {
 		logging.LogWarnf("clean up retired document addressing records failed: %s", err)
 	}
+	// 读取前先收紧凭据文件权限，避免其他本机账号在启动期间读取
+	util.RestrictConfFilePermissions()
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	confFileExists := gulu.File.IsExist(confPath)
 	var confData []byte
@@ -1037,6 +1039,7 @@ func (conf *AppConf) save0(data []byte) {
 		util.ReportFileSysFatalError(err)
 		return
 	}
+	util.RestrictConfFilePermissions()
 	recordPersistedConf(data)
 }
 

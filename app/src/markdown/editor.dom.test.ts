@@ -652,7 +652,7 @@ test("Vditor 4.0.2-alpha.3 adapter preserves content and isolates programmatic, 
     const compile = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const bundle = compile("identity.ts") + "\n" + compile("limits.ts") + "\n" + compile("resourcePolicy.ts") + "\n" + compile("link.ts") + "\n" + compile("panelAnimation.ts") + "\n" + compile("editor.ts") +
+    const bundle = compile("identity.ts") + "\n" + compile("limits.ts") + "\n" + compile("resourcePolicy.ts") + "\n" + compile("link.ts") + "\n" + compile("panelAnimation.ts") + "\n" + compile("codeCopy.ts") + "\n" + compile("editor.ts") +
         "\nwindow.MarkdownEditorTest = {createMarkdownEditor, createMarkdownResourcePolicy};";
     const html = path.join(temporary, "index.html");
     writeFileSync(html, '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" ' +

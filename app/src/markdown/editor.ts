@@ -1,4 +1,5 @@
 import type {MarkdownEditorSnapshot} from "./contracts";
+import {renderMarkdownCodeCopy} from "./codeCopy";
 import {MARKDOWN_DOCUMENT_BYTES, MARKDOWN_RENDER_BYTES, MARKDOWN_RECOVERY_BYTES, markdownByteLength} from "./limits";
 import {markdownLinkDestination} from "./link";
 import {createMarkdownPanelAnimation} from "./panelAnimation";
@@ -534,7 +535,8 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 outline: {enable: outlineEnabled, position: "left"},
                 toolbar: ["headings", "bold", "italic", "link", "list", "undo", "redo", "edit-mode"],
                 preview: {mode: recoverySourceOnly ? "editor" : "both", actions: [], delay: 150, markdown: {sanitize: true},
-                    theme: {current: dark ? "dark" : "light"}, hljs: {style: dark ? "github-dark" : "github"},
+                    theme: {current: dark ? "dark" : "light"},
+                    hljs: {style: dark ? "github-dark" : "github", renderMenu: renderMarkdownCodeCopy},
                     math: {engine: "KaTeX"}, render: {media: {enable: false}}, transform: policy.sanitize,
                     parse: () => {
                         policy.hydrate(element);

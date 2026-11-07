@@ -101,7 +101,7 @@ import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {collectionRemovalOperations, getTagRemovalChanges, hasReferenceRemoval, previewCollectionRemoval} from "../util/collectionRemoval";
 import {showMessage} from "../../dialog/message";
-import {getEditorFocusRange, restoreEditorFocusRange} from "../util/editorFocus";
+import {canRestoreEditorFocus, getEditorFocusRange, restoreEditorFocusRange, restoreTabTitleEditing} from "../util/editorFocus";
 import {replayListMindmap} from "../render/listMindmap/render";
 import {
     invalidateTrackedRangesByOperations,
@@ -2653,6 +2653,9 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             const selection = getSelection();
             const focusRange = getEditorFocusRange(protyle.wysiwyg.element,
                 selection.rangeCount ? selection.getRangeAt(0) : undefined);
+            const focusElement = focusRange?.startContainer.nodeType === Node.ELEMENT_NODE ?
+                focusRange.startContainer as Element : focusRange?.startContainer.parentElement;
+            const focusTitleItemID = focusElement?.closest(".tab-item-title")?.closest<HTMLElement>(".tab-item")?.dataset.nodeId;
             let focusContext = getUndoFocusContext(protyle.wysiwyg.element, focusRange, true);
             const operationFocus = (operations?: IOperation[]) => {
                 const operation = operations?.find(item => item.action === "update" &&
@@ -2706,8 +2709,11 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                 } finally {
                     try {
                         if (protyle.element === element && protyle.wysiwyg.element === editor) element.inert = wasInert;
-                        if (isCurrent() && !wasDisabled && !wasInert && !protyle.disabled) {
-                            if ((sourceRestored || entriesRemoved || !restoreEditorFocusRange(protyle.wysiwyg.element, focusRange)) && focusContext) {
+                        if (isCurrent() && !wasDisabled && !wasInert && !protyle.disabled && canRestoreEditorFocus(editor)) {
+                            const titleItem = focusTitleItemID && editor.querySelector<HTMLElement>(`.tab-item[data-node-id="${focusTitleItemID}"]`);
+                            // 标题可能在预检期间被切换、重载或转为只读，两条恢复路径共用同一许可。
+                            const canRestoreTitle = !focusTitleItemID || (titleItem && restoreTabTitleEditing(titleItem));
+                            if (canRestoreTitle && (sourceRestored || entriesRemoved || !restoreEditorFocusRange(protyle.wysiwyg.element, focusRange)) && focusContext) {
                                 protyle.wysiwyg.element.focus({preventScroll: true});
                                 restoreUndoFocus(protyle, [{action: "update", id: focusContext.undoFocusId, context: focusContext}]);
                             }

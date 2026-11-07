@@ -1,3 +1,6 @@
+import {isHiddenTabContent} from "../render/tabsVisibility";
+import {setTabTitleNavigationEditing} from "../render/tabsRender";
+
 const getNodeElement = (node: Node) => node.nodeType === 1 ? node as Element : node.parentElement;
 
 const isRangeInEditor = (editorElement: HTMLElement, range?: Range) => Boolean(range?.startContainer.isConnected &&
@@ -16,6 +19,15 @@ export const getEditorFocusRangeOutsideElement = (editorElement: HTMLElement, ex
         range : undefined;
 };
 
+export const canRestoreEditorFocus = (editorElement: HTMLElement) => {
+    const active = document.activeElement;
+    return editorElement.isConnected && editorElement.getClientRects().length > 0 &&
+        (!active || active === document.body || active === editorElement || editorElement.contains(active));
+};
+
+export const restoreTabTitleEditing = (item: HTMLElement) => !isHiddenTabContent(item) &&
+    (!item.parentElement?.classList.contains("tabs") || setTabTitleNavigationEditing(item, true));
+
 export const restoreEditorFocusRange = (editorElement: HTMLElement, range?: Range,
                                         selection = document.getSelection()) => {
     if (!isRangeInEditor(editorElement, range) || !selection) {
@@ -25,6 +37,13 @@ export const restoreEditorFocusRange = (editorElement: HTMLElement, range?: Rang
     const editableElement = startElement?.closest<HTMLElement>('[contenteditable="true"]');
     if (!editableElement || !editorElement.contains(editableElement)) {
         return false;
+    }
+    if (editableElement.classList.contains("tab-item-title")) {
+        // 异步确认期间选区清空会结束页签标题编辑，恢复焦点前先同步显示标题输入层。
+        const item = editableElement.closest<HTMLElement>(".tab-item");
+        if (item && !restoreTabTitleEditing(item)) {
+            return false;
+        }
     }
     editableElement.focus({preventScroll: true});
     selection.removeAllRanges();

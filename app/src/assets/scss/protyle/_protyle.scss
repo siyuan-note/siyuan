@@ -1534,11 +1534,11 @@ table + .protyle-action__table {
     }
 
     &--row {
-      cursor: row-resize;
+      cursor: ns-resize;
     }
 
     &--column {
-      cursor: col-resize;
+      cursor: ew-resize;
     }
 
     &--both {

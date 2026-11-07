@@ -8,7 +8,7 @@
 		"id": "20240530101000-hnu6o79",
 		"title": "エディタ",
 		"type": "doc",
-		"updated": "20261101145217"
+		"updated": "20261107104457"
 	},
 	"Children": [
 		{
@@ -460,7 +460,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-4f7o94j",
-				"updated": "20261024163013"
+				"updated": "20261107104457"
 			},
 			"Children": [
 				{
@@ -537,6 +537,83 @@
 				{
 					"Type": "NodeText",
 					"Data": "確認すると保存され、キャンセルすると変更を破棄します。並び順のリセットでは表示設定とドック項目の配置場所は維持され、リセットした階層は今後の初期順序の変更にも従います。"
+				}
+			]
+		},
+		{
+			"ID": "20261107104457-sno3sds",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107104457-sno3sds",
+				"updated": "20261107104457"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップとモバイルで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "メニューとボタンの表示と順序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、カスタムプロファイルを編集して "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "参照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択すると、参照検索の候補に表示される "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "サブドキュメントを作成"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存先を選択してドキュメントを作成"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を個別に非表示にできます。両方とも既定では表示されます。プロファイルを保存して有効にすると適用されます。"
 				}
 			]
 		},

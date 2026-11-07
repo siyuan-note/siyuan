@@ -78,7 +78,7 @@ const getVisibleEntryCatalog = () => {
     /// #endif
     const sections = mobile ? entryCatalog.filter(item =>
         item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash" || item.key === "editor.image" ||
-        item.key === "editor.blockEmbed" || item.key === BREADCRUMB_ROOT_PATH)
+        item.key === "editor.blockEmbed" || item.key === "editor.ref" || item.key === BREADCRUMB_ROOT_PATH)
         .map(item => item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, sortable: false,
             children: item.children.filter(child => MOBILE_TOOLBAR_CONTEXT_KEYS.includes(child.key))} : item) : entryCatalog.map(item =>
         item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child => !child.key.startsWith("mobile-"))} :

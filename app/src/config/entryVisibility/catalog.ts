@@ -929,6 +929,15 @@ export const entryCatalog: IEntryCatalogSection[] = [
     toolbarCatalogSection,
     breadcrumbCatalogSection,
     {
+        key: "editor.ref",
+        label: location(lang("editor"), lang("ref")),
+        sortable: false,
+        children: [
+            node("newSubDoc", lang("newSubDoc"), true, undefined, false),
+            node("newFileAtPath", lang("newFileAtPath"), true, undefined, false),
+        ],
+    },
+    {
         key: "editor.blockEmbed",
         label: location(lang("editor"), lang("blockEmbed")),
         sortable: false,

@@ -60,7 +60,7 @@ test("entry settings show exit only on native tablets without changing the persi
     mobile = true;
     const catalog = exports.catalog();
     assert.deepEqual(Array.from(catalog, item => item.key), [TOOLBAR_ENTRY_ROOT_PATH, BREADCRUMB_ROOT_PATH,
-        "editor.blockEmbed", "editor.image", "editor.slash"]);
+        "editor.ref", "editor.blockEmbed", "editor.image", "editor.slash"]);
     const breadcrumbKeys = catalog.find(item => item.key === BREADCRUMB_ROOT_PATH).children.map(item => item.key);
     assert.deepEqual(Array.from(breadcrumbKeys), ["command-panel", "readonly", "doc", "more"]);
     assert.equal(catalog.find(item => item.key === "editor.slash"), entryCatalog.find(item => item.key === "editor.slash"));

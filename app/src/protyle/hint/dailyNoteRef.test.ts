@@ -24,6 +24,7 @@ test("typing a slash in reference search does not run title replacement or show 
         Constants: {ZWSP: "\u200b"}, Lute: {Caret: "caret", UnEscapeHTMLStr: (text: string) => text},
         getEditorRange: () => ({startContainer: block}), hasClosestBlock: () => block,
         isEncryptedBox: () => false, getDailyNoteHints: async (): Promise<IHintData[]> => [],
+        getConfiguredEntryVisibility: () => true,
         normalizeDocumentTitle: () => assert.fail("typing a query sanitized a document title"),
         fetchPost: (path: string, request: {k: string}, callback: (response: unknown) => void) => {
             assert.equal(path, "/api/search/searchRefBlock");
@@ -43,7 +44,7 @@ test("typing a slash in reference search does not run title replacement or show 
 });
 
 test("closing a reference resolves exact titles before daily notes or configured creation and rejects stale results", async () => {
-    const scenarios = ["document", "daily", "create", "subdoc", "stale", "error", "ordinary"];
+    const scenarios = ["document", "daily", "create", "subdoc", "path", "hidden", "stale", "error", "ordinary"];
     for (const [splitChar, scenario] of ["[[", "【【"].flatMap(split => scenarios.map(scenario => [split, scenario]))) {
         const block = {getAttribute: () => "block"};
         const closeContext = {range: "original"};
@@ -54,6 +55,8 @@ test("closing a reference resolves exact titles before daily notes or configured
             Constants: {ZWSP: "\u200b"}, Lute: {Caret: "caret", UnEscapeHTMLStr: (text: string) => text},
             getEditorRange: () => ({startContainer: block}), hasClosestBlock: () => block,
             isEncryptedBox: () => true, genHintItemHTML: () => "document",
+            getConfiguredEntryVisibility: (path: string) => scenario !== "hidden" &&
+                (scenario !== "path" || path !== "editor.ref.newSubDoc"),
             getDailyNoteHints: async () => scenario === "daily" || scenario === "document" ?
                 [{value: "daily-note:2026-10-14:box", html: "daily"}] : [],
             fetchPost: (_path: string, request: {exactDocTitle?: boolean; notebook?: string}, callback: (response: unknown) => void) => {
@@ -68,7 +71,7 @@ test("closing a reference resolves exact titles before daily notes or configured
                 splitChar, closeKeyTyped: scenario !== "ordinary", genLoading() {},
                 getRefCloseContext: () => closeContext,
                 isRefCloseContextCurrent: () => scenario !== "stale",
-                prepareCreateTarget: () => ({promise: Promise.resolve(scenario === "subdoc"), isCurrent: () => true}),
+                prepareCreateTarget: () => ({promise: Promise.resolve(["subdoc", "path", "hidden"].includes(scenario)), isCurrent: () => true}),
                 fillRefClose: (value: string, _protyle: unknown, original: unknown) => {
                     assert.equal(original, closeContext);
                     commits.push(value);
@@ -82,12 +85,13 @@ test("closing a reference resolves exact titles before daily notes or configured
             assert.match(commits[0], /data-id="exact"/);
         } else if (scenario === "daily") {
             assert.deepEqual(commits, ["daily-note:2026-10-14:box"]);
-        } else if (scenario === "create" || scenario === "subdoc") {
+        } else if (["create", "subdoc", "path"].includes(scenario)) {
             assert.equal(commits.length, 1);
-            assert.ok(commits[0].startsWith(scenario === "create" ? "((newFile " : "((newSubDoc "));
+            const command = scenario === "create" ? "newFile" : scenario === "subdoc" ? "newSubDoc" : "newFileAtPath";
+            assert.ok(commits[0].startsWith(`((${command} `));
         } else {
             assert.equal(commits.length, 0);
-            assert.equal(rendered, scenario === "ordinary");
+            assert.equal(rendered, scenario === "ordinary" || scenario === "hidden");
         }
     }
 });

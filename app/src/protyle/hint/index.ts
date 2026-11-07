@@ -81,6 +81,7 @@ import {genCellValueByElement} from "../render/av/cell";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
+import {getConfiguredEntryVisibility} from "../../config/entryVisibility/runtime";
 import {
     endsWithMultiCharHintPrefix,
     getBlockHintTriggerOffset,
@@ -897,7 +898,10 @@ export class Hint {
                 }
                 upDownHint(this.element.lastElementChild, event);
                 if (event.key === "Enter") {
-                    this.fill(decodeURIComponent(this.element.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, false, isNotCtrl(event));
+                    const value = this.element.querySelector(".b3-list-item--focus")?.getAttribute("data-value");
+                    if (value) {
+                        this.fill(decodeURIComponent(value), protyle, false, isNotCtrl(event));
+                    }
                     event.preventDefault();
                 } else if (event.key === "Escape") {
                     this.bindingDismissController?.abort();
@@ -952,12 +956,16 @@ export class Hint {
                 }
                 if (response.newDoc) {
                     const newFileName = Lute.UnEscapeHTMLStr(response.k);
-                    const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
-                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${hideConfiguredCreate && response.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+                    if (getConfiguredEntryVisibility("editor.ref.newSubDoc")) {
+                        const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
+                        searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${searchHTML === "" && response.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.k}</mark></span></div></button>`;
-                    const pathRefText = `((newFileAtPath "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
-                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(pathRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
+                    }
+                    if (getConfiguredEntryVisibility("editor.ref.newFileAtPath")) {
+                        const pathRefText = `((newFileAtPath "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
+                        searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${searchHTML === "" && response.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(pathRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.k}</mark></span></div></button>`;
+                    }
                 }
                 response.blocks.forEach((item: IBlock, index: number) => {
                     let blockRefHTML;

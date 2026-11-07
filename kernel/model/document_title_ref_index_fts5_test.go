@@ -12,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"testing/synctest"
+	"time"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -25,13 +27,77 @@ import (
 
 func drainDocumentTitleIndexTasks(t *testing.T) {
 	t.Helper()
-	for count := 0; count < 128; count++ {
-		if !task.ContainIndexTask() {
-			return
+	if !waitDocumentTitleIndexTasks(10 * time.Second) {
+		t.Fatal("document lifecycle index tasks did not finish")
+	}
+}
+
+func waitDocumentTitleIndexTasks(timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for task.ContainIndexTask() {
+		if !time.Now().Before(deadline) {
+			return false
 		}
 		task.ExecTaskJob()
+		if task.ContainIndexTask() {
+			// 同一时钟刻度的新任务或在途任务可能暂不可执行，轮询必须让出执行时间。
+			time.Sleep(time.Millisecond)
+		}
 	}
-	t.Fatal("document lifecycle index tasks did not finish")
+	return true
+}
+
+func TestDocumentTitleIndexTaskDrainWaitsForClockProgress(t *testing.T) {
+	if !documentTitleTestProcess(t) {
+		return
+	}
+	synctest.Test(t, func(t *testing.T) {
+		ran := false
+		task.AppendTask(task.DatabaseIndex, func() { ran = true })
+		// 入队与出队可能落在同一时钟刻度，零延迟任务也要等经过时间大于零才会被调度。
+		drainDocumentTitleIndexTasks(t)
+		if !ran || task.ContainIndexTask() {
+			t.Fatal("index task drain returned before executing its queued task")
+		}
+	})
+}
+
+func TestDocumentTitleIndexTaskDrainRetainsRunningTaskOnExpiry(t *testing.T) {
+	if !documentTitleTestProcess(t) {
+		return
+	}
+	synctest.Test(t, func(t *testing.T) {
+		started, release, done := make(chan struct{}), make(chan struct{}), make(chan struct{})
+		task.AppendTask(task.DatabaseIndex, func() {
+			close(started)
+			<-release
+		})
+		time.Sleep(time.Nanosecond)
+		go func() {
+			task.ExecTaskJob()
+			close(done)
+		}()
+		<-started
+		released := false
+		defer func() {
+			if !released {
+				close(release)
+				<-done
+			}
+		}()
+		start := time.Now()
+		const timeout = 10 * time.Millisecond
+		if waitDocumentTitleIndexTasks(timeout) || time.Since(start) < timeout || !task.ContainIndexTask() {
+			t.Fatal("index task deadline accepted or removed an unfinished task")
+		}
+		close(release)
+		<-done
+		released = true
+		start = time.Now()
+		if !waitDocumentTitleIndexTasks(timeout) || !time.Now().Equal(start) {
+			t.Fatal("completed index task still needed a polling delay")
+		}
+	})
 }
 
 func TestDocumentTitleDeferredIndexPropagation(t *testing.T) {

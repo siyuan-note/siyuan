@@ -28,10 +28,10 @@ func TestModelConfigAllowsExtraFields(t *testing.T) {
 func TestPinnedModelConfigurations(t *testing.T) {
 	root := os.Getenv("SIYUAN_OCR_TEST_ASSETS")
 	if root == "" {
-		t.Skip("set SIYUAN_OCR_TEST_ASSETS to model configuration directory")
+		t.Skip("set SIYUAN_OCR_TEST_ASSETS to models root directory")
 	}
 	for _, kind := range []string{"det", "rec"} {
-		if _, err := readModelConfig(root, kind); err != nil {
+		if _, err := readModelConfig(filepath.Join(root, "tiny"), kind); err != nil {
 			t.Fatalf("%s: %v", kind, err)
 		}
 	}

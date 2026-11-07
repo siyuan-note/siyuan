@@ -17,6 +17,13 @@ const readonlyDeclaration = onGetSource.statements.filter(isVariableStatement)
 const compiledReadonly = transpileModule(`const disabledProtyle = ${readonlyDeclaration.initializer.getText(onGetSource)};`,
     {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
 
+const focusSource = createSourceFile("editorFocus.ts", readFileSync(__dirname + "/../util/editorFocus.ts", "utf8"), ScriptTarget.Latest, true);
+const focusDeclaration = focusSource.statements.filter(isVariableStatement)
+    .flatMap(statement => Array.from(statement.declarationList.declarations))
+    .find(item => item.name.getText(focusSource) === "canRestoreEditorFocus");
+const compiledFocus = transpileModule(`const canRestoreEditorFocus = ${focusDeclaration.initializer.getText(focusSource)};`,
+    {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
+
 const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
     let finishPreview: (value: unknown) => void;
     let finishSave: () => void;
@@ -43,7 +50,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
             setProperty: (name: string, value: string) => { styles.set(name, value); },
             removeProperty: (name: string) => { styles.delete(name); },
         }}, scroll: {lastScrollTop: 120},
-        wysiwyg: {element: {focus() {}, querySelectorAll: (): Element[] => []}}};
+        wysiwyg: {element: {isConnected: true, getClientRects: () => [{}], focus() {}, querySelectorAll: (): Element[] => []}}};
     const cleanup: IOperation = {action: "cleanupAttrViewBlocks", avID: "database", data: {ruleVersion: "version", items: []}};
     const changes = kind === "references" ? [] : [{id: "block", tags: ["todo"]}];
     const dependencies = {
@@ -56,7 +63,9 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
             createRange: () => ({setStartBefore() {}, collapse() {}}),
         },
         getSelection: () => ({rangeCount: 1, getRangeAt: () => ({}), removeAllRanges() {}}),
-        getEditorFocusRange: () => ({}),
+        canRestoreEditorFocus: new Function("document", compiledFocus + "\nreturn canRestoreEditorFocus;")({activeElement: null}),
+        Node: {ELEMENT_NODE: 1},
+        getEditorFocusRange: () => ({startContainer: {nodeType: 1, closest: (): null => null}}),
         getUndoFocusContext: (element: unknown) => mode === "cancelWithoutRange" && element === protyle.wysiwyg.element ? undefined :
             {undoFocusId: "block", undoFocusStart: element === protyle.wysiwyg.element ? "4" : "5"},
         restoreEditorFocusRange: () => { assert.equal(protyle.disabled, false); focusRestored++; return true; },

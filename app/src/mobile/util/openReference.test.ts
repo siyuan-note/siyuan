@@ -14,6 +14,7 @@ const transpile = (file: string) => transpileModule(readFileSync(join(__dirname,
 }).outputText;
 const referenceSource = transpile("openReference.ts");
 const dialogSource = transpile("MobileEditorDialog.ts");
+const keyboardSheetSource = transpile("keyboardSheetState.ts");
 const sheetSource = transpile("bindBottomSheetDialog.ts");
 const sheetLayoutSource = transpile("mobileSheetLayout.ts");
 const saveSource = transpile("../../protyle/util/editorSave.ts");
@@ -159,6 +160,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         destroy() { this.destroyed++; registered.delete(this); }
     }
     const dialogAPI = {} as typeof import("./MobileEditorDialog");
+    const keyboardSheetAPI = {} as typeof import("./keyboardSheetState");
     const sheetAPI = {} as typeof import("./bindBottomSheetDialog");
     const sheetLayoutAPI = {} as typeof import("./mobileSheetLayout");
     const saveAPI = {} as typeof import("../../protyle/util/editorSave");
@@ -183,6 +185,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
         "./MobileEditorDialog": dialogAPI,
         "./bindBottomSheetDialog": sheetAPI,
         "./mobileSheetLayout": sheetLayoutAPI,
+        "./keyboardSheetState": keyboardSheetAPI,
         "./mobileSheetGesture": sheetGesture,
         "./orientation": {isMobileLandscape: () => false},
         "./bindBottomSheetDrag": {bindBottomSheetDrag: (element: ElementMock, _scrim: unknown, _close: unknown,
@@ -220,6 +223,7 @@ const setup = (readonly = false, deferSheetOpen = false) => {
     }};
     runInNewContext(dialogSource, {...globals, exports: dialogAPI});
     runInNewContext(sheetLayoutSource, {...globals, exports: sheetLayoutAPI});
+    runInNewContext(keyboardSheetSource, {...globals, exports: keyboardSheetAPI});
     runInNewContext(sheetSource, {...globals, exports: sheetAPI});
     runInNewContext(saveSource, {...globals, exports: saveAPI});
     runInNewContext(editorSessionSource, {...globals, exports: editorSessionAPI});
@@ -688,7 +692,7 @@ test("viewport changes preserve the original scroll and all resize listeners are
     const sheet = dialog.element.querySelector(".b3-dialog__container");
     assert.equal(sheet.querySelector('[data-type="sheet-expand"]'), undefined);
     assert.equal(sheet.children.has("actions"), false);
-    assert.equal(fixture.window.listenerCount(), 2);
+    assert.equal(fixture.window.listenerCount(), 3);
     assert.equal(fixture.window.visualViewport.listenerCount(), 2);
     fixture.viewport.top = 90;
     fixture.viewport.bottom = 440;

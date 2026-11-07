@@ -248,7 +248,7 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
         check.equal(richEditor.saved, saved);
         check.notEqual(fingerprint(draft), saved);
     }
-    const hideElements = new Function(sources[6] + "\nreturn hideElements;")();
+    const {hideElements, hideAllElements} = new Function(sources[6] + "\nreturn {hideElements, hideAllElements};")();
     for (const mobile of [false, true]) {
         for (const draft of [false, true]) {
             const host = document.createElement("div");
@@ -268,7 +268,7 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
                 prepareDocumentTitleInitialDOM: (html: string) => html,
                 prepareDocumentTitleBlockDOM: prepare, getDocumentTitleUnsupportedPasteBlocks: unsupported,
                 getDocumentTitleDOMFingerprint: fingerprint, mountProtyleLiteFragment: () => fragment,
-                setMobileToolbarUndo: () => {}, hideElements,
+                setMobileToolbarUndo: () => {}, hideElements, hideAllElements,
             };
             const MountedEditor = new Function(...Object.keys(dependencies), sources[3] + "\nreturn DocumentTitleEditor;")(
                 ...Object.values(dependencies));

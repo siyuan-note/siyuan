@@ -34,7 +34,7 @@ const browserCases = async (source: string) => {
             return element.innerHTML;
         },
         Constants: {BLOCK_HINT_KEYS: ["((", "[["], INLINE_TYPE: ["strong"], ZWSP: "\u200b"},
-        hideElements: () => {}, getUndoFocusContext: (): undefined => undefined,
+        isInAndroid: () => false, hideElements: () => {}, getUndoFocusContext: (): undefined => undefined,
         focusByRange: (range: Range) => {
             getSelection().removeAllRanges();
             getSelection().addRange(range);

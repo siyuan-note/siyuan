@@ -20,7 +20,7 @@ test("row navigation replaces only its original desktop preview across bound and
     let checkSource: () => void;
     const element = () => {
         const classes = new Set<string>();
-        const root = {isConnected: true, dataset: {}, querySelector: (): unknown => root, dispatchEvent() {},
+        const root = {isConnected: true, dataset: {}, style: {visibility: ""}, querySelector: (): unknown => root, dispatchEvent() {},
             remove() { root.isConnected = false; },
             classList: {add: (name: string) => classes.add(name), remove: (name: string) => classes.delete(name),
                 contains: (name: string) => classes.has(name)}};
@@ -131,12 +131,14 @@ test("row navigation replaces only its original desktop preview across bound and
     request({code: 0, data: {rootID: "another-document", rootTitle: "Document"}});
     await new Promise(setImmediate);
     assert.equal(removed.length, 0, "the current preview stays until document and attributes load");
-    assert.equal(latest.panelElement.classList.contains("fn__none"), true);
+    assert.equal(latest.panelElement.classList.contains("fn__none"), false);
+    assert.equal(latest.panelElement.style.visibility, "hidden");
     documentLoaded();
     await new Promise(setImmediate);
     assert.equal(removed.length, 0);
     attributesLoaded({querySelector: () => ({})});
     assert.equal(await move, true);
+    assert.equal(latest.panelElement.style.visibility, "");
     assert.deepEqual(removed, ["initial"]);
     assert.equal(latest.parent, wnd);
     assert.equal(created[0].id, "bound");

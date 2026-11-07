@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sources: Record<string, string>, css: string) => {
+const browserCases = async (sources: Record<string, string>, css: string, typographyCSS: string) => {
     const check: typeof assert = require("node:assert/strict");
     const nodePath: typeof path = require("node:path");
     const noop = () => {};
@@ -494,6 +494,78 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     }
     for (const touchMode of [true, false]) {
         mobile = touchMode;
+        {
+            const typographyStyle = document.createElement("style");
+            typographyStyle.textContent = typographyCSS;
+            document.head.append(typographyStyle);
+            for (const fontSize of [16, 32]) {
+                for (const dark of [false, true]) {
+                    const f = fixture();
+                    f.root.style.width = touchMode ? "360px" : "800px";
+                    f.root.style.setProperty("--b3-font-size-editor", `${fontSize}px`);
+                    f.root.style.setProperty("--b3-theme-surface-lighter", dark ? "#444" : "#ddd");
+                    f.root.style.color = dark ? "#eee" : "#222";
+                    f.root.style.backgroundColor = dark ? "#222" : "#fff";
+                    f.table.removeAttribute("style");
+                    f.table.innerHTML = '<thead><tr><th colspan="2">Before</th><th class="fn__none"></th>' +
+                        '<th colspan="2">After</th><th class="fn__none"></th></tr>' +
+                        "<tr><th>Usage</th><th>Price</th><th>Usage</th><th>Price</th></tr></thead><tbody>" +
+                        "<tr><td>0-360</td><td>2.53</td><td>0-360</td><td>2.91</td></tr>" +
+                        '<tr><td>360-600</td><td>2.78</td><td rowspan="2">360-1100</td><td rowspan="2">3.49</td></tr>' +
+                        '<tr><td>600+</td><td>3.54</td><td class="fn__none"></td><td class="fn__none"></td></tr>' +
+                        "<tr><td></td><td></td><td>1100+</td><td>4.37</td></tr></tbody>";
+                    const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+                    const heights = () => Array.from(f.table.rows).map(row => row.getBoundingClientRect().height);
+                    const before = heights();
+                    const count = transactions.length;
+                    for (const column of [0, 1]) {
+                        check.equal(f.core.selectCellRange(f.cell(4, column), f.cell(5, column)), true);
+                        f.invoke("openMenu", 0, 0);
+                        const merge = items.find(item => item.label === "mergeCell");
+                        check.equal(merge.disabled, false);
+                        merge.click(undefined, undefined);
+                        check.deepEqual(heights(), before, "staggered vertical merges retain every logical row's height");
+                    }
+                    check.equal(transactions.length, count + 2, "each merge remains a single undoable transaction");
+                    check.equal(before[4], fontSize * 1.625 + 9, "the row minimum follows the editor font size");
+                    check.equal(f.cell(3, 2).rowSpan, 2, "adjacent merged cells retain their span");
+                    check.equal(f.cell(4, 1).rowSpan, 2);
+                    check.equal(f.cell(4, 1).textContent, "3.54");
+                    const preview = document.createElement("div");
+                    preview.className = "b3-typography";
+                    preview.style.lineHeight = "1.625";
+                    f.root.append(preview);
+                    for (const html of [lute.SpinBlockDOM(node.outerHTML),
+                        lute.Md2BlockDOM(lute.BlockDOM2Md(node.outerHTML)), lute.BlockDOM2HTML(node.outerHTML)]) {
+                        preview.innerHTML = html;
+                        check.equal(preview.querySelectorAll("tr").length, 6);
+                        const previewHeights = Array.from(preview.querySelectorAll("tr"))
+                            .map(row => row.getBoundingClientRect().height);
+                        check.ok(previewHeights[0] >= parseFloat(getComputedStyle(preview).fontSize),
+                            "previews and exports keep a visible minimum at their own font size");
+                        check.ok(previewHeights.every(height => height === previewHeights[0]),
+                            "internal and HTML conversions retain every logical row's height");
+                    }
+                    preview.remove();
+                    const row = f.table.rows[4];
+                    for (const height of [12, 90]) {
+                        row.style.height = `${height}px`;
+                        check.equal(row.getBoundingClientRect().height, height, "explicit row heights override the automatic minimum");
+                    }
+                    row.removeAttribute("style");
+                    const multiline = f.cell(2, 0);
+                    multiline.innerHTML = "first<br>second<br>third";
+                    check.ok(f.table.rows[2].getBoundingClientRect().height > before[2],
+                        "multiline content can grow beyond the automatic row height");
+                    const content = document.createRange();
+                    content.selectNodeContents(multiline);
+                    check.ok(content.getBoundingClientRect().bottom <= multiline.getBoundingClientRect().bottom -
+                        parseFloat(getComputedStyle(multiline).paddingBottom), "expanded rows contain their final text line");
+                    f.dispose();
+                }
+            }
+            typographyStyle.remove();
+        }
         {
             const f = fixture();
             const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
@@ -1421,6 +1493,7 @@ test("desktop and mobile table selection, resize feedback and gesture cancellati
         {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const css = require("sass").compile(path.resolve("src/assets/scss/protyle/_protyle.scss"),
         {silenceDeprecations: ["legacy-js-api"]}).css;
+    const typographyCSS = require("sass").compile(path.resolve("src/assets/scss/component/_typography.scss")).css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-touch-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -1431,10 +1504,11 @@ app.whenReady().then(async () => {
         nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false,
     }});
     try {
-        await win.loadURL("data:text/html,<html><body></body></html>");
+        await win.loadURL("data:text/html,<!DOCTYPE html><html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(path.resolve("stage/protyle/js/lute/lute.min.js"))}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-            browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(css) + ").catch(error => { throw new Error(error.stack || String(error)); })")}));
+            browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(css) + "," +
+            JSON.stringify(typographyCSS) + ").catch(error => { throw new Error(error.stack || String(error)); })")}));
         win.destroy();
         app.exit(0);
     } catch (error) {

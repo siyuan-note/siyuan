@@ -882,6 +882,8 @@
       gap: 8px 16px;
 
       > label {
+        align-items: center;
+        min-height: 24px;
         min-width: 0;
       }
     }

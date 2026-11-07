@@ -395,6 +395,7 @@ const runPersistenceCases = async () => {
 const checkLayout = () => {
     const assert = require("node:assert/strict");
     const {panel, types} = window.fixture;
+    let wrappedLabels = 0;
     for (const type of types) {
         const element = panel(type);
         if (element.classList.contains("fn__none")) continue;
@@ -418,11 +419,21 @@ const checkLayout = () => {
         }));
         for (const label of labels) {
             const input = label.querySelector("input");
-            assert.equal(Math.round(input.getBoundingClientRect().width), 26, "shared switches keep their width");
+            const inputBounds = input.getBoundingClientRect();
+            const labelBounds = label.getBoundingClientRect();
+            const text = label.lastElementChild;
+            const textBounds = text.getBoundingClientRect();
+            assert.equal(Math.round(inputBounds.width), 26, "shared switches keep their width");
+            assert.equal(Math.round(inputBounds.height), 16, "shared switches keep their height");
+            assert.equal(getComputedStyle(text).fontSize, "12px", "filters use shared small-text typography");
+            assert.ok(labelBounds.height >= 24, "labels retain a usable click target with smaller text");
+            assert.ok(Math.abs(inputBounds.top + inputBounds.height / 2 - textBounds.top - textBounds.height / 2) < 1,
+                "switches and label text are vertically centered, including wrapped translations");
+            if (textBounds.height > 24) wrappedLabels++;
             assert.notEqual(getComputedStyle(input).backgroundColor, "rgba(0, 0, 0, 0)");
         }
     }
-    return {width: innerWidth, height: innerHeight};
+    return {width: innerWidth, height: innerHeight, wrappedLabels};
 };
 
 const runElectron = async () => {
@@ -447,6 +458,7 @@ const runElectron = async () => {
             catch (error) { return {error: error.stack}; }
         })()`).then(result => { assert.equal(result.error, undefined); return result.value; });
         let layouts = 0;
+        let wrappedLabels = 0;
         for (const mobile of [false, true]) {
             await win.loadURL("data:text/html,<html><head><meta name='viewport' content='width=device-width, initial-scale=1'></head><body></body></html>");
             await win.webContents.insertCSS(styles[mobile ? "mobile" : "desktop"]);
@@ -479,7 +491,8 @@ const runElectron = async () => {
             await win.webContents.removeInsertedCSS(theme);
             for (const appearance of ["daylight", "midnight"]) {
                 const themeID = await win.webContents.insertCSS(read(`appearance/themes/${appearance}/theme.css`));
-                for (const [width, font, language] of mobile ? [[320, 14, "en"], [390, 24, "de"], [768, 24, "zh-CN"]] :
+                for (const [width, font, language] of mobile ?
+                    [[320, 14, "en"], [320, 16, "zh-CN"], [320, 24, "de"], [768, 24, "zh-CN"]] :
                     [[1100, 14, "en"], [600, 24, "de"], [400, 24, "zh-CN"]]) {
                     await win.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride", {
                         width, height: 900, deviceScaleFactor: 1, mobile,
@@ -492,9 +505,9 @@ const runElectron = async () => {
                         await window.fixture.remount();
                         for (const type of window.fixture.types) window.fixture.response(type, window.fixture.packages);
                     }, {font, languages: languages[language], appearance});
-                    for (const type of ["plugins", "themes"]) {
+                    for (const type of await evaluate(() => window.fixture.types)) {
                         await evaluate(type => window.fixture.activate(type), type);
-                        await evaluate(checkLayout);
+                        wrappedLabels += (await evaluate(checkLayout)).wrappedLabels;
                         layouts++;
                     }
                     if (process.env.SIYUAN_BAZAAR_SCREENSHOTS) {
@@ -508,6 +521,7 @@ const runElectron = async () => {
             }
             win.webContents.debugger.detach();
         }
+        assert.ok(wrappedLabels > 0, "layout coverage includes multiline filter labels");
         console.log(`Verified marketplace compatibility interactions and ${layouts} production-style layouts`);
     } catch (error) {
         console.error(error);
@@ -535,7 +549,7 @@ if (process.versions.electron && process.type === "browser") {
             const {stdout} = await promisify(execFile)(require("electron"), [...headless, __filename, profile], {
                 env, windowsHide: true, timeout: 95000, maxBuffer: 1024 * 1024,
             });
-            assert.match(stdout, /Verified marketplace compatibility interactions and 24 production-style layouts/);
+            assert.match(stdout, /Verified marketplace compatibility interactions and 70 production-style layouts/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-bazaar-compatibility-"));

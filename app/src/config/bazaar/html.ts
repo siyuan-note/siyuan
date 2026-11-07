@@ -37,7 +37,7 @@ export const genBazaarPackagePanelHTML = (
             <input spellcheck="false" class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
-        <div class="config-bazaar__compatibility">
+        <div class="config-bazaar__compatibility ft__smaller">
             <label class="fn__flex fn__flex-center">
                 <input type="checkbox" class="b3-switch" data-bazaar-filter="hideUnsupportedVersion"${filters?.hideUnsupportedVersion === true ? " checked" : ""}>
                 <span class="fn__space"></span><span>${window.siyuan.languages.bazaarHideUnsupportedVersion}</span>

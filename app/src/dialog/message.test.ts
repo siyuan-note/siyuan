@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import {execFile} from "node:child_process";
-import {mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
@@ -27,26 +27,29 @@ const cases = async (source: string, styles: string[], themes: string[], notific
             });
         },
     };
-    const api = new Function(...Object.keys(dependencies), source + "return {initMessage, showMessage, formatMessageActions};")(
+    const api = new Function(...Object.keys(dependencies), source + "return {initMessage, showMessage};")(
         ...Object.values(dependencies));
     window.siyuan = {zIndex: 0, languages: {}} as unknown as typeof window.siyuan;
     const message = document.createElement("div");
     message.id = "message";
     document.body.append(message);
-    api.showMessage('Startup <button class="b3-button">Continue</button>', -1, "info", "startup");
-    api.showMessage("Startup error <button>Retry</button>", 0, "error", "startup-error");
-    check.equal(document.querySelectorAll("#tempMessage .b3-snackbar__body").length, 2);
+    const startup = 'Startup <button class="b3-button">Continue</button> then finish';
+    const startupError = "Startup error <button>Retry</button> or reopen";
+    api.showMessage(startup, -1, "info", "startup");
+    api.showMessage(startupError, 0, "error", "startup-error");
+    api.showMessage(notifications[0], -1, "info", "startup-actions");
+    check.equal(document.querySelector('#tempMessage [data-message-id="startup"]').innerHTML, startup);
+    check.equal(document.querySelector('#tempMessage [data-message-id="startup-error"]').innerHTML, startupError);
+    check.equal(document.querySelectorAll("#tempMessage .b3-snackbar__body").length, 1);
     api.initMessage();
-    check.equal(message.querySelectorAll('[data-id="startup"] .b3-snackbar__body').length, 1,
-        "initializing notifications does not nest a second body around the startup message");
-    check.equal(message.querySelector('[data-id="startup"] .b3-snackbar__actions > button').textContent, "Continue");
-    check.equal(message.querySelectorAll('[data-id="startup-error"] .b3-snackbar__body').length, 1);
-    check.equal(message.querySelector('[data-id="startup-error"] .b3-snackbar__body').textContent, "Startup error  vtest",
-        "startup errors merge the version into the existing body before the action");
-    const notification = 'New release <a href="https://example.com/release">Release</a> ' +
-        '<button type="button" data-type="download-update" data-version="99.0.0-alpha.1">Download this version</button>';
+    check.equal(message.querySelector('[data-id="startup"] .b3-snackbar__content').innerHTML, startup,
+        "initializing notifications preserves inline buttons and the surrounding text");
+    check.equal(message.querySelector('[data-id="startup-error"] .b3-snackbar__content').innerHTML, startupError + " vtest");
+    check.equal(message.querySelectorAll('[data-id="startup-actions"] .b3-snackbar__body').length, 1,
+        "initializing notifications preserves the explicitly supplied action layout");
+    const notification = notifications[0];
     const notify = () => api.showMessage(notification, -1, "info", "update-notify");
-    const button = () => message.querySelector<HTMLButtonElement>('[data-type="download-update"]');
+    const button = () => message.querySelector<HTMLButtonElement>('[data-id="update-notify"] [data-type="download-update"]');
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
     notify();
     button().click();
@@ -67,10 +70,10 @@ const cases = async (source: string, styles: string[], themes: string[], notific
     ownsKernel = false;
     notify();
     check.equal(button(), null, "remote frontends do not offer downloading the server's installer");
-    check.ok(message.querySelector("a"), "remote frontends retain the release link");
+    check.ok(message.querySelector('[data-id="update-notify"] a'), "remote frontends retain the release link");
     ownsKernel = true;
     api.showMessage(notification, -1, "info", "unrelated");
-    button().click();
+    message.querySelector<HTMLButtonElement>('[data-id="unrelated"] [data-type="download-update"]').click();
     check.equal(requests, 2, "only the update notification can invoke the download action");
     api.showMessage("Select all", -1, "info", "select-all-tip");
     const selectAllTip = message.querySelector('[data-id="select-all-tip"]');
@@ -81,10 +84,18 @@ const cases = async (source: string, styles: string[], themes: string[], notific
     check.equal(message.querySelector('[data-id="select-all-tip"]'), selectAllTip);
     check.equal(selectAllTip.textContent, "Loading...");
 
-    const plugin = document.createElement("div");
-    plugin.innerHTML = '<section id="plugin-wrapper">Before <a href="https://example.com/help">Help</a> ' +
+    const showContent = (html: string, id: string) => {
+        api.showMessage(html, -1, "info", id);
+        const content = message.querySelector(`[data-id="${id}"] .b3-snackbar__content`);
+        const expected = document.createElement("div");
+        expected.innerHTML = html;
+        check.equal(content.innerHTML, expected.innerHTML, "notification HTML retains its structure and node order");
+        return content;
+    };
+    const pluginHTML = '<section id="plugin-wrapper">Before <a href="https://example.com/help">Help</a> ' +
         '<button id="first" type="button" onclick="this.dataset.clicked = this.parentElement.id">First</button>' +
-        ' after <strong>important</strong><button id="second" type="button">Second</button></section>';
+        ' after <strong>important</strong><span class="fn__space"></span><button id="second" type="button">Second</button></section>';
+    const plugin = showContent(pluginHTML, "plugin");
     const wrapper = plugin.firstElementChild;
     const first = plugin.querySelector<HTMLButtonElement>("#first");
     const second = plugin.querySelector<HTMLButtonElement>("#second");
@@ -92,64 +103,46 @@ const cases = async (source: string, styles: string[], themes: string[], notific
     let direct = 0;
     wrapper.addEventListener("click", () => delegated++);
     first.addEventListener("click", () => direct++);
-    api.formatMessageActions(plugin);
-    document.body.append(plugin);
     check.equal(first.parentElement, wrapper, "plugin buttons retain their direct parent");
     check.deepEqual(Array.from(wrapper.querySelectorAll(":scope > button")), [first, second]);
-    check.equal(wrapper.querySelector("a").closest(".b3-snackbar__body"), wrapper.firstElementChild,
-        "ordinary links stay with the message body");
-    check.equal(wrapper.firstElementChild.textContent, "Before Help  after important");
+    check.equal(first.nextSibling.textContent, " after ", "text following an inline button stays after it");
+    check.ok(second.previousElementSibling.classList.contains("fn__space"), "plugin spacing remains intact");
+    check.equal(wrapper.querySelector("a").parentElement, wrapper, "links retain their parent");
     first.click();
     check.equal(first.dataset.clicked, "plugin-wrapper", "inline handlers retain the same parent");
     check.equal(direct, 1);
     check.equal(delegated, 1, "ancestor delegation is preserved");
-    const once = plugin.innerHTML;
-    api.formatMessageActions(plugin);
-    check.equal(plugin.innerHTML, once, "formatting an existing action group is idempotent");
-    plugin.remove();
+    showContent(pluginHTML, "plugin");
 
-    const nested = document.createElement("div");
-    nested.innerHTML = 'Outer<button id="outer-action">Outer action</button>' +
-        '<section>Inner<button id="inner-action">Inner action</button></section>';
-    const nestedButtons = Array.from(nested.querySelectorAll("button"));
-    const originalParents = nestedButtons.map(button => button.parentElement);
-    api.formatMessageActions(nested);
-    const nestedOnce = nested.innerHTML;
-    api.formatMessageActions(nested);
-    check.equal(nested.innerHTML, nestedOnce, "nested action groups do not grow new wrappers");
-    check.deepEqual(nestedButtons.map(button => button.parentElement), originalParents);
-
-    for (const html of [
+    for (const [index, html] of [
+        'Outer<button id="outer-action">Outer action</button><section>Inner<button>Inner action</button> after</section>',
+        'Before <input type="button" value="Action"> after <input type="submit"><input type="reset">',
+        'Before <a class="b3-button" href="https://example.com">Action</a> after <span role="button" tabindex="0">Next</span>',
+        '<div class="fn__flex" style="gap: 4px">Plugin <button hidden>Hidden</button><button>Action</button> after</div>',
         '<form><input name="before"><button type="submit">Save</button><input name="after"></form>',
         '<fieldset disabled><legend><input name="enabled"></legend><button>Disabled</button></fieldset>',
         "<label>Label <button>Action</button></label>",
         "<details><summary>Details</summary><button>Action</button></details>",
         "<table><tbody><tr><td><button>Action</button></td></tr></tbody></table>",
         '<div contenteditable="true">Editable <button>Action</button></div>',
-    ]) {
-        const semantic = document.createElement("div");
-        semantic.innerHTML = html;
-        const before = semantic.innerHTML;
-        api.formatMessageActions(semantic);
-        check.equal(semantic.innerHTML, before, "semantic plugin containers retain their structure and focus order");
+    ].entries()) {
+        showContent(html, `plugin-structure-${index}`);
+        showContent(html, `plugin-structure-${index}`);
     }
-    const form = document.createElement("form");
-    form.innerHTML = 'Form message <button type="submit">Submit</button><button type="reset">Reset</button>';
-    document.body.append(form);
+    const form = showContent('<form>Form message <button type="submit">Submit</button><button type="reset">Reset</button></form>',
+        "plugin-form").querySelector("form");
     const submit = form.querySelector<HTMLButtonElement>("button");
     let submissions = 0;
     form.addEventListener("submit", event => { event.preventDefault(); submissions++; });
-    api.formatMessageActions(form);
     check.equal(submit.form, form);
     submit.click();
-    check.equal(submissions, 1, "formatting does not replace native button behavior");
-    form.remove();
+    check.equal(submissions, 1, "notifications preserve native form submission");
 
-    api.showMessage(' <span class="fn__space"></span><button>Only action</button> ', -1, "info", "actions-only");
+    showContent(' <span class="fn__space"></span><button>Only action</button> ', "actions-only");
     check.equal(message.querySelector('[data-id="actions-only"] .b3-snackbar__body'), null);
-    api.showMessage("Text <button>Action</button>", -1, "info", "replaced-actions");
-    api.showMessage("Changed <button>New action</button>", -1, "info", "replaced-actions");
-    check.equal(message.querySelectorAll('[data-id="replaced-actions"] .b3-snackbar__body').length, 1);
+    showContent("Text <button>Action</button> after", "replaced-actions");
+    showContent("Changed <button>New action</button> after", "replaced-actions");
+    check.equal(message.querySelectorAll('[data-id="replaced-actions"] .b3-snackbar__body').length, 0);
     check.equal(message.querySelector('[data-id="replaced-actions"] button').textContent, "New action");
     api.showMessage("Error <button>Retry</button>", 0, "error", "replaced-error");
     api.showMessage("Changed error <button>Retry again</button>", 0, "error", "replaced-error");
@@ -158,6 +151,7 @@ const cases = async (source: string, styles: string[], themes: string[], notific
     check.equal(message.querySelector('[data-id="plain"] .b3-snackbar__actions'), null);
 
     notifications.forEach((html, index) => api.showMessage(html, -1, "info", `fixture-${index}`));
+    const compactIndex = notifications.findIndex(html => html.includes("b3-snackbar__action") && !html.includes("b3-snackbar__actions"));
     await tick();
     const actionHTML = notifications.map((_, index) =>
         message.querySelector(`[data-id="fixture-${index}"]`).outerHTML).join("");
@@ -203,9 +197,12 @@ const cases = async (source: string, styles: string[], themes: string[], notific
                     for (const notification of Array.from(doc.querySelectorAll<HTMLElement>('[data-id^="fixture-"]'))) {
                         const notificationContent = notification.querySelector<HTMLElement>(".b3-snackbar__content");
                         const parent = notification.querySelector<HTMLElement>(".b3-snackbar__actions");
-                        check.ok(parent, "each builtin and simple plugin fixture gets an action row");
-                        const body = parent.querySelector<HTMLElement>(":scope > .b3-snackbar__body");
-                        const buttons = Array.from(parent.querySelectorAll<HTMLElement>(":scope > .b3-snackbar__action"))
+                        const expected = document.createElement("div");
+                        expected.innerHTML = notifications[Number(notification.dataset.id.slice("fixture-".length))];
+                        check.equal(notificationContent.innerHTML, expected.innerHTML,
+                            "layout does not alter the caller's notification markup");
+                        const body = parent?.querySelector<HTMLElement>(":scope > .b3-snackbar__body");
+                        const buttons = Array.from(parent?.querySelectorAll<HTMLElement>(":scope > .b3-snackbar__action") || [])
                             .filter(button => frame.contentWindow.getComputedStyle(button).display !== "none");
                         check.ok(notificationContent.scrollWidth <= notificationContent.clientWidth + 1,
                             `actions fit at ${width}px with ${fontSize}px text: ${notification.dataset.id}`);
@@ -216,10 +213,19 @@ const cases = async (source: string, styles: string[], themes: string[], notific
                             buttons.forEach(button => check.ok(button.getBoundingClientRect().top >=
                                 body.getBoundingClientRect().bottom + 7, "actions start below the body"));
                         }
-                        const right = body ? body.getBoundingClientRect().right : parent.getBoundingClientRect().right;
                         const last = buttons.at(-1);
-                        if (last && body) check.ok(Math.abs(last.getBoundingClientRect().right - right) < 1,
+                        if (last && body) check.ok(Math.abs(last.getBoundingClientRect().right - body.getBoundingClientRect().right) < 1,
                             "the final action is aligned to the right edge");
+                        const compactButton = notificationContent.querySelector<HTMLElement>(":scope > .b3-snackbar__action");
+                        if (compactButton && notification.dataset.id === `fixture-${compactIndex}` && width === 1024 && fontSize === 14) {
+                            const text = doc.createRange();
+                            text.selectNode(notificationContent.firstChild);
+                            const bounds = text.getBoundingClientRect();
+                            const buttonBounds = compactButton.getBoundingClientRect();
+                            check.ok(buttonBounds.top < bounds.bottom && buttonBounds.bottom > bounds.top,
+                                "the font size reset stays beside its text when space permits");
+                            check.ok(buttonBounds.left >= bounds.right + 7, "compact actions retain their spacing");
+                        }
                         notification.querySelectorAll<HTMLElement>('[hidden]:not([hidden="until-found" i])').forEach(button =>
                             check.equal(frame.contentWindow.getComputedStyle(button).display, "none"));
                         notification.querySelectorAll<HTMLElement>('[hidden="until-found" i]').forEach(element => {
@@ -236,7 +242,7 @@ const cases = async (source: string, styles: string[], themes: string[], notific
     return "update-message-ok";
 };
 
-test("notifications preserve actions, retries and recovery text on desktop and mobile", {timeout: 30000}, async () => {
+test("notifications preserve caller layouts, actions, retries and recovery text on desktop and mobile", {timeout: 30000}, async () => {
     const source = transpileModule(readFileSync("src/dialog/message.ts", "utf8")
         .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
@@ -248,21 +254,47 @@ test("notifications preserve actions, retries and recovery text on desktop and m
     const themes = ["daylight", "midnight"].map(name => readFileSync(`appearance/themes/${name}/theme.css`, "utf8"));
     const lang = JSON.parse(readFileSync("appearance/langs/zh-CN.json", "utf8"));
     const button = (label: string) => `<button type="button" class="b3-button b3-button--white">${label}</button>`;
+    const updateTemplate = readFileSync("../kernel/model/updater.go", "utf8")
+        .match(/message = fmt.Sprintf\(`([^`]+b3-snackbar__actions[^`]+)`/)[1];
+    const updateMessage = updateTemplate.replace("%s", 'New release <a href="https://example.com/very-long-release-link">Release details</a>')
+        .replace("%s", "99.0.0-alpha.1").replace("%s", lang._kernel[437]);
+    const fontSizeSource = transpileModule(readFileSync("src/util/editorFontSize.ts", "utf8")
+        .match(/^const showEditorFontSizeMessage = [\s\S]+?^};/m)[0], {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
+    const renderFontSizeMessage = (languages: Record<string, unknown>) => {
+        let result = "";
+        new Function("window", "document", "showMessage", "MESSAGE_ID", fontSizeSource + "showEditorFontSizeMessage(24);")(
+            {siyuan: {languages}}, {querySelector: (): null => null}, (html: string) => {result = html;}, "editorFontSize");
+        return result;
+    };
+    let exportMessage = "";
+    const exportSource = transpileModule(readFileSync("src/protyle/export/util.ts", "utf8")
+        .match(/^export const afterExport = [\s\S]+?^};/m)[0].replace("export ", ""), {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
+    new Function("window", "document", "showMessage", "escapeHtml", exportSource + "afterExport('/export/result.pdf', 'export');")(
+        {siyuan: {languages: lang}}, {querySelector: () => ({addEventListener() {}})},
+        (html: string) => {exportMessage = html;}, (text: string) => text);
     const notifications = [
-        `New release <a href="https://example.com/very-long-release-link">Release details</a> ${button(lang._kernel[437])}`,
+        updateMessage,
         lang._kernel[252], lang._kernel[156],
-        `${lang.exported} /export/result.pdf<div class="fn__space"></div>${button(lang.showInFolder)}`,
+        exportMessage,
         ...[[lang.recording, lang.endRecord], [lang.uploadError, lang.retry],
             [lang.selectAllTip, lang.doNotRemindAgain], [lang.selectAllIncompleteTip, lang.loadAllAndSelectAll]]
             .map(([text, action]) => `<div class="fn__flex fn__flex-wrap"><span class="fn__flex-center">${text}</span>` +
                 `<span class="fn__space"></span>${button(action)}</div>`),
-        `${lang.editorFontSize} 24px<span class="fn__space"></span>${button(lang.resetEditorFontSize)}`,
+        renderFontSizeMessage(lang),
         `<span role="status">${lang.loading} 64/256</span><span class="fn__space"></span>${button(lang.cancel)}`,
-        `Plugin text${button("A long translated action label that must wrap inside narrow notifications")}${button("Another action")}`,
+        '<div class="b3-snackbar__actions"><div class="b3-snackbar__body">Explicit actions</div>' +
+            '<button class="b3-button b3-button--wrap b3-snackbar__action">A long translated action label that must wrap inside narrow notifications</button>' +
+            '<button class="b3-button b3-snackbar__action">Another action</button></div>',
         `Hidden action<button hidden class="b3-button">Hidden</button>${button("Visible")}`,
         `<div hidden>Hidden container${button("Hidden action")}</div>Visible${button("Visible action")}`,
         `<div hidden="UNTIL-FOUND">Searchable container${button("Searchable action")}</div>Visible${button("Visible action")}`,
         'Plugin text <a class="b3-button" href="https://example.com/action">Action link</a>',
+        ...readdirSync("appearance/langs").filter(name => name.endsWith(".json")).map(name =>
+            renderFontSizeMessage(JSON.parse(readFileSync(`appearance/langs/${name}`, "utf8")))),
     ];
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-update-message-"));
     const script = path.join(directory, "main.cjs");

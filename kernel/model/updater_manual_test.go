@@ -124,6 +124,14 @@ func TestManualUpdateNotification(t *testing.T) {
 		if available && !strings.Contains(events[0].Msg, `data-version="99.0.0"`) {
 			t.Fatal("notification lost the selected version")
 		}
+		if available {
+			if !strings.HasPrefix(events[0].Msg, `<div class="b3-snackbar__actions"><div class="b3-snackbar__body">New version <a `) ||
+				!strings.Contains(events[0].Msg, `</div><button type="button" class="b3-button b3-button--white b3-button--wrap b3-snackbar__action"`) {
+				t.Fatalf("notification must explicitly separate its body and download action: %s", events[0].Msg)
+			}
+		} else if strings.Contains(events[0].Msg, `b3-snackbar__actions`) {
+			t.Fatal("notification without a download action has an empty action layout")
+		}
 	}
 }
 

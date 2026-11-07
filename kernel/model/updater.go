@@ -351,8 +351,8 @@ func pushNewVersionNotification(release *updateRelease) {
 	message := fmt.Sprintf(Conf.Language(9), releaseLink)
 	if !skipNewVerInstallPkg() {
 		if _, err := getReleaseInstallPackage(release); err == nil {
-			message += fmt.Sprintf(` <button type="button" class="b3-button b3-button--white" data-type="download-update" data-version="%s">%s</button>`,
-				html.EscapeString(release.Version), html.EscapeString(Conf.Language(437)))
+			message = fmt.Sprintf(`<div class="b3-snackbar__actions"><div class="b3-snackbar__body">%s</div><button type="button" class="b3-button b3-button--white b3-button--wrap b3-snackbar__action" data-type="download-update" data-version="%s">%s</button></div>`,
+				message, html.EscapeString(release.Version), html.EscapeString(Conf.Language(437)))
 		}
 	}
 	util.PushUpdateMsg("update-notify", message, 15000)

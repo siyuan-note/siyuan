@@ -110,6 +110,9 @@ func TestDuplicateRichTitleSuffixLiteralDOM(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		if paragraph.LastChild.Type != ast.NodeText || paragraph.LastChild.TokensStr() != suffix {
+			t.Fatalf("suffix must be a literal text node: %+v", paragraph.LastChild)
+		}
 		if got := treenode.DocumentTitleText(paragraph); got != "Original"+suffix {
 			t.Fatalf("literal suffix changed: %q", got)
 		}
@@ -117,7 +120,7 @@ func TestDuplicateRichTitleSuffixLiteralDOM(t *testing.T) {
 		fragment := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: engine.ParseOptions}}
 		fragment.Root.AppendChild(paragraph)
 		dom := engine.Tree2BlockDOM(fragment, engine.RenderOptions, engine.ParseOptions)
-		if strings.Contains(dom, `data-type="backslash"`) || strings.Contains(dom, "<tag>") {
+		if strings.Contains(dom, `data-type="backslash"`) || strings.Contains(dom, `data-type="text"`) || strings.Contains(dom, "<tag>") {
 			t.Fatalf("suffix escaped or interpreted as HTML: %s", dom)
 		}
 		if !strings.Contains(dom, `data-type="em"`) {

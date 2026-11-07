@@ -97,7 +97,7 @@ const browserCases = async () => {
                 saved.selectNodeContents(titleElement);
                 saved.collapse(false);
                 check.equal(api.restoreEditorFocusRange(editor, saved), true, "standalone focused item needs no controller");
-                const replacement = item.cloneNode(true);
+                const replacement = item.cloneNode(true) as HTMLElement;
                 item.replaceWith(replacement);
                 check.equal(api.restorePendingFocus(editor, "item", saved, true, false), 1,
                     "reloaded item is resolved by stable ID");

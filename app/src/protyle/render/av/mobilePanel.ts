@@ -1,6 +1,7 @@
 import {updateMenuItemGroupClasses} from "../../../menus/menuGroup";
 import {getVisibleSheetViewport, waitForSheetViewport} from "../../../menus/sheetOpen";
 import {setSheetExpanded} from "../../../menus/sheetActions";
+import {getMobileSheetBounds, moveSheetGesture, SheetGesture} from "../../../mobile/util/mobileSheetGesture";
 import {escapeAttr} from "../../../util/escape";
 
 export const getMobileAVPanelBackTarget = (menuElement: HTMLElement) =>
@@ -13,13 +14,20 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
     menuElement.setAttribute("data-prevent-swipe", "true");
     menuElement.style.maxHeight = "";
     const scrimElement = panelElement.querySelector<HTMLElement>(".b3-dialog__scrim");
+    let preferredHeight: number;
+    let resize: SheetGesture;
+    const getResizeBounds = () => getMobileSheetBounds(menuElement.scrollHeight,
+        menuElement.firstElementChild.getBoundingClientRect().height,
+        getVisibleSheetViewport(window.innerHeight, window.visualViewport).height);
     const updateHeight = () => {
         const size = window.siyuan.mobile.size;
         const orientation = size.isLandscape ? size.landscape : size.portrait;
         const viewport = getVisibleSheetViewport(window.innerHeight, window.visualViewport);
         const fullHeight = Math.max(window.innerHeight, orientation?.height1 || 0);
-        menuElement.style.height = (menuElement.classList.contains("b3-menu--expanded") ? viewport.height :
-            Math.min(fullHeight * .56, viewport.height)) + "px";
+        menuElement.style.maxHeight = `min(${viewport.height}px, calc(100dvh - env(safe-area-inset-top)))`;
+        menuElement.style.height = (preferredHeight !== undefined ? Math.min(preferredHeight, viewport.height) :
+            menuElement.classList.contains("b3-menu--expanded") ? viewport.height :
+                Math.min(fullHeight * .56, viewport.height)) + "px";
         menuElement.style.setProperty("--b3-menu-sheet-bottom", viewport.bottomOffset + "px");
     };
     const updateContent = () => {
@@ -102,6 +110,7 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
     let suppressClickUntil = 0;
     const reset = () => {
         start = undefined;
+        resize = undefined;
         dragging = false;
         menuElement.style.transform = "";
         menuElement.style.transition = "";
@@ -125,6 +134,10 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
             element = element.parentElement;
         }
         const touch = event.touches[0];
+        if (target.closest(".b3-menu__title--actions")) {
+            const bounds = getResizeBounds();
+            resize = {height: menuElement.getBoundingClientRect().height, ...bounds, offset: 0, time: performance.now()};
+        }
         start = {x: touch.clientX, y: touch.clientY, time: performance.now(), height: menuElement.clientHeight,
             canExpand: !!target.closest(".b3-menu__title--actions") && !menuElement.classList.contains("b3-menu--expanded")};
     }, {passive: true});
@@ -134,6 +147,25 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
         }
         const touch = event.touches[0];
         const offset = touch.clientY - start.y;
+        if (resize) {
+            if (Math.abs(touch.clientX - start.x) > Math.max(4, Math.abs(offset))) {
+                reset();
+                updateHeight();
+                return;
+            }
+            if (!dragging && Math.abs(offset) < 4) return;
+            dragging = true;
+            menuElement.style.transition = "none";
+            Object.assign(resize, getResizeBounds());
+            const result = moveSheetGesture(resize, offset, performance.now());
+            preferredHeight = result.height;
+            setSheetExpanded(menuElement, result.height >= resize.max);
+            updateHeight();
+            menuElement.style.transform = `translateY(${result.excess}px)`;
+            scrimElement.style.opacity = Math.max(0, 1 - result.excess / Math.max(1, result.height)).toString();
+            if (event.cancelable) event.preventDefault();
+            return;
+        }
         if (!dragging && ((offset <= 0 && !start.canExpand) || Math.abs(touch.clientX - start.x) > Math.abs(offset))) {
             start = undefined;
             return;
@@ -156,14 +188,29 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
             return;
         }
         const offset = event.changedTouches[0].clientY - start.y;
+        if (resize) {
+            Object.assign(resize, getResizeBounds());
+            const result = moveSheetGesture(resize, offset, performance.now());
+            preferredHeight = result.height;
+            setSheetExpanded(menuElement, result.height >= resize.max);
+            suppressClickUntil = performance.now() + 300;
+            reset();
+            updateHeight();
+            if (result.close) {
+                panelElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
+            }
+            return;
+        }
         const velocity = Math.abs(offset) / Math.max(1, performance.now() - start.time);
         const shouldExpand = start.canExpand && (offset < -40 || (offset < -20 && velocity > .6));
         const shouldClose = offset > Math.min(120, start.height * .25) || (offset > 20 && velocity > .6);
         suppressClickUntil = performance.now() + 300;
         reset();
         if (shouldExpand) {
+            preferredHeight = undefined;
             setSheetExpanded(menuElement, true);
         } else if (shouldClose && menuElement.classList.contains("b3-menu--expanded")) {
+            preferredHeight = undefined;
             setSheetExpanded(menuElement, false);
         } else if (shouldClose) {
             // 复用关闭入口，确保日期、关联等编辑值提交及嵌套菜单关闭顺序一致

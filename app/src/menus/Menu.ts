@@ -270,7 +270,7 @@ export class Menu {
         this.sheetTouchStartTime = performance.now();
         this.sheetCanDrag = this.canDragSheet(event.target as HTMLElement);
         this.sheetDragging = false;
-        this.sheetStartHeight = this.element.clientHeight;
+        this.sheetStartHeight = this.element.getBoundingClientRect().height;
         this.sheetTouchIdentifier = touch.identifier;
         this.sheetResize = undefined;
         if (this.sheetCanDrag && (event.target as HTMLElement).closest(".b3-menu__title") === this.element.firstElementChild) {

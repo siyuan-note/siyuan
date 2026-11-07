@@ -1960,6 +1960,7 @@ body.mobile-topbar--merged {
 .mobile-bottom-sheet-dialog {
   .mobile-sheet-action-bar {
     flex-direction: column;
+    justify-content: flex-start;
     flex-wrap: nowrap;
     flex-shrink: 1;
     min-height: 0;

@@ -139,12 +139,12 @@ const runCases = sources => {
 
 module.exports = {fixtures, runCases};
 
-if (require.main === module && process.versions.electron && process.type === "browser") {
+if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow} = require("electron");
     app.setPath("userData", process.argv[2]);
     app.whenReady().then(async () => {
         const win = new BrowserWindow({show: false, width: 390, height: 844,
-            webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+            webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
         let code = 0;
         try {
             await win.loadURL("data:text/html,<html><body></body></html>");

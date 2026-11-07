@@ -237,7 +237,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         check(select.options.length === 6, "Mobile must offer toolbar, breadcrumb, reference, embed, slash, and image categories");
         select.value = "editor.ref";
         select.dispatchEvent(new Event("change", {bubbles: true}));
-        for (const key of ["newSubDoc", "newFileAtPath"]) {
+        for (const key of ["newFile", "newSubDoc", "newFileAtPath"]) {
             const path = `editor.ref.${key}`;
             const input = view.querySelector<HTMLInputElement>(`[data-entry-path='${path}']`);
             check(input?.checked, "Reference creation entries are visible by default");

@@ -47,9 +47,9 @@ import {getBuiltinProfileEntryVisibility} from "./profile";
 
 test("reference creation visibility has stable paths and preserves existing defaults", () => {
     const path = "editor.ref";
-    assert.deepEqual(getEntryCatalogChildren(path).map(item => item.key), ["newSubDoc", "newFileAtPath"]);
+    assert.deepEqual(getEntryCatalogChildren(path).map(item => item.key), ["newFile", "newSubDoc", "newFileAtPath"]);
     assert.equal(isEntryOrderSortable(path), false);
-    for (const key of ["newSubDoc", "newFileAtPath"]) {
+    for (const key of ["newFile", "newSubDoc", "newFileAtPath"]) {
         const entryPath = `${path}.${key}`;
         const entry = getEntryCatalogNode(entryPath);
         assert.equal(entry.type, "entry");

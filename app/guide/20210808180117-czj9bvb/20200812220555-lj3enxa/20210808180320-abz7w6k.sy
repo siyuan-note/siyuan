@@ -7,7 +7,7 @@
 		"id": "20210808180320-abz7w6k",
 		"title": "编辑器",
 		"type": "doc",
-		"updated": "20261107104457"
+		"updated": "20261107224449"
 	},
 	"Children": [
 		{
@@ -445,7 +445,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-5ii2y6n",
-				"updated": "20261107104457"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -502,7 +502,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261107104457-oh9rxn2",
-				"updated": "20261107104457"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -557,6 +557,15 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "新建子文档"
 				},
 				{
@@ -570,7 +579,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，两项默认显示。保存并启用方案后生效。"
+					"Data": "，三项默认显示。保存并启用方案后生效。"
 				}
 			]
 		},

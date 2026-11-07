@@ -760,7 +760,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
             createItemCount += dateHints.length;
             if (response.newDoc) {
                 const newFileName = Lute.UnEscapeHTMLStr(response.k);
-                if (!hideConfiguredCreate) {
+                if (!hideConfiguredCreate && getConfiguredEntryVisibility("editor.ref.newFile")) {
                     dataList.push({
                         value: `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
                         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>

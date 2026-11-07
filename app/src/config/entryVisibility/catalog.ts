@@ -933,6 +933,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
         label: location(lang("editor"), lang("ref")),
         sortable: false,
         children: [
+            node("newFile", lang("newFile"), true, undefined, false),
             node("newSubDoc", lang("newSubDoc"), true, undefined, false),
             node("newFileAtPath", lang("newFileAtPath"), true, undefined, false),
         ],

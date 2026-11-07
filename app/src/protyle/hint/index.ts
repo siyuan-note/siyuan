@@ -949,7 +949,7 @@ export class Hint {
                     return;
                 }
                 let searchHTML = "";
-                if (response.newDoc && !hideConfiguredCreate) {
+                if (response.newDoc && !hideConfiguredCreate && getConfiguredEntryVisibility("editor.ref.newFile")) {
                     const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.k}${Lute.Caret}'))`;
                     searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${response.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.k}</mark></span></div></button>`;

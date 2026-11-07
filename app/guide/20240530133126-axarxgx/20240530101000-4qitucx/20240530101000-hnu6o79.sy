@@ -8,7 +8,7 @@
 		"id": "20240530101000-hnu6o79",
 		"title": "エディタ",
 		"type": "doc",
-		"updated": "20261107104457"
+		"updated": "20261107224449"
 	},
 	"Children": [
 		{
@@ -460,7 +460,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-4f7o94j",
-				"updated": "20261107104457"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -545,7 +545,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261107104457-sno3sds",
-				"updated": "20261107104457"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -600,6 +600,15 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新規ドキュメント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "サブドキュメントを作成"
 				},
 				{
@@ -613,7 +622,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を個別に非表示にできます。両方とも既定では表示されます。プロファイルを保存して有効にすると適用されます。"
+					"Data": " を個別に非表示にできます。3 項目とも既定では表示されます。プロファイルを保存して有効にすると適用されます。"
 				}
 			]
 		},

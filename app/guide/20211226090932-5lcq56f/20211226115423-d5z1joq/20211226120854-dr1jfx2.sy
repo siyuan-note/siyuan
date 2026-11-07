@@ -7,7 +7,7 @@
 		"id": "20211226120854-dr1jfx2",
 		"title": "編輯器",
 		"type": "doc",
-		"updated": "20261107104457"
+		"updated": "20261107224449"
 	},
 	"Children": [
 		{
@@ -417,7 +417,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-4gm4g2v",
-				"updated": "20261107104457"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -474,7 +474,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261107104457-iip2m2r",
-				"updated": "20261107104457"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -529,6 +529,15 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "新建子文件"
 				},
 				{
@@ -542,7 +551,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，兩項預設顯示。儲存並啟用方案後生效。"
+					"Data": "，三項預設顯示。儲存並啟用方案後生效。"
 				}
 			]
 		},

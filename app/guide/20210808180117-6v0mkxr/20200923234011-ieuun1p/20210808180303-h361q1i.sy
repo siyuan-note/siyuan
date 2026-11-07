@@ -7,7 +7,7 @@
 		"id": "20210808180303-h361q1i",
 		"title": "Editor",
 		"type": "doc",
-		"updated": "20261107104457"
+		"updated": "20261107224449"
 	},
 	"Children": [
 		{
@@ -456,7 +456,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-3cctil8",
-				"updated": "20261107104457"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -541,7 +541,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261107104457-nrq65rr",
-				"updated": "20261107104457"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -596,6 +596,15 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
+					"TextMarkTextContent": "New Doc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Create sub doc"
 				},
 				{
@@ -609,7 +618,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " independently in reference search candidates; both are shown by default. Save and activate the profile to apply the settings."
+					"Data": " independently in reference search candidates; all three are shown by default. Save and activate the profile to apply the settings."
 				}
 			]
 		},

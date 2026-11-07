@@ -34,18 +34,11 @@ export const genBazaarPackagePanelHTML = (
         ${bazaarType === "themes" ? genThemeModeSelectHTML() : ""}
         <div class="fn__space"></div>
         <div class="fn__flex config-bazaar__filter-row">
+            <button type="button" class="block__icon block__icon--show block__icon--touch ariaLabel${filters?.hideUnsupportedVersion === true || filters?.hideIncompatiblePlatform === true ? " block__icon--active" : ""}" data-bazaar-filter-menu aria-label="${window.siyuan.languages.filter}" data-position="north" aria-haspopup="menu" aria-expanded="false">
+                <svg><use xlink:href="#iconFilter"></use></svg>
+            </button>
             <input spellcheck="false" class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
-        </div>
-        <div class="config-bazaar__compatibility ft__smaller">
-            <label class="fn__flex fn__flex-center">
-                <input type="checkbox" class="b3-switch" data-bazaar-filter="hideUnsupportedVersion"${filters?.hideUnsupportedVersion === true ? " checked" : ""}>
-                <span class="fn__space"></span><span>${window.siyuan.languages.bazaarHideUnsupportedVersion}</span>
-            </label>
-            <label class="fn__flex fn__flex-center">
-                <input type="checkbox" class="b3-switch" data-bazaar-filter="hideIncompatiblePlatform"${filters?.hideIncompatiblePlatform === true ? " checked" : ""}>
-                <span class="fn__space"></span><span>${window.siyuan.languages.bazaarHideIncompatiblePlatform}</span>
-            </label>
         </div>
     </div>
     <div id="${config.panelID}" class="config-bazaar__content">

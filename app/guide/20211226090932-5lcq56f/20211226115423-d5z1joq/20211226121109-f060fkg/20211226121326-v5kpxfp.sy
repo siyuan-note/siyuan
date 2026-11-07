@@ -6,7 +6,7 @@
 		"id": "20211226121326-v5kpxfp",
 		"title": "主題",
 		"type": "doc",
-		"updated": "20261107023948"
+		"updated": "20261107142118"
 	},
 	"Children": [
 		{
@@ -724,7 +724,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226121625-afma4ct",
-				"updated": "20261107023948"
+				"updated": "20261107142118"
 			},
 			"Children": [
 				{
@@ -832,12 +832,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261107023948-9mgy2ah",
-				"updated": "20261107023948"
+				"updated": "20261107142118"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "線上瀏覽插件、主題、圖示、範本和小工具時，可以分別或同時勾選 "
+					"Data": "線上瀏覽插件、主題、圖示、範本和小工具時，點擊搜尋框左側的篩選圖示，在選單中分別或同時勾選 "
 				},
 				{
 					"Type": "NodeTextMark",

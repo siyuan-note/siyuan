@@ -44,6 +44,7 @@ import {
 import {genBazaarPackagePanelHTML} from "./bazaar/html";
 import {filterBazaarPackagesByCompatibility} from "./bazaar/filters";
 import {bindBazaarEvents} from "./bazaar/events";
+import {closeBazaarFilterMenu, refreshBazaarFilterMenu} from "./bazaar/filterMenu";
 import {renderBazaarInstall} from "./bazaar/installTask";
 import {
     bindRatingUserChange,
@@ -153,6 +154,7 @@ export const bazaar = {
         this.element = element;
     },
     _invalidateMount() {
+        closeBazaarFilterMenu(this.element);
         Array.from(this._bazaarCardRenderStates.keys()).forEach((container) => {
             this._disposeBazaarCardRender(container);
         });
@@ -1923,18 +1925,12 @@ type="checkbox">
     },
     _refreshCompatibilityFilters() {
         if (!this.element?.isConnected) return;
+        refreshBazaarFilterMenu(this.element);
         BAZAAR_PACKAGE_TYPES.forEach((bazaarType) => {
             const config = BAZAAR_PACKAGE_CONFIG[bazaarType];
             const container = this.element.querySelector(`#${config.panelID}`) as HTMLElement;
             const panel = container?.closest(".config-bazaar__panel");
             if (!panel) return;
-            const filters = window.siyuan.config.bazaar.compatibilityFilters?.[bazaarType];
-            panel.querySelectorAll<HTMLInputElement>("[data-bazaar-filter]").forEach((input) => {
-                if (!input.disabled) {
-                    input.checked = input.dataset.bazaarFilter === "hideUnsupportedVersion" ?
-                        filters?.hideUnsupportedVersion === true : filters?.hideIncompatiblePlatform === true;
-                }
-            });
             if (panel.getAttribute("data-init") === "true") {
                 this._renderBazaarCards(container,
                     sortBazaarPackages(this._data[bazaarType], window.siyuan.storage[Constants.LOCAL_BAZAAR][config.tabType]),

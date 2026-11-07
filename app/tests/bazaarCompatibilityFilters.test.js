@@ -47,11 +47,14 @@ const compileSources = () => {
         "config/bazaar/batchRenderer", "util/bazaarPackage", "util/escape", "util/number",
         "util/themeCompatibility", "protyle/util/hasClosest", "config/bazaar/runtime", "config/bazaarTab",
         "config/util/namespaceApi", "config/util/configApi", "config/util/dotPath", "config/util/sectionRuntime",
-        "config/setting/pending"]) {
+        "config/setting/pending", "config/bazaar/filterMenu", "menus/Menu", "menus/menuToggle",
+        "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/menuKeyboard",
+        "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "util/setPosition", "util/zIndex"]) {
         modules[file] = compile(read(`src/${file}.ts`));
     }
     assert.match(read("src/config/setting/tabs.ts"), /mount:\s*mountBazaarTab/);
-    return {modules, controller: compile(body) + "\nreturn {bazaar, mountBazaarTab, unmountBazaarTab, bindBazaarEvents, openSettingTab};"};
+    return {modules, icons: read("appearance/icons/litheness/icon.js"),
+        controller: compile(body) + "\nreturn {bazaar, mountBazaarTab, unmountBazaarTab, bindBazaarEvents, openSettingTab};"};
 };
 
 const setupFixture = async ({sources, languages, mobile}) => {
@@ -66,8 +69,21 @@ const setupFixture = async ({sources, languages, mobile}) => {
     let serverConfig = {trust: true, petalDisabled: false};
     window.siyuan = {languages, storage: {"local-bazaar": {
         plugin: "0", theme: "0", icon: "0", template: "0", widget: "0", downloadedPlugin: "0",
-    }}, config: {bazaar: JSON.parse(JSON.stringify(serverConfig))}};
+    }}, config: {bazaar: JSON.parse(JSON.stringify(serverConfig)), appearance: {}}, zIndex: 10,
+    mobile: {size: {portrait: {height1: innerHeight}}}, menus: {}};
     const overrides = {
+        "protyle/util/compatibility": {getEventName: () => "click", isInMobileApp: () => false,
+            updateHotkeyTip: value => value},
+        "util/functions": {isMobile: () => mobile},
+        "layout/getTopBarHeight": {getTopBarHeight: () => 0},
+        constants: {Constants: {TIMEOUT_DBLCLICK: 10, ATTRIBUTE_MENU_KEYMAP: "data-keymap",
+            KEYCODELIST: {13: "↩", 27: "Escape", 32: " ", 37: "←", 38: "↑", 39: "→", 40: "↓"}}},
+        "protyle/undo": {electronUndo() {}},
+        "plugin/EventBusCore": {forEachPluginSubscriber() {}},
+        "mobile/util/keyboardToolbar": {activeBlur() {}},
+        "block/popoverLifecycle": {setPopoverMenuOpen() {}},
+        "config/entryVisibility/runtime": {applyMenuEntryVisibility() {}},
+        "dialog/message": {showMessage: message => persistence.messages.push(message)},
         "util/fetch": {fetchSyncPost: (url, patch) => {
             assert.equal(url, "/api/setting/patch");
             const operation = {};
@@ -110,6 +126,26 @@ const setupFixture = async ({sources, languages, mobile}) => {
     const dependencies = Object.assign({}, ...Object.keys(sources.modules).filter(key =>
         !key.startsWith("config/util/") && key !== "config/bazaarTab" && key !== "config/setting/pending").map(load));
     document.documentElement.dataset.frontend = mobile ? "browser-mobile" : "browser-desktop";
+    document.addEventListener("keydown", event => {
+        if (load("menus/Menu").bindMenuKeydown(event)) {
+            event.preventDefault();
+        } else if (event.key === "Escape") {
+            window.siyuan.menus.menu.remove(true);
+        }
+    });
+    const createMenu = () => {
+        if (window.siyuan.menus.menu) {
+            document.body.append(window.siyuan.menus.menu.element);
+            return;
+        }
+        const element = document.createElement("div");
+        element.id = "commonMenu";
+        element.className = "b3-menu fn__none";
+        element.innerHTML = '<div class="b3-menu__title fn__none"><span class="b3-menu__label"></span></div>' +
+            '<div class="b3-menu__items"></div>';
+        document.body.append(element);
+        window.siyuan.menus.menu = new (load("menus/Menu").Menu)(element);
+    };
     const bind = root => {
         mounted = load("config/bazaarTab").mountBazaarTab(root).then(() => {
             api.bindBazaarEvents(api.bazaar, {}, api.bazaar._captureMount());
@@ -132,6 +168,7 @@ const setupFixture = async ({sources, languages, mobile}) => {
             document.body.innerHTML = '<div id="model" style="width:100%;height:100%"><div class="fixture-host" style="width:100%;height:100%"></div></div>';
             const host = document.querySelector(".fixture-host");
             host.innerHTML = options.html;
+            createMenu();
             options.bindEvent(host);
         },
     });
@@ -145,14 +182,34 @@ const setupFixture = async ({sources, languages, mobile}) => {
             assert.ok(bazaar.element.classList.contains("config--mobile"));
         } else {
             document.body.innerHTML = '<div class="config" style="height:100%;width:100%"></div>';
+            createMenu();
             await bind(document.body.firstElementChild);
         }
         const installed = [{name: "installed-incompatible", bazaarIncompatible: true, bazaarVersionUnsupported: true}];
         bazaar._data.downloaded = installed;
         bazaar.element.querySelector("#configBazaarDownloaded").textContent = "Installed packages stay visible";
+        new Function(sources.icons)();
     };
     const panel = type => bazaar.element.querySelector(`.config-bazaar__panel[data-type="${dependencies.BAZAAR_PACKAGE_CONFIG[type].tabType}"]`);
-    const input = (type, filter) => panel(type).querySelector(`[data-bazaar-filter="${filter}"]`);
+    const button = type => panel(type).querySelector("[data-bazaar-filter-menu]");
+    const input = (type, filter) => {
+        const menu = window.siyuan.menus.menu;
+        if (menu.data !== button(type) || menu.element.classList.contains("fn__none")) button(type).click();
+        return menu.element.querySelector(`[data-bazaar-filter="${filter}"]`);
+    };
+    const checked = (type, filter) => window.siyuan.config.bazaar.compatibilityFilters?.[type]?.[filter] === true;
+    const waitForMenu = async () => {
+        const menu = window.siyuan.menus.menu.element;
+        const deadline = performance.now() + 2000;
+        while (performance.now() < deadline) {
+            const transform = getComputedStyle(menu).transform;
+            if (!menu.classList.contains("b3-menu--sheet") ||
+                (menu.style.transform === "translateY(0px)" &&
+                    (transform === "none" || Math.abs(new DOMMatrixReadOnly(transform).m42) < .5))) return;
+            await new Promise(resolve => setTimeout(resolve, 25));
+        }
+        assert.fail("shared menu opening animation did not settle");
+    };
     const names = type => Array.from(panel(type).querySelectorAll(".b3-card[data-name]"), item => item.dataset.name);
     const response = (type, packages, mount = bazaar._beginBazaarRequest(type)) => {
         panel(type).setAttribute("data-init", "true");
@@ -177,7 +234,7 @@ const setupFixture = async ({sources, languages, mobile}) => {
         {name: "same-time", created: "2025-02-01T08:00:00+08:00", modes: ["light", "dark"]},
     ].map((item, index) => ({preferredName: item.name, preferredDesc: "Marketplace compatibility regression",
         author: "SiYuan", frontends: ["all"], downloads: 100 - index, updated: `2025-06-0${7 - index}`, ...item}));
-    window.fixture = {api, bazaar, remount, panel, input, names, response, select, activate,
+    window.fixture = {api, bazaar, remount, panel, button, input, checked, waitForMenu, names, response, select, activate,
         packages, requests, writes, persistence, types: dependencies.BAZAAR_PACKAGE_TYPES, mobile,
         settle: () => load("config/setting/pending").flushSettingSaves(),
         snapshot: () => JSON.parse(JSON.stringify(serverConfig))};
@@ -190,27 +247,33 @@ const runInteractionCases = async () => {
     const {bazaar, panel, input, names, response, select, activate, packages, requests, writes, types} = f;
     const version = "hideUnsupportedVersion";
     const platform = "hideIncompatiblePlatform";
-    const toggle = async (type, filter, label = false) => {
-        const control = input(type, filter);
-        (label ? control.labels[0] : control).click();
+    const toggle = async (type, filter) => {
+        input(type, filter).click();
         await f.settle();
     };
     const installedHTML = bazaar.element.querySelector("#configBazaarDownloaded").innerHTML;
     for (const type of types) {
         activate(type);
         response(type, packages);
-        assert.equal(panel(type).querySelectorAll("[data-bazaar-filter]").length, 2);
+        assert.equal(panel(type).querySelectorAll("[data-bazaar-filter]").length, 0);
+        assert.equal(panel(type).querySelectorAll("[data-bazaar-filter-menu]").length, 1);
+        assert.equal(f.button(type).getAttribute("aria-haspopup"), "menu");
         for (const filter of [version, platform]) {
             const element = input(type, filter);
-            assert.equal(element.type, "checkbox");
-            assert.equal(element.checked, false);
-            assert.equal(element.labels.length, 1);
-            assert.ok(element.labels[0].textContent.trim().length > 0);
+            assert.equal(element.getAttribute("role"), "menuitemcheckbox");
+            assert.equal(element.getAttribute("aria-checked"), "false");
+            assert.ok(element.textContent.trim().length > 0);
             assert.equal(element.tabIndex, 0);
         }
+        f.button(type).click();
+        await new Promise(resolve => setTimeout(resolve, 30));
+        assert.equal(f.button(type).getAttribute("aria-expanded"), "false", "repeated trigger closes the owned menu");
+        assert.equal(window.siyuan.menus.menu.element.classList.contains("fn__none"), true);
         assert.equal(panel(type).querySelector(".counter").textContent, "7");
-        await toggle(type, version, true);
-        assert.equal(input(type, version).checked, true, "label activates the native checkbox");
+        await toggle(type, version);
+        assert.equal(f.checked(type, version), true);
+        assert.ok(f.button(type).classList.contains("block__icon--active"));
+        assert.equal(input(type, version).getAttribute("aria-checked"), "true", "reopened menu shows saved state");
         assert.deepEqual(names(type), ["new", "old", "platform", "unknown", "same-time"]);
         await toggle(type, platform);
         assert.deepEqual(names(type), ["new", "old", "unknown", "same-time"]);
@@ -222,11 +285,12 @@ const runInteractionCases = async () => {
         assert.deepEqual(names(type), ["new", "old", "version", "unknown", "same-time"]);
         await toggle(type, platform);
         assert.equal(names(type).length, 7);
+        assert.equal(f.button(type).classList.contains("block__icon--active"), false);
     }
-    assert.equal(bazaar.element.querySelector('[data-type="downloaded"] [data-bazaar-filter]'), null);
+    assert.equal(bazaar.element.querySelector('[data-type="downloaded"] [data-bazaar-filter-menu]'), null);
     activate("plugins");
     await toggle("plugins", version);
-    assert.equal(input("themes", version).checked, false, "types do not share preferences");
+    assert.equal(f.checked("themes", version), false, "types do not share preferences");
     select("plugins", "6");
     assert.deepEqual(names("plugins"), ["platform", "new", "same-time", "old", "unknown"]);
     select("plugins", "7");
@@ -287,9 +351,9 @@ const runInteractionCases = async () => {
     assert.equal(oldRoot.isConnected, false);
     window.siyuan.config.bazaar = JSON.parse(JSON.stringify(persisted));
     await f.remount();
-    assert.equal(input("plugins", version).checked, true);
-    assert.equal(input("plugins", platform).checked, true);
-    assert.equal(input("icons", version).checked, false);
+    assert.equal(f.checked("plugins", version), true);
+    assert.equal(f.checked("plugins", platform), true);
+    assert.equal(f.checked("icons", version), false);
     assert.equal(panel("themes").querySelector(".b3-select").value, "7");
     activate("plugins");
     response("plugins", packages);
@@ -320,7 +384,7 @@ const runInteractionCases = async () => {
 const runPersistenceCases = async () => {
     const assert = require("node:assert/strict");
     const f = window.fixture;
-    const {input, names, response, packages, persistence, bazaar} = f;
+    const {input, button, checked, names, response, packages, persistence, bazaar} = f;
     const version = "hideUnsupportedVersion";
     const platform = "hideIncompatiblePlatform";
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -328,74 +392,139 @@ const runPersistenceCases = async () => {
     response("plugins", packages);
     persistence.paused = true;
     const initialSaves = persistence.saves.length;
-    const versionInput = input("plugins", version);
-    versionInput.focus();
-    versionInput.click();
-    assert.equal(versionInput.disabled, true);
-    assert.equal(window.siyuan.config.bazaar.compatibilityFilters.plugins.hideUnsupportedVersion, false);
-    versionInput.click();
+    const trigger = button("plugins");
+    input("plugins", version).focus();
+    input("plugins", version).click();
+    assert.equal(trigger.disabled, true);
+    assert.equal(checked("plugins", version), false);
+    trigger.click();
     await tick();
-    assert.equal(persistence.saves.length, initialSaves + 1, "rapid clicks cannot duplicate a pending save");
+    assert.equal(persistence.saves.length, initialSaves + 1, "rapid trigger clicks cannot duplicate a pending save");
+    assert.equal(window.siyuan.menus.menu.element.classList.contains("fn__none"), true);
     response("plugins", packages);
     assert.equal(names("plugins").length, 7, "a search response uses confirmed configuration while saving");
-    const platformInput = input("plugins", platform);
-    platformInput.focus();
-    platformInput.click();
-    await tick();
-    assert.equal(platformInput.disabled, true);
-    assert.equal(persistence.saves.length, initialSaves + 1, "namespace writes serialize different switches");
     persistence.saves[initialSaves].finish();
+    await f.settle();
     await tick();
-    assert.equal(persistence.saves.length, initialSaves + 2);
-    assert.equal(versionInput.disabled, false);
-    assert.equal(versionInput.checked, true);
-    assert.notEqual(document.activeElement, versionInput, "the earlier save cannot steal focus from a later pending switch");
-    assert.equal(platformInput.checked, true, "refresh does not overwrite another pending checkbox");
+    assert.equal(trigger.disabled, false);
+    assert.equal(checked("plugins", version), true);
+    assert.equal(document.activeElement, trigger, "keyboard focus returns to the trigger after saving");
     assert.equal(names("plugins").length, 5);
+    input("plugins", platform).focus();
+    input("plugins", platform).click();
+    await tick();
     const failed = f.settle().then(() => assert.fail("rejected save must fail"), () => {});
-    persistence.saves[initialSaves + 1].finish(false);
+    persistence.saves.at(-1).finish(false);
     await failed;
     await tick();
-    assert.equal(platformInput.disabled, false);
-    assert.equal(platformInput.checked, false);
-    assert.equal(document.activeElement, platformInput, "the last operated switch regains keyboard focus after failure");
-    assert.equal(window.siyuan.config.bazaar.compatibilityFilters.plugins.hideIncompatiblePlatform, false);
+    assert.equal(trigger.disabled, false);
+    assert.equal(checked("plugins", platform), false);
+    assert.equal(document.activeElement, trigger, "failed saves release the trigger and restore keyboard focus");
     assert.equal(names("plugins").length, 5, "failed writes do not filter the list");
     assert.equal(persistence.messages.at(-1), "Save rejected");
+    input("plugins", platform).focus();
+    input("plugins", platform).click();
+    await tick();
+    f.activate("icons");
+    input("icons", version).focus();
+    input("icons", version).click();
+    await tick();
+    const firstConcurrent = persistence.saves.at(-1);
+    firstConcurrent.finish();
+    await tick();
+    assert.notEqual(document.activeElement, trigger, "the earlier package save cannot steal the later operation's focus");
+    const lastConcurrent = persistence.saves.at(-1);
+    assert.notEqual(lastConcurrent, firstConcurrent, "different package saves remain serialized");
+    lastConcurrent.finish();
+    await f.settle();
+    await tick();
+    assert.equal(document.activeElement, button("icons"));
     persistence.paused = false;
-    platformInput.click();
+    input("icons", version).click();
+    await f.settle();
+    f.activate("plugins");
+    input("plugins", platform).click();
+    await f.settle();
+    input("plugins", platform).click();
     await f.settle();
     assert.equal(names("plugins").length, 4, "failed saves can be retried");
     persistence.paused = true;
-    versionInput.click();
+    input("plugins", version).click();
     await tick();
     const pending = persistence.saves.at(-1);
+    f.activate("icons");
+    input("icons", version);
+    const iconMenu = window.siyuan.menus.menu.element;
+    pending.finish();
+    await f.settle();
+    assert.equal(iconMenu.classList.contains("fn__none"), false,
+        "an earlier save cannot close another package type's menu");
+    assert.equal(window.siyuan.menus.menu.data, button("icons"));
+    window.siyuan.menus.menu.remove();
+    f.activate("plugins");
+    input("plugins", version).click();
+    await tick();
+    const pendingRemount = persistence.saves.at(-1);
     const oldRoot = bazaar.element;
     await f.remount();
     f.activate("plugins");
     response("plugins", packages);
     assert.equal(oldRoot.isConnected, false);
-    assert.equal(input("plugins", version).checked, true, "remount reads saved rather than pending state");
-    assert.equal(input("plugins", version).disabled, false);
+    assert.equal(checked("plugins", version), false, "remount reads saved rather than pending state");
+    assert.equal(button("plugins").disabled, false);
     const search = f.panel("plugins").querySelector(".b3-text-field");
     search.focus();
-    pending.finish();
+    pendingRemount.finish();
     await f.settle();
-    assert.equal(input("plugins", version).checked, false, "late save refreshes the current mount");
-    assert.equal(names("plugins").length, 5);
+    assert.equal(checked("plugins", version), true, "late save refreshes the current mount");
+    assert.equal(names("plugins").length, 4);
     assert.equal(document.activeElement, search, "a save on an old mount cannot steal the current search focus");
     persistence.paused = false;
+    input("plugins", version).click();
+    await f.settle();
     input("plugins", platform).click();
     await f.settle();
     assert.equal(names("plugins").length, 7);
+    persistence.paused = true;
+    input("plugins", version).focus();
+    input("plugins", version).click();
+    await tick();
+    f.activate("icons");
+    button("icons").dispatchEvent(new MouseEvent("click", {bubbles: true, detail: 1}));
+    document.activeElement.blur();
+    input("icons", version).dispatchEvent(new MouseEvent("click", {bubbles: true, detail: 1}));
+    await tick();
+    persistence.saves.at(-1).finish();
+    await tick();
+    assert.equal(document.activeElement, document.body,
+        "a keyboard-started save cannot reclaim focus after a later non-focusing touch selection");
+    persistence.saves.at(-1).finish();
+    await f.settle();
+    await tick();
+    assert.equal(document.activeElement, document.body, "touch selection does not force keyboard focus");
+    persistence.paused = false;
+    input("icons", version).click();
+    await f.settle();
+    f.activate("plugins");
+    input("plugins", version).click();
+    await f.settle();
+    input("plugins", version);
+    const oldMenu = window.siyuan.menus.menu.element;
+    await f.remount();
+    assert.equal(oldMenu.classList.contains("fn__none"), true, "unmount closes the owned filter menu");
     assert.ok(persistence.saves.every(({patch}) => Object.keys(patch).join() === "bazaar"));
     return {saves: persistence.saves.length, rejected: persistence.messages.length};
 };
 
-const checkLayout = () => {
+const checkLayout = async () => {
     const assert = require("node:assert/strict");
-    const {panel, types} = window.fixture;
-    let wrappedLabels = 0;
+    const {panel, button, input, types, mobile} = window.fixture;
+    const checkViewport = () => {
+        assert.equal(innerWidth, window.fixture.viewportWidth, "layout viewport keeps the requested CSS width");
+        assert.ok(Math.abs(visualViewport.width - window.fixture.viewportWidth) < 1,
+            `visual viewport keeps the requested CSS width: ${visualViewport.width}, scale ${visualViewport.scale}`);
+    };
+    checkViewport();
     for (const type of types) {
         const element = panel(type);
         if (element.classList.contains("fn__none")) continue;
@@ -403,7 +532,7 @@ const checkLayout = () => {
         const bounds = title.getBoundingClientRect();
         assert.ok(bounds.left >= -1 && bounds.right <= innerWidth + 1, `${type}: title fits the viewport`);
         assert.ok(element.scrollWidth <= element.clientWidth + 1, `${type}: no horizontal panel overflow`);
-        const controls = title.querySelectorAll("select, .config-bazaar__filter-row, .config-bazaar__compatibility > label");
+        const controls = title.querySelectorAll("select, .config-bazaar__filter-row");
         for (const control of controls) {
             const rect = control.getBoundingClientRect();
             assert.ok(rect.width > 0 && rect.height >= 16, `${type}: visible control`);
@@ -411,29 +540,43 @@ const checkLayout = () => {
             assert.ok(rect.top >= bounds.top - 1 && rect.bottom <= bounds.bottom + 1, `${type}: control is not clipped`);
             assert.ok(control.scrollWidth <= control.clientWidth + 1, `${type}: control content does not overflow`);
         }
-        const labels = Array.from(title.querySelectorAll(".config-bazaar__compatibility > label"));
         const rectangles = Array.from(controls, control => control.getBoundingClientRect());
         rectangles.forEach((a, index) => rectangles.slice(index + 1).forEach(b => {
             assert.ok(a.right <= b.left + 1 || b.right <= a.left + 1 || a.bottom <= b.top + 1 || b.bottom <= a.top + 1,
                 `${type}: toolbar controls do not overlap`);
         }));
-        for (const label of labels) {
-            const input = label.querySelector("input");
-            const inputBounds = input.getBoundingClientRect();
-            const labelBounds = label.getBoundingClientRect();
-            const text = label.lastElementChild;
-            const textBounds = text.getBoundingClientRect();
-            assert.equal(Math.round(inputBounds.width), 26, "shared switches keep their width");
-            assert.equal(Math.round(inputBounds.height), 16, "shared switches keep their height");
-            assert.equal(getComputedStyle(text).fontSize, "12px", "filters use shared small-text typography");
-            assert.ok(labelBounds.height >= 24, "labels retain a usable click target with smaller text");
-            assert.ok(Math.abs(inputBounds.top + inputBounds.height / 2 - textBounds.top - textBounds.height / 2) < 1,
-                "switches and label text are vertically centered, including wrapped translations");
-            if (textBounds.height > 24) wrappedLabels++;
-            assert.notEqual(getComputedStyle(input).backgroundColor, "rgba(0, 0, 0, 0)");
+        const trigger = button(type);
+        const triggerRect = trigger.getBoundingClientRect();
+        assert.equal(getComputedStyle(trigger).opacity, "1", "filter remains visible without toolbar hover");
+        const search = title.querySelector(".b3-text-field").getBoundingClientRect();
+        assert.ok(triggerRect.width >= 24 && triggerRect.height >= 24, "filter retains a shared icon-button hit target");
+        if (matchMedia("(pointer: coarse)").matches) {
+            assert.ok(triggerRect.width >= 44 && triggerRect.height >= 44, "touch filter retains its larger shared hit target");
         }
+        assert.ok(triggerRect.right <= search.left && Math.abs(triggerRect.top + triggerRect.height / 2 -
+            search.top - search.height / 2) < 1, "filter sits before the search field and is vertically centered");
+        input(type, "hideUnsupportedVersion");
+        await window.fixture.waitForMenu();
+        checkViewport();
+        const menu = window.siyuan.menus.menu.element;
+        assert.equal(menu.classList.contains("b3-menu--sheet"), mobile, "mobile uses the shared bottom sheet");
+        const menuRect = menu.getBoundingClientRect();
+        assert.ok(menuRect.left >= -1 && menuRect.right <= innerWidth + 1,
+            `menu fits viewport: ${JSON.stringify({type, mobile, viewport: innerWidth, left: menuRect.left,
+                right: menuRect.right, width: menuRect.width})}`);
+        assert.ok(menuRect.top >= -1 && menuRect.bottom <= innerHeight + 1,
+            `menu fits viewport height: ${JSON.stringify({type, mobile, viewport: innerHeight,
+                top: menuRect.top, bottom: menuRect.bottom, style: menu.getAttribute("style"),
+                transform: getComputedStyle(menu).transform, visualHeight: window.visualViewport.height})}`);
+        assert.equal(menu.querySelectorAll('[role="menuitemcheckbox"]').length, 2);
+        for (const item of menu.querySelectorAll('[role="menuitemcheckbox"]')) {
+            assert.ok(item.scrollWidth <= item.clientWidth + 1, "translated menu labels do not overflow");
+        }
+        window.siyuan.menus.menu.remove();
+        assert.equal(menu.classList.contains("config-bazaar__filter-menu"), false,
+            "closing removes filter-specific bounds from the shared menu");
     }
-    return {width: innerWidth, height: innerHeight, wrappedLabels};
+    return {width: innerWidth, height: innerHeight};
 };
 
 const runElectron = async () => {
@@ -458,20 +601,38 @@ const runElectron = async () => {
             catch (error) { return {error: error.stack}; }
         })()`).then(result => { assert.equal(result.error, undefined); return result.value; });
         let layouts = 0;
-        let wrappedLabels = 0;
+        const mobileViewport = read("src/mobile/index.ts").match(/setAttribute\("content", "([^"]*interactive-widget=resizes-content[^"]*)"\)/)[1];
         for (const mobile of [false, true]) {
-            await win.loadURL("data:text/html,<html><head><meta name='viewport' content='width=device-width, initial-scale=1'></head><body></body></html>");
+            await win.loadURL(`data:text/html,<html><head><meta name='viewport' content='${mobile ? mobileViewport : "width=device-width, initial-scale=1"}'></head><body></body></html>`);
             await win.webContents.insertCSS(styles[mobile ? "mobile" : "desktop"]);
             const theme = await win.webContents.insertCSS(read("appearance/themes/daylight/theme.css"));
             await evaluate(setupFixture, {sources, languages: languages.en, mobile});
             console.log("Interaction coverage", await evaluate(runInteractionCases));
             console.log("Persistence coverage", await evaluate(runPersistenceCases));
             win.webContents.debugger.attach("1.3");
-            // 通过 Chromium 的输入通道发送空格和 Tab，验证浏览器原生键盘行为。
+            await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: mobile});
+            await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled", {enabled: true});
+            // 通过 Chromium 的输入通道验证菜单导航、原生激活与退出焦点。
             await evaluate(() => {
                 window.fixture.activate("plugins");
+                window.fixture.response("plugins", window.fixture.packages);
+                window.fixture.button("plugins").focus();
+                require("node:assert/strict").equal(document.hasFocus(), true);
+            });
+            win.webContents.sendInputEvent({type: "keyDown", keyCode: "Space"});
+            win.webContents.sendInputEvent({type: "keyUp", keyCode: "Space"});
+            await new Promise(resolve => setTimeout(resolve, 100));
+            await evaluate(() => {
+                const assert = require("node:assert/strict");
+                assert.equal(window.fixture.button("plugins").getAttribute("aria-expanded"), "true");
                 window.fixture.input("plugins", "hideUnsupportedVersion").focus();
-                require("node:assert/strict").equal(document.activeElement, window.fixture.input("plugins", "hideUnsupportedVersion"));
+            });
+            win.webContents.sendInputEvent({type: "keyDown", keyCode: "Down"});
+            win.webContents.sendInputEvent({type: "keyUp", keyCode: "Down"});
+            await new Promise(resolve => setTimeout(resolve, 50));
+            await evaluate(() => {
+                require("node:assert/strict").equal(document.activeElement,
+                    window.fixture.input("plugins", "hideIncompatiblePlatform"), "ArrowDown focuses the second menu item");
             });
             win.webContents.sendInputEvent({type: "keyDown", keyCode: "Space"});
             win.webContents.sendInputEvent({type: "keyUp", keyCode: "Space"});
@@ -479,15 +640,67 @@ const runElectron = async () => {
             await evaluate(async () => {
                 const assert = require("node:assert/strict");
                 await window.fixture.settle();
-                assert.equal(window.fixture.input("plugins", "hideUnsupportedVersion").checked, true);
-                assert.equal(document.activeElement, window.fixture.input("plugins", "hideUnsupportedVersion"),
+                assert.equal(window.fixture.checked("plugins", "hideIncompatiblePlatform"), true);
+                assert.equal(window.fixture.checked("plugins", "hideUnsupportedVersion"), false,
+                    "Space activates the arrow-selected item, not the initially focused one");
+                window.fixture.input("plugins", "hideUnsupportedVersion").focus();
+            });
+            win.webContents.sendInputEvent({type: "keyDown", keyCode: "Return"});
+            win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
+            win.webContents.sendInputEvent({type: "keyUp", keyCode: "Return"});
+            await new Promise(resolve => setTimeout(resolve, 50));
+            await evaluate(async () => {
+                const assert = require("node:assert/strict");
+                await window.fixture.settle();
+                assert.equal(window.fixture.checked("plugins", "hideUnsupportedVersion"), true);
+                assert.equal(document.activeElement, window.fixture.button("plugins"),
                     "keyboard focus returns after the save without needing another Tab");
-                assert.deepEqual(window.fixture.names("plugins"), ["old", "new", "same-time", "platform", "unknown"]);
+                assert.deepEqual(window.fixture.names("plugins"), ["old", "new", "same-time", "unknown"]);
+                window.fixture.input("plugins", "hideUnsupportedVersion").focus();
             });
             win.webContents.sendInputEvent({type: "keyDown", keyCode: "Tab"});
             win.webContents.sendInputEvent({type: "keyUp", keyCode: "Tab"});
             await new Promise(resolve => setTimeout(resolve, 50));
-            await evaluate(() => require("node:assert/strict").equal(document.activeElement, window.fixture.input("plugins", "hideIncompatiblePlatform")));
+            await evaluate(() => {
+                const assert = require("node:assert/strict");
+                assert.equal(window.fixture.button("plugins").getAttribute("aria-expanded"), "false");
+                assert.equal(document.activeElement, window.fixture.panel("plugins").querySelector(".b3-text-field"));
+                window.fixture.input("plugins", "hideUnsupportedVersion").focus();
+            });
+            win.webContents.sendInputEvent({type: "keyDown", keyCode: "Escape"});
+            win.webContents.sendInputEvent({type: "keyUp", keyCode: "Escape"});
+            await new Promise(resolve => setTimeout(resolve, 50));
+            await evaluate(() => {
+                const assert = require("node:assert/strict");
+                assert.equal(window.fixture.button("plugins").getAttribute("aria-expanded"), "false");
+                assert.equal(document.activeElement, window.fixture.button("plugins"));
+            });
+            const point = await evaluate(() => {
+                const rect = window.fixture.button("plugins").getBoundingClientRect();
+                return {x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + rect.height / 2)};
+            });
+            await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {
+                type: "mousePressed", button: "left", clickCount: 1, ...point,
+            });
+            await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {
+                type: "mouseReleased", button: "left", clickCount: 1, ...point,
+            });
+            await new Promise(resolve => setTimeout(resolve, 100));
+            await evaluate(() => require("node:assert/strict").equal(
+                window.fixture.button("plugins").getAttribute("aria-expanded"), "true", "pointer opens filter menu"));
+            win.webContents.sendInputEvent({type: "keyDown", keyCode: "Down"});
+            win.webContents.sendInputEvent({type: "keyUp", keyCode: "Down"});
+            await new Promise(resolve => setTimeout(resolve, 50));
+            await evaluate(() => require("node:assert/strict").equal(document.activeElement,
+                window.fixture.input("plugins", "hideIncompatiblePlatform")));
+            win.webContents.sendInputEvent({type: "keyDown", keyCode: "Space"});
+            win.webContents.sendInputEvent({type: "keyUp", keyCode: "Space"});
+            await new Promise(resolve => setTimeout(resolve, 50));
+            await evaluate(async () => {
+                await window.fixture.settle();
+                require("node:assert/strict").equal(window.fixture.checked("plugins", "hideIncompatiblePlatform"), false,
+                    "pointer-opened menus support subsequent arrow navigation and native Space activation");
+            });
             await win.webContents.removeInsertedCSS(theme);
             for (const appearance of ["daylight", "midnight"]) {
                 const themeID = await win.webContents.insertCSS(read(`appearance/themes/${appearance}/theme.css`));
@@ -497,17 +710,19 @@ const runElectron = async () => {
                     await win.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride", {
                         width, height: 900, deviceScaleFactor: 1, mobile,
                     });
-                    await evaluate(async ({font, languages, appearance}) => {
+                    await evaluate(async ({font, languages, appearance, width}) => {
+                        await new Promise(resolve => requestAnimationFrame(resolve));
+                        window.fixture.viewportWidth = width;
                         document.documentElement.style.setProperty("--b3-font-size", `${font}px`);
                         document.body.style.fontSize = `${font}px`;
                         document.documentElement.dataset.themeMode = appearance === "midnight" ? "dark" : "light";
                         window.siyuan.languages = languages;
                         await window.fixture.remount();
                         for (const type of window.fixture.types) window.fixture.response(type, window.fixture.packages);
-                    }, {font, languages: languages[language], appearance});
+                    }, {font, languages: languages[language], appearance, width});
                     for (const type of await evaluate(() => window.fixture.types)) {
                         await evaluate(type => window.fixture.activate(type), type);
-                        wrappedLabels += (await evaluate(checkLayout)).wrappedLabels;
+                        await evaluate(checkLayout);
                         layouts++;
                     }
                     if (process.env.SIYUAN_BAZAAR_SCREENSHOTS) {
@@ -515,13 +730,17 @@ const runElectron = async () => {
                         mkdirSync(process.env.SIYUAN_BAZAAR_SCREENSHOTS, {recursive: true});
                         const file = `${mobile ? "mobile" : "desktop"}-${appearance}-${width}-${font}-${language}.png`;
                         writeFileSync(path.join(process.env.SIYUAN_BAZAAR_SCREENSHOTS, file), (await win.webContents.capturePage()).toPNG());
+                        await evaluate(() => window.fixture.input(window.fixture.types.at(-1), "hideUnsupportedVersion"));
+                        await evaluate(() => window.fixture.waitForMenu());
+                        writeFileSync(path.join(process.env.SIYUAN_BAZAAR_SCREENSHOTS, file.replace(".png", "-menu.png")),
+                            (await win.webContents.capturePage()).toPNG());
+                        await evaluate(() => window.siyuan.menus.menu.remove());
                     }
                 }
                 await win.webContents.removeInsertedCSS(themeID);
             }
             win.webContents.debugger.detach();
         }
-        assert.ok(wrappedLabels > 0, "layout coverage includes multiline filter labels");
         console.log(`Verified marketplace compatibility interactions and ${layouts} production-style layouts`);
     } catch (error) {
         console.error(error);

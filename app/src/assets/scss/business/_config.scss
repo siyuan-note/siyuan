@@ -857,6 +857,10 @@
       }
     }
 
+    &__filter-menu:not(.b3-menu--fullscreen) {
+      max-width: calc(100vw - 16px);
+    }
+
     &__filter-row {
       align-items: center;
       flex: 1 1 240px;
@@ -872,19 +876,6 @@
       > .counter {
         flex-shrink: 0;
         margin-left: auto;
-      }
-    }
-
-    &__compatibility {
-      display: flex;
-      flex-basis: 100%;
-      flex-wrap: wrap;
-      gap: 8px 16px;
-
-      > label {
-        align-items: center;
-        min-height: 24px;
-        min-width: 0;
       }
     }
 

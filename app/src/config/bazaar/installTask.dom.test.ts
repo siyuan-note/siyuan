@@ -58,6 +58,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     style.textContent = css + ":root {--b3-theme-primary:#3573f0;--b3-theme-on-primary:#fff;}";
     document.head.append(style);
     const externals = {
+        "./filterMenu": {bindBazaarFilterMenu() {}},
         "./installTask": tasks,
         "./packageConfig": {BAZAAR_PACKAGE_CONFIG: {plugins: {tabType: "plugin", api: {install: "/api/bazaar/installBazaarPlugin"}}},
             isBazaarPackageType: (value: string) => value === "plugins", getBazaarTypeByMyType: (): undefined => undefined},
@@ -276,7 +277,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
 };
 
 test("marketplace installation, single update and batch update progress and cancellation on desktop and mobile", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
     timeout: 45000,
 }, async () => {
     const sources = Object.fromEntries(["installTask", "events"].map(name => [name,
@@ -318,8 +319,9 @@ app.whenReady().then(async () => {
 });`, "utf8");
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
+    const headless = process.env.SIYUAN_ELECTRON_HEADLESS ? ["--ozone-platform=headless"] : [];
     try {
-        const result = await promisify(execFile)(require("electron") as unknown as string, [script],
+        const result = await promisify(execFile)(require("electron") as unknown as string, [...headless, script],
             {env, timeout: 40000, windowsHide: true});
         assert.match(result.stdout, /Bazaar install interaction cases passed/);
     } finally {

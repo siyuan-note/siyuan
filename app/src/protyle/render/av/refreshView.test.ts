@@ -8,6 +8,41 @@ import {DOMFixture} from "./testDOM";
 
 const compiled = compileModule("src/protyle/render/av/render.ts", ScriptTarget.ES2021);
 
+test("database search reuses HTTP snapshots when typing or clearing and ignores detached hosts", () => {
+    const document = new DOMFixture();
+    const block = document.createElement("div");
+    document.body.append(block);
+    const scheduled = new Map<number, () => void>();
+    const rendered: unknown[][] = [];
+    let next = 0;
+    let active = true;
+    const api = evaluateModule<any>(compiled, {require: () => ({
+        Constants: {TIMEOUT_INPUT: 1}, getAVRelationHost: () => ({active}),
+    }), clearTimeout: (id: number) => scheduled.delete(id), window: {
+        setTimeout: (callback: () => void) => { scheduled.set(++next, callback); return next; },
+    }});
+    api.avRender = (...args: unknown[]) => rendered.push(args);
+    const editor = {};
+    api.updateSearch(block, editor);
+    api.updateSearch(block, editor);
+    assert.equal(scheduled.size, 1);
+    const run = () => { const callbacks = [...scheduled.values()]; scheduled.clear(); callbacks.forEach(callback => callback()); };
+    run();
+    assert.deepEqual(rendered, [[block, editor, undefined, false, undefined, "presentation"]]);
+    api.updateSearch(block, editor);
+    run();
+    assert.equal(rendered.length, 2);
+    active = false;
+    api.updateSearch(block, editor);
+    run();
+    assert.equal(rendered.length, 2);
+    active = true;
+    api.updateSearch(block, editor);
+    block.remove();
+    run();
+    assert.equal(rendered.length, 2);
+});
+
 test("switching one database carrier refreshes only its copies and preserves other carriers", () => {
     const document = new DOMFixture();
     const root = document.createElement("div");

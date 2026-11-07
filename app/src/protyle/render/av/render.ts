@@ -851,7 +851,7 @@ export const updateSearch = (e: HTMLElement, protyle: IProtyle) => {
     searchTimeouts.set(e, window.setTimeout(() => {
         if (!e.isConnected || (getAVRelationHost(e) && !getAVRelationHost(e).active)) return;
         e.removeAttribute("data-render");
-        avRender(e, protyle, undefined, false);
+        avRender(e, protyle, undefined, false, undefined, "presentation");
     }, Constants.TIMEOUT_INPUT));
 };
 

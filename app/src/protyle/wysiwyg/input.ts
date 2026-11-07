@@ -243,11 +243,14 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
             html = renderedCalloutElement.outerHTML;
         }
         if (needRender && renderedTitleElement?.innerHTML !== editElement.innerHTML) {
-            blockElement.insertAdjacentHTML("afterend", html);
-            blockElement = blockElement.nextElementSibling as HTMLElement;
-            blockElement.previousElementSibling.remove();
-            if (blockElement.classList.contains("tab-item")) {
+            if (editElement.classList.contains("tab-item-title")) {
+                // 标题规范化只更新行内内容，避免替换编辑宿主后丢失焦点及页签输入层布局。
+                editElement.innerHTML = renderedTitleElement.innerHTML;
                 blockElement.dataset.tabsEditing = "true";
+            } else {
+                blockElement.insertAdjacentHTML("afterend", html);
+                blockElement = blockElement.nextElementSibling as HTMLElement;
+                blockElement.previousElementSibling.remove();
             }
             blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             mathRender(blockElement);
@@ -258,7 +261,9 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
                     });
                 }
             });
-            html = blockElement.outerHTML;
+            if (!editElement.classList.contains("tab-item-title")) {
+                html = blockElement.outerHTML;
+            }
         }
         focusByWbr(protyle.wysiwyg.element, range);
         protyle.hint.render(protyle);

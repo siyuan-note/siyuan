@@ -549,26 +549,13 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 link: {isOpen: false, click: followLink}, image: {isPreview: false},
                 input: (value: string) => {
                     if (!userPending || programmatic || isComposing()) return;
-                    const surface = activeSurface()?.element;
-                    const selection = element.ownerDocument.getSelection();
-                    // 空历史快照可能没有光标标记，撤销后将选区恢复到编辑区内。
-                    if (value.trim() === "" && mode !== "sv" && surface && selection &&
-                        selection.isCollapsed && selection.anchorNode === surface.parentNode &&
-                        surface.parentNode.childNodes[selection.anchorOffset] === surface) {
-                        const range = element.ownerDocument.createRange();
-                        range.selectNodeContents(surface);
-                        range.collapse(false);
-                        surface.focus();
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                    }
                     cachedInput = {version: inputVersion, value};
                     if (!scheduled) schedule();
                 },
                 after: () => queueMicrotask(() => {
                     try {
                         if (destroyed) return;
-                        if (instance.version !== "4.0.2-alpha.3") throw new Error("Unsupported Markdown editor version");
+                        if (instance.version !== "4.0.2-alpha.4") throw new Error("Unsupported Markdown editor version");
                         if (element.id) instance.vditor.outline.element.id = `${element.id}-outline`;
                         outlineAnimation = createMarkdownPanelAnimation({
                             element: instance.vditor.outline.element,

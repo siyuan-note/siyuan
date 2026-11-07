@@ -9,7 +9,7 @@ const startupSource = source.slice(source.indexOf("        const notebookPromise
     source.indexOf("        initBlockPopover(this);"));
 const compiled = transpileModule(startupSource, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
-const start = (failure?: string, render = async () => {}) => {
+const start = (failure?: string, render: (target: EventTarget) => Promise<void> = async () => {}) => {
     const stages: string[] = [];
     const errors: unknown[] = [];
     const calls: string[] = [];
@@ -49,7 +49,7 @@ const start = (failure?: string, render = async () => {}) => {
             failure === "language" ? onError(new Error("language")) : callback({loading: "Loading"}),
         initializeEnglishCommandTranslations() {}, Menus: class {}, ensureOnboarding: async () => {},
         initWindowWithLoading: async (callback: () => Promise<void>) => { await callback(); calls.push("rendered"); },
-        onGetConfig: async () => { fail("interface"); await render(); }, setTabPosition() {},
+        onGetConfig: async () => { fail("interface"); await render(window); }, setTabPosition() {},
         ipcRenderer: {send: () => calls.push("shown")}, onSetaccount() {}, setTitle() {}, initMessage() {},
         isInMobileApp: () => false, isIOSDevice: () => false, isChromeBrowser: () => true, showMessage() {},
         mainWs: {flushMainMessages: () => calls.push("flushed")}, bootSync() {}, exitAfterSettingsReset() {},
@@ -100,6 +100,20 @@ test("desktop startup reports failed dependencies without claiming successful in
                 failure === "/api/setting/getCloudUser" ? "interface" : failure);
         } finally { fixture.dispose(); }
     }
+});
+
+test("desktop interface initialization completes after unrelated global asynchronous errors", async () => {
+    const fixture = start(undefined, async target => {
+        await settle();
+        target.dispatchEvent(Object.assign(new Event("error"), {error: new SyntaxError("anonymous eval")}));
+        target.dispatchEvent(Object.assign(new Event("unhandledrejection"), {reason: new Error("plugin rejection")}));
+    });
+    try {
+        await settle();
+        await settle();
+        assert.equal(fixture.ready(), true);
+        assert.deepEqual(fixture.errors, []);
+    } finally { fixture.dispose(); }
 });
 
 test("desktop layout completion preserves diagnostic overlays while ordinary loading is removed", async () => {

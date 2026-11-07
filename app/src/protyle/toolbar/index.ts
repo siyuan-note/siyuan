@@ -60,7 +60,7 @@ import {isMobile} from "../../util/functions";
 import dayjs from "dayjs";
 import {insertEmptyBlock} from "../../block/util";
 import {matchHotKey} from "../util/hotKey";
-import {hideElements} from "../ui/hideElements";
+import {hideAllElements, hideElements} from "../ui/hideElements";
 import {electronUndo} from "../undo";
 import {clearTemplatePreview, mergeSameInlineElement, previewTemplate, toolbarKeyToMenu} from "./util";
 import {openTemplateManager} from "../../template/manager";
@@ -342,6 +342,7 @@ export class Toolbar {
         }
         this.rangePosition = getSelectionPosition(nodeElement, range, true, position);
         updateFontControls(protyle);
+        hideAllElements(["toolbar"]);
         this.element.classList.remove("fn__none");
         this.toolbarHeight = this.element.clientHeight;
         const y = this.setSelectionElementPosition(protyle, this.element);

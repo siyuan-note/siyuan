@@ -22,6 +22,17 @@ const browserCases = (sources: Record<string, string>, css: string, themes: stri
         "../../layout/getTopBarHeight": topBar,
         "./selectionElementPosition": load(sources.selection),
         "./subElementLifecycle": load(sources.lifecycle),
+        "../ui/hideElements": load(sources.hide),
+        "../util/hasClosest": {
+            hasClosestBlock: (node: Node) => (node instanceof Element ? node : node.parentElement)?.closest("[data-type]"),
+            hasClosestByTag: (node: Node, tag: string) => (node instanceof Element ? node : node.parentElement)?.closest(tag),
+        },
+        "../util/selection": {getSelectionPosition: (_node: HTMLElement, range: Range) => ({left: range.getBoundingClientRect().left, isBottom: false})},
+        "../../util/functions": {isMobile: () => false},
+        "../../constants": {Constants: {ZWSP: "\u200b"}},
+        "./BlockType": {updateBlockTypeButton: () => {}},
+        "./fontControls": {updateFontControls: () => {}},
+        "../../config/entryVisibility/runtime": {applyToolbarEntryVisibility: () => {}},
     });
     const style = document.createElement("style");
     style.textContent = css + `
@@ -45,9 +56,9 @@ body {margin:0;font-family:Arial,sans-serif}
                     const content = owner.querySelector<HTMLElement>(".fixture-content")!;
                     const host = document.createElement("div");
                     if (kind !== "body") host.className = "protyle protyle-title__rich protyle-lite-fragment";
-                    host.innerHTML = '<div class="fixture-text" contenteditable="true"><span>Small </span><strong>Selected text</strong></div>';
+                    host.innerHTML = '<div class="protyle-wysiwyg"><div class="fixture-text" data-type="NodeParagraph" contenteditable="true"><span>Small </span><strong>Selected text</strong></div></div>';
                     content.append(host);
-                    const editable = host.firstElementChild as HTMLElement;
+                    const editable = host.querySelector<HTMLElement>(".fixture-text")!;
                     editable.style.fontSize = `${fontSize}px`;
                     const larger = editable.querySelector<HTMLElement>("strong")!;
                     larger.style.fontSize = `${fontSize + 12}px`;
@@ -60,10 +71,20 @@ body {margin:0;font-family:Arial,sans-serif}
                     const subject = Object.assign(Object.create(Toolbar.prototype), {
                         element: toolbarElement, range, isMultipleClick: multipleClick,
                         rangePosition: {left: range.getBoundingClientRect().left, top: range.getBoundingClientRect().top, isBottom: false, rectIndex: 0},
+                        getCurrentToolbarType: (): string[] => [],
                     });
                     const protyle = {element: kind === "body" ? owner : host, notebookId: "notebook",
+                        wysiwyg: {element: host.querySelector(".protyle-wysiwyg")}, contentElement: content,
                         block: {rootID: kind === "notebook-title" ? "notebook" : "document"}};
-                    subject.setSelectionElementPosition(protyle, toolbarElement);
+                    const staleToolbar = toolbarElement.cloneNode(true) as HTMLElement;
+                    document.body.append(staleToolbar);
+                    staleToolbar.style.display = "flex";
+                    subject.render(protyle, range, {detail: multipleClick ? 2 : 1});
+                    check.ok(staleToolbar.classList.contains("fn__none"), "selection in another editor hides the old toolbar without relying on pointer bubbling");
+                    check.equal(staleToolbar.style.display, "");
+                    check.ok(!toolbarElement.classList.contains("fn__none"));
+                    subject.render(protyle, range, {detail: multipleClick ? 2 : 1});
+                    check.ok(!toolbarElement.classList.contains("fn__none"), "repeated selection keeps the active toolbar visible");
                     const selection = range.getBoundingClientRect();
                     const toolbar = toolbarElement.getBoundingClientRect();
                     const evidence = JSON.stringify({kind, multipleClick, fontSize, selection: selection.toJSON(), toolbar: toolbar.toJSON()});
@@ -109,7 +130,7 @@ test("selection toolbars avoid complete title and body selections at different f
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
     const sources = {toolbar: source("index.ts"), selection: source("selectionElementPosition.ts"),
-        position: source("../../util/setPosition.ts"), lifecycle: source("subElementLifecycle.ts")};
+        position: source("../../util/setPosition.ts"), lifecycle: source("subElementLifecycle.ts"), hide: source("../ui/hideElements.ts")};
     const css = compile(join(__dirname, "../../assets/scss/protyle/_toolbar.scss"), {logger: Logger.silent}).css;
     const themes = ["daylight", "midnight"].map(theme => readFileSync(join(__dirname, `../../../appearance/themes/${theme}/theme.css`), "utf8"));
     const directory = mkdtempSync(join(tmpdir(), "siyuan-selection-toolbar-"));
@@ -135,7 +156,9 @@ app.whenReady().then(async()=>{
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
-        const result = await promisify(execFile)(require("electron") as unknown as string, [script],
+        const args = process.env.SIYUAN_ELECTRON_HEADLESS === "1" ?
+            ["--ozone-platform=headless", "--ozone-override-screen-size=1920,1080", script] : [script];
+        const result = await promisify(execFile)(require("electron") as unknown as string, args,
             {env, windowsHide: true, timeout: 40000});
         assert.match(result.stdout, /Selection toolbar cases passed: 108/);
     } finally {

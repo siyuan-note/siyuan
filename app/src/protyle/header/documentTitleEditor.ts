@@ -27,7 +27,7 @@ import {buildBlockDOMClipboardData} from "../util/blockDOMClipboard";
 import {writeClipboardData} from "../util/compatibility";
 import {prepareExternalClipboardHTML} from "../util/richClipboard";
 import {isCommittedTextInput} from "../wysiwyg/compositionInput";
-import {hideElements} from "../ui/hideElements";
+import {hideAllElements} from "../ui/hideElements";
 import {getDocumentTitleDOMFingerprint, getDocumentTitleLute, getDocumentTitleUnsupportedPasteBlocks,
     prepareDocumentTitleBlockDOM, prepareDocumentTitleInitialDOM} from "./documentTitleDOM";
 
@@ -137,7 +137,7 @@ export class DocumentTitleEditor {
             redo => void this.undo(redo).catch((): void => {}));
         this.fragment.wysiwyg.addEventListener("mousedown", () => {
             // 标题事件在宿主处停止冒泡，需在编辑区内关闭选中文字的工具栏。
-            hideElements(["toolbar"], this.fragment.protyle);
+            hideAllElements(["toolbar"]);
         });
         const events = ["input", "copy", "cut", "paste", "pointerdown", "pointerup", "mousedown", "mouseup",
             "click", "dblclick", "contextmenu", "dragstart", "dragover", "drop", "keyup"];

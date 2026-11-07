@@ -35,6 +35,7 @@ import {
 } from "../util/hasClosest";
 import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
+import {getTopBarHeight} from "../../layout/getTopBarHeight";
 import {transaction, updateBatchTransaction, updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
 import {
@@ -251,16 +252,15 @@ export class Toolbar {
         const mindmap = protyle.element.closest(".mindmap-view");
         const protyleRect = (mindmap || cellEditor?.parentElement.closest(".protyle") ||
             protyle.element).getBoundingClientRect();
-        const viewportBoundary = element.dataset.positionBoundary === "viewport";
-        const topBoundary = viewportBoundary ? 8 : protyleRect.top + 30;
+        // 标题片段只包住文字，浮层需要使用窗口空间避让选区。
+        const viewportBoundary = element.dataset.positionBoundary === "viewport" ||
+            !!protyle.element.closest(".protyle-title__rich");
+        const topBoundary = Math.max(getTopBarHeight(), viewportBoundary ? 8 : protyleRect.top + 30);
         const bottomBoundary = viewportBoundary ? window.innerHeight - 8 :
             Math.min(protyleRect.bottom, window.innerHeight);
-        const rangeRects = this.range.getClientRects();
-        const rangeRect = (typeof this.rangePosition.rectIndex === "number" ?
-            rangeRects[this.rangePosition.rectIndex] : undefined) ||
-            (this.rangePosition.isBottom ? rangeRects[rangeRects.length - 1] : rangeRects[0]) ||
-            this.range.getBoundingClientRect();
-        const gap = this.isMultipleClick ? 2 : 4;
+        // 不同字号和换行会产生多个矩形，浮层需要避让完整选区。
+        const rangeRect = this.range.getBoundingClientRect();
+        const gap = element === this.element ? 8 : this.isMultipleClick ? 2 : 4;
         const toolbarRect = element.dataset.subElementSource === SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE &&
         !this.element.classList.contains("fn__none") ? this.element.getBoundingClientRect() : undefined;
         const positionOptions = {

@@ -5205,7 +5205,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     new Function("protyle", "services", `const {${Object.keys(services).join(",")}} = services;\n` + dragSource)
         .call(Object.assign(dragOwner.wysiwyg, {host: dragHost, owner: dragOwner}), dragOwner, services);
     const dragErrors: string[] = [];
-    const collectDragError = (event: ErrorEvent) => dragErrors.push(event.message);
+    const collectDragError = (event: ErrorEvent) => dragErrors.push(event.error?.stack || event.message);
     window.addEventListener("error", collectDragError);
     await settle();
     const selectedIDs = () => Array.from(dragEditor.querySelectorAll<HTMLElement>(".protyle-wysiwyg--select"))

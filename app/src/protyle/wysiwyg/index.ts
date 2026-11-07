@@ -1320,7 +1320,7 @@ export class WYSIWYG {
             const customElement = hasClosestByClassName(target, "protyle-custom");
             // 富文本预览以 b3-typography 作为渲染边界，先回到单元格再查找数据库块。
             let nodeElement = hasClosestBlock(avCellElement || target) as HTMLElement;
-            if (nodeElement?.classList.contains("av")) {
+            if (nodeElement && nodeElement.classList.contains("av")) {
                 prepareAVColumnWindow(nodeElement);
             }
             let clickedTableNode = !customElement && nodeElement && nodeElement.dataset.type === "NodeTable" ?

@@ -11,9 +11,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
-// unwrapNativeContainerInsert 将同类型页签或脑图片段的直属项目插入目标容器，保留项目的 ID 和属性。
+// unwrapNativeContainerInsert 将同类型容器片段的直属项目插入目标容器，保留项目的 ID 和属性。
 func unwrapNativeContainerInsert(root, parent *ast.Node) (changed bool, err error) {
-	if root == nil || parent == nil || (parent.Type != ast.NodeTabs && parent.Type != ast.NodeMindmap) {
+	if root == nil || parent == nil || (parent.Type != ast.NodeList && parent.Type != ast.NodeTabs && parent.Type != ast.NodeMindmap) {
 		return false, nil
 	}
 	for node := root.FirstChild; node != nil; {

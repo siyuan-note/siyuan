@@ -40,13 +40,12 @@ export const createMarkdownSubmenu = (options: {
         element.classList.add("b3-menu__item--show");
         element.setAttribute("aria-expanded", "true");
         const anchor = element.getBoundingClientRect();
-        // 按边框盒计算高度，避免内容完整显示时仍出现滚动条。
+        // 按实际边框盒高度计算可用空间，保留缩放产生的亚像素边框。
         menu.style.maxHeight = "none";
         const bounds = menu.getBoundingClientRect();
-        const border = menu.offsetHeight - menu.clientHeight;
         const firstItem = menu.firstElementChild?.getBoundingClientRect();
         const top = Math.max(8, anchor.top - (firstItem ? firstItem.top - bounds.top : 0));
-        const position = getAnchoredMenuPosition(top, 0, Math.ceil(menu.scrollHeight + border), innerHeight - 8, 8);
+        const position = getAnchoredMenuPosition(top, 0, Math.ceil(bounds.height), innerHeight - 8, 8);
         menu.style.top = `${Math.max(8, position.top)}px`;
         menu.style.maxHeight = `${position.height}px`;
         const parentMenu = element.parentElement?.closest<HTMLElement>(".markdown-choice__menu");

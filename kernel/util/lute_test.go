@@ -11,7 +11,47 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
+	"github.com/siyuan-note/dataparser"
 )
+
+func TestLuteQuotedHashCodeRoundTrip(t *testing.T) {
+	engine := NewLute()
+	for _, source := range []string{
+		"маркер «#» и код `bare_guille` между «#» и «#» же.",
+		"маркер „#“ и код `bare_lapki` между „#“ и „#“ же.",
+	} {
+		markdown := source
+		for round := range 3 {
+			_, tree := engine.Md2BlockDOMTree(markdown, true)
+			data := render.NewJSONRenderer(tree, engine.RenderOptions, engine.ParseOptions).Render()
+			tree, err := dataparser.ParseJSONWithoutFix(data, engine.ParseOptions)
+			if err != nil {
+				t.Fatal(err)
+			}
+			codeCount := 0
+			ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+				if entering && node.Type == ast.NodeTextMark {
+					if node.IsTextMarkType("tag") {
+						t.Fatalf("quoted hash became a tag: %s", data)
+					}
+					if node.IsTextMarkType("code") {
+						codeCount++
+					}
+				}
+				return ast.WalkContinue
+			})
+			if codeCount != 1 {
+				t.Fatalf("round %d: code mark count = %d", round, codeCount)
+			}
+			renderer := render.NewProtyleExportMdRenderer(tree, engine.RenderOptions, engine.ParseOptions)
+			markdown = strings.TrimSpace(string(renderer.Render()))
+			if markdown != source {
+				t.Fatalf("round %d: markdown = %q, want %q", round, markdown, source)
+			}
+		}
+	}
+}
 
 func TestLuteTextMarkEscapedContentRoundTrip(t *testing.T) {
 	for _, blockType := range []string{"NodeHeading", "NodeParagraph"} {

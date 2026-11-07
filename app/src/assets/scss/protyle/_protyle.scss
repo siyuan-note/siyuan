@@ -31,7 +31,7 @@
 
 .b3-typography.document-title-preview,
 .mobile-document-title-editor .protyle-title__input,
-.mobile-document-title-dialog .protyle-title__input {
+.document-title-dialog .protyle-title__input {
   code:not(.hljs),
   span[data-type~="code"] {
     white-space: inherit;
@@ -1062,17 +1062,51 @@
 }
 
 .document-title-dialog {
+  min-height: 0;
   max-height: min(60vh, 640px);
   overflow: auto;
+  padding: 16px 24px;
+  background-color: transparent;
 
-  > .protyle-content > .protyle-wysiwyg,
-  > .protyle-content > .protyle-background,
+  > .protyle-content,
   > .protyle-preview {
     display: none;
   }
+}
 
-  > .protyle-content > .protyle-top > .protyle-title {
-    margin: 16px 24px;
+.document-title-dialog__editor {
+  min-height: 0;
+  overflow: auto;
+  font-size: var(--b3-font-size);
+
+  .protyle-title__rich {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .protyle-wysiwyg {
+    font-size: inherit;
+    font-family: inherit;
+
+    > [data-type="NodeParagraph"] {
+      padding: 0;
+    }
+  }
+
+  .protyle-title__input {
+    font-size: inherit;
+    font-weight: inherit;
+    padding: 0;
+    white-space: nowrap;
+  }
+
+  img {
+    max-height: 1.5em;
+    width: auto;
+  }
+
+  .protyle-attr {
+    display: none;
   }
 }
 

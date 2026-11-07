@@ -124,7 +124,6 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
             render: {background: false, title: true, titleShowTop: false, breadcrumb: false, gutter: false, scroll: false},
             after: (protyle) => {
                 if (!closing && !disposed) {
-                    /// #if MOBILE
                     const owner = protyle.protyle;
                     let field = owner.element.querySelector<HTMLElement>(":scope > .document-title-dialog__editor");
                     if (!field) {
@@ -133,6 +132,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
                         owner.element.appendChild(field);
                     }
                     owner.title?.mountEditorOnly(field);
+                    /// #if MOBILE
                     editorReady = true;
                     void focusTitle().catch(error => console.error(error));
                     /// #else

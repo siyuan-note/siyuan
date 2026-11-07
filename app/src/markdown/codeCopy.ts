@@ -20,9 +20,12 @@ export const renderMarkdownCodeCopy = (_code: HTMLElement, menu: HTMLElement) =>
             {start: input.selectionStart, end: input.selectionEnd, direction: input.selectionDirection} : undefined;
         const selection = document.getSelection();
         const ranges = Array.from({length: selection?.rangeCount ?? 0}, (_, index) => selection.getRangeAt(index).cloneRange());
+        button.setAttribute("aria-label", label);
+        let copied = false;
         textarea.select();
         try {
-            if (document.execCommand("copy")) button.setAttribute("aria-label", labels?.copied ?? label);
+            copied = document.execCommand("copy");
+            if (copied) button.setAttribute("aria-label", labels?.copied ?? label);
         } finally {
             textarea.blur();
             if (active instanceof HTMLElement && active.isConnected) active.focus({preventScroll: true});
@@ -32,6 +35,7 @@ export const renderMarkdownCodeCopy = (_code: HTMLElement, menu: HTMLElement) =>
                 input.setSelectionRange(inputSelection.start, inputSelection.end, inputSelection.direction);
             }
         }
+        if (copied) button.dispatchEvent(new CustomEvent("markdown-copy-success", {bubbles: true, detail: {label}}));
     };
     button.addEventListener("click", copy);
     button.addEventListener("keydown", event => {

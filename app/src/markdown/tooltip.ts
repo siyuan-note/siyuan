@@ -21,6 +21,8 @@ export const createMarkdownTooltips = (root: HTMLElement) => {
     let dismissed: HTMLElement;
     let touchInput = view.matchMedia("(hover: none)").matches;
     let disposed = false;
+    let feedbackTimeout: number;
+    let resetFeedback: () => void;
     const find = (node: EventTarget | null) => {
         const element = node instanceof Element ? node.closest<HTMLElement>(MARKDOWN_TOOLTIP_SELECTOR) : null;
         return element && root.contains(element) ? element : undefined;
@@ -30,6 +32,10 @@ export const createMarkdownTooltips = (root: HTMLElement) => {
         return label && element.dataset.tooltipShortcut ? `${label} ${element.dataset.tooltipShortcut}` : label;
     };
     const hide = () => {
+        view.clearTimeout(feedbackTimeout);
+        const reset = resetFeedback;
+        resetFeedback = undefined;
+        reset?.();
         tooltip.hidden = true;
         if (described) {
             const ids = (described.getAttribute("aria-describedby") ?? "").split(/\s+/)
@@ -40,8 +46,8 @@ export const createMarkdownTooltips = (root: HTMLElement) => {
         target = undefined;
         described = undefined;
     };
-    const show = (element: HTMLElement, focus?: HTMLElement) => {
-        if (disposed || touchInput || !element || element.closest("[inert]")) {hide(); return;}
+    const show = (element: HTMLElement, focus?: HTMLElement, feedback = false) => {
+        if (disposed || (touchInput && !feedback) || !element || element.closest("[inert]")) {hide(); return;}
         const text = message(element);
         const anchor = element.getBoundingClientRect();
         if (!text || !anchor.height || !anchor.width || anchor.bottom <= 0 || anchor.top >= view.innerHeight ||
@@ -56,7 +62,7 @@ export const createMarkdownTooltips = (root: HTMLElement) => {
         described.setAttribute("aria-describedby", [...ids].join(" "));
         tooltip.style.maxWidth = `${Math.min(320, view.innerWidth)}px`;
         tooltip.style.maxHeight = "90vh";
-        tooltip.style.animationDelay = element.dataset.delay ? `${element.dataset.delay}ms` : "";
+        tooltip.style.animationDelay = feedback ? "0ms" : element.dataset.delay ? `${element.dataset.delay}ms` : "";
         tooltip.hidden = false;
         const width = tooltip.offsetWidth;
         const height = tooltip.offsetHeight;
@@ -82,6 +88,16 @@ export const createMarkdownTooltips = (root: HTMLElement) => {
         tooltip.style.left = `${Math.max(0, Math.min(view.innerWidth - width, left))}px`;
         tooltip.style.top = `${Math.max(0, top)}px`;
     };
+    root.addEventListener("markdown-copy-success", event => {
+        const button = find(event.target);
+        if (!button?.closest(".vditor-copy")) return;
+        dismissed = undefined;
+        show(button, undefined, true);
+        const label = (event as CustomEvent<{label: string}>).detail?.label;
+        resetFeedback = () => {if (label) button.setAttribute("aria-label", label);};
+        view.clearTimeout(feedbackTimeout);
+        feedbackTimeout = view.setTimeout(hide, 1500);
+    }, {signal});
     const pointer = (event: PointerEvent) => {
         if (["mouse", "touch", "pen"].includes(event.pointerType)) touchInput = event.pointerType === "touch";
         const next = find(event.target);

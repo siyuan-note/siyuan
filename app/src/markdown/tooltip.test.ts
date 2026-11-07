@@ -41,7 +41,7 @@ const fixture = () => {
         getBoundingClientRect() {return this.bounds;}
         getClientRects() {return this.hidden ? [] : [this.bounds];}
     }
-    const view = Object.assign(new EventTarget(), {innerWidth: 800, innerHeight: 600, matchMedia: () => ({matches: false})});
+    const view = Object.assign(new EventTarget(), {clearTimeout, setTimeout, innerWidth: 800, innerHeight: 600, matchMedia: () => ({matches: false})});
     const document = Object.assign(new EventTarget(), {defaultView: view, body: new Element(), createElement: () => new Element()});
     const root = new Element(); root.ownerDocument = document; document.body.append(root);
     let observe: (records: Array<{type: string; attributeName?: string; target?: Element}>) => void;

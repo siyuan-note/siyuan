@@ -125,7 +125,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             serializations++;
             return api.serializeTableCellRich(html);
         },
-        TABLE_CELL_RICH_ATTRIBUTE: "data-sy-table-cell-rich", TABLE_CELL_SLASH_IDS: new Set(),
+        TABLE_CELL_RICH_ATTRIBUTE: "data-sy-table-cell-rich", filterTableCellSlashMenuItems: (items: IHintData[]) => items,
         hintRef: noop, hintTag: noop, registerBuiltinSlashHint: (callback: unknown) => callback,
         getDefaultToolbar: (): string[] => [], updateOutlineCurrentBlock: noop,
         setMobileToolbarUndo: noop, setTableCellRichContext: noop, bindTableCellRichDrag: noop,

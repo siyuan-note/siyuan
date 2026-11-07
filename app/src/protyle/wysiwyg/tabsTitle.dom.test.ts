@@ -7,11 +7,11 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {createSourceFile, isIfStatement, isMethodDeclaration, Node, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = (source: string) => {
+const browserCases = async (source: string) => {
     const check = require("node:assert/strict");
     const focused: Element[] = [];
     const api = new Function("focusBlock", "hideElements", source +
-        "\nreturn {tabsRender, destroyTabsRender, titleKeydown, TitleHint};")(
+        "\nreturn {tabsRender, destroyTabsRender, titleKeydown, TitleHint, openAddMenu};")(
         (element: Element) => focused.push(element),
         (_types: string[], protyle: IProtyle) => protyle.hint.element.classList.add("fn__none"));
     const editor = document.createElement("div");
@@ -21,6 +21,7 @@ const browserCases = (source: string) => {
         for (const extension of ["svg", "png"]) {
             for (const titleHTML of [
                 `<img class="emoji" src="/emojis/custom.${extension}">`,
+                `<img src="/assets/image.${extension}">`,
                 `A<img class="emoji" src="/emojis/custom.${extension}">B`,
                 `<img class="emoji" src="/emojis/custom.${extension}"><img class="emoji" src="/emojis/second.${extension}">`,
                 "&#x1f600;", "", "<strong>A</strong><br>B",
@@ -32,7 +33,7 @@ const browserCases = (source: string) => {
                 api.tabsRender(editor, {label: "Untitled"});
                 const title = editor.querySelector<HTMLElement>(".tab-item-title");
                 const label = editor.querySelector(".tabs-tab-label");
-                check.equal(label.querySelectorAll("img.emoji").length, title.querySelectorAll("img.emoji").length);
+                check.equal(label.querySelectorAll("img").length, title.querySelectorAll("img").length);
                 check.equal(label.textContent, titleHTML.includes("<br>") ? "A B" :
                     title.textContent || (titleHTML ? "" : "Untitled"));
                 for (let index = 0; index <= title.childNodes.length; index++) {
@@ -61,6 +62,53 @@ const browserCases = (source: string) => {
                 api.destroyTabsRender(editor);
             }
         }
+        editor.innerHTML = '<div class="tabs" data-type="NodeTabs" data-node-id="tabs">' +
+            '<div class="tab-item" data-type="NodeTabItem" data-node-id="item" data-tabs-editing="true">' +
+            '<div class="tab-item-info"><span class="tab-item-title callout-title" contenteditable="true">Title</span>' +
+            '</div><div class="tab-item-content">Body</div></div></div>';
+        api.tabsRender(editor, {label: "Untitled", readonly: () => false});
+        const item = editor.querySelector<HTMLElement>(".tab-item");
+        const title = editor.querySelector<HTMLElement>(".tab-item-title");
+        for (const selector of ["keyboardToolbar", "protyle-hint", "outside"]) {
+            title.focus();
+            const range = document.createRange();
+            range.selectNodeContents(title);
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+            item.dataset.tabsEditing = "true";
+            const panel = document.createElement("div");
+            if (selector === "keyboardToolbar") {
+                panel.id = selector;
+            } else {
+                panel.className = selector;
+            }
+            const input = document.createElement("input");
+            panel.append(input);
+            document.body.append(panel);
+            if (selector === "keyboardToolbar") {
+                const util = document.createElement("div");
+                util.className = "keyboard__util";
+                util.append(input);
+                panel.append(util);
+                const button = document.createElement("button");
+                button.className = "keyboard__action";
+                button.dataset.type = "done";
+                button.innerHTML = "<svg><use></use></svg>";
+                panel.append(button);
+                const protyle = {toolbar: {range}, contentElement: {scrollTop: 0}};
+                api.openAddMenu(protyle, panel, button, range);
+                check.notEqual(protyle.toolbar.range, range);
+                check.equal(document.activeElement, util);
+            } else {
+                input.focus();
+            }
+            await new Promise(resolve => setTimeout(resolve, 0));
+            check.equal(item.dataset.tabsEditing, selector === "outside" ? "false" : "true",
+                selector + ": " + document.activeElement.outerHTML);
+            panel.remove();
+            await new Promise(resolve => setTimeout(resolve, 0));
+        }
+        api.destroyTabsRender(editor);
         for (const titleClass of ["callout-title", "callout-title tab-item-title"]) {
             editor.innerHTML = `<span class="${titleClass}" contenteditable="true">/</span>`;
             const title = editor.firstElementChild;
@@ -139,6 +187,17 @@ test("titles prioritize hint selection and preserve custom emoji and editing bou
     };
     visit(ast);
     assert.ok(handler);
+    const mobileFile = "src/mobile/util/keyboardToolbar.ts";
+    const mobileAst = createSourceFile(mobileFile, readFileSync(mobileFile, "utf8"), ScriptTarget.ES2021, true);
+    let addHandler: string;
+    const visitMobile = (node: Node) => {
+        if (isIfStatement(node) && node.expression.getText(mobileAst) === 'type === "add"') {
+            addHandler = node.thenStatement.getText(mobileAst);
+        }
+        node.forEachChild(visitMobile);
+    };
+    visitMobile(mobileAst);
+    assert.ok(addHandler);
     const hintAst = createSourceFile("hint.ts", readFileSync("src/protyle/hint/index.ts", "utf8"), ScriptTarget.ES2021, true);
     let select: string;
     const visitHint = (node: Node) => {
@@ -158,6 +217,11 @@ test("titles prioritize hint selection and preserve custom emoji and editing bou
         const isNotCtrl = event => !event.ctrlKey && !event.metaKey;
         const isOnlyMeta = event => event.ctrlKey || event.metaKey;
         const Constants = {ZWSP: "\\u200b"};
+        const resetKeyboardToolbarUtilButtons = () => {};
+        const renderSlashMenu = () => {};
+        const showKeyboardToolbarUtil = () => {};
+        const hideAndroidKeyboardForPanel = () => {};
+        const openAddMenu = (protyle, toolbarElement, buttonElement, range) => ${addHandler};
         class TitleHint {${select}}
         const titleKeydown = (calloutTitleElement, nodeElement, range, event, protyle) => {
             const blockSelectionModeElement = undefined;

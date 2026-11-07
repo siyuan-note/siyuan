@@ -3068,7 +3068,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Each tab item has a title and body and supports nested content and block references. To toggle task mode for the group, open the block icon menu and select "
+					"Data": "Each tab item has a title and body and supports nested content and block references. The title's slash menu and mobile plus menu support inline elements, including images, attachments, and creating a document with a reference. The title input stays visible while the menu is open. To toggle task mode for the group, open the block icon menu and select "
 				},
 				{
 					"Type": "NodeTextMark",

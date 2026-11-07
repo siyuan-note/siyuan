@@ -20,7 +20,7 @@ import {getAdjacentRichTableCell, isTableCellCaretAtBoundary, leaveRichTableCell
 import {focusEditableAtGoalX, getCaretGoalX} from "../wysiwyg/verticalCaret";
 import {fixTable} from "../util/table";
 import {updateTableCellContentLayout} from "../util/tableCellRich";
-import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
+import {filterTableCellSlashMenuItems} from "../util/tableCellRichMenu";
 import {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection} from "../util/tableCellRichSelection";
 import {matchHotKey} from "../util/hotKey";
 import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
@@ -231,7 +231,7 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     owner.gutter?.render(owner, table, host);
     const toolbar = getDefaultToolbar(isMobile()).filter(item => typeof item === "string" ? item !== "ai" : item.name !== "ai");
     const safeSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, hintSource: THintSource) =>
-        hintSlash(key, protyle, hintSource, {allowCreateRef: true}).filter(item => TABLE_CELL_SLASH_IDS.has(item.id)));
+        filterTableCellSlashMenuItems(hintSlash(key, protyle, hintSource, {allowCreateRef: true})));
     const hint: IProtyleOptions["hint"] = {
         extend: [{key: "((", hint: hintRef}, {key: "【【", hint: hintRef}, {key: "（（", hint: hintRef},
             {key: "[[", hint: hintRef}, {key: "#", hint: hintTag}, {key: "/", hint: safeSlash}, {key: "、", hint: safeSlash},

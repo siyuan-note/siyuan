@@ -617,8 +617,8 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
     const inTableCell = cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element;
     return resolveSlashMenuItems(allList.filter((item) => {
         const builtinStyleID = slashBuiltinStyleIDs[item.entryKey];
-        return (!inTitle || (item.entryKey === item.id && TITLE_INLINE_SLASH_IDS.has(item.id))) &&
-            (!inTableCell || TABLE_CELL_SLASH_IDS.has(item.id)) &&
+        return (!inTitle || item.html === "separator" || (item.entryKey === item.id && TITLE_INLINE_SLASH_IDS.has(item.id))) &&
+            (!inTableCell || item.html === "separator" || TABLE_CELL_SLASH_IDS.has(item.id)) &&
             getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey)) &&
             (!builtinStyleID || isBuiltinInlineStyleVisible("style1", builtinStyleID));
     }), {

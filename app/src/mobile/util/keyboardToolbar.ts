@@ -750,9 +750,10 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     if (isTitleSlashContext(protyle)) {
         const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
         const items = hintSlash("", protyle, false, {visibilityRoot: SLASH_MENU_ROOT_PATH});
-        utilElement.innerHTML = getLiteSlashMenuHTML(items);
+        utilElement.innerHTML = getLiteSlashMenuHTML(items, !!isInAndroid());
         const buttons = getFrequentSlashButtons(utilElement, items.map(item => item.entryKey));
         prependFrequentSlashButtons(utilElement, getFrequentSlashItems(buttons, button => button.dataset.slashEntryKey));
+        protyle.hint.bindUploadEvent(protyle, utilElement);
         return;
     }
     let pluginHTML = "";
@@ -1957,7 +1958,9 @@ export const initKeyboardToolbar = () => {
             const oldScrollTop = protyle.contentElement.scrollTop;
             renderSlashMenu(protyle, toolbarElement);
             showKeyboardToolbarUtil(oldScrollTop);
-            (document.activeElement as HTMLElement)?.blur();
+            const panel = toolbarElement.querySelector<HTMLElement>(".keyboard__util");
+            panel.tabIndex = -1;
+            panel.focus({preventScroll: true});
             hideAndroidKeyboardForPanel(protyle);
             return;
         } else if (type === "block") {

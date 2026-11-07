@@ -169,7 +169,7 @@ for (const iosPhotos of [false, true]) {
         assert.equal(eligibilityCalls, 2);
         assert.deepEqual(util.querySelectorAll().map(button => button.dataset.slashEntryKey), ["ref", "bold"]);
         assert.deepEqual(frequentButtons.map(button => button.dataset.slashEntryKey), ["bold"]);
-        assert.equal(boundUploads, 1);
+        assert.equal(boundUploads, 2);
     });
 }
 

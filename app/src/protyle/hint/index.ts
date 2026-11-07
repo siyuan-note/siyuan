@@ -70,7 +70,7 @@ import {openMobileFileById} from "../../mobile/editor";
 import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
-import {isNotCtrl, isOnlyMeta} from "../util/compatibility";
+import {isInAndroid, isNotCtrl, isOnlyMeta} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
@@ -817,7 +817,7 @@ export class Hint {
             }
         }
         if (this.source === "hint" && this.element.closest("#keyboardToolbar")) {
-            return getLiteSlashMenuHTML(data);
+            return getLiteSlashMenuHTML(data, !!isInAndroid());
         }
         let hintsHTML = '<div style="flex: 1;overflow:auto;">';
         if (this.source !== "hint") {

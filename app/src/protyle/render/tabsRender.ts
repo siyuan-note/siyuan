@@ -121,7 +121,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
         const selection = window.getSelection();
         const active = document.activeElement;
         // 工具栏及其弹窗继续使用标题选区，不结束正在进行的富文本编辑。
-        if (active?.closest(".protyle-toolbar, .protyle-util, .b3-menu, .b3-dialog")) {
+        if (active?.closest(".protyle-toolbar, .protyle-util, .protyle-hint, #keyboardToolbar, .b3-menu, .b3-dialog")) {
             return;
         }
         let changed = false;
@@ -294,7 +294,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         button.id = `${state.instance}-tab-${index}`;
                         const title = getTabTitle(item);
                         const label = title?.textContent || controller.options.label || "Tab";
-                        if (title && (title.textContent || title.querySelector("img.emoji"))) {
+                        if (title && (title.textContent || title.querySelector("img"))) {
                             const clone = title.cloneNode(true) as HTMLElement;
                             clone.className = "tabs-tab-label";
                             clone.removeAttribute("contenteditable");

@@ -300,7 +300,7 @@ for (const mobile of [false, true]) {
         {timeout: 45000}, async () => {
         const sources = Object.fromEntries(["plugin/openDocTreeMenu", "plugin/EventBus", "plugin/Menu", "menus/navigation",
             "menus/navigationSelection", "menus/Menu", "menus/menuToggle", "menus/menuPosition", "menus/menuMouseScroll",
-            "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture",
+            "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
             "util/setPosition", "protyle/util/hasClosest", "layout/dock/docTree/row", "layout/dock/docTree/rowData",
             "protyle/render/av/addToDatabase", "protyle/render/av/relation"]
             .map(name => [name, transpileModule(parse(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"),

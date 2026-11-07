@@ -24,6 +24,7 @@ const setup = () => {
     const api: any = {};
     runInNewContext(source, {exports: api,
         require: () => ({bindMobileSheetLayout: () => layout,
+            bindKeyboardSheetState: () => () => {},
             bindBottomSheetDrag: () => Object.assign(() => {}, {cancel() {}}),
             waitForSheetViewport: (options: {open(): void}) => {options.open(); return () => cancelled++;}}),
         document: {createElement: () => ({className: "", setAttribute() {}, remove() {}})},

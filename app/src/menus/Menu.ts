@@ -5,6 +5,7 @@ import {getAnchoredMenuPosition} from "./menuPosition";
 import {bindMenuMouseScroll} from "./menuMouseScroll";
 import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGroup";
 import {getVisibleSheetViewport, waitForSheetViewport} from "./sheetOpen";
+import {bindKeyboardSheetState} from "../mobile/util/keyboardSheetState";
 import {setSheetExpanded} from "./sheetActions";
 import {getMobileSheetBounds, moveSheetGesture, SheetGesture} from "../mobile/util/mobileSheetGesture";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -60,6 +61,7 @@ export class Menu {
     private sheetViewport = "";
     private sheetSafeArea: HTMLElement;
     private sheetViewportObserver: MutationObserver;
+    private disposeKeyboardSheetState: () => void;
     private sheetClosing = false;
     private suppressSheetClick = false;
     private targetPositionFrame: number | undefined;
@@ -797,6 +799,7 @@ export class Menu {
 
     private startTrackingSheetViewport() {
         this.stopTrackingTargetPosition();
+        this.disposeKeyboardSheetState = bindKeyboardSheetState(this.element);
         this.sheetSafeArea = document.createElement("div");
         this.sheetSafeArea.style.cssText = "display:none;padding-top:var(--mobile-top-safe-area, env(safe-area-inset-top))";
         document.body.append(this.sheetSafeArea);
@@ -812,6 +815,8 @@ export class Menu {
     }
 
     private stopTrackingTargetPosition() {
+        this.disposeKeyboardSheetState?.();
+        this.disposeKeyboardSheetState = undefined;
         this.sheetSafeArea?.remove();
         this.sheetSafeArea = undefined;
         this.sheetViewportObserver?.disconnect();

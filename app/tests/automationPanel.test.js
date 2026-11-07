@@ -1022,7 +1022,7 @@ if (process.versions.electron && process.type === "browser") {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
             }).outputText;
             for (const name of ["dialog/index", "dialog/confirmDialog", "dialog/mobileConfirmDialog", "dialog/mobileDialog",
-                "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/mobileSheetLayout",
+                "mobile/util/keyboardSheetState", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/mobileSheetLayout",
                 "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetOpen", "menus/sheetActions"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname,
                     `../src/${name}.ts`), "utf8"), {

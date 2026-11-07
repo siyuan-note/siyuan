@@ -49,7 +49,7 @@ const compileSources = () => {
         "config/util/namespaceApi", "config/util/configApi", "config/util/dotPath", "config/util/sectionRuntime",
         "config/setting/pending", "config/bazaar/filterMenu", "menus/Menu", "menus/menuToggle",
         "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/menuKeyboard",
-        "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "util/setPosition", "util/zIndex"]) {
+        "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "util/setPosition", "util/zIndex"]) {
         modules[file] = compile(read(`src/${file}.ts`));
     }
     assert.match(read("src/config/setting/tabs.ts"), /mount:\s*mountBazaarTab/);

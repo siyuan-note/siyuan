@@ -47,6 +47,7 @@ const setup = () => {
     };
     const module = {exports: {} as {Menu: typeof Menu}};
     runInNewContext(compiled, {
+        bindKeyboardSheetState: () => () => {},
         exports: module.exports,
         fullscreenCloseTimeout: undefined,
         isMobile: () => true,

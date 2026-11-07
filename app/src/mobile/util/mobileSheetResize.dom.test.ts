@@ -21,6 +21,58 @@ const browserCases = async (sources: string[]) => {
         new Function("exports", "require", source)(exports, () => dependencies);
         Object.assign(dependencies, exports);
     }
+    document.body.innerHTML = `<div id="keyboardToolbar" style="height:40px"></div>
+<div id="host"><div class="mobile-bottom-sheet" style="height:100px;visibility:hidden"></div></div>
+<div class="b3-menu--sheet" style="height:100px"></div>`;
+    const toolbar = document.getElementById("keyboardToolbar");
+    const dialogSheet = document.querySelector<HTMLElement>(".mobile-bottom-sheet");
+    const menuSheet = document.querySelector<HTMLElement>(".b3-menu--sheet");
+    const settle = () => new Promise(resolve => setTimeout(resolve, 40));
+    const active = () => toolbar.classList.contains("keyboard--sheet-open");
+    const disposeDialogState = dependencies.bindKeyboardSheetState(dialogSheet);
+    check.equal(active(), false, "an unopened sheet does not expose the theme state");
+    dialogSheet.style.visibility = "";
+    await settle();
+    check.equal(active(), true);
+    const theme = document.createElement("style");
+    theme.textContent = "#keyboardToolbar.keyboard--sheet-open {display:none}";
+    document.head.append(theme);
+    await settle();
+    check.equal(active(), true, "theme-derived visibility cannot feed back into the application state");
+    toolbar.classList.add("fn__none");
+    await settle();
+    check.equal(active(), false, "explicit application hiding still clears a theme-hidden toolbar");
+    toolbar.classList.remove("fn__none");
+    await settle();
+    check.equal(active(), true);
+    theme.remove();
+    toolbar.style.display = "none";
+    await settle();
+    check.equal(active(), false);
+    toolbar.style.display = "";
+    await settle();
+    check.equal(active(), true);
+    const disposeMenuState = dependencies.bindKeyboardSheetState(menuSheet);
+    disposeDialogState();
+    check.equal(active(), true, "closing a dialog must preserve an overlapping menu's state");
+    menuSheet.hidden = true;
+    await settle();
+    check.equal(active(), false);
+    menuSheet.hidden = false;
+    await settle();
+    check.equal(active(), true);
+    menuSheet.remove();
+    await settle();
+    check.equal(active(), false, "removed sheets must not leave stale state");
+    disposeMenuState();
+    const disposeAgain = dependencies.bindKeyboardSheetState(dialogSheet);
+    check.equal(active(), true);
+    document.getElementById("host").style.display = "none";
+    await settle();
+    check.equal(active(), false, "hidden ancestors are respected");
+    disposeAgain();
+    disposeAgain();
+    check.equal(active(), false);
     document.body.style.cssText = "--b3-font-size:16px;--mobile-top-safe-area:20px;--mobile-bottom-bar-safe-area:30px";
     document.body.innerHTML = `<div class="mobile-bottom-sheet-dialog b3-dialog--open"><div class="b3-dialog">
 <div class="b3-dialog__scrim"></div><div class="b3-dialog__container mobile-bottom-sheet" style="width:100vw">
@@ -186,7 +238,7 @@ test("real sheet geometry keeps short minimums and footer visible across manual 
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !headless,
     timeout: 30000,
 }, async () => {
-    const sources = ["mobileSheetGesture", "mobileSheetLayout", "bindBottomSheetDrag", "bindBottomSheetDialog"].map(id => transpileModule(
+    const sources = ["keyboardSheetState", "mobileSheetGesture", "mobileSheetLayout", "bindBottomSheetDrag", "bindBottomSheetDialog"].map(id => transpileModule(
         readFileSync(`src/mobile/util/${id}.ts`, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText);

@@ -812,7 +812,7 @@ test("desktop and mobile rename use standalone fields and preserve mobile keyboa
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
     const lifecycleSources = ["../../dialog/index.ts", "../../menus/sheetOpen.ts",
-        "../../mobile/util/mobileSheetGesture.ts", "../../mobile/util/mobileSheetLayout.ts", "../../mobile/util/bindBottomSheetDrag.ts", "../../mobile/util/bindBottomSheetDialog.ts",
+        "../../mobile/util/keyboardSheetState.ts", "../../mobile/util/mobileSheetGesture.ts", "../../mobile/util/mobileSheetLayout.ts", "../../mobile/util/bindBottomSheetDrag.ts", "../../mobile/util/bindBottomSheetDialog.ts",
         "documentTitleDialogs.ts", "documentTitleDialog.ts"].map(file => transpileModule(
         require("ifdef-loader/preprocessor").parse(readFileSync(resolve(__dirname, file), "utf8"), {MOBILE: true, BROWSER: false}),
         {compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS}}).outputText);

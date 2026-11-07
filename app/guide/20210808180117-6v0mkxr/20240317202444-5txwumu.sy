@@ -225,6 +225,20 @@
 			]
 		},
 		{
+			"ID": "20261107234500-fnmilo5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107234500-fnmilo5",
+				"updated": "20261107234500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mobile themes can use #keyboardToolbar.keyboard--sheet-open to style the keyboard toolbar while the app shows the keyboard toolbar together with a bottom menu or dialog sheet. This state follows application visibility, not styles derived from this class. The class is removed when the toolbar is hidden or all sheets are closed."
+				}
+			]
+		},
+		{
 			"ID": "20240317202653-yk5we0e",
 			"Type": "NodeParagraph",
 			"Properties": {

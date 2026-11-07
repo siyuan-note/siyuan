@@ -11,7 +11,7 @@ const sources = () => {
         "layout/dock/GlobalBacklinkList", "layout/dock/globalBacklinkPaging",
         "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkContextBatch", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
         "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/MobileEditorDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "menus/sheetOpen", "protyle/util/transactionQueue",
-        "mobile/util/mobileSheetLayout", "mobile/util/mobileSheetGesture", "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetActions", "protyle/util/editorSave", "protyle/util/browserCompatibility",
+        "mobile/util/mobileSheetLayout", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetActions", "protyle/util/editorSave", "protyle/util/browserCompatibility",
         "util/escape", "util/zIndex", "dialog/index", "layout/dock/panelSearch", "protyle/wysiwyg/backlinkTypeFold",
         "layout/dock/backlinkMentionCache", "layout/dock/bottomBacklinkScroll", "protyle/gutter/layout"]) {
         modules[name] = ts.transpileModule(preprocess(

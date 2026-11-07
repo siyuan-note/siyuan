@@ -150,6 +150,12 @@ body.mobile-keyboard--open {
 }
 
 .b3-list--mobile {
+  .file-tree__row {
+    --file-tree-indent: 30px;
+    --file-tree-toggle-size: 32px;
+    --file-tree-toggle-padding: 8px;
+  }
+
   .b3-list-item__toggle--hl {
     &::before {
       inset-inline-end: -22px;
@@ -203,7 +209,7 @@ body.mobile-keyboard--open {
 
     &__toggle {
       height: 32px;
-      padding: 4px 4px 4px 0;
+      padding: 4px var(--file-tree-toggle-padding, 4px) 4px var(--file-tree-toggle-left, 0px);
     }
 
     &__arrow {

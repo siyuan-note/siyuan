@@ -1,6 +1,15 @@
 @use "../util/mixin";
 @use "../util/function";
 
+.file-tree__row {
+  --file-tree-indent: 24px;
+  --file-tree-toggle-size: 22px;
+  --file-tree-toggle-padding: 4px;
+  --file-tree-toggle-left: calc(var(--file-tree-depth) * var(--file-tree-indent) + var(--file-tree-toggle-padding));
+  --file-toggle-width: calc(var(--file-tree-depth) * var(--file-tree-indent) + var(--file-tree-toggle-size));
+  --file-action-offset: var(--file-toggle-width);
+}
+
 .file-tree__pins {
   --file-toggle-width: 0px;
   padding-bottom: 8px;
@@ -255,7 +264,8 @@
       display: flex;
       align-items: center;
       height: 22px;
-      padding: 0 2px;
+      padding: 0 var(--file-tree-toggle-padding, 2px);
+      padding-left: var(--file-tree-toggle-left, 2px);
       color: var(--b3-theme-on-surface-light);
       transition: color .2s cubic-bezier(0, 0, .2, 1), background-color .2s cubic-bezier(0, 0, .2, 1);
       border-radius: var(--b3-border-radius);

@@ -19,6 +19,9 @@ export const goForward = () => {
 };
 
 export const goBack = () => {
+    if (document.querySelector(".b3-dialog__scrim--progress")) {
+        return;
+    }
     const editor = getCurrentEditor();
     const menuElement = document.getElementById("menu");
     const richTextElement = document.querySelector<HTMLElement>(".av__richtext-mask");

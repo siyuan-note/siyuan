@@ -211,3 +211,33 @@ test("mobile back handles the top database editor before its retained parent and
         assert.deepEqual(calls, [top === "panel" || top === "menu" || top === "select" ? `${top}:back` : top], top);
     }
 });
+
+
+test("mobile back consumes repeated progress returns and resumes after the last task", () => {
+    const source = transpileModule(readFileSync(join(__dirname, "MobileBackFoward.ts"), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+    }).outputText;
+    let remainingTasks = 2;
+    let backgroundCalls = 0;
+    const api = {} as typeof import("./MobileBackFoward");
+    runInNewContext(source, {
+        exports: api,
+        document: {querySelector: (selector: string) => {
+            assert.equal(selector, ".b3-dialog__scrim--progress");
+            return remainingTasks ? {} : null;
+        }},
+        require: () => ({getCurrentEditor: () => {
+            backgroundCalls++;
+            throw new Error("background resumed");
+        }}),
+    });
+    api.goBack();
+    api.goBack();
+    remainingTasks--;
+    api.goBack();
+    assert.equal(backgroundCalls, 0);
+    assert.equal(remainingTasks, 1);
+    remainingTasks--;
+    assert.throws(() => api.goBack(), /background resumed/);
+    assert.equal(backgroundCalls, 1);
+});

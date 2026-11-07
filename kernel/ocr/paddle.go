@@ -27,10 +27,10 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/siyuan-note/logging"
+	"go.yaml.in/yaml/v4"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff"
 	_ "golang.org/x/image/webp"
-	"gopkg.in/yaml.v3"
 )
 
 // PaddleConfig 指定一组检测和识别模型，Linux 使用原生辅助进程以兼容静态内核。
@@ -115,7 +115,7 @@ func readModelConfig(directory, kind string) (modelConfig, error) {
 	if err != nil {
 		return config, err
 	}
-	err = yaml.Unmarshal(data, &config)
+	err = yaml.Load(data, &config)
 	if err != nil {
 		return config, err
 	}

@@ -34,7 +34,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"gopkg.in/yaml.v3"
 )
 
 // Box 笔记本。
@@ -812,7 +811,7 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 		if ast.NodeYamlFrontMatterContent == n.Type {
 			// Parsing YAML Front Matter as document custom attributes when importing Markdown files https://github.com/siyuan-note/siyuan/issues/10878
 			attrs := map[string]any{}
-			parseErr := yaml.Unmarshal(n.Tokens, &attrs)
+			parseErr := loadFrontMatter(n.Tokens, &attrs)
 			if parseErr != nil {
 				logging.LogWarnf("parse YAML front matter [%s] failed: %s", n.Tokens, parseErr)
 				return ast.WalkContinue

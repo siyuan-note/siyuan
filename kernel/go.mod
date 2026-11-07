@@ -93,6 +93,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342
 	github.com/xuri/excelize/v2 v2.11.0
+	go.yaml.in/yaml/v4 v4.0.0
 	golang.org/x/mobile v0.0.0-20251209145715-2553ed8ce294
 	golang.org/x/mod v0.41.0
 	golang.org/x/net v0.59.0
@@ -100,7 +101,6 @@ require (
 	golang.org/x/sys v0.49.0
 	golang.org/x/text v0.43.0
 	golang.org/x/time v0.15.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require github.com/88250/lute v1.7.9-0.20261107114518-d552c7ede7ed
@@ -116,6 +116,7 @@ require (
 	github.com/olekukonko/ll v0.1.8 // indirect
 	github.com/tphakala/simd v1.11.0 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.8.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (

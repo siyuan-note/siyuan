@@ -7,10 +7,10 @@ package memory
 import (
 	"bytes"
 	"fmt"
-	"gopkg.in/yaml.v3"
-	"io"
 	"strings"
 	"unicode/utf8"
+
+	"go.yaml.in/yaml/v4"
 )
 
 // YAML 节点先作结构校验，禁用别名、重复键、自定义标签及隐式日期等类型。
@@ -63,20 +63,13 @@ func decode(data []byte, target interface{}) (string, error) {
 	}
 	header := data[4 : 4+end]
 	var node yaml.Node
-	dec := yaml.NewDecoder(bytes.NewReader(header))
-	if err := dec.Decode(&node); err != nil {
+	if err := yaml.Load(header, &node); err != nil {
 		return "", fmt.Errorf("%w: metadata", ErrInvalid)
 	}
 	if err := validateNode(&node, 0); err != nil {
 		return "", err
 	}
-	var extra yaml.Node
-	if dec.Decode(&extra) != io.EOF {
-		return "", ErrInvalid
-	}
-	dec = yaml.NewDecoder(bytes.NewReader(header))
-	dec.KnownFields(true)
-	if err := dec.Decode(target); err != nil {
+	if err := node.Load(target, yaml.WithKnownFields()); err != nil {
 		return "", fmt.Errorf("%w: metadata fields", ErrInvalid)
 	}
 	return string(data[4+end+5:]), nil
@@ -85,7 +78,8 @@ func encode(value interface{}, body string) ([]byte, error) {
 	if !utf8.ValidString(body) {
 		return nil, ErrInvalid
 	}
-	header, err := yaml.Marshal(value)
+	// revision 基于文件字节，缩进与长字符串不折行的布局必须保持稳定。
+	header, err := yaml.Dump(value, yaml.WithV3Defaults(), yaml.WithLineWidth(-1))
 	if err != nil {
 		return nil, err
 	}

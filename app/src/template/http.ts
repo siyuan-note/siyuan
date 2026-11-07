@@ -4,6 +4,7 @@ import {fetchWithAppId} from "../util/fetchWithAppId";
 import type {Dialog} from "../dialog";
 import type {TemplateHTTPCancelRequestInput, TemplateHTTPReplyRequestInput} from "../types/api";
 import {clearTemplateHTTPConfirmations} from "./httpConfirmHandoff";
+import {getAVCurrentViewID} from "../protyle/render/av/viewVisibility";
 
 interface HTTPExecution {
     id: string;
@@ -11,6 +12,7 @@ interface HTTPExecution {
     session: string;
     controller: AbortController;
     owners?: Element[];
+    avMetadataOnly?: boolean;
     isCurrent: () => boolean;
     confirmation?: string;
     confirmations: Set<string>;
@@ -63,8 +65,10 @@ export const revokeTemplateHTTPConfirmation = (token: string, owner: {app: strin
     }
 };
 
-export const cancelTemplateHTTPForElement = (element: Element) => {
+export const cancelTemplateHTTPForElement = (element: Element, options?: {preserveAVMetadata?: boolean}) => {
     executions.forEach(execution => {
+        // 数据库行刷新不替代字段配置请求，后者仍由宿主和页面生命周期取消。
+        if (options?.preserveAVMetadata && execution.avMetadataOnly && execution.isCurrent()) return;
         if (execution.owners?.includes(element)) {
             execution.controller.abort();
         }
@@ -91,7 +95,7 @@ export const guardTemplateHTTPRequest = (isCurrent: () => boolean, owner?: Eleme
     }};
 };
 
-export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockID?: string},
+export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockID?: string; ignoreRows?: boolean},
                                          headers?: Record<string, string>, signal?: AbortSignal) => {
     if (!["/api/template/render", "/api/av/renderAttributeView", "/api/av/getAttributeViewKeys", "/api/filetree/createDailyNote"].includes(url) ||
         window.siyuan.isPublish || signal?.aborted) {
@@ -110,6 +114,11 @@ export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockI
     const id = genUUID();
     let ownerGuard: ReturnType<typeof guardTemplateHTTPRequest>;
     let owners: Element[];
+    const avMetadataOnly = url === "/api/av/renderAttributeView" && data.ignoreRows === true;
+    let metadataOwners: Array<{owner: Element; avID: string; viewID: string}>;
+    const isCurrentOwner = () => (!owners || owners.some(owner => owner.isConnected && !owner.closest(".fn__none"))) &&
+        (!metadataOwners || metadataOwners.every(({owner, avID, viewID}) =>
+            owner.getAttribute("data-av-id") === avID && getAVCurrentViewID(owner) === viewID));
     if (url === "/api/av/renderAttributeView" || url === "/api/av/getAttributeViewKeys") {
         const selector = data.blockID ? `[data-node-id="${CSS.escape(data.blockID)}"]` :
             `[data-av-id="${CSS.escape(data.id || "")}"]`;
@@ -122,7 +131,11 @@ export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockI
         if (!owners.length) {
             return undefined;
         }
-        ownerGuard = guardTemplateHTTPRequest(() => owners.some(owner => owner.isConnected && !owner.closest(".fn__none")));
+        if (avMetadataOnly) {
+            metadataOwners = owners.map(owner => ({owner, avID: owner.getAttribute("data-av-id"),
+                viewID: getAVCurrentViewID(owner)}));
+        }
+        ownerGuard = guardTemplateHTTPRequest(isCurrentOwner);
     }
     const abort = () => controller.abort();
     signal?.addEventListener("abort", abort, {once: true});
@@ -130,8 +143,9 @@ export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockI
     let finished = false;
     const execution: HTTPExecution = {
         id, app: Constants.SIYUAN_APPID, session, controller, owners, confirmations: new Set(),
+        avMetadataOnly,
         isCurrent: () => !signal?.aborted && (signalValidity.get(signal)?.() ?? true) &&
-            (!owners || owners.some(owner => owner.isConnected && !owner.closest(".fn__none"))),
+            isCurrentOwner(),
         cleanup: () => {
             if (finished) {
                 return;

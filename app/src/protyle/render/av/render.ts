@@ -622,7 +622,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         if (isMobile() || isInMobileApp()) {
             e.classList.add("av--touch");
         }
-        const renderToken = inheritedRenderToken || beginAVRender(e);
+        const renderToken = inheritedRenderToken || beginAVRender(e, {preserveAVMetadata: true});
         disposeAVColumnWindow(e);
 
         if (e.getAttribute("data-av-type") === "gallery") {
@@ -953,6 +953,16 @@ const waitForAddingCellPosition = async (options: {
 };
 
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
+    // 视图结构变更可能先改变内核当前视图，面板请求必须在延迟重绘前失效。
+    if (["setAttrViewBlockView", "addAttrViewView", "duplicateAttrViewView",
+        "removeAttrViewView", "sortAttrViewView"].includes(operation.action)) {
+        getAVElements(protyle, operation.avID).forEach(item => {
+            if (["removeAttrViewView", "sortAttrViewView"].includes(operation.action) ||
+                !operation.blockID || item.dataset.nodeId === operation.blockID) {
+                beginAVRender(item);
+            }
+        });
+    }
     if (operation.action === "setAttrViewBlockView" && operation.blockID) {
         getAVElements(protyle, operation.avID).forEach(item => {
             if (item.dataset.nodeId !== operation.blockID) return;

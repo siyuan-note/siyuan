@@ -3,6 +3,7 @@ import {prepareAVColumnWindow} from "./columnWindow";
 import {removeAVTableColumn} from "./columnPresentation";
 import {navigateSubItems} from "./subItemsNavigation";
 import {locateRequests} from "./locateState";
+import {beginAVRender} from "./locate";
 import {clearSubItemsViewportAnchor} from "./subItemsState";
 import {addSubItemsMenu} from "./subItems";
 import {Menu} from "../../../plugin/Menu";
@@ -1653,6 +1654,7 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
 };
 
 export const switchAVView = (protyle: IProtyle, blockElement: HTMLElement, target: HTMLElement) => {
+    beginAVRender(blockElement);
     locateRequests.delete(blockElement);
     clearSubItemsViewportAnchor(blockElement);
     blockElement.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);

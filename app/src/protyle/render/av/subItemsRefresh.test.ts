@@ -68,7 +68,7 @@ const setup = () => {
     });
     const refresh = extract<typeof import("./render").refreshAV>("refreshAV", {
         Constants: constants, prepareSubItemsRefresh: api.prepareSubItemsRefresh, clearSubItemsViewportAnchor: state.clearSubItemsViewportAnchor,
-        locateRequests, getAVElements: () => [block], getAVViewPageSize: () => "50",
+        locateRequests, getAVElements: () => [block], getAVViewPageSize: () => "50", beginAVRender() {},
         addingFocusTokens: new Map(), refreshTimeouts: {}, clearTimeout() {},
         window: {setTimeout: (callback: () => void) => callback()}, document: {querySelector: (): null => null},
         inspectAVInsertedItem() {}, removeAVPasteSkeleton() {}, isTableLikeView: () => true,
@@ -172,7 +172,7 @@ test("manual switching cancels pending locate before either editable or readonly
         const switchAVView = h.extract<typeof import("./action").switchAVView>("switchAVView", {
             locateRequests: h.locateRequests, clearSubItemsViewportAnchor: h.state.clearSubItemsViewportAnchor,
             Constants: h.constants, clearSelect() {}, window: {siyuan: {isPublish: false}},
-            setReadonlyAVView() {}, transaction: verify, avRender: verify, getAVCurrentViewID: () => "first",
+            setReadonlyAVView() {}, beginAVRender() {}, transaction: verify, avRender: verify, getAVCurrentViewID: () => "first",
         }, "action.ts");
         switchAVView(h.protyle, h.block, {dataset: {id: "second"}} as unknown as HTMLElement);
         assert.equal(h.locateRequests.has(h.block), false);

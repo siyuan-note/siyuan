@@ -16,10 +16,12 @@ test("switching one database carrier refreshes only its copies and preserves oth
         `<div class="av" data-av-id="database" data-node-id="${id}" data-render="true" data-view="original" data-v-scroll="true"><div class="av__header" data-view-pages="pages"></div><div class="av__body" data-page-size="100"></div></div>`).join("");
     const blocks = root.children;
     const rendered: unknown[] = [];
+    const canceled: unknown[] = [];
     const exports = evaluateModule<any>(compiled, {require: () => ({
         getAVViewPageSize: (_pages: string, id: string) => id === "limited" ? "50" : undefined,
         Constants: {CUSTOM_SY_AV_VIEW: "data-view", ATTRIBUTE_V_SCROLL: "data-v-scroll"},
         clearSubItemsViewportAnchor() {}, locateRequests: new WeakMap(),
+        beginAVRender: (block: unknown) => canceled.push(block),
     }), window: {setTimeout: () => assert.fail("Carrier-only view changes must not schedule a database-wide refresh")}});
     exports.avRender = (block: unknown, _protyle: unknown, _callback: unknown, _all: boolean,
                         _data: unknown, automaticRefresh: boolean) => {
@@ -29,6 +31,7 @@ test("switching one database carrier refreshes only its copies and preserves oth
     const protyle = {wysiwyg: {element: root}};
     exports.refreshAV(protyle, {action: "setAttrViewBlockView", avID: "database", blockID: "carrier", id: "limited"});
     assert.deepEqual(rendered, [blocks[0], blocks[2]]);
+    assert.deepEqual(canceled, [blocks[0], blocks[2]]);
     assert.equal(blocks[1].getAttribute("data-render"), "true");
     assert.equal(blocks[1].getAttribute("data-view"), "original");
     assert.equal(blocks[1].getAttribute("data-v-scroll"), "true");

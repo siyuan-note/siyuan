@@ -235,6 +235,8 @@ if (response.code === 0 && response.data) {
 
 `name` 是纯文本显示名称，保留半角 `/` 并与 `／` 区分，不会因此创建目录；笔记本身份仍由 ID 确定。
 
+存在笔记本文档时，重命名会同步其纯文本标题。对于富文本标题，原样回传当前笔记本名称不作修改，其他名称会被拒绝，以保留样式、图片和引用。编辑完整标题须以笔记本 ID 调用 `getDocTitle`，再提交带 `expectedRevision` 的 `setDocTitle` 事务。
+
 * `/api/notebook/renameNotebook`
 * 参数
 
@@ -346,6 +348,8 @@ if (response.code === 0 && response.data) {
 管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。`titleFormats` 列出支持的标题格式，`indexState` 报告索引状态，`revision` 标识能力声明。`literalSlash` 仅在索引就绪时为 `true`。兼容性取决于每篇文档的源规格和标题表示。同步按原始字节传输文档，不解释不支持的源格式。读取、索引和编辑仍需要支持该格式的版本；快照恢复继续保留源规格预检。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
 
 ### 保存笔记本配置
+
+`name` 字段沿用 `renameNotebook` 的笔记本文档标题联动及富文本保护规则。修改其他设置时可省略此字段；重命名被拒绝时，也不会保存同次请求中的其他配置修改。
 
 * `/api/notebook/setNotebookConf`
 * 参数

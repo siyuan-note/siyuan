@@ -563,7 +563,7 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 		treenode.UpsertBlockTree(refTree)
 		sql.UpdateRefsTreeQueue(refTree)
 		if titleChanged {
-			publishDocumentTitleProjection(refTree)
+			publishDocumentTitleProjection(refTree, oldTitle.Text)
 		}
 		updatedRefTrees[refTreeID] = refTree
 		if ok {

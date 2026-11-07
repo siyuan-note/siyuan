@@ -20,21 +20,20 @@ export const focusDatabasePrimary = (root: Element, protyle: IProtyle,
     }
     if (focusTitle && !bindPrimary && request.boundBlockID && request.boundBlockID === protyle.block?.rootID) {
         const title = protyle.title;
-        const sourceAware = protyle.block.rootID !== protyle.notebookId;
         let isTitleVisible: () => boolean;
         /// #if MOBILE
-        if (sourceAware && window.siyuan.mobile.editor?.protyle !== protyle) {
+        if (window.siyuan.mobile.editor?.protyle !== protyle) {
             return;
         }
         isTitleVisible = () => {
-            const input = document.getElementById(sourceAware ? "toolbarNameReadonly" : "toolbarName") as HTMLInputElement;
+            const input = document.getElementById("toolbarNameReadonly") as HTMLInputElement;
             return Boolean(input && !input.disabled && input.getClientRects().length &&
                 window.siyuan.mobile.editor?.protyle === protyle);
         };
         /// #else
         isTitleVisible = () => Boolean(title?.editElement?.getClientRects().length);
         /// #endif
-        if (sourceAware && title && isTitleVisible()) {
+        if (title && isTitleVisible()) {
             // 标题完整源加载后再聚焦，重绘与迟到响应不能重复抢占光标。
             return title.openEditor(() => root.isConnected && protyle.title === title &&
                 protyle.block.rootID === request.boundBlockID && isTitleVisible())

@@ -235,6 +235,8 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
 
 `name` is a plain display label. ASCII `/` remains distinct from `／` and does not create a directory. Notebook identity remains its ID.
 
+When a notebook document exists, renaming also updates its plain title. For a rich title, returning the current notebook name is a no-op; a different name is rejected to preserve styles, images, and references. Read the complete title with `getDocTitle` using the notebook ID, then edit it through a `setDocTitle` transaction with `expectedRevision`.
+
 * `/api/notebook/renameNotebook`
 * Parameters
 
@@ -346,6 +348,8 @@ Administrator responses may also include the read-only `documentCapabilities` ob
 Administrator responses also include the optional read-only `documentCapabilities` object. `structuredPaths` advertises the ID and segment APIs; it does not grant access to closed or locked notebooks. `titleFormats` lists supported title formats, `indexState` reports readiness and `revision` identifies the capability declaration. `literalSlash` is true only when indexes are ready. Compatibility depends on each document's source specification and title representation. Synchronization transfers document bytes without interpreting unsupported source formats. Reading, indexing, and editing still require a compatible version; snapshot restoration retains source-specification preflight checks. An absent object on an older server differs from a failed request; failures must not trigger a fallback write through legacy path APIs.
 
 ### Save notebook configuration
+
+The `name` field follows the same notebook-document title linkage and rich-title protection as `renameNotebook`. Omit it when changing other settings; a rejected rename does not save the remaining configuration changes.
 
 * `/api/notebook/setNotebookConf`
 * Parameters

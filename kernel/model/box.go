@@ -334,6 +334,21 @@ func (box *Box) SaveConf(conf *conf.BoxConf) error {
 
 // SaveConfAndSync 保存用户修改的笔记本配置，并为已落盘的变更重新计划同步。
 func (box *Box) SaveConfAndSync(conf *conf.BoxConf) error {
+	boxDocTitleNameLock.Lock()
+	defer boxDocTitleNameLock.Unlock()
+	if box.Exist(boxDocPath(box.ID)) && (!IsEncryptedBox(box.ID) || IsBoxUnlocked(box.ID)) {
+		tree, _, err := filesys.ReadTreeSnapshot(box.ID, boxDocPath(box.ID))
+		if err != nil {
+			return err
+		}
+		// 其他设置的旧快照不能覆盖标题事务已更新的名称。
+		if tree.Root.IALAttr(boxDocTitleSourceAttr) == "document" || tree.Root.DocumentTitle != nil {
+			conf.Name = treenode.ReadDocumentTitle(tree.Root).Text
+			if conf.Name == "" {
+				conf.Name = Conf.Language(16)
+			}
+		}
+	}
 	return box.saveConf(conf, true)
 }
 

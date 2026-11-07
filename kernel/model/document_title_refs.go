@@ -12,6 +12,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -330,7 +331,18 @@ func refreshDocumentTitleAnchors(root *ast.Node, tree *parse.Tree) (bool, error)
 }
 
 // publishDocumentTitleProjection 只发布已保存的标题投影，不再次登记引用刷新任务。
-func publishDocumentTitleProjection(tree *parse.Tree) {
+func publishDocumentTitleProjection(tree *parse.Tree, previousTitle string) {
+	if IsBoxDoc(tree.Box, tree.ID) {
+		if err := syncBoxDocTitleName(tree); err != nil {
+			logging.LogErrorf("update notebook title projection [%s] failed: %s", tree.Box, err)
+			return
+		}
+		if previousTitle != treenode.ReadDocumentTitle(tree.Root).Text {
+			event := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
+			event.Data = map[string]any{"box": tree.Box, "name": Conf.Box(tree.Box).Name}
+			util.PushEvent(event)
+		}
+	}
 	evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
 		"box": tree.Box, "id": tree.Root.ID, "path": tree.Path,

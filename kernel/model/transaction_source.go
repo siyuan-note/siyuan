@@ -349,6 +349,11 @@ func (tx *Transaction) rollbackDocumentSources() {
 			continue
 		}
 		if err == nil {
+			if IsBoxDoc(tree.Box, tree.ID) {
+				if projectionErr := syncBoxDocTitleName(tree); projectionErr != nil {
+					tx.sourceRollbackErr = errors.Join(tx.sourceRollbackErr, projectionErr)
+				}
+			}
 			for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
 				presentMirrors[node.ID] = node.AttributeViewID
 			}

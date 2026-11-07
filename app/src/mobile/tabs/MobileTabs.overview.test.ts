@@ -30,7 +30,7 @@ test("mobile tab overview renders current document titles and rejects reused or 
     const tabs = Object.assign(Object.create(exports.MobileTabs.prototype), {state, canGoBack: () => false,
         canGoForward: () => false, bindOverviewEvents: () => {}});
     tabs.renderOverview();
-    assert.deepEqual(reads.map(read => read.id), ["document", "plain-document"]);
+    assert.deepEqual(reads.map(read => read.id), ["document", "plain-document", "box"]);
     assert.ok(reads.every(read => read.notebook === "box" && read.label === label && read.current()));
     rich.current = {...rich.current, rootID: "another-document"};
     assert.equal(reads[0].current(), false);

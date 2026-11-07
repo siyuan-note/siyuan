@@ -5039,6 +5039,7 @@ export interface APIPOSTRoutes {
     /**
      * 读取完整文档标题源及编辑用 BlockDOM，按文档 ID 寻址并保留加密笔记本响应租约。
      * 旧纯文本不解释为 Markdown；纯文本摘要不能作为富标题完整源回写，写入使用 setDocTitle 事务。
+     * 笔记本文档使用笔记本 ID 读取，其纯文本摘要与笔记本名称同步。
      */
     "/api/block/getDocTitle": {
         request: DocumentTitleRequestInput;
@@ -6864,6 +6865,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 保持笔记本文档同名；富文本标题仅允许原样回传摘要，其他纯文本改名拒绝并保留完整源。
+     * 修改富文本须读取 getDocTitle 并提交带 expectedRevision 的 setDocTitle 事务。
+     */
     "/api/notebook/renameNotebook": {
         request: RenameNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6888,6 +6893,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 的 name 与笔记本文档标题联动，富文本标题只允许原样回传纯文本名称。
+     * 其他配置字段仍可单独修改；编辑富文本标题须使用带 expectedRevision 的 setDocTitle 事务。
+     */
     "/api/notebook/setNotebookConf": {
         request: SetNotebookConfRequestInput;
         response: { "code": 0; "data": NotebookConf | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

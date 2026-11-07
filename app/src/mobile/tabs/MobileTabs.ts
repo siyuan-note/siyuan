@@ -927,7 +927,7 @@ export class MobileTabs {
             bindEvent: (element) => {
                 this.state.tabs.forEach(tab => {
                     const entry = tab.current;
-                    if (!entry?.rootID || entry.rootID === entry.notebookID) return;
+                    if (!entry?.rootID) return;
                     const row = Array.from(element.querySelectorAll<HTMLElement>("[data-tab-id]"))
                         .find(item => item.dataset.tabId === tab.id);
                     renderDocumentTitlePreview(row?.querySelector(".mobile-tabs__item-title"), entry.rootID, entry.notebookID,

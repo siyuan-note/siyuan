@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -25,9 +26,12 @@ import (
 )
 
 const (
-	boxDocMetaSpec = 1
-	boxDocMetaName = "boxDoc.json"
+	boxDocMetaSpec        = 1
+	boxDocMetaName        = "boxDoc.json"
+	boxDocTitleSourceAttr = "custom-sy-notebook-title-source"
 )
+
+var boxDocTitleNameLock sync.Mutex
 
 type boxDocMeta struct {
 	Spec     int    `json:"spec"`
@@ -237,6 +241,12 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 	if "" == title {
 		title = Conf.Language(16)
 	}
+	if tree.Root.IALAttr(boxDocTitleSourceAttr) == "document" || tree.Root.DocumentTitle != nil {
+		if err = syncBoxDocTitleName(tree); err != nil {
+			return err
+		}
+		title = treenode.ReadDocumentTitle(tree.Root).Text
+	}
 	titleChanged := treenode.ReadDocumentTitle(tree.Root).Text != title
 	changed := titleChanged || tree.HPath != "/"+title || tree.Root.IALAttr(DocHiddenAttr) != "true" ||
 		tree.Root.IALAttr("icon") != boxConf.Icon
@@ -318,12 +328,38 @@ func normalizeBoxDocTarget(boxID, p string) string {
 	return normalizeBoxDocPath(boxID, p)
 }
 
-func renameBoxDoc(boxID, name string) error {
-	box := Conf.Box(boxID)
-	if nil == box || !box.Exist(boxDocPath(box.ID)) {
-		return nil
+// 笔记本文档保存完整标题，配置中的名称是可重新生成的纯文本投影。
+func syncBoxDocTitleName(tree *parse.Tree) error {
+	boxDocTitleNameLock.Lock()
+	defer boxDocTitleNameLock.Unlock()
+	box := Conf.Box(tree.Box)
+	if box == nil || tree.ID != box.ID {
+		return ErrBoxNotFound
 	}
-	return renameDoc0(boxID, boxDocPath(box.ID), name)
+	boxConf, err := readRawBoxConf(box.ID)
+	if err != nil {
+		return err
+	}
+	if boxConf == nil {
+		return errors.New("notebook configuration is missing")
+	}
+	if boxConf.Encrypted {
+		if err = revealBoxMetadataIfUnlocked(box.ID, boxConf); err != nil {
+			return err
+		}
+	}
+	name := treenode.ReadDocumentTitle(tree.Root).Text
+	if name == "" {
+		name = Conf.Language(16)
+	}
+	if boxConf.Name != name {
+		boxConf.Name = name
+		if err = box.SaveConf(boxConf); err != nil {
+			return err
+		}
+	}
+	box.Name = name
+	return nil
 }
 
 func setBoxDocIcon(boxID, icon string) error {

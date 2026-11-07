@@ -3258,7 +3258,7 @@ func (tx *Transaction) commit() (err error) {
 		checkUpsertInUserGuide(tree)
 		for _, operation := range tx.DoOperations {
 			if operation.Action == "setDocTitle" && operation.ID == tree.ID {
-				publishDocumentTitleProjection(tree)
+				publishDocumentTitleProjection(tree, tx.documentTitleWrite.title.Text)
 				break
 			}
 		}

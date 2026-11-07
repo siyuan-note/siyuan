@@ -232,6 +232,13 @@ func indexBoxDocIfNeeded(boxID, boxDocID string) {
 }
 
 func reconcileBoxDoc(box *Box, boxDocID string) error {
+	boxDocTitleNameLock.Lock()
+	locked := true
+	defer func() {
+		if locked {
+			boxDocTitleNameLock.Unlock()
+		}
+	}()
 	tree, err := filesys.LoadTree(box.ID, boxDocPath(boxDocID), util.NewLute())
 	if err != nil {
 		return err
@@ -242,7 +249,7 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 		title = Conf.Language(16)
 	}
 	if tree.Root.IALAttr(boxDocTitleSourceAttr) == "document" || tree.Root.DocumentTitle != nil {
-		if err = syncBoxDocTitleName(tree); err != nil {
+		if err = syncBoxDocTitleName0(tree); err != nil {
 			return err
 		}
 		title = treenode.ReadDocumentTitle(tree.Root).Text
@@ -265,6 +272,8 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return err
 	}
+	boxDocTitleNameLock.Unlock()
+	locked = false
 	if titleChanged {
 		updateRefTextRenameDoc(tree)
 	}
@@ -332,6 +341,11 @@ func normalizeBoxDocTarget(boxID, p string) string {
 func syncBoxDocTitleName(tree *parse.Tree) error {
 	boxDocTitleNameLock.Lock()
 	defer boxDocTitleNameLock.Unlock()
+	return syncBoxDocTitleName0(tree)
+}
+
+// 调用方持有 boxDocTitleNameLock，避免旧的重开快照覆盖已提交的历史标题。
+func syncBoxDocTitleName0(tree *parse.Tree) error {
 	box := Conf.Box(tree.Box)
 	if box == nil || tree.ID != box.ID {
 		return ErrBoxNotFound

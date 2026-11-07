@@ -36,6 +36,12 @@ type documentSourceFile struct {
 }
 
 func (file *documentSourceFile) filename() (string, error) {
+	if file.Kind == "notebook" {
+		if !ast.IsNodeIDPattern(file.Box) || file.Path != "/.siyuan/conf.json" {
+			return "", errors.New("invalid notebook recovery path")
+		}
+		return filepath.Join(util.DataDir, file.Box, ".siyuan", "conf.json"), nil
+	}
 	if file.Kind == "flashcard" {
 		name := path.Base(file.Path)
 		extension := path.Ext(name)
@@ -347,6 +353,9 @@ func restoreDocumentSource(file *documentSourceFile) error {
 	}
 	if file.Before == nil {
 		return removeIndexRepairSourceIfUnchanged(name, file.After)
+	}
+	if file.Kind == "notebook" {
+		return writeHistoryNotebookConf(file.Box, file.After, file.Before)
 	}
 	if err = util.WriteFileIfUnchanged(name, file.After, file.Before); os.IsNotExist(err) {
 		return fmt.Errorf("%w: %s", util.ErrFileChanged, name)

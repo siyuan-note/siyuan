@@ -379,6 +379,18 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 	if encrypted && tree.Root.ID+".sy" != filepath.Base(historyPath) {
 		return errors.New("encrypted document history root ID does not match its filename")
 	}
+	var unlockBoxTitle func()
+	if !needResetTree && IsBoxDoc(boxID, tree.ID) {
+		boxDocTitleNameLock.Lock()
+		unlockBoxTitle = boxDocTitleNameLock.Unlock
+		defer func() {
+			if unlockBoxTitle != nil {
+				unlockBoxTitle()
+			}
+		}()
+		// 恢复的标题源优先于配置投影，纯文本历史同样需要在重开时保留。
+		tree.Root.SetIALAttr(boxDocTitleSourceAttr, "document")
+	}
 	boundRecovery := &Transaction{trees: map[string]*parse.Tree{}, historyRecovery: newAttributeViewHistoryRecovery()}
 	defer boundRecovery.finishHistoryRecovery(&err)
 	if nil != tree {
@@ -481,11 +493,24 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 			return
 		}
 	}
+	var boxName string
+	if IsBoxDoc(tree.Box, tree.ID) {
+		if boxName, err = boundRecovery.historyRecovery.writeBoxDocTitleName(tree, writeHistoryNotebookConf); err != nil {
+			return
+		}
+	}
 	if err = writeHistoryDocument(tree, workingDoc, removeOldDoc, boundRecovery.historyRecovery); err != nil {
 		return
 	}
 	if err = boundRecovery.historyRecovery.commit(); err != nil {
 		return
+	}
+	if IsBoxDoc(tree.Box, tree.ID) {
+		box.Name = boxName
+	}
+	if unlockBoxTitle != nil {
+		unlockBoxTitle()
+		unlockBoxTitle = nil
 	}
 	invalidateDocumentHistory(tree.ID)
 	if workingDoc != nil && workingDoc.Type == "d" && workingDoc.BoxID == boxID && workingDoc.RootID != tree.ID {

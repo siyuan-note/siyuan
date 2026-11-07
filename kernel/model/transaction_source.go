@@ -332,7 +332,7 @@ func (tx *Transaction) rollbackDocumentSources() {
 	presentMirrors := map[string]string{}
 	mirrorSourcesValid := true
 	for _, file := range j.Files {
-		if file.Kind == "relations" || file.Kind == "flashcard" {
+		if file.Kind == "relations" || file.Kind == "flashcard" || file.Kind == "notebook" {
 			continue
 		}
 		if file.Kind == "database" {

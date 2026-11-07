@@ -226,6 +226,37 @@ const cases = async (source: string, styles: string[], themes: string[], notific
                                 "the font size reset stays beside its text when space permits");
                             check.ok(buttonBounds.left >= bounds.right + 7, "compact actions retain their spacing");
                         }
+                        const callerButton = notificationContent.querySelector<HTMLElement>(".caller-notice-action");
+                        if (callerButton) {
+                            const callerStyle = doc.createElement("style");
+                            doc.head.append(callerStyle);
+                            const after = doc.createRange();
+                            after.setStart(notificationContent.lastChild, 1);
+                            after.setEnd(notificationContent.lastChild, 2);
+                            for (const float of ["right", "none"]) {
+                                callerStyle.textContent = `.caller-notice-action {float: ${float}}`;
+                                check.equal(frame.contentWindow.getComputedStyle(callerButton).cssFloat, float,
+                                    "notifications preserve the caller's button float");
+                                check.equal(notificationContent.innerHTML, expected.innerHTML,
+                                    "a floated button stays between the same text nodes");
+                                const buttonBounds = callerButton.getBoundingClientRect();
+                                const afterBounds = after.getBoundingClientRect();
+                                if (float === "right") {
+                                    const padding = parseFloat(frame.contentWindow.getComputedStyle(notificationContent).paddingRight);
+                                    check.ok(Math.abs(buttonBounds.right - notificationContent.getBoundingClientRect().right + padding) < 1,
+                                        "the caller's float places its button at the content's right edge");
+                                    if (width === 1024 && fontSize === 14) {
+                                        check.ok(afterBounds.left < buttonBounds.left,
+                                            "a right float lets following text flow before the button without changing DOM order");
+                                    }
+                                } else {
+                                    check.ok(afterBounds.left >= buttonBounds.right - 1 ||
+                                        afterBounds.top + afterBounds.height / 2 > buttonBounds.top + buttonBounds.height / 2 + 10,
+                                    "inline buttons keep following text after them when the caller removes its float");
+                                }
+                            }
+                            callerStyle.remove();
+                        }
                         notification.querySelectorAll<HTMLElement>('[hidden]:not([hidden="until-found" i])').forEach(button =>
                             check.equal(frame.contentWindow.getComputedStyle(button).display, "none"));
                         notification.querySelectorAll<HTMLElement>('[hidden="until-found" i]').forEach(element => {
@@ -293,6 +324,7 @@ test("notifications preserve caller layouts, actions, retries and recovery text 
         `<div hidden>Hidden container${button("Hidden action")}</div>Visible${button("Visible action")}`,
         `<div hidden="UNTIL-FOUND">Searchable container${button("Searchable action")}</div>Visible${button("Visible action")}`,
         'Plugin text <a class="b3-button" href="https://example.com/action">Action link</a>',
+        'Before <button class="caller-notice-action b3-button">Action</button> after',
         ...readdirSync("appearance/langs").filter(name => name.endsWith(".json")).map(name =>
             renderFontSizeMessage(JSON.parse(readFileSync(`appearance/langs/${name}`, "utf8")))),
     ];

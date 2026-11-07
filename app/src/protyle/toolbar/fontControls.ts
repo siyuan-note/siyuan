@@ -7,7 +7,7 @@ import {getBlockRanges} from "../util/selection";
 import {focusByRange} from "../util/selectionOffsets";
 import {escapeAttr} from "../../util/escape";
 import {isMixedFontSize, normalizeFontSizeInput} from "./fontSizeCore";
-import {closeSubElement} from "./subElementLifecycle";
+import {closeSubElement, SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "./subElementLifecycle";
 import {getSelectedFontSize} from "./fontSizeSelection";
 
 export const getFontSizeState = (protyle: IProtyle) => {
@@ -154,6 +154,7 @@ export class FontControl extends ToolbarItem {
                     }
                     menu.addItem({
                         type: "empty", label: "", bind: element => {
+                            element.dataset.subElementSource = SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE;
                             element.append(createFontSizePicker(protyle, value => {
                                 menu.close();
                                 apply("fontSize", value);

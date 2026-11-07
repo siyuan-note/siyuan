@@ -64,6 +64,7 @@ const runCases = async (sources, appDirectory) => {
         },
         Lute: {UnEscapeHTMLStr: value => value, Caret: "caret"},
         getDailyNoteHints: async () => [],
+        getConfiguredEntryVisibility: () => true,
         Constants: {ZWSP: "\u200b"},
     };
     const hintRef = new Function(...Object.keys(hintDependencies), "exports", sources.hintRef + "\nreturn exports.hintRef;")(

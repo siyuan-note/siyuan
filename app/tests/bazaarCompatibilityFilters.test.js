@@ -393,11 +393,25 @@ const runPersistenceCases = async () => {
     persistence.paused = true;
     const initialSaves = persistence.saves.length;
     const trigger = button("plugins");
-    input("plugins", version).focus();
-    input("plugins", version).click();
-    assert.equal(trigger.disabled, true);
+    const assertReady = () => {
+        assert.equal(trigger.disabled, false);
+        assert.equal(trigger.hasAttribute("aria-disabled"), false);
+        assert.equal(trigger.hasAttribute("aria-busy"), false);
+    };
+    assertReady();
+    const firstItem = input("plugins", version);
+    firstItem.focus();
+    firstItem.click();
+    assert.equal(trigger.disabled, false, "saving preserves native focusability");
+    assert.equal(trigger.getAttribute("aria-disabled"), "true");
+    assert.equal(trigger.getAttribute("aria-busy"), "true");
+    assert.equal(document.activeElement, trigger, "closing the menu immediately restores focus while saving");
+    await new Promise(resolve => setTimeout(resolve, 350));
+    assert.equal(getComputedStyle(trigger).opacity, "1", "saving must not dim the filter trigger");
     assert.equal(checked("plugins", version), false);
     trigger.click();
+    firstItem.click();
+    assert.equal(trigger.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true})), false);
     await tick();
     assert.equal(persistence.saves.length, initialSaves + 1, "rapid trigger clicks cannot duplicate a pending save");
     assert.equal(window.siyuan.menus.menu.element.classList.contains("fn__none"), true);
@@ -406,7 +420,7 @@ const runPersistenceCases = async () => {
     persistence.saves[initialSaves].finish();
     await f.settle();
     await tick();
-    assert.equal(trigger.disabled, false);
+    assertReady();
     assert.equal(checked("plugins", version), true);
     assert.equal(document.activeElement, trigger, "keyboard focus returns to the trigger after saving");
     assert.equal(names("plugins").length, 5);
@@ -417,10 +431,11 @@ const runPersistenceCases = async () => {
     persistence.saves.at(-1).finish(false);
     await failed;
     await tick();
-    assert.equal(trigger.disabled, false);
+    assertReady();
     assert.equal(checked("plugins", platform), false);
     assert.equal(document.activeElement, trigger, "failed saves release the trigger and restore keyboard focus");
     assert.equal(names("plugins").length, 5, "failed writes do not filter the list");
+    assert.equal(getComputedStyle(trigger).opacity, "1", "failed saves keep the trigger visible");
     assert.equal(persistence.messages.at(-1), "Save rejected");
     input("plugins", platform).focus();
     input("plugins", platform).click();
@@ -579,6 +594,41 @@ const checkLayout = async () => {
     return {width: innerWidth, height: innerHeight};
 };
 
+const checkSavingAppearance = async () => {
+    const assert = require("node:assert/strict");
+    const f = window.fixture;
+    f.activate("plugins");
+    const trigger = f.button("plugins");
+    const filter = "hideUnsupportedVersion";
+    const checked = f.checked("plugins", filter);
+    f.persistence.paused = true;
+    f.input("plugins", filter).click();
+    const samples = [];
+    for (let i = 0; i < 6; i++) {
+        samples.push(Number(getComputedStyle(trigger).opacity));
+        await new Promise(resolve => setTimeout(resolve, 75));
+    }
+    assert.ok(samples.every(opacity => opacity === 1), `pending trigger opacity: ${samples}`);
+    assert.equal(trigger.disabled, false);
+    assert.equal(trigger.getAttribute("aria-disabled"), "true");
+    assert.equal(trigger.getAttribute("aria-busy"), "true");
+    assert.equal(f.checked("plugins", filter), checked, "pending configuration is not applied optimistically");
+    f.persistence.saves.at(-1).finish();
+    await f.settle();
+    assert.equal(f.checked("plugins", filter), !checked);
+    assert.equal(trigger.hasAttribute("aria-disabled"), false);
+    assert.equal(trigger.hasAttribute("aria-busy"), false);
+    for (let i = 0; i < 6; i++) {
+        samples.push(Number(getComputedStyle(trigger).opacity));
+        await new Promise(resolve => setTimeout(resolve, 75));
+    }
+    assert.ok(samples.every(opacity => opacity === 1), `settled trigger opacity: ${samples}`);
+    f.persistence.paused = false;
+    f.input("plugins", filter).click();
+    await f.settle();
+    return {samples: samples.length, min: Math.min(...samples), max: Math.max(...samples)};
+};
+
 const runElectron = async () => {
     const {app, BrowserWindow} = require("electron");
     app.setPath("userData", process.argv.at(-1));
@@ -637,24 +687,61 @@ const runElectron = async () => {
             win.webContents.sendInputEvent({type: "keyDown", keyCode: "Space"});
             win.webContents.sendInputEvent({type: "keyUp", keyCode: "Space"});
             await new Promise(resolve => setTimeout(resolve, 50));
-            await evaluate(async () => {
+            const pendingSaves = await evaluate(async () => {
                 const assert = require("node:assert/strict");
                 await window.fixture.settle();
                 assert.equal(window.fixture.checked("plugins", "hideIncompatiblePlatform"), true);
                 assert.equal(window.fixture.checked("plugins", "hideUnsupportedVersion"), false,
                     "Space activates the arrow-selected item, not the initially focused one");
+                window.fixture.persistence.paused = true;
                 window.fixture.input("plugins", "hideUnsupportedVersion").focus();
+                return window.fixture.persistence.saves.length;
             });
             win.webContents.sendInputEvent({type: "keyDown", keyCode: "Return"});
             win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
             win.webContents.sendInputEvent({type: "keyUp", keyCode: "Return"});
             await new Promise(resolve => setTimeout(resolve, 50));
+            const pendingPoint = await evaluate(() => {
+                const assert = require("node:assert/strict");
+                const trigger = window.fixture.button("plugins");
+                assert.equal(document.activeElement, trigger, "native activation restores focus before saving finishes");
+                assert.equal(trigger.disabled, false);
+                assert.equal(trigger.getAttribute("aria-disabled"), "true");
+                assert.equal(trigger.getAttribute("aria-busy"), "true");
+                const rect = trigger.getBoundingClientRect();
+                return {x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + rect.height / 2)};
+            });
+            win.webContents.sendInputEvent({type: "keyDown", keyCode: "Space"});
+            win.webContents.sendInputEvent({type: "keyUp", keyCode: "Space"});
+            win.webContents.sendInputEvent({type: "keyDown", keyCode: "Return"});
+            win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
+            win.webContents.sendInputEvent({type: "keyUp", keyCode: "Return"});
+            await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {
+                type: "mousePressed", button: "left", clickCount: 1, ...pendingPoint,
+            });
+            await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {
+                type: "mouseReleased", button: "left", clickCount: 1, ...pendingPoint,
+            });
+            await new Promise(resolve => setTimeout(resolve, 50));
+            await evaluate(pendingSaves => {
+                const assert = require("node:assert/strict");
+                assert.equal(window.fixture.persistence.saves.length, pendingSaves + 1,
+                    "native Space, Enter and pointer clicks cannot repeat a pending save");
+                assert.equal(window.fixture.button("plugins").getAttribute("aria-expanded"), "false");
+                assert.equal(window.siyuan.menus.menu.element.classList.contains("fn__none"), true);
+            }, pendingSaves);
+            win.webContents.sendInputEvent({type: "keyDown", keyCode: "Tab"});
+            win.webContents.sendInputEvent({type: "keyUp", keyCode: "Tab"});
+            await new Promise(resolve => setTimeout(resolve, 50));
             await evaluate(async () => {
                 const assert = require("node:assert/strict");
+                const search = window.fixture.panel("plugins").querySelector(".b3-text-field");
+                assert.equal(document.activeElement, search, "Tab can leave the pending trigger");
+                window.fixture.persistence.saves.at(-1).finish();
                 await window.fixture.settle();
+                window.fixture.persistence.paused = false;
                 assert.equal(window.fixture.checked("plugins", "hideUnsupportedVersion"), true);
-                assert.equal(document.activeElement, window.fixture.button("plugins"),
-                    "keyboard focus returns after the save without needing another Tab");
+                assert.equal(document.activeElement, search, "completion does not reclaim focus after Tab");
                 assert.deepEqual(window.fixture.names("plugins"), ["old", "new", "same-time", "unknown"]);
                 window.fixture.input("plugins", "hideUnsupportedVersion").focus();
             });
@@ -725,6 +812,8 @@ const runElectron = async () => {
                         await evaluate(checkLayout);
                         layouts++;
                     }
+                    console.log("Stable filter appearance", {mobile, appearance, width,
+                        ...await evaluate(checkSavingAppearance)});
                     if (process.env.SIYUAN_BAZAAR_SCREENSHOTS) {
                         await new Promise(resolve => setTimeout(resolve, 100));
                         mkdirSync(process.env.SIYUAN_BAZAAR_SCREENSHOTS, {recursive: true});

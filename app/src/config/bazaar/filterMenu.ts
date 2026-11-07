@@ -40,9 +40,14 @@ export const refreshBazaarFilterMenu = (root: HTMLElement) => {
 export const bindBazaarFilterMenu = (root: HTMLElement) => {
     let lastFocusedButton: HTMLButtonElement;
     root.querySelectorAll<HTMLButtonElement>("[data-bazaar-filter-menu]").forEach(button => {
+        let saving = false;
         button.addEventListener("click", event => {
+            event.stopPropagation();
             const type = getFilterType(button);
-            if (button.disabled || !type) return;
+            if (saving || button.disabled || !type) {
+                event.preventDefault();
+                return;
+            }
             lastFocusedButton = button;
             toggleMenu({
                 target: button,
@@ -95,17 +100,21 @@ export const bindBazaarFilterMenu = (root: HTMLElement) => {
                                 item.setAttribute("aria-checked", String(checked));
                             },
                             click: async () => {
-                                if (button.disabled || !button.isConnected) return;
+                                if (saving || button.disabled || !button.isConnected) return;
                                 const restoreFocus = document.activeElement === button ||
                                     menu.element.contains(document.activeElement);
                                 lastFocusedButton = button;
-                                button.disabled = true;
+                                saving = true;
+                                button.setAttribute("aria-disabled", "true");
+                                button.setAttribute("aria-busy", "true");
                                 try {
                                     await bazaarConfigApi.patch(`compatibilityFilters.${type}.${filter}`, !checked);
                                 } catch (error) {
                                     showMessage(error instanceof Error ? error.message : String(error));
                                 } finally {
-                                    button.disabled = false;
+                                    saving = false;
+                                    button.removeAttribute("aria-disabled");
+                                    button.removeAttribute("aria-busy");
                                     if (restoreFocus && lastFocusedButton === button && button.isConnected &&
                                         document.activeElement === document.body &&
                                         window.siyuan.menus.menu.element.classList.contains("fn__none")) {
@@ -123,7 +132,6 @@ export const bindBazaarFilterMenu = (root: HTMLElement) => {
                     menu.element.querySelector<HTMLButtonElement>(".b3-menu__item")?.focus();
                 },
             });
-            event.stopPropagation();
         });
     });
 };

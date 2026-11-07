@@ -1119,13 +1119,13 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, treenode.GetNodeInTree(tree, operation.ParentID), false); insertErr != nil {
 		return &TxErr{code: TxErrCodeReloadUI, msg: insertErr.Error(), id: operation.ParentID}
 	} else if changed {
-		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = tx.renderInsertBlockDOM(subTree)
 	}
 	if err = tx.validateBlockWriteIDs(subTree.Root, tree, nil); err != nil {
 		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: operation.ParentID}
 	}
 	if tx.fromAPI {
-		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = tx.renderInsertBlockDOM(subTree)
 	}
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
 	// subTree.Box 此时尚未设置，用目标树所在 box 作为 srcBox
@@ -1150,7 +1150,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	}
 	attrViews := map[string]*av.AttributeView{}
 	if normalizeDatabaseBlockViews(subTree.Root, tree.Box, attrViews) {
-		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = tx.renderInsertBlockDOM(subTree)
 	}
 
 	node := treenode.GetNodeInTree(tree, operation.ParentID)
@@ -1207,7 +1207,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 			if item.Type == ast.NodeKramdownBlockIAL {
 				continue
 			}
-			dom.WriteString(tx.luteEngine.RenderNodeBlockDOM(item))
+			dom.WriteString(tx.renderInsertNodeBlockDOM(item))
 			tx.markStructureCheck(item)
 		}
 		operation.Data = dom.String()
@@ -1245,13 +1245,13 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, treenode.GetNodeInTree(tree, operation.ParentID), false); insertErr != nil {
 		return &TxErr{code: TxErrCodeReloadUI, msg: insertErr.Error(), id: operation.ParentID}
 	} else if changed {
-		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = tx.renderInsertBlockDOM(subTree)
 	}
 	if err = tx.validateBlockWriteIDs(subTree.Root, tree, nil); err != nil {
 		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: operation.ParentID}
 	}
 	if tx.fromAPI {
-		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = tx.renderInsertBlockDOM(subTree)
 	}
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
 	// subTree.Box 此时尚未设置，用目标树所在 box 作为 srcBox
@@ -1276,7 +1276,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	}
 	attrViews := map[string]*av.AttributeView{}
 	if normalizeDatabaseBlockViews(subTree.Root, tree.Box, attrViews) {
-		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = tx.renderInsertBlockDOM(subTree)
 	}
 
 	node := treenode.GetNodeInTree(tree, operation.ParentID)
@@ -1344,7 +1344,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 			if item.Type == ast.NodeKramdownBlockIAL {
 				continue
 			}
-			dom.WriteString(tx.luteEngine.RenderNodeBlockDOM(item))
+			dom.WriteString(tx.renderInsertNodeBlockDOM(item))
 			tx.markStructureCheck(item)
 		}
 		operation.Data = dom.String()
@@ -1924,14 +1924,14 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, insertParent, true); insertErr != nil {
 		return &TxErr{code: TxErrCodeReloadUI, msg: insertErr.Error(), id: operation.ParentID}
 	} else if changed {
-		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = tx.renderInsertBlockDOM(subTree)
 	}
 	subTree.Box, subTree.Path = tree.Box, tree.Path
 	if err := tx.validateBlockWriteIDs(subTree.Root, tree, nil); err != nil {
 		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: operation.ParentID}
 	}
 	if tx.fromAPI {
-		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = tx.renderInsertBlockDOM(subTree)
 	}
 	tx.processGlobalAssets(subTree)
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
@@ -1964,7 +1964,7 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	}
 	attrViews := map[string]*av.AttributeView{}
 	if normalizeDatabaseBlockViews(subTree.Root, tree.Box, attrViews) {
-		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+		operation.Data = tx.renderInsertBlockDOM(subTree)
 	}
 
 	if "" != nextID {
@@ -2062,7 +2062,7 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 			normalized := tx.luteEngine.BlockDOM2Tree(operation.Data.(string))
 			if copied := treenode.GetNodeInTree(normalized, insertedNode.ID); copied != nil {
 				copied.RemoveIALAttr(NodeAttrRiffDecks)
-				operation.Data = tx.luteEngine.Tree2BlockDOM(normalized, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+				operation.Data = tx.renderInsertBlockDOM(normalized)
 			}
 		}
 	}
@@ -3635,12 +3635,12 @@ func getRefsCacheByDefNode(updateNode *ast.Node, boxID string) (ret []*sql.Ref, 
 	return
 }
 
-var updateRefTextRenameDocs = map[string]*parse.Tree{}
+var updateRefTextRenameDocs = map[dynamicRefTextRetryKey]struct{}{}
 var updateRefTextRenameDocLock = sync.Mutex{}
 
 func updateRefTextRenameDoc(renamedTree *parse.Tree) {
 	updateRefTextRenameDocLock.Lock()
-	updateRefTextRenameDocs[renamedTree.ID] = renamedTree
+	updateRefTextRenameDocs[dynamicRefTextRetryKey{renamedTree.Box, renamedTree.ID}] = struct{}{}
 	updateRefTextRenameDocLock.Unlock()
 }
 
@@ -3651,13 +3651,43 @@ func FlushUpdateRefTextRenameDocJob() {
 }
 
 func flushUpdateRefTextRenameDoc() {
-	updateRefTextRenameDocLock.Lock()
-	defer updateRefTextRenameDocLock.Unlock()
-
-	for _, tree := range updateRefTextRenameDocs {
-		refreshDynamicRefText(tree.Root, tree)
+	if util.IsExiting.Load() || util.ReadOnly {
+		return
 	}
-	updateRefTextRenameDocs = map[string]*parse.Tree{}
+	updateRefTextRenameDocLock.Lock()
+	pending := updateRefTextRenameDocs
+	updateRefTextRenameDocs = map[dynamicRefTextRetryKey]struct{}{}
+	updateRefTextRenameDocLock.Unlock()
+	if len(pending) == 0 {
+		return
+	}
+	defer func() {
+		updateRefTextRenameDocLock.Lock()
+		for key := range pending {
+			updateRefTextRenameDocs[key] = struct{}{}
+		}
+		updateRefTextRenameDocLock.Unlock()
+	}()
+
+	// 不持队列锁等待编辑锁，刷新期间新登记的定义保留到下一批；失败或锁定的笔记本仍待刷新。
+	flushLock.Lock()
+	isFlushing.Store(true)
+	defer func() {
+		isFlushing.Store(false)
+		flushLock.Unlock()
+	}()
+	sql.FlushQueue()
+	if !sql.IndexQueueIdle() {
+		return
+	}
+	for key := range pending {
+		if util.IsExiting.Load() {
+			return
+		}
+		if retryDynamicRefText(key) {
+			delete(pending, key)
+		}
+	}
 }
 
 type changedDefNode struct {

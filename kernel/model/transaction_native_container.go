@@ -8,8 +8,41 @@ import (
 	"fmt"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
+
+func (tx *Transaction) renderInsertBlockDOM(tree *parse.Tree) string {
+	return renderInsertFragment(tree.Root, func() string {
+		return tx.luteEngine.Tree2BlockDOM(tree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+	})
+}
+
+func (tx *Transaction) renderInsertNodeBlockDOM(node *ast.Node) string {
+	return renderInsertFragment(node, func() string {
+		return tx.luteEngine.RenderNodeBlockDOM(node)
+	})
+}
+
+func renderInsertFragment(root *ast.Node, render func() string) string {
+	var boundaries []*ast.Node
+	defer func() {
+		for _, boundary := range boundaries {
+			boundary.Unlink()
+		}
+	}()
+	ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.Type == ast.NodeTaskListItemMarker && node.Next == nil && node.Parent != nil {
+			// 插入片段可以暂时只有任务标记，后续操作才移入正文。非渲染 IAL 边界阻止渲染器补入额外段落，
+			// 该边界只在本次渲染期间存在，不进入持久化树、返回 DOM 或撤销重放数据。
+			boundary := &ast.Node{Type: ast.NodeKramdownBlockIAL}
+			node.InsertAfter(boundary)
+			boundaries = append(boundaries, boundary)
+		}
+		return ast.WalkContinue
+	})
+	return render()
+}
 
 func newListEdgeItem(typ int) *ast.Node {
 	item := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeListItem, ListData: &ast.ListData{Typ: typ}}

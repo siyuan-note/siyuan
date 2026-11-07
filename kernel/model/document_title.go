@@ -114,6 +114,8 @@ func (tx *Transaction) writeDocumentTitleTree(tree *parse.Tree, preflight func()
 	}
 	sql.UpsertTreeQueueWithChanges(tree, tx.treeIndexChanges(tree))
 	refreshDocInfoWithSize(tree, size)
+	// 新增标题依赖可能尚未入库，索引完成后重新读取定义，补齐本次即时刷新遗漏的引用。
+	updateRefTextRenameDoc(tree)
 	return nil
 }
 

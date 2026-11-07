@@ -203,6 +203,15 @@ func clearQueue() {
 
 var flushingTx = atomic.Bool{}
 
+// IndexQueueIdle 在索引执行锁内检查队列，避免把已取出但尚未提交的操作误判为空闲。
+func IndexQueueIdle() bool {
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+	return len(operationQueue) == 0 && !flushingTx.Load()
+}
+
 func FlushQueue() {
 	timing := util.BeginPerformance("index.flush")
 	timing.Stage("wait_lock")

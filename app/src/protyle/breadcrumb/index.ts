@@ -72,6 +72,7 @@ export class Breadcrumb {
     private startingRecord = false;
     private stoppingRecord = false;
     private renderRequestID = 0;
+    private renderedRequestID = 0;
     private menuRequestID = 0;
     private globalBreadcrumb: boolean;
     private destroyed = false;
@@ -1355,7 +1356,8 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         }
         const id = blockElement.getAttribute("data-node-id");
         const global = window.siyuan.config.editor.globalBreadcrumb;
-        if (id === this.id && !update && this.globalBreadcrumb === global) {
+        if (id === this.id && !update && this.globalBreadcrumb === global &&
+            this.renderedRequestID === this.renderRequestID) {
             protyle.breadcrumb.element.querySelectorAll(".protyle-breadcrumb__item--active").forEach(item => {
                 item.classList.remove("protyle-breadcrumb__item--active");
             });
@@ -1422,6 +1424,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                 }
             });
             this.element.innerHTML = html;
+            this.renderedRequestID = requestID;
             improveBreadcrumbAppearance(this.element.parentElement);
         });
         /// #endif

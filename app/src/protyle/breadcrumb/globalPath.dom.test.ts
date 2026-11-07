@@ -166,6 +166,20 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         check.equal(breadcrumb.element.querySelector(`[data-node-id="${root}"] .protyle-breadcrumb__text`).textContent,
             'Current <img src=x onerror="alert(1)"> & 日本語');
         check.equal(breadcrumb.element.querySelector("script, img[onerror]"), null);
+        for (const global of [false, true]) {
+            let finish: () => void;
+            dependency.waitForPendingTransactions = () => new Promise<void>(resolve => { finish = resolve; });
+            window.siyuan.config.editor.globalBreadcrumb = global;
+            const oldBlock = wysiwyg.firstElementChild;
+            const pendingRender = breadcrumb.render(protyle, true, oldBlock);
+            oldBlock.replaceWith(oldBlock.cloneNode(true));
+            finish();
+            await pendingRender;
+            dependency.waitForPendingTransactions = async () => {};
+            await render(false);
+            check.equal(breadcrumb.element.querySelectorAll('[data-global-type="notebook"]').length, global ? 1 : 0,
+                "reloading the same block during a settings refresh must not leave the previous breadcrumb");
+        }
         const ancestorIcon = breadcrumb.element.querySelector(`[data-node-id="${ancestor}"] .popover__block`) as HTMLElement;
         check.equal(ancestorIcon.getAttribute("data-id"), ancestor);
         check.ok(ancestorIcon.querySelector("img"));

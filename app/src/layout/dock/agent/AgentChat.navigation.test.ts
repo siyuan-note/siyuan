@@ -89,10 +89,12 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     check.equal(getComputedStyle(tip).pointerEvents, "none", "preview cannot intercept clicks");
     const next = markers[1].getBoundingClientRect();
     check.ok(Math.abs(first.bottom - next.top) < 0.1, "adjacent hit targets have no gap");
-    for (let y = first.top + first.height / 2; y < next.bottom; y++) {
+    // 原生鼠标坐标会取整，逐像素检查须使用整数坐标以匹配实际命中区域。
+    for (let y = Math.ceil(first.top + first.height / 2); y < next.bottom; y++) {
         await move(first.left + first.width / 2, y);
         check.equal(tip.classList.contains("fn__none"), false, "preview stays visible between lines");
-        check.equal(tip.textContent, y < next.top ? chat.entries[0].content : "Second question");
+        check.equal(tip.textContent, y < next.top ? chat.entries[0].content : "Second question",
+            `preview at y=${y}, next marker starts at ${next.top}`);
     }
     await move(first.left + first.width / 2, first.top + first.height / 2);
     const preview = tip.getBoundingClientRect();

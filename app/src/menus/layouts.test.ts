@@ -26,6 +26,7 @@ const fixture = (geometryAvailable = true) => {
     }
     let dialog: any;
     const dependencies = {
+        syncMarkdownKeymap: () => {},
         clearReloadSnapshot: () => {},
         Layout,
         Constants: {LOCAL_LAYOUTS: "layouts", LOCAL_FILESPATHS: "paths",

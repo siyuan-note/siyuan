@@ -38,7 +38,7 @@ exports.mobileDialogRuntimeSource = () => {
     const sources = {};
     for (const name of ["dialog/mobileDialog", "dialog/mobileInputDialog", "dialog/mobileConfirmDialog",
         "dialog/inputDialog", "dialog/confirmDialog", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag",
-        "mobile/util/mobileSheetLayout", "mobile/util/visibleViewport", "mobile/util/orientation",
+        "mobile/util/mobileSheetLayout", "mobile/util/mobileSheetGesture", "mobile/util/visibleViewport", "mobile/util/orientation",
         "protyle/util/browserCompatibility", "menus/sheetOpen", "menus/sheetActions", "util/escape",
         "mobile/util/secondaryEditors", "protyle/util/editorSave", "card/pendingAction"]) {
         sources[name] = transpileModule(readFileSync(path.join(__dirname, "../../src", name + ".ts"), "utf8"), {

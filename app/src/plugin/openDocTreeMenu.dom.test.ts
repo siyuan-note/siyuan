@@ -102,6 +102,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     }
     Object.assign(externals, {
         "protyle/render/av/searchAVFocus": {getSearchAVFocus: (): undefined => undefined},
+        "protyle/render/av/relatedViewConfig": {getPendingRelatedViewConfig: (): undefined => undefined},
         "protyle/render/av/filteredTip": {}, "protyle/util/selectionOffsets": {},
         "protyle/util/selection": {}, "util/upDownHint": {}, "util/documentSelectionRequest": {},
     });

@@ -58,7 +58,8 @@ const browserCases = async (sources: Record<string, string>, snippets: Record<st
     };
     const evaluate = (source: string, names: string[]) => new Function(...Object.keys(deps), source +
         `\nreturn {${names.join(",")}};`)(...Object.values(deps));
-    Object.assign(deps, evaluate(snippets.block, ["getContenteditableElement", "hasNextSibling", "hasPreviousSibling"]));
+    Object.assign(deps, evaluate(snippets.block, ["getContenteditableElement", "hasNextSibling", "hasPreviousSibling",
+        "getPreviousBlockSibling", "getNextBlockSibling"]));
     Object.assign(deps, evaluate(snippets.style, ["setFontStyle", "hasSameTextStyle", "mergeSameInlineElement"]));
     Object.assign(deps, evaluate(snippets.transaction, ["updateTransaction"]));
     Object.assign(deps, load("protyle/wysiwyg/blockSelection"), {
@@ -339,7 +340,8 @@ test("block references and inline formatting survive repeated toggles, paste ord
         selection: extract("protyle/util/selection", ["selectAll"]) +
             extract("protyle/util/selectionOffsets", ["selectIsEditor", "getSelectionOffset"]),
         toolbar: compile(`class ReviewToolbar {${methods}}`),
-        block: extract("protyle/wysiwyg/getBlock", ["getContenteditableElement", "hasNextSibling", "hasPreviousSibling"]),
+        block: extract("protyle/wysiwyg/getBlock", ["getContenteditableElement", "hasNextSibling", "hasPreviousSibling",
+            "getPreviousBlockSibling", "getNextBlockSibling"]),
         style: extract("protyle/toolbar/Font", ["setFontStyle", "hasSameTextStyle"]) +
             extract("protyle/toolbar/util", ["mergeSameInlineElement"]) + extract("util/functions", ["isArrayEqual"]),
         transaction: extract("protyle/wysiwyg/transaction", ["updateTransaction"]),

@@ -70,7 +70,7 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     const toolbar = document.createElement("div");
     toolbar.id = "keyboardToolbar";
     toolbar.className = "keyboard";
-    toolbar.style.height = "300px";
+    toolbar.style.height = "max(48px, calc(100vh - 550px))";
     toolbar.innerHTML = '<div class="keyboard__bar"><button class="keyboard__action protyle-toolbar__item--current" data-type="text">Appearance</button></div><div class="keyboard__util"></div>';
     const util = toolbar.querySelector<HTMLElement>(".keyboard__util");
     util.innerHTML = new Function("disableFontFamily", "escapeHtml", "getInlineFontFamilyLabel", "fontFamilyState",
@@ -96,7 +96,7 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
         renderTextMenu: () => { button.querySelector("span").textContent = "Font 12"; },
         restoreKeyboardToolbarRange: () => restored++,
         activeBlur: () => (document.activeElement as HTMLElement)?.blur(),
-        keyboardPanelTop: 200,
+        keyboardPanelTop: 550,
         notifyMobileKeyboardChange() {},
         hideKeyboardToolbarUtil: () => check.fail("font searches must preserve the appearance panel"),
         hasClosestByClassName: load("protyle/util/hasClosest").hasClosestByClassName,
@@ -160,7 +160,11 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     check.equal(menuElement.getAttribute("data-sheet-expandable"), "true", "gesture and viewport behavior remain enabled");
     check.ok(util.contains(button), "font list opens outside the original appearance panel");
     check.notEqual(document.activeElement, search(), "opening does not summon the search keyboard");
-    check.ok(menuElement.getBoundingClientRect().top > 100, "font sheet opens from the bottom");
+    const sheetBounds = menuElement.getBoundingClientRect();
+    const toolbarTop = toolbar.getBoundingClientRect().top;
+    check.ok(Math.abs(sheetBounds.bottom - toolbarTop) <= 1, "font sheet stays above the keyboard toolbar");
+    check.ok(Math.abs(sheetBounds.height - Math.min(innerHeight * .56, toolbarTop)) <= 1,
+        "font sheet uses the standard height within the available viewport");
     await swipeDown();
     check.ok(menuElement.classList.contains("fn__none"), "a downward touch gesture closes the font sheet");
     check.ok(util.contains(button));
@@ -172,9 +176,10 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     controls.hideKeyboardToolbarUtilOnEditorClick();
     await require("electron").ipcRenderer.invoke("font-resize", 350);
     await settle();
-    // 断言跟随本次 resize 传入的高度，不是与 innerHeight 自比；设备像素取整会差 1px。
-    check.ok(Math.abs(parseFloat(menuElement.style.height) - 350) <= 1,
-        "font sheet still tracks the available viewport while searching");
+    check.equal(innerHeight, 350, "keyboard resize changes the layout viewport");
+    check.ok(Math.abs(menuElement.getBoundingClientRect().height - (350 - toolbar.getBoundingClientRect().height)) <= 1,
+        "font sheet tracks the viewport above the preserved appearance panel");
+    check.ok(Math.abs(menuElement.getBoundingClientRect().bottom - toolbar.getBoundingClientRect().top) <= 1);
     check.ok(search().getBoundingClientRect().top >= menuElement.getBoundingClientRect().top);
     check.ok(search().getBoundingClientRect().bottom <= innerHeight);
     search().value = "Font 12";

@@ -102,7 +102,7 @@ const rendererSource = () => {
         extract("util/compatibility", ["isIOSDevice", "isMac"]) +
         extract("util/hasClosest", ["hasClosestBlock", "hasClosestByAttribute", "hasClosestByClassName",
             "hasClosestByTag", "isBlockElement"]) +
-        extract("wysiwyg/getBlock", ["getContenteditableElement", "isContainerBlock", "isNotEditBlock", "hasPreviousSibling", "hasNextSibling"]) +
+        extract("wysiwyg/getBlock", ["getContenteditableElement", "isContainerBlock", "isNotEditBlock", "hasPreviousSibling", "hasNextSibling", "getPreviousBlockSibling", "getNextBlockSibling"]) +
         (extract("util/selectionOffsets", ["focusByRange", "getSelectionOffset", "selectIsEditor", "searchNode", "setLastNodeRange", "createRangeByOffsets", "getDOMOffset"]) +
         extract("util/selection", ["getEditorRange", "focusByOffset", "setInsertWbrHTML", "focusByWbr"]))
             .replace("export const getEditorRange =", "const readEditorRange =") +

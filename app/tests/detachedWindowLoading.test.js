@@ -47,6 +47,7 @@ const runRendererCase = async (sources, expected) => {
         electron, "../constants": {Constants: constants}, "../util/functions": functions,
         "../protyle/util/compatibility": compatibility, "./windowControls": controls,
         "./globalEvent/commonHotkey": {syncAppMenuShortcuts() {}},
+        "../markdown/keymapSync": {syncMarkdownKeymap() {}},
         "../window/closeWin": {closeWindow: () => calls.push("close")},
         "../window/workspace": {initWindowWorkspace: async () => {
             await workspace.promise;

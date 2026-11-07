@@ -9,6 +9,7 @@ const runCases = (sources, mobile) => {
     const primary = {id: "value", value: {keyID: "primary", block: {id: "document", content: "Title"}}};
     window.siyuan = {languages: {}};
     const dependencies = {
+        "./columnWindow": {prepareAVColumnWindow() {}},
         "./conditionalColor": {getConditionalItemStyle: () => ""},
         "../../../util/escape": {escapeAttr: value => value},
         "../../../util/image": {getCompressURL: value => value},

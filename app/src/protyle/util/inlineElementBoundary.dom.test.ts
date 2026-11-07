@@ -85,6 +85,82 @@ const browserCases = async (sources: Record<string, string>, entrySource: string
         "return {enter, softEnter};")(...Object.values(dependencies));
     Object.assign(window, {siyuan: {config: {editor: {markdown: {}}}}});
 
+    for (const types of [["sup", "sub"], ["sub", "sup"], ["strong sup", "em sub"], ["code", "kbd"], ["tag", "code"]]) {
+        const editor = document.createElement("div");
+        editor.contentEditable = "true";
+        editor.innerHTML = paragraph(`22<span data-type="${types[0]}">2</span><span data-type="${types[1]}">3</span>`);
+        document.body.append(editor);
+        marker.normalizeSemanticInlineElements(editor);
+        const [first, second] = Array.from(editor.querySelectorAll<HTMLElement>("span[data-type]"));
+        const shared = first.nextSibling;
+        const range = document.createRange();
+        range.setStart(second.firstChild, marker.getSemanticInternalMarkerPrefixLength(second.textContent));
+        range.collapse(true);
+        check.equal(marker.moveCaretAcrossSemanticMarker(range, "left"), true);
+        check.equal(range.startContainer, shared);
+        check.equal(range.startOffset, 1, `${types.join("/")}: shared boundary uses normal caret metrics`);
+        check.equal(marker.moveCaretAcrossSemanticMarker(range, "left"), true);
+        check.equal(first.contains(range.startContainer), true);
+        check.equal(range.startOffset, first.textContent.length);
+        check.equal(marker.moveCaretAcrossSemanticMarker(range, "right"), true);
+        check.equal(range.startContainer, shared);
+        check.equal(range.startOffset, 1);
+        check.equal(marker.moveCaretAcrossSemanticMarker(range, "right"), true);
+        check.equal(second.contains(range.startContainer), true);
+        check.equal(marker.moveCaretForSemanticDelete(range, false), true);
+        check.equal(range.startContainer, shared);
+        check.equal(range.startOffset, 1);
+        editor.remove();
+    }
+
+    const style = document.createElement("style");
+    style.textContent = '[data-type~="sup"]{vertical-align:super;font-size:.8em}' +
+        '[data-type~="sub"]{vertical-align:sub;font-size:.8em}';
+    document.head.append(style);
+    for (const type of ["sup", "sub", "strong sup", "em sub", "code", "kbd", "tag"]) {
+        const editor = document.createElement("div");
+        editor.contentEditable = "true";
+        editor.style.fontSize = "24px";
+        editor.innerHTML = paragraph(`22<span data-type="${type}">23</span>`);
+        document.body.append(editor);
+        marker.normalizeSemanticInlineElements(editor);
+        editor.addEventListener("click", (event: MouseEvent) => {
+            const range = getSelection().getRangeAt(0);
+            if (marker.normalizeSemanticCaretAfterClick(range, event.clientX)) {
+                focusByRange(range);
+            }
+        });
+        const inline = editor.querySelector<HTMLElement>("span[data-type]");
+        const bounds = inline.getBoundingClientRect();
+        editor.focus();
+        await ipcRenderer.invoke("click-point", {x: Math.ceil(bounds.right + 40),
+            y: Math.round(editor.getBoundingClientRect().top + editor.getBoundingClientRect().height / 2)});
+        const range = getSelection().getRangeAt(0);
+        check.equal(range.startContainer, inline.nextSibling, `${type}: click after the final inline`);
+        check.equal(range.startOffset, 1, `${type}: click uses the trailing boundary's normal text metrics`);
+        await ipcRenderer.invoke("type-text", "x");
+        check.equal(marker.getSemanticInlineVisibleText(inline), "23");
+        check.equal(marker.getTextWithoutSemanticMarkers(editor).replace(/\u200b/g, ""), "2223x");
+        range.setStart(inline.firstChild, inline.textContent.length);
+        range.collapse(true);
+        check.equal(marker.normalizeSemanticCaretAfterClick(range, bounds.right - 1), false,
+            "clicks inside the text keep its format");
+        range.selectNodeContents(inline);
+        check.equal(marker.normalizeSemanticCaretAfterClick(range, bounds.right + 40), false,
+            "text selections remain unchanged");
+        range.setStart(inline.nextSibling, 0);
+        range.collapse(true);
+        check.equal(marker.normalizeSemanticCaretAfterClick(range, bounds.right + 40), true);
+        check.equal(range.startOffset, 1);
+        range.setStartAfter(inline);
+        range.collapse(true);
+        check.equal(marker.normalizeSemanticCaretAfterClick(range, bounds.right + 40), true);
+        check.equal(range.startContainer, inline.nextSibling);
+        check.equal(range.startOffset, 1);
+        editor.remove();
+    }
+    style.remove();
+
     for (const type of ["sup", "sub", "strong sup", "em sub"]) {
         for (const direction of ["left", "right"] as const) {
             for (const action of ["type", "paste"]) {
@@ -219,7 +295,7 @@ const browserCases = async (sources: Record<string, string>, entrySource: string
     return "Inline boundary mutation cases passed";
 };
 
-test("arrows, input, paste and line breaks preserve semantic inline boundary ownership", {
+test("clicks, arrows, input, paste and line breaks preserve semantic inline boundary ownership", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -254,6 +330,11 @@ app.whenReady().then(async () => {
     ipcMain.handle("type-text", async (_event, keyCode) => {
         win.webContents.sendInputEvent({type: "char", keyCode});
         await new Promise(resolve => setTimeout(resolve, 20));
+    });
+    ipcMain.handle("click-point", async (_event, point) => {
+        win.webContents.sendInputEvent({type: "mouseDown", button: "left", clickCount: 1, ...point});
+        win.webContents.sendInputEvent({type: "mouseUp", button: "left", clickCount: 1, ...point});
+        await new Promise(resolve => setTimeout(resolve, 30));
     });
     try {
         await win.loadURL("about:blank");

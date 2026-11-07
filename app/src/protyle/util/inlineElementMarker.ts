@@ -369,7 +369,10 @@ const setRangeBeforeLeftBoundary = (range: Range, element: HTMLElement) => {
     const previousSibling = element.previousSibling;
     if (previousSibling?.nodeType === Node.TEXT_NODE) {
         const text = getTextWithLegacyInlineBoundary(previousSibling);
-        range.setStart(previousSibling, text.length - (text.match(/\u200b+$/u)?.[0].length || 0));
+        // 相邻语义元素共用边界，停在占位符后侧才能使用正文的字号和基线。
+        const sharedBoundary = /^\u200b+$/u.test(text) && getAdjacentSemanticInline(previousSibling, true);
+        range.setStart(previousSibling, sharedBoundary ? text.length :
+            text.length - (text.match(/\u200b+$/u)?.[0].length || 0));
     } else {
         range.setStartBefore(element);
     }
@@ -385,6 +388,40 @@ const setRangeAfterRightBoundary = (range: Range, element: HTMLElement) => {
     } else {
         range.setStartAfter(element);
     }
+    range.collapse(true);
+    return true;
+};
+
+export const normalizeSemanticCaretAfterClick = (range: Range, clientX: number) => {
+    if (!range.collapsed) {
+        return false;
+    }
+    const container = range.startContainer;
+    const element = container.nodeType === Node.ELEMENT_NODE ? container as Element : container.parentElement;
+    const inline = element?.closest("span[data-type]");
+    if (isSemanticInlineElement(inline)) {
+        const lastText = getLastTextNode(inline);
+        if (container !== lastText || range.startOffset !== lastText.data.length) {
+            return false;
+        }
+        const textRange = inline.ownerDocument.createRange();
+        textRange.selectNodeContents(inline);
+        const rects = textRange.getClientRects();
+        const lastRect = rects[rects.length - 1];
+        if (!lastRect || clientX < lastRect.right) {
+            return false;
+        }
+        return setRangeAfterRightBoundary(range, inline);
+    }
+    const nextText = container.nodeType === Node.TEXT_NODE ? container : container.childNodes[range.startOffset];
+    if (nextText?.nodeType !== Node.TEXT_NODE || !isSemanticInlineElement(nextText.previousSibling as Element)) {
+        return false;
+    }
+    const prefixLength = getTextWithLegacyInlineBoundary(nextText).match(/^\u200b+/u)?.[0].length || 0;
+    if (!prefixLength || container === nextText && range.startOffset >= prefixLength) {
+        return false;
+    }
+    range.setStart(nextText, prefixLength);
     range.collapse(true);
     return true;
 };

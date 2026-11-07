@@ -210,6 +210,7 @@ import {
     getSemanticInlineVisibleText,
     getTextWithoutSemanticMarkers,
     hasSemanticInlineType,
+    normalizeSemanticCaretAfterClick,
     normalizeSemanticInlineHTML,
     stripSemanticMarkersFromRangeText,
     transformSemanticInlineHTML
@@ -5527,6 +5528,10 @@ export class WYSIWYG {
                 return;
             }
 
+            if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && !event.altKey && event.detail === 1 &&
+                normalizeSemanticCaretAfterClick(range, event.clientX)) {
+                focusByRange(range);
+            }
             // 需在工具栏渲染前记录鼠标释放位置，避免浮层覆盖选区末端
             const pointerElement = document.elementFromPoint(event.clientX, event.clientY);
             const isDirectCalloutClick = isDirectCalloutStructureClick(this.mouseDownTarget, event.target,

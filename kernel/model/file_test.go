@@ -556,8 +556,8 @@ func TestValidateCreateDocDoesNotWrite(t *testing.T) {
 	}
 
 	invalidChildPath := path.Join(fixture.targetPath, newID+".sy")
-	if err := ValidateCreateDoc(fixture.box.ID, invalidChildPath, "Invalid child"); !errors.Is(err, ErrBlockNotFound) {
-		t.Fatalf("expected parent path with .sy suffix to return ErrBlockNotFound, got [%v]", err)
+	if err := ValidateCreateDoc(fixture.box.ID, invalidChildPath, "Invalid child"); err == nil || !strings.Contains(err.Error(), "invalid document path") {
+		t.Fatalf("expected parent path with .sy suffix to fail path validation, got [%v]", err)
 	}
 
 	wrongParentPath := path.Join(strings.TrimSuffix(fixture.sourcePath, ".sy"), strings.TrimSuffix(fixture.targetPath, ".sy"), newID+".sy")
@@ -862,7 +862,10 @@ func TestPerformCreateDocTransactionSyncReturnsWriteError(t *testing.T) {
 
 func TestCreateDocByMdSyncReturnsWriteError(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	docID := "20260718000009-abcdefg\x00"
+	docID := "20260718000009-abcdefg"
+	if err := os.WriteFile(filepath.Join(util.QueueDir, "document-sources"), []byte("not a directory"), 0600); err != nil {
+		t.Fatal(err)
+	}
 	tree, err := CreateDocByMdSync(fixture.box.ID, "/"+docID+".sy", "Inbox", "Keep the cloud original", nil, nil)
 	if tree == nil {
 		t.Fatal("expected document validation to succeed before the filesystem write fails")
@@ -872,6 +875,21 @@ func TestCreateDocByMdSyncReturnsWriteError(t *testing.T) {
 	}
 	if bt := treenode.GetBlockTree(docID); bt != nil {
 		t.Fatal("failed document remains in the block tree")
+	}
+	if fixture.box.Exist("/" + docID + ".sy") {
+		t.Fatal("failed document was persisted")
+	}
+}
+
+func TestCreateDocByMdSyncRejectsInvalidPath(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	docID := "20260718000009-abcdefg\x00"
+	tree, err := CreateDocByMdSync(fixture.box.ID, "/"+docID+".sy", "Inbox", "Keep the cloud original", nil, nil)
+	if tree != nil || err == nil || !strings.Contains(err.Error(), "invalid document path") {
+		t.Fatalf("invalid path must fail before creating a tree: tree=%v, error=%v", tree, err)
+	}
+	if bt := treenode.GetBlockTree(docID); bt != nil {
+		t.Fatal("invalid document remains in the block tree")
 	}
 }
 

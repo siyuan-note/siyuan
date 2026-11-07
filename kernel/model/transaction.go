@@ -1116,7 +1116,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
-	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, treenode.GetNodeInTree(tree, operation.ParentID)); insertErr != nil {
+	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, treenode.GetNodeInTree(tree, operation.ParentID), false); insertErr != nil {
 		return &TxErr{code: TxErrCodeReloadUI, msg: insertErr.Error(), id: operation.ParentID}
 	} else if changed {
 		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
@@ -1159,6 +1159,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	isContainer := node.IsContainerBlock()
+	var insertedListItems []*ast.Node
 	slices.Reverse(toInserts)
 
 	for _, toInsert := range toInserts {
@@ -1170,13 +1171,13 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 					for childLi := toInsert.FirstChild; nil != childLi; childLi = childLi.Next {
 						childLis = append(childLis, childLi)
 					}
+					insertedListItems = append(childLis, insertedListItems...)
 					for i := len(childLis) - 1; -1 < i; i-- {
 						node.PrependChild(childLis[i])
 					}
 				} else {
-					newLiID := ast.NewNodeID()
-					newLi := &ast.Node{ID: newLiID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: node.ListData.Typ}}
-					newLi.SetIALAttr("id", newLiID)
+					newLi := newListEdgeItem(node.ListData.Typ)
+					insertedListItems = append([]*ast.Node{newLi}, insertedListItems...)
 					node.PrependChild(newLi)
 					newLi.AppendChild(toInsert)
 				}
@@ -1197,6 +1198,19 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		treenode.CreatedUpdated(toInsert)
 		tx.nodes[toInsert.ID] = toInsert
 		tx.markStructureCheck(toInsert)
+	}
+
+	if len(insertedListItems) > 0 {
+		insertedNode = insertedListItems[0]
+		var dom strings.Builder
+		for _, item := range insertedListItems {
+			if item.Type == ast.NodeKramdownBlockIAL {
+				continue
+			}
+			dom.WriteString(tx.luteEngine.RenderNodeBlockDOM(item))
+			tx.markStructureCheck(item)
+		}
+		operation.Data = dom.String()
 	}
 
 	treenode.CreatedUpdated(insertedNode)
@@ -1228,7 +1242,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
-	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, treenode.GetNodeInTree(tree, operation.ParentID)); insertErr != nil {
+	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, treenode.GetNodeInTree(tree, operation.ParentID), false); insertErr != nil {
 		return &TxErr{code: TxErrCodeReloadUI, msg: insertErr.Error(), id: operation.ParentID}
 	} else if changed {
 		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
@@ -1271,6 +1285,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	isContainer := node.IsContainerBlock()
+	var insertedListItems []*ast.Node
 	if !isContainer {
 		slices.Reverse(toInserts)
 	}
@@ -1290,13 +1305,13 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 					for childLi := toInsert.FirstChild; nil != childLi; childLi = childLi.Next {
 						childLis = append(childLis, childLi)
 					}
+					insertedListItems = append(insertedListItems, childLis...)
 					for _, childLi := range childLis {
 						node.AppendChild(childLi)
 					}
 				} else {
-					newLiID := ast.NewNodeID()
-					newLi := &ast.Node{ID: newLiID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: node.ListData.Typ}}
-					newLi.SetIALAttr("id", newLiID)
+					newLi := newListEdgeItem(node.ListData.Typ)
+					insertedListItems = append(insertedListItems, newLi)
 					node.AppendChild(newLi)
 					newLi.AppendChild(toInsert)
 				}
@@ -1320,6 +1335,19 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		treenode.CreatedUpdated(toInsert)
 		tx.nodes[toInsert.ID] = toInsert
 		tx.markStructureCheck(toInsert)
+	}
+
+	if len(insertedListItems) > 0 {
+		insertedNode = insertedListItems[0]
+		var dom strings.Builder
+		for _, item := range insertedListItems {
+			if item.Type == ast.NodeKramdownBlockIAL {
+				continue
+			}
+			dom.WriteString(tx.luteEngine.RenderNodeBlockDOM(item))
+			tx.markStructureCheck(item)
+		}
+		operation.Data = dom.String()
 	}
 
 	treenode.CreatedUpdated(insertedNode)
@@ -1893,7 +1921,7 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	if node != nil {
 		insertParent = node.Parent
 	}
-	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, insertParent); insertErr != nil {
+	if changed, insertErr := unwrapNativeContainerInsert(subTree.Root, insertParent, true); insertErr != nil {
 		return &TxErr{code: TxErrCodeReloadUI, msg: insertErr.Error(), id: operation.ParentID}
 	} else if changed {
 		operation.Data = tx.luteEngine.Tree2BlockDOM(subTree, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)

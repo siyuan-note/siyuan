@@ -353,7 +353,7 @@ func (projection *collectionRemovalProjection) insertionNodes(operation *Operati
 	if err != nil {
 		return nil, err
 	}
-	if _, err = unwrapNativeContainerInsert(subtree.Root, parent); err != nil {
+	if _, err = unwrapNativeContainerInsert(subtree.Root, parent, operation.Action == "insert"); err != nil {
 		return nil, err
 	}
 	tx := &Transaction{fromAPI: true, trees: projection.after}
@@ -528,8 +528,7 @@ func (projection *collectionRemovalProjection) insertAtEdge(action string, ancho
 					}
 				}
 			} else {
-				item := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeListItem, ListData: &ast.ListData{Typ: anchor.ListData.Typ}}
-				item.SetIALAttr("id", item.ID)
+				item := newListEdgeItem(anchor.ListData.Typ)
 				if prepend {
 					anchor.PrependChild(item)
 				} else {

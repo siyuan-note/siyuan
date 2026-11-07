@@ -364,6 +364,142 @@ describe("plugin lifecycle coordinator", () => {
         assert.equal(coordinator.getState("sample"), "absent");
     });
 
+    for (const remaining of [1, 1000]) {
+        it(`does not renew an expired loading removal budget after a ${remaining}ms clock rollback`, async () => {
+            const clock = new FakeClock();
+            const never = new Promise<void>(() => undefined);
+            const late = deferred<void>();
+            let rollback = true;
+            const {coordinator, events} = createHarness({
+                onload(plugin) { events.push(`onload:${plugin.name}`); return plugin.revision === 1 ? never : undefined; },
+                onunload(plugin) { events.push(`onunload:${plugin.name}`); return plugin.revision === 1 ? late.promise : never; },
+                uninstall(plugin) { events.push(`uninstall:${plugin.name}`); return never; },
+            }, 10, {
+                now: () => clock.now,
+                setTimeout: (callback, delay) => clock.setTimeout(() => {
+                    if (rollback) clock.now -= remaining;
+                    callback();
+                }, delay),
+                clearTimeout: clock.clearTimeout,
+            });
+            coordinator.start();
+            const loading = coordinator.requestLoad("sample", getSampleData());
+            await flushMicrotasks();
+            const unloading = coordinator.requestUninstall("sample");
+            await flushMicrotasks();
+            clock.advance(10);
+            await flushMicrotasks();
+            assert.equal(coordinator.getState("sample"), "absent");
+            assert.equal(events.filter(event => event === "onunload:sample").length, 1);
+            assert.equal(events.filter(event => event === "uninstall:sample").length, 1);
+            assert.equal(events.includes("error:sample:onload"), true);
+            assert.equal(events.includes("error:sample:onunload"), false);
+            assert.equal(events.includes("error:sample:uninstall"), false);
+            assert.equal(events.includes("dispose:sample:true"), true);
+            await Promise.all([loading, unloading]);
+            late.reject(new Error("late unload failure"));
+            await flushMicrotasks();
+            assert.equal(events.filter(event => event === "error:sample:onunload").length, 1);
+            rollback = false;
+            await coordinator.requestLoad("sample", getSampleData(2));
+            const nextUnload = coordinator.requestUnload("sample");
+            await flushMicrotasks();
+            clock.advance(9);
+            await flushMicrotasks();
+            assert.equal(coordinator.getState("sample"), "unloading");
+            clock.advance(1);
+            await nextUnload;
+            assert.equal(coordinator.getState("sample"), "absent");
+            assert.equal(events.filter(event => event === "error:sample:onunload").length, 2);
+        });
+    }
+
+    it("keeps the first removal budget across repeated unload and uninstall upgrade after clock rollback", async () => {
+        const clock = new FakeClock();
+        const never = new Promise<void>(() => undefined);
+        const {coordinator, events} = createHarness({
+            onload: () => never,
+            onunload(plugin) { events.push(`onunload:${plugin.name}`); return never; },
+            uninstall(plugin) { events.push(`uninstall:${plugin.name}`); return never; },
+        }, 10, {
+            now: () => clock.now,
+            setTimeout: (callback, delay) => clock.setTimeout(() => {
+                clock.now--;
+                callback();
+            }, delay),
+            clearTimeout: clock.clearTimeout,
+        });
+        coordinator.start();
+        const loading = coordinator.requestLoad("sample", getSampleData());
+        await flushMicrotasks();
+        const unloading = coordinator.requestUnload("sample");
+        await flushMicrotasks();
+        clock.advance(4);
+        const repeated = coordinator.requestUnload("sample");
+        const uninstalling = coordinator.requestUninstall("sample");
+        const repeatedUninstall = coordinator.requestUninstall("sample");
+        await flushMicrotasks();
+        clock.advance(5);
+        await flushMicrotasks();
+        assert.equal(events.includes("onunload:sample"), false);
+        clock.advance(1);
+        await flushMicrotasks();
+        assert.equal(clock.now, 9);
+        assert.equal(coordinator.getState("sample"), "absent");
+        await Promise.all([loading, unloading, repeated, uninstalling, repeatedUninstall]);
+        for (const event of ["onunload:sample", "uninstall:sample", "markDisposed:sample", "dispose:sample:true"]) {
+            assert.equal(events.filter(item => item === event).length, 1);
+        }
+        assert.deepEqual(events.filter(event => event.startsWith("error:")), ["error:sample:onload"]);
+        clock.advance(100);
+        await flushMicrotasks();
+        assert.equal(events.filter(event => event === "dispose:sample:true").length, 1);
+        assert.equal(coordinator.getState("sample"), "absent");
+    });
+
+    it("observes an expired old hook rejection after replacement without disposing or exhausting the new instance", async () => {
+        const clock = new FakeClock();
+        const oldLoad = deferred<void>();
+        const never = new Promise<void>(() => undefined);
+        const {coordinator, events} = createHarness({
+            onload: plugin => plugin.revision === 1 ? oldLoad.promise : undefined,
+            onunload: () => never,
+        }, 10, {
+            now: () => clock.now,
+            setTimeout: clock.setTimeout,
+            clearTimeout: clock.clearTimeout,
+        });
+        coordinator.start();
+        const loading = coordinator.requestLoad("sample", getSampleData());
+        await flushMicrotasks();
+        const unloading = coordinator.requestUnload("sample");
+        await flushMicrotasks();
+        clock.advance(10);
+        await Promise.all([loading, unloading]);
+        await coordinator.requestLoad("sample", getSampleData(2));
+        const replacement = coordinator.getInstance("sample");
+        assert.equal(replacement.revision, 2);
+        oldLoad.reject(new Error("old load failed late"));
+        await flushMicrotasks();
+        assert.equal(coordinator.getInstance("sample"), replacement);
+        assert.equal(replacement.disposed, false);
+        assert.equal(coordinator.getState("sample"), "loaded");
+        assert.equal(events.filter(event => event === "error:sample:onload").length, 2);
+        assert.equal(events.filter(event => event === "dispose:sample:false").length, 1);
+        const nextUnload = coordinator.requestUnload("sample");
+        await flushMicrotasks();
+        clock.advance(9);
+        await flushMicrotasks();
+        assert.equal(replacement.disposed, false);
+        assert.equal(coordinator.getState("sample"), "unloading");
+        clock.advance(1);
+        await nextUnload;
+        assert.equal(replacement.disposed, true);
+        assert.equal(coordinator.getState("sample"), "absent");
+        assert.equal(events.filter(event => event === "error:sample:onunload").length, 1);
+        assert.equal(events.filter(event => event === "dispose:sample:false").length, 2);
+    });
+
     it("continues teardown when pending kernel initialization reaches the removal deadline", async () => {
         const never = new Promise<void>(() => undefined);
         const {coordinator, events} = createHarness({

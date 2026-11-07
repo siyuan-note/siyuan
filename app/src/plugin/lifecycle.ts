@@ -72,6 +72,7 @@ interface IPluginLifecycleRecord<TData, TPlugin> {
     latestStructuralKind?: TPluginStructuralTaskKind;
     interrupt: IPluginLifecycleInterrupt;
     removalDeadline?: number;
+    removalDeadlineReached?: boolean;
 }
 
 export interface IPluginLifecycleOptions {
@@ -487,9 +488,9 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         // 加载阶段收到的拆除请求与后续拆除钩子共用首次请求建立的超时预算。
         // Promise 无法取消；预算耗尽后仍尽力调用后续钩子，但不再为它们追加等待时间。
         const deadline = record.removalDeadline ?? this.now() + this.teardownTimeout;
-        let deadlineReached = false;
+        let deadlineReached = record.removalDeadlineReached === true;
         record.state = "unloading";
-        if (!await this.runTeardownHook(record.name, "onunload", () => this.adapter.onunload(plugin), deadline)) {
+        if (!await this.runTeardownHook(record.name, "onunload", () => this.adapter.onunload(plugin), deadline, deadlineReached)) {
             deadlineReached = true;
             this.reportTimeout(record.name, "onunload");
         }
@@ -561,6 +562,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
                         return;
                     }
                     settled = true;
+                    record.removalDeadlineReached = true;
                     this.reportTimeout(record.name, hook);
                     resolve(false);
                 }, remaining);
@@ -633,6 +635,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     private resetInterrupt(record: IPluginLifecycleRecord<TData, TPlugin>) {
         record.interrupt = createInterrupt();
         record.removalDeadline = undefined;
+        record.removalDeadlineReached = false;
     }
 
     private hasPendingTeardown(record: IPluginLifecycleRecord<TData, TPlugin>) {

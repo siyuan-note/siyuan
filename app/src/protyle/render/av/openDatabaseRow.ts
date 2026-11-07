@@ -303,7 +303,9 @@ export const switchDesktopDatabaseRowPreview = async (model: Editor | Custom, ne
     const loaded = new Promise<void>(resolve => { documentLoaded = resolve; });
     const opened = newTab({...options, keepCursor: true}, () => documentLoaded());
     opened.parent = wnd;
-    opened.panelElement.classList.add("fn__none");
+    const previousVisibility = opened.panelElement.style.visibility;
+    // 准备期间保持属性请求的所属面板有效，fn__none 会触发模板请求取消。
+    opened.panelElement.style.visibility = "hidden";
     document.body.append(opened.panelElement);
     let preparing = true;
     let cancel: () => void;
@@ -361,7 +363,7 @@ export const switchDesktopDatabaseRowPreview = async (model: Editor | Custom, ne
     if (!ready) {
         return false;
     }
-    opened.panelElement.classList.remove("fn__none");
+    opened.panelElement.style.visibility = previousVisibility;
     // 复用来源预览所在的分屏，不依赖异步请求完成时用户正激活哪个分屏。
     wnd.addTab(opened, false, true, undefined, tab.id);
     if (opened.model instanceof Custom) {

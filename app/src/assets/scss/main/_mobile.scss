@@ -1986,6 +1986,16 @@ body.mobile-topbar--merged {
     &--stacked {
       grid-template-columns: minmax(0, 1fr);
     }
+
+    &--compact {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+
+      > .b3-button {
+        max-width: 100%;
+      }
+    }
   }
 
   .b3-dialog__scrim {

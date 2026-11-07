@@ -36,7 +36,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         dialogs: [] as any[], mobile: {size: {isLandscape: false, portrait: {height1: 800}, landscape: {height1: 390}}},
         layout: {}, blockPanels: [] as any[], ws: {app: {}},
         config: {readonly: false}, isPublish: false,
-        languages: {rename: "Rename", confirm: "Confirm", settingsPendingSaveError: "Save failed"},
+        languages: {rename: "Rename", confirm: "Confirm", cancel: "Cancel", settingsPendingSaveError: "Save failed"},
     }};
     let canDrag: () => boolean;
     const messages: string[] = [];
@@ -96,6 +96,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         editors: any;
         host = new ElementMock();
         confirm = new ElementMock();
+        cancel = new ElementMock();
         destroyed = false;
         viewport = {style: {top: "", bottom: "", height: ""}, isConnected: true, classList: {add() {}}};
         sheet = {style: {height: "", maxHeight: ""}, classList: {add() {}, toggle() {}}, getBoundingClientRect: () => ({height:
@@ -106,7 +107,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         element = {dataset: {}, isConnected: true, classList: {add: (name: string) => this.classes.add(name)},
             querySelector: (selector: string) => selector === ".b3-dialog" ? this.viewport :
                 selector === ".mobile-document-title-sheet" ? this.sheet :
-                selector === ".document-title-dialog" ? this.host : this.confirm};
+                selector === ".document-title-dialog" ? this.host : selector === '[data-type="cancel"]' ? this.cancel : this.confirm};
         constructor(public options: {beforeClose: () => boolean, destroyCallback: () => void,
             width?: string, height?: string, containerClassName?: string, hideCloseIcon?: boolean}) {
             window.siyuan.dialogs.push(this);
@@ -234,14 +235,28 @@ test("a closing title drawer ignores late editor readiness and source focus", as
 });
 
 for (const mobile of [false, true]) {
+    test(`${mobile ? "mobile" : "desktop"} rename can cancel its retained draft after confirmation fails`, async () => {
+        const state = setup(mobile);
+        let writes = 0;
+        state.setFlush(async () => { writes++; throw new Error("Save failed"); });
+        const dialog = state.open();
+        dialog.confirm.listeners.get("click")();
+        await settle();
+        assert.equal(dialog.destroyed, false);
+        assert.equal(state.messages.length, 1);
+        dialog.cancel.listeners.get("click")();
+        assert.equal(dialog.destroyed, true);
+        assert.equal(dialog.host.content, "");
+        assert.equal(writes, 1, "cancellation must not retry the failed save");
+    });
+
     test(`${mobile ? "mobile" : "desktop"} rename dismissal discards its draft without saving`, async () => {
         const state = setup(mobile);
         let writes = 0;
         state.setFlush(async () => { writes++; });
         state.setTitle(async () => { writes++; });
         const dialog = state.open();
-        if (mobile) await state.closeSheet();
-        else dialog.destroy();
+        dialog.cancel.listeners.get("click")();
         await settle();
         assert.equal(dialog.destroyed, true);
         assert.equal(dialog.host.content, "");
@@ -260,6 +275,7 @@ for (const mobile of [false, true]) {
         dialog.confirm.listeners.get("click")();
         if (mobile) assert.equal(state.canDrag(), false);
         dialog.confirm.listeners.get("click")();
+        dialog.cancel.listeners.get("click")();
         dialog.destroy();
         if (mobile) await state.closeSheet();
         assert.equal(writes, 1);
@@ -581,7 +597,9 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
 <div class="protyle-title__rich protyle"><div class="protyle-content"><div class="protyle-wysiwyg">
 <div data-node-id="title-paragraph" data-type="NodeParagraph" class="p"><div class="protyle-title__input" contenteditable="true"></div><div class="protyle-attr">Paragraph badge</div></div>
 </div></div></div></div></div><div class="protyle-wysiwyg">Hidden document body</div></div></div>
-<div class="b3-dialog__action"><button class="b3-button b3-button--text">Confirm</button></div></div></div></div></div>`;
+<div class="b3-dialog__action mobile-sheet-action-bar"><div class="mobile-sheet-action-group mobile-sheet-action-group--compact">
+<button class="b3-button b3-button--touch b3-button--wrap b3-button--cancel b3-button--secondary">Cancel</button>
+<button class="b3-button b3-button--touch b3-button--wrap">Confirm</button></div></div></div></div></div></div>`;
     const container = document.querySelector<HTMLElement>(".b3-dialog");
     const sheet = document.querySelector<HTMLElement>(".mobile-document-title-sheet");
     const host = document.querySelector<HTMLElement>(".document-title-dialog");

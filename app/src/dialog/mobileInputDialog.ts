@@ -4,6 +4,7 @@ import {isMobile} from "../util/functions";
 import {escapeHtml} from "../util/escape";
 
 export const mobileInputDialog = (options: {
+    compactActions?: boolean,
     mobileSheet?: MobileSheetOptions,
     awaitConfirm?: boolean,
     title: string,
@@ -63,7 +64,7 @@ export const mobileInputDialog = (options: {
         positionId: options.positionId,
         content: `<div class="b3-dialog__content">${options.prefixContent || ""}${options.label ? `<label>${escapeHtml(options.label)}<div class="fn__hr"></div>${inputHTML}</label>` : inputHTML}${options.description ? `<div class="b3-label__text">${options.description}</div>` : ""}${options.extraContent || ""}</div>
 <div class="b3-dialog__action mobile-sheet-action-bar">
-    <div class="mobile-sheet-action-group${options.actions?.length ? " mobile-sheet-action-group--stacked" : ""}">${actionHTML}</div>
+    <div class="mobile-sheet-action-group${options.compactActions ? " mobile-sheet-action-group--compact" : options.actions?.length ? " mobile-sheet-action-group--stacked" : ""}">${actionHTML}</div>
 </div>`,
         width: options.width || (isMobile() ? "92vw" : "520px"),
         destroyCallback: options.destroyCallback,

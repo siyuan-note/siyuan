@@ -485,8 +485,23 @@ func NormalizeStat(stat *Stat) *Stat {
 
 // NormalizeBazaar 在集市配置缺失时使用默认值。
 func NormalizeBazaar(bazaar *Bazaar) *Bazaar {
+	defaults := NewBazaar()
 	if bazaar == nil {
-		bazaar = NewBazaar()
+		return defaults
+	}
+	if bazaar.CompatibilityFilters == nil {
+		bazaar.CompatibilityFilters = defaults.CompatibilityFilters
+		return bazaar
+	}
+	for pkgType := range bazaar.CompatibilityFilters {
+		if _, known := defaults.CompatibilityFilters[pkgType]; !known {
+			delete(bazaar.CompatibilityFilters, pkgType)
+		}
+	}
+	for pkgType, filter := range defaults.CompatibilityFilters {
+		if bazaar.CompatibilityFilters[pkgType] == nil {
+			bazaar.CompatibilityFilters[pkgType] = filter
+		}
 	}
 	return bazaar
 }

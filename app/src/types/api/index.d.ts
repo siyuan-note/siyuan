@@ -802,7 +802,7 @@ export type BazaarNotifications = { "browserCompatibility": boolean; "docTreeMax
 
 export type BazaarPDFTheme = { "annoColor": string; "dark": string; "light": string; };
 
-export type BazaarPackage = { "author": string; "backends": Array<string> | null; "bazaarIncompatible"?: boolean; "bootAppearances"?: Array<string>; "choices"?: Array<BazaarPackageChoice>; "current": boolean; "deprecated"?: boolean; "deprecatedReason"?: Record<string, string>; "description": Record<string, string> | null; "disabledInPublish": boolean; "disallowInstall": boolean; "disallowUpdate": boolean; "displayName": Record<string, string> | null; "downloads": number; "enabled"?: boolean; "frontends": Array<string> | null; "funding": BazaarFunding | null; "hInstallDate": string; "hInstallSize": string; "hSize": string; "hUpdated": string; "hasStorageData"?: boolean; "icon"?: string; "iconURL": string; "installSize": number; "installTime": number; "installed": boolean; "installedIncompatible"?: boolean; "invalidReason"?: "missing-manifest" | "invalid-manifest" | "name-mismatch"; "kernels": Array<string> | null; "keywords": Array<string> | null; "minAppVersion": string; "modes"?: Array<string> | null; "name": string; "openIssues": number; "outdated": boolean; "preferredDeprecatedReason"?: string; "preferredDesc": string; "preferredFunding": string; "preferredName": string; "preferredReadme": string; "preview"?: string; "previewURL": string; "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "readme": Record<string, string> | null; "repoHash": string; "repoRef"?: string; "repoURL": string; "settingsWindow"?: boolean; "size": number; "stars": number; "updateRequiredMinAppVer"?: string; "updateTime": number; "updated": string; "url": string; "userDisabledInPublish"?: boolean; "version": string; };
+export type BazaarPackage = { "author": string; "backends": Array<string> | null; "bazaarIncompatible"?: boolean; "bazaarVersionUnsupported"?: boolean; "bootAppearances"?: Array<string>; "choices"?: Array<BazaarPackageChoice>; "created"?: string; "current": boolean; "deprecated"?: boolean; "deprecatedReason"?: Record<string, string>; "description": Record<string, string> | null; "disabledInPublish": boolean; "disallowInstall": boolean; "disallowUpdate": boolean; "displayName": Record<string, string> | null; "downloads": number; "enabled"?: boolean; "frontends": Array<string> | null; "funding": BazaarFunding | null; "hInstallDate": string; "hInstallSize": string; "hSize": string; "hUpdated": string; "hasStorageData"?: boolean; "icon"?: string; "iconURL": string; "installSize": number; "installTime": number; "installed": boolean; "installedIncompatible"?: boolean; "invalidReason"?: "missing-manifest" | "invalid-manifest" | "name-mismatch"; "kernels": Array<string> | null; "keywords": Array<string> | null; "minAppVersion": string; "modes"?: Array<string> | null; "name": string; "openIssues": number; "outdated": boolean; "preferredDeprecatedReason"?: string; "preferredDesc": string; "preferredFunding": string; "preferredName": string; "preferredReadme": string; "preview"?: string; "previewURL": string; "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "readme": Record<string, string> | null; "repoHash": string; "repoRef"?: string; "repoURL": string; "settingsWindow"?: boolean; "size": number; "stars": number; "updateRequiredMinAppVer"?: string; "updateTime": number; "updated": string; "url": string; "userDisabledInPublish"?: boolean; "version": string; };
 
 export type BazaarPackageChoice = { "name": string; "packageType": string; };
 
@@ -2108,7 +2108,7 @@ export type SetAttributeViewBlockAttrRequestInput = { "avID": string; "itemID"?:
 
 export type SetBazaarPackageRatingRequestInput = { "packageName": string; "packageType": string; "rating": number; };
 
-export type SetBazaarRequestInput = { "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
+export type SetBazaarRequestInput = { "compatibilityFilters"?: Record<string, SettingBazaarCompatibilityFilterInput | null> | null; "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
 
 export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>; "id": string; };
 
@@ -2210,9 +2210,13 @@ export type SettingBasicAuthAccountInput = { "memo"?: string | null; "password"?
 
 export type SettingBasicAuthInput = { "accounts"?: Array<SettingBasicAuthAccountInput | null> | null; "enable"?: boolean | null; };
 
-export type SettingBazaar = { "petalDisabled": boolean; "trust": boolean; };
+export type SettingBazaar = { "compatibilityFilters": Record<string, SettingBazaarCompatibilityFilter | null> | null; "petalDisabled": boolean; "trust": boolean; };
 
-export type SettingBazaarInput = { "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
+export type SettingBazaarCompatibilityFilter = { "hideIncompatiblePlatform": boolean; "hideUnsupportedVersion": boolean; };
+
+export type SettingBazaarCompatibilityFilterInput = { "hideIncompatiblePlatform"?: boolean | null; "hideUnsupportedVersion"?: boolean | null; };
+
+export type SettingBazaarInput = { "compatibilityFilters"?: Record<string, SettingBazaarCompatibilityFilterInput | null> | null; "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
 
 export type SettingBodyGradient = { "dark": SettingBodyGradientColor; "light": SettingBodyGradientColor; "mode": string; };
 
@@ -4526,6 +4530,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 在线包的 created 为集市索引记录的首次上架时间，缺失时省略，不使用 updated、installTime 或 updateTime 补齐。
+     * bazaarVersionUnsupported 为 true 表示在线包要求更高的应用版本，与 bazaarIncompatible 的平台兼容性独立。
+     * 这两个可选字段也适用于返回在线包的集市列表、安装和更新接口；本地清单不提供它们。
+     */
     "/api/bazaar/getBazaarPackage": {
         request: GetBazaarPackageRequestInput;
         response: { "code": 0; "data": BazaarPackageDetail; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7798,6 +7807,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * compatibilityFilters 按 plugins、themes、widgets、icons、templates 分别保存集市兼容性筛选，两个开关默认 false。
+     * 对象递归合并，省略的类型和开关保持当前值，null 恢复默认；未知类型忽略，不影响 trust 和 petalDisabled。
+     */
     "/api/setting/setBazaar": {
         request: SetBazaarRequestInput;
         response: { "code": 0; "data": SettingBazaar | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

@@ -508,6 +508,13 @@ declare namespace Config {
      */
     export interface IBazaar {
         /**
+         * 集市各分类的兼容性筛选偏好；两个开关默认 false，配置补丁可分别更新类型和开关。
+         */
+        compatibilityFilters?: Partial<Record<"plugins" | "themes" | "icons" | "templates" | "widgets", {
+            hideUnsupportedVersion?: boolean;
+            hideIncompatiblePlatform?: boolean;
+        }>>;
+        /**
          * Whether to disable all plug-ins
          */
         petalDisabled: boolean;

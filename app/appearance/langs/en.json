@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "Release date (newest first)",
+	"sortByReleaseTimeAsc": "Release date (oldest first)",
+	"bazaarHideUnsupportedVersion": "Hide packages requiring a newer app version",
+	"bazaarHideIncompatiblePlatform": "Hide platform-incompatible packages",
 	"sourceRemovalPending": "Finish the current deletion confirmation before making another change",
 	"referenceRemovalOnly": "Delete references only",
 	"sourceRemovalOnly": "Delete tags and references only",

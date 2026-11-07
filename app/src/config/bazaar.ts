@@ -42,6 +42,7 @@ import {
     isBazaarPackageType,
 } from "./bazaar/packageConfig";
 import {genBazaarPackagePanelHTML} from "./bazaar/html";
+import {filterBazaarPackagesByCompatibility} from "./bazaar/filters";
 import {bindBazaarEvents} from "./bazaar/events";
 import {renderBazaarInstall} from "./bazaar/installTask";
 import {
@@ -299,6 +300,7 @@ export const bazaar = {
 </div>`;
         }
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
+        const compatibilityFilters = window.siyuan.config.bazaar.compatibilityFilters;
         const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><span class="b3-loading" aria-hidden="true"></span></div>`;
         return `<div class="config-bazaar fn__flex-column" style="height: 100%">
 <div class="config-bazaar__main fn__flex-column fn__flex-1">
@@ -354,11 +356,11 @@ export const bazaar = {
             ${loadingHTML}
         </div>
     </div>
-    ${genBazaarPackagePanelHTML("themes", localSort.theme, loadingHTML)}
-    ${genBazaarPackagePanelHTML("templates", localSort.template, loadingHTML)}
-    ${genBazaarPackagePanelHTML("plugins", localSort.plugin, loadingHTML)}
-    ${genBazaarPackagePanelHTML("icons", localSort.icon, loadingHTML)}
-    ${genBazaarPackagePanelHTML("widgets", localSort.widget, loadingHTML)}
+    ${genBazaarPackagePanelHTML("themes", localSort.theme, loadingHTML, compatibilityFilters?.themes)}
+    ${genBazaarPackagePanelHTML("templates", localSort.template, loadingHTML, compatibilityFilters?.templates)}
+    ${genBazaarPackagePanelHTML("plugins", localSort.plugin, loadingHTML, compatibilityFilters?.plugins)}
+    ${genBazaarPackagePanelHTML("icons", localSort.icon, loadingHTML, compatibilityFilters?.icons)}
+    ${genBazaarPackagePanelHTML("widgets", localSort.widget, loadingHTML, compatibilityFilters?.widgets)}
 </div>
 </div>
 <div id="configBazaarReadme" class="config-bazaar__readme config__view"></div>
@@ -1919,9 +1921,33 @@ type="checkbox">
             }
         });
     },
+    _refreshCompatibilityFilters() {
+        if (!this.element?.isConnected) return;
+        BAZAAR_PACKAGE_TYPES.forEach((bazaarType) => {
+            const config = BAZAAR_PACKAGE_CONFIG[bazaarType];
+            const container = this.element.querySelector(`#${config.panelID}`) as HTMLElement;
+            const panel = container?.closest(".config-bazaar__panel");
+            if (!panel) return;
+            const filters = window.siyuan.config.bazaar.compatibilityFilters?.[bazaarType];
+            panel.querySelectorAll<HTMLInputElement>("[data-bazaar-filter]").forEach((input) => {
+                if (!input.disabled) {
+                    input.checked = input.dataset.bazaarFilter === "hideUnsupportedVersion" ?
+                        filters?.hideUnsupportedVersion === true : filters?.hideIncompatiblePlatform === true;
+                }
+            });
+            if (panel.getAttribute("data-init") === "true") {
+                this._renderBazaarCards(container,
+                    sortBazaarPackages(this._data[bazaarType], window.siyuan.storage[Constants.LOCAL_BAZAAR][config.tabType]),
+                    bazaarType, bazaarType === "themes" ?
+                        (panel.querySelector("#bazaarSelect") as HTMLSelectElement)?.value : undefined);
+            }
+        });
+    },
     _renderBazaarCards(container: Element, packages: IBazaarItem[], bazaarType: TBazaarType, themeModeValue?: string) {
         this._disposeBazaarCardRender(container);
-        const visiblePackages = filterBazaarPackagesByThemeMode(packages, bazaarType, themeModeValue);
+        const compatiblePackages = filterBazaarPackagesByCompatibility(packages,
+            window.siyuan.config.bazaar.compatibilityFilters?.[bazaarType]);
+        const visiblePackages = filterBazaarPackagesByThemeMode(compatiblePackages, bazaarType, themeModeValue);
         container.parentElement.querySelector(".counter").textContent = visiblePackages.length.toString();
         if (visiblePackages.length === 0) {
             container.innerHTML = `<div class="b3-cards b3-cards--nowrap"><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul></div>`;

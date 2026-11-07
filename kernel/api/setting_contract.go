@@ -28,6 +28,18 @@ func settingBazaarPayload(value *conf.Bazaar) *apicontract.SettingBazaar {
 	result := &apicontract.SettingBazaar{}
 	result.Trust = value.Trust
 	result.PetalDisabled = value.PetalDisabled
+	if value.CompatibilityFilters != nil {
+		result.CompatibilityFilters = make(map[string]*apicontract.SettingBazaarCompatibilityFilter, len(value.CompatibilityFilters))
+		for pkgType, filter := range value.CompatibilityFilters {
+			if filter == nil {
+				result.CompatibilityFilters[pkgType] = nil
+				continue
+			}
+			result.CompatibilityFilters[pkgType] = &apicontract.SettingBazaarCompatibilityFilter{
+				HideUnsupportedVersion: filter.HideUnsupportedVersion, HideIncompatiblePlatform: filter.HideIncompatiblePlatform,
+			}
+		}
+	}
 	return result
 }
 

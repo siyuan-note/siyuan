@@ -245,11 +245,12 @@ func TestAPIContractSettingErrorsAndAdmission(t *testing.T) {
 }
 
 func TestAPIContractSettingEmojiAndPublishValidation(t *testing.T) {
-	previous := model.Conf
+	previous, readonly, confDir := model.Conf, util.ReadOnly, util.ConfDir
+	util.ReadOnly, util.ConfDir = true, t.TempDir()
 	model.Conf = model.NewAppConf()
 	model.Conf.Editor.Store(conf.NewEditor())
 	model.Conf.Publish.Store(conf.NewPublish())
-	t.Cleanup(func() { model.Conf = previous })
+	t.Cleanup(func() { model.Conf, util.ReadOnly, util.ConfDir = previous, readonly, confDir })
 	code, _, data := settingContractRequest(t, "setEmoji", setEmoji, `{"emoji":[]}`)
 	if code != 0 || string(data) != "null" || model.Conf.Editor.Load().Emoji == nil || len(model.Conf.Editor.Load().Emoji) != 0 {
 		t.Fatal("empty emoji list changed")

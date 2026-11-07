@@ -875,6 +875,17 @@
       }
     }
 
+    &__compatibility {
+      display: flex;
+      flex-basis: 100%;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+
+      > label {
+        min-width: 0;
+      }
+    }
+
     &__tabs,
     &__tools {
       align-items: center;

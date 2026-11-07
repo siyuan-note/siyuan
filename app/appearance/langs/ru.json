@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "Дата публикации (сначала новые)",
+	"sortByReleaseTimeAsc": "Дата публикации (сначала старые)",
+	"bazaarHideUnsupportedVersion": "Скрыть пакеты, требующие более новой версии приложения",
+	"bazaarHideIncompatiblePlatform": "Скрыть пакеты, несовместимые с платформой",
 	"sourceRemovalPending": "Завершите текущее подтверждение удаления, прежде чем вносить другие изменения",
 	"referenceRemovalOnly": "Удалить только ссылки",
 	"sourceRemovalOnly": "Удалить только теги и ссылки",

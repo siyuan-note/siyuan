@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "Tanggal rilis (terbaru dahulu)",
+	"sortByReleaseTimeAsc": "Tanggal rilis (terlama dahulu)",
+	"bazaarHideUnsupportedVersion": "Sembunyikan paket yang memerlukan versi aplikasi lebih baru",
+	"bazaarHideIncompatiblePlatform": "Sembunyikan paket yang tidak kompatibel dengan platform",
 	"sourceRemovalPending": "Selesaikan konfirmasi penghapusan saat ini sebelum membuat perubahan lain",
 	"referenceRemovalOnly": "Hapus referensi saja",
 	"sourceRemovalOnly": "Hapus tag dan referensi saja",

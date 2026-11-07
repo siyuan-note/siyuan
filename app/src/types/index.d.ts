@@ -1082,6 +1082,7 @@ interface IBazaarItem {
     stars: number;
     author: string;
     updated: string;
+    created?: string;
     downloads: number;
     ratingAvailable?: boolean;
     rating?: IBazaarRating;
@@ -1110,6 +1111,7 @@ interface IBazaarItem {
     invalidReason?: TBazaarPackageInvalidReason;
     installedIncompatible?: boolean; // 仅插件/主题
     bazaarIncompatible?: boolean; // 仅插件/主题
+    bazaarVersionUnsupported?: boolean;
     enabled?: boolean; // 仅 plugin
     userDisabledInPublish?: boolean; // 仅 plugin
     hasStorageData?: boolean; // 仅插件

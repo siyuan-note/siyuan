@@ -6,7 +6,7 @@
 		"id": "20200922102318-oz84yu3",
 		"title": "主题",
 		"type": "doc",
-		"updated": "20261103081326"
+		"updated": "20261107023948"
 	},
 	"Children": [
 		{
@@ -719,7 +719,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225202158-ujxvje1",
-				"updated": "20261016202635"
+				"updated": "20261107023948"
 			},
 			"Children": [
 				{
@@ -748,7 +748,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201225215903-j4268ow",
-				"updated": "20261016202635"
+				"updated": "20261107023948"
 			},
 			"Children": [
 				{
@@ -860,6 +860,70 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261107023948-th6r631",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107023948-th6r631",
+				"updated": "20261107023948"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在线浏览插件、主题、图标、模板和挂件时，可以分别或同时勾选 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "隐藏版本不支持的包"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "隐藏平台不兼容的包"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。两项默认不勾选，选择会按包类型保存，仅影响在线列表，不影响已下载和更新列表。"
+				}
+			]
+		},
+		{
+			"ID": "20261107023948-one75ce",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107023948-one75ce",
+				"updated": "20261107023948"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "发布时间降序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "发布时间升序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。发布时间取集市记录的首次收录时间，缺失或无效的时间排在末尾。"
 				}
 			]
 		},

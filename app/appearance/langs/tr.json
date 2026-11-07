@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "Yayın tarihi (önce en yeniler)",
+	"sortByReleaseTimeAsc": "Yayın tarihi (önce en eskiler)",
+	"bazaarHideUnsupportedVersion": "Daha yeni bir uygulama sürümü gerektiren paketleri gizle",
+	"bazaarHideIncompatiblePlatform": "Platformla uyumsuz paketleri gizle",
 	"sourceRemovalPending": "Başka bir değişiklik yapmadan önce mevcut silme onayını tamamlayın",
 	"referenceRemovalOnly": "Yalnızca referansları sil",
 	"sourceRemovalOnly": "Yalnızca etiketleri ve referansları sil",

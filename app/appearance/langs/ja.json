@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "公開日時 (新しい順)",
+	"sortByReleaseTimeAsc": "公開日時 (古い順)",
+	"bazaarHideUnsupportedVersion": "新しいアプリバージョンが必要なパッケージを非表示",
+	"bazaarHideIncompatiblePlatform": "プラットフォームに非対応のパッケージを非表示",
 	"sourceRemovalPending": "ほかの変更を行う前に、現在の削除確認を完了してください",
 	"referenceRemovalOnly": "参照のみ削除",
 	"sourceRemovalOnly": "タグと参照のみ削除",

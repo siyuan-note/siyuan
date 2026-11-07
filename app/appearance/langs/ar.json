@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "تاريخ النشر (الأحدث أولًا)",
+	"sortByReleaseTimeAsc": "تاريخ النشر (الأقدم أولًا)",
+	"bazaarHideUnsupportedVersion": "إخفاء الحزم التي تتطلب إصدارًا أحدث من التطبيق",
+	"bazaarHideIncompatiblePlatform": "إخفاء الحزم غير المتوافقة مع المنصة",
 	"sourceRemovalPending": "أكمل تأكيد الحذف الحالي قبل إجراء أي تعديل آخر",
 	"referenceRemovalOnly": "حذف المراجع فقط",
 	"sourceRemovalOnly": "حذف الوسوم والمراجع فقط",

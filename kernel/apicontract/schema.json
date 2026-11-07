@@ -18535,6 +18535,9 @@
         "bazaarIncompatible": {
           "type": "boolean"
         },
+        "bazaarVersionUnsupported": {
+          "type": "boolean"
+        },
         "bootAppearances": {
           "type": "array",
           "items": {
@@ -18546,6 +18549,9 @@
           "items": {
             "$ref": "#/$defs/BazaarPackageChoice"
           }
+        },
+        "created": {
+          "type": "string"
         },
         "current": {
           "type": "boolean"
@@ -44158,6 +44164,26 @@
     "SetBazaarRequestInput": {
       "type": "object",
       "properties": {
+        "compatibilityFilters": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBazaarCompatibilityFilterInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "petalDisabled": {
           "anyOf": [
             {
@@ -48083,6 +48109,26 @@
     "SettingBazaar": {
       "type": "object",
       "properties": {
+        "compatibilityFilters": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBazaarCompatibilityFilter"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "petalDisabled": {
           "type": "boolean"
         },
@@ -48091,14 +48137,77 @@
         }
       },
       "required": [
+        "compatibilityFilters",
         "petalDisabled",
         "trust"
       ],
       "additionalProperties": false
     },
+    "SettingBazaarCompatibilityFilter": {
+      "type": "object",
+      "properties": {
+        "hideIncompatiblePlatform": {
+          "type": "boolean"
+        },
+        "hideUnsupportedVersion": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "hideIncompatiblePlatform",
+        "hideUnsupportedVersion"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBazaarCompatibilityFilterInput": {
+      "type": "object",
+      "properties": {
+        "hideIncompatiblePlatform": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hideUnsupportedVersion": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SettingBazaarInput": {
       "type": "object",
       "properties": {
+        "compatibilityFilters": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBazaarCompatibilityFilterInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "petalDisabled": {
           "anyOf": [
             {

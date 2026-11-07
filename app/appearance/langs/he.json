@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "תאריך פרסום (מהחדש לישן)",
+	"sortByReleaseTimeAsc": "תאריך פרסום (מהישן לחדש)",
+	"bazaarHideUnsupportedVersion": "הסתר חבילות הדורשות גרסה חדשה יותר של האפליקציה",
+	"bazaarHideIncompatiblePlatform": "הסתר חבילות שאינן תואמות לפלטפורמה",
 	"sourceRemovalPending": "יש להשלים את אישור המחיקה הנוכחי לפני ביצוע שינוי נוסף",
 	"referenceRemovalOnly": "מחיקת הפניות בלבד",
 	"sourceRemovalOnly": "מחיקת תגיות והפניות בלבד",

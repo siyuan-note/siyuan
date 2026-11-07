@@ -528,6 +528,7 @@ func bazaarPackage(value *bazaar.Package) *apicontract.BazaarPackage {
 	ret.HasStorageData = value.HasStorageData
 	ret.Outdated = value.Outdated
 	ret.Current = value.Current
+	ret.Created = value.Created
 	ret.Updated = value.Updated
 	ret.Stars = value.Stars
 	ret.OpenIssues = value.OpenIssues
@@ -542,6 +543,7 @@ func bazaarPackage(value *bazaar.Package) *apicontract.BazaarPackage {
 	ret.Downloads = value.Downloads
 	ret.DisallowInstall = value.DisallowInstall
 	ret.DisallowUpdate = value.DisallowUpdate
+	ret.BazaarVersionUnsupported = value.BazaarVersionUnsupported
 	ret.UpdateRequiredMinAppVer = value.UpdateRequiredMinAppVer
 	ret.InvalidReason = value.InvalidReason
 	ret.RatingAvailable = value.RatingAvailable

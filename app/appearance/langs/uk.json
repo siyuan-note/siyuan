@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "Дата публікації (спочатку найновіші)",
+	"sortByReleaseTimeAsc": "Дата публікації (спочатку найстаріші)",
+	"bazaarHideUnsupportedVersion": "Приховати пакунки, що потребують новішої версії застосунку",
+	"bazaarHideIncompatiblePlatform": "Приховати пакунки, несумісні з платформою",
 	"sourceRemovalPending": "Завершіть поточне підтвердження видалення, перш ніж вносити інші зміни",
 	"referenceRemovalOnly": "Видалити лише посилання",
 	"sourceRemovalOnly": "Видалити лише теги й посилання",

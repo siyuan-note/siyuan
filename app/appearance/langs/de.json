@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "Veröffentlichungsdatum (neueste zuerst)",
+	"sortByReleaseTimeAsc": "Veröffentlichungsdatum (älteste zuerst)",
+	"bazaarHideUnsupportedVersion": "Pakete ausblenden, die eine neuere App-Version benötigen",
+	"bazaarHideIncompatiblePlatform": "Plattforminkompatible Pakete ausblenden",
 	"sourceRemovalPending": "Schließe die aktuelle Löschbestätigung ab, bevor du weitere Änderungen vornimmst",
 	"referenceRemovalOnly": "Nur Referenzen löschen",
 	"sourceRemovalOnly": "Nur Tags und Referenzen löschen",

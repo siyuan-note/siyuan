@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "วันที่เผยแพร่ (ใหม่ไปเก่า)",
+	"sortByReleaseTimeAsc": "วันที่เผยแพร่ (เก่าไปใหม่)",
+	"bazaarHideUnsupportedVersion": "ซ่อนแพ็กเกจที่ต้องใช้แอปเวอร์ชันใหม่กว่า",
+	"bazaarHideIncompatiblePlatform": "ซ่อนแพ็กเกจที่เข้ากันไม่ได้กับแพลตฟอร์ม",
 	"sourceRemovalPending": "โปรดดำเนินการยืนยันการลบที่ค้างอยู่ให้เสร็จก่อนทำการเปลี่ยนแปลงอื่น",
 	"referenceRemovalOnly": "ลบเฉพาะการอ้างอิง",
 	"sourceRemovalOnly": "ลบเฉพาะแท็กและการอ้างอิง",

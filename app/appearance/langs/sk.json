@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "Dátum vydania (najnovšie prvé)",
+	"sortByReleaseTimeAsc": "Dátum vydania (najstaršie prvé)",
+	"bazaarHideUnsupportedVersion": "Skryť balíky vyžadujúce novšiu verziu aplikácie",
+	"bazaarHideIncompatiblePlatform": "Skryť balíky nekompatibilné s platformou",
 	"sourceRemovalPending": "Pred ďalšou zmenou dokončite aktuálne potvrdenie odstránenia",
 	"referenceRemovalOnly": "Odstrániť iba odkazy",
 	"sourceRemovalOnly": "Odstrániť iba štítky a odkazy",

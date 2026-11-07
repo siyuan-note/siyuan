@@ -207,6 +207,44 @@ for (const mobile of [false, true]) {
         assert.equal(refreshed, 2);
     });
 
+    test(`bazaar filter changes preserve the mounted view without reloading package lists (mobile=${mobile})`, async () => {
+        const {parse} = require("ifdef-loader/preprocessor");
+        const compiled = transpileModule(parse(readFileSync("src/config/setting/sync.ts", "utf8"),
+            {MOBILE: mobile, BROWSER: mobile}, false, true), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText;
+        const config = {bazaar: {trust: true, petalDisabled: false,
+            compatibilityFilters: {plugins: {hideUnsupportedVersion: false}}}};
+        const next = JSON.parse(JSON.stringify(config)) as typeof config;
+        next.bazaar.compatibilityFilters.plugins.hideUnsupportedVersion = true;
+        let reloaded = 0;
+        let filtered = 0;
+        let remounted = 0;
+        const exports = {} as {refreshSettingConfig: (namespace?: string) => Promise<void>};
+        runInNewContext(compiled, {exports, window: {siyuan: {config}}, console, require: () => ({
+            fetchSyncPost: async () => ({code: 0, data: {conf: next}}),
+            systemConfig: (value: unknown) => value,
+            objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
+            syncSettingTasks() {}, getSettingTabDefs: () => [{id: "bazaar"}],
+            refreshMountedBazaar: () => { reloaded++; },
+            refreshMountedBazaarFilters: async () => {
+                assert.equal(config.bazaar.compatibilityFilters.plugins.hideUnsupportedVersion, true);
+                filtered++;
+            },
+            remountOpenSettingTab: async () => { remounted++; },
+        })});
+        await exports.refreshSettingConfig("bazaar");
+        assert.deepEqual({reloaded, filtered, remounted}, {reloaded: 0, filtered: 1, remounted: 0});
+        await exports.refreshSettingConfig("bazaar");
+        assert.deepEqual({reloaded, filtered, remounted}, {reloaded: 1, filtered: 1, remounted: 0});
+        next.bazaar = {...next.bazaar, petalDisabled: true};
+        await exports.refreshSettingConfig("bazaar");
+        assert.deepEqual({reloaded, filtered, remounted}, {reloaded: 2, filtered: 1, remounted: mobile ? 0 : 1});
+        next.bazaar = {...next.bazaar, compatibilityFilters: {plugins: {hideUnsupportedVersion: false}}};
+        await exports.refreshSettingConfig();
+        assert.deepEqual({reloaded, filtered, remounted}, {reloaded: 3, filtered: 1, remounted: mobile ? 0 : 2});
+    });
+
     test(`OCR notifications preserve the settings page and unrelated runtime configuration (mobile=${mobile})`, async () => {
         const {parse} = require("ifdef-loader/preprocessor");
         const compiled = transpileModule(parse(readFileSync("src/config/setting/sync.ts", "utf8"),

@@ -13,6 +13,7 @@ import {openBazaarPath} from "./openPath";
 import {previewImages} from "../../protyle/preview/image";
 import {isBazaarPackageRatingEditable, sortBazaarPackages} from "../../util/bazaarPackage";
 import {Constants} from "../../constants";
+import {bazaarConfigApi} from "./runtime";
 import {
     BAZAAR_PACKAGE_CONFIG,
     getBazaarTypeByMyType,
@@ -681,6 +682,36 @@ const bindBazaarSelectEvents = (controller: TBazaarController) => {
     });
 };
 
+const bindBazaarFilterEvents = (controller: TBazaarController) => {
+    let lastFocusedFilter: HTMLInputElement;
+    controller.element.querySelectorAll<HTMLInputElement>("[data-bazaar-filter]").forEach((inputElement) => {
+        inputElement.addEventListener("change", async () => {
+            const panelElement = inputElement.closest(".config-bazaar__panel");
+            const bazaarType = getBazaarTypeByTab(panelElement?.getAttribute("data-type"));
+            const filter = inputElement.dataset.bazaarFilter;
+            if (inputElement.disabled || !bazaarType ||
+                (filter !== "hideUnsupportedVersion" && filter !== "hideIncompatiblePlatform")) {
+                return;
+            }
+            const restoreFocus = document.activeElement === inputElement;
+            if (restoreFocus) lastFocusedFilter = inputElement;
+            inputElement.disabled = true;
+            try {
+                await bazaarConfigApi.patch(`compatibilityFilters.${bazaarType}.${filter}`, inputElement.checked);
+            } catch (error) {
+                showMessage(error instanceof Error ? error.message : String(error));
+            } finally {
+                inputElement.disabled = false;
+                inputElement.checked = window.siyuan.config.bazaar.compatibilityFilters?.[bazaarType]?.[filter] === true;
+                if (restoreFocus && lastFocusedFilter === inputElement && inputElement.isConnected &&
+                    document.activeElement === document.body) {
+                    inputElement.focus();
+                }
+            }
+        });
+    });
+};
+
 export const bindBazaarEvents = (
     controller: TBazaarController,
     app: App,
@@ -689,4 +720,5 @@ export const bindBazaarEvents = (
     bindBazaarClickEvent(controller, app, mount);
     bindBazaarSearchEvents(controller, app, mount);
     bindBazaarSelectEvents(controller);
+    bindBazaarFilterEvents(controller);
 };

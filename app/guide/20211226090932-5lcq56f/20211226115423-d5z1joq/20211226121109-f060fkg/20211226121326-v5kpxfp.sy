@@ -6,7 +6,7 @@
 		"id": "20211226121326-v5kpxfp",
 		"title": "主題",
 		"type": "doc",
-		"updated": "20261103081326"
+		"updated": "20261107023948"
 	},
 	"Children": [
 		{
@@ -436,7 +436,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230418093635-7nkc3rv",
-				"updated": "20261024163429"
+				"updated": "20261107023948"
 			},
 			"Children": [
 				{
@@ -724,7 +724,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226121625-afma4ct",
-				"updated": "20261016202635"
+				"updated": "20261107023948"
 			},
 			"Children": [
 				{
@@ -824,6 +824,70 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261107023948-9mgy2ah",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107023948-9mgy2ah",
+				"updated": "20261107023948"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "線上瀏覽插件、主題、圖示、範本和小工具時，可以分別或同時勾選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "隱藏版本不支援的套件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "隱藏平台不相容的套件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。兩項預設不勾選，選擇會按套件類型儲存，僅影響線上清單，不影響已下載和更新清單。"
+				}
+			]
+		},
+		{
+			"ID": "20261107023948-cv5acqo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107023948-cv5acqo",
+				"updated": "20261107023948"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "發布時間降序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "發布時間升序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。發布時間取集市記錄的首次收錄時間，缺失或無效的時間排在末尾。"
 				}
 			]
 		},

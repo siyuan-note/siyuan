@@ -938,6 +938,10 @@ var GetUpdatedPackage = define[GetUpdatedPackageRequest, BazaarUpdatedData]("get
 // 请求取消会中止下载、解压及尚未提交的替换；已提交的更新不会回滚。
 var UpdateBazaarPackage = define[UpdateBazaarPackageRequest, BazaarPackagesData]("updateBazaarPackage", "/api/bazaar/updateBazaarPackage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledPackageSize = define[GetInstalledPackageSizeRequest, BazaarPackageSizeData]("getInstalledPackageSize", "/api/bazaar/getInstalledPackageSize", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// 在线包的 created 为集市索引记录的首次上架时间，缺失时省略，不使用 updated、installTime 或 updateTime 补齐。
+// bazaarVersionUnsupported 为 true 表示在线包要求更高的应用版本，与 bazaarIncompatible 的平台兼容性独立。
+// 这两个可选字段也适用于返回在线包的集市列表、安装和更新接口；本地清单不提供它们。
 var GetBazaarPackage = define[GetBazaarPackageRequest, BazaarPackageDetail]("getBazaarPackage", "/api/bazaar/getBazaarPackage", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarPackageRatings = define[GetBazaarPackageRatingsRequest, BazaarRatingsData]("getBazaarPackageRatings", "/api/bazaar/getBazaarPackageRatings", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarPackageUserRatings = define[GetBazaarPackageUserRatingsRequest, BazaarUserRatingsResult]("getBazaarPackageUserRatings", "/api/bazaar/getBazaarPackageUserRatings", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
@@ -1472,6 +1476,9 @@ var InsertCover = define[InsertCoverRequest, AssetInsertCoverData]("insertCover"
 var UploadAsset = define[UploadAssetRequest, AssetUploadData]("uploadAsset", "/api/asset/upload", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 
 var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet", "/api/setting/setSnippet", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "snippet", Merge: true}}, "POST")
+
+// compatibilityFilters 按 plugins、themes、widgets、icons、templates 分别保存集市兼容性筛选，两个开关默认 false。
+// 对象递归合并，省略的类型和开关保持当前值，null 恢复默认；未知类型忽略，不影响 trust 和 petalDisabled。
 var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/setting/setBazaar", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar", Merge: true}}, "POST")
 
 // SetAI 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。

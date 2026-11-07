@@ -1,11 +1,14 @@
 import {BAZAAR_PACKAGE_CONFIG} from "./packageConfig";
+import type {IBazaarCompatibilityFilters} from "./filters";
 
 const genSortOptionsHTML = (sortValue: string) => `<option ${sortValue === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
 <option ${sortValue === "1" ? "selected" : ""} value="1">${window.siyuan.languages.sortByUpdateTimeAsc}</option>
 <option ${sortValue === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
 <option ${sortValue === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
 <option ${sortValue === "4" ? "selected" : ""} value="4">${window.siyuan.languages.sortByRatingDesc}</option>
-<option ${sortValue === "5" ? "selected" : ""} value="5">${window.siyuan.languages.sortByRatingAsc}</option>`;
+<option ${sortValue === "5" ? "selected" : ""} value="5">${window.siyuan.languages.sortByRatingAsc}</option>
+<option ${sortValue === "6" ? "selected" : ""} value="6">${window.siyuan.languages.sortByReleaseTimeDesc}</option>
+<option ${sortValue === "7" ? "selected" : ""} value="7">${window.siyuan.languages.sortByReleaseTimeAsc}</option>`;
 
 const genThemeModeSelectHTML = () => `<div class="fn__space"></div>
 <select id="bazaarSelect" class="b3-select">
@@ -14,7 +17,12 @@ const genThemeModeSelectHTML = () => `<div class="fn__space"></div>
     <option value="1">${window.siyuan.languages.themeDark}</option>
 </select>`;
 
-export const genBazaarPackagePanelHTML = (bazaarType: TBazaarType, sortValue: string, loadingHTML: string) => {
+export const genBazaarPackagePanelHTML = (
+    bazaarType: TBazaarType,
+    sortValue: string,
+    loadingHTML: string,
+    filters?: IBazaarCompatibilityFilters,
+) => {
     const config = BAZAAR_PACKAGE_CONFIG[bazaarType];
     return `<div class="config-bazaar__panel fn__none" data-type="${config.tabType}">
     <div class="fn__flex config-bazaar__title">
@@ -28,6 +36,16 @@ export const genBazaarPackagePanelHTML = (bazaarType: TBazaarType, sortValue: st
         <div class="fn__flex config-bazaar__filter-row">
             <input spellcheck="false" class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+        </div>
+        <div class="config-bazaar__compatibility">
+            <label class="fn__flex fn__flex-center">
+                <input type="checkbox" class="b3-switch" data-bazaar-filter="hideUnsupportedVersion"${filters?.hideUnsupportedVersion === true ? " checked" : ""}>
+                <span class="fn__space"></span><span>${window.siyuan.languages.bazaarHideUnsupportedVersion}</span>
+            </label>
+            <label class="fn__flex fn__flex-center">
+                <input type="checkbox" class="b3-switch" data-bazaar-filter="hideIncompatiblePlatform"${filters?.hideIncompatiblePlatform === true ? " checked" : ""}>
+                <span class="fn__space"></span><span>${window.siyuan.languages.bazaarHideIncompatiblePlatform}</span>
+            </label>
         </div>
     </div>
     <div id="${config.panelID}" class="config-bazaar__content">

@@ -9,7 +9,7 @@ import {objEquals} from "../../util/functions";
 import {syncSettingTasks} from "./taskBlocker";
 import {processSync} from "../../dialog/processSystem";
 import {notifyOCRChanged} from "../ocrRuntime";
-import {refreshMountedBazaar} from "../bazaarTab";
+import {refreshMountedBazaar, refreshMountedBazaarFilters} from "../bazaarTab";
 import {remountOpenSettingTab} from "./mount";
 /// #if !MOBILE
 import {applyKeymap} from "../tabs/keymapRuntime";
@@ -79,6 +79,11 @@ export const refreshSettingConfigAfter = async (namespace: string, save: () => P
 
 const applySettingConfig = async (next: Config.IConf, namespaces: Set<string>) => {
     const includes = (key: string) => namespaces.has("*") || namespaces.has(key);
+    const preserveBazaarView = namespaces.size === 1 && namespaces.has("bazaar") &&
+        window.siyuan.config.bazaar?.trust === next.bazaar?.trust &&
+        window.siyuan.config.bazaar?.petalDisabled === next.bazaar?.petalDisabled;
+    const onlyBazaarFiltersChanged = preserveBazaarView &&
+        !objEquals(window.siyuan.config.bazaar?.compatibilityFilters, next.bazaar?.compatibilityFilters);
     if (includes("editor") && !objEquals(window.siyuan.config.editor, next.editor)) {
         await editorConfigApi.apply(next.editor);
     }
@@ -124,14 +129,19 @@ const applySettingConfig = async (next: Config.IConf, namespaces: Set<string>) =
         notifyOCRChanged();
     }
     if (includes("bazaar")) {
-        void refreshMountedBazaar();
+        if (onlyBazaarFiltersChanged) {
+            await refreshMountedBazaarFilters();
+        } else {
+            void refreshMountedBazaar();
+        }
     }
     /// #if !MOBILE
     const tabs: Record<string, TSettingTab> = {fileTree: "file", secrets: "secretsVariables", variables: "secretsVariables", system: "app", publish: "access"};
     const remountTabs = new Set<TSettingTab>();
     for (const key of namespaces.has("*") ? [...simple, "editor", "export", "keymap", "appearance", "ai", "sync"] : namespaces) {
         const tab = getSettingTabDefs().find(definition => definition.id === (tabs[key] || key));
-        if (tab && tab.id !== "ocr" && tab.id !== "appearance") remountTabs.add(tab.id);
+        if (tab && tab.id !== "ocr" && tab.id !== "appearance" &&
+            !(tab.id === "bazaar" && preserveBazaarView)) remountTabs.add(tab.id);
     }
     if (accessChanged) remountTabs.add("access");
     remountTabs.forEach(tab => { void remountOpenSettingTab(tab); });

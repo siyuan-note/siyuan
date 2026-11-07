@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "Data publikacji (od najnowszych)",
+	"sortByReleaseTimeAsc": "Data publikacji (od najstarszych)",
+	"bazaarHideUnsupportedVersion": "Ukryj pakiety wymagające nowszej wersji aplikacji",
+	"bazaarHideIncompatiblePlatform": "Ukryj pakiety niezgodne z platformą",
 	"sourceRemovalPending": "Zakończ bieżące potwierdzanie usunięcia przed wprowadzeniem kolejnej zmiany",
 	"referenceRemovalOnly": "Usuń tylko odnośniki",
 	"sourceRemovalOnly": "Usuń tylko tagi i odnośniki",

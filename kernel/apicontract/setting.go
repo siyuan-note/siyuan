@@ -10,8 +10,14 @@ type SettingSnpt struct {
 }
 
 type SettingBazaar struct {
-	Trust         bool `json:"trust" api:"optional,nullable"`
-	PetalDisabled bool `json:"petalDisabled" api:"optional,nullable"`
+	Trust                bool                                         `json:"trust" api:"optional,nullable"`
+	PetalDisabled        bool                                         `json:"petalDisabled" api:"optional,nullable"`
+	CompatibilityFilters map[string]*SettingBazaarCompatibilityFilter `json:"compatibilityFilters" api:"optional,nullable"`
+}
+
+type SettingBazaarCompatibilityFilter struct {
+	HideUnsupportedVersion   bool `json:"hideUnsupportedVersion" api:"optional,nullable"`
+	HideIncompatiblePlatform bool `json:"hideIncompatiblePlatform" api:"optional,nullable"`
 }
 
 type SettingAI struct {

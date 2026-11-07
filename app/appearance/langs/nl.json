@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "Publicatiedatum (nieuwste eerst)",
+	"sortByReleaseTimeAsc": "Publicatiedatum (oudste eerst)",
+	"bazaarHideUnsupportedVersion": "Pakketten verbergen die een nieuwere appversie vereisen",
+	"bazaarHideIncompatiblePlatform": "Pakketten verbergen die niet compatibel zijn met het platform",
 	"sourceRemovalPending": "Rond de huidige verwijderbevestiging af voordat je een andere wijziging aanbrengt",
 	"referenceRemovalOnly": "Alleen verwijzingen verwijderen",
 	"sourceRemovalOnly": "Alleen tags en verwijzingen verwijderen",

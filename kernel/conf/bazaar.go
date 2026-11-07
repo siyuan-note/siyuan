@@ -5,13 +5,22 @@
 package conf
 
 type Bazaar struct {
-	Trust         bool `json:"trust"`
-	PetalDisabled bool `json:"petalDisabled"`
+	Trust                bool                                  `json:"trust"`
+	PetalDisabled        bool                                  `json:"petalDisabled"`
+	CompatibilityFilters map[string]*BazaarCompatibilityFilter `json:"compatibilityFilters"`
+}
+
+type BazaarCompatibilityFilter struct {
+	HideUnsupportedVersion   bool `json:"hideUnsupportedVersion"`
+	HideIncompatiblePlatform bool `json:"hideIncompatiblePlatform"`
 }
 
 func NewBazaar() *Bazaar {
 	return &Bazaar{
 		Trust:         false,
 		PetalDisabled: false,
+		CompatibilityFilters: map[string]*BazaarCompatibilityFilter{
+			"plugins": {}, "themes": {}, "widgets": {}, "icons": {}, "templates": {},
+		},
 	}
 }

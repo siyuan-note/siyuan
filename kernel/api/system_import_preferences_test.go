@@ -106,6 +106,8 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 	appearance.PDFTheme = &conf.PDFTheme{Light: "dark", Dark: "light", AnnoColor: "red"}
 	appearance.MobileBars = &conf.MobileBars{AutoHide: new(false), SidebarSwipe: new(false), SidebarButtons: new(true)}
 	source.FileTree.Load().RecentDocsSort = "updated"
+	source.Bazaar.Load().CompatibilityFilters["plugins"].HideUnsupportedVersion = true
+	source.Bazaar.Load().CompatibilityFilters["themes"].HideIncompatiblePlatform = true
 	source.AI.Load().Agent.StreamingMarkdown = true
 	appearance.GlobalFontFamilies = []*conf.EditorFont{{Family: "serif"}}
 	appearance.EntryVisibility = &conf.EntryVisibility{Version: conf.EntryVisibilityVersion, Active: "portable",
@@ -167,6 +169,7 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 				t.Fatal("reader and control preferences did not survive configuration transfer")
 			}
 			if target.Lang != "ja" || actualAppearance.Lang != "ja" || !actualAppearance.HideStatusBar || actualAppearance.Mode != 1 || actualAppearance.ModeOS ||
+				!reflect.DeepEqual(target.Bazaar.Load().CompatibilityFilters, source.Bazaar.Load().CompatibilityFilters) ||
 				!reflect.DeepEqual(actualAppearance.EntryVisibility, source.Appearance.Load().EntryVisibility) ||
 				!reflect.DeepEqual(actualAppearance.GlobalFontFamilies, source.Appearance.Load().GlobalFontFamilies) ||
 				!reflect.DeepEqual(target.OCR.Load(), source.OCR.Load()) || !reflect.DeepEqual(target.Snippet.Load(), source.Snippet.Load()) ||
@@ -191,6 +194,7 @@ func TestAPIContractImportedPortablePreferences(t *testing.T) {
 			}
 			saved := model.NewAppConf()
 			if err = json.Unmarshal(persisted, saved); err != nil || saved.Lang != "ja" || saved.Appearance.Load().Lang != "ja" ||
+				!reflect.DeepEqual(saved.Bazaar.Load().CompatibilityFilters, source.Bazaar.Load().CompatibilityFilters) ||
 				!reflect.DeepEqual(saved.OCR.Load(), source.OCR.Load()) || !reflect.DeepEqual(saved.Snippet.Load(), source.Snippet.Load()) ||
 				!reflect.DeepEqual(saved.Variables.Load(), source.Variables.Load()) || !reflect.DeepEqual(saved.UILayout.Load(), source.UILayout.Load()) {
 				t.Fatalf("imported preferences were not persisted: %v", err)

@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "發布時間降序",
+	"sortByReleaseTimeAsc": "發布時間升序",
+	"bazaarHideUnsupportedVersion": "隱藏版本不支援的套件",
+	"bazaarHideIncompatiblePlatform": "隱藏平台不相容的套件",
 	"sourceRemovalPending": "請先完成目前的刪除確認，再進行其他修改",
 	"referenceRemovalOnly": "僅刪除引用",
 	"sourceRemovalOnly": "僅刪除標籤和引用",

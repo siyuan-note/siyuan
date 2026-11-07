@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "Datum objavljivanja (prvo najnoviji)",
+	"sortByReleaseTimeAsc": "Datum objavljivanja (prvo najstariji)",
+	"bazaarHideUnsupportedVersion": "Sakrij pakete koji zahtevaju noviju verziju aplikacije",
+	"bazaarHideIncompatiblePlatform": "Sakrij pakete nekompatibilne sa platformom",
 	"sourceRemovalPending": "Завршите тренутну потврду брисања пре него што направите другу измену",
 	"referenceRemovalOnly": "Обриши само референце",
 	"sourceRemovalOnly": "Обриши само ознаке и референце",

@@ -1,4 +1,8 @@
 {
+	"sortByReleaseTimeDesc": "출시일 (최신순)",
+	"sortByReleaseTimeAsc": "출시일 (오래된 순)",
+	"bazaarHideUnsupportedVersion": "더 최신 앱 버전이 필요한 패키지 숨기기",
+	"bazaarHideIncompatiblePlatform": "플랫폼과 호환되지 않는 패키지 숨기기",
 	"sourceRemovalPending": "다른 변경을 하기 전에 현재 삭제 확인을 완료하세요",
 	"referenceRemovalOnly": "참조만 삭제",
 	"sourceRemovalOnly": "태그와 참조만 삭제",

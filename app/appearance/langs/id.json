@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Sertakan nomor judul otomatis dalam ekspor Markdown",
+	"exportHeadingNumberTip": "Jika diaktifkan, penyalinan atau ekspor Markdown menyertakan nomor judul jika penomoran judul otomatis diaktifkan dalam dokumen",
 	"agentThinkingStats": "Selesai berpikir %s, %s panggilan alat",
 	"agentThinkingLiveStats": "Berpikir %s, %s panggilan alat",
 	"bazaarSkipBatchUpdate": "Lewati pembaruan massal",

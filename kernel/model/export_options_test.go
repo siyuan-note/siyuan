@@ -59,7 +59,7 @@ func TestExportOptionsSnapshot(t *testing.T) {
 		t.Fatal("heading number selection leaked between independent exports or retains an input reference")
 	}
 	configJSON, err := json.Marshal(resolved)
-	if err != nil || strings.Contains(string(configJSON), "headingNumber") || strings.Contains(string(configJSON), "HeadingNumber") {
+	if err != nil || !strings.Contains(string(configJSON), `"headingNumber":true`) || strings.Contains(string(configJSON), "MarkdownHeadingNumber") {
 		t.Fatalf("temporary heading number selection reached persistent configuration: %s (%v)", configJSON, err)
 	}
 	options.Render = ExportRenderOptions{FillCSSVar: true, AVPublishFilter: func(view av.Viewable, _, _ string) av.Viewable { return view }}

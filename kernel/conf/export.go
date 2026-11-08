@@ -5,7 +5,8 @@
 package conf
 
 type Export struct {
-	// 单次 Markdown 导出快照中的编号选择，不写入持久化设置；nil 沿用文档编号开关。
+	HeadingNumber *bool `json:"headingNumber"` // Markdown 复制和导出是否保留文档标题编号，默认 true，不影响其他格式
+	// 单次 Markdown 导出快照中的编号选择，不写入持久化设置；nil 沿用持久化 HeadingNumber 设置。
 	MarkdownHeadingNumber   *bool `json:"-"`
 	ParagraphBeginningSpace bool  `json:"paragraphBeginningSpace"` // 是否使用中文排版段落开头空两格
 	AddTitle                bool  `json:"addTitle"`                // 是否添加标题
@@ -38,6 +39,7 @@ type Export struct {
 
 func NewExport() *Export {
 	return &Export{
+		HeadingNumber:           new(true),
 		ParagraphBeginningSpace: false,
 		AddTitle:                true,
 		BlockRefMode:            4,

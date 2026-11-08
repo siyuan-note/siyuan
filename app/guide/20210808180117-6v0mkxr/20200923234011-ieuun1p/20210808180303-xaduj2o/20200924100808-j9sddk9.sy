@@ -754,8 +754,22 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "When exporting Markdown, turn off “Automatic heading block numbering” below “Add document title” to omit automatic numbers for that export only. For documents with heading numbering enabled, “Copy as Markdown” and “Copy full document” also offer this option, enabled by default. Documents without heading numbering are copied directly. This choice does not change the document, editor settings, or other export formats."
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Export"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " controls whether Markdown copies and exports include automatic heading numbers. “Include automatic heading numbers in Markdown exports” is enabled by default and follows the document’s numbering state. Turn it off to omit numbers from Markdown output without changing the document or editor settings. Copying uses this saved preference directly without a numbering prompt. Other export formats are unaffected."
 								}
 							]
 						}

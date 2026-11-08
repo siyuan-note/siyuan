@@ -11,9 +11,6 @@ const coverage: Record<string, Record<string, number>> = {
         "MobileDialog": 1,
         "mobileConfirmDialog": 1
     },
-    "protyle/export/copyHeadingNumber.ts": {
-        "MobileDialog": 1
-    },
     "protyle/export/headingPageBreaksUI.ts": {
         "MobileDialog": 1
     },

@@ -182,6 +182,9 @@ func NormalizeExport(export *Export) *Export {
 	if export == nil {
 		export = defaults
 	}
+	if export.HeadingNumber == nil {
+		export.HeadingNumber = defaults.HeadingNumber
+	}
 	if export.BlockEmbedMode < 0 || export.BlockEmbedMode > 1 {
 		export.BlockEmbedMode = defaults.BlockEmbedMode
 	}

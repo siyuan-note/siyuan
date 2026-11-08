@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Automatische kopnummering opnemen in Markdown-export",
+	"exportHeadingNumberTip": "Indien ingeschakeld, bevat gekopieerde of geëxporteerde Markdown kopnummers als automatische kopnummering in het document is ingeschakeld",
 	"agentThinkingStats": "Nagedacht %s, %s tool-aanroepen",
 	"agentThinkingLiveStats": "Denkt na %s, %s tool-aanroepen",
 	"bazaarSkipBatchUpdate": "Overslaan bij bulkupdates",

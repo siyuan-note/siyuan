@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Incluir numeração automática de títulos na exportação Markdown",
+	"exportHeadingNumberTip": "Quando ativado, copiar ou exportar Markdown inclui os números dos títulos se a numeração automática estiver ativada no documento",
 	"agentThinkingStats": "Pensado %s, %s chamadas de ferramentas",
 	"agentThinkingLiveStats": "Pensando %s, %s chamadas de ferramentas",
 	"bazaarSkipBatchUpdate": "Ignorar nas atualizações em lote",

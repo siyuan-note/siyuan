@@ -19,8 +19,8 @@ const compile = (file: string, flags: Flags) => transpileModule(require("ifdef-l
 
 const loadOpenMenu = (flags: Flags, markdownAvailable = false) => {
     const calls: Array<{name: string; args: unknown[]}> = [];
-    let headingNumberChoice: boolean | undefined = true;
-    const window = {siyuan: {config: {editor: {}, fileTree: {}}, languages: {}}};
+    const exportConfig: {headingNumber?: boolean} = {};
+    const window = {siyuan: {config: {editor: {}, fileTree: {}, export: exportConfig}, languages: {}}};
     // 未显式提供的依赖统一替换为记录调用的空函数
     const recorder = new Proxy({}, {
         get: (_target, name) => typeof name === "string" && name !== "__esModule" ?
@@ -43,7 +43,6 @@ const loadOpenMenu = (flags: Flags, markdownAvailable = false) => {
         "../constants": constants,
         "../util/imageURL": imageURL,
         "../editor/pdfAssetLink": pdfAssetLink,
-        "../protyle/export/copyHeadingNumber": {selectCopyHeadingNumber: async () => headingNumberChoice},
         "../util/fetch": {fetchSyncPost: async (...args: unknown[]) => {
             calls.push({name: "fetchSyncPost", args});
             return {code: 0, data: {content: "Markdown"}};
@@ -52,29 +51,25 @@ const loadOpenMenu = (flags: Flags, markdownAvailable = false) => {
             openMarkdownAsset: (...args: unknown[]) => calls.push({name: "openMarkdownAsset", args})},
     });
     return {openMenu: menu.openMenu, copySubMenu: menu.copySubMenu, calls,
-        setHeadingNumberChoice: (value: boolean | undefined) => { headingNumberChoice = value; }};
+        setHeadingNumberChoice: (value: boolean | undefined) => { exportConfig.headingNumber = value; }};
 };
 
 const app = {};
 
 for (const mobile of [false, true]) {
-    test(`copy Markdown forwards the numbering choice and respects cancellation (${mobile ? "mobile" : "desktop"})`, async () => {
+    test(`copy Markdown uses persisted numbering without an additional prompt (${mobile ? "mobile" : "desktop"})`, async () => {
         for (const choice of [true, false, undefined]) {
             const state = loadOpenMenu({MOBILE: mobile, BROWSER: mobile});
             state.setHeadingNumberChoice(choice);
             const items = state.copySubMenu(["document"], false, undefined, "heading");
             await items.find((item: IMenu) => item.id === "copyMarkdown").click();
             const request = state.calls.find(call => call.name === "fetchSyncPost");
-            if (choice === undefined) {
-                assert.equal(request, undefined);
-                assert.equal(state.calls.some(call => call.name === "writeText"), false);
-            } else {
-                assert.equal(JSON.stringify(request.args), JSON.stringify(["/api/export/exportMdContent", {
-                    id: "heading", headingNumber: choice, refMode: 3, embedMode: 1, yfm: false,
-                    preserveTaskMarkers: true, fillCSSVar: false, adjustHeadingLevel: false,
-                }]));
-                assert.ok(state.calls.some(call => call.name === "writeText"));
-            }
+            assert.equal(JSON.stringify(request.args), JSON.stringify(["/api/export/exportMdContent", {
+                id: "heading", headingNumber: choice !== false, refMode: 3, embedMode: 1, yfm: false,
+                preserveTaskMarkers: true, fillCSSVar: false, adjustHeadingLevel: false,
+            }]));
+            assert.ok(state.calls.some(call => call.name === "writeText"));
+            assert.equal(state.calls.filter(call => call.name === "fetchSyncPost").length, 1);
         }
     });
 }

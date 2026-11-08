@@ -10,7 +10,7 @@ import {saveExportFile} from "../util/compatibility";
 
 // 导出参数对话框 https://github.com/siyuan-note/siyuan/issues/17031
 // 通用部分（8 项）可被各导出格式复用，Markdown 专属部分仅 Markdown 导出使用。
-// 编号选项默认开启，其余默认值取自 window.siyuan.config.export；仅本次生效，不修改全局设置、不记忆上次选择。
+// 参数默认值取自导出设置；对话框内的调整仅本次生效，编号始终使用持久设置。
 
 // 类型别名：约束字段 key 与 Config.IExport 的字段类型对应，避免用 string 索引报错
 type BoolKey = "addTitle" | "inlineMemo" | "includeSubDocs" | "includeRelatedDocs" | "markdownYFM" | "removeAssetsID";
@@ -56,8 +56,6 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
         content: `<div class="b3-dialog__content export-md__content">
     <!-- 常用 -->
     ${row(window.siyuan.languages.export17, window.siyuan.languages.export18, bool("addTitle"))}
-    ${row(window.siyuan.languages.headingNumber, window.siyuan.languages.headingNumberTip,
-        '<input id="headingNumber" class="b3-switch fn__flex-center" type="checkbox" checked>')}
     ${showSubDocs ? row(window.siyuan.languages.includeSubDocs, window.siyuan.languages.includeSubDocsTip, bool("includeSubDocs")) : ""}
     ${showRelatedDocs ? row(window.siyuan.languages.includeRelatedDocs, window.siyuan.languages.includeRelatedDocsTip, bool("includeRelatedDocs")) : ""}
     ${row(window.siyuan.languages.export23, window.siyuan.languages.export24, bool("markdownYFM"))}
@@ -102,7 +100,7 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
     };
     const collect = (): IExportMdOptionsPayload => ({
         addTitle: (el.querySelector("#addTitle") as HTMLInputElement).checked,
-        headingNumber: (el.querySelector("#headingNumber") as HTMLInputElement).checked,
+        headingNumber: window.siyuan.config.export.headingNumber !== false,
         inlineMemo: (el.querySelector("#inlineMemo") as HTMLInputElement).checked,
         blockRefMode: parseInt((el.querySelector("#blockRefMode") as HTMLSelectElement).value, 10),
         blockEmbedMode: parseInt((el.querySelector("#blockEmbedMode") as HTMLSelectElement).value, 10),

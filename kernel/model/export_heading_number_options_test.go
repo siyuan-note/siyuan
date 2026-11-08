@@ -46,32 +46,47 @@ func TestExportMarkdownHeadingNumberOptions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, choice := range []*bool{new(false), new(true), nil} {
-		opts := &ExportOptions{HeadingNumber: choice}
-		wantNumber := choice == nil || *choice
-		_, copied := ExportMarkdownContent(source.ID, opts)
-		if strings.Contains(copied, "# 1 First heading") != wantNumber || !strings.Contains(copied, "First heading") {
-			t.Fatalf("copy heading option lost: %v %s", choice, copied)
+	for _, persistent := range []bool{true, false} {
+		Conf.Export.Load().HeadingNumber = new(persistent)
+		for _, choice := range []*bool{new(false), new(true), nil} {
+			opts := &ExportOptions{HeadingNumber: choice}
+			wantNumber := persistent
+			if choice != nil {
+				wantNumber = *choice
+			}
+			_, copied := ExportMarkdownContent(source.ID, opts)
+			if strings.Contains(copied, "# 1 First heading") != wantNumber || !strings.Contains(copied, "First heading") {
+				t.Fatalf("copy heading option lost: %v %s", choice, copied)
+			}
+			_, partial := ExportMarkdownContent(partialID, opts)
+			if strings.Contains(partial, "# 2 Second heading") != wantNumber || !strings.Contains(partial, "Second heading") {
+				t.Fatalf("partial copy lost source numbering: %v %s", choice, partial)
+			}
+			_, noNumber := ExportMarkdownContent(disabled.ID, opts)
+			if strings.Contains(noNumber, "# 1 First heading") || !strings.Contains(noNumber, "First heading") {
+				t.Fatalf("request must not enable numbering for a disabled document: %s", noNumber)
+			}
+			_, zipPath := ExportPandocConvertZipWithOptions([]string{source.ID, disabled.ID}, "", ".md", opts)
+			archive := openExportArchive(t, zipPath)
+			exported := markdownArchiveDocument(t, archive, "Source")
+			if strings.Contains(exported, "# 1 First heading") != wantNumber || !strings.Contains(exported, "First heading") {
+				t.Fatalf("archive heading option lost: %v %s", choice, exported)
+			}
+			if strings.Contains(markdownArchiveDocument(t, archive, "Disabled"), "# 1 First heading") {
+				t.Fatal("multi-document archive enabled numbering for a disabled document")
+			}
+			if *Conf.Export.Load().HeadingNumber != persistent || Conf.Export.Load().MarkdownHeadingNumber != nil {
+				t.Fatal("request override changed persistent preference")
+			}
+			if err := archive.Close(); err != nil {
+				t.Fatal(err)
+			}
 		}
-		_, partial := ExportMarkdownContent(partialID, opts)
-		if strings.Contains(partial, "# 2 Second heading") != wantNumber || !strings.Contains(partial, "Second heading") {
-			t.Fatalf("partial copy lost source numbering: %v %s", choice, partial)
-		}
-		_, noNumber := ExportMarkdownContent(disabled.ID, opts)
-		if strings.Contains(noNumber, "# 1 First heading") || !strings.Contains(noNumber, "First heading") {
-			t.Fatalf("request must not enable numbering for a disabled document: %s", noNumber)
-		}
-		_, zipPath := ExportPandocConvertZipWithOptions([]string{source.ID, disabled.ID}, "", ".md", opts)
-		archive := openExportArchive(t, zipPath)
-		exported := markdownArchiveDocument(t, archive, "Source")
-		if strings.Contains(exported, "# 1 First heading") != wantNumber || !strings.Contains(exported, "First heading") {
-			t.Fatalf("archive heading option lost: %v %s", choice, exported)
-		}
-		if strings.Contains(markdownArchiveDocument(t, archive, "Disabled"), "# 1 First heading") {
-			t.Fatal("multi-document archive enabled numbering for a disabled document")
-		}
-		if err := archive.Close(); err != nil {
-			t.Fatal(err)
+	}
+	for _, ext := range []string{".docx", ".html", ".pdf"} {
+		_, intermediate, _ := exportMarkdownContent(source.ID, markdownExportOptions{Config: resolveExportOptions(nil), Ext: ext})
+		if !strings.Contains(intermediate, "# 1 First heading") {
+			t.Fatalf("Markdown preference affected %s intermediate: %s", ext, intermediate)
 		}
 	}
 	current, err := os.ReadFile(sourcePath)

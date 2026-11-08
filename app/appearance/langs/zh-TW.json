@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Markdown 匯出時包含標題區塊自動編號",
+	"exportHeadingNumberTip": "啟用後，如果文件啟用了標題區塊自動編號，複製或匯出 Markdown 時將包含編號",
 	"agentThinkingStats": "已思考 %s，呼叫 %s 次工具",
 	"agentThinkingLiveStats": "思考中 %s，呼叫 %s 次工具",
 	"bazaarSkipBatchUpdate": "略過批次更新",

@@ -14,7 +14,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
     const items: IMenu[] = [];
     const events: {detail: {protyle: IProtyle}, separatorPosition: string}[] = [];
     const calls: {name: string, args: unknown[]}[] = [];
-    let headingNumberChoice: boolean | undefined = true;
+    const exportConfig: {headingNumber?: boolean} = {};
     const attributes = new Map<string, string>();
     const menu = {element: {classList: {contains: () => true}, getAttribute: (key: string) => attributes.get(key),
         setAttribute: (key: string, value: string) => attributes.set(key, value)},
@@ -32,7 +32,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
     const lute = {BlockDOM2HTML: (source: string) => "html:" + source};
     const cardData: {cards: unknown[], unreviewedCount: number} = {cards: [], unreviewedCount: 0};
     const globals = {window: {siyuan: {menus: {menu}, languages: {}, isPublish: false,
-        config: {readonly, cloudRegion: 0, flashcard: {deck: true}, system: {dataDir: "/data"},
+        config: {export: exportConfig, readonly, cloudRegion: 0, flashcard: {deck: true}, system: {dataDir: "/data"},
             keymap: {general: keymaps, editor: {general: keymaps}}}}}, getSelection: () => ({rangeCount: 0})};
     const dependencies: Record<string, unknown> = {
         "../../menus/Menu": {MenuItem: class {element: IMenu; constructor(item: IMenu) { this.element = item; }}},
@@ -73,7 +73,6 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
             ({textHTML: parser.BlockDOM2HTML(source), textSiyuan: "sy:" + source})},
         "../util/clipboardData": {buildWebClipboardHTML: (html: string) => "web:" + html},
         "../export/util": {exportImage: record("copyAsPNG")},
-        "../export/copyHeadingNumber": {selectCopyHeadingNumber: async () => headingNumberChoice},
         "../wysiwyg/transaction": {transaction: record("transaction")},
         "../../util/hostCapabilities": {getHostCapabilities: () => ({documentImportExport: true, localFileSystem: true})},
         "../../constants": {Constants: {MENU_TITLE: "title", CUSTOM_RIFF_DECKS: "decks", QUICK_DECK_ID: "quick", DIALOG_SEARCH: "search"}},
@@ -115,7 +114,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
         await item.click(null, null);
     };
     return {documentModule, titleModule, options, items, events, calls, attributes, cardData, lute, click,
-        setHeadingNumberChoice: (value: boolean | undefined) => { headingNumberChoice = value; },
+        setHeadingNumberChoice: (value: boolean | undefined) => { exportConfig.headingNumber = value; },
         open: (overrides: Partial<typeof options> = {}) => documentModule.openDocumentMenu({...options, ...overrides})};
 };
 
@@ -169,20 +168,16 @@ test("copying a closed document uses the shared parser and retains Markdown and 
     assert.equal((request.args[1] as {id: string}).id, menu.options.id);
 });
 
-test("copy document passes the one-time numbering choice and cancellation leaves the clipboard untouched", async () => {
+test("copy document uses persisted numbering without an additional prompt", async () => {
     for (const choice of [true, false, undefined]) {
         const menu = setup();
         menu.setHeadingNumberChoice(choice);
         menu.open();
         await menu.click("copyDoc");
         const request = menu.calls.find(call => call.name === "fetchSyncPost" && call.args[0] === "/api/export/exportMdContent");
-        if (choice === undefined) {
-            assert.equal(request, undefined);
-            assert.equal(menu.calls.some(call => call.name === "clipboard"), false);
-        } else {
-            assert.equal((request.args[1] as {headingNumber: boolean}).headingNumber, choice);
-            assert.ok(menu.calls.some(call => call.name === "clipboard"));
-        }
+        assert.equal((request.args[1] as {headingNumber: boolean}).headingNumber, choice !== false);
+        assert.ok(menu.calls.some(call => call.name === "clipboard"));
+        assert.equal(menu.calls.filter(call => call.name === "fetchSyncPost").length, 2);
     }
 });
 

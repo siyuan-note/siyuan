@@ -1320,7 +1320,7 @@ var ExportNotebooksMd = define[ExportNotebooksMarkdownRequest, ExportNamedZipDat
 var ExportMds = define[ExportDocumentsMarkdownRequest, ExportNamedZipData]("exportMds", "/api/export/exportMds", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 // Markdown 导出按文档标题编号开关和编辑器编号格式添加编号，不修改源文档。
-// headingNumber=false 仅在本次 Markdown 导出中省略编号；省略、null 或 true 沿用文档开关。
+// headingNumber=false 仅在本次 Markdown 导出中省略编号；省略或 null 沿用导出设置；true 保留文档编号。
 var ExportMd = define[ExportMarkdownRequest, ExportNamedZipData]("exportMd", "/api/export/exportMd", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportNotebookSY = define[ExportIDRequest, ExportZipData]("exportNotebookSY", "/api/export/exportNotebookSY", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportNotebooksSY = define[ExportNotebooksRequest, ExportZipData]("exportNotebooksSY", "/api/export/exportNotebooksSY", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1328,7 +1328,7 @@ var ExportSYs = define[ExportIDsRequest, ExportZipData]("exportSYs", "/api/expor
 var ExportSY = define[ExportIDRequest, ExportZipData]("exportSY", "/api/export/exportSY", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 // Markdown 内容按文档标题编号开关和编辑器编号格式添加编号，局部导出保留原文档编号。
-// headingNumber=false 仅在本次 Markdown 复制中省略编号；省略、null 或 true 沿用文档开关，不改变源文档或导出设置。
+// headingNumber=false 仅在本次 Markdown 复制中省略编号；省略或 null 沿用导出设置；true 保留文档编号，不改变源文档或导出设置。
 var ExportMdContent = define[ExportMarkdownContentRequest, ExportMarkdownContentData]("exportMdContent", "/api/export/exportMdContent", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportDocx = define[ExportDocxRequest, ExportPathData]("exportDocx", "/api/export/exportDocx", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var ExportMdHTML = define[ExportMarkdownHTMLRequest, ExportHTMLData]("exportMdHTML", "/api/export/exportMdHTML", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")

@@ -49,6 +49,10 @@ const registerExportFormatGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.export17,
         desc: window.siyuan.languages.export18,
     });
+    group.switch("export.headingNumber", {
+        title: window.siyuan.languages.exportHeadingNumber,
+        desc: window.siyuan.languages.exportHeadingNumberTip,
+    });
     group.switch("export.paragraphBeginningSpace", {
         title: window.siyuan.languages.paragraphBeginningSpace,
         desc: window.siyuan.languages.md4,

@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "כלול מספור כותרות אוטומטי בייצוא Markdown",
+	"exportHeadingNumberTip": "כאשר האפשרות מופעלת, העתקה או ייצוא של Markdown כוללים מספרי כותרות אם מספור כותרות אוטומטי מופעל במסמך",
 	"agentThinkingStats": "חשב %s, %s קריאות לכלים",
 	"agentThinkingLiveStats": "חושב %s, %s קריאות לכלים",
 	"bazaarSkipBatchUpdate": "דלג בעדכונים מרוכזים",

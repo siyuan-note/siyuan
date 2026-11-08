@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Markdown エクスポートに見出しの自動番号を含める",
+	"exportHeadingNumberTip": "有効にすると、文書で見出しの自動番号が有効な場合、Markdown のコピーやエクスポートに番号を含めます",
 	"agentThinkingStats": "考え済み %s、ツールを %s 回呼び出し",
 	"agentThinkingLiveStats": "考え中 %s、ツールを %s 回呼び出し",
 	"bazaarSkipBatchUpdate": "一括更新をスキップ",

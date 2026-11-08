@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Markdown निर्यात में स्वचालित शीर्षक क्रमांक शामिल करें",
+	"exportHeadingNumberTip": "सक्षम होने पर, यदि दस्तावेज़ में स्वचालित शीर्षक क्रमांकन सक्षम है, तो Markdown की प्रतिलिपि बनाने या निर्यात करने पर शीर्षक क्रमांक शामिल होंगे",
 	"agentThinkingStats": "सोच लिया %s, %s बार टूल कॉल",
 	"agentThinkingLiveStats": "सोच रहा है %s, %s बार टूल कॉल",
 	"bazaarSkipBatchUpdate": "सामूहिक अपडेट में छोड़ें",

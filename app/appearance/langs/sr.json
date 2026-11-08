@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Укључи аутоматске бројеве наслова у Markdown извоз",
+	"exportHeadingNumberTip": "Када је укључено, копирање или извоз Markdown садржи бројеве наслова ако је аутоматско нумерисање укључено у документу",
 	"agentThinkingStats": "Razmišljanje: %s, poziva alata: %s",
 	"agentThinkingLiveStats": "Razmišlja: %s, poziva alata: %s",
 	"bazaarSkipBatchUpdate": "Прескочи групна ажурирања",

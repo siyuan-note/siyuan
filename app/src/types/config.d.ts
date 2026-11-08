@@ -878,6 +878,8 @@ declare namespace Config {
      * SiYuan export related configuration
      */
     export interface IExport {
+        /** Preserve document heading numbering for Markdown copy/export; defaults to true. */
+        headingNumber?: boolean;
         /**
          * Add article title (insert the article title as a first-level title at the beginning of
          * the document)

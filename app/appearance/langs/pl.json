@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Uwzględniaj automatyczne numery nagłówków przy eksporcie Markdown",
+	"exportHeadingNumberTip": "Po włączeniu kopiowanie lub eksport Markdown uwzględnia numery nagłówków, jeśli automatyczna numeracja jest włączona w dokumencie",
 	"agentThinkingStats": "Przemyślane %s, wywołań narzędzi: %s",
 	"agentThinkingLiveStats": "Myśli %s, wywołań narzędzi: %s",
 	"bazaarSkipBatchUpdate": "Pomiń w aktualizacjach zbiorczych",

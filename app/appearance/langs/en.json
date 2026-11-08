@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Include automatic heading numbers in Markdown exports",
+	"exportHeadingNumberTip": "When enabled, copying or exporting Markdown includes heading numbers if automatic heading numbering is enabled in the document",
 	"agentThinkingStats": "Thought %s, called tools %s times",
 	"agentThinkingLiveStats": "Thinking %s, called tools %s times",
 	"bazaarSkipBatchUpdate": "Skip batch updates",

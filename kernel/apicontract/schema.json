@@ -45242,6 +45242,16 @@
             }
           ]
         },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "imageWatermarkDesc": {
           "anyOf": [
             {
@@ -50685,6 +50695,16 @@
         "fileAnnotationRefMode": {
           "type": "integer"
         },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "imageWatermarkDesc": {
           "type": "string"
         },
@@ -50738,6 +50758,7 @@
         "blockRefTextLeft",
         "blockRefTextRight",
         "fileAnnotationRefMode",
+        "headingNumber",
         "imageWatermarkDesc",
         "imageWatermarkStr",
         "includeRelatedDocs",
@@ -50813,6 +50834,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

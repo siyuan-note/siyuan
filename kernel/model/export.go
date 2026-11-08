@@ -2365,7 +2365,7 @@ type ExportOptions struct {
 	TagOpenMarker         *string `json:"tagOpenMarker"`         // 标签开始标记符
 	TagCloseMarker        *string `json:"tagCloseMarker"`        // 标签结束标记符
 	// Markdown 专属部分
-	HeadingNumber      *bool `json:"headingNumber"`      // false 省略本次 Markdown 的标题编号，nil 或 true 沿用文档开关
+	HeadingNumber      *bool `json:"headingNumber"`      // false 省略本次 Markdown 的标题编号，nil 沿用导出设置，true 保留文档编号
 	IncludeSubDocs     *bool `json:"includeSubDocs"`     // 是否包含子文档
 	IncludeRelatedDocs *bool `json:"includeRelatedDocs"` // 是否包含关联文档
 	MarkdownYFM        *bool `json:"markdownYFM"`        // 是否添加 YAML Front Matter
@@ -3380,6 +3380,7 @@ func exportMarkdownContent(rootID string, exportOpts markdownExportOptions) (tre
 	exportedMd = exportMarkdownContent0(rootID, tree, markdownExportOptions{
 		Config: conf.Export{
 			MarkdownHeadingNumber: config.MarkdownHeadingNumber,
+			HeadingNumber:         config.HeadingNumber,
 			BlockRefMode:          exportRefMode,
 			BlockEmbedMode:        config.BlockEmbedMode,
 			FileAnnotationRefMode: config.FileAnnotationRefMode,
@@ -3411,7 +3412,12 @@ func exportMarkdownContent(rootID string, exportOpts markdownExportOptions) (tre
 }
 
 func exportMarkdownContent0(id string, tree *parse.Tree, exportOpts markdownExportOptions) (ret string) {
-	if exportOpts.Config.MarkdownHeadingNumber == nil || *exportOpts.Config.MarkdownHeadingNumber {
+	numberHeadings := exportOpts.Config.MarkdownHeadingNumber
+	if numberHeadings == nil {
+		numberHeadings = exportOpts.Config.HeadingNumber
+	}
+	// Pandoc 格式复用 Markdown 中间态，但不使用 Markdown 编号偏好。
+	if exportOpts.Ext != ".md" || numberHeadings == nil || *numberHeadings {
 		if numberErr := applyHeadingNumbersForExport(tree, getExportBlockTreeInBox(id, tree.Box), false); nil != numberErr {
 			logging.LogErrorf("prepare Markdown heading numbers failed: %s", numberErr)
 			return ""

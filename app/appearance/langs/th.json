@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "รวมหมายเลขหัวข้ออัตโนมัติเมื่อส่งออก Markdown",
+	"exportHeadingNumberTip": "เมื่อเปิดใช้งาน การคัดลอกหรือส่งออก Markdown จะรวมหมายเลขหัวข้อหากเอกสารเปิดใช้การกำหนดหมายเลขหัวข้ออัตโนมัติ",
 	"agentThinkingStats": "คิดแล้ว %s, เรียกใช้เครื่องมือ %s ครั้ง",
 	"agentThinkingLiveStats": "กำลังคิด %s, เรียกใช้เครื่องมือ %s ครั้ง",
 	"bazaarSkipBatchUpdate": "ข้ามการอัปเดตแบบกลุ่ม",

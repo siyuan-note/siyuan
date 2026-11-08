@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Automatische Überschriftennummern in Markdown exportieren",
+	"exportHeadingNumberTip": "Wenn aktiviert, enthalten kopierte oder exportierte Markdown-Inhalte Überschriftennummern, sofern die automatische Nummerierung im Dokument aktiviert ist",
 	"agentThinkingStats": "Nachgedacht %s, %s Tool-Aufrufe",
 	"agentThinkingLiveStats": "Denkt nach %s, %s Tool-Aufrufe",
 	"bazaarSkipBatchUpdate": "Bei Sammelupdates überspringen",

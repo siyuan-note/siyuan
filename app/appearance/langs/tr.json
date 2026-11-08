@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Markdown dışa aktarımına otomatik başlık numaralarını ekle",
+	"exportHeadingNumberTip": "Etkinleştirildiğinde, belgede otomatik başlık numaralandırması açıksa Markdown kopyalama veya dışa aktarma başlık numaralarını içerir",
 	"agentThinkingStats": "Düşünüldü %s, %s araç çağrısı",
 	"agentThinkingLiveStats": "Düşünüyor %s, %s araç çağrısı",
 	"bazaarSkipBatchUpdate": "Toplu güncellemelerde atla",

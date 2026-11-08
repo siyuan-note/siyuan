@@ -716,8 +716,22 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "导出 Markdown 时，可在“添加文档标题”下方关闭“标题块自动编号”，仅在本次导出中省略自动编号。文档启用标题自动编号时，“复制为 Markdown”和“复制全文”也会显示该选项，默认开启；未启用编号时直接复制。此选择不修改文档或编辑器设置，也不影响其他导出格式。"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "导出"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中的“Markdown 导出时包含标题块自动编号”默认开启：文档启用编号时，复制和导出 Markdown 会包含编号。关闭后，Markdown 输出省略编号，但不修改文档或编辑器设置。复制直接沿用此持久设置，不弹出编号选择窗口；其他导出格式不受影响。"
 								}
 							]
 						}

@@ -1,4 +1,6 @@
 {
+	"exportHeadingNumber": "Markdown 내보내기에 자동 제목 번호 포함",
+	"exportHeadingNumberTip": "활성화하면 문서에서 제목 자동 번호 매기기가 켜져 있을 때 Markdown 복사 또는 내보내기에 제목 번호가 포함됩니다",
 	"agentThinkingStats": "생각함 %s, 도구 %s회 호출",
 	"agentThinkingLiveStats": "생각 중 %s, 도구 %s회 호출",
 	"bazaarSkipBatchUpdate": "일괄 업데이트에서 제외",

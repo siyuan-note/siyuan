@@ -704,8 +704,22 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "導出 Markdown 時，可在「新增文件標題」下方關閉「標題區塊自動編號」，僅在本次導出中省略自動編號。文件啟用標題自動編號時，「複製為 Markdown」和「複製全文」也會顯示該選項，預設開啟；未啟用編號時直接複製。此選擇不修改文件或編輯器設定，也不影響其他導出格式。"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "匯出"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中的「Markdown 匯出時包含標題區塊自動編號」預設開啟：文件啟用編號時，複製和匯出 Markdown 會包含編號。關閉後，Markdown 輸出省略編號，但不修改文件或編輯器設定。複製直接沿用此持久設定，不彈出編號選擇視窗；其他匯出格式不受影響。"
 								}
 							]
 						}

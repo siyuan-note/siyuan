@@ -252,7 +252,6 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
                 blockElement = blockElement.nextElementSibling as HTMLElement;
                 blockElement.previousElementSibling.remove();
             }
-            blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             mathRender(blockElement);
             blockElement.querySelectorAll('[data-type~="block-ref"][data-subtype="d"]').forEach(refItem => {
                 if (refItem.textContent === "") {
@@ -268,6 +267,8 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
         focusByWbr(protyle.wysiwyg.element, range);
         protyle.hint.render(protyle);
         updateGutterAfterInput(protyle, blockElement);
+        // 引用移除预检会清空选区，事务需通过编辑标记识别并保留当前标题宿主。
+        blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         updateInput(html, protyle, id, inputOperations);
         return;
     }

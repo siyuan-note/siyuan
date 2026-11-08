@@ -6,6 +6,7 @@ import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, 
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
+import {selectCopyHeadingNumber} from "../protyle/export/copyHeadingNumber";
 import {openHeadingPageBreakDialog} from "../protyle/export/headingPageBreaksUI";
 import {
     isInAndroid,
@@ -633,8 +634,13 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
             label: window.siyuan.languages.copyMarkdown,
             accelerator: undefined,
             click: async () => {
+                const headingNumber = await selectCopyHeadingNumber(stdMarkdownId, window.siyuan.languages.copyMarkdown);
+                if (headingNumber === undefined) {
+                    return;
+                }
                 const response = await fetchSyncPost("/api/export/exportMdContent", {
                     id: stdMarkdownId,
+                    headingNumber,
                     refMode: 3,
                     embedMode: 1,
                     yfm: false,

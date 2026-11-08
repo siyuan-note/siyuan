@@ -33,6 +33,7 @@ import {exportImage} from "../export/util";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getLute} from "../render/setLute";
 import {transaction} from "../wysiwyg/transaction";
+import {selectCopyHeadingNumber} from "../export/copyHeadingNumber";
 
 export const openDocumentMenu = (options: {
     app: App,
@@ -73,6 +74,10 @@ export const openDocumentMenu = (options: {
         label: window.siyuan.languages.copyDoc,
         accelerator: undefined,
         click: async () => {
+            const headingNumber = await selectCopyHeadingNumber(id, window.siyuan.languages.copyDoc);
+            if (headingNumber === undefined) {
+                return;
+            }
             const [responseHTML, responseText] = await Promise.all([
                 fetchSyncPost("/api/block/getBlockDOM", {
                     id,
@@ -80,6 +85,7 @@ export const openDocumentMenu = (options: {
                 }),
                 fetchSyncPost("/api/export/exportMdContent", {
                     id,
+                    headingNumber,
                     refMode: 3,
                     embedMode: 1,
                     yfm: false,

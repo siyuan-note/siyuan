@@ -26458,6 +26458,16 @@
             }
           ]
         },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "ids": {
           "type": "array",
           "items": {
@@ -26809,6 +26819,16 @@
             }
           ]
         },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "type": "string"
         },
@@ -26937,6 +26957,16 @@
           "anyOf": [
             {
               "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -27113,6 +27143,16 @@
             }
           ]
         },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "includeRelatedDocs": {
           "anyOf": [
             {
@@ -27249,6 +27289,16 @@
           "anyOf": [
             {
               "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

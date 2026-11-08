@@ -1876,6 +1876,7 @@ if (response.code === 0 && response.data) {
   ```
 
     * `id`：要导出的文档块 ID
+    * `headingNumber`：可选布尔值，`false` 仅在本次复制 Markdown 时省略自动标题编号；省略、`null` 或 `true` 沿用文档编号开关，不会为未启用编号的文档强制添加编号
     * `preserveTaskMarkers`：用于复制 Markdown 的可选布尔值，`true` 时保留 `[/]`、`[-]` 等任务标记；省略、`null` 或 `false` 时保持标准 Markdown 兼容行为，将非标准标记归一化为 `[X]`
 * 返回值
 

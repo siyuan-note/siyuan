@@ -5,8 +5,10 @@
 package conf
 
 type Export struct {
-	ParagraphBeginningSpace bool `json:"paragraphBeginningSpace"` // 是否使用中文排版段落开头空两格
-	AddTitle                bool `json:"addTitle"`                // 是否添加标题
+	// 单次 Markdown 导出快照中的编号选择，不写入持久化设置；nil 沿用文档编号开关。
+	MarkdownHeadingNumber   *bool `json:"-"`
+	ParagraphBeginningSpace bool  `json:"paragraphBeginningSpace"` // 是否使用中文排版段落开头空两格
+	AddTitle                bool  `json:"addTitle"`                // 是否添加标题
 	// 内容块引用导出模式
 	//   2：锚文本块链
 	//   3：仅锚文本

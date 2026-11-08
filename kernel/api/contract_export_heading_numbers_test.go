@@ -128,6 +128,25 @@ func TestAPIContractExportHeadingNumbers(t *testing.T) {
 				if id == docID && (!strings.Contains(data.Content, "# "+test.wantFirst+"\n") || !strings.Contains(data.Content, "## Quoted\n")) {
 					t.Fatalf("unexpected full-document numbering: %s", data.Content)
 				}
+				for _, selected := range []bool{false, true} {
+					body, err := json.Marshal(map[string]any{"id": id, "refMode": 3, "embedMode": 1,
+						"addTitle": false, "yfm": false, "headingNumber": selected})
+					if err != nil {
+						t.Fatal(err)
+					}
+					code, message, raw := exportContractRequest(t, "exportMdContent", exportMdContent, string(body))
+					var selectedData apicontract.ExportMarkdownContentData
+					if err := json.Unmarshal(raw, &selectedData); err != nil || code != 0 {
+						t.Fatalf("selected export failed: %d %s %s %v", code, message, raw, err)
+					}
+					wantLast := "Last"
+					if selected {
+						wantLast = test.wantLast
+					}
+					if !strings.Contains(selectedData.Content, "## "+wantLast+"\n") {
+						t.Fatalf("per-copy heading number selection was lost: %s", selectedData.Content)
+					}
+				}
 				engine := gin.New()
 				engine.Use(boxLeaseMiddleware)
 				engine.POST("/api/lute/copyStdMarkdown", copyStdMarkdown)

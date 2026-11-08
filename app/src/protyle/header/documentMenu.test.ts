@@ -14,6 +14,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
     const items: IMenu[] = [];
     const events: {detail: {protyle: IProtyle}, separatorPosition: string}[] = [];
     const calls: {name: string, args: unknown[]}[] = [];
+    let headingNumberChoice: boolean | undefined = true;
     const attributes = new Map<string, string>();
     const menu = {element: {classList: {contains: () => true}, getAttribute: (key: string) => attributes.get(key),
         setAttribute: (key: string, value: string) => attributes.set(key, value)},
@@ -72,6 +73,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
             ({textHTML: parser.BlockDOM2HTML(source), textSiyuan: "sy:" + source})},
         "../util/clipboardData": {buildWebClipboardHTML: (html: string) => "web:" + html},
         "../export/util": {exportImage: record("copyAsPNG")},
+        "../export/copyHeadingNumber": {selectCopyHeadingNumber: async () => headingNumberChoice},
         "../wysiwyg/transaction": {transaction: record("transaction")},
         "../../util/hostCapabilities": {getHostCapabilities: () => ({documentImportExport: true, localFileSystem: true})},
         "../../constants": {Constants: {MENU_TITLE: "title", CUSTOM_RIFF_DECKS: "decks", QUICK_DECK_ID: "quick", DIALOG_SEARCH: "search"}},
@@ -113,6 +115,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
         await item.click(null, null);
     };
     return {documentModule, titleModule, options, items, events, calls, attributes, cardData, lute, click,
+        setHeadingNumberChoice: (value: boolean | undefined) => { headingNumberChoice = value; },
         open: (overrides: Partial<typeof options> = {}) => documentModule.openDocumentMenu({...options, ...overrides})};
 };
 
@@ -164,6 +167,23 @@ test("copying a closed document uses the shared parser and retains Markdown and 
     assert.equal(clipboard.textHTML, "web:html:Document DOM");
     const request = menu.calls.find(call => call.name === "fetchSyncPost" && call.args[0] === "/api/block/getBlockDOM");
     assert.equal((request.args[1] as {id: string}).id, menu.options.id);
+});
+
+test("copy document passes the one-time numbering choice and cancellation leaves the clipboard untouched", async () => {
+    for (const choice of [true, false, undefined]) {
+        const menu = setup();
+        menu.setHeadingNumberChoice(choice);
+        menu.open();
+        await menu.click("copyDoc");
+        const request = menu.calls.find(call => call.name === "fetchSyncPost" && call.args[0] === "/api/export/exportMdContent");
+        if (choice === undefined) {
+            assert.equal(request, undefined);
+            assert.equal(menu.calls.some(call => call.name === "clipboard"), false);
+        } else {
+            assert.equal((request.args[1] as {headingNumber: boolean}).headingNumber, choice);
+            assert.ok(menu.calls.some(call => call.name === "clipboard"));
+        }
+    }
 });
 
 test("graph flashcards keep response data and use document IDs with reversible operations", async () => {

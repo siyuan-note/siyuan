@@ -744,6 +744,20 @@
 									"Data": "Markdown"
 								}
 							]
+						},
+						{
+							"ID": "20261108001000-45919c5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108001000-45919c5",
+								"updated": "20261108001000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When exporting Markdown, turn off “Automatic heading block numbering” below “Add document title” to omit automatic numbers for that export only. For documents with heading numbering enabled, “Copy as Markdown” and “Copy full document” also offer this option, enabled by default. Documents without heading numbering are copied directly. This choice does not change the document, editor settings, or other export formats."
+								}
+							]
 						}
 					]
 				},

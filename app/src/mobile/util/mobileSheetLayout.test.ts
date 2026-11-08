@@ -33,7 +33,7 @@ const setup = () => {
             toggle: (value: string, enabled: boolean) => enabled ? values.add(value) : values.delete(value)};
     };
     const overlay = {isConnected: true, classList: classes(), style: {top: "", bottom: "", height: ""}, paddingTop: 0, paddingBottom: 0};
-    const sheet = {querySelector: () => ({style: {flex: ""}, querySelector: (): null => null,
+    const sheet = {querySelectorAll: (): HTMLElement[] => [], scrollTop: 0, scrollLeft: 0, querySelector: () => ({style: {flex: ""}, querySelector: (): null => null,
         getBoundingClientRect: () => ({height: sheet.contentHeight - sheet.chromeHeight})}), classList: classes(), style: {height: "", maxHeight: ""}, contentHeight: 120, chromeHeight: 40,
         getBoundingClientRect: () => ({height: Math.min(sheet.style.height === "auto" ? sheet.contentHeight :
             parseFloat(sheet.style.height), (sheet.style.maxHeight === "none" ? Infinity : parseFloat(sheet.style.maxHeight)))})};

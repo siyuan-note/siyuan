@@ -21,6 +21,10 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
     if (options.standalone) overlay.classList.add("mobile-sheet-layout--standalone");
     sheet.classList.add("mobile-sheet-panel");
     const getBounds = () => {
+        // 自然高度测量会展开滚动区域，须在恢复约束后恢复其原有位置。
+        const positions = [sheet, ...Array.from(sheet.querySelectorAll<HTMLElement>("*"))]
+            .filter(element => element.scrollTop !== 0 || element.scrollLeft !== 0)
+            .map(element => ({element, top: element.scrollTop, left: element.scrollLeft}));
         const height = sheet.style.height;
         const maxHeight = sheet.style.maxHeight;
         const body = sheet.querySelector<HTMLElement>(":scope > .b3-dialog__body, :scope > .b3-menu__items");
@@ -35,6 +39,10 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
         if (body) body.style.flex = flex;
         sheet.style.height = height;
         sheet.style.maxHeight = maxHeight;
+        positions.forEach(({element, top, left}) => {
+            element.scrollTop = top;
+            element.scrollLeft = left;
+        });
         const bounds = getMobileSheetBounds(natural, chrome, available);
         bounds.min = Math.min(bounds.min, Math.max(chrome, standardMax));
         return bounds;

@@ -1793,6 +1793,38 @@
 					]
 				},
 				{
+					"ID": "20261108121039-717d462",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261108121039-717d462",
+						"updated": "20261108121039"
+					},
+					"Children": [
+						{
+							"ID": "20261108121039-631d8e3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108121039-631d8e3",
+								"updated": "20261108121039"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Markdown export: Lists, underlines, and other formatting in text fields are preserved as HTML inside table cells; the preview application needs to support HTML in Markdown tables"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20260613155453-gcgdtj5",
 					"Type": "NodeListItem",
 					"Data": "-",

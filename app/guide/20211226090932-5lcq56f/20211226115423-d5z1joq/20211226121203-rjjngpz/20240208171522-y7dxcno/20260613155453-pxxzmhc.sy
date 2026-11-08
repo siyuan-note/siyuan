@@ -1793,6 +1793,38 @@
 					]
 				},
 				{
+					"ID": "20261108121039-297965b",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261108121039-297965b",
+						"updated": "20261108121039"
+					},
+					"Children": [
+						{
+							"ID": "20261108121039-3541c92",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108121039-3541c92",
+								"updated": "20261108121039"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Markdown 匯出：文字欄位中的清單、底線等格式以 HTML 保留在表格儲存格內，預覽軟體需要支援 Markdown 表格中的 HTML"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20260613155453-egyyjmm",
 					"Type": "NodeListItem",
 					"Data": "-",

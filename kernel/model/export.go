@@ -4066,8 +4066,8 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 						}
 					} else if av.KeyTypeText == cell.Value.Type {
 						if nil != cell.Value.Text {
-							if exportOpts.RichTableCells && cell.Value.Text.IsRich() {
-								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, cell.Value.Text); attrViewRichErr != nil {
+							if cell.Value.Text.IsRich() {
+								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, cell.Value.Text, exportOpts.RichTableCells); attrViewRichErr != nil {
 									return ast.WalkStop
 								}
 								continue
@@ -4239,8 +4239,8 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 							if nil == v {
 								continue
 							}
-							if exportOpts.RichTableCells && av.KeyTypeText == v.Type && v.Text.IsRich() {
-								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, v.Text); attrViewRichErr != nil {
+							if av.KeyTypeText == v.Type && v.Text.IsRich() {
+								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, v.Text, exportOpts.RichTableCells); attrViewRichErr != nil {
 									return ast.WalkStop
 								}
 								if i < len(cell.Value.Rollup.Contents)-1 {

@@ -1789,6 +1789,38 @@
 					]
 				},
 				{
+					"ID": "20261108121039-4122ec8",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261108121039-4122ec8",
+						"updated": "20261108121039"
+					},
+					"Children": [
+						{
+							"ID": "20261108121039-0339165",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108121039-0339165",
+								"updated": "20261108121039"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Markdown エクスポート：テキストフィールドのリスト、下線などの書式は表のセル内に HTML として保持されます。プレビューするアプリは Markdown の表内の HTML に対応している必要があります"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20260613155453-l0ytx3x",
 					"Type": "NodeListItem",
 					"Data": "-",

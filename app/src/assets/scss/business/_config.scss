@@ -868,7 +868,7 @@
 
     &__filter-row {
       @media (hover: none) {
-        > [data-bazaar-filter-menu]:not(:focus-visible) {
+        > [data-bazaar-filter-menu]:not(:focus-visible):not(:active) {
           --b3-list-icon-hover: transparent;
         }
       }

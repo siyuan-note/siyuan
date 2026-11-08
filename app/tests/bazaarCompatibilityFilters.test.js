@@ -704,6 +704,7 @@ const runElectron = async () => {
                 await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {
                     type: "touchStart", touchPoints: [{...position, radiusX: 1, radiusY: 1}],
                 });
+                await new Promise(resolve => setTimeout(resolve, 200));
                 await evaluate(() => {
                     const assert = require("node:assert/strict");
                     const button = window.fixture.button("plugins");
@@ -711,7 +712,6 @@ const runElectron = async () => {
                         assert.equal(getComputedStyle(target).webkitTapHighlightColor, "rgba(0, 0, 0, 0)",
                             "touch press does not paint a native highlight over the hit area");
                     }
-                    assert.equal(getComputedStyle(button).backgroundColor, "rgba(0, 0, 0, 0)");
                 });
                 await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []});
                 await new Promise(resolve => setTimeout(resolve, 400));
@@ -725,7 +725,7 @@ const runElectron = async () => {
                         "touch opening does not leave a sticky hover background");
                     window.siyuan.menus.menu.remove();
                 });
-                const hoverProbe = await win.webContents.insertCSS("[data-bazaar-filter-menu]:hover { --fixture-hover: 1; }");
+                const hoverProbe = await win.webContents.insertCSS("[data-bazaar-filter-menu]:hover { --fixture-hover: 1; } [data-bazaar-filter-menu]:active { --fixture-active: 1; }");
                 await win.webContents.debugger.sendCommand("DOM.enable");
                 await win.webContents.debugger.sendCommand("CSS.enable");
                 const {root} = await win.webContents.debugger.sendCommand("DOM.getDocument");
@@ -742,6 +742,23 @@ const runElectron = async () => {
                         "forced hover styling is active on a touch device");
                     assert.equal(getComputedStyle(button).backgroundColor, "rgba(0, 0, 0, 0)");
                 });
+                await win.webContents.debugger.sendCommand("CSS.forcePseudoState", {nodeId, forcedPseudoClasses: ["hover", "active"]});
+                await new Promise(resolve => setTimeout(resolve, 400));
+                await evaluate(() => {
+                    const assert = require("node:assert/strict");
+                    const style = getComputedStyle(window.fixture.button("plugins"));
+                    assert.equal(style.getPropertyValue("--fixture-active").trim(), "1");
+                    assert.notEqual(style.backgroundColor, "rgba(0, 0, 0, 0)",
+                        "touch press retains the shared icon button feedback");
+                    assert.equal(style.backgroundClip, "padding-box");
+                    assert.equal(style.borderLeftWidth, "8px");
+                    assert.equal(style.webkitTapHighlightColor, "rgba(0, 0, 0, 0)");
+                });
+                await win.webContents.debugger.sendCommand("CSS.forcePseudoState", {nodeId, forcedPseudoClasses: ["hover"]});
+                await new Promise(resolve => setTimeout(resolve, 400));
+                await evaluate(() => require("node:assert/strict").equal(
+                    getComputedStyle(window.fixture.button("plugins")).backgroundColor, "rgba(0, 0, 0, 0)",
+                    "releasing a touch press clears the background even if hover remains"));
                 await win.webContents.debugger.sendCommand("CSS.forcePseudoState", {nodeId, forcedPseudoClasses: []});
                 await win.webContents.removeInsertedCSS(hoverProbe);
             }

@@ -88,7 +88,7 @@ export const createMarkdownTooltips = (root: HTMLElement) => {
         tooltip.style.left = `${Math.max(0, Math.min(view.innerWidth - width, left))}px`;
         tooltip.style.top = `${Math.max(0, top)}px`;
     };
-    root.addEventListener("markdown-copy-success", event => {
+    root.addEventListener("vditor-copy-success", event => {
         const button = find(event.target);
         if (!button?.closest(".vditor-copy")) return;
         dismissed = undefined;

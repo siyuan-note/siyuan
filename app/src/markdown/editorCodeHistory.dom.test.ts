@@ -34,8 +34,35 @@ const browserCases = async (cdn: string, lutePath: string) => {
             }
             throw new Error(`${mode} ${phase}: source and preview highlighting not restored`);
         };
+        const copyCode = async () => {
+            const ipc = require("electron").ipcRenderer;
+            await ipc.invoke("copy-seed");
+            for (let attempt = 0; attempt < 100 && !root.querySelector(".vditor-copy"); attempt++) {
+                await new Promise(resolve => setTimeout(resolve, 20));
+            }
+            const pre = root.querySelector(".vditor-copy").closest("pre");
+            const area = pre.getBoundingClientRect();
+            await ipc.invoke("copy-mouse", {type: "mouseMoved", x: area.x + 10, y: area.y + 10});
+            await new Promise(resolve => setTimeout(resolve, 80));
+            const button = pre.querySelector<HTMLElement>(".vditor-copy span");
+            const rect = button.getBoundingClientRect();
+            const x = rect.x + rect.width / 2, y = rect.y + rect.height / 2;
+            await ipc.invoke("copy-mouse", {type: "mouseMoved", x, y});
+            check.ok(button.contains(document.elementFromPoint(x, y)));
+            await ipc.invoke("copy-mouse", {type: "mousePressed", x, y, button: "left", clickCount: 1});
+            await ipc.invoke("copy-mouse", {type: "mouseReleased", x, y, button: "left", clickCount: 1});
+            const expected = "document.body.insertAdjacentHTML('afterbegin', ``);";
+            let actual = "";
+            for (let attempt = 0; attempt < 30; attempt++) {
+                actual = await ipc.invoke("copy-read");
+                if (actual === expected) break;
+                await new Promise(resolve => setTimeout(resolve, 30));
+            }
+            check.equal(actual, expected, mode + " native clipboard after code copy");
+        };
         try {
             await highlighted("initial");
+            await copyCode();
             const paragraph = root.querySelector("p");
             const range = document.createRange();
             range.selectNodeContents(paragraph); range.collapse(false);
@@ -47,26 +74,29 @@ const browserCases = async (cdn: string, lutePath: string) => {
             editor.undo(); await tick();
             check.equal(editor.flush().content, markdown);
             await highlighted("undo");
+            await copyCode();
             editor.redo(); await tick();
             check.equal(editor.flush().content, markdown.replace("outside", "outsidex"));
             await highlighted("redo");
+            await copyCode();
             editor.undo(); await tick();
             check.equal(editor.flush().content, markdown);
             await highlighted("second undo");
+            await copyCode();
         } finally {
             editor.destroy(); host.remove();
         }
     }
     return "Markdown code history DOM cases passed";
 };
-test("Markdown undo and redo restore source and preview syntax highlighting", {
+test("Markdown undo and redo restore highlighting and native code copying", {
     timeout: 45000,
 }, async () => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-markdown-editor-test-"));
     const compile = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const bundle = compile("identity.ts") + "\n" + compile("limits.ts") + "\n" + compile("resourcePolicy.ts") + "\n" + compile("link.ts") + "\n" + compile("panelAnimation.ts") + "\n" + compile("codeCopy.ts") + "\n" + compile("editor.ts") +
+    const bundle = compile("identity.ts") + "\n" + compile("limits.ts") + "\n" + compile("resourcePolicy.ts") + "\n" + compile("link.ts") + "\n" + compile("panelAnimation.ts") + "\n" + compile("editor.ts") +
         "\nwindow.MarkdownEditorTest = {createMarkdownEditor, createMarkdownResourcePolicy};";
     const html = path.join(temporary, "index.html");
     writeFileSync(html, '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" ' +
@@ -75,12 +105,16 @@ test("Markdown undo and redo restore source and preview syntax highlighting", {
     const script = path.join(temporary, "run.cjs");
     const cdn = pathToFileURL(path.resolve(__dirname, "../../node_modules/vditor")).href;
     const lutePath = pathToFileURL(path.resolve(__dirname, "../../stage/protyle/js/lute/lute.min.js")).href;
-    writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");
+    writeFileSync(script, `const {app, BrowserWindow, ipcMain, clipboard} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show:false, width:1000, height:720, webPreferences:{nodeIntegration:true, contextIsolation:false}});
     ipcMain.handle("markdown-undo-input", (_event, text) => win.webContents.debugger.sendCommand("Input.insertText", {text}));
+    ipcMain.handle("copy-seed", () => clipboard.writeText("old clipboard"));
+    ipcMain.handle("copy-read", () => clipboard.readText());
+    ipcMain.handle("copy-mouse", (_event, event) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", event));
+    const initialClipboard = await clipboard.readText();
     const external = [];
     win.webContents.session.webRequest.onBeforeRequest({urls:["http://*/*","https://*/*"]}, (details, callback) => {
         external.push(details.url);
@@ -99,8 +133,9 @@ app.whenReady().then(async () => {
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
         `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(cdn)},${JSON.stringify(lutePath)})`)}));
         if (external.length) throw new Error("Unexpected external requests: " + external.join(","));
+        await clipboard.writeText(initialClipboard);
         win.destroy(); app.exit(0);
-    } catch (error) {console.error(error); win.destroy(); app.exit(1);}
+    } catch (error) {console.error(error); await clipboard.writeText(initialClipboard); win.destroy(); app.exit(1);}
 });`, "utf8");
     const env: NodeJS.ProcessEnv = {...process.env, XDG_CACHE_HOME: path.join(temporary, "cache")};
     delete env.ELECTRON_RUN_AS_NODE;

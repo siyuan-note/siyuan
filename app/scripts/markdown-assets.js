@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const {createRequire} = require("node:module");
 
-const VDITOR_VERSION = "4.0.2-alpha.5";
+const VDITOR_VERSION = "4.0.2-alpha.6";
 const appRoot = path.resolve(__dirname, "..");
 const LEGACY_LUTE_ASSET = "vditor/dist/js/lute/lute.min.js";
 const SHARED_LUTE_ASSET = "stage/protyle/js/lute/lute.min.js";

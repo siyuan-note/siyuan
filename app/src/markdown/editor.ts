@@ -1,5 +1,4 @@
 import type {MarkdownEditorSnapshot} from "./contracts";
-import {renderMarkdownCodeCopy} from "./codeCopy";
 import {MARKDOWN_DOCUMENT_BYTES, MARKDOWN_RENDER_BYTES, MARKDOWN_RECOVERY_BYTES, markdownByteLength} from "./limits";
 import {markdownLinkDestination} from "./link";
 import {createMarkdownPanelAnimation} from "./panelAnimation";
@@ -536,7 +535,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 toolbar: ["headings", "bold", "italic", "link", "list", "undo", "redo", "edit-mode"],
                 preview: {mode: recoverySourceOnly ? "editor" : "both", actions: [], delay: 150, markdown: {sanitize: true},
                     theme: {current: dark ? "dark" : "light"},
-                    hljs: {style: dark ? "github-dark" : "github", renderMenu: renderMarkdownCodeCopy},
+                    hljs: {style: dark ? "github-dark" : "github"},
                     math: {engine: "KaTeX"}, render: {media: {enable: false}}, transform: policy.sanitize,
                     parse: () => {
                         policy.hydrate(element);
@@ -555,7 +554,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 after: () => queueMicrotask(() => {
                     try {
                         if (destroyed) return;
-                        if (instance.version !== "4.0.2-alpha.5") throw new Error("Unsupported Markdown editor version");
+                        if (instance.version !== "4.0.2-alpha.6") throw new Error("Unsupported Markdown editor version");
                         if (element.id) instance.vditor.outline.element.id = `${element.id}-outline`;
                         outlineAnimation = createMarkdownPanelAnimation({
                             element: instance.vditor.outline.element,

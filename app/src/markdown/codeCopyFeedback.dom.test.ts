@@ -11,7 +11,7 @@ import {ScriptTarget, transpileModule} from "typescript";
 const browserCases = async (vendor: string) => {
     const check = require("node:assert/strict");
     const {ipcRenderer} = require("electron");
-    const api = (window as unknown as {copyTest: typeof import("./codeCopy") & typeof import("./tooltip")}).copyTest;
+    const api = (window as unknown as {copyTest: typeof import("./tooltip")}).copyTest;
     Object.assign(window, {VditorI18n: {copy: "Copy", copied: "Copied"}});
     const Vditor = require(vendor);
     const root = document.createElement("div");
@@ -19,7 +19,7 @@ const browserCases = async (vendor: string) => {
     root.style.cssText = "position:fixed;inset:0;width:800px;height:600px;box-sizing:border-box;padding:40px";
     root.innerHTML = '<textarea id="source">keep source selection</textarea><div class="vditor-reset"><pre><code>let answer = 42;\n</code></pre></div>';
     document.body.append(root);
-    Vditor.codeRender(root, {renderMenu: api.renderMarkdownCodeCopy});
+    Vditor.codeRender(root);
     const controller = api.createMarkdownTooltips(root);
     const button = root.querySelector<HTMLElement>(".vditor-copy > span");
     const tooltip = document.querySelector<HTMLElement>('[role="tooltip"]');
@@ -95,14 +95,14 @@ const browserCases = async (vendor: string) => {
 
 test("Markdown copy shows visible success after native mouse and keyboard input", {timeout: 45000}, async () => {
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-copy-feedback-"));
-    const source = ["../menus/menuPosition.ts", "tooltip.ts", "codeCopy.ts"].map(file =>
+    const source = ["../menus/menuPosition.ts", "tooltip.ts"].map(file =>
         transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2022}}).outputText).join("\n");
     const css = readFileSync(path.resolve(__dirname, "../../node_modules/vditor/dist/index.css"), "utf8") + "\n" +
         compile(path.resolve(__dirname, "../assets/scss/markdown.scss")).css + "\n" +
         readFileSync(path.resolve(__dirname, "../../appearance/themes/daylight/theme.css"), "utf8");
-    const renderer = `${source}\nwindow.copyTest={createMarkdownTooltips,renderMarkdownCodeCopy};
+    const renderer = `${source}\nwindow.copyTest={createMarkdownTooltips};
         const style=document.createElement('style');style.textContent=${JSON.stringify(css)};document.head.append(style);
         const __name=value=>value; (${browserCases.toString()})(${JSON.stringify(path.resolve(__dirname, "../../node_modules/vditor"))})`;
     const script = path.join(directory, "run.cjs");

@@ -32,7 +32,7 @@ export const genBazaarPackagePanelHTML = (
         ${bazaarType === "themes" ? genThemeModeSelectHTML() : ""}
         <div class="fn__space"></div>
         <div class="fn__flex config-bazaar__filter-row">
-            <button type="button" class="block__icon block__icon--show block__icon--touch block__icon--inset ariaLabel" data-bazaar-filter-menu aria-label="${window.siyuan.languages.filter}" data-position="north" aria-haspopup="menu" aria-expanded="false">
+            <button type="button" class="block__icon block__icon--show block__icon--touch block__icon--inset block__icon--tap ariaLabel" data-bazaar-filter-menu aria-label="${window.siyuan.languages.filter}" data-position="north" aria-haspopup="menu" aria-expanded="false">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </button>
             <input spellcheck="false" class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">

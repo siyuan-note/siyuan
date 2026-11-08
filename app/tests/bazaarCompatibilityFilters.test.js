@@ -704,6 +704,15 @@ const runElectron = async () => {
                 await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {
                     type: "touchStart", touchPoints: [{...position, radiusX: 1, radiusY: 1}],
                 });
+                await evaluate(() => {
+                    const assert = require("node:assert/strict");
+                    const button = window.fixture.button("plugins");
+                    for (const target of [button, button.querySelector("svg"), button.querySelector("use")]) {
+                        assert.equal(getComputedStyle(target).webkitTapHighlightColor, "rgba(0, 0, 0, 0)",
+                            "touch press does not paint a native highlight over the hit area");
+                    }
+                    assert.equal(getComputedStyle(button).backgroundColor, "rgba(0, 0, 0, 0)");
+                });
                 await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []});
                 await new Promise(resolve => setTimeout(resolve, 400));
                 await evaluate(async () => {

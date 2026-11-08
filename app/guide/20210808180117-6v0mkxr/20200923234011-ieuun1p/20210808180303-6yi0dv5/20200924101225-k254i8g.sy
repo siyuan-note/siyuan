@@ -1990,7 +1990,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Tap the plus controls at the table edges to add rows or columns, or drag the edge controls to add several at once or remove trailing empty rows and columns. Shrinking preserves nonempty content and merged cells."
+					"Data": "Tap the plus controls at the table edges to add rows or columns, or drag the edge controls to add several at once or remove trailing empty rows and columns. Shrinking preserves nonempty content and merged cells. When a table exceeds the visible width, the add-column and bottom-right controls stay at its visible right edge. Hover over that edge on desktop or tap a cell on mobile to show them. New columns are appended to the end of the whole table and scrolled into view after the operation. Space for the controls scrolls with the table content and appears only at the right end."
 				}
 			]
 		},

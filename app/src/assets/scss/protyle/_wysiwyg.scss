@@ -1065,8 +1065,12 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[data-readonly="false"] {
   &[contenteditable="true"] [data-node-id].table {
-    padding-right: 30px;
     padding-bottom: 30px;
+
+    // 增列操作空间随表格内容滚动，仅在末尾露出。
+    > div:first-child > table {
+      margin-right: 26px;
+    }
   }
 
   caption {

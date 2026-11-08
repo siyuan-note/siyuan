@@ -1,7 +1,7 @@
 import type {ITableGrid} from "./table";
 import {TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
 import {renderMultiSelectToolbar, updateMultiSelectToolbar} from "../../mobile/util/multiSelectToolbar";
-import {TABLE_ADD_CONTROL_GAP, TABLE_ADD_CONTROL_THICKNESS} from "./tableResize";
+import {getTableAddColumnEdge, TABLE_ADD_CONTROL_GAP, TABLE_ADD_CONTROL_THICKNESS} from "./tableResize";
 import {Constants} from "../../constants";
 import {getTableRowBoundary} from "./tableRowHeight";
 
@@ -247,16 +247,18 @@ export class TableTouchControl {
         this.renderRowBoundary(state);
         const tableRect = table.getBoundingClientRect();
         const addOffset = TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2;
+        const addColumnEdge = getTableAddColumnEdge(tableRect.right, viewport.right,
+            Math.min(this.content().getBoundingClientRect().right, window.innerWidth));
         if (tableRect.bottom <= viewport.bottom + 1) {
             this.addResize(cell, "add-row", viewport.left + (viewport.right - viewport.left) / 2,
                 tableRect.bottom + addOffset, viewport.right - viewport.left, TABLE_ADD_CONTROL_THICKNESS);
         }
-        if (tableRect.right <= viewport.right + 1) {
-            this.addResize(cell, "add-column", tableRect.right + addOffset,
+        if (addColumnEdge >= viewport.left) {
+            this.addResize(cell, "add-column", addColumnEdge + addOffset,
                 viewport.top + (viewport.bottom - viewport.top) / 2, TABLE_ADD_CONTROL_THICKNESS, viewport.bottom - viewport.top);
         }
-        if (tableRect.bottom <= viewport.bottom + 1 && tableRect.right <= viewport.right + 1) {
-            this.addResize(cell, "add-both", tableRect.right + addOffset, tableRect.bottom + addOffset,
+        if (tableRect.bottom <= viewport.bottom + 1 && addColumnEdge >= viewport.left) {
+            this.addResize(cell, "add-both", addColumnEdge + addOffset, tableRect.bottom + addOffset,
                 TABLE_ADD_CONTROL_THICKNESS, TABLE_ADD_CONTROL_THICKNESS);
         }
         this.renderEndpoints(state);

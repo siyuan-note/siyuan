@@ -4,7 +4,7 @@ import {
     constrainTableResizeCount,
     getTableResizeControlCenter,
     getTableResizeCount,
-    isTableResizeControlVisible,
+    getTableAddColumnEdge,
     isTableCellContentEmpty,
 } from "./tableResize";
 
@@ -61,12 +61,17 @@ describe("getTableResizeControlCenter", () => {
     });
 });
 
-describe("isTableResizeControlVisible", () => {
-    it("requires enough viewport space for the whole control", () => {
-        assert.equal(isTableResizeControlVisible(384, 400, 16), true);
-        assert.equal(isTableResizeControlVisible(374, 400, 16, 10), true);
-        assert.equal(isTableResizeControlVisible(384, 400, 16, 10), false);
-        assert.equal(isTableResizeControlVisible(395, 400, 16), false);
-        assert.equal(isTableResizeControlVisible(450, 400, 16), false);
+describe("getTableAddColumnEdge", () => {
+    it("follows the real edge when the table fits", () => {
+        assert.equal(getTableAddColumnEdge(240, 240, 400), 240);
+    });
+
+    it("docks at the visible right edge of an overflowing table", () => {
+        assert.equal(getTableAddColumnEdge(600, 350, 400), 350);
+    });
+
+    it("reserves room for the complete button when the editor clips the table", () => {
+        assert.equal(getTableAddColumnEdge(600, 400, 400), 374);
+        assert.equal(getTableAddColumnEdge(395, 395, 400), 374);
     });
 });

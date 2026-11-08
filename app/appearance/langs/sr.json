@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "Када је укључено, копирање или извоз Markdown садржи бројеве наслова ако је аутоматско нумерисање укључено у документу",
 	"agentThinkingStats": "Razmišljanje: %s, poziva alata: %s",
 	"agentThinkingLiveStats": "Razmišlja: %s, poziva alata: %s",
-	"bazaarSkipBatchUpdate": "Прескочи групна ажурирања",
+	"bazaarSkipBatchUpdate": "Preskoči pri „Ažuriraj sve“",
 	"sortByReleaseTimeDesc": "Datum objavljivanja (prvo najnoviji)",
 	"sortByReleaseTimeAsc": "Datum objavljivanja (prvo najstariji)",
 	"bazaarHideUnsupportedVersion": "Sakrij pakete koji zahtevaju noviju verziju aplikacije",

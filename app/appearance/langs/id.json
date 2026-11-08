@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "Jika diaktifkan, penyalinan atau ekspor Markdown menyertakan nomor judul jika penomoran judul otomatis diaktifkan dalam dokumen",
 	"agentThinkingStats": "Selesai berpikir %s, %s panggilan alat",
 	"agentThinkingLiveStats": "Berpikir %s, %s panggilan alat",
-	"bazaarSkipBatchUpdate": "Lewati pembaruan massal",
+	"bazaarSkipBatchUpdate": "Lewati saat Perbarui semua",
 	"sortByReleaseTimeDesc": "Tanggal rilis (terbaru dahulu)",
 	"sortByReleaseTimeAsc": "Tanggal rilis (terlama dahulu)",
 	"bazaarHideUnsupportedVersion": "Sembunyikan paket yang memerlukan versi aplikasi lebih baru",

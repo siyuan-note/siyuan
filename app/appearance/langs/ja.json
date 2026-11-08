@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "有効にすると、文書で見出しの自動番号が有効な場合、Markdown のコピーやエクスポートに番号を含めます",
 	"agentThinkingStats": "考え済み %s、ツールを %s 回呼び出し",
 	"agentThinkingLiveStats": "考え中 %s、ツールを %s 回呼び出し",
-	"bazaarSkipBatchUpdate": "一括更新をスキップ",
+	"bazaarSkipBatchUpdate": "「すべて更新」をスキップ",
 	"sortByReleaseTimeDesc": "公開日時 (新しい順)",
 	"sortByReleaseTimeAsc": "公開日時 (古い順)",
 	"bazaarHideUnsupportedVersion": "新しいアプリバージョンが必要なパッケージを非表示",

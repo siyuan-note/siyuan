@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "启用后在复制或导出的 Markdown 中保留文档的标题块自动编号",
 	"agentThinkingStats": "已思考 %s，调用 %s 次工具",
 	"agentThinkingLiveStats": "思考中 %s，调用 %s 次工具",
-	"bazaarSkipBatchUpdate": "跳过批量更新",
+	"bazaarSkipBatchUpdate": "跳过全部更新",
 	"sortByReleaseTimeDesc": "发布时间降序",
 	"sortByReleaseTimeAsc": "发布时间升序",
 	"bazaarHideUnsupportedVersion": "隐藏版本不支持的包",

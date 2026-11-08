@@ -103,7 +103,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             <div class="item__actions${mobile ? " item__actions--mobile" : ""}" data-name="sample" data-package-type="plugins" data-from="${update ? "updated" : "bazaar"}">
             ${icon ? '<span data-type="install-t" class="block__icon ariaLabel" aria-label="Update"><svg></svg></span>' :
         `<button class="b3-button ariaLabel" data-type="${update ? "install-t" : "install"}" ${disabled ? 'disabled aria-label="Incompatible package"' : ""}>${update ? "Update" : "Download"}</button>`}
-            <button data-type="skip-batch-update" role="switch" aria-checked="false">Skip batch updates</button>
+            <button data-type="skip-batch-update" role="switch" aria-checked="false">Skip Update all</button>
             </div></div><button class="b3-button" data-type="install-all">Update all</button></div>`;
         events.bindBazaarEvents(controller as unknown as Parameters<typeof events.bindBazaarEvents>[0], {} as App, mount);
         tasks.renderBazaarInstall(root);
@@ -293,7 +293,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         }, () => {}, tasks.renderBazaarInstall) as typeof import("../bazaar").bazaar;
     preferenceController.element = root;
     preferenceController._isUpdatePanelActive = () => false;
-    window.siyuan.languages.bazaarSkipBatchUpdate = "Skip batch updates";
+    window.siyuan.languages.bazaarSkipBatchUpdate = "Skip Update all";
     root.innerHTML = `<div data-name="sample" data-package-type="plugins" data-package-source="updated">
         ${preferenceController._genBatchUpdatePreferenceHTML("plugins", "sample")}</div><input id="other-control">`;
     const preferenceButton = root.querySelector<HTMLButtonElement>('[data-type="skip-batch-update"]');

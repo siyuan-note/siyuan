@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "Indien ingeschakeld, bevat gekopieerde of geëxporteerde Markdown kopnummers als automatische kopnummering in het document is ingeschakeld",
 	"agentThinkingStats": "Nagedacht %s, %s tool-aanroepen",
 	"agentThinkingLiveStats": "Denkt na %s, %s tool-aanroepen",
-	"bazaarSkipBatchUpdate": "Overslaan bij bulkupdates",
+	"bazaarSkipBatchUpdate": "Overslaan bij Alles bijwerken",
 	"sortByReleaseTimeDesc": "Publicatiedatum (nieuwste eerst)",
 	"sortByReleaseTimeAsc": "Publicatiedatum (oudste eerst)",
 	"bazaarHideUnsupportedVersion": "Pakketten verbergen die een nieuwere appversie vereisen",

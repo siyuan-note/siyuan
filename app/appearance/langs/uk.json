@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "Якщо ввімкнено, копіювання або експорт Markdown містить номери заголовків, коли автоматичну нумерацію ввімкнено в документі",
 	"agentThinkingStats": "Обдумано %s, викликів інструментів: %s",
 	"agentThinkingLiveStats": "Думає %s, викликів інструментів: %s",
-	"bazaarSkipBatchUpdate": "Пропускати під час масового оновлення",
+	"bazaarSkipBatchUpdate": "Пропускати під час «Оновити все»",
 	"sortByReleaseTimeDesc": "Дата публікації (спочатку найновіші)",
 	"sortByReleaseTimeAsc": "Дата публікації (спочатку найстаріші)",
 	"bazaarHideUnsupportedVersion": "Приховати пакунки, що потребують новішої версії застосунку",

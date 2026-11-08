@@ -13,7 +13,7 @@ const createController = (save?: (path: string, value: Record<string, boolean>) 
     const config: Config.IBazaar = {trust: true, petalDisabled: false, batchUpdateExcluded: {plugins: {same: true}}};
     const messages: string[] = [];
     const controller = runInNewContext(transpileModule(`const bazaar = ${declaration.initializer.getText(source)}; bazaar;`, {}).outputText, {
-        window: {siyuan: {config: {bazaar: config}, languages: {bazaarSkipBatchUpdate: "Skip batch updates"}}},
+        window: {siyuan: {config: {bazaar: config}, languages: {bazaarSkipBatchUpdate: "Skip Update all"}}},
         isBazaarBatchUpdateExcluded, getBazaarBatchUpdate: (): undefined => undefined,
         bazaarConfigApi: {patch: async (path: string, value: Record<string, boolean>) => {
             await save?.(path, value);

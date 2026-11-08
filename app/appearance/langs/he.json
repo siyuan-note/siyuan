@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "כאשר האפשרות מופעלת, העתקה או ייצוא של Markdown כוללים מספרי כותרות אם מספור כותרות אוטומטי מופעל במסמך",
 	"agentThinkingStats": "חשב %s, %s קריאות לכלים",
 	"agentThinkingLiveStats": "חושב %s, %s קריאות לכלים",
-	"bazaarSkipBatchUpdate": "דלג בעדכונים מרוכזים",
+	"bazaarSkipBatchUpdate": "דלג בעת „עדכן הכל“",
 	"sortByReleaseTimeDesc": "תאריך פרסום (מהחדש לישן)",
 	"sortByReleaseTimeAsc": "תאריך פרסום (מהישן לחדש)",
 	"bazaarHideUnsupportedVersion": "הסתר חבילות הדורשות גרסה חדשה יותר של האפליקציה",

@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "When enabled, copying or exporting Markdown includes heading numbers if automatic heading numbering is enabled in the document",
 	"agentThinkingStats": "Thought %s, called tools %s times",
 	"agentThinkingLiveStats": "Thinking %s, called tools %s times",
-	"bazaarSkipBatchUpdate": "Skip batch updates",
+	"bazaarSkipBatchUpdate": "Skip Update all",
 	"sortByReleaseTimeDesc": "Release date (newest first)",
 	"sortByReleaseTimeAsc": "Release date (oldest first)",
 	"bazaarHideUnsupportedVersion": "Hide packages requiring a newer app version",

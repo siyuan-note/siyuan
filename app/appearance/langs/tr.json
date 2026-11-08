@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "Etkinleştirildiğinde, belgede otomatik başlık numaralandırması açıksa Markdown kopyalama veya dışa aktarma başlık numaralarını içerir",
 	"agentThinkingStats": "Düşünüldü %s, %s araç çağrısı",
 	"agentThinkingLiveStats": "Düşünüyor %s, %s araç çağrısı",
-	"bazaarSkipBatchUpdate": "Toplu güncellemelerde atla",
+	"bazaarSkipBatchUpdate": "Tümünü güncelle sırasında atla",
 	"sortByReleaseTimeDesc": "Yayın tarihi (önce en yeniler)",
 	"sortByReleaseTimeAsc": "Yayın tarihi (önce en eskiler)",
 	"bazaarHideUnsupportedVersion": "Daha yeni bir uygulama sürümü gerektiren paketleri gizle",

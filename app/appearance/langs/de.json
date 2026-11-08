@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "Wenn aktiviert, enthalten kopierte oder exportierte Markdown-Inhalte Überschriftennummern, sofern die automatische Nummerierung im Dokument aktiviert ist",
 	"agentThinkingStats": "Nachgedacht %s, %s Tool-Aufrufe",
 	"agentThinkingLiveStats": "Denkt nach %s, %s Tool-Aufrufe",
-	"bazaarSkipBatchUpdate": "Bei Sammelupdates überspringen",
+	"bazaarSkipBatchUpdate": "Bei „Alle aktualisieren“ überspringen",
 	"sortByReleaseTimeDesc": "Veröffentlichungsdatum (neueste zuerst)",
 	"sortByReleaseTimeAsc": "Veröffentlichungsdatum (älteste zuerst)",
 	"bazaarHideUnsupportedVersion": "Pakete ausblenden, die eine neuere App-Version benötigen",

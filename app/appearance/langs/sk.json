@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "Ak je zapnuté, kopírovanie alebo export Markdown obsahuje čísla nadpisov, ak je v dokumente zapnuté automatické číslovanie",
 	"agentThinkingStats": "Premyslené %s, volaní nástrojov: %s",
 	"agentThinkingLiveStats": "Premýšľa %s, volaní nástrojov: %s",
-	"bazaarSkipBatchUpdate": "Preskočiť pri hromadnej aktualizácii",
+	"bazaarSkipBatchUpdate": "Preskočiť pri „Aktualizovať všetko“",
 	"sortByReleaseTimeDesc": "Dátum vydania (najnovšie prvé)",
 	"sortByReleaseTimeAsc": "Dátum vydania (najstaršie prvé)",
 	"bazaarHideUnsupportedVersion": "Skryť balíky vyžadujúce novšiu verziu aplikácie",

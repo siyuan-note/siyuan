@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "Quando ativado, copiar ou exportar Markdown inclui os números dos títulos se a numeração automática estiver ativada no documento",
 	"agentThinkingStats": "Pensado %s, %s chamadas de ferramentas",
 	"agentThinkingLiveStats": "Pensando %s, %s chamadas de ferramentas",
-	"bazaarSkipBatchUpdate": "Ignorar nas atualizações em lote",
+	"bazaarSkipBatchUpdate": "Ignorar em Atualizar tudo",
 	"sortByReleaseTimeDesc": "Data de publicação (mais recentes primeiro)",
 	"sortByReleaseTimeAsc": "Data de publicação (mais antigos primeiro)",
 	"bazaarHideUnsupportedVersion": "Ocultar pacotes que exigem uma versão mais recente do aplicativo",

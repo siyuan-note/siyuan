@@ -6,7 +6,7 @@
 	"exportHeadingNumberTip": "활성화하면 문서에서 제목 자동 번호 매기기가 켜져 있을 때 Markdown 복사 또는 내보내기에 제목 번호가 포함됩니다",
 	"agentThinkingStats": "생각함 %s, 도구 %s회 호출",
 	"agentThinkingLiveStats": "생각 중 %s, 도구 %s회 호출",
-	"bazaarSkipBatchUpdate": "일괄 업데이트에서 제외",
+	"bazaarSkipBatchUpdate": "모두 업데이트에서 제외",
 	"sortByReleaseTimeDesc": "출시일 (최신순)",
 	"sortByReleaseTimeAsc": "출시일 (오래된 순)",
 	"bazaarHideUnsupportedVersion": "더 최신 앱 버전이 필요한 패키지 숨기기",

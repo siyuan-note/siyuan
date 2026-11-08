@@ -1,4 +1,7 @@
 {
+	"automationManual": "수동",
+	"automationRunNow": "지금 실행",
+	"automationManualTip": "조건에 맞는 항목에서 실행하고 결과를 필드에 저장합니다. HTTP 실패 시 기존 값을 유지합니다",
 	"exportHeadingNumber": "Markdown 내보내기에 자동 제목 번호 포함",
 	"exportHeadingNumberTip": "활성화하면 문서에서 제목 자동 번호 매기기가 켜져 있을 때 Markdown 복사 또는 내보내기에 제목 번호가 포함됩니다",
 	"agentThinkingStats": "생각함 %s, 도구 %s회 호출",

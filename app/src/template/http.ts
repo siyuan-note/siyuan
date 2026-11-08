@@ -97,7 +97,7 @@ export const guardTemplateHTTPRequest = (isCurrent: () => boolean, owner?: Eleme
 
 export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockID?: string; ignoreRows?: boolean},
                                          headers?: Record<string, string>, signal?: AbortSignal) => {
-    if (!["/api/template/render", "/api/av/renderAttributeView", "/api/av/getAttributeViewKeys", "/api/filetree/createDailyNote"].includes(url) ||
+    if (!["/api/template/render", "/api/av/renderAttributeView", "/api/av/getAttributeViewKeys", "/api/av/runAttributeViewAutomation", "/api/filetree/createDailyNote"].includes(url) ||
         window.siyuan.isPublish || signal?.aborted) {
         return undefined;
     }
@@ -119,7 +119,7 @@ export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockI
     const isCurrentOwner = () => (!owners || owners.some(owner => owner.isConnected && !owner.closest(".fn__none"))) &&
         (!metadataOwners || metadataOwners.every(({owner, avID, viewID}) =>
             owner.getAttribute("data-av-id") === avID && getAVCurrentViewID(owner) === viewID));
-    if (url === "/api/av/renderAttributeView" || url === "/api/av/getAttributeViewKeys") {
+    if (url === "/api/av/renderAttributeView" || url === "/api/av/getAttributeViewKeys" || url === "/api/av/runAttributeViewAutomation") {
         const selector = data.blockID ? `[data-node-id="${CSS.escape(data.blockID)}"]` :
             `[data-av-id="${CSS.escape(data.id || "")}"]`;
         const owner = signalOwners.get(signal);

@@ -1,4 +1,7 @@
 {
+	"automationManual": "Manual",
+	"automationRunNow": "Jalankan sekarang",
+	"automationManualTip": "Jalankan pada entri yang cocok dan simpan hasil ke bidang; kegagalan HTTP mempertahankan nilai yang ada",
 	"exportHeadingNumber": "Sertakan nomor judul otomatis dalam ekspor Markdown",
 	"exportHeadingNumberTip": "Jika diaktifkan, penyalinan atau ekspor Markdown menyertakan nomor judul jika penomoran judul otomatis diaktifkan dalam dokumen",
 	"agentThinkingStats": "Selesai berpikir %s, %s panggilan alat",

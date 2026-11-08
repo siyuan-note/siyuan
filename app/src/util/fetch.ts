@@ -13,7 +13,7 @@ import {showMessage} from "../dialog/message";
 
 const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockID?: string},
                                   headers?: Record<string, string>, signal?: AbortSignal) => {
-    if (!["/api/template/render", "/api/av/renderAttributeView", "/api/av/getAttributeViewKeys", "/api/filetree/createDailyNote"].includes(url)) {
+    if (!["/api/template/render", "/api/av/renderAttributeView", "/api/av/getAttributeViewKeys", "/api/av/runAttributeViewAutomation", "/api/filetree/createDailyNote"].includes(url)) {
         return undefined;
     }
     const {beginTemplateHTTPRequest: begin}: typeof import("../template/http") = require("../template/http");

@@ -1,4 +1,7 @@
 {
+	"automationManual": "Manuell",
+	"automationRunNow": "Jetzt ausführen",
+	"automationManualTip": "Für passende Einträge ausführen und Ergebnisse in Feldern speichern; bei HTTP-Fehlern bleiben vorhandene Werte erhalten",
 	"exportHeadingNumber": "Automatische Überschriftennummern in Markdown exportieren",
 	"exportHeadingNumberTip": "Wenn aktiviert, enthalten kopierte oder exportierte Markdown-Inhalte Überschriftennummern, sofern die automatische Nummerierung im Dokument aktiviert ist",
 	"agentThinkingStats": "Nachgedacht %s, %s Tool-Aufrufe",

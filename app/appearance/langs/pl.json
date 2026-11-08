@@ -1,4 +1,7 @@
 {
+	"automationManual": "Ręcznie",
+	"automationRunNow": "Uruchom teraz",
+	"automationManualTip": "Uruchom dla pasujących wpisów i zapisz wyniki w polach; błędy HTTP zachowują istniejące wartości",
 	"exportHeadingNumber": "Uwzględniaj automatyczne numery nagłówków przy eksporcie Markdown",
 	"exportHeadingNumberTip": "Po włączeniu kopiowanie lub eksport Markdown uwzględnia numery nagłówków, jeśli automatyczna numeracja jest włączona w dokumencie",
 	"agentThinkingStats": "Przemyślane %s, wywołań narzędzi: %s",

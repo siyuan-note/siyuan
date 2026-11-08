@@ -2,7 +2,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {clearTemplateHTTPConfirmations} from "./httpConfirmHandoff";
 
 export type TemplateHTTPPermissionSource = {kind: "file", path: string} |
-    {kind: "av", avID: string, keyID: string, slot: "template" | "renderTemplate"};
+    {kind: "av", avID: string, keyID: string, slot: "template" | "renderTemplate" | "automation"};
 
 export const templateHTTPPermission = async (action: "get" | "revoke" | "revokeAll",
                                             source?: TemplateHTTPPermissionSource) => {

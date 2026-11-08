@@ -91,6 +91,10 @@ func (paused automationPausedRule) message() string {
 
 // 仅用户及 API 的条目写入产生触发事件，撤销重放只执行已记录的操作。
 func (tx *Transaction) prepareAttributeViewAutomations() error {
+	if tx.manualAutomation != nil {
+		tx.attributeViewAutomations = &attributeViewAutomationState{time: tx.manualAutomation.at.UnixMilli(), recordUndo: true}
+		return nil
+	}
 	if !tx.fromAPI && !tx.isReplay {
 		return nil
 	}
@@ -215,6 +219,9 @@ func (tx *Transaction) rememberAutomationTree(tree *parse.Tree) error {
 }
 
 func (tx *Transaction) runAttributeViewAutomations() error {
+	if tx.manualAutomation != nil {
+		return nil
+	}
 	if tx.attributeViewCollections != nil && tx.attributeViewCollections.err != nil {
 		return tx.attributeViewCollections.err
 	}
@@ -251,7 +258,7 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 		relationValues := tx.automationRelationValues(source.boxID, state.current)
 		paused := false
 		for _, rule := range current.Automations.Rules {
-			if rule == nil || !rule.Enabled || rule.Trigger == "block" {
+			if rule == nil || !rule.Enabled || rule.Trigger == "block" || rule.Trigger == "manual" {
 				continue
 			}
 			validationErr := tx.validateAutomationRule(current, rule, source.boxID)
@@ -492,7 +499,7 @@ func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av
 	if rule.Trigger == "block" {
 		return tx.validateBlockCollectionRule(source, rule, boxID)
 	}
-	if rule.Trigger != "added" && rule.Trigger != "changed" || len(rule.Actions) == 0 || len(rule.Actions) > 20 {
+	if rule.Trigger != "added" && rule.Trigger != "changed" && rule.Trigger != "manual" || len(rule.Actions) == 0 || len(rule.Actions) > 20 {
 		return fmt.Errorf("invalid automation trigger or actions")
 	}
 	if rule.KeyID != "" {
@@ -528,7 +535,11 @@ func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av
 			}
 			switch field.Mode {
 			case "template":
-				if err := av.ValidateAutomationTemplate(field.Template, rule.TimeZone); err != nil {
+				validate := av.ValidateAutomationTemplate
+				if rule.Trigger == "manual" {
+					validate = av.ValidateManualAutomationTemplate
+				}
+				if err := validate(field.Template, rule.TimeZone); err != nil {
 					return err
 				}
 			case "currentTime":
@@ -594,6 +605,8 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 		}
 		ids = []string{id}
 		result.record("added", target.ID, id)
+	} else if tx.manualAutomation != nil {
+		ids = tx.manualAutomation.targets[itemID][action]
 	} else {
 		switch action.Target {
 		case "current":
@@ -629,7 +642,7 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 		if target.GetBlockValue(id) == nil {
 			return av.ErrItemNotFound
 		}
-		if action.Type != "add" {
+		if action.Type != "add" && tx.manualAutomation == nil {
 			matches, filterErr := target.MatchesAutomationFilters(id, action.Filters, relationValues)
 			if filterErr != nil {
 				return filterErr
@@ -719,6 +732,13 @@ func automationValuePatch(value *av.Value) map[string]any {
 
 func (tx *Transaction) resolveAutomationValue(source *av.AttributeView, itemID string, key *av.Key,
 	field *av.AutomationValue, timeZone string) (*av.Value, error) {
+	if tx.manualAutomation != nil {
+		value := tx.manualAutomation.values[itemID][field]
+		if value == nil {
+			return nil, fmt.Errorf("manual automation snapshot is unavailable")
+		}
+		return value.Clone(), nil
+	}
 	var value *av.Value
 	switch field.Mode {
 	case "template":

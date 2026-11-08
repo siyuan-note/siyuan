@@ -261,6 +261,20 @@ func ResolveTemplateHTTPDBSource(owner, avID, fieldID, slot, content string) (*T
 	}, "", "")
 }
 
+func ResolveTemplateHTTPAutomationSource(owner, avID string, rule *av.AutomationRule) (*TemplateHTTPSource, error) {
+	if owner == "" {
+		owner = "global"
+	}
+	data, err := json.Marshal(rule)
+	if err != nil || rule == nil || rule.Trigger != "manual" {
+		return nil, errors.New("invalid manual automation permission source")
+	}
+	return resolveTemplateHTTPSource(templateHTTPDigest("database", owner, avID, rule.ID, "automation"), templateHTTPPermissionRecord{
+		Version: templateHTTPDigest(string(data)), Kind: "database", Label: avID + "/" + rule.Name,
+		Owner: owner, AV: avID, Field: rule.ID, Slot: "automation", Persistable: true,
+	}, "", "")
+}
+
 func templateHTTPSourceMatchesLocked(source *TemplateHTTPSource) (templateHTTPPermissionRecord, bool) {
 	if source == nil {
 		return templateHTTPPermissionRecord{}, false
@@ -322,6 +336,22 @@ func templateHTTPDatabaseSourceCurrent(source *TemplateHTTPSource) bool {
 		return false
 	}
 	defer clear(data)
+	if source.slot == "automation" {
+		var database struct {
+			ID          string               `json:"id"`
+			Automations *av.AutomationConfig `json:"automations"`
+		}
+		if json.Unmarshal(data, &database) != nil || database.ID != source.avID || database.Automations == nil || database.Automations.ValidateSpec() != nil {
+			return false
+		}
+		for _, rule := range database.Automations.Rules {
+			if rule != nil && rule.ID == source.fieldID && rule.Trigger == "manual" && rule.Enabled {
+				encoded, err := json.Marshal(rule)
+				return err == nil && templateHTTPDigest(string(encoded)) == source.Version
+			}
+		}
+		return false
+	}
 	fields, valid := templateHTTPCheckoutFields(data, source.avID)
 	if !valid {
 		return false

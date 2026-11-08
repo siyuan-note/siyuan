@@ -11,10 +11,61 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 const permissionTestAVID = "20261030000000-permav1"
+
+func TestTemplateHTTPPermissionManualRuleVersion(t *testing.T) {
+	setupTemplateHTTPPermissionTest(t)
+	view := &av.AttributeView{ID: permissionTestAVID}
+	rule := &av.AutomationRule{ID: "20261108000000-manual1", Name: "Manual", Enabled: true, Trigger: "manual"}
+	view.Automations = &av.AutomationConfig{Spec: 9, Rules: []*av.AutomationRule{rule}}
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	source, err := ResolveTemplateHTTPAutomationSource("", view.ID, rule)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = GrantTemplateHTTPSource(source); err != nil {
+		t.Fatal(err)
+	}
+	if allowed, err := CheckTemplateHTTPSource(source); err != nil || !allowed {
+		t.Fatal("saved rule permission unavailable", err)
+	}
+	rule.Conditions = []*av.ViewFilter{{Column: "changed"}}
+	if err = av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	if IsTemplateHTTPSourceCurrent(source) {
+		t.Fatal("changed rule retained its old permission")
+	}
+	next, err := ResolveTemplateHTTPAutomationSource("", view.ID, rule)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if allowed, _ := CheckTemplateHTTPSource(next); allowed {
+		t.Fatal("changed rule inherited permission")
+	}
+	if err = GrantTemplateHTTPSource(next); err != nil {
+		t.Fatal(err)
+	}
+	if err = RevokeTemplateHTTPSource(next.ID); err != nil {
+		t.Fatal(err)
+	}
+	if allowed, _ := CheckTemplateHTTPSource(next); allowed {
+		t.Fatal("revocation failed")
+	}
+	rule.Enabled = false
+	if err = av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	if IsTemplateHTTPSourceCurrent(next) {
+		t.Fatal("disabled rule remains current")
+	}
+}
 
 func writeTemplateHTTPPermissionTestAV(t *testing.T, avID, fieldID, slot, content string) {
 	t.Helper()

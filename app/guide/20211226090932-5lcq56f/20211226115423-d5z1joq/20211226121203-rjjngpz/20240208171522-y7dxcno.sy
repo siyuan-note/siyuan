@@ -4580,12 +4580,111 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024164212-c9mzs9w",
-				"updated": "20261024164212"
+				"updated": "20261108182000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "模板結果只在觸發時寫入，重做沿用首次結果。模板不支援 SQL、檔案、網路、迴圈或遞迴；原始碼最多 8 KiB，單一輸入與輸出最多 64 KiB。儲存模板後，該資料庫需要支援自動化版本 2 的用戶端讀取，舊版會明確拒絕讀取；既有版本 1 的規則保持相容。"
+					"Data": "模板結果只在觸發時寫入，重做沿用首次結果。模板不支援 SQL、檔案、迴圈或遞迴；事件觸發規則不支援網路。原始碼最多 8 KiB，單一欄位輸入與輸出最多 64 KiB。儲存模板後，該資料庫需要支援自動化版本 2 的用戶端讀取，舊版會明確拒絕讀取；原有版本 1 的規則保持相容。"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-glsiyob",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261108182000-glsiyob",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動執行"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261108182000-1ul4n1x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-1ul4n1x",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "手動"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 觸發器，新增寫入一般欄位的動作，將賦值方式設為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "模板"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，然後啟用規則。點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "立即執行"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 處理全部符合規則條件的已儲存條目。結果可離線檢視，重新開啟資料庫不會再次取數。目前不提供定時執行。"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-whgwxfd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-whgwxfd",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動規則的 .action{...} 運算式支援 httpGet 和 fromJson。例如，以下模板將傳回的投影片標題寫入文字欄位："
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-cpbv0q1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-cpbv0q1",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{$r := httpGet \"https://httpbingo.org/json\"}.action{(fromJson $r.body).slideshow.title}"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-50aoyyj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-50aoyyj",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "網路請求需要目前視窗確認，並遵循模板 HTTP 限制。持久許可綁定已儲存的規則版本，可在自動化面板撤銷。任一請求、解析或類型轉換失敗均保留全部原值；等待期間若規則使用的資料庫發生變化，需要重新執行。所有動作讀取執行開始時的儲存快照，復原和重做沿用已儲存結果，不重新取數。HTTP 請求沿用現有執行預算，每次最多進行 1,000 次欄位寫入和條目新增。手動模板不提供欄位預覽。手動規則需要自動化格式 9，既有格式 1–8 仍可讀取，舊用戶端拒絕格式 9 且不改寫資料庫。"
 				}
 			]
 		},

@@ -91,6 +91,23 @@ it("checks template ownership synchronously before callbacks and sync response c
     }
 });
 
+it("manual automation transport carries confirmation identity and releases the execution", async () => {
+    const controller = new AbortController();
+    let finished = 0;
+    const headers = {"X-Siyuan-Template-Execution": "manual-execution"};
+    const state = loadFetchPost(async (url, options) => {
+        assert.equal(url, "/api/av/runAttributeViewAutomation");
+        assert.equal(options.headers, headers);
+        assert.equal(options.signal, controller.signal);
+        return new Response(JSON.stringify({code: 0, msg: "", data: null}));
+    }, () => true, {signal: controller.signal, headers, isCurrent: () => true, finish: () => {finished++;}});
+    const response = await state.fetchSyncPost("/api/av/runAttributeViewAutomation", {
+        avID: "database", blockID: "carrier", ruleID: "rule",
+    }, undefined, false, controller.signal);
+    assert.equal(response.code, 0);
+    assert.equal(finished, 1);
+});
+
 it("keeps positive business errors in the callback and filters negative errors", async () => {
     for (const code of [-1, 0, 3]) {
         const payload = {code, msg: "message", data: code === 0 ? {rootID: "id"} : "indexing"};

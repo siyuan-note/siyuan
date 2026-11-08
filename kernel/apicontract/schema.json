@@ -7698,7 +7698,8 @@
           "enum": [
             "added",
             "changed",
-            "block"
+            "block",
+            "manual"
           ]
         }
       },
@@ -7780,7 +7781,8 @@
           "enum": [
             "added",
             "changed",
-            "block"
+            "block",
+            "manual"
           ]
         }
       },
@@ -41995,6 +41997,26 @@
       },
       "required": [
         "id"
+      ],
+      "additionalProperties": false
+    },
+    "RunAttributeViewAutomationRequestInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "blockID": {
+          "type": "string"
+        },
+        "ruleID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avID",
+        "blockID",
+        "ruleID"
       ],
       "additionalProperties": false
     },
@@ -143927,6 +143949,86 @@
                     "type": "null"
                   }
                 ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/av/runAttributeViewAutomation",
+      "handler": "runAttributeViewAutomation",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/RunAttributeViewAutomationRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
               },
               "msg": {
                 "type": "string"

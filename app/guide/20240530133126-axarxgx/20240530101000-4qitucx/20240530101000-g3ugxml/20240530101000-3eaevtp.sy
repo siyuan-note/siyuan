@@ -4698,12 +4698,111 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-74qc87t",
-				"updated": "20261024161816"
+				"updated": "20261108182000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SQL、ファイル、ネットワーク、ループ、再帰は使用できません。ソースは最大 8 KiB、各入力と出力は最大 64 KiB です。テンプレート保存後は自動化形式 2 に対応したクライアントが必要で、旧版はデータベースの読み込みを明示的に拒否します。既存の形式 1 のルールは引き続き使用できます。"
+					"Data": "結果は実行時に保存され、やり直しではその結果を再利用します。SQL、ファイル、ループ、再帰は使えません。イベントで起動するルールはネットワークにアクセスできません。ソースは最大 8 KiB、各フィールドの入力と出力は最大 64 KiB です。テンプレート保存後は自動化形式 2 に対応したクライアントが必要で、旧版はデータベースの読み込みを明示的に拒否します。既存の形式 1 のルールは引き続き使えます。"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-a4cew2i",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261108182000-a4cew2i",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動実行"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261108182000-4jbsvw5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-4jbsvw5",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "トリガーに "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "手動"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選び、通常のフィールドに書き込むアクションを追加して、値の指定方法に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "テンプレート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選び、ルールを有効にします。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "今すぐ実行"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、条件に一致する保存済みの全項目を処理します。結果はオフラインでも閲覧でき、データベースを開き直しても再取得しません。定期実行には対応していません。"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-0algzdl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-0algzdl",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動ルールの .action{...} 式では httpGet と fromJson を使用できます。次の例は、取得したスライドショーのタイトルをテキストフィールドに保存します："
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-mdy15aq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-mdy15aq",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{$r := httpGet \"https://httpbingo.org/json\"}.action{(fromJson $r.body).slideshow.title}"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-xt7twj6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-xt7twj6",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ネットワーク要求には現在のウィンドウでの確認が必要で、テンプレート HTTP の制限に従います。継続的な許可は保存済みルールのバージョンに紐付き、自動化パネルで取り消せます。要求、解析、型変換のいずれかが失敗した場合は元の値をすべて保持します。待機中に対象のデータベースが変更された場合は再実行してください。すべてのアクションは開始時の保存済みスナップショットを参照し、元に戻す操作とやり直しでは保存結果を再利用して通信しません。HTTP 要求には既存の実行予算が適用され、1 回につきフィールドの書き込みと項目の追加は合計 1,000 回までです。手動テンプレートにはフィールドプレビューがありません。手動ルールには自動化形式 9 が必要です。既存の形式 1–8 は引き続き読み取れますが、古いクライアントはデータベースを書き換えずに形式 9 を拒否します。"
 				}
 			]
 		},

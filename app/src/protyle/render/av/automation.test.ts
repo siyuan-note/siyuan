@@ -17,7 +17,7 @@ test("collection autosave versions document depth, attribute names, self exclusi
     let save: () => void;
     const child = {innerHTML: "", textContent: "", checked: true, classList: {toggle() {}},
         querySelectorAll: (): HTMLElement[] => [], addEventListener() {}};
-    const body = {...child, isConnected: true, querySelector: () => child};
+    const body = {...child, isConnected: true, getAttribute: (): null => null, querySelector: () => child};
     const panel = {isConnected: true, addEventListener() {}, querySelector: () => body};
     const menu = {innerHTML: "", classList: {add() {}, remove() {}}, addEventListener() {}, querySelector: () => panel};
     const database: Pick<AVAttributeViewData, "id" | "keyValues" | "automations"> = {id: "database", keyValues: [], automations: {spec: 1, rules: [{
@@ -119,7 +119,7 @@ test("automation settings autosave changes with independent undo snapshots and k
     const conditionHost = {innerHTML: "", querySelector: (selector: string) => selector === "[data-conditions]" ? conditionList : {addEventListener() {}}};
     const actionsHost = {innerHTML: "", classList: {toggle() {}}, querySelectorAll: (): HTMLElement[] => []};
     const body = {
-        isConnected: true, innerHTML: "", querySelectorAll: (): HTMLElement[] => [],
+        isConnected: true, innerHTML: "", getAttribute: (): null => null, querySelectorAll: (): HTMLElement[] => [],
         querySelector: (selector: string) => selector === "[data-source-conditions]" ? conditionHost : actionsHost,
         addEventListener: (type: string, listener: (event: unknown) => void) => listeners.set(type, listener),
     };
@@ -203,11 +203,16 @@ test("automation settings autosave changes with independent undo snapshots and k
     listeners.get("change")({target: {checked: true, matches: (selector: string) => selector === "[data-enabled]", closest: (): HTMLElement => null}});
     assert.equal(transactions.length, 3);
     assert.equal(JSON.parse(JSON.stringify(transactions[2].perform[0].data)).rules[0].enabled, true);
-    listeners.get("click")({target: {closest: () => ({dataset: {action: "add-action"}, closest: (): HTMLElement => null})}});
+    listeners.get("change")({target: {value: "manual", matches: (selector: string) => selector === "[data-trigger]", closest: (): HTMLElement => null}});
     assert.equal(transactions.length, 4);
+    assert.equal(JSON.parse(JSON.stringify(transactions[3].perform[0].data)).spec, 9);
+    assert.equal(JSON.parse(JSON.stringify(transactions[3].perform[0].data)).rules[0].trigger, "manual");
     assert.equal(JSON.parse(JSON.stringify(transactions[3].perform[0].data)).rules[0].enabled, false);
-    assert.equal(JSON.parse(JSON.stringify(transactions[3].perform[0].data)).rules[0].actions.length, 2);
-    assert.deepEqual(JSON.parse(JSON.stringify(transactions[3].perform[0].data)).rules[1], otherRule);
+    listeners.get("click")({target: {closest: () => ({dataset: {action: "add-action"}, closest: (): HTMLElement => null})}});
+    assert.equal(transactions.length, 5);
+    assert.equal(JSON.parse(JSON.stringify(transactions[4].perform[0].data)).rules[0].enabled, false);
+    assert.equal(JSON.parse(JSON.stringify(transactions[4].perform[0].data)).rules[0].actions.length, 2);
+    assert.deepEqual(JSON.parse(JSON.stringify(transactions[4].perform[0].data)).rules[1], otherRule);
     panel.isConnected = false;
     menuVisible = true;
     captureClick({target: {closest: () => null}});
@@ -225,7 +230,7 @@ test("empty automation settings persist an incomplete rule disabled on editing a
     const enabled = {checked: false};
     const list = {innerHTML: "", querySelectorAll: (): HTMLElement[] => []};
     const conditions = {innerHTML: "", querySelector: (selector: string) => selector === "[data-conditions]" ? list : {addEventListener() {}}};
-    const body = {isConnected: true, innerHTML: "",
+    const body = {isConnected: true, innerHTML: "", getAttribute: (): null => null,
         addEventListener: (type: string, listener: (event: unknown) => void) => listeners.set(type, listener),
         querySelectorAll: (): HTMLElement[] => [],
         querySelector: (selector: string) => ({"[data-source-conditions]": conditions, "[data-status]": status,

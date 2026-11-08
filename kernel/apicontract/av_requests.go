@@ -4,6 +4,12 @@
 
 package apicontract
 
+type RunAttributeViewAutomationRequest struct {
+	AvID    string `json:"avID"`
+	BlockID string `json:"blockID"`
+	RuleID  string `json:"ruleID"`
+}
+
 type RemoveUnusedAttributeViewRequest struct {
 	ID string `json:"id"`
 }

@@ -1,4 +1,7 @@
 {
+	"automationManual": "Manual",
+	"automationRunNow": "Ejecutar ahora",
+	"automationManualTip": "Ejecutar en las entradas coincidentes y guardar los resultados en los campos; los errores HTTP conservan los valores existentes",
 	"exportHeadingNumber": "Incluir numeración automática de títulos al exportar Markdown",
 	"exportHeadingNumberTip": "Si se activa, al copiar o exportar Markdown se incluyen los números de los títulos cuando la numeración automática está activada en el documento",
 	"agentThinkingStats": "Pensado %s, %s llamadas a herramientas",

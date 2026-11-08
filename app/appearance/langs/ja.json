@@ -1,4 +1,7 @@
 {
+	"automationManual": "手動",
+	"automationRunNow": "今すぐ実行",
+	"automationManualTip": "条件に一致する項目で実行し、結果をフィールドに保存します。HTTP に失敗した場合は既存の値を保持します",
 	"exportHeadingNumber": "Markdown エクスポートに見出しの自動番号を含める",
 	"exportHeadingNumberTip": "有効にすると、文書で見出しの自動番号が有効な場合、Markdown のコピーやエクスポートに番号を含めます",
 	"agentThinkingStats": "考え済み %s、ツールを %s 回呼び出し",

@@ -1,4 +1,7 @@
 {
+	"automationManual": "يدوي",
+	"automationRunNow": "تشغيل الآن",
+	"automationManualTip": "التشغيل على الإدخالات المطابقة وحفظ النتائج في الحقول؛ يحتفظ فشل HTTP بالقيم الحالية",
 	"exportHeadingNumber": "تضمين ترقيم العناوين التلقائي عند تصدير Markdown",
 	"exportHeadingNumberTip": "عند التفعيل، يتضمن نسخ Markdown أو تصديره أرقام العناوين إذا كان ترقيم العناوين التلقائي مفعلاً في المستند",
 	"agentThinkingStats": "تم التفكير %s، استدعاء الأدوات %s مرات",

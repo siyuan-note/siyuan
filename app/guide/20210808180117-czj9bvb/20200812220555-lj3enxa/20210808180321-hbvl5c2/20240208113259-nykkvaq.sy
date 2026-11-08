@@ -4580,12 +4580,111 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024164212-gnpd7xm",
-				"updated": "20261024164212"
+				"updated": "20261108182000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "模板结果只在触发时写入，重做复用首次结果。模板不支持 SQL、文件、网络、循环或递归；源码最多 8 KiB，单个输入和输出最多 64 KiB。保存模板后，该数据库需要支持自动化版本 2 的客户端读取，旧版会明确拒绝读取；原有版本 1 的规则保持兼容。"
+					"Data": "模板结果只在触发时写入，重做复用首次结果。模板不支持 SQL、文件、循环或递归；事件触发规则不支持网络。源码最多 8 KiB，单个字段输入和输出最多 64 KiB。保存模板后，该数据库需要支持自动化版本 2 的客户端读取，旧版会明确拒绝读取；原有版本 1 的规则保持兼容。"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-il2fq3j",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261108182000-il2fq3j",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手动执行"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261108182000-zauhsiq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-zauhsiq",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "手动"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 触发器，添加写入普通字段的动作，将赋值方式设为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "模板"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，然后启用规则。点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "立即执行"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 处理全部符合规则条件的已保存条目。结果可离线查看，重新打开数据库不会再次取数。目前不提供定时执行。"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-z5dzzsc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-z5dzzsc",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手动规则的 .action{...} 表达式支持 httpGet 和 fromJson。例如，下面的模板将返回的幻灯片标题写入文本字段："
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-howdc75",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-howdc75",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{$r := httpGet \"https://httpbingo.org/json\"}.action{(fromJson $r.body).slideshow.title}"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-zu1yqrl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-zu1yqrl",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "网络请求需要当前窗口确认，并遵循模板 HTTP 限制。持久许可绑定已保存的规则版本，可在自动化面板撤销。任一请求、解析或类型转换失败均保留全部原值；等待期间若规则使用的数据库发生变化，需要重新执行。所有动作读取执行开始时的存储快照，撤销和重做复用已保存结果，不重新取数。HTTP 请求沿用现有执行预算，每次最多进行 1,000 次字段写入和条目新增。手动模板不提供字段预览。手动规则需要自动化格式 9，既有格式 1–8 仍可读取，旧客户端拒绝格式 9 且不改写数据库。"
 				}
 			]
 		},

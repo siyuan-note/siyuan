@@ -1,4 +1,7 @@
 {
+	"automationManual": "Ručne",
+	"automationRunNow": "Spustiť teraz",
+	"automationManualTip": "Spustiť pre zodpovedajúce položky a uložiť výsledky do polí; pri chybách HTTP sa zachovajú existujúce hodnoty",
 	"exportHeadingNumber": "Zahrnúť automatické čísla nadpisov do exportu Markdown",
 	"exportHeadingNumberTip": "Ak je zapnuté, kopírovanie alebo export Markdown obsahuje čísla nadpisov, ak je v dokumente zapnuté automatické číslovanie",
 	"agentThinkingStats": "Premyslené %s, volaní nástrojov: %s",

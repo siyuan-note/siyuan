@@ -1,4 +1,7 @@
 {
+	"automationManual": "Manual",
+	"automationRunNow": "Run now",
+	"automationManualTip": "Run on matching entries and save results to fields; HTTP failures keep existing values",
 	"exportHeadingNumber": "Include automatic heading numbers in Markdown exports",
 	"exportHeadingNumberTip": "When enabled, copying or exporting Markdown includes heading numbers if automatic heading numbering is enabled in the document",
 	"agentThinkingStats": "Thought %s, called tools %s times",

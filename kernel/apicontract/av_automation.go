@@ -5,7 +5,8 @@
 package apicontract
 
 // AVAutomationConfig 通过 setAttrViewAutomations 事务操作整体保存，所有镜像和视图共享。
-// spec 为 1 至 8；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4，有限文档深度至少使用 5。
+// spec 为 1 至 9；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4，有限文档深度至少使用 5。
+// manual 触发至少使用 9，仅显式执行时取数并写入普通字段；存量版本 1–8 保持兼容。
 // 属性名包含或正则匹配至少使用 6；缺省或 equals 保持既有的精确匹配。
 // 旧读取器拒绝新版本，防止配置静默丢失。
 // 缺省配置不会触发自动化，既有版本的主类型匹配含义不变。
@@ -24,7 +25,7 @@ type AVAutomationRule struct {
 	ID          string                   `json:"id"`
 	Name        string                   `json:"name"`
 	Enabled     bool                     `json:"enabled"`
-	Trigger     string                   `json:"trigger" api:"enum=added|changed|block"`
+	Trigger     string                   `json:"trigger" api:"enum=added|changed|block|manual"`
 	KeyID       string                   `json:"keyID,omitempty" api:"optional"`
 	Conditions  []*AVViewFilter          `json:"conditions,omitempty" api:"optional"`
 	Actions     []*AVAutomationAction    `json:"actions"`

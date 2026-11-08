@@ -316,9 +316,9 @@ export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | nul
 
 export type AVAutomationConfigInput = { "rules": Array<AVAutomationRuleInput | null>; "spec": number; };
 
-export type AVAutomationRule = { "actions": Array<AVAutomationAction | null> | null; "blockSource"?: AVAutomationBlockSource; "conditions"?: Array<AVViewFilter | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean; "timeZone"?: string; "trigger": "added" | "changed" | "block"; };
+export type AVAutomationRule = { "actions": Array<AVAutomationAction | null> | null; "blockSource"?: AVAutomationBlockSource; "conditions"?: Array<AVViewFilter | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean; "timeZone"?: string; "trigger": "added" | "changed" | "block" | "manual"; };
 
-export type AVAutomationRuleInput = { "actions": Array<AVAutomationActionInput | null>; "blockSource"?: AVAutomationBlockSourceInput | null; "conditions"?: Array<AVViewFilterInput | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean | null; "timeZone"?: string; "trigger": "added" | "changed" | "block"; };
+export type AVAutomationRuleInput = { "actions": Array<AVAutomationActionInput | null>; "blockSource"?: AVAutomationBlockSourceInput | null; "conditions"?: Array<AVViewFilterInput | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean | null; "timeZone"?: string; "trigger": "added" | "changed" | "block" | "manual"; };
 
 export type AVAutomationTemplatePreviewRequestInput = { "avID": string; "inputs"?: Record<string, string>; "itemID": string; "keyID": string; "targetAvID"?: string; "template": string; "timeZone": string; "triggerTime"?: string; };
 
@@ -2013,6 +2013,8 @@ export type RiffReviewedCardInput = { "cardID": string; };
 export type RiffTreeDueCardsRequestInput = { "reviewedCards"?: Array<RiffReviewedCardInput> | null; "rootID": string; };
 
 export type RollbackRepoSnapshotFileRequestInput = { "id": string; };
+
+export type RunAttributeViewAutomationRequestInput = { "avID": string; "blockID": string; "ruleID": string; };
 
 export type SQLQueryRequestInput = { "mode"?: string | null; "stmt": string; };
 
@@ -4432,6 +4434,20 @@ export interface APIPOSTRoutes {
         body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 显式执行已启用的 manual 规则，要求配置版本 9。
+     * 条目、条件、动作目标及输入均使用开始执行时的存储快照，不受当前视图筛选或分页限制。
+     * httpGet 和 fromJson 仅在手动模板中可用，联网沿用交互确认、持久许可及公网请求限制。
+     * 全部取数成功后重新校验已读取的数据库，在单笔可撤销事务中写入；失败、取消或来源改变均保留原值。
+     * 撤销和重做复用已保存结果，不重复联网；每次最多 1000 个写入操作，不提供定时执行。
+     */
+    "/api/av/runAttributeViewAutomation": {
+        request: RunAttributeViewAutomationRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/searchAttributeView": {
         request: SearchAttributeViewRequestInput;

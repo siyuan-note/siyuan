@@ -1,4 +1,7 @@
 {
+	"automationManual": "Elle",
+	"automationRunNow": "Şimdi çalıştır",
+	"automationManualTip": "Eşleşen girdilerde çalıştır ve sonuçları alanlara kaydet; HTTP hatalarında mevcut değerler korunur",
 	"exportHeadingNumber": "Markdown dışa aktarımına otomatik başlık numaralarını ekle",
 	"exportHeadingNumberTip": "Etkinleştirildiğinde, belgede otomatik başlık numaralandırması açıksa Markdown kopyalama veya dışa aktarma başlık numaralarını içerir",
 	"agentThinkingStats": "Düşünüldü %s, %s araç çağrısı",

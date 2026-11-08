@@ -293,7 +293,7 @@ func (e *TxErr) Code() int {
 }
 
 func performTx(tx *Transaction) (ret *TxErr) {
-	if 1 > len(tx.DoOperations) {
+	if 1 > len(tx.DoOperations) && tx.manualAutomation == nil {
 		return
 	}
 	timing := util.BeginPerformance("transaction")
@@ -341,6 +341,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	diagnostic.Stage("prepare database automations")
 	timing.Stage("automations")
+	if err = tx.validateManualAttributeViewAutomation(); err != nil {
+		tx.rollback()
+		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+	}
 	if err = tx.validateCollectionRemovalSources(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
@@ -352,6 +356,12 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	if err = tx.prepareAttributeViewAutomations(); err != nil {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+	}
+	if tx.manualAutomation != nil {
+		if err = tx.runManualAttributeViewAutomation(); err != nil {
+			tx.rollback()
+			return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+		}
 	}
 	diagnostic.Stage("process bulk operations")
 	timing.Stage("apply")
@@ -365,7 +375,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		tx.rollback()
 		return ret
 	}
-	if !isLargeInsert {
+	if !isLargeInsert && tx.manualAutomation == nil {
 		for operationIndex := 0; operationIndex < len(tx.DoOperations); operationIndex++ {
 			op := tx.DoOperations[operationIndex]
 			if err = tx.validateAttributeViewRelationCellOperation(op); err != nil {
@@ -2948,6 +2958,7 @@ type Transaction struct {
 	attributeViewRollback         *attributeViewRollback
 	historyRecovery               *attributeViewHistoryRecovery
 	attributeViewAutomations      *attributeViewAutomationState
+	manualAutomation              *manualAttributeViewAutomation
 	pushAutomationMessage         func(string, int) string
 	attributeViewCollections      *attributeViewCollectionState
 	attributeViewItemCreation     bool

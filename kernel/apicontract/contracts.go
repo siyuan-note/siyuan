@@ -1664,6 +1664,13 @@ var RemoveTagWithCollections = define[RemoveTagWithCollectionsRequest, Null]("re
 // PreviewAttributeViewTemplate 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。
 // 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。
 var PreviewAttributeViewTemplate = define[AVAutomationTemplatePreviewRequest, *AVValue]("previewAttributeViewTemplate", "/api/av/previewAttributeViewTemplate", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// RunAttributeViewAutomation 显式执行已启用的 manual 规则，要求配置版本 9。
+// 条目、条件、动作目标及输入均使用开始执行时的存储快照，不受当前视图筛选或分页限制。
+// httpGet 和 fromJson 仅在手动模板中可用，联网沿用交互确认、持久许可及公网请求限制。
+// 全部取数成功后重新校验已读取的数据库，在单笔可撤销事务中写入；失败、取消或来源改变均保留原值。
+// 撤销和重做复用已保存结果，不重复联网；每次最多 1000 个写入操作，不提供定时执行。
+var RunAttributeViewAutomation = define[RunAttributeViewAutomationRequest, Null]("runAttributeViewAutomation", "/api/av/runAttributeViewAutomation", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPasteRowsData]("getAttributeViewPasteRows", "/api/av/getAttributeViewPasteRows", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 

@@ -1,4 +1,7 @@
 {
+	"automationManual": "Ручно",
+	"automationRunNow": "Покрени сада",
+	"automationManualTip": "Покрени за одговарајуће ставке и сачувај резултате у пољима; HTTP грешке задржавају постојеће вредности",
 	"exportHeadingNumber": "Укључи аутоматске бројеве наслова у Markdown извоз",
 	"exportHeadingNumberTip": "Када је укључено, копирање или извоз Markdown садржи бројеве наслова ако је аутоматско нумерисање укључено у документу",
 	"agentThinkingStats": "Razmišljanje: %s, poziva alata: %s",

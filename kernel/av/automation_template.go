@@ -30,6 +30,8 @@ type AutomationTemplateContext struct {
 	ItemID   string
 	Time     time.Time
 	TimeZone string
+	Manual   bool
+	HTTP     template.FuncMap
 }
 
 type automationTemplateOutput struct{ bytes.Buffer }
@@ -60,6 +62,21 @@ func automationTemplate(context AutomationTemplateContext, source string) (*temp
 	functions["date"] = func(layout string, date time.Time) string { return date.In(zone).Format(layout) }
 	functions["field"] = func(id string) (any, error) { return context.field(id, zone, false) }
 	functions["value"] = func(id string) (any, error) { return context.field(id, zone, true) }
+	if context.Manual {
+		functions["httpGet"] = func(string, ...map[string]any) (map[string]any, error) {
+			return nil, fmt.Errorf("manual HTTP execution is unavailable")
+		}
+		if request := context.HTTP["httpGet"]; request != nil {
+			functions["httpGet"] = request
+		}
+		functions["fromJson"] = func(source string) (any, error) {
+			var value any
+			if len(source) > 1<<20 || json.Unmarshal([]byte(source), &value) != nil {
+				return nil, fmt.Errorf("invalid HTTP JSON response")
+			}
+			return value, nil
+		}
+	}
 	functions["toJson"] = func(value any) (string, error) {
 		data, err := json.Marshal(value)
 		if len(data) > AutomationTemplateLimit {
@@ -161,6 +178,11 @@ func automationTemplate(context AutomationTemplateContext, source string) (*temp
 
 func ValidateAutomationTemplate(source, timeZone string) error {
 	_, err := automationTemplate(AutomationTemplateContext{TimeZone: timeZone}, source)
+	return err
+}
+
+func ValidateManualAutomationTemplate(source, timeZone string) error {
+	_, err := automationTemplate(AutomationTemplateContext{TimeZone: timeZone, Manual: true}, source)
 	return err
 }
 
@@ -371,7 +393,7 @@ func ParseAutomationTemplateValue(key *Key, source string, zone *time.Location) 
 
 // 只改写语法树中 field/value 的字面量参数，保留模板之外的同名文字。
 func RemapAutomationTemplate(source string, ids map[string]string) string {
-	tpl, err := automationTemplate(AutomationTemplateContext{TimeZone: "UTC"}, source)
+	tpl, err := automationTemplate(AutomationTemplateContext{TimeZone: "UTC", Manual: true}, source)
 	if err != nil {
 		return source
 	}

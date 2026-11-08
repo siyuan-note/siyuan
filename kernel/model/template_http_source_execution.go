@@ -176,6 +176,23 @@ func ManageTemplateHTTPPermission(action, kind, path, avID, keyID, slot string) 
 		if err != nil {
 			return false, err
 		}
+		if slot == "automation" {
+			if database.Automations != nil {
+				for _, rule := range database.Automations.Rules {
+					if rule != nil && rule.ID == keyID && rule.Trigger == "manual" {
+						source, err = ResolveTemplateHTTPAutomationSource(av.GetAVBoxID(avID), avID, rule)
+						break
+					}
+				}
+			}
+			if source == nil || err != nil {
+				return false, errors.New("manual automation permission is unavailable")
+			}
+			if action == "revoke" {
+				return false, RevokeTemplateHTTPSource(source.ID)
+			}
+			return CheckTemplateHTTPSource(source)
+		}
 		var key *av.Key
 		key, err = database.GetKey(keyID)
 		if err != nil {

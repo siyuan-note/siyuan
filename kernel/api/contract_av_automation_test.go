@@ -496,4 +496,29 @@ func TestAVContractAutomationWrites(t *testing.T) {
 			t.Fatal("API reference edit did not collect the backlink parent", err)
 		}
 	})
+	t.Run("manual automation contract", func(t *testing.T) {
+		manual := rule("manual", "", fixture.textKeyID, &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "stored manual result"}})
+		if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID,
+			BlockID: fixture.databaseID, Data: &av.AutomationConfig{Spec: 9, Rules: []*av.AutomationRule{manual}}}}); err != nil {
+			t.Fatal(err)
+		}
+		call("/api/av/runAttributeViewAutomation", map[string]any{"avID": database.ID, "blockID": fixture.databaseID, "ruleID": manual.ID}, runAttributeViewAutomation)
+		stored, err := av.ParseAttributeView(database.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, row := range stored.GetBlockKeyValues().Values {
+			if value := stored.GetValue(fixture.textKeyID, row.BlockID); value == nil || value.Text.Content != "stored manual result" {
+				t.Fatal("manual API did not store ordinary field results")
+			}
+		}
+		response := callAttributeViewContextFilterAPI(t, "/api/av/runAttributeViewAutomation",
+			map[string]any{"avID": database.ID, "blockID": fixture.databaseID, "ruleID": "missing"}, runAttributeViewAutomation)
+		requireAPIContract(t, http.MethodPost, "/api/av/runAttributeViewAutomation", response)
+		var failed struct{ Code int }
+		decodeAttributeViewContextFilterAPIResponse(t, response, &failed)
+		if failed.Code == 0 {
+			t.Fatal("missing manual rule succeeded")
+		}
+	})
 }

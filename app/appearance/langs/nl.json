@@ -1,4 +1,7 @@
 {
+	"automationManual": "Handmatig",
+	"automationRunNow": "Nu uitvoeren",
+	"automationManualTip": "Uitvoeren voor overeenkomende items en resultaten in velden opslaan; bij HTTP-fouten blijven bestaande waarden behouden",
 	"exportHeadingNumber": "Automatische kopnummering opnemen in Markdown-export",
 	"exportHeadingNumberTip": "Indien ingeschakeld, bevat gekopieerde of geëxporteerde Markdown kopnummers als automatische kopnummering in het document is ingeschakeld",
 	"agentThinkingStats": "Nagedacht %s, %s tool-aanroepen",

@@ -104,6 +104,7 @@ export const mountAutomationTemplate = (options: {
         invalidate();
     });
     const preview = host.querySelector<HTMLDetailsElement>("[data-template-preview]");
+    preview.classList.toggle("fn__none", rule.trigger === "manual");
     preview.addEventListener("toggle", () => {
         preview.querySelector("summary use").setAttribute("xlink:href", preview.open ? "#iconDown" : "#iconRight");
         onResize();

@@ -1,4 +1,7 @@
 {
+	"automationManual": "手動",
+	"automationRunNow": "立即執行",
+	"automationManualTip": "對符合條件的項目執行並將結果儲存到欄位；HTTP 失敗時保留原值",
 	"exportHeadingNumber": "匯出 Markdown 包含標題區塊自動編號",
 	"exportHeadingNumberTip": "啟用後在複製或匯出的 Markdown 中保留文件的標題區塊自動編號",
 	"agentThinkingStats": "已思考 %s，呼叫 %s 次工具",

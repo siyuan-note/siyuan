@@ -886,6 +886,7 @@ func registerAvRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/reviewAttributeViewCollection", contractRouteHandlers(apicontract.ReviewAttributeViewCollection, reviewAttributeViewCollection)...)
 	ginServer.Handle("POST", "/api/av/previewCollectionRemoval", contractRouteHandlers(apicontract.PreviewCollectionRemoval, previewCollectionRemoval)...)
 	ginServer.Handle("POST", "/api/av/previewAttributeViewTemplate", contractRouteHandlers(apicontract.PreviewAttributeViewTemplate, previewAttributeViewTemplate)...)
+	ginServer.Handle("POST", "/api/av/runAttributeViewAutomation", contractRouteHandlers(apicontract.RunAttributeViewAutomation, runAttributeViewAutomation)...)
 	ginServer.Handle("POST", "/api/av/getAttributeViewPasteRows", contractRouteHandlers(apicontract.GetAttributeViewPasteRows, getAttributeViewPasteRows)...)
 	ginServer.Handle("POST", "/api/av/searchAttributeViewRelationKey", contractRouteHandlers(apicontract.SearchAttributeViewRelationKey, searchAttributeViewRelationKey)...)
 	ginServer.Handle("POST", "/api/av/searchAttributeViewRollupDestKeys", contractRouteHandlers(apicontract.SearchAttributeViewRollupDestKeys, searchAttributeViewRollupDestKeys)...)

@@ -1,4 +1,7 @@
 {
+	"automationManual": "ידני",
+	"automationRunNow": "הפעלה כעת",
+	"automationManualTip": "הפעלה על רשומות תואמות ושמירת התוצאות בשדות; כשלי HTTP משאירים את הערכים הקיימים",
 	"exportHeadingNumber": "כלול מספור כותרות אוטומטי בייצוא Markdown",
 	"exportHeadingNumberTip": "כאשר האפשרות מופעלת, העתקה או ייצוא של Markdown כוללים מספרי כותרות אם מספור כותרות אוטומטי מופעל במסמך",
 	"agentThinkingStats": "חשב %s, %s קריאות לכלים",

@@ -9,7 +9,28 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 )
+
+var runAttributeViewAutomation = contractHandler(apicontract.RunAttributeViewAutomation,
+	func(c *gin.Context, request apicontract.RunAttributeViewAutomationRequest) apicontract.Response[apicontract.Null] {
+		if err := holdAttributeViewRequest(c, request.BlockID, request.AvID); err != nil {
+			return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(314))
+		}
+		execution, err := startTemplateHTTP(c, "manual-automation")
+		if err != nil {
+			return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(258))
+		}
+		var runtime *templatehttp.Execution
+		if execution != nil {
+			defer execution.Close()
+			runtime = execution.Runtime
+		}
+		if err = model.RunAttributeViewAutomation(c.Request.Context(), request.AvID, request.BlockID, request.RuleID, runtime); err != nil {
+			return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(258))
+		}
+		return apicontract.Success(apicontract.Null{})
+	})
 
 var previewAttributeViewCollection = contractHandler(apicontract.PreviewAttributeViewCollection,
 	func(c *gin.Context, request apicontract.AVBlockCollectionPreviewRequest) apicontract.Response[*apicontract.AVBlockCollectionPreview] {

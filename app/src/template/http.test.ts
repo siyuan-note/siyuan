@@ -550,6 +550,18 @@ for (const kind of ["disconnect", "pagehide", "owner-removed", "superseded"]) {
     });
 }
 
+test("manual automation uses interactive confirmation and cancels with its database owner", () => {
+    const state = loadHTTP();
+    const request = state.begin("/api/av/runAttributeViewAutomation");
+    assert.equal(request.headers["X-Siyuan-Template-Execution"], "execution-1");
+    state.event("templateHTTPConfirm", {confirmID: "manual", canPersist: true});
+    assert.equal(state.dialogs.length, 1);
+    state.exports.cancelTemplateHTTPForElement(state.owner);
+    assert.equal(request.signal.aborted, true);
+    assert.equal(state.dialogs[0].destroyed, true);
+    assert.equal(state.requests.at(-1).url, "/api/template/cancelHTTP");
+});
+
 
 test("persistent approval is explicit and only offered for kernel-verified sources", () => {
     const state = loadHTTP();

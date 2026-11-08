@@ -22,7 +22,7 @@ type AutomationRule struct {
 	ID              string                 `json:"id"`
 	Name            string                 `json:"name"`
 	Enabled         bool                   `json:"enabled"`
-	Trigger         string                 `json:"trigger"` // added、changed 或 block
+	Trigger         string                 `json:"trigger"` // added、changed、block 或 manual
 	KeyID           string                 `json:"keyID,omitempty"`
 	Conditions      []*ViewFilter          `json:"conditions,omitempty"`
 	Actions         []*AutomationAction    `json:"actions"`
@@ -97,6 +97,9 @@ func IsAutomationBlockType(value string) bool {
 
 // RequiredSpec 保留普通规则的版本，仅在使用新增语义时要求支持该语义的读取器。
 func (rule *AutomationRule) RequiredSpec() int {
+	if rule.Trigger == "manual" {
+		return 9
+	}
 	ret := 1
 	if rule.BlockSource != nil {
 		if rule.BlockSource.ReferenceID != "" {
@@ -142,7 +145,7 @@ func (config *AutomationConfig) ValidateSpec() error {
 	if config == nil {
 		return nil
 	}
-	if config.Spec < 1 || config.Spec > 8 {
+	if config.Spec < 1 || config.Spec > 9 {
 		return fmt.Errorf("unsupported database automation specification [%d]", config.Spec)
 	}
 	for _, rule := range config.Rules {

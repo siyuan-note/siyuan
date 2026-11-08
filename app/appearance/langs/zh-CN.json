@@ -1,4 +1,7 @@
 {
+	"automationManual": "手动",
+	"automationRunNow": "立即执行",
+	"automationManualTip": "对符合条件的条目执行并将结果保存到字段；HTTP 失败时保留原值",
 	"exportHeadingNumber": "导出 Markdown 包含标题块自动编号",
 	"exportHeadingNumberTip": "启用后在复制或导出的 Markdown 中保留文档的标题块自动编号",
 	"agentThinkingStats": "已思考 %s，调用 %s 次工具",

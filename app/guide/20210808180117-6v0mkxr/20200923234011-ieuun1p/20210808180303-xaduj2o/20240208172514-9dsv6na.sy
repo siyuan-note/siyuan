@@ -4692,12 +4692,111 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-coesny2",
-				"updated": "20261024161816"
+				"updated": "20261108182000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Results are stored once, and redo reuses them. SQL, files, network access, loops, and recursion are unavailable. Source is limited to 8 KiB; each input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
+					"Data": "Results are stored once, and redo reuses them. SQL, files, loops, and recursion are unavailable. Event-triggered rules cannot access the network. Source is limited to 8 KiB; each field input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-cjr8luh",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261108182000-cjr8luh",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manual execution"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261108182000-ggfyqb8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-ggfyqb8",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Manual"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", add an edit-field action targeting an ordinary field, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and enable the rule. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Run now"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to process all saved rows matching the rule conditions. Results remain available offline and reopening the database does not fetch them again. Scheduled execution is not provided."
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-w2cs6vs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-w2cs6vs",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A manual rule can use httpGet and fromJson in .action{...} expressions. For example, this writes the returned slideshow title to a text field:"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-362kkdg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-362kkdg",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{$r := httpGet \"https://httpbingo.org/json\"}.action{(fromJson $r.body).slideshow.title}"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-i0uewmx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-i0uewmx",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Network access requires confirmation in the current window and follows the template HTTP restrictions. Persistent permission is tied to the saved rule version; it can be revoked in the automation panel. Any request, parsing or conversion failure preserves all original values. If a database used by the rule changes while waiting, run again. All actions read the initial stored snapshot; undo and redo reuse saved results without fetching. HTTP requests use the existing execution budget; each run permits at most 1,000 field writes and row additions. Manual templates do not provide the field preview. Manual rules require automation format 9; formats 1–8 remain readable and older clients reject format 9 without rewriting the database."
 				}
 			]
 		},

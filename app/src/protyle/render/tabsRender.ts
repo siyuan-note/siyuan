@@ -39,6 +39,7 @@ interface ITabState {
 interface ITabsRoot {
     options: ITabsRenderOptions;
     render: () => void;
+    endTitleEditing: () => void;
     observer: MutationObserver;
     resize: ResizeObserver;
     destroy: () => void;
@@ -48,6 +49,7 @@ interface ITabsRoot {
 const roots = new WeakMap<Element, ITabsRoot>();
 const states = new WeakMap<HTMLElement, ITabState>();
 const boundHeaders = new WeakSet<Element>();
+const suspendedTitleExits = new WeakMap<HTMLElement, number>();
 let instanceID = 0;
 
 export const getTabItems = (tabs: Element): HTMLElement[] =>
@@ -129,6 +131,10 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             if (!owns(item)) {
                 return;
             }
+            // 引用移除预检暂时清空选区并冻结编辑器，不等于用户结束标题编辑。
+            if (suspendedTitleExits.has(item) && element.closest("[inert]")) {
+                return;
+            }
             const title = getTabTitle(item);
             const selectionInTitle = title?.contains(selection?.anchorNode) &&
                 (active === element || element.contains(active));
@@ -155,6 +161,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
     };
     const controller: ITabsRoot = {
         options,
+        endTitleEditing,
         select(tabs, id, persist) {
             // 文档刚插入时观察器尚未渲染，先初始化状态以支持立即跳转到隐藏页签。
             if (!states.has(tabs)) {
@@ -578,6 +585,34 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
 };
 
 export const destroyTabsRender = (element: Element) => roots.get(element)?.destroy();
+
+// 只暂停指定标题的自动退出，不阻止切换页签、只读渲染或后续焦点所有权检查。
+export const suspendTabTitleEditingExit = (item?: HTMLElement) => {
+    if (!item) {
+        return () => {};
+    }
+    suspendedTitleExits.set(item, (suspendedTitleExits.get(item) || 0) + 1);
+    let released = false;
+    return () => {
+        if (released) {
+            return;
+        }
+        released = true;
+        const remaining = suspendedTitleExits.get(item) - 1;
+        if (remaining > 0) {
+            suspendedTitleExits.set(item, remaining);
+            return;
+        }
+        suspendedTitleExits.delete(item);
+        for (let root: Element = item; root; root = root.parentElement) {
+            const controller = roots.get(root);
+            if (controller) {
+                controller.endTitleEditing();
+                break;
+            }
+        }
+    };
+};
 
 export const setTabTitleNavigationEditing = (item: HTMLElement, editing: boolean) => {
     for (let root: Element = item; root; root = root.parentElement) {

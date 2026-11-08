@@ -13,6 +13,7 @@ const browserCases = async () => {
     const api = (window as unknown as {focusTest: {
         tabsRender: (root: HTMLElement, options: {readonly: () => boolean}) => void;
         destroyTabsRender: (root: HTMLElement) => void;
+        suspendTabTitleEditingExit: (item: HTMLElement) => () => void;
         restorePendingFocus: (root: HTMLElement, id: string, range: Range, restored: boolean, removed: boolean) => number;
         canRestoreEditorFocus: (root: HTMLElement) => boolean;
         getEditorFocusRange: (root: HTMLElement, range: Range) => Range;
@@ -110,6 +111,56 @@ const browserCases = async () => {
             }
         }
     }
+    // 完整应用预检会使标题先退出再恢复；定向暂停避免等待期间编辑层关闭。
+    for (const keepFocus of [true, false]) {
+        const host = document.createElement("div");
+        const editor = document.createElement("div");
+        editor.className = "protyle-wysiwyg";
+        editor.contentEditable = "true";
+        host.append(editor);
+        document.body.append(host);
+        editor.innerHTML = '<div class="tabs" data-type="NodeTabs" data-node-id="tabs"><div class="tab-item" data-type="NodeTabItem" data-node-id="item"><div class="tab-item-info" contenteditable="false"><span class="tab-item-title callout-title" contenteditable="true">11</span></div><div class="tab-item-content"><div contenteditable="true">Body</div></div></div></div>';
+        const item = editor.querySelector<HTMLElement>(".tab-item");
+        const title = editor.querySelector<HTMLElement>(".tab-item-title");
+        const other = document.createElement("input");
+        document.body.append(other);
+        try {
+            item.dataset.tabsEditing = "true";
+            api.tabsRender(editor, {readonly: () => false});
+            title.focus();
+            const range = document.createRange();
+            range.selectNodeContents(title);
+            range.collapse(false);
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+            const saved = api.getEditorFocusRange(editor, range);
+            const release = api.suspendTabTitleEditingExit(item);
+            getSelection().removeAllRanges();
+            host.inert = true;
+            await new Promise(resolve => setTimeout(resolve, 100));
+            check.equal(item.dataset.tabsEditing, "true", "preflight must not close the title input layer");
+            check.ok(title.getClientRects().length > 0);
+            host.inert = false;
+            if (keepFocus) {
+                check.equal(api.restoreEditorFocusRange(editor, saved), true);
+            } else {
+                other.focus();
+            }
+            release();
+            release();
+            await new Promise(resolve => setTimeout(resolve, 30));
+            check.equal(item.dataset.tabsEditing, String(keepFocus));
+            check.equal(document.activeElement, keepFocus ? title : other);
+            if (keepFocus) {
+                document.execCommand("insertText", false, "x");
+                check.equal(title.textContent, "11x");
+            }
+        } finally {
+            api.destroyTabsRender(editor);
+            host.remove();
+            other.remove();
+        }
+    }
     return "tab-title-focus-restored";
 };
 
@@ -141,7 +192,7 @@ test("restores tab title editing after asynchronous collection-removal focus sus
     const css = compileSass("src/assets/scss/protyle/_tabs.scss").css;
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-tab-focus-"));
     const script = path.join(directory, "main.cjs");
-    const renderer = `${source}\n${pendingSource}\nwindow.focusTest={tabsRender,destroyTabsRender,getEditorFocusRange,restoreEditorFocusRange,canRestoreEditorFocus,restorePendingFocus};
+    const renderer = `${source}\n${pendingSource}\nwindow.focusTest={tabsRender,destroyTabsRender,suspendTabTitleEditingExit,getEditorFocusRange,restoreEditorFocusRange,canRestoreEditorFocus,restorePendingFocus};
         const style=document.createElement('style');style.textContent=${JSON.stringify(css)};document.head.append(style);
         const __name=value=>value; (${browserCases.toString()})()`;
     writeFileSync(script, `const {app,BrowserWindow}=require('electron');

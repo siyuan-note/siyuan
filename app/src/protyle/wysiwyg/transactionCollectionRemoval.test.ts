@@ -39,6 +39,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
     let restored = 0;
     let history = 0;
     let focusRestored = 0;
+    let titleExitResumed = 0;
     let previews = 0;
     const synced: IProtyle[] = [];
     const messages: string[] = [];
@@ -65,6 +66,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
         getSelection: () => ({rangeCount: 1, getRangeAt: () => ({}), removeAllRanges() {}}),
         canRestoreEditorFocus: new Function("document", compiledFocus + "\nreturn canRestoreEditorFocus;")({activeElement: null}),
         Node: {ELEMENT_NODE: 1},
+        suspendTabTitleEditingExit: () => () => { titleExitResumed++; },
         getEditorFocusRange: () => ({startContainer: {nodeType: 1, closest: (): null => null}}),
         getUndoFocusContext: (element: unknown) => mode === "cancelWithoutRange" && element === protyle.wysiwyg.element ? undefined :
             {undoFocusId: "block", undoFocusStart: element === protyle.wysiwyg.element ? "4" : "5"},
@@ -118,7 +120,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
         },
         finishPreview: (value: unknown) => finishPreview(value),
         finishSave: () => finishSave(), failSave: () => failSave(new Error("save failed")),
-        counts: () => ({restored, history, focusRestored, previews})};
+        counts: () => ({restored, history, focusRestored, previews, titleExitResumed})};
 };
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -161,6 +163,7 @@ for (const kind of ["tags", "references", "mixed"] as const) {
             assert.equal(f.protyle.scroll.lastScrollTop, 120);
             assert.equal(f.styles.get("overflow-anchor"), "auto");
             assert.equal(f.counts().focusRestored, 1);
+            assert.equal(f.counts().titleExitResumed, 1);
             if (mode.startsWith("cancel") || mode.endsWith("Error")) {
                 assert.equal(f.counts().history, 0);
                 assert.equal(f.counts().restored, 1);
@@ -197,6 +200,7 @@ for (const timing of ["beforePreview", "afterPreview"] as const) {
             assert.equal(f.counts().restored, 0);
             assert.equal(f.counts().history, 0);
             assert.equal(f.counts().focusRestored, 0);
+            assert.equal(f.counts().titleExitResumed, 1);
             assert.equal(f.counts().previews, timing === "beforePreview" ? 0 : 1);
             assert.equal(f.protyle.contentElement.scrollTop, 30);
             assert.equal(f.protyle.element.inert, action === "replaceEditor" || action === "replaceContainer");
@@ -289,6 +293,7 @@ for (const mode of ["success", "cancel", "previewError", "saveError"]) {
             assert.equal(f.protyle.disabled, true);
             assert.equal(f.protyle.element.inert, false);
             assert.equal(f.counts().focusRestored, 0);
+            assert.equal(f.counts().titleExitResumed, 1);
             assert.equal(containerFocusCalls, 0);
             assert.equal(document.activeElement, activeElement);
             assert.equal(f.counts().history, mode === "success" ? 1 : 0);
@@ -308,6 +313,7 @@ for (const kind of ["tags", "references", "mixed"] as const) {
             assert.equal(f.counts().history, 1);
             assert.equal(f.counts().restored, 0);
             assert.equal(f.counts().focusRestored, 0);
+            assert.equal(f.counts().titleExitResumed, 0);
             assert.equal(f.writes.length, 0);
             assert.deepEqual(f.synced, [f.protyle]);
             assert.equal(f.protyle.element.inert, false);

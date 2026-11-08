@@ -1,3 +1,4 @@
+import {suspendTabTitleEditingExit} from "../render/tabsRender";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {refreshBreadcrumbForIconChanges} from "../breadcrumb/iconRefresh";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -2676,6 +2677,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             };
             focusContext = focusContext || operationFocus(doOperations);
             // 等待确认时阻止交互，保留数据库控件及正文的布局占位。
+            const resumeTitleEditingExit = suspendTabTitleEditingExit(
+                focusElement?.closest(".tab-item-title")?.closest<HTMLElement>(".tab-item"));
             selection.removeAllRanges();
             element.inert = true;
             const pending: Promise<void> = (async () => {
@@ -2728,6 +2731,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                             content.style.removeProperty("overflow-anchor");
                         }
                     } finally {
+                        resumeTitleEditingExit();
                         if (pendingCollectionRemovals.get(protyle)?.promise === pending) pendingCollectionRemovals.delete(protyle);
                     }
                 }

@@ -35,6 +35,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
         entries: Array<{type: string, id: string, content: string}>;
         messagesContainer: HTMLElement;
         initNavRail: (wrap: HTMLElement) => void;
+        resolveNavMarker: (clientY: number) => HTMLElement | null;
         rebuildNavMarkers: () => void;
         updateActiveMarker: () => void;
     };
@@ -96,6 +97,21 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
         check.equal(tip.textContent, y < next.top ? chat.entries[0].content : "Second question",
             `preview at y=${y}, next marker starts at ${next.top}`);
     }
+    // 分数缩放下接缝的命中会被浏览器反复改判，预览必须由坐标解析并保持稳定。
+    const seam = next.top;
+    const seamTexts = new Set<string>();
+    for (let i = 0; i < 20; i++) {
+        rail.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientY: seam - 0.001}));
+        seamTexts.add(tip.textContent || "");
+    }
+    check.equal(seamTexts.size, 1, "preview never alternates around a marker seam");
+    check.equal(Array.from(seamTexts)[0], chat.entries[0].content, "a coordinate above the seam previews the upper marker");
+    rail.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientY: seam + 0.001}));
+    check.equal(tip.textContent, "Second question", "a coordinate below the seam previews the lower marker");
+    check.equal((chat.resolveNavMarker(seam - 0.001) as HTMLElement).dataset.messageId, "first",
+        "click resolution above the seam matches the preview");
+    check.equal((chat.resolveNavMarker(seam + 0.001) as HTMLElement).dataset.messageId, "second",
+        "click resolution below the seam matches the preview");
     await move(first.left + first.width / 2, first.top + first.height / 2);
     const preview = tip.getBoundingClientRect();
     const copy = document.getElementById("copy");
@@ -137,6 +153,21 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     chat.entries = [];
     chat.rebuildNavMarkers();
     check.equal(rail.children.length, 0, "switching to an empty conversation removes stale markers");
+    // 接缝上预览与点击必须指向同一条消息，避免「预览上一条、跳转下一条」。
+    chat.entries = [
+        {type: "user", id: "first", content: "Upper question"},
+        {type: "user", id: "second", content: "Lower question"},
+    ];
+    chat.rebuildNavMarkers();
+    const seamTop = (rail.children[1] as HTMLElement).getBoundingClientRect().top;
+    chat.messagesContainer.querySelectorAll(".agent-chat__msg--jumped").forEach(
+        element => element.classList.remove("agent-chat__msg--jumped"));
+    chat.messagesContainer.scrollTop = 0;
+    rail.dispatchEvent(new MouseEvent("click", {bubbles: true, clientY: seamTop - 0.001}));
+    check.equal(chat.messagesContainer.querySelector('[data-message-id="first"]').classList.contains("agent-chat__msg--jumped"),
+        true, "clicking above the seam jumps to the upper message");
+    check.equal(chat.messagesContainer.querySelector('[data-message-id="second"]').classList.contains("agent-chat__msg--jumped"),
+        false, "clicking above the seam never jumps to the lower message");
     return "Navigation cases passed";
 };
 
@@ -178,7 +209,8 @@ test("agent navigation keeps previews outside its click targets, paints short li
     const source = createSourceFile("AgentChat.ts", readFileSync(path.join(__dirname, "AgentChat.ts"), "utf8"),
         ScriptTarget.Latest, true);
     const methods: string[] = [];
-    const names = new Set(["initNavRail", "rebuildNavMarkers", "updateActiveMarker", "jumpToMessage"]);
+    const names = new Set(["initNavRail", "resolveNavMarker", "showNavPreview", "resetNavPreview",
+        "rebuildNavMarkers", "updateActiveMarker", "jumpToMessage"]);
     const visit = (node: import("typescript").Node) => {
         if (isMethodDeclaration(node) && names.has(node.name.getText(source))) methods.push(node.getText(source));
         forEachChild(node, visit);

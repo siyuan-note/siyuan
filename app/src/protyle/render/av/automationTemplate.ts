@@ -4,6 +4,7 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {hasAVCapability} from "./capabilities";
 import {getSelectedOptionsHTML} from "./fieldValueEditor";
 import {getAVLocationDisplayText} from "./locationValue";
+import {automationTemplateFunctions} from "./automationTemplateFunctions";
 
 export const automationTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
@@ -104,7 +105,9 @@ export const mountAutomationTemplate = (options: {
         invalidate();
     });
     const preview = host.querySelector<HTMLDetailsElement>("[data-template-preview]");
-    preview.classList.toggle("fn__none", rule.trigger === "manual");
+    const updatePreview = () => preview.classList.toggle("fn__none", rule.trigger === "manual" || automationTemplateFunctions(editor.value).has("httpGet"));
+    updatePreview();
+    editor.addEventListener("input", updatePreview);
     preview.addEventListener("toggle", () => {
         preview.querySelector("summary use").setAttribute("xlink:href", preview.open ? "#iconDown" : "#iconRight");
         onResize();

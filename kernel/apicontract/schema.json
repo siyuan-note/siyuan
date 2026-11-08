@@ -9802,6 +9802,60 @@
       },
       "additionalProperties": false
     },
+    "AVHTTPAutomationJob": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "blockID": {
+          "type": "string"
+        },
+        "boxID": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "sequence": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "avID",
+        "blockID",
+        "id",
+        "sequence"
+      ],
+      "additionalProperties": false
+    },
+    "AVHTTPAutomationJobInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "blockID": {
+          "type": "string"
+        },
+        "boxID": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "sequence": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "avID",
+        "blockID",
+        "id",
+        "sequence"
+      ],
+      "additionalProperties": false
+    },
     "AVIDData": {
       "type": "object",
       "properties": {
@@ -42009,6 +42063,9 @@
         "blockID": {
           "type": "string"
         },
+        "jobID": {
+          "type": "string"
+        },
         "ruleID": {
           "type": "string"
         }
@@ -58723,6 +58780,19 @@
             }
           ]
         },
+        "httpAutomationJobs": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVHTTPAutomationJob"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
         "templateDocTreePlanID": {
           "type": "string"
         },
@@ -59234,6 +59304,19 @@
               "type": "null"
             }
           ]
+        },
+        "httpAutomationJobs": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVHTTPAutomationJobInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
         },
         "templateDocTreePlanID": {
           "anyOf": [
@@ -144047,7 +144130,8 @@
               "code": {
                 "type": "integer",
                 "enum": [
-                  -1
+                  -1,
+                  -409
                 ]
               },
               "data": {
@@ -184607,7 +184691,9 @@
       "path": "/api/system/getChangelog",
       "handler": "getChangelog",
       "authorization": [
-        "authenticated"
+        "authenticated",
+        "admin",
+        "writable"
       ],
       "body": "legacyOptional",
       "request": {

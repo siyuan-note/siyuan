@@ -78,7 +78,7 @@ func TestManualAutomationFailurePreservesStoredValues(t *testing.T) {
 			if err := av.SaveAttributeView(source); err != nil {
 				t.Fatal(err)
 			}
-			before := manualAutomationVersion(source)
+			before := attributeViewAutomationVersion(source)
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			if mode == "canceled" {
@@ -102,7 +102,7 @@ func TestManualAutomationFailurePreservesStoredValues(t *testing.T) {
 			if mode == "denied" && requests != 1 {
 				t.Fatal("manual HTTP did not request confirmation", err)
 			}
-			if got := manualAutomationVersion(readAttributeViewItemsTest(t, source.ID)); got != before {
+			if got := attributeViewAutomationVersion(readAttributeViewItemsTest(t, source.ID)); got != before {
 				t.Fatal("failed manual execution changed stored data")
 			}
 			if mode != "denied" && requests != 0 {
@@ -114,14 +114,14 @@ func TestManualAutomationFailurePreservesStoredValues(t *testing.T) {
 
 func TestManualAutomationRejectsChangedSnapshotBeforeWriting(t *testing.T) {
 	fixture, source, _, _, _ := setupAutomationTest(t)
-	plan := &manualAttributeViewAutomation{ctx: context.Background(), at: time.Now(),
+	plan := &storedAttributeViewAutomation{ctx: context.Background(), at: time.Now(),
 		source:   &attributeViewAutomationSource{before: source, blockID: fixture.sourceID},
-		versions: map[string]string{source.ID: manualAutomationVersion(source)}}
+		versions: map[string]string{source.ID: attributeViewAutomationVersion(source)}}
 	source.Name = "Changed while requesting"
 	if err := av.SaveAttributeView(source); err != nil {
 		t.Fatal(err)
 	}
-	if err := PerformTransactionSync(&Transaction{manualAutomation: plan, fromAPI: true}); err == nil {
+	if err := PerformTransactionSync(&Transaction{storedAutomation: plan, fromAPI: true}); err == nil {
 		t.Fatal("stale manual result overwrote the changed database")
 	}
 	if got := readAttributeViewItemsTest(t, source.ID).Name; got != source.Name {

@@ -6,6 +6,7 @@ package api
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"net/http"
 	"os"
@@ -519,6 +520,70 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		decodeAttributeViewContextFilterAPIResponse(t, response, &failed)
 		if failed.Code == 0 {
 			t.Fatal("missing manual rule succeeded")
+		}
+	})
+	t.Run("automatic HTTP editing contract", func(t *testing.T) {
+		util.IncBootProgress(100-util.GetBootProgress(), "")
+		connectSettingNotifications(t, gin.New())
+		automatic := rule("changed", fixture.textKeyID, fixture.textKeyID, &av.Value{Type: av.KeyTypeText})
+		automatic.TimeZone = "UTC"
+		automatic.Actions[0].Fields[fixture.textKeyID] = &av.AutomationValue{Mode: "template", Template: `.action{if false}.action{httpGet "https://example.com"}.action{end}deferred value`}
+		if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID, BlockID: fixture.databaseID,
+			Data: &av.AutomationConfig{Spec: 10, Rules: []*av.AutomationRule{automatic}}}}); err != nil {
+			t.Fatal(err)
+		}
+		stored, err := av.ParseAttributeView(database.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		item := stored.GetBlockKeyValues().Values[0].BlockID
+		edit := map[string]any{"reqId": time.Now().UnixMilli(), "transactions": []any{map[string]any{
+			"doOperations":   []any{map[string]any{"action": "updateAttrViewCell", "avID": database.ID, "blockID": fixture.databaseID, "keyID": fixture.textKeyID, "rowID": item, "data": map[string]any{"text": map[string]any{"content": "saved input"}}}},
+			"undoOperations": []any{}, "httpAutomationJobs": []any{map[string]any{"id": "forged", "avID": database.ID, "blockID": fixture.databaseID, "sequence": 0}},
+		}}}
+		headers := func(handler gin.HandlerFunc, execution bool) gin.HandlerFunc {
+			return func(c *gin.Context) {
+				c.Request.Header.Set("X-Siyuan-Template-App", t.Name())
+				c.Request.Header.Set("X-Siyuan-Template-Session", "settings-notifications")
+				if execution {
+					c.Request.Header.Set("X-Siyuan-Template-Execution", rand.Text())
+				}
+				handler(c)
+			}
+		}
+		response := callAttributeViewContextFilterAPI(t, "/api/transactions", edit, headers(performTransactions, false))
+		requireAPIContract(t, http.MethodPost, "/api/transactions", response)
+		var result struct {
+			Code int
+			Data []*apicontract.Transaction
+		}
+		decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+		if result.Code != 0 || len(result.Data) != 1 || len(result.Data[0].HTTPAutomationJobs) != 1 {
+			t.Fatal("saved edit did not return a deferred task", response.Body.String())
+		}
+		if value, _ := av.ParseAttributeView(database.ID); value.GetValue(fixture.textKeyID, item).Text.Content != "saved input" {
+			t.Fatal("HTTP ran before acknowledging the edit")
+		}
+		job := result.Data[0].HTTPAutomationJobs[0]
+		if job.ID == "forged" {
+			t.Fatal("request injected an automatic task")
+		}
+		request := map[string]any{"avID": database.ID, "blockID": fixture.databaseID, "ruleID": "", "jobID": job.ID}
+		response = callAttributeViewContextFilterAPI(t, "/api/av/runAttributeViewAutomation", request, headers(runAttributeViewAutomation, true))
+		requireAPIContract(t, http.MethodPost, "/api/av/runAttributeViewAutomation", response)
+		var finished struct{ Code int }
+		decodeAttributeViewContextFilterAPIResponse(t, response, &finished)
+		if finished.Code != 0 {
+			t.Fatal("deferred execution failed", response.Body.String())
+		}
+		if value, _ := av.ParseAttributeView(database.ID); value.GetValue(fixture.textKeyID, item).Text.Content != "deferred value" {
+			t.Fatal("deferred result was not stored")
+		}
+		response = callAttributeViewContextFilterAPI(t, "/api/av/runAttributeViewAutomation", request, headers(runAttributeViewAutomation, true))
+		requireAPIContract(t, http.MethodPost, "/api/av/runAttributeViewAutomation", response)
+		decodeAttributeViewContextFilterAPIResponse(t, response, &finished)
+		if finished.Code != -409 {
+			t.Fatal("consumed task was replayed", response.Body.String())
 		}
 	})
 }

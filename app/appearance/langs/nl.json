@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP wordt uitgevoerd na het opslaan; bij fouten blijven wijzigingen en waarden behouden en resultaten kunnen apart ongedaan worden gemaakt",
 	"automationManual": "Handmatig",
 	"automationRunNow": "Nu uitvoeren",
 	"automationManualTip": "Uitvoeren voor overeenkomende items en resultaten in velden opslaan; bij HTTP-fouten blijven bestaande waarden behouden",

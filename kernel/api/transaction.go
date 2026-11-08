@@ -94,6 +94,7 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 	}
 	for _, transaction := range transactions {
 		transaction.Timestamp = timestamp
+		transaction.SetHTTPAutomationOwner(c.GetHeader("X-Siyuan-Template-App"), c.GetHeader("X-Siyuan-Template-Session"))
 		transaction.MarkFromAPI() // 标记来自 HTTP 入口，供全局撤销日志捕获判别
 	}
 
@@ -126,6 +127,9 @@ var performTransactions = contractHandler(apicontract.PerformTransactions, func(
 	result, err := transactionContracts(transactions)
 	if err != nil {
 		return apicontract.Failure[[]*apicontract.Transaction](-1, err.Error())
+	}
+	for index, transaction := range transactions {
+		result[index].HTTPAutomationJobs = transaction.HTTPAutomationJobs()
 	}
 	return apicontract.Success(result)
 })

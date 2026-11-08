@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP runs after edits are saved; failures preserve edits and stored values, and results have a separate undo step",
 	"automationManual": "Manual",
 	"automationRunNow": "Run now",
 	"automationManualTip": "Run on matching entries and save results to fields; HTTP failures keep existing values",

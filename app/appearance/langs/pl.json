@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP uruchamia się po zapisaniu zmian; błędy zachowują zmiany i dotychczasowe wartości, a wyniki można cofnąć osobno",
 	"automationManual": "Ręcznie",
 	"automationRunNow": "Uruchom teraz",
 	"automationManualTip": "Uruchom dla pasujących wpisów i zapisz wyniki w polach; błędy HTTP zachowują istniejące wartości",

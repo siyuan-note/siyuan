@@ -5,6 +5,7 @@
 package apicontract
 
 type RunAttributeViewAutomationRequest struct {
+	JobID   string `json:"jobID,omitempty" api:"optional"`
 	AvID    string `json:"avID"`
 	BlockID string `json:"blockID"`
 	RuleID  string `json:"ruleID"`

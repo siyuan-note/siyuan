@@ -15,6 +15,7 @@ import {openAutomationRules} from "./automationRules";
 import {openCollectionManager} from "./collectionReview";
 import {runManualAutomation} from "./manualAutomation";
 import {templateHTTPPermission, templateHTTPPermissionLabel} from "../../../template/httpPermission";
+import {automationRuleFunctions, automationTemplateSpec} from "./automationTemplateFunctions";
 
 interface AutomationValue extends Omit<AVAutomationValueInput, "value"> {
     value?: IAVCellValue;
@@ -197,6 +198,9 @@ export const openAutomationMenu = async (options: {
         }
         const run = body.querySelector<HTMLButtonElement>('[data-action="run-manual"]');
         if (run) run.disabled = !!issue || !rule?.enabled;
+        const hasHTTP = automationRuleFunctions(rule).has("httpGet");
+        body.querySelector('[data-action="revoke-manual"]')?.classList.toggle("fn__none", !hasHTTP);
+        body.querySelector("[data-http-tip]")?.classList.toggle("fn__none", !hasHTTP);
     };
     const save = (rule = rules[index]) => {
         // 不完整规则保留配置并停用，补全后由用户显式启用，避免编辑中途开始执行。
@@ -220,7 +224,7 @@ export const openAutomationMenu = async (options: {
         const excludesSelectedDocuments = rules.some(rule => rule.blockSource?.includeSelectedDocuments === false);
         const usesReferences = rules.some(rule => !!rule.blockSource?.referenceID);
         const usesManual = rules.some(rule => rule.trigger === "manual");
-        const next = {spec: Math.max(previous.spec, usesManual ? 9 : usesReferences ? 8 : excludesSelectedDocuments ? 7 : usesAttributeNameMatch ? 6 : usesDocumentDepth ? 5 : usesTagTarget ? 4 : usesSourceOptions ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
+        const next = {spec: Math.max(previous.spec, ...rules.map(automationTemplateSpec), usesManual ? 9 : usesReferences ? 8 : excludesSelectedDocuments ? 7 : usesAttributeNameMatch ? 6 : usesDocumentDepth ? 5 : usesTagTarget ? 4 : usesSourceOptions ? 3 : usesTemplates ? 2 : 1), rules: clone(rules)};
         if (JSON.stringify(next) === JSON.stringify(previous)) {
             return;
         }
@@ -335,7 +339,8 @@ ${rule.trigger === "block" ? `<div class="ft__on-surface ft__smaller av__automat
 <section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">1</span><span class="av__automation-section-title">${lang.automationWhen}</span></div>
 <div class="av__automation-columns"><label class="av__automation-control"><span class="ft__on-surface av__automation-control-label">${lang.automationTrigger}</span><select class="b3-select av__automation-trigger" data-trigger>${optionHTML("added", lang.automationAdded, rule.trigger)}${optionHTML("changed", lang.automationChanged, rule.trigger)}${optionHTML("block", lang.automationCollectBlocks, rule.trigger)}${optionHTML("manual", lang.automationManual, rule.trigger)}</select></label>${rule.trigger === "changed" ? `<label class="av__automation-control"><span class="ft__on-surface av__automation-control-label">${lang.automationWatchField}</span><select class="b3-select av__automation-watch-field" data-trigger-field>${optionHTML("", lang.automationAnyField, rule.keyID || "")}${fieldsOf(database).map(field => optionHTML(field.id, field.name, rule.keyID)).join("")}</select></label>` : ""}</div>
 ${rule.trigger === "changed" ? `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationChangedTip}</div>` : ""}
-${rule.trigger === "manual" ? `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationManualTip}</div><div class="av__automation-row"><button type="button" class="b3-button b3-button--outline" data-action="run-manual">${lang.automationRunNow}</button><button type="button" class="b3-button b3-button--cancel b3-button--wrap" data-action="revoke-manual">${lang.templateHTTPRevoke}</button></div>` : ""}</section>
+${rule.trigger === "manual" ? `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationManualTip}</div>` : `<div class="ft__on-surface ft__smaller av__automation-tip" data-http-tip>${lang.automationHTTPTip}</div>`}
+${rule.trigger !== "block" ? `<div class="av__automation-row">${rule.trigger === "manual" ? `<button type="button" class="b3-button b3-button--outline" data-action="run-manual">${lang.automationRunNow}</button>` : ""}<button type="button" class="b3-button b3-button--cancel b3-button--wrap" data-action="revoke-manual">${lang.templateHTTPRevoke}</button></div>` : ""}</section>
 <section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">2</span><span class="av__automation-section-title">${rule.trigger === "block" ? lang.automationBlockConditions : lang.automationConditions}</span></div>
 ${rule.trigger === "block" ? "" : `<div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationConditionsTip}</div>`}<div data-source-conditions></div></section>
 <section class="av__automation-section"><div class="av__automation-row ft__b"><span class="ft__on-surface av__automation-section-index">3</span><span class="av__automation-section-title">${lang.automationThen}</span></div><div data-actions></div>${rule.trigger === "block" ? "" : `<button type="button" class="b3-button b3-button--cancel" data-action="add-action"><svg><use xlink:href="#iconAdd"></use></svg>${lang.automationAddAction}</button>`}</section>` : ""}`;

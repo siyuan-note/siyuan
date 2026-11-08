@@ -5,6 +5,8 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -16,6 +18,34 @@ var runAttributeViewAutomation = contractHandler(apicontract.RunAttributeViewAut
 	func(c *gin.Context, request apicontract.RunAttributeViewAutomationRequest) apicontract.Response[apicontract.Null] {
 		if err := holdAttributeViewRequest(c, request.BlockID, request.AvID); err != nil {
 			return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(314))
+		}
+		if request.JobID != "" {
+			job, ctx, finish, err := model.ClaimAttributeViewHTTPAutomation(c.Request.Context(), request.JobID, request.AvID, request.BlockID,
+				c.GetHeader("X-Siyuan-Template-App"), c.GetHeader("X-Siyuan-Template-Session"))
+			if errors.Is(err, model.ErrAutomaticHTTPObsolete) {
+				return apicontract.Failure[apicontract.Null](-409, "")
+			}
+			if err != nil {
+				return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(258))
+			}
+			defer finish()
+			c.Request = c.Request.WithContext(ctx)
+			execution, err := startTemplateHTTP(c, "automatic-automation")
+			if err != nil || execution == nil {
+				return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(258))
+			}
+			defer execution.Close()
+			tx, err := model.RunAttributeViewHTTPAutomation(ctx, job, execution)
+			if ctx.Err() != nil || errors.Is(err, model.ErrAutomaticHTTPObsolete) {
+				return apicontract.Failure[apicontract.Null](-409, "")
+			}
+			if err != nil {
+				return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(258))
+			}
+			if tx != nil {
+				pushTransactions(c.GetHeader("X-Siyuan-Template-App"), c.GetHeader("X-Siyuan-Template-Session"), []*model.Transaction{tx})
+			}
+			return apicontract.Success(apicontract.Null{})
 		}
 		execution, err := startTemplateHTTP(c, "manual-automation")
 		if err != nil {

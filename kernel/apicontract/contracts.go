@@ -1665,12 +1665,15 @@ var RemoveTagWithCollections = define[RemoveTagWithCollectionsRequest, Null]("re
 // 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。
 var PreviewAttributeViewTemplate = define[AVAutomationTemplatePreviewRequest, *AVValue]("previewAttributeViewTemplate", "/api/av/previewAttributeViewTemplate", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
-// RunAttributeViewAutomation 显式执行已启用的 manual 规则，要求配置版本 9。
+// RunAttributeViewAutomation 执行已启用的 manual 规则或继续编辑提交后返回的单次 HTTP 任务。
 // 条目、条件、动作目标及输入均使用开始执行时的存储快照，不受当前视图筛选或分页限制。
-// httpGet 和 fromJson 仅在手动模板中可用，联网沿用交互确认、持久许可及公网请求限制。
+// manual 规则要求配置版本 9；事件 HTTP 任务要求 10，仅处理触发编辑的条目。
+// jobID 非空时校验任务的 avID、blockID 和发起窗口，忽略 ruleID；任务五分钟内有效且仅能消费一次。
+// 失效、重复、被后续编辑替代或取消的任务返回 code -409，不写入结果；普通失败返回 -1。
+// 联网沿用交互确认、持久许可及公网请求限制，无交互窗口不能执行事件 HTTP 任务。
 // 全部取数成功后重新校验已读取的数据库，在单笔可撤销事务中写入；失败、取消或来源改变均保留原值。
 // 撤销和重做复用已保存结果，不重复联网；每次最多 1000 个写入操作，不提供定时执行。
-var RunAttributeViewAutomation = define[RunAttributeViewAutomationRequest, Null]("runAttributeViewAutomation", "/api/av/runAttributeViewAutomation", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+var RunAttributeViewAutomation = define[RunAttributeViewAutomationRequest, Null]("runAttributeViewAutomation", "/api/av/runAttributeViewAutomation", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{AdditionalCodes: []int{-409}}, "POST")
 var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPasteRowsData]("getAttributeViewPasteRows", "/api/av/getAttributeViewPasteRows", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1992,6 +1995,9 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 // retData 返回受影响的文档 ID。逆向操作使用受影响顶层块的私有内存快照；快照不传给客户端，也不接受客户端提交。
 // 重放保留块 ID 和数据库绑定，内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。
 // 撤销与重放为所有受影响文档持有笔记本租约，直至响应序列化完成。
+// 请求头 X-Siyuan-Template-App/Session 指定当前非发布主窗口，启用格式 10 的事件 HTTP 规则会返回 httpAutomationJobs。
+// 编辑先提交，再由该窗口继续单次任务，网络等待不阻塞编辑；输入中的 httpAutomationJobs 被忽略。
+// 任务仅包含标识和摘要，不持有明文快照；无有效窗口的 API 写入只保存编辑，不执行事件 HTTP 动作。
 var PerformTransactions = define[PerformTransactionsRequest, []*Transaction]("performTransactions", "/api/transactions", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-409}}, "POST")
 var UndoState = define[TransactionUndoStateRequest, TransactionUndoState]("undoState", "/api/transactions/undoState", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformUndo = define[TransactionHistoryRequest, TransactionHistoryResult]("performUndo", "/api/transactions/undo", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

@@ -97,6 +97,20 @@ func IsAutomationBlockType(value string) bool {
 
 // RequiredSpec 保留普通规则的版本，仅在使用新增语义时要求支持该语义的读取器。
 func (rule *AutomationRule) RequiredSpec() int {
+	for _, action := range rule.Actions {
+		if action == nil {
+			continue
+		}
+		for _, value := range action.Fields {
+			if !rule.Enabled || value == nil || value.Mode != "template" {
+				continue
+			}
+			if automationTemplateUses(value.Template, "printf", "urlquery", "dict", "toString") ||
+				rule.Trigger != "manual" && automationTemplateUses(value.Template, "httpGet", "fromJson") {
+				return 10
+			}
+		}
+	}
 	if rule.Trigger == "manual" {
 		return 9
 	}
@@ -145,7 +159,7 @@ func (config *AutomationConfig) ValidateSpec() error {
 	if config == nil {
 		return nil
 	}
-	if config.Spec < 1 || config.Spec > 9 {
+	if config.Spec < 1 || config.Spec > 10 {
 		return fmt.Errorf("unsupported database automation specification [%d]", config.Spec)
 	}
 	for _, rule := range config.Rules {

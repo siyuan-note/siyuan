@@ -91,8 +91,8 @@ func (paused automationPausedRule) message() string {
 
 // 仅用户及 API 的条目写入产生触发事件，撤销重放只执行已记录的操作。
 func (tx *Transaction) prepareAttributeViewAutomations() error {
-	if tx.manualAutomation != nil {
-		tx.attributeViewAutomations = &attributeViewAutomationState{time: tx.manualAutomation.at.UnixMilli(), recordUndo: true}
+	if tx.storedAutomation != nil {
+		tx.attributeViewAutomations = &attributeViewAutomationState{time: tx.storedAutomation.at.UnixMilli(), recordUndo: true}
 		return nil
 	}
 	if !tx.fromAPI && !tx.isReplay {
@@ -219,7 +219,7 @@ func (tx *Transaction) rememberAutomationTree(tree *parse.Tree) error {
 }
 
 func (tx *Transaction) runAttributeViewAutomations() error {
-	if tx.manualAutomation != nil {
+	if tx.storedAutomation != nil {
 		return nil
 	}
 	if tx.attributeViewCollections != nil && tx.attributeViewCollections.err != nil {
@@ -302,6 +302,10 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 	}
 	// 先确定全部触发条件，关联关键词也不会读到前一自动动作修改后的标题。
 	for _, entry := range triggered {
+		if entry.rule.UsesHTTP() {
+			tx.queueHTTPAutomation(entry.source, entry.rule, entry.itemID)
+			continue
+		}
 		result := tx.automationResult(entry.source.boxID, entry.current.ID, entry.rule)
 		for _, action := range entry.rule.Actions {
 			if err := tx.runAutomationAction(entry.source, entry.current, entry.itemID, action, entry.rule.TimeZone, result); err != nil {
@@ -536,7 +540,7 @@ func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av
 			switch field.Mode {
 			case "template":
 				validate := av.ValidateAutomationTemplate
-				if rule.Trigger == "manual" {
+				if rule.Trigger == "manual" || rule.UsesHTTP() {
 					validate = av.ValidateManualAutomationTemplate
 				}
 				if err := validate(field.Template, rule.TimeZone); err != nil {
@@ -605,8 +609,8 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 		}
 		ids = []string{id}
 		result.record("added", target.ID, id)
-	} else if tx.manualAutomation != nil {
-		ids = tx.manualAutomation.targets[itemID][action]
+	} else if tx.storedAutomation != nil {
+		ids = tx.storedAutomation.targets[itemID][action]
 	} else {
 		switch action.Target {
 		case "current":
@@ -642,7 +646,7 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 		if target.GetBlockValue(id) == nil {
 			return av.ErrItemNotFound
 		}
-		if action.Type != "add" && tx.manualAutomation == nil {
+		if action.Type != "add" && tx.storedAutomation == nil {
 			matches, filterErr := target.MatchesAutomationFilters(id, action.Filters, relationValues)
 			if filterErr != nil {
 				return filterErr
@@ -732,8 +736,8 @@ func automationValuePatch(value *av.Value) map[string]any {
 
 func (tx *Transaction) resolveAutomationValue(source *av.AttributeView, itemID string, key *av.Key,
 	field *av.AutomationValue, timeZone string) (*av.Value, error) {
-	if tx.manualAutomation != nil {
-		value := tx.manualAutomation.values[itemID][field]
+	if tx.storedAutomation != nil {
+		value := tx.storedAutomation.values[itemID][field]
 		if value == nil {
 			return nil, fmt.Errorf("manual automation snapshot is unavailable")
 		}

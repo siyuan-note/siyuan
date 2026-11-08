@@ -22,7 +22,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestManualAutomationEncryptedPersistenceAndReplay(t *testing.T) {
+func setupStoredAutomationEncryptedTest(t *testing.T) (*fileOperationTestFixture, *av.AttributeView, *av.Key) {
+	t.Helper()
 	fixture, view, _, _, _ := setupAutomationTest(t)
 	view.Automations = &av.AutomationConfig{Spec: 8, Rules: []*av.AutomationRule{}}
 	boxID := fixture.box.ID
@@ -86,17 +87,23 @@ func TestManualAutomationEncryptedPersistenceAndReplay(t *testing.T) {
 	if key == nil {
 		t.Fatal("unexpected text fixture")
 	}
+	return fixture, view, key
+}
+
+func TestManualAutomationEncryptedPersistenceAndReplay(t *testing.T) {
+	fixture, view, key := setupStoredAutomationEncryptedTest(t)
+	boxID := fixture.box.ID
 	rule := &av.AutomationRule{ID: "20261108000000-manual1", Name: "Manual", Enabled: true, Trigger: "manual", TimeZone: "UTC",
 		Actions: []*av.AutomationAction{{Type: "edit", Target: "current", Fields: map[string]*av.AutomationValue{
 			key.ID: {Mode: "template", Template: `.action{now | date "2006-01-02T15:04:05.999999999Z07:00"}`},
 		}}}}
 	view.Automations = &av.AutomationConfig{Spec: 9, Rules: []*av.AutomationRule{rule}}
-	if err = av.SaveAttributeView(view); err != nil {
+	if err := av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)
 	}
 	item := view.GetBlockKeyValues().Values[0].BlockID
 	before := view.GetValue(key.ID, item).Text.Content
-	if err = RunAttributeViewAutomation(context.Background(), view.ID, fixture.sourceID, rule.ID, nil); err != nil {
+	if err := RunAttributeViewAutomation(context.Background(), view.ID, fixture.sourceID, rule.ID, nil); err != nil {
 		t.Fatal(err)
 	}
 	read := func() string {
@@ -115,13 +122,13 @@ func TestManualAutomationEncryptedPersistenceAndReplay(t *testing.T) {
 	if entry == nil {
 		t.Fatal("encrypted manual execution has no undo")
 	}
-	if err = PerformTxSync(&Transaction{DoOperations: entry.UndoOperationsForReplay(), isReplay: true}); err != nil {
+	if err := PerformTxSync(&Transaction{DoOperations: entry.UndoOperationsForReplay(), isReplay: true}); err != nil {
 		t.Fatal(err)
 	}
 	if read() != before {
 		t.Fatal("encrypted undo changed the original value")
 	}
-	if err = PerformTxSync(&Transaction{DoOperations: entry.DoOperationsForReplay(), isReplay: true}); err != nil {
+	if err := PerformTxSync(&Transaction{DoOperations: entry.DoOperationsForReplay(), isReplay: true}); err != nil {
 		t.Fatal(err)
 	}
 	if read() != after {
@@ -146,5 +153,56 @@ func TestManualAutomationEncryptedPersistenceAndReplay(t *testing.T) {
 	stored, _ := os.ReadFile(path)
 	if !bytes.Equal(stored, ciphertext) {
 		t.Fatal("failed authentication changed ciphertext")
+	}
+}
+
+func TestAutomaticHTTPEncryptedPersistenceAndReplay(t *testing.T) {
+	fixture, view, key := setupStoredAutomationEncryptedTest(t)
+	_, app := templateHTTPTestWindow(t)
+	view.Automations = &av.AutomationConfig{Spec: 10, Rules: []*av.AutomationRule{{ID: "20261109000000-autorul", Name: "Fetch", Enabled: true,
+		Trigger: "changed", KeyID: key.ID, TimeZone: "UTC", Actions: []*av.AutomationAction{{Type: "edit", Target: "current",
+			Fields: map[string]*av.AutomationValue{key.ID: {Mode: "template", Template: `.action{if false}.action{httpGet "https://example.com"}.action{end}.action{printf "%s" "encrypted result"}`}}}}}}}
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	item := view.GetBlockKeyValues().Values[0].BlockID
+	tx := &Transaction{fromAPI: true, DoOperations: []*Operation{{Action: "updateAttrViewCell", AvID: view.ID, BlockID: fixture.sourceID,
+		KeyID: key.ID, RowID: item, Data: map[string]any{"text": map[string]any{"content": "saved input"}}}}}
+	tx.SetHTTPAutomationOwner(app, "main")
+	if err := PerformTxSync(tx); err != nil {
+		t.Fatal(err)
+	}
+	job, ctx, finish := claimHTTPAutomationTest(t, tx, app)
+	defer finish()
+	if job.BoxID != fixture.box.ID {
+		t.Fatal("encrypted task lost its notebook scope")
+	}
+	if err := runStoredAttributeViewAutomation(ctx, view.ID, fixture.sourceID, "", nil, job, nil); err != nil {
+		t.Fatal(err)
+	}
+	entry := GlobalUndoLog.Peek(fixture.sourceID)
+	if entry == nil {
+		t.Fatal("encrypted automatic result has no undo")
+	}
+	for _, step := range []struct {
+		ops  []*Operation
+		want string
+	}{{entry.UndoOperationsForReplay(), "saved input"}, {entry.DoOperationsForReplay(), "encrypted result"}} {
+		if err := PerformTxSync(&Transaction{DoOperations: step.ops, isReplay: true}); err != nil {
+			t.Fatal(err)
+		}
+		cache.ClearAVCache()
+		stored, err := av.ParseAttributeViewForIndexInBox(view.ID, fixture.box.ID)
+		if err != nil || stored.GetValue(key.ID, item).Text.Content != step.want {
+			t.Fatal("encrypted automatic replay changed the saved result", err)
+		}
+	}
+	path := filepath.Join(util.DataDir, fixture.box.ID, "storage", "av", view.ID+".json")
+	data, err := os.ReadFile(path)
+	if err != nil || !util.IsCiphertext(data) || bytes.Contains(data, []byte("encrypted result")) {
+		t.Fatal("automatic result did not remain encrypted", err)
+	}
+	if _, err = os.Stat(filepath.Join(util.DataDir, "storage", "av", view.ID+".json")); !os.IsNotExist(err) {
+		t.Fatal("automatic result created a plaintext fallback")
 	}
 }

@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP 在编辑保存后执行；失败时保留编辑和原值，取数结果单独撤销",
 	"automationManual": "手动",
 	"automationRunNow": "立即执行",
 	"automationManualTip": "对符合条件的条目执行并将结果保存到字段；HTTP 失败时保留原值",

@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP 在編輯儲存後執行；失敗時保留編輯和原值，取數結果可單獨復原",
 	"automationManual": "手動",
 	"automationRunNow": "立即執行",
 	"automationManualTip": "對符合條件的項目執行並將結果儲存到欄位；HTTP 失敗時保留原值",

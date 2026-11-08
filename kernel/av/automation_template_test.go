@@ -22,7 +22,7 @@ func TestManualAutomationTemplateHTTPAndJSON(t *testing.T) {
 		t.Fatal(err)
 	}
 	calls := 0
-	context := AutomationTemplateContext{TimeZone: "UTC", Manual: true, HTTP: template.FuncMap{
+	context := AutomationTemplateContext{TimeZone: "UTC", AllowHTTP: true, HTTP: template.FuncMap{
 		"httpGet": func(string, ...map[string]any) (map[string]any, error) {
 			calls++
 			return map[string]any{"body": `{"value":12.5}`}, nil

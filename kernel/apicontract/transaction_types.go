@@ -102,12 +102,22 @@ type TransactionOperation struct {
 }
 
 type Transaction struct {
+	// 仅响应返回的单次联网任务；输入中的同名字段不参与执行，任务绑定提交窗口且五分钟内有效。
+	HTTPAutomationJobs []*AVHTTPAutomationJob `json:"httpAutomationJobs,omitempty" api:"optional"`
 	// 来源删除预览的认证字节摘要，包含仅删除来源及未选择移出条目的分支；过期时拒绝整笔编辑。
 	CollectionRemovalSourceVersions map[string]string       `json:"collectionRemovalSourceVersions,omitempty" api:"optional"`
 	Timestamp                       int64                   `json:"timestamp" api:"optional,nullable"`
 	DoOperations                    []*TransactionOperation `json:"doOperations" api:"optional,nullable"`
 	UndoOperations                  []*TransactionOperation `json:"undoOperations" api:"optional,nullable"`
 	TemplateDocTreePlanID           string                  `json:"templateDocTreePlanID,omitempty" api:"optional,nullable"`
+}
+
+type AVHTTPAutomationJob struct {
+	BoxID    string `json:"boxID,omitempty" api:"optional"`
+	ID       string `json:"id"`
+	AVID     string `json:"avID"`
+	BlockID  string `json:"blockID"`
+	Sequence int64  `json:"sequence"`
 }
 
 type PerformTransactionsRequest struct {

@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP viene eseguito dopo il salvataggio; gli errori conservano modifiche e valori, i risultati si annullano separatamente",
 	"automationManual": "Manuale",
 	"automationRunNow": "Esegui ora",
 	"automationManualTip": "Esegui sulle voci corrispondenti e salva i risultati nei campi; gli errori HTTP mantengono i valori esistenti",

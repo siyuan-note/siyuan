@@ -6,6 +6,7 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -25,6 +26,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -236,6 +238,10 @@ func PerformTransactionSync(transaction *Transaction) (err error) {
 	}
 
 	if err = performTxSyncLocked(transaction); nil != err {
+		if transaction.storedAutomation != nil && (errors.Is(err, ErrAutomaticHTTPObsolete) ||
+			errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)) {
+			return err
+		}
 		if txErr, ok := err.(*TxErr); ok {
 			handleTxErr(transaction, txErr)
 			if txErr.code == TxErrCodeSkipTx {
@@ -293,7 +299,7 @@ func (e *TxErr) Code() int {
 }
 
 func performTx(tx *Transaction) (ret *TxErr) {
-	if 1 > len(tx.DoOperations) && tx.manualAutomation == nil {
+	if 1 > len(tx.DoOperations) && tx.storedAutomation == nil {
 		return
 	}
 	timing := util.BeginPerformance("transaction")
@@ -341,9 +347,9 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	diagnostic.Stage("prepare database automations")
 	timing.Stage("automations")
-	if err = tx.validateManualAttributeViewAutomation(); err != nil {
+	if err = tx.validateStoredAttributeViewAutomation(); err != nil {
 		tx.rollback()
-		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), cause: err}
 	}
 	if err = tx.validateCollectionRemovalSources(); err != nil {
 		tx.rollback()
@@ -357,10 +363,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		tx.rollback()
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
 	}
-	if tx.manualAutomation != nil {
-		if err = tx.runManualAttributeViewAutomation(); err != nil {
+	if tx.storedAutomation != nil {
+		if err = tx.applyStoredAttributeViewAutomation(); err != nil {
 			tx.rollback()
-			return &TxErr{code: TxErrHandleAttributeView, msg: err.Error()}
+			return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), cause: err}
 		}
 	}
 	diagnostic.Stage("process bulk operations")
@@ -375,7 +381,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		tx.rollback()
 		return ret
 	}
-	if !isLargeInsert && tx.manualAutomation == nil {
+	if !isLargeInsert && tx.storedAutomation == nil {
 		for operationIndex := 0; operationIndex < len(tx.DoOperations); operationIndex++ {
 			op := tx.DoOperations[operationIndex]
 			if err = tx.validateAttributeViewRelationCellOperation(op); err != nil {
@@ -652,6 +658,15 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	diagnostic.Stage("commit transaction")
 	timing.Stage("commit")
+	if plan := tx.storedAutomation; plan != nil {
+		if err = plan.ctx.Err(); err == nil && plan.runtime != nil {
+			err = plan.runtime.Err()
+		}
+		if err != nil {
+			tx.rollback()
+			return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), cause: err}
+		}
+	}
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
 		if 1 == tx.state.Load() {
@@ -2958,7 +2973,10 @@ type Transaction struct {
 	attributeViewRollback         *attributeViewRollback
 	historyRecovery               *attributeViewHistoryRecovery
 	attributeViewAutomations      *attributeViewAutomationState
-	manualAutomation              *manualAttributeViewAutomation
+	storedAutomation              *storedAttributeViewAutomation
+	httpAutomationOwner           *attributeViewHTTPOwner
+	pendingHTTPAutomations        map[string]*attributeViewHTTPAutomation
+	httpAutomationJobs            []*apicontract.AVHTTPAutomationJob
 	pushAutomationMessage         func(string, int) string
 	attributeViewCollections      *attributeViewCollectionState
 	attributeViewItemCreation     bool
@@ -3343,6 +3361,7 @@ func (tx *Transaction) commit() (err error) {
 	committed = true
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
 	GlobalUndoLog.Record(tx)
+	tx.commitHTTPAutomations(memoryDatabaseIDs)
 	tx.finishAttributeViewMutation(false)
 	tx.releaseCommittedResources()
 	tx.m.Unlock()

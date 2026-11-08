@@ -642,6 +642,8 @@ Parent directories below the history root are not part of AAD. Every history ent
 
 Manual database automation uses automation format 9 without changing the encryption envelope, AAD or key derivation. Formats 1–8 remain authenticated and readable through the existing export, history, backup and recovery paths; older clients reject format 9 without rewriting its source. Manual execution holds notebook lifecycle leases while reading snapshots, confirming HTTP access and committing ordinary field values. Network waits do not hold the editing transaction lock. Failed, canceled, stale or unauthenticated executions preserve existing values and ciphertext; undo and redo reuse stored results without HTTP. No plaintext HTTP-response cache is persisted.
 
+Automation format 10 retains the same authenticated storage envelope and readers for formats 1–9. Event-triggered HTTP tasks persist no plaintext snapshots: pending tasks contain only identifiers and digests, expire within five minutes, and require the originating live main window. They acquire notebook leases before reading or fetching; locked, corrupt or unauthenticated sources cannot continue. Edits commit before network waits, and results commit atomically as a separate undoable transaction only while snapshots remain current. Failure or cancellation preserves the saved edits and previous results; replay performs no HTTP.
+
 ## Verification
 
 ### Security acceptance matrix

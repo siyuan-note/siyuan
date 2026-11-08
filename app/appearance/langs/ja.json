@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP は編集内容を保存した後に実行します。失敗時は編集内容と既存の値を保持し、取得結果は別の操作として元に戻せます",
 	"automationManual": "手動",
 	"automationRunNow": "今すぐ実行",
 	"automationManualTip": "条件に一致する項目で実行し、結果をフィールドに保存します。HTTP に失敗した場合は既存の値を保持します",

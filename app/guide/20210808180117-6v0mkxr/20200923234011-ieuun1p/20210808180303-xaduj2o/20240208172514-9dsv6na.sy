@@ -4692,12 +4692,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-coesny2",
-				"updated": "20261108182000"
+				"updated": "20261109002000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Results are stored once, and redo reuses them. SQL, files, loops, and recursion are unavailable. Event-triggered rules cannot access the network. Source is limited to 8 KiB; each field input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
+					"Data": "Results are stored once, and redo reuses them. SQL, files, loops, and recursion are unavailable. Rules containing HTTP run after the edit is saved. Source is limited to 8 KiB; each field input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
 				}
 			]
 		},
@@ -4797,6 +4797,78 @@
 				{
 					"Type": "NodeText",
 					"Data": "Network access requires confirmation in the current window and follows the template HTTP restrictions. Persistent permission is tied to the saved rule version; it can be revoked in the automation panel. Any request, parsing or conversion failure preserves all original values. If a database used by the rule changes while waiting, run again. All actions read the initial stored snapshot; undo and redo reuse saved results without fetching. HTTP requests use the existing execution budget; each run permits at most 1,000 field writes and row additions. Manual templates do not provide the field preview. Manual rules require automation format 9; formats 1–8 remain readable and older clients reject format 9 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-ys4550m",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261109002000-ys4550m",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic HTTP and formatting functions"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261109002000-xsz4h51",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-xsz4h51",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For item-added and field-changed triggers, a rule containing httpGet runs all its actions after the edit is saved. Continuous edits in one database are combined, and the current window handles network confirmation. Failure preserves the saved edit and previous results; changes to a database used by the execution discard stale results. Results are saved together as a separate undo step. Undoing the result keeps the input edit; undoing again reverts that edit. Redo reuses saved results without HTTP, and result writes do not trigger other automations. Without an interactive window, API writes save their edits without running rules that contain HTTP. Scheduled execution is not provided."
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-o3lyz6m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-o3lyz6m",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "All automation templates support printf, urlquery, dict, toString and fromJson. printf supports common format verbs with bounded width and precision for scalar arguments, without dynamic width (*) or argument indexes; dict requires string keys and complete key/value pairs. These helpers accept at most 64 arguments and 64 KiB of serialized input, and string output is limited to 64 KiB. New formatting functions and event HTTP rules require automation format 10. Existing formats 1–9 remain readable, including disabled unfinished templates; older clients reject format 10 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-jr9ehz4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-jr9ehz4",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, construct a URL from a source field (replace FIELD_ID with its field ID):"
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-0vr0465",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-0vr0465",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{printf \"https://example.com?q=%s\" (urlquery (field \"FIELD_ID\"))}"
 				}
 			]
 		},

@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP sa vykoná po uložení úprav; pri chybe zostanú úpravy a pôvodné hodnoty zachované, výsledky možno vrátiť späť samostatne",
 	"automationManual": "Ručne",
 	"automationRunNow": "Spustiť teraz",
 	"automationManualTip": "Spustiť pre zodpovedajúce položky a uložiť výsledky do polí; pri chybách HTTP sa zachovajú existujúce hodnoty",

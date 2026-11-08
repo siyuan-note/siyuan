@@ -418,6 +418,10 @@ export type AVGroupRange = { "numEnd": number; "numStart": number; "numStep": nu
 
 export type AVGroupRangeInput = { "numEnd"?: number | null; "numStart"?: number | null; "numStep"?: number | null; };
 
+export type AVHTTPAutomationJob = { "avID": string; "blockID": string; "boxID"?: string; "id": string; "sequence": number; };
+
+export type AVHTTPAutomationJobInput = { "avID": string; "blockID": string; "boxID"?: string; "id": string; "sequence": number; };
+
 export type AVIDData = { "id": string; };
 
 export type AVItemConditionalColors = { "background"?: AVValueSelect; "properties"?: Record<string, AVValueSelect | null>; };
@@ -2014,7 +2018,7 @@ export type RiffTreeDueCardsRequestInput = { "reviewedCards"?: Array<RiffReviewe
 
 export type RollbackRepoSnapshotFileRequestInput = { "id": string; };
 
-export type RunAttributeViewAutomationRequestInput = { "avID": string; "blockID": string; "ruleID": string; };
+export type RunAttributeViewAutomationRequestInput = { "avID": string; "blockID": string; "jobID"?: string; "ruleID": string; };
 
 export type SQLQueryRequestInput = { "mode"?: string | null; "stmt": string; };
 
@@ -2694,7 +2698,7 @@ export type TestSyncProviderS3RequestInput = { "s3": SyncS3Input; };
 
 export type TestSyncProviderWebDAVRequestInput = { "cloudName"?: string; "webdav": SyncWebDAVInput; };
 
-export type Transaction = { "collectionRemovalSourceVersions"?: Record<string, string>; "doOperations": Array<TransactionOperation | null> | null; "templateDocTreePlanID"?: string; "timestamp": number; "undoOperations": Array<TransactionOperation | null> | null; };
+export type Transaction = { "collectionRemovalSourceVersions"?: Record<string, string>; "doOperations": Array<TransactionOperation | null> | null; "httpAutomationJobs"?: Array<AVHTTPAutomationJob | null>; "templateDocTreePlanID"?: string; "timestamp": number; "undoOperations": Array<TransactionOperation | null> | null; };
 
 export type TransactionAttributeChangeInput = { "data-av-type"?: string | null; "new"?: Record<string, string> | null; "old"?: Record<string, string> | null; };
 
@@ -2722,7 +2726,7 @@ export type TransactionHistoryFailure = { "failed": true; "msg": string; };
 
 export type TransactionHistoryRequestInput = { "app"?: string; "rootID": string; "session"?: string; };
 
-export type TransactionInput = { "collectionRemovalSourceVersions"?: Record<string, string>; "doOperations"?: Array<TransactionOperationRequest | null> | null; "templateDocTreePlanID"?: string | null; "timestamp"?: number | null; "undoOperations"?: Array<TransactionOperationRequest | null> | null; };
+export type TransactionInput = { "collectionRemovalSourceVersions"?: Record<string, string>; "doOperations"?: Array<TransactionOperationRequest | null> | null; "httpAutomationJobs"?: Array<AVHTTPAutomationJobInput | null>; "templateDocTreePlanID"?: string | null; "timestamp"?: number | null; "undoOperations"?: Array<TransactionOperationRequest | null> | null; };
 
 export type TransactionInsertedItems = { "existingItemIDs": Array<string> | null; "insertedItemIDs": Array<string> | null; };
 
@@ -4436,15 +4440,18 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 显式执行已启用的 manual 规则，要求配置版本 9。
+     * 执行已启用的 manual 规则或继续编辑提交后返回的单次 HTTP 任务。
      * 条目、条件、动作目标及输入均使用开始执行时的存储快照，不受当前视图筛选或分页限制。
-     * httpGet 和 fromJson 仅在手动模板中可用，联网沿用交互确认、持久许可及公网请求限制。
+     * manual 规则要求配置版本 9；事件 HTTP 任务要求 10，仅处理触发编辑的条目。
+     * jobID 非空时校验任务的 avID、blockID 和发起窗口，忽略 ruleID；任务五分钟内有效且仅能消费一次。
+     * 失效、重复、被后续编辑替代或取消的任务返回 code -409，不写入结果；普通失败返回 -1。
+     * 联网沿用交互确认、持久许可及公网请求限制，无交互窗口不能执行事件 HTTP 任务。
      * 全部取数成功后重新校验已读取的数据库，在单笔可撤销事务中写入；失败、取消或来源改变均保留原值。
      * 撤销和重做复用已保存结果，不重复联网；每次最多 1000 个写入操作，不提供定时执行。
      */
     "/api/av/runAttributeViewAutomation": {
         request: RunAttributeViewAutomationRequestInput;
-        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -409; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
@@ -9209,6 +9216,9 @@ export interface APIPOSTRoutes {
      * retData 返回受影响的文档 ID。逆向操作使用受影响顶层块的私有内存快照；快照不传给客户端，也不接受客户端提交。
      * 重放保留块 ID 和数据库绑定，内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。
      * 撤销与重放为所有受影响文档持有笔记本租约，直至响应序列化完成。
+     * 请求头 X-Siyuan-Template-App/Session 指定当前非发布主窗口，启用格式 10 的事件 HTTP 规则会返回 httpAutomationJobs。
+     * 编辑先提交，再由该窗口继续单次任务，网络等待不阻塞编辑；输入中的 httpAutomationJobs 被忽略。
+     * 任务仅包含标识和摘要，不持有明文快照；无有效窗口的 API 写入只保存编辑，不执行事件 HTTP 动作。
      */
     "/api/transactions": {
         request: PerformTransactionsRequestInput;

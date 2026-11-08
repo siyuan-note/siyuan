@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP, düzenlemeler kaydedildikten sonra çalışır; hatalarda düzenlemeler ve eski değerler korunur, sonuçlar ayrı geri alınabilir",
 	"automationManual": "Elle",
 	"automationRunNow": "Şimdi çalıştır",
 	"automationManualTip": "Eşleşen girdilerde çalıştır ve sonuçları alanlara kaydet; HTTP hatalarında mevcut değerler korunur",

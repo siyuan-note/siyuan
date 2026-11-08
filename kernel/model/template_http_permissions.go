@@ -161,6 +161,15 @@ func resolveTemplateHTTPSource(locator string, record templateHTTPPermissionReco
 	}
 	existing, exists := templateHTTPPermissionStore.state.Sources[locator]
 	if exists && existing.Version == record.Version && existing.Persistable == record.Persistable {
+		if existing.Label != record.Label {
+			existing.Label = record.Label
+			templateHTTPPermissionStore.state.Sources[locator] = existing
+			if existing.Granted {
+				if err := saveTemplateHTTPPermissionsLocked(); err != nil {
+					return nil, err
+				}
+			}
+		}
 		record = existing
 	} else {
 		if exists {
@@ -266,13 +275,17 @@ func ResolveTemplateHTTPAutomationSource(owner, avID string, rule *av.Automation
 		owner = "global"
 	}
 	data, err := json.Marshal(rule)
-	if err != nil || rule == nil || rule.Trigger != "manual" {
-		return nil, errors.New("invalid manual automation permission source")
+	if err != nil || rule == nil || rule.Trigger != "manual" && ((rule.Trigger != "added" && rule.Trigger != "changed") || !rule.UsesHTTP()) {
+		return nil, errors.New("invalid automation permission source")
 	}
-	return resolveTemplateHTTPSource(templateHTTPDigest("database", owner, avID, rule.ID, "automation"), templateHTTPPermissionRecord{
-		Version: templateHTTPDigest(string(data)), Kind: "database", Label: avID + "/" + rule.Name,
+	source, err := resolveTemplateHTTPSource(templateHTTPDigest("database", owner, avID, rule.ID, "automation"), templateHTTPPermissionRecord{
+		Version: templateHTTPDigest(string(data)), Kind: "database", Label: avID + "/" + rule.ID,
 		Owner: owner, AV: avID, Field: rule.ID, Slot: "automation", Persistable: true,
 	}, "", "")
+	if source != nil {
+		source.Label = avID + "/" + rule.Name
+	}
+	return source, err
 }
 
 func templateHTTPSourceMatchesLocked(source *TemplateHTTPSource) (templateHTTPPermissionRecord, bool) {
@@ -345,7 +358,7 @@ func templateHTTPDatabaseSourceCurrent(source *TemplateHTTPSource) bool {
 			return false
 		}
 		for _, rule := range database.Automations.Rules {
-			if rule != nil && rule.ID == source.fieldID && rule.Trigger == "manual" && rule.Enabled {
+			if rule != nil && rule.ID == source.fieldID && rule.Trigger != "block" && rule.Enabled {
 				encoded, err := json.Marshal(rule)
 				return err == nil && templateHTTPDigest(string(encoded)) == source.Version
 			}

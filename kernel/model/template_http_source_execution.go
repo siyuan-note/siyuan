@@ -179,7 +179,7 @@ func ManageTemplateHTTPPermission(action, kind, path, avID, keyID, slot string) 
 		if slot == "automation" {
 			if database.Automations != nil {
 				for _, rule := range database.Automations.Rules {
-					if rule != nil && rule.ID == keyID && rule.Trigger == "manual" {
+					if rule != nil && rule.ID == keyID && rule.Trigger != "block" {
 						source, err = ResolveTemplateHTTPAutomationSource(av.GetAVBoxID(avID), avID, rule)
 						break
 					}

@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP wird nach dem Speichern ausgeführt; bei Fehlern bleiben Änderungen und Werte erhalten, Ergebnisse lassen sich separat rückgängig machen",
 	"automationManual": "Manuell",
 	"automationRunNow": "Jetzt ausführen",
 	"automationManualTip": "Für passende Einträge ausführen und Ergebnisse in Feldern speichern; bei HTTP-Fehlern bleiben vorhandene Werte erhalten",

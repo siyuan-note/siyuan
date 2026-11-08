@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP s’exécute après l’enregistrement ; les échecs préservent les modifications et les valeurs, et les résultats s’annulent séparément",
 	"automationManual": "Manuel",
 	"automationRunNow": "Exécuter maintenant",
 	"automationManualTip": "Exécuter sur les entrées correspondantes et enregistrer les résultats dans les champs ; les échecs HTTP conservent les valeurs existantes",

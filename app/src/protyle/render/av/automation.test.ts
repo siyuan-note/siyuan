@@ -1,5 +1,6 @@
 import * as capabilities from "./capabilities";
 import * as filterDropdown from "./filterDropdown";
+import * as templateFunctions from "./automationTemplateFunctions";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -27,7 +28,7 @@ test("collection autosave versions document depth, attribute names, self exclusi
     const methods = {} as typeof import("./automation");
     runInNewContext(compiled, {
         exports: methods, window: {siyuan: {config: {}, languages: {}}},
-        require: (name: string) => name === "./capabilities" ? capabilities : (({
+        require: (name: string) => name === "./automationTemplateFunctions" ? templateFunctions : name === "./capabilities" ? capabilities : (({
             "./blockCollection": {collectionSourceIncomplete: () => false,
                 mountBlockCollectionSource: (_host: HTMLElement, value: AVAutomationBlockSourceInput, _protyle: IProtyle, persist: () => void) => {
                     source = value; save = persist;
@@ -152,7 +153,7 @@ test("automation settings autosave changes with independent undo snapshots and k
         exports: methods,
         window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations", fields: "Fields", automationIncomplete: "Incomplete: ${1}"},
             menus: {menu: {remove() { menuVisible = false; }}}}},
-        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
+        require: (name: string) => name === "./automationTemplateFunctions" ? templateFunctions : name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "../../../plugin/Menu": {Menu: class {
                 addItem() {}
                 open() { menuVisible = true; }
@@ -228,7 +229,7 @@ test("empty automation settings persist an incomplete rule disabled on editing a
     let renameRule: (id: string, name: string) => void;
     let removeRule: (id: string) => void;
     const enabled = {checked: false};
-    const list = {innerHTML: "", querySelectorAll: (): HTMLElement[] => []};
+    const list = {innerHTML: "", classList: {toggle() {}}, querySelectorAll: (): HTMLElement[] => []};
     const conditions = {innerHTML: "", querySelector: (selector: string) => selector === "[data-conditions]" ? list : {addEventListener() {}}};
     const body = {isConnected: true, innerHTML: "", getAttribute: (): null => null,
         addEventListener: (type: string, listener: (event: unknown) => void) => listeners.set(type, listener),
@@ -247,7 +248,7 @@ test("empty automation settings persist an incomplete rule disabled on editing a
         exports: methods,
         Lute: {NewNodeID: () => "draft-rule"},
         window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations", fields: "Fields", automationIncomplete: "Incomplete: ${1}"}}},
-        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
+        require: (name: string) => name === "./automationTemplateFunctions" ? templateFunctions : name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "./automationRules": {openAutomationRules: (_target: HTMLElement, _rules: unknown, _current: string,
                 _select: unknown, rename: typeof renameRule, remove: typeof removeRule) => { renameRule = rename; removeRule = remove; }},
             "./automationTemplate": {automationTimeZone: () => "UTC"},
@@ -308,7 +309,7 @@ test("leaving automation settings while loading does not replace the next page o
     runInNewContext(compiled, {
         exports: methods,
         window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations"}}},
-        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
+        require: (name: string) => name === "./automationTemplateFunctions" ? templateFunctions : name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "../../../util/fetch": {fetchSyncPost: () => new Promise(resolve => { complete = resolve; })},
             "../../wysiwyg/transaction": {transaction: () => assert.fail("cancel submitted a transaction")},
         })[name] || {}),

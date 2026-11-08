@@ -116,7 +116,7 @@ func TestAutomationClonePreservesPausedRules(t *testing.T) {
 	if copiedRule.Actions[1].RelationKeyID == relationID || !rule.Enabled || rule.KeyID != primaryID {
 		t.Fatal("copy changed the original rule or retained its source field")
 	}
-	source.Automations.Spec = 10
+	source.Automations.Spec = 11
 	future, _ := json.Marshal(source)
 	if _, err := ParseAttributeViewData(source.ID, future); err == nil {
 		t.Fatal("unknown automation format was accepted")
@@ -314,6 +314,32 @@ func TestManualAutomationSpecCompatibility(t *testing.T) {
 		raw, _ = json.Marshal(view)
 		if _, err = ParseAttributeViewData(view.ID, raw); err != nil {
 			t.Fatalf("legacy spec %d lost readability: %v", spec, err)
+		}
+	}
+}
+
+func TestAutomationLegacyDisabledFormattingRemainsReadable(t *testing.T) {
+	data, err := os.ReadFile("testdata/spec9-layouts.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for spec := 2; spec <= 9; spec++ {
+		view, err := ParseAttributeViewData("20260921000000-layouts", data)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rule := &AutomationRule{Trigger: "changed", Enabled: false, Actions: []*AutomationAction{{Fields: map[string]*AutomationValue{
+			"field": {Mode: "template", Template: `.action{printf "%s" "unfinished"}`},
+		}}}}
+		view.Automations = &AutomationConfig{Spec: spec, Rules: []*AutomationRule{rule}}
+		raw, _ := json.Marshal(view)
+		stored, err := ParseAttributeViewData(view.ID, raw)
+		if err != nil || stored.Automations.Rules[0].Actions[0].Fields["field"].Template != rule.Actions[0].Fields["field"].Template {
+			t.Fatal("legacy disabled template lost readability", spec, err)
+		}
+		rule.Enabled = true
+		if view.Automations.ValidateSpec() == nil {
+			t.Fatal("new formatting enabled without the new version", spec)
 		}
 	}
 }

@@ -84,7 +84,7 @@ type TemplateHTTPCancelRequest struct {
 
 // TemplateHTTPPermissionRequest 只查询或撤销许可；创建持久许可必须响应当前窗口的有效确认。
 // 文件 path 是模板目录相对路径；数据库由 avID、keyID 与 template/renderTemplate 槽位标识。
-// 手动自动化使用 slot=automation，keyID 为规则 ID；许可绑定整条已保存规则，修改规则后失效。
+// 自动化使用 slot=automation，keyID 为规则 ID；许可绑定整条已保存规则，修改规则后失效。
 type TemplateHTTPPermissionRequest struct {
 	Action string `json:"action"`
 	Kind   string `json:"kind" api:"optional"`

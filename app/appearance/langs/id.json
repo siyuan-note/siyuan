@@ -1,4 +1,5 @@
 {
+	"automationHTTPTip": "HTTP dijalankan setelah perubahan disimpan; kegagalan mempertahankan perubahan dan nilai lama, hasil dapat diurungkan secara terpisah",
 	"automationManual": "Manual",
 	"automationRunNow": "Jalankan sekarang",
 	"automationManualTip": "Jalankan pada entri yang cocok dan simpan hasil ke bidang; kegagalan HTTP mempertahankan nilai yang ada",

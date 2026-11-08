@@ -29,6 +29,10 @@
   line-height: 1.625;
 }
 
+.b3-list-item__text.document-title-preview span[data-type~="inline-math"] {
+  user-select: none;
+}
+
 .b3-typography.document-title-preview,
 .mobile-document-title-editor .protyle-title__input,
 .document-title-dialog .protyle-title__input {

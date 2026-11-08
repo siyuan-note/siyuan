@@ -245,12 +245,28 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
             }
             container.remove();
         }
+        const treeTitle = document.createElement("span");
+        treeTitle.className = "b3-list-item__text b3-typography document-title-preview";
+        treeTitle.innerHTML = '<span data-type="inline-math"><span>1+2=3</span></span>';
+        document.body.append(treeTitle);
+        check.equal(getComputedStyle(treeTitle.firstElementChild).userSelect, "none",
+            `${entry} document tree formulas must not select text when clicked`);
+        window.getSelection().removeAllRanges();
+        const formulaRect = treeTitle.firstElementChild.getBoundingClientRect();
+        await require("electron").ipcRenderer.invoke("click-formula", Math.round(formulaRect.left + 5),
+            Math.round(formulaRect.top + formulaRect.height / 2));
+        await new Promise(resolve => setTimeout(resolve, 30));
+        check.equal(window.getSelection().toString(), "", `${entry} clicking a tree formula leaves no text selected`);
+        treeTitle.remove();
         const body = document.createElement("div");
         body.className = "b3-typography";
         body.style.width = "80px";
         body.innerHTML = '<p><span data-type="code">body code with spaces that needs to wrap across several lines</span></p>';
         document.body.append(body);
         check.ok(body.querySelector("span").getClientRects().length > 1, "ordinary body inline code retains wrapping");
+        body.innerHTML = '<span data-type="inline-math">1+2=3</span>';
+        check.equal(getComputedStyle(body.firstElementChild).userSelect, "all",
+            "ordinary body formulas retain atomic text selection");
         body.remove();
     }
     return "Outline document title cases passed";
@@ -275,11 +291,15 @@ test("document title previews preserve custom font sizes, vertical alignment, in
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-outline-title-test-"));
     const script = path.join(temporary, "run.cjs");
     const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(tabSource) + "," + JSON.stringify(styles) + "," + JSON.stringify(themes) + ")";
-    writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+    writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    ipcMain.handle("click-formula", (event, x, y) => {
+        event.sender.sendInputEvent({type: "mouseDown", x, y, button: "left", clickCount: 1});
+        event.sender.sendInputEvent({type: "mouseUp", x, y, button: "left", clickCount: 1});
+    });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));

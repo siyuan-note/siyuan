@@ -692,12 +692,12 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         return bazaar._getUpdatedItems().filter(({type, item}) =>
             !isBazaarBatchUpdateExcluded(window.siyuan.config.bazaar.batchUpdateExcluded, type, item.installed.name));
     },
-    _genUpdateButtonHTML(item: IBazaarItem | undefined, bazaarType: TBazaarType, reserveSpace = false) {
-        if (!item?.outdated && !reserveSpace) {
+    _genUpdateButtonHTML(item: IBazaarItem | undefined, bazaarType: TBazaarType, keepSlot = false) {
+        if (!item?.outdated && !keepSlot) {
             return "";
         }
         const ariaLabel = item ? this._genUpdateButtonAriaLabel(item, bazaarType) : window.siyuan.languages.update;
-        return `<span data-position="north" data-type="install-t" ${item?.disallowUpdate ? "disabled" : ""} aria-label="${ariaLabel}" class="ariaLabel block__icon block__icon--show${item?.outdated ? "" : " fn__hidden"}">
+        return `<span data-position="north" data-type="install-t" ${item?.disallowUpdate ? "disabled" : ""} aria-label="${ariaLabel}" class="ariaLabel block__icon block__icon--show${item?.outdated ? "" : " fn__none"}">
     <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
 </span>`;
     },

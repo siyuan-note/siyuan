@@ -25,6 +25,7 @@ const browserCases = async (languages: Record<string, string>) => {
     let newDocuments = 0;
     let openedDocuments = 0;
     let revealedFiles = 0;
+    let resourceAuthorizations = 0;
     let closeConfirmations = 0;
     let cancelledCandidates = 0;
     let failWrite = false;
@@ -63,7 +64,7 @@ const browserCases = async (languages: Record<string, string>) => {
         newDocument: async () => { newDocuments++; }, openDocument: async () => {openedDocuments++;},
         revealFile: async () => {revealedFiles++;},
         chooseSaveAs: async () => ({kind: "selected", target: {...target, handle: "copy", identity: "copy", displayName: "README-copy.md"}}),
-        cancelSaveAs: async () => {cancelledCandidates++;}, authorizeResources: async () => true, resolveResource: async () => undefined,
+        cancelSaveAs: async () => {cancelledCandidates++;}, authorizeResources: async () => {resourceAuthorizations++; return true;}, resolveResource: async () => undefined,
         insertImage: async () => ({kind: "inserted", reference: "images/example%20photo.png"}),
         openLink: async () => {}, preferences: async patch => {preferenceUpdates.push({...patch}); storedPreferences = {...storedPreferences, ...patch}; return {...storedPreferences};},
         confirm: async () => true, confirmClose: async () => {closeConfirmations++; return "keep";},
@@ -425,6 +426,25 @@ const browserCases = async (languages: Record<string, string>) => {
                     `${platform} information icons align with submenu arrows`);
                 check.ok(item.getBoundingClientRect().height >= 44, "the menu action keeps its touch target");
                 check.equal(getComputedStyle(info).backgroundColor, "rgba(0, 0, 0, 0)");
+                const bounds = info.getBoundingClientRect();
+                const x = bounds.left - 10;
+                const y = bounds.top + bounds.height / 2;
+                check.equal(document.elementFromPoint(x, y)?.closest("[data-tooltip-touch]"), info,
+                    "the transparent touch area extends beyond the visible icon");
+                const authorizations = resourceAuthorizations;
+                const recoveryHidden = document.getElementById("markdownRecoveryPanel").hidden;
+                await ipcRenderer.invoke("markdown-touch", x, y); await tick();
+                const tooltip = document.querySelector<HTMLElement>('[role="tooltip"]');
+                check.equal(tooltip.hidden, false, `${platform} tapping information shows the tooltip`);
+                check.equal(tooltip.textContent, info.dataset.tooltip);
+                check.equal(getComputedStyle(tooltip).opacity, "1", "the touch tooltip is visibly displayed");
+                check.equal(more.open, true, "reading information keeps the menu open");
+                check.equal(resourceAuthorizations, authorizations, "reading information does not authorize resources");
+                check.equal(document.getElementById("markdownRecoveryPanel").hidden, recoveryHidden,
+                    "reading information does not open the recovery panel");
+                if (id === "markdownResources") await ipcRenderer.invoke("markdown-screenshot", `touch-${platform}-${dark ? "dark" : "light"}-tooltip`);
+                await ipcRenderer.invoke("markdown-touch", x, y); await tick();
+                check.equal(tooltip.hidden, true, "a second tap dismisses the tooltip");
             }
             await ipcRenderer.invoke("markdown-screenshot", `touch-${platform}-${dark ? "dark" : "light"}-icons`);
             moreButton.click();
@@ -515,8 +535,8 @@ const browserCases = async (languages: Record<string, string>) => {
     for (const id of ["markdownResources", "markdownRecovery"]) {
         openMore();
         const item = document.getElementById(id);
-        const info = document.querySelector<SVGElement>(`#${id}Info`);
-        check.equal(info.tagName, "svg");
+        const info = document.querySelector<HTMLElement>(`#${id}Info`);
+        check.equal(info.tagName, "SPAN");
         check.equal(info.parentElement, item);
         check.equal(info.getBoundingClientRect().right,
             document.querySelector("#markdownMode > .b3-menu__icon--small").getBoundingClientRect().right);
@@ -1326,6 +1346,15 @@ app.whenReady().then(async () => {
         const point = await win.webContents.executeJavaScript('(()=>{const rect=document.querySelector('+JSON.stringify(selector)+').getBoundingClientRect();return {x:Math.round(rect.x+rect.width/2),y:Math.round(rect.y+rect.height/2)};})()');
         await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mousePressed",...point,button:"left",buttons:1,clickCount:1});
         await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mouseReleased",...point,button:"left",buttons:0,clickCount:1});
+    });
+    ipcMain.handle("markdown-touch", async (_event, x, y) => {
+        await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled:true});
+        try {
+            await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchStart",touchPoints:[{x,y}]});
+            await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchEnd",touchPoints:[]});
+        } finally {
+            await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled:false});
+        }
     });
     ipcMain.handle("markdown-sidebar-key", (_event, digit) => {
         win.webContents.sendInputEvent({type: "keyDown", keyCode: digit, modifiers: ["alt"]});

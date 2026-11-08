@@ -113,8 +113,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         ["markdownRecovery", "markdownPrivacy"]]) {
         const action = control(id);
         action.setAttribute("aria-description", text(explanation));
-        action.insertAdjacentHTML("beforeend", `<svg id="${id}Info" class="b3-menu__icon b3-menu__icon--small" aria-hidden="true"><use href="#iconInfo"></use></svg>`);
-        action.querySelector<SVGElement>(`#${id}Info`).dataset.tooltip = text(explanation);
+        action.insertAdjacentHTML("beforeend", `<span id="${id}Info" class="b3-menu__icon b3-menu__icon--small markdown-menu__info" data-tooltip-touch aria-hidden="true"><svg width="100%" height="100%"><use href="#iconInfo"></use></svg></span>`);
+        control(`${id}Info`).dataset.tooltip = text(explanation);
     }
     const header = root.querySelector<HTMLElement>(".markdown-header");
     header.inert = true;

@@ -100,6 +100,10 @@ export const createMarkdownTooltips = (root: HTMLElement) => {
     }, {signal});
     const pointer = (event: PointerEvent) => {
         if (["mouse", "touch", "pen"].includes(event.pointerType)) touchInput = event.pointerType === "touch";
+        if (touchInput) {
+            if (target?.dataset.tooltipTouch === undefined) hide();
+            return;
+        }
         const next = find(event.target);
         if (dismissed !== next) dismissed = undefined;
         if (touchInput || !next || next === dismissed) hide();
@@ -109,10 +113,19 @@ export const createMarkdownTooltips = (root: HTMLElement) => {
     // 禁用按钮仍分发 pointer 事件，必要说明不依赖 click 或可聚焦状态。
     root.addEventListener("pointermove", pointer, {capture: true, passive: true, signal});
     root.addEventListener("pointerout", event => {
+        if (touchInput) return;
         const next = find(event.relatedTarget);
         if (dismissed !== next) dismissed = undefined;
         if (target && target !== next) hide();
     }, {capture: true, passive: true, signal});
+    root.addEventListener("click", event => {
+        const next = find(event.target);
+        if (!touchInput || next?.dataset.tooltipTouch === undefined) return;
+        event.preventDefault(); event.stopImmediatePropagation();
+        if (next === dismissed) {dismissed = undefined; return;}
+        dismissed = undefined;
+        show(next, undefined, true);
+    }, {capture: true, signal});
     root.addEventListener("focusin", event => show(find(event.target), event.target as HTMLElement), {signal});
     root.addEventListener("focusout", hide, {signal});
     document.addEventListener("pointerdown", event => {

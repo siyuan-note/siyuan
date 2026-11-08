@@ -204,6 +204,10 @@ button {
   }
 }
 
+.markdown-menu__info {
+  position: relative;
+}
+
 .markdown-choice[aria-disabled="true"] {
   opacity: .38;
   cursor: not-allowed;
@@ -514,6 +518,12 @@ button {
 }
 
 @mixin touch-controls {
+  .markdown-menu__info::before {
+    content: "";
+    position: absolute;
+    inset: -14px;
+  }
+
   .markdown-header {
     height: 48px;
   }

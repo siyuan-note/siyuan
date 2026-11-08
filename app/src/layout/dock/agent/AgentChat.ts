@@ -3116,7 +3116,6 @@ export class AgentChat extends Model {
         if (!body || this.renderedToolCalls.has(toolCall)) {
             return;
         }
-        this.refreshThinkingHeaderText();
         updateThinkingBody(body, () => {
             if (this.currentToolLine?.parentElement !== body || this.currentToolLine !== body.lastElementChild) {
                 body.insertAdjacentHTML("beforeend", renderToolsLineHTML([]));
@@ -3129,6 +3128,7 @@ export class AgentChat extends Model {
             this.currentToolLine.appendChild(toolElement);
             this.renderedToolCalls.set(toolCall, {element: toolElement, startedAt: Date.now()});
         });
+        this.refreshThinkingHeaderText();
         this.scrollToBottom();
     }
 
@@ -3233,7 +3233,6 @@ export class AgentChat extends Model {
             const durSec = this.currentThinkingDuration ||
                 (this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0);
             this.currentThinkingDuration = durSec;
-            const doneText = this.formatThinkingHeader(durSec, this.currentToolCalls.length);
             const oldCards = this.messagesContainer.querySelectorAll(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)");
             for (let i = 0; i < oldCards.length; i++) {
                 const card = oldCards[i] as HTMLElement;
@@ -3246,7 +3245,7 @@ export class AgentChat extends Model {
                 card.querySelector(".agent-chat__thinking-latest")?.classList.add("fn__none");
                 const txtEl = card.querySelector(".agent-chat__thinking-text");
                 if (txtEl) {
-                    txtEl.textContent = doneText;
+                    txtEl.textContent = this.formatThinkingHeader(durSec, card.querySelectorAll(".agent-chat__thinking-tool").length);
                 }
             }
             if (this.currentThinkingSteps.length > 0) {
@@ -4597,10 +4596,11 @@ export class AgentChat extends Model {
             return;
         }
         const seconds = this.requestStartTime ? Math.floor((Date.now() - this.requestStartTime) / 1000) : 0;
-        const live = formatAgentThinkingStats(seconds, this.currentToolCalls.length, window.siyuan.languages, true);
         for (let i = 0; i < cards.length; i++) {
             if (this.messagesContainer.contains(cards[i])) {
-                cards[i].textContent = live;
+                const toolCount = cards[i].closest(".agent-chat__msg--thinking")
+                    .querySelectorAll(".agent-chat__thinking-tool").length;
+                cards[i].textContent = formatAgentThinkingStats(seconds, toolCount, window.siyuan.languages, true);
             }
         }
     }
@@ -4619,7 +4619,6 @@ export class AgentChat extends Model {
         // 耗时存为数值（用于持久化 entry.duration），"已思考：Xs" 文本只在 DOM 显示、不落盘。
         const durSec = this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0;
         this.currentThinkingDuration = durSec;
-        const doneText = this.formatThinkingHeader(durSec, this.currentToolCalls.length);
 
         const items = this.messagesContainer.querySelectorAll(
             ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
@@ -4651,6 +4650,7 @@ export class AgentChat extends Model {
             }
             el.classList.add("agent-chat__msg--thinking-done");
             el.querySelector(".agent-chat__thinking-latest")?.classList.add("fn__none");
+            const doneText = this.formatThinkingHeader(durSec, el.querySelectorAll(".agent-chat__thinking-tool").length);
             if (doneText) {
                 const textEl = el.querySelector(".agent-chat__thinking-text");
                 if (textEl) {

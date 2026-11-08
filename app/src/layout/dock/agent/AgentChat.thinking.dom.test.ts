@@ -38,6 +38,8 @@ const browserCases = async (sources: Record<string, string>) => {
         renderRetryCardHTML: renderer.renderRetryCardHTML,
         renderQuestionCardHTML: renderer.renderQuestionCardHTML,
         getAgentThinkingToolGroups: history.getAgentThinkingToolGroups,
+        formatAgentThinkingStats: history.formatAgentThinkingStats,
+        getAgentThinkingDisplaySeconds: history.getAgentThinkingDisplaySeconds,
         hasAgentThinkingStepDetails: history.hasAgentThinkingStepDetails,
         updateThinkingBody: thinking.updateThinkingBody,
         bindThinkingCardToggle: thinking.bindThinkingCardToggle,
@@ -89,6 +91,8 @@ const browserCases = async (sources: Record<string, string>) => {
             rebuildNavMarkers: noop,
             slimToolCallsForPersistence: (calls: unknown[]) => calls,
             finishActiveThinking: noop,
+            stopThinkingTimer: noop,
+            syncScrollState: noop,
             flushThinkingStep: noop,
             finalizeStreamingBody: (content: string) => { chat.currentAIElement.textContent = content; },
             appendPersistedAssistant: (content: string) => {
@@ -185,6 +189,49 @@ const browserCases = async (sources: Record<string, string>) => {
         check.deepEqual(compareReload(interrupted), [[["block"]], [["block"]]]);
     }
 
+    Object.assign(dependencies.window.siyuan.languages, {
+        agentThinking: "Thinking", agentThinkingDoneTime: "Thought %s",
+        agentThinkingStats: "Thought %s, tools %s", agentThinkingLiveStats: "Thinking %s, tools %s",
+    });
+    for (const mobile of [false, true]) {
+        const chat = createChat(mobile);
+        delete chat.refreshThinkingHeaderText;
+        delete chat.formatThinkingHeader;
+        delete chat.finishActiveThinking;
+        delete chat.flushThinkingStep;
+        chat.requestStartTime = Date.now() - 2000;
+        chat.appendThinking("processing", "stats-1");
+        chat.refreshThinkingHeaderText();
+        const title = () => chat.getActiveThinkingCard().querySelector(".agent-chat__thinking-text").textContent;
+        check.match(title(), /^Thinking 2s$/);
+        await call(chat, "stats-a");
+        check.match(title(), /tools 1$/);
+        await call(chat, "stats-b");
+        check.match(title(), /tools 2$/);
+        chat.appendRetry(1, 2);
+        check.match(title(), /tools 2$/);
+        chat.collectCurrentThinkingStep();
+        chat.currentToolCalls = [];
+        chat.lastStepToolCount = 0;
+        chat.refreshThinkingHeaderText();
+        check.match(title(), /tools 2$/, "rendered calls survive a streaming state reset");
+        chat.finishActiveThinking();
+        chat.flushThinkingStep();
+        check.match(chat.messagesContainer.querySelector(".agent-chat__thinking-text").textContent, /tools 2$/);
+        const saved = createChat(mobile);
+        delete saved.formatThinkingHeader;
+        const entry = chat.entries.find((item: any) => item.type === "thinking");
+        saved.renderMergedThinkingCard(entry.steps, entry.id, entry.duration);
+        check.match(saved.messagesContainer.querySelector(".agent-chat__thinking-text").textContent, /tools 2$/);
+        chat.hasInterveningCard = false;
+        chat.appendThinking("processing", "stats-2");
+        chat.refreshThinkingHeaderText();
+        check.doesNotMatch(title(), /tools/);
+        await call(chat, "stats-c");
+        check.match(title(), /tools 1$/);
+        check.match(chat.messagesContainer.querySelector(".agent-chat__thinking-text").textContent, /tools 2$/);
+    }
+
     const concurrent = createChat();
     concurrent.appendThinking("processing", "round-1");
     await call(concurrent, "a");
@@ -248,6 +295,7 @@ test("thinking tools preserve round grouping, duplicate calls and running state 
     assert.ok(declaration && isClassDeclaration(declaration));
     const names = new Set(["handleSSEEvent", "getActiveThinkingCard", "appendToolCall", "setToolCallRunning",
         "finishToolCall", "appendThinking", "appendReasoning", "flushReasoningUpdate", "collectCurrentThinkingStep",
+        "formatThinkingHeader", "refreshThinkingHeaderText", "finishActiveThinking", "flushThinkingStep",
         "renderMergedThinkingCard", "captureRunViewState", "captureRunView", "restoreRunView", "appendRetry", "appendQuestion"]);
     const methods = declaration.members.filter(item => names.has(item.name?.getText(source))).map(item => item.getText(source));
     assert.equal(methods.length, names.size);

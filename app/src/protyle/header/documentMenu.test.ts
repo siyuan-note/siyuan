@@ -31,7 +31,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
     const target = {getAttribute: (): null => null} as unknown as HTMLElement;
     const lute = {BlockDOM2HTML: (source: string) => "html:" + source};
     const cardData: {cards: unknown[], unreviewedCount: number} = {cards: [], unreviewedCount: 0};
-    const globals = {window: {siyuan: {menus: {menu}, languages: {}, isPublish: false,
+    const globals = {window: {siyuan: {menus: {menu}, languages: {untitled: "Untitled", _kernel: {16: "Untitled document"}}, isPublish: false,
         config: {export: exportConfig, readonly, cloudRegion: 0, flashcard: {deck: true}, system: {dataDir: "/data"},
             keymap: {general: keymaps, editor: {general: keymaps}}}}}, getSelection: () => ({rangeCount: 0})};
     const dependencies: Record<string, unknown> = {
@@ -46,7 +46,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
             record("clipboard")(...args); return {status: "success"};
         }},
         "../../layout/dock/util": {openOutline: record("outline"), openBacklink: record("backlinks"), openGraph: record("graphView")},
-        "../../util/pathName": {isEncryptedBox: () => encrypted, pathPosix: () => posix,
+        "../../util/pathName": {getDocDisplayName: (name: string, empty: boolean) => empty ? globals.window.siyuan.languages._kernel[16] : name, isEncryptedBox: () => encrypted, pathPosix: () => posix,
             getNotebookName: () => "Notebook", getDisplayName: (value: string) => value.replace(/\.sy$/, ""), useShell: record("folder")},
         "../../card/makeCard": {makeCard: record("makeCard"), quickMakeCard: record("quickMakeCard")},
         "../../card/openCard": {openCardByData: record("spaceRepetition")},
@@ -113,7 +113,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
         assert.ok(item, id);
         await item.click(null, null);
     };
-    return {documentModule, titleModule, options, items, events, calls, attributes, cardData, lute, click,
+    return {globals, documentModule, titleModule, options, items, events, calls, attributes, cardData, lute, click,
         setHeadingNumberChoice: (value: boolean | undefined) => { exportConfig.headingNumber = value; },
         open: (overrides: Partial<typeof options> = {}) => documentModule.openDocumentMenu({...options, ...overrides})};
 };
@@ -234,3 +234,25 @@ test("workspace readonly and encrypted documents preserve existing history and n
     assert.equal(JSON.stringify(encrypted.calls.find(call => call.name === "move").args[1]), '["notebook"]');
     assert.ok(!encrypted.items.some(item => item.id === "riffCard"));
 });
+
+for (const [generic, document] of [["未命名", "未命名文档"], ["未命名", "未命名文件"]]) {
+    test(`document menus use document-specific empty titles (${document})`, async () => {
+        for (const title of ["", "  ", "Equation $x^2$ ![image](asset.png)"]) {
+            const menu = setup();
+            menu.globals.window.siyuan.languages.untitled = generic;
+            menu.globals.window.siyuan.languages._kernel[16] = document;
+            const protyle = {app: menu.options.app, notebookId: "notebook", path: menu.options.path, disabled: false,
+                block: {rootID: menu.options.id, id: menu.options.id, showAll: true},
+                element: menu.options.target, options: {history: {}, render: {title: true}},
+                preview: {element: {classList: {contains: () => true}}},
+                title: {getText: () => title}, lute: menu.lute,
+            } as unknown as IProtyle;
+            menu.titleModule.openTitleMenu(protyle, menu.options.position, "editor");
+            for (const name of ["outline", "backlinks", "graphView"]) {
+                await menu.click(name);
+                assert.equal((menu.calls.find(call => call.name === name).args[0] as {title: string}).title,
+                    title.trim() ? title : document);
+            }
+        }
+    });
+}

@@ -29,7 +29,7 @@ import {newDailyNote} from "../../util/mount";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {goBack, goForward} from "../../util/backForward";
-import {getDisplayName, getNotebookName, isEncryptedBox} from "../../util/pathName";
+import {getDocDisplayName, getDisplayName, getNotebookName, isEncryptedBox} from "../../util/pathName";
 import {openFileById} from "../../editor/util";
 import {getAllDocks, getAllEditor, getAllModels, getAllTabs} from "../../layout/getAll";
 import {getDockHotkey, getDockKeymap} from "../../layout/dock/hotkey";
@@ -245,7 +245,7 @@ const documentKeydown = (app: App, event: KeyboardEvent, protyle: IProtyle, rang
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition, event) &&
         !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-            openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title?.editElement.textContent || window.siyuan.languages.untitled, true);
+            openCardByData(app, response.data, "doc", protyle.block.rootID, getDocDisplayName(protyle.title?.getText() ?? "", !protyle.title?.getText().trim()), true);
         });
         event.preventDefault();
         return true;
@@ -293,7 +293,7 @@ const documentKeydown = (app: App, event: KeyboardEvent, protyle: IProtyle, rang
             rootId: protyle.block.rootID,
             notebookId: protyle.notebookId,
             useBlockId: protyle.block.showAll,
-            title: protyle.title ? (protyle.title.getText() || window.siyuan.languages.untitled) : null,
+            title: protyle.title ? getDocDisplayName(protyle.title.getText(), protyle.title.getText().trim() === "") : null,
         });
         return true;
     }
@@ -316,7 +316,7 @@ const documentKeydown = (app: App, event: KeyboardEvent, protyle: IProtyle, rang
             rootId: protyle.block.rootID,
             notebookId: protyle.notebookId,
             useBlockId: protyle.block.showAll,
-            title: protyle.title ? (protyle.title.getText() || window.siyuan.languages.untitled) : null,
+            title: protyle.title ? getDocDisplayName(protyle.title.getText(), protyle.title.getText().trim() === "") : null,
         });
         return true;
     }
@@ -326,7 +326,7 @@ const documentKeydown = (app: App, event: KeyboardEvent, protyle: IProtyle, rang
             app,
             rootId: protyle.block.rootID,
             notebookId: protyle.notebookId,
-            title: protyle.options.render.title ? (protyle.title.getText() || window.siyuan.languages.untitled) : "",
+            title: protyle.options.render.title ? getDocDisplayName(protyle.title.getText(), protyle.title.getText().trim() === "") : "",
             isPreview: !protyle.preview.element.classList.contains("fn__none")
         });
         return true;

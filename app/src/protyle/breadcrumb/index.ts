@@ -1410,11 +1410,11 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                     '<svg><use xlink:href="#iconNotebook"></use></svg>' :
                     `<svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
                 if (index === 0 && !global && !protyle.options.render.breadcrumbDocName) {
-                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}" role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || window.siyuan.languages.untitled)}"${response.data.length === 1 ? ' style="max-width:none"' : ""}>
+                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}" role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || (item.type === "NodeDocument" ? window.siyuan.languages._kernel[16] : window.siyuan.languages.untitled))}"${response.data.length === 1 ? ' style="max-width:none"' : ""}>
     <svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
 </span>`;
                 } else {
-                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" ${attributes} role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || window.siyuan.languages.untitled)}"${(paths.length === 1 || index === 0) ? ' style="max-width:none"' : ""}>
+                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" ${attributes} role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || (item.type === "NodeDocument" ? window.siyuan.languages._kernel[16] : window.siyuan.languages.untitled))}"${(paths.length === 1 || index === 0) ? ' style="max-width:none"' : ""}>
     ${icon}
     ${item.name ? `<span class="protyle-breadcrumb__text" title="${escapeAttr(escapeHtml(decodeHTML(item.name)))}">${escapeSearchHighlight(item.name)}</span>` : ""}
 </span>`;

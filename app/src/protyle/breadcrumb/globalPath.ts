@@ -45,7 +45,7 @@ export const getGlobalBreadcrumb = async (blocks: IBreadcrumb[], notebook: strin
         const document = response.data.documents.find(item => item.id === rootID && item.notebook === notebook);
         const box = window.siyuan.notebooks.find(item => item.id === notebook && !item.closed);
         if (!document || !box || (box.encrypted && !box.unlocked)) return blocks;
-        return mergeGlobalBreadcrumb(blocks, document, box.name, window.siyuan.languages.untitled, box.icon, response.data.icons);
+        return mergeGlobalBreadcrumb(blocks, document, box.name, window.siyuan.languages._kernel[16], box.icon, response.data.icons);
     } catch (error) {
         console.warn("get global breadcrumb failed", error);
         return blocks;

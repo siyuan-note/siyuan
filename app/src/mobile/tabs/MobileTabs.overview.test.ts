@@ -11,6 +11,7 @@ test("mobile tab overview renders current document titles and rejects reused or 
     const rows = ["rich", "plain", "blank", "notebook"].map(id => ({dataset: {tabId: id}, querySelector: () => label}));
     const modules: Record<string, unknown> = {
         "../../constants": {Constants: {}},
+        "../../util/pathName": {getDocDisplayName: (name: string, empty: boolean) => empty ? "Untitled document" : name},
         "../../util/escape": {escapeAttr: String, escapeHtml: String},
         "../../emoji/fileTreeIcon": {getDocumentIconHTML: () => ""},
         "./mobileTabsState": {orderTabsForOverview: (tabs: unknown[]) => tabs, canCloseTab: () => true},
@@ -26,10 +27,12 @@ test("mobile tab overview renders current document titles and rejects reused or 
     }).outputText, {exports, require: (name: string) => modules[name] || {}, window: {siyuan: {languages: {}}}});
     const rich = {id: "rich", current: {rootID: "document", notebookID: "box", title: "Rich"}};
     const plain = {id: "plain", current: {rootID: "plain-document", notebookID: "box", title: "Plain"}};
-    const state = {tabs: [rich, plain, {id: "blank"}, {id: "notebook", current: {rootID: "box", notebookID: "box"}}]};
+    const state = {tabs: [rich, plain, {id: "blank"}, {id: "notebook", current: {rootID: "box", notebookID: "box", title: ""}}]};
     const tabs = Object.assign(Object.create(exports.MobileTabs.prototype), {state, canGoBack: () => false,
         canGoForward: () => false, bindOverviewEvents: () => {}});
     tabs.renderOverview();
+    assert.match(tabs.renderOverviewItem(state.tabs[3]), /mobile-tabs__item-title">Untitled document<\/span>/);
+    assert.match(tabs.renderOverviewItem(plain), /mobile-tabs__item-title">Plain<\/span>/);
     assert.deepEqual(reads.map(read => read.id), ["document", "plain-document", "box"]);
     assert.ok(reads.every(read => read.notebook === "box" && read.label === label && read.current()));
     rich.current = {...rich.current, rootID: "another-document"};
@@ -50,6 +53,7 @@ test("tab overview actions do not handle back buttons in a subsequent settings p
     };
     const modules: Record<string, unknown> = {
         "../../constants": {Constants: {}},
+        "../../util/pathName": {getDocDisplayName: (name: string, empty: boolean) => empty ? "Untitled document" : name},
         "../../util/escape": {escapeAttr: (value: string) => value},
         "./mobileTabsState": {orderTabsForOverview: (tabs: unknown[]) => tabs},
         "../menu/model": {openModel: (options: {bindEvent: (element: unknown) => void}) => options.bindEvent(shell)},

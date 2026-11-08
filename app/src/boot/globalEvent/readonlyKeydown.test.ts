@@ -436,3 +436,31 @@ test("native command availability protects readonly content across command panel
     assert.equal(matches({legacyId: "search", requirement: "none"}, {protyle: {disabled: true}}), true);
     assert.equal(matches({legacyId: "switchReadonly", requirement: "editor"}, {protyle: {disabled: true}}), true);
 });
+
+test("document shortcuts use summary titles and document-specific empty labels", () => {
+    for (const emptyTitle of ["未命名文档", "未命名文件"]) {
+        for (const title of ["", "  ", "Equation $x^2$ ![image](asset.png)"]) {
+            const calls: string[] = [];
+            const bindings = new Proxy({}, {get: (_target, key) => key});
+            const keydown = loadFunction("src/boot/globalEvent/keydown.ts", "documentKeydown", {
+                window: {siyuan: {languages: {untitled: "未命名", _kernel: {16: emptyTitle}},
+                    config: {keymap: {general: bindings, editor: {general: bindings}}}}},
+                matchHotKey: (binding: string, event: {key: string}) => binding === event.key,
+                isEncryptedBox: () => false,
+                getDocDisplayName: (name: string, empty: boolean) => empty ? emptyTitle : name,
+                fetchPost: (_url: string, _data: unknown, callback: (value: unknown) => void) => callback({data: {}}),
+                openCardByData: (_app: unknown, _data: unknown, _type: string, _id: string, name: string) => calls.push(name),
+                openBacklink: (options: {title: string}) => calls.push(options.title),
+                openGraph: (options: {title: string}) => calls.push(options.title),
+                openOutline: (options: {title: string}) => calls.push(options.title),
+            });
+            const protyle = {block: {rootID: "doc"}, options: {render: {title: true}},
+                title: {getText: () => title, editElement: {textContent: "incorrect raw DOM"}},
+                preview: {element: {classList: {contains: () => true}}}};
+            for (const command of ["spaceRepetition", "backlinks", "graphView", "outline"]) {
+                assert.equal(keydown({}, keyboardEvent(command), protyle, null, false), true);
+            }
+            assert.deepEqual(calls, Array(4).fill(title.trim() ? title : emptyTitle));
+        }
+    }
+});

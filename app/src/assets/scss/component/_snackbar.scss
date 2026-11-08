@@ -145,6 +145,12 @@ html[data-frontend="browser-desktop"] body:not(.body--toolbar-hide):not(.body--w
   }
 }
 
+// 直接嵌入正文的按钮参与行内排版，防止后文绕排到按钮前面
+.b3-snackbar__content > button,
+#tempMessage > div > button {
+  float: none;
+}
+
 .b3-snackbar__content [hidden]:not([hidden="until-found" i]),
 #tempMessage [hidden]:not([hidden="until-found" i]) {
   display: none;

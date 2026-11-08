@@ -33,7 +33,7 @@ const cases = async (source: string, styles: string[], themes: string[], notific
     const message = document.createElement("div");
     message.id = "message";
     document.body.append(message);
-    const startup = 'Startup <button class="b3-button">Continue</button> then finish';
+    const startup = 'Startup <button class="caller-notice-action b3-button">Continue</button> then finish';
     const startupError = "Startup error <button>Retry</button> or reopen";
     api.showMessage(startup, -1, "info", "startup");
     api.showMessage(startupError, 0, "error", "startup-error");
@@ -41,6 +41,7 @@ const cases = async (source: string, styles: string[], themes: string[], notific
     check.equal(document.querySelector('#tempMessage [data-message-id="startup"]').innerHTML, startup);
     check.equal(document.querySelector('#tempMessage [data-message-id="startup-error"]').innerHTML, startupError);
     check.equal(document.querySelectorAll("#tempMessage .b3-snackbar__body").length, 1);
+    const startupMarkup = document.getElementById("tempMessage").outerHTML;
     api.initMessage();
     check.equal(message.querySelector('[data-id="startup"] .b3-snackbar__content').innerHTML, startup,
         "initializing notifications preserves inline buttons and the surrounding text");
@@ -161,6 +162,26 @@ const cases = async (source: string, styles: string[], themes: string[], notific
     api.showMessage("Content changed" + pre.outerHTML, 0, "error", "recovery");
     await tick();
     const notificationHTML = message.querySelector('[data-id="recovery"]').outerHTML;
+    const assertInlineButtonOrder = (button: HTMLElement) => {
+        const doc = button.ownerDocument;
+        const before = doc.createRange();
+        const beforeOffset = button.previousSibling.textContent.trimEnd().length - 1;
+        before.setStart(button.previousSibling, beforeOffset);
+        before.setEnd(button.previousSibling, beforeOffset + 1);
+        const after = doc.createRange();
+        const afterOffset = button.nextSibling.textContent.search(/\S/);
+        after.setStart(button.nextSibling, afterOffset);
+        after.setEnd(button.nextSibling, afterOffset + 1);
+        const follows = (first: DOMRect, second: DOMRect) => {
+            const lineOffset = second.top + second.height / 2 - first.top - first.height / 2;
+            return lineOffset > 10 || Math.abs(lineOffset) <= 10 && second.left >= first.right - 1;
+        };
+        const bounds = button.getBoundingClientRect();
+        check.ok(follows(before.getBoundingClientRect(), bounds), "the button visually follows its preceding text");
+        check.ok(follows(bounds, after.getBoundingClientRect()), "following text visually follows the button");
+        check.equal(doc.defaultView.getComputedStyle(button).cssFloat, "none",
+            "buttons directly in message text do not float away from their surrounding text");
+    };
     for (const css of styles) {
         for (const width of [320, 1024]) {
             const frame = document.createElement("iframe");
@@ -173,7 +194,7 @@ const cases = async (source: string, styles: string[], themes: string[], notific
             doc.head.append(style);
             const theme = doc.createElement("style");
             doc.head.append(theme);
-            doc.body.innerHTML = '<div class="b3-snackbars b3-snackbars--show">' + notificationHTML + actionHTML + "</div>";
+            doc.body.innerHTML = '<div class="b3-snackbars b3-snackbars--show">' + notificationHTML + actionHTML + "</div>" + startupMarkup;
             for (const themeCSS of themes) {
                 theme.textContent = themeCSS;
                 for (const fontSize of [14, 24]) {
@@ -194,6 +215,15 @@ const cases = async (source: string, styles: string[], themes: string[], notific
                         `recovery content must fit its notification at ${width}px and ${fontSize}px font size`);
                     check.ok(content.getBoundingClientRect().left >= 0);
                     check.ok(content.getBoundingClientRect().right <= width);
+                    const startupContent = doc.querySelector<HTMLElement>('#tempMessage [data-message-id="startup"]');
+                    const startupStyle = doc.createElement("style");
+                    doc.head.append(startupStyle);
+                    for (const float of ["right", "left", "none"]) {
+                        startupStyle.textContent = `.caller-notice-action {float: ${float}; padding: 1px 6px; font-size: 12px}`;
+                        assertInlineButtonOrder(startupContent.querySelector("button"));
+                        check.equal(startupContent.innerHTML, startup, "startup notification HTML remains intact");
+                    }
+                    startupStyle.remove();
                     for (const notification of Array.from(doc.querySelectorAll<HTMLElement>('[data-id^="fixture-"]'))) {
                         const notificationContent = notification.querySelector<HTMLElement>(".b3-snackbar__content");
                         const parent = notification.querySelector<HTMLElement>(".b3-snackbar__actions");
@@ -226,36 +256,29 @@ const cases = async (source: string, styles: string[], themes: string[], notific
                                 "the font size reset stays beside its text when space permits");
                             check.ok(buttonBounds.left >= bounds.right + 7, "compact actions retain their spacing");
                         }
-                        const callerButton = notificationContent.querySelector<HTMLElement>(".caller-notice-action");
+                        const callerButton = notificationContent.querySelector<HTMLElement>(":scope > .caller-notice-action");
                         if (callerButton) {
                             const callerStyle = doc.createElement("style");
                             doc.head.append(callerStyle);
-                            const after = doc.createRange();
-                            after.setStart(notificationContent.lastChild, 1);
-                            after.setEnd(notificationContent.lastChild, 2);
-                            for (const float of ["right", "none"]) {
-                                callerStyle.textContent = `.caller-notice-action {float: ${float}}`;
-                                check.equal(frame.contentWindow.getComputedStyle(callerButton).cssFloat, float,
-                                    "notifications preserve the caller's button float");
+                            for (const float of ["right", "left", "none"]) {
+                                callerStyle.textContent = `.caller-notice-action {float: ${float}; padding: 1px 6px; font-size: 12px}`;
+                                assertInlineButtonOrder(callerButton);
                                 check.equal(notificationContent.innerHTML, expected.innerHTML,
-                                    "a floated button stays between the same text nodes");
-                                const buttonBounds = callerButton.getBoundingClientRect();
-                                const afterBounds = after.getBoundingClientRect();
-                                if (float === "right") {
-                                    const padding = parseFloat(frame.contentWindow.getComputedStyle(notificationContent).paddingRight);
-                                    check.ok(Math.abs(buttonBounds.right - notificationContent.getBoundingClientRect().right + padding) < 1,
-                                        "the caller's float places its button at the content's right edge");
-                                    if (width === 1024 && fontSize === 14) {
-                                        check.ok(afterBounds.left < buttonBounds.left,
-                                            "a right float lets following text flow before the button without changing DOM order");
-                                    }
-                                } else {
-                                    check.ok(afterBounds.left >= buttonBounds.right - 1 ||
-                                        afterBounds.top + afterBounds.height / 2 > buttonBounds.top + buttonBounds.height / 2 + 10,
-                                    "inline buttons keep following text after them when the caller removes its float");
-                                }
+                                    "keeping inline reading order does not change notification HTML");
                             }
                             callerStyle.remove();
+                        }
+                        const layoutButton = notificationContent.querySelector<HTMLElement>(".caller-layout-action");
+                        if (layoutButton) {
+                            const layoutStyle = doc.createElement("style");
+                            doc.head.append(layoutStyle);
+                            for (const float of ["left", "right", "none"]) {
+                                layoutStyle.textContent = `.caller-layout-action {float: ${float}}`;
+                                check.equal(frame.contentWindow.getComputedStyle(layoutButton).cssFloat, float,
+                                    "buttons in custom containers and explicit action groups retain their layout");
+                                check.equal(notificationContent.innerHTML, expected.innerHTML);
+                            }
+                            layoutStyle.remove();
                         }
                         notification.querySelectorAll<HTMLElement>('[hidden]:not([hidden="until-found" i])').forEach(button =>
                             check.equal(frame.contentWindow.getComputedStyle(button).display, "none"));
@@ -273,7 +296,7 @@ const cases = async (source: string, styles: string[], themes: string[], notific
     return "update-message-ok";
 };
 
-test("notifications preserve caller layouts, actions, retries and recovery text on desktop and mobile", {timeout: 30000}, async () => {
+test("notifications preserve inline reading order, custom layouts, actions, retries and recovery text on desktop and mobile", {timeout: 30000}, async () => {
     const source = transpileModule(readFileSync("src/dialog/message.ts", "utf8")
         .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
@@ -319,12 +342,14 @@ test("notifications preserve caller layouts, actions, retries and recovery text 
         `<span role="status">${lang.loading} 64/256</span><span class="fn__space"></span>${button(lang.cancel)}`,
         '<div class="b3-snackbar__actions"><div class="b3-snackbar__body">Explicit actions</div>' +
             '<button class="b3-button b3-button--wrap b3-snackbar__action">A long translated action label that must wrap inside narrow notifications</button>' +
-            '<button class="b3-button b3-snackbar__action">Another action</button></div>',
+            '<button class="caller-layout-action b3-button b3-snackbar__action">Another action</button></div>',
         `Hidden action<button hidden class="b3-button">Hidden</button>${button("Visible")}`,
         `<div hidden>Hidden container${button("Hidden action")}</div>Visible${button("Visible action")}`,
         `<div hidden="UNTIL-FOUND">Searchable container${button("Searchable action")}</div>Visible${button("Visible action")}`,
         'Plugin text <a class="b3-button" href="https://example.com/action">Action link</a>',
         'Before <button class="caller-notice-action b3-button">Action</button> after',
+        '修改 JS 代码片段后需重新加载界面 <button class="caller-notice-action b3-button">不再提示</button> 才能保证生效',
+        '<div>Before <button class="caller-layout-action b3-button">Action</button> after</div>',
         ...readdirSync("appearance/langs").filter(name => name.endsWith(".json")).map(name =>
             renderFontSizeMessage(JSON.parse(readFileSync(`appearance/langs/${name}`, "utf8")))),
     ];

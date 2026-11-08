@@ -424,12 +424,19 @@ const browserCases = async (languages: Record<string, string>) => {
     const appearanceItem = document.querySelector<HTMLElement>("#markdownPreferences");
     check.equal(appearanceItem.tagName, "DIV", "appearance uses a submenu instead of a details accordion");
     check.equal(appearanceItem.getAttribute("aria-haspopup"), "menu");
-    check.equal(appearanceItem.querySelector(":scope > .b3-menu__icon--arrow use").getAttribute("href"), "#iconRight");
+    check.equal(appearanceItem.querySelector(":scope > .b3-menu__icon--small use").getAttribute("href"), "#iconRight");
     appearanceItem.click();
     const appearanceSubmenu = appearanceItem.querySelector<HTMLElement>(":scope > .b3-menu__submenu");
     check.ok(appearanceSubmenu.scrollHeight <= appearanceSubmenu.clientHeight,
         `appearance submenu fits: ${appearanceSubmenu.scrollHeight}/${appearanceSubmenu.clientHeight}`);
     check.equal(document.querySelector("#markdownTheme").checkVisibility(), true);
+    for (const item of [modeItem, appearanceItem, document.getElementById("markdownTheme"), document.getElementById("markdownFont")]) {
+        const bounds = item.getBoundingClientRect();
+        const leading = item.querySelector(":scope > .b3-menu__icon").getBoundingClientRect();
+        const arrow = item.querySelector(":scope > .b3-menu__icon--small").getBoundingClientRect();
+        check.equal(bounds.right - arrow.right, leading.left - bounds.left,
+            `${item.id} submenu arrow has the same edge inset as the leading icon`);
+    }
     appearanceItem.focus();
     appearanceItem.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
     check.equal(document.activeElement.id, "markdownTheme");

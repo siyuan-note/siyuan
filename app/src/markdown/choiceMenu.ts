@@ -18,7 +18,7 @@ export const createMarkdownSubmenu = (options: {
     element.setAttribute("role", "menuitem");
     element.setAttribute("aria-haspopup", "menu");
     element.setAttribute("aria-expanded", "false");
-    element.innerHTML = `<svg class="b3-menu__icon" aria-hidden="true"><use href="#${options.icon}"></use></svg><span class="b3-menu__label"></span><svg class="b3-menu__icon b3-menu__icon--arrow" aria-hidden="true"><use href="#iconRight"></use></svg><div class="b3-menu__submenu markdown-choice__menu" role="menu"></div>`;
+    element.innerHTML = `<svg class="b3-menu__icon" aria-hidden="true"><use href="#${options.icon}"></use></svg><span class="b3-menu__label"></span><svg class="b3-menu__icon b3-menu__icon--small" aria-hidden="true"><use href="#iconRight"></use></svg><div class="b3-menu__submenu markdown-choice__menu" role="menu"></div>`;
     element.querySelector(".b3-menu__label").textContent = options.label;
     const menu = element.querySelector<HTMLElement>(".b3-menu__submenu");
     menu.append(...children);

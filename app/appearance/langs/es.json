@@ -18,7 +18,7 @@
 	"globalBreadcrumb": "Ruta de navegación global",
 	"globalBreadcrumbTip": "Mostrar las rutas del cuaderno, los documentos y los bloques en una sola ruta de navegación",
 	"windowCloseTimeout": "La ventana no responde a la solicitud de cierre. ¿Salir sin guardar los cambios pendientes de la interfaz? Los cambios sin guardar podrían perderse",
-	"markdownOutlineUnavailable": "El esquema solo está disponible en los modos de renderizado instantáneo o WYSIWYG con una ventana ancha",
+	"markdownOutlineUnavailable": "El esquema solo está disponible en los modos de renderizado instantáneo o WYSIWYG",
 	"showFloatingStatusBar": "Mostrar la barra de estado oculta al pasar el cursor por la esquina inferior derecha de la ventana",
 	"changelogUnavailable": "No se pudo cargar el registro de cambios. Consulta esta versión en GitHub o inténtalo de nuevo más tarde",
 	"templateHTTPUnsafeTarget": "El destino de la plantilla se resuelve en una dirección no pública y se ha bloqueado; puede deberse al modo Fake-IP del proxy. Excluye este dominio de Fake-IP o usa DNS con IP reales",

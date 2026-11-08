@@ -58,6 +58,12 @@ const runElectron = async options => {
                 setTimeout(check, 25);
             }; check();
         })`);
+        assert.equal(window.getTitle(), "A.md", "page initialization keeps the native filename title");
+        const pageTitleChanged = once(window, "page-title-updated", {signal: AbortSignal.timeout(5000)});
+        await window.webContents.executeJavaScript("document.title = 'SiYuan'; void 0;");
+        await pageTitleChanged;
+        assert.equal(window.getTitle(), "A.md", "a temporary page title cannot replace the native filename");
+        await window.webContents.executeJavaScript("document.title = 'A.md'; void 0;");
         const security = await window.webContents.executeJavaScript(`({node: typeof require, process: typeof process,
             host: typeof window.siyuanMarkdown.host.write, unsafe: typeof window.siyuanMarkdown.invoke,
             origin: location.href, text: document.querySelector('#markdownEditor').innerText,

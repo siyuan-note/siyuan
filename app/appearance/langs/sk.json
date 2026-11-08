@@ -18,7 +18,7 @@
 	"globalBreadcrumb": "Globálna navigačná cesta",
 	"globalBreadcrumbTip": "Zobraziť cesty zápisníka, dokumentov a blokov v jednej navigačnej ceste",
 	"windowCloseTimeout": "Okno nereaguje na požiadavku na zatvorenie. Ukončiť bez uloženia čakajúcich úprav v rozhraní? Neuložené úpravy sa môžu stratiť",
-	"markdownOutlineUnavailable": "Osnova je dostupná iba v režime okamžitého vykresľovania alebo WYSIWYG v širokom okne",
+	"markdownOutlineUnavailable": "Osnova je dostupná iba v režime okamžitého vykresľovania alebo WYSIWYG",
 	"showFloatingStatusBar": "Zobraziť skrytý stavový riadok pri ukázaní myšou na pravý dolný roh okna",
 	"changelogUnavailable": "Nepodarilo sa načítať zoznam zmien. Pozrite si túto verziu na GitHube alebo to skúste znova neskôr",
 	"templateHTTPUnsafeTarget": "Cieľ šablóny sa prekladá na neverejnú adresu a bol zablokovaný; príčinou môže byť režim Fake-IP servera proxy. Vylúčte túto doménu z Fake-IP alebo použite DNS so skutočnými IP adresami",

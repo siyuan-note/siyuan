@@ -342,6 +342,8 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         records.set(sessionId, record);
         byContents.set(window.webContents.id, record);
         const browsing = window.webContents.session;
+        // 原生标题取当前授权文件名，页面加载时的临时标题不能覆盖它。
+        window.on("page-title-updated", event => event.preventDefault());
         browsing.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
         browsing.setPermissionCheckHandler(() => false);
         browsing.webRequest.onBeforeRequest((details, callback) => {

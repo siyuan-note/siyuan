@@ -283,6 +283,12 @@ test("native titles use the authorized current filename instead of renderer stat
     const file = path.join(directory, "example.md");
     await fs.writeFile(file, "example");
     const window = await manager.open(file);
+    assert.equal(window.options.title, "example.md");
+    for (const title of ["SiYuan", "", "untrusted.md"]) {
+        let prevented = false;
+        window.emit("page-title-updated", {preventDefault: () => {prevented = true;}}, title);
+        assert.equal(prevented, true, "page titles cannot replace the native filename during initialization");
+    }
     const initial = await call(window, "bootstrap");
     await call(window, "state", {sessionId: initial.sessionId, status: "dirty", revision: 1,
         savedRevision: 0, target: {displayName: "untrusted.md"}});

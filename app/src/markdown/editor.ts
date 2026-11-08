@@ -183,8 +183,8 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     let outlineAnimation: ReturnType<typeof createMarkdownPanelAnimation>;
     const syncOutline = (animate = false, force = false) => {
         if (destroyed || !ready) return;
-        // Vditor 的源码模式与小于 520px 的窗口不展示大纲，保留开关意图供恢复时使用。
-        const available = instance.getCurrentMode() !== "sv" && element.ownerDocument.defaultView.innerWidth >= 520;
+        // 源码模式隐藏大纲，保留开关意图供切回富文本模式时使用。
+        const available = instance.getCurrentMode() !== "sv";
         const visible = outlineEnabled && available;
         instance.vditor.options.outline.enable = outlineEnabled;
         outlineAnimation?.setVisible(visible, {animate, force});
@@ -567,7 +567,14 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                                         closingOutlineVersion.generation === generation;
                                     // 退场途中恢复时复用标题节点和折叠状态，原生 toggle 仍计算编辑区边距。
                                     if (reuse) outline.render = () => "";
-                                    try {outline.toggle(instance.vditor, visible, false);}
+                                    try {
+                                        outline.toggle(instance.vditor, visible, false);
+                                        // 独立编辑器允许窄屏展开大纲，标题内容和跳转仍由 Vditor 渲染。
+                                        if (visible && outline.element.style.display !== "block") {
+                                            outline.element.style.display = "block";
+                                            outline.render?.(instance.vditor);
+                                        }
+                                    }
                                     finally {if (reuse) outline.render = render;}
                                     if (visible) closingOutlineVersion = undefined;
                                 }

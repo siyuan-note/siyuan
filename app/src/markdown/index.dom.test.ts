@@ -269,10 +269,18 @@ const browserCases = async (languages: Record<string, string>) => {
     check.ok(outlineBounds.width <= contentBounds.width * .4 + 1, "outline stays bounded with the file tree open");
     check.ok(editorBoundsWithOutline.width > 0 && editorBoundsWithOutline.right <= contentBounds.right + 1);
     await ipcRenderer.invoke("markdown-resize", 360, 800); await tick();
-    check.equal(outlineToggle.disabled, true);
-    check.equal(outlineToggle.dataset.tooltip, languages.markdownOutlineUnavailable);
+    check.equal(outlineToggle.disabled, false);
+    check.equal(outlineToggle.dataset.tooltip, languages.outline);
+    check.equal(outlineToggle.getAttribute("aria-expanded"), "true");
+    check.equal(outlinePanel.checkVisibility(), true);
+    outlineToggle.click(); await tick();
     check.equal(outlineToggle.getAttribute("aria-expanded"), "false");
     check.equal(outlinePanel.checkVisibility(), false);
+    outlineToggle.click(); await tick();
+    check.equal(outlineToggle.getAttribute("aria-expanded"), "true");
+    check.equal(outlinePanel.checkVisibility(), true);
+    const narrowContent = document.querySelector(".vditor-content").getBoundingClientRect();
+    check.ok(outlinePanel.getBoundingClientRect().width <= narrowContent.width * .4 + 1);
     await ipcRenderer.invoke("markdown-resize", 1100, 850); await tick();
     check.equal(outlineToggle.disabled, false);
     check.equal(outlineToggle.getAttribute("aria-expanded"), "true");
@@ -413,6 +421,13 @@ const browserCases = async (languages: Record<string, string>) => {
             await ipcRenderer.invoke("markdown-screenshot", `touch-${platform}-${dark ? "dark" : "light"}-icons`);
             (document.querySelector("#markdownResourcesInfo") as HTMLElement).click();
             moreButton.click();
+            check.equal(outlineToggle.disabled, false, `${platform} outline is available in portrait orientation`);
+            outlineToggle.click(); await tick();
+            check.equal(outlinePanel.checkVisibility(), true);
+            check.equal(outlinePanel.inert, false);
+            await ipcRenderer.invoke("markdown-screenshot", `touch-${platform}-${dark ? "dark" : "light"}-outline`);
+            outlineToggle.click(); await tick();
+            check.equal(outlinePanel.checkVisibility(), false);
         }
     }
     document.body.className = desktopClasses;
@@ -1147,6 +1162,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.ok(document.querySelector(".vditor-preview h1"), "a user's source mode still previews small files");
     smallExplicitSource.destroy();
     const desktopBody = document.body.className;
+    await ipcRenderer.invoke("markdown-resize", 360, 800); await tick();
     for (const platform of ["android", "ios", "harmony"]) {
         document.body.className = "";
         storedPreferences = {...storedPreferences, mode: "wysiwyg"};
@@ -1154,15 +1170,23 @@ const browserCases = async (languages: Record<string, string>) => {
         const mobileLarge = await api.mountMarkdownApplication(bridge);
         check.equal(document.querySelector('#markdownMode [aria-checked="true"]').getAttribute("data-value"), "sv");
         check.equal(storedPreferences.mode, "wysiwyg", `${platform} preserves the preferred mode during automatic fallback`);
+        check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").disabled, true);
         mobileLarge.destroy();
         bridge.bootstrap = async () => ({...bootstrap, platform, sessionId: `${platform}-small`, content: "# Small mobile document\n", preferences: {...storedPreferences}});
         const mobileSmall = await api.mountMarkdownApplication(bridge);
         check.equal(document.querySelector('#markdownMode [aria-checked="true"]').getAttribute("data-value"), "wysiwyg");
         check.equal(document.querySelector("#markdownFiles").tagName, "DIV", `${platform} filename is display-only`);
         check.equal(document.querySelector("#markdownFiles").getAttribute("aria-controls"), null);
+        const mobileOutline = document.querySelector<HTMLButtonElement>("#markdownOutlineToggle");
+        check.equal(mobileOutline.disabled, false, `${platform} starts with a usable outline button on a narrow screen`);
+        await ipcRenderer.invoke("markdown-pointer-click", "#markdownOutlineToggle"); await tick();
+        check.equal(mobileOutline.getAttribute("aria-expanded"), "true");
+        check.ok(document.querySelector<HTMLElement>(".vditor-outline").checkVisibility());
+        check.ok(document.querySelector(".vditor-outline").textContent.includes("Small mobile document"));
         mobileSmall.destroy();
     }
     document.body.className = desktopBody;
+    await ipcRenderer.invoke("markdown-resize", 1100, 850); await tick();
     for (const platform of ["win32", "darwin", "linux"]) {
         const controls: string[] = [];
         const overlays: Array<{height: number; symbolColor: string}> = [];

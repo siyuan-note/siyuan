@@ -200,14 +200,34 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
         const width = Object.getOwnPropertyDescriptor(window, "innerWidth");
         try {
-            Object.defineProperty(window, "innerWidth", {configurable: true, value: 519});
-            window.dispatchEvent(new Event("resize"));
-            check.deepEqual(states.at(-1), {enabled: true, visible: false, available: false});
-            Object.defineProperty(window, "innerWidth", {configurable: true, value: 520});
-            window.dispatchEvent(new Event("resize"));
-            check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
+            for (const viewportWidth of [360, 519, 520]) {
+                Object.defineProperty(window, "innerWidth", {configurable: true, value: viewportWidth});
+                wrapper.style.width = `${viewportWidth}px`;
+                window.dispatchEvent(new Event("resize"));
+                check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
+                editor.setOutline(false); await finishOutline();
+                editor.setOutline(true); await finishOutline();
+                check.ok(panel.checkVisibility(), `${mode} outline can reopen at ${viewportWidth}px`);
+                check.equal(panel.inert, false);
+                const folded = panel.querySelector<SVGElement>(".vditor-outline__action");
+                folded.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+                check.equal((folded.parentElement.nextElementSibling as HTMLElement).style.display, "none");
+                folded.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+                const surface = element.querySelector<HTMLElement>(`.vditor-${mode} .vditor-reset`);
+                surface.scrollTop = 0;
+                Array.from(panel.querySelectorAll<HTMLElement>("[data-target-id]")).find(item => item.textContent === "Last").click();
+                check.ok(surface.scrollTop > 0, `${mode} outline navigates at ${viewportWidth}px`);
+                editor.setMode("sv");
+                check.deepEqual(states.at(-1), {enabled: true, visible: false, available: false});
+                editor.setMode(mode);
+                check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
+                check.ok(panel.checkVisibility(), `${mode} outline returns after switching modes at ${viewportWidth}px`);
+                check.deepEqual(editor.flush(), {content: source, edited: false, composing: false});
+            }
         } finally {
             Object.defineProperty(window, "innerWidth", width);
+            wrapper.style.width = "";
+            window.dispatchEvent(new Event("resize"));
         }
         const surface = element.querySelector<HTMLElement>(`.vditor-${mode} .vditor-reset`);
         const heading = surface.querySelector("h1");

@@ -158,7 +158,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " on macOS; check the button tooltip for any custom binding. It updates as you edit; expand or collapse nested headings and click a heading to jump to it. The outline is available in instant rendering and WYSIWYG modes when the window is at least 520 pixels wide. In source/split view or narrower windows, it is hidden and the button is disabled with an explanatory tooltip. Whether the outline is enabled is retained across documents only in the current window."
+					"Data": " on macOS; check the button tooltip for any custom binding. It updates as you edit; expand or collapse nested headings and click a heading to jump to it. The outline is available in instant rendering and WYSIWYG modes, including on mobile devices and in narrow windows. In source/split view, it is hidden and the button is disabled with an explanatory tooltip. Whether the outline is enabled is retained across documents only in the current window."
 				}
 			]
 		},

@@ -18,7 +18,7 @@
 	"globalBreadcrumb": "Genel gezinme yolu",
 	"globalBreadcrumbTip": "Not defteri, belge ve blok yollarını tek bir gezinme yolunda göster",
 	"windowCloseTimeout": "Pencere kapatma isteğine yanıt vermiyor. Arayüzdeki bekleyen düzenlemeler kaydedilmeden çıkılsın mı? Kaydedilmemiş düzenlemeler kaybolabilir",
-	"markdownOutlineUnavailable": "Anahat yalnızca geniş bir pencerede anında işleme veya WYSIWYG modunda kullanılabilir",
+	"markdownOutlineUnavailable": "Anahat yalnızca anında işleme veya WYSIWYG modunda kullanılabilir",
 	"showFloatingStatusBar": "Pencerenin sağ alt köşesine gelindiğinde gizli durum çubuğunu göster",
 	"changelogUnavailable": "Değişiklik günlüğü yüklenemedi. Bu sürümü GitHub'da görüntüleyin veya daha sonra tekrar deneyin",
 	"templateHTTPUnsafeTarget": "Şablon hedefi genel olmayan bir adrese çözümlendi ve engellendi; nedeni vekil sunucunun Fake-IP modu olabilir. Bu alan adını Fake-IP dışında tutun veya gerçek IP döndüren DNS kullanın",

@@ -11,6 +11,9 @@ for (const available of [true, false]) {
     test(`bound editor preparation keeps attribute requests alive and handles availability=${available}`, async () => {
         const document = new DOMFixture();
         const original = document.createElement("div");
+        Object.assign(original, {getBoundingClientRect: () => ({left: 0, top: 0, width: 800, height: 600})});
+        const createElement = document.createElement.bind(document);
+        document.createElement = (tag: string) => Object.assign(createElement(tag), {style: {}});
         const panel = Object.assign(document.createElement("div"), {style: {visibility: ""}});
         document.body.append(original);
         const window = {siyuan: {config: {editor: {databaseAttrShow: true}}, ws: {ws: {
@@ -23,7 +26,7 @@ for (const available of [true, false]) {
                 fetchWithAppId: async () => {}, Constants: {SIYUAN_APPID: "test"}})});
         let replaced = 0;
         let checked = 0;
-        const wnd = {addTab() { replaced++; original.remove(); }};
+        const wnd = {addTab() { replaced++; original.remove(); document.body.append(panel); }};
         class Custom {}
         class Editor {
             editor = {resize() {}, protyle: {element: panel, contentElement: panel, block: {}, databaseAttributePanel: {

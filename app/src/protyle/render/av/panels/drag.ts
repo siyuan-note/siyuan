@@ -7,6 +7,7 @@ import { updateCellsValue } from "../cell";
 import { getLanguageByIndex } from "../groups";
 import { hasClosestByAttribute } from "../../../util/hasClosest";
 import { getPropertiesHTML } from "./properties";
+import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "../viewVisibility";
 import type { IAVPanelContext } from "./types";
 export const bindAVPanelDrag = (context: IAVPanelContext) => {
     let counter = 0;
@@ -99,28 +100,63 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
             bindSortsEvent(context.options.protyle, context.menuElement, context.data, context.blockID);
             return;
         }
-        // 视图切换拖拽排序
-        if (targetElement.querySelector('[data-type="av-view-edit"]')) {
-            transaction(context.options.protyle, [{
-                    action: "sortAttrViewView",
-                    avID: context.avID,
-                    blockID: context.blockID,
-                    id: sourceId,
-                    previousID: isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")
-                }], [{
-                    action: "sortAttrViewView",
-                    avID: context.avID,
-                    blockID: context.blockID,
-                    id: sourceId,
-                    previousID: sourceElement.previousElementSibling?.getAttribute("data-id")
-                }]);
-            if (isTop) {
-                targetElement.before(sourceElement);
-                targetElement.classList.remove("dragover__top");
+        if (context.options.type === "switcher" && sourceElement.dataset.avViewVisibility &&
+            (targetElement.dataset.avViewVisibility || targetElement.dataset.avViewSection)) {
+            event.preventDefault();
+            event.stopPropagation();
+            targetElement.classList.remove("dragover__top", "dragover__bottom");
+            const oldViews = context.data.views;
+            const sourceIndex = oldViews.findIndex(view => view.id === sourceId);
+            const targetVisibility = targetElement.dataset.avViewVisibility || targetElement.dataset.avViewSection;
+            const visibleViewIDs = getAVVisibleViewIDs(context.options.blockElement, oldViews);
+            const wasVisible = visibleViewIDs.includes(sourceId);
+            const visible = targetVisibility === "visible";
+            if (!context.menuElement.contains(sourceElement) || sourceIndex < 0 || sourceId === targetId ||
+                (wasVisible && !visible && visibleViewIDs.length === 1)) {
+                return;
             }
-            else {
-                targetElement.after(sourceElement);
-                targetElement.classList.remove("dragover__bottom");
+            const views = oldViews.filter(view => view.id !== sourceId);
+            let index = targetId ? views.findIndex(view => view.id === targetId) :
+                views.findIndex(view => visibleViewIDs.includes(view.id) === visible);
+            if (targetId && index < 0) {
+                return;
+            }
+            if (index < 0) {
+                index = views.length;
+            } else if (targetId && !isTop) {
+                index++;
+            }
+            views.splice(index, 0, oldViews[sourceIndex]);
+            const operations: IOperation[] = [];
+            const undoOperations: IOperation[] = [];
+            if (index !== sourceIndex) {
+                operations.push({
+                    action: "sortAttrViewView",
+                    avID: context.avID,
+                    blockID: context.blockID,
+                    id: sourceId,
+                    previousID: views[index - 1]?.id || ""
+                });
+                undoOperations.push({
+                    action: "sortAttrViewView",
+                    avID: context.avID,
+                    blockID: context.blockID,
+                    id: sourceId,
+                    previousID: oldViews[sourceIndex - 1]?.id || ""
+                });
+            }
+            if (wasVisible !== visible) {
+                const viewIDs = visible ? visibleViewIDs.concat(sourceId) : visibleViewIDs.filter(id => id !== sourceId);
+                operations.push({action: "setAttrViewBlockVisibleViews", avID: context.avID,
+                    blockID: context.blockID, viewIDs});
+                undoOperations.push({action: "setAttrViewBlockVisibleViews", avID: context.avID,
+                    blockID: context.blockID, viewIDs: visibleViewIDs});
+                setAVVisibleViewIDs(context.options.blockElement, viewIDs);
+            }
+            if (operations.length > 0) {
+                context.data.views = views;
+                transaction(context.options.protyle, operations, undoOperations);
+                context.rerenderSwitcher();
             }
             return;
         }
@@ -342,7 +378,8 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
             return;
         }
         const target = event.target as HTMLElement;
-        let targetElement = target.closest<HTMLElement>(".av__conditional-rule") || target.closest<HTMLElement>('[data-option-row="true"]') ||
+        const viewSection = context.options.type === "switcher" ? target.closest<HTMLElement>("[data-av-view-section]") : undefined;
+        let targetElement = viewSection || target.closest<HTMLElement>(".av__conditional-rule") || target.closest<HTMLElement>('[data-option-row="true"]') ||
             hasClosestByAttribute(target, "draggable", "true");
         if (!targetElement) {
             const nearbyElement = document.elementFromPoint(event.clientX, event.clientY - 1);
@@ -350,10 +387,16 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
                 hasClosestByAttribute(nearbyElement, "draggable", "true");
         }
         if (!targetElement || targetElement === window.siyuan.dragElement) {
+            if (context.options.type === "switcher") {
+                context.avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach(item => {
+                    item.classList.remove("dragover__bottom", "dragover__top");
+                });
+            }
             return;
         }
         event.preventDefault();
-        if (dragoverElement && targetElement === dragoverElement) {
+        if ((dragoverElement && targetElement === dragoverElement) ||
+            context.options.type === "switcher" && window.siyuan.dragElement?.dataset.avViewVisibility) {
             const nodeRect = targetElement.getBoundingClientRect();
             context.avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
                 item.classList.remove("dragover__bottom", "dragover__top");

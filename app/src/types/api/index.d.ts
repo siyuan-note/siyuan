@@ -8680,12 +8680,15 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 读取版本更新日志；未指定 force 时同时清除待显示标记并落盘 conf.json，因此需要写权限。
+     */
     "/api/system/getChangelog": {
         request: SystemChangelogRequestInput;
         response: { "code": 0; "data": SystemChangelogData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "legacyOptional";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
-        authorization?: readonly ["authenticated"];
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/getConf": {
         request: EmptyRequestInput;

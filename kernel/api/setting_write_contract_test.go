@@ -127,6 +127,14 @@ func TestSettingWriteEndpointsAreDeclared(t *testing.T) {
 			if directSettingWritePattern.MatchString(expanded.String()) && !definition.Setting.Declared() {
 				t.Errorf("%s (%s) writes configuration directly but declares no setting namespace", path, name)
 			}
+			// 写配置必须有管理或写权限，或在处理函数内自行校验角色：发布服务的读者只能读取，
+			// 否则会把只读角色可写工作空间配置的缺口留在网关上。
+			if directSettingWritePattern.MatchString(expanded.String()) &&
+				definition.Authorization&(apicontract.AdminAccess|apicontract.WritableAccess) == 0 &&
+				!strings.Contains(expanded.String(), "IsReadOnlyRoleContext(") &&
+				!strings.Contains(expanded.String(), "IsAdminRoleContext(") {
+				t.Errorf("%s (%s) writes configuration without admin/writable access or an in-handler role guard", path, name)
+			}
 			if definition.Setting.Declared() && definition.Setting.Mode != apicontract.SettingSelfManaged &&
 				strings.Contains(expanded.String(), "settingMutationMu.Lock()") {
 				t.Errorf("%s locks the setting mutex itself; declare SettingSelfManaged instead", path)

@@ -41,13 +41,13 @@ const registerExportReferencesGroup = (tab: SettingTabBuilder) => {
 const registerExportFormatGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("format", window.siyuan.languages.configGroupFormat);
 
-    group.switch("export.markdownYFM", {
-        title: window.siyuan.languages.export23,
-        desc: window.siyuan.languages.export24,
-    });
     group.switch("export.addTitle", {
         title: window.siyuan.languages.export17,
         desc: window.siyuan.languages.export18,
+    });
+    group.switch("export.markdownYFM", {
+        title: window.siyuan.languages.export23,
+        desc: window.siyuan.languages.export24,
     });
     group.switch("export.headingNumber", {
         title: window.siyuan.languages.exportHeadingNumber,

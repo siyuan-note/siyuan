@@ -848,11 +848,11 @@
       position: sticky;
       top: 0;
       z-index: 2;
+      align-items: center;
       flex-wrap: wrap;
       row-gap: 8px;
 
       &--downloaded {
-        align-items: center;
         column-gap: 8px;
       }
     }
@@ -866,6 +866,12 @@
       flex: 1 1 240px;
       gap: 8px;
       min-width: 0;
+
+      @media (pointer: coarse) {
+        > .block__icon--inset {
+          --b3-icon-background-inset: 8px;
+        }
+      }
 
       > .b3-text-field {
         flex: 1;

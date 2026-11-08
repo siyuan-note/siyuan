@@ -559,6 +559,10 @@ const checkLayout = async () => {
         rectangles.forEach((a, index) => rectangles.slice(index + 1).forEach(b => {
             assert.ok(a.right <= b.left + 1 || b.right <= a.left + 1 || a.bottom <= b.top + 1 || b.bottom <= a.top + 1,
                 `${type}: toolbar controls do not overlap`);
+            if (Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top) + 1) {
+                assert.ok(Math.abs(a.top + a.height / 2 - b.top - b.height / 2) < 1,
+                    `${type}: controls on the same toolbar row share a vertical center`);
+            }
         }));
         const trigger = button(type);
         const triggerRect = trigger.getBoundingClientRect();
@@ -567,6 +571,20 @@ const checkLayout = async () => {
         assert.ok(triggerRect.width >= 24 && triggerRect.height >= 24, "filter retains a shared icon-button hit target");
         if (matchMedia("(pointer: coarse)").matches) {
             assert.ok(triggerRect.width >= 44 && triggerRect.height >= 44, "touch filter retains its larger shared hit target");
+            const style = getComputedStyle(trigger);
+            assert.equal(style.backgroundClip, "padding-box", "touch highlight is inset inside the hit target");
+            assert.ok(Math.abs(triggerRect.height - parseFloat(style.borderTopWidth) -
+                parseFloat(style.borderBottomWidth) - search.height) < 1,
+            "touch highlight matches the adjacent search field height");
+            for (const [x, y] of [
+                [triggerRect.left + 2, triggerRect.top + triggerRect.height / 2],
+                [triggerRect.right - 2, triggerRect.top + triggerRect.height / 2],
+                [triggerRect.left + triggerRect.width / 2, triggerRect.top + 2],
+                [triggerRect.left + triggerRect.width / 2, triggerRect.bottom - 2],
+            ]) {
+                assert.equal(document.elementFromPoint(x, y)?.closest("[data-bazaar-filter-menu]"), trigger,
+                    "transparent touch padding belongs to the filter button");
+            }
         }
         assert.ok(triggerRect.right <= search.left && Math.abs(triggerRect.top + triggerRect.height / 2 -
             search.top - search.height / 2) < 1, "filter sits before the search field and is vertically centered");
@@ -764,7 +782,8 @@ const runElectron = async () => {
             });
             const point = await evaluate(() => {
                 const rect = window.fixture.button("plugins").getBoundingClientRect();
-                return {x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + rect.height / 2)};
+                return {x: Math.round(rect.left + (matchMedia("(pointer: coarse)").matches ? 2 : rect.width / 2)),
+                    y: Math.round(rect.top + rect.height / 2)};
             });
             await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {
                 type: "mousePressed", button: "left", clickCount: 1, ...point,
@@ -791,9 +810,11 @@ const runElectron = async () => {
             await win.webContents.removeInsertedCSS(theme);
             for (const appearance of ["daylight", "midnight"]) {
                 const themeID = await win.webContents.insertCSS(read(`appearance/themes/${appearance}/theme.css`));
-                for (const [width, font, language] of mobile ?
+                for (const [width, font, language, coarse = mobile] of mobile ?
                     [[320, 14, "en"], [320, 16, "zh-CN"], [320, 24, "de"], [768, 24, "zh-CN"]] :
-                    [[1100, 14, "en"], [600, 24, "de"], [400, 24, "zh-CN"]]) {
+                    [[1100, 14, "en"], [600, 24, "de"], [400, 24, "zh-CN"],
+                        [1100, 14, "en", true], [640, 14, "zh-CN", true], [400, 24, "zh-CN", true]]) {
+                    await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: coarse});
                     await win.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride", {
                         width, height: 900, deviceScaleFactor: 1, mobile,
                     });
@@ -812,12 +833,12 @@ const runElectron = async () => {
                         await evaluate(checkLayout);
                         layouts++;
                     }
-                    console.log("Stable filter appearance", {mobile, appearance, width,
+                    console.log("Stable filter appearance", {mobile, appearance, width, coarse,
                         ...await evaluate(checkSavingAppearance)});
                     if (process.env.SIYUAN_BAZAAR_SCREENSHOTS) {
                         await new Promise(resolve => setTimeout(resolve, 100));
                         mkdirSync(process.env.SIYUAN_BAZAAR_SCREENSHOTS, {recursive: true});
-                        const file = `${mobile ? "mobile" : "desktop"}-${appearance}-${width}-${font}-${language}.png`;
+                        const file = `${mobile ? "mobile" : "desktop"}-${appearance}-${width}-${font}-${language}${!mobile && coarse ? "-touch" : ""}.png`;
                         writeFileSync(path.join(process.env.SIYUAN_BAZAAR_SCREENSHOTS, file), (await win.webContents.capturePage()).toPNG());
                         await evaluate(() => window.fixture.input(window.fixture.types.at(-1), "hideUnsupportedVersion"));
                         await evaluate(() => window.fixture.waitForMenu());
@@ -857,7 +878,7 @@ if (process.versions.electron && process.type === "browser") {
             const {stdout} = await promisify(execFile)(require("electron"), [...headless, __filename, profile], {
                 env, windowsHide: true, timeout: 95000, maxBuffer: 1024 * 1024,
             });
-            assert.match(stdout, /Verified marketplace compatibility interactions and 70 production-style layouts/);
+            assert.match(stdout, /Verified marketplace compatibility interactions and 100 production-style layouts/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-bazaar-compatibility-"));

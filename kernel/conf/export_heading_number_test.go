@@ -16,7 +16,7 @@ func TestExportHeadingNumberDefaults(t *testing.T) {
 			t.Fatal(err)
 		}
 		NormalizeExport(value)
-		want := input != `{"headingNumber":false}`
+		want := input == `{"headingNumber":true}`
 		if value.HeadingNumber == nil || *value.HeadingNumber != want {
 			t.Fatalf("incorrect default for %s", input)
 		}
@@ -29,7 +29,7 @@ func TestExportHeadingNumberDefaults(t *testing.T) {
 			t.Fatalf("round trip: %s %v", data, err)
 		}
 	}
-	if !*NewExport().HeadingNumber || !*NormalizeExport(nil).HeadingNumber {
-		t.Fatal("new default must be true")
+	if *NewExport().HeadingNumber || *NormalizeExport(nil).HeadingNumber {
+		t.Fatal("new default must be false")
 	}
 }

@@ -46,8 +46,9 @@ func TestExportMarkdownHeadingNumberOptions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, persistent := range []bool{true, false} {
-		Conf.Export.Load().HeadingNumber = new(persistent)
+	for _, preference := range []*bool{new(true), new(false), nil} {
+		Conf.Export.Load().HeadingNumber = preference
+		persistent := preference != nil && *preference
 		for _, choice := range []*bool{new(false), new(true), nil} {
 			opts := &ExportOptions{HeadingNumber: choice}
 			wantNumber := persistent
@@ -75,7 +76,7 @@ func TestExportMarkdownHeadingNumberOptions(t *testing.T) {
 			if strings.Contains(markdownArchiveDocument(t, archive, "Disabled"), "# 1 First heading") {
 				t.Fatal("multi-document archive enabled numbering for a disabled document")
 			}
-			if *Conf.Export.Load().HeadingNumber != persistent || Conf.Export.Load().MarkdownHeadingNumber != nil {
+			if Conf.Export.Load().HeadingNumber != preference || (preference != nil && *preference != persistent) || Conf.Export.Load().MarkdownHeadingNumber != nil {
 				t.Fatal("request override changed persistent preference")
 			}
 			if err := archive.Close(); err != nil {

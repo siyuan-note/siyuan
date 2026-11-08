@@ -35,9 +35,14 @@ test("Markdown export uses persisted numbering without adding a heading number c
     assert.ok(content.includes('id="includeSubDocs"'));
     assert.equal(content.includes('id="headingNumber"'), false);
     handlers[1]();
-    assert.equal(payload.headingNumber, true);
+    assert.equal(payload.headingNumber, false);
     exports.openExportOptionsDialog(value => { payload = value; });
+    config.headingNumber = true;
+    handlers[1]();
+    assert.equal(payload.headingNumber, true);
+    assert.deepEqual(config, {addTitle: true, includeSubDocs: true, headingNumber: true});
     config.headingNumber = false;
+    exports.openExportOptionsDialog(value => { payload = value; });
     handlers[1]();
     assert.equal(payload.headingNumber, false);
     assert.deepEqual(config, {addTitle: true, includeSubDocs: true, headingNumber: false});

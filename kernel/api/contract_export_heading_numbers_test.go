@@ -115,6 +115,17 @@ func TestAPIContractExportHeadingNumbers(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			// 默认不包含编号；显式开启后复用下方文档开关及格式覆盖。
+			model.Conf.Export.Load().HeadingNumber = new(false)
+			for _, id := range []string{docID, lastID} {
+				code, message, raw := exportContractRequest(t, "exportMdContent", exportMdContent,
+					`{"id":"`+id+`","refMode":3,"embedMode":1,"addTitle":false,"yfm":false}`)
+				var data apicontract.ExportMarkdownContentData
+				if err := json.Unmarshal(raw, &data); err != nil || code != 0 || !strings.Contains(data.Content, "## Last\n") {
+					t.Fatalf("default Markdown export must omit numbers: %d %s %s %v", code, message, raw, err)
+				}
+			}
+			model.Conf.Export.Load().HeadingNumber = new(true)
 			for _, id := range []string{docID, lastID} {
 				code, message, raw := exportContractRequest(t, "exportMdContent", exportMdContent,
 					`{"id":"`+id+`","refMode":3,"embedMode":1,"addTitle":true,"yfm":false}`)

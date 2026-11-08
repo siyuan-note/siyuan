@@ -73,7 +73,7 @@ export const openDocumentMenu = (options: {
         label: window.siyuan.languages.copyDoc,
         accelerator: undefined,
         click: async () => {
-            const headingNumber = window.siyuan.config.export.headingNumber !== false;
+            const headingNumber = window.siyuan.config.export.headingNumber === true;
             const [responseHTML, responseText] = await Promise.all([
                 fetchSyncPost("/api/block/getBlockDOM", {
                     id,

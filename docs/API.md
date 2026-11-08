@@ -1878,7 +1878,7 @@ Incoming titles containing ASCII `/` must declare `Spec` at least `6`; otherwise
   ```
 
     * `id`: ID of the doc block to export
-    * `headingNumber`: Optional boolean; `false` omits automatic heading numbers for this Markdown copy only. Omitted or `null` follows the export preference; `true` preserves the document's numbering without enabling numbering on a document where it is disabled
+    * `headingNumber`: Optional boolean; `false` omits automatic heading numbers for this Markdown copy only. Omitted or `null` follows the export preference (disabled by default); `true` preserves the document's numbering without enabling numbering on a document where it is disabled
     * `preserveTaskMarkers`: Optional boolean for Markdown copying; `true` retains task markers such as `[/]` and `[-]`. Omitted, `null`, or `false` keeps standard Markdown normalization to `[X]` for nonstandard markers
 * Return value
 

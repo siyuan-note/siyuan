@@ -175,7 +175,7 @@ test("copy document uses persisted numbering without an additional prompt", asyn
         menu.open();
         await menu.click("copyDoc");
         const request = menu.calls.find(call => call.name === "fetchSyncPost" && call.args[0] === "/api/export/exportMdContent");
-        assert.equal((request.args[1] as {headingNumber: boolean}).headingNumber, choice !== false);
+        assert.equal((request.args[1] as {headingNumber: boolean}).headingNumber, choice === true);
         assert.ok(menu.calls.some(call => call.name === "clipboard"));
         assert.equal(menu.calls.filter(call => call.name === "fetchSyncPost").length, 2);
     }

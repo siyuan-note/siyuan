@@ -100,7 +100,7 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
     };
     const collect = (): IExportMdOptionsPayload => ({
         addTitle: (el.querySelector("#addTitle") as HTMLInputElement).checked,
-        headingNumber: window.siyuan.config.export.headingNumber !== false,
+        headingNumber: window.siyuan.config.export.headingNumber === true,
         inlineMemo: (el.querySelector("#inlineMemo") as HTMLInputElement).checked,
         blockRefMode: parseInt((el.querySelector("#blockRefMode") as HTMLSelectElement).value, 10),
         blockEmbedMode: parseInt((el.querySelector("#blockEmbedMode") as HTMLSelectElement).value, 10),

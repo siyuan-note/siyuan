@@ -3417,7 +3417,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, exportOpts markdownExpo
 		numberHeadings = exportOpts.Config.HeadingNumber
 	}
 	// Pandoc 格式复用 Markdown 中间态，但不使用 Markdown 编号偏好。
-	if exportOpts.Ext != ".md" || numberHeadings == nil || *numberHeadings {
+	if exportOpts.Ext != ".md" || (numberHeadings != nil && *numberHeadings) {
 		if numberErr := applyHeadingNumbersForExport(tree, getExportBlockTreeInBox(id, tree.Box), false); nil != numberErr {
 			logging.LogErrorf("prepare Markdown heading numbers failed: %s", numberErr)
 			return ""

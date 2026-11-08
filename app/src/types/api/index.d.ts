@@ -5468,7 +5468,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * Markdown 导出按文档标题编号开关和编辑器编号格式添加编号，不修改源文档。
-     * headingNumber=false 仅在本次 Markdown 导出中省略编号；省略或 null 沿用导出设置；true 保留文档编号。
+     * headingNumber=false 仅在本次 Markdown 导出中省略编号；省略或 null 沿用导出设置（默认不包含编号）；true 保留文档编号。
      */
     "/api/export/exportMd": {
         request: ExportMarkdownRequestInput;
@@ -5479,7 +5479,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * Markdown 内容按文档标题编号开关和编辑器编号格式添加编号，局部导出保留原文档编号。
-     * headingNumber=false 仅在本次 Markdown 复制中省略编号；省略或 null 沿用导出设置；true 保留文档编号，不改变源文档或导出设置。
+     * headingNumber=false 仅在本次 Markdown 复制中省略编号；省略或 null 沿用导出设置（默认不包含编号）；true 保留文档编号，不改变源文档或导出设置。
      */
     "/api/export/exportMdContent": {
         request: ExportMarkdownContentRequestInput;

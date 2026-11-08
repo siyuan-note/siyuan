@@ -769,7 +769,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " controls whether Markdown copies and exports include automatic heading numbers. “Include automatic heading numbers in Markdown exports” is enabled by default and follows the document’s numbering state. Turn it off to omit numbers from Markdown output without changing the document or editor settings. Copying uses this saved preference directly without a numbering prompt. Other export formats are unaffected."
+									"Data": " controls whether Markdown copies and exports include automatic heading numbers. “Include automatic heading numbers in Markdown exports” is disabled by default, omitting numbers from Markdown output without changing the document or editor settings. Turn it on to preserve numbering when the document has heading numbering enabled. Copying uses this saved preference directly without a numbering prompt. Other export formats are unaffected."
 								}
 							]
 						}

@@ -6,48 +6,58 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/siyuan-note/siyuan/kernel/util"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestExportHeadingNumberPersistAndReset(t *testing.T) {
 	prepareConfConsistencyTest(t)
 	settingsResetTestEnvironment(t)
-	for _, patch := range []string{`{"headingNumber":false}`, `{"addTitle":false}`, `{}`} {
-		if _, err := ApplyConfPatch("export", []byte(patch)); err != nil {
+	for _, selected := range []bool{true, false} {
+		patch, err := json.Marshal(map[string]bool{"headingNumber": selected})
+		if err != nil {
 			t.Fatal(err)
 		}
-		if *Conf.Export.Load().HeadingNumber {
-			t.Fatal("omitted field did not preserve false")
+		for _, raw := range [][]byte{patch, []byte(`{"addTitle":false}`), []byte(`{}`)} {
+			if _, err := ApplyConfPatch("export", raw); err != nil {
+				t.Fatal(err)
+			}
+			if *Conf.Export.Load().HeadingNumber != selected {
+				t.Fatal("omitted field did not preserve selection")
+			}
+		}
+		data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		reloaded := NewAppConf()
+		if err = json.Unmarshal(data, reloaded); err != nil {
+			t.Fatal(err)
+		}
+		NormalizeAppConf(reloaded)
+		if *reloaded.Export.Load().HeadingNumber != selected {
+			t.Fatal("selection did not persist")
 		}
 	}
-	data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
-	if err != nil {
+	if _, err := ApplyConfPatch("export", []byte(`{"headingNumber":true}`)); err != nil {
 		t.Fatal(err)
 	}
-	reloaded := NewAppConf()
-	if err = json.Unmarshal(data, reloaded); err != nil {
+	if _, err := ApplyConfPatch("export", []byte(`{"headingNumber":null}`)); err != nil {
 		t.Fatal(err)
 	}
-	NormalizeAppConf(reloaded)
-	if *reloaded.Export.Load().HeadingNumber {
-		t.Fatal("false did not persist")
-	}
-	if _, err = ApplyConfPatch("export", []byte(`{"headingNumber":null}`)); err != nil {
-		t.Fatal(err)
-	}
-	if !*Conf.Export.Load().HeadingNumber || Conf.Export.Load().AddTitle {
+	if *Conf.Export.Load().HeadingNumber || Conf.Export.Load().AddTitle {
 		t.Fatal("null did not reset only headingNumber")
 	}
-	if _, err = ApplyConfPatch("export", []byte(`{"headingNumber":false}`)); err != nil {
+	if _, err := ApplyConfPatch("export", []byte(`{"headingNumber":true}`)); err != nil {
 		t.Fatal(err)
 	}
-	if err = ResetSettings(); err != nil {
+	if err := ResetSettings(); err != nil {
 		t.Fatal(err)
 	}
-	if !*Conf.Export.Load().HeadingNumber {
-		t.Fatal("settings reset did not restore default")
+	if *Conf.Export.Load().HeadingNumber {
+		t.Fatal("settings reset did not restore false")
 	}
 }

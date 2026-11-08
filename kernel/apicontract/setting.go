@@ -354,7 +354,7 @@ type SettingMarkdown struct {
 }
 
 type SettingExport struct {
-	// Markdown 复制和导出保留文档标题编号，默认 true，不影响其他格式；省略保留现值，null 恢复默认。
+	// Markdown 复制和导出保留文档标题编号，默认 false，不影响其他格式；省略保留现值，null 恢复默认。
 	HeadingNumber           *bool  `json:"headingNumber" api:"optional,nullable"`
 	ParagraphBeginningSpace bool   `json:"paragraphBeginningSpace" api:"optional,nullable"`
 	AddTitle                bool   `json:"addTitle" api:"optional,nullable"`

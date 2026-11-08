@@ -65,7 +65,7 @@ for (const mobile of [false, true]) {
             await items.find((item: IMenu) => item.id === "copyMarkdown").click();
             const request = state.calls.find(call => call.name === "fetchSyncPost");
             assert.equal(JSON.stringify(request.args), JSON.stringify(["/api/export/exportMdContent", {
-                id: "heading", headingNumber: choice !== false, refMode: 3, embedMode: 1, yfm: false,
+                id: "heading", headingNumber: choice === true, refMode: 3, embedMode: 1, yfm: false,
                 preserveTaskMarkers: true, fillCSSVar: false, adjustHeadingLevel: false,
             }]));
             assert.ok(state.calls.some(call => call.name === "writeText"));

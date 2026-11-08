@@ -15,6 +15,51 @@ import (
 	"github.com/siyuan-note/dataparser"
 )
 
+func TestLuteBlockIDUpdatedCompatibility(t *testing.T) {
+	for _, test := range []struct {
+		name            string
+		id              string
+		existingUpdated string
+		wantUpdated     string
+	}{
+		{name: "short", id: "1"},
+		{name: "thirteen bytes", id: "1234567890123"},
+		{name: "fourteen bytes", id: "20200101000000", wantUpdated: "20200101000000"},
+		{name: "normal", id: "20200101000000-abcdefg", wantUpdated: "20200101000000"},
+		{name: "existing updated", id: "1", existingUpdated: "20210101000000", wantUpdated: "20210101000000"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			engine := NewLute()
+			updated := ""
+			if test.existingUpdated != "" {
+				updated = ` updated="` + test.existingUpdated + `"`
+			}
+			_, tree := engine.Md2BlockDOMTree("foo\n{: id=\""+test.id+"\""+updated+"}\n", true)
+			node := tree.Root.FirstChild
+			if node == nil || node.Type != ast.NodeParagraph || node.ID != test.id || node.IALAttr("id") != test.id {
+				t.Fatalf("block ID was not preserved: %#v", node)
+			}
+			if got := node.IALAttr("updated"); got != test.wantUpdated {
+				t.Fatalf("updated = %q, want %q", got, test.wantUpdated)
+			}
+
+			engine.SetSpin(true)
+			dom := `<div data-node-id="` + test.id + `" data-type="NodeParagraph" class="p"` + updated + `>` +
+				`<div contenteditable="true">foo</div><div class="protyle-attr" contenteditable="false"></div></div>`
+			for round := range 3 {
+				dom = engine.SpinBlockDOM(dom)
+				node = engine.BlockDOM2Tree(dom).Root.FirstChild
+				if node == nil || node.Type != ast.NodeParagraph || node.ID != test.id || node.IALAttr("id") != test.id {
+					t.Fatalf("round %d: block ID was not preserved: %s", round, dom)
+				}
+				if got := node.IALAttr("updated"); got != test.wantUpdated {
+					t.Fatalf("round %d: updated = %q, want %q", round, got, test.wantUpdated)
+				}
+			}
+		})
+	}
+}
+
 func TestLuteQuotedHashCodeRoundTrip(t *testing.T) {
 	engine := NewLute()
 	for _, source := range []string{

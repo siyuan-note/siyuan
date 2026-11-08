@@ -699,6 +699,48 @@ func sensitiveHomeDirs() []string {
 	return homeDirs
 }
 
+// userHomeParents 是各平台用户家目录的父目录。路径比较前已统一为小写，因此这里同样使用小写。
+var userHomeParents = []string{"/home", "/users", `c:\users`}
+
+// isForeignUserHomePath 判断小写绝对路径是否位于其他 OS 用户的家目录。家目录父目录下的首个路径段
+// 即该用户的家目录名，与内核进程自身的家目录（含系统家目录及其真实路径）不同时视为其他用户。
+// 多用户主机、共享服务器与容器挂载宿主机目录时，其他用户家目录中的凭据不属于本工作空间的数据。
+func isForeignUserHomePath(lowerPath string) bool {
+	homeDirs := sensitiveHomeDirs()
+	// 自定义配置主目录不改变内核进程所属的 OS 用户，其系统家目录始终属于自己。
+	if "" != systemHomeDir {
+		homeDirs = append(homeDirs, systemHomeDir)
+		if resolved, err := ResolveRealPath(systemHomeDir); err == nil && resolved != systemHomeDir {
+			homeDirs = append(homeDirs, resolved)
+		}
+	}
+	for _, parent := range userHomeParents {
+		rest, ok := strings.CutPrefix(lowerPath, parent+string(filepath.Separator))
+		if !ok {
+			continue
+		}
+		user, _, _ := strings.Cut(rest, string(filepath.Separator))
+		if "" == user {
+			return true
+		}
+		userHome := parent + string(filepath.Separator) + user
+		ownHome := false
+		for _, homeDir := range homeDirs {
+			if "" == homeDir {
+				continue
+			}
+			if strings.EqualFold(strings.ToLower(filepath.Clean(homeDir)), userHome) {
+				ownHome = true
+				break
+			}
+		}
+		if !ownHome {
+			return true
+		}
+	}
+	return false
+}
+
 // isSensitivePath 执行敏感性黑名单匹配，必要时解析工作空间路径，但不解析目标路径。
 func isSensitivePath(p string, htmlAsset bool) bool {
 	p = resolveNamespaceAlias(p)
@@ -739,6 +781,10 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 			"/usr",
 			"/opt",
 			"/sbin",
+			// 挂载点与外部介质没有必须由内核复制的合法来源，避免把宿主机或其他系统的数据复制进工作空间。
+			"/mnt",
+			"/media",
+			"/snap",
 		}
 		for _, pre := range prefixes {
 			if strings.HasPrefix(toCheckPathLower, pre) {
@@ -766,6 +812,12 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 			if strings.HasPrefix(toCheckPathLower, sp) {
 				return true
 			}
+		}
+
+		// 其他 OS 用户的家目录同样不属于工作空间外的合法导入来源。逐个家目录列出凭据条目无法覆盖
+		// 多用户主机与容器挂载宿主机目录的情况，因此按家目录父目录与内核自身家目录的差异整体拒绝。
+		if isForeignUserHomePath(toCheckPathLower) {
+			return true
 		}
 	}
 

@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "Nachgedacht %s, %s Tool-Aufrufe",
+	"agentThinkingLiveStats": "Denkt nach %s, %s Tool-Aufrufe",
 	"bazaarSkipBatchUpdate": "Bei Sammelupdates überspringen",
 	"sortByReleaseTimeDesc": "Veröffentlichungsdatum (neueste zuerst)",
 	"sortByReleaseTimeAsc": "Veröffentlichungsdatum (älteste zuerst)",

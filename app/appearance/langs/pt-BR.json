@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "Pensado %s, %s chamadas de ferramentas",
+	"agentThinkingLiveStats": "Pensando %s, %s chamadas de ferramentas",
 	"bazaarSkipBatchUpdate": "Ignorar nas atualizações em lote",
 	"sortByReleaseTimeDesc": "Data de publicação (mais recentes primeiro)",
 	"sortByReleaseTimeAsc": "Data de publicação (mais antigos primeiro)",

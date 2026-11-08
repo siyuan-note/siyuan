@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "Razmišljanje: %s, poziva alata: %s",
+	"agentThinkingLiveStats": "Razmišlja: %s, poziva alata: %s",
 	"bazaarSkipBatchUpdate": "Прескочи групна ажурирања",
 	"sortByReleaseTimeDesc": "Datum objavljivanja (prvo najnoviji)",
 	"sortByReleaseTimeAsc": "Datum objavljivanja (prvo najstariji)",

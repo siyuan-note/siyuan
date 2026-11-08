@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "חשב %s, %s קריאות לכלים",
+	"agentThinkingLiveStats": "חושב %s, %s קריאות לכלים",
 	"bazaarSkipBatchUpdate": "דלג בעדכונים מרוכזים",
 	"sortByReleaseTimeDesc": "תאריך פרסום (מהחדש לישן)",
 	"sortByReleaseTimeAsc": "תאריך פרסום (מהישן לחדש)",

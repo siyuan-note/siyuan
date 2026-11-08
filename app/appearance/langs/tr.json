@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "Düşünüldü %s, %s araç çağrısı",
+	"agentThinkingLiveStats": "Düşünüyor %s, %s araç çağrısı",
 	"bazaarSkipBatchUpdate": "Toplu güncellemelerde atla",
 	"sortByReleaseTimeDesc": "Yayın tarihi (önce en yeniler)",
 	"sortByReleaseTimeAsc": "Yayın tarihi (önce en eskiler)",

@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "Réflexion terminée %s, %s appels d'outils",
+	"agentThinkingLiveStats": "Réflexion %s, %s appels d'outils",
 	"bazaarSkipBatchUpdate": "Ignorer lors des mises à jour groupées",
 	"sortByReleaseTimeDesc": "Date de publication (les plus récents d’abord)",
 	"sortByReleaseTimeAsc": "Date de publication (les plus anciens d’abord)",

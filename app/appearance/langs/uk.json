@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "Обдумано %s, викликів інструментів: %s",
+	"agentThinkingLiveStats": "Думає %s, викликів інструментів: %s",
 	"bazaarSkipBatchUpdate": "Пропускати під час масового оновлення",
 	"sortByReleaseTimeDesc": "Дата публікації (спочатку найновіші)",
 	"sortByReleaseTimeAsc": "Дата публікації (спочатку найстаріші)",

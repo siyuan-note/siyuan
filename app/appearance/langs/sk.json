@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "Premyslené %s, volaní nástrojov: %s",
+	"agentThinkingLiveStats": "Premýšľa %s, volaní nástrojov: %s",
 	"bazaarSkipBatchUpdate": "Preskočiť pri hromadnej aktualizácii",
 	"sortByReleaseTimeDesc": "Dátum vydania (najnovšie prvé)",
 	"sortByReleaseTimeAsc": "Dátum vydania (najstaršie prvé)",

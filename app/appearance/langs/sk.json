@@ -3699,6 +3699,7 @@
 		"465": "Niektoré zdroje alebo historické snímky stále závisia od pôvodného zdroja synchronizácie. Prihláste sa znova pomocou pôvodného účtu, oblasti cloudu a nastavení synchronizácie, prepnite na Stiahnuť všetky a skúste to znova",
 		"466": "Automatické AI OCR pozastavené pre %s; ďalší pokus o 10 minút. Skontrolujte účet poskytovateľa a nastavenia modelu: %s",
 		"467": "Streamovaná odpoveď bola prerušená, pretože klient nestíhal prijímať údaje; znova otvorte reláciu a obnovte dostupný výstup",
-		"468": "Odpoveď bola prerušená; znova otvorte reláciu a obnovte dostupný výstup"
+		"468": "Odpoveď bola prerušená; znova otvorte reláciu a obnovte dostupný výstup",
+		"469": "Overenie zlyhalo: táto požiadavka neprešla kontrolami lokálneho prístupu. VPN, proxy alebo aplikácie na filtrovanie siete môžu ovplyvniť lokálny prístup; skúste ich dočasne vypnúť a skúste to znova. Pri prístupe cez inú ako lokálnu adresu najprv nastavte heslo uzamknutia obrazovky"
 	}
 }

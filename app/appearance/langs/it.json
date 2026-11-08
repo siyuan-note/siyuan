@@ -3699,6 +3699,7 @@
 		"465": "Alcune risorse o istantanee storiche dipendono ancora dalla fonte di sincronizzazione originale. Accedi di nuovo con l’account, la regione cloud e le impostazioni di sincronizzazione originali, passa a Scarica tutto e riprova",
 		"466": "OCR automatico con IA sospeso per %s; nuovo tentativo tra 10 minuti. Controlla l’account del fornitore e le impostazioni del modello: %s",
 		"467": "La risposta in streaming è stata interrotta perché il client non riusciva a tenere il passo; riapri la sessione per recuperare il contenuto disponibile",
-		"468": "La risposta è stata interrotta; riapri la sessione per recuperare il contenuto disponibile"
+		"468": "La risposta è stata interrotta; riapri la sessione per recuperare il contenuto disponibile",
+		"469": "Autenticazione non riuscita: questa richiesta non ha superato i controlli di accesso locale. VPN, proxy o app di filtraggio della rete possono influire sull’accesso locale; prova a disattivarli temporaneamente e riprova. Per accedere tramite un indirizzo non locale, imposta prima una password di blocco schermo"
 	}
 }

@@ -3699,6 +3699,7 @@
 		"465": "Einige Ressourcen oder historische Schnappschüsse benötigen noch die ursprüngliche Synchronisierungsquelle. Melden Sie sich mit dem ursprünglichen Konto, der ursprünglichen Cloud-Region und den ursprünglichen Synchronisierungseinstellungen erneut an, wechseln Sie zu Alle herunterladen und versuchen Sie es erneut",
 		"466": "Automatische KI-OCR für %s pausiert; erneuter Versuch in 10 Minuten. Anbieterkonto und Modelleinstellungen prüfen: %s",
 		"467": "Die Streaming-Antwort wurde unterbrochen, weil der Client nicht mithalten konnte; öffnen Sie die Sitzung erneut, um verfügbare Ausgaben wiederherzustellen",
-		"468": "Die Antwort wurde unterbrochen; öffnen Sie die Sitzung erneut, um verfügbare Ausgaben wiederherzustellen"
+		"468": "Die Antwort wurde unterbrochen; öffnen Sie die Sitzung erneut, um verfügbare Ausgaben wiederherzustellen",
+		"469": "Authentifizierung fehlgeschlagen: Diese Anfrage hat die Prüfungen für den lokalen Zugriff nicht bestanden. VPNs, Proxys oder Netzwerkfilter-Apps können den lokalen Zugriff beeinträchtigen; deaktivieren Sie diese vorübergehend und versuchen Sie es erneut. Richten Sie beim Zugriff über eine nicht lokale Adresse zuerst ein Sperrbildschirm-Passwort ein"
 	}
 }

@@ -3699,6 +3699,7 @@
 		"465": "Bazı kaynaklar veya geçmiş anlık görüntüler hâlâ özgün eşitleme kaynağına bağlı. Özgün hesap, bulut bölgesi ve eşitleme ayarlarıyla yeniden oturum açın, ardından Tümünü indir seçeneğine geçip tekrar deneyin",
 		"466": "%s için otomatik AI OCR duraklatıldı; 10 dakika sonra yeniden denenecek. Sağlayıcı hesabını ve model ayarlarını kontrol edin: %s",
 		"467": "İstemci verileri yeterince hızlı alamadığı için akış yanıtı kesildi; mevcut çıktıyı kurtarmak için oturumu yeniden açın",
-		"468": "Yanıt kesildi; mevcut çıktıyı kurtarmak için oturumu yeniden açın"
+		"468": "Yanıt kesildi; mevcut çıktıyı kurtarmak için oturumu yeniden açın",
+		"469": "Kimlik doğrulama başarısız: bu istek yerel erişim denetimlerinden geçemedi. VPN, proxy veya ağ filtreleme uygulamaları yerel erişimi etkileyebilir; bunları geçici olarak devre dışı bırakıp yeniden deneyin. Yerel olmayan bir adres üzerinden erişirken önce bir ekran kilidi parolası belirleyin"
 	}
 }

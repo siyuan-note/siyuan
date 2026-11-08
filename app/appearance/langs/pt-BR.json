@@ -3699,6 +3699,7 @@
 		"465": "Alguns recursos ou snapshots históricos ainda dependem da origem de sincronização original. Entre novamente com a conta, a região da nuvem e as configurações de sincronização originais, mude para Baixar todos e tente novamente",
 		"466": "OCR automático com IA pausado para %s; nova tentativa em 10 minutos. Verifique a conta do provedor e as configurações do modelo: %s",
 		"467": "A resposta em streaming foi interrompida porque o cliente não conseguiu acompanhar o ritmo; reabra a sessão para recuperar o conteúdo disponível",
-		"468": "A resposta foi interrompida; reabra a sessão para recuperar o conteúdo disponível"
+		"468": "A resposta foi interrompida; reabra a sessão para recuperar o conteúdo disponível",
+		"469": "Falha na autenticação: esta solicitação não passou nas verificações de acesso local. VPNs, proxies ou aplicativos de filtragem de rede podem afetar o acesso local; tente desativá-los temporariamente e tente novamente. Ao acessar por um endereço não local, defina primeiro uma senha de bloqueio de tela"
 	}
 }

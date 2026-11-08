@@ -3699,6 +3699,7 @@
 		"465": "Niektóre zasoby lub historyczne migawki nadal zależą od pierwotnego źródła synchronizacji. Zaloguj się ponownie przy użyciu pierwotnego konta, regionu chmury i ustawień synchronizacji, przełącz na Pobierz wszystkie i spróbuj ponownie",
 		"466": "Automatyczny OCR AI wstrzymany dla %s; ponowna próba za 10 minut. Sprawdź konto dostawcy i ustawienia modelu: %s",
 		"467": "Odpowiedź strumieniowa została przerwana, ponieważ klient nie nadążał z odbiorem; otwórz sesję ponownie, aby odzyskać dostępną treść",
-		"468": "Odpowiedź została przerwana; otwórz sesję ponownie, aby odzyskać dostępną treść"
+		"468": "Odpowiedź została przerwana; otwórz sesję ponownie, aby odzyskać dostępną treść",
+		"469": "Uwierzytelnianie nie powiodło się: to żądanie nie przeszło kontroli dostępu lokalnego. Sieci VPN, serwery proxy lub aplikacje filtrujące sieć mogą wpływać na dostęp lokalny; spróbuj je tymczasowo wyłączyć i ponowić próbę. Przy dostępie przez adres inny niż lokalny najpierw ustaw hasło blokady ekranu"
 	}
 }

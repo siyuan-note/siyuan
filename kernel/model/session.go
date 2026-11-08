@@ -289,7 +289,7 @@ func CheckAuth(c *gin.Context) {
 
 		// Authenticate requests with the Origin header other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9180
 		if !localhost || !isLocalHostRequestAllowed(c) {
-			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: for security reasons, please set [Lock screen password] when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请设置 [锁屏密码]"})
+			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": Conf.Language(469)})
 			c.Abort()
 			return
 		}

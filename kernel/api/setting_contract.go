@@ -26,6 +26,7 @@ func settingBazaarPayload(value *conf.Bazaar) *apicontract.SettingBazaar {
 		return nil
 	}
 	result := &apicontract.SettingBazaar{}
+	result.BatchUpdateExcluded = value.BatchUpdateExcluded
 	result.Trust = value.Trust
 	result.PetalDisabled = value.PetalDisabled
 	if value.CompatibilityFilters != nil {
@@ -498,6 +499,7 @@ func settingExportPayload(value *conf.Export) *apicontract.SettingExport {
 		return nil
 	}
 	result := &apicontract.SettingExport{}
+	result.HeadingNumber = value.HeadingNumber
 	result.ParagraphBeginningSpace = value.ParagraphBeginningSpace
 	result.AddTitle = value.AddTitle
 	result.BlockRefMode = value.BlockRefMode

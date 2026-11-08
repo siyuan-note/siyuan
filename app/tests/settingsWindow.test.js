@@ -655,8 +655,16 @@ if (process.versions.electron && process.type === "browser") {
         });
         ipcMain.handle("test-settings-native-state", async (_event, state) => {
             const child = [...children][0];
-            const transition = (event, action) => new Promise(resolve => {
-                child.once(event, resolve);
+            const transition = (event, action) => new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    child.removeListener(event, complete);
+                    reject(new Error(`Settings window did not emit ${event}`));
+                }, 10000);
+                const complete = () => {
+                    clearTimeout(timeout);
+                    resolve();
+                };
+                child.once(event, complete);
                 action();
             });
             if (child.isFullScreen()) {
@@ -695,6 +703,7 @@ if (process.versions.electron && process.type === "browser") {
             });
             await owner.loadURL(origin + "/stage/build/app/");
             const runRendererCases = () => owner.webContents.executeJavaScript(`const loadRendererModule = ${loadRendererModule.toString()}; const rendererModules = ${rendererModules.toString()}; (${runCases.toString()})(${JSON.stringify(sources)})`);
+            console.log("Settings window: initial lifecycle");
             await runRendererCases();
             const previousTokens = new Set([...children].map(child => new URL(child.webContents.getURL()).searchParams.get("settingsWindowToken")));
             assert.ok(previousTokens.size > 0);
@@ -706,6 +715,7 @@ if (process.versions.electron && process.type === "browser") {
             assert.equal(children.size, 0, "owner reload closes settings without restoring them");
             commands.length = 0;
             ready = 0;
+            console.log("Settings window: lifecycle after owner reload");
             await runRendererCases();
             assert.ok(children.size > 0, "settings can be manually reopened after owner reload");
             for (const child of children) {
@@ -730,7 +740,7 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("native settings preserve plugin controls, callbacks, default dialogs and owning-window lifecycle", {timeout: 180000}, async () => {
+    test("native settings preserve plugin controls, callbacks, default dialogs and owning-window lifecycle", {timeout: 250000}, async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-settings-window-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
@@ -742,7 +752,7 @@ if (process.versions.electron && process.type === "browser") {
                     "-AssemblyPath", path.join(profile, "WindowHitTest.dll")], {windowsHide: true, timeout: 60000});
             }
             // 两轮窗口生命周期包含多个原生命中测试子进程，为 CI 启动开销预留时间。
-            await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 110000});
+            await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 180000});
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});

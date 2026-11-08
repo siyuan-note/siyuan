@@ -998,7 +998,6 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genOpenStorageHTML(bazaarItem, bazaarType)}
-        ${bazaar._genBatchUpdatePreferenceHTML(bazaarType, bazaarItem.name)}
         ${bazaar._genUpdateButtonHTML(available, bazaarType, true)}
         <span data-position="north" class="ariaLabel block__icon block__icon--show${showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
             <svg><use xlink:href="#iconSelect"></use></svg>

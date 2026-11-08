@@ -84,7 +84,7 @@ test("directory actions delegate to the owner and preserve installed-package and
 });
 
 for (const mode of ["settings-window", "main-window", "mobile"]) {
-    test(`installed cards preserve plugin ownership and shared update action order (${mode})`, () => {
+    test(`installed cards omit batch exclusion controls and preserve plugin ownership (${mode})`, () => {
         const packages = ["none", "configured", "custom"].map(name => ({name, preferredName: name, preferredDesc: ""}));
         const classList = {contains: () => false, add() {}, remove() {}};
         const activeButton = {classList, getAttribute: () => "myPlugins"};
@@ -123,7 +123,6 @@ for (const mode of ["settings-window", "main-window", "mobile"]) {
             _applyDownloadedDeprecations() {}, _sortDownloadedPackages: items => items, _getUpdatedItem() {},
             _shouldKeepDownloadedOrder: () => false,
             _genPackageIconHTML: () => "", _genUpdateButtonHTML: () => '<span data-type="install-t"></span>',
-            _genBatchUpdatePreferenceHTML: () => '<button data-type="skip-batch-update"></button>',
             _genIncompatibleChipHTML: () => "", _genDeprecatedChipHTML: () => "",
             _genFundingHTML: () => '<span data-type="funding"></span>',
             _genOpenStorageHTML: () => '<span data-type="open-storage"></span>',
@@ -138,9 +137,10 @@ for (const mode of ["settings-window", "main-window", "mobile"]) {
         for (const type of ["plugins", "themes", "icons", "templates", "widgets"]) {
             bazaar._genMyHTML(type, {plugins: packages});
             for (const card of content.innerHTML.split('<div data-name="').slice(1)) {
-                const commonActions = ["rate-package", "funding", "open", "open-storage", "skip-batch-update", "install-t"];
+                const commonActions = ["rate-package", "funding", "open", "open-storage", "install-t"];
                 const actions = Array.from(card.matchAll(/data-type="([^"]+)"/g), match => match[1]);
                 assert.deepEqual(actions.filter(action => commonActions.includes(action)), commonActions);
+                assert.ok(!actions.includes("skip-batch-update"));
                 assert.ok(actions.indexOf("install-t") < actions.indexOf("plugin-enable"));
             }
             if (type !== "plugins") assert.ok(!content.innerHTML.includes('data-type="setting"'));

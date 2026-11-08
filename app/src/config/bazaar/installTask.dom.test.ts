@@ -294,7 +294,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     preferenceController.element = root;
     preferenceController._isUpdatePanelActive = () => false;
     window.siyuan.languages.bazaarSkipBatchUpdate = "Skip batch updates";
-    root.innerHTML = `<div data-name="sample" data-package-type="plugins" data-package-source="downloaded">
+    root.innerHTML = `<div data-name="sample" data-package-type="plugins" data-package-source="updated">
         ${preferenceController._genBatchUpdatePreferenceHTML("plugins", "sample")}</div><input id="other-control">`;
     const preferenceButton = root.querySelector<HTMLButtonElement>('[data-type="skip-batch-update"]');
     preferenceButton.focus();

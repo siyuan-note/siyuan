@@ -198,7 +198,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the downloaded packages and updates lists, enable “Skip batch updates” to keep a specific package out of Update all. This applies to plugins, themes, icons, templates, and widgets. You can still update it individually or turn the switch off later. The preference is saved in the current workspace configuration and does not sync between devices."
+					"Data": "In the updates list, enable “Skip batch updates” to keep a specific package out of Update all. This applies to plugins, themes, icons, templates, and widgets. You can still update it individually or turn the switch off later. The preference is saved in the current workspace configuration and does not sync between devices."
 				}
 			]
 		}

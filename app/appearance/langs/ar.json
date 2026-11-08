@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "تخطي التحديثات الجماعية",
 	"sortByReleaseTimeDesc": "تاريخ النشر (الأحدث أولًا)",
 	"sortByReleaseTimeAsc": "تاريخ النشر (الأقدم أولًا)",
 	"bazaarHideUnsupportedVersion": "إخفاء الحزم التي تتطلب إصدارًا أحدث من التطبيق",

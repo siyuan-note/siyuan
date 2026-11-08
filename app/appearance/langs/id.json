@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "Lewati pembaruan massal",
 	"sortByReleaseTimeDesc": "Tanggal rilis (terbaru dahulu)",
 	"sortByReleaseTimeAsc": "Tanggal rilis (terlama dahulu)",
 	"bazaarHideUnsupportedVersion": "Sembunyikan paket yang memerlukan versi aplikasi lebih baru",

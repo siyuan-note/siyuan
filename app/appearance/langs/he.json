@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "דלג בעדכונים מרוכזים",
 	"sortByReleaseTimeDesc": "תאריך פרסום (מהחדש לישן)",
 	"sortByReleaseTimeAsc": "תאריך פרסום (מהישן לחדש)",
 	"bazaarHideUnsupportedVersion": "הסתר חבילות הדורשות גרסה חדשה יותר של האפליקציה",

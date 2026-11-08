@@ -1484,6 +1484,7 @@ var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet
 
 // compatibilityFilters 按 plugins、themes、widgets、icons、templates 分别保存集市兼容性筛选，两个开关默认 false。
 // 对象递归合并，省略的类型和开关保持当前值，null 恢复默认；未知类型忽略，不影响 trust 和 petalDisabled。
+// batchUpdateExcluded 按相同类型和包名保存跳过开关，默认均为空对象，true 跳过、false 恢复；补丁按包名合并；仅跳过批量更新，仍提示更新并允许手动单项更新。
 var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/setting/setBazaar", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar", Merge: true}}, "POST")
 
 // SetAI 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。

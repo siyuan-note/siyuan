@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "Overslaan bij bulkupdates",
 	"sortByReleaseTimeDesc": "Publicatiedatum (nieuwste eerst)",
 	"sortByReleaseTimeAsc": "Publicatiedatum (oudste eerst)",
 	"bazaarHideUnsupportedVersion": "Pakketten verbergen die een nieuwere appversie vereisen",

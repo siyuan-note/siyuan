@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "Пропускати під час масового оновлення",
 	"sortByReleaseTimeDesc": "Дата публікації (спочатку найновіші)",
 	"sortByReleaseTimeAsc": "Дата публікації (спочатку найстаріші)",
 	"bazaarHideUnsupportedVersion": "Приховати пакунки, що потребують новішої версії застосунку",

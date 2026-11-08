@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "Toplu güncellemelerde atla",
 	"sortByReleaseTimeDesc": "Yayın tarihi (önce en yeniler)",
 	"sortByReleaseTimeAsc": "Yayın tarihi (önce en eskiler)",
 	"bazaarHideUnsupportedVersion": "Daha yeni bir uygulama sürümü gerektiren paketleri gizle",

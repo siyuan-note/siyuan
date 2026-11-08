@@ -83,7 +83,8 @@ const applySettingConfig = async (next: Config.IConf, namespaces: Set<string>) =
         window.siyuan.config.bazaar?.trust === next.bazaar?.trust &&
         window.siyuan.config.bazaar?.petalDisabled === next.bazaar?.petalDisabled;
     const onlyBazaarFiltersChanged = preserveBazaarView &&
-        !objEquals(window.siyuan.config.bazaar?.compatibilityFilters, next.bazaar?.compatibilityFilters);
+        (!objEquals(window.siyuan.config.bazaar?.compatibilityFilters, next.bazaar?.compatibilityFilters) ||
+            !objEquals(window.siyuan.config.bazaar?.batchUpdateExcluded, next.bazaar?.batchUpdateExcluded));
     if (includes("editor") && !objEquals(window.siyuan.config.editor, next.editor)) {
         await editorConfigApi.apply(next.editor);
     }

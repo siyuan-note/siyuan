@@ -2108,7 +2108,7 @@ export type SetAttributeViewBlockAttrRequestInput = { "avID": string; "itemID"?:
 
 export type SetBazaarPackageRatingRequestInput = { "packageName": string; "packageType": string; "rating": number; };
 
-export type SetBazaarRequestInput = { "compatibilityFilters"?: Record<string, SettingBazaarCompatibilityFilterInput | null> | null; "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
+export type SetBazaarRequestInput = { "batchUpdateExcluded"?: Record<string, Record<string, boolean> | null> | null; "compatibilityFilters"?: Record<string, SettingBazaarCompatibilityFilterInput | null> | null; "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
 
 export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>; "id": string; };
 
@@ -2210,13 +2210,13 @@ export type SettingBasicAuthAccountInput = { "memo"?: string | null; "password"?
 
 export type SettingBasicAuthInput = { "accounts"?: Array<SettingBasicAuthAccountInput | null> | null; "enable"?: boolean | null; };
 
-export type SettingBazaar = { "compatibilityFilters": Record<string, SettingBazaarCompatibilityFilter | null> | null; "petalDisabled": boolean; "trust": boolean; };
+export type SettingBazaar = { "batchUpdateExcluded": Record<string, Record<string, boolean> | null> | null; "compatibilityFilters": Record<string, SettingBazaarCompatibilityFilter | null> | null; "petalDisabled": boolean; "trust": boolean; };
 
 export type SettingBazaarCompatibilityFilter = { "hideIncompatiblePlatform": boolean; "hideUnsupportedVersion": boolean; };
 
 export type SettingBazaarCompatibilityFilterInput = { "hideIncompatiblePlatform"?: boolean | null; "hideUnsupportedVersion"?: boolean | null; };
 
-export type SettingBazaarInput = { "compatibilityFilters"?: Record<string, SettingBazaarCompatibilityFilterInput | null> | null; "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
+export type SettingBazaarInput = { "batchUpdateExcluded"?: Record<string, Record<string, boolean> | null> | null; "compatibilityFilters"?: Record<string, SettingBazaarCompatibilityFilterInput | null> | null; "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
 
 export type SettingBodyGradient = { "dark": SettingBodyGradientColor; "light": SettingBodyGradientColor; "mode": string; };
 
@@ -7820,6 +7820,7 @@ export interface APIPOSTRoutes {
     /**
      * compatibilityFilters 按 plugins、themes、widgets、icons、templates 分别保存集市兼容性筛选，两个开关默认 false。
      * 对象递归合并，省略的类型和开关保持当前值，null 恢复默认；未知类型忽略，不影响 trust 和 petalDisabled。
+     * batchUpdateExcluded 按相同类型和包名保存跳过开关，默认均为空对象，true 跳过、false 恢复；补丁按包名合并；仅跳过批量更新，仍提示更新并允许手动单项更新。
      */
     "/api/setting/setBazaar": {
         request: SetBazaarRequestInput;

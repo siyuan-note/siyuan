@@ -10,6 +10,9 @@ type SettingSnpt struct {
 }
 
 type SettingBazaar struct {
+	// BatchUpdateExcluded 按 plugins/themes/widgets/icons/templates 保存跳过批量更新的包名，true 跳过，false 恢复。
+	// 仍检查并显示更新，手动单项更新不受影响；省略保留，null 恢复默认空映射。
+	BatchUpdateExcluded  map[string]map[string]bool                   `json:"batchUpdateExcluded" api:"optional,nullable"`
 	Trust                bool                                         `json:"trust" api:"optional,nullable"`
 	PetalDisabled        bool                                         `json:"petalDisabled" api:"optional,nullable"`
 	CompatibilityFilters map[string]*SettingBazaarCompatibilityFilter `json:"compatibilityFilters" api:"optional,nullable"`

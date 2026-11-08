@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "सामूहिक अपडेट में छोड़ें",
 	"sortByReleaseTimeDesc": "प्रकाशन तिथि (नवीनतम पहले)",
 	"sortByReleaseTimeAsc": "प्रकाशन तिथि (सबसे पुरानी पहले)",
 	"bazaarHideUnsupportedVersion": "ऐप के नए संस्करण की आवश्यकता वाले पैकेज छिपाएँ",

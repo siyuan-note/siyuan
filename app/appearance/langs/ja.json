@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "一括更新をスキップ",
 	"sortByReleaseTimeDesc": "公開日時 (新しい順)",
 	"sortByReleaseTimeAsc": "公開日時 (古い順)",
 	"bazaarHideUnsupportedVersion": "新しいアプリバージョンが必要なパッケージを非表示",

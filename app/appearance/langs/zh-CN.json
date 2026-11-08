@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "跳过批量更新",
 	"sortByReleaseTimeDesc": "发布时间降序",
 	"sortByReleaseTimeAsc": "发布时间升序",
 	"bazaarHideUnsupportedVersion": "隐藏版本不支持的包",

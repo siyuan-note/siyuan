@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "略過批次更新",
 	"sortByReleaseTimeDesc": "發布時間降序",
 	"sortByReleaseTimeAsc": "發布時間升序",
 	"bazaarHideUnsupportedVersion": "隱藏版本不支援的套件",

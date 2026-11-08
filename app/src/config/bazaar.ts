@@ -45,7 +45,9 @@ import {genBazaarPackagePanelHTML} from "./bazaar/html";
 import {filterBazaarPackagesByCompatibility} from "./bazaar/filters";
 import {bindBazaarEvents} from "./bazaar/events";
 import {closeBazaarFilterMenu, refreshBazaarFilterMenu} from "./bazaar/filterMenu";
-import {renderBazaarInstall} from "./bazaar/installTask";
+import {getBazaarBatchUpdate, renderBazaarInstall} from "./bazaar/installTask";
+import {bazaarConfigApi} from "./bazaar/runtime";
+import {isBazaarBatchUpdateExcluded} from "./bazaar/batchUpdatePreference";
 import {
     bindRatingUserChange,
     genCardRatingHTML,
@@ -634,6 +636,63 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         }
         return window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.updateRequiredMinAppVer || "");
     },
+    _batchUpdatePreferenceSaving: false,
+    _genBatchUpdatePreferenceHTML(type: TBazaarType, name: string) {
+        const checked = isBazaarBatchUpdateExcluded(window.siyuan.config.bazaar.batchUpdateExcluded, type, name);
+        return `<button type="button" role="switch" aria-checked="${checked}" aria-busy="${bazaar._batchUpdatePreferenceSaving}" data-type="skip-batch-update"
+            ${bazaar._batchUpdatePreferenceSaving || getBazaarBatchUpdate() ? "disabled" : ""}
+            aria-label="${window.siyuan.languages.bazaarSkipBatchUpdate}" data-position="north"
+            class="ariaLabel block__icon block__icon--show config-bazaar__skip-update${checked ? " block__icon--active" : ""}">
+            <svg><use xlink:href="#iconLock"></use></svg></button>`;
+    },
+    _refreshBatchUpdatePreferences() {
+        bazaar.element?.querySelectorAll<HTMLButtonElement>('[data-type="skip-batch-update"]').forEach(button => {
+            const owner = button.closest("[data-name][data-package-type]");
+            const type = owner?.getAttribute("data-package-type");
+            if (!isBazaarPackageType(type)) return;
+            const checked = isBazaarBatchUpdateExcluded(window.siyuan.config.bazaar.batchUpdateExcluded,
+                type, owner.getAttribute("data-name"));
+            button.setAttribute("aria-checked", String(checked));
+            button.classList.toggle("block__icon--active", checked);
+            button.disabled = bazaar._batchUpdatePreferenceSaving || Boolean(getBazaarBatchUpdate());
+            button.setAttribute("aria-busy", String(bazaar._batchUpdatePreferenceSaving));
+        });
+        if (bazaar._isUpdatePanelActive() && bazaar._updateState === "loaded" && !getBazaarBatchUpdate()) {
+            bazaar.element?.querySelector('[data-type="install-all"]')?.classList.toggle("fn__none",
+                !bazaar._getBatchUpdateItems().some(({item}) => !item.available.disallowUpdate));
+        }
+    },
+    async _toggleBatchUpdatePreference(type: TBazaarType, name: string, source?: HTMLElement) {
+        const restoreFocus = source && document.activeElement === source;
+        const packageSource = source?.closest("[data-package-source]")?.getAttribute("data-package-source");
+        if (bazaar._batchUpdatePreferenceSaving || getBazaarBatchUpdate()) return;
+        bazaar._batchUpdatePreferenceSaving = true;
+        bazaar._refreshBatchUpdatePreferences();
+        const next = !isBazaarBatchUpdateExcluded(window.siyuan.config.bazaar.batchUpdateExcluded, type, name);
+        try {
+            await bazaarConfigApi.patch(`batchUpdateExcluded.${type}`, {[name]: next});
+        } catch (error) {
+            showMessage(error instanceof Error ? error.message : String(error));
+        } finally {
+            const stillOwnsFocus = restoreFocus &&
+                (document.activeElement === document.body || document.activeElement === source);
+            bazaar._batchUpdatePreferenceSaving = false;
+            bazaar._refreshBatchUpdatePreferences();
+            if (stillOwnsFocus) {
+                bazaar.element?.querySelectorAll<HTMLButtonElement>('[data-type="skip-batch-update"]').forEach(button => {
+                    const owner = button.closest("[data-name][data-package-type]");
+                    if (owner?.getAttribute("data-name") === name && owner.getAttribute("data-package-type") === type &&
+                        owner.getAttribute("data-package-source") === packageSource && button.getClientRects().length > 0) {
+                        button.focus();
+                    }
+                });
+            }
+        }
+    },
+    _getBatchUpdateItems(): Array<{type: TBazaarType, item: IUpdatedBazaarItem}> {
+        return bazaar._getUpdatedItems().filter(({type, item}) =>
+            !isBazaarBatchUpdateExcluded(window.siyuan.config.bazaar.batchUpdateExcluded, type, item.installed.name));
+    },
     _genUpdateButtonHTML(item: IBazaarItem | undefined, bazaarType: TBazaarType, reserveSpace = false) {
         if (!item?.outdated && !reserveSpace) {
             return "";
@@ -675,6 +734,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genOpenStorageHTML(installed, bazaarType)}
+        ${bazaar._genBatchUpdatePreferenceHTML(bazaarType, installed.name)}
         ${bazaar._genUpdateButtonHTML(available, bazaarType)}
     </div>
 </div>`;
@@ -778,7 +838,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         counterElement.classList.remove("fn__none");
         counterElement.textContent = items.length.toString();
         installAllElement?.classList.toggle("fn__none",
-            !items.some(({item}) => !item.available.disallowUpdate));
+            !bazaar._getBatchUpdateItems().some(({item}) => !item.available.disallowUpdate));
         contentElement.innerHTML = items.map(({type, item}) => this._genUpdateItemHTML(item, type)).join("");
         loadUpdatedRatings(this);
         renderBazaarInstall(bazaar.element);
@@ -925,6 +985,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         ${publishSwitchHTML}
+        ${bazaar._genBatchUpdatePreferenceHTML(bazaarType, bazaarItem.name)}
         ${bazaar._genUpdateButtonHTML(available, bazaarType, true)}
         ${genRatePackageActionHTML(bazaar._data.downloadedRatingKeys.has(ratingKey), bazaar._data.userRatings.get(ratingKey))}
         ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed", bazaarType)}
@@ -1926,6 +1987,7 @@ type="checkbox">
     _refreshCompatibilityFilters() {
         if (!this.element?.isConnected) return;
         refreshBazaarFilterMenu(this.element);
+        this._refreshBatchUpdatePreferences();
         BAZAAR_PACKAGE_TYPES.forEach((bazaarType) => {
             const config = BAZAAR_PACKAGE_CONFIG[bazaarType];
             const container = this.element.querySelector(`#${config.panelID}`) as HTMLElement;

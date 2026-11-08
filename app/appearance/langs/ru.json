@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "Пропускать при массовом обновлении",
 	"sortByReleaseTimeDesc": "Дата публикации (сначала новые)",
 	"sortByReleaseTimeAsc": "Дата публикации (сначала старые)",
 	"bazaarHideUnsupportedVersion": "Скрыть пакеты, требующие более новой версии приложения",

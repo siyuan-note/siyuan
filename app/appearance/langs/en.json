@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "Skip batch updates",
 	"sortByReleaseTimeDesc": "Release date (newest first)",
 	"sortByReleaseTimeAsc": "Release date (oldest first)",
 	"bazaarHideUnsupportedVersion": "Hide packages requiring a newer app version",

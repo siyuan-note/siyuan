@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "Preskočiť pri hromadnej aktualizácii",
 	"sortByReleaseTimeDesc": "Dátum vydania (najnovšie prvé)",
 	"sortByReleaseTimeAsc": "Dátum vydania (najstaršie prvé)",
 	"bazaarHideUnsupportedVersion": "Skryť balíky vyžadujúce novšiu verziu aplikácie",

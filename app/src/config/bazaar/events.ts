@@ -94,6 +94,10 @@ const handleDownloadedTab: TBazaarActionHandler = (context, target) => {
 };
 
 const ACTION_HANDLERS = {
+    "skip-batch-update": (({controller, pkgType, packageName}, target) => {
+        if (pkgType && packageName) void controller._toggleBatchUpdatePreference(pkgType, packageName, target);
+        return HANDLED;
+    }) satisfies TBazaarActionHandler,
     "rate-package": ((context) => {
         const {controller, packageSource, packageName, pkgType, installedItem, pkgItem} = context;
         const packageInstalled = Boolean(installedItem) ||
@@ -219,13 +223,15 @@ const ACTION_HANDLERS = {
     }) satisfies TBazaarActionHandler,
     "install-all": ((context) => {
         const {controller, mount} = context;
+        if (controller._batchUpdatePreferenceSaving) return HANDLED;
         if (getBazaarBatchUpdate()) {
             cancelBazaarBatchUpdate();
             renderBazaarInstall(mount.element);
             return HANDLED;
         }
         mobileConfirmDialog("⬆️ " + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
-            const batch = beginBazaarBatchUpdate(controller._getUpdatedItems());
+            if (controller._batchUpdatePreferenceSaving) return;
+            const batch = beginBazaarBatchUpdate(controller._getBatchUpdateItems());
             if (!batch) {
                 return;
             }

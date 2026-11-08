@@ -58,3 +58,22 @@ func TestBazaarCompatibilityFiltersRemainIndependent(t *testing.T) {
 		}
 	}
 }
+
+func TestBazaarBatchUpdateExclusionsNormalize(t *testing.T) {
+	for _, input := range []string{`null`, `{}`, `{"batchUpdateExcluded":null}`, `{"batchUpdateExcluded":{"plugins":null,"unknown":{"a":true}}}`} {
+		var value *Bazaar
+		if err := json.Unmarshal([]byte(input), &value); err != nil {
+			t.Fatal(err)
+		}
+		value = NormalizeBazaar(value)
+		if !reflect.DeepEqual(value.BatchUpdateExcluded, NewBazaar().BatchUpdateExcluded) {
+			t.Fatalf("%s: %#v", input, value.BatchUpdateExcluded)
+		}
+	}
+	value := NewBazaar()
+	value.BatchUpdateExcluded["plugins"] = map[string]bool{"sample": true, "": true, " ": true, "other": true, "restored": false}
+	value = NormalizeBazaar(value)
+	if !reflect.DeepEqual(value.BatchUpdateExcluded["plugins"], map[string]bool{"sample": true, "other": true}) || len(value.BatchUpdateExcluded["themes"]) != 0 || len(NewBazaar().BatchUpdateExcluded["plugins"]) != 0 {
+		t.Fatalf("unexpected exclusions: %#v", value.BatchUpdateExcluded)
+	}
+}

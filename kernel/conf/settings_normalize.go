@@ -491,7 +491,6 @@ func NormalizeBazaar(bazaar *Bazaar) *Bazaar {
 	}
 	if bazaar.CompatibilityFilters == nil {
 		bazaar.CompatibilityFilters = defaults.CompatibilityFilters
-		return bazaar
 	}
 	for pkgType := range bazaar.CompatibilityFilters {
 		if _, known := defaults.CompatibilityFilters[pkgType]; !known {
@@ -502,6 +501,23 @@ func NormalizeBazaar(bazaar *Bazaar) *Bazaar {
 		if bazaar.CompatibilityFilters[pkgType] == nil {
 			bazaar.CompatibilityFilters[pkgType] = filter
 		}
+	}
+	if bazaar.BatchUpdateExcluded == nil {
+		bazaar.BatchUpdateExcluded = defaults.BatchUpdateExcluded
+	}
+	for pkgType := range bazaar.BatchUpdateExcluded {
+		if _, known := defaults.BatchUpdateExcluded[pkgType]; !known {
+			delete(bazaar.BatchUpdateExcluded, pkgType)
+		}
+	}
+	for pkgType := range defaults.BatchUpdateExcluded {
+		names := make(map[string]bool)
+		for name, excluded := range bazaar.BatchUpdateExcluded[pkgType] {
+			if strings.TrimSpace(name) != "" && excluded {
+				names[name] = true
+			}
+		}
+		bazaar.BatchUpdateExcluded[pkgType] = names
 	}
 	return bazaar
 }

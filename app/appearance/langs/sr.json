@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "Прескочи групна ажурирања",
 	"sortByReleaseTimeDesc": "Datum objavljivanja (prvo najnoviji)",
 	"sortByReleaseTimeAsc": "Datum objavljivanja (prvo najstariji)",
 	"bazaarHideUnsupportedVersion": "Sakrij pakete koji zahtevaju noviju verziju aplikacije",

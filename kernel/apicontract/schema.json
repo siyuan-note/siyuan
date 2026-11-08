@@ -44164,6 +44164,29 @@
     "SetBazaarRequestInput": {
       "type": "object",
       "properties": {
+        "batchUpdateExcluded": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "boolean"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "compatibilityFilters": {
           "anyOf": [
             {
@@ -48109,6 +48132,29 @@
     "SettingBazaar": {
       "type": "object",
       "properties": {
+        "batchUpdateExcluded": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "boolean"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "compatibilityFilters": {
           "anyOf": [
             {
@@ -48137,6 +48183,7 @@
         }
       },
       "required": [
+        "batchUpdateExcluded",
         "compatibilityFilters",
         "petalDisabled",
         "trust"
@@ -48188,6 +48235,29 @@
     "SettingBazaarInput": {
       "type": "object",
       "properties": {
+        "batchUpdateExcluded": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "boolean"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "compatibilityFilters": {
           "anyOf": [
             {

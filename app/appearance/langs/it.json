@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "Escludi dagli aggiornamenti in blocco",
 	"sortByReleaseTimeDesc": "Data di pubblicazione (più recenti prima)",
 	"sortByReleaseTimeAsc": "Data di pubblicazione (più vecchi prima)",
 	"bazaarHideUnsupportedVersion": "Nascondi i pacchetti che richiedono una versione più recente dell’app",

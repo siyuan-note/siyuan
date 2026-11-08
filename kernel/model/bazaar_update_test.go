@@ -101,3 +101,36 @@ func TestBazaarUpdateCanceledBeforeQuery(t *testing.T) {
 		}
 	}
 }
+
+func TestBazaarBatchExclusionsDoNotRemoveUpdateDiscovery(t *testing.T) {
+	packages := []*UpdatedPackage{
+		{Installed: &bazaar.Package{Name: "sample"}, Available: &bazaar.Package{Name: "sample"}},
+		{Installed: &bazaar.Package{Name: "other"}, Available: &bazaar.Package{Name: "other"}},
+		{Available: &bazaar.Package{Name: "incompatible", DisallowUpdate: true}},
+	}
+	exclusions := map[string]map[string]bool{"plugins": {"sample": true}, "themes": {"other": true}, "widgets": {}, "icons": {"sample": true}, "templates": {"sample": true, "other": true}}
+	for pkgType, names := range exclusions {
+		filtered := excludeBazaarBatchPackages(packages, names)
+		for _, pkg := range filtered {
+			for name := range names {
+				if pkg.Available.Name == name {
+					t.Fatalf("%s retained excluded package %s", pkgType, name)
+				}
+			}
+		}
+		updatable, incompatible := filterUpdatableBazaarPackages(filtered)
+		if incompatible != 1 || len(updatable) != 2-len(names) {
+			t.Fatalf("%s changed compatibility counts: %d, %#v", pkgType, incompatible, updatable)
+		}
+	}
+	if len(packages) != 3 || packages[0].Available.Name != "sample" || packages[0].Available.DisallowUpdate {
+		t.Fatal("batch exclusions changed shared update entries or manual eligibility")
+	}
+	if len(excludeBazaarBatchPackages(packages, nil)) != 3 {
+		t.Fatal("empty exclusions removed updates")
+	}
+	mismatched := []*UpdatedPackage{{Installed: &bazaar.Package{Name: "installed"}, Available: &bazaar.Package{Name: "online"}}}
+	if len(excludeBazaarBatchPackages(mismatched, map[string]bool{"installed": true})) != 0 || len(excludeBazaarBatchPackages(mismatched, map[string]bool{"online": true})) != 1 {
+		t.Fatal("exclusion did not use the installed package identity")
+	}
+}

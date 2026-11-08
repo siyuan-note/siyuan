@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "ข้ามการอัปเดตแบบกลุ่ม",
 	"sortByReleaseTimeDesc": "วันที่เผยแพร่ (ใหม่ไปเก่า)",
 	"sortByReleaseTimeAsc": "วันที่เผยแพร่ (เก่าไปใหม่)",
 	"bazaarHideUnsupportedVersion": "ซ่อนแพ็กเกจที่ต้องใช้แอปเวอร์ชันใหม่กว่า",

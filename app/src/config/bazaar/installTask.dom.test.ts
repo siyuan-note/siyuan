@@ -92,7 +92,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         element: root, _data: {plugins: [item]}, _getPackageDetail: (): undefined => undefined,
         _beginBazaarRequest: () => mount, _isMountCurrent: () => true,
         _onBazaar() {}, _genMyHTML() {}, _refreshReadmeDetail: () => refreshed++,
-        _getUpdatedItem: () => updatedItem, _getUpdatedItems: () => [
+        _getUpdatedItem: () => updatedItem, _getBatchUpdateItems: () => [
             {type: "plugins", item: updatedItem}, {type: "plugins", item: otherUpdatedItem},
         ], _checkUpdate() {},
     };
@@ -103,6 +103,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             <div class="item__actions${mobile ? " item__actions--mobile" : ""}" data-name="sample" data-package-type="plugins" data-from="${update ? "updated" : "bazaar"}">
             ${icon ? '<span data-type="install-t" class="block__icon ariaLabel" aria-label="Update"><svg></svg></span>' :
         `<button class="b3-button ariaLabel" data-type="${update ? "install-t" : "install"}" ${disabled ? 'disabled aria-label="Incompatible package"' : ""}>${update ? "Update" : "Download"}</button>`}
+            <button data-type="skip-batch-update" role="switch" aria-checked="false">Skip batch updates</button>
             </div></div><button class="b3-button" data-type="install-all">Update all</button></div>`;
         events.bindBazaarEvents(controller as unknown as Parameters<typeof events.bindBazaarEvents>[0], {} as App, mount);
         tasks.renderBazaarInstall(root);
@@ -235,6 +236,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         all.click();
         check.equal(requests.at(-1).url, "/api/bazaar/batchUpdatePackage");
         check.equal(all.textContent, "Cancel 0%");
+        check.equal(root.querySelector<HTMLButtonElement>('[data-type="skip-batch-update"]').disabled, true);
         checkTooltip(all);
         checkTooltip(root.querySelector('[data-type="install-t"]'));
         check.equal(root.querySelector<HTMLButtonElement>('[data-type="install-t"]').disabled, true);
@@ -259,6 +261,11 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         requests.at(-1).resolve();
         await settle();
         check.equal(tasks.getBazaarBatchUpdate(), undefined, "A failed batch releases all package locks");
+        const skip = root.querySelector<HTMLButtonElement>('[data-type="skip-batch-update"]');
+        check.equal(skip.disabled, false, "A completed batch restores preference controls");
+        skip.setAttribute("aria-busy", "true");
+        tasks.renderBazaarInstall(root);
+        check.equal(skip.disabled, true, "Install refresh cannot re-enable a pending preference save");
     }
     for (const mobile of [false, true]) {
         mobileFrontend = mobile;
@@ -272,6 +279,40 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         check.equal(disabledButton.getAttribute("aria-label"), "Incompatible package");
         checkTooltip(disabledButton, "Incompatible package");
     }
+    let finishPreferenceSave: () => void;
+    const preferenceController = new Function("isBazaarBatchUpdateExcluded", "getBazaarBatchUpdate",
+        "isBazaarPackageType", "bazaarConfigApi", "showMessage", sources.preferenceController + "; return result;")(
+        (excluded: Record<string, Record<string, boolean>>, type: string, name: string) => excluded?.[type]?.[name] === true,
+        tasks.getBazaarBatchUpdate, (type: string) => type === "plugins", {
+            patch: (_path: string, value: Record<string, boolean>) => new Promise<void>(resolve => {
+                finishPreferenceSave = () => {
+                    window.siyuan.config.bazaar.batchUpdateExcluded = {plugins: value};
+                    resolve();
+                };
+            }),
+        }, () => {}) as typeof import("../bazaar").bazaar;
+    preferenceController.element = root;
+    preferenceController._isUpdatePanelActive = () => false;
+    window.siyuan.languages.bazaarSkipBatchUpdate = "Skip batch updates";
+    root.innerHTML = `<div data-name="sample" data-package-type="plugins" data-package-source="downloaded">
+        ${preferenceController._genBatchUpdatePreferenceHTML("plugins", "sample")}</div><input id="other-control">`;
+    const preferenceButton = root.querySelector<HTMLButtonElement>('[data-type="skip-batch-update"]');
+    preferenceButton.focus();
+    const savingPreference = preferenceController._toggleBatchUpdatePreference("plugins", "sample", preferenceButton);
+    check.equal(preferenceButton.disabled, true);
+    const otherControl = root.querySelector<HTMLInputElement>("#other-control");
+    otherControl.focus();
+    finishPreferenceSave();
+    await savingPreference;
+    check.equal(document.activeElement, otherControl, "Saving must not steal focus moved to another control");
+    check.equal(preferenceButton.getAttribute("aria-checked"), "true");
+    preferenceButton.focus();
+    const restoringPreference = preferenceController._toggleBatchUpdatePreference("plugins", "sample", preferenceButton);
+    finishPreferenceSave();
+    await restoringPreference;
+    check.equal(document.activeElement, preferenceButton, "Keyboard focus returns to the initiating switch");
+    check.equal(preferenceButton.getAttribute("aria-checked"), "false");
+    check.equal(preferenceButton.disabled, false);
     check.deepEqual(errors, []);
     return "Bazaar install interaction cases passed";
 };
@@ -284,6 +325,12 @@ test("marketplace installation, single update and batch update progress and canc
         transpileModule(readFileSync(path.join(__dirname, name + ".ts"), "utf8"), {
             compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
         }).outputText]));
+    const bazaarSource = createSourceFile("bazaar.ts", readFileSync(path.join(__dirname, "../bazaar.ts"), "utf8"), ScriptTarget.Latest, true);
+    const bazaarDeclaration = bazaarSource.statements.filter(isVariableStatement)
+        .flatMap(statement => [...statement.declarationList.declarations]).find(item => item.name.getText(bazaarSource) === "bazaar");
+    sources.preferenceController = transpileModule(`const bazaar = ${bazaarDeclaration.initializer.getText(bazaarSource)}; const result = bazaar;`, {
+        compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
+    }).outputText;
     const systemSource = createSourceFile("processSystem.ts", readFileSync(path.join(__dirname, "../../dialog/processSystem.ts"), "utf8"), ScriptTarget.ES2021, true);
     const progress = systemSource.statements.find(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => item.name.getText(systemSource) === "downloadProgress"));

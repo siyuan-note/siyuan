@@ -1,4 +1,5 @@
 {
+	"bazaarSkipBatchUpdate": "일괄 업데이트에서 제외",
 	"sortByReleaseTimeDesc": "출시일 (최신순)",
 	"sortByReleaseTimeAsc": "출시일 (오래된 순)",
 	"bazaarHideUnsupportedVersion": "더 최신 앱 버전이 필요한 패키지 숨기기",

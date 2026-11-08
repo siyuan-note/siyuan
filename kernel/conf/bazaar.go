@@ -5,6 +5,7 @@
 package conf
 
 type Bazaar struct {
+	BatchUpdateExcluded  map[string]map[string]bool            `json:"batchUpdateExcluded"`
 	Trust                bool                                  `json:"trust"`
 	PetalDisabled        bool                                  `json:"petalDisabled"`
 	CompatibilityFilters map[string]*BazaarCompatibilityFilter `json:"compatibilityFilters"`
@@ -17,6 +18,9 @@ type BazaarCompatibilityFilter struct {
 
 func NewBazaar() *Bazaar {
 	return &Bazaar{
+		BatchUpdateExcluded: map[string]map[string]bool{
+			"plugins": {}, "themes": {}, "widgets": {}, "icons": {}, "templates": {},
+		},
 		Trust:         false,
 		PetalDisabled: false,
 		CompatibilityFilters: map[string]*BazaarCompatibilityFilter{

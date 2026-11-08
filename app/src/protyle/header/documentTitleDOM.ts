@@ -35,8 +35,8 @@ export const prepareDocumentTitleBlockDOM = (blockDOM: string, id?: string) => {
     return template.innerHTML;
 };
 
-// 已有 NodeText 是文字，不是等待解释的 Markdown。使用原生转义节点保护其标点；
-// 后续输入的文本仍按原生行级语法处理，保存前也不需要引入私有标记。
+// 已有 NodeText 中可能触发行内语法的字符需要保护，单括号、连字符和数字间冒号保持普通文本。
+// 后续输入仍按原生行级语法处理，保存前不需要引入私有标记。
 export const prepareDocumentTitleInitialDOM = (blockDOM: string, id: string) => {
     const template = document.createElement("template");
     template.innerHTML = prepareDocumentTitleBlockDOM(blockDOM, id);
@@ -45,7 +45,7 @@ export const prepareDocumentTitleInitialDOM = (blockDOM: string, id: string) => 
         if (node.nodeType !== Node.TEXT_NODE) {
             return;
         }
-        const fragments = node.textContent.split(/([!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~])/);
+        const fragments = node.textContent.split(/([!"#$%&'*+,./;<=>?@[\\\]^_`{|}~]|\((?=\()|(?<=\()\(|:(?!\d)|(?<!\d):)/);
         if (fragments.length < 2) {
             return;
         }

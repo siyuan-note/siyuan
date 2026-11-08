@@ -66,6 +66,22 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
     lute.SetTag(true);
     lute.SetInlineMath(true);
     lute.SetKramdownIAL(true);
+    for (const prefix of ["Plain", '<span data-type="em">Styled</span>']) {
+        for (const suffix of [" (Duplicated 2026-11-08 00:02:47)", " (Conflicted 2026-11-08 00:02:47)"]) {
+            template.innerHTML = initial(paragraph(prefix + suffix), "20260101000000-abcdefg");
+            check.equal(template.content.querySelector('[data-type="backslash"], [data-type="text"]'), null,
+                "initialized copy suffixes remain plain text");
+            for (let cycle = 0; cycle < 3; cycle++) {
+                template.content.querySelector("[contenteditable]").append(document.createTextNode(" x"));
+                template.innerHTML = lute.SpinBlockDOM(template.innerHTML);
+                check.equal(template.content.querySelector('[data-type="backslash"], [data-type="text"]'), null,
+                    "editing and reloading cannot introduce suffix escape nodes or spans");
+                check.equal(template.content.querySelector("[contenteditable]").textContent,
+                    (prefix === "Plain" ? "Plain" : "Styled") + suffix + " x".repeat(cycle + 1));
+                template.innerHTML = initial(prepare(template.innerHTML), "20260101000000-abcdefg");
+            }
+        }
+    }
     for (const text of ["# Heading", "- List", "1. Ordered", "> Quote", "```code", "---", "first\nsecond", "line\n\nline"]) {
         const spun = lute.SpinBlockDOM(paragraph(text));
         template.innerHTML = spun;

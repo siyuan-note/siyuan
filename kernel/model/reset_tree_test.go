@@ -11,6 +11,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -125,6 +126,49 @@ func TestDuplicateRichTitleSuffixLiteralDOM(t *testing.T) {
 		}
 		if !strings.Contains(dom, `data-type="em"`) {
 			t.Fatalf("title formatting lost: %s", dom)
+		}
+	}
+}
+
+func TestDuplicateRichTitleSuffixSaveReload(t *testing.T) {
+	for _, suffix := range []string{" (Duplicated 2026-11-08 00:02:47)", " (Conflicted 2026-11-08 00:02:47)"} {
+		tree := treenode.NewTree("box", "/20261004000001-doc0001.sy", "/Original", "Original")
+		paragraph := &ast.Node{Type: ast.NodeParagraph}
+		paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "em", TextMarkTextContent: "Original"})
+		if err := treenode.SetDocumentTitleParagraph(tree.Root, paragraph); err != nil {
+			t.Fatal(err)
+		}
+		if err := appendDuplicateDocumentTitle(tree.Root, suffix); err != nil {
+			t.Fatal(err)
+		}
+		engine := util.NewLute()
+		for cycle := 0; cycle < 3; cycle++ {
+			paragraph, err := treenode.DocumentTitleParagraph(tree.Root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if paragraph.FirstChild.TextMarkType != "em" || paragraph.LastChild.Type != ast.NodeText || paragraph.LastChild.TokensStr() != suffix {
+				t.Fatalf("cycle %d changed title formatting or suffix node", cycle)
+			}
+			fragment := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: engine.ParseOptions}}
+			fragment.Root.AppendChild(paragraph)
+			dom := engine.Tree2BlockDOM(fragment, engine.RenderOptions, engine.ParseOptions)
+			if strings.Contains(dom, `data-type="backslash"`) || strings.Contains(dom, `data-type="text"`) {
+				t.Fatalf("cycle %d changed literal suffix DOM: %s", cycle, dom)
+			}
+			parsed := engine.BlockDOM2Tree(dom)
+			if err = treenode.SetDocumentTitleParagraph(tree.Root, parsed.Root.FirstChild); err != nil {
+				t.Fatal(err)
+			}
+			treenode.UpgradeSpec(tree)
+			data := render.NewJSONRenderer(tree, engine.RenderOptions, engine.ParseOptions).Render()
+			tree, _, err = treenode.ParseJSON(data, engine.ParseOptions)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if title := treenode.ReadDocumentTitle(tree.Root).Text; title != "Original"+suffix {
+				t.Fatalf("cycle %d changed saved suffix text: %q", cycle, title)
+			}
 		}
 	}
 }

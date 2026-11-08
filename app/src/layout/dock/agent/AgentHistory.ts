@@ -44,6 +44,35 @@ export const getAgentThinkingDisplaySeconds = (duration?: number): number | unde
     return Math.max(1, Math.round(duration));
 };
 
+export type AgentThinkingStatsLabels = {
+    agentThinking?: string;
+    agentThinkingDoneTime?: string;
+    agentThinkingStats?: string;
+    agentThinkingLiveStats?: string;
+};
+
+// 生成思考卡标题：有工具调用时追加调用次数，无工具调用时沿用原有文案。
+// seconds 为已取整的展示秒数，streaming 区分思考中与已结束两种模板。
+export const formatAgentThinkingStats = (seconds: number | undefined, toolCount: number,
+                                          labels: AgentThinkingStatsLabels, streaming = false): string => {
+    const fallback = labels.agentThinking || "Thinking";
+    if (seconds === undefined || !Number.isFinite(seconds)) {
+        return fallback;
+    }
+    const secondsText = seconds + "s";
+    const calls = Number.isFinite(toolCount) ? Math.max(0, Math.floor(toolCount)) : 0;
+    if (calls > 0) {
+        const template = streaming ? labels.agentThinkingLiveStats : labels.agentThinkingStats;
+        if (template) {
+            return template.replace("%s", secondsText).replace("%s", String(calls));
+        }
+    }
+    if (streaming) {
+        return fallback + " " + secondsText;
+    }
+    return labels.agentThinkingDoneTime ? labels.agentThinkingDoneTime.replace("%s", secondsText) : fallback;
+};
+
 export type AgentHistoryReference = { id: string; title: string };
 
 export type AgentHistoryUserEntry = {

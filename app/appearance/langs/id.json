@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "Selesai berpikir %s, %s panggilan alat",
+	"agentThinkingLiveStats": "Berpikir %s, %s panggilan alat",
 	"bazaarSkipBatchUpdate": "Lewati pembaruan massal",
 	"sortByReleaseTimeDesc": "Tanggal rilis (terbaru dahulu)",
 	"sortByReleaseTimeAsc": "Tanggal rilis (terlama dahulu)",

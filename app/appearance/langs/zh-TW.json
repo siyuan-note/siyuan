@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "已思考 %s，呼叫 %s 次工具",
+	"agentThinkingLiveStats": "思考中 %s，呼叫 %s 次工具",
 	"bazaarSkipBatchUpdate": "略過批次更新",
 	"sortByReleaseTimeDesc": "發布時間降序",
 	"sortByReleaseTimeAsc": "發布時間升序",

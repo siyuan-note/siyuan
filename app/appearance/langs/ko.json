@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "생각함 %s, 도구 %s회 호출",
+	"agentThinkingLiveStats": "생각 중 %s, 도구 %s회 호출",
 	"bazaarSkipBatchUpdate": "일괄 업데이트에서 제외",
 	"sortByReleaseTimeDesc": "출시일 (최신순)",
 	"sortByReleaseTimeAsc": "출시일 (오래된 순)",

@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "Thought %s, called tools %s times",
+	"agentThinkingLiveStats": "Thinking %s, called tools %s times",
 	"bazaarSkipBatchUpdate": "Skip batch updates",
 	"sortByReleaseTimeDesc": "Release date (newest first)",
 	"sortByReleaseTimeAsc": "Release date (oldest first)",

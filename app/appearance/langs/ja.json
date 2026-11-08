@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "考え済み %s、ツールを %s 回呼び出し",
+	"agentThinkingLiveStats": "考え中 %s、ツールを %s 回呼び出し",
 	"bazaarSkipBatchUpdate": "一括更新をスキップ",
 	"sortByReleaseTimeDesc": "公開日時 (新しい順)",
 	"sortByReleaseTimeAsc": "公開日時 (古い順)",

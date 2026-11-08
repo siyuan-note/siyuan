@@ -77,6 +77,7 @@ const browserCases = async (sources: Record<string, string>) => {
             observeStickTarget: noop,
             anchorThinkingCard: noop,
             startThinkingTimer: noop,
+            refreshThinkingHeaderText: noop,
             finishVisibleRound: noop,
             formatThinkingHeader: () => "Thought",
             appendToolResult: noop,

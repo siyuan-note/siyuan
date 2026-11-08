@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "सोच लिया %s, %s बार टूल कॉल",
+	"agentThinkingLiveStats": "सोच रहा है %s, %s बार टूल कॉल",
 	"bazaarSkipBatchUpdate": "सामूहिक अपडेट में छोड़ें",
 	"sortByReleaseTimeDesc": "प्रकाशन तिथि (नवीनतम पहले)",
 	"sortByReleaseTimeAsc": "प्रकाशन तिथि (सबसे पुरानी पहले)",

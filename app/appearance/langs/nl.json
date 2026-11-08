@@ -1,4 +1,6 @@
 {
+	"agentThinkingStats": "Nagedacht %s, %s tool-aanroepen",
+	"agentThinkingLiveStats": "Denkt na %s, %s tool-aanroepen",
 	"bazaarSkipBatchUpdate": "Overslaan bij bulkupdates",
 	"sortByReleaseTimeDesc": "Publicatiedatum (nieuwste eerst)",
 	"sortByReleaseTimeAsc": "Publicatiedatum (oudste eerst)",

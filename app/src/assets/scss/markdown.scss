@@ -422,6 +422,10 @@ button {
   display: none;
 }
 
+.markdown-editor .vditor-wysiwyg {
+  margin-top: 24px;
+}
+
 .markdown-app[data-tooltips] .vditor-tooltipped::before,
 .markdown-app[data-tooltips] .vditor-tooltipped::after {
   content: none;

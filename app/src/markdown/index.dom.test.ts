@@ -137,16 +137,34 @@ const browserCases = async (languages: Record<string, string>) => {
     for (const startup of [{theme: "dark", systemDark: false}, {theme: "system", systemDark: true}, {theme: "light", systemDark: true}] as const) {
         const dark = startup.theme !== "light";
         for (const mode of ["ir", "wysiwyg", "sv"] as const) {
-            bridge.bootstrap = async () => ({...await themeBootstrap(), content: original + '\nInline `code`\n\n```js\nconst answer = "readable";\n```\n' + attribution,
+            bridge.bootstrap = async () => ({...await themeBootstrap(), content: (mode === "wysiwyg" ? "1. first\n2. second\n\n" : "") + original + '\nInline `code`\n\n```js\nconst answer = "readable";\n```\n' + attribution,
                 preferences: {...storedPreferences, mode, theme: startup.theme}, dark: startup.systemDark});
             const initial = await api.mountMarkdownApplication(bridge);
             await checkTheme(mode, dark);
             checkTableWidths(mode);
+            const checkWysiwygPopover = async () => {
+                const surface = document.querySelector<HTMLElement>(".vditor-wysiwyg > .vditor-reset");
+                surface.scrollTop = 0;
+                await ipcRenderer.invoke("markdown-pointer-click", ".vditor-wysiwyg li");
+                await tick();
+                const panel = document.querySelector<HTMLElement>(".vditor-wysiwyg > .vditor-panel");
+                check.equal(panel.checkVisibility(), true, "the first list item opens its floating toolbar");
+                const header = document.querySelector(".markdown-header").getBoundingClientRect();
+                check.ok(panel.getBoundingClientRect().top >= header.bottom, "the toolbar stays below the header");
+                surface.scrollTop = 40;
+                surface.dispatchEvent(new Event("scroll"));
+                await tick();
+                check.ok(panel.getBoundingClientRect().top >= header.bottom, "scrolling keeps the floating toolbar below the header");
+                surface.scrollTop = 0;
+                surface.dispatchEvent(new Event("scroll"));
+            };
+            if (mode === "wysiwyg") await checkWysiwygPopover();
             if (startup.theme === "dark") {
                 await ipcRenderer.invoke("markdown-resize", 360, 800);
                 document.getElementById("markdownApp").style.setProperty("--markdown-font-size", "32px");
                 await tick();
                 checkTableWidths(mode);
+                if (mode === "wysiwyg") await checkWysiwygPopover();
                 document.getElementById("markdownApp").style.removeProperty("--markdown-font-size");
                 await ipcRenderer.invoke("markdown-resize", 1100, 850);
                 await tick();

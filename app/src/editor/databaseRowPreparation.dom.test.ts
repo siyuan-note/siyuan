@@ -10,6 +10,15 @@ import {compile} from "sass";
 
 const cases = async (source: string, css: string) => {
     const check: typeof assert = require("node:assert/strict");
+    const deadline = Date.now() + 5000;
+    while (window.innerWidth !== 800 || window.innerHeight !== 600) {
+        check.ok(Date.now() < deadline, `Unexpected test viewport: ${window.innerWidth}x${window.innerHeight}`);
+        await new Promise(resolve => setTimeout(resolve, 25));
+    }
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    check.equal(window.innerWidth, 800);
+    check.equal(window.innerHeight, 600);
     const style = document.createElement("style");
     style.textContent = css + "html {height: 100vh} body {width: 100%; display: flex; flex-direction: column}";
     document.head.append(style);
@@ -27,6 +36,9 @@ const cases = async (source: string, css: string) => {
                 const original = document.querySelector("section > div");
                 const destination = original.parentElement;
                 const footer = document.querySelector("footer");
+                await new Promise(requestAnimationFrame);
+                await new Promise(requestAnimationFrame);
+                const viewport: {width: number, height: number} = {width: window.innerWidth, height: window.innerHeight};
                 const before = {height: main.getBoundingClientRect().height, footer: footer.getBoundingClientRect().top};
                 const panel = document.createElement("div");
                 panel.className = "fn__flex-1 fn__flex-column";
@@ -53,6 +65,8 @@ const cases = async (source: string, css: string) => {
                     notebookID: "notebook", itemID: "item", valueID: "value", title: "Bound", boundBlockID: "bound", isDetached: false}, {});
                 await new Promise(requestAnimationFrame);
                 await new Promise(requestAnimationFrame);
+                check.deepEqual({width: window.innerWidth, height: window.innerHeight}, viewport,
+                    "the test viewport remains unchanged during preparation");
                 check.equal(typeof ready, "function", "the target reaches attribute preparation");
                 check.equal(main.getBoundingClientRect().height, before.height, "loading cannot shrink the main layout");
                 check.equal(footer.getBoundingClientRect().top, before.footer, "loading cannot move the status bar");
@@ -99,8 +113,10 @@ test("database row preparation preserves browser layout, target sizing and clean
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show: false, width: 1280, height: 800,
+    const win = new BrowserWindow({show: false, width: 800, height: 600, useContentSize: true,
         webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
+    win.removeMenu();
+    win.setContentSize(800, 600);
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));

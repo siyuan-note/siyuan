@@ -204,30 +204,6 @@ button {
   }
 }
 
-.markdown-menu__row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  > .b3-menu__item {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
-.markdown-menu__info {
-  flex-shrink: 0;
-}
-
-.markdown-menu__explanation {
-  flex-basis: 100%;
-  margin: 4px 8px 8px;
-  color: var(--b3-theme-on-surface);
-  font-size: 12px;
-  line-height: 1.6;
-  white-space: normal;
-}
-
 .markdown-choice[aria-disabled="true"] {
   opacity: .38;
   cursor: not-allowed;
@@ -553,8 +529,7 @@ button {
   .markdown-more__button,
   .markdown-tree-toggle,
   .markdown-outline-toggle,
-  .markdown-history,
-  .markdown-menu__info {
+  .markdown-history {
     width: 44px;
     height: 44px;
     --b3-icon-background-inset: 6px;

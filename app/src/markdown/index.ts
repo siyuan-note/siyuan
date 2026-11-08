@@ -109,32 +109,12 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownOutlineToggle").dataset.tooltipShortcut = outline.available ? sidebarShortcuts.label("outline") : "";
     };
     root.querySelectorAll<HTMLElement>("[data-label]").forEach(element => { element.textContent = text(element.dataset.label); });
-    // Contextual explanations remain available to keyboard and touch users, not only hover.
-    for (const [id, label, explanation] of [["markdownResources", "markdownResources", "markdownPreviewPolicy"],
-        ["markdownRecovery", "markdownRecovery", "markdownPrivacy"]]) {
+    for (const [id, explanation] of [["markdownResources", "markdownPreviewPolicy"],
+        ["markdownRecovery", "markdownPrivacy"]]) {
         const action = control(id);
-        const row = document.createElement("div");
-        row.className = "markdown-menu__row";
-        const info = document.createElement("button");
-        info.type = "button";
-        info.className = "block__icon block__icon--show block__icon--tap block__icon--inset markdown-menu__info";
-        info.id = `${id}Info`;
-        info.dataset.tooltip = text(explanation);
-        info.setAttribute("aria-label", `${text(label)}: ${text("about")}`);
-        info.setAttribute("aria-expanded", "false");
-        info.setAttribute("aria-controls", `${id}Explanation`);
-        info.innerHTML = '<svg aria-hidden="true"><use href="#iconInfo"></use></svg>';
-        const description = document.createElement("p");
-        description.id = `${id}Explanation`;
-        description.className = "markdown-menu__explanation";
-        description.textContent = text(explanation);
-        description.hidden = true;
-        info.addEventListener("click", () => {
-            description.hidden = !description.hidden;
-            info.setAttribute("aria-expanded", String(!description.hidden));
-        });
-        action.replaceWith(row);
-        row.append(action, info, description);
+        action.setAttribute("aria-description", text(explanation));
+        action.insertAdjacentHTML("beforeend", `<svg id="${id}Info" class="b3-menu__icon b3-menu__icon--small" aria-hidden="true"><use href="#iconInfo"></use></svg>`);
+        action.querySelector<SVGElement>(`#${id}Info`).dataset.tooltip = text(explanation);
     }
     const header = root.querySelector<HTMLElement>(".markdown-header");
     header.inert = true;

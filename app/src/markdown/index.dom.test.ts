@@ -401,9 +401,7 @@ const browserCases = async (languages: Record<string, string>) => {
             const deadline = Date.now() + 5000;
             while (document.documentElement.dataset.themeMode !== (dark ? "dark" : "light") && Date.now() < deadline) await tick();
             openMore(); await tick();
-            await ipcRenderer.invoke("markdown-pointer-click", "#markdownResourcesInfo"); await tick();
-            check.equal(document.querySelector("#markdownResourcesInfo").getAttribute("aria-expanded"), "true");
-            for (const id of ["markdownTreeToggle", "markdownOutlineToggle", "markdownMoreButton", "markdownUndo", "markdownRedo", "markdownResourcesInfo", "markdownRecoveryInfo"]) {
+            for (const id of ["markdownTreeToggle", "markdownOutlineToggle", "markdownMoreButton", "markdownUndo", "markdownRedo"]) {
                 const button = document.getElementById(id);
                 const bounds = button.getBoundingClientRect();
                 const icon = button.querySelector("svg").getBoundingClientRect();
@@ -418,8 +416,17 @@ const browserCases = async (languages: Record<string, string>) => {
                 check.ok(Math.abs(icon.x + icon.width / 2 - bounds.x - bounds.width / 2) < 0.5, `${id} is horizontally centered`);
                 check.ok(Math.abs(icon.y + icon.height / 2 - bounds.y - bounds.height / 2) < 0.5, `${id} is vertically centered`);
             }
+            for (const id of ["markdownResources", "markdownRecovery"]) {
+                const item = document.getElementById(id);
+                const info = document.getElementById(`${id}Info`);
+                const arrow = document.querySelector("#markdownMode > .b3-menu__icon--small");
+                check.equal(info.parentElement, item, "information icons belong to their menu items");
+                check.equal(info.getBoundingClientRect().right, arrow.getBoundingClientRect().right,
+                    `${platform} information icons align with submenu arrows`);
+                check.ok(item.getBoundingClientRect().height >= 44, "the menu action keeps its touch target");
+                check.equal(getComputedStyle(info).backgroundColor, "rgba(0, 0, 0, 0)");
+            }
             await ipcRenderer.invoke("markdown-screenshot", `touch-${platform}-${dark ? "dark" : "light"}-icons`);
-            (document.querySelector("#markdownResourcesInfo") as HTMLElement).click();
             moreButton.click();
             check.equal(outlineToggle.disabled, false, `${platform} outline is available in portrait orientation`);
             outlineToggle.click(); await tick();
@@ -507,16 +514,31 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(more.open, false, "moving focus outside closes the menu"); check.equal(document.activeElement, panelToggle);
     for (const id of ["markdownResources", "markdownRecovery"]) {
         openMore();
-        const info = document.querySelector<HTMLButtonElement>(`#${id}Info`);
-        const explanation = document.querySelector<HTMLElement>(`#${id}Explanation`);
-        check.equal(explanation.hidden, true);
-        info.focus(); info.click();
-        check.equal(explanation.hidden, false, "contextual explanations can be opened without hover");
-        check.equal(info.getAttribute("aria-expanded"), "true");
+        const item = document.getElementById(id);
+        const info = document.querySelector<SVGElement>(`#${id}Info`);
+        check.equal(info.tagName, "svg");
+        check.equal(info.parentElement, item);
+        check.equal(info.getBoundingClientRect().right,
+            document.querySelector("#markdownMode > .b3-menu__icon--small").getBoundingClientRect().right);
         check.ok(info.dataset.tooltip.length > 0);
-        check.equal(more.open, true, "reading an explanation does not execute its adjacent action");
-        info.click();
-        check.equal(explanation.hidden, true);
+        check.equal(item.getAttribute("aria-description"), info.dataset.tooltip, "assistive technology retains the explanation");
+        const itemHeight = item.getBoundingClientRect().height;
+        await ipcRenderer.invoke("markdown-pointer-move", 10, 60);
+        const bounds = info.getBoundingClientRect();
+        await ipcRenderer.invoke("markdown-pointer-move", bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+        await tick();
+        const tooltip = document.querySelector<HTMLElement>('[role="tooltip"]');
+        check.equal(tooltip.hidden, false, "hovering the information icon shows its tooltip");
+        check.equal(tooltip.textContent, info.dataset.tooltip);
+        check.equal(getComputedStyle(info).backgroundColor, "rgba(0, 0, 0, 0)", "the information icon has no hover background");
+        check.equal(item.getBoundingClientRect().height, itemHeight, "information does not expand the menu item");
+        await ipcRenderer.invoke("markdown-screenshot", `${id}-tooltip`);
+        await ipcRenderer.invoke("markdown-pointer-click", `#${id}Info`); await tick();
+        check.equal(document.getElementById(`${id}Explanation`), null, "clicking does not insert an inline explanation");
+        check.equal(more.open, false, "the information icon is part of the menu action");
+        if (id === "markdownRecovery") {
+            document.querySelector<HTMLButtonElement>("#markdownRecoveryClose").click(); await tick();
+        }
     }
     for (const [id, value] of [["markdownTheme", "dark"], ["markdownTheme", "light"], ["markdownTheme", "system"], ["markdownFont", "20"], ["markdownFont", "16"]]) {
         openMore(); appearanceItem.focus();

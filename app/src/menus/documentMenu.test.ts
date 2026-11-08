@@ -29,7 +29,10 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
     const deletions: string[][] = [];
     const treeDeletions: unknown[][] = [];
     const moves: unknown[] = [];
-    const events: {detail: {elements: NodeListOf<HTMLElement>, items: {id: string}[]}}[] = [];
+    const events: {detail: {elements: NodeListOf<HTMLElement>, items: {
+        id: string, path: string, notebookId: string, effectiveSortMode: number, childrenSortMode?: number | null,
+    }[]}}[] = [];
+    const fileTree = {parentDocTitleClickMode: 1, sort: 0};
     const created: unknown[][] = [];
     const menuAttributes = new Map<string, string>();
     const menu = {element: {setAttribute: (name: string, value: string) => menuAttributes.set(name, value)},
@@ -80,18 +83,19 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
                     menu.append({id: "separator_pluginTop", type: "separator"}); menu.append({id: "plugin"});
                 }},
                 "../protyle/render/av/addToDatabase": {addBlocksToDatabase: (...args: unknown[]) => databases.push(args)},
-                "../util/fileTreeSort": {getConfiguredChildrenSortMode: () => 0, isCustomFileTreeList: () => false},
+                "../util/fileTreeSort": {getConfiguredChildrenSortMode: (element: Element) =>
+                    controller?.getItemFromElement?.(element)?.childrenSortMode ?? null},
                 "../util/hostCapabilities": {getHostCapabilities: () => ({documentImportExport: true})},
             };
             return dependencies[name] || {};
         },
         window: {siyuan: {notebooks: [], menus: {menu}, languages: {}, mobile: {docks: {}},
-            config: {readonly, fileTree: {parentDocTitleClickMode: 1}, flashcard: {deck: true},
+            config: {readonly, fileTree, flashcard: {deck: true},
                 keymap: {general: keymap, editor: {general: keymap}}}}},
     });
     const options: Parameters<typeof exports.initDocumentMenu>[1] = {
         id: "doc", notebookId: "notebook", path: "/parent/doc.sy", name: "Document",
-        subFileCount: 2, childrenSortMode: 0, customSort: false,
+        subFileCount: 2, childrenSortMode: 0, effectiveSortMode: 0, customSort: false,
         target: {} as HTMLElement, elements: [] as unknown as NodeListOf<HTMLElement>,
         position: {x: 100, y: 120}, readonlyHistory: true,
     };
@@ -102,10 +106,49 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
         assert.ok(item, id);
         return item.click(null, null);
     };
-    return {exports, open, click, options, items, requests, renames, histories, databases, confirmations, icons, deletions, treeDeletions, moves, events, created, menuAttributes};
+    return {exports, open, click, options, items, requests, renames, histories, databases, confirmations, icons, deletions, treeDeletions, moves, events, created, menuAttributes, fileTree};
 };
 
 for (const mobile of [false, true]) {
+    test(`document tree events expose each target's effective and declared sorting (${mobile ? "mobile" : "desktop"})`, () => {
+        const inherited: IDocTreeItem = {...menuTarget("inherited"), effectiveSortMode: 7, childrenSortMode: null};
+        const custom = {...menuTarget("custom"), effectiveSortMode: 6, childrenSortMode: 0};
+        const notebook = {...menuTarget("notebook", "notebook", "notebook"), effectiveSortMode: 15};
+        const otherNotebook = {...menuTarget("other", "other", "notebook"), effectiveSortMode: 2};
+        const notebookDoc = {...menuTarget("notebook"), effectiveSortMode: 15};
+        for (const selected of [[inherited], [custom], [inherited, custom], [notebook], [notebook, otherNotebook],
+            [notebook, inherited, custom], [notebookDoc]]) {
+            const f = setup(mobile);
+            for (const globalSort of [6, 1]) {
+                f.fileTree.sort = globalSort;
+                f.exports.initDocTreeMenu({} as never, {items: selected, elements: () => f.options.elements as NodeListOf<HTMLElement>,
+                    target: f.options.target});
+                assert.deepEqual(Array.from(f.events.at(-1).detail.items, item => ({...item})), selected.map(item => ({
+                    id: item.id, path: item.path, notebookId: item.notebookId,
+                    effectiveSortMode: item.effectiveSortMode === 15 ? globalSort : item.effectiveSortMode,
+                    ...(item.kind === "document" ? {childrenSortMode: item.childrenSortMode} : {}),
+                })));
+            }
+        }
+    });
+
+    test(`native document menu events preserve live row sorting (${mobile ? "mobile" : "desktop"})`, () => {
+        const row = {} as HTMLElement;
+        for (const effectiveSortMode of [0, 6, 7]) {
+            for (const childrenSortMode of [null, 0, 6]) {
+                const item = {...menuTarget("doc"), effectiveSortMode, childrenSortMode};
+                const f = setup(mobile, false, {
+                    getItemFromElement: () => item,
+                    getSelectedItems: () => [item],
+                    getSelectionElements: () => [row] as unknown as NodeListOf<HTMLElement>,
+                });
+                f.exports.initFileMenu({} as never, item.notebookId, item.path, row);
+                assert.equal(f.events[0].detail.items[0].effectiveSortMode, effectiveSortMode);
+                assert.equal(f.events[0].detail.items[0].childrenSortMode, childrenSortMode);
+            }
+        }
+    });
+
     test(`shared menus preserve all five event kinds without touching tree selection (${mobile ? "mobile" : "desktop"})`, () => {
         const notebook = menuTarget("notebook", "notebook", "notebook");
         const otherNotebook = menuTarget("other", "other", "notebook");
@@ -311,8 +354,8 @@ test("plugin and official document menus preserve raw titles in rename and histo
 });
 
 test("large virtual selections build native menus from complete metadata without DOM snapshots", () => {
-    const selected = Array.from({length: 10000}, (_, index) => ({id: String(index), notebookId: "notebook",
-        path: `/${index}.sy`, kind: "document" as const, name: String(index), occurrenceKey: `root/${index}`}));
+    const selected = Array.from({length: 10000}, (_, index): IDocTreeItem => ({...menuTarget(String(index)),
+        occurrenceKey: `root/${index}`}));
     selected.push({...selected[0], occurrenceKey: "pinned/0"});
     const controller = {
         getSelectedItems: () => selected,
@@ -328,8 +371,8 @@ test("large virtual selections build native menus from complete metadata without
 });
 
 test("subscribed virtual menu events preserve all occurrence snapshots while actions deduplicate documents", () => {
-    const selected = ["root", "pinned"].map(root => ({id: "doc", notebookId: "notebook", path: "/doc.sy",
-        kind: "document" as const, name: "Document", occurrenceKey: `${root}/doc`}));
+    const selected = ["root", "pinned"].map((root): IDocTreeItem => ({...menuTarget("doc"), name: "Document",
+        occurrenceKey: `${root}/doc`}));
     const rows = [{}, {}] as unknown as NodeListOf<HTMLElement>;
     let snapshots = 0;
     const controller = {

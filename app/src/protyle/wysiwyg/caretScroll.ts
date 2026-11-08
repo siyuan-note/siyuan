@@ -1,4 +1,5 @@
 import {getVerticalCaretRect} from "./verticalCaret";
+import {getTableCellRichContext} from "../util/tableCellRichContext";
 import {isAtomicVerticalNavigationTarget, isAtomicVerticalNavigationRange} from "./verticalNavigationState";
 import {
     getCaretOverflowDirection,
@@ -20,7 +21,8 @@ const getLineHeight = (element: Element) => {
 };
 
 const getCaretScrollGeometry = (protyle: IProtyle): ICaretScrollGeometry | undefined => {
-    if (protyle.disabled || !protyle.element.isConnected) {
+    const owner = getTableCellRichContext(protyle)?.owner || protyle;
+    if (protyle.disabled || owner.disabled || !protyle.element.isConnected || !owner.element.isConnected) {
         return;
     }
     const selection = window.getSelection();
@@ -52,7 +54,7 @@ const getCaretScrollGeometry = (protyle: IProtyle): ICaretScrollGeometry | undef
         return;
     }
     const lineHeight = getLineHeight(editableElement);
-    const viewportRect = protyle.contentElement.getBoundingClientRect();
+    const viewportRect = owner.contentElement.getBoundingClientRect();
     return {
         caretTop: caretPosition.top,
         caretHeight: caretPosition.height,
@@ -70,7 +72,8 @@ const scrollCaretIntoMargin = (protyle: IProtyle, direction: TCaretVerticalDirec
     }
     const delta = getCaretScrollDelta(geometry, direction);
     if (delta !== 0) {
-        protyle.contentElement.scrollTop += delta;
+        const owner = getTableCellRichContext(protyle)?.owner || protyle;
+        owner.contentElement.scrollTop += delta;
     }
 };
 
@@ -78,12 +81,13 @@ export const scheduleCaretScroll = (protyle: IProtyle, direction: TCaretVertical
     if (window.siyuan.config.editor.cursorSurroundingLines <= 0) {
         return;
     }
-    const pendingFrame = pendingFrames.get(protyle.contentElement);
+    const owner = getTableCellRichContext(protyle)?.owner || protyle;
+    const pendingFrame = pendingFrames.get(owner.contentElement);
     if (pendingFrame !== undefined) {
         cancelAnimationFrame(pendingFrame);
     }
-    pendingFrames.set(protyle.contentElement, requestAnimationFrame(() => {
-        pendingFrames.delete(protyle.contentElement);
+    pendingFrames.set(owner.contentElement, requestAnimationFrame(() => {
+        pendingFrames.delete(owner.contentElement);
         if (protyle.element.isConnected) {
             scrollCaretIntoMargin(protyle, direction);
         }

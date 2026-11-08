@@ -18,6 +18,7 @@ import {focusByOffset, getUndoFocusContext} from "../util/selection";
 import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {getAdjacentRichTableCell, isTableCellCaretAtBoundary, leaveRichTableCell} from "../util/tableCellRichNavigation";
 import {focusEditableAtGoalX, getCaretGoalX} from "../wysiwyg/verticalCaret";
+import {scheduleCaretScroll} from "../wysiwyg/caretScroll";
 import {fixTable} from "../util/table";
 import {updateTableCellContentLayout} from "../util/tableCellRich";
 import {filterTableCellSlashMenuItems} from "../util/tableCellRichMenu";
@@ -565,6 +566,9 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
                     if (leaveRichTableCell(owner, table, event.key, goalX)) {
                         finish();
                         owner.toolbar.range = getSelection().getRangeAt(0).cloneRange();
+                        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                            scheduleCaretScroll(owner, event.key === "ArrowUp" ? "up" : "down");
+                        }
                     }
                 }
                 return;
@@ -645,6 +649,9 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
         return;
     }
     if (navigation) {
+        if (navigation.key === "ArrowUp" || navigation.key === "ArrowDown") {
+            scheduleCaretScroll(fragment.protyle, navigation.key === "ArrowUp" ? "up" : "down");
+        }
         const editables = fragment.wysiwyg.querySelectorAll<HTMLElement>('[contenteditable="true"]');
         const backward = navigation.key === "ArrowLeft" || navigation.key === "ArrowUp";
         const edit = backward ? editables[editables.length - 1] : editables[0];

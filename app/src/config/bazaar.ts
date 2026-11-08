@@ -984,8 +984,6 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         ${publishSwitchHTML}
-        ${bazaar._genBatchUpdatePreferenceHTML(bazaarType, bazaarItem.name)}
-        ${bazaar._genUpdateButtonHTML(available, bazaarType, true)}
         ${genRatePackageActionHTML(bazaar._data.downloadedRatingKeys.has(ratingKey), bazaar._data.userRatings.get(ratingKey))}
         ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed", bazaarType)}
         ${bazaar._genDeprecatedChipHTML(bazaarItem)}
@@ -1000,6 +998,8 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genOpenStorageHTML(bazaarItem, bazaarType)}
+        ${bazaar._genBatchUpdatePreferenceHTML(bazaarType, bazaarItem.name)}
+        ${bazaar._genUpdateButtonHTML(available, bazaarType, true)}
         <span data-position="north" class="ariaLabel block__icon block__icon--show${showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
             <svg><use xlink:href="#iconSelect"></use></svg>
         </span>

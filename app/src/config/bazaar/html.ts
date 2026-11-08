@@ -1,5 +1,4 @@
 import {BAZAAR_PACKAGE_CONFIG} from "./packageConfig";
-import type {IBazaarCompatibilityFilters} from "./filters";
 
 const genSortOptionsHTML = (sortValue: string) => `<option ${sortValue === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
 <option ${sortValue === "1" ? "selected" : ""} value="1">${window.siyuan.languages.sortByUpdateTimeAsc}</option>
@@ -21,7 +20,6 @@ export const genBazaarPackagePanelHTML = (
     bazaarType: TBazaarType,
     sortValue: string,
     loadingHTML: string,
-    filters?: IBazaarCompatibilityFilters,
 ) => {
     const config = BAZAAR_PACKAGE_CONFIG[bazaarType];
     return `<div class="config-bazaar__panel fn__none" data-type="${config.tabType}">
@@ -34,7 +32,7 @@ export const genBazaarPackagePanelHTML = (
         ${bazaarType === "themes" ? genThemeModeSelectHTML() : ""}
         <div class="fn__space"></div>
         <div class="fn__flex config-bazaar__filter-row">
-            <button type="button" class="block__icon block__icon--show block__icon--touch block__icon--inset ariaLabel${filters?.hideUnsupportedVersion === true || filters?.hideIncompatiblePlatform === true ? " block__icon--active" : ""}" data-bazaar-filter-menu aria-label="${window.siyuan.languages.filter}" data-position="north" aria-haspopup="menu" aria-expanded="false">
+            <button type="button" class="block__icon block__icon--show block__icon--touch block__icon--inset ariaLabel" data-bazaar-filter-menu aria-label="${window.siyuan.languages.filter}" data-position="north" aria-haspopup="menu" aria-expanded="false">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </button>
             <input spellcheck="false" class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">

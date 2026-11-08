@@ -19,12 +19,6 @@ export const closeBazaarFilterMenu = (root: HTMLElement) => {
 };
 
 export const refreshBazaarFilterMenu = (root: HTMLElement) => {
-    root.querySelectorAll<HTMLElement>("[data-bazaar-filter-menu]").forEach(button => {
-        const type = getFilterType(button);
-        const filters = type && window.siyuan.config.bazaar.compatibilityFilters?.[type];
-        button.classList.toggle("block__icon--active",
-            filters?.hideUnsupportedVersion === true || filters?.hideIncompatiblePlatform === true);
-    });
     const menu = window.siyuan.menus?.menu;
     const target = menu?.data;
     if (target instanceof HTMLElement && target.hasAttribute("data-bazaar-filter-menu") && root.contains(target)) {
@@ -71,6 +65,13 @@ export const bindBazaarFilterMenu = (root: HTMLElement) => {
                             event.stopPropagation();
                         }
                     };
+                    const keydownFromBody = (event: KeyboardEvent) => {
+                        if (event.target === document.body &&
+                            (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "Tab")) {
+                            keydown(event);
+                        }
+                    };
+                    document.addEventListener("keydown", keydownFromBody, true);
                     menu.removeCB = () => {
                         menu.element.classList.remove("config-bazaar__filter-menu");
                         button.setAttribute("aria-expanded", "false");
@@ -80,6 +81,7 @@ export const bindBazaarFilterMenu = (root: HTMLElement) => {
                         items.removeEventListener("focusin", focusItem);
                         items.removeEventListener("keydown", keydown);
                         button.removeEventListener("keydown", keydown);
+                        document.removeEventListener("keydown", keydownFromBody, true);
                         items.removeAttribute("role");
                     };
                     items.setAttribute("role", "menu");
@@ -129,7 +131,9 @@ export const bindBazaarFilterMenu = (root: HTMLElement) => {
                     button.setAttribute("aria-expanded", "true");
                     const rect = button.getBoundingClientRect();
                     menu.popup({x: rect.left, y: rect.bottom, h: rect.height, target: button});
-                    menu.element.querySelector<HTMLButtonElement>(".b3-menu__item")?.focus();
+                    if (event.detail === 0) {
+                        menu.element.querySelector<HTMLButtonElement>(".b3-menu__item")?.focus();
+                    }
                 },
             });
         });

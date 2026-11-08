@@ -304,7 +304,6 @@ export const bazaar = {
 </div>`;
         }
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
-        const compatibilityFilters = window.siyuan.config.bazaar.compatibilityFilters;
         const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><span class="b3-loading" aria-hidden="true"></span></div>`;
         return `<div class="config-bazaar fn__flex-column" style="height: 100%">
 <div class="config-bazaar__main fn__flex-column fn__flex-1">
@@ -360,11 +359,11 @@ export const bazaar = {
             ${loadingHTML}
         </div>
     </div>
-    ${genBazaarPackagePanelHTML("themes", localSort.theme, loadingHTML, compatibilityFilters?.themes)}
-    ${genBazaarPackagePanelHTML("templates", localSort.template, loadingHTML, compatibilityFilters?.templates)}
-    ${genBazaarPackagePanelHTML("plugins", localSort.plugin, loadingHTML, compatibilityFilters?.plugins)}
-    ${genBazaarPackagePanelHTML("icons", localSort.icon, loadingHTML, compatibilityFilters?.icons)}
-    ${genBazaarPackagePanelHTML("widgets", localSort.widget, loadingHTML, compatibilityFilters?.widgets)}
+    ${genBazaarPackagePanelHTML("themes", localSort.theme, loadingHTML)}
+    ${genBazaarPackagePanelHTML("templates", localSort.template, loadingHTML)}
+    ${genBazaarPackagePanelHTML("plugins", localSort.plugin, loadingHTML)}
+    ${genBazaarPackagePanelHTML("icons", localSort.icon, loadingHTML)}
+    ${genBazaarPackagePanelHTML("widgets", localSort.widget, loadingHTML)}
 </div>
 </div>
 <div id="configBazaarReadme" class="config-bazaar__readme config__view"></div>

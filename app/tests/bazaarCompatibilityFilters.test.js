@@ -174,6 +174,8 @@ const setupFixture = async ({sources, languages, mobile}) => {
     });
     api = new Function(...Object.keys(dependencies), sources.controller)(...Object.values(dependencies));
     const {bazaar} = api;
+    // 批量更新控件由独立用例覆盖，此夹具仅挂载兼容性筛选。
+    bazaar._refreshBatchUpdatePreferences = () => {};
     const remount = async () => {
         if (bazaar.element) load("config/bazaarTab").unmountBazaarTab(bazaar.element);
         if (mobile) {
@@ -272,7 +274,7 @@ const runInteractionCases = async () => {
         assert.equal(panel(type).querySelector(".counter").textContent, "7");
         await toggle(type, version);
         assert.equal(f.checked(type, version), true);
-        assert.ok(f.button(type).classList.contains("block__icon--active"));
+        assert.equal(f.button(type).classList.contains("block__icon--active"), false, "enabled filters do not add a persistent background");
         assert.equal(input(type, version).getAttribute("aria-checked"), "true", "reopened menu shows saved state");
         assert.deepEqual(names(type), ["new", "old", "platform", "unknown", "same-time"]);
         await toggle(type, platform);
@@ -680,6 +682,86 @@ const runElectron = async () => {
             win.webContents.debugger.attach("1.3");
             await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: mobile});
             await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled", {enabled: true});
+            await evaluate(() => {
+                const assert = require("node:assert/strict");
+                const f = window.fixture;
+                f.activate("plugins");
+                f.response("plugins", f.packages);
+                window.siyuan.menus.menu.remove();
+                for (let i = 0; i < 2; i++) {
+                    f.button("plugins").dispatchEvent(new MouseEvent("click", {bubbles: true, detail: 1}));
+                    assert.equal(window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current"), null,
+                        "pointer opening does not preselect the first filter");
+                    assert.notEqual(document.activeElement, window.siyuan.menus.menu.element.querySelector(".b3-menu__item"));
+                    window.siyuan.menus.menu.remove();
+                }
+            });
+            if (mobile) {
+                const position = await evaluate(() => {
+                    const rect = window.fixture.button("plugins").getBoundingClientRect();
+                    return {x: Math.round(rect.x + rect.width / 2), y: Math.round(rect.y + rect.height / 2)};
+                });
+                await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {
+                    type: "touchStart", touchPoints: [{...position, radiusX: 1, radiusY: 1}],
+                });
+                await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []});
+                await new Promise(resolve => setTimeout(resolve, 400));
+                await evaluate(async () => {
+                    const assert = require("node:assert/strict");
+                    await window.fixture.waitForMenu();
+                    assert.equal(window.fixture.button("plugins").getAttribute("aria-expanded"), "true");
+                    assert.equal(window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current"), null);
+                    assert.equal(matchMedia("(hover: none)").matches, true);
+                    assert.equal(getComputedStyle(window.fixture.button("plugins")).backgroundColor, "rgba(0, 0, 0, 0)",
+                        "touch opening does not leave a sticky hover background");
+                    window.siyuan.menus.menu.remove();
+                });
+                const hoverProbe = await win.webContents.insertCSS("[data-bazaar-filter-menu]:hover { --fixture-hover: 1; }");
+                await win.webContents.debugger.sendCommand("DOM.enable");
+                await win.webContents.debugger.sendCommand("CSS.enable");
+                const {root} = await win.webContents.debugger.sendCommand("DOM.getDocument");
+                const {nodeId} = await win.webContents.debugger.sendCommand("DOM.querySelector", {
+                    nodeId: root.nodeId, selector: '[data-type="plugin"] [data-bazaar-filter-menu]',
+                });
+                await win.webContents.debugger.sendCommand("CSS.forcePseudoState", {nodeId, forcedPseudoClasses: ["hover"]});
+                await new Promise(resolve => setTimeout(resolve, 400));
+                await evaluate(() => {
+                    const assert = require("node:assert/strict");
+                    const button = window.fixture.button("plugins");
+                    assert.equal(matchMedia("(hover: none)").matches, true);
+                    assert.equal(getComputedStyle(button).getPropertyValue("--fixture-hover").trim(), "1",
+                        "forced hover styling is active on a touch device");
+                    assert.equal(getComputedStyle(button).backgroundColor, "rgba(0, 0, 0, 0)");
+                });
+                await win.webContents.debugger.sendCommand("CSS.forcePseudoState", {nodeId, forcedPseudoClasses: []});
+                await win.webContents.removeInsertedCSS(hoverProbe);
+            }
+            if (!mobile) {
+                for (const [keyCode, filter] of [["Down", "hideUnsupportedVersion"], ["Up", "hideIncompatiblePlatform"]]) {
+                    const position = await evaluate(() => {
+                        window.siyuan.menus.menu.remove();
+                        const rect = window.fixture.button("plugins").getBoundingClientRect();
+                        return {x: Math.round(rect.x + rect.width / 2), y: Math.round(rect.y + rect.height / 2)};
+                    });
+                    for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) {
+                        await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {
+                            type, ...position, button: "left", clickCount: 1,
+                        });
+                    }
+                    await evaluate(() => {
+                        const assert = require("node:assert/strict");
+                        assert.equal(document.activeElement, window.fixture.button("plugins"));
+                        assert.equal(window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current"), null);
+                    });
+                    win.webContents.sendInputEvent({type: "keyDown", keyCode});
+                    win.webContents.sendInputEvent({type: "keyUp", keyCode});
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    await evaluate(filter => {
+                        require("node:assert/strict").equal(document.activeElement, window.fixture.input("plugins", filter));
+                        window.siyuan.menus.menu.remove();
+                    }, filter);
+                }
+            }
             // 通过 Chromium 的输入通道验证菜单导航、原生激活与退出焦点。
             await evaluate(() => {
                 window.fixture.activate("plugins");
@@ -794,6 +876,8 @@ const runElectron = async () => {
             await new Promise(resolve => setTimeout(resolve, 100));
             await evaluate(() => require("node:assert/strict").equal(
                 window.fixture.button("plugins").getAttribute("aria-expanded"), "true", "pointer opens filter menu"));
+            win.webContents.sendInputEvent({type: "keyDown", keyCode: "Down"});
+            win.webContents.sendInputEvent({type: "keyUp", keyCode: "Down"});
             win.webContents.sendInputEvent({type: "keyDown", keyCode: "Down"});
             win.webContents.sendInputEvent({type: "keyUp", keyCode: "Down"});
             await new Promise(resolve => setTimeout(resolve, 50));

@@ -867,6 +867,12 @@
     }
 
     &__filter-row {
+      @media (hover: none) {
+        > [data-bazaar-filter-menu]:not(:focus-visible) {
+          --b3-list-icon-hover: transparent;
+        }
+      }
+
       align-items: center;
       flex: 1 1 240px;
       gap: 8px;

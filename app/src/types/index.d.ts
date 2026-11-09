@@ -931,6 +931,7 @@ interface IFile {
     titleEmpty?: boolean;
     titleFormat?: "plain" | "inline-ast";
     titleRevision?: string;
+    specTooNew?: boolean;
     hMtime: string;
     hCtime: string;
     hSize: string;

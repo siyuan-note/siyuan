@@ -10,6 +10,12 @@
   --file-action-offset: var(--file-toggle-width);
 }
 
+// 源版本高于当前客户端支持的文档只能占位显示，避免被当作可编辑文档。
+.file-tree__row--spec-too-new .b3-list-item__text {
+  color: var(--b3-theme-on-surface-light);
+  cursor: not-allowed;
+}
+
 .file-tree__pins {
   --file-toggle-width: 0px;
   padding-bottom: 8px;

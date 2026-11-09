@@ -55,6 +55,30 @@ func TestDocTreeRangeRetriesPendingWriter(t *testing.T) {
 	}
 }
 
+func TestDocTreeRangeShowsNewerSpecAsPlaceholder(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	absPath := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)
+	if err := os.WriteFile(absPath, []byte(`{"Spec":"999","Properties":{"title":"Future"}}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	cache.RemoveDocIALInBox(fixture.sourcePath, fixture.box.ID)
+	cache.BeginDocTreeMutation(fixture.box.ID)()
+	batch, err := ListDocTreeRange(context.Background(), fixture.box.ID, "", 0, 32, "", DocTreeAccess{})
+	if err != nil {
+		t.Fatalf("listing document tree range failed: %v", err)
+	}
+	for _, file := range batch.Files {
+		if fixture.sourceID != file.ID {
+			continue
+		}
+		if !file.SpecTooNew || file.Name != "Future" {
+			t.Fatalf("newer spec was not listed as a placeholder: %+v", file)
+		}
+		return
+	}
+	t.Fatalf("newer spec document [%s] was not listed", fixture.sourceID)
+}
+
 func TestDocTreeRangeCompleteAndLocate(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	ctx := context.Background()

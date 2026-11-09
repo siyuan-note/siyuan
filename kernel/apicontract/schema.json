@@ -28402,6 +28402,9 @@
         "sort": {
           "type": "integer"
         },
+        "specTooNew": {
+          "type": "boolean"
+        },
         "subFileCount": {
           "type": "integer"
         },
@@ -39108,6 +39111,9 @@
         },
         "path": {
           "type": "string"
+        },
+        "specTooNew": {
+          "type": "boolean"
         },
         "subFileCount": {
           "type": "integer"

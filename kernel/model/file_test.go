@@ -210,6 +210,53 @@ func TestDocIALPreservesUnsupportedSpec(t *testing.T) {
 	}
 }
 
+func TestListDocTreeShowsNewerSpecAsPlaceholder(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	originalWorkspace := util.WorkspaceDir
+	util.WorkspaceDir = t.TempDir()
+	t.Cleanup(func() { util.WorkspaceDir = originalWorkspace })
+	absPath := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)
+	for _, test := range []struct {
+		name      string
+		source    string
+		wantName  string
+		wantEmpty bool
+	}{
+		{"title", `{"Spec":"999","Properties":{"title":"Future"}}`, "Future", false},
+		{"no title", `{"Spec":"999","Properties":{"id":"` + fixture.sourceID + `"}}`, "", true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			cache.RemoveDocIALInBox(fixture.sourcePath, fixture.box.ID)
+			if err := os.WriteFile(absPath, []byte(test.source), 0600); err != nil {
+				t.Fatal(err)
+			}
+			files, _, err := ListDocTree(fixture.box.ID, "/", util.SortModeNameASC, false, false, 128)
+			if err != nil {
+				t.Fatalf("list documents failed: %v", err)
+			}
+			var found *File
+			for _, file := range files {
+				if fixture.sourceID == file.ID {
+					found = file
+					break
+				}
+			}
+			if found == nil || !found.SpecTooNew {
+				t.Fatalf("newer spec document was not listed as a placeholder: %+v", found)
+			}
+			if found.Name != test.wantName || found.TitleEmpty != test.wantEmpty {
+				t.Fatalf("placeholder title mismatch: name=%q empty=%v", found.Name, found.TitleEmpty)
+			}
+			if properties := cache.GetDocIALInBox(fixture.sourcePath, fixture.box.ID); properties != nil {
+				t.Fatalf("placeholder properties entered the document property cache: %v", properties)
+			}
+			if _, statErr := os.Stat(filepath.Join(util.WorkspaceDir, "corrupted")); !os.IsNotExist(statErr) {
+				t.Fatalf("newer spec entered corruption recovery: %v", statErr)
+			}
+		})
+	}
+}
+
 func TestResolveDocTreeSortModeInheritance(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	Conf.FileTree.Load().Sort = util.SortModeSizeDESC

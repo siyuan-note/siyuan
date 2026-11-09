@@ -256,8 +256,10 @@ type FileTreeFile struct {
 	Name       string `json:"name"`
 	TitleEmpty bool   `json:"titleEmpty,omitempty"`
 	// 标题格式和语义源版本来自笔记本内的派生索引；索引尚未就绪时省略，完整源按 ID 单独读取。
-	TitleFormat       string `json:"titleFormat,omitempty" api:"enum=plain|inline-ast"`
-	TitleRevision     string `json:"titleRevision,omitempty"`
+	TitleFormat   string `json:"titleFormat,omitempty" api:"enum=plain|inline-ast"`
+	TitleRevision string `json:"titleRevision,omitempty"`
+	// 源版本高于当前客户端支持的版本时为 true，name 等属性只来自占位读取，文档不可打开或编辑。
+	SpecTooNew        bool   `json:"specTooNew,omitempty"`
 	Icon              string `json:"icon"`
 	Name1             string `json:"name1"`
 	Alias             string `json:"alias"`

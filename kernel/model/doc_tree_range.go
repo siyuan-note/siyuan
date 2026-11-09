@@ -91,18 +91,25 @@ func docTreeVisible(access DocTreeAccess) func(string, string) bool {
 }
 
 // 直接读取已认证的属性，读取失败不作为可见文档计数，也不搬移源文件。
-func readDocTreeIAL(box *Box, p string) (map[string]string, error) {
-	if _, err := box.validateBoxPath(p); err != nil {
-		return nil, err
+// 源版本高于当前版本时仍返回可解码属性作为占位；属性不可解码时保留版本错误。
+func readDocTreeIAL(box *Box, p string) (ial map[string]string, specTooNew bool, err error) {
+	if _, err = box.validateBoxPath(p); err != nil {
+		return nil, false, err
 	}
-	ial, err := filesys.DocIAL(filepath.Join(util.DataDir, box.ID, p))
+	ial, err = filesys.DocIAL(filepath.Join(util.DataDir, box.ID, p))
+	if errors.Is(err, treenode.ErrSpecTooNew) {
+		if len(ial) == 0 {
+			return nil, true, err
+		}
+		return ial, true, nil
+	}
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	if len(ial) == 0 {
-		return nil, filesys.ErrInvalidDocIAL
+		return nil, false, filesys.ErrInvalidDocIAL
 	}
-	return ial, nil
+	return ial, false, nil
 }
 
 func newDocTreeQuery(notebook, parentID string, access DocTreeAccess) (*docTreeQuery, error) {
@@ -136,7 +143,7 @@ func newDocTreeQuery(notebook, parentID string, access DocTreeAccess) (*docTreeQ
 		if !query.visibility(notebook, current) {
 			return nil, errDocTreeUnavailable
 		}
-		ial, err := readDocTreeIAL(box, current)
+		ial, _, err := readDocTreeIAL(box, current)
 		if err != nil {
 			return nil, err
 		}
@@ -201,8 +208,11 @@ func (query *docTreeQuery) childCount(ctx context.Context, p string) (int, error
 		if !query.visibility(query.box.ID, childPath) {
 			continue
 		}
-		ial, readErr := readDocTreeIAL(query.box, childPath)
+		ial, _, readErr := readDocTreeIAL(query.box, childPath)
 		if readErr != nil {
+			if errors.Is(readErr, treenode.ErrSpecTooNew) {
+				continue
+			}
 			return 0, readErr
 		}
 		if ial[DocHiddenAttr] != "true" {
@@ -221,7 +231,7 @@ func docTreeEntry(entry os.DirEntry, notebook string) bool {
 }
 
 func (query *docTreeQuery) readFile(p string) (*File, error) {
-	ial, err := readDocTreeIAL(query.box, p)
+	ial, specTooNew, err := readDocTreeIAL(query.box, p)
 	if err != nil {
 		return nil, err
 	}
@@ -235,6 +245,10 @@ func (query *docTreeQuery) readFile(p string) (*File, error) {
 	file := query.box.docFromFileInfo(&FileInfo{path: p, name: path.Base(p), size: info.Size()}, ial)
 	if file == nil {
 		return nil, errDocTreeUnavailable
+	}
+	file.SpecTooNew = specTooNew
+	if specTooNew && "" == file.Name {
+		file.TitleEmpty = true
 	}
 	return file, nil
 }
@@ -263,15 +277,22 @@ func (query *docTreeQuery) collect(ctx context.Context) (*cache.DocTreeOrder, er
 		if !query.visibility(query.box.ID, p) {
 			continue
 		}
-		ial, readErr := readDocTreeIAL(query.box, p)
+		ial, specTooNew, readErr := readDocTreeIAL(query.box, p)
 		if readErr != nil {
+			if errors.Is(readErr, treenode.ErrSpecTooNew) {
+				// 版本过新且属性不可解码，没有可用于占位的标题，跳过该条目避免整个目录不可用。
+				continue
+			}
 			return nil, readErr
 		}
 		if ial[DocHiddenAttr] == "true" {
 			continue
 		}
 		id := strings.TrimSuffix(entry.Name(), ".sy")
-		file := &File{ID: id, Path: p, Name: ial["title"], TitleEmpty: ial[NodeAttrTitleEmpty] == "true"}
+		file := &File{ID: id, Path: p, Name: ial["title"], TitleEmpty: ial[NodeAttrTitleEmpty] == "true", SpecTooNew: specTooNew}
+		if specTooNew && "" == file.Name {
+			file.TitleEmpty = true
+		}
 		if query.sortMode == util.SortModeUpdatedASC || query.sortMode == util.SortModeUpdatedDESC ||
 			query.sortMode == util.SortModeCreatedASC || query.sortMode == util.SortModeCreatedDESC {
 			created, _ := time.ParseInLocation("20060102150405", id[:14], time.Local)

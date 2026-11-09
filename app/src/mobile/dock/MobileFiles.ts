@@ -330,6 +330,8 @@ export class MobileFiles extends Model {
                                 this.parentDocClick.cancel();
                                 this.toggleTreeItem(target);
                             }
+                        } else if (getDocTreeItem(target)?.file?.specTooNew) {
+                            showMessage(window.siyuan.languages._kernel[275]);
                         } else {
                             openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL], undefined, notebookId);
                         }
@@ -343,6 +345,8 @@ export class MobileFiles extends Model {
                                     this.parentDocClick.cancel();
                                     this.toggleTreeItem(target);
                                 }
+                            } else if (getDocTreeItem(target)?.file?.specTooNew) {
+                                showMessage(window.siyuan.languages._kernel[275]);
                             } else {
                                 openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL], undefined, notebookId);
                             }

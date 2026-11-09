@@ -7,6 +7,7 @@ package model
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"slices"
 	"sort"
@@ -18,17 +19,30 @@ import (
 )
 
 type storedAttributeViewAutomation struct {
-	ctx      context.Context
-	runtime  *templatehttp.Execution
-	at       time.Time
-	source   *attributeViewAutomationSource
-	runs     []*storedAutomationRun
-	jobID    string
-	views    map[string]*av.AttributeView
-	versions map[string]string
-	values   map[string]map[*av.AutomationValue]*av.Value
-	targets  map[string]map[*av.AutomationAction][]string
+	ctx        context.Context
+	runtime    *templatehttp.Execution
+	at         time.Time
+	source     *attributeViewAutomationSource
+	runs       []*storedAutomationRun
+	jobID      string
+	views      map[string]*av.AttributeView
+	versions   map[string]string
+	values     map[string]map[*av.AutomationValue]*av.Value
+	targets    map[string]map[*av.AutomationAction][]string
+	operations int
 }
+
+type storedAutomationOptions struct {
+	items       []string
+	operations  int
+	ruleVersion string
+}
+
+var errAutomationOperationBudget = errors.New("automation operation budget exhausted")
+
+type automationHTTPError struct{ code string }
+
+func (err *automationHTTPError) Error() string { return "automation HTTP request failed: " + err.code }
 
 type storedAutomationRun struct {
 	rule  *av.AutomationRule
@@ -46,7 +60,7 @@ func RunAttributeViewAutomation(ctx context.Context, avID, blockID, ruleID strin
 
 // 取数在存储快照上完成，全部成功后再进入写事务，网络等待不占用编辑事务锁。
 func runStoredAttributeViewAutomation(ctx context.Context, avID, blockID, ruleID string, runtime *templatehttp.Execution,
-	job *attributeViewHTTPAutomation, result **Transaction) error {
+	job *attributeViewHTTPAutomation, result **Transaction, options ...storedAutomationOptions) error {
 	if job != nil && job.overflow {
 		return fmt.Errorf("automation exceeds %d operations per execution", maxAutomationOperations)
 	}
@@ -86,6 +100,9 @@ func runStoredAttributeViewAutomation(ctx context.Context, avID, blockID, ruleID
 		plan.jobID = job.ID
 	}
 	if source.Automations == nil || source.Automations.ValidateSpec() != nil {
+		if len(options) > 0 {
+			return errManualAutomationChanged
+		}
 		return fmt.Errorf("manual automation is unavailable")
 	}
 	for _, rule := range source.Automations.Rules {
@@ -98,9 +115,15 @@ func runStoredAttributeViewAutomation(ctx context.Context, avID, blockID, ruleID
 		}
 	}
 	if len(plan.runs) == 0 {
+		if len(options) > 0 {
+			return errManualAutomationChanged
+		}
 		return fmt.Errorf("manual automation is unavailable")
 	}
 	for _, run := range plan.runs {
+		if len(options) > 0 && automationRuleVersion(run.rule) != options[0].ruleVersion {
+			return errManualAutomationChanged
+		}
 		if err = reader.validateAutomationRule(source, run.rule, boxID); err != nil {
 			return err
 		}
@@ -130,6 +153,9 @@ func runStoredAttributeViewAutomation(ctx context.Context, avID, blockID, ruleID
 			return err
 		}
 		for _, item := range source.GetBlockKeyValues().Values {
+			if len(options) > 0 && !slices.Contains(options[0].items, item.BlockID) {
+				continue
+			}
 			if job != nil && !slices.Contains(job.rules[rule.ID], item.BlockID) {
 				continue
 			}
@@ -195,6 +221,9 @@ func runStoredAttributeViewAutomation(ctx context.Context, avID, blockID, ruleID
 				if count > maxAutomationOperations {
 					return fmt.Errorf("automation exceeds %d operations per execution", maxAutomationOperations)
 				}
+				if len(options) > 0 && count > options[0].operations {
+					return errAutomationOperationBudget
+				}
 				keys := make([]string, 0, len(action.Fields))
 				for id := range action.Fields {
 					keys = append(keys, id)
@@ -225,6 +254,7 @@ func runStoredAttributeViewAutomation(ctx context.Context, avID, blockID, ruleID
 	if count == 0 {
 		return nil
 	}
+	plan.operations = count
 	tx := &Transaction{storedAutomation: plan, fromAPI: true}
 	err = PerformTransactionSync(tx)
 	if err == nil && result != nil {
@@ -246,7 +276,8 @@ func automationHTTPFunctions(runtime *templatehttp.Execution, boxID, avID string
 	return map[string]any{"httpGet": func(url string, options ...map[string]any) (map[string]any, error) {
 		value, requestErr := request(url, options...)
 		if requestErr == nil && value["ok"] != true {
-			requestErr = fmt.Errorf("manual automation HTTP request failed")
+			code, _ := value["error"].(string)
+			requestErr = &automationHTTPError{code: code}
 		}
 		return value, requestErr
 	}}, nil

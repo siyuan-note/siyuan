@@ -4702,6 +4702,38 @@
 			]
 		},
 		{
+			"ID": "20261109112907-kueu1ko",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-kueu1ko",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the template editor, select a source field by name and click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Insert field reference"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to insert a stable field ID reference at the cursor. Renaming the field keeps the reference valid. Click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Copy ID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to copy the selected field ID. The picker also works on mobile."
+				}
+			]
+		},
+		{
 			"ID": "20261108182000-cjr8luh",
 			"Type": "NodeHeading",
 			"Properties": {
@@ -4796,7 +4828,35 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Network access requires confirmation in the current window and follows the template HTTP restrictions. Persistent permission is tied to the saved rule version; it can be revoked in the automation panel. Any request, parsing or conversion failure preserves all original values. If a database used by the rule changes while waiting, run again. All actions read the initial stored snapshot; undo and redo reuse saved results without fetching. HTTP requests use the existing execution budget; each run permits at most 1,000 field writes and row additions. Manual templates do not provide the field preview. Manual rules require automation format 9; formats 1–8 remain readable and older clients reject format 9 without rewriting the database."
+					"Data": "Network requests require confirmation in the current window and follow the template HTTP limits. Persistent permission is bound to the saved rule version and can be revoked in the automation panel. The manual interface saves each matching entry independently: all actions for one entry succeed together or leave that entry unchanged; other successful entries stay saved. Each entry reads a fresh stored snapshot, shared by all its actions; changes during fetching reject stale results. Undo and redo reuse saved results without HTTP. HTTP limits apply across batches, with at most 1,000 field writes and row additions per round. Manual templates have no field preview. Manual rules require automation format 9; formats 1–8 remain readable, and older clients reject format 9 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-hyg3j9f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-hyg3j9f",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Execution displays saved, failed, remaining and skipped counts, with an expandable failure list. Retry failed and remaining entries continues only those entries; it does not repeat successful additions. Batches share request, response-size, elapsed-time and write limits. Reaching a limit, denying permission or closing the panel stops further work and preserves committed results. Explicit retry starts a new budget round. A lost response is checked through progress before any further writes. Progress is bound to the current main window for fifteen minutes and is cleared when notebooks begin locking. Check saved values before restarting after progress expires. Existing API calls retain whole-run atomic behavior and null data unless rows mode is explicitly requested."
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-pq3tbas",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-pq3tbas",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A checkbox can serve as a refresh switch: watch its changes, require it to be checked, and save HTTP results together with clearing the checkbox. A successful result does not trigger another automation. On failure the checkbox and old results remain unchanged; uncheck and check it again to trigger another attempt."
 				}
 			]
 		},

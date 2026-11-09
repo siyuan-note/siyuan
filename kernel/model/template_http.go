@@ -226,6 +226,7 @@ func (execution *TemplateHTTPExecution) Close() {
 
 // 笔记本进入锁定流程时立即终止联网等待，随后响应级租约才能安全释放。
 func cancelTemplateHTTPExecutions() {
+	clearManualAutomationRuns()
 	templateHTTPExecutions.Lock()
 	executions := make([]*TemplateHTTPExecution, 0, len(templateHTTPExecutions.values))
 	for _, execution := range templateHTTPExecutions.values {

@@ -13,6 +13,7 @@ interface HTTPExecution {
     controller: AbortController;
     owners?: Element[];
     avMetadataOnly?: boolean;
+    manualAutomationRows?: boolean;
     isCurrent: () => boolean;
     confirmation?: string;
     confirmations: Set<string>;
@@ -65,10 +66,12 @@ export const revokeTemplateHTTPConfirmation = (token: string, owner: {app: strin
     }
 };
 
-export const cancelTemplateHTTPForElement = (element: Element, options?: {preserveAVMetadata?: boolean}) => {
+export const cancelTemplateHTTPForElement = (element: Element, options?: {preserveAVMetadata?: boolean; preserveManualAutomation?: boolean}) => {
     executions.forEach(execution => {
         // 数据库行刷新不替代字段配置请求，后者仍由宿主和页面生命周期取消。
         if (options?.preserveAVMetadata && execution.avMetadataOnly && execution.isCurrent()) return;
+        // 逐条保存会多次重渲数据库，请求由面板生命周期和内核逐条快照校验控制。
+        if (options?.preserveManualAutomation && execution.manualAutomationRows && execution.isCurrent()) return;
         if (execution.owners?.includes(element)) {
             execution.controller.abort();
         }
@@ -95,7 +98,7 @@ export const guardTemplateHTTPRequest = (isCurrent: () => boolean, owner?: Eleme
     }};
 };
 
-export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockID?: string; ignoreRows?: boolean},
+export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockID?: string; ignoreRows?: boolean; rows?: boolean},
                                          headers?: Record<string, string>, signal?: AbortSignal) => {
     if (!["/api/template/render", "/api/av/renderAttributeView", "/api/av/getAttributeViewKeys", "/api/av/runAttributeViewAutomation", "/api/filetree/createDailyNote"].includes(url) ||
         window.siyuan.isPublish || signal?.aborted) {
@@ -115,6 +118,7 @@ export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockI
     let ownerGuard: ReturnType<typeof guardTemplateHTTPRequest>;
     let owners: Element[];
     const avMetadataOnly = url === "/api/av/renderAttributeView" && data.ignoreRows === true;
+    const manualAutomationRows = url === "/api/av/runAttributeViewAutomation" && data.rows === true;
     let metadataOwners: Array<{owner: Element; avID: string; viewID: string}>;
     const isCurrentOwner = () => (!owners || owners.some(owner => owner.isConnected && !owner.closest(".fn__none"))) &&
         (!metadataOwners || metadataOwners.every(({owner, avID, viewID}) =>
@@ -131,7 +135,7 @@ export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockI
         if (!owners.length) {
             return undefined;
         }
-        if (avMetadataOnly) {
+        if (avMetadataOnly || manualAutomationRows) {
             metadataOwners = owners.map(owner => ({owner, avID: owner.getAttribute("data-av-id"),
                 viewID: getAVCurrentViewID(owner)}));
         }
@@ -143,7 +147,7 @@ export const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockI
     let finished = false;
     const execution: HTTPExecution = {
         id, app: Constants.SIYUAN_APPID, session, controller, owners, confirmations: new Set(),
-        avMetadataOnly,
+        avMetadataOnly, manualAutomationRows,
         isCurrent: () => !signal?.aborted && (signalValidity.get(signal)?.() ?? true) &&
             isCurrentOwner(),
         cleanup: () => {

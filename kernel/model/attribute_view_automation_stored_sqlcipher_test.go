@@ -10,10 +10,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -88,6 +90,51 @@ func setupStoredAutomationEncryptedTest(t *testing.T) (*fileOperationTestFixture
 		t.Fatal("unexpected text fixture")
 	}
 	return fixture, view, key
+}
+
+func TestManualAutomationRowsEncryptedPartialResultsRemainAuthenticated(t *testing.T) {
+	fixture, view, key := setupStoredAutomationEncryptedTest(t)
+	_, app := templateHTTPTestWindow(t)
+	clearManualAutomationRuns()
+	t.Cleanup(clearManualAutomationRuns)
+	failed := view.GetBlockKeyValues().Values[0].BlockID
+	view.Automations = &av.AutomationConfig{Spec: 10, Rules: []*av.AutomationRule{{ID: "20261109000000-rowrule", Name: "Rows", Enabled: true, Trigger: "manual", TimeZone: "UTC",
+		Actions: []*av.AutomationAction{{Type: "edit", Target: "current", Fields: map[string]*av.AutomationValue{key.ID: {Mode: "template",
+			Template: fmt.Sprintf(`.action{if eq .ItemID %q}.action{fromJson "invalid"}.action{else}encrypted partial result.action{end}`, failed)}}}}}}}
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	request := apicontract.RunAttributeViewAutomationRequest{AvID: view.ID, BlockID: fixture.sourceID, RuleID: view.Automations.Rules[0].ID, Rows: true}
+	initial, err := StartManualAutomationRows(request, app, "main")
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.RunID, request.Action = initial.RunID, "run"
+	report, err := RunManualAutomationRows(context.Background(), request, app, "main", nil, nil)
+	if err != nil || len(report.Failed) != 1 || len(report.Succeeded) != report.Total-1 {
+		t.Fatal("encrypted partial results lost", report, err)
+	}
+	path := filepath.Join(util.DataDir, fixture.box.ID, "storage", "av", view.ID+".json")
+	ciphertext, err := os.ReadFile(path)
+	if err != nil || !util.IsCiphertext(ciphertext) || bytes.Contains(ciphertext, []byte("encrypted partial result")) {
+		t.Fatal("partial results leaked to plaintext", err)
+	}
+	if _, err = os.Stat(filepath.Join(util.DataDir, "storage", "av", view.ID+".json")); !os.IsNotExist(err) {
+		t.Fatal("partial execution created plaintext fallback")
+	}
+	ciphertext[len(ciphertext)-1] ^= 1
+	if err = os.WriteFile(path, ciphertext, 0600); err != nil {
+		t.Fatal(err)
+	}
+	cache.ClearAVCache()
+	request.Step, request.Action = report.Step, "retry"
+	if _, err = RunManualAutomationRows(context.Background(), request, app, "main", nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	stored, _ := os.ReadFile(path)
+	if !bytes.Equal(stored, ciphertext) {
+		t.Fatal("retry changed unauthenticated ciphertext")
+	}
 }
 
 func TestManualAutomationEncryptedPersistenceAndReplay(t *testing.T) {

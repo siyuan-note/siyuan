@@ -146,6 +146,7 @@ func cancelTemplateHTTPSourceExecutions(ids []string) {
 		}
 	}
 	clearTemplateHTTPHandoffs()
+	clearManualAutomationApprovals()
 }
 
 // ManageTemplateHTTPPermission 只从实际文件或字段解析来源，不接受客户端提供的授权 ID 或源码。

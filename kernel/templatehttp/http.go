@@ -108,6 +108,7 @@ type Execution struct {
 	approvalsImported      bool
 	requests, bytes, calls int
 	networkTime            time.Duration
+	budget                 *Budget
 	transport              http.RoundTripper
 }
 
@@ -435,7 +436,7 @@ func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout t
 		if batchRequests {
 			requestLimit = maxCalls
 		}
-		if e.requests >= requestLimit || e.bytes >= maxTotalBody || e.networkTime >= maxNetworkDuration {
+		if e.requests >= requestLimit || e.bytes >= maxTotalBody || e.networkTime >= maxNetworkDuration || e.budgetDuration() <= 0 {
 			return result{Error: "budget_exceeded"}
 		}
 		if batchRequests && e.requests > 0 && e.requests%maxRequests == 0 {
@@ -456,7 +457,7 @@ func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout t
 		fingerprint := e.requestFingerprint(scope, u, headers, previous)
 		previous = fingerprint
 		if !e.inheritedApproval(fingerprint) {
-			confirmCtx, cancelConfirm := context.WithTimeout(e.ctx, confirmationDuration)
+			confirmCtx, cancelConfirm := context.WithTimeout(e.ctx, min(confirmationDuration, e.budgetDuration()))
 			approved := e.confirm(confirmCtx, Request{Method: http.MethodGet, URL: displayURL(u), HeaderNames: names, Scope: scope})
 			confirmErr := confirmCtx.Err()
 			cancelConfirm()
@@ -478,7 +479,7 @@ func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout t
 		if timeout > remaining {
 			timeout = remaining
 		}
-		networkCtx, cancelNetwork := context.WithTimeout(e.ctx, timeout)
+		networkCtx, cancelNetwork := context.WithTimeout(e.ctx, min(timeout, e.budgetDuration()))
 		select {
 		case networkSlots <- struct{}{}:
 		case <-networkCtx.Done():

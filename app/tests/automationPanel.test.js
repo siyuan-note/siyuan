@@ -56,6 +56,7 @@ const runCases = async (sources, css, mobile) => {
     const searches = [];
     const scopePreviews = [];
     const scopeRequests = [];
+    const copied = [];
     let fieldMenu;
     let collectionTypeInput;
     let nextID = 0;
@@ -95,7 +96,7 @@ const runCases = async (sources, css, mobile) => {
             showSubMenu() {}
         }},
         "util/functions": {isMobile: () => mobile},
-        "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => false},
+        "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => false, writeText: value => copied.push(value)},
         "constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_CONFIRM: "confirm"}},
         "util/genID": {genUUID: () => `dialog-${++nextID}`},
         "util/zIndex": {getZIndex: () => 0, isAbove: () => false},
@@ -525,6 +526,15 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(transactions.at(-1).perform[0].data.spec, 2, "templates use the new format");
     assert.ok(latest().timeZone, "the rule records the frontend timezone");
     const editor = get("[data-template]");
+    editor.value = "prefix suffix";
+    editor.setSelectionRange(7, 13);
+    get("[data-template-field]").value = "finished";
+    await click("[data-template-insert]");
+    assert.equal(editor.value, 'prefix .action{field "finished"}');
+    assert.equal(latest().actions[0].fields.finished.template, editor.value, "field insertion persists a stable ID reference");
+    assert.equal(document.activeElement, editor, "inserting a field restores editor focus");
+    await click("[data-template-copy]");
+    assert.equal(copied.at(-1), "finished");
     editor.value = '.action{((now).AddDate 0 0 7).Format "2006-01-02"}';
     editor.dispatchEvent(new Event("input", {bubbles: true}));
     editor.dispatchEvent(new Event("change", {bubbles: true}));

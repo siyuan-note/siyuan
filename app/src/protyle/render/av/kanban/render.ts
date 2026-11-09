@@ -63,7 +63,7 @@ export const renderKanban = async (options: {
     automaticRefresh?: AVAutomaticRefresh,
     renderToken?: symbol,
 }) => {
-    const renderToken = options.renderToken || beginAVRender(options.blockElement, {preserveAVMetadata: true});
+    const renderToken = options.renderToken || beginAVRender(options.blockElement, {preserveAVMetadata: true, preserveManualAutomation: true});
     const resetData = captureAVCardRenderState(options, "kanban");
     const virtualData = resetData.virtualData;
     if (options.blockElement.firstElementChild.innerHTML === "") {

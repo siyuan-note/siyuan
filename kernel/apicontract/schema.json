@@ -7795,6 +7795,113 @@
       ],
       "additionalProperties": false
     },
+    "AVAutomationRunFailure": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "itemID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "itemID"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationRunResult": {
+      "type": "object",
+      "properties": {
+        "failed": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVAutomationRunFailure"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "paused": {
+          "type": "string"
+        },
+        "pending": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "runID": {
+          "type": "string"
+        },
+        "running": {
+          "type": "boolean"
+        },
+        "skipped": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "step": {
+          "type": "integer"
+        },
+        "succeeded": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "failed",
+        "paused",
+        "pending",
+        "runID",
+        "running",
+        "skipped",
+        "step",
+        "succeeded",
+        "total"
+      ],
+      "additionalProperties": false
+    },
     "AVAutomationTemplatePreviewRequestInput": {
       "type": "object",
       "properties": {
@@ -42057,6 +42164,9 @@
     "RunAttributeViewAutomationRequestInput": {
       "type": "object",
       "properties": {
+        "action": {
+          "type": "string"
+        },
         "avID": {
           "type": "string"
         },
@@ -42066,8 +42176,24 @@
         "jobID": {
           "type": "string"
         },
+        "rows": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "ruleID": {
           "type": "string"
+        },
+        "runID": {
+          "type": "string"
+        },
+        "step": {
+          "type": "integer"
         }
       },
       "required": [
@@ -144111,7 +144237,14 @@
                 ]
               },
               "data": {
-                "type": "null"
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVAutomationRunResult"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "msg": {
                 "type": "string"
@@ -144131,7 +144264,8 @@
                 "type": "integer",
                 "enum": [
                   -1,
-                  -409
+                  -409,
+                  1
                 ]
               },
               "data": {
@@ -144150,6 +144284,16 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/AVAutomationRunResult"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 ]
               },

@@ -241,6 +241,37 @@ for (const renderer of ["render.ts", "gallery/render.ts", "kanban/render.ts"]) {
     });
 }
 
+test("manual row batches survive their result rendering and retain source and view ownership", () => {
+    const state = loadHTTP();
+    const request = state.exports.beginTemplateHTTPRequest("/api/av/runAttributeViewAutomation", {blockID: "block", rows: true});
+    renderAV(state);
+    assert.equal(request.signal.aborted, false);
+    state.owner.setAttribute("data-av-id", "another-database");
+    assert.equal(request.isCurrent(), false);
+    assert.equal(request.signal.aborted, true);
+    assert.equal(state.timers.size, 0);
+});
+
+for (const kind of ["disconnect", "pagehide", "owner-removed", "explicit-cancel", "caller-abort"]) {
+    test(`manual row batches preserved by rendering still cancel on ${kind}`, () => {
+        const state = loadHTTP();
+        const controller = new AbortController();
+        const request = state.exports.beginTemplateHTTPRequest("/api/av/runAttributeViewAutomation", {
+            blockID: "block", rows: true,
+        }, undefined, controller.signal);
+        renderAV(state);
+        assert.equal(request.signal.aborted, false);
+        if (kind === "disconnect") state.exports.cancelTemplateHTTPExecutions();
+        if (kind === "pagehide") state.listeners.get("pagehide")();
+        if (kind === "owner-removed") state.owner.isConnected = false;
+        if (kind === "explicit-cancel") state.exports.cancelTemplateHTTPForElement(state.owner);
+        if (kind === "caller-abort") controller.abort();
+        assert.equal(request.isCurrent(), false);
+        assert.equal(request.signal.aborted, true);
+        assert.equal(state.timers.size, 0);
+    });
+}
+
 test("only boolean metadata-only AV rendering survives row refresh", () => {
     for (const ignoreRows of [undefined, false, "true", 1]) {
         const state = loadHTTP();

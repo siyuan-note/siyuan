@@ -320,6 +320,10 @@ export type AVAutomationRule = { "actions": Array<AVAutomationAction | null> | n
 
 export type AVAutomationRuleInput = { "actions": Array<AVAutomationActionInput | null>; "blockSource"?: AVAutomationBlockSourceInput | null; "conditions"?: Array<AVViewFilterInput | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean | null; "timeZone"?: string; "trigger": "added" | "changed" | "block" | "manual"; };
 
+export type AVAutomationRunFailure = { "code": string; "itemID": string; };
+
+export type AVAutomationRunResult = { "failed": Array<AVAutomationRunFailure | null> | null; "paused": string; "pending": Array<string> | null; "runID": string; "running": boolean; "skipped": Array<string> | null; "step": number; "succeeded": Array<string> | null; "total": number; };
+
 export type AVAutomationTemplatePreviewRequestInput = { "avID": string; "inputs"?: Record<string, string>; "itemID": string; "keyID": string; "targetAvID"?: string; "template": string; "timeZone": string; "triggerTime"?: string; };
 
 export type AVAutomationValue = { "keyID"?: string; "mode": "static" | "source" | "currentTime" | "triggerItem" | "template"; "template"?: string; "value"?: AVValue; };
@@ -2018,7 +2022,7 @@ export type RiffTreeDueCardsRequestInput = { "reviewedCards"?: Array<RiffReviewe
 
 export type RollbackRepoSnapshotFileRequestInput = { "id": string; };
 
-export type RunAttributeViewAutomationRequestInput = { "avID": string; "blockID": string; "jobID"?: string; "ruleID": string; };
+export type RunAttributeViewAutomationRequestInput = { "action"?: string; "avID": string; "blockID": string; "jobID"?: string; "rows"?: boolean | null; "ruleID": string; "runID"?: string; "step"?: number; };
 
 export type SQLQueryRequestInput = { "mode"?: string | null; "stmt": string; };
 
@@ -4448,10 +4452,18 @@ export interface APIPOSTRoutes {
      * 联网沿用交互确认、持久许可及公网请求限制，无交互窗口不能执行事件 HTTP 任务。
      * 全部取数成功后重新校验已读取的数据库，在单笔可撤销事务中写入；失败、取消或来源改变均保留原值。
      * 撤销和重做复用已保存结果，不重复联网；每次最多 1000 个写入操作，不提供定时执行。
+     * rows 缺省或 false 保持整批原子提交及 null 响应；true 仅用于 manual 规则，要求有效主窗口，返回逐条进度。
+     * rows 模式先以空 runID 和 action=start 选择符合条件的存储条目，不执行动作；之后以 runID、step 和 action=run 顺序续批。
+     * 每批最多 32 条，每条内部全部动作原子提交；普通失败只影响本条，成功结果立即保存且可撤销，重放不联网。
+     * 重复 step 或 action=status 仅查询进度；客户端响应丢失后先查询，不能盲目重发新增动作。
+     * 各批共享一轮网络预算及 1000 次写入上限；超限、拒绝、取消或规则变化暂停，成功结果保持。
+     * action=retry 显式重置本轮预算，仅执行失败及未完成条目；规则修改后须重新开始。
+     * 部分成功或暂停返回 code 1 及进度；无效、过期或跨窗口记录返回 -409，记录十五分钟内有效。
+     * 进度最多 32 份、每份最多 10000 条，只保存标识与摘要，笔记本进入锁定流程时清除。
      */
     "/api/av/runAttributeViewAutomation": {
         request: RunAttributeViewAutomationRequestInput;
-        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -409; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": AVAutomationRunResult | null; "msg": string; } | { "code": -1 | -409 | 1; "data": { "closeTimeout": number; } | null | AVAutomationRunResult | null; "msg": string; };
         body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];

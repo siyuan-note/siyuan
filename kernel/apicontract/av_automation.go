@@ -4,6 +4,26 @@
 
 package apicontract
 
+// AVAutomationRunResult 仅包含条目标识和固定错误码，不缓存取数正文或字段明文。
+// 每批最多处理 32 条记录，网络和写入预算在同一轮批次间累计；retry 显式开始新一轮，仅处理失败及未完成项。
+// step 是下一批序号；重复或过期序号只返回当前进度，不重复执行已提交的动作。
+type AVAutomationRunResult struct {
+	RunID     string                    `json:"runID"`
+	Step      int                       `json:"step"`
+	Total     int                       `json:"total"`
+	Succeeded []string                  `json:"succeeded"`
+	Failed    []*AVAutomationRunFailure `json:"failed"`
+	Pending   []string                  `json:"pending"`
+	Skipped   []string                  `json:"skipped"`
+	Paused    string                    `json:"paused"`
+	Running   bool                      `json:"running"`
+}
+
+type AVAutomationRunFailure struct {
+	ItemID string `json:"itemID"`
+	Code   string `json:"code"`
+}
+
 // AVAutomationConfig 通过 setAttrViewAutomations 事务操作整体保存，所有镜像和视图共享。
 // spec 为 1 至 10；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4，有限文档深度至少使用 5。
 // manual 触发至少使用 9，仅显式执行时取数并写入普通字段；存量版本 1–8 保持兼容。

@@ -644,6 +644,8 @@ Manual database automation uses automation format 9 without changing the encrypt
 
 Automation format 10 retains the same authenticated storage envelope and readers for formats 1–9. Event-triggered HTTP tasks persist no plaintext snapshots: pending tasks contain only identifiers and digests, expire within five minutes, and require the originating live main window. They acquire notebook leases before reading or fetching; locked, corrupt or unauthenticated sources cannot continue. Edits commit before network waits, and results commit atomically as a separate undoable transaction only while snapshots remain current. Failure or cancellation preserves the saved edits and previous results; replay performs no HTTP.
 
+Manual per-entry automation commits each source record and all of its cross-database actions through the existing authenticated transaction and undo paths. A failed record preserves its old values while earlier successes remain saved. Pending progress keeps only IDs, rule digests, counters and permission-scope identifiers; it holds no decrypted snapshots, response bodies or notebook leases. Every continuation authenticates current sources and checks the exact originating main session, and notebook locking clears progress and cancels active requests. Retrying never removes supported readers, changes key material or falls back to plaintext; no document, database or encryption-envelope format changes are introduced.
+
 ## Verification
 
 ### Security acceptance matrix

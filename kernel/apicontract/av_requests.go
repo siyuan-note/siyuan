@@ -5,6 +5,11 @@
 package apicontract
 
 type RunAttributeViewAutomationRequest struct {
+	// rows 为 true 时使用逐条提交模式；缺省或 false 保持整批提交及 null 响应。
+	Rows    bool   `json:"rows,omitempty" api:"optional,nullable"`
+	RunID   string `json:"runID,omitempty" api:"optional"`
+	Step    int    `json:"step,omitempty" api:"optional"`
+	Action  string `json:"action,omitempty" api:"optional"`
 	JobID   string `json:"jobID,omitempty" api:"optional"`
 	AvID    string `json:"avID"`
 	BlockID string `json:"blockID"`

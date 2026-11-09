@@ -622,7 +622,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         if (isMobile() || isInMobileApp()) {
             e.classList.add("av--touch");
         }
-        const renderToken = inheritedRenderToken || beginAVRender(e, {preserveAVMetadata: true});
+        const renderToken = inheritedRenderToken || beginAVRender(e, {preserveAVMetadata: true, preserveManualAutomation: true});
         disposeAVColumnWindow(e);
 
         if (e.getAttribute("data-av-type") === "gallery") {

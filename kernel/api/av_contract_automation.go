@@ -15,41 +15,44 @@ import (
 )
 
 var runAttributeViewAutomation = contractHandler(apicontract.RunAttributeViewAutomation,
-	func(c *gin.Context, request apicontract.RunAttributeViewAutomationRequest) apicontract.Response[apicontract.Null] {
+	func(c *gin.Context, request apicontract.RunAttributeViewAutomationRequest) apicontract.Response[*apicontract.AVAutomationRunResult] {
 		if err := holdAttributeViewRequest(c, request.BlockID, request.AvID); err != nil {
-			return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(314))
+			return apicontract.Failure[*apicontract.AVAutomationRunResult](-1, model.Conf.Language(314))
+		}
+		if request.Rows {
+			return runAttributeViewAutomationRows(c, request)
 		}
 		if request.JobID != "" {
 			job, ctx, finish, err := model.ClaimAttributeViewHTTPAutomation(c.Request.Context(), request.JobID, request.AvID, request.BlockID,
 				c.GetHeader("X-Siyuan-Template-App"), c.GetHeader("X-Siyuan-Template-Session"))
 			if errors.Is(err, model.ErrAutomaticHTTPObsolete) {
-				return apicontract.Failure[apicontract.Null](-409, "")
+				return apicontract.Failure[*apicontract.AVAutomationRunResult](-409, "")
 			}
 			if err != nil {
-				return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(258))
+				return apicontract.Failure[*apicontract.AVAutomationRunResult](-1, model.Conf.Language(258))
 			}
 			defer finish()
 			c.Request = c.Request.WithContext(ctx)
 			execution, err := startTemplateHTTP(c, "automatic-automation")
 			if err != nil || execution == nil {
-				return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(258))
+				return apicontract.Failure[*apicontract.AVAutomationRunResult](-1, model.Conf.Language(258))
 			}
 			defer execution.Close()
 			tx, err := model.RunAttributeViewHTTPAutomation(ctx, job, execution)
 			if ctx.Err() != nil || errors.Is(err, model.ErrAutomaticHTTPObsolete) {
-				return apicontract.Failure[apicontract.Null](-409, "")
+				return apicontract.Failure[*apicontract.AVAutomationRunResult](-409, "")
 			}
 			if err != nil {
-				return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(258))
+				return apicontract.Failure[*apicontract.AVAutomationRunResult](-1, model.Conf.Language(258))
 			}
 			if tx != nil {
 				pushTransactions(c.GetHeader("X-Siyuan-Template-App"), c.GetHeader("X-Siyuan-Template-Session"), []*model.Transaction{tx})
 			}
-			return apicontract.Success(apicontract.Null{})
+			return apicontract.Success((*apicontract.AVAutomationRunResult)(nil))
 		}
 		execution, err := startTemplateHTTP(c, "manual-automation")
 		if err != nil {
-			return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(258))
+			return apicontract.Failure[*apicontract.AVAutomationRunResult](-1, model.Conf.Language(258))
 		}
 		var runtime *templatehttp.Execution
 		if execution != nil {
@@ -57,10 +60,47 @@ var runAttributeViewAutomation = contractHandler(apicontract.RunAttributeViewAut
 			runtime = execution.Runtime
 		}
 		if err = model.RunAttributeViewAutomation(c.Request.Context(), request.AvID, request.BlockID, request.RuleID, runtime); err != nil {
-			return apicontract.Failure[apicontract.Null](-1, model.Conf.Language(258))
+			return apicontract.Failure[*apicontract.AVAutomationRunResult](-1, model.Conf.Language(258))
 		}
-		return apicontract.Success(apicontract.Null{})
+		return apicontract.Success((*apicontract.AVAutomationRunResult)(nil))
 	})
+
+func runAttributeViewAutomationRows(c *gin.Context, request apicontract.RunAttributeViewAutomationRequest) apicontract.Response[*apicontract.AVAutomationRunResult] {
+	app, session := c.GetHeader("X-Siyuan-Template-App"), c.GetHeader("X-Siyuan-Template-Session")
+	var result *apicontract.AVAutomationRunResult
+	var err error
+	if request.JobID != "" {
+		err = model.ErrManualAutomationExpired
+	} else if request.RunID == "" && (request.Action == "" || request.Action == "start") {
+		result, err = model.StartManualAutomationRows(request, app, session)
+	} else if request.Action == "status" {
+		result, err = model.ManualAutomationRowsStatus(request, app, session)
+	} else if request.RunID != "" && (request.Action == "run" || request.Action == "retry") {
+		var execution *model.TemplateHTTPExecution
+		execution, err = startTemplateHTTP(c, "manual-automation-rows")
+		if err == nil && execution == nil {
+			err = model.ErrManualAutomationExpired
+		}
+		if err == nil {
+			defer execution.Close()
+			result, err = model.RunManualAutomationRows(c.Request.Context(), request, app, session, execution.Runtime, func(tx *model.Transaction) {
+				pushTransactions(app, session, []*model.Transaction{tx})
+			})
+		}
+	} else {
+		err = model.ErrManualAutomationExpired
+	}
+	if errors.Is(err, model.ErrManualAutomationExpired) {
+		return apicontract.Failure[*apicontract.AVAutomationRunResult](-409, "")
+	}
+	if err != nil {
+		return apicontract.Failure[*apicontract.AVAutomationRunResult](-1, model.Conf.Language(258))
+	}
+	if len(result.Failed) > 0 || result.Paused != "" {
+		return apicontract.RunAttributeViewAutomation.FailureWithData(1, "", result)
+	}
+	return apicontract.Success(result)
+}
 
 var previewAttributeViewCollection = contractHandler(apicontract.PreviewAttributeViewCollection,
 	func(c *gin.Context, request apicontract.AVBlockCollectionPreviewRequest) apicontract.Response[*apicontract.AVBlockCollectionPreview] {

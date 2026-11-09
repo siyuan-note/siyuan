@@ -504,6 +504,15 @@ func TestAVContractAutomationWrites(t *testing.T) {
 			t.Fatal(err)
 		}
 		call("/api/av/runAttributeViewAutomation", map[string]any{"avID": database.ID, "blockID": fixture.databaseID, "ruleID": manual.ID}, runAttributeViewAutomation)
+		legacy := callAttributeViewContextFilterAPI(t, "/api/av/runAttributeViewAutomation", map[string]any{"avID": database.ID, "blockID": fixture.databaseID, "ruleID": manual.ID}, runAttributeViewAutomation)
+		var legacyResult struct {
+			Code int
+			Data json.RawMessage
+		}
+		decodeAttributeViewContextFilterAPIResponse(t, legacy, &legacyResult)
+		if legacyResult.Code != 0 || string(legacyResult.Data) != "null" {
+			t.Fatal("legacy manual response changed", legacy.Body.String())
+		}
 		stored, err := av.ParseAttributeView(database.ID)
 		if err != nil {
 			t.Fatal(err)
@@ -520,6 +529,56 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		decodeAttributeViewContextFilterAPIResponse(t, response, &failed)
 		if failed.Code == 0 {
 			t.Fatal("missing manual rule succeeded")
+		}
+	})
+	t.Run("manual row progress contract", func(t *testing.T) {
+		util.IncBootProgress(100-util.GetBootProgress(), "")
+		connectSettingNotifications(t, gin.New())
+		stored, err := av.ParseAttributeView(database.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		failedID := stored.GetBlockKeyValues().Values[0].BlockID
+		manual := rule("manual", "", fixture.textKeyID, &av.Value{Type: av.KeyTypeText})
+		manual.TimeZone = "UTC"
+		manual.Actions[0].Fields[fixture.textKeyID] = &av.AutomationValue{Mode: "template", Template: `.action{if eq .ItemID "` + failedID + `"}.action{fromJson "invalid"}.action{else}rows saved.action{end}`}
+		if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "setAttrViewAutomations", AvID: database.ID, BlockID: fixture.databaseID,
+			Data: &av.AutomationConfig{Spec: 10, Rules: []*av.AutomationRule{manual}}}}); err != nil {
+			t.Fatal(err)
+		}
+		payload := map[string]any{"avID": database.ID, "blockID": fixture.databaseID, "ruleID": manual.ID, "rows": true, "action": "start"}
+		rowCall := func() (int, *apicontract.AVAutomationRunResult) {
+			response := callAttributeViewContextFilterAPI(t, "/api/av/runAttributeViewAutomation", payload, func(c *gin.Context) {
+				c.Request.Header.Set("X-Siyuan-Template-App", t.Name())
+				c.Request.Header.Set("X-Siyuan-Template-Session", "settings-notifications")
+				c.Request.Header.Set("X-Siyuan-Template-Execution", rand.Text())
+				runAttributeViewAutomation(c)
+			})
+			requireAPIContract(t, http.MethodPost, "/api/av/runAttributeViewAutomation", response)
+			var result struct {
+				Code int
+				Data *apicontract.AVAutomationRunResult
+			}
+			decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+			return result.Code, result.Data
+		}
+		code, initial := rowCall()
+		if code != 0 || initial == nil || initial.Step != 0 || len(initial.Pending) != len(stored.GetBlockKeyValues().Values) {
+			t.Fatal("progress start failed", code, initial)
+		}
+		payload["runID"], payload["step"], payload["action"] = initial.RunID, 0, "run"
+		code, partial := rowCall()
+		if code != 1 || partial == nil || len(partial.Failed) != 1 || partial.Failed[0].ItemID != failedID || len(partial.Succeeded) != initial.Total-1 {
+			t.Fatal("partial success was reported as complete success or failure", code, partial)
+		}
+		code, replayed := rowCall()
+		if code != 1 || replayed.Step != partial.Step {
+			t.Fatal("repeated step ran again", code, replayed)
+		}
+		payload["action"] = "status"
+		code, progress := rowCall()
+		if code != 1 || len(progress.Succeeded) != len(partial.Succeeded) {
+			t.Fatal("status discarded saved results")
 		}
 	})
 	t.Run("automatic HTTP editing contract", func(t *testing.T) {

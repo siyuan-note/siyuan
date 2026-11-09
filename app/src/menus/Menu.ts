@@ -779,15 +779,16 @@ export class Menu {
             this.position.h = rect.height;
             this.position.w = rect.width;
         }
-        const scrollPositions = Array.from(this.element.querySelectorAll<HTMLElement>(".b3-menu__items"),
-            items => ({items, top: items.scrollTop}));
+        const scrollPositions = new Map(Array.from(this.element.querySelectorAll<HTMLElement>(".b3-menu__items"),
+            items => [items, items.scrollTop] as const));
         this.setPopupPosition();
+        // 父菜单恢复滚动后再测量子菜单的锚点，逐层恢复以定位更深的子菜单。
+        scrollPositions.forEach((top, items) => { items.scrollTop = top; });
         this.element.querySelectorAll(".b3-menu__item--show > .b3-menu__submenu").forEach((item: HTMLElement) => {
-            // 可能有多层子菜单，都要重新定位
             this.showSubMenu(item);
+            const itemsElement = item.lastElementChild as HTMLElement;
+            itemsElement.scrollTop = scrollPositions.get(itemsElement) || 0;
         });
-        // 测量时会临时取消限高，恢复滚动位置以保留异步菜单加载期间的浏览进度。
-        scrollPositions.forEach(({items, top}) => { items.scrollTop = top; });
     }
 
     private startTrackingTargetPosition() {

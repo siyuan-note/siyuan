@@ -557,6 +557,11 @@ const browserCases = async (sources: Record<string, string>, css: string,
     check.ok(lazyScroll > 0, "Asynchronous submenu loading preserves the parent's scroll position");
     const loadedMenu = lazyItems.querySelector(".b3-menu__item--show > .b3-menu__submenu");
     check.match(loadedMenu.textContent, /Loaded \d+/, "The item under a scrolled pointer loads its asynchronous submenu");
+    const loadedRect = loadedMenu.getBoundingClientRect();
+    const loadedParentRect = loadedMenu.parentElement.getBoundingClientRect();
+    check.ok(Math.abs(loadedRect.top - Math.max(32,
+        Math.min(loadedParentRect.top - 9, innerHeight - loadedRect.height - 1))) < 2,
+    "The first loaded submenu aligns with its parent after restoring the parent's scroll position");
     pointer(lazyItems, .75);
     check.ok(lazyItems.scrollTop > lazyScroll, "Loading a child does not interrupt scrolling of its unchanged parent");
     dispose(lazyMouse);

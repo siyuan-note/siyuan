@@ -146,6 +146,7 @@ func cancelTemplateHTTPSourceExecutions(ids []string) {
 		}
 	}
 	clearTemplateHTTPHandoffs()
+	clearManualAutomationApprovals()
 }
 
 // ManageTemplateHTTPPermission 只从实际文件或字段解析来源，不接受客户端提供的授权 ID 或源码。
@@ -175,6 +176,23 @@ func ManageTemplateHTTPPermission(action, kind, path, avID, keyID, slot string) 
 		database, err = av.ParseAttributeView(avID)
 		if err != nil {
 			return false, err
+		}
+		if slot == "automation" {
+			if database.Automations != nil {
+				for _, rule := range database.Automations.Rules {
+					if rule != nil && rule.ID == keyID && rule.Trigger != "block" {
+						source, err = ResolveTemplateHTTPAutomationSource(av.GetAVBoxID(avID), avID, rule)
+						break
+					}
+				}
+			}
+			if source == nil || err != nil {
+				return false, errors.New("manual automation permission is unavailable")
+			}
+			if action == "revoke" {
+				return false, RevokeTemplateHTTPSource(source.ID)
+			}
+			return CheckTemplateHTTPSource(source)
 		}
 		var key *av.Key
 		key, err = database.GetKey(keyID)

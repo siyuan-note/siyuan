@@ -330,6 +330,7 @@ var exportMdContent = contractHandler(apicontract.ExportMdContent, func(c *gin.C
 	}
 
 	hPath, content := model.ExportMarkdownContent(id, &model.ExportOptions{
+		HeadingNumber:  request.HeadingNumber,
 		BlockRefMode:   new(refMode),
 		BlockEmbedMode: new(embedMode),
 		MarkdownYFM:    new(yfm),
@@ -596,6 +597,7 @@ func exportMarkdownOptions(options apicontract.ExportMarkdownOptions) *model.Exp
 		return &result
 	}
 	return &model.ExportOptions{
+		HeadingNumber:         options.HeadingNumber,
 		AddTitle:              options.AddTitle,
 		InlineMemo:            options.InlineMemo,
 		BlockRefMode:          integer(options.BlockRefMode),

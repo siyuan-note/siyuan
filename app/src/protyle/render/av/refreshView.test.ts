@@ -8,6 +8,41 @@ import {DOMFixture} from "./testDOM";
 
 const compiled = compileModule("src/protyle/render/av/render.ts", ScriptTarget.ES2021);
 
+test("database search reuses HTTP snapshots when typing or clearing and ignores detached hosts", () => {
+    const document = new DOMFixture();
+    const block = document.createElement("div");
+    document.body.append(block);
+    const scheduled = new Map<number, () => void>();
+    const rendered: unknown[][] = [];
+    let next = 0;
+    let active = true;
+    const api = evaluateModule<any>(compiled, {require: () => ({
+        Constants: {TIMEOUT_INPUT: 1}, getAVRelationHost: () => ({active}),
+    }), clearTimeout: (id: number) => scheduled.delete(id), window: {
+        setTimeout: (callback: () => void) => { scheduled.set(++next, callback); return next; },
+    }});
+    api.avRender = (...args: unknown[]) => rendered.push(args);
+    const editor = {};
+    api.updateSearch(block, editor);
+    api.updateSearch(block, editor);
+    assert.equal(scheduled.size, 1);
+    const run = () => { const callbacks = [...scheduled.values()]; scheduled.clear(); callbacks.forEach(callback => callback()); };
+    run();
+    assert.deepEqual(rendered, [[block, editor, undefined, false, undefined, "presentation"]]);
+    api.updateSearch(block, editor);
+    run();
+    assert.equal(rendered.length, 2);
+    active = false;
+    api.updateSearch(block, editor);
+    run();
+    assert.equal(rendered.length, 2);
+    active = true;
+    api.updateSearch(block, editor);
+    block.remove();
+    run();
+    assert.equal(rendered.length, 2);
+});
+
 test("switching one database carrier refreshes only its copies and preserves other carriers", () => {
     const document = new DOMFixture();
     const root = document.createElement("div");
@@ -16,10 +51,12 @@ test("switching one database carrier refreshes only its copies and preserves oth
         `<div class="av" data-av-id="database" data-node-id="${id}" data-render="true" data-view="original" data-v-scroll="true"><div class="av__header" data-view-pages="pages"></div><div class="av__body" data-page-size="100"></div></div>`).join("");
     const blocks = root.children;
     const rendered: unknown[] = [];
+    const canceled: unknown[] = [];
     const exports = evaluateModule<any>(compiled, {require: () => ({
         getAVViewPageSize: (_pages: string, id: string) => id === "limited" ? "50" : undefined,
         Constants: {CUSTOM_SY_AV_VIEW: "data-view", ATTRIBUTE_V_SCROLL: "data-v-scroll"},
         clearSubItemsViewportAnchor() {}, locateRequests: new WeakMap(),
+        beginAVRender: (block: unknown) => canceled.push(block),
     }), window: {setTimeout: () => assert.fail("Carrier-only view changes must not schedule a database-wide refresh")}});
     exports.avRender = (block: unknown, _protyle: unknown, _callback: unknown, _all: boolean,
                         _data: unknown, automaticRefresh: boolean) => {
@@ -29,6 +66,7 @@ test("switching one database carrier refreshes only its copies and preserves oth
     const protyle = {wysiwyg: {element: root}};
     exports.refreshAV(protyle, {action: "setAttrViewBlockView", avID: "database", blockID: "carrier", id: "limited"});
     assert.deepEqual(rendered, [blocks[0], blocks[2]]);
+    assert.deepEqual(canceled, [blocks[0], blocks[2]]);
     assert.equal(blocks[1].getAttribute("data-render"), "true");
     assert.equal(blocks[1].getAttribute("data-view"), "original");
     assert.equal(blocks[1].getAttribute("data-v-scroll"), "true");

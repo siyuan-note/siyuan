@@ -1,5 +1,11 @@
 @use "component/button";
+@use "component/loading";
+@use "component/dialog";
 @use "component/menu";
+@use "component/list";
+@use "component/chip";
+@use "component/select";
+@use "component/text-field";
 @use "component/tooltips";
 @use "business/block";
 @use "util/scroll";
@@ -19,6 +25,11 @@ body {
 
 button {
   font-family: inherit;
+  outline: none;
+}
+
+.b3-select {
+  outline: none;
 }
 
 ::view-transition-old(root),
@@ -37,6 +48,8 @@ button {
   display: flex;
   flex-direction: column;
   --markdown-font-size: 16px;
+  font-family: var(--markdown-global-font-family, var(--b3-font-family));
+  font-weight: var(--markdown-global-font-weight, 400);
 }
 
 .markdown-header {
@@ -167,6 +180,8 @@ button {
 }
 
 .markdown-more summary:focus-visible,
+button:focus-visible,
+.b3-chip:focus-visible,
 .markdown-history:focus-visible,
 .markdown-tree-toggle:focus-visible,
 .markdown-outline-toggle:focus-visible,
@@ -204,28 +219,8 @@ button {
   }
 }
 
-.markdown-menu__row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  > .b3-menu__item {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
 .markdown-menu__info {
-  flex-shrink: 0;
-}
-
-.markdown-menu__explanation {
-  flex-basis: 100%;
-  margin: 4px 8px 8px;
-  color: var(--b3-theme-on-surface);
-  font-size: 12px;
-  line-height: 1.6;
-  white-space: normal;
+  position: relative;
 }
 
 .markdown-choice[aria-disabled="true"] {
@@ -242,6 +237,12 @@ button {
   overflow: auto;
   overscroll-behavior: contain;
   z-index: 4;
+
+  &--workspace .b3-menu__label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   &--compact {
     min-width: 0;
@@ -422,6 +423,10 @@ button {
   display: none;
 }
 
+.markdown-editor .vditor-wysiwyg {
+  margin-top: 24px;
+}
+
 .markdown-app[data-tooltips] .vditor-tooltipped::before,
 .markdown-app[data-tooltips] .vditor-tooltipped::after {
   content: none;
@@ -434,12 +439,18 @@ button {
 .markdown-editor .vditor-reset,
 .markdown-editor .vditor-sv {
   font-size: var(--markdown-font-size);
-  font-family: var(--b3-font-family-protyle);
+  font-family: var(--markdown-editor-font-family, var(--b3-font-family-protyle));
+  font-weight: var(--markdown-editor-font-weight, 400);
 }
 
 .markdown-editor .vditor-reset code,
 .markdown-editor .vditor-sv {
-  font-family: var(--b3-font-family-code);
+  font-family: var(--markdown-code-font-family, var(--b3-font-family-code));
+  font-weight: var(--markdown-code-font-weight, 400);
+}
+
+.markdown-editor .vditor-reset table code:not(.hljs):not(.highlight-chroma) {
+  white-space: pre;
 }
 
 // 先按标题字号计算实际行高，让小字号的 H1-H6 标识继承同一行高。
@@ -530,6 +541,12 @@ button {
 }
 
 @mixin touch-controls {
+  .markdown-menu__info::before {
+    content: "";
+    position: absolute;
+    inset: -14px;
+  }
+
   .markdown-header {
     height: 48px;
   }
@@ -545,8 +562,7 @@ button {
   .markdown-more__button,
   .markdown-tree-toggle,
   .markdown-outline-toggle,
-  .markdown-history,
-  .markdown-menu__info {
+  .markdown-history {
     width: 44px;
     height: 44px;
     --b3-icon-background-inset: 6px;
@@ -562,4 +578,67 @@ button {
 .body--ios,
 .body--harmony {
   @include touch-controls;
+}
+
+.markdown-appearance-form,
+.markdown-appearance-form__field,
+.markdown-appearance-form__fonts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.markdown-appearance-form__fonts {
+  gap: 8px;
+}
+
+.markdown-font-picker__controls {
+  display: flex;
+  gap: 8px;
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.markdown-font-picker__list {
+  padding: 0;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.markdown-font-picker__chip {
+  max-width: calc(100% - 8px);
+}
+
+.markdown-font-picker__weights {
+  position: fixed;
+  z-index: 10;
+  max-height: min(320px, calc(100vh - 16px));
+  overflow-y: auto;
+}
+
+// 原生模态层提供焦点约束，容器和操作区使用共享对话框样式。
+.markdown-appearance-dialog {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  max-width: none;
+  max-height: none;
+  background: transparent;
+  color: inherit;
+
+  &::backdrop {
+    background: transparent;
+  }
+}
+
+.markdown-appearance-dialog__container {
+  width: 560px;
+  max-height: 88vh;
+}
+
+.markdown-appearance-dialog__actions {
+  gap: 8px;
 }

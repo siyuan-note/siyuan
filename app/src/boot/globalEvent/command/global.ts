@@ -200,26 +200,15 @@ export const globalCommand = (command: string, app: App, range?: Range, openOnly
                     return true;
                 }
                 if (childData.instance === "Custom") {
-                    let exit = childData.customModelType === "siyuan-card";
-                    if (!exit) {
-                        app.plugins.find(p => {
-                            if (p.models[childData.customModelType]) {
-                                exit = true;
-                                return true;
-                            }
-                        });
-                    }
-                    if (exit) {
-                        openFile({
-                            app,
-                            custom: {
-                                icon: closeData.icon,
-                                title: closeData.title,
-                                data: childData.customModelData,
-                                id: childData.customModelType
-                            },
-                        });
-                    }
+                    openFile({
+                        app,
+                        custom: {
+                            icon: closeData.icon,
+                            title: closeData.title,
+                            data: childData.customModelData,
+                            id: childData.customModelType
+                        },
+                    });
                     return true;
                 }
                 fetchPost("/api/block/getBlockInfo", {id: childData.rootId || childData.blockId}, (infoResponse) => {

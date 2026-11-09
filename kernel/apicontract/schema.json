@@ -7698,7 +7698,8 @@
           "enum": [
             "added",
             "changed",
-            "block"
+            "block",
+            "manual"
           ]
         }
       },
@@ -7780,7 +7781,8 @@
           "enum": [
             "added",
             "changed",
-            "block"
+            "block",
+            "manual"
           ]
         }
       },
@@ -7790,6 +7792,113 @@
         "id",
         "name",
         "trigger"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationRunFailure": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "itemID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "itemID"
+      ],
+      "additionalProperties": false
+    },
+    "AVAutomationRunResult": {
+      "type": "object",
+      "properties": {
+        "failed": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVAutomationRunFailure"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "paused": {
+          "type": "string"
+        },
+        "pending": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "runID": {
+          "type": "string"
+        },
+        "running": {
+          "type": "boolean"
+        },
+        "skipped": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "step": {
+          "type": "integer"
+        },
+        "succeeded": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "failed",
+        "paused",
+        "pending",
+        "runID",
+        "running",
+        "skipped",
+        "step",
+        "succeeded",
+        "total"
       ],
       "additionalProperties": false
     },
@@ -9798,6 +9907,60 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "AVHTTPAutomationJob": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "blockID": {
+          "type": "string"
+        },
+        "boxID": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "sequence": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "avID",
+        "blockID",
+        "id",
+        "sequence"
+      ],
+      "additionalProperties": false
+    },
+    "AVHTTPAutomationJobInput": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "blockID": {
+          "type": "string"
+        },
+        "boxID": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "sequence": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "avID",
+        "blockID",
+        "id",
+        "sequence"
+      ],
       "additionalProperties": false
     },
     "AVIDData": {
@@ -19064,6 +19227,9 @@
         "bazaarIncompatible": {
           "type": "boolean"
         },
+        "bazaarVersionUnsupported": {
+          "type": "boolean"
+        },
         "bootAppearances": {
           "type": "array",
           "items": {
@@ -19075,6 +19241,9 @@
           "items": {
             "$ref": "#/$defs/BazaarPackageChoice"
           }
+        },
+        "created": {
+          "type": "string"
         },
         "current": {
           "type": "boolean"
@@ -26296,6 +26465,12 @@
             }
           ]
         },
+        "icons": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "missingIDs": {
           "anyOf": [
             {
@@ -27018,6 +27193,16 @@
             }
           ]
         },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "ids": {
           "type": "array",
           "items": {
@@ -27369,6 +27554,16 @@
             }
           ]
         },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "type": "string"
         },
@@ -27497,6 +27692,16 @@
           "anyOf": [
             {
               "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -27673,6 +27878,16 @@
             }
           ]
         },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "includeRelatedDocs": {
           "anyOf": [
             {
@@ -27809,6 +28024,16 @@
           "anyOf": [
             {
               "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -28748,6 +28973,9 @@
         },
         "sort": {
           "type": "integer"
+        },
+        "specTooNew": {
+          "type": "boolean"
         },
         "subFileCount": {
           "type": "integer"
@@ -37338,6 +37566,9 @@
             "type": "string"
           }
         },
+        "includeIcons": {
+          "type": "boolean"
+        },
         "notebook": {
           "type": "string"
         }
@@ -38768,10 +38999,18 @@
               "type": "null"
             }
           ]
+        },
+        "pageCount": {
+          "type": "integer"
+        },
+        "totalCount": {
+          "type": "integer"
         }
       },
       "required": [
-        "items"
+        "items",
+        "pageCount",
+        "totalCount"
       ],
       "additionalProperties": false
     },
@@ -38795,6 +39034,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "number"
             },
             {
               "type": "null"
@@ -45226,6 +45475,9 @@
         "path": {
           "type": "string"
         },
+        "specTooNew": {
+          "type": "boolean"
+        },
         "subFileCount": {
           "type": "integer"
         },
@@ -48359,6 +48611,48 @@
       ],
       "additionalProperties": false
     },
+    "RunAttributeViewAutomationRequestInput": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "avID": {
+          "type": "string"
+        },
+        "blockID": {
+          "type": "string"
+        },
+        "jobID": {
+          "type": "string"
+        },
+        "rows": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ruleID": {
+          "type": "string"
+        },
+        "runID": {
+          "type": "string"
+        },
+        "step": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "avID",
+        "blockID",
+        "ruleID"
+      ],
+      "additionalProperties": false
+    },
     "SQLQueryRequestInput": {
       "type": "object",
       "properties": {
@@ -49240,6 +49534,19 @@
             }
           ]
         },
+        "itemCounts": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "pageCount": {
           "type": "integer"
         },
@@ -49249,6 +49556,7 @@
       },
       "required": [
         "histories",
+        "itemCounts",
         "pageCount",
         "totalCount"
       ],
@@ -50575,6 +50883,49 @@
     "SetBazaarRequestInput": {
       "type": "object",
       "properties": {
+        "batchUpdateExcluded": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "boolean"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compatibilityFilters": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBazaarCompatibilityFilterInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "petalDisabled": {
           "anyOf": [
             {
@@ -51554,6 +51905,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -54570,6 +54931,49 @@
     "SettingBazaar": {
       "type": "object",
       "properties": {
+        "batchUpdateExcluded": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "boolean"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compatibilityFilters": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBazaarCompatibilityFilter"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "petalDisabled": {
           "type": "boolean"
         },
@@ -54578,14 +54982,101 @@
         }
       },
       "required": [
+        "batchUpdateExcluded",
+        "compatibilityFilters",
         "petalDisabled",
         "trust"
       ],
       "additionalProperties": false
     },
+    "SettingBazaarCompatibilityFilter": {
+      "type": "object",
+      "properties": {
+        "hideIncompatiblePlatform": {
+          "type": "boolean"
+        },
+        "hideUnsupportedVersion": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "hideIncompatiblePlatform",
+        "hideUnsupportedVersion"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBazaarCompatibilityFilterInput": {
+      "type": "object",
+      "properties": {
+        "hideIncompatiblePlatform": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hideUnsupportedVersion": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SettingBazaarInput": {
       "type": "object",
       "properties": {
+        "batchUpdateExcluded": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "boolean"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compatibilityFilters": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBazaarCompatibilityFilterInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "petalDisabled": {
           "anyOf": [
             {
@@ -56943,6 +57434,16 @@
         "fileAnnotationRefMode": {
           "type": "integer"
         },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "imageWatermarkDesc": {
           "type": "string"
         },
@@ -56996,6 +57497,7 @@
         "blockRefTextLeft",
         "blockRefTextRight",
         "fileAnnotationRefMode",
+        "headingNumber",
         "imageWatermarkDesc",
         "imageWatermarkStr",
         "includeRelatedDocs",
@@ -57071,6 +57573,16 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -64984,6 +65496,19 @@
             }
           ]
         },
+        "httpAutomationJobs": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVHTTPAutomationJob"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
         "templateDocTreePlanID": {
           "type": "string"
         },
@@ -65495,6 +66020,19 @@
               "type": "null"
             }
           ]
+        },
+        "httpAutomationJobs": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVHTTPAutomationJobInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
         },
         "templateDocTreePlanID": {
           "anyOf": [
@@ -150266,6 +150804,105 @@
     },
     {
       "method": "POST",
+      "path": "/api/av/runAttributeViewAutomation",
+      "handler": "runAttributeViewAutomation",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/RunAttributeViewAutomationRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/AVAutomationRunResult"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  -409,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/AVAutomationRunResult"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/av/searchAttributeView",
       "handler": "searchAttributeView",
       "authorization": [
@@ -194128,7 +194765,9 @@
       "path": "/api/system/getChangelog",
       "handler": "getChangelog",
       "authorization": [
-        "authenticated"
+        "authenticated",
+        "admin",
+        "writable"
       ],
       "body": "legacyOptional",
       "request": {

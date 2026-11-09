@@ -341,6 +341,7 @@
         > .fn__flex-1 {
           min-width: 0;
           white-space: normal;
+          overflow: visible;
           overflow-wrap: anywhere;
         }
 
@@ -521,6 +522,12 @@
   &__doc-compare {
     height: 100%;
     min-height: 0;
+
+    &-dialog > .b3-dialog__body {
+      border-bottom-left-radius: inherit;
+      border-bottom-right-radius: inherit;
+      overflow: hidden;
+    }
   }
 
   &__compare {

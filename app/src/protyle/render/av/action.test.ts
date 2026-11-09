@@ -5,25 +5,28 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as host from "./host";
 import * as columnWindow from "./columnWindow";
+import {isTableLikeView} from "./viewType";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-const setup = (mobile = true, detached = true) => {
+const setup = (mobile = true, detached = true, viewType: TAVView = "table") => {
     const items: IMenu[] = [];
     const events: string[] = [];
     const opened: Array<Record<string, unknown>> = [];
+    const inserted: Array<{count: number; previousID: string; parentID?: string; groupID?: string}> = [];
     const fields: IAVColumn[] = [];
     const siyuan = {config: {readonly: false, keymap: {editor: {general: {
         newNameSettingFile: {custom: ""}, newNameFile: {custom: ""},
     }}}}, isPublish: false, languages: new Proxy({}, {get: (_target, key) => String(key)})};
-    const selected = [{itemID: "row", groupID: "group"}];
+    const selected: Array<{itemID: string; groupID: string; previousID?: string; item?: IAVRow | IAVGalleryItem}> =
+        [{itemID: "row", groupID: "group", item: {id: "row", cells: []}}];
     const classes = {contains: () => false, add: () => { events.push("select"); }};
     const cell = {dataset: {id: "value", colId: "primary", detached: detached ? "true" : undefined},
         isConnected: true, classList: classes, getClientRects: () => [{}],
         querySelector: () => ({textContent: " Title "})};
     const row = {dataset: {id: "row"}, querySelector: () => cell, getAttribute: () => "row"};
     const block = {dataset: {avId: "database", nodeId: "carrier"},
-        getAttribute: () => "table", querySelector: () => row, querySelectorAll: (): HTMLElement[] => []};
+        getAttribute: () => viewType, querySelector: () => row, querySelectorAll: (): HTMLElement[] => []};
     const target = {getAttribute: () => "av-row-more", closest: (): null => null,
         isEqualNode: () => false, getBoundingClientRect: () => ({left: 10, bottom: 30, width: 28, height: 28})};
     const protyle = {app: {}, notebookId: "notebook", toolbar: {}, disabled: false, options: {history: {}}} as IProtyle;
@@ -61,11 +64,12 @@ const setup = (mobile = true, detached = true) => {
             getAVSelectedItemPoints: (): unknown[] => [],
             getAVSelectedItemIDs: () => selected.map(item => item.itemID),
         },
-        "./viewType": {isTableLikeView: () => true},
+        "./viewType": {isTableLikeView},
         "./itemLink": {genAVItemLink: () => "link"},
         "./viewVisibility": {getAVCurrentViewID: () => "view"},
         "../../../menus/util": {openEditorTab: (): IMenu[] => []},
         "./subItems": {addSubItemsMenu() {}},
+        "./row": {insertRows: (options: typeof inserted[number]) => inserted.push(options)},
         "./batchEdit": {getEditableAVFields: () => fields,
             openAVFieldBinding: () => events.push("binding-panel")},
         "../../../plugin/EventBus": {emitOpenMenu() {}},
@@ -82,8 +86,56 @@ const setup = (mobile = true, detached = true) => {
     const context = () => exports.avContextmenu(protyle, undefined, {x: 10, y: 30}, {
         blockElement: block as unknown as HTMLElement, anchorElement: target as unknown as HTMLElement,
     });
-    return {more, context, items, events, opened, siyuan, protyle, cell, selected, fields};
+    return {more, context, items, events, opened, inserted, siyuan, protyle, cell, selected, fields};
 };
+
+test("desktop and mobile insertion menus keep table/list siblings under the selected entry's parent", () => {
+    for (const mobile of [false, true]) {
+        for (const viewType of ["table", "list"] as const) {
+            for (const parentID of [undefined, "parent", "nested-parent"]) {
+                for (const direction of ["Before", "After"]) {
+                    for (const keyboard of [false, true]) {
+                        const h = setup(mobile, true, viewType);
+                        h.selected[0].previousID = "previous-visible";
+                        if (parentID) {
+                            h.selected[0].item = {id: "row", cells: [], hierarchy: {
+                                parentID, depth: parentID === "parent" ? 1 : 2, childCount: 0, context: false, expanded: false,
+                            }};
+                        }
+                        h.context();
+                        const item = h.items.find(value => value.id === `insertRow${direction}`);
+                        assert.ok(item);
+                        const input = Object.assign(new EventTarget(), {value: "3"});
+                        const element = Object.assign(new EventTarget(), {querySelector: () => input});
+                        item.bind(element as unknown as HTMLElement);
+                        if (keyboard) input.dispatchEvent(Object.assign(new Event("keydown"), {key: "Enter", isComposing: false}));
+                        else element.dispatchEvent(new Event("click"));
+                        assert.equal(h.inserted.length, 1);
+                        assert.equal(h.inserted[0].count, 3);
+                        assert.equal(h.inserted[0].previousID, direction === "Before" ? "previous-visible" : "row");
+                        assert.equal(h.inserted[0].groupID, "group");
+                        assert.equal(h.inserted[0].parentID, parentID);
+                        assert.ok(h.events.includes("menu-close"));
+                    }
+                }
+            }
+        }
+    }
+});
+
+test("flat gallery insertion retains its root placement without table hierarchy metadata", () => {
+    const h = setup(false, true, "gallery");
+    h.selected[0].item = {id: "row", values: []};
+    h.context();
+    const item = h.items.find(value => value.id === "insertItemAfter");
+    assert.ok(item);
+    const input = Object.assign(new EventTarget(), {value: "1"});
+    const element = Object.assign(new EventTarget(), {querySelector: () => input});
+    item.bind(element as unknown as HTMLElement);
+    element.dispatchEvent(new Event("click"));
+    assert.equal(h.inserted[0].parentID, undefined);
+    assert.equal(h.inserted[0].previousID, "row");
+});
 
 for (const detached of [true, false]) {
     test(`compact row menu opens and ${detached ? "binds" : "rebinds"} only its own entry`, () => {

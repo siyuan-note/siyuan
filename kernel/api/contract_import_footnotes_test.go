@@ -170,12 +170,12 @@ func TestAPIContractMarkdownFootnotes(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			count := 0
+			var refs []*ast.Node
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if entering && treenode.IsBlockRef(n) {
-					count++
+					refs = append(refs, n)
 					def := treenode.GetNodeInTree(tree, n.TextMarkBlockRefID)
-					if def == nil || def.Type != ast.NodeListItem || !n.IsTextMarkType("sup") {
+					if def == nil || def.Type != ast.NodeListItem || !n.IsTextMarkType("sup") || n.TextMarkBlockRefSubtype != "s" {
 						t.Errorf("lost footnote target or content in %s", hpath)
 						return ast.WalkContinue
 					}
@@ -184,7 +184,7 @@ func TestAPIContractMarkdownFootnotes(t *testing.T) {
 							def.FirstChild.Text() != "" || def.Text() != "Nested firstNested second" {
 							t.Errorf("lost nested footnote structure in %s", hpath)
 						}
-					} else if def.Text() != "Confidential footnoteSecond paragraph" {
+					} else if n.TextMarkTextContent != "[note_key]" || def.Text() != "Confidential footnoteSecond paragraph" {
 						t.Errorf("lost multi-paragraph footnote in %s", hpath)
 					}
 					if refs := sql.QueryRefsByDefIDInBox(n.TextMarkBlockRefID, false, boxID); len(refs) != 2 {
@@ -193,11 +193,39 @@ func TestAPIContractMarkdownFootnotes(t *testing.T) {
 				}
 				return ast.WalkContinue
 			})
-			if count != 4 {
-				t.Fatalf("expected four references in %s, got %d", hpath, count)
+			if len(refs) != 4 {
+				t.Fatalf("expected four references in %s, got %d", hpath, len(refs))
 			}
-			if text := tree.Root.FirstChild.Text(); text != "First[note_key]." {
+			want := "First[note_key]."
+			if hpath == "/API footnotes" {
+				// 创建接口经过 BlockDOM，上标引用两侧带有编辑器插入符边界。
+				want = "First\u200b[note_key]\u200b."
+			}
+			if text := tree.Root.FirstChild.Text(); text != want {
 				t.Fatalf("footnote label altered paragraph in %s: %q", hpath, text)
+			}
+			luteEngine := util.NewLute()
+			dom := luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+			reopened := luteEngine.BlockDOM2Tree(luteEngine.SpinBlockDOM(dom))
+			index := 0
+			ast.Walk(reopened.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if entering && treenode.IsBlockRef(n) {
+					if index >= len(refs) {
+						t.Fatal("editing added a footnote reference")
+					}
+					original := refs[index]
+					def := treenode.GetNodeInTree(reopened, n.TextMarkBlockRefID)
+					if n.TextMarkTextContent != original.TextMarkTextContent || n.TextMarkType != original.TextMarkType ||
+						n.TextMarkBlockRefSubtype != "s" || n.TextMarkBlockRefID != original.TextMarkBlockRefID ||
+						def == nil || def.Text() != treenode.GetNodeInTree(tree, original.TextMarkBlockRefID).Text() {
+						t.Fatalf("editing changed footnote label, type or target in %s", hpath)
+					}
+					index++
+				}
+				return ast.WalkContinue
+			})
+			if index != len(refs) || reopened.Root.FirstChild.Text() != "First\u200b[note_key]\u200b." {
+				t.Fatalf("editing changed footnote count or boundaries in %s", hpath)
 			}
 			data, err := os.ReadFile(filepath.Join(util.DataDir, boxID, block.Path))
 			if err != nil || util.IsCiphertext(data) != encrypted {

@@ -4,6 +4,9 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {hasAVCapability} from "./capabilities";
 import {getSelectedOptionsHTML} from "./fieldValueEditor";
 import {getAVLocationDisplayText} from "./locationValue";
+import {automationTemplateFunctions} from "./automationTemplateFunctions";
+import {writeText} from "../../util/compatibility";
+import {showMessage} from "../../../dialog/message";
 
 export const automationTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
@@ -54,10 +57,13 @@ export const mountAutomationTemplate = (options: {
     const lang = window.siyuan.languages;
     const timeZone = rule.timeZone || automationTimeZone();
     const fields = source.keyValues.filter(item => item?.key && hasAVCapability(item.key.type, "editable"));
+    const names = new Map<string, number>();
+    fields.forEach(entry => names.set(entry.key.name, (names.get(entry.key.name) || 0) + 1));
     const rows = fields.find(item => item.key.type === "block")?.values || [];
     let version = 0;
     host.classList.add("av__automation-template");
     host.innerHTML = `<textarea class="b3-text-field fn__block av__automation-template-editor" data-template rows="3" maxlength="8192" aria-label="${escapeAttr(lang.template)}">${escapeHtml(value.template || "")}</textarea>
+<div class="av__automation-row"><label class="av__automation-control fn__flex-1"><span class="av__automation-control-label">${lang.automationSourceField}</span><select class="b3-select" data-template-field>${fields.map(entry => `<option value="${escapeAttr(entry.key.id)}">${escapeHtml(entry.key.name || entry.key.id)}${names.get(entry.key.name) > 1 ? ` (${escapeHtml(entry.key.id)})` : ""}</option>`).join("")}</select></label><button type="button" class="b3-button b3-button--outline b3-button--wrap" data-template-insert${fields.length ? "" : " disabled"}>${lang.automationInsertField}</button><button type="button" class="b3-button b3-button--outline b3-button--wrap" data-template-copy${fields.length ? "" : " disabled"}>${lang.copyID}</button></div>
 <div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationTemplateTip}</div>
 <details data-template-preview><summary class="av__automation-template-toggle b3-button b3-button--cancel fn__block"><svg aria-hidden="true"><use xlink:href="#iconRight"></use></svg><span class="av__automation-control-label">${lang.automationPreviewData}</span></summary><div class="av__automation-template-data">
 <div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationPreviewOnly}</div>
@@ -96,6 +102,23 @@ export const mountAutomationTemplate = (options: {
         value.template = editor.value;
         save();
     });
+    const sourceField = host.querySelector<HTMLSelectElement>("[data-template-field]");
+    host.querySelector<HTMLButtonElement>("[data-template-copy]").addEventListener("click", () => {
+        if (sourceField.value) writeText(sourceField.value);
+    });
+    host.querySelector<HTMLButtonElement>("[data-template-insert]").addEventListener("click", () => {
+        if (!fields.some(entry => entry.key.id === sourceField.value)) return;
+        const reference = `.action{field ${JSON.stringify(sourceField.value)}}`;
+        const next = editor.value.slice(0, editor.selectionStart) + reference + editor.value.slice(editor.selectionEnd);
+        if (new TextEncoder().encode(next).byteLength > 8192) {
+            showMessage(lang.automationTemplateSourceLimit, 5000, "error");
+            return;
+        }
+        editor.setRangeText(reference, editor.selectionStart, editor.selectionEnd, "end");
+        editor.dispatchEvent(new Event("input", {bubbles: true}));
+        editor.dispatchEvent(new Event("change", {bubbles: true}));
+        editor.focus();
+    });
     host.addEventListener("input", event => {
         const input = event.target as HTMLInputElement;
         if (input.matches("[data-template-input]")) {
@@ -104,6 +127,9 @@ export const mountAutomationTemplate = (options: {
         invalidate();
     });
     const preview = host.querySelector<HTMLDetailsElement>("[data-template-preview]");
+    const updatePreview = () => preview.classList.toggle("fn__none", rule.trigger === "manual" || automationTemplateFunctions(editor.value).has("httpGet"));
+    updatePreview();
+    editor.addEventListener("input", updatePreview);
     preview.addEventListener("toggle", () => {
         preview.querySelector("summary use").setAttribute("xlink:href", preview.open ? "#iconDown" : "#iconRight");
         onResize();

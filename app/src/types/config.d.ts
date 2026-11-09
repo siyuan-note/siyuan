@@ -507,6 +507,15 @@ declare namespace Config {
      * SiYuan bazaar related configuration
      */
     export interface IBazaar {
+        /** Package names excluded from batch updates only; manual updates remain available. */
+        batchUpdateExcluded?: Partial<Record<"plugins" | "themes" | "icons" | "templates" | "widgets", Record<string, boolean>>>;
+        /**
+         * 集市各分类的兼容性筛选偏好；两个开关默认 false，配置补丁可分别更新类型和开关。
+         */
+        compatibilityFilters?: Partial<Record<"plugins" | "themes" | "icons" | "templates" | "widgets", {
+            hideUnsupportedVersion?: boolean;
+            hideIncompatiblePlatform?: boolean;
+        }>>;
         /**
          * Whether to disable all plug-ins
          */
@@ -869,6 +878,8 @@ declare namespace Config {
      * SiYuan export related configuration
      */
     export interface IExport {
+        /** Preserve document heading numbering for Markdown copy/export; defaults to false. */
+        headingNumber?: boolean;
         /**
          * Add article title (insert the article title as a first-level title at the beginning of
          * the document)

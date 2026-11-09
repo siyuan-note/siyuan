@@ -332,7 +332,7 @@ func (tx *Transaction) rollbackDocumentSources() {
 	presentMirrors := map[string]string{}
 	mirrorSourcesValid := true
 	for _, file := range j.Files {
-		if file.Kind == "relations" || file.Kind == "flashcard" {
+		if file.Kind == "relations" || file.Kind == "flashcard" || file.Kind == "notebook" {
 			continue
 		}
 		if file.Kind == "database" {
@@ -349,6 +349,11 @@ func (tx *Transaction) rollbackDocumentSources() {
 			continue
 		}
 		if err == nil {
+			if IsBoxDoc(tree.Box, tree.ID) {
+				if projectionErr := syncBoxDocTitleName(tree); projectionErr != nil {
+					tx.sourceRollbackErr = errors.Join(tx.sourceRollbackErr, projectionErr)
+				}
+			}
 			for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
 				presentMirrors[node.ID] = node.AttributeViewID
 			}

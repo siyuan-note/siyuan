@@ -47,7 +47,7 @@ func loadCookieKey(confCookieKey string) string {
 	var key, legacyKey string
 	if err == nil {
 		if key = string(bytes.TrimSpace(data)); cookieKeyMinLen <= len(key) {
-			restrictCookieKeyFile(keyPath)
+			util.RestrictSecretFile(keyPath)
 			return key
 		}
 		logging.LogInfof("replace legacy cookie key [%s]", keyPath)
@@ -71,18 +71,4 @@ func newCookieKey() string {
 	key := make([]byte, 32)
 	rand.Read(key)
 	return base64.RawURLEncoding.EncodeToString(key)
-}
-
-// restrictCookieKeyFile 将旧版本以 0644 写入的密钥文件收紧为仅当前用户可读写。Windows 由用户目录的访问控制保护。
-func restrictCookieKeyFile(keyPath string) {
-	if gulu.OS.IsWindows() {
-		return
-	}
-	info, err := os.Stat(keyPath)
-	if err != nil || 0 == info.Mode().Perm()&0077 {
-		return
-	}
-	if err = os.Chmod(keyPath, 0600); err != nil {
-		logging.LogWarnf("restrict cookie key file [%s] permission failed: %s", keyPath, err)
-	}
 }

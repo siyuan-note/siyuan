@@ -25,6 +25,7 @@ const browserCases = async (languages: Record<string, string>) => {
     let newDocuments = 0;
     let openedDocuments = 0;
     let revealedFiles = 0;
+    let resourceAuthorizations = 0;
     let closeConfirmations = 0;
     let cancelledCandidates = 0;
     let failWrite = false;
@@ -63,7 +64,7 @@ const browserCases = async (languages: Record<string, string>) => {
         newDocument: async () => { newDocuments++; }, openDocument: async () => {openedDocuments++;},
         revealFile: async () => {revealedFiles++;},
         chooseSaveAs: async () => ({kind: "selected", target: {...target, handle: "copy", identity: "copy", displayName: "README-copy.md"}}),
-        cancelSaveAs: async () => {cancelledCandidates++;}, authorizeResources: async () => true, resolveResource: async () => undefined,
+        cancelSaveAs: async () => {cancelledCandidates++;}, authorizeResources: async () => {resourceAuthorizations++; return true;}, resolveResource: async () => undefined,
         insertImage: async () => ({kind: "inserted", reference: "images/example%20photo.png"}),
         openLink: async () => {}, preferences: async patch => {preferenceUpdates.push({...patch}); storedPreferences = {...storedPreferences, ...patch}; return {...storedPreferences};},
         confirm: async () => true, confirmClose: async () => {closeConfirmations++; return "keep";},
@@ -115,13 +116,60 @@ const browserCases = async (languages: Record<string, string>) => {
         }
     };
     const themeBootstrap = bridge.bootstrap;
+    const attribution = "\n| `File` | Author | License | Source |\n| --- | --- | --- | --- |\n" +
+        "| `02-风景/Landscape-Arnisee-region-640px.jpg` | Simon Koopmann | CC BY-SA 2.5 | Commons |\n" +
+        "| `03-城市/City-of-London-skyline-from-Lond-1024px.jpg` | David Illif with image-alignment and Photoshoping by User:Co | CC BY-SA 4.0 | Commons |\n";
+    const checkTableWidths = (mode: import("./editor").MarkdownEditorMode) => {
+        const surface = document.querySelector(mode === "sv" ? ".vditor-preview .vditor-reset" : `.vditor-${mode} .vditor-reset`);
+        const table = surface.querySelectorAll<HTMLTableElement>("table")[1];
+        check.ok(table, `attribution table rendered in ${mode}`);
+        for (const code of table.querySelectorAll("code")) {
+            const style = getComputedStyle(code);
+            check.ok(code.getBoundingClientRect().height <= parseFloat(style.lineHeight) + parseFloat(style.fontSize),
+                `${mode} table columns accommodate inline code without wrapping it into a tall column`);
+        }
+        check.ok(table.getBoundingClientRect().right <= surface.getBoundingClientRect().right + 1,
+            `${mode} wide table stays within the editor`);
+        check.ok(document.documentElement.scrollWidth <= window.innerWidth,
+            `${mode} wide table does not overflow the page`);
+        table.scrollLeft = 20;
+        check.ok(table.scrollLeft > 0, `${mode} wide table content remains horizontally reachable`);
+    };
     for (const startup of [{theme: "dark", systemDark: false}, {theme: "system", systemDark: true}, {theme: "light", systemDark: true}] as const) {
         const dark = startup.theme !== "light";
         for (const mode of ["ir", "wysiwyg", "sv"] as const) {
-            bridge.bootstrap = async () => ({...await themeBootstrap(), content: original + '\nInline `code`\n\n```js\nconst answer = "readable";\n```\n',
+            bridge.bootstrap = async () => ({...await themeBootstrap(), content: (mode === "wysiwyg" ? "1. first\n2. second\n\n" : "") + original + '\nInline `code`\n\n```js\nconst answer = "readable";\n```\n' + attribution,
                 preferences: {...storedPreferences, mode, theme: startup.theme}, dark: startup.systemDark});
             const initial = await api.mountMarkdownApplication(bridge);
             await checkTheme(mode, dark);
+            checkTableWidths(mode);
+            const checkWysiwygPopover = async () => {
+                const surface = document.querySelector<HTMLElement>(".vditor-wysiwyg > .vditor-reset");
+                surface.scrollTop = 0;
+                await ipcRenderer.invoke("markdown-pointer-click", ".vditor-wysiwyg li");
+                await tick();
+                const panel = document.querySelector<HTMLElement>(".vditor-wysiwyg > .vditor-panel");
+                check.equal(panel.checkVisibility(), true, "the first list item opens its floating toolbar");
+                const header = document.querySelector(".markdown-header").getBoundingClientRect();
+                check.ok(panel.getBoundingClientRect().top >= header.bottom, "the toolbar stays below the header");
+                surface.scrollTop = 40;
+                surface.dispatchEvent(new Event("scroll"));
+                await tick();
+                check.ok(panel.getBoundingClientRect().top >= header.bottom, "scrolling keeps the floating toolbar below the header");
+                surface.scrollTop = 0;
+                surface.dispatchEvent(new Event("scroll"));
+            };
+            if (mode === "wysiwyg") await checkWysiwygPopover();
+            if (startup.theme === "dark") {
+                await ipcRenderer.invoke("markdown-resize", 360, 800);
+                document.getElementById("markdownApp").style.setProperty("--markdown-font-size", "32px");
+                await tick();
+                checkTableWidths(mode);
+                if (mode === "wysiwyg") await checkWysiwygPopover();
+                document.getElementById("markdownApp").style.removeProperty("--markdown-font-size");
+                await ipcRenderer.invoke("markdown-resize", 1100, 850);
+                await tick();
+            }
             check.equal(document.querySelector(".vditor-toolbar").getBoundingClientRect().height, 0);
             check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").disabled, mode === "sv");
             check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").dataset.tooltip,
@@ -222,10 +270,18 @@ const browserCases = async (languages: Record<string, string>) => {
     check.ok(outlineBounds.width <= contentBounds.width * .4 + 1, "outline stays bounded with the file tree open");
     check.ok(editorBoundsWithOutline.width > 0 && editorBoundsWithOutline.right <= contentBounds.right + 1);
     await ipcRenderer.invoke("markdown-resize", 360, 800); await tick();
-    check.equal(outlineToggle.disabled, true);
-    check.equal(outlineToggle.dataset.tooltip, languages.markdownOutlineUnavailable);
+    check.equal(outlineToggle.disabled, false);
+    check.equal(outlineToggle.dataset.tooltip, languages.outline);
+    check.equal(outlineToggle.getAttribute("aria-expanded"), "true");
+    check.equal(outlinePanel.checkVisibility(), true);
+    outlineToggle.click(); await tick();
     check.equal(outlineToggle.getAttribute("aria-expanded"), "false");
     check.equal(outlinePanel.checkVisibility(), false);
+    outlineToggle.click(); await tick();
+    check.equal(outlineToggle.getAttribute("aria-expanded"), "true");
+    check.equal(outlinePanel.checkVisibility(), true);
+    const narrowContent = document.querySelector(".vditor-content").getBoundingClientRect();
+    check.ok(outlinePanel.getBoundingClientRect().width <= narrowContent.width * .4 + 1);
     await ipcRenderer.invoke("markdown-resize", 1100, 850); await tick();
     check.equal(outlineToggle.disabled, false);
     check.equal(outlineToggle.getAttribute("aria-expanded"), "true");
@@ -346,9 +402,7 @@ const browserCases = async (languages: Record<string, string>) => {
             const deadline = Date.now() + 5000;
             while (document.documentElement.dataset.themeMode !== (dark ? "dark" : "light") && Date.now() < deadline) await tick();
             openMore(); await tick();
-            await ipcRenderer.invoke("markdown-pointer-click", "#markdownResourcesInfo"); await tick();
-            check.equal(document.querySelector("#markdownResourcesInfo").getAttribute("aria-expanded"), "true");
-            for (const id of ["markdownTreeToggle", "markdownOutlineToggle", "markdownMoreButton", "markdownUndo", "markdownRedo", "markdownResourcesInfo", "markdownRecoveryInfo"]) {
+            for (const id of ["markdownTreeToggle", "markdownOutlineToggle", "markdownMoreButton", "markdownUndo", "markdownRedo"]) {
                 const button = document.getElementById(id);
                 const bounds = button.getBoundingClientRect();
                 const icon = button.querySelector("svg").getBoundingClientRect();
@@ -363,9 +417,44 @@ const browserCases = async (languages: Record<string, string>) => {
                 check.ok(Math.abs(icon.x + icon.width / 2 - bounds.x - bounds.width / 2) < 0.5, `${id} is horizontally centered`);
                 check.ok(Math.abs(icon.y + icon.height / 2 - bounds.y - bounds.height / 2) < 0.5, `${id} is vertically centered`);
             }
+            for (const id of ["markdownResources", "markdownRecovery"]) {
+                const item = document.getElementById(id);
+                const info = document.getElementById(`${id}Info`);
+                const arrow = document.querySelector("#markdownMode > .b3-menu__icon--small");
+                check.equal(info.parentElement, item, "information icons belong to their menu items");
+                check.equal(info.getBoundingClientRect().right, arrow.getBoundingClientRect().right,
+                    `${platform} information icons align with submenu arrows`);
+                check.ok(item.getBoundingClientRect().height >= 44, "the menu action keeps its touch target");
+                check.equal(getComputedStyle(info).backgroundColor, "rgba(0, 0, 0, 0)");
+                const bounds = info.getBoundingClientRect();
+                const x = bounds.left - 10;
+                const y = bounds.top + bounds.height / 2;
+                check.equal(document.elementFromPoint(x, y)?.closest("[data-tooltip-touch]"), info,
+                    "the transparent touch area extends beyond the visible icon");
+                const authorizations = resourceAuthorizations;
+                const recoveryHidden = document.getElementById("markdownRecoveryPanel").hidden;
+                await ipcRenderer.invoke("markdown-touch", x, y); await tick();
+                const tooltip = document.querySelector<HTMLElement>('[role="tooltip"]');
+                check.equal(tooltip.hidden, false, `${platform} tapping information shows the tooltip`);
+                check.equal(tooltip.textContent, info.dataset.tooltip);
+                check.equal(getComputedStyle(tooltip).opacity, "1", "the touch tooltip is visibly displayed");
+                check.equal(more.open, true, "reading information keeps the menu open");
+                check.equal(resourceAuthorizations, authorizations, "reading information does not authorize resources");
+                check.equal(document.getElementById("markdownRecoveryPanel").hidden, recoveryHidden,
+                    "reading information does not open the recovery panel");
+                if (id === "markdownResources") await ipcRenderer.invoke("markdown-screenshot", `touch-${platform}-${dark ? "dark" : "light"}-tooltip`);
+                await ipcRenderer.invoke("markdown-touch", x, y); await tick();
+                check.equal(tooltip.hidden, true, "a second tap dismisses the tooltip");
+            }
             await ipcRenderer.invoke("markdown-screenshot", `touch-${platform}-${dark ? "dark" : "light"}-icons`);
-            (document.querySelector("#markdownResourcesInfo") as HTMLElement).click();
             moreButton.click();
+            check.equal(outlineToggle.disabled, false, `${platform} outline is available in portrait orientation`);
+            outlineToggle.click(); await tick();
+            check.equal(outlinePanel.checkVisibility(), true);
+            check.equal(outlinePanel.inert, false);
+            await ipcRenderer.invoke("markdown-screenshot", `touch-${platform}-${dark ? "dark" : "light"}-outline`);
+            outlineToggle.click(); await tick();
+            check.equal(outlinePanel.checkVisibility(), false);
         }
     }
     document.body.className = desktopClasses;
@@ -395,12 +484,19 @@ const browserCases = async (languages: Record<string, string>) => {
     const appearanceItem = document.querySelector<HTMLElement>("#markdownPreferences");
     check.equal(appearanceItem.tagName, "DIV", "appearance uses a submenu instead of a details accordion");
     check.equal(appearanceItem.getAttribute("aria-haspopup"), "menu");
-    check.equal(appearanceItem.querySelector(":scope > .b3-menu__icon--arrow use").getAttribute("href"), "#iconRight");
+    check.equal(appearanceItem.querySelector(":scope > .b3-menu__icon--small use").getAttribute("href"), "#iconRight");
     appearanceItem.click();
     const appearanceSubmenu = appearanceItem.querySelector<HTMLElement>(":scope > .b3-menu__submenu");
     check.ok(appearanceSubmenu.scrollHeight <= appearanceSubmenu.clientHeight,
         `appearance submenu fits: ${appearanceSubmenu.scrollHeight}/${appearanceSubmenu.clientHeight}`);
     check.equal(document.querySelector("#markdownTheme").checkVisibility(), true);
+    for (const item of [modeItem, appearanceItem, document.getElementById("markdownTheme"), document.getElementById("markdownFont")]) {
+        const bounds = item.getBoundingClientRect();
+        const leading = item.querySelector(":scope > .b3-menu__icon").getBoundingClientRect();
+        const arrow = item.querySelector(":scope > .b3-menu__icon--small").getBoundingClientRect();
+        check.equal(bounds.right - arrow.right, leading.left - bounds.left,
+            `${item.id} submenu arrow has the same edge inset as the leading icon`);
+    }
     appearanceItem.focus();
     appearanceItem.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
     check.equal(document.activeElement.id, "markdownTheme");
@@ -438,16 +534,31 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(more.open, false, "moving focus outside closes the menu"); check.equal(document.activeElement, panelToggle);
     for (const id of ["markdownResources", "markdownRecovery"]) {
         openMore();
-        const info = document.querySelector<HTMLButtonElement>(`#${id}Info`);
-        const explanation = document.querySelector<HTMLElement>(`#${id}Explanation`);
-        check.equal(explanation.hidden, true);
-        info.focus(); info.click();
-        check.equal(explanation.hidden, false, "contextual explanations can be opened without hover");
-        check.equal(info.getAttribute("aria-expanded"), "true");
+        const item = document.getElementById(id);
+        const info = document.querySelector<HTMLElement>(`#${id}Info`);
+        check.equal(info.tagName, "SPAN");
+        check.equal(info.parentElement, item);
+        check.equal(info.getBoundingClientRect().right,
+            document.querySelector("#markdownMode > .b3-menu__icon--small").getBoundingClientRect().right);
         check.ok(info.dataset.tooltip.length > 0);
-        check.equal(more.open, true, "reading an explanation does not execute its adjacent action");
-        info.click();
-        check.equal(explanation.hidden, true);
+        check.equal(item.getAttribute("aria-description"), info.dataset.tooltip, "assistive technology retains the explanation");
+        const itemHeight = item.getBoundingClientRect().height;
+        await ipcRenderer.invoke("markdown-pointer-move", 10, 60);
+        const bounds = info.getBoundingClientRect();
+        await ipcRenderer.invoke("markdown-pointer-move", bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+        await tick();
+        const tooltip = document.querySelector<HTMLElement>('[role="tooltip"]');
+        check.equal(tooltip.hidden, false, "hovering the information icon shows its tooltip");
+        check.equal(tooltip.textContent, info.dataset.tooltip);
+        check.equal(getComputedStyle(info).backgroundColor, "rgba(0, 0, 0, 0)", "the information icon has no hover background");
+        check.equal(item.getBoundingClientRect().height, itemHeight, "information does not expand the menu item");
+        await ipcRenderer.invoke("markdown-screenshot", `${id}-tooltip`);
+        await ipcRenderer.invoke("markdown-pointer-click", `#${id}Info`); await tick();
+        check.equal(document.getElementById(`${id}Explanation`), null, "clicking does not insert an inline explanation");
+        check.equal(more.open, false, "the information icon is part of the menu action");
+        if (id === "markdownRecovery") {
+            document.querySelector<HTMLButtonElement>("#markdownRecoveryClose").click(); await tick();
+        }
     }
     for (const [id, value] of [["markdownTheme", "dark"], ["markdownTheme", "light"], ["markdownTheme", "system"], ["markdownFont", "20"], ["markdownFont", "16"]]) {
         openMore(); appearanceItem.focus();
@@ -1093,6 +1204,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.ok(document.querySelector(".vditor-preview h1"), "a user's source mode still previews small files");
     smallExplicitSource.destroy();
     const desktopBody = document.body.className;
+    await ipcRenderer.invoke("markdown-resize", 360, 800); await tick();
     for (const platform of ["android", "ios", "harmony"]) {
         document.body.className = "";
         storedPreferences = {...storedPreferences, mode: "wysiwyg"};
@@ -1100,15 +1212,23 @@ const browserCases = async (languages: Record<string, string>) => {
         const mobileLarge = await api.mountMarkdownApplication(bridge);
         check.equal(document.querySelector('#markdownMode [aria-checked="true"]').getAttribute("data-value"), "sv");
         check.equal(storedPreferences.mode, "wysiwyg", `${platform} preserves the preferred mode during automatic fallback`);
+        check.equal(document.querySelector<HTMLButtonElement>("#markdownOutlineToggle").disabled, true);
         mobileLarge.destroy();
         bridge.bootstrap = async () => ({...bootstrap, platform, sessionId: `${platform}-small`, content: "# Small mobile document\n", preferences: {...storedPreferences}});
         const mobileSmall = await api.mountMarkdownApplication(bridge);
         check.equal(document.querySelector('#markdownMode [aria-checked="true"]').getAttribute("data-value"), "wysiwyg");
         check.equal(document.querySelector("#markdownFiles").tagName, "DIV", `${platform} filename is display-only`);
         check.equal(document.querySelector("#markdownFiles").getAttribute("aria-controls"), null);
+        const mobileOutline = document.querySelector<HTMLButtonElement>("#markdownOutlineToggle");
+        check.equal(mobileOutline.disabled, false, `${platform} starts with a usable outline button on a narrow screen`);
+        await ipcRenderer.invoke("markdown-pointer-click", "#markdownOutlineToggle"); await tick();
+        check.equal(mobileOutline.getAttribute("aria-expanded"), "true");
+        check.ok(document.querySelector<HTMLElement>(".vditor-outline").checkVisibility());
+        check.ok(document.querySelector(".vditor-outline").textContent.includes("Small mobile document"));
         mobileSmall.destroy();
     }
     document.body.className = desktopBody;
+    await ipcRenderer.invoke("markdown-resize", 1100, 850); await tick();
     for (const platform of ["win32", "darwin", "linux"]) {
         const controls: string[] = [];
         const overlays: Array<{height: number; symbolColor: string}> = [];
@@ -1154,6 +1274,105 @@ const browserCases = async (languages: Record<string, string>) => {
         check.equal(root.dataset.windowControls, undefined);
     }
     delete bridge.window;
+    const inherited: import("./bridge").MarkdownAppearance = {
+        theme: "light", fontSize: 23, sources: {theme: "one", fontSize: "one", fonts: "one"},
+        workspaces: [{id: "one", name: "Workspace One"}, {id: "two", name: "Workspace Two"}],
+        fonts: {global: [{family: "serif", weight: 500}], editor: [{family: "monospace", weight: 400}], code: [{family: "serif", weight: 600}]}, customFonts: [],
+    };
+    let appearanceSnapshot = inherited;
+    const appearancePatches: Array<import("./bridge").MarkdownAppearancePatch> = [];
+    let finishAppearance: () => void;
+    bridge.appearance = async patch => {
+        appearancePatches.push(patch);
+        if (appearancePatches.length === 1) await new Promise<void>(resolve => {finishAppearance = resolve;});
+        appearanceSnapshot = {...appearanceSnapshot, sources: {...appearanceSnapshot.sources, ...patch.sources},
+            theme: patch.sources?.theme === "two" ? "dark" : appearanceSnapshot.theme,
+            fontSize: patch.sources?.fontSize === "two" ? 31 : patch.independent?.fontSize ?? appearanceSnapshot.fontSize,
+            independent: {...appearanceSnapshot.independent, ...patch.independent}};
+        return appearanceSnapshot;
+    };
+    bridge.systemFonts = async () => [
+        {family: "Arial", displayName: "Arial", weight: 400, aliases: ["Sans"]},
+        {family: "Arial", displayName: "Arial Bold", weight: 700},
+        {family: "Courier", displayName: "Courier", weight: 400, spacing: "monospace"},
+    ];
+    bridge.bootstrap = async () => ({...bootstrap, sessionId: "workspace-appearance", preferences: {mode: "ir"}, appearance: appearanceSnapshot});
+    const inheritedApp = await api.mountMarkdownApplication(bridge);
+    const inheritedEditor = inheritedApp.editor;
+    const inheritedText = inheritedApp.editor.flush().content;
+    check.equal(document.querySelectorAll("#markdownFonts button").length, 3);
+    check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').getAttribute("data-value"), "one");
+    check.equal(getComputedStyle(document.querySelector(".vditor-ir .vditor-reset")).fontSize, "23px");
+    check.ok(getComputedStyle(document.getElementById("markdownApp")).fontFamily.includes("serif"));
+    const oldPreferencesCount = preferenceUpdates.length;
+    document.querySelector<HTMLButtonElement>('#markdownTheme button[data-value="two"]').click();
+    document.querySelector<HTMLButtonElement>('#markdownFont button[data-value="two"]').click();
+    await tick();
+    check.equal(appearancePatches.length, 1, "workspace preference requests are serialized");
+    finishAppearance(); await tick(); await tick();
+    check.equal(appearancePatches.length, 2);
+    check.equal(document.documentElement.dataset.themeMode, "dark");
+    check.equal(getComputedStyle(document.querySelector(".vditor-ir .vditor-reset")).fontSize, "31px");
+    check.equal(document.querySelector('#markdownFonts [aria-checked="true"]').getAttribute("data-value"), "one", "each appearance group has its own source");
+    check.equal(inheritedApp.editor, inheritedEditor, "appearance changes do not recreate the document");
+    check.equal(inheritedApp.editor.flush().content, inheritedText);
+    check.equal(preferenceUpdates.length, oldPreferencesCount, "workspace selections do not overwrite independent edit-mode preferences");
+    document.querySelector<HTMLButtonElement>('#markdownFont button[data-value="independent"]').click();
+    await tick();
+    const independentPanel = document.getElementById("markdownAppearancePanel");
+    check.equal(independentPanel.hidden, false);
+    check.equal((independentPanel as HTMLDialogElement).open, true);
+    check.equal(independentPanel.closest(".markdown-workspace"), null);
+    check.equal(getComputedStyle(independentPanel.querySelector(".b3-dialog__action")).justifyContent, "flex-end");
+    check.equal(appearancePatches.length, 2, "opening independent settings does not change the persisted source");
+    check.equal(document.querySelector('#markdownFont [aria-checked="true"]').getAttribute("data-value"), "two");
+    const sizeInput = independentPanel.querySelector<HTMLInputElement>('input[type="number"]');
+    check.equal(sizeInput.min, "9"); check.equal(sizeInput.max, "72");
+    sizeInput.value = "72";
+    independentPanel.querySelector("form").requestSubmit(); await tick();
+    check.equal(appearancePatches.at(-1).independent.fontSize, 72);
+    check.equal(appearancePatches.at(-1).sources.fontSize, "independent");
+    check.equal(independentPanel.hidden, true);
+    check.equal(document.querySelectorAll("[data-configure]").length, 0, "independent settings have no duplicated bottom entry");
+    check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').getAttribute("data-value"), "two");
+    document.querySelector<HTMLButtonElement>('#markdownFonts button[data-value="independent"]').click(); await tick();
+    const fontSections = independentPanel.querySelectorAll("section");
+    check.equal(fontSections.length, 3);
+    const familySearch = fontSections[0].querySelector<HTMLInputElement>('input[type="search"]');
+    familySearch.value = "Sans"; familySearch.dispatchEvent(new Event("input")); await tick();
+    check.equal(fontSections[0].querySelectorAll(".b3-list-item").length, 1);
+    fontSections[0].querySelector<HTMLButtonElement>('.b3-list-item[data-family="Arial"]').click();
+    const chip = fontSections[0].querySelector<HTMLElement>(".b3-chip");
+    chip.querySelector<HTMLButtonElement>('[aria-haspopup="menu"]').click();
+    check.deepEqual(Array.from(fontSections[0].querySelectorAll("[data-weight]")).map(item => item.getAttribute("data-weight")), ["400", "700"]);
+    fontSections[0].querySelector<HTMLButtonElement>('[data-weight="700"]').click();
+    check.equal(fontSections[2].querySelectorAll(".b3-list-item").length, 1);
+    fontSections[2].querySelector<HTMLButtonElement>('[aria-pressed="false"]').click();
+    check.equal(fontSections[2].querySelectorAll(".b3-list-item").length, 2);
+    independentPanel.querySelector("form").requestSubmit(); await tick();
+    check.deepEqual(appearancePatches.at(-1).independent.fonts.global, [{family: "Arial", weight: 700}]);
+    check.deepEqual(appearancePatches.at(-1).independent.fonts.editor, []);
+    check.equal(inheritedApp.editor.flush().content, inheritedText);
+    inheritedApp.destroy();
+    check.equal(document.getElementById("markdownApp").style.getPropertyValue("--markdown-editor-font-family"), "");
+    appearanceSnapshot = {...inherited, sources: {theme: "missing", fontSize: "independent", fonts: "independent"}, workspaces: [], theme: "system", fontSize: 16,
+        fonts: {global: [], editor: [], code: []}};
+    const unavailableAppearance = await api.mountMarkdownApplication(bridge);
+    check.equal(document.querySelector<HTMLButtonElement>('#markdownTheme button[data-value="missing"]').disabled, true);
+    check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').textContent, languages.markdownWorkspaceUnavailable);
+    check.equal(document.querySelector('#markdownFont [aria-checked="true"]').textContent, languages.markdownIndependentAppearance);
+    let resolveFonts: (fonts: import("./bridge").MarkdownSystemFont[]) => void;
+    bridge.systemFonts = () => new Promise(resolve => {resolveFonts = resolve;});
+    document.querySelector<HTMLButtonElement>('#markdownFonts button[data-value="independent"]').click(); await tick();
+    const closingPanel = document.getElementById("markdownAppearancePanel");
+    closingPanel.querySelector<HTMLButtonElement>(".b3-button--cancel").click();
+    resolveFonts([{family: "Late", displayName: "Late", weight: 400}]); await tick();
+    check.equal(closingPanel.hidden, true);
+    check.equal(closingPanel.childElementCount, 0, "a closed form cannot be repopulated by pending system-font requests");
+    unavailableAppearance.destroy();
+    delete bridge.appearance;
+    delete bridge.systemFonts;
+    bridge.bootstrap = async () => ({...bootstrap, sessionId: "native-appearance-fallback"});
     const beforeFailureClear = clears;
     const failureBootstrap = await bridge.bootstrap();
     bridge.bootstrap = async () => ({...failureBootstrap, dark: true, sessionId: "failed-ui", recovered: {revision: 7, targetGeneration: 3}});
@@ -1188,7 +1407,7 @@ test("Markdown file tree and compact menus preserve edits across switching, stal
     const compileSource = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "index.ts"].map(compileSource).join("\n") +
+    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "../util/systemFontCore.ts", "../util/fontPreview.ts", "fontPicker.ts", "appearance.ts", "index.ts"].map(compileSource).join("\n") +
         "\nwindow.MarkdownApplicationTest = {mountMarkdownApplication, createMarkdownTree, MARKDOWN_RENDER_BYTES}; void 0;";
     const style = compile(path.resolve(__dirname, "../assets/scss/markdown.scss")).css;
     const template = readFileSync(path.resolve(__dirname, "../assets/template/markdown/index.tpl"), "utf8")
@@ -1226,6 +1445,15 @@ app.whenReady().then(async () => {
         const point = await win.webContents.executeJavaScript('(()=>{const rect=document.querySelector('+JSON.stringify(selector)+').getBoundingClientRect();return {x:Math.round(rect.x+rect.width/2),y:Math.round(rect.y+rect.height/2)};})()');
         await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mousePressed",...point,button:"left",buttons:1,clickCount:1});
         await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type:"mouseReleased",...point,button:"left",buttons:0,clickCount:1});
+    });
+    ipcMain.handle("markdown-touch", async (_event, x, y) => {
+        await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled:true});
+        try {
+            await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchStart",touchPoints:[{x,y}]});
+            await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchEnd",touchPoints:[]});
+        } finally {
+            await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled:false});
+        }
     });
     ipcMain.handle("markdown-sidebar-key", (_event, digit) => {
         win.webContents.sendInputEvent({type: "keyDown", keyCode: digit, modifiers: ["alt"]});

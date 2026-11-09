@@ -1,4 +1,5 @@
 import {getDocTreeItem} from "../layout/dock/docTree/rowData";
+import {updateNotebookBreadcrumbIcon} from "../protyle/breadcrumb/iconRefresh";
 import {config as configApi} from "../config/util/configApi";
 import {getRandom, isMobile} from "../util/functions";
 import {fetchPost} from "../util/fetch";
@@ -1593,7 +1594,7 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
             return;
         }
         if (notebook) {
-            notebook.icon = unicode;
+            updateNotebookBreadcrumbIcon(id, unicode);
             if (notebook.encrypted && notebook.closed) {
                 return;
             }

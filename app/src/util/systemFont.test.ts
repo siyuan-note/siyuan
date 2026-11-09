@@ -62,10 +62,13 @@ test("older HarmonyOS containers and native failures retain the kernel fallback"
 });
 
 test("other containers retain cached kernel fonts", async () => {
-    const harness = load("std", async () => { throw new Error("must not call HarmonyOS"); });
-    await Promise.all([harness.load(), harness.load()]);
-    await harness.load();
-    assert.equal(harness.requests(), 1);
+    for (const container of ["std", "android", "ios"]) {
+        const harness = load(container, async () => { throw new Error("must not call HarmonyOS"); });
+        const results = await Promise.all([harness.load(), harness.load()]);
+        assert.deepEqual(results, [[font], [font]], `${container} exposes kernel fonts`);
+        await harness.load();
+        assert.equal(harness.requests(), 1);
+    }
 });
 
 test("malformed native entries are skipped without losing valid fonts", () => {

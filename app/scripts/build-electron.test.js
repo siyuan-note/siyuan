@@ -61,13 +61,13 @@ test("watch copies every runtime asset without a main-process edit", {timeout: 6
     child.once("error", error => { failure = error; });
     child.stdout.on("data", data => { output += data; });
     child.stderr.on("data", data => { output += data; });
-    const waitFor = async (predicate, description) => {
+    const waitFor = async (predicate, description, retryCodes = ["ENOENT", "EBUSY", "EPERM"]) => {
         const deadline = Date.now() + 15000;
         while (true) {
             try {
                 if (predicate()) return;
             } catch (error) {
-                if (!["ENOENT", "EBUSY", "EPERM"].includes(error.code)) throw error;
+                if (!retryCodes.includes(error.code)) throw error;
             }
             if (failure) throw failure;
             assert.equal(exited, false, output);
@@ -76,10 +76,15 @@ test("watch copies every runtime asset without a main-process edit", {timeout: 6
             await delay(25);
         }
     };
+    // Windows 复制源文件时可能短暂持有句柄，写入也需等待该句柄释放。
+    const writeSource = (file, contents) => waitFor(() => {
+        fs.writeFileSync(file, contents);
+        return true;
+    }, "source file remained locked: " + file, ["EBUSY", "EPERM"]);
     await waitFor(() => /webpack compiled in/.test(output), "initial watch compilation");
     const main = path.join(root, "electron-dist", "main.js");
     const initialBundle = fs.readFileSync(main, "utf8");
-    fs.writeFileSync(entry, "const value: number = 2;\nconsole.log(value);\n");
+    await writeSource(entry, "const value: number = 2;\nconsole.log(value);\n");
     await waitFor(() => {
         const content = fs.readFileSync(main, "utf8");
         return content.length > 0 && content !== initialBundle;
@@ -87,7 +92,7 @@ test("watch copies every runtime asset without a main-process edit", {timeout: 6
     const bundle = fs.readFileSync(main, "utf8");
     const preload = path.join(root, "electron-dist", "preload.js");
     const initialPreload = fs.readFileSync(preload, "utf8");
-    fs.writeFileSync(path.join(root, bundledEntries.preload), "const value: number = 3;\nconsole.log(value);\n");
+    await writeSource(path.join(root, bundledEntries.preload), "const value: number = 3;\nconsole.log(value);\n");
     await waitFor(() => {
         const content = fs.readFileSync(preload, "utf8");
         return content.length > 0 && content !== initialPreload;
@@ -97,7 +102,7 @@ test("watch copies every runtime asset without a main-process edit", {timeout: 6
     // 所有资源均单独修改，避免其他主进程改动触发重建而掩盖监听缺项。
     for (const asset of assets) {
         const contents = "updated " + asset.source;
-        fs.writeFileSync(path.join(root, asset.source), contents);
+        await writeSource(path.join(root, asset.source), contents);
         await waitFor(() => fs.readFileSync(path.join(root, asset.target), "utf8") === contents,
             "runtime asset was not copied: " + asset.source);
     }

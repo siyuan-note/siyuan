@@ -7,7 +7,7 @@
 		"id": "20211226120854-dr1jfx2",
 		"title": "編輯器",
 		"type": "doc",
-		"updated": "20261101145217"
+		"updated": "20261107224449"
 	},
 	"Children": [
 		{
@@ -417,7 +417,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-4gm4g2v",
-				"updated": "20261024164212"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -466,6 +466,92 @@
 				{
 					"Type": "NodeText",
 					"Data": "清空搜尋後，可點擊欄標題或停靠欄分組標題上的重設圖示重設該層級。重設全部排序時，桌面端可點擊「位置」欄標題右側的重新整理圖示，提示為「重設全部排序」；行動端可點擊底部的重設全部排序按鈕。確認後儲存，取消則放棄修改。重設排序會保留顯隱和停靠欄入口所在位置，重設後的層級持續跟隨後續版本的預設排序。"
+				}
+			]
+		},
+		{
+			"ID": "20261107104457-iip2m2r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107104457-iip2m2r",
+				"updated": "20261107224449"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端和行動端開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "選單和按鈕的顯隱與排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，編輯自訂方案並選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 分類，可分別隱藏區塊引用搜尋候選中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建子文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "選擇位置新增文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，三項預設顯示。儲存並啟用方案後生效。"
 				}
 			]
 		},

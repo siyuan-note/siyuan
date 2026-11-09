@@ -75,6 +75,7 @@ body:
         - 版本：
         - 操作系统：
         - 浏览器（如果使用了）：
+      render: text
     validations:
       required: true
   - type: textarea

@@ -48,6 +48,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         "protyle/render/av/panels/inputs": {bindAVPanelInputs() {}},
         "protyle/render/av/viewType": {}, "protyle/wysiwyg/transaction": {}, "util/fetch": {},
         "protyle/render/av/automationPosition": {}, "protyle/render/av/select": {}, "protyle/render/av/filter": {},
+        "protyle/render/av/cell": {},
         "protyle/ui/hideElements": {}, "protyle/render/av/view": {getFieldsByData: (): IAVColumn[] => []},
         "protyle/util/selection": {focusBlock() {}}, "protyle/render/av/row": {},
         "protyle/render/av/groups": {getPageSize: () => ({})},
@@ -132,10 +133,10 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     check.equal(back.classList.contains("fn__none"), false);
     check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight * .56) < 1);
     check.equal(menu.querySelector('[data-type="sheet-expand"]'), null);
-    const touch = (type: string, y: number) => {
+    const touch = (type: string, y: number, target: Element = menu.firstElementChild) => {
         const event = new Event(type, {bubbles: true, cancelable: true});
         Object.assign(event, {touches: [{clientX: 80, clientY: y}], changedTouches: [{clientX: 80, clientY: y}]});
-        menu.firstElementChild.dispatchEvent(event);
+        target.dispatchEvent(event);
     };
     touch("touchstart", menu.getBoundingClientRect().top + 8);
     touch("touchmove", 0);
@@ -158,6 +159,16 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     const items = menu.querySelector<HTMLElement>(".b3-menu__items");
     check.ok(items.clientHeight > 200 && items.scrollHeight > items.clientHeight);
     check.equal(common.classList.contains("fn__none"), false);
+    items.scrollTop = 40;
+    const beforeScrollGesture = menu.getBoundingClientRect().height;
+    touch("touchstart", 100, items);
+    touch("touchmove", 280, items);
+    touch("touchend", 280, items);
+    await settle();
+    check.equal(saves, 0);
+    check.ok(Math.abs(menu.getBoundingClientRect().height - beforeScrollGesture) < 1,
+        "scrolling content does not resize the sheet");
+    items.scrollTop = 0;
 
     Object.assign(viewport, {height: innerHeight - 260, offsetTop: 0});
     viewport.dispatchEvent(new Event("resize"));
@@ -172,12 +183,23 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     touch("touchmove", 280);
     touch("touchend", 280);
     await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 180)) < 1);
+    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 180)) < 1,
+        `drag height ${menu.getBoundingClientRect().height}, expected ${innerHeight - 180}`);
     touch("touchstart", 200);
     touch("touchmove", 60);
     touch("touchend", 60);
     await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 40)) < 1);
+    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 40)) < 1,
+        `resized height ${menu.getBoundingClientRect().height}, expected ${innerHeight - 40}`);
+    Object.assign(viewport, {height: innerHeight - 300});
+    viewport.dispatchEvent(new Event("resize"));
+    await settle();
+    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 300)) < 1);
+    Object.assign(viewport, {height: innerHeight});
+    viewport.dispatchEvent(new Event("resize"));
+    await settle();
+    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 40)) < 1,
+        "keyboard dismissal restores the manually selected height");
     await new Promise(resolve => setTimeout(resolve, 310));
     check.equal(menu.querySelector('[data-type="sheet-close"]'), null);
     menu.classList.remove("b3-menu--expanded");
@@ -206,7 +228,7 @@ test("mobile database sheets expand, preserve navigation and edits, and fit the 
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
-    const sources = Object.fromEntries(["menus/Menu", "menus/menuGroup", "menus/menuPosition", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture",
+    const sources = Object.fromEntries(["menus/Menu", "menus/menuGroup", "menus/menuPosition", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
         "util/escape", "util/setPosition", "protyle/util/hasClosest", "protyle/render/av/openMenuPanel",
         "protyle/render/av/mobilePanel", "protyle/render/av/host", "protyle/render/av/renderData"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},

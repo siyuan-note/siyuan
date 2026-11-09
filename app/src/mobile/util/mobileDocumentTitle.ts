@@ -11,10 +11,6 @@ export const updateMobileDocumentTitle = (protyle: IProtyle) => {
     const notebook = protyle.notebookId;
     const editor = label.querySelector<HTMLElement>(".mobile-document-title-editor");
     if (editor?.dataset.documentTitleId === id && editor.dataset.notebookId === notebook) return;
-    if (id === notebook) {
-        label.textContent = input.value;
-        return;
-    }
     let preview = label.firstElementChild as HTMLElement;
     if (!preview || preview.dataset.documentTitleId !== id || preview.dataset.notebookId !== notebook) {
         preview = document.createElement("span");

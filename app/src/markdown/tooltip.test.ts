@@ -41,7 +41,7 @@ const fixture = () => {
         getBoundingClientRect() {return this.bounds;}
         getClientRects() {return this.hidden ? [] : [this.bounds];}
     }
-    const view = Object.assign(new EventTarget(), {innerWidth: 800, innerHeight: 600, matchMedia: () => ({matches: false})});
+    const view = Object.assign(new EventTarget(), {clearTimeout, setTimeout, innerWidth: 800, innerHeight: 600, matchMedia: () => ({matches: false})});
     const document = Object.assign(new EventTarget(), {defaultView: view, body: new Element(), createElement: () => new Element()});
     const root = new Element(); root.ownerDocument = document; document.body.append(root);
     let observe: (records: Array<{type: string; attributeName?: string; target?: Element}>) => void;
@@ -56,10 +56,11 @@ const fixture = () => {
     const tooltip = document.body.children.at(-1);
     const control = (message: string) => {const element = new Element(); element.dataset.tooltip = message; root.append(element); return element;};
     const dispatch = (type: string, target: Element, extra: Record<string, unknown> = {}, owner: EventTarget = root) => {
-        const event = new Event(type);
+        const event = new Event(type, {cancelable: true});
         Object.defineProperties(event, Object.fromEntries(Object.entries({target, pointerType: "mouse", ...extra})
             .map(([key, value]) => [key, {value}])));
         owner.dispatchEvent(event);
+        return event;
     };
     return {root, view, document, tooltip, control, dispatch, instance,
         changed: () => observe([{type: "childList"}]), disconnected: () => disconnected,
@@ -143,6 +144,41 @@ test("Markdown tooltips follow pointer, keyboard and dismissal lifecycle without
         assert.equal(f.tooltip.parentElement, undefined);
         f.dispatch("pointerover", f.control("Disposed"));
         assert.equal(f.tooltip.hidden, true);
+    } finally {f.cleanup();}
+});
+
+test("touch information tooltips toggle without activating the menu and survive pointer release", () => {
+    const f = fixture();
+    try {
+        const info = f.control("Resource policy");
+        info.dataset.tooltipTouch = "";
+        const tap = () => {
+            f.dispatch("pointerover", info, {pointerType: "touch"});
+            f.dispatch("pointerdown", info, {pointerType: "touch"}, f.document);
+            const click = f.dispatch("click", info, {pointerType: "touch"});
+            f.dispatch("pointerout", info, {pointerType: "touch"});
+            return click;
+        };
+        assert.equal(tap().defaultPrevented, true);
+        assert.equal(f.tooltip.hidden, false);
+        assert.equal(f.tooltip.textContent, info.dataset.tooltip);
+        assert.equal(f.tooltip.style.animationDelay, "0ms");
+        f.dispatch("pointermove", info, {pointerType: "touch"});
+        assert.equal(f.tooltip.hidden, false);
+        assert.equal(tap().defaultPrevented, true);
+        assert.equal(f.tooltip.hidden, true, "a second tap dismisses the information");
+        tap();
+        f.dispatch("pointerdown", f.root, {pointerType: "touch"}, f.document);
+        assert.equal(f.tooltip.hidden, true, "an outside tap dismisses the information");
+        tap();
+        f.dispatch("scroll", info, {}, f.document);
+        assert.equal(f.tooltip.hidden, true, "scrolling dismisses the information");
+        f.dispatch("pointerdown", info, {pointerType: "mouse"}, f.document);
+        assert.equal(f.dispatch("click", info).defaultPrevented, false, "mouse activation remains available to the menu");
+        const ordinary = f.control("Ordinary button");
+        f.dispatch("pointerdown", ordinary, {pointerType: "touch"}, f.document);
+        assert.equal(f.dispatch("click", ordinary, {pointerType: "touch"}).defaultPrevented, false);
+        assert.equal(f.tooltip.hidden, true, "ordinary touch controls do not acquire tooltip interception");
     } finally {f.cleanup();}
 });
 

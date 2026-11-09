@@ -441,6 +441,10 @@ const handleTouchEnd = (e: TouchEvent) => {
 };
 
 const handleContextMenu = (event: MouseEvent) => {
+    if (!event.isTrusted && dragState && !dragState.isDragging) {
+        // 合成长按菜单的 touchend 会阻断后续监听器，菜单打开前释放原触点的拖拽候选。
+        completeBridgeDrag(undefined, true);
+    }
     // WebView 会在手指仍按住时派发原生长按菜单，菜单遮罩会截获后续 drop。
     // 松手后由 event.ts 合成的 contextmenu 不是可信事件，需要保留以打开正常的长按菜单。
     if (shouldSuppressNativeContextMenu(event.isTrusted, hasActiveTouchGesture([dragState, manualState]))) {

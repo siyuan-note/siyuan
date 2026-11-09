@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261109130054"
 	},
 	"Children": [
 		{
@@ -1059,6 +1059,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " to get the new version."
+				}
+			]
+		},
+		{
+			"ID": "20261109130054-ss6gsc3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109130054-ss6gsc3",
+				"updated": "20261109130054"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If a document uses a file format newer than this client supports, readable titles and icons remain visible as dimmed placeholders in the document tree. Upgrade SiYuan to open or edit these documents; you can still use the expand arrow to browse their child documents."
 				}
 			]
 		},

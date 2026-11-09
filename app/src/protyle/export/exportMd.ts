@@ -10,7 +10,7 @@ import {saveExportFile} from "../util/compatibility";
 
 // 导出参数对话框 https://github.com/siyuan-note/siyuan/issues/17031
 // 通用部分（8 项）可被各导出格式复用，Markdown 专属部分仅 Markdown 导出使用。
-// 默认值一律取自全局 window.siyuan.config.export，确认后本次导出生效，不修改全局设置、不记忆上次选择。
+// 参数默认值取自导出设置；对话框内的调整仅本次生效，编号始终使用持久设置。
 
 // 类型别名：约束字段 key 与 Config.IExport 的字段类型对应，避免用 string 索引报错
 type BoolKey = "addTitle" | "inlineMemo" | "includeSubDocs" | "includeRelatedDocs" | "markdownYFM" | "removeAssetsID";
@@ -24,7 +24,7 @@ interface IExportMdOptions {
     notebooks?: string[];
 }
 
-// openExportOptionsDialog 渲染「通用 + Markdown 专属」两组开关，确认时回调 onConfirm 传出全部 13 项。
+// openExportOptionsDialog 渲染「通用 + Markdown 专属」两组开关，确认时回调 onConfirm 传出选项。
 // showSubDocs/showRelatedDocs 控制是否显示「包含子文档/关联文档」项（单文档无对应内容时隐藏）。
 export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPayload) => void, showSubDocs = true, showRelatedDocs = true) => {
     const conf = window.siyuan.config.export;
@@ -100,6 +100,7 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
     };
     const collect = (): IExportMdOptionsPayload => ({
         addTitle: (el.querySelector("#addTitle") as HTMLInputElement).checked,
+        headingNumber: window.siyuan.config.export.headingNumber === true,
         inlineMemo: (el.querySelector("#inlineMemo") as HTMLInputElement).checked,
         blockRefMode: parseInt((el.querySelector("#blockRefMode") as HTMLSelectElement).value, 10),
         blockEmbedMode: parseInt((el.querySelector("#blockEmbedMode") as HTMLSelectElement).value, 10),
@@ -127,6 +128,7 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
 
 interface IExportMdOptionsPayload {
     addTitle: boolean;
+    headingNumber: boolean;
     inlineMemo: boolean;
     blockRefMode: number;
     blockEmbedMode: number;

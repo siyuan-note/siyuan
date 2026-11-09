@@ -118,7 +118,7 @@ const runCases = async source => {
         revealTabsForTarget() {},
         getAtomicVerticalNavigationOwner: () => undefined,
         normalizeHTMLAssetIFrameSources() {},
-        renderIFrameResize() {},
+        renderMediaResize() {},
         resetCodeBlockRenderState() {},
         cleanListMindmapHTML: identity,
         cleanHeadingNumberHTML: identity,

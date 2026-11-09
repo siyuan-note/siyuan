@@ -161,6 +161,15 @@ func resolveTemplateHTTPSource(locator string, record templateHTTPPermissionReco
 	}
 	existing, exists := templateHTTPPermissionStore.state.Sources[locator]
 	if exists && existing.Version == record.Version && existing.Persistable == record.Persistable {
+		if existing.Label != record.Label {
+			existing.Label = record.Label
+			templateHTTPPermissionStore.state.Sources[locator] = existing
+			if existing.Granted {
+				if err := saveTemplateHTTPPermissionsLocked(); err != nil {
+					return nil, err
+				}
+			}
+		}
 		record = existing
 	} else {
 		if exists {
@@ -261,6 +270,24 @@ func ResolveTemplateHTTPDBSource(owner, avID, fieldID, slot, content string) (*T
 	}, "", "")
 }
 
+func ResolveTemplateHTTPAutomationSource(owner, avID string, rule *av.AutomationRule) (*TemplateHTTPSource, error) {
+	if owner == "" {
+		owner = "global"
+	}
+	data, err := json.Marshal(rule)
+	if err != nil || rule == nil || rule.Trigger != "manual" && ((rule.Trigger != "added" && rule.Trigger != "changed") || !rule.UsesHTTP()) {
+		return nil, errors.New("invalid automation permission source")
+	}
+	source, err := resolveTemplateHTTPSource(templateHTTPDigest("database", owner, avID, rule.ID, "automation"), templateHTTPPermissionRecord{
+		Version: templateHTTPDigest(string(data)), Kind: "database", Label: avID + "/" + rule.ID,
+		Owner: owner, AV: avID, Field: rule.ID, Slot: "automation", Persistable: true,
+	}, "", "")
+	if source != nil {
+		source.Label = avID + "/" + rule.Name
+	}
+	return source, err
+}
+
 func templateHTTPSourceMatchesLocked(source *TemplateHTTPSource) (templateHTTPPermissionRecord, bool) {
 	if source == nil {
 		return templateHTTPPermissionRecord{}, false
@@ -322,6 +349,22 @@ func templateHTTPDatabaseSourceCurrent(source *TemplateHTTPSource) bool {
 		return false
 	}
 	defer clear(data)
+	if source.slot == "automation" {
+		var database struct {
+			ID          string               `json:"id"`
+			Automations *av.AutomationConfig `json:"automations"`
+		}
+		if json.Unmarshal(data, &database) != nil || database.ID != source.avID || database.Automations == nil || database.Automations.ValidateSpec() != nil {
+			return false
+		}
+		for _, rule := range database.Automations.Rules {
+			if rule != nil && rule.ID == source.fieldID && rule.Trigger != "block" && rule.Enabled {
+				encoded, err := json.Marshal(rule)
+				return err == nil && templateHTTPDigest(string(encoded)) == source.Version
+			}
+		}
+		return false
+	}
 	fields, valid := templateHTTPCheckoutFields(data, source.avID)
 	if !valid {
 		return false

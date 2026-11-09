@@ -2,31 +2,23 @@ import {Constants} from "../constants";
 import {MenuItem} from "./Menu";
 import {escapeHtml} from "../util/escape";
 import {showMessage} from "../dialog/message";
+import {ISpellcheckContext, SPELLCHECK_CONTEXT_TIMEOUT} from "./spellcheckContext";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
 
-export interface ISpellcheckContext {
-    contextId: number;
-    x: number;
-    y: number;
-    misspelledWord: string;
-    dictionarySuggestions: string[];
-}
-
 interface IPendingSpellcheckRequest {
-    key: string;
+    requestId: number;
     resolve: (context: ISpellcheckContext | null | undefined) => void;
     timeout: number;
 }
 
 let pendingSpellcheckRequest: IPendingSpellcheckRequest;
-
-const getPositionKey = (x: number, y: number) => `${Math.round(x)}:${Math.round(y)}`;
+let requestSequence = 0;
 
 /// #if !BROWSER
 ipcRenderer.on(Constants.SIYUAN_SPELLCHECK_CONTEXT, (event, context: ISpellcheckContext) => {
-    if (!pendingSpellcheckRequest || pendingSpellcheckRequest.key !== getPositionKey(context.x, context.y)) {
+    if (!pendingSpellcheckRequest || pendingSpellcheckRequest.requestId !== context.requestId) {
         return;
     }
     window.clearTimeout(pendingSpellcheckRequest.timeout);
@@ -45,20 +37,21 @@ export const requestSpellcheckContext = (x: number, y: number) => {
         pendingSpellcheckRequest.resolve(null);
     }
     return new Promise<ISpellcheckContext | null | undefined>((resolve) => {
-        const key = getPositionKey(x, y);
+        const requestId = ++requestSequence;
         const timeout = window.setTimeout(() => {
-            if (pendingSpellcheckRequest?.key !== key) {
+            if (pendingSpellcheckRequest?.requestId !== requestId) {
                 return;
             }
             pendingSpellcheckRequest = undefined;
             resolve(undefined);
-        }, 100);
+        }, SPELLCHECK_CONTEXT_TIMEOUT);
         pendingSpellcheckRequest = {
-            key,
+            requestId,
             resolve,
             timeout,
         };
         ipcRenderer.send(Constants.SIYUAN_SPELLCHECK_CONTEXT, {
+            requestId,
             x,
             y,
             requestedAt: Date.now(),

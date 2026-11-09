@@ -67,7 +67,7 @@ import {getAVSelectedTableCells, getAvBodyData} from "../render/av/virtualScroll
 import {resetCodeBlockRenderState} from "./codeBlockRenderState";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
-import {renderIFrameResize} from "../render/iframeResize";
+import {renderMediaResize} from "../render/mediaResize";
 import {genEmptyElement} from "../../block/util";
 import {resumeMobileEditorAfterInsertion} from "../../mobile/util/keyboardToolbar";
 
@@ -1070,7 +1070,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     const tempElement = document.createElement("template");
     if (html.includes("NodeList")) tempElement.innerHTML = html;
     const pastedType = tempElement.content.firstElementChild?.getAttribute("data-type");
-    const selectedList = !range.collapsed && (pastedType === "NodeList" || pastedType === "NodeListItem") ?
+    // 空父项粘贴会把原子列表并入新项，必须按整个列表更新，避免先插入相同子块 ID 再删除旧项。
+    // 仅扩展单点粘贴；跨容器选区仍使用原来的跨块事务。
+    const emptyListItem = range.collapsed && blockElement.previousElementSibling?.classList.contains("protyle-action") ?
+        hasClosestByClassName(blockElement, "li") || undefined : undefined;
+    const emptyListEditable = emptyListItem ? getContenteditableElement(blockElement) : undefined;
+    const preserveNestedList = emptyListEditable && emptyListItem?.querySelector(":scope > [data-type='NodeList']") &&
+        getTextWithoutSemanticMarkers(emptyListEditable).split(Constants.ZWSP).join("").trim() === "";
+    const selectedList = (!range.collapsed || preserveNestedList) && (pastedType === "NodeList" || pastedType === "NodeListItem") ?
         hasClosestByAttribute(range.commonAncestorContainer, "data-type", "NodeList") : undefined;
     const selectedListOldHTML = selectedList && protyle.wysiwyg.element.contains(selectedList) ?
         selectedList.outerHTML : undefined;
@@ -1181,7 +1188,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     let oldHTML = crossBlockOldHTML ?? blockElement.outerHTML;
     const type = blockElement.getAttribute("data-type");
     const isNodeCodeBlock = type === "NodeCodeBlock";
-    const editableElement = getContenteditableElement(blockElement);
+    const editableElement = getContenteditableElement(blockElement, range.startContainer);
     const crossBlockDoOperations: IOperation[] = [];
     const crossBlockUndoOperations: IOperation[] = [];
     const processCrossBlockData = () => {
@@ -1405,7 +1412,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 }
             });
             // 相邻标签之间插入空格区隔，避免后续 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
-            fixAdjacentTags(getContenteditableElement(blockElement));
+            fixAdjacentTags(getContenteditableElement(blockElement, range.startContainer));
             protyle.wysiwyg.lastHTMLs[id] = oldHTML;
             input(protyle, blockElement as HTMLElement, range, true, undefined, isCrossBlockRange || undoContext ? {
                 doOperations: crossBlockDoOperations,
@@ -1569,7 +1576,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             } else {
                 blockElement.after(item);
             }
-            renderIFrameResize(item);
+            renderMediaResize(item);
         }
         if (!lastElement && !hasParentHeading) {
             lastElement = item;
@@ -1752,7 +1759,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         });
     });
     if (isListPaste && selectedList && selectedListOldHTML && selectedList.isConnected && selectedList.contains(lastElement)) {
-        // 同一列表内的覆盖同时改变列表项、子列表和序号，按列表提交可避免撤销先访问已删除的子块。
+        // 同一列表内的覆盖或空父项粘贴同时改变列表项、子列表和序号，按列表提交保留块身份和撤销顺序。
         const listID = selectedList.getAttribute("data-node-id");
         transaction(protyle, [{action: "update", id: listID, data: selectedList.outerHTML}], [{
             action: "update", id: listID, data: selectedListOldHTML,

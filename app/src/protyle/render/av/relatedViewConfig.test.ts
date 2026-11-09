@@ -48,8 +48,6 @@ const setup = (detailView?: IAVColumnRelation["detailView"], info = "relatedData
     const menu = new Control();
     const switchElement = new Control();
     const infoButton = new Control();
-    const infoElement = new Control();
-    infoElement.classes.add("fn__none");
     let target = new Control();
     const tip = new Control();
     const tipText = new Control();
@@ -74,7 +72,6 @@ const setup = (detailView?: IAVColumnRelation["detailView"], info = "relatedData
     menu.querySelector = selector => ({
         '[data-type="relatedViewEnabled"]': switchElement,
         '[data-type="relatedViewInfo"]': infoButton,
-        "[data-related-view-info]": infoElement,
         '[data-type="relatedViewTarget"]': target,
         "[data-related-view-tip]": tip,
         '[data-type="goSearchAV"]': source,
@@ -122,8 +119,8 @@ const setup = (detailView?: IAVColumnRelation["detailView"], info = "relatedData
             }},
         }[id] || {}),
     });
-    return {api, field, protyle, config, menu, switchElement, infoButton, infoElement, source, operations, requests, messages, mobileItems,
-        tipText, get target() { return target; }, get targetOptions() { return targetOptions; },
+    return {api, field, protyle, config, menu, switchElement, infoButton, source, operations, requests, messages, mobileItems,
+        tip, tipText, get target() { return target; }, get targetOptions() { return targetOptions; },
         get shown() { return shown; }, get fullscreen() { return fullscreen; },
         setResponse: (callback: typeof response) => { response = callback; },
         setMobile: () => { mobile = true; }, observe: () => observe(),
@@ -132,35 +129,30 @@ const setup = (detailView?: IAVColumnRelation["detailView"], info = "relatedData
     };
 };
 
-it("opens and closes the explanation without toggling the relation setting on desktop and mobile", async () => {
+it("keeps help passive on desktop and shows it on mobile without toggling the relation", async () => {
     for (const mobile of [false, true]) {
         const h = setup();
         if (mobile) h.setMobile();
         const html = h.api.getRelatedViewConfigHTML(h.field, h.protyle);
-        assert.match(html, /<button type="button"[^>]+data-type="relatedViewInfo"[^>]+aria-expanded="false"/);
-        assert.match(html, /iconInfo/);
-        assert.match(html, /relatedDatabaseViewInfo/);
+        assert.doesNotMatch(html, /block__icon|aria-expanded|data-related-view-info/);
+        assert.ok(html.indexOf("showRelatedDatabaseView") < html.indexOf('data-type="relatedViewInfo"'));
         await h.bind();
         let stopped = false;
         h.infoButton.dispatch("click", {stopPropagation() { stopped = true; }});
         assert.equal(stopped, true);
-        assert.equal(h.infoButton.dataset["aria-expanded"], "true");
-        assert.equal(h.infoElement.classes.has("fn__none"), false);
+        assert.deepEqual(h.messages, mobile ? ["relatedDatabaseViewInfo"] : []);
         assert.equal(h.switchElement.checked, false);
         assert.equal(h.operations.length, 0);
-        h.infoButton.dispatch("click");
-        assert.equal(h.infoButton.dataset["aria-expanded"], "false");
-        assert.equal(h.infoElement.classes.has("fn__none"), true);
     }
 });
 
-it("uses the native hover tooltip and escapes its separately parsed content", () => {
+it("uses passive hover help and escapes its content", () => {
     const text = 'View <entry> "details" &lt;sample>';
     const h = setup(undefined, text);
     const html = h.api.getRelatedViewConfigHTML(h.field, h.protyle);
-    assert.match(html, /block__icon block__icon--show ariaLabel/);
+    assert.match(html, /b3-menu__icon ariaLabel/);
     assert.ok(html.includes(`data-position="north" aria-label="${escapeAriaLabel(text)}"`));
-    assert.ok(html.includes(escapeHtml(text)));
+    assert.doesNotMatch(html, /#iconTable/);
 });
 
 it("uses a native switch and a checked existing-table submenu without a select or layout copy", async () => {
@@ -169,7 +161,8 @@ it("uses a native switch and a checked existing-table submenu without a select o
     assert.match(html, /b3-switch b3-switch--menu/);
     assert.doesNotMatch(html, /<select/);
     await h.bind();
-    assert.equal(h.targetOptions.label, "relatedDatabaseView");
+    assert.match(h.targetOptions.label, /relatedDatabaseView.*relatedViewSharedInfo/);
+    assert.equal(h.targetOptions.iconHTML, "");
     assert.equal(h.targetOptions.accelerator, escapeHtml("First <view>"));
     assert.deepEqual(copy(h.requests), [{url: "/api/av/getAttributeView", payload: {id: "target", blockID: "source-carrier",
         relationFieldContext: {sourceAvID: "source", relationKeyID: "relation-key"}}}]);
@@ -182,7 +175,7 @@ it("uses a native switch and a checked existing-table submenu without a select o
         undo: [{action: "setAttrViewRelationDetail", avID: "source", keyID: "relation-key", blockID: "source-carrier", data: null}],
     });
     assert.equal(h.target.classes.has("fn__none"), false);
-    assert.equal(h.tipText.textContent, "relatedDatabaseViewShared");
+    assert.equal(h.tip.classes.has("fn__none"), true);
     h.targetOptions.submenu[1].click(undefined, undefined);
     assert.equal(h.target.focused, true);
     assert.deepEqual(h.operations[1].undo[0].data, {spec: 1, enabled: true, viewID: "first"});
@@ -381,4 +374,18 @@ it("rejects a previous target's submenu callback while loading and after replace
     assert.equal(h.operations.length, 0);
     h.toggle(true);
     assert.equal(h.api.getPendingRelatedViewConfig(h.menu as unknown as Element).viewID, "new");
+});
+
+
+it("keeps loading and unavailable states visible but hides the normal shared-layout explanation", async () => {
+    const h = setup({spec: 1, enabled: true, viewID: "first"});
+    let resolve: (value: unknown) => void;
+    h.setResponse(() => new Promise(done => { resolve = done; }));
+    const binding = h.bind();
+    assert.equal(h.tip.classes.has("fn__none"), false);
+    assert.equal(h.tipText.textContent, "Loading");
+    resolve({code: -1});
+    await binding;
+    assert.equal(h.tip.classes.has("fn__none"), false);
+    assert.equal(h.tipText.textContent, "relatedDatabaseViewUnavailable");
 });

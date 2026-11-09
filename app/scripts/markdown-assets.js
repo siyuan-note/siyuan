@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const {createRequire} = require("node:module");
 
-const VDITOR_VERSION = "4.0.2-alpha.3";
+const VDITOR_VERSION = "4.0.2-alpha.8";
 const appRoot = path.resolve(__dirname, "..");
 const LEGACY_LUTE_ASSET = "vditor/dist/js/lute/lute.min.js";
 const SHARED_LUTE_ASSET = "stage/protyle/js/lute/lute.min.js";
@@ -112,7 +112,9 @@ class MarkdownAssetsPlugin {
             }, () => {
                 for (const file of markdownAssetFiles()) {
                     compilation.fileDependencies.add(file.source);
-                    compilation.emitAsset(file.name, new compiler.webpack.sources.RawSource(fs.readFileSync(file.source)));
+                    // 离线库的全局导出依赖原有脚本作用域，构建时保留其原始产物。
+                    compilation.emitAsset(file.name, new compiler.webpack.sources.RawSource(fs.readFileSync(file.source)),
+                        {minimized: true});
                 }
             });
         });

@@ -11,10 +11,98 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 const permissionTestAVID = "20261030000000-permav1"
+
+func TestTemplateHTTPAutomationPermissionStoresOnlyIdentifiers(t *testing.T) {
+	setupTemplateHTTPPermissionTest(t)
+	rule := &av.AutomationRule{ID: "20261108000000-manual1", Name: "private-rule-name", Enabled: true, Trigger: "manual"}
+	view := &av.AttributeView{ID: permissionTestAVID, Automations: &av.AutomationConfig{Spec: 9, Rules: []*av.AutomationRule{rule}}}
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	source, err := ResolveTemplateHTTPAutomationSource("", view.ID, rule)
+	if err != nil || !strings.Contains(source.Label, rule.Name) {
+		t.Fatal("interactive label unavailable", err)
+	}
+	if err = GrantTemplateHTTPSource(source); err != nil {
+		t.Fatal(err)
+	}
+	// 已保存授权沿用原身份，仅清理旧格式标签中的规则名称。
+	templateHTTPPermissionStore.Lock()
+	record := templateHTTPPermissionStore.state.Sources[source.locator]
+	record.Label = source.Label
+	templateHTTPPermissionStore.state.Sources[source.locator] = record
+	err = saveTemplateHTTPPermissionsLocked()
+	templateHTTPPermissionStore.Unlock()
+	if err != nil {
+		t.Fatal(err)
+	}
+	next, err := ResolveTemplateHTTPAutomationSource("", view.ID, rule)
+	if err != nil || next.ID != source.ID {
+		t.Fatal("label migration changed source identity", err)
+	}
+	if allowed, checkErr := CheckTemplateHTTPSource(next); checkErr != nil || !allowed {
+		t.Fatal("label migration lost permission", checkErr)
+	}
+	data, err := os.ReadFile(filepath.Join(util.ConfDir, templateHTTPPermissionsFile))
+	if err != nil || strings.Contains(string(data), rule.Name) || !strings.Contains(string(data), rule.ID) {
+		t.Fatal("permission store leaked rule name", err)
+	}
+}
+
+func TestTemplateHTTPPermissionManualRuleVersion(t *testing.T) {
+	setupTemplateHTTPPermissionTest(t)
+	view := &av.AttributeView{ID: permissionTestAVID}
+	rule := &av.AutomationRule{ID: "20261108000000-manual1", Name: "Manual", Enabled: true, Trigger: "manual"}
+	view.Automations = &av.AutomationConfig{Spec: 9, Rules: []*av.AutomationRule{rule}}
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	source, err := ResolveTemplateHTTPAutomationSource("", view.ID, rule)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = GrantTemplateHTTPSource(source); err != nil {
+		t.Fatal(err)
+	}
+	if allowed, err := CheckTemplateHTTPSource(source); err != nil || !allowed {
+		t.Fatal("saved rule permission unavailable", err)
+	}
+	rule.Conditions = []*av.ViewFilter{{Column: "changed"}}
+	if err = av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	if IsTemplateHTTPSourceCurrent(source) {
+		t.Fatal("changed rule retained its old permission")
+	}
+	next, err := ResolveTemplateHTTPAutomationSource("", view.ID, rule)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if allowed, _ := CheckTemplateHTTPSource(next); allowed {
+		t.Fatal("changed rule inherited permission")
+	}
+	if err = GrantTemplateHTTPSource(next); err != nil {
+		t.Fatal(err)
+	}
+	if err = RevokeTemplateHTTPSource(next.ID); err != nil {
+		t.Fatal(err)
+	}
+	if allowed, _ := CheckTemplateHTTPSource(next); allowed {
+		t.Fatal("revocation failed")
+	}
+	rule.Enabled = false
+	if err = av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	if IsTemplateHTTPSourceCurrent(next) {
+		t.Fatal("disabled rule remains current")
+	}
+}
 
 func writeTemplateHTTPPermissionTestAV(t *testing.T, avID, fieldID, slot, content string) {
 	t.Helper()

@@ -32,11 +32,12 @@ test("update cards keep rating before funding and updating as the final action",
                 _genPackageIconHTML: () => "", _genIncompatibleChipHTML: () => "", _genDeprecatedChipHTML: () => "",
                 _genFundingHTML: () => '<span data-type="funding"></span>',
                 _genOpenStorageHTML: () => '<span data-type="open-storage"></span>',
+                _genBatchUpdatePreferenceHTML: () => '<button data-type="skip-batch-update"></button>',
                 _genUpdateButtonHTML: () => '<span data-type="install-t"></span>',
             });
             const html = exports.bazaar._genUpdateItemHTML({installed: {name: "package"}, available: {}}, type);
             assert.deepEqual(Array.from(html.matchAll(/data-type="([^"]+)"/g), match => match[1]),
-                ["rate-package", "funding", "open", "open-storage", "install-t"]);
+                ["rate-package", "funding", "open", "open-storage", "skip-batch-update", "install-t"]);
         }
     }
 });
@@ -83,7 +84,7 @@ test("directory actions delegate to the owner and preserve installed-package and
 });
 
 for (const mode of ["settings-window", "main-window", "mobile"]) {
-    test(`installed package cards use plugin ownership for setting buttons (${mode})`, () => {
+    test(`installed cards omit batch exclusion controls and preserve plugin ownership (${mode})`, () => {
         const packages = ["none", "configured", "custom"].map(name => ({name, preferredName: name, preferredDesc: ""}));
         const classList = {contains: () => false, add() {}, remove() {}};
         const activeButton = {classList, getAttribute: () => "myPlugins"};
@@ -93,8 +94,8 @@ for (const mode of ["settings-window", "main-window", "mobile"]) {
         const settingNames = [];
         const exports = {};
         runInNewContext(compiled, {exports,
-            BAZAAR_PACKAGE_CONFIG: {plugins: {myType: "myPlugins", api: {installed: "/installed"}},
-                themes: {myType: "myPlugins", api: {installed: "/installed"}}},
+            BAZAAR_PACKAGE_CONFIG: Object.fromEntries(["plugins", "themes", "icons", "templates", "widgets"]
+                .map(type => [type, {myType: "myPlugins", api: {installed: "/installed"}}])),
             fetchPost: (_url, _data, callback) => {callback({data: {packages}}); return Promise.resolve();},
             getFrontend: () => "desktop", isMobile: () => mode === "mobile", isBrowser: () => false,
             getHostCapabilities: () => ({localFileSystem: true}),
@@ -107,7 +108,8 @@ for (const mode of ["settings-window", "main-window", "mobile"]) {
                 return plugin.name !== "none";
             },
             isBazaarPluginEnabledInPublish: () => false, getRatingKey: (_type, name) => name,
-            escapeHtml: value => value, escapeAttr: value => value, genRatePackageActionHTML: () => "",
+            escapeHtml: value => value, escapeAttr: value => value,
+            genRatePackageActionHTML: () => '<span data-type="rate-package"></span>',
             loadDownloadedRatings() {}, loadDownloadedUserRatings() {}, renderBazaarInstall() {},
             window: {siyuan: {config: {publish: {enable: false}, bazaar: {petalDisabled: false}},
                 languages: {config: "Settings", uninstall: "Uninstall", disable: "Disable", enable: "Enable"}}},
@@ -119,8 +121,11 @@ for (const mode of ["settings-window", "main-window", "mobile"]) {
             _syncPluginGlobalSwitch() {}, _updateDownloadedToolbar() {}, _updateDownloadedSortSelect() {},
             _getDownloadedSortValue: () => "", _captureMount: () => 0, _isMountCurrent: () => true,
             _applyDownloadedDeprecations() {}, _sortDownloadedPackages: items => items, _getUpdatedItem() {},
-            _genPackageIconHTML: () => "", _genUpdateButtonHTML: () => "", _genIncompatibleChipHTML: () => "",
-            _genDeprecatedChipHTML: () => "", _genFundingHTML: () => "", _genOpenStorageHTML: () => "",
+            _shouldKeepDownloadedOrder: () => false,
+            _genPackageIconHTML: () => "", _genUpdateButtonHTML: () => '<span data-type="install-t"></span>',
+            _genIncompatibleChipHTML: () => "", _genDeprecatedChipHTML: () => "",
+            _genFundingHTML: () => '<span data-type="funding"></span>',
+            _genOpenStorageHTML: () => '<span data-type="open-storage"></span>',
             _loadDownloadedDeprecations() {},
         });
         bazaar._genMyHTML("plugins", {plugins: packages});
@@ -129,8 +134,16 @@ for (const mode of ["settings-window", "main-window", "mobile"]) {
         assert.deepEqual(cards.map(card => card.includes('data-type="setting"')), [false, true, true]);
         assert.deepEqual(settingNames, mode === "settings-window" ? ["none", "configured", "custom"] : []);
         settingNames.length = 0;
-        bazaar._genMyHTML("themes", {plugins: packages});
-        assert.ok(!content.innerHTML.includes('data-type="setting"'));
-        assert.deepEqual(settingNames, []);
+        for (const type of ["plugins", "themes", "icons", "templates", "widgets"]) {
+            bazaar._genMyHTML(type, {plugins: packages});
+            for (const card of content.innerHTML.split('<div data-name="').slice(1)) {
+                const commonActions = ["rate-package", "funding", "open", "open-storage", "install-t"];
+                const actions = Array.from(card.matchAll(/data-type="([^"]+)"/g), match => match[1]);
+                assert.deepEqual(actions.filter(action => commonActions.includes(action)), commonActions);
+                assert.ok(!actions.includes("skip-batch-update"));
+                assert.ok(actions.indexOf("install-t") < actions.indexOf("plugin-enable"));
+            }
+            if (type !== "plugins") assert.ok(!content.innerHTML.includes('data-type="setting"'));
+        }
     });
 }

@@ -91,9 +91,20 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
             }
         });
         await settle();
-        check.equal(configurations, 24, "a mutation batch configures each image once");
+        check.equal(configurations, 0, "stable image controls survive unrelated child mutations without reconfiguration");
         check.ok(initializations <= 24, `a mutation batch initializes each image at most once: ${initializations}`);
         check.equal(batch.querySelectorAll(".protyle-image-resize").length, 24);
+        const caption = batch.querySelector(".protyle-action__title");
+        caption.textContent = "new caption";
+        await settle();
+        check.equal(configurations, 1, "caption changes configure only their image");
+        check.equal(caption.classList.contains("protyle-image-caption"), true);
+        const brokenFrame = batch.querySelector(".protyle-image-resize");
+        brokenFrame.firstElementChild.remove();
+        // 控件内部变更由布局节点变更触发校验。
+        brokenFrame.parentElement.append(document.createTextNode(" "));
+        await settle();
+        check.equal(brokenFrame.childElementCount, 3, "an incomplete frame is repaired");
         stop();
         batch.remove();
     }

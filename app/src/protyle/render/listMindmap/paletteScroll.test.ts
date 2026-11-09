@@ -288,10 +288,11 @@ for (const scale of [1, 2]) {
         writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
+app.commandLine.appendSwitch("enable-smooth-scrolling");
 app.commandLine.appendSwitch("force-device-scale-factor", "${scale}");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, width: 600, height: 400,
-        webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+        webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
     win.webContents.debugger.attach("1.3");
     ipcMain.handle("palette-wheel", async (_event, input) => {
         await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", input);

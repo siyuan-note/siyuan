@@ -674,14 +674,18 @@ func renderAttributeViewWithOptions(attrView *av.AttributeView, nodeID, viewID, 
 		err = contextErr
 		return
 	}
+	nested := options.Nested != nil && attrView.SubItems != nil && attrView.SubItems.Enabled && view.SubItemsDisplay == "nested" &&
+		(view.LayoutType == av.LayoutTypeTable || view.LayoutType == av.LayoutTypeList)
 	if options.HTTPPreview.Prepare(attrView) && !ignoreRows {
-		plan := planAttributeViewTemplates(attrView, view, query, false)
-		if plan == nil || len(plan.required) != 0 || options.Nested != nil {
-			// 筛选、排序、分组和日历依赖模板结果时先展示字段结构，避免临时行集被误认作最终结果。
+		previewView := *view
+		previewView.Sorts = nil
+		plan := planAttributeViewTemplates(attrView, &previewView, query, false)
+		if plan == nil || len(plan.required) != 0 || nested {
+			// 筛选、分组和日历依赖模板结果时先展示字段结构；仅排序时可先显示条目，联网后再确定顺序。
 			ignoreRows = true
 		}
 	}
-	if options.Nested != nil && attrView.SubItems != nil && attrView.SubItems.Enabled && view.SubItemsDisplay == "nested" && (view.LayoutType == av.LayoutTypeTable || view.LayoutType == av.LayoutTypeList) {
+	if nested {
 		return renderNestedAttributeView(attrView, view, query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, filterContext, options)
 	}
 

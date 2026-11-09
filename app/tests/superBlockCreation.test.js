@@ -26,6 +26,7 @@ const sources = () => {
             (extract("protyle/util/selectionOffsets.ts", ["focusByRange"]) +
         extract("protyle/util/selection.ts", ["focusByWbr"])),
             extract("protyle/wysiwyg/getBlock.ts", ["getContenteditableElement", "getParentBlock"]),
+            extract("protyle/hint/titleSlash.ts", ["isTitleSlashContext"]),
             extract("mobile/util/keyboardToolbar.ts", ["getSlashItem", "renderSlashMenu"]),
         ].join("\n"),
         hint: compile(readFileSync(path.join(__dirname, "../src/protyle/hint/index.ts"), "utf8")),

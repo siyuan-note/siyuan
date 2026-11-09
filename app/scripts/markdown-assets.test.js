@@ -4,6 +4,7 @@ const os = require("node:os");
 const path = require("node:path");
 const {spawnSync} = require("node:child_process");
 const {test} = require("node:test");
+const vm = require("node:vm");
 const {markdownAssetFiles, prepareMarkdownAssets, MarkdownAssetsPlugin, REQUIRED_ASSETS, SHARED_LUTE_ASSET, LEGACY_LUTE_ASSET} = require("./markdown-assets");
 
 const temporary = t => {
@@ -114,7 +115,7 @@ test("Markdown configuration is an independent web entry included by development
     assert.equal(config.watch, false);
     assert.equal(makeConfig({}, {mode: "development"}).watch, true);
     const pkg = require("../package.json");
-    assert.equal(pkg.devDependencies.vditor, "4.0.2-alpha.3");
+    assert.equal(pkg.devDependencies.vditor, "4.0.2-alpha.8");
     assert.match(pkg.scripts.dev, /--config webpack\.markdown\.js/);
     assert.match(pkg.scripts["build:markdown"], /webpack\.markdown\.js/);
     assert.match(pkg.scripts.build, /\/build:\.\*\//);
@@ -147,5 +148,30 @@ test("the real standalone Webpack dependency graph compiles in an isolated outpu
         assert.equal(fs.existsSync(legacy), false);
         assert.equal(fs.existsSync(emoji), false);
         assert.equal(fs.existsSync(path.join(config.output.path, "open-window.js")), true);
+    } finally {await new Promise((resolve, reject) => compiler.close(error => error ? reject(error) : resolve()));}
+});
+
+test("production Markdown assets preserve vendor globals and highlight JavaScript", {timeout: 90000}, async t => {
+    const config = require("../webpack.markdown")({}, {mode: "production"});
+    config.context = path.resolve(__dirname, "..");
+    config.output = {...config.output, path: temporary(t)};
+    const compiler = require("webpack")(config);
+    try {
+        const stats = await new Promise((resolve, reject) => compiler.run((error, value) => error ? reject(error) : resolve(value)));
+        assert.equal(stats.hasErrors(), false, stats.toString({all: false, errors: true}));
+        for (const file of markdownAssetFiles()) {
+            assert.ok(fs.readFileSync(path.join(config.output.path, file.name)).equals(fs.readFileSync(file.source)),
+                `production changed offline asset ${file.name}`);
+        }
+        const context = vm.createContext({});
+        for (const filename of ["highlight.min.js", "third-languages.js"]) {
+            vm.runInContext(fs.readFileSync(path.join(config.output.path, "vditor/dist/js/highlight.js", filename), "utf8"),
+                context, {filename, timeout: 15000});
+        }
+        assert.equal(typeof context.hljs.highlight, "function");
+        assert.ok(context.hljs.getLanguage("yul"), "third-party grammars register on the shared global");
+        const html = context.hljs.highlight("document.body.insertAdjacentHTML('afterbegin', ``);", {language: "js"}).value;
+        assert.match(html, /hljs-title function_/);
+        assert.match(html, /hljs-string/);
     } finally {await new Promise((resolve, reject) => compiler.close(error => error ? reject(error) : resolve()));}
 });

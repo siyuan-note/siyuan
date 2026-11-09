@@ -319,3 +319,35 @@ func TestTransactionSourcePreservesNewerConcurrentFile(t *testing.T) {
 	}
 	assertIndexRepairDocument(t, current)
 }
+
+func TestTransactionSourceRejectsConcurrentDatabaseWrite(t *testing.T) {
+	_, view, tx := setupAttributeViewBindingUndoTest(t, false)
+	filename, _ := view.StoragePath()
+	original, err := os.ReadFile(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tx.watchSourceDatabase(view)
+	defer func() {
+		for _, release := range tx.sourceWatchers {
+			release()
+		}
+	}()
+	tx.sourceJournal = &documentSourceJournal{Version: 1, ID: ast.NewNodeID(), State: "pending"}
+	newer := bytes.ReplaceAll(original, []byte("Original primary"), []byte("Concurrent primary"))
+	if bytes.Equal(newer, original) {
+		t.Fatal("fixture did not change the database source")
+	}
+	// 模拟不属于当前事务的已提交写入，不能由事务记录器吸收为自身修改。
+	if err = os.WriteFile(filename, newer, 0644); err != nil {
+		t.Fatal(err)
+	}
+	view.Name = "Stale transaction"
+	if err = av.SaveAttributeView(view); !errors.Is(err, util.ErrFileChanged) {
+		t.Fatalf("stale database write was not rejected: %v", err)
+	}
+	actual, err := os.ReadFile(filename)
+	if err != nil || !bytes.Equal(actual, newer) {
+		t.Fatal("rejected transaction overwrote the newer database", err)
+	}
+}

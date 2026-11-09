@@ -5,15 +5,18 @@
 package model
 
 import (
+	"bytes"
+
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
-// appendAttributeViewRichTextExport 将数据库富文本源作为单元格子块导出，保留列表和行级样式。
-func appendAttributeViewRichTextExport(cell *ast.Node, value *av.ValueText) error {
+// Markdown 单元格使用单行 HTML 保存块结构，其他格式使用子块参与后续导出转换。
+func appendAttributeViewRichTextExport(cell *ast.Node, value *av.ValueText, richTableCells bool) error {
 	fragment, err := av.ParseValueTextRich(value.Rich)
 	if err != nil {
 		return err
@@ -32,6 +35,19 @@ func appendAttributeViewRichTextExport(cell *ast.Node, value *av.ValueText) erro
 	})
 	for _, node := range unlinks {
 		node.Unlink()
+	}
+	if !richTableCells {
+		options := render.NewOptions()
+		options.Sanitize, options.SoftBreak2HardBreak, options.DataTask = true, true, true
+		options.CodeSyntaxHighlight = false
+		renderer := render.NewHtmlRenderer(fragment, options, fragment.Context.ParseOption)
+		renderer.SetTextMarkStandardTag()
+		content := renderer.Render()
+		content = bytes.ReplaceAll(content, []byte("|"), []byte("&#124;"))
+		content = bytes.ReplaceAll(content, []byte("\r"), []byte("&#13;"))
+		content = bytes.ReplaceAll(content, []byte("\n"), []byte("&#10;"))
+		cell.AppendChild(&ast.Node{Type: ast.NodeInlineHTML, Tokens: content})
+		return nil
 	}
 	for fragment.Root.FirstChild != nil {
 		cell.AppendChild(fragment.Root.FirstChild)

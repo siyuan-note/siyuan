@@ -533,24 +533,38 @@ func parseDocIALForMode(reader io.Reader, mode int) (ret map[string]string, err 
 	if r.err != nil {
 		return nil, r.err
 	}
-	// 属性可以排在版本之前，完整检查根对象后才能返回，版本错误不能进入属性修复。
-	if specErr != nil {
+	// 版本错误不能进入属性修复；无法识别的版本值不暴露源内容。
+	if specErr != nil && !errors.Is(specErr, treenode.ErrSpecTooNew) {
 		return nil, specErr
 	}
 	if iter.Error != io.EOF {
+		if specErr != nil {
+			return nil, specErr
+		}
 		return nil, ErrInvalidDocIAL
+	}
+	// 未来版本的属性表示不可信，解码失败时版本错误优先，不把源当成可修复的损坏。
+	decodeErr := jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal(properties, &ret)
+	if decodeErr != nil || len(ret) == 0 {
+		ret = nil
+	}
+	for k, v := range ret {
+		ret[k] = html.UnescapeAttrVal(v)
+	}
+	if specErr != nil {
+		// 版本过新时属性随错误一并返回，仅供调用方占位展示，不得写回、缓存或据此修复源。
+		if decodeErr == nil && len(ret) > 0 {
+			return ret, specErr
+		}
+		return nil, specErr
 	}
 	if titleErr != nil {
 		return nil, titleErr
 	}
-	// 先校验源版本，再按当前属性结构解码，避免把未来版本的属性表示当成损坏数据。
-	if err = jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal(properties, &ret); err != nil || len(ret) == 0 {
+	if decodeErr != nil || len(ret) == 0 {
 		return nil, ErrInvalidDocIAL
 	}
 
-	for k, v := range ret {
-		ret[k] = html.UnescapeAttrVal(v)
-	}
 	return
 }
 

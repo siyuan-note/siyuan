@@ -17,7 +17,9 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     const files = [doc, otherDoc].map((id): IFile => ({id, path: `/${id}.sy`, name: `Title ${id}`, subFileCount: 0,
         icon: "", count: 0, name1: "", alias: "", memo: "", bookmark: "", hMtime: "", hCtime: "", hSize: "",
         childrenSortMode: null}));
-    const events: {type: string, items: {id: string, path: string, notebookId: string}[], elements: NodeListOf<HTMLElement>}[] = [];
+    const events: {type: string, items: {
+        id: string, path: string, notebookId: string, effectiveSortMode: number, childrenSortMode?: number | null,
+    }[], elements: NodeListOf<HTMLElement>}[] = [];
     const databases: unknown[][] = [], icons: unknown[][] = [];
     let treeAccess = 0;
     let subscribed = true;
@@ -90,7 +92,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
         "mobile/util/closePanel": {}, "mobile/menu/search": {}, "util/newFile": {}, "editor/deleteFile": {},
         "editor/util": {}, "layout/tabUtil": {getDockByType: (): undefined => undefined}, "layout/dock/Files": {},
         "layout/dock/docTree/DocTreeController": {getDocTreeController: () => { treeAccess++; throw new Error("Live tree access"); }},
-        "card/openCard": {}, "card/viewCards": {}, "history/doc": {}, "card/makeCard": {},
+        "card/openCard": {}, "card/flashcardV2": {}, "history/doc": {}, "card/makeCard": {},
         "protyle/wysiwyg/transaction": {}, "protyle/export/exportMd": {},
         "util/fileTreeSort": {}, "util/hostCapabilities": {getHostCapabilities: () => ({documentImportExport: false})},
         "emoji": {openEmojiPanel: (...args: unknown[]) => icons.push(args), unicode2Emoji: () => '<img src="data:,">'},
@@ -102,6 +104,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     }
     Object.assign(externals, {
         "protyle/render/av/searchAVFocus": {getSearchAVFocus: (): undefined => undefined},
+        "protyle/render/av/relatedViewConfig": {getPendingRelatedViewConfig: (): undefined => undefined},
         "protyle/render/av/filteredTip": {}, "protyle/util/selectionOffsets": {},
         "protyle/util/selection": {}, "util/upDownHint": {}, "util/documentSelectionRequest": {},
     });
@@ -128,9 +131,9 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     const keys = new Proxy({}, {get: () => ({custom: ""})});
     Object.assign(window, {siyuan: {languages: new Proxy({}, {get: (_value, key) => String(key)}), zIndex: 0, storage: {},
         notebooks: [box, otherBox].map((id, index) => ({id, name: `Notebook ${index}`, icon: "", closed: false,
-            subFileCount: 2, sortMode: 6})), ws: {app: {}}, menus: {},
+            subFileCount: 2, sortMode: index === 0 ? 15 : 2})), ws: {app: {}}, menus: {},
         mobile: {size: {portrait: {height1: innerHeight}}, docks: {}},
-        config: {appearance: {}, readonly: false, fileTree: {boxDocEnabled: true, parentDocTitleClickMode: 1},
+        config: {appearance: {}, readonly: false, fileTree: {boxDocEnabled: true, parentDocTitleClickMode: 1, sort: 0},
             flashcard: {deck: false}, keymap: {general: keys, editor: {general: keys}}}}});
     const {Menu, MenuItem}: typeof import("../menus/Menu") = load("menus/Menu");
     Object.assign(window, {Lute: {NewNodeID: () => "20260101000000-eeeeeee"}});
@@ -172,6 +175,11 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
         check.ok(event.elements instanceof NodeList);
         check.equal(event.elements.length, items.length);
         check.equal(event.items.length, items.length);
+        event.items.forEach((item, index) => {
+            check.equal(item.effectiveSortMode, items[index].id ? 6 : items[index].notebookId === box ? 0 : 2);
+            check.equal(Object.hasOwn(item, "childrenSortMode"), Boolean(items[index].id));
+            if (items[index].id) { check.equal(item.childrenSortMode, null); }
+        });
         event.elements.forEach((element, index) => {
             check.equal(element.isConnected, false);
             check.equal(getDocTreeItem(element).notebookId, items[index].notebookId);
@@ -299,7 +307,7 @@ for (const mobile of [false, true]) {
         {timeout: 45000}, async () => {
         const sources = Object.fromEntries(["plugin/openDocTreeMenu", "plugin/EventBus", "plugin/Menu", "menus/navigation",
             "menus/navigationSelection", "menus/Menu", "menus/menuToggle", "menus/menuPosition", "menus/menuMouseScroll",
-            "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture",
+            "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
             "util/setPosition", "protyle/util/hasClosest", "layout/dock/docTree/row", "layout/dock/docTree/rowData",
             "protyle/render/av/addToDatabase", "protyle/render/av/relation"]
             .map(name => [name, transpileModule(parse(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"),

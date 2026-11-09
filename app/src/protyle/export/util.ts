@@ -25,9 +25,8 @@ const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAA
 
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
-    showMessage(`${window.siyuan.languages.exported} ${escapeHtml(exportPath)}
-<div class="fn__space"></div>
-<button class="b3-button b3-button--white">${window.siyuan.languages.showInFolder}</button>`, 6000, "info", msgId);
+    showMessage(`<div class="b3-snackbar__actions"><div class="b3-snackbar__body">${window.siyuan.languages.exported} ${escapeHtml(exportPath)}</div>
+<button class="b3-button b3-button--white b3-button--wrap b3-snackbar__action">${window.siyuan.languages.showInFolder}</button></div>`, 6000, "info", msgId);
     document.querySelector(`#message [data-id="${msgId}"] button`).addEventListener("click", () => {
         useShell("showItemInFolder", path.join(exportPath));
         hideMessage(msgId);

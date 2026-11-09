@@ -5,6 +5,8 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {isAVReadonlyType} from "./capabilities";
 import {genAVDragFillValue} from "./dragFillValue";
+import {getAVHostBlockID} from "./host";
+import dayjs from "dayjs";
 
 const load = (file: string, name: string, dependencies: Record<string, unknown>) => {
     const source = ts.createSourceFile(file, readFileSync(`src/protyle/render/av/${file}`, "utf8"), ts.ScriptTarget.ES2022, true);
@@ -34,12 +36,13 @@ test("drag filling a first field retains hierarchy controls and the normal undo 
     const target: IAVCellValue = {id: "value", type: "text", keyID: "field", blockID: "child", text: {content: "Before"}};
     const content = {innerHTML: "Before"};
     const cell = {dataset: {id: "value", colId: "field"}, innerHTML: controls, querySelector: () => content};
-    const node = {dataset: {avId: "database"}, querySelector: (): null => null, querySelectorAll: () => [cell]};
+    const node = {dataset: {avId: "database", nodeId: "carrier"}, getAttribute: () => "20261101000000",
+        querySelector: (): null => null, querySelectorAll: () => [cell]};
     const transactions: IOperation[][][] = [];
     const fill = load("cell.ts", "dragFillCellsValue", {
         getAVSelectedCells: (): import("./selectionState").IAVSelectedCell[] => [],
         hasClosestByClassName: () => ({dataset: {id: "child"}}), getTypeByCellElement: () => "text",
-        genCellValueByElement: () => structuredClone(target), genAVDragFillValue, isAVReadonlyType,
+        genCellValueByElement: () => structuredClone(target), genAVDragFillValue, isAVReadonlyType, getAVHostBlockID, dayjs,
         renderCell: (value: IAVCellValue) => `<span class="av__celltext">${value.text.content}</span>`,
         renderCellAttr() {}, renderAVRichTextElements() {}, updateAVSelectedCellValue() {}, focusBlock() {},
         transaction: (_protyle: IProtyle, redo: IOperation[], undo: IOperation[]) => transactions.push([redo, undo]),
@@ -50,6 +53,12 @@ test("drag filling a first field retains hierarchy controls and the normal undo 
     assert.equal(transactions.length, 1);
     assert.equal(transactions[0][0][0].action, "updateAttrViewCell");
     assert.equal(transactions[0][0][0].rowID, "child");
+    assert.equal(transactions[0][0][0].blockID, "carrier");
+    assert.equal(transactions[0][0].length, 2);
+    assert.equal(transactions[0][0][1].action, "doUpdateUpdated");
+    assert.equal(transactions[0][0][1].id, "carrier");
+    assert.equal(transactions[0][1][1].action, "doUpdateUpdated");
+    assert.equal(transactions[0][1][1].data, "20261101000000");
     const undo = transactions[0][1][0];
     assert.equal(undo.action, "updateAttrViewCell");
     if (undo.action === "updateAttrViewCell") assert.equal(undo.data.text.content, "Before");

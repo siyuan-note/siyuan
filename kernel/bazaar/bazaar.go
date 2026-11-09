@@ -174,6 +174,7 @@ func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*baz
 
 	// 更新信息
 	disallowVer := isBelowRequiredAppVersion(&pkg)
+	pkg.BazaarVersionUnsupported = disallowVer
 	pkg.DisallowInstall = disallowVer
 	pkg.DisallowUpdate = disallowVer
 	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
@@ -190,6 +191,7 @@ func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*baz
 	}
 
 	// 统计信息
+	pkg.Created = repo.Created
 	pkg.Updated = repo.Updated
 	pkg.HUpdated = formatUpdated(pkg.Updated)
 	pkg.Stars = repo.Stars

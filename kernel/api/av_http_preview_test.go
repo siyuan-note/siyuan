@@ -22,6 +22,7 @@ func TestAPIContractAttributeViewHTTPPreview(t *testing.T) {
 	primary.Values = append(primary.Values, &av.Value{ID: "20261104000000-httpval", KeyID: primary.Key.ID,
 		BlockID: rowID, Type: av.KeyTypeBlock, IsDetached: true, Block: &av.ValueBlock{Content: "Available"}})
 	fixture.attrView.Views[0].ItemIDs = []string{rowID}
+	fixture.attrView.Views[0].Sorts = []*av.ViewSort{{Column: key.ID, Order: av.SortOrderDesc}}
 	if err := av.SaveAttributeView(fixture.attrView); err != nil {
 		t.Fatal(err)
 	}
@@ -29,6 +30,7 @@ func TestAPIContractAttributeViewHTTPPreview(t *testing.T) {
 		response := callAttributeViewContextFilterAPI(t, "/api/av/renderAttributeView", map[string]any{
 			"id": fixture.attrView.ID, "viewID": fixture.attrView.Views[0].ID,
 			"createIfNotExist": false, "deferHTTPTemplates": preview,
+			"nested": map[string]any{"groupExpandedIDs": map[string]any{}, "childPaging": map[string]any{}},
 		}, renderAttributeView)
 		requireAPIContract(t, "POST", "/api/av/renderAttributeView", response)
 		var result struct {

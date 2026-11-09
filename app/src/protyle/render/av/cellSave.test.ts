@@ -2,12 +2,75 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
-import {createSourceFile, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isCallExpression, ModuleKind, Node, ScriptTarget, transpileModule} from "typescript";
+import {loadModule} from "../../../testSupport/loadModule";
 import {createAVCellUpdateOperation} from "./cellValue";
 import {isAVReadonlyType} from "./capabilities";
 import {getAVHostIdentity} from "./host";
 
 const source = createSourceFile("cell.ts", readFileSync("src/protyle/render/av/cell.ts", "utf8"), ScriptTarget.Latest);
+const inputSave = source.statements.find(statement => statement.getText(source).startsWith("const updateCellValueByInput"));
+let inputKeydown: Node;
+const findInputKeydown = (node: Node) => {
+    if (isCallExpression(node) && node.expression.getText(source) === "inputElement.addEventListener" &&
+        node.arguments[0].getText(source) === '"keydown"' && node.arguments[1].getText(source).includes("savingContinuousInput")) {
+        inputKeydown = node.arguments[1];
+    }
+    node.forEachChild(findInputKeydown);
+};
+findInputKeydown(source);
+assert.ok(inputSave && inputKeydown);
+const inputCode = transpileModule(`let savingContinuousInput = false; ${inputSave.getText(source)}
+const handler = ${inputKeydown.getText(source)}; handler;`, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
+const continuous = loadModule<typeof import("./continuousInput")>("src/protyle/render/av/continuousInput.ts", {require: () => ({})});
+
+test("ordinary input confirms once, retains failed drafts and respects focus moved during saving", async () => {
+    for (const result of ["saved", "failed", "focusMoved"]) {
+        let complete: () => void;
+        let fail: () => void;
+        const saving = new Promise<void>((resolve, reject) => {complete = resolve; fail = () => reject(new Error("failed"));});
+        let saves = 0;
+        let next = 0;
+        let errors = 0;
+        const input = {value: "42", dataset: {changed: "true"}, disabled: false};
+        const cell = {dataset: {dtype: "number"}, classList: {add() {}}};
+        const block = {isConnected: true, getAttribute: (key: string) => key === "data-av-type" ? "table" : "database"};
+        const mask = {isConnected: true, querySelector: () => input, contains: () => false, remove() {this.isConnected = false;}};
+        const body = {};
+        const document = {body, activeElement: body, querySelector: (key: string) => key === ".av__mask" ? mask : null};
+        const keydown = runInNewContext(inputCode, {
+            protyle: {}, type: "number", blockElement: block, cellElements: [cell], inputElement: input, avMaskElement: mask,
+            inputTarget: () => ({elements: [cell], cells: [] as import("./selectionState").IAVSelectedCell[]}), electronUndo: () => false,
+            isAVContinuousInputKey: continuous.isAVContinuousInputKey,
+            prepareAVContinuousInput: () => () => {next++;},
+            updateCellsValue: (...args: unknown[]) => {
+                assert.equal(args.at(-1), true);
+                saves++;
+                return saving;
+            },
+            hasClosestByClassName: (): null => null, isTableLikeView: () => true, addDragFill() {}, focusBlock() {},
+            document,
+            window: {siyuan: {languages: {settingsPendingSaveError: "failed"}}},
+            showMessage: () => {errors++;}, console: {error() {}},
+        }) as (event: KeyboardEvent) => Promise<void>;
+        const event = {key: "Enter", preventDefault() {}, stopPropagation() {}} as KeyboardEvent;
+        const pending = keydown(event);
+        assert.equal(saves, 1);
+        assert.equal(next, 0);
+        assert.equal(input.disabled, true);
+        await keydown(event);
+        assert.equal(saves, 1);
+        if (result === "focusMoved") document.activeElement = {};
+        if (result === "failed") fail();
+        else complete();
+        await pending;
+        assert.equal(next, result === "saved" ? 1 : 0);
+        assert.equal(mask.isConnected, result === "failed");
+        assert.equal(input.disabled, false);
+        assert.equal(errors, result === "failed" ? 1 : 0);
+        assert.equal(input.value, "42");
+    }
+});
 const declaration = source.statements.find(statement => statement.getText(source).startsWith("export const updateCellsValue"));
 const code = transpileModule(declaration.getText(source), {compilerOptions: {
     module: ModuleKind.CommonJS, target: ScriptTarget.ES2022,

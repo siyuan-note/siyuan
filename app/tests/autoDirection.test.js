@@ -160,6 +160,83 @@ const runCases = async () => {
     assert.equal(root.querySelector("[data-auto-direction]"), null);
 };
 
+const runTitleObserverCases = async () => {
+    const assert = require("node:assert/strict");
+    const {setAutoDirection, destroyAutoDirection, setTitleAutoDirection} = window.direction;
+    for (const mobile of [false, true]) {
+        const container = document.createElement("div");
+        container.className = "protyle";
+        const root = document.createElement("div");
+        root.className = "protyle-wysiwyg";
+        const html = '<div data-type="NodeParagraph"><div contenteditable="true"><strong>English</strong></div></div>';
+        root.innerHTML = mobile ? '<input value="English">' : html;
+        container.append(root);
+        document.body.append(container);
+        const editable = () => root.querySelector(mobile ? "input" : "[contenteditable]");
+        let enabled = true;
+        let callbacks = 0;
+        let overflow = false;
+        // 标题片段的属性变更会刷新可编辑区域，并重新应用标题方向。
+        const observer = new MutationObserver(() => {
+            if (++callbacks > 20) {
+                overflow = true;
+                observer.disconnect();
+                return;
+            }
+            setTitleAutoDirection(editable(), enabled);
+        });
+        observer.observe(root, {subtree: true, childList: true, characterData: true, attributes: true});
+        const settle = async () => {
+            await new Promise(resolve => setTimeout(resolve, 0));
+            assert.equal(overflow, false, `${mobile ? "mobile" : "rich"} title direction must converge`);
+            assert.ok(callbacks < 6, `${callbacks} title callbacks for one update`);
+            callbacks = 0;
+        };
+        try {
+            setAutoDirection(root, enabled);
+            setTitleAutoDirection(editable(), enabled);
+            await settle();
+            assert.equal(editable().dir, "auto");
+            setTitleAutoDirection(editable(), enabled);
+            await settle();
+            assert.equal(observer.takeRecords().length, 0);
+            for (const text of ["שלום English", "English שלום"]) {
+                if (mobile) {
+                    editable().value = text;
+                } else {
+                    editable().firstElementChild.firstChild.data = text;
+                }
+                await settle();
+                assert.equal(getComputedStyle(editable()).direction, text.startsWith("English") ? "ltr" : "rtl");
+            }
+            for (const direction of ["rtl", "ltr"]) {
+                editable().dir = direction;
+                await settle();
+                setTitleAutoDirection(editable(), false);
+                assert.equal(editable().dir, direction);
+                assert.equal(getComputedStyle(editable()).direction, direction);
+            }
+            root.innerHTML = mobile ? '<input value="English">' : html;
+            await settle();
+            assert.equal(editable().dir, "auto");
+            enabled = false;
+            setAutoDirection(root, enabled);
+            setTitleAutoDirection(editable(), enabled);
+            await settle();
+            assert.equal(editable().hasAttribute("dir"), false);
+            enabled = true;
+            setAutoDirection(root, enabled);
+            setTitleAutoDirection(editable(), enabled);
+            await settle();
+            assert.equal(editable().dir, "auto");
+        } finally {
+            observer.disconnect();
+            destroyAutoDirection(root);
+            container.remove();
+        }
+    }
+};
+
 const runListCases = async () => {
     const assert = require("node:assert/strict");
     const settle = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -509,6 +586,7 @@ const runElectron = async () => {
             window.direction = exports;
         })()`);
         await win.webContents.executeJavaScript(`(${runCases.toString()})()`);
+        await win.webContents.executeJavaScript(`(${runTitleObserverCases.toString()})()`);
         for (const file of ["protyle/_wysiwyg.scss", "component/_typography.scss"]) {
             await win.webContents.insertCSS(require("sass").compile(path.join(__dirname, "../src/assets/scss", file)).css);
         }
@@ -574,7 +652,7 @@ if (process.versions.electron && process.type === "browser") {
         require("electron").app.exit(1);
     });
 } else {
-    require("node:test").it("batches automatic direction updates while preserving manual settings, content and structural layout", {
+    require("node:test").it("batches automatic direction updates and converges for observed titles while preserving content and layout", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,
     }, async () => {

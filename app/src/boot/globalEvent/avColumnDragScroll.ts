@@ -31,6 +31,11 @@ export const scrollDraggedAVColumn = (event: DragEvent & {target: HTMLElement}) 
             bottom = Math.min(bottom, viewport.bottom);
         }
     }
+    // 冻结列遮住左侧内容，向左滚动的触发边缘位于冻结区域右侧。
+    const frozen = header.querySelector(".av__colsticky--freeze");
+    if (frozen && !header.closest(".av__body")?.classList.contains("av__body--unfreeze")) {
+        left = Math.max(left, frozen.getBoundingClientRect().right);
+    }
     if (left >= right || top >= bottom || event.clientX < left || event.clientX > right ||
         event.clientY < top || event.clientY > bottom) {
         stopScrollAnimation();

@@ -354,16 +354,13 @@ test("block retry requires an acknowledged update and never replays titles or st
     guard.dispose();
 });
 
-test("plain notebook Title flushes debounce once, captures composition, and can cancel pending saves", () => {
+test("notebook Title protects unloaded source during composition and flushes through its rich editor", async () => {
     let nextTimer = 0;
     const timers = new Map<number, () => void>();
     const requests: unknown[] = [];
     const exports = loadModule<{Title?: {prototype: any}}>("src/protyle/header/Title.ts", {
         require: (name: string) => {
             if (name === "../../util/fetch") return {fetchPost: (_url: string, data: unknown) => requests.push(data)};
-            if (name === "../../editor/rename") return {validateName: () => true, normalizeDocumentTitle: (name: string) => name};
-            if (name === "../../dialog/tooltip") return {hideTooltip: () => {}};
-            if (name === "../../constants") return {Constants: {TIMEOUT_INPUT: 400}};
             return {};
         },
         window: {siyuan: {},
@@ -376,19 +373,29 @@ test("plain notebook Title flushes debounce once, captures composition, and can 
     title.protyle = protyle;
     title.editElement = {textContent: "new title"};
     title.rename(protyle);
-    assert.equal(timers.size, 1);
+    assert.equal(timers.size, 0);
     title.flushPendingInput();
     title.flushPendingInput();
     assert.equal(timers.size, 0);
-    assert.equal(requests.length, 1);
+    assert.equal(requests.length, 0);
     title.editElement.textContent = "composing title";
     title.composing = true;
     title.flushPendingInput();
-    assert.equal(requests.length, 2);
-    assert.equal((requests[1] as {title: string}).title, "composing title");
+    assert.equal(requests.length, 0);
     title.rename(protyle);
     title.cancelPendingInput();
     title.flushPendingInput();
     assert.equal(timers.size, 0);
-    assert.equal(requests.length, 2);
+    assert.equal(requests.length, 0);
+    assert.equal(title.composing, false);
+    let finish: () => void;
+    let flushed = false;
+    title.richEditor = {flush: () => new Promise<void>(resolve => { finish = resolve; })};
+    const saving = title.flushPendingInput().then(() => { flushed = true; });
+    await Promise.resolve();
+    assert.equal(flushed, false);
+    finish();
+    await saving;
+    assert.equal(flushed, true);
+    assert.equal(requests.length, 0);
 });

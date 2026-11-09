@@ -17,6 +17,13 @@ const readonlyDeclaration = onGetSource.statements.filter(isVariableStatement)
 const compiledReadonly = transpileModule(`const disabledProtyle = ${readonlyDeclaration.initializer.getText(onGetSource)};`,
     {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
 
+const focusSource = createSourceFile("editorFocus.ts", readFileSync(__dirname + "/../util/editorFocus.ts", "utf8"), ScriptTarget.Latest, true);
+const focusDeclaration = focusSource.statements.filter(isVariableStatement)
+    .flatMap(statement => Array.from(statement.declarationList.declarations))
+    .find(item => item.name.getText(focusSource) === "canRestoreEditorFocus");
+const compiledFocus = transpileModule(`const canRestoreEditorFocus = ${focusDeclaration.initializer.getText(focusSource)};`,
+    {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
+
 const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
     let finishPreview: (value: unknown) => void;
     let finishSave: () => void;
@@ -32,9 +39,11 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
     let restored = 0;
     let history = 0;
     let focusRestored = 0;
+    let titleExitResumed = 0;
     let previews = 0;
     const synced: IProtyle[] = [];
     const messages: string[] = [];
+    const keyboardEvents: string[] = [];
     const styles = new Map([["overflow-anchor", "auto"]]);
     const protyle = {lite: false, disabled: false, element: {inert: false, isConnected: true}, block: {rootID: "root", id: "root"},
         undo: {add: () => history++}, contentElement: {scrollTop: 120, style: {
@@ -43,7 +52,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
             setProperty: (name: string, value: string) => { styles.set(name, value); },
             removeProperty: (name: string) => { styles.delete(name); },
         }}, scroll: {lastScrollTop: 120},
-        wysiwyg: {element: {focus() {}, querySelectorAll: (): Element[] => []}}};
+        wysiwyg: {element: {isConnected: true, getClientRects: () => [{}], focus() {}, querySelectorAll: (): Element[] => []}}};
     const cleanup: IOperation = {action: "cleanupAttrViewBlocks", avID: "database", data: {ruleVersion: "version", items: []}};
     const changes = kind === "references" ? [] : [{id: "block", tags: ["todo"]}];
     const dependencies = {
@@ -56,7 +65,15 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
             createRange: () => ({setStartBefore() {}, collapse() {}}),
         },
         getSelection: () => ({rangeCount: 1, getRangeAt: () => ({}), removeAllRanges() {}}),
-        getEditorFocusRange: () => ({}),
+        canRestoreEditorFocus: new Function("document", compiledFocus + "\nreturn canRestoreEditorFocus;")({activeElement: null}),
+        Node: {ELEMENT_NODE: 1},
+        suspendTabTitleEditingExit: () => () => { titleExitResumed++; },
+        preserveMobileEditorKeyboard: () => {
+            if (mode !== "mobile") return;
+            keyboardEvents.push("hold");
+            return {hasFocus: () => true, release: () => keyboardEvents.push("release")};
+        },
+        getEditorFocusRange: () => ({startContainer: {nodeType: 1, closest: (): null => null}}),
         getUndoFocusContext: (element: unknown) => mode === "cancelWithoutRange" && element === protyle.wysiwyg.element ? undefined :
             {undoFocusId: "block", undoFocusStart: element === protyle.wysiwyg.element ? "4" : "5"},
         restoreEditorFocusRange: () => { assert.equal(protyle.disabled, false); focusRestored++; return true; },
@@ -96,7 +113,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
     const transaction = new Function(...Object.keys(dependencies), compiled + "\nreturn transaction;")(...Object.values(dependencies));
     const operations: IOperation[] = [{action: "update", id: "block", data: "after"}];
     const undo: IOperation[] = [{action: "update", id: "block", data: "before<wbr>"}];
-    return {protyle, writes, messages, styles, operations, undo, cleanup, sourceVersions, synced, callbackResponse, previewed,
+    return {protyle, writes, messages, styles, operations, undo, cleanup, sourceVersions, synced, callbackResponse, previewed, keyboardEvents,
         runFrom: (editor: IProtyle) => transaction(editor, operations, undo, {awaitResponse: true}) as Promise<void>,
         run: (data = "after", awaitResponse = true, collectionRemovalSourceVersions?: Record<string, string>,
               callback?: (...args: unknown[]) => void) => transaction(protyle,
@@ -109,10 +126,44 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
         },
         finishPreview: (value: unknown) => finishPreview(value),
         finishSave: () => finishSave(), failSave: () => failSave(new Error("save failed")),
-        counts: () => ({restored, history, focusRestored, previews})};
+        counts: () => ({restored, history, focusRestored, previews, titleExitResumed})};
 };
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
+
+test("mobile reference removal keeps the keyboard guard through preview and releases it after success or failure", async () => {
+    for (const result of ["success", "cancel", "failure"]) {
+        const f = fixture("references", "mobile");
+        const pending = f.run();
+        assert.deepEqual(f.keyboardEvents, ["hold"]);
+        assert.equal(f.protyle.element.inert, true);
+        await tick();
+        f.finishPreview(result === "cancel" ? null : []);
+        await tick();
+        if (result !== "cancel") {
+            assert.deepEqual(f.keyboardEvents, ["hold"]);
+            if (result === "failure") f.failSave();
+            else f.finishSave();
+        }
+        if (result === "success") await pending;
+        else await assert.rejects(pending);
+        assert.deepEqual(f.keyboardEvents, ["hold", "release"]);
+        assert.equal(f.protyle.element.inert, false);
+    }
+});
+
+test("a mobile keyboard guard cannot restore focus to an editor hidden during deletion", async () => {
+    const f = fixture("references", "mobile");
+    const pending = f.run();
+    await tick();
+    f.protyle.wysiwyg.element.getClientRects = () => [];
+    f.finishPreview([]);
+    await tick();
+    f.finishSave();
+    await pending;
+    assert.equal(f.counts().focusRestored, 0);
+    assert.deepEqual(f.keyboardEvents, ["hold", "release"]);
+});
 
 for (const kind of ["tags", "references", "mixed"] as const) {
     for (const mode of ["cancel", "cancelWithoutRange", "sourcesOnly", "withEntries", "previewError", "noMatches", "saveError"]) {
@@ -152,6 +203,7 @@ for (const kind of ["tags", "references", "mixed"] as const) {
             assert.equal(f.protyle.scroll.lastScrollTop, 120);
             assert.equal(f.styles.get("overflow-anchor"), "auto");
             assert.equal(f.counts().focusRestored, 1);
+            assert.equal(f.counts().titleExitResumed, 1);
             if (mode.startsWith("cancel") || mode.endsWith("Error")) {
                 assert.equal(f.counts().history, 0);
                 assert.equal(f.counts().restored, 1);
@@ -188,6 +240,7 @@ for (const timing of ["beforePreview", "afterPreview"] as const) {
             assert.equal(f.counts().restored, 0);
             assert.equal(f.counts().history, 0);
             assert.equal(f.counts().focusRestored, 0);
+            assert.equal(f.counts().titleExitResumed, 1);
             assert.equal(f.counts().previews, timing === "beforePreview" ? 0 : 1);
             assert.equal(f.protyle.contentElement.scrollTop, 30);
             assert.equal(f.protyle.element.inert, action === "replaceEditor" || action === "replaceContainer");
@@ -280,6 +333,7 @@ for (const mode of ["success", "cancel", "previewError", "saveError"]) {
             assert.equal(f.protyle.disabled, true);
             assert.equal(f.protyle.element.inert, false);
             assert.equal(f.counts().focusRestored, 0);
+            assert.equal(f.counts().titleExitResumed, 1);
             assert.equal(containerFocusCalls, 0);
             assert.equal(document.activeElement, activeElement);
             assert.equal(f.counts().history, mode === "success" ? 1 : 0);
@@ -299,6 +353,7 @@ for (const kind of ["tags", "references", "mixed"] as const) {
             assert.equal(f.counts().history, 1);
             assert.equal(f.counts().restored, 0);
             assert.equal(f.counts().focusRestored, 0);
+            assert.equal(f.counts().titleExitResumed, 0);
             assert.equal(f.writes.length, 0);
             assert.deepEqual(f.synced, [f.protyle]);
             assert.equal(f.protyle.element.inert, false);

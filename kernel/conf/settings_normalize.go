@@ -182,6 +182,9 @@ func NormalizeExport(export *Export) *Export {
 	if export == nil {
 		export = defaults
 	}
+	if export.HeadingNumber == nil {
+		export.HeadingNumber = defaults.HeadingNumber
+	}
 	if export.BlockEmbedMode < 0 || export.BlockEmbedMode > 1 {
 		export.BlockEmbedMode = defaults.BlockEmbedMode
 	}
@@ -488,8 +491,39 @@ func NormalizeStat(stat *Stat) *Stat {
 
 // NormalizeBazaar 在集市配置缺失时使用默认值。
 func NormalizeBazaar(bazaar *Bazaar) *Bazaar {
+	defaults := NewBazaar()
 	if bazaar == nil {
-		bazaar = NewBazaar()
+		return defaults
+	}
+	if bazaar.CompatibilityFilters == nil {
+		bazaar.CompatibilityFilters = defaults.CompatibilityFilters
+	}
+	for pkgType := range bazaar.CompatibilityFilters {
+		if _, known := defaults.CompatibilityFilters[pkgType]; !known {
+			delete(bazaar.CompatibilityFilters, pkgType)
+		}
+	}
+	for pkgType, filter := range defaults.CompatibilityFilters {
+		if bazaar.CompatibilityFilters[pkgType] == nil {
+			bazaar.CompatibilityFilters[pkgType] = filter
+		}
+	}
+	if bazaar.BatchUpdateExcluded == nil {
+		bazaar.BatchUpdateExcluded = defaults.BatchUpdateExcluded
+	}
+	for pkgType := range bazaar.BatchUpdateExcluded {
+		if _, known := defaults.BatchUpdateExcluded[pkgType]; !known {
+			delete(bazaar.BatchUpdateExcluded, pkgType)
+		}
+	}
+	for pkgType := range defaults.BatchUpdateExcluded {
+		names := make(map[string]bool)
+		for name, excluded := range bazaar.BatchUpdateExcluded[pkgType] {
+			if strings.TrimSpace(name) != "" && excluded {
+				names[name] = true
+			}
+		}
+		bazaar.BatchUpdateExcluded[pkgType] = names
 	}
 	return bazaar
 }

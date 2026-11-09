@@ -37,6 +37,22 @@ func TestHistoryItemsRequestCompatibility(t *testing.T) {
 	}
 }
 
+func TestHistoryItemsPaginationContract(t *testing.T) {
+	for _, body := range []string{`{"created":"time"}`, `{"created":"time","page":null}`} {
+		request, err := GetHistoryItems.Decode(strings.NewReader(body))
+		if err != nil || request.Page != nil {
+			t.Fatalf("missing page must retain default: %+v %v", request, err)
+		}
+	}
+	request, err := GetHistoryItems.Decode(strings.NewReader(`{"created":"time","page":2}`))
+	if err != nil || request.Page == nil || *request.Page != 2 {
+		t.Fatalf("explicit page not decoded: %+v %v", request, err)
+	}
+	if _, err := GetHistoryItems.Decode(strings.NewReader(`{"created":"time","page":"2"}`)); err == nil {
+		t.Fatal("invalid page accepted")
+	}
+}
+
 func TestDocHistoryContentRequestCompatibility(t *testing.T) {
 	for _, field := range []string{"", `,"highlight":null`, `,"highlight":false`, `,"highlight":true`} {
 		request, err := GetDocHistoryContent.Decode(strings.NewReader(`{"historyPath":" path ","k":" keyword "` + field + `}`))

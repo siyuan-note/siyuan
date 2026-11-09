@@ -485,10 +485,23 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 !protyle.hint.element.classList.contains("fn__none") && protyle.hint.select(event, protyle)) {
                 return;
             }
+            const getTitleOffset = (titleRange: Range) => {
+                const offset = getSelectionOffset(calloutTitleElement, nodeElement, titleRange);
+                const before = titleRange.cloneRange();
+                before.selectNodeContents(calloutTitleElement);
+                before.setEnd(titleRange.startContainer, titleRange.startOffset);
+                // 通用选区偏移已计算表情图片，标题边界还需计入普通图片。
+                const countImages = (fragment: DocumentFragment) => fragment.querySelectorAll("img").length -
+                    fragment.querySelectorAll("img.emoji").length;
+                const beforeImages = countImages(before.cloneContents());
+                offset.start += beforeImages;
+                offset.end += beforeImages + countImages(titleRange.cloneContents());
+                return offset;
+            };
             const getTitleLength = () => {
                 const titleRange = range.cloneRange();
                 titleRange.selectNodeContents(calloutTitleElement);
-                return getSelectionOffset(calloutTitleElement, nodeElement, titleRange).end;
+                return getTitleOffset(titleRange).end;
             };
             if (matchHotKey("⌘A", event)) {
                 range.selectNodeContents(calloutTitleElement);
@@ -506,7 +519,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (event.key === "Backspace" || event.key === "Delete") {
-                const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
+                const offset = getTitleOffset(range);
                 if (range.collapsed && ((event.key === "Backspace" && offset.start === 0) ||
                     (event.key === "Delete" && offset.end === getTitleLength()))) {
                     event.preventDefault();
@@ -520,7 +533,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.key === "Home" || event.key === "End") {
                 if (calloutTitleElement.classList.contains("tab-item-title") && range.collapsed &&
                     !event.altKey && !event.shiftKey && isNotCtrl(event)) {
-                    const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
+                    const offset = getTitleOffset(range);
                     if (event.key === "ArrowLeft" && offset.start === 0 ||
                         event.key === "ArrowRight" && offset.end === getTitleLength()) {
                         event.preventDefault();

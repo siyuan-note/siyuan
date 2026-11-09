@@ -7,7 +7,7 @@ const sources = mobile => {
     const ts = require("typescript");
     const {parse} = require("ifdef-loader/preprocessor");
     const root = path.join(__dirname, "../src/protyle/render/av");
-    return Object.fromEntries(["relatedView", "host", "action", "cell", "asset", "blockAttr", "openMenuPanel", "panels/asset", "../../preview/image"].map(name => [name,
+    return Object.fromEntries(["relatedView", "host", "action", "cell", "cellValue", "cellEditor", "asset", "blockAttr", "openMenuPanel", "panels/asset", "../../preview/image"].map(name => [name,
         ts.transpileModule(parse(readFileSync(path.join(root, name + ".ts"), "utf8"), {MOBILE: mobile, BROWSER: !mobile}), {
             compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS},
         }).outputText]));
@@ -16,6 +16,13 @@ const sources = mobile => {
 const cases = async (compiled, mobile) => {
     const check = require("node:assert/strict");
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
+    const errors = [];
+    const onError = event => {
+        errors.push(event.error?.stack || event.reason?.stack || event.message || String(event.reason));
+        event.preventDefault();
+    };
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onError);
     const requests = [], previews = [], navigations = [], sharedRenders = [], transactions = [], messages = [], timeouts = [];
     const data = new WeakMap();
     const lang = new Proxy({}, {get: (_object, key) => key === "_attrView" ? lang : String(key)});
@@ -37,6 +44,8 @@ const cases = async (compiled, mobile) => {
         getCompressURL: value => value, removeCompressURL: value => value,
         escapeHtml: String, escapeAttr: String, escapeAriaLabel: String, escapeHtmlTextAndAttr: String,
         getAVData: element => data.get(element), setAVData: (element, value) => data.set(element, value),
+        getColId: element => element.dataset.colId,
+        getFieldIdByCellElement: element => element.closest(".av__row").dataset.id,
         getAVSelectedItemIDs: () => [], getAVSelectedItemPoints: () => [], getFieldsByData: () => [],
         getPageSize: () => ({}), isAVRenderData: () => true,
         preserveAVBindingRange: () => noop,
@@ -119,7 +128,8 @@ const cases = async (compiled, mobile) => {
         source.className = "custom-attr";
         source.innerHTML = '<div data-av-id="source"></div>';
         document.body.append(source);
-        const editor = {id: "native-source-" + ++nextSource, disabled: false, options: {}, app: {appId: "app"}, element: source};
+        const editor = {id: "native-source-" + ++nextSource, disabled: false, options: {}, app: {appId: "app"},
+            block: {rootID: "source-doc"}, element: source};
         api.mountRelatedAVViews(source, [{avID: "source", keyValues: [
             {key: {type: "block"}, values: [{blockID: "source-entry"}]},
             {key: {type: "relation", id: "relation", relation: {avID: "target", detailView: {spec: 1, enabled: true, viewID: "view"}}}},
@@ -127,10 +137,12 @@ const cases = async (compiled, mobile) => {
         api.syncRelatedAVViews(source);
         const host = source.querySelector("[data-av-host]");
         host.innerHTML = '<div class="av__container"><div class="av__views"><span data-type="av-filter">Filter</span><span data-type="av-more">Settings</span><button data-type="set-page-size">Page size</button></div><div class="av__scroll"><div class="av__body" data-group-id="group"><div class="av__row av__row--header"><div data-col-id="image" data-dtype="mAsset"></div></div><div class="av__row" data-id="member"><div class="av__colsticky"></div><div class="av__cell" data-col-id="image" data-id="value"><img class="av__cellassetimg" src="assets/member.png"></div></div></div></div></div>';
-        host.querySelector(".av__cell").dataset.cellValue = encodeURIComponent(JSON.stringify({type: "mAsset", mAsset: [
+        const value = {type: "mAsset", mAsset: [
             {type: "image", content: "assets/member.png", name: ""},
-        ]}));
-        const av = {id: "target", viewID: "view", view: {filters: []}, views: []};
+        ]};
+        host.querySelector(".av__cell").dataset.cellValue = encodeURIComponent(JSON.stringify(value));
+        const av = {id: "target", viewID: "view", view: {id: "group", filters: [],
+            columns: [{id: "image", type: "mAsset"}], rows: [{id: "member", cells: [{id: "value", value}]}]}, views: []};
         data.set(host, av); hostAPI.getAVRelationHost(host).rendered(av);
         return {source, editor, host, dispose: () => {
             api.disposeRelatedAVViews(source); source.remove(); document.querySelector(".av__panel")?.remove();
@@ -159,6 +171,7 @@ const cases = async (compiled, mobile) => {
 
     const asset = mount();
     asset.host.querySelector(".av__cell").click(); await tick();
+    check.deepEqual(errors, [], "Opening the asset panel must not cause JavaScript errors");
     const preview = document.querySelector('.av__panel [data-type="openAssetItem"]');
     check.ok(preview);
     preview.click(); await tick();
@@ -250,6 +263,9 @@ const cases = async (compiled, mobile) => {
         state.dispose(); destination.remove();
     }
     check.ok(timeouts.every(timeout => timeout.cancelled));
+    check.deepEqual(errors, [], "Native related actions must not cause JavaScript errors");
+    window.removeEventListener("error", onError);
+    window.removeEventListener("unhandledrejection", onError);
     return `Native related actions passed: ${mobile ? "mobile" : "desktop"}`;
 };
 

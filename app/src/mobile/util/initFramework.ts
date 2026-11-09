@@ -4,7 +4,6 @@ import {openStandaloneDatabaseItemByURI} from "../../protyle/render/av/openStand
 import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {openMobileOnboarding} from "../../onboarding";
-import {truncateDocumentTitle, validateName} from "../../editor/rename";
 import {getEventName, isDisabledFeature, isInMobileApp} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
@@ -25,7 +24,6 @@ import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
-import {setTitle} from "../../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../../protyle/render/av/locate";
 import {MobileTabs} from "../tabs/MobileTabs";
 import {initMobileBottomBar} from "./mobileBottomBar";
@@ -50,7 +48,6 @@ import {
     type IMobilePluginDockEntry,
 } from "../dock/pluginDockState";
 import {exitSiYuan} from "../../dialog/processSystem";
-import {enterDocumentFromTitle} from "../../protyle/header/titleEnter";
 
 // 侧栏首次使用前随布局选择默认功能，使用后保留当前页签。
 const activatedSidePanels = new WeakSet<HTMLElement>();
@@ -451,21 +448,22 @@ export const initFramework = async (app: App, isStart: boolean) => {
 const initEditorName = () => {
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
     setTitleAutoDirection(inputElement, window.siyuan.config.editor.autoDirection);
-    let titleSavePromise: Promise<unknown> = Promise.resolve();
-    let titleSavedOnEnter: {rootID: string, value: string} | undefined;
-    let enteringDocument = false;
-    const richTitle = () => {
-        const protyle = window.siyuan.mobile.editor?.protyle;
-        return protyle?.block.rootID !== protyle?.notebookId;
-    };
     const openTitle = () => {
         const protyle = window.siyuan.mobile.editor?.protyle;
-        if (richTitle() && protyle && !protyle.disabled && protyle.preview.element.classList.contains("fn__none")) {
+        if (protyle && !protyle.disabled && protyle.preview.element.classList.contains("fn__none")) {
             inputElement.blur();
             void protyle.title?.openEditor();
         }
     };
     inputElement.addEventListener("click", openTitle);
+    inputElement.setAttribute("placeholder", window.siyuan.languages._kernel[16]);
+    inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (!event.isComposing && event.key === "Enter") {
+            event.preventDefault();
+            event.stopPropagation();
+            openTitle();
+        }
+    });
     const label = document.getElementById("toolbarNameReadonly");
     label.addEventListener("click", (event) => {
         if ((event.target as HTMLElement).closest(".mobile-document-title-editor")) return;
@@ -478,66 +476,5 @@ const initEditorName = () => {
             event.preventDefault();
             openTitle();
         }
-    });
-    const saveTitle = () => {
-        if (richTitle() || inputElement.getAttribute("readonly") === "readonly") {
-            return titleSavePromise;
-        }
-        if (!validateName(inputElement.value)) {
-            const original = inputElement.value;
-            inputElement.value = truncateDocumentTitle(inputElement.value);
-            if (inputElement.value === original ||
-                !validateName(inputElement.value)) {
-                return titleSavePromise;
-            }
-        }
-
-        titleSavePromise = fetchPost("/api/filetree/renameDoc", {
-            notebook: window.siyuan.mobile.editor.protyle.notebookId,
-            path: window.siyuan.mobile.editor.protyle.path,
-            title: inputElement.value,
-        });
-        setTitle(inputElement.value);
-        return titleSavePromise;
-    };
-    inputElement.setAttribute("placeholder", window.siyuan.languages._kernel[16]);
-    inputElement.addEventListener("blur", () => {
-        const skipSave = titleSavedOnEnter?.rootID === window.siyuan.mobile.editor?.protyle.block.rootID &&
-            titleSavedOnEnter.value === inputElement.value;
-        titleSavedOnEnter = undefined;
-        if (skipSave) {
-            return;
-        }
-        void saveTitle();
-    });
-    inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.isComposing || event.key !== "Enter") {
-            return;
-        }
-        if (richTitle()) {
-            event.preventDefault();
-            event.stopPropagation();
-            openTitle();
-            return;
-        }
-        const protyle = window.siyuan.mobile.editor?.protyle;
-        if (!protyle || protyle.disabled || inputElement.readOnly) {
-            return;
-        }
-        const rootID = protyle.block.rootID;
-        event.preventDefault();
-        event.stopPropagation();
-        if (enteringDocument) {
-            return;
-        }
-        enteringDocument = true;
-        const beforeLoad = saveTitle();
-        titleSavedOnEnter = {rootID, value: inputElement.value};
-        void enterDocumentFromTitle(protyle, {
-            beforeLoad,
-            isValid: () => window.siyuan.mobile.editor?.protyle === protyle && protyle.block.rootID === rootID,
-        }).finally(() => {
-            enteringDocument = false;
-        });
     });
 };

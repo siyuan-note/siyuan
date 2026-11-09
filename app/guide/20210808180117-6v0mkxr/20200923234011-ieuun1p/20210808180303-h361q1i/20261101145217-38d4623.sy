@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261106132257"
+		"updated": "20261109092557"
 	},
 	"Children": [
 		{
@@ -66,7 +66,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101154840-193b541",
-				"updated": "20261105055849"
+				"updated": "20261109070428"
 			},
 			"Children": [
 				{
@@ -80,7 +80,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " menu. There is no separate formatting toolbar. Desktop windows use an integrated title bar. File actions, editing modes, image insertion, resource authorization, recovery, theme, and font size are grouped there. The status bar shows additional actions only when needed. On desktop, toggle developer tools with "
+					"Data": " menu. There is no separate formatting toolbar. Desktop windows use an integrated title bar. File actions, editing modes, image insertion, resource authorization, recovery, appearance mode, font size, and fonts are grouped there. The status bar shows additional actions only when needed. On desktop, toggle developer tools with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -158,7 +158,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " on macOS; check the button tooltip for any custom binding. It updates as you edit; expand or collapse nested headings and click a heading to jump to it. The outline is available in instant rendering and WYSIWYG modes when the window is at least 520 pixels wide. In source/split view or narrower windows, it is hidden and the button is disabled with an explanatory tooltip. Whether the outline is enabled is retained across documents only in the current window."
+					"Data": " on macOS; check the button tooltip for any custom binding. It updates as you edit; expand or collapse nested headings and click a heading to jump to it. The outline is available in instant rendering and WYSIWYG modes, including on mobile devices and in narrow windows. In source/split view, it is hidden and the button is disabled with an explanatory tooltip. Whether the outline is enabled is retained across documents only in the current window."
 				}
 			]
 		},
@@ -245,7 +245,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-3d23d38",
-				"updated": "20261101171827"
+				"updated": "20261109092557"
 			},
 			"Children": [
 				{
@@ -268,7 +268,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to select instant rendering, WYSIWYG, or split view; a check mark identifies the current mode. Switching modes alone does not save the file. Editing may normalize Markdown formatting while retaining its content. Theme and font size are selected from the same style of checked submenus under "
+					"Data": " to select instant rendering, WYSIWYG, or split view; a check mark identifies the current mode. The editing mode is stored independently. Switching modes alone does not save the file. Editing may normalize Markdown formatting while retaining its content. In versions supporting appearance sources, use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -286,7 +286,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and are stored independently of workspace settings."
+					"Data": " to choose a workspace or independent configuration separately for appearance mode, font size, and fonts. Click independent configuration at the top of a source menu to open its settings dialog. The source switches only when you save; cancelling keeps the original source. Clicking a workspace option in the same menu immediately inherits its settings. The list shows only workspace folder names; hover to see the full path. Scroll the list when there are many workspaces. Independent configuration is the default; you can optionally choose to inherit from a workspace. Each setting can use a different source. Once you explicitly choose independent configuration, adding a workspace does not switch it automatically. If a selected workspace is missing or inaccessible, the affected setting switches to independent configuration and saves that choice, using its saved independent value. Other settings remain unchanged, and it does not switch back automatically when the workspace becomes available again. Independent configuration lets you set appearance mode, font size, and ordered lists for global default, editor, and monospace fonts. On desktop, search and preview the system font list, then select fonts using the checkboxes. Use the selected font chips to remove or reorder fonts and choose available weights. The monospace list is filtered to monospace fonts by default, with an option to show all fonts. This picker works without opening a workspace and does not offer a separate font-file import. Inheriting from a workspace also supports its custom fonts; missing or failed fonts fall back in font order. Workspace theme CSS and scripts are not loaded. Android, iOS, and HarmonyOS versions supporting appearance sources also default to independent configuration. For each of appearance mode, font size, and fonts, you can select a registered, accessible workspace on this device. Inheritance and fallback when a workspace is unavailable follow the same rules as on desktop. The font picker lists fonts provided by the mobile system. Tap the weight button on a selected font to choose an available weight, and use the up/down buttons to reorder fonts. Available fonts and their rendering depend on the system and WebView."
 				}
 			]
 		},

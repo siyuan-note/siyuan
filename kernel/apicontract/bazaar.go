@@ -268,26 +268,28 @@ type BazaarPackage struct {
 	PreviewURL string `json:"previewURL"`
 	IconURL    string `json:"iconURL"`
 
-	Installed               bool   `json:"installed"`
-	HasStorageData          bool   `json:"hasStorageData,omitempty"`
-	Outdated                bool   `json:"outdated"`
-	Current                 bool   `json:"current"`
-	Updated                 string `json:"updated"`
-	Stars                   int    `json:"stars"`
-	OpenIssues              int    `json:"openIssues"`
-	Size                    int64  `json:"size"`
-	HSize                   string `json:"hSize"`
-	InstallSize             int64  `json:"installSize"`
-	HInstallSize            string `json:"hInstallSize"`
-	InstallTime             int64  `json:"installTime"`
-	UpdateTime              int64  `json:"updateTime"`
-	HInstallDate            string `json:"hInstallDate"`
-	HUpdated                string `json:"hUpdated"`
-	Downloads               int    `json:"downloads"`
-	DisallowInstall         bool   `json:"disallowInstall"`
-	DisallowUpdate          bool   `json:"disallowUpdate"`
-	UpdateRequiredMinAppVer string `json:"updateRequiredMinAppVer,omitempty"`                                                  // 升级目标要求的最小应用版本
-	InvalidReason           string `json:"invalidReason,omitempty" api:"enum=missing-manifest|invalid-manifest|name-mismatch"` // 本地安装包异常原因
+	Installed                bool   `json:"installed"`
+	HasStorageData           bool   `json:"hasStorageData,omitempty"`
+	Outdated                 bool   `json:"outdated"`
+	Current                  bool   `json:"current"`
+	Created                  string `json:"created,omitempty"` // 在线集市首次上架时间，缺失时未知，不以更新时间补齐
+	Updated                  string `json:"updated"`
+	Stars                    int    `json:"stars"`
+	OpenIssues               int    `json:"openIssues"`
+	Size                     int64  `json:"size"`
+	HSize                    string `json:"hSize"`
+	InstallSize              int64  `json:"installSize"`
+	HInstallSize             string `json:"hInstallSize"`
+	InstallTime              int64  `json:"installTime"`
+	UpdateTime               int64  `json:"updateTime"`
+	HInstallDate             string `json:"hInstallDate"`
+	HUpdated                 string `json:"hUpdated"`
+	Downloads                int    `json:"downloads"`
+	DisallowInstall          bool   `json:"disallowInstall"`
+	DisallowUpdate           bool   `json:"disallowUpdate"`
+	BazaarVersionUnsupported bool   `json:"bazaarVersionUnsupported,omitempty"`                                                 // 在线包最低应用版本高于当前版本；与平台兼容性独立
+	UpdateRequiredMinAppVer  string `json:"updateRequiredMinAppVer,omitempty"`                                                  // 升级目标要求的最小应用版本
+	InvalidReason            string `json:"invalidReason,omitempty" api:"enum=missing-manifest|invalid-manifest|name-mismatch"` // 本地安装包异常原因
 
 	RatingAvailable bool                 `json:"ratingAvailable"`  // 在线集市公开评分是否可用
 	Rating          *BazaarPackageRating `json:"rating,omitempty"` // 在线集市公开评分

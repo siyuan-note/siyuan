@@ -105,11 +105,13 @@ test("rename construction retains local undo and toolbar history while inline ti
         let cleared = false;
         const subElement = {remove: () => { floating = false; }, replaceChildren: () => { cleared = true; }};
         const listeners = new Map<string, () => void>();
+        const wysiwygListeners = new Map<string, () => void>();
+        let toolbarHides = 0;
         const editable = {classList: {contains: () => true}, dataset: {tip: "Untitled"}};
         const localUndo = {undo: () => localUndos++, redo: () => {}, clear: () => {}};
         const fragment = {protyle: {block: {}, undo: localUndo, toolbar: {subElement}, wysiwyg: {flushPendingInput: async () => {}}},
             wysiwyg: {querySelector: () => editable, replaceChildren: () => {},
-                addEventListener: () => {}},
+                addEventListener: (type: string, listener: () => void) => wysiwygListeners.set(type, listener)},
             getBlockHTML: () => "initial", destroy: () => {},
             instance: {enable: () => { disabled = false; }, disable: () => { disabled = true; }}};
         const owner = {element: {classList: {contains: () => draft}}, block: {rootID: "doc"},
@@ -131,6 +133,10 @@ test("rename construction retains local undo and toolbar history while inline ti
                 toolbarUndo = run;
             },
             Constants: {TIMEOUT_INPUT: 256},
+            hideAllElements: (types: string[]) => {
+                assert.deepEqual(Array.from(types), ["toolbar"]);
+                toolbarHides++;
+            },
         };
         runInNewContext(transpileModule(readFileSync(join(__dirname, "documentTitleEditor.ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -141,6 +147,8 @@ test("rename construction retains local undo and toolbar history while inline ti
                 mobile: preview ? {editor: {protyle: owner}} : {}}}});
         const editor = new moduleExports.DocumentTitleEditor(owner, host, {blockDOM: "initial", revision: "r0"}, () => {}, () => {});
         assert.equal(floating, inline, "only top-bar title menus escape their clipping and stacking ancestors");
+        wysiwygListeners.get("mousedown")();
+        assert.equal(toolbarHides, 1, "title pointer selection hides body and title toolbars despite stopped bubbling");
         assert.equal(toolbarOwner, draft ? fragment.protyle : owner);
         assert.equal(fragment.protyle.undo === localUndo, draft);
         assert.equal(disabled, preview, "late source loading keeps preview-mode titles readonly");

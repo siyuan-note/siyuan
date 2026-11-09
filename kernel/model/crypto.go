@@ -1912,6 +1912,7 @@ func finishMasterPasswordMigration(kek []byte) error {
 		if err = atomicWriteFile(filepath.Join(util.ConfDir, "conf.json"), data); err != nil {
 			return err
 		}
+		util.RestrictConfFilePermissions()
 		recordPersistedConf(data)
 		return nil
 	}()

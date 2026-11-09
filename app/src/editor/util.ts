@@ -86,19 +86,19 @@ export const openFileById = async (options: {
     retryOnUnavailable?: number
 }): Promise<Tab | void> => {
     const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id, notebook: options.notebookId});
-    if (response.code === -1) {
+    if (response.code === -1 || response.code === 3) {
         const retryOnUnavailable = options.retryOnUnavailable || 0;
         if (retryOnUnavailable > 0) {
-            await new Promise(resolve => window.setTimeout(resolve, Constants.TIMEOUT_TRANSITION));
+            await new Promise(resolve => window.setTimeout(resolve,
+                response.code === 3 ? 1000 : Constants.TIMEOUT_TRANSITION));
             return openFileById({
                 ...options,
                 retryOnUnavailable: retryOnUnavailable - 1,
             });
         }
-        return;
-    }
-    if (response.code === 3) {
-        showMessage(response.msg);
+        if (response.code === 3) {
+            showMessage(response.msg);
+        }
         return;
     }
     if (response.code !== 0) {
@@ -660,6 +660,7 @@ export const newTab = (options: IOpenFileOptions, afterInitProtyle?: Constructor
                     });
                     if (model) {
                         tab.addModel(model);
+                        tab.headElement.removeAttribute("data-initdata");
                     }
                 } else {
                     // plugin 0.8.3 历史兼容

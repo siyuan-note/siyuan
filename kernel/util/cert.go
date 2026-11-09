@@ -284,7 +284,8 @@ func writeCertAndKey(certPath, keyPath string, certDER []byte, privateKey *ecdsa
 		return err
 	}
 
-	keyFile, err := os.Create(keyPath)
+	// 私钥仅当前用户可读写
+	keyFile, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}

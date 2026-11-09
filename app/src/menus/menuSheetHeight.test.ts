@@ -84,6 +84,7 @@ const setup = (options: {
             },
     };
     runInNewContext(compiled, {exports: module.exports, getVisibleSheetViewport, getMobileSheetBounds, window,
+        bindKeyboardSheetState: () => () => {},
         getComputedStyle: () => ({paddingTop: (options.safeTop || 0) + "px"}),
         document: {getElementById: () => options.toolbarTop === undefined ? undefined : toolbar,
             createElement: () => ({style: {}, remove() {}}), body: {append() {}}},

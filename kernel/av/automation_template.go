@@ -26,10 +26,13 @@ const AutomationTemplateLimit = 65536
 
 // AutomationTemplateContext 只暴露本次触发的存储快照，不提供工作区查询或写入函数。
 type AutomationTemplateContext struct {
-	Source   *AttributeView
-	ItemID   string
-	Time     time.Time
-	TimeZone string
+	Source          *AttributeView
+	ItemID          string
+	Time            time.Time
+	TimeZone        string
+	AllowHTTP       bool
+	HTTP            template.FuncMap
+	inspectFunction func(string)
 }
 
 type automationTemplateOutput struct{ bytes.Buffer }
@@ -60,6 +63,25 @@ func automationTemplate(context AutomationTemplateContext, source string) (*temp
 	functions["date"] = func(layout string, date time.Time) string { return date.In(zone).Format(layout) }
 	functions["field"] = func(id string) (any, error) { return context.field(id, zone, false) }
 	functions["value"] = func(id string) (any, error) { return context.field(id, zone, true) }
+	functions["printf"] = automationPrintf
+	functions["urlquery"] = automationURLQuery
+	functions["dict"] = automationDict
+	functions["toString"] = automationToString
+	if context.AllowHTTP {
+		functions["httpGet"] = func(string, ...map[string]any) (map[string]any, error) {
+			return nil, fmt.Errorf("manual HTTP execution is unavailable")
+		}
+		if request := context.HTTP["httpGet"]; request != nil {
+			functions["httpGet"] = request
+		}
+	}
+	functions["fromJson"] = func(source string) (any, error) {
+		var value any
+		if len(source) > 1<<20 || json.Unmarshal([]byte(source), &value) != nil {
+			return nil, fmt.Errorf("invalid HTTP JSON response")
+		}
+		return value, nil
+	}
 	functions["toJson"] = func(value any) (string, error) {
 		data, err := json.Marshal(value)
 		if len(data) > AutomationTemplateLimit {
@@ -113,6 +135,16 @@ func automationTemplate(context AutomationTemplateContext, source string) (*temp
 			children = node.Args
 			if len(node.Args) > 0 {
 				if name, ok := node.Args[0].(*parse.IdentifierNode); ok {
+					if name.Ident == "printf" && len(node.Args) > 1 {
+						if format, ok := node.Args[1].(*parse.StringNode); ok {
+							if _, err := parseAutomationFormat(format.Text); err != nil {
+								return err
+							}
+						}
+					}
+					if context.inspectFunction != nil {
+						context.inspectFunction(name.Ident)
+					}
 					if functions[name.Ident] == nil && !strings.Contains("|and|or|not|eq|ne|lt|le|gt|ge|len|index|slice|", "|"+name.Ident+"|") {
 						return fmt.Errorf("automation function [%s] is unavailable", name.Ident)
 					}
@@ -162,6 +194,35 @@ func automationTemplate(context AutomationTemplateContext, source string) (*temp
 func ValidateAutomationTemplate(source, timeZone string) error {
 	_, err := automationTemplate(AutomationTemplateContext{TimeZone: timeZone}, source)
 	return err
+}
+
+func ValidateManualAutomationTemplate(source, timeZone string) error {
+	_, err := automationTemplate(AutomationTemplateContext{TimeZone: timeZone, AllowHTTP: true}, source)
+	return err
+}
+
+func automationTemplateUses(source string, names ...string) bool {
+	if !slices.ContainsFunc(names, func(name string) bool { return strings.Contains(source, name) }) {
+		return false
+	}
+	found := false
+	_, err := automationTemplate(AutomationTemplateContext{TimeZone: "UTC", AllowHTTP: true,
+		inspectFunction: func(name string) { found = found || slices.Contains(names, name) }}, source)
+	return err == nil && found
+}
+
+func (rule *AutomationRule) UsesHTTP() bool {
+	for _, action := range rule.Actions {
+		if action == nil {
+			continue
+		}
+		for _, value := range action.Fields {
+			if value != nil && value.Mode == "template" && automationTemplateUses(value.Template, "httpGet") {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (context AutomationTemplateContext) field(id string, zone *time.Location, raw bool) (any, error) {
@@ -371,7 +432,7 @@ func ParseAutomationTemplateValue(key *Key, source string, zone *time.Location) 
 
 // 只改写语法树中 field/value 的字面量参数，保留模板之外的同名文字。
 func RemapAutomationTemplate(source string, ids map[string]string) string {
-	tpl, err := automationTemplate(AutomationTemplateContext{TimeZone: "UTC"}, source)
+	tpl, err := automationTemplate(AutomationTemplateContext{TimeZone: "UTC", AllowHTTP: true}, source)
 	if err != nil {
 		return source
 	}

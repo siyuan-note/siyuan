@@ -3,6 +3,7 @@
 import * as electron from "electron";
 import * as nodePath from "node:path";
 import {createMarkdownWindows, registerMarkdownSchemes} from "../markdown/windows";
+import {createMarkdownSystemFonts} from "../markdown/systemFonts";
 import {createMarkdownLifecycle} from "../markdown/lifecycle";
 import {parseMarkdownLaunch} from "../markdown/launch";
 import {isSystemShuttingDown, paths, state, writeLog} from "../shared/runtime";
@@ -91,12 +92,15 @@ const routeMarkdownLaunch = (argv: string[], cwd = process.cwd()): boolean => {
 // app ready 后创建窗口管理器与退出协调；Markdown 关闭最后一个窗口时由 onEmpty 决定是否退出。
 const createMarkdownEditors = (): void => {
     const {app, BrowserWindow, ipcMain, dialog, shell, protocol, nativeTheme} = electron;
+    const systemFonts = createMarkdownSystemFonts(nodePath.join(paths.appDir, "kernel", process.platform === "win32" ? "SiYuan-Kernel.exe" : "SiYuan-Kernel"));
+    app.once("will-quit", () => systemFonts.dispose());
     state.markdown.windows = createMarkdownWindows({
         app, BrowserWindow, ipcMain, dialog, shell, protocol, nativeTheme,
         rootDirectory: paths.appDir,
         configDirectory: nodePath.join(paths.confDir, "markdown"),
         lang: resolveAppLanguage(getArgFrom(process.argv, "--lang") ?
             [getArgFrom(process.argv, "--lang") as string] : app.getPreferredSystemLanguages()),
+        systemFonts,
         platform: process.platform,
         windowControls: {getOptions: getTitleBarOverlayOptions, update: updateTitleBarOverlay},
         devTools: {isShortcut: isDevToolsShortcut, toggle: toggleDevTools},

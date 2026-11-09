@@ -29,6 +29,7 @@ import {nbsp2space} from "../util/normalizeText";
 import {getBlockquoteContext, isBlockquoteMarker, shouldCancelBlockquote} from "./blockquote";
 import {
     getSemanticMarkerPrefixLengthForNode,
+    hasSemanticInlineType,
     normalizeSemanticInlineElements,
     removeEmptySemanticInlineElement
 } from "../util/inlineElementMarker";
@@ -184,8 +185,7 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
         if (event.inputType === "deleteContentForward") {
             if (wbrNextElement && wbrNextElement.nodeType === 1 &&
                 getSemanticMarkerPrefixLengthForNode(wbrNextElement.firstChild) === 0) {
-                const nextType = (wbrNextElement.getAttribute("data-type") || "").split(" ");
-                if (nextType.includes("code") || nextType.includes("kbd") || nextType.includes("tag")) {
+                if (hasSemanticInlineType(wbrNextElement.getAttribute("data-type"))) {
                     wbrNextElement.insertAdjacentElement("afterbegin", wbrElement);
                 }
             }
@@ -243,13 +243,15 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
             html = renderedCalloutElement.outerHTML;
         }
         if (needRender && renderedTitleElement?.innerHTML !== editElement.innerHTML) {
-            blockElement.insertAdjacentHTML("afterend", html);
-            blockElement = blockElement.nextElementSibling as HTMLElement;
-            blockElement.previousElementSibling.remove();
-            if (blockElement.classList.contains("tab-item")) {
+            if (editElement.classList.contains("tab-item-title")) {
+                // 标题规范化只更新行内内容，避免替换编辑宿主后丢失焦点及页签输入层布局。
+                editElement.innerHTML = renderedTitleElement.innerHTML;
                 blockElement.dataset.tabsEditing = "true";
+            } else {
+                blockElement.insertAdjacentHTML("afterend", html);
+                blockElement = blockElement.nextElementSibling as HTMLElement;
+                blockElement.previousElementSibling.remove();
             }
-            blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             mathRender(blockElement);
             blockElement.querySelectorAll('[data-type~="block-ref"][data-subtype="d"]').forEach(refItem => {
                 if (refItem.textContent === "") {
@@ -258,11 +260,15 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
                     });
                 }
             });
-            html = blockElement.outerHTML;
+            if (!editElement.classList.contains("tab-item-title")) {
+                html = blockElement.outerHTML;
+            }
         }
         focusByWbr(protyle.wysiwyg.element, range);
         protyle.hint.render(protyle);
         updateGutterAfterInput(protyle, blockElement);
+        // 引用移除预检会清空选区，事务需通过编辑标记识别并保留当前标题宿主。
+        blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         updateInput(html, protyle, id, inputOperations);
         return;
     }

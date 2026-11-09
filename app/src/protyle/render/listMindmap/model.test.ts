@@ -4167,77 +4167,112 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         panView.offsetY = readingTransform[2];
         panView.draw();
         panView.setInteractionActive(false);
+        HTMLElement.prototype.setPointerCapture = originalCapture;
+        HTMLElement.prototype.hasPointerCapture = originalHasCapture;
+        HTMLElement.prototype.releasePointerCapture = originalReleaseCapture;
         const reader = document.createElement("input");
         reader.value = "Document reading selection";
         reader.style.cssText = "position:fixed;top:0;left:0";
         document.body.append(reader);
-        for (const modifier of ["control", "meta", "middle"]) {
-            const button = modifier === "middle" ? "middle" : "right";
-            const modifiers = modifier === "middle" ? [] : [modifier];
-            panView.setReadOnly(modifier === "meta");
-            panView.selectNode(panModel.root.id);
-            panView.inspector.hidden = true;
-            reader.focus({preventScroll: true});
-            reader.setSelectionRange(2, 8);
-            await settle();
-            const node = panHost.querySelector<HTMLElement>(`[data-mindmap-id="${panModel.root.id}"]`);
-            const point = centerPoint(node);
-            const end = {x: point.x + 30, y: point.y + 20};
-            const before = [panView.offsetX, panView.offsetY];
-            let auxiliaryClick: MouseEvent;
-            if (button === "middle") {
-                viewport.addEventListener("auxclick", event => auxiliaryClick = event, {once: true});
-            }
-            await nativeInput([
-                {type: "mouseMove", ...point},
-                {type: "mouseDown", ...point, button, clickCount: 1, modifiers},
-                {type: "mouseMove", ...end, button, modifiers},
-                {type: "mouseUp", ...end, button, clickCount: 1, modifiers},
-            ]);
-            check.deepEqual([panView.offsetX, panView.offsetY], [before[0] + 30, before[1] + 20]);
-            check.equal(panView.interactionActive, false, "temporary dragging preserves reading mode");
-            check.equal(document.activeElement, reader, "temporary dragging does not steal document focus");
-            check.deepEqual([reader.selectionStart, reader.selectionEnd], [2, 8]);
-            check.equal(panView.getSelectedId(), panModel.root.id);
-            if (button === "middle") {
-                check.equal(auxiliaryClick?.defaultPrevented, true, "middle release cancels the browser auxiliary action");
+        try {
+            for (const modifier of ["control", "meta", "middle"]) {
+                const button = modifier === "middle" ? "middle" : "right";
+                const modifiers = modifier === "middle" ? [] : [modifier];
+                panView.setReadOnly(modifier === "meta");
+                panView.selectNode(panModel.root.id);
+                panView.inspector.hidden = true;
+                reader.focus({preventScroll: true});
+                reader.setSelectionRange(2, 8);
+                await settle();
+                check.deepEqual([reader.selectionStart, reader.selectionEnd], [2, 8]);
+                const node = panHost.querySelector<HTMLElement>(`[data-mindmap-id="${panModel.root.id}"]`);
+                const point = centerPoint(node);
+                const end = {x: point.x + 30, y: point.y + 20};
+                const before = [panView.offsetX, panView.offsetY];
+                let auxiliaryClick: MouseEvent;
+                if (button === "middle") {
+                    viewport.addEventListener("auxclick", event => auxiliaryClick = event, {once: true});
+                }
                 await nativeInput([
-                    {type: "mouseDown", ...end, button, clickCount: 1},
-                    {type: "mouseUp", ...end, button, clickCount: 1},
+                    {type: "mouseMove", ...point},
+                    {type: "mouseDown", ...point, button, clickCount: 1, modifiers},
+                    {type: "mouseMove", ...end, button, modifiers},
+                    {type: "mouseUp", ...end, button, clickCount: 1, modifiers},
                 ]);
-                check.equal(panView.getSelectedId(), panModel.root.id, "a middle click preserves the selected node");
-                check.equal(document.activeElement, reader, "a middle click preserves document focus");
-                await nativeInput([{type: "mouseDown", ...end, button, clickCount: 1}]);
-                check.ok(panView.pointer?.pan);
-                viewport.dispatchEvent(new PointerEvent("pointercancel", {
-                    pointerId: panView.pointer.pointerId, pointerType: "mouse"}));
-                check.equal(panView.pointer, undefined, "canceling a middle drag releases its state");
-                await nativeInput([{type: "mouseUp", ...end, button, clickCount: 1}]);
+                check.deepEqual([panView.offsetX, panView.offsetY], [before[0] + 30, before[1] + 20]);
+                check.equal(panView.interactionActive, false, "temporary dragging preserves reading mode");
+                check.equal(document.activeElement, reader, "temporary dragging does not steal document focus");
+                check.deepEqual([reader.selectionStart, reader.selectionEnd], [2, 8], `${modifier} dragging preserves the input selection`);
+                check.equal(reader.value, "Document reading selection", `${modifier} dragging does not paste into the focused input`);
+                check.equal(panView.getSelectedId(), panModel.root.id);
+                if (button === "middle") {
+                    check.equal(auxiliaryClick?.defaultPrevented, true, "middle release cancels the browser auxiliary action");
+                    await nativeInput([
+                        {type: "mouseDown", ...end, button, clickCount: 1},
+                        {type: "mouseUp", ...end, button, clickCount: 1},
+                    ]);
+                    check.equal(panView.getSelectedId(), panModel.root.id, "a middle click preserves the selected node");
+                    check.equal(document.activeElement, reader, "a middle click preserves document focus");
+                    check.deepEqual([reader.selectionStart, reader.selectionEnd], [2, 8]);
+                    check.equal(reader.value, "Document reading selection", "a middle click does not paste into the focused input");
+                    await nativeInput([{type: "mouseDown", ...end, button, clickCount: 1}]);
+                    check.ok(panView.pointer?.pan);
+                    viewport.dispatchEvent(new PointerEvent("pointercancel", {
+                        pointerId: panView.pointer.pointerId, pointerType: "mouse"}));
+                    check.equal(panView.pointer, undefined, "canceling a middle drag releases its state");
+                    await nativeInput([{type: "mouseUp", ...end, button, clickCount: 1}]);
+                    check.deepEqual([reader.selectionStart, reader.selectionEnd], [2, 8]);
+                    check.equal(reader.value, "Document reading selection", "releasing a canceled middle drag does not paste");
+                    const outside = {x: Math.round(viewport.getBoundingClientRect().right + 24), y: end.y};
+                    check.ok(outside.x < window.innerWidth);
+                    check.equal(viewport.contains(document.elementFromPoint(outside.x, outside.y)), false);
+                    let capturedRelease: PointerEvent;
+                    viewport.addEventListener("pointerup", event => capturedRelease = event, {once: true});
+                    await nativeInput([
+                        {type: "mouseMove", ...end},
+                        {type: "mouseDown", ...end, button, clickCount: 1},
+                    ]);
+                    check.ok(panView.pointer?.pan, "cross-boundary drag starts on the canvas");
+                    check.ok(viewport.hasPointerCapture(panView.pointer.pointerId));
+                    await nativeInput([{type: "mouseMove", ...outside, button}]);
+                    check.ok(panView.pointer?.pan, "cross-boundary dragging retains pointer state");
+                    check.ok(viewport.hasPointerCapture(panView.pointer.pointerId));
+                    await nativeInput([{type: "mouseUp", ...outside, button, clickCount: 1}]);
+                    check.equal(capturedRelease?.defaultPrevented, true, "captured release outside the canvas cancels native paste");
+                    check.equal(panView.pointer, undefined);
+                    check.equal(document.activeElement, reader);
+                    check.deepEqual([reader.selectionStart, reader.selectionEnd], [2, 8]);
+                    check.equal(reader.value, "Document reading selection", "dragging beyond the canvas preserves the focused input");
+                }
+                let receivedWheel: WheelEvent;
+                let scrollingFinished = false;
+                viewport.addEventListener("wheel", event => receivedWheel = event, {once: true});
+                scrollHost.addEventListener("scrollend", () => scrollingFinished = true, {once: true});
+                await nativeInput([
+                    {type: "keyUp", keyCode: modifier === "control" ? "Control" : "Meta"},
+                    {type: "mouseMove", ...end, modifiers: []},
+                    {type: "mouseWheel", ...end, deltaX: 0, deltaY: -80, canScroll: true, modifiers: []},
+                ]);
+                const deadline = performance.now() + 1000;
+                while ((!scrollHost.scrollTop || !scrollingFinished) && performance.now() < deadline) {
+                    await frame();
+                }
+                check.ok(scrollHost.scrollTop > 0, "ordinary wheel input still scrolls the document after temporary panning: " +
+                    JSON.stringify({modifier, point: end, target: document.elementFromPoint(end.x, end.y)?.className,
+                        wheel: receivedWheel && {ctrlKey: receivedWheel.ctrlKey, metaKey: receivedWheel.metaKey,
+                            defaultPrevented: receivedWheel.defaultPrevented}}));
+                scrollHost.scrollTop = 0;
+                await settle();
+                panView.offsetX = readingTransform[1];
+                panView.offsetY = readingTransform[2];
+                panView.draw();
             }
-            let receivedWheel: WheelEvent;
-            let scrollingFinished = false;
-            viewport.addEventListener("wheel", event => receivedWheel = event, {once: true});
-            scrollHost.addEventListener("scrollend", () => scrollingFinished = true, {once: true});
-            await nativeInput([
-                {type: "keyUp", keyCode: modifier === "control" ? "Control" : "Meta"},
-                {type: "mouseMove", ...end, modifiers: []},
-                {type: "mouseWheel", ...end, deltaX: 0, deltaY: -80, canScroll: true, modifiers: []},
-            ]);
-            const deadline = performance.now() + 1000;
-            while ((!scrollHost.scrollTop || !scrollingFinished) && performance.now() < deadline) {
-                await frame();
-            }
-            check.ok(scrollHost.scrollTop > 0, "ordinary wheel input still scrolls the document after temporary panning: " +
-                JSON.stringify({modifier, point: end, target: document.elementFromPoint(end.x, end.y)?.className,
-                    wheel: receivedWheel && {ctrlKey: receivedWheel.ctrlKey, metaKey: receivedWheel.metaKey,
-                        defaultPrevented: receivedWheel.defaultPrevented}}));
-            scrollHost.scrollTop = 0;
-            await settle();
-            panView.offsetX = readingTransform[1];
-            panView.offsetY = readingTransform[2];
-            panView.draw();
+        } finally {
+            reader.remove();
+            HTMLElement.prototype.setPointerCapture = () => undefined;
+            HTMLElement.prototype.hasPointerCapture = () => false;
+            HTMLElement.prototype.releasePointerCapture = () => undefined;
         }
-        reader.remove();
         panView.setReadOnly(false);
         check.ok(Array.from(panHost.querySelectorAll(".mindmap-view__toolbar use"))
             .every(icon => icon.getAttribute("xlink:href") !== "#iconEdit"), "canvas activation has no separate pencil button");
@@ -5205,7 +5240,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     new Function("protyle", "services", `const {${Object.keys(services).join(",")}} = services;\n` + dragSource)
         .call(Object.assign(dragOwner.wysiwyg, {host: dragHost, owner: dragOwner}), dragOwner, services);
     const dragErrors: string[] = [];
-    const collectDragError = (event: ErrorEvent) => dragErrors.push(event.message);
+    const collectDragError = (event: ErrorEvent) => dragErrors.push(event.error?.stack || event.message);
     window.addEventListener("error", collectDragError);
     await settle();
     const selectedIDs = () => Array.from(dragEditor.querySelectorAll<HTMLElement>(".protyle-wysiwyg--select"))

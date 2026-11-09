@@ -5,9 +5,9 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"html"
 	"io/fs"
 	"os"
 	"path"
@@ -93,7 +93,7 @@ func resetTreeData(tree *parse.Tree, titleSuffix string, removeAvBinding bool) e
 	return nil
 }
 
-// Duplicate suffixes belong to the title source; localized placeholders are not empty-title markers.
+// 副本后缀写入标题源，本地化占位文字不作为空标题标记。
 func appendDuplicateDocumentTitle(root *ast.Node, suffix string) error {
 	title := treenode.ReadDocumentTitle(root)
 	if suffix == "" || title.Empty || title.Text == "" {
@@ -103,12 +103,28 @@ func appendDuplicateDocumentTitle(root *ast.Node, suffix string) error {
 		root.SetIALAttr("title", title.Text+suffix)
 		return nil
 	}
-	paragraph, err := treenode.DocumentTitleParagraph(root)
+	var nodes []json.RawMessage
+	if err := json.Unmarshal([]byte(root.DocumentTitle.Content), &nodes); err != nil {
+		return err
+	}
+	text, err := json.Marshal(struct {
+		Type string
+		Data string
+	}{"NodeText", suffix})
 	if err != nil {
 		return err
 	}
-	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: html.EscapeString(suffix)})
-	return treenode.SetDocumentTitleParagraph(root, paragraph)
+	content, err := json.Marshal(append(nodes, text))
+	if err != nil {
+		return err
+	}
+	source := *root.DocumentTitle
+	source.Content = string(content)
+	if _, err = parse.ParseDocumentTitle(&source); err != nil {
+		return err
+	}
+	root.DocumentTitle = &source
+	return treenode.RefreshDocumentTitle(root)
 }
 
 func pagedPaths(localPath string, pageSize int) (ret map[int][]string) {

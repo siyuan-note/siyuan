@@ -68,7 +68,15 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
         docks[position] = window.siyuan.layout[position.toLowerCase() + "Dock"] =
             new Dock({app: {plugins: []}, data: {pin: false, data: []}, position});
     }
-    const settle = () => new Promise(resolve => setTimeout(resolve, 350));
+    const settle = async () => {
+        await new Promise(resolve => setTimeout(resolve, 350));
+        // 悬停计时器触发后，等待实际过渡完成，避免繁忙的 CI 在动画收尾前读取显隐状态。
+        const deadline = performance.now() + 5000;
+        while (document.getAnimations().some(animation => animation.pending || animation.playState === "running")) {
+            check.ok(performance.now() < deadline, "dock animations settle within five seconds");
+            await new Promise(resolve => setTimeout(resolve, 20));
+        }
+    };
     await settle();
     for (const position of ["Left", "Right", "Bottom"]) {
         const dock = docks[position];

@@ -5,8 +5,33 @@ import type {SidebarKeymap} from "../util/dockKeymap";
 
 export interface MarkdownPreferences {
     mode: "ir" | "wysiwyg" | "sv";
+    theme?: "system" | "light" | "dark";
+    fontSize?: number;
+    sources?: Partial<Record<MarkdownAppearanceGroup, string>>;
+    independent?: MarkdownIndependentAppearance;
+    fonts?: MarkdownIndependentAppearance["fonts"];
+}
+
+export type MarkdownAppearanceGroup = "theme" | "fontSize" | "fonts";
+export interface MarkdownSystemFont {family: string; weight: number; displayName: string; aliases?: string[]; spacing?: string;}
+export interface MarkdownFont {family: string; weight: number;}
+export interface MarkdownIndependentAppearance {
+    theme?: "system" | "light" | "dark";
+    fontSize?: number;
+    fonts?: {global: MarkdownFont[]; editor: MarkdownFont[]; code: MarkdownFont[]};
+}
+export interface MarkdownAppearancePatch {
+    sources?: Partial<Record<MarkdownAppearanceGroup, string>>;
+    independent?: MarkdownIndependentAppearance;
+}
+export interface MarkdownAppearance {
     theme: "system" | "light" | "dark";
     fontSize: number;
+    sources: Record<MarkdownAppearanceGroup, string>;
+    workspaces: Array<{id: string; name: string}>;
+    fonts: {global: MarkdownFont[]; editor: MarkdownFont[]; code: MarkdownFont[]};
+    customFonts: Array<MarkdownFont & {url: string}>;
+    independent?: MarkdownIndependentAppearance;
 }
 
 export interface MarkdownBootstrap {
@@ -16,6 +41,8 @@ export interface MarkdownBootstrap {
     format?: MarkdownFormat;
     recovered?: {revision: number; targetGeneration: number};
     preferences: MarkdownPreferences;
+    appearance?: MarkdownAppearance;
+    capabilities?: {systemFonts?: boolean; workspaceAppearance?: boolean};
     languages: Record<string, string>;
     lang: string;
     platform: string;
@@ -52,6 +79,8 @@ export interface MarkdownBridge {
     resolveResource(reference: string): Promise<string | undefined>;
     openLink(url: string): Promise<void>;
     preferences(patch: Partial<MarkdownPreferences>): Promise<MarkdownPreferences>;
+    systemFonts?(): Promise<MarkdownSystemFont[]>;
+    appearance?(patch?: MarkdownAppearancePatch): Promise<MarkdownAppearance>;
     confirm(action: "reload" | "overwrite" | "save-as"): Promise<boolean>;
     confirmClose(): Promise<"keep" | "save-as" | "cancel">;
     recoveries(): Promise<Array<{id: string; displayName: string; updatedAt: number}>>;

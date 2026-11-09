@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261106090000"
+		"updated": "20261109202618"
 	},
 	"Children": [
 		{
@@ -4692,12 +4692,243 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-coesny2",
-				"updated": "20261024161816"
+				"updated": "20261109002000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Results are stored once, and redo reuses them. SQL, files, network access, loops, and recursion are unavailable. Source is limited to 8 KiB; each input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
+					"Data": "Results are stored once, and redo reuses them. SQL, files, loops, and recursion are unavailable. Rules containing HTTP run after the edit is saved. Source is limited to 8 KiB; each field input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-kueu1ko",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-kueu1ko",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the template editor, select a source field by name and click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Insert field reference"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to insert a stable field ID reference at the cursor. Renaming the field keeps the reference valid. Click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Copy ID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to copy the selected field ID. The picker also works on mobile."
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-cjr8luh",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261108182000-cjr8luh",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manual execution"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261108182000-ggfyqb8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-ggfyqb8",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Manual"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", add an edit-field action targeting an ordinary field, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and enable the rule. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Run now"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to process all saved rows matching the rule conditions. Results remain available offline and reopening the database does not fetch them again. Scheduled execution is not provided."
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-w2cs6vs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-w2cs6vs",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A manual rule can use httpGet and fromJson in .action{...} expressions. For example, this writes the returned slideshow title to a text field:"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-362kkdg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-362kkdg",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{$r := httpGet \"https://httpbingo.org/json\"}.action{(fromJson $r.body).slideshow.title}"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-i0uewmx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-i0uewmx",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Network requests require confirmation in the current window and follow the template HTTP limits. Persistent permission is bound to the saved rule version and can be revoked in the automation panel. The manual interface saves each matching entry independently: all actions for one entry succeed together or leave that entry unchanged; other successful entries stay saved. Each entry reads a fresh stored snapshot, shared by all its actions; changes during fetching reject stale results. Undo and redo reuse saved results without HTTP. HTTP limits apply across batches, with at most 1,000 field writes and row additions per round. Manual templates have no field preview. Manual rules require automation format 9; formats 1–8 remain readable, and older clients reject format 9 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-hyg3j9f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-hyg3j9f",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Execution displays saved, failed, remaining and skipped counts, with an expandable failure list. Retry failed and remaining entries continues only those entries; it does not repeat successful additions. Batches share request, response-size, elapsed-time and write limits. Reaching a limit, denying permission or closing the panel stops further work and preserves committed results. Explicit retry starts a new budget round. A lost response is checked through progress before any further writes. Progress is bound to the current main window for fifteen minutes and is cleared when notebooks begin locking. Check saved values before restarting after progress expires. Existing API calls retain whole-run atomic behavior and null data unless rows mode is explicitly requested."
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-pq3tbas",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-pq3tbas",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A checkbox can serve as a refresh switch: watch its changes, require it to be checked, and save HTTP results together with clearing the checkbox. A successful result does not trigger another automation. On failure the checkbox and old results remain unchanged; uncheck and check it again to trigger another attempt."
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-ys4550m",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261109002000-ys4550m",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic HTTP and formatting functions"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261109002000-xsz4h51",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-xsz4h51",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For item-added and field-changed triggers, a rule containing httpGet runs all its actions after the edit is saved. Continuous edits in one database are combined, and the current window handles network confirmation. Failure preserves the saved edit and previous results; changes to a database used by the execution discard stale results. Results are saved together as a separate undo step. Undoing the result keeps the input edit; undoing again reverts that edit. Redo reuses saved results without HTTP, and result writes do not trigger other automations. Without an interactive window, API writes save their edits without running rules that contain HTTP. Scheduled execution is not provided."
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-o3lyz6m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-o3lyz6m",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "All automation templates support printf, urlquery, dict, toString and fromJson. printf supports common format verbs with bounded width and precision for scalar arguments, without dynamic width (*) or argument indexes; dict requires string keys and complete key/value pairs. These helpers accept at most 64 arguments and 64 KiB of serialized input, and string output is limited to 64 KiB. New formatting functions and event HTTP rules require automation format 10. Existing formats 1–9 remain readable, including disabled unfinished templates; older clients reject format 10 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-jr9ehz4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-jr9ehz4",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, construct a URL from a source field (replace FIELD_ID with its field ID):"
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-0vr0465",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-0vr0465",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{printf \"https://example.com?q=%s\" (urlquery (field \"FIELD_ID\"))}"
 				}
 			]
 		},
@@ -5808,7 +6039,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". Moving a parent also moves its descendants. Reparenting does not automatically change child statuses, dates, or other fields. With automatic sorting enabled, sort rules determine sibling order."
+					"Data": ". Moving a parent also moves its descendants. Reparenting does not automatically change child statuses, dates, or other fields. With automatic sorting enabled, sort rules determine sibling order. In tree display, inserting entries above or below an entry creates siblings with the same parent."
 				}
 			]
 		},
@@ -5917,6 +6148,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20261109202618-42779dc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109202618-42779dc",
+				"updated": "20261109202618"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In table and list views, Enter confirms an input field and immediately edits the same field in the next row of the same group. This applies to text, number, URL, email, phone and unbound primary-key input fields. The last row does not create another entry. Shift+Enter inserts a text line break; use entry details for full rich text editing. Composition and candidate selection keep their existing behavior. A failed save keeps the current draft open."
 				}
 			]
 		},

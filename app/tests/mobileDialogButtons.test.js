@@ -60,6 +60,30 @@ const runCases = sources => {
     for (const dark of [false, true]) {
         document.body.style.setProperty("--b3-theme-surface-lighter", dark ? "#333333" : "#eeeeee");
         document.body.style.setProperty("--b3-theme-on-surface", dark ? "#eeeeee" : "#222222");
+        for (const width of [280, 390, 560]) {
+            const compact = inputDialog({title: "Rename", value: "", compactActions: true, onConfirm() {}});
+            compact.element.style.width = width + "px";
+            const group = compact.element.querySelector(".mobile-sheet-action-group");
+            const actions = [...group.children];
+            const groupRect = group.getBoundingClientRect();
+            const confirmRect = actions[1].getBoundingClientRect();
+            check(Math.abs(confirmRect.right - groupRect.right) < 1, "compact actions align to the right");
+            for (const action of actions) {
+                const rect = action.getBoundingClientRect();
+                check(rect.height >= 48, "compact actions preserve touch height");
+                check(rect.width < groupRect.width / 2, "short labels do not stretch across the sheet");
+                check(getComputedStyle(action).fontSize === "16px", "compact actions preserve readable font size");
+            }
+            actions[1].textContent = "A very long translated confirmation label with several words andaverylongunbrokentoken";
+            check(actions[1].scrollWidth <= actions[1].clientWidth, "long compact labels wrap without overflow");
+            check(actions[0].hasAttribute("data-input-cancel") && actions[1].hasAttribute("data-input-confirm"), "focus order remains cancel then confirm");
+            for (const action of actions) {
+                check(action.tabIndex === 0, "compact actions remain in the keyboard focus order");
+                action.focus();
+                check(document.activeElement === action, "long compact labels remain keyboard focusable");
+            }
+            compact.element.remove();
+        }
         for (const make of [() => confirmDialog("Title", "Text"),
             () => inputDialog({title: "Name", value: "", onConfirm() {}})]) {
             const dialog = make();
@@ -139,15 +163,19 @@ const runCases = sources => {
 
 module.exports = {fixtures, runCases};
 
-if (require.main === module && process.versions.electron && process.type === "browser") {
+if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow} = require("electron");
-    app.setPath("userData", process.argv[2]);
+    app.setPath("userData", process.argv.at(-1));
+    app.disableHardwareAcceleration();
     app.whenReady().then(async () => {
         const win = new BrowserWindow({show: false, width: 390, height: 844,
-            webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+            webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
         let code = 0;
         try {
             await win.loadURL("data:text/html,<html><body></body></html>");
+            win.webContents.debugger.attach("1.3");
+            await win.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride",
+                {width: 390, height: 844, deviceScaleFactor: 1, mobile: false});
             await win.webContents.insertCSS(require("sass").compile(path.join(__dirname, "../src/assets/scss/mobile.scss"),
                 {logger: {warn() {}, debug() {}}}).css);
             const error = await win.webContents.executeJavaScript(`(() => {
@@ -168,7 +196,9 @@ if (require.main === module && process.versions.electron && process.type === "br
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         try {
-            const result = await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 60000});
+            const args = process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY ?
+                ["--ozone-platform=headless", __filename, profile] : [__filename, profile];
+            const result = await promisify(execFile)(require("electron"), args, {env, windowsHide: true, timeout: 60000});
             assert.match(result.stdout, /Mobile dialog button cases passed/);
         }
         finally { fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100}); }

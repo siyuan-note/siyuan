@@ -11,7 +11,7 @@ import bundledLanguages from "../../appearance/boot/startup-languages.json";
 const browserCases = async (startupSource: string, snippetsSource: string, languages: typeof bundledLanguages) => {
     const check: typeof assert = require("node:assert/strict");
     const startup = new Function("bundledLanguages", startupSource +
-        "\nreturn {installStartupError, completeStartup, setStartupStage, withStartupErrorSuppressed};")(languages) as typeof import("./startupError");
+        "\nreturn {installStartupError, completeStartup, setStartupStage, withStartupErrorSuppressed, reportStartupError};")(languages) as typeof import("./startupError");
     const snippets = new Function("withStartupErrorSuppressed", "getHostCapabilities", "getExtensionScriptNonce",
         "fetchPost", "refreshHeadingNumberMeasurements", snippetsSource + "\nreturn {renderSnippet};")(
         startup.withStartupErrorSuppressed, () => ({customAppearance: true}), () => "", async (_url: string, _request: unknown,
@@ -20,8 +20,11 @@ const browserCases = async (startupSource: string, snippetsSource: string, langu
     let currentSnippets: Array<{id: string; type: string; enabled: boolean; content: string}>;
     let reported = 0;
     window.addEventListener("error", event => { reported++; event.preventDefault(); });
+    window.addEventListener("unhandledrejection", event => { reported++; event.preventDefault(); });
     for (const deferred of [false, true]) {
-        for (const content of ["const unfinished = '", "throw new Error('snippet runtime');"]) {
+        for (const content of ["const unfinished = '", "throw new Error('snippet runtime');",
+            "setTimeout(() => { eval('invalid: :'); }, 0);",
+            "setTimeout(() => { Promise.reject(new Error('snippet rejection')); }, 0);"]) {
             const monitor = startup.installStartupError(window, "test");
             startup.setStartupStage("interface");
             const before = reported;
@@ -30,6 +33,7 @@ const browserCases = async (startupSource: string, snippetsSource: string, langu
                 {id: "good", type: "js", enabled: true, content: "window.snippetRan = true;"},
             ];
             await snippets.renderSnippet(0, () => true, deferred ? async () => {} : undefined);
+            await new Promise(resolve => setTimeout(resolve, 50));
             check.equal(reported, before + 1, "the browser must still report the snippet error");
             check.equal(document.documentElement.dataset.startupState, "loading");
             check.equal(document.querySelector(".startup-error"), null);
@@ -42,14 +46,14 @@ const browserCases = async (startupSource: string, snippetsSource: string, langu
         }
     }
     const monitor = startup.installStartupError(window, "test");
-    window.dispatchEvent(new ErrorEvent("error", {error: new Error("real startup failure")}));
+    startup.reportStartupError(new Error("real startup failure"));
     check.equal(document.documentElement.dataset.startupState, "failed");
     check.match(document.querySelector("pre").textContent, /real startup failure/);
     monitor.dispose();
     return "Snippet startup isolation passed";
 };
 
-test("real inline snippet syntax and runtime errors preserve mobile startup and later snippets", {
+test("real synchronous and asynchronous snippet errors preserve shared startup and later snippets", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

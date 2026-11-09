@@ -316,9 +316,13 @@ export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | nul
 
 export type AVAutomationConfigInput = { "rules": Array<AVAutomationRuleInput | null>; "spec": number; };
 
-export type AVAutomationRule = { "actions": Array<AVAutomationAction | null> | null; "blockSource"?: AVAutomationBlockSource; "conditions"?: Array<AVViewFilter | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean; "timeZone"?: string; "trigger": "added" | "changed" | "block"; };
+export type AVAutomationRule = { "actions": Array<AVAutomationAction | null> | null; "blockSource"?: AVAutomationBlockSource; "conditions"?: Array<AVViewFilter | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean; "timeZone"?: string; "trigger": "added" | "changed" | "block" | "manual"; };
 
-export type AVAutomationRuleInput = { "actions": Array<AVAutomationActionInput | null>; "blockSource"?: AVAutomationBlockSourceInput | null; "conditions"?: Array<AVViewFilterInput | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean | null; "timeZone"?: string; "trigger": "added" | "changed" | "block"; };
+export type AVAutomationRuleInput = { "actions": Array<AVAutomationActionInput | null>; "blockSource"?: AVAutomationBlockSourceInput | null; "conditions"?: Array<AVViewFilterInput | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "notifyOnSuccess"?: boolean | null; "timeZone"?: string; "trigger": "added" | "changed" | "block" | "manual"; };
+
+export type AVAutomationRunFailure = { "code": string; "itemID": string; };
+
+export type AVAutomationRunResult = { "failed": Array<AVAutomationRunFailure | null> | null; "paused": string; "pending": Array<string> | null; "runID": string; "running": boolean; "skipped": Array<string> | null; "step": number; "succeeded": Array<string> | null; "total": number; };
 
 export type AVAutomationTemplatePreviewRequestInput = { "avID": string; "inputs"?: Record<string, string>; "itemID": string; "keyID": string; "targetAvID"?: string; "template": string; "timeZone": string; "triggerTime"?: string; };
 
@@ -417,6 +421,10 @@ export type AVGroupPagingInput = { "page"?: number | null; "pageSize"?: number |
 export type AVGroupRange = { "numEnd": number; "numStart": number; "numStep": number; };
 
 export type AVGroupRangeInput = { "numEnd"?: number | null; "numStart"?: number | null; "numStep"?: number | null; };
+
+export type AVHTTPAutomationJob = { "avID": string; "blockID": string; "boxID"?: string; "id": string; "sequence": number; };
+
+export type AVHTTPAutomationJobInput = { "avID": string; "blockID": string; "boxID"?: string; "id": string; "sequence": number; };
 
 export type AVIDData = { "id": string; };
 
@@ -826,7 +834,7 @@ export type BazaarNotifications = { "browserCompatibility": boolean; "docTreeMax
 
 export type BazaarPDFTheme = { "annoColor": string; "dark": string; "light": string; };
 
-export type BazaarPackage = { "author": string; "backends": Array<string> | null; "bazaarIncompatible"?: boolean; "bootAppearances"?: Array<string>; "choices"?: Array<BazaarPackageChoice>; "current": boolean; "deprecated"?: boolean; "deprecatedReason"?: Record<string, string>; "description": Record<string, string> | null; "disabledInPublish": boolean; "disallowInstall": boolean; "disallowUpdate": boolean; "displayName": Record<string, string> | null; "downloads": number; "enabled"?: boolean; "frontends": Array<string> | null; "funding": BazaarFunding | null; "hInstallDate": string; "hInstallSize": string; "hSize": string; "hUpdated": string; "hasStorageData"?: boolean; "icon"?: string; "iconURL": string; "installSize": number; "installTime": number; "installed": boolean; "installedIncompatible"?: boolean; "invalidReason"?: "missing-manifest" | "invalid-manifest" | "name-mismatch"; "kernels": Array<string> | null; "keywords": Array<string> | null; "minAppVersion": string; "modes"?: Array<string> | null; "name": string; "openIssues": number; "outdated": boolean; "preferredDeprecatedReason"?: string; "preferredDesc": string; "preferredFunding": string; "preferredName": string; "preferredReadme": string; "preview"?: string; "previewURL": string; "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "readme": Record<string, string> | null; "repoHash": string; "repoRef"?: string; "repoURL": string; "settingsWindow"?: boolean; "size": number; "stars": number; "updateRequiredMinAppVer"?: string; "updateTime": number; "updated": string; "url": string; "userDisabledInPublish"?: boolean; "version": string; };
+export type BazaarPackage = { "author": string; "backends": Array<string> | null; "bazaarIncompatible"?: boolean; "bazaarVersionUnsupported"?: boolean; "bootAppearances"?: Array<string>; "choices"?: Array<BazaarPackageChoice>; "created"?: string; "current": boolean; "deprecated"?: boolean; "deprecatedReason"?: Record<string, string>; "description": Record<string, string> | null; "disabledInPublish": boolean; "disallowInstall": boolean; "disallowUpdate": boolean; "displayName": Record<string, string> | null; "downloads": number; "enabled"?: boolean; "frontends": Array<string> | null; "funding": BazaarFunding | null; "hInstallDate": string; "hInstallSize": string; "hSize": string; "hUpdated": string; "hasStorageData"?: boolean; "icon"?: string; "iconURL": string; "installSize": number; "installTime": number; "installed": boolean; "installedIncompatible"?: boolean; "invalidReason"?: "missing-manifest" | "invalid-manifest" | "name-mismatch"; "kernels": Array<string> | null; "keywords": Array<string> | null; "minAppVersion": string; "modes"?: Array<string> | null; "name": string; "openIssues": number; "outdated": boolean; "preferredDeprecatedReason"?: string; "preferredDesc": string; "preferredFunding": string; "preferredName": string; "preferredReadme": string; "preview"?: string; "previewURL": string; "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "readme": Record<string, string> | null; "repoHash": string; "repoRef"?: string; "repoURL": string; "settingsWindow"?: boolean; "size": number; "stars": number; "updateRequiredMinAppVer"?: string; "updateTime": number; "updated": string; "url": string; "userDisabledInPublish"?: boolean; "version": string; };
 
 export type BazaarPackageChoice = { "name": string; "packageType": string; };
 
@@ -1148,9 +1156,9 @@ export type DocumentPathSegment = { "empty": boolean; "id": string; "text": stri
 
 export type DocumentPathStartInput = { "id"?: string; "kind": "root" | "document"; };
 
-export type DocumentPathsData = { "documents": Array<DocumentPath> | null; "missingIDs": Array<string> | null; };
+export type DocumentPathsData = { "documents": Array<DocumentPath> | null; "icons"?: Record<string, string>; "missingIDs": Array<string> | null; };
 
-export type DocumentPathsResult = (DocumentPathsData & { "reason"?: never; }) | (DocumentAddressingFailure & { "documents"?: never; "missingIDs"?: never; });
+export type DocumentPathsResult = (DocumentPathsData & { "reason"?: never; }) | (DocumentAddressingFailure & { "documents"?: never; "icons"?: never; "missingIDs"?: never; });
 
 export type DocumentPreviewImage = { "notebook": string; "src": string; "video"?: string; };
 
@@ -1208,7 +1216,7 @@ export type ExportAttributeViewRequestInput = { "blockID": string; "id": string;
 
 export type ExportBrowserHTMLRequestInput = { "folder": string; "html": string; "name": string; };
 
-export type ExportDocumentsMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "ids": Array<string>; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+export type ExportDocumentsMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "headingNumber"?: boolean | null; "ids": Array<string>; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
 export type ExportDocxRequestInput = { "id": string; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "removeAssets": boolean; "savePath": string; };
 
@@ -1226,19 +1234,19 @@ export type ExportIDsRequestInput = { "ids": Array<string>; };
 
 export type ExportMarkdownContentData = { "content": string; "hPath": string; };
 
-export type ExportMarkdownContentRequestInput = { "addTitle"?: boolean | null; "adjustHeadingLevel"?: boolean | null; "embedMode"?: number | null; "fillCSSVar"?: boolean | null; "id": string; "imgTag"?: boolean | null; "preserveTaskMarkers"?: boolean | null; "refMode"?: number | null; "yfm"?: boolean | null; };
+export type ExportMarkdownContentRequestInput = { "addTitle"?: boolean | null; "adjustHeadingLevel"?: boolean | null; "embedMode"?: number | null; "fillCSSVar"?: boolean | null; "headingNumber"?: boolean | null; "id": string; "imgTag"?: boolean | null; "preserveTaskMarkers"?: boolean | null; "refMode"?: number | null; "yfm"?: boolean | null; };
 
 export type ExportMarkdownHTMLRequestInput = { "id": string; "savePath"?: string | null; };
 
-export type ExportMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "id": string; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+export type ExportMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "headingNumber"?: boolean | null; "id": string; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
 export type ExportNameData = { "name": string; };
 
 export type ExportNamedZipData = { "name": string; "zip": string; };
 
-export type ExportNotebookMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "notebook": string; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+export type ExportNotebookMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "headingNumber"?: boolean | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "notebook": string; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
-export type ExportNotebooksMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "notebooks"?: Array<string> | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+export type ExportNotebooksMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "headingNumber"?: boolean | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "notebooks"?: Array<string> | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
 export type ExportNotebooksRequestInput = { "notebooks"?: Array<string> | null; };
 
@@ -1296,7 +1304,7 @@ export type FileTreeDocTreeData = { "tree": Array<FileTreeDocFile | null> | null
 
 export type FileTreeDuplicateData = { "hPath": string; "id": string; "notebook": string; "path": string; };
 
-export type FileTreeFile = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "count": number; "ctime": number; "dueFlashcardCount": number; "flashcardCount": number; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "mtime": number; "name": string; "name1": string; "newFlashcardCount": number; "path": string; "size": number; "sort": number; "subFileCount": number; "titleEmpty"?: boolean; "titleFormat"?: "plain" | "inline-ast"; "titleRevision"?: string; };
+export type FileTreeFile = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "count": number; "ctime": number; "dueFlashcardCount": number; "flashcardCount": number; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "mtime": number; "name": string; "name1": string; "newFlashcardCount": number; "path": string; "size": number; "sort": number; "specTooNew"?: boolean; "subFileCount": number; "titleEmpty"?: boolean; "titleFormat"?: "plain" | "inline-ast"; "titleRevision"?: string; };
 
 export type FileTreeGetDocData = { "blockCount": number; "box": string; "content": string; "docInfo"?: DocInfo; "eof": boolean; "headingNumbers": Record<string, string> | null; "id": string; "isBacklinkExpand": boolean; "isSyncing": boolean; "keywords": Array<string> | null; "mode": number; "parent2ID": string; "parentID": string; "path": string; "publishAccessRequired": boolean; "reqId": JSONValue; "rootID": string; "scroll": boolean; "type": string; };
 
@@ -1678,7 +1686,7 @@ export type GetCurrentAttrViewImagesRequestInput = { "blockID"?: string | null; 
 
 export type GetDocCreateTargetRequestInput = { "notebook": string; "purpose": "document" | "reference" | "dailyNote"; };
 
-export type GetDocPathsRequestInput = { "ids": Array<string>; "notebook": string; };
+export type GetDocPathsRequestInput = { "ids": Array<string>; "includeIcons"?: boolean; "notebook": string; };
 
 export type GetEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "headingMode"?: number | null; "includeIDs": Array<string>; "notebook"?: string | null; };
 
@@ -1762,9 +1770,9 @@ export type History = { "hCreated": string; "items": Array<HistoryItem | null> |
 
 export type HistoryItem = { "id": string; "notebook": string; "op": string; "path": string; "title": string; };
 
-export type HistoryItemsData = { "items": Array<HistoryItem | null> | null; };
+export type HistoryItemsData = { "items": Array<HistoryItem | null> | null; "pageCount": number; "totalCount": number; };
 
-export type HistoryItemsRequestInput = { "created": string; "notebook"?: string | null; "op"?: string | null; "query"?: string | null; "type"?: number | null; };
+export type HistoryItemsRequestInput = { "created": string; "notebook"?: string | null; "op"?: string | null; "page"?: number | null; "query"?: string | null; "type"?: number | null; };
 
 export type HistoryPathRequestInput = { "historyPath": string; };
 
@@ -2076,7 +2084,7 @@ export type PerformTransactionsRequestInput = { "app"?: string; "reqId": number;
 
 export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "settingsWindow"?: boolean; "userDisabledInPublish": boolean; "version": string; };
 
-export type PinnedDoc = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "name": string; "name1": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
+export type PinnedDoc = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "name": string; "name1": string; "notebook": string; "path": string; "specTooNew"?: boolean; "subFileCount": number; "unavailable": boolean; };
 
 export type PlanDocCreateRequestInput = { "ancestorChoices"?: Array<DocumentAncestorChoiceInput>; "contextID"?: string | null; "date"?: string; "id": string; "notebook": string; "placement"?: "configured" | "child"; "purpose": "document" | "reference" | "dailyNote"; "reuse"?: boolean; "targetRevision"?: string; "time"?: string; "title"?: string; };
 
@@ -2282,6 +2290,8 @@ export type RiffTreeDueCardsRequestInput = { "reviewedCards"?: Array<RiffReviewe
 
 export type RollbackRepoSnapshotFileRequestInput = { "id": string; };
 
+export type RunAttributeViewAutomationRequestInput = { "action"?: string; "avID": string; "blockID": string; "jobID"?: string; "rows"?: boolean | null; "ruleID": string; "runID"?: string; "step"?: number; };
+
 export type SQLQueryRequestInput = { "mode"?: string | null; "stmt": string; };
 
 export type SavePluginPublishDataRequestInput = { "data": Record<string, null | string | number | boolean>; "packageName": string; };
@@ -2316,7 +2326,7 @@ export type SearchEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "emb
 
 export type SearchHeadingFilterInput = { "h1"?: boolean | null; "h2"?: boolean | null; "h3"?: boolean | null; "h4"?: boolean | null; "h5"?: boolean | null; "h6"?: boolean | null; };
 
-export type SearchHistoryData = { "histories": Array<string> | null; "pageCount": number; "totalCount": number; };
+export type SearchHistoryData = { "histories": Array<string> | null; "itemCounts": Record<string, number> | null; "pageCount": number; "totalCount": number; };
 
 export type SearchHistoryRequestInput = { "notebook"?: string | null; "op"?: string | null; "page"?: number | null; "query"?: string | null; "type"?: number | null; };
 
@@ -2376,7 +2386,7 @@ export type SetAttributeViewBlockAttrRequestInput = { "avID": string; "itemID"?:
 
 export type SetBazaarPackageRatingRequestInput = { "packageName": string; "packageType": string; "rating": number; };
 
-export type SetBazaarRequestInput = { "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
+export type SetBazaarRequestInput = { "batchUpdateExcluded"?: Record<string, Record<string, boolean> | null> | null; "compatibilityFilters"?: Record<string, SettingBazaarCompatibilityFilterInput | null> | null; "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
 
 export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>; "id": string; };
 
@@ -2390,7 +2400,7 @@ export type SetEditorRequestInput = { "allowHTMLBLockScript"?: boolean | null; "
 
 export type SetEntryVisibilityRequestInput = { "active"?: string | null; "profiles"?: Array<SettingEntryVisibilityProfileInput | null> | null; "version"?: number | null; };
 
-export type SetExportRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+export type SetExportRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "headingNumber"?: boolean | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
 export type SetFiletreeRequestInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "closeWindowOnLastTabClosed"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "docTreeBatchSize"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "recentDocsSort"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
 
@@ -2480,9 +2490,13 @@ export type SettingBasicAuthAccountInput = { "memo"?: string | null; "password"?
 
 export type SettingBasicAuthInput = { "accounts"?: Array<SettingBasicAuthAccountInput | null> | null; "enable"?: boolean | null; };
 
-export type SettingBazaar = { "petalDisabled": boolean; "trust": boolean; };
+export type SettingBazaar = { "batchUpdateExcluded": Record<string, Record<string, boolean> | null> | null; "compatibilityFilters": Record<string, SettingBazaarCompatibilityFilter | null> | null; "petalDisabled": boolean; "trust": boolean; };
 
-export type SettingBazaarInput = { "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
+export type SettingBazaarCompatibilityFilter = { "hideIncompatiblePlatform": boolean; "hideUnsupportedVersion": boolean; };
+
+export type SettingBazaarCompatibilityFilterInput = { "hideIncompatiblePlatform"?: boolean | null; "hideUnsupportedVersion"?: boolean | null; };
+
+export type SettingBazaarInput = { "batchUpdateExcluded"?: Record<string, Record<string, boolean> | null> | null; "compatibilityFilters"?: Record<string, SettingBazaarCompatibilityFilterInput | null> | null; "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
 
 export type SettingBodyGradient = { "dark": SettingBodyGradientColor; "light": SettingBodyGradientColor; "mode": string; };
 
@@ -2550,9 +2564,9 @@ export type SettingEntryVisibilityProfile = { "defaults"?: "simple" | "full"; "e
 
 export type SettingEntryVisibilityProfileInput = { "defaults"?: "simple" | "full"; "entries"?: Record<string, boolean> | null; "id"?: string | null; "name"?: string | null; "orders"?: Record<string, Array<string> | null> | null; };
 
-export type SettingExport = { "addTitle": boolean; "blockEmbedMode": number; "blockRefMode": number; "blockRefTextLeft": string; "blockRefTextRight": string; "fileAnnotationRefMode": number; "imageWatermarkDesc": string; "imageWatermarkStr": string; "includeRelatedDocs": boolean; "includeSubDocs": boolean; "inlineMemo": boolean; "markdownYFM": boolean; "pandocBin": string; "pandocParams": string; "paragraphBeginningSpace": boolean; "pdfFooter": string; "pdfWatermarkDesc": string; "pdfWatermarkStr": string; "removeAssetsID": boolean; "tagCloseMarker": string; "tagOpenMarker": string; };
+export type SettingExport = { "addTitle": boolean; "blockEmbedMode": number; "blockRefMode": number; "blockRefTextLeft": string; "blockRefTextRight": string; "fileAnnotationRefMode": number; "headingNumber": boolean | null; "imageWatermarkDesc": string; "imageWatermarkStr": string; "includeRelatedDocs": boolean; "includeSubDocs": boolean; "inlineMemo": boolean; "markdownYFM": boolean; "pandocBin": string; "pandocParams": string; "paragraphBeginningSpace": boolean; "pdfFooter": string; "pdfWatermarkDesc": string; "pdfWatermarkStr": string; "removeAssetsID": boolean; "tagCloseMarker": string; "tagOpenMarker": string; };
 
-export type SettingExportInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+export type SettingExportInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "headingNumber"?: boolean | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
 export type SettingFileTree = { "allowCreateDeeper": boolean; "alwaysSelectOpenedFile": boolean; "boxDocEnabled": boolean | null; "closeTabOnDoubleClick": boolean; "closeTabsOnStart": boolean; "closeWindowOnLastTabClosed": boolean | null; "createDocAtTop": boolean | null; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "docIconClickMode": number; "docTreeBatchSize": number | null; "largeFileWarningSize": number; "maxListCount": number; "maxOpenTabCount": number; "noSplitScreenWhenOpenTab": boolean; "openFilesUseCurrentTab": boolean; "parentDocTitleClickMode": number; "recentDocsMaxListCount": number; "recentDocsSort": string; "refCreateSaveBox": string; "refCreateSavePath": string; "removeDocWithoutConfirm": boolean; "shorthandSaveBox": string; "shorthandSavePath": string; "sort": number; "tabStartupMode": number | null; "useSVGDefaultIcon": boolean | null; "useSingleLineSave": boolean; };
 
@@ -2958,7 +2972,7 @@ export type TestSyncProviderS3RequestInput = { "s3": SyncS3Input; };
 
 export type TestSyncProviderWebDAVRequestInput = { "cloudName"?: string; "webdav": SyncWebDAVInput; };
 
-export type Transaction = { "collectionRemovalSourceVersions"?: Record<string, string>; "doOperations": Array<TransactionOperation | null> | null; "templateDocTreePlanID"?: string; "timestamp": number; "undoOperations": Array<TransactionOperation | null> | null; };
+export type Transaction = { "collectionRemovalSourceVersions"?: Record<string, string>; "doOperations": Array<TransactionOperation | null> | null; "httpAutomationJobs"?: Array<AVHTTPAutomationJob | null>; "templateDocTreePlanID"?: string; "timestamp": number; "undoOperations": Array<TransactionOperation | null> | null; };
 
 export type TransactionAttributeChangeInput = { "data-av-type"?: string | null; "new"?: Record<string, string> | null; "old"?: Record<string, string> | null; };
 
@@ -2986,7 +3000,7 @@ export type TransactionHistoryFailure = { "failed": true; "msg": string; };
 
 export type TransactionHistoryRequestInput = { "app"?: string; "rootID": string; "session"?: string; };
 
-export type TransactionInput = { "collectionRemovalSourceVersions"?: Record<string, string>; "doOperations"?: Array<TransactionOperationRequest | null> | null; "templateDocTreePlanID"?: string | null; "timestamp"?: number | null; "undoOperations"?: Array<TransactionOperationRequest | null> | null; };
+export type TransactionInput = { "collectionRemovalSourceVersions"?: Record<string, string>; "doOperations"?: Array<TransactionOperationRequest | null> | null; "httpAutomationJobs"?: Array<AVHTTPAutomationJobInput | null>; "templateDocTreePlanID"?: string | null; "timestamp"?: number | null; "undoOperations"?: Array<TransactionOperationRequest | null> | null; };
 
 export type TransactionInsertedItems = { "existingItemIDs": Array<string> | null; "insertedItemIDs": Array<string> | null; };
 
@@ -4657,9 +4671,10 @@ export interface APIPOSTRoutes {
      * 无效上下文、未知配置版本和发布读取角色均拒绝访问，不回退到完整数据库。
      * HTTP 模板字段的普通解析、求值错误作为字段内容返回，并定向提示发起窗口；取消、锁定和执行超限仍终止请求。
      * automaticRefresh 默认 false；true 时仅复用来源、行及模板输入未变的成功内存结果，不扩大读取权限。
-     * preserveHTTPResults 默认 false；配合 automaticRefresh 用于排序等展示操作，复用外部依赖模板的当前快照。
+     * preserveHTTPResults 默认 false；配合 automaticRefresh 用于排序、搜索等展示操作，复用外部依赖模板的当前快照。
      * deferHTTPTemplates 默认 false；true 时不执行联网模板，返回 pendingHTTPTemplates 字段 ID 供首屏显示加载状态。
-     * 同库模板一并延后；依赖模板的筛选、排序、分组、统计、日历和嵌套视图仅返回结构，完成查询后重新请求最终结果。
+     * 同库模板一并延后；仅排序依赖模板时先返回条目，完成查询后确定顺序。
+     * 筛选、分组、统计、日历和嵌套视图依赖模板时仅返回结构，完成查询后重新请求最终结果。
      */
     "/api/av/renderAttributeView": {
         request: RenderAttributeViewRequestInput;
@@ -4697,6 +4712,31 @@ export interface APIPOSTRoutes {
         body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 执行已启用的 manual 规则或继续编辑提交后返回的单次 HTTP 任务。
+     * 条目、条件、动作目标及输入均使用开始执行时的存储快照，不受当前视图筛选或分页限制。
+     * manual 规则要求配置版本 9；事件 HTTP 任务要求 10，仅处理触发编辑的条目。
+     * jobID 非空时校验任务的 avID、blockID 和发起窗口，忽略 ruleID；任务五分钟内有效且仅能消费一次。
+     * 失效、重复、被后续编辑替代或取消的任务返回 code -409，不写入结果；普通失败返回 -1。
+     * 联网沿用交互确认、持久许可及公网请求限制，无交互窗口不能执行事件 HTTP 任务。
+     * 全部取数成功后重新校验已读取的数据库，在单笔可撤销事务中写入；失败、取消或来源改变均保留原值。
+     * 撤销和重做复用已保存结果，不重复联网；每次最多 1000 个写入操作，不提供定时执行。
+     * rows 缺省或 false 保持整批原子提交及 null 响应；true 仅用于 manual 规则，要求有效主窗口，返回逐条进度。
+     * rows 模式先以空 runID 和 action=start 选择符合条件的存储条目，不执行动作；之后以 runID、step 和 action=run 顺序续批。
+     * 每批最多 32 条，每条内部全部动作原子提交；普通失败只影响本条，成功结果立即保存且可撤销，重放不联网。
+     * 重复 step 或 action=status 仅查询进度；客户端响应丢失后先查询，不能盲目重发新增动作。
+     * 各批共享一轮网络预算及 1000 次写入上限；超限、拒绝、取消或规则变化暂停，成功结果保持。
+     * action=retry 显式重置本轮预算，仅执行失败及未完成条目；规则修改后须重新开始。
+     * 部分成功或暂停返回 code 1 及进度；无效、过期或跨窗口记录返回 -409，记录十五分钟内有效。
+     * 进度最多 32 份、每份最多 10000 条，只保存标识与摘要，笔记本进入锁定流程时清除。
+     */
+    "/api/av/runAttributeViewAutomation": {
+        request: RunAttributeViewAutomationRequestInput;
+        response: { "code": 0; "data": AVAutomationRunResult | null; "msg": string; } | { "code": -1 | -409 | 1; "data": { "closeTimeout": number; } | null | AVAutomationRunResult | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/searchAttributeView": {
         request: SearchAttributeViewRequestInput;
@@ -4796,6 +4836,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 在线包的 created 为集市索引记录的首次上架时间，缺失时省略，不使用 updated、installTime 或 updateTime 补齐。
+     * bazaarVersionUnsupported 为 true 表示在线包要求更高的应用版本，与 bazaarIncompatible 的平台兼容性独立。
+     * 这两个可选字段也适用于返回在线包的集市列表、安装和更新接口；本地清单不提供它们。
+     */
     "/api/bazaar/getBazaarPackage": {
         request: GetBazaarPackageRequestInput;
         response: { "code": 0; "data": BazaarPackageDetail; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5300,6 +5345,7 @@ export interface APIPOSTRoutes {
     /**
      * 读取完整文档标题源及编辑用 BlockDOM，按文档 ID 寻址并保留加密笔记本响应租约。
      * 旧纯文本不解释为 Markdown；纯文本摘要不能作为富标题完整源回写，写入使用 setDocTitle 事务。
+     * 笔记本文档使用笔记本 ID 读取，其纯文本摘要与笔记本名称同步。
      */
     "/api/block/getDocTitle": {
         request: DocumentTitleRequestInput;
@@ -5727,6 +5773,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * Markdown 导出按文档标题编号开关和编辑器编号格式添加编号，不修改源文档。
+     * headingNumber=false 仅在本次 Markdown 导出中省略编号；省略或 null 沿用导出设置（默认不包含编号）；true 保留文档编号。
      */
     "/api/export/exportMd": {
         request: ExportMarkdownRequestInput;
@@ -5737,6 +5784,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * Markdown 内容按文档标题编号开关和编辑器编号格式添加编号，局部导出保留原文档编号。
+     * headingNumber=false 仅在本次 Markdown 复制中省略编号；省略或 null 沿用导出设置（默认不包含编号）；true 保留文档编号，不改变源文档或导出设置。
      */
     "/api/export/exportMdContent": {
         request: ExportMarkdownContentRequestInput;
@@ -6163,6 +6211,8 @@ export interface APIPOSTRoutes {
      * 在指定笔记本内按文档 ID 读取结构化祖先链，要求管理员权限，加密响应保留操作租约。
      * ids 必须包含 1 至 128 项，按首次出现顺序去重；缺失、其他笔记本或内容块身份列入 missingIDs。
      * 文档标题、segments 与 revision 来自同一快照，displayPath 仅用于显示，不能反向解析身份。
+     * includeIcons 默认为 false；为 true 时，icons 按文档及祖先 ID 返回原始图标值，无图标时为空字符串。
+     * 图标独立于路径 revision，读取源文件失败时返回错误；未启用时省略 icons 且不读取源文件。
      * 索引未就绪返回 indexUnavailable，源格式和认证错误不能伪装成缺失；批量结果不承诺全局快照。
      */
     "/api/filetree/getDocPaths": {
@@ -6998,6 +7048,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 按路径、ID、操作和索引行号升序分页，每页 32 条，page 缺省或小于 1 时使用第一页。
+     * totalCount 为该时间分组在当前筛选条件下的文件条数，pageCount 为分组内页数。
+     */
     "/api/history/getHistoryItems": {
         request: HistoryItemsRequestInput;
         response: { "code": 0; "data": HistoryItemsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7055,6 +7109,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 按时间分组分页；itemCounts 为当前筛选条件下各时间分组的文件条数，totalCount 为分组总数。
+     */
     "/api/history/searchHistory": {
         request: SearchHistoryRequestInput;
         response: { "code": 0; "data": SearchHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7532,6 +7589,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 保持笔记本文档同名；富文本标题仅允许原样回传摘要，其他纯文本改名拒绝并保留完整源。
+     * 修改富文本须读取 getDocTitle 并提交带 expectedRevision 的 setDocTitle 事务。
+     */
     "/api/notebook/renameNotebook": {
         request: RenameNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7556,6 +7617,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 的 name 与笔记本文档标题联动，富文本标题只允许原样回传纯文本名称。
+     * 其他配置字段仍可单独修改；编辑富文本标题须使用带 expectedRevision 的 setDocTitle 事务。
+     */
     "/api/notebook/setNotebookConf": {
         request: SetNotebookConfRequestInput;
         response: { "code": 0; "data": NotebookConf | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8475,6 +8540,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * compatibilityFilters 按 plugins、themes、widgets、icons、templates 分别保存集市兼容性筛选，两个开关默认 false。
+     * 对象递归合并，省略的类型和开关保持当前值，null 恢复默认；未知类型忽略，不影响 trust 和 petalDisabled。
+     * batchUpdateExcluded 按相同类型和包名保存跳过开关，默认均为空对象，true 跳过、false 恢复；补丁按包名合并；仅跳过批量更新，仍提示更新并允许手动单项更新。
+     */
     "/api/setting/setBazaar": {
         request: SetBazaarRequestInput;
         response: { "code": 0; "data": SettingBazaar | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -9315,12 +9385,15 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 读取版本更新日志；未指定 force 时同时清除待显示标记并落盘 conf.json，因此需要写权限。
+     */
     "/api/system/getChangelog": {
         request: SystemChangelogRequestInput;
         response: { "code": 0; "data": SystemChangelogData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "legacyOptional";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
-        authorization?: readonly ["authenticated"];
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/getConf": {
         request: EmptyRequestInput;
@@ -9841,6 +9914,9 @@ export interface APIPOSTRoutes {
      * retData 返回受影响的文档 ID。逆向操作使用受影响顶层块的私有内存快照；快照不传给客户端，也不接受客户端提交。
      * 重放保留块 ID 和数据库绑定，内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。
      * 撤销与重放为所有受影响文档持有笔记本租约，直至响应序列化完成。
+     * 请求头 X-Siyuan-Template-App/Session 指定当前非发布主窗口，启用格式 10 的事件 HTTP 规则会返回 httpAutomationJobs。
+     * 编辑先提交，再由该窗口继续单次任务，网络等待不阻塞编辑；输入中的 httpAutomationJobs 被忽略。
+     * 任务仅包含标识和摘要，不持有明文快照；无有效窗口的 API 写入只保存编辑，不执行事件 HTTP 动作。
      */
     "/api/transactions": {
         request: PerformTransactionsRequestInput;

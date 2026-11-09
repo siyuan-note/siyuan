@@ -107,8 +107,15 @@ func (tx *Transaction) writeDocumentTitleTree(tree *parse.Tree, preflight func()
 	if err != nil {
 		return err
 	}
+	if IsBoxDoc(tree.Box, tree.ID) {
+		if err = syncBoxDocTitleName(tree); err != nil {
+			return err
+		}
+	}
 	sql.UpsertTreeQueueWithChanges(tree, tx.treeIndexChanges(tree))
 	refreshDocInfoWithSize(tree, size)
+	// 新增标题依赖可能尚未入库，索引完成后重新读取定义，补齐本次即时刷新遗漏的引用。
+	updateRefTextRenameDoc(tree)
 	return nil
 }
 
@@ -152,8 +159,8 @@ func (tx *Transaction) doSetDocTitle(operation *Operation) *TxErr {
 	if err != nil {
 		return loadTreeTxErr(operation.ID, err)
 	}
-	if operation.ID != tree.ID || IsBoxDoc(tree.Box, tree.ID) {
-		return fail(errors.New("rich titles require a regular document root"))
+	if operation.ID != tree.ID {
+		return fail(errors.New("rich titles require a document root"))
 	}
 	before := captureDocumentTitle(tree.Root)
 	if tx.isReplay {
@@ -255,6 +262,9 @@ func (tx *Transaction) doSetDocTitle(operation *Operation) *TxErr {
 		if _, err = refreshDocumentTitleAnchors(tree.Root, tree); err != nil {
 			return fail(err)
 		}
+	}
+	if IsBoxDoc(tree.Box, tree.ID) {
+		tree.Root.SetIALAttr(boxDocTitleSourceAttr, "document")
 	}
 	parent, err := documentParentDisplayPath(tree.Box, tree.Path)
 	if err != nil {

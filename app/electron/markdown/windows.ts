@@ -5,6 +5,7 @@ import {createAvailableMarkdownId, createMarkdownInstanceId} from "../../src/mar
 import {MarkdownDesktopHost} from "./host";
 import {MarkdownResources, inside} from "./resources";
 import {createMarkdownPreferences, defaults} from "./preferences";
+import {createMarkdownAppearance} from "./appearance";
 import {importMarkdownImage, imageExtensions} from "./imageImport";
 import {parseMarkdownLaunch} from "./launch";
 import {MarkdownTree, treeFailure} from "./tree";
@@ -16,7 +17,7 @@ import type {App, BrowserWindow as ElectronWindow, Dialog, Input, IpcMain, IpcMa
 import type {FSWatcher} from "node:fs";
 import type {ExpectedMarkdownFile} from "./disk";
 import type {MarkdownInitial} from "./host";
-import type {MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "../../src/markdown/bridge";
+import type {MarkdownSystemFont, MarkdownAppearance, MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "../../src/markdown/bridge";
 import type {MarkdownFailure, MarkdownFormat, MarkdownHost, MarkdownSaveAsCommitResult, MarkdownWriteRequest} from "../../src/markdown/contracts";
 import type {MarkdownTreeLocation, MarkdownTreeOpen, MarkdownTreeView} from "../../src/markdown/treeContracts";
 
@@ -32,6 +33,7 @@ export type MarkdownWindowsOptions = {
     app: Pick<App, "getLocale">; BrowserWindow: typeof ElectronWindow; ipcMain: Pick<IpcMain, "handle">;
     dialog: Dialog; shell: Pick<Shell, "openExternal" | "showItemInFolder">; protocol?: Protocol; nativeTheme?: NativeTheme;
     rootDirectory: string; configDirectory: string; lang?: string | (() => string); platform?: NodeJS.Platform;
+    systemFonts?: (language: string) => Promise<MarkdownSystemFont[]>;
     onEmpty?: () => void; host?: MarkdownDesktopHost; windowControls: MarkdownWindowControls; devTools: MarkdownDevTools;
 };
 export type MarkdownWindows = {
@@ -46,6 +48,9 @@ type CurrentDocument = {sessionId: string; initial: MarkdownInitial; resources: 
 type MarkdownWindowRecord = {
     window: ElectronWindow; containerId: string; current: CurrentDocument;
     shortcutSource?: string;
+    appearance: MarkdownAppearance;
+    appearanceHost: ReturnType<typeof createMarkdownAppearance>;
+    appearanceTask?: Promise<MarkdownAppearance>;
     readonly sessionId: string; readonly initial: MarkdownInitial; readonly resources: MarkdownResources;
     pending: Map<string, (accepted: boolean) => void>; approved: boolean; tree: MarkdownTree;
     crashed?: boolean; crashApproved?: boolean; closing?: boolean; followTreePending?: boolean;
@@ -82,7 +87,7 @@ const trustedEvent = (event: Pick<IpcMainInvokeEvent, "sender" | "senderFrame">,
 };
 
 const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, rootDirectory, configDirectory,
-    lang, platform = process.platform, nativeTheme, onEmpty, host: injectedHost, windowControls, devTools}: MarkdownWindowsOptions): MarkdownWindows => {
+    lang, platform = process.platform, nativeTheme, systemFonts, onEmpty, host: injectedHost, windowControls, devTools}: MarkdownWindowsOptions): MarkdownWindows => {
     const directory = path.join(rootDirectory, "stage", "build", "markdown");
     const host = injectedHost || new MarkdownDesktopHost({directory: path.join(configDirectory, "recovery")});
     const preferences = createMarkdownPreferences(configDirectory);
@@ -177,10 +182,19 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         if (!session?.target) return undefined;
         return host.disk.registry.get(record.sessionId, session.target.handle);
     };
-    const bootstrap = async (initial: MarkdownInitial, source?: string): Promise<MarkdownBootstrap> => {
+    const loadAppearance = async (appearanceHost: ReturnType<typeof createMarkdownAppearance>, values: MarkdownPreferences) => {
+        const appearance = await appearanceHost.load(values.sources, values.independent);
+        const changed: MarkdownPreferences["sources"] = {};
+        for (const group of ["theme", "fontSize", "fonts"] as const) {
+            if (values.sources?.[group] && values.sources[group] !== appearance.sources[group]) changed[group] = appearance.sources[group];
+        }
+        if (Object.keys(changed).length) await preferences.update({sources: changed}, values.sources);
+        return appearance;
+    };
+    const bootstrap = async (initial: MarkdownInitial, source?: string, appearance?: MarkdownAppearance): Promise<MarkdownBootstrap> => {
         let values;
         try { values = await preferences.read(); } catch { values = {...defaults}; }
-        return {...initial, preferences: values, languages: languages!, lang: language!, platform, keymap: keymapFor(source),
+        return {...initial, preferences: values, appearance, languages: languages!, lang: language!, platform, keymap: keymapFor(source),
             dark: nativeTheme?.shouldUseDarkColors ?? false};
     };
     const cancelCandidate = async (record: MarkdownWindowRecord, ticket?: string): Promise<void> => {
@@ -237,6 +251,10 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         try {
             const url = new URL(request.url);
             if (request.method !== "GET" || url.protocol !== scheme + ":" || url.hostname !== record.containerId) return new Response(null, {status: 403});
+            if (url.pathname.startsWith("/appearance-font/")) {
+                const font = await record.appearanceHost.readFont(url.pathname.slice("/appearance-font/".length));
+                return font ? new Response(font.bytes, {headers: {...headers, "Content-Type": font.type}}) : new Response(null, {status: 404});
+            }
             if (url.pathname.startsWith("/resource/")) {
                 const current = record.current;
                 const resource = await current.resources.read(url.pathname.slice("/resource/".length));
@@ -258,7 +276,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             const canonical = await fs.realpath(file);
             if (!inside(root, canonical) || !(await fs.stat(canonical)).isFile()) return new Response(null, {status: 403});
             if (url.pathname === "/index.html") {
-                const theme = (await preferences.read()).theme;
+                const theme = record.appearance.theme;
                 const dark = theme === "dark" || theme === "system" && nativeTheme?.shouldUseDarkColors;
                 const html = await fs.readFile(canonical, "utf8");
                 return new Response(dark ? html.replace("./appearance/themes/daylight/theme.css", "./appearance/themes/midnight/theme.css") : html,
@@ -283,8 +301,9 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             return;
         }
         if (quitting) return;
-        let theme: MarkdownPreferences["theme"];
-        try { theme = (await preferences.read()).theme; }
+        const appearanceHost = createMarkdownAppearance(configDirectory);
+        let appearance: MarkdownAppearance;
+        try { const values = await preferences.read(); appearance = await loadAppearance(appearanceHost, values); }
         catch {
             const restoredSession = restored && host.sessions.get(restored.sessionId);
             if (restoredSession) restoredSession.crashed = true;
@@ -292,7 +311,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             return;
         }
         if (quitting) return;
-        const dark = theme === "dark" || theme === "system" && nativeTheme?.shouldUseDarkColors;
+        const dark = appearance.theme === "dark" || appearance.theme === "system" && nativeTheme?.shouldUseDarkColors;
         let initial = restored;
         if (!initial) {
             const sessionId = host.createSession();
@@ -331,7 +350,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 devTools.toggle(window.webContents, platform);
             }
         });
-        const record = {window, containerId: sessionId, shortcutSource,
+        const record = {window, containerId: sessionId, shortcutSource, appearanceHost, appearance,
             current: {sessionId, initial, resources: new MarkdownResources(sessionId), epoch: 0}, pending: new Map(), approved: false} as MarkdownWindowRecord;
         Object.defineProperties(record, {
             sessionId: {get: () => record.current.sessionId}, initial: {get: () => record.current.initial},
@@ -342,6 +361,8 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         records.set(sessionId, record);
         byContents.set(window.webContents.id, record);
         const browsing = window.webContents.session;
+        // 原生标题取当前授权文件名，页面加载时的临时标题不能覆盖它。
+        window.on("page-title-updated", event => event.preventDefault());
         browsing.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
         browsing.setPermissionCheckHandler(() => false);
         browsing.webRequest.onBeforeRequest((details, callback) => {
@@ -395,6 +416,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             pendingOpens.add(cleanup);
             cleanup.finally(() => { pendingOpens.delete(cleanup); if (!records.size) onEmpty?.(); });
             records.delete(record.containerId);
+            record.appearanceHost.close();
             byContents.delete(contentsId);
             browsing.protocol.unhandle(scheme);
         });
@@ -467,7 +489,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 if (opened.kind !== "opened") return opened;
                 await record.tree.file(location);
                 const initial = {sessionId: candidateSession, content: opened.content, target: opened.target};
-                const value = await bootstrap(initial, record.shortcutSource);
+                const value = await bootstrap(initial, record.shortcutSource, record.appearance);
                 if (quitting || record.closing || record.crashed || record.current !== current || record.window.isDestroyed()) throw new Error("Markdown switch cancelled");
                 const ticket = createAvailableMarkdownId(value => record.candidate?.ticket === value || record.committedSwitch?.ticket === value);
                 record.candidate = {ticket, initial, bootstrap: value, current};
@@ -496,6 +518,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         record.candidate = undefined;
         record.followTreePending = false;
         candidate.bootstrap.keymap = keymapFor(record.shortcutSource);
+        candidate.bootstrap.appearance = record.appearance;
         record.committedSwitch = {ticket, bootstrap: candidate.bootstrap};
         record.state = undefined;
         record.crashApproved = false;
@@ -546,7 +569,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                     height: Math.round((height === undefined ? NaN : height) * (record.window.webContents.getZoomFactor?.() || 1))}, platform);
             }
             case "bootstrap": {
-                return bootstrap(record.initial, record.shortcutSource);
+                return bootstrap(record.initial, record.shortcutSource, record.appearance);
             }
             case "tree-state": {
                 if (record.treeError) return {kind: "blocked", generation: record.tree.generation, expanded: [],
@@ -652,8 +675,25 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             }
             case "preferences": {
                 const patch = payload as Partial<MarkdownPreferences> | undefined;
-                if (!patch || Object.keys(patch).some(key => !["mode", "theme", "fontSize"].includes(key))) throw new Error("Invalid Markdown preferences");
+                if (!patch || Object.keys(patch).some(key => key !== "mode")) throw new Error("Invalid Markdown preferences");
                 return preferences.update(patch);
+            }
+            case "system-fonts": {
+                if (!systemFonts) throw new Error("System font enumeration unavailable");
+                return systemFonts(language ?? "en");
+            }
+            case "appearance": {
+                const task = (record.appearanceTask || Promise.resolve(record.appearance)).catch(() => record.appearance).then(async () => {
+                    if (record.window.isDestroyed()) throw new Error("Markdown window closed");
+                    const patch = payload === undefined ? {} : await record.appearanceHost.validate(payload);
+                    const values = payload === undefined ? await preferences.read() : await preferences.update(patch);
+                    const next = await loadAppearance(record.appearanceHost, values);
+                    if (record.window.isDestroyed()) throw new Error("Markdown window closed");
+                    record.appearance = next;
+                    return next;
+                });
+                record.appearanceTask = task;
+                return task;
             }
             case "confirm": {
                 const key = ({reload: "markdownReloadConfirm", overwrite: "markdownOverwriteConfirm", "save-as": "markdownRelativeLinks"} as Record<string, string>)[payload as string];

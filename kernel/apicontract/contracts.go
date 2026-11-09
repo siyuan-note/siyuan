@@ -139,6 +139,8 @@ var (
 	GetBlocksWordCount  = define[BlocksWordCountRequest, WordCountData]("getBlocksWordCount", "/api/block/getBlocksWordCount", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 )
 
+// SetNotebookConf 的 name 与笔记本文档标题联动，富文本标题只允许原样回传纯文本名称。
+// 其他配置字段仍可单独修改；编辑富文本标题须使用带 expectedRevision 的 setDocTitle 事务。
 var SetNotebookConf = define[SetNotebookConfRequest, *NotebookConf]("setNotebookConf", "/api/notebook/setNotebookConf", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var ReorderNotebooks = define[ReorderNotebooksRequest, *ReorderData]("reorderNotebooks", "/api/notebook/reorder", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
@@ -163,10 +165,12 @@ var (
 var (
 	SetNotebookIcon    = define[SetNotebookIconRequest, Null]("setNotebookIcon", "/api/notebook/setNotebookIcon", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	ChangeSortNotebook = define[ChangeSortNotebookRequest, Null]("changeSortNotebook", "/api/notebook/changeSortNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	RenameNotebook     = define[RenameNotebookRequest, Null]("renameNotebook", "/api/notebook/renameNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	RemoveNotebook     = define[NotebookIDRequest, Null]("removeNotebook", "/api/notebook/removeNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	CreateNotebook     = define[CreateNotebookRequest, CreateNotebookData]("createNotebook", "/api/notebook/createNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	CloseNotebook      = define[CloseNotebookRequest, Null]("closeNotebook", "/api/notebook/closeNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	// RenameNotebook 保持笔记本文档同名；富文本标题仅允许原样回传摘要，其他纯文本改名拒绝并保留完整源。
+	// 修改富文本须读取 getDocTitle 并提交带 expectedRevision 的 setDocTitle 事务。
+	RenameNotebook = define[RenameNotebookRequest, Null]("renameNotebook", "/api/notebook/renameNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	RemoveNotebook = define[NotebookIDRequest, Null]("removeNotebook", "/api/notebook/removeNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	CreateNotebook = define[CreateNotebookRequest, CreateNotebookData]("createNotebook", "/api/notebook/createNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	CloseNotebook  = define[CloseNotebookRequest, Null]("closeNotebook", "/api/notebook/closeNotebook", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 )
 
 var (
@@ -197,6 +201,7 @@ var (
 	SetBlockAttrs = define[SetBlockAttrsRequest, Null]("setBlockAttrs", "/api/attr/setBlockAttrs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	SearchTag     = define[SearchTagRequest, SearchTagData]("searchTag", "/api/search/searchTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	ListNotebooks = define[ListNotebooksRequest, *ListNotebooksData]("lsNotebooks", "/api/notebook/lsNotebooks", AuthenticatedAccess, LegacyOptionalBody, ResponseOptions{}, "POST")
+	// SearchHistory 按时间分组分页；itemCounts 为当前筛选条件下各时间分组的文件条数，totalCount 为分组总数。
 	SearchHistory = define[SearchHistoryRequest, SearchHistoryData]("searchHistory", "/api/history/searchHistory", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 	GetBlockInfo  = define[BlockInfoRequest, BlockInfoData]("getBlockInfo", "/api/block/getBlockInfo", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{3}, Text: true}, "POST")
 )
@@ -267,9 +272,10 @@ type SearchHistoryRequest struct {
 }
 
 type SearchHistoryData struct {
-	Histories  []string `json:"histories"`
-	PageCount  int      `json:"pageCount"`
-	TotalCount int      `json:"totalCount"`
+	ItemCounts map[string]int `json:"itemCounts"`
+	Histories  []string       `json:"histories"`
+	PageCount  int            `json:"pageCount"`
+	TotalCount int            `json:"totalCount"`
 }
 
 type BlockInfoRequest struct {
@@ -439,6 +445,7 @@ var GetDocInfo = define[BlockQueryRequest, *DocInfo]("getDocInfo", "/api/block/g
 
 // GetDocTitle 读取完整文档标题源及编辑用 BlockDOM，按文档 ID 寻址并保留加密笔记本响应租约。
 // 旧纯文本不解释为 Markdown；纯文本摘要不能作为富标题完整源回写，写入使用 setDocTitle 事务。
+// 笔记本文档使用笔记本 ID 读取，其纯文本摘要与笔记本名称同步。
 var GetDocTitle = define[DocumentTitleRequest, DocumentTitleData]("getDocTitle", "/api/block/getDocTitle", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetDocsInfo = define[DocsInfoRequest, []*DocInfo]("getDocsInfo", "/api/block/getDocsInfo", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -828,6 +835,8 @@ var ImportSYNotebook = define[ImportDataRequest, ImportNotebookData]("importSYNo
 // 同名不同内容时返回错误并保留已有表情文件。
 var ImportSYAuto = define[ImportSYRequest, ImportAutoData]("importSYAuto", "/api/import/importSYAuto", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{DataOnError: true}, "POST")
 
+// GetHistoryItems 按路径、ID、操作和索引行号升序分页，每页 32 条，page 缺省或小于 1 时使用第一页。
+// totalCount 为该时间分组在当前筛选条件下的文件条数，pageCount 为分组内页数。
 var GetHistoryItems = define[HistoryItemsRequest, HistoryItemsData]("getHistoryItems", "/api/history/getHistoryItems", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetNotebookHistory = define[EmptyRequest, NotebookHistoryData]("getNotebookHistory", "/api/history/getNotebookHistory", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
@@ -947,6 +956,10 @@ var GetUpdatedPackage = define[GetUpdatedPackageRequest, BazaarUpdatedData]("get
 // 请求取消会中止下载、解压及尚未提交的替换；已提交的更新不会回滚。
 var UpdateBazaarPackage = define[UpdateBazaarPackageRequest, BazaarPackagesData]("updateBazaarPackage", "/api/bazaar/updateBazaarPackage", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetInstalledPackageSize = define[GetInstalledPackageSizeRequest, BazaarPackageSizeData]("getInstalledPackageSize", "/api/bazaar/getInstalledPackageSize", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// 在线包的 created 为集市索引记录的首次上架时间，缺失时省略，不使用 updated、installTime 或 updateTime 补齐。
+// bazaarVersionUnsupported 为 true 表示在线包要求更高的应用版本，与 bazaarIncompatible 的平台兼容性独立。
+// 这两个可选字段也适用于返回在线包的集市列表、安装和更新接口；本地清单不提供它们。
 var GetBazaarPackage = define[GetBazaarPackageRequest, BazaarPackageDetail]("getBazaarPackage", "/api/bazaar/getBazaarPackage", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarPackageRatings = define[GetBazaarPackageRatingsRequest, BazaarRatingsData]("getBazaarPackageRatings", "/api/bazaar/getBazaarPackageRatings", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBazaarPackageUserRatings = define[GetBazaarPackageUserRatingsRequest, BazaarUserRatingsResult]("getBazaarPackageUserRatings", "/api/bazaar/getBazaarPackageUserRatings", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
@@ -1173,6 +1186,8 @@ var GetHPathByID = define[FileTreeIDRequest, string]("getHPathByID", "/api/filet
 // GetDocPaths 在指定笔记本内按文档 ID 读取结构化祖先链，要求管理员权限，加密响应保留操作租约。
 // ids 必须包含 1 至 128 项，按首次出现顺序去重；缺失、其他笔记本或内容块身份列入 missingIDs。
 // 文档标题、segments 与 revision 来自同一快照，displayPath 仅用于显示，不能反向解析身份。
+// includeIcons 默认为 false；为 true 时，icons 按文档及祖先 ID 返回原始图标值，无图标时为空字符串。
+// 图标独立于路径 revision，读取源文件失败时返回错误；未启用时省略 icons 且不读取源文件。
 // 索引未就绪返回 indexUnavailable，源格式和认证错误不能伪装成缺失；批量结果不承诺全局快照。
 var GetDocPaths = define[GetDocPathsRequest, DocumentPathsResult]("getDocPaths", "/api/filetree/getDocPaths", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 
@@ -1318,6 +1333,7 @@ var ExportNotebooksMd = define[ExportNotebooksMarkdownRequest, ExportNamedZipDat
 var ExportMds = define[ExportDocumentsMarkdownRequest, ExportNamedZipData]("exportMds", "/api/export/exportMds", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 // Markdown 导出按文档标题编号开关和编辑器编号格式添加编号，不修改源文档。
+// headingNumber=false 仅在本次 Markdown 导出中省略编号；省略或 null 沿用导出设置（默认不包含编号）；true 保留文档编号。
 var ExportMd = define[ExportMarkdownRequest, ExportNamedZipData]("exportMd", "/api/export/exportMd", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportNotebookSY = define[ExportIDRequest, ExportZipData]("exportNotebookSY", "/api/export/exportNotebookSY", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportNotebooksSY = define[ExportNotebooksRequest, ExportZipData]("exportNotebooksSY", "/api/export/exportNotebooksSY", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1325,6 +1341,7 @@ var ExportSYs = define[ExportIDsRequest, ExportZipData]("exportSYs", "/api/expor
 var ExportSY = define[ExportIDRequest, ExportZipData]("exportSY", "/api/export/exportSY", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 // Markdown 内容按文档标题编号开关和编辑器编号格式添加编号，局部导出保留原文档编号。
+// headingNumber=false 仅在本次 Markdown 复制中省略编号；省略或 null 沿用导出设置（默认不包含编号）；true 保留文档编号，不改变源文档或导出设置。
 var ExportMdContent = define[ExportMarkdownContentRequest, ExportMarkdownContentData]("exportMdContent", "/api/export/exportMdContent", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportDocx = define[ExportDocxRequest, ExportPathData]("exportDocx", "/api/export/exportDocx", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var ExportMdHTML = define[ExportMarkdownHTMLRequest, ExportHTMLData]("exportMdHTML", "/api/export/exportMdHTML", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1479,6 +1496,10 @@ var InsertCover = define[InsertCoverRequest, AssetInsertCoverData]("insertCover"
 var UploadAsset = define[UploadAssetRequest, AssetUploadData]("uploadAsset", "/api/asset/upload", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 
 var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet", "/api/setting/setSnippet", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "snippet", Merge: true}}, "POST")
+
+// compatibilityFilters 按 plugins、themes、widgets、icons、templates 分别保存集市兼容性筛选，两个开关默认 false。
+// 对象递归合并，省略的类型和开关保持当前值，null 恢复默认；未知类型忽略，不影响 trust 和 petalDisabled。
+// batchUpdateExcluded 按相同类型和包名保存跳过开关，默认均为空对象，true 跳过、false 恢复；补丁按包名合并；仅跳过批量更新，仍提示更新并允许手动单项更新。
 var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/setting/setBazaar", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "bazaar", Merge: true}}, "POST")
 
 // SetAI 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。
@@ -1656,6 +1677,24 @@ var RemoveTagWithCollections = define[RemoveTagWithCollectionsRequest, Null]("re
 // PreviewAttributeViewTemplate 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。
 // 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。
 var PreviewAttributeViewTemplate = define[AVAutomationTemplatePreviewRequest, *AVValue]("previewAttributeViewTemplate", "/api/av/previewAttributeViewTemplate", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// RunAttributeViewAutomation 执行已启用的 manual 规则或继续编辑提交后返回的单次 HTTP 任务。
+// 条目、条件、动作目标及输入均使用开始执行时的存储快照，不受当前视图筛选或分页限制。
+// manual 规则要求配置版本 9；事件 HTTP 任务要求 10，仅处理触发编辑的条目。
+// jobID 非空时校验任务的 avID、blockID 和发起窗口，忽略 ruleID；任务五分钟内有效且仅能消费一次。
+// 失效、重复、被后续编辑替代或取消的任务返回 code -409，不写入结果；普通失败返回 -1。
+// 联网沿用交互确认、持久许可及公网请求限制，无交互窗口不能执行事件 HTTP 任务。
+// 全部取数成功后重新校验已读取的数据库，在单笔可撤销事务中写入；失败、取消或来源改变均保留原值。
+// 撤销和重做复用已保存结果，不重复联网；每次最多 1000 个写入操作，不提供定时执行。
+// rows 缺省或 false 保持整批原子提交及 null 响应；true 仅用于 manual 规则，要求有效主窗口，返回逐条进度。
+// rows 模式先以空 runID 和 action=start 选择符合条件的存储条目，不执行动作；之后以 runID、step 和 action=run 顺序续批。
+// 每批最多 32 条，每条内部全部动作原子提交；普通失败只影响本条，成功结果立即保存且可撤销，重放不联网。
+// 重复 step 或 action=status 仅查询进度；客户端响应丢失后先查询，不能盲目重发新增动作。
+// 各批共享一轮网络预算及 1000 次写入上限；超限、拒绝、取消或规则变化暂停，成功结果保持。
+// action=retry 显式重置本轮预算，仅执行失败及未完成条目；规则修改后须重新开始。
+// 部分成功或暂停返回 code 1 及进度；无效、过期或跨窗口记录返回 -409，记录十五分钟内有效。
+// 进度最多 32 份、每份最多 10000 条，只保存标识与摘要，笔记本进入锁定流程时清除。
+var RunAttributeViewAutomation = define[RunAttributeViewAutomationRequest, *AVAutomationRunResult]("runAttributeViewAutomation", "/api/av/runAttributeViewAutomation", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{AdditionalCodes: []int{-409, 1}, DataOnError: true}, "POST")
 var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPasteRowsData]("getAttributeViewPasteRows", "/api/av/getAttributeViewPasteRows", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1687,9 +1726,10 @@ var RenderHistoryAttributeView = define[RenderHistoryAttributeViewRequest, AVArc
 // 无效上下文、未知配置版本和发布读取角色均拒绝访问，不回退到完整数据库。
 // HTTP 模板字段的普通解析、求值错误作为字段内容返回，并定向提示发起窗口；取消、锁定和执行超限仍终止请求。
 // automaticRefresh 默认 false；true 时仅复用来源、行及模板输入未变的成功内存结果，不扩大读取权限。
-// preserveHTTPResults 默认 false；配合 automaticRefresh 用于排序等展示操作，复用外部依赖模板的当前快照。
+// preserveHTTPResults 默认 false；配合 automaticRefresh 用于排序、搜索等展示操作，复用外部依赖模板的当前快照。
 // deferHTTPTemplates 默认 false；true 时不执行联网模板，返回 pendingHTTPTemplates 字段 ID 供首屏显示加载状态。
-// 同库模板一并延后；依赖模板的筛选、排序、分组、统计、日历和嵌套视图仅返回结构，完成查询后重新请求最终结果。
+// 同库模板一并延后；仅排序依赖模板时先返回条目，完成查询后确定顺序。
+// 筛选、分组、统计、日历和嵌套视图依赖模板时仅返回结构，完成查询后重新请求最终结果。
 var RenderAttributeView = define[RenderAttributeViewRequest, AVRenderResult]("renderAttributeView", "/api/av/renderAttributeView", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, FastJSON: true}, "POST")
 var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalendarUndatedData]("getAttributeViewCalendarUndated", "/api/av/getAttributeViewCalendarUndated", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1879,7 +1919,9 @@ var SystemExportConf = define[EmptyRequest, SystemExportConfData]("exportConf", 
 var SystemExportLog = define[EmptyRequest, SystemZipData]("exportLog", "/api/system/exportLog", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportTLSCABundle = define[EmptyRequest, SystemPathData]("exportTLSCABundle", "/api/system/exportTLSCABundle", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportTLSCACert = define[EmptyRequest, SystemPathData]("exportTLSCACert", "/api/system/exportTLSCACert", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
-var SystemGetChangelog = define[SystemChangelogRequest, SystemChangelogData]("getChangelog", "/api/system/getChangelog", AuthenticatedAccess, LegacyOptionalBody, ResponseOptions{Setting: SettingWrite{Namespace: "system", Mode: SettingSilent}}, "POST")
+
+// SystemGetChangelog 读取版本更新日志；未指定 force 时同时清除待显示标记并落盘 conf.json，因此需要写权限。
+var SystemGetChangelog = define[SystemChangelogRequest, SystemChangelogData]("getChangelog", "/api/system/getChangelog", AuthenticatedAccess|AdminAccess|WritableAccess, LegacyOptionalBody, ResponseOptions{Setting: SettingWrite{Namespace: "system", Mode: SettingSilent}}, "POST")
 var SystemGetConf = define[EmptyRequest, SystemConfData]("getConf", "/api/system/getConf", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 var SystemGetCustomFonts = define[EmptyRequest, []*SystemCustomFont]("getCustomFonts", "/api/system/getCustomFonts", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 var SystemGetEmojiConf = define[EmptyRequest, []*SystemEmojiGroup]("getEmojiConf", "/api/system/getEmojiConf", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
@@ -1974,6 +2016,9 @@ var SystemAddUIProcess = define[EmptyRequest, Null]("addUIProcess", "/api/system
 // retData 返回受影响的文档 ID。逆向操作使用受影响顶层块的私有内存快照；快照不传给客户端，也不接受客户端提交。
 // 重放保留块 ID 和数据库绑定，内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。
 // 撤销与重放为所有受影响文档持有笔记本租约，直至响应序列化完成。
+// 请求头 X-Siyuan-Template-App/Session 指定当前非发布主窗口，启用格式 10 的事件 HTTP 规则会返回 httpAutomationJobs。
+// 编辑先提交，再由该窗口继续单次任务，网络等待不阻塞编辑；输入中的 httpAutomationJobs 被忽略。
+// 任务仅包含标识和摘要，不持有明文快照；无有效窗口的 API 写入只保存编辑，不执行事件 HTTP 动作。
 var PerformTransactions = define[PerformTransactionsRequest, []*Transaction]("performTransactions", "/api/transactions", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{-409}}, "POST")
 var UndoState = define[TransactionUndoStateRequest, TransactionUndoState]("undoState", "/api/transactions/undoState", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformUndo = define[TransactionHistoryRequest, TransactionHistoryResult]("performUndo", "/api/transactions/undo", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

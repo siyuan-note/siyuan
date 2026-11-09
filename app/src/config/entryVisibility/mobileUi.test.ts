@@ -234,7 +234,23 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         select.dispatchEvent(new Event("change", {bubbles: true}));
         check(view.querySelector("[data-entry-path='editor.image.ocrText']"), "Mobile exposes image OCR visibility");
         check(view.querySelector("[data-entry-path='editor.image.copyAsPNG']"), "Mobile exposes image copy visibility");
-        check(select.options.length === 5, "Mobile must offer toolbar, breadcrumb, embed, slash, and image categories");
+        check(select.options.length === 6, "Mobile must offer toolbar, breadcrumb, reference, embed, slash, and image categories");
+        select.value = "editor.ref";
+        select.dispatchEvent(new Event("change", {bubbles: true}));
+        for (const key of ["newFile", "newSubDoc", "newFileAtPath"]) {
+            const path = `editor.ref.${key}`;
+            const input = view.querySelector<HTMLInputElement>(`[data-entry-path='${path}']`);
+            check(input?.checked, "Reference creation entries are visible by default");
+            const saved = JSON.stringify(config());
+            const readonly = input.hasAttribute("data-entry-readonly");
+            input.click();
+            check(view.querySelector<HTMLInputElement>(`[data-entry-path='${path}']`).checked === readonly,
+                "Custom profiles can hide reference creation while built-in profiles remain read-only");
+            check(JSON.stringify(config()) === saved, "Reference visibility remains staged until confirmed");
+            if (!readonly) {
+                view.querySelector<HTMLInputElement>(`[data-entry-path='${path}']`).click();
+            }
+        }
         select.value = "editor.blockEmbed";
         select.dispatchEvent(new Event("change", {bubbles: true}));
         const embedToolbar = view.querySelector<HTMLInputElement>("[data-entry-path='editor.blockEmbed.toolbar']");

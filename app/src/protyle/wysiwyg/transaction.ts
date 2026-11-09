@@ -1,4 +1,6 @@
+import {suspendTabTitleEditingExit} from "../render/tabsRender";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
+import {refreshBreadcrumbForIconChanges} from "../breadcrumb/iconRefresh";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import dayjs from "dayjs";
 import {restoreInlineElementBoundaryHTML} from "../util/inlineElementBoundary";
@@ -99,8 +101,9 @@ import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./t
 import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {collectionRemovalOperations, getTagRemovalChanges, hasReferenceRemoval, previewCollectionRemoval} from "../util/collectionRemoval";
+import {preserveMobileEditorKeyboard} from "../../mobile/util/keepKeyboard";
 import {showMessage} from "../../dialog/message";
-import {getEditorFocusRange, restoreEditorFocusRange} from "../util/editorFocus";
+import {canRestoreEditorFocus, getEditorFocusRange, restoreEditorFocusRange, restoreTabTitleEditing} from "../util/editorFocus";
 import {replayListMindmap} from "../render/listMindmap/render";
 import {
     invalidateTrackedRangesByOperations,
@@ -924,6 +927,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     if (protyle.wysiwyg.element.firstElementChild?.classList.contains("protyle-password")) {
         return;
     }
+    if (protyle.breadcrumb) refreshBreadcrumbForIconChanges(protyle, operations);
     if (shouldReloadForEmbedConversion(protyle.block.rootID, operations)) {
         // 隐藏子块可能已在内核删除，直接重载可避免回放时定位失效 ID，并恢复折叠边界外的内容。
         reloadProtyle(protyle, false);
@@ -2651,6 +2655,9 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             const selection = getSelection();
             const focusRange = getEditorFocusRange(protyle.wysiwyg.element,
                 selection.rangeCount ? selection.getRangeAt(0) : undefined);
+            const focusElement = focusRange?.startContainer.nodeType === Node.ELEMENT_NODE ?
+                focusRange.startContainer as Element : focusRange?.startContainer.parentElement;
+            const focusTitleItemID = focusElement?.closest(".tab-item-title")?.closest<HTMLElement>(".tab-item")?.dataset.nodeId;
             let focusContext = getUndoFocusContext(protyle.wysiwyg.element, focusRange, true);
             const operationFocus = (operations?: IOperation[]) => {
                 const operation = operations?.find(item => item.action === "update" &&
@@ -2671,6 +2678,9 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             };
             focusContext = focusContext || operationFocus(doOperations);
             // 等待确认时阻止交互，保留数据库控件及正文的布局占位。
+            const resumeTitleEditingExit = suspendTabTitleEditingExit(
+                focusElement?.closest(".tab-item-title")?.closest<HTMLElement>(".tab-item"));
+            const keyboard = !wasDisabled && !wasInert ? preserveMobileEditorKeyboard(element) : undefined;
             selection.removeAllRanges();
             element.inert = true;
             const pending: Promise<void> = (async () => {
@@ -2704,8 +2714,12 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                 } finally {
                     try {
                         if (protyle.element === element && protyle.wysiwyg.element === editor) element.inert = wasInert;
-                        if (isCurrent() && !wasDisabled && !wasInert && !protyle.disabled) {
-                            if ((sourceRestored || entriesRemoved || !restoreEditorFocusRange(protyle.wysiwyg.element, focusRange)) && focusContext) {
+                        if (isCurrent() && !wasDisabled && !wasInert && !protyle.disabled &&
+                            (canRestoreEditorFocus(editor) || (keyboard?.hasFocus() && editor.getClientRects().length > 0))) {
+                            const titleItem = focusTitleItemID && editor.querySelector<HTMLElement>(`.tab-item[data-node-id="${focusTitleItemID}"]`);
+                            // 标题可能在预检期间被切换、重载或转为只读，两条恢复路径共用同一许可。
+                            const canRestoreTitle = !focusTitleItemID || (titleItem && restoreTabTitleEditing(titleItem));
+                            if (canRestoreTitle && (sourceRestored || entriesRemoved || !restoreEditorFocusRange(protyle.wysiwyg.element, focusRange)) && focusContext) {
                                 protyle.wysiwyg.element.focus({preventScroll: true});
                                 restoreUndoFocus(protyle, [{action: "update", id: focusContext.undoFocusId, context: focusContext}]);
                             }
@@ -2720,6 +2734,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                             content.style.removeProperty("overflow-anchor");
                         }
                     } finally {
+                        keyboard?.release();
+                        resumeTitleEditingExit();
                         if (pendingCollectionRemovals.get(protyle)?.promise === pending) pendingCollectionRemovals.delete(protyle);
                     }
                 }

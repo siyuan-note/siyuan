@@ -6,7 +6,7 @@
 		"id": "20200924101200-gss5vee",
 		"title": "Navigate between content blocks",
 		"type": "doc",
-		"updated": "20261105155201"
+		"updated": "20261106164550"
 	},
 	"Children": [
 		{
@@ -146,7 +146,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210428225947-bkizd86",
-				"updated": "20261105155201"
+				"updated": "20261106164550"
 			},
 			"Children": [
 				{
@@ -240,7 +240,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261105154152-q9zc4in",
-				"updated": "20261105155201"
+				"updated": "20261106164550"
 			},
 			"Children": [
 				{
@@ -304,12 +304,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261105154152-ehgvfln",
-				"updated": "20261105155201"
+				"updated": "20261106164550"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On desktop, click a parent document to open it, or use the arrows beside the notebook or parent documents to select child documents. On mobile, tap a parent document to show its child documents, then choose Open to open the parent itself; leaf documents open directly. Existing block navigation remains unchanged."
+					"Data": "On desktop, click a parent document to open it, or use the arrows beside the notebook or parent documents to select child documents. On mobile, tap a parent document to show its child documents, then choose Open to open the parent itself; leaf documents open directly. Existing block navigation remains unchanged. Notebook and document entries use their existing emoji or custom icons, including entries in child-document menus. Missing or invalid icons use the default icon."
 				}
 			]
 		},

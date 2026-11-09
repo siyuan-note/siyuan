@@ -76,8 +76,8 @@ const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, view
     });
 };
 
-export const beginAVRender = (blockElement: HTMLElement) => {
-    cancelTemplateHTTPForElement(blockElement);
+export const beginAVRender = (blockElement: HTMLElement, options?: {preserveAVMetadata?: boolean; preserveManualAutomation?: boolean}) => {
+    cancelTemplateHTTPForElement(blockElement, options);
     const token = Symbol();
     renderTokens.set(blockElement, token);
     return token;

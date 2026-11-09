@@ -221,7 +221,9 @@ func originHostEquals(origin, host string) bool {
 	return "" != originHost && originHost == host
 }
 
-// SSRFSafeDialer returns a net.Dialer whose Control hook blocks private, loopback, link-local and unspecified IPs.
+// SSRFSafeDialer 返回内核出站请求使用的拨号器，在连接阶段按目标 IP 判断是否允许访问。
+// 非安全模式下放行回环与 RFC1918 私网，以支持插件访问本机或局域网服务，仅记录一次审计日志；
+// 链路本地与未指定地址始终拒绝，避免访问云元数据等仅本机可达的服务。
 func SSRFSafeDialer(timeout time.Duration) *net.Dialer {
 	return &net.Dialer{
 		Timeout: timeout,
@@ -230,7 +232,13 @@ func SSRFSafeDialer(timeout time.Duration) *net.Dialer {
 			if err != nil {
 				return err
 			}
-			if ip := net.ParseIP(host); ip != nil && isPrivateIP(ip) {
+			if ip := parseDialIP(host); nil != ip && isPrivateIP(ip) {
+				if isAlwaysBlockedIP(ip) {
+					if _, loaded := auditedAddresses.LoadOrStore(address, struct{}{}); !loaded {
+						logging.LogWarnf("Blocked connection to link-local or unspecified address [address=%s, network=%s]", address, network)
+					}
+					return fmt.Errorf("ip address [%s] is prohibited", host)
+				}
 				if _, loaded := auditedAddresses.LoadOrStore(address, struct{}{}); !loaded {
 					logging.LogWarnf("Establishing a connection to the private network [address=%s, network=%s]", address, network)
 				}
@@ -241,6 +249,27 @@ func SSRFSafeDialer(timeout time.Duration) *net.Dialer {
 			return nil
 		},
 	}
+}
+
+// parseDialIP 解析拨号地址中的 IP，忽略 IPv6 区域标识（例如 fe80::1%eth0），
+// 否则带区域标识的链路本地地址会被 net.ParseIP 判为无效而绕过检查。
+func parseDialIP(host string) net.IP {
+	if i := strings.IndexByte(host, '%'); 0 <= i {
+		host = host[:i]
+	}
+	return net.ParseIP(host)
+}
+
+// isAlwaysBlockedIP 判断 IP 是否始终禁止出站访问：链路本地单播（含 169.254.0.0/16 云元数据地址）
+// 与未指定地址。回环、RFC1918 私网和组播在非安全模式下仍允许。
+func isAlwaysBlockedIP(ip net.IP) bool {
+	if ip.IsLinkLocalUnicast() || ip.IsUnspecified() {
+		return true
+	}
+	if ip4 := extractEmbeddedIPv4(ip); nil != ip4 && !ip4.Equal(ip) {
+		return isAlwaysBlockedIP(ip4)
+	}
+	return false
 }
 
 // ssrfSafeDialContext 返回智能体出站请求专用的拨号函数：拨号时自行解析主机名并拒绝私网地址，
@@ -283,7 +312,7 @@ func ssrfSafeDialContext(timeout time.Duration) func(ctx context.Context, networ
 	}
 }
 
-// isPrivateIP 判断 IP 是否为私网地址，含内嵌私网 IPv4 的 IPv6 过渡地址（NAT64、6to4、Teredo、IPv4 兼容）。
+// isPrivateIP 判断 IP 是否为私网地址，含内嵌私网 IPv4 的 IPv6 过渡地址（NAT64、6to4、Teredo、IPv4-translated、IPv4 兼容）。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-qq8m-8p8v-x4xg
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rg26-cg95-gq6p
 func isPrivateIP(ip net.IP) bool {
@@ -298,7 +327,7 @@ func isPrivateIP(ip net.IP) bool {
 	return false
 }
 
-// extractEmbeddedIPv4 提取 IPv6 过渡地址（NAT64、6to4、Teredo、IPv4 兼容）中内嵌的 IPv4 地址，非过渡地址返回 nil。
+// extractEmbeddedIPv4 提取 IPv6 过渡地址（NAT64、6to4、Teredo、IPv4-translated、IPv4 兼容）中内嵌的 IPv4 地址，非过渡地址返回 nil。
 func extractEmbeddedIPv4(ip net.IP) net.IP {
 	ip16 := ip.To16()
 	if nil == ip16 || 16 != len(ip16) {
@@ -315,6 +344,10 @@ func extractEmbeddedIPv4(ip net.IP) net.IP {
 	// Teredo（RFC 4380 2001:0000::/32）：低 32 位按位取反后为内嵌 IPv4。
 	if ip16[0] == 0x20 && ip16[1] == 0x01 && ip16[2] == 0x00 && ip16[3] == 0x00 {
 		return net.IPv4(ip16[12]^0xff, ip16[13]^0xff, ip16[14]^0xff, ip16[15]^0xff)
+	}
+	// IPv4-translated（RFC 2765 2.1 的 0::ffff:0:0:0/96，RFC 6145 已废弃）：第 64-79 位为 0xffff，低 32 位为内嵌 IPv4。
+	if isZeroIPv6(ip16[0:8]) && ip16[8] == 0xff && ip16[9] == 0xff && isZeroIPv6(ip16[10:12]) {
+		return net.IPv4(ip16[12], ip16[13], ip16[14], ip16[15])
 	}
 	// IPv4 兼容地址（RFC 4291 已废弃 ::/96）：低 32 位为内嵌 IPv4。
 	if isZeroIPv6(ip16[0:12]) {

@@ -28,8 +28,9 @@ export const renderDocTreeRowHTML = (item: IDocTreeItem, options: IDocTreeRowOpt
     const hasChildren = item.subFileCount > 0;
     const file = item.file;
     const icon = root ? notebook?.icon : file?.icon;
+    // 源版本高于当前客户端支持的文档只能占位显示，不能打开、拖拽或参与保存。
+    const specTooNew = !root && !closed && !!file?.specTooNew;
     const defaultIcon = closed && encrypted ? "lock" : root ? "notebook" : hasChildren ? "folder" : "file";
-    const padding = root ? 0 : (item.depth + 1) * (mobile ? 20 : 18);
     const iconExpands = !root && !pinned && !mobile && config.fileTree.docIconClickMode === 1;
     const iconChanges = !mobile && (root || !config.fileTree.docIconClickMode);
     const actionClasses = !mobile && !pinned ? `${iconExpands && hasChildren && !publish ? " file-tree__item--icon-expand" : ""}${
@@ -39,7 +40,8 @@ export const renderDocTreeRowHTML = (item: IDocTreeItem, options: IDocTreeRowOpt
     const type = closed ? "navigation-closed" : root ? "navigation-root" : "navigation-file";
     const iconLabel = pinned ? (mobile ? language.docIconClickExpand : config.fileTree.docIconClickMode === 1 ? "" : language.changeIcon) :
         mobile && boxDoc ? (hasChildren ? language.docIconClickExpand : language.openDocument) : language.changeIcon;
-    const tooltip = pinned && (item.unavailable || !file?.hSize) ? escapeTooltipTextAttr(item.name +
+    const tooltip = specTooNew ? escapeTooltipTextAttr(window.siyuan.languages._kernel[275]) :
+        pinned && (item.unavailable || !file?.hSize) ? escapeTooltipTextAttr(item.name +
         (item.unavailable ? ` (${language.closeNotebook})` : "")) : file ? genFileTreeDocAriaLabel(file, true) : "";
     const iconHTML = `<span class="b3-list-item__icon${iconChanges || pinned && iconLabel ? " ariaLabel" : mobile && root ? " b3-tooltips b3-tooltips__e" : ""}${
         !mobile && !pinned && (!root || boxDoc) ? " popover__block" : ""}${publish ? " fn__none" : ""}" data-position="8east"${
@@ -53,8 +55,8 @@ export const renderDocTreeRowHTML = (item: IDocTreeItem, options: IDocTreeRowOpt
             pinned && (item.unavailable || config.readonly) ? "" : `<span ${add} class="b3-list-item__action${actionTooltip}${config.readonly ? " fn__none" : ""}" aria-label="${language.newSubDoc}"><svg><use xlink:href="#iconAdd"></use></svg></span>`}`;
     const count = file?.count > 0 && !pinned ? `<span class="${!mobile ? "popover__block b3-tooltips b3-tooltips__nw " : ""}counter"${!mobile ? ` aria-label="${language.ref}"` : ""}>${file.count}</span>` : "";
     const title = root ? escapeHtml(item.name) : getDocDisplayName(item.name, file?.titleEmpty, true);
-    return `<li class="b3-list-item${!mobile ? " b3-list-item--hide-action" : ""}${actionClasses}" data-type="${type}" data-node-id="${nodeID}" data-tree-key="${escapeHtmlTextAndAttr(item.occurrenceKey)}" draggable="${!mobile && !closed && !item.unavailable && !config.readonly && (!root || config.fileTree.sort === 6)}" style="--file-toggle-width:${root ? mobile ? 24 : 22 : padding + (mobile ? 20 : 18)}px;--file-action-offset:${root ? 22 : padding + 20}px"${getFileTreeDefaultIconAttr(closed && encrypted ? "" : icon, defaultIcon)}${item.unavailable ? ' aria-disabled="true"' : ""}>
-    <span ${pinned ? 'data-pin-toggle="true" ' : ""}style="padding-left:${padding}px" class="b3-list-item__toggle${!mobile ? " b3-list-item__toggle--hl" : ""}${closed || (!root || boxDoc) && !hasChildren ? " fn__hidden" : ""}"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
+    return `<li class="b3-list-item file-tree__row${!mobile ? " b3-list-item--hide-action" : ""}${specTooNew ? " file-tree__row--spec-too-new" : ""}${actionClasses}" data-type="${type}" data-node-id="${nodeID}" data-tree-key="${escapeHtmlTextAndAttr(item.occurrenceKey)}"${specTooNew ? ' data-spec-too-new="true" aria-disabled="true"' : ""} draggable="${!mobile && !closed && !item.unavailable && !specTooNew && !config.readonly && (!root || config.fileTree.sort === 6)}" style="--file-tree-depth:${item.depth}"${getFileTreeDefaultIconAttr(closed && encrypted ? "" : icon, defaultIcon)}${item.unavailable ? ' aria-disabled="true"' : ""}>
+    <span ${pinned ? 'data-pin-toggle="true" ' : ""}class="b3-list-item__toggle${!mobile ? " b3-list-item__toggle--hl" : ""}${closed || (!root || boxDoc) && !hasChildren ? " fn__hidden" : ""}"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
     ${iconHTML}${switchHTML}
     <span class="b3-list-item__text${!mobile || pinned ? " ariaLabel" : ""}" data-delay="200" data-position="parentE" data-tooltip-encoding="none"${tooltip ? ` aria-label="${tooltip}"` : ""}>${title}${item.unavailable ? ` (${language.closeNotebook})` : ""}</span>
     ${mobile && !pinned ? getTreeItemTailHTML(count, actions, true) : actions + count}

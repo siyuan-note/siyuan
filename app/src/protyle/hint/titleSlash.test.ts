@@ -16,8 +16,8 @@ class TestElement {
     }
 }
 
-const inlineIDs = ["ref", "emoji", "link", "bold", "italic", "underline", "strike", "mark", "sup", "sub",
-    "inlineCode", "kbd", "tag", "inlineMath"];
+const inlineIDs = ["assets", "ref", "newFileRef", "emoji", "link", "bold", "italic", "underline", "strike", "mark",
+    "sup", "sub", "inlineCode", "kbd", "tag", "inlineMath", "insertIOSPhotos", "insertAsset", "insertImgURL"];
 
 const setup = () => {
     let focusNode: TestElement | {parentElement: TestElement};
@@ -60,7 +60,8 @@ test("title slash menus retain only built-in inline items for text and element s
         setFocus(focus);
         for (const options of [{}, {visibilityRoot: "editor.slash.menu"}]) {
             const items = hintSlash("", protyle, false, options);
-            assert.deepEqual(items.map(item => item.entryKey), inlineIDs);
+            assert.deepEqual(items.filter(item => item.html !== "separator").map(item => item.entryKey), inlineIDs);
+            assert.ok(items.some(item => item.html === "separator"));
             assert.ok(items.every(item => item.frequentEligible));
             assert.deepEqual(rankFrequentSlashItems(items, item => item.entryKey,
                 {heading1: 100, "plugin:test:bold": 99, bold: 2, ref: 1}).map(item => item.entryKey), ["bold", "ref"]);
@@ -84,6 +85,7 @@ test("body and other editors retain block, style and plugin choices while table 
     setFocus({parentElement: new TestElement("td, th", root)});
     const items = hintSlash("", protyle);
     assert.ok(items.some(item => item.entryKey === "heading1"));
-    assert.ok(items.every(item => TABLE_CELL_SLASH_IDS.has(item.id)));
+    assert.ok(items.every(item => item.html === "separator" || TABLE_CELL_SLASH_IDS.has(item.id)));
+    assert.ok(items.some(item => item.html === "separator"));
     assert.equal(items.some(item => item.id === "table"), false);
 });

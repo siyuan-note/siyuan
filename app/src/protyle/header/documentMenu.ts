@@ -14,7 +14,7 @@ import {openMobileFileById} from "../../mobile/editor";
 import {Constants} from "../../constants";
 import {openCardByScope} from "../../card/openCard";
 import {openFlashcardV2ManagementByRoots} from "../../card/flashcardV2";
-import {getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../../util/pathName";
+import {getDocDisplayName, getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../../util/pathName";
 import {createQuickSources, makeCard} from "../../card/makeCard";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import dayjs from "dayjs";
@@ -72,6 +72,7 @@ export const openDocumentMenu = (options: {
         label: window.siyuan.languages.copyDoc,
         accelerator: undefined,
         click: async () => {
+            const headingNumber = window.siyuan.config.export.headingNumber === true;
             const [responseHTML, responseText] = await Promise.all([
                 fetchSyncPost("/api/block/getBlockDOM", {
                     id,
@@ -79,6 +80,7 @@ export const openDocumentMenu = (options: {
                 }),
                 fetchSyncPost("/api/export/exportMdContent", {
                     id,
+                    headingNumber,
                     refMode: 3,
                     embedMode: 1,
                     yfm: false,
@@ -159,7 +161,7 @@ export const openDocumentMenu = (options: {
                 rootId: id,
                 notebookId,
                 title: protyle ? (protyle.options.render.title ?
-                    (protyle.title.getText() || window.siyuan.languages.untitled) : "") : docInfo.name,
+                    getDocDisplayName(protyle.title.getText(), protyle.title.getText().trim() === "") : "") : docInfo.name,
                 isPreview: protyle ? !protyle.preview.element.classList.contains("fn__none") : false,
             });
         }
@@ -177,7 +179,7 @@ export const openDocumentMenu = (options: {
                 notebookId,
                 useBlockId: showAll,
                 title: protyle ? (protyle.title ?
-                    (protyle.title.getText() || window.siyuan.languages.untitled) : null) : docInfo.name,
+                    getDocDisplayName(protyle.title.getText(), protyle.title.getText().trim() === "") : null) : docInfo.name,
             });
         }
     }).element);
@@ -194,7 +196,7 @@ export const openDocumentMenu = (options: {
                 notebookId,
                 useBlockId: showAll,
                 title: protyle ? (protyle.title ?
-                    (protyle.title.getText() || window.siyuan.languages.untitled) : null) : docInfo.name,
+                    getDocDisplayName(protyle.title.getText(), protyle.title.getText().trim() === "") : null) : docInfo.name,
             });
         }
     }).element);

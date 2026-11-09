@@ -16,9 +16,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/sys/windows"
 )
 
 // 目录联接（junction）无需管理员权限即可创建，是 Windows 上对符号链接漏洞的同源变体，
@@ -97,15 +97,7 @@ func TestAPIContractGetFileReturnsExternalJunctionLockError(t *testing.T) {
 	if output, err := exec.Command("cmd", "/d", "/c", "mklink", "/J", link, external).CombinedOutput(); err != nil {
 		t.Skipf("junction creation not supported: %s: %s", err, output)
 	}
-	p, err := windows.UTF16PtrFromString(target)
-	if err != nil {
-		t.Fatal(err)
-	}
-	handle, err := windows.CreateFile(p, windows.GENERIC_READ, 0, nil, windows.OPEN_EXISTING, windows.FILE_ATTRIBUTE_NORMAL, 0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer windows.CloseHandle(handle)
+	release := testutil.LockUserFile(t, target)
 	engine := gin.New()
 	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator) })
 	engine.POST("/api/file/getFile", getFile)
@@ -114,5 +106,11 @@ func TestAPIContractGetFileReturnsExternalJunctionLockError(t *testing.T) {
 	requireAPIContract(t, "POST", "/api/file/getFile", recorder)
 	if recorder.Code != http.StatusAccepted || !strings.Contains(recorder.Body.String(), `"code":500`) {
 		t.Fatalf("external lock must return a file error: %d %s", recorder.Code, recorder.Body.String())
+	}
+	release()
+	recorder = httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/file/getFile", strings.NewReader(`{"path":"external/locked.txt"}`)))
+	if recorder.Code != http.StatusOK || recorder.Body.String() != "original" {
+		t.Fatalf("released file must be readable and unchanged: %d %s", recorder.Code, recorder.Body.String())
 	}
 }

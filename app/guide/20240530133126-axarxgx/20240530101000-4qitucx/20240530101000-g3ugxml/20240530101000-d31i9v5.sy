@@ -724,6 +724,34 @@
 									"Data": "Markdown"
 								}
 							]
+						},
+						{
+							"ID": "20261108001000-2b8324a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108001000-2b8324a",
+								"updated": "20261108001000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エクスポート"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " の「Markdown エクスポートに見出しの自動番号を含める」は初期状態でオフです。文書やエディタの設定を変更せずに、Markdown のコピーとエクスポートでは番号を省略します。オンにすると、文書の自動番号が有効な場合に Markdown 出力に番号を含めます。コピーは保存済みの設定に従い、番号の確認画面は表示しません。他のエクスポート形式には影響しません。"
+								}
+							]
 						}
 					]
 				},

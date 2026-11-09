@@ -13,6 +13,7 @@ import {openBazaarPath} from "./openPath";
 import {previewImages} from "../../protyle/preview/image";
 import {isBazaarPackageRatingEditable, sortBazaarPackages} from "../../util/bazaarPackage";
 import {Constants} from "../../constants";
+import {bindBazaarFilterMenu} from "./filterMenu";
 import {
     BAZAAR_PACKAGE_CONFIG,
     getBazaarTypeByMyType,
@@ -93,6 +94,10 @@ const handleDownloadedTab: TBazaarActionHandler = (context, target) => {
 };
 
 const ACTION_HANDLERS = {
+    "skip-batch-update": (({controller, pkgType, packageName}, target) => {
+        if (pkgType && packageName) void controller._toggleBatchUpdatePreference(pkgType, packageName, target);
+        return HANDLED;
+    }) satisfies TBazaarActionHandler,
     "rate-package": ((context) => {
         const {controller, packageSource, packageName, pkgType, installedItem, pkgItem} = context;
         const packageInstalled = Boolean(installedItem) ||
@@ -218,13 +223,15 @@ const ACTION_HANDLERS = {
     }) satisfies TBazaarActionHandler,
     "install-all": ((context) => {
         const {controller, mount} = context;
+        if (controller._batchUpdatePreferenceSaving) return HANDLED;
         if (getBazaarBatchUpdate()) {
             cancelBazaarBatchUpdate();
             renderBazaarInstall(mount.element);
             return HANDLED;
         }
         mobileConfirmDialog("⬆️ " + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
-            const batch = beginBazaarBatchUpdate(controller._getUpdatedItems());
+            if (controller._batchUpdatePreferenceSaving) return;
+            const batch = beginBazaarBatchUpdate(controller._getBatchUpdateItems());
             if (!batch) {
                 return;
             }
@@ -689,4 +696,5 @@ export const bindBazaarEvents = (
     bindBazaarClickEvent(controller, app, mount);
     bindBazaarSearchEvents(controller, app, mount);
     bindBazaarSelectEvents(controller);
+    bindBazaarFilterMenu(controller.element);
 };

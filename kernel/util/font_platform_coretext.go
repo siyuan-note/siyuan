@@ -2,7 +2,7 @@
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-//go:build darwin && !ios
+//go:build darwin || ios
 
 package util
 

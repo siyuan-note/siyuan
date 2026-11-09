@@ -373,6 +373,11 @@
     border-spacing: 0;
     width: max-content;
 
+    tr {
+      // 交错跨行合并时，每个逻辑行仍需独立的高度支撑。
+      height: calc(1.625em + 9px);
+    }
+
     thead > tr:first-child > :first-child {
       border-top-left-radius: var(--b3-table-border-radius-top-left);
     }
@@ -819,6 +824,10 @@
   .protyle-icons {
     display: none;
   }
+}
+
+.b3-list-item__text.document-title-preview span {
+  user-select: none;
 }
 
 // 标题预览默认继承所在界面的字号，单类主题或片段规则可直接覆盖。

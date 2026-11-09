@@ -2,7 +2,6 @@ import * as assert from "node:assert/strict";
 import {test} from "node:test";
 import {createMarkdownSubmenu} from "./choiceMenu";
 
-// Exercise submenu sizing without depending on a running Electron display.
 test("Markdown submenu includes its borders and remeasures after a constrained opening", () => {
     const previous = new Map<string, PropertyDescriptor>();
     const setGlobal = (name: string, value: unknown) => {
@@ -11,9 +10,11 @@ test("Markdown submenu includes its borders and remeasures after a constrained o
     };
     let anchor = {top: 20, right: 100, left: 0};
     const menu = {
-        style: {maxHeight: "", top: "", left: ""}, scrollHeight: 104, offsetHeight: 106, clientHeight: 104,
+        style: {maxHeight: "", top: "", left: ""},
         firstElementChild: undefined as {getBoundingClientRect(): {top: number}} | undefined,
-        getBoundingClientRect: () => ({width: 220, top: 0}), append: () => {}, contains: () => false,
+        getBoundingClientRect: (): {width: number; top: number; height: number} => ({width: 220, top: 0,
+            height: menu.style.maxHeight === "none" ? 106.333 : Math.min(106.333, parseFloat(menu.style.maxHeight) || 106.333)}),
+        append: () => {}, contains: () => false,
     };
     class Entry extends EventTarget {
         childNodes: Node[] = [];
@@ -43,7 +44,7 @@ test("Markdown submenu includes its borders and remeasures after a constrained o
         submenu.close();
         Object.defineProperty(globalThis, "innerHeight", {value: 800, configurable: true});
         entry.dispatchEvent(new Event("click"));
-        assert.equal(menu.style.maxHeight, "106px", "content plus both borders fit without a spurious scrollbar");
+        assert.equal(menu.style.maxHeight, "107px", "fractional content and borders fit without a spurious scrollbar");
         assert.equal(menu.style.left, "100px");
         submenu.close();
         anchor = {top: 100, right: 500, left: 400};

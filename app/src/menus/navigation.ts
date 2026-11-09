@@ -84,7 +84,17 @@ const openFileTreeSearch = async (app: App, notebookId: string, pathString: stri
     /// #endif
 };
 
-type IDocTreeMenuItem = Pick<IDocTreeItem, "id" | "notebookId" | "path" | "kind" | "name" | "occurrenceKey"> & {sortMode?: number};
+type IDocTreeMenuItem = Pick<IDocTreeItem, "id" | "notebookId" | "path" | "kind" | "name" | "occurrenceKey" |
+    "effectiveSortMode" | "childrenSortMode"> & {sortMode?: number};
+
+const getDocTreeMenuItem = (item: Pick<IDocTreeMenuItem, "id" | "path" | "notebookId" | "kind" |
+    "effectiveSortMode" | "childrenSortMode">) => ({
+    id: item.id,
+    path: item.path,
+    notebookId: item.notebookId,
+    effectiveSortMode: item.effectiveSortMode === 15 ? window.siyuan.config.fileTree.sort : item.effectiveSortMode,
+    ...(item.kind === "document" ? {childrenSortMode: item.childrenSortMode} : {}),
+});
 
 const getMenuSelection = (liElement: Element) => {
     const controller = getDocTreeController(liElement);
@@ -116,7 +126,7 @@ const initMultiMenu = (selection: IDocTreeMenuContext, app: App) => {
     const selectedItems = getDocTreeActionItems(selection.items);
     const docCount = selection.items.filter(item => item.kind === "document").length;
     const type = docCount === selection.items.length ? "docs" : docCount === 0 ? "notebooks" : "items";
-    const items = selection.items.map(({id, path, notebookId}) => ({id, path, notebookId}));
+    const items = selection.items.map(getDocTreeMenuItem);
     if (type === "notebooks") {
         window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOKS);
         const notebookIds = selectedItems.map((item) => item.id);
@@ -751,7 +761,7 @@ const initNotebookMenu = (app: App, selection: IDocTreeMenuContext, item: IDocTr
         detail: () => ({
             elements: selection.elements(),
             type: "notebook",
-            items: [{id: notebookId, path: "/", notebookId}],
+            items: [getDocTreeMenuItem(item)],
         }),
         separatorPosition: "top",
     });
@@ -806,6 +816,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         name: getDocTreeItem(liElement).name,
         subFileCount: getDocTreeItem(liElement).subFileCount,
         childrenSortMode: getConfiguredChildrenSortMode(liElement),
+        effectiveSortMode: getDocTreeItem(liElement).effectiveSortMode,
         customSort: getDocTreeItem(liElement).effectiveSortMode === 6,
         target: liElement as HTMLElement,
         elements: selection.elements,
@@ -820,6 +831,7 @@ export const initDocumentMenu = (app: App, options: {
     name: string,
     subFileCount: number,
     childrenSortMode: number | null,
+    effectiveSortMode: number,
     customSort: boolean,
     target: HTMLElement,
     elements: NodeListOf<HTMLElement> | (() => NodeListOf<HTMLElement>),
@@ -1105,7 +1117,7 @@ export const initDocumentMenu = (app: App, options: {
         detail: () => ({
             elements: typeof options.elements === "function" ? options.elements() : options.elements,
             type: "doc",
-            items: [{id, path: pathString, notebookId}],
+            items: [getDocTreeMenuItem({...options, kind: "document"})],
         }),
         separatorPosition: "top",
     });

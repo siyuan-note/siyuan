@@ -4,7 +4,7 @@ import {ensureAVColumnWindow} from "./columnWindow";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
-import {canEditAVHost, getAVHost as hasClosestBlock, getAVHostIdentity, getAVRelationHost} from "./host";
+import {canEditAVHost, getAVHost as hasClosestBlock, getAVHostBlockID, getAVHostIdentity, getAVRelationHost} from "./host";
 import {openMenuPanel} from "./openMenuPanel";
 import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
@@ -69,6 +69,7 @@ import {bindAnchoredInputPosition} from "../../../dialog/anchoredInputPosition";
 import {createAVLocationFromText, createAVLocationReplacement, getAVLocationDisplayText, getAVLocationText, isAVLocationEmpty} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
 import {showMessage} from "../../../dialog/message";
+import {isAVContinuousInputKey, prepareAVContinuousInput} from "./continuousInput";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -652,7 +653,12 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
     const avID = blockElement.dataset.avId;
     const hostID = getAVHostIdentity(blockElement);
     const rootID = protyle.block.rootID;
-    const ownerElement = getAVCellEditorOwner(blockElement);
+    const attributeSelect = (type === "select" || type === "mSelect") && cellElements.every(element =>
+        element.classList.contains("custom-attr__avvalue") && !element.dataset.avBatchOriginalValue);
+    const cellOwner = getAVCellEditorOwner(blockElement);
+    const ownerElement = attributeSelect ?
+        cellOwner.closest<HTMLElement>(".protyle-db-attr, .protyle-db-row, .b3-dialog__container") || cellOwner : cellOwner;
+    const attributeID = blockElement.dataset.attributeId;
     const viewType = blockElement.dataset.avType as TAVView;
     const initialData = getAVData(blockElement);
     const viewID = initialData?.viewID || initialData?.view.id;
@@ -689,8 +695,17 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
         }
     };
     return () => {
+        if (attributeSelect && !blockElement.isConnected) {
+            // 属性栏刷新会替换数据库容器，只在原面板内恢复同一属性目标。
+            const currentBlock = ownerElement.querySelector<HTMLElement>(
+                `[data-av-id="${escapeAttr(avID)}"][data-attribute-id="${escapeAttr(attributeID || "")}"]` +
+                `[data-node-id="${escapeAttr(hostID)}"]`);
+            if (!currentBlock) return;
+            blockElement = currentBlock;
+        }
         const currentRelationHost = getAVRelationHost(blockElement);
         if (!blockElement.isConnected || !ownerElement.contains(blockElement) ||
+            (attributeSelect && blockElement.dataset.attributeId !== attributeID) ||
             blockElement.dataset.avId !== avID || getAVHostIdentity(blockElement) !== hostID ||
             blockElement.dataset.avType !== viewType || protyle.block.rootID !== rootID ||
             blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) !== viewAttribute ||
@@ -705,9 +720,18 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
         const data = getAVData(blockElement);
         if (initialData && (!data || (data.viewID || data.view.id) !== viewID)) return;
         const cells: IAVSelectedCell[] = [];
+        const values: IAVCellValue[] = [];
+        const attributeElements: HTMLElement[] = [];
         for (const target of targets) {
             if (!target.rowID || !target.colID) return;
-            if (data) {
+            if (attributeSelect) {
+                const element = blockElement.querySelector<HTMLElement>(
+                    `.custom-attr__avvalue[data-row-id="${escapeAttr(target.rowID)}"]` +
+                    `[data-col-id="${escapeAttr(target.colID)}"][data-type="${type}"]`);
+                if (!element) return;
+                attributeElements.push(element);
+                values.push(genCellValueByElement(type, element));
+            } else if (data) {
                 // 从当前模型读取撤销值和块绑定，行卸载及字段重排不会改变原编辑目标。
                 const cell = resolveCell(data.view, target);
                 if (!cell) return;
@@ -719,8 +743,12 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
                 return;
             }
         }
+        if (attributeSelect) {
+            attributeElements.forEach((element, index) => cellElements[index] = element);
+            return {cells, values, elements: attributeElements, blockElement};
+        }
         // 批量代理保存显示值供销毁回调同步，普通单元格的显示更新只绑定当前挂载的原分组条目。
-        return {cells, elements: targets.map(target => {
+        return {cells, values, blockElement, elements: targets.map(target => {
             if (!data || target.isBatch) return target.element;
             const group = target.groupID ? `.av__body[data-group-id="${escapeAttr(target.groupID)}"] ` : "";
             return blockElement.querySelector<HTMLElement>(`${group}` +
@@ -853,6 +881,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                         false, false, false, selectedCells, true, true);
                 },
                 onDestroy: options?.destroyCallback,
+                prepareNextInput: anchorElement => cellElements.length === 1 ?
+                    prepareAVContinuousInput(protyle, blockElement, [anchorElement], cell => popTextCell(protyle, [cell])) : undefined,
             });
             return;
         }
@@ -955,7 +985,12 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     ${html}
     </div>`);
     const avMaskElement = document.querySelector(".av__mask");
+    let savingContinuousInput = false;
     avMaskElement.addEventListener(AV_CELL_EDITOR_CLOSE_EVENT, () => {
+        if (savingContinuousInput) {
+            avMaskElement.remove();
+            return;
+        }
         updateCellValueByInput(protyle, type, blockElement, cellElements, false, inputTarget);
         avMaskElement.remove();
     }, {once: true});
@@ -1056,12 +1091,39 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 }
             });
         }
-        inputElement.addEventListener("keydown", (event) => {
+        inputElement.addEventListener("keydown", async (event) => {
+            if (savingContinuousInput) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             if (event.isComposing) {
                 return;
             }
             if (electronUndo(event)) {
                 return;
+            }
+            if (isAVContinuousInputKey(event, true) && type !== "template") {
+                const next = prepareAVContinuousInput(protyle, blockElement, cellElements,
+                    cell => popTextCell(protyle, [cell]));
+                if (next) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (event.repeat) return;
+                    savingContinuousInput = true;
+                    inputElement.disabled = true;
+                    try {
+                        const saved = await updateCellValueByInput(protyle, type, blockElement, cellElements, true, inputTarget, true);
+                        if (saved) next();
+                    } catch (error) {
+                        console.error(error);
+                        if (avMaskElement.isConnected) showMessage(window.siyuan.languages.settingsPendingSaveError);
+                    } finally {
+                        savingContinuousInput = false;
+                        inputElement.disabled = false;
+                    }
+                    return;
+                }
             }
             if (event.key === "Escape" || event.key === "Tab" ||
                 (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
@@ -1083,6 +1145,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
 
     const removeAvMask = (event: Event) => {
+        if (savingContinuousInput) return;
         if ((event.target as HTMLElement).classList.contains("av__mask")
             && document.activeElement.tagName !== "TEXTAREA" && document.activeElement.tagName !== "INPUT") {
             updateCellValueByInput(protyle, type, blockElement, cellElements, true, inputTarget);
@@ -1108,16 +1171,16 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     });
 };
 
-const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: HTMLElement, cellElements: HTMLElement[],
-                                restoreFocus = true, inputTarget?: ReturnType<typeof createCellInputTarget>) => {
+const updateCellValueByInput = async (protyle: IProtyle, type: TAVCol, blockElement: HTMLElement, cellElements: HTMLElement[],
+                                     restoreFocus = true, inputTarget?: ReturnType<typeof createCellInputTarget>, awaitSave = false) => {
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     if (!inputTarget && isTableLikeView(viewType) && !cellElements[0].dataset.avId) {
         const rowElement = hasClosestByClassName(cellElements[0], "av__row");
         if (!rowElement) {
-            return;
+            return false;
         }
         if (cellElements.length === 1 && cellElements[0].dataset.detached === "true" && !rowElement.dataset.id) {
-            return;
+            return false;
         }
     }
     const avMaskElement = document.querySelector(".av__mask");
@@ -1152,22 +1215,37 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
             if (restoreFocus) {
                 focusBlock(blockElement);
             }
-            return;
+            return true;
         }
         const target = inputTarget?.();
         if (inputTarget && !target) {
             avMaskElement?.remove();
-            return;
+            return false;
         }
         const value = type === "checkbox" ? {
             checked: !genCellValueByElement(type, cellElements[0]).checkbox?.checked
         } : inputElement.value;
         if (target) {
-            updateCellsValue(protyle, blockElement, value, target.elements, undefined, undefined,
-                false, false, false, target.cells);
+            if (awaitSave) {
+                await updateCellsValue(protyle, blockElement, value, target.elements, undefined, undefined,
+                    false, false, false, target.cells, true, true);
+            } else {
+                updateCellsValue(protyle, blockElement, value, target.elements, undefined, undefined,
+                    false, false, false, target.cells);
+            }
         } else {
-            updateCellsValue(protyle, blockElement, value, cellElements);
+            if (awaitSave) {
+                await updateCellsValue(protyle, blockElement, value, cellElements, undefined, undefined,
+                    false, false, false, undefined, true, true);
+            } else {
+                updateCellsValue(protyle, blockElement, value, cellElements);
+            }
         }
+    }
+    if (awaitSave && (!blockElement.isConnected || !avMaskElement?.isConnected)) return false;
+    if (awaitSave && document.activeElement !== document.body && !avMaskElement.contains(document.activeElement)) {
+        avMaskElement.remove();
+        return false;
     }
     if (isTableLikeView(viewType) &&
         // 兼容新增行后台隐藏
@@ -1180,9 +1258,9 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
     if (restoreFocus && !document.querySelector(".b3-dialog")) {
         focusBlock(blockElement);
     }
-    document.querySelectorAll(".av__mask").forEach((item) => {
-        item.remove();
-    });
+    if (awaitSave) avMaskElement.remove();
+    else document.querySelectorAll(".av__mask").forEach(item => item.remove());
+    return true;
 };
 
 export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLElement, value?: any,
@@ -1884,6 +1962,16 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
     [key: string]: IAVCellValue[]
 }, originCellIds: string[], activeElement: Element) => {
     nodeElement.querySelector(".av__drag-fill")?.remove();
+    const blockID = getAVHostBlockID(nodeElement);
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const commit = () => {
+        if (doOperations.length === 0) return;
+        // 单元格数据保存在数据库文件中，同时更新宿主块，使填充进入该文档的撤销栈。
+        doOperations.push({action: "doUpdateUpdated", id: blockID, data: dayjs().format("YYYYMMDDHHmmss")});
+        undoOperations.push({action: "doUpdateUpdated", id: blockID, data: nodeElement.getAttribute("updated")});
+        transaction(protyle, doOperations, undoOperations);
+    };
     const selectedCells = getAVSelectedCells(nodeElement);
     if (selectedCells.length > 0) {
         const data = getAVData(nodeElement);
@@ -1897,8 +1985,6 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
             cells.push(cell);
             targetRows.set(key, cells);
         });
-        const doOperations: IOperation[] = [];
-        const undoOperations: IOperation[] = [];
         Array.from(targetRows.values()).forEach((cells, rowIndex) => {
             cells.forEach((selectedCell, colIndex) => {
                 const originValues = originData[originKeys[rowIndex % originKeys.length]];
@@ -1918,7 +2004,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                     value.isDetached = true;
                     delete value.block.id;
                 }
-                const operation = {avID: nodeElement.dataset.avId, valueID: target.cell.id,
+                const operation = {avID: nodeElement.dataset.avId, blockID, valueID: target.cell.id,
                     keyID: target.colID, rowID: target.rowID};
                 doOperations.push(createAVCellUpdateOperation({...operation, data: value}));
                 undoOperations.push(createAVCellUpdateOperation({...operation, data: oldValue}));
@@ -1929,7 +2015,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
             });
         });
         focusBlock(nodeElement);
-        if (doOperations.length > 0) transaction(protyle, doOperations, undoOperations);
+        commit();
         return;
     }
     const newData: { [key: string]: Array<IAVCellValue & { colId?: string, element?: HTMLElement }> } = {};
@@ -1952,8 +2038,6 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
         value.element = item;
         newData[rowElement.dataset.id].push(value);
     });
-    const doOperations: IOperation[] = [];
-    const undoOperations: IOperation[] = [];
     const avID = nodeElement.dataset.avId;
     const originKeys = Object.keys(originData);
     const showIcon = activeElement.querySelector(".b3-menu__avemoji") ? true : false;
@@ -1982,6 +2066,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 action: "updateAttrViewCell",
                 id: item.id,
                 avID,
+                blockID,
                 keyID,
                 rowID,
                 data
@@ -1998,6 +2083,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 action: "updateAttrViewCell",
                 id: item.id,
                 avID,
+                blockID,
                 keyID,
                 rowID,
                 data: item
@@ -2005,9 +2091,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
         });
     });
     focusBlock(nodeElement);
-    if (doOperations.length > 0) {
-        transaction(protyle, doOperations, undoOperations);
-    }
+    commit();
 };
 
 export const addDragFill = (cellElement: Element) => {

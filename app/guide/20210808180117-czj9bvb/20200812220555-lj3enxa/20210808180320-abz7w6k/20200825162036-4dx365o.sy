@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261106130000"
+		"updated": "20261107150237"
 	},
 	"Children": [
 		{
@@ -32,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091228-ttcj9nm",
-				"updated": "20261019194453"
+				"updated": "20261107150237"
 			},
 			"Children": [
 				{
@@ -366,7 +366,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210604220948-4e5cfij"
+						"id": "20210604220948-4e5cfij",
+						"updated": "20261107150237"
 					},
 					"Children": [
 						{
@@ -381,6 +382,20 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "sub",
 									"TextMarkTextContent": "下标"
+								}
+							]
+						},
+						{
+							"ID": "20261107150237-oarlsov",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261107150237-oarlsov",
+								"updated": "20261107150237"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在上下标的左右边界处，可使用左右方向键将光标移入或移出；在边界外输入或粘贴文字时使用普通文本格式"
 								}
 							]
 						}
@@ -5325,6 +5340,20 @@
 				"id": "20210608113914-zvtw5kj",
 				"updated": "20210608113914"
 			}
+		},
+		{
+			"ID": "20261109120000-7763dd5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109120000-7763dd5",
+				"updated": "20261109120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "拖动视频右侧、底部或右下角的把手可等比例调整大小，也支持触摸拖动。"
+				}
+			]
 		},
 		{
 			"ID": "20210608113645-k19wsmr",

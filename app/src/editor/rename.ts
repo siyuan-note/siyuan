@@ -74,14 +74,18 @@ export const rename = (options: {
         return;
     }
     const rootID = options.path?.split("/").pop()?.replace(/\.sy$/, "");
-    if (options.type === "file" && rootID && rootID !== options.notebookId) {
+    const notebookDocument = options.type === "notebook" && window.siyuan.config.fileTree?.boxDocEnabled;
+    if ((options.type === "file" && rootID) || notebookDocument) {
         void import("../protyle/header/documentTitleDialog").then(({openDocumentTitleDialog}) => {
-            openDocumentTitleDialog({id: rootID, notebook: options.notebookId});
+            openDocumentTitleDialog({id: notebookDocument ? options.notebookId : rootID, notebook: options.notebookId});
         });
         return;
     }
     const initialName = options.empty ? "" : options.name;
     const dialog = openInputDialog({
+        /// #if MOBILE
+        compactActions: true,
+        /// #endif
         title: window.siyuan.languages.rename,
         value: initialName,
         awaitConfirm: true,

@@ -26,7 +26,7 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
         .protyle-wysiwyg { font-size: 24px; }
     `;
     document.head.appendChild(style);
-    const render = new Function(renderSource + "\nreturn renderIFrameResize;")();
+    const render = new Function(renderSource + "\nreturn renderMediaResize;")();
     const updates: {before: string, after: string}[] = [];
     const start = new Function("protyle", "target", "nodeElement", "event", "documentSelf", "mostRight", "mostBottom", "y",
         "focusBlock", "updateTransaction", "img3115", resizeSource);
@@ -279,7 +279,7 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
                     ...(load("src/protyle/util/hasClosest") as typeof import("../util/hasClosest")),
                     ...(load("src/protyle/wysiwyg/getBlock") as typeof import("../wysiwyg/getBlock")),
                     ...(load("src/protyle/hint/blockHintRange") as typeof import("../hint/blockHintRange")),
-                    Constants: constants, renderIFrameResize: render,
+                    Constants: constants, renderMediaResize: render,
                     isMobile: () => mobile, isProtyleListItemFragment: () => false,
                     getSuperBlockCommandLayout: (): undefined => undefined,
                     hideElements() {},
@@ -474,19 +474,81 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     root.dataset.readonly = "true";
     check.equal(getComputedStyle(readonly.querySelector(".protyle-block-resize")).display, "none");
     root.dataset.readonly = "false";
-    const video = create("NodeVideo");
-    render(video);
-    check.equal(video.querySelector(".protyle-block-resize"), null);
-    video.querySelector("iframe").replaceWith(document.createElement("video"));
-    const videoContent = video.querySelector("video");
-    videoContent.style.width = "300px";
-    videoContent.style.height = "180px";
-    start({disabled: false}, video.querySelector(".protyle-action__drag"), video, {clientX: 400},
-        document, 1000, 1000, 300, () => {}, () => {}, () => {});
-    document.onmousemove(new MouseEvent("mousemove", {clientX: 420, clientY: 330}));
-    check.equal(videoContent.style.width, "320px");
-    check.equal(videoContent.style.height, "210px");
-    document.onmouseup(new MouseEvent("mouseup"));
+    for (const mode of ["mouse", "touch", "unloaded"]) {
+        for (const centered of [false, true]) {
+            for (const axis of ["width", "height", "both"]) {
+                root.innerHTML = lute.Md2BlockDOM('<video controls src="assets/movie.mp4" width="200" height="120" style="width:200px;height:120px"></video>');
+                const video = root.firstElementChild as HTMLElement;
+                video.style.textAlign = centered ? "center" : "left";
+                const videoContent = video.querySelector("video");
+                const ratio = mode === "unloaded" ? 200 / 120 : 16 / 9;
+                if (mode !== "unloaded") {
+                    Object.defineProperties(videoContent, {videoWidth: {value: 1600}, videoHeight: {value: 900}});
+                }
+                const original = lute.BlockDOM2StdMd(video.outerHTML);
+                render(video);
+                render(root);
+                check.equal(video.querySelectorAll(".protyle-block-resize").length, 3);
+                check.equal(lute.BlockDOM2StdMd(video.outerHTML), original);
+                const handle = video.querySelector<HTMLElement>(`[data-resize-axis="${axis}"]`);
+                const rect = handle.getBoundingClientRect();
+                const videoRect = videoContent.getBoundingClientRect();
+                if (axis !== "height") check.ok(rect.right > videoRect.right && rect.left < videoRect.right + 24);
+                if (axis !== "width") check.ok(rect.bottom > videoRect.bottom && rect.top < videoRect.bottom + 24);
+                updates.length = 0;
+                const before = video.outerHTML;
+                const begin = (event: {clientX: number, clientY: number}) => start({disabled: false}, handle, video, event,
+                    document, 1000, 1000, event.clientY, () => {},
+                    (_owner: unknown, node: HTMLElement, html: string) => updates.push({before: html, after: node.outerHTML}), () => {});
+                const touch = (type: string, offset: number) => {
+                    const point = new Touch({identifier: 1, target: handle, clientX: rect.left + offset, clientY: rect.top + offset});
+                    const event = new TouchEvent(type, {bubbles: true, cancelable: true,
+                        touches: type === "touchend" ? [] : [point], changedTouches: [point]});
+                    handle.dispatchEvent(event);
+                    return event;
+                };
+                if (mode === "touch") {
+                    handle.addEventListener("mousedown", begin);
+                    touch("touchstart", 0);
+                    check.equal(touch("touchmove", 20).defaultPrevented, true);
+                } else {
+                    begin({clientX: 200, clientY: 150});
+                    document.onmousemove(new MouseEvent("mousemove", {clientX: 220, clientY: 170}));
+                }
+                check.ok(videoContent.clientWidth > 200);
+                check.ok(Math.abs(videoContent.clientWidth / videoContent.clientHeight - ratio) < 0.02);
+                check.equal(videoContent.getAttribute("width"), null);
+                check.equal(videoContent.getAttribute("height"), null);
+                if (mode === "touch") {
+                    touch("touchend", 20);
+                } else {
+                    document.onmousemove(new MouseEvent("mousemove", {clientX: 3000, clientY: 3000}));
+                    check.ok(videoContent.clientWidth <= video.clientWidth);
+                    check.ok(videoContent.clientHeight <= window.innerHeight * 0.9);
+                    check.ok(Math.abs(videoContent.clientWidth / videoContent.clientHeight - ratio) < 0.02,
+                        "the content width limit preserves the aspect ratio at the resize boundary");
+                    document.onmouseup(new MouseEvent("mouseup"));
+                }
+                check.equal(updates.length, 1);
+                check.equal(updates[0].before, before);
+                const saved = lute.BlockDOM2StdMd(updates[0].after);
+                root.innerHTML = lute.Md2BlockDOM(saved);
+                check.equal(lute.BlockDOM2StdMd(root.innerHTML), saved, "video dimensions survive Markdown export and reopening");
+                root.innerHTML = updates[0].before;
+                check.equal(root.querySelector("video").style.height, "120px", "undo preserves historical dimensions");
+                root.innerHTML = updates[0].after;
+                const restored = root.querySelector("video");
+                check.equal(restored.style.height, "auto");
+                check.ok(Math.abs(restored.clientWidth / restored.clientHeight - ratio) < 0.02);
+                const source = restored.outerHTML;
+                root.style.width = "200px";
+                check.ok(Math.abs(restored.clientWidth / restored.clientHeight - ratio) < 0.02,
+                    "narrowing the editor preserves the saved video aspect ratio");
+                check.equal(restored.outerHTML, source, "responsive layout does not rewrite source dimensions");
+                root.style.width = "";
+            }
+        }
+    }
     root.innerHTML = lute.Md2BlockDOM("![sample](assets/sample.png)");
     const image = root.querySelector("img");
     image.style.width = "100px";
@@ -624,7 +686,9 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     }
     layoutRoot.remove();
     block.querySelectorAll(".protyle-block-resize").forEach(handle => handle.classList.add("touch-resize-active"));
-    return "IFrame, widget and mind map resize cases passed";
+    root.insertAdjacentHTML("beforeend", lute.Md2BlockDOM('<video controls src="assets/movie.mp4" style="width:200px;height:112.5px"></video>'));
+    render(root);
+    return "IFrame, widget, video and mind map resize cases passed";
 };
 
 const visibilityCases = async (move: (x: number, y: number) => Promise<void>, tab: () => Promise<void>,
@@ -632,10 +696,10 @@ const visibilityCases = async (move: (x: number, y: number) => Promise<void>, ta
     await move(1, 1);
     await evaluate("document.querySelectorAll(\".touch-resize-active\").forEach(handle => handle.classList.remove(\"touch-resize-active\"));");
     const touchOnly = await evaluate("matchMedia('(hover: none) and (pointer: coarse)').matches");
-    for (const selector of [".iframe", ".mindmap-view"]) {
+    for (const selector of [".iframe", '[data-type="NodeVideo"]', ".mindmap-view"]) {
         const state = await evaluate(`(() => {
             const block = document.querySelector(${JSON.stringify(selector)});
-            const target = block.querySelector("iframe, .mindmap-view__viewport");
+            const target = block.querySelector("iframe, video, .mindmap-view__viewport");
             target.tabIndex = 0;
             target.focus();
             require("node:assert/strict").equal(document.activeElement, target);
@@ -690,7 +754,7 @@ test("external resize handles preserve source, axes, historical dimensions and n
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const resizeSource = imageResizeSource + transpileModule(`function resize() { ${resize} }`, {compilerOptions: {target: ScriptTarget.ES2021}})
         .outputText + "\nreturn resize.call(this);";
-    const renderSource = transpileModule(readFileSync("src/protyle/render/iframeResize.ts", "utf8").replace(/^export /gm, ""),
+    const renderSource = transpileModule(readFileSync("src/protyle/render/mediaResize.ts", "utf8").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const css = compileString('@use "protyle/protyle"; @use "component/typography"; @use "business/resize";',
         {loadPaths: ["src/assets/scss"], logger: {warn() {}, debug() {}}}).css;
@@ -699,7 +763,7 @@ test("external resize handles preserve source, axes, historical dimensions and n
     const bridgeSources = ["src/util/touchDragBridge.ts", "src/util/touchDragBridgeCore.ts"].map(file =>
         transpileModule(readFileSync(file, "utf8"), {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText);
     const insertSources = Object.fromEntries([
-        "src/protyle/util/insertHTML", "src/protyle/render/iframeResize", "src/protyle/util/hasClosest",
+        "src/protyle/util/insertHTML", "src/protyle/render/mediaResize", "src/protyle/util/hasClosest",
         "src/protyle/wysiwyg/getBlock", "src/protyle/util/inlineElementBoundary", "src/protyle/util/inlineElementMarker",
         "src/protyle/util/longTextWrap", "src/protyle/util/codeBlockRenderState", "src/asset/html",
         "src/protyle/hint/blockHintRange",

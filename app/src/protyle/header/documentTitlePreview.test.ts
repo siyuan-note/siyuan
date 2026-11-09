@@ -245,12 +245,57 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
             }
             container.remove();
         }
+        const treeTitle = document.createElement("span");
+        treeTitle.className = "b3-list-item__text b3-typography document-title-preview";
+        treeTitle.style.cssText = "position:fixed;left:10px;top:10px;width:300px";
+        const navigation = document.createElement("div");
+        navigation.append(treeTitle);
+        document.body.append(navigation);
+        let clicks = 0;
+        navigation.addEventListener("click", () => clicks++);
+        for (const markup of [
+            "<span>Plain title</span>",
+            '<span data-type="strong"><span data-type="em">Nested title</span></span>',
+            '<span data-type="a" data-href="https://example.com"><span>Link title</span></span>',
+            '<span data-type="inline-math"><span>1+2=3</span></span>',
+        ]) {
+            treeTitle.innerHTML = markup;
+            treeTitle.querySelectorAll("span").forEach(span => {
+                check.equal(getComputedStyle(span).userSelect, "none",
+                    `${entry} navigation title spans must not select text`);
+            });
+            for (const clickCount of [1, 2]) {
+                window.getSelection().removeAllRanges();
+                const bounds = treeTitle.firstElementChild.getBoundingClientRect();
+                await new Promise(resolve => requestAnimationFrame(resolve));
+                check.ok(treeTitle.contains(document.elementFromPoint(bounds.left + 5, bounds.top + bounds.height / 2)),
+                    "click coordinates hit the navigation title: " + JSON.stringify({bounds: bounds.toJSON(), width: innerWidth, height: innerHeight,
+                        hit: document.elementFromPoint(bounds.left + 5, bounds.top + bounds.height / 2)?.outerHTML.slice(0, 250)}));
+                const previousClicks = clicks;
+                await require("electron").ipcRenderer.invoke("click-title", Math.round(bounds.left + 5),
+                    Math.round(bounds.top + bounds.height / 2), clickCount);
+                await new Promise(resolve => setTimeout(resolve, 30));
+                check.equal(window.getSelection().toString(), "", `${entry} title clicks leave no text selected`);
+                check.equal(clicks, previousClicks + 1, "title clicks still reach the navigation container");
+            }
+        }
+        navigation.remove();
+        treeTitle.remove();
         const body = document.createElement("div");
         body.className = "b3-typography";
         body.style.width = "80px";
         body.innerHTML = '<p><span data-type="code">body code with spaces that needs to wrap across several lines</span></p>';
         document.body.append(body);
         check.ok(body.querySelector("span").getClientRects().length > 1, "ordinary body inline code retains wrapping");
+        body.innerHTML = '<span data-type="inline-math">1+2=3</span>';
+        check.equal(getComputedStyle(body.firstElementChild).userSelect, "all",
+            "ordinary body formulas retain atomic text selection");
+        for (const className of ["protyle-wysiwyg protyle-title__input", "b3-typography document-title-preview item__text",
+            "b3-typography document-title-preview b3-menu__label"]) {
+            body.className = className;
+            check.equal(getComputedStyle(body.firstElementChild).userSelect, "all",
+                `${entry} editor, tab and menu formulas keep their existing selection behavior`);
+        }
         body.remove();
     }
     return "Outline document title cases passed";
@@ -275,13 +320,22 @@ test("document title previews preserve custom font sizes, vertical alignment, in
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-outline-title-test-"));
     const script = path.join(temporary, "run.cjs");
     const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(tabSource) + "," + JSON.stringify(styles) + "," + JSON.stringify(themes) + ")";
-    writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+    writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    const win = new BrowserWindow({show: false, width: 800, height: 600, webPreferences: {
+        nodeIntegration: true, contextIsolation: false, backgroundThrottling: false,
+    }});
+    ipcMain.handle("click-title", (event, x, y, clickCount) => {
+        event.sender.sendInputEvent({type: "mouseMove", x, y});
+        event.sender.sendInputEvent({type: "mouseDown", x, y, button: "left", clickCount});
+        event.sender.sendInputEvent({type: "mouseUp", x, y, button: "left", clickCount});
+    });
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
+        win.webContents.enableDeviceEmulation({screenPosition: "desktop", screenSize: {width: 800, height: 600},
+            viewPosition: {x: 0, y: 0}, deviceScaleFactor: 1, viewSize: {width: 800, height: 600}, scale: 1});
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
         win.destroy(); app.exit(0);
     } catch (error) { console.error(error); win.destroy(); app.exit(1); }

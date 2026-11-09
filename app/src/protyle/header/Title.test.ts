@@ -191,7 +191,7 @@ test("normal editor enabling cannot unlock the plain title while its full source
     assert.equal(title.editElement.textContent, "Original");
 });
 
-test("a title without its loaded source stays readonly while notebook roots retain plain editing", () => {
+test("document and notebook document titles stay readonly until their full source loads", () => {
     const {title} = setup();
     title.protyle.block = {rootID: "document"};
     const attributes: Record<string, string> = {};
@@ -200,7 +200,7 @@ test("a title without its loaded source stays readonly while notebook roots reta
     assert.equal(attributes.contenteditable, "false");
     title.protyle.block.rootID = title.protyle.notebookId;
     title.setReadonly(false);
-    assert.equal(attributes.contenteditable, "true", "notebook roots retain their plain title editor");
+    assert.equal(attributes.contenteditable, "false", "notebook document titles also protect their complete source");
     title.setReadonly(true);
     assert.equal(attributes.contenteditable, "false");
 });

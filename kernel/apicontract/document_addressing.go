@@ -159,13 +159,15 @@ type DocumentPath struct {
 }
 
 type GetDocPathsRequest struct {
-	Notebook string   `json:"notebook"`
-	IDs      []string `json:"ids"`
+	Notebook     string   `json:"notebook"`
+	IDs          []string `json:"ids"`
+	IncludeIcons bool     `json:"includeIcons,omitempty" api:"optional,nonnullable"`
 }
 
 type DocumentPathsData struct {
-	Documents  []DocumentPath `json:"documents"`
-	MissingIDs []string       `json:"missingIDs"`
+	Documents  []DocumentPath    `json:"documents"`
+	MissingIDs []string          `json:"missingIDs"`
+	Icons      map[string]string `json:"icons,omitempty"`
 }
 
 type DocumentPathStart struct {

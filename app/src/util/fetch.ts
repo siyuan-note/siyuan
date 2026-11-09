@@ -13,11 +13,27 @@ import {showMessage} from "../dialog/message";
 
 const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockID?: string},
                                   headers?: Record<string, string>, signal?: AbortSignal) => {
-    if (!["/api/template/render", "/api/av/renderAttributeView", "/api/av/getAttributeViewKeys", "/api/filetree/createDailyNote"].includes(url)) {
+    if (url === "/api/transactions" && window.siyuan.ws?.ws) {
+        const {getTemplateHTTPWindow}: typeof import("../template/http") = require("../template/http");
+        const owner = getTemplateHTTPWindow();
+        if (owner) return {headers: {...headers, "X-Siyuan-Template-App": owner.app, "X-Siyuan-Template-Session": owner.session},
+            signal, isCurrent: () => true, finish: () => {}};
+        return undefined;
+    }
+    if (!["/api/template/render", "/api/av/renderAttributeView", "/api/av/getAttributeViewKeys", "/api/av/runAttributeViewAutomation", "/api/filetree/createDailyNote"].includes(url)) {
         return undefined;
     }
     const {beginTemplateHTTPRequest: begin}: typeof import("../template/http") = require("../template/http");
     return begin(url, data, headers, signal);
+};
+
+const scheduleAutomaticHTTP = (url: string, response: IWebSocketData) => {
+    if (url !== "/api/transactions" || response.code !== 0 || !Array.isArray(response.data)) return;
+    const jobs = response.data.flatMap((transaction: import("../types/api").Transaction) => transaction.httpAutomationJobs || []);
+    if (jobs.length) {
+        const {scheduleAutomaticHTTP: schedule}: typeof import("../protyle/render/av/automaticHTTP") = require("../protyle/render/av/automaticHTTP");
+        schedule(jobs);
+    }
 };
 
 const reportTransactionFailure = (url: string, error: Error) => {
@@ -129,6 +145,7 @@ export const fetchPost = ((
         } else if (cb) {
             cb(response);
         }
+        scheduleAutomaticHTTP(url, response);
     }).catch((e) => {
         if (e?.name === "AbortError" || (templateRequest && !templateRequest.isCurrent())) {
             return;
@@ -187,6 +204,7 @@ export const fetchSyncPost = (async (url: string, data?: any, headers?: Record<s
         if (process) {
             processMessage(res2);
         }
+        scheduleAutomaticHTTP(url, res2);
         return res2;
     }), url === "/api/storage/setLocalStorageVal" && data?.key === Constants.LOCAL_SLASH_USAGE)
         .finally(() => templateRequest?.finish());

@@ -52,30 +52,33 @@ test("notebook rename sends the original slashes and updates the displayed name"
     assert.equal(closed, true);
 });
 
-test("document rename opens complete rich title source instead of editing the derived summary", async () => {
-    const source = transpileModule(readFileSync(path.resolve(__dirname, "rename.ts"), "utf8"),
-        {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText;
-    const opened: unknown[] = [];
-    const moduleExports: {rename?: (options: object) => void} = {};
-    runInNewContext(source, {
-        exports: moduleExports,
-        window: {siyuan: {config: {readonly: false}}},
-        require: (name: string) => {
-            if (name === "../protyle/header/documentTitleDialog") return {openDocumentTitleDialog: (options: unknown) => opened.push(options)};
-            if (name === "../dialog/inputDialog") return {openInputDialog: () => assert.fail("A document summary must never become editable source")};
-            return {};
-        },
+for (const kind of ["document", "notebook-document", "notebook"]) {
+    test(`${kind} rename opens complete rich title source`, async () => {
+        const source = transpileModule(readFileSync(path.resolve(__dirname, "rename.ts"), "utf8"),
+            {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText;
+        const opened: unknown[] = [];
+        const moduleExports: {rename?: (options: object) => void} = {};
+        runInNewContext(source, {
+            exports: moduleExports,
+            window: {siyuan: {config: {readonly: false, fileTree: {boxDocEnabled: true}}}},
+            require: (name: string) => {
+                if (name === "../protyle/header/documentTitleDialog") return {openDocumentTitleDialog: (options: unknown) => opened.push(options)};
+                if (name === "../dialog/inputDialog") return {openInputDialog: () => assert.fail("A document summary must never become editable source")};
+                return {};
+            },
+        });
+        moduleExports.rename({path: kind === "document" ? "/document.sy" : "/box.sy", notebookId: "box",
+            name: "Derived summary", type: kind === "notebook" ? "notebook" : "file"});
+        await new Promise<void>(resolve => setImmediate(resolve));
+        assert.equal(opened.length, 1);
+        assert.deepEqual(JSON.parse(JSON.stringify(opened[0])), {id: kind === "document" ? "document" : "box", notebook: "box"});
     });
-    moduleExports.rename({path: "/document.sy", notebookId: "box", name: "Derived summary", type: "file"});
-    await new Promise<void>(resolve => setImmediate(resolve));
-    assert.equal(opened.length, 1);
-    assert.deepEqual(JSON.parse(JSON.stringify(opened[0])), {id: "document", notebook: "box"});
-});
+}
 
 test("mobile notebook rename waits for a confirmed response and preserves the draft on failure", async () => {
     const source = transpileModule(readFileSync(path.resolve(__dirname, "rename.ts"), "utf8"),
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText;
-    let options: {awaitConfirm: boolean, onConfirm: (value: string, dialog: object) => Promise<boolean>};
+    let options: {awaitConfirm: boolean, compactActions: boolean, onConfirm: (value: string, dialog: object) => Promise<boolean>};
     let respond: (value: {code: number}) => void;
     let closes = 0;
     const displayed: string[] = [];
@@ -97,6 +100,7 @@ test("mobile notebook rename waits for a confirmed response and preserves the dr
     });
     api.rename({path: "/", notebookId: "box", name: "Before", type: "notebook"});
     assert.equal(options.awaitConfirm, true);
+    assert.equal(options.compactActions, true);
     const failure = options.onConfirm("Draft", dialog);
     assert.equal(closes, 0);
     assert.deepEqual(displayed, []);

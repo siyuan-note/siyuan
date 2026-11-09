@@ -133,7 +133,7 @@ func testCreateEncryptedBoxInitializesBoxDocument(t *testing.T) {
 	if err = reconcileBoxDoc(box, boxID); err != nil {
 		t.Fatal(err)
 	}
-	assertNotebookName(boxID, "Encrypted/Synced／Notes")
+	assertNotebookName(boxID, "Encrypted/Renamed／Notes")
 	if data, readErr := os.ReadFile(filepath.Join(util.DataDir, boxID, boxDocPath(boxID))); readErr != nil || !util.IsCiphertext(data) {
 		t.Fatalf("renaming and reconciling the notebook root did not retain encryption: %v", readErr)
 	}

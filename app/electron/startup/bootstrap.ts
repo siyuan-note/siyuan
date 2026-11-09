@@ -64,6 +64,7 @@ const bootstrap = (): void => {
     initializeProcessIdentity();
 
     if (!app.requestSingleInstanceLock()) {
+        writeLog("single instance lock not acquired, quitting; command line args " + JSON.stringify(launchArguments));
         app.quit();
         return;
     }

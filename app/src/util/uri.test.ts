@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {normalizeSiYuanUri} from "./normalizeSiYuanUri";
+import {resolveCustomModelFactory} from "../plugin/customTabOwner";
 
 const preprocess: (source: string, options: {MOBILE: boolean, BROWSER: boolean}) => string =
     require("ifdef-loader/preprocessor").parse;
@@ -95,10 +96,13 @@ const createDispatcher = (URLClass: typeof URL, mobile: boolean, exists = true) 
     const events: {type: string, url: string}[] = [];
     const bazaar: {type: string, name: string, from: string}[] = [];
     const messages: string[] = [];
+    const customOpens: Array<{custom: {id: string}}> = [];
     const exports = {} as typeof import("./uri");
     const dependencies = {
         ...parser,
         normalizeSiYuanUri,
+        resolveCustomModelFactory,
+        openFile: (options: {custom: {id: string}}) => customOpens.push(options),
         showMessage: (message: string) => messages.push(message),
         Constants: constants,
         fetchPost: (url: string, data: {id: string}, callback: (response: {data: boolean}) => void) => {
@@ -118,14 +122,33 @@ const createDispatcher = (URLClass: typeof URL, mobile: boolean, exists = true) 
     runInNewContext(compile("src/util/uri.ts", mobile), {
         exports,
         URL: URLClass,
-        window: {siyuan: {languages: {_kernel: {15: "Content block with id [%s] not found"}}}},
+        window: {siyuan: {languages: {pluginTabUnavailable: "Plugin unavailable", _kernel: {15: "Content block with id [%s] not found"}}}},
         require: () => dependencies,
     });
-    const app = {plugins: [{name: "plugin-sample", eventBus: {
+    const app = {plugins: [{name: "plugin-sample", models: {}, eventBus: {
         emit: (type: string, detail: {url: string}) => events.push({type, url: detail.url}),
     }}]} as unknown as Parameters<typeof exports.processSiYuanUri>[0];
-    return {exports, app, requests, opens, events, bazaar, messages};
+    return {exports, app, requests, opens, events, bazaar, messages, customOpens};
 };
+
+test("custom tab URIs use the shared factory resolution and report unavailable or ambiguous owners", () => {
+    for (const mobile of [false, true]) {
+        const context = createDispatcher(URL, mobile);
+        const uri = "siyuan://plugins/plugin-sampleview?title=Saved";
+        assert.equal(context.exports.processSiYuanUri(context.app, uri), true);
+        assert.deepEqual(context.messages, ["Plugin unavailable"]);
+        context.messages.length = 0;
+        const factory = (): never => { throw new Error("URI dispatch must use openFile"); };
+        context.app.plugins[0].models["plugin-sampleview"] = factory;
+        assert.equal(context.exports.processSiYuanUri(context.app, uri), true);
+        assert.equal(context.customOpens.length, mobile ? 0 : 1);
+        assert.deepEqual(context.messages, []);
+        context.app.plugins.push({name: "plugin-samplev", models: {"plugin-sampleview": factory}} as unknown as import("../plugin").Plugin);
+        assert.equal(context.exports.processSiYuanUri(context.app, uri), true);
+        assert.deepEqual(context.messages, ["Plugin unavailable"]);
+        assert.equal(context.customOpens.length, mobile ? 0 : 1);
+    }
+});
 
 test("reported agent block links reach document navigation in both desktop and mobile builds", () => {
     for (const URLClass of [URL, LegacyURL]) {

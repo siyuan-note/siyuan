@@ -13,7 +13,7 @@ const compiled = transpileModule(declaration.getText(source), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const createSheet = (expandable = false, realSizing = false) => {
+const createSheet = (expandable = false, realSizing = false, borderHeight = 0) => {
     let closes = 0;
     let now = 1000;
     let busy = false;
@@ -24,7 +24,8 @@ const createSheet = (expandable = false, realSizing = false) => {
         style: {transform: "", transition: "", height: "448px"},
         classList: {contains: (name: string) => classes.has(name)},
         getAttribute: (name: string) => name === "aria-busy" ? String(busy) : expandable ? "true" : null,
-        get clientHeight() { return parseFloat(this.style.height); },
+        get clientHeight() { return parseFloat(this.style.height) - borderHeight; },
+        getBoundingClientRect() { return {height: parseFloat(this.style.height)}; },
         firstElementChild: {getBoundingClientRect: () => ({height: 16})},
         lastElementChild: {style: {flex: ""}, scrollHeight: 1000, get clientHeight() { return element.clientHeight - 16; }},
         querySelector: () => ({innerHTML: ""}),
@@ -140,6 +141,17 @@ test("dragging a menu grip retains arbitrary height rather than snapping between
     sheet.swipe({title: true}, 200);
     assert.equal(sheet.classes.has("b3-menu--expanded"), false);
     assert.equal(sheet.element.style.height, "348px");
+    assert.equal(sheet.closes(), 0);
+});
+
+test("repeated grip resizing preserves the border-box height", () => {
+    const sheet = createSheet(true, true, 2);
+    sheet.swipe({title: true}, -100);
+    assert.equal(sheet.element.style.height, "548px");
+    sheet.swipe({title: true}, 40);
+    assert.equal(sheet.element.style.height, "508px");
+    sheet.swipe({title: true}, -40);
+    assert.equal(sheet.element.style.height, "548px");
     assert.equal(sheet.closes(), 0);
 });
 

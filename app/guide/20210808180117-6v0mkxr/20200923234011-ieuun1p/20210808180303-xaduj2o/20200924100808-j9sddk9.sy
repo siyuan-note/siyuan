@@ -744,6 +744,34 @@
 									"Data": "Markdown"
 								}
 							]
+						},
+						{
+							"ID": "20261108001000-45919c5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108001000-45919c5",
+								"updated": "20261108001000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Export"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " controls whether Markdown copies and exports include automatic heading numbers. “Include automatic heading numbers in Markdown exports” is disabled by default, omitting numbers from Markdown output without changing the document or editor settings. Turn it on to preserve numbering when the document has heading numbering enabled. Copying uses this saved preference directly without a numbering prompt. Other export formats are unaffected."
+								}
+							]
 						}
 					]
 				},

@@ -303,8 +303,14 @@ export const switchDesktopDatabaseRowPreview = async (model: Editor | Custom, ne
     const loaded = new Promise<void>(resolve => { documentLoaded = resolve; });
     const opened = newTab({...options, keepCursor: true}, () => documentLoaded());
     opened.parent = wnd;
-    opened.panelElement.classList.add("fn__none");
-    document.body.append(opened.panelElement);
+    const preparation = document.createElement("div");
+    const bounds = tab.panelElement.getBoundingClientRect();
+    preparation.className = "fn__flex-column";
+    // 固定定位容器不参与页面排版，隐藏期间仍允许目标面板完成属性请求和尺寸测量。
+    Object.assign(preparation.style, {position: "fixed", left: `${bounds.left}px`, top: `${bounds.top}px`,
+        width: `${bounds.width}px`, height: `${bounds.height}px`, visibility: "hidden", pointerEvents: "none"});
+    preparation.append(opened.panelElement);
+    document.body.append(preparation);
     let preparing = true;
     let cancel: () => void;
     const cancelled = new Promise<boolean>(resolve => { cancel = () => resolve(false); });
@@ -356,14 +362,18 @@ export const switchDesktopDatabaseRowPreview = async (model: Editor | Custom, ne
             opened.model?.destroy();
             opened.model?.send("closews", {});
             opened.panelElement.remove();
+            preparation.remove();
         }
     }
     if (!ready) {
         return false;
     }
-    opened.panelElement.classList.remove("fn__none");
     // 复用来源预览所在的分屏，不依赖异步请求完成时用户正激活哪个分屏。
-    wnd.addTab(opened, false, true, undefined, tab.id);
+    try {
+        wnd.addTab(opened, false, true, undefined, tab.id);
+    } finally {
+        preparation.remove();
+    }
     if (opened.model instanceof Custom) {
         opened.model.resize();
         mountDesktopDatabaseRowNavigation(opened.model, next, source);

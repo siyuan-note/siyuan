@@ -185,6 +185,11 @@ func TestIsPrivateIP(t *testing.T) {
 		{name: "Teredo private", ip: "2001:0000:0000:0000:0000:0000:3f57:fefe", want: true},
 		{name: "Teredo link-local", ip: "2001:0000:0000:0000:0000:0000:5601:5601", want: true},
 		{name: "Teredo public", ip: "2001:0000:0000:0000:0000:0000:f7f7:f7f7", want: false},
+		// IPv4-translated 地址（RFC 2765 已废弃 0::ffff:0:0:0/96）
+		{name: "IPv4-translated loopback", ip: "::ffff:0:7f00:1", want: true},
+		{name: "IPv4-translated private", ip: "::ffff:0:a00:1", want: true},
+		{name: "IPv4-translated link-local", ip: "::ffff:0:a9fe:a9fe", want: true},
+		{name: "IPv4-translated public", ip: "::ffff:0:808:808", want: false},
 		// IPv4 兼容地址（RFC 4291 已废弃 ::/96）
 		{name: "IPv4-compatible loopback", ip: "::127.0.0.1", want: true},
 		{name: "IPv4-compatible private", ip: "::c0a8:101", want: true},
@@ -225,6 +230,8 @@ func TestCheckHostSSRF(t *testing.T) {
 		{name: "6to4 loopback", host: "2002:7f00:1::1", want: true},
 		{name: "6to4 private", host: "2002:c0a8:101::1", want: true},
 		{name: "Teredo private", host: "2001:0000:0000:0000:0000:0000:3f57:fefe", want: true},
+		{name: "IPv4-translated private", host: "::ffff:0:a00:1", want: true},
+		{name: "IPv4-translated public", host: "::ffff:0:808:808", want: false},
 		{name: "IPv4-compatible loopback", host: "::127.0.0.1", want: true},
 		{name: "public IPv4", host: "8.8.8.8", want: false},
 		{name: "public IPv6", host: "2606:4700:4700::1111", want: false},
@@ -259,6 +266,42 @@ func TestSSRFSafeDialerSafeMode(t *testing.T) {
 		{name: "NAT64 link-local", address: "64:ff9b::a9fe:a9fe:80", blocked: true},
 		{name: "6to4 private", address: "2002:c0a8:101::1:80", blocked: true},
 		{name: "Teredo private", address: "2001:0000:0000:0000:0000:0000:3f57:fefe:80", blocked: true},
+		{name: "IPv4-translated private", address: "[::ffff:0:a00:1]:80", blocked: true},
+		{name: "public", address: "8.8.8.8:80", blocked: false},
+	}
+
+	dialer := SSRFSafeDialer(30)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := dialer.Control("tcp", test.address, nil)
+			if test.blocked != (nil != err) {
+				t.Fatalf("Control(%q) error [%v], want blocked [%v]", test.address, err, test.blocked)
+			}
+		})
+	}
+}
+
+// TestSSRFSafeDialerBlocksLinkLocal 验证非安全模式下仍拒绝链路本地与未指定地址，
+// 同时保留回环、RFC1918 私网和组播（mDNS）以支持插件访问本机或局域网服务。
+func TestSSRFSafeDialerBlocksLinkLocal(t *testing.T) {
+	previous := SafeMode
+	SafeMode = false
+	defer func() { SafeMode = previous }()
+
+	tests := []struct {
+		name    string
+		address string
+		blocked bool
+	}{
+		{name: "metadata", address: "169.254.169.254:80", blocked: true},
+		{name: "link-local", address: "169.254.1.1:80", blocked: true},
+		{name: "IPv6 link-local with zone", address: "[fe80::1%eth0]:80", blocked: true},
+		{name: "NAT64 metadata", address: "[64:ff9b::a9fe:a9fe]:80", blocked: true},
+		{name: "IPv4-translated metadata", address: "[::ffff:0:a9fe:a9fe]:80", blocked: true},
+		{name: "unspecified", address: "0.0.0.0:80", blocked: true},
+		{name: "loopback", address: "127.0.0.1:80", blocked: false},
+		{name: "private", address: "192.168.1.1:80", blocked: false},
+		{name: "multicast", address: "224.0.0.251:5353", blocked: false},
 		{name: "public", address: "8.8.8.8:80", blocked: false},
 	}
 
@@ -289,6 +332,7 @@ func TestSSRFSafeDialContext(t *testing.T) {
 		{name: "link-local", address: "169.254.169.254:80", blocked: true},
 		{name: "IPv6 loopback", address: "[::1]:80", blocked: true},
 		{name: "NAT64 loopback", address: "[64:ff9b::7f00:1]:80", blocked: true},
+		{name: "IPv4-translated private", address: "[::ffff:0:a00:1]:80", blocked: true},
 		{name: "localhost 解析结果全为私网", address: "localhost:80", blocked: true},
 	}
 

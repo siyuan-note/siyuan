@@ -65,6 +65,7 @@ export const installStartupError = (target: Window, version: string, timeout = 3
     let language = resolveStartupLanguage(target.navigator.languages || [target.navigator.language]);
     let stage: TStartupStage = "page";
     let failure: {stage: TStartupStage; error: string} | undefined;
+    let runtimeError = "";
     let ready = false;
     let timer: number;
 
@@ -157,8 +158,14 @@ export const installStartupError = (target: Window, version: string, timeout = 3
     const armTimeout = () => {
         target.clearTimeout(timer);
         if (!ready && !failure && !document.hidden) {
-            timer = target.setTimeout(() => fail(`${languages[language].startupTimeout}\n${getStartupReadDiagnostic()}`), timeout);
+            timer = target.setTimeout(() => fail(`${languages[language].startupTimeout}\n${runtimeError}\n${getStartupReadDiagnostic()}`), timeout);
         }
+    };
+    const recordRuntimeError = (error: unknown) => {
+        if (suppressedErrors > 0 || runtimeError) return;
+        // 全局错误可能来自扩展的异步代码，只有启动超时才将其纳入失败诊断。
+        const value = error && typeof error === "object" && "stack" in error ? error.stack : error;
+        runtimeError = String(value || error).slice(0, 16000);
     };
     const setStage = (event: CustomEvent<TStartupStage>) => {
         if (!(event.detail in stageKeys)) return;
@@ -179,11 +186,10 @@ export const installStartupError = (target: Window, version: string, timeout = 3
             if (!/\/stage\/build\/(?:app|desktop|mobile)\//.test(resource.pathname)) return;
             fail(new Error(resource.pathname));
         } else {
-            if (suppressedErrors > 0) return;
-            fail(event.error || `${event.message}\n${event.filename}:${event.lineno}:${event.colno}`);
+            recordRuntimeError(event.error || `${event.message}\n${event.filename}:${event.lineno}:${event.colno}`);
         }
     };
-    const onRejection = (event: PromiseRejectionEvent) => fail(event.reason);
+    const onRejection = (event: PromiseRejectionEvent) => recordRuntimeError(event.reason);
     const onFailure = (event: CustomEvent<unknown>) => fail(event.detail);
     const complete = () => {
         ready = true;

@@ -49,6 +49,7 @@ size-adjust: 85%;
     let capturedTitleImage: boolean;
     let dialog: {element: HTMLElement, resize: () => void};
     let captured: {blob: Blob, width: number, height: number, x: number, y: number};
+    const suspendedColumns = new Set<HTMLElement>();
     const messages: string[] = [];
     let watermarkWidth = 0;
     class ExportDialog {
@@ -96,6 +97,12 @@ size-adjust: 85%;
     const dependencies: Record<string, unknown> = {
         "./imageLayout": layout,
         "./imageFonts": fonts,
+        "../render/av/columnWindow": {suspendAVColumnWindows: (element: HTMLElement) => {
+            check.equal(element, dialog.element.querySelector(".protyle-wysiwyg"));
+            check.equal(suspendedColumns.has(element), false);
+            suspendedColumns.add(element);
+            return () => check.equal(suspendedColumns.delete(element), true);
+        }},
         "../../dialog/mobileDialog": {MobileDialog: ExportDialog},
         "../../dialog/message": {showMessage: (message: string) => messages.push(message), hideMessage: () => {}},
         "../../util/fetch": {fetchPost: (url: string, data: {file: File, excludeTitleImage: boolean, addTitle: boolean}, callback: (response: unknown) => void) => {
@@ -175,6 +182,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
     };
     const verifyCaptured = async () => {
         check.ok(captured, "No PNG captured: " + messages.join("\n"));
+        check.equal(suspendedColumns.size, 0, "capture restores column virtualization");
         const image = new Image();
         const url = URL.createObjectURL(captured.blob);
         try {
@@ -321,6 +329,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         await waitForActions("oversized image");
         check.equal(captured, undefined);
         check.ok(messages.includes("Image too large"), "Oversized image must show a size error");
+        check.equal(suspendedColumns.size, 0, "failed capture restores column virtualization");
         check.equal(large.style.overflow, "");
         large.querySelector<HTMLElement>("table").style.width = "";
         await capture();

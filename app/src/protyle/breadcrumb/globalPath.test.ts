@@ -19,7 +19,7 @@ const fixture = (mobile = false) => {
     let response: any = {code: 0, data: {documents: [documentPath()]}};
     const box = {id: "box", name: "Notebook & name", closed: false, encrypted: false, unlocked: true, state: "Unlocked"};
     const window = {siyuan: {notebooks: [box], config: {editor: {globalBreadcrumb: true}},
-        languages: {untitled: "Untitled", openBy: "Open", loadMore: "Load more"}}};
+        languages: {untitled: "Untitled", _kernel: {16: "Untitled document"}, openBy: "Open", loadMore: "Load more"}}};
     const paths: any = {};
     const dependencies = {
         ...escape,
@@ -29,7 +29,7 @@ const fixture = (mobile = false) => {
     const exports: any = {};
     const navigations: any[] = [];
     runInNewContext(breadcrumbSource, {exports, window, console, require: () => ({
-        ...dependencies, ...paths, isMobile: () => mobile,
+        ...dependencies, ...paths, getBreadcrumbCustomIcon: (): undefined => undefined, isMobile: () => mobile,
         getDocDisplayName: (name: string, empty: boolean) => empty ? "Untitled" : escape.escapeHtmlTextAndAttr(name),
         openFileById: (options: any) => navigations.push(options),
         openMobileFileById: (_app: unknown, id: string) => navigations.push({id}),
@@ -76,6 +76,7 @@ test("disabled mode makes no path request; enabled reads carry the notebook and 
     assert.equal(f.requests.length, 0);
     assert.equal((await f.paths.getGlobalBreadcrumb(blocks, "box", "doc", true)).length, 3);
     assert.equal(f.requests[0].data.notebook, "box");
+    assert.equal(f.requests[0].data.includeIcons, true);
     assert.equal(f.requests[0].data.ids[0], "doc");
     for (const response of [{code: -1}, {code: 0, data: {reason: "indexUnavailable"}},
         {code: 0, data: {documents: [] as ReturnType<typeof documentPath>[]}}]) {
@@ -151,4 +152,40 @@ test("document menus reject stale revisions and late results after lock, navigat
     await assert.rejects(f.breadcrumb.genDocumentMenuItems(f.protyle, "parent", new Set(), 64, "old"), /changed/);
     assert.equal(f.requests[0].data.revision, "old");
     assert.equal(f.requests[0].data.offset, 64);
+});
+
+test("global path icon metadata covers notebooks, ancestors and current documents without changing block icons", async () => {
+    const f = fixture();
+    const blocks = [item("doc"), {...item("heading"), icon: "1f600"}];
+    const icons = {parent: "parent.png", doc: "1f4c4"};
+    const result = f.paths.mergeGlobalBreadcrumb(blocks, documentPath(), "Notebook", "Untitled", "1f4d2", icons);
+    assert.deepEqual(Array.from(result, (value: any) => value.icon), ["1f4d2", "parent.png", "1f4c4", "1f600"]);
+    assert.equal(result[3], blocks[1]);
+    const notebookDocument = {...documentPath(), id: "box", segments: [] as ReturnType<typeof documentPath>["segments"]};
+    assert.equal(f.paths.mergeGlobalBreadcrumb([item("box")], notebookDocument, "Notebook", "Untitled", "1f4d2", icons)[0].icon, "1f4d2");
+    Object.assign(f.box, {icon: "1f4d2"});
+    f.setResponse({code: 0, data: {documents: [documentPath()], icons}});
+    assert.deepEqual(Array.from(await f.paths.getGlobalBreadcrumb(blocks, "box", "doc", true), (value: any) => value.icon),
+        ["1f4d2", "parent.png", "1f4c4", "1f600"]);
+    f.setResponse({code: 0, data: {documents: [documentPath()]}});
+    const legacy = await f.paths.getGlobalBreadcrumb(blocks, "box", "doc", true);
+    assert.equal(legacy[1].icon || "", "");
+    assert.equal(legacy[2].icon || "", "");
+});
+
+test("global breadcrumbs use the document-specific localized fallback only for documents", async () => {
+    for (const title of ["未命名文档", "未命名文件"]) {
+        const f = fixture();
+        f.window.siyuan.languages.untitled = "未命名";
+        f.window.siyuan.languages._kernel[16] = title;
+        const path = documentPath();
+        path.title.empty = true;
+        path.segments[0].empty = true;
+        f.setResponse({code: 0, data: {documents: [path]}});
+        const paragraph = {...item("paragraph", ""), type: "NodeParagraph"};
+        const result = await f.paths.getGlobalBreadcrumb([item("doc"), paragraph], "box", "doc", true);
+        assert.equal(result[1].name, title);
+        assert.equal(result[2].name, title);
+        assert.equal(result[3].name, "");
+    }
 });

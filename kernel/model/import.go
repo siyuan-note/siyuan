@@ -46,7 +46,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/webp"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -2011,7 +2010,7 @@ func parseStdMd(markdown []byte, footnotes bool) (ret *parse.Tree, yfmRootID, yf
 	if first := ret.Root.FirstChild; first != nil && first.Type == ast.NodeYamlFrontMatter {
 		attrs := map[string]any{}
 		if content := first.ChildByType(ast.NodeYamlFrontMatterContent); content != nil {
-			if err := yaml.Unmarshal(content.Tokens, &attrs); err != nil {
+			if err := loadFrontMatter(content.Tokens, &attrs); err != nil {
 				// 无效的元数据按普通 Markdown 解析，保留开头分隔线之间的正文。
 				luteEngine.SetYamlFrontMatter(false)
 				ret = parse.Parse("", markdown, luteEngine.ParseOptions)

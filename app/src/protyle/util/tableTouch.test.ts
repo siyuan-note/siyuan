@@ -7,7 +7,8 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sources: Record<string, string>, css: string) => {
+const browserCases = async (sources: Record<string, string>, css: string, typographyCSS: string,
+                            layoutStyles: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     const nodePath: typeof path = require("node:path");
     const noop = () => {};
@@ -495,6 +496,78 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     for (const touchMode of [true, false]) {
         mobile = touchMode;
         {
+            const typographyStyle = document.createElement("style");
+            typographyStyle.textContent = typographyCSS;
+            document.head.append(typographyStyle);
+            for (const fontSize of [16, 32]) {
+                for (const dark of [false, true]) {
+                    const f = fixture();
+                    f.root.style.width = touchMode ? "360px" : "800px";
+                    f.root.style.setProperty("--b3-font-size-editor", `${fontSize}px`);
+                    f.root.style.setProperty("--b3-theme-surface-lighter", dark ? "#444" : "#ddd");
+                    f.root.style.color = dark ? "#eee" : "#222";
+                    f.root.style.backgroundColor = dark ? "#222" : "#fff";
+                    f.table.removeAttribute("style");
+                    f.table.innerHTML = '<thead><tr><th colspan="2">Before</th><th class="fn__none"></th>' +
+                        '<th colspan="2">After</th><th class="fn__none"></th></tr>' +
+                        "<tr><th>Usage</th><th>Price</th><th>Usage</th><th>Price</th></tr></thead><tbody>" +
+                        "<tr><td>0-360</td><td>2.53</td><td>0-360</td><td>2.91</td></tr>" +
+                        '<tr><td>360-600</td><td>2.78</td><td rowspan="2">360-1100</td><td rowspan="2">3.49</td></tr>' +
+                        '<tr><td>600+</td><td>3.54</td><td class="fn__none"></td><td class="fn__none"></td></tr>' +
+                        "<tr><td></td><td></td><td>1100+</td><td>4.37</td></tr></tbody>";
+                    const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
+                    const heights = () => Array.from(f.table.rows).map(row => row.getBoundingClientRect().height);
+                    const before = heights();
+                    const count = transactions.length;
+                    for (const column of [0, 1]) {
+                        check.equal(f.core.selectCellRange(f.cell(4, column), f.cell(5, column)), true);
+                        f.invoke("openMenu", 0, 0);
+                        const merge = items.find(item => item.label === "mergeCell");
+                        check.equal(merge.disabled, false);
+                        merge.click(undefined, undefined);
+                        check.deepEqual(heights(), before, "staggered vertical merges retain every logical row's height");
+                    }
+                    check.equal(transactions.length, count + 2, "each merge remains a single undoable transaction");
+                    check.equal(before[4], fontSize * 1.625 + 9, "the row minimum follows the editor font size");
+                    check.equal(f.cell(3, 2).rowSpan, 2, "adjacent merged cells retain their span");
+                    check.equal(f.cell(4, 1).rowSpan, 2);
+                    check.equal(f.cell(4, 1).textContent, "3.54");
+                    const preview = document.createElement("div");
+                    preview.className = "b3-typography";
+                    preview.style.lineHeight = "1.625";
+                    f.root.append(preview);
+                    for (const html of [lute.SpinBlockDOM(node.outerHTML),
+                        lute.Md2BlockDOM(lute.BlockDOM2Md(node.outerHTML)), lute.BlockDOM2HTML(node.outerHTML)]) {
+                        preview.innerHTML = html;
+                        check.equal(preview.querySelectorAll("tr").length, 6);
+                        const previewHeights = Array.from(preview.querySelectorAll("tr"))
+                            .map(row => row.getBoundingClientRect().height);
+                        check.ok(previewHeights[0] >= parseFloat(getComputedStyle(preview).fontSize),
+                            "previews and exports keep a visible minimum at their own font size");
+                        check.ok(previewHeights.every(height => height === previewHeights[0]),
+                            "internal and HTML conversions retain every logical row's height");
+                    }
+                    preview.remove();
+                    const row = f.table.rows[4];
+                    for (const height of [12, 90]) {
+                        row.style.height = `${height}px`;
+                        check.equal(row.getBoundingClientRect().height, height, "explicit row heights override the automatic minimum");
+                    }
+                    row.removeAttribute("style");
+                    const multiline = f.cell(2, 0);
+                    multiline.innerHTML = "first<br>second<br>third";
+                    check.ok(f.table.rows[2].getBoundingClientRect().height > before[2],
+                        "multiline content can grow beyond the automatic row height");
+                    const content = document.createRange();
+                    content.selectNodeContents(multiline);
+                    check.ok(content.getBoundingClientRect().bottom <= multiline.getBoundingClientRect().bottom -
+                        parseFloat(getComputedStyle(multiline).paddingBottom), "expanded rows contain their final text line");
+                    f.dispose();
+                }
+            }
+            typographyStyle.remove();
+        }
+        {
             const f = fixture();
             const node = f.table.closest<HTMLElement>('[data-type="NodeTable"]');
             node.setAttribute("custom-pinthead", "true");
@@ -832,13 +905,15 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
                 check.equal(f.touch("[data-action='add-row']").classList.contains("fn__none"), true);
             }
             if (action !== "add-row") {
-                check.equal(column.left + column.width / 2, Math.round(table.right + 18), `${action}: column + follows the right edge during drag`);
+                check.equal(column.left + column.width / 2, Math.round(Math.min(table.right + 18,
+                    f.root.getBoundingClientRect().right - 8)), `${action}: column + follows the visible right edge during drag`);
                 check.equal(column.height, table.height);
             } else {
                 check.equal(f.touch("[data-action='add-column']").classList.contains("fn__none"), true);
             }
             if (action === "add-both") {
-                check.equal(both.left + both.width / 2, Math.round(table.right + 18));
+                check.equal(both.left + both.width / 2, Math.round(Math.min(table.right + 18,
+                    f.root.getBoundingClientRect().right - 8)));
                 check.equal(both.top + both.height / 2, Math.round(table.bottom + 18));
             } else {
                 check.equal(f.touch("[data-action='add-both']").classList.contains("fn__none"), true);
@@ -865,7 +940,9 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             f.root.style.width = "300px";
             pointer(document, "pointermove", x + 180, y + 90);
             await frames(3);
-            check.equal(button.classList.contains("fn__none"), true, "an offscreen right edge does not leave controls over cells");
+            check.equal(button.classList.contains("fn__none"), false, "the add control remains reachable when the right edge leaves the viewport");
+            check.ok(button.getBoundingClientRect().right <= f.root.getBoundingClientRect().right + 1,
+                "the complete control stays inside the editor");
             f.root.style.width = "360px";
             pointer(document, "pointermove", x + 60, y + 90);
             await frames(3);
@@ -1139,7 +1216,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         }
         if (mode !== "row") {
             const rect = column.getBoundingClientRect();
-            check.equal(rect.left + rect.width / 2, Math.round(f.table.getBoundingClientRect().right + 18));
+            check.equal(rect.left + rect.width / 2, Math.round(Math.min(f.table.getBoundingClientRect().right + 18,
+                f.root.getBoundingClientRect().right - 8)));
         }
         pointer(document, "pointercancel", 360, 316, 10);
         await frames(3);
@@ -1398,6 +1476,104 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         f.dispose();
     }
     realStyle.remove();
+    const layoutStyle = document.createElement("style");
+    document.head.append(layoutStyle);
+    for (const [styleName, style] of Object.entries(layoutStyles)) {
+        layoutStyle.textContent = style;
+        mobile = styleName.startsWith("mobile/");
+        for (const width of [280, 360]) {
+            for (const fontSize of [16, 28]) {
+                for (const pinned of [false, true]) {
+                    const f = fixture();
+                    f.root.style.width = `${width}px`;
+                    f.editor.contentEditable = "true";
+                    f.editor.dataset.readonly = "false";
+                    f.editor.style.setProperty("--b3-font-size-editor", `${fontSize}px`);
+                    f.table.style.removeProperty("margin");
+                    f.table.style.width = "600px";
+                    f.table.closest("[data-node-id]").setAttribute("custom-pinthead", String(pinned));
+                    const scroller = f.table.parentElement;
+                    const context = `${styleName}/${width}/${fontSize}/${pinned}`;
+                    const show = () => {
+                        if (mobile) {
+                            f.core.startTouchSelection(f.cell(1, 0));
+                        } else {
+                            const viewport = scroller.getBoundingClientRect();
+                            const event = new PointerEvent("pointermove", {bubbles: true,
+                                clientX: Math.min(viewport.right, f.table.getBoundingClientRect().right) + 5,
+                                clientY: f.cell(1, 0).getBoundingClientRect().top + 10});
+                            scroller.dispatchEvent(event);
+                        }
+                        f.render();
+                        return f.touch(mobile ? "[data-action='add-column']" : "[data-type='add-column']");
+                    };
+                    const add = show();
+                    check.ok(add && !add.classList.contains("fn__none"), context + " offscreen end retains an add control");
+                    const viewport = scroller.getBoundingClientRect();
+                    const addRect = add.getBoundingClientRect();
+                    check.ok(addRect.right <= f.root.getBoundingClientRect().right + 1,
+                        context + " the entire add control fits in the editor");
+                    check.ok(Math.abs(viewport.right - (f.editor.getBoundingClientRect().right - 20)) < 1,
+                        context + " the scroll viewport uses the complete table block width");
+                    check.ok(f.table.getBoundingClientRect().right > viewport.right,
+                        context + " the fixture overflows horizontally");
+                    scroller.scrollLeft = 90;
+                    f.render();
+                    const scrolledAdd = f.touch(mobile ? "[data-action='add-column']" : "[data-type='add-column']");
+                    check.equal(scrolledAdd.getBoundingClientRect().left, addRect.left,
+                        context + " the floating control stays docked during scrolling");
+                    const count = transactions.length;
+                    const firstRow = f.table.rows[0].textContent;
+                    scrolledAdd.click();
+                    check.equal(f.table.rows[0].cells.length, 4, context + " click appends one column");
+                    check.equal(f.table.rows[0].textContent, firstRow, context + " existing columns stay intact");
+                    check.equal(transactions.length, count + 1, context + " adding creates one undo transaction");
+                    check.equal(scroller.scrollLeft, scroller.scrollWidth - scroller.clientWidth,
+                        context + " the appended column is scrolled into view");
+                    check.ok(Math.abs(scroller.getBoundingClientRect().right - f.table.getBoundingClientRect().right - 26) <= 1,
+                        context + " control space appears only at the scroll end");
+                    const endAdd = show();
+                    const endRect = endAdd.getBoundingClientRect();
+                    check.ok(Math.abs(endRect.left + endRect.width / 2 - f.table.getBoundingClientRect().right - 18) <= 1,
+                        context + " controls follow the real edge at the end");
+                    if (width === 360 && fontSize === 28 && !pinned) {
+                        scroller.scrollLeft = 0;
+                        const before = f.table.innerHTML;
+                        const dragCount = transactions.length;
+                        for (const cancel of [true, false]) {
+                            const control = show();
+                            const rect = control.getBoundingClientRect();
+                            const x = rect.left + rect.width / 2;
+                            const y = rect.top + rect.height / 2;
+                            pointer(control, "pointerdown", x, y, 81);
+                            pointer(document, "pointermove", x + 120, y, 81);
+                            f.render();
+                            check.equal(control.classList.contains("fn__none"), false,
+                                context + " dragging from a clipped table keeps the input target visible");
+                            check.ok(control.getBoundingClientRect().right <= f.root.getBoundingClientRect().right + 1,
+                                context + " dragging keeps the floating control inside the editor");
+                            pointer(document, cancel ? "pointercancel" : "pointerup", x + 120, y, 81);
+                            if (cancel) {
+                                check.equal(f.table.innerHTML, before, context + " cancel restores all table contents");
+                                check.equal(transactions.length, dragCount, context + " cancel creates no transaction");
+                                check.equal(scroller.scrollLeft, 0, context + " cancel keeps the scroll position");
+                            } else {
+                                check.equal(f.table.rows[0].cells.length, 6, context + " drag appends to the whole table");
+                                check.equal(transactions.length, dragCount + 1, context + " drag commits once");
+                                check.equal(scroller.scrollLeft, scroller.scrollWidth - scroller.clientWidth,
+                                    context + " completing a drag reveals the new columns");
+                                control.click();
+                                check.equal(f.table.rows[0].cells.length, 6,
+                                    context + " the click following a drag cannot append an extra column");
+                            }
+                        }
+                    }
+                    f.dispose();
+                }
+            }
+        }
+    }
+    layoutStyle.remove();
     menuElement.remove();
     menuScrim.remove();
     fixtureStyle.remove();
@@ -1421,6 +1597,13 @@ test("desktop and mobile table selection, resize feedback and gesture cancellati
         {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const css = require("sass").compile(path.resolve("src/assets/scss/protyle/_protyle.scss"),
         {silenceDeprecations: ["legacy-js-api"]}).css;
+    const typographyCSS = require("sass").compile(path.resolve("src/assets/scss/component/_typography.scss")).css;
+    const sass = require("sass");
+    const layoutStyles = Object.fromEntries(["base", "mobile"].flatMap(entry => {
+        const styles = sass.compile(path.resolve(`src/assets/scss/${entry}.scss`), {logger: sass.Logger.silent}).css;
+        return ["daylight", "midnight"].map(theme => [`${entry}/${theme}`, styles + "\n" +
+            readFileSync(path.resolve(`appearance/themes/${theme}/theme.css`), "utf8")]);
+    }));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-touch-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -1431,10 +1614,11 @@ app.whenReady().then(async () => {
         nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false,
     }});
     try {
-        await win.loadURL("data:text/html,<html><body></body></html>");
+        await win.loadURL("data:text/html,<!DOCTYPE html><html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(path.resolve("stage/protyle/js/lute/lute.min.js"))}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-            browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(css) + ").catch(error => { throw new Error(error.stack || String(error)); })")}));
+            browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(css) + "," +
+            JSON.stringify(typographyCSS) + "," + JSON.stringify(layoutStyles) + ").catch(error => { throw new Error(error.stack || String(error)); })")}));
         win.destroy();
         app.exit(0);
     } catch (error) {

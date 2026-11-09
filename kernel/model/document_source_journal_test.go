@@ -15,6 +15,23 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestNotebookDocumentSourceJournalPath(t *testing.T) {
+	box := ast.NewNodeID()
+	for _, file := range []*documentSourceFile{
+		{Kind: "notebook", Box: box, Path: "/.siyuan/conf.json"},
+		{Kind: "notebook", Box: "../" + box, Path: "/.siyuan/conf.json"},
+		{Kind: "notebook", Box: box, Path: "/.siyuan/../conf.json"},
+		{Kind: "notebook", Box: box, Path: "/.siyuan/crypt-backup.json"},
+		{Kind: "notebook", Box: "", Path: "/.siyuan/conf.json"},
+	} {
+		filename, err := file.filename()
+		valid := file.Box == box && file.Path == "/.siyuan/conf.json"
+		if valid != (err == nil) || valid && filename != filepath.Join(util.DataDir, box, ".siyuan", "conf.json") {
+			t.Fatalf("unexpected notebook recovery path: %+v, %q, %v", file, filename, err)
+		}
+	}
+}
+
 func TestDocumentSourceJournalConcurrentScanAndWrites(t *testing.T) {
 	oldQueue := util.QueueDir
 	util.QueueDir = t.TempDir()

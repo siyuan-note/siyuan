@@ -18,10 +18,12 @@ describe("semantic inline markers", () => {
         assert.equal(marker.getInlinePlaceholder("strong code"), Constants.WORD_JOINER);
     });
 
-    it("recognizes code, tag and kbd in compound inline types", () => {
+    it("recognizes code, tag, kbd and scripts in compound inline types", () => {
         assert.equal(marker.hasSemanticInlineType("strong code"), true);
         assert.equal(marker.hasSemanticInlineType("tag"), true);
         assert.equal(marker.hasSemanticInlineType("em kbd"), true);
+        assert.equal(marker.hasSemanticInlineType("sup"), true);
+        assert.equal(marker.hasSemanticInlineType("strong sub"), true);
         assert.equal(marker.hasSemanticInlineType("strong em"), false);
     });
 
@@ -37,7 +39,7 @@ describe("semantic inline markers", () => {
     });
 
     it("builds canonical spans with external boundaries after ordinary text", () => {
-        for (const type of ["code", "tag", "kbd"] as const) {
+        for (const type of ["code", "tag", "kbd", "sup", "sub"] as const) {
             const html = "before" + marker.buildSemanticInlineHTML(type, "value") + "after";
             assert.equal(html, `before\u200b<span data-type="${type}">\u2060value</span>\u200bafter`);
         }

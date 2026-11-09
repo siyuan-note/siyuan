@@ -252,6 +252,32 @@ export const ensureAVTableBoundaryRow = (blockElement: HTMLElement, direction: "
     }
 };
 
+export const ensureAVTableRow = (blockElement: HTMLElement, rowID: string, groupID: string) => {
+    const body = Array.from(blockElement.querySelectorAll<HTMLElement>(".av__body"))
+        .find(item => item.closest(".av") === blockElement && (item.dataset.groupId || "") === groupID &&
+            !item.classList.contains("fn__none"));
+    if (!body || !blockElement.isConnected) return;
+    const view = getBodyData(body) as IAVTable;
+    const index = view?.rows?.findIndex(row => row.id === rowID) ?? -1;
+    if (index < 0) return;
+    const findRow = () => Array.from(body.querySelectorAll<HTMLElement>(".av__row[data-id]"))
+        .find(row => row.dataset.id === rowID);
+    const existing = findRow();
+    if (existing) return existing;
+    const state = bodyStates.get(body);
+    if (!state || state.view !== view) return;
+    const rowHeight = Math.max(state.rowHeight || 36, 1);
+    const viewportHeight = (getBacklinkScrollElement(blockElement) ||
+        dataStore.get(blockElement)?.protyle.contentElement)?.clientHeight || rowHeight;
+    const top = state.rowHeights ? state.rowHeights.offset(index) : index * rowHeight;
+    if (rebuildTableWindow(body, state, getGroupTableViewportWindow({
+        dataStart: state.dataOffset, dataEnd: state.dataOffset + view.rows.length - 1,
+        bodyTop: 0, headerHeight: 0, rowHeight, viewportTop: top, viewportBottom: top + viewportHeight,
+        bufferRatio: blockElement.dataset.avType === "table" && getTableBufferRatio(view) < 1 ? getTableBufferRatio(view) : undefined,
+        rowHeights: state.rowHeights,
+    }))) return findRow();
+};
+
 const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     const localScroller = getBacklinkScrollElement(blockElement);
     if (localScroller) {

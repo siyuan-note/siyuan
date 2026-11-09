@@ -56,7 +56,7 @@ test("database rows and template loading indicators render before the HTTP resul
     assert.ok(f.indicators.every(indicator => indicator.removed));
 });
 
-test("views awaiting template sorting or filtering show a loading indicator without provisional rows", async () => {
+test("views awaiting template filtering show a loading indicator without provisional rows", async () => {
     const f = fixture(false, false, false);
     const pending = f.run();
     await new Promise(resolve => setImmediate(resolve));

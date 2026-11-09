@@ -34,6 +34,7 @@ type DocumentTitleData struct {
 // expectedRevision 必须匹配当前语义源版本，撤销快照由内核生成，不接受客户端伪造快照。
 // 可无损还原的普通文字保存为纯文本标题；行级格式、资源、引用及换行保留完整标题源。
 // TransactionDocumentTitle 的版本冲突返回响应 code=-409；调用方必须保留草稿并重新读取标题。
+// 支持笔记本文档；完整源保存在文档中，笔记本名称同步为纯文本摘要，空摘要使用无标题名称。
 type TransactionDocumentTitle struct {
 	BlockDOM         *string              `json:"blockDOM,omitempty" api:"optional,nonnullable"`
 	Source           *DocumentTitleSource `json:"source,omitempty" api:"optional,nonnullable"`

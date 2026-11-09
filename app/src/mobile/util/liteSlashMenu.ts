@@ -26,7 +26,7 @@ export const prependFrequentSlashButtons = (container: HTMLElement, buttons: HTM
     container.prepend(group, separator);
 };
 
-export const getLiteSlashMenuHTML = (items: IHintData[]) => {
+export const getLiteSlashMenuHTML = (items: IHintData[], androidImages = false) => {
     const menu = document.createElement("div");
     const hasFrequentItems = items.some(item => (item as TSlashMenuItem).entryKey === "__frequent_separator__");
     let group: HTMLElement;
@@ -87,6 +87,24 @@ export const getLiteSlashMenuHTML = (items: IHintData[]) => {
         button.appendChild(text);
         // 附件控件保留在按钮内，继续由候选面板绑定上传事件。
         button.append(...uploads);
+        if (item.id === "insertAsset" && uploads.length > 0 && androidImages) {
+            [
+                {icon: "iconImage", label: window.siyuan.languages.insertImage, photos: true},
+                {icon: "iconCamera", label: window.siyuan.languages.insertPhoto, photos: false},
+            ].forEach(action => {
+                const nativeButton = button.cloneNode(true) as HTMLButtonElement;
+                nativeButton.querySelector(".keyboard__slash-text").textContent = action.label;
+                nativeButton.querySelector("use")?.setAttribute("xlink:href", "#" + action.icon);
+                const input = nativeButton.querySelector("input");
+                input.accept = action.photos ? "image/*,application/x-siyuan-image-picker" : "image/*";
+                if (action.photos) {
+                    input.dataset.nativePhotos = "true";
+                } else {
+                    input.setAttribute("capture", "user");
+                }
+                group.appendChild(nativeButton);
+            });
+        }
         group.appendChild(button);
     });
     return menu.innerHTML;

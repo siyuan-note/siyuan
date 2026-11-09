@@ -13,6 +13,8 @@ const compile = source => ts.transpileModule(source, {
 }).outputText;
 const lifecycleExports = {};
 runInNewContext(compile(lifecycleSource), {exports: lifecycleExports, setTimeout, clearTimeout, queueMicrotask});
+const ownerExports = {};
+runInNewContext(compile(readFileSync(path.resolve(__dirname, "../src/plugin/customTabOwner.ts"), "utf8")), {exports: ownerExports});
 
 const deferred = () => {
     let resolve;
@@ -24,6 +26,7 @@ const createHost = ({mobile = false, settingsWindow = false, names = ["alpha", "
     onWrite = () => {}, padding = ""} = {}) => {
     const app = {plugins: []};
     const calls = [];
+    const catalogRequests = [];
     const events = [];
     const errors = [];
     let nextResponse;
@@ -49,13 +52,17 @@ const createHost = ({mobile = false, settingsWindow = false, names = ["alpha", "
             "module.exports = class extends require(\"siyuan\").Plugin {};") + `\n/*${padding}*/`,
     }));
     const dependencies = {
-        Plugin, ...lifecycleExports,
+        Plugin, ...lifecycleExports, ...ownerExports,
         getHostCapabilities: () => ({plugins: permitted}),
         isSettingsWindow: () => settingsWindow,
         isWindow: () => false,
         isMobile: () => mobile,
         getFrontend: () => mobile ? "browser-mobile" : "browser-desktop",
         fetchSyncPost: async (url, request) => {
+            if (url === "/api/bazaar/getInstalledPlugin") {
+                catalogRequests.push(request);
+                return {code: 0, data: {packages: names.map(name => ({name}))}};
+            }
             assert.equal(url, "/api/petal/loadPetals");
             const data = catalog.filter(item => request.names === undefined || request.names.includes(item.name));
             const response = {code: 0, data};
@@ -71,6 +78,7 @@ const createHost = ({mobile = false, settingsWindow = false, names = ["alpha", "
         getAllEditor: () => [],
         beginPluginTeardown() {}, markPluginDisposed() {},
         destroyPlugin: (owner, instance) => { owner.plugins = owner.plugins.filter(item => item !== instance); },
+        destroyPluginByName: (_owner, name) => events.push(`disposeMissing:${name}`),
         deactivateCustomBlockPlugin() {}, activateCustomBlockPlugin() {},
         saveLayout() {}, applyTopBarEntryVisibility() {}, resizeTopBar() {}, ensureLute() {},
         refreshDockCatalog() {}, dispatchMobilePluginDocksChange() {},
@@ -83,7 +91,7 @@ const createHost = ({mobile = false, settingsWindow = false, names = ["alpha", "
         window: {eval: code => runInNewContext(code), siyuan: {layout: {}}},
         document: {getElementById: () => ({remove() {}, insertAdjacentElement() {}})},
     });
-    return {app, calls, events, catalog, exports, errors,
+    return {app, calls, catalogRequests, events, catalog, exports, errors,
         setPermitted(value) { permitted = value; },
         pauseNextResponse() {
             nextResponse = {entered: deferred(), release: deferred()};
@@ -96,6 +104,21 @@ const createHost = ({mobile = false, settingsWindow = false, names = ["alpha", "
         },
     };
 };
+
+for (const options of [{mobile: false, settingsWindow: false}, {mobile: true, settingsWindow: false},
+    {mobile: false, settingsWindow: true}]) {
+    test(`custom tab catalogs are read only by desktop tab hosts (${JSON.stringify(options)})`, async () => {
+        const host = createHost(options);
+        await host.init();
+        const expected = options.mobile || options.settingsWindow ? 0 : 1;
+        assert.equal(host.catalogRequests.length, expected);
+        await host.exports.refreshPlugins(host.app);
+        assert.equal(host.catalogRequests.length, expected * 2);
+        await host.exports.loadPlugins(host.app, ["alpha"], false);
+        assert.equal(host.catalogRequests.length, expected * 2, "named loads reuse the known catalog");
+        assert.deepEqual(host.errors, []);
+    });
+}
 
 for (const mobile of [false, true]) {
     test(`targeted data reloads fetch only their resources and preserve other instances (mobile=${mobile})`, async () => {

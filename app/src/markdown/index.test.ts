@@ -12,7 +12,8 @@ const complete = section("    const completeSwitch =", "    const openTreeFile =
 const actions = section("    const runAction =", "    const action =");
 const command = section("    const command =", "    unsubscribeInitialization();");
 
-const setup = () => {
+const setup = (withAppearance = false) => {
+    const appliedAppearances: unknown[] = [];
     const renders: unknown[] = [];
     const callbacks: Array<Record<string, (...args: any[]) => any>> = [];
     const editors: Array<{destroyed: boolean; destroy(): void}> = [];
@@ -22,9 +23,10 @@ const setup = () => {
     let failEditor = false;
     let resolveResource: (value: string) => void;
     const resource = new Promise<string>(resolve => {resolveResource = resolve;});
-    const element = {className: "", inert: true, textContent: "", replaceChildren() {}, setAttribute() {}};
+    const element = {className: "", inert: true, textContent: "", style: {setProperty() {}}, replaceChildren() {}, setAttribute() {}};
     const bridge = {
         host: {}, resolveResource: () => resource, openLink: async (url: string) => {openedLinks.push(url);},
+        appearance: withAppearance ? async (): Promise<undefined> => undefined : undefined,
         preferences: async (patch: Partial<import("./bridge").MarkdownPreferences>) => {preferenceWrites.push({...patch});},
         tree: {commitOpen: async () => snapshot("b")}, bootstrap: async () => snapshot("b"),
         respond: async (_id: string, accepted: boolean) => {responses.push(accepted);},
@@ -51,14 +53,16 @@ const setup = () => {
         modeChoice: {setValue() {}}, tree: {syncSelection: async () => {}, refresh: async () => {}},
         windowChrome: undefined as undefined, checkpointBackground: async () => {throw new Error("Unready editor must not checkpoint");},
         applyTheme: async () => {}, protectExit: async () => {throw new Error("Unready editor must not close");},
+        fontAppearance: {apply: (value: unknown) => appliedAppearances.push(value)}, workspaceChoices() {},
     };
     // 执行实际生命周期函数，只替换编辑器、宿主和界面边界；无显示服务器时也能验证异步流程。
     const body = transpileModule(`
-        let bootstrap, editor, session, autoSave, pendingSwitch, switchTask, pendingFileAction;
+        let bootstrap, editor, session, autoSave, pendingSwitch, switchTask, pendingFileAction, appearance, appearanceMenu;
         let disposed = false, initializationClosing = false, documentGeneration = 0, targetGeneration = 0;
         let actionMessage = "", resourceUnavailable = false, editPending = false, sourceOnly = false, history;
         let outline = {enabled: false, visible: false, available: false};
         let preferences = {mode: "ir", theme: "light"}, systemDark = false, preparing = false, prepared = false;
+        const appearanceTheme = () => preferences.theme;
         let activeMode = preferences.mode;
         let switching = true, frozen = true, exitSequence = 0, switchFailed = false;
         const freeze = value => {frozen = value;};
@@ -70,10 +74,20 @@ const setup = () => {
             state: () => ({editor, session, pendingSwitch, frozen, documentGeneration, history, outline, resourceUnavailable, preferences, activeMode, actionMessage, switchFailed})};
     `, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const lifecycle = new Function("deps", `with (deps) { ${body} }`)(deps);
-    return {lifecycle, callbacks, editors, renders, responses, bridge, resolveResource, preferenceWrites, openedLinks,
+    return {lifecycle, callbacks, editors, renders, responses, bridge, resolveResource, preferenceWrites, openedLinks, appliedAppearances,
         failEditor(value: boolean) {failEditor = value;}};
 };
 const snapshot = (sessionId: string) => ({sessionId, content: sessionId + "\n", lang: "en", preferences: {mode: "ir", theme: "light"}});
+
+test("document replacement refreshes session-bound workspace font grants", async () => {
+    const {lifecycle, appliedAppearances} = setup(true);
+    const appearance = {fontSize: 20, customFonts: [{url: "siyuan-markdown://first/appearance-font/first-token"}]};
+    await lifecycle.initializeDocument({...snapshot("first"), appearance});
+    const next = {fontSize: 24, customFonts: [{url: "siyuan-markdown://second/appearance-font/second-token"}]};
+    await lifecycle.initializeDocument({...snapshot("second"), appearance: next});
+    assert.deepEqual(appliedAppearances, [appearance, next]);
+    assert.equal(lifecycle.state().session.getState().sessionId, "second");
+});
 
 test("the Markdown footer stays hidden during normal editing, saving and switching but exposes actionable problems", () => {
     const controls = new Map<string, {textContent: string; hidden: boolean; dataset: Record<string, string>; setAttribute(): void}>();

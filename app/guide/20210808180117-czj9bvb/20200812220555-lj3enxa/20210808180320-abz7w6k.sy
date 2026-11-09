@@ -7,7 +7,7 @@
 		"id": "20210808180320-abz7w6k",
 		"title": "编辑器",
 		"type": "doc",
-		"updated": "20261101145217"
+		"updated": "20261107224449"
 	},
 	"Children": [
 		{
@@ -445,7 +445,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-5ii2y6n",
-				"updated": "20261024164212"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -494,6 +494,92 @@
 				{
 					"Type": "NodeText",
 					"Data": "清空搜索后，可点击列标题或停靠栏分组标题上的重置图标重置该层级。重置全部排序时，桌面端可点击“位置”列标题右侧的刷新图标，提示为“重置全部排序”；移动端可点击底部的重置全部排序按钮。确认后保存，取消则放弃修改。重置排序会保留显隐和停靠栏入口所在位置，重置后的层级持续跟随后续版本的默认排序。"
+				}
+			]
+		},
+		{
+			"ID": "20261107104457-oh9rxn2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107104457-oh9rxn2",
+				"updated": "20261107224449"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端和移动端打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "菜单和按钮的显隐与排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，编辑自定义方案并选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 分类，可分别隐藏引用搜索候选中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建子文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "选择位置新建文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，三项默认显示。保存并启用方案后生效。"
 				}
 			]
 		},

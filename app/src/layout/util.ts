@@ -32,6 +32,7 @@ import {newDatabaseRowModel} from "../editor/databaseRow";
 import {showDatabaseRowPreview} from "../protyle/render/av/openDatabaseRow";
 import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
+import {resolveCustomModelFactory} from "../plugin/customTabOwner";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {
     isDisabledFeature,
@@ -50,10 +51,6 @@ import {stickyRow} from "../protyle/render/av/row";
 import {flushSettingSaves, settingSaveFailures} from "../config/setting/pending";
 import {clearReloadSnapshot, consumeReloadSnapshot, removeLayoutScroll, saveReloadSnapshot} from "./reloadSnapshot";
 import {syncMarkdownKeymap} from "../markdown/keymapSync";
-
-const isBuiltInCustomModel = (type: string) => {
-    return type === "siyuan-card" || type === "siyuan-database-row";
-};
 
 export const isSensitiveTab = (tab: Tab) => {
     if (tab.model instanceof Editor) {
@@ -665,30 +662,6 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             }
         });
     }
-    // 移除没有插件的 tab
-    document.querySelectorAll('li[data-type="tab-header"]').forEach((item: HTMLElement) => {
-        const initData = item.getAttribute("data-initdata");
-        if (initData) {
-            const initDataObj = JSON.parse(initData);
-            if (initDataObj.instance === "Custom" && !isBuiltInCustomModel(initDataObj.customModelType)) {
-                let hasPlugin = false;
-                app.plugins.find(plugin => {
-                    if (Object.keys(plugin.models).includes(initDataObj.customModelType)) {
-                        hasPlugin = true;
-                        return true;
-                    }
-                });
-                if (!hasPlugin) {
-                    const tabId = item.getAttribute("data-id");
-                    const tab = getInstanceById(tabId) as Tab;
-                    if (tab) {
-                        tab.parent.removeTab(tabId, false, false, false);
-                    }
-                }
-            }
-        }
-    });
-
     const info = parseUriInfo();
     if (info.id && openStandaloneDatabaseItemByURI(app, info)) {
         // 独立条目链接不需要打开数据库所在文档。
@@ -1032,15 +1005,24 @@ export const newModelByInitData = (app: App, tab: Tab, json: any, afterInitProty
                 data: json.customModelData,
             });
         } else {
-            app.plugins.find(item => {
-                if (item.models[json.customModelType]) {
-                    model = item.models[json.customModelType]({
-                        tab: tab,
-                        data: json.customModelData
-                    });
-                    return true;
-                }
-            });
+            const factory = resolveCustomModelFactory(app, json.customModelType, tab);
+            if (factory) {
+                tab.panelElement.replaceChildren();
+                model = factory({tab, data: json.customModelData});
+            } else {
+                // 工厂可能延迟注册，或插件暂未启用；保留原始数据以便就绪后重试。
+                tab.headElement.setAttribute("data-initdata", JSON.stringify(json));
+                const empty = document.createElement("div");
+                empty.className = "b3-list--empty";
+                const tip = document.createElement("p");
+                tip.textContent = window.siyuan.languages.pluginTabUnavailable;
+                const retry = document.createElement("button");
+                retry.className = "b3-button b3-button--outline";
+                retry.textContent = window.siyuan.languages.retry;
+                retry.addEventListener("click", () => tab.parent.switchTab(tab.headElement));
+                empty.append(tip, retry);
+                tab.panelElement.replaceChildren(empty);
+            }
         }
     } else if (json.instance === "Editor") {
         if (json.rootId === json.blockId && json.action) {

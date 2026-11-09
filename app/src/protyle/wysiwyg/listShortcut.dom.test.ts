@@ -33,6 +33,7 @@ const browserCases = async (source: string) => {
         setInsertWbrHTML: noop, getAtomicVerticalNavigationOwner: noop, revealTabsForTarget: noop,
         formatPainter: {deactivate: () => false},
         isMac: () => false,
+        isInIOS: () => false,
         isProtyleListItemFragment: () => false,
         getAdjacentVisibleBlock: (element: Element) => element.previousElementSibling,
         hideElements: (panels: string[]) => {
@@ -150,7 +151,8 @@ test("keyboard and gutter selection route all three mindmap list shortcuts to th
     };
     const source = transpileModule([
         extract("../util/hasClosest"), extract("getBlock"),
-        extract("../../util/keymapBindings"), extract("../util/hotKey", ["matchHotKey", "matchAuxiliaryHotKey"]),
+        extract("../../util/keymapBindings"), extract("../../util/shortcut"),
+        extract("../util/hotKey", ["matchHotKey", "matchAuxiliaryHotKey"]),
         extract("../util/compatibility", ["isNotCtrl", "isOnlyMeta"]),
         `const {BLOCK_SELECTION_CLASS, getBlockSelectionModeElement, setBlockSelectionModeElement,
             clearBlockSelectionMode, getBlockOperationElements, getBlockSelectionStatusIDs} = (() => {${extract("blockSelection")}
@@ -168,7 +170,7 @@ test("keyboard and gutter selection route all three mindmap list shortcuts to th
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false}});
     try {
         await win.loadURL("about:blank");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(expression)}));

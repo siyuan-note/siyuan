@@ -118,20 +118,30 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         return {owner, queue, element, wysiwyg, table, range};
     };
     let tableExitTarget: HTMLElement;
+    let adjacentCell: HTMLTableCellElement;
+    const caretScrolls: {owner: IProtyle, direction: string}[] = [];
     let serializations = 0;
     const editorDependencies = {
         ...dependencies, ...api, TABLE_CELL_INLINE_ATTRIBUTE: "data-sy-table-cell-inline",
+        scheduleCaretScroll: (owner: IProtyle, direction: string) => caretScrolls.push({owner, direction}),
         serializeTableCellRich: (html: string) => {
             serializations++;
             return api.serializeTableCellRich(html);
         },
-        TABLE_CELL_RICH_ATTRIBUTE: "data-sy-table-cell-rich", TABLE_CELL_SLASH_IDS: new Set(),
+        TABLE_CELL_RICH_ATTRIBUTE: "data-sy-table-cell-rich", filterTableCellSlashMenuItems: (items: IHintData[]) => items,
         hintRef: noop, hintTag: noop, registerBuiltinSlashHint: (callback: unknown) => callback,
         getDefaultToolbar: (): string[] => [], updateOutlineCurrentBlock: noop,
         setMobileToolbarUndo: noop, setTableCellRichContext: noop, bindTableCellRichDrag: noop,
         bindLiteCodeActions: noop, highlightRender: noop, renderTableCellRichElements: noop,
         isTableCellCaretAtBoundary: () => true,
-        getAdjacentRichTableCell: (): undefined => undefined,
+        getAdjacentRichTableCell: () => adjacentCell,
+        focusEditableAtGoalX: (element: Element) => {
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            range.collapse(true);
+            focusByRange(range);
+            return true;
+        },
         getCaretGoalX: () => 80,
         leaveRichTableCell: () => {
             if (!tableExitTarget) {
@@ -1086,13 +1096,31 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         check.ok(cells[1].querySelector(".table__cell-editor"));
         await finish(element);
     }
+    for (const key of ["ArrowUp", "ArrowDown"]) {
+        const {owner, element, table} = fixture();
+        const cells = table.querySelectorAll("td");
+        await open(owner, cells[0]);
+        adjacentCell = cells[1];
+        caretScrolls.length = 0;
+        cells[0].querySelector(".table__cell-editor").dispatchEvent(
+            new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true}));
+        await tick();
+        check.ok(cells[1].querySelector(".table__cell-editor"));
+        check.equal(caretScrolls.length, 1);
+        check.ok(fragmentOwners.has(caretScrolls[0].owner));
+        check.equal(caretScrolls[0].direction, key === "ArrowUp" ? "up" : "down");
+        adjacentCell = undefined;
+        await finish(element);
+    }
     for (const key of ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]) {
         const {owner, element, table, wysiwyg} = fixture();
         const cell = table.querySelector("td");
         await open(owner, cell);
         const host = cell.querySelector<HTMLElement>(".table__cell-editor");
+        caretScrolls.length = 0;
         host.dispatchEvent(new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true}));
         check.ok(cell.querySelector(".table__cell-editor"), "no adjacent region keeps editing active");
+        check.equal(caretScrolls.length, 0);
         tableExitTarget = document.createElement("div");
         tableExitTarget.contentEditable = "true";
         tableExitTarget.textContent = "Outside";
@@ -1105,6 +1133,8 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         check.ok(cell.textContent.includes("Saved before leaving"));
         check.ok(tableExitTarget.contains(getSelection().anchorNode));
         check.ok(tableExitTarget.contains(owner.toolbar.range.startContainer));
+        check.deepEqual(caretScrolls, key === "ArrowUp" || key === "ArrowDown" ?
+            [{owner, direction: key === "ArrowUp" ? "up" : "down"}] : []);
         tableExitTarget = undefined;
         await finish(element);
     }

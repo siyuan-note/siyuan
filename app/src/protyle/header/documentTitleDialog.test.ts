@@ -36,7 +36,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         dialogs: [] as any[], mobile: {size: {isLandscape: false, portrait: {height1: 800}, landscape: {height1: 390}}},
         layout: {}, blockPanels: [] as any[], ws: {app: {}},
         config: {readonly: false}, isPublish: false,
-        languages: {rename: "Rename", confirm: "Confirm", settingsPendingSaveError: "Save failed"},
+        languages: {rename: "Rename", confirm: "Confirm", cancel: "Cancel", settingsPendingSaveError: "Save failed"},
     }};
     let canDrag: () => boolean;
     const messages: string[] = [];
@@ -96,6 +96,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         editors: any;
         host = new ElementMock();
         confirm = new ElementMock();
+        cancel = new ElementMock();
         destroyed = false;
         viewport = {style: {top: "", bottom: "", height: ""}, isConnected: true, classList: {add() {}}};
         sheet = {style: {height: "", maxHeight: ""}, classList: {add() {}, toggle() {}}, getBoundingClientRect: () => ({height:
@@ -106,7 +107,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         element = {dataset: {}, isConnected: true, classList: {add: (name: string) => this.classes.add(name)},
             querySelector: (selector: string) => selector === ".b3-dialog" ? this.viewport :
                 selector === ".mobile-document-title-sheet" ? this.sheet :
-                selector === ".document-title-dialog" ? this.host : this.confirm};
+                selector === ".document-title-dialog" ? this.host : selector === '[data-type="cancel"]' ? this.cancel : this.confirm};
         constructor(public options: {beforeClose: () => boolean, destroyCallback: () => void,
             width?: string, height?: string, containerClassName?: string, hideCloseIcon?: boolean}) {
             window.siyuan.dialogs.push(this);
@@ -234,14 +235,28 @@ test("a closing title drawer ignores late editor readiness and source focus", as
 });
 
 for (const mobile of [false, true]) {
+    test(`${mobile ? "mobile" : "desktop"} rename can cancel its retained draft after confirmation fails`, async () => {
+        const state = setup(mobile);
+        let writes = 0;
+        state.setFlush(async () => { writes++; throw new Error("Save failed"); });
+        const dialog = state.open();
+        dialog.confirm.listeners.get("click")();
+        await settle();
+        assert.equal(dialog.destroyed, false);
+        assert.equal(state.messages.length, 1);
+        dialog.cancel.listeners.get("click")();
+        assert.equal(dialog.destroyed, true);
+        assert.equal(dialog.host.content, "");
+        assert.equal(writes, 1, "cancellation must not retry the failed save");
+    });
+
     test(`${mobile ? "mobile" : "desktop"} rename dismissal discards its draft without saving`, async () => {
         const state = setup(mobile);
         let writes = 0;
         state.setFlush(async () => { writes++; });
         state.setTitle(async () => { writes++; });
         const dialog = state.open();
-        if (mobile) await state.closeSheet();
-        else dialog.destroy();
+        dialog.cancel.listeners.get("click")();
         await settle();
         assert.equal(dialog.destroyed, true);
         assert.equal(dialog.host.content, "");
@@ -260,6 +275,7 @@ for (const mobile of [false, true]) {
         dialog.confirm.listeners.get("click")();
         if (mobile) assert.equal(state.canDrag(), false);
         dialog.confirm.listeners.get("click")();
+        dialog.cancel.listeners.get("click")();
         dialog.destroy();
         if (mobile) await state.closeSheet();
         assert.equal(writes, 1);
@@ -464,7 +480,7 @@ test("desktop title editing retains the centered dialog without mobile viewport 
     assert.equal(state.resizeListeners.size, 0);
 });
 
-test("mobile rename readiness mounts one standalone field and rejects late readiness after dismissal", () => {
+test("rename readiness mounts one standalone field on both platforms and rejects late readiness after dismissal", () => {
     const mobile = setup(true);
     const dialog = mobile.open();
     mobile.afters[0]();
@@ -479,7 +495,7 @@ test("mobile rename readiness mounts one standalone field and rejects late readi
     const desktop = setup(false);
     const desktopDialog = desktop.open();
     desktop.afters[0]();
-    assert.equal(desktopDialog.host.children.length, 0, "desktop keeps its existing title layout");
+    assert.equal(desktopDialog.host.children.length, 1, "desktop mounts the same standalone field");
 });
 
 for (const sheetFirst of [true, false]) {
@@ -562,7 +578,7 @@ test("failed mobile title loading and desktop readiness never request the mobile
 });
 
 const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSource: string, titleSource: string,
-                                lifecycleSources: string[]) => {
+                                lifecycleSources: string[], desktopCSS: string) => {
     const check: typeof assert = require("node:assert/strict");
     const {paddingElement, setUndo} = new Function(toolbarSource +
         "\nreturn {paddingElement: getMobileToolbarPaddingElement, setUndo: setMobileToolbarUndo};")() as {
@@ -581,7 +597,9 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
 <div class="protyle-title__rich protyle"><div class="protyle-content"><div class="protyle-wysiwyg">
 <div data-node-id="title-paragraph" data-type="NodeParagraph" class="p"><div class="protyle-title__input" contenteditable="true"></div><div class="protyle-attr">Paragraph badge</div></div>
 </div></div></div></div></div><div class="protyle-wysiwyg">Hidden document body</div></div></div>
-<div class="b3-dialog__action"><button class="b3-button b3-button--text">Confirm</button></div></div></div></div></div>`;
+<div class="b3-dialog__action mobile-sheet-action-bar"><div class="mobile-sheet-action-group mobile-sheet-action-group--compact">
+<button class="b3-button b3-button--touch b3-button--wrap b3-button--cancel b3-button--secondary">Cancel</button>
+<button class="b3-button b3-button--touch b3-button--wrap">Confirm</button></div></div></div></div></div></div>`;
     const container = document.querySelector<HTMLElement>(".b3-dialog");
     const sheet = document.querySelector<HTMLElement>(".mobile-document-title-sheet");
     const host = document.querySelector<HTMLElement>(".document-title-dialog");
@@ -662,9 +680,10 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
                 paddingElement(fragment)?.style.setProperty("padding-bottom", padding);
                 const gap = sheet.getBoundingClientRect().bottom - action.getBoundingClientRect().bottom;
                 check.ok(gap < 1, `keyboard padding cannot create a gap below Confirm: ${theme}, ${height}, ${padding}, gap=${gap}`);
-                check.equal(getComputedStyle(field).backgroundColor, getComputedStyle(host).backgroundColor,
-                    "the standalone input follows the editor background in both themes");
-                check.equal(getComputedStyle(fragment.element).backgroundColor, getComputedStyle(host).backgroundColor);
+                check.equal(getComputedStyle(host).backgroundColor, "rgba(0, 0, 0, 0)",
+                    "the field surroundings reveal the dialog surface in both themes");
+                check.equal(getComputedStyle(field).backgroundColor, getComputedStyle(fragment.element).backgroundColor,
+                    "the rich editor follows the shared input background");
             }
         }
     }
@@ -675,6 +694,29 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
     check.equal(document.activeElement, editable);
     check.equal(getComputedStyle(editable, "::after").content, '"Untitled document"');
     check.equal(document.querySelector<HTMLElement>(".document-title-dialog > .protyle-content > .protyle-wysiwyg").offsetHeight, 0);
+    document.head.innerHTML = `<style>${desktopCSS}</style>`;
+    document.body.firstElementChild.className = "b3-dialog--open";
+    sheet.className = "b3-dialog__container";
+    sheet.style.cssText = "height:auto;transition:none";
+    for (const theme of ["light", "dark"]) {
+        document.body.style.setProperty("--b3-theme-background", theme === "light" ? "#fff" : "#1e1e1e");
+        document.body.style.setProperty("--b3-theme-surface", theme === "light" ? "#f3f3f3" : "#292929");
+        for (const width of [320, 560]) {
+            sheet.style.width = `${width}px`;
+            for (const large of [false, true]) {
+                document.body.style.setProperty("--b3-font-size-editor", large ? "48px" : "16px");
+                editable.innerHTML = "<strong>Rich title </strong><em>with styles </em>".repeat(50);
+                check.equal(host.querySelector(".protyle-top"), null);
+                check.equal(getComputedStyle(host).backgroundColor, "rgba(0, 0, 0, 0)");
+                check.equal(getComputedStyle(editable).fontSize, "16px");
+                check.ok(field.scrollWidth > field.clientWidth);
+                check.ok(editable.getBoundingClientRect().height < 40);
+                check.ok(host.getBoundingClientRect().height < 100, "desktop rename does not inherit the full editor height");
+                check.ok(field.getBoundingClientRect().right <= sheet.getBoundingClientRect().right);
+            }
+        }
+    }
+    document.head.innerHTML = `<style>${css}</style>`;
     document.body.replaceChildren();
     const pause = (duration: number) => new Promise(resolve => setTimeout(resolve, duration));
     let viewportHeight = 800;
@@ -773,8 +815,8 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
     return "Title drawer layout passed";
 };
 
-test("native mobile title drawer keeps its action above the keyboard and edits rich titles in a single standalone line", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+test("desktop and mobile rename use standalone fields and preserve mobile keyboard and dismissal layout", {
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
     timeout: 30000,
 }, async () => {
     const css = compile(resolve(__dirname, "../../assets/scss/mobile.scss"), {logger: {warn() {}, debug() {}}}).css;
@@ -788,7 +830,7 @@ test("native mobile title drawer keeps its action above the keyboard and edits r
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
     const lifecycleSources = ["../../dialog/index.ts", "../../menus/sheetOpen.ts",
-        "../../mobile/util/mobileSheetGesture.ts", "../../mobile/util/mobileSheetLayout.ts", "../../mobile/util/bindBottomSheetDrag.ts", "../../mobile/util/bindBottomSheetDialog.ts",
+        "../../mobile/util/keyboardSheetState.ts", "../../mobile/util/mobileSheetGesture.ts", "../../mobile/util/mobileSheetLayout.ts", "../../mobile/util/bindBottomSheetDrag.ts", "../../mobile/util/bindBottomSheetDialog.ts",
         "documentTitleDialogs.ts", "documentTitleDialog.ts"].map(file => transpileModule(
         require("ifdef-loader/preprocessor").parse(readFileSync(resolve(__dirname, file), "utf8"), {MOBILE: true, BROWSER: false}),
         {compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS}}).outputText);
@@ -796,7 +838,8 @@ test("native mobile title drawer keeps its action above the keyboard and edits r
     const script = resolve(directory, "run.cjs");
     const code = "const __name = value => value; (" + checkDrawerLayout.toString() + ")(" + JSON.stringify(css) + "," +
         JSON.stringify(toolbarSource) + "," + JSON.stringify(paddingSource) + "," + JSON.stringify(titleSource) + "," +
-        JSON.stringify(lifecycleSources) + ")";
+        JSON.stringify(lifecycleSources) + "," +
+        JSON.stringify(compile(resolve(__dirname, "../../assets/scss/base.scss"), {logger: {warn() {}, debug() {}}}).css) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(resolve(directory, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
@@ -812,7 +855,9 @@ app.whenReady().then(async () => {
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
-        const result = await promisify(execFile)(require("electron") as unknown as string, [script],
+        const args = process.env.SIYUAN_ELECTRON_HEADLESS ?
+            ["--ozone-platform=headless", "--ozone-override-screen-size=1920,1080", script] : [script];
+        const result = await promisify(execFile)(require("electron") as unknown as string, args,
             {env, windowsHide: true, timeout: 25000});
         assert.match(result.stdout, /Title drawer layout passed/);
     } finally {

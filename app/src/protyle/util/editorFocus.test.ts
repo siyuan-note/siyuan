@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {getEditorFocusRange, getEditorFocusRangeOutsideElement, restoreEditorFocusRange} from "./editorFocus";
 
 class TestElement {
+    public readonly classList = {contains: () => false};
     public readonly nodeType = 1;
     public isConnected = true;
     public focused = false;

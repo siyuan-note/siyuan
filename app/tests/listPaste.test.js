@@ -51,7 +51,7 @@ const runCases = source => {
         prepareInlineElementBoundaryMutation() {},
         normalizeHTMLAssetIFrameSources() {},
         resetCodeBlockRenderState() {},
-        renderIFrameResize() {},
+        renderMediaResize() {},
         isHiddenTabContent: () => false,
         isMobile: () => mobile,
         focusBlock: element => {

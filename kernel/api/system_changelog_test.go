@@ -8,6 +8,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -102,4 +104,59 @@ func TestAPIContractStableChangelogStaysLocal(t *testing.T) {
 		response.Data.Version != "3.8.9" || !strings.Contains(response.Data.HTML, "Local stable changes") {
 		t.Fatalf("stable local changelog changed: %s, %v", recorder.Body.String(), err)
 	}
+}
+
+// TestAPIContractChangelogRequiresWriteRole 验证只读角色无法借读取更新日志持久化配置。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-cvcw-64hw-hvhf
+func TestAPIContractChangelogRequiresWriteRole(t *testing.T) {
+	oldDir, oldConf, oldConfDir := util.WorkingDir, model.Conf, util.ConfDir
+	t.Cleanup(func() { util.WorkingDir, model.Conf, util.ConfDir = oldDir, oldConf, oldConfDir })
+	util.WorkingDir, util.ConfDir = t.TempDir(), t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Lang = "en"
+	model.Conf.ShowChangelog = true
+	directory := filepath.Join(util.WorkingDir, "changelogs", "v3.8.9")
+	if err := os.MkdirAll(directory, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(directory, "v3.8.9.en.md"), []byte("## Changes"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	recorder := changelogRouteRequest(t, model.RoleReader)
+	if http.StatusForbidden != recorder.Code {
+		t.Fatalf("reader reached the changelog handler: %d %s", recorder.Code, recorder.Body.String())
+	}
+	if !model.Conf.ShowChangelog {
+		t.Fatal("reader persisted the changelog state")
+	}
+
+	if recorder = changelogRouteRequest(t, model.RoleVisitor); http.StatusOK == recorder.Code {
+		t.Fatalf("visitor reached the changelog handler: %s", recorder.Body.String())
+	}
+	if !model.Conf.ShowChangelog {
+		t.Fatal("visitor persisted the changelog state")
+	}
+
+	recorder = changelogRouteRequest(t, model.RoleAdministrator)
+	if http.StatusOK != recorder.Code {
+		t.Fatalf("administrator was rejected: %d %s", recorder.Code, recorder.Body.String())
+	}
+	if model.Conf.ShowChangelog {
+		t.Fatal("administrator did not persist the changelog state")
+	}
+}
+
+func changelogRouteRequest(t *testing.T, role model.Role) *httptest.ResponseRecorder {
+	t.Helper()
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, role) })
+	handlers := contractRouteHandlers(apicontract.SystemGetChangelog, changelogContractHandler("3.8.9"))
+	router.POST("/api/system/getChangelog", handlers...)
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest("POST", "/api/system/getChangelog", strings.NewReader("{}"))
+	request.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(recorder, request)
+	return recorder
 }

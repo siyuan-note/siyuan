@@ -111,11 +111,13 @@ test("copy failures keep the diagnostic text selected for the system copy menu",
     } finally { page.dispose(); }
 });
 
-test("startup catches main script failures and timeouts, then stops monitoring after successful initialization", () => {
+test("unattributed runtime errors do not fail successful startup or remain monitored afterwards", () => {
     const page = createPage();
     try {
         page.target.dispatchEvent(Object.assign(new Event("error"), {error: new Error("bundle syntax error")}));
-        assert.match(page.find(element => element.tagName === "PRE").textContent, /bundle syntax error/);
+        page.target.dispatchEvent(Object.assign(new Event("unhandledrejection"), {reason: new Error("plugin rejection")}));
+        assert.equal(page.document.documentElement.attributes.get("data-startup-state"), "loading");
+        assert.equal(page.document.querySelector(".startup-error"), undefined);
         completeStartup();
         assert.equal(page.document.querySelector(".startup-error"), undefined);
         assert.equal(page.document.documentElement.attributes.get("data-startup-state"), "ready");
@@ -126,9 +128,12 @@ test("startup catches main script failures and timeouts, then stops monitoring a
     const timeout = createPage();
     try {
         setStartupStage("storage");
+        timeout.target.dispatchEvent(Object.assign(new Event("error"), {error: new SyntaxError("bundle syntax error")}));
+        assert.equal(timeout.document.documentElement.attributes.get("data-startup-state"), "loading");
         [...timeout.timers.values()][0]();
         assert.match(timeout.find(element => element.tagName === "PRE").textContent, /stage=storage/);
         assert.match(timeout.find(element => element.tagName === "PRE").textContent, /Startup timed out/);
+        assert.match(timeout.find(element => element.tagName === "PRE").textContent, /bundle syntax error/);
     } finally { timeout.dispose(); }
 });
 
@@ -167,7 +172,7 @@ test("desktop and mobile main script failures are diagnosed without treating ext
     }
 });
 
-test("nested user scripts isolate synchronous global errors and restore diagnostics after exceptions", () => {
+test("nested user scripts isolate synchronous errors and restore timeout diagnostics after exceptions", () => {
     const page = createPage();
     const report = () => page.target.dispatchEvent(Object.assign(new Event("error"), {error: new SyntaxError("snippet")}));
     try {
@@ -178,12 +183,15 @@ test("nested user scripts isolate synchronous global errors and restore diagnost
             throw new Error("append failed");
         }), /append failed/);
         report();
+        assert.equal(page.document.documentElement.attributes.get("data-startup-state"), "loading");
+        [...page.timers.values()][0]();
         assert.equal(page.document.documentElement.attributes.get("data-startup-state"), "failed");
+        assert.match(page.find(element => element.tagName === "PRE").textContent, /snippet/);
     } finally { page.dispose(); }
 });
 
-test("user script isolation keeps resource, asynchronous, explicit and timeout failures visible", () => {
-    for (const kind of ["resource", "rejection", "explicit", "timeout"]) {
+test("user script isolation keeps required resource, explicit and timeout failures visible", () => {
+    for (const kind of ["resource", "explicit", "timeout"]) {
         const page = createPage();
         try {
             withStartupErrorSuppressed(() => {
@@ -191,8 +199,6 @@ test("user script isolation keeps resource, asynchronous, explicit and timeout f
                     const event = new Event("error");
                     Object.defineProperty(event, "target", {value: {tagName: "SCRIPT", src: "http://localhost/stage/build/mobile/missing.js"}});
                     page.target.dispatchEvent(event);
-                } else if (kind === "rejection") {
-                    page.target.dispatchEvent(Object.assign(new Event("unhandledrejection"), {reason: new Error("async failure")}));
                 } else if (kind === "explicit") {
                     page.target.dispatchEvent(new CustomEvent("siyuan-startup-error", {detail: new Error("explicit failure")}));
                 } else {
@@ -200,6 +206,24 @@ test("user script isolation keeps resource, asynchronous, explicit and timeout f
                 }
             });
             assert.equal(page.document.documentElement.attributes.get("data-startup-state"), "failed", kind);
+        } finally { page.dispose(); }
+    }
+});
+
+test("global rejections are included in timeout diagnostics and respect synchronous user script isolation", () => {
+    for (const suppressed of [false, true]) {
+        const page = createPage();
+        try {
+            const reject = () => page.target.dispatchEvent(Object.assign(new Event("unhandledrejection"), {
+                reason: new Error("async extension failure"),
+            }));
+            if (suppressed) withStartupErrorSuppressed(reject);
+            else reject();
+            assert.equal(page.document.documentElement.attributes.get("data-startup-state"), "loading");
+            [...page.timers.values()][0]();
+            const details = page.find(element => element.tagName === "PRE").textContent;
+            assert.match(details, /Startup timed out/);
+            assert.equal(details.includes("async extension failure"), !suppressed);
         } finally { page.dispose(); }
     }
 });

@@ -20,6 +20,7 @@ import {
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {IBacklinkAVTarget, prepareBacklinkAV} from "../render/av/backlink";
 import {captureBacklinkAVSources, reuseBacklinkAVSources} from "../render/av/backlinkReuse";
+import {captureBacklinkImageSources, reuseBacklinkImageSources} from "../render/backlinkImageReuse";
 import {markBacklinkReference, updateBacklinkReferenceVisibility} from "./backlinkReference";
 import {setBacklinkTypeFoldExpandHandler, updateBacklinkTypeFolds} from "./backlinkTypeFold";
 
@@ -40,6 +41,7 @@ interface IBacklinkDOMRecord {
     anchor: HTMLElement,
     targets: IBacklinkAVTarget[],
     databases: ReturnType<typeof captureBacklinkAVSources>,
+    images: ReturnType<typeof captureBacklinkImageSources>,
 }
 
 const backlinkDOMRecords = new WeakMap<IProtyle, Map<string, IBacklinkDOMRecord>>();
@@ -76,6 +78,7 @@ const createBacklinkDOMRecord = (item: IBacklinkData, index: number, id: string,
             anchor: nodes[0] as HTMLElement,
             targets: item.attributeViewTargets || [],
             databases: captureBacklinkAVSources(nodes, item.attributeViewTargets || []),
+            images: captureBacklinkImageSources(nodes),
         },
         nodes,
     };
@@ -136,6 +139,7 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
             const created = createBacklinkDOMRecord(item, index, id, protyle.element.hasAttribute("data-backlink-show-document"));
             if (record) {
                 const restoreAVScroll = reuseBacklinkAVSources(created.nodes, created.record.databases, record.databases);
+                reuseBacklinkImageSources(created.record.images, record.images);
                 created.nodes.forEach(node => element.insertBefore(node, record.anchor));
                 removeBacklinkDOMRecord(record);
                 restoreAVScroll();

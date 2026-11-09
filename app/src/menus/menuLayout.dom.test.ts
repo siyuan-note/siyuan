@@ -55,6 +55,7 @@ const browserCases = async (sources: Record<string, string>, css: string,
         }},
         "protyle/render/av/automationPosition": {},
         "protyle/render/av/select": {},
+        "protyle/render/av/cell": {},
         "protyle/render/av/filter": {},
         "protyle/ui/hideElements": {},
         "protyle/render/av/mobilePanel": {},
@@ -556,6 +557,11 @@ const browserCases = async (sources: Record<string, string>, css: string,
     check.ok(lazyScroll > 0, "Asynchronous submenu loading preserves the parent's scroll position");
     const loadedMenu = lazyItems.querySelector(".b3-menu__item--show > .b3-menu__submenu");
     check.match(loadedMenu.textContent, /Loaded \d+/, "The item under a scrolled pointer loads its asynchronous submenu");
+    const loadedRect = loadedMenu.getBoundingClientRect();
+    const loadedParentRect = loadedMenu.parentElement.getBoundingClientRect();
+    check.ok(Math.abs(loadedRect.top - Math.max(32,
+        Math.min(loadedParentRect.top - 9, innerHeight - loadedRect.height - 1))) < 2,
+    "The first loaded submenu aligns with its parent after restoring the parent's scroll position");
     pointer(lazyItems, .75);
     check.ok(lazyItems.scrollTop > lazyScroll, "Loading a child does not interrupt scrolling of its unchanged parent");
     dispose(lazyMouse);
@@ -825,11 +831,16 @@ const browserCases = async (sources: Record<string, string>, css: string,
     pointer(mobilePDF.items, .7);
     check.equal(mobilePDF.items.scrollTop, 0, "Mobile PDF menus preserve their touch interaction");
     mobilePDF.host.remove();
+    const keyboardToolbar = document.createElement("div");
+    keyboardToolbar.id = "keyboardToolbar";
+    keyboardToolbar.style.cssText = "position:fixed;bottom:0;height:40px;width:100%";
+    document.body.append(keyboardToolbar);
     const sheet = createMenu();
     sheet.element.classList.add("b3-menu--fit");
     addItems(sheet, 2);
     sheet.fullscreen("bottom", undefined, {preserveKeyboard: true});
     await settle();
+    check.equal(keyboardToolbar.classList.contains("keyboard--sheet-open"), true);
     const sheetHeight = sheet.element.getBoundingClientRect().height;
     const resetSheet = sheet.resetPosition.bind(sheet);
     let sheetResets = 0;
@@ -851,6 +862,8 @@ const browserCases = async (sources: Record<string, string>, css: string,
     await settle();
     check.equal(sheetResets, 1, "Closing cancels the pending layout update");
     sheet.element.remove();
+    check.equal(keyboardToolbar.classList.contains("keyboard--sheet-open"), false);
+    keyboardToolbar.remove();
 
     const scrim = document.createElement("div");
     scrim.id = "commonMenuScrim";
@@ -926,7 +939,7 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture",
+    const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
         "util/setPosition", "util/zIndex", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel", "protyle/render/av/renderData",
         "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated", "protyle/gutter/embedBreadcrumbMenu",
         "layout/dock/agent/AgentSessionPanel", "protyle/render/listMindmap/appearance"].map(name => [name,

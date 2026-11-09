@@ -303,7 +303,8 @@ func sendForwardProxyRequest(request *req.Request, method, destURL string) (resp
 	return
 }
 
-// 创建安全的 HTTP Client，防止 SSRF 和 DNS 重绑定
+// 创建代理请求使用的 HTTP Client。目标 IP 在拨号阶段解析，避免校验与连接之间的 DNS 重绑定；
+// 私网访问策略由 util.SSRFSafeDialer 决定：非安全模式下允许回环与局域网，链路本地地址始终拒绝。
 func getSafeClient(timeout time.Duration) *req.Client {
 	dialer := util.SSRFSafeDialer(timeout)
 

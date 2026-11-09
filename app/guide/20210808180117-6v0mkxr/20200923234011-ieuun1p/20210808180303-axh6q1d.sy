@@ -180,7 +180,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Show hidden status bar on hover"
+					"TextMarkTextContent": "Show hidden status bar on hover in the bottom-right corner of the window"
 				},
 				{
 					"Type": "NodeText",

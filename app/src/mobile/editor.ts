@@ -113,18 +113,8 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             void window.siyuan.mobile.docks.file?.selectOpenedFile(protyle.notebookId, protyle.path);
         }
         afterOpen?.(protyle);
-        const titleElement = document.getElementById("toolbarName") as HTMLInputElement;
-        if (isValid() && action.includes(Constants.CB_GET_OPENNEW) && !protyle.disabled &&
-            protyle.block.rootID !== protyle.notebookId) {
+        if (isValid() && action.includes(Constants.CB_GET_OPENNEW) && !protyle.disabled) {
             void protyle.title?.openEditor();
-            return;
-        }
-        if (isValid() && action.includes(Constants.CB_GET_OPENNEW) && !protyle.disabled &&
-            titleElement && !titleElement.readOnly && !titleElement.disabled) {
-            // 新建文档加载完成后聚焦标题，通过移动端焦点桥接唤起键盘。
-            protyle.contentElement.scrollTop = 0;
-            titleElement.focus({preventScroll: true});
-            titleElement.setSelectionRange(titleElement.value.length, titleElement.value.length);
         }
     };
     const fail = (invalid = false) => {

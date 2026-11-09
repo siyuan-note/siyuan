@@ -49,6 +49,7 @@ export const getTableResizeControlCenter = (edge: number, viewportStart: number,
     return Math.min(Math.max(edge + controlGap + halfSize, min), max);
 };
 
-export const isTableResizeControlVisible = (edge: number, viewportEnd: number, controlSize: number, controlGap = 0) => {
-    return edge + controlGap + controlSize <= viewportEnd + 1;
+export const getTableAddColumnEdge = (tableRight: number, viewportRight: number, contentRight: number) => {
+    // 表格右边界滚出视口时，添加入口仍需留在正文可视区域内。
+    return Math.min(tableRight, viewportRight, contentRight - TABLE_ADD_CONTROL_GAP - TABLE_ADD_CONTROL_THICKNESS);
 };

@@ -230,10 +230,14 @@ const browserCases = async (sources: Record<string, string>) => {
     input.value = "Notebook / literal **title**";
     update(protyle);
     readonly(protyle);
-    check.equal(input.classList.contains("fn__none"), false);
-    check.equal(label.classList.contains("fn__none"), true);
-    check.equal(input.readOnly, false);
-    check.equal(label.textContent, input.value);
+    check.equal(input.classList.contains("fn__none"), true);
+    check.equal(label.classList.contains("fn__none"), false);
+    check.equal(input.readOnly, true);
+    const notebookRequest = pending.find(request => request.id === "box");
+    check.ok(notebookRequest, "notebook documents load their complete title source");
+    notebookRequest.reply(response('<span data-type="strong">Notebook</span> <span class="img"><img alt="Picture"></span>'));
+    check.equal(label.querySelector('[data-type="strong"]').textContent, "Notebook");
+    check.ok(label.querySelector("img"));
     return "Mobile document title cases passed";
 };
 

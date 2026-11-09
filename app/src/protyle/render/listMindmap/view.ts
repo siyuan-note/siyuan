@@ -368,11 +368,12 @@ export class ListMindmapView {
         this.listen(this.viewport, "pointermove", this.pointerMove);
         this.listen(this.viewport, "pointerleave", () => this.setHoveredLine());
         this.listen(this.viewport, "pointerup", this.pointerUp);
-        this.listen(this.viewport, "auxclick", (event: MouseEvent) => {
+        // Linux 中键松开会向当前编辑焦点粘贴选区，必须同时取消指针释放的默认动作。
+        ["pointerup", "auxclick"].forEach(type => this.listen(this.viewport, type, (event: MouseEvent) => {
             if (event.button === 1 && this.isPanTarget(event as PointerEvent)) {
                 event.preventDefault();
             }
-        });
+        }));
         this.listen(this.viewport, "touchstart", this.pinchStart, {passive: false});
         this.listen(this.viewport, "touchmove", this.pinchMove, {passive: false});
         this.listen(this.viewport, "touchend", this.pinchEnd, {passive: false});

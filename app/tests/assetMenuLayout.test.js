@@ -14,7 +14,7 @@ test("asset menu previews preserve list geometry and pointer selection during im
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "asset/renderAssets", "asset/previewPath"];
+    const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "asset/renderAssets", "asset/previewPath"];
     const sources = Object.fromEntries(names.map(name => [name, compile(fs.readFileSync(path.join(root, "src", name + ".ts"), "utf8"))]));
     const menuSource = ts.createSourceFile("protyle.ts", fs.readFileSync(path.join(root, "src/menus/protyle.ts"), "utf8"), ts.ScriptTarget.Latest, true);
     const declarations = ["renderAssetPreview", "renderAssetList", "buildAssetMenu"].map(name => menuSource.statements.find(node => ts.isVariableStatement(node) && node.declarationList.declarations.some(item => item.name.getText(menuSource) === name)).getText(menuSource)).join("\n");

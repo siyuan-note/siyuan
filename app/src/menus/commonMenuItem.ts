@@ -633,8 +633,10 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
             label: window.siyuan.languages.copyMarkdown,
             accelerator: undefined,
             click: async () => {
+                const headingNumber = window.siyuan.config.export.headingNumber === true;
                 const response = await fetchSyncPost("/api/export/exportMdContent", {
                     id: stdMarkdownId,
+                    headingNumber,
                     refMode: 3,
                     embedMode: 1,
                     yfm: false,

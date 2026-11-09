@@ -8,8 +8,39 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"text/template"
 	"time"
 )
+
+func TestManualAutomationTemplateHTTPAndJSON(t *testing.T) {
+	key := &Key{Type: KeyTypeNumber}
+	source := `.action{$r := httpGet "https://example.com/data"}.action{(fromJson $r.body).value}`
+	if err := ValidateAutomationTemplate(source, "UTC"); err == nil {
+		t.Fatal("event automation accepted network access")
+	}
+	if err := ValidateManualAutomationTemplate(source, "UTC"); err != nil {
+		t.Fatal(err)
+	}
+	calls := 0
+	context := AutomationTemplateContext{TimeZone: "UTC", AllowHTTP: true, HTTP: template.FuncMap{
+		"httpGet": func(string, ...map[string]any) (map[string]any, error) {
+			calls++
+			return map[string]any{"body": `{"value":12.5}`}, nil
+		},
+	}}
+	value, err := EvaluateAutomationTemplate(context, key, source)
+	if err != nil || calls != 1 || value.Number.Content != 12.5 || !value.Number.IsNotEmpty {
+		t.Fatalf("invalid HTTP assignment: %+v %v calls=%d", value, err, calls)
+	}
+	if _, err := EvaluateAutomationTemplate(context, key, `.action{fromJson "invalid"}`); err == nil {
+		t.Fatal("invalid JSON became an empty assignment")
+	}
+	for _, source := range []string{`.action{range .}x.action{end}`, `.action{readFile "secret"}`} {
+		if ValidateManualAutomationTemplate(source, "UTC") == nil {
+			t.Fatal("manual template escaped bounded evaluation", source)
+		}
+	}
+}
 
 func TestAutomationTemplateWritableTypes(t *testing.T) {
 	zone, _ := time.LoadLocation("Asia/Shanghai")

@@ -3,6 +3,7 @@ import {prepareAVColumnWindow} from "./columnWindow";
 import {removeAVTableColumn} from "./columnPresentation";
 import {navigateSubItems} from "./subItemsNavigation";
 import {locateRequests} from "./locateState";
+import {beginAVRender} from "./locate";
 import {clearSubItemsViewportAnchor} from "./subItemsState";
 import {addSubItemsMenu} from "./subItems";
 import {Menu} from "../../../plugin/Menu";
@@ -1338,6 +1339,8 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
             }
         });
         if (selectedItemInfos.length === 1 && avType !== "calendar") {
+            const selectedItem = selectedItemInfos[0].item;
+            const parentID = "cells" in selectedItem ? selectedItem.hierarchy?.parentID : undefined;
             if (!primaryRows[0].isDetached) {
                 menu.addSeparator({id: "separator_1"});
             }
@@ -1356,6 +1359,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                             protyle,
                             count: parseInt(inputElement.value),
                             previousID: selectedItemInfos[0].previousID,
+                            parentID,
                             groupID: selectedItemInfos[0].groupID
                         });
                         menu.close();
@@ -1367,6 +1371,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                                 protyle,
                                 count: parseInt(inputElement.value),
                                 previousID: selectedItemInfos[0].previousID,
+                                parentID,
                                 groupID: selectedItemInfos[0].groupID
                             });
                             menu.close();
@@ -1389,6 +1394,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                             protyle,
                             count: parseInt(inputElement.value),
                             previousID: selectedItemInfos[0].itemID,
+                            parentID,
                             groupID: selectedItemInfos[0].groupID
                         });
                         menu.close();
@@ -1400,6 +1406,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
                                 protyle,
                                 count: parseInt(inputElement.value),
                                 previousID: selectedItemInfos[0].itemID,
+                                parentID,
                                 groupID: selectedItemInfos[0].groupID
                             });
                             menu.close();
@@ -1647,6 +1654,7 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
 };
 
 export const switchAVView = (protyle: IProtyle, blockElement: HTMLElement, target: HTMLElement) => {
+    beginAVRender(blockElement);
     locateRequests.delete(blockElement);
     clearSubItemsViewportAnchor(blockElement);
     blockElement.removeAttribute(Constants.ATTRIBUTE_V_SCROLL);

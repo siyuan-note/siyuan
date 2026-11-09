@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = (source: string, css: string, dark: boolean) => {
+const browserCases = async (source: string, css: string, dark: boolean) => {
     const check: typeof assert = require("node:assert/strict");
     const module = {exports: {} as typeof import("./statusHover")};
     new Function("exports", source)(module.exports);
@@ -15,13 +15,14 @@ const browserCases = (source: string, css: string, dark: boolean) => {
     document.head.innerHTML = `<style>${css}
 html, body {margin: 0; height: 100%; width: 100%;}
 body {display: flex; flex-direction: column; font-size: 36px;
-    --b3-theme-background: ${dark ? "#1e1e1e" : "#fff"}; --b3-border-radius: 4px;}
+    --b3-theme-background: ${dark ? "#1e1e1e" : "#fff"}; --b3-border-radius: 4px;
+    --b3-transition: all 1s ease;}
 .fn__flex {display: flex;} .fn__flex-1 {flex: 1; min-width: 0;}
 .fn__none {display: none !important;} #editor {flex: 1;}
 </style>`;
     document.body.innerHTML = `<div id="editor">Editor</div><div id="status" class="status fn__flex">
 <div class="status__msg">A background message with a long description</div><div class="fn__flex-1"></div>
-<div class="status__counter">Words 100 Blocks 20</div><button id="help">Help</button></div>`;
+<div class="status__counter">Words 100 Blocks 20</div><button id="help" class="toolbar__item">Help</button></div>`;
     const status = document.getElementById("status");
     const editor = document.getElementById("editor");
     const appearance = {hideStatusBar: true, showFloatingStatusBar: undefined as boolean | undefined};
@@ -44,6 +45,7 @@ body {display: flex; flex-direction: column; font-size: 36px;
     check.equal(open(), false);
     hover();
     check.equal(open(), true);
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     const rect = status.getBoundingClientRect();
     check.equal(rect.right, innerWidth);
     check.equal(rect.bottom, innerHeight);
@@ -58,8 +60,13 @@ body {display: flex; flex-direction: column; font-size: 36px;
     button.addEventListener("click", () => { clicks++; });
     button.click();
     check.equal(clicks, 1);
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    check.equal(getComputedStyle(status).opacity, "1");
     hover(0, 0);
     check.equal(open(), false);
+    check.equal(getComputedStyle(status).opacity, "0", "the entire bar disappears immediately despite child visibility transitions");
+    check.equal(getComputedStyle(button).visibility, "visible", "the fixture exercises a child whose visibility transition is still running");
+    check.equal(document.elementFromPoint(buttonRect.left + 3, buttonRect.top + 3), editor, "hidden controls cannot intercept pointer input");
     hover();
     appearance.showFloatingStatusBar = false;
     syncStatusBarVisibility();

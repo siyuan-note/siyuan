@@ -19,7 +19,8 @@ const compile = (file: string, flags: Flags) => transpileModule(require("ifdef-l
 
 const loadOpenMenu = (flags: Flags, markdownAvailable = false) => {
     const calls: Array<{name: string; args: unknown[]}> = [];
-    const window = {siyuan: {config: {editor: {}, fileTree: {}}, languages: {}}};
+    const exportConfig: {headingNumber?: boolean} = {};
+    const window = {siyuan: {config: {editor: {}, fileTree: {}, export: exportConfig}, languages: {}}};
     // 未显式提供的依赖统一替换为记录调用的空函数
     const recorder = new Proxy({}, {
         get: (_target, name) => typeof name === "string" && name !== "__esModule" ?
@@ -42,13 +43,36 @@ const loadOpenMenu = (flags: Flags, markdownAvailable = false) => {
         "../constants": constants,
         "../util/imageURL": imageURL,
         "../editor/pdfAssetLink": pdfAssetLink,
+        "../util/fetch": {fetchSyncPost: async (...args: unknown[]) => {
+            calls.push({name: "fetchSyncPost", args});
+            return {code: 0, data: {content: "Markdown"}};
+        }},
         "../editor/markdownAsset": {canOpenMarkdownAsset: () => markdownAvailable,
             openMarkdownAsset: (...args: unknown[]) => calls.push({name: "openMarkdownAsset", args})},
     });
-    return {openMenu: menu.openMenu, calls};
+    return {openMenu: menu.openMenu, copySubMenu: menu.copySubMenu, calls,
+        setHeadingNumberChoice: (value: boolean | undefined) => { exportConfig.headingNumber = value; }};
 };
 
 const app = {};
+
+for (const mobile of [false, true]) {
+    test(`copy Markdown uses persisted numbering without an additional prompt (${mobile ? "mobile" : "desktop"})`, async () => {
+        for (const choice of [true, false, undefined]) {
+            const state = loadOpenMenu({MOBILE: mobile, BROWSER: mobile});
+            state.setHeadingNumberChoice(choice);
+            const items = state.copySubMenu(["document"], false, undefined, "heading");
+            await items.find((item: IMenu) => item.id === "copyMarkdown").click();
+            const request = state.calls.find(call => call.name === "fetchSyncPost");
+            assert.equal(JSON.stringify(request.args), JSON.stringify(["/api/export/exportMdContent", {
+                id: "heading", headingNumber: choice === true, refMode: 3, embedMode: 1, yfm: false,
+                preserveTaskMarkers: true, fillCSSVar: false, adjustHeadingLevel: false,
+            }]));
+            assert.ok(state.calls.some(call => call.name === "writeText"));
+            assert.equal(state.calls.filter(call => call.name === "fetchSyncPost").length, 1);
+        }
+    });
+}
 
 for (const {name, flags, newWindow} of [
     {name: "desktop", flags: {MOBILE: false, BROWSER: false}, newWindow: true},

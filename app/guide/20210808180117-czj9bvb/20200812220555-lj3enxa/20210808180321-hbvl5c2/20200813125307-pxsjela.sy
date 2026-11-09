@@ -706,6 +706,34 @@
 									"Data": "Markdown"
 								}
 							]
+						},
+						{
+							"ID": "20261108001000-28daeee",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108001000-28daeee",
+								"updated": "20261108001000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "导出"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中的“导出 Markdown 包含标题块自动编号”默认关闭：复制和导出 Markdown 时省略编号，但不修改文档或编辑器设置。开启后，文档启用编号时 Markdown 输出会包含编号。复制直接沿用此持久设置，不弹出编号选择窗口；其他导出格式不受影响。"
+								}
+							]
 						}
 					]
 				},

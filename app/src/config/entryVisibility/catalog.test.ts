@@ -45,6 +45,24 @@ import {
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
+test("reference creation visibility has stable paths and preserves existing defaults", () => {
+    const path = "editor.ref";
+    assert.deepEqual(getEntryCatalogChildren(path).map(item => item.key), ["newFile", "newSubDoc", "newFileAtPath"]);
+    assert.equal(isEntryOrderSortable(path), false);
+    for (const key of ["newFile", "newSubDoc", "newFileAtPath"]) {
+        const entryPath = `${path}.${key}`;
+        const entry = getEntryCatalogNode(entryPath);
+        assert.equal(entry.type, "entry");
+        assert.equal(getEntryParentPath(entryPath), path);
+        assert.equal(entry.simple, true);
+        assert.equal(entry.sortable, false);
+        assert.equal(getEntryCatalogDefaultVisibility(entryPath), true);
+        assert.equal(getEntryCatalogCustomDefaultVisibility(entryPath), true);
+        assert.equal(getBuiltinProfileEntryVisibility("simple", entry.simple), true);
+        assert.equal(getBuiltinProfileEntryVisibility("full", entry.simple), true);
+    }
+});
+
 test("the workspace menu has no standalone Markdown entry or configurable application section", () => {
     assert.equal(getEntryCatalogNode("application.markdownEditor"), undefined);
     assert.equal(getEntryCatalogSection("application"), undefined);

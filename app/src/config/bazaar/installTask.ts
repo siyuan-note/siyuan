@@ -128,6 +128,9 @@ const prepareButton = (element: HTMLElement) => {
 };
 
 export const renderBazaarInstall = (root: ParentNode) => {
+    root.querySelectorAll<HTMLButtonElement>('[data-type="skip-batch-update"]').forEach(button => {
+        button.disabled = Boolean(batchUpdate) || button.getAttribute("aria-busy") === "true";
+    });
     root.querySelectorAll<HTMLElement>('[data-type="install"], [data-type="install-t"]').forEach(element => {
         const owner = element.closest("[data-name][data-package-type]");
         const task = owner && installTasks.get(`${owner.getAttribute("data-package-type")}/${owner.getAttribute("data-name")}`);

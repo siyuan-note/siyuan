@@ -2365,6 +2365,7 @@ type ExportOptions struct {
 	TagOpenMarker         *string `json:"tagOpenMarker"`         // 标签开始标记符
 	TagCloseMarker        *string `json:"tagCloseMarker"`        // 标签结束标记符
 	// Markdown 专属部分
+	HeadingNumber      *bool `json:"headingNumber"`      // false 省略本次 Markdown 的标题编号，nil 沿用导出设置，true 保留文档编号
 	IncludeSubDocs     *bool `json:"includeSubDocs"`     // 是否包含子文档
 	IncludeRelatedDocs *bool `json:"includeRelatedDocs"` // 是否包含关联文档
 	MarkdownYFM        *bool `json:"markdownYFM"`        // 是否添加 YAML Front Matter
@@ -2374,7 +2375,11 @@ type ExportOptions struct {
 // resolveExportOptions 解析单次导出的独立配置快照，缺省选项沿用当前配置，不写入全局配置。
 func resolveExportOptions(opts *ExportOptions) (ret conf.Export) {
 	ret = *Conf.Export.Load()
+	ret.MarkdownHeadingNumber = nil
 	if nil != opts {
+		if nil != opts.HeadingNumber {
+			ret.MarkdownHeadingNumber = new(*opts.HeadingNumber)
+		}
 		if nil != opts.AddTitle {
 			ret.AddTitle = *opts.AddTitle
 		}
@@ -2462,6 +2467,9 @@ func ParseExportOptions(arg map[string]any) (opts *ExportOptions) {
 		opts.TagCloseMarker = new(arg["tagCloseMarker"].(string))
 	}
 	// Markdown 专属部分
+	if nil != arg["headingNumber"] {
+		opts.HeadingNumber = new(arg["headingNumber"].(bool))
+	}
 	if nil != arg["includeSubDocs"] {
 		opts.IncludeSubDocs = new(arg["includeSubDocs"].(bool))
 	}
@@ -3371,6 +3379,8 @@ func exportMarkdownContent(rootID string, exportOpts markdownExportOptions) (tre
 
 	exportedMd = exportMarkdownContent0(rootID, tree, markdownExportOptions{
 		Config: conf.Export{
+			MarkdownHeadingNumber: config.MarkdownHeadingNumber,
+			HeadingNumber:         config.HeadingNumber,
 			BlockRefMode:          exportRefMode,
 			BlockEmbedMode:        config.BlockEmbedMode,
 			FileAnnotationRefMode: config.FileAnnotationRefMode,
@@ -3402,9 +3412,16 @@ func exportMarkdownContent(rootID string, exportOpts markdownExportOptions) (tre
 }
 
 func exportMarkdownContent0(id string, tree *parse.Tree, exportOpts markdownExportOptions) (ret string) {
-	if numberErr := applyHeadingNumbersForExport(tree, getExportBlockTreeInBox(id, tree.Box), false); nil != numberErr {
-		logging.LogErrorf("prepare Markdown heading numbers failed: %s", numberErr)
-		return ""
+	numberHeadings := exportOpts.Config.MarkdownHeadingNumber
+	if numberHeadings == nil {
+		numberHeadings = exportOpts.Config.HeadingNumber
+	}
+	// Pandoc 格式复用 Markdown 中间态，但不使用 Markdown 编号偏好。
+	if exportOpts.Ext != ".md" || (numberHeadings != nil && *numberHeadings) {
+		if numberErr := applyHeadingNumbersForExport(tree, getExportBlockTreeInBox(id, tree.Box), false); nil != numberErr {
+			logging.LogErrorf("prepare Markdown heading numbers failed: %s", numberErr)
+			return ""
+		}
 	}
 	tree, exportTreeErr := exportTree(tree, treeExportOptions{
 		Config:           exportOpts.Config,
@@ -4055,8 +4072,8 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 						}
 					} else if av.KeyTypeText == cell.Value.Type {
 						if nil != cell.Value.Text {
-							if exportOpts.RichTableCells && cell.Value.Text.IsRich() {
-								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, cell.Value.Text); attrViewRichErr != nil {
+							if cell.Value.Text.IsRich() {
+								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, cell.Value.Text, exportOpts.RichTableCells); attrViewRichErr != nil {
 									return ast.WalkStop
 								}
 								continue
@@ -4228,8 +4245,8 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 							if nil == v {
 								continue
 							}
-							if exportOpts.RichTableCells && av.KeyTypeText == v.Type && v.Text.IsRich() {
-								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, v.Text); attrViewRichErr != nil {
+							if av.KeyTypeText == v.Type && v.Text.IsRich() {
+								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, v.Text, exportOpts.RichTableCells); attrViewRichErr != nil {
 									return ast.WalkStop
 								}
 								if i < len(cell.Value.Rollup.Contents)-1 {

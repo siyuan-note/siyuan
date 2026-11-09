@@ -76,6 +76,7 @@ func autoSpaceTree(tree *parse.Tree) *parse.Tree {
 
 	// 第一次格式化为了合并相邻的文本节点
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	formatRenderer.PreserveTextCodeFences = true
 	md := formatRenderer.Render()
 	newTree := parseKTree(md)
 	restoreMindmapTypes(newTree)
@@ -83,6 +84,7 @@ func autoSpaceTree(tree *parse.Tree) *parse.Tree {
 	// 第二次格式化启用自动空格
 	luteEngine.SetAutoSpace(true)
 	formatRenderer = render.NewFormatRenderer(newTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	formatRenderer.PreserveTextCodeFences = true
 	md = formatRenderer.Render()
 	newTree = parseKTree(md)
 	restoreMindmapTypes(newTree)

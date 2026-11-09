@@ -7,6 +7,7 @@ package av
 import (
 	"bytes"
 	"encoding/json"
+	"math"
 	"os"
 	"path/filepath"
 	"slices"
@@ -151,6 +152,19 @@ func TestBlockCollectionIndexScopesAndSnapshots(t *testing.T) {
 	}
 	view.Automations.Rules[0].Enabled = true
 	view.Automations.Spec = 9
+	if err := view.Automations.ValidateSpec(); err != nil {
+		t.Fatal("supported specification rejected", err)
+	}
+	rememberCollectionView(view, "")
+	supported, err := BlockCollectionIndexInBox("")
+	if err != nil || !supported.MatchesDocument("unrelated", parent, "/"+parent+".sy") ||
+		supported.MatchesDocument("unrelated", child, "/child.sy") {
+		t.Fatal("supported specification did not preserve document scope", err)
+	}
+	view.Automations.Spec = math.MaxInt
+	if err := view.Automations.ValidateSpec(); err == nil {
+		t.Fatal("unknown specification fixture must be unsupported")
+	}
 	rememberCollectionView(view, "")
 	unknown, err := BlockCollectionIndexInBox("")
 	if err != nil || !unknown.MatchesDocument("unrelated", child, "/child.sy") {

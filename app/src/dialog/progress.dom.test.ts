@@ -8,7 +8,7 @@ import {promisify} from "node:util";
 import {compileString} from "sass";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = (progressSource: string, touchSource: string, css: string) => {
+const browserCases = (progressSource: string, touchSource: string, backSource: string, css: string) => {
     const check = (value: boolean, message: string) => { if (!value) throw new Error(message); };
     document.head.insertAdjacentHTML("beforeend", `<style>${css}</style>`);
     document.body.innerHTML = '<div class="side-mask"></div><div class="b3-dialog" style="z-index:99"></div>';
@@ -58,18 +58,35 @@ const browserCases = (progressSource: string, touchSource: string, css: string) 
     }
     check(panelChanges === 0, "progress gestures must not open or close background panels");
 
+    const back = {} as typeof import("../mobile/util/MobileBackFoward");
+    let backCalls = 0;
+    new Function("exports", "require", backSource)(back, () => ({
+        getCurrentEditor: () => { backCalls++; throw new Error("background back reached"); },
+    }));
+    back.goBack();
+    back.goBack();
+    check(backCalls === 0, "repeated system back must not reach background navigation");
+
     let clicks = 0;
     api.progressLoading({code: 1, msg: "Exiting"} as IWebSocketData, "exitProgress",
         {label: "Cancel", callback: () => clicks++});
     const exit = document.getElementById("exitProgress");
     const button = exit.querySelector("button");
     check(document.activeElement === button, "explicit progress action must retain focus");
+    back.goBack();
+    check(clicks === 0, "system back must not trigger cancellation");
     button.click();
     check(clicks === 1, "progress action must remain usable");
     api.progressLoading({code: 2} as IWebSocketData);
     check(!root.isConnected && exit.isConnected, "closing one task must retain the other");
+    back.goBack();
+    check(backCalls === 0, "remaining task must keep system back blocked");
     api.progressLoading({code: 2} as IWebSocketData, "exitProgress");
     check(!exit.isConnected, "each task must close independently");
+    try { back.goBack(); } catch (error) {
+        check(error.message === "background back reached", "unexpected back failure");
+    }
+    check(backCalls === 1, "system back must resume when all tasks finish");
     return "Progress DOM cases passed";
 };
 
@@ -82,10 +99,11 @@ test("progress overlays cover dialogs, isolate mobile gestures and preserve scro
     }).outputText;
     const progress = compile("src/dialog/progress.ts");
     const touch = compile("src/mobile/util/touch.ts");
+    const back = compile("src/mobile/util/MobileBackFoward.ts");
     const css = compileString(readFileSync("src/assets/scss/component/_dialog.scss", "utf8")).css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-progress-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(progress)}, ${JSON.stringify(touch)}, ${JSON.stringify(css)})`;
+    const code = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(progress)}, ${JSON.stringify(touch)}, ${JSON.stringify(back)}, ${JSON.stringify(css)})`;
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");

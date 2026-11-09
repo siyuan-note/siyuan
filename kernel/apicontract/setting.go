@@ -10,8 +10,17 @@ type SettingSnpt struct {
 }
 
 type SettingBazaar struct {
-	Trust         bool `json:"trust" api:"optional,nullable"`
-	PetalDisabled bool `json:"petalDisabled" api:"optional,nullable"`
+	// BatchUpdateExcluded 按 plugins/themes/widgets/icons/templates 保存跳过批量更新的包名，true 跳过，false 恢复。
+	// 仍检查并显示更新，手动单项更新不受影响；省略保留，null 恢复默认空映射。
+	BatchUpdateExcluded  map[string]map[string]bool                   `json:"batchUpdateExcluded" api:"optional,nullable"`
+	Trust                bool                                         `json:"trust" api:"optional,nullable"`
+	PetalDisabled        bool                                         `json:"petalDisabled" api:"optional,nullable"`
+	CompatibilityFilters map[string]*SettingBazaarCompatibilityFilter `json:"compatibilityFilters" api:"optional,nullable"`
+}
+
+type SettingBazaarCompatibilityFilter struct {
+	HideUnsupportedVersion   bool `json:"hideUnsupportedVersion" api:"optional,nullable"`
+	HideIncompatiblePlatform bool `json:"hideIncompatiblePlatform" api:"optional,nullable"`
 }
 
 type SettingAI struct {
@@ -349,6 +358,8 @@ type SettingMarkdown struct {
 }
 
 type SettingExport struct {
+	// Markdown 复制和导出保留文档标题编号，默认 false，不影响其他格式；省略保留现值，null 恢复默认。
+	HeadingNumber           *bool  `json:"headingNumber" api:"optional,nullable"`
 	ParagraphBeginningSpace bool   `json:"paragraphBeginningSpace" api:"optional,nullable"`
 	AddTitle                bool   `json:"addTitle" api:"optional,nullable"`
 	BlockRefMode            int    `json:"blockRefMode" api:"optional,nullable"`

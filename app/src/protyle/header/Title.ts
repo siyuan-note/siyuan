@@ -93,9 +93,7 @@ export class Title {
             });
             this.editElement.addEventListener("click", () => {
                 protyle.toolbar?.element.classList.add("fn__none");
-                if (protyle.block.rootID !== protyle.notebookId) {
-                    void this.openEditor().catch(error => console.error(error));
-                }
+                void this.openEditor().catch(error => console.error(error));
             });
             this.editElement.addEventListener("input", (event: InputEvent) => {
                 if (event.isComposing) {
@@ -504,7 +502,7 @@ export class Title {
 
     private async loadSource() {
         const id = this.protyle.block.rootID;
-        if (this.richEditor || !id || id === this.protyle.notebookId || !this.editElement ||
+        if (this.richEditor || !id || !this.editElement ||
             this.destroyed) {
             return;
         }
@@ -566,7 +564,7 @@ export class Title {
     }
 
     private needsSourceEditor() {
-        return !this.richEditor && !!this.protyle.block?.rootID && this.protyle.block.rootID !== this.protyle.notebookId;
+        return !this.richEditor && !!this.protyle.block?.rootID;
     }
 
     public async openEditor(isValid?: () => boolean) {
@@ -590,7 +588,7 @@ export class Title {
         }
         if (!this.editElement) {
             /// #if MOBILE
-            if (window.siyuan.mobile.editor?.protyle === this.protyle && id !== notebook) {
+            if (window.siyuan.mobile.editor?.protyle === this.protyle) {
                 const label = document.getElementById("toolbarNameReadonly");
                 if (!label) return;
                 const container = document.createElement("div");
@@ -650,7 +648,7 @@ export class Title {
         try {
             // 新建文档的正文启用与标题源读取分别完成，不能在只读的旧标题节点上定位。
             await this.loadSource();
-            if (id !== this.protyle.notebookId && !this.richEditor) {
+            if (!this.richEditor) {
                 return;
             }
             await this.openEditorWithSelection(() => !cancelled && this.protyle.block.rootID === id &&

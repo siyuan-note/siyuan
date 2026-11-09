@@ -751,6 +751,8 @@ func TestBazaarContractTransportCompatibility(t *testing.T) {
 	enabled := false
 	modes := []string{}
 	pkg := &bazaar.Package{Author: "a", DisplayName: bazaar.LocaleStrings{"en_US": "name"}, Icon: &icon, Enabled: &enabled, Modes: &modes, Funding: &bazaar.Funding{Custom: []string{}, Links: []bazaar.FundingLink{{Label: "label", URL: "url"}}}, Rating: &bazaar.PackageRating{Average: 3.5, Count: 2, Distribution: [5]int64{0, 0, 1, 1, 0}}}
+	pkg.Created = "2026-11-01T12:34:56Z"
+	pkg.BazaarVersionUnsupported = true
 	appearance := conf.NewAppearance()
 	appearance.DarkThemes = []*conf.AppearanceTheme{nil, {Name: "dark", Frontends: []string{"desktop"}}}
 	appearance.Icons = []*conf.AppearanceIcon{{Name: "icon"}}

@@ -50,14 +50,10 @@ export const restoreDocTreeStateData = async (controller: TStateController, stat
         const id = path === "/" ? notebookId : path.slice(path.lastIndexOf("/") + 1).replace(/\.sy$/, "");
         expanded.push({notebookId, id, kind: path === "/" ? "notebook" : "document"});
     });
-    for (const item of expanded) {
-        if (!isCurrent()) {
-            return;
-        }
+    if (expanded.length && isCurrent()) {
         try {
-            await controller.restoreExpanded([item]);
+            await controller.restoreExpanded(expanded, isCurrent);
         } catch (error) {
-            // 已保存的文档可能已删除或失去访问权限，继续恢复其他可用分支。
             console.error(error);
         }
     }

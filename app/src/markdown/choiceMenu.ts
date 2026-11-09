@@ -5,6 +5,7 @@ const activeSubmenus = new WeakMap<HTMLElement, () => void>();
 export const createMarkdownSubmenu = (options: {
     element: HTMLElement;
     label: string;
+    maxHeight?: number;
     icon: string;
     onClose?(): void;
 }) => {
@@ -18,7 +19,7 @@ export const createMarkdownSubmenu = (options: {
     element.setAttribute("role", "menuitem");
     element.setAttribute("aria-haspopup", "menu");
     element.setAttribute("aria-expanded", "false");
-    element.innerHTML = `<svg class="b3-menu__icon" aria-hidden="true"><use href="#${options.icon}"></use></svg><span class="b3-menu__label"></span><svg class="b3-menu__icon b3-menu__icon--arrow" aria-hidden="true"><use href="#iconRight"></use></svg><div class="b3-menu__submenu markdown-choice__menu" role="menu"></div>`;
+    element.innerHTML = `<svg class="b3-menu__icon" aria-hidden="true"><use href="#${options.icon}"></use></svg><span class="b3-menu__label"></span><svg class="b3-menu__icon b3-menu__icon--small" aria-hidden="true"><use href="#iconRight"></use></svg><div class="b3-menu__submenu markdown-choice__menu" role="menu"></div>`;
     element.querySelector(".b3-menu__label").textContent = options.label;
     const menu = element.querySelector<HTMLElement>(".b3-menu__submenu");
     menu.append(...children);
@@ -40,13 +41,12 @@ export const createMarkdownSubmenu = (options: {
         element.classList.add("b3-menu__item--show");
         element.setAttribute("aria-expanded", "true");
         const anchor = element.getBoundingClientRect();
-        // 按边框盒计算高度，避免内容完整显示时仍出现滚动条。
+        // 按实际边框盒高度计算可用空间，保留缩放产生的亚像素边框。
         menu.style.maxHeight = "none";
         const bounds = menu.getBoundingClientRect();
-        const border = menu.offsetHeight - menu.clientHeight;
         const firstItem = menu.firstElementChild?.getBoundingClientRect();
         const top = Math.max(8, anchor.top - (firstItem ? firstItem.top - bounds.top : 0));
-        const position = getAnchoredMenuPosition(top, 0, Math.ceil(menu.scrollHeight + border), innerHeight - 8, 8);
+        const position = getAnchoredMenuPosition(top, 0, Math.min(Math.ceil(bounds.height), options.maxHeight ?? Infinity), innerHeight - 8, 8);
         menu.style.top = `${Math.max(8, position.top)}px`;
         menu.style.maxHeight = `${position.height}px`;
         const parentMenu = element.parentElement?.closest<HTMLElement>(".markdown-choice__menu");
@@ -103,8 +103,9 @@ export const createMarkdownSubmenu = (options: {
 export const createMarkdownChoice = (options: {
     element: HTMLElement;
     label: string;
+    maxHeight?: number;
     icon: string;
-    values: Array<{value: string; label: string}>;
+    values: Array<{value: string; label: string; tooltip?: string}>;
     value: string;
     onChange(value: string): void;
 }) => {
@@ -118,6 +119,10 @@ export const createMarkdownChoice = (options: {
         button.setAttribute("role", "menuitemradio");
         button.innerHTML = '<svg class="b3-menu__icon" aria-hidden="true"><use href="#iconSelect"></use></svg><span class="b3-menu__label"></span>';
         button.querySelector(".b3-menu__label").textContent = item.label;
+        if (item.tooltip) {
+            button.dataset.tooltip = item.tooltip;
+            button.setAttribute("aria-label", `${item.label}: ${item.tooltip}`);
+        }
         button.addEventListener("click", event => {
             event.stopPropagation();
             if (options.element.getAttribute("aria-disabled") === "true") return;

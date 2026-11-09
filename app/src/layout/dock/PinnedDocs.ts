@@ -23,6 +23,7 @@ import {isOnlyMeta} from "../../protyle/util/compatibility";
 import {setFileTreeVisibility} from "./fileTreeAnimation";
 import {ParentDocClick} from "./parentDocClick";
 import {hideDragTip, setDragTipGhost, showDragTip} from "../../protyle/util/dragTip";
+import {showMessage} from "../../dialog/message";
 
 // 根入口与子树使用独立容器，避免重复文档干扰源文档树的选择和移动定位。
 export class PinnedDocs {
@@ -244,7 +245,7 @@ export class PinnedDocs {
             file: {id: doc.id, name: doc.name, path: doc.path, icon: doc.icon, subFileCount: doc.subFileCount,
                 childrenSortMode: doc.childrenSortMode, count: 0, name1: doc.name1 || "", alias: doc.alias || "",
                 memo: doc.memo || "", bookmark: doc.bookmark || "", hSize: doc.hSize || "",
-                hMtime: doc.hMtime || "", hCtime: doc.hCtime || ""},
+                hMtime: doc.hMtime || "", hCtime: doc.hCtime || "", specTooNew: doc.specTooNew},
         })));
         this.element.classList.toggle("fn__none", response.data.length === 0);
         if (!this.restored) {
@@ -342,6 +343,12 @@ export class PinnedDocs {
         }
         const row = target.closest<HTMLElement>("li[data-tree-key]");
         if (!row) { return; }
+        // 源版本高于当前客户端的文档仅占位显示，仍允许展开子文档和打开菜单。
+        if (row.getAttribute?.("data-spec-too-new") === "true" && !target.closest("[data-pin-more], [data-pin-toggle]")) {
+            showMessage(window.siyuan.languages._kernel[275]);
+            event.preventDefault();
+            return;
+        }
         if (isOnlyMeta(event) && !event.altKey && !event.shiftKey) {
             event.preventDefault();
             const item = this.docTree.getItemFromElement(row);

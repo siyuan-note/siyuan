@@ -121,3 +121,44 @@ test("uninitialized tab lookup remains available when no matching editor is load
     assert.equal(switched.length, 0);
     assert.equal(getUninitializedChecks(), 1);
 });
+
+for (const codes of [[3, 3, 0], [-1, 3, 0], [3, -1, 0]]) {
+    test(`opening a block retries transient lookup results ${codes.join(", ")} and preserves its destination`, async () => {
+        const {context, switched} = setup([makeEditor("current", true, true, 100)]);
+        const requests: unknown[] = [];
+        const delays: number[] = [];
+        context.Constants = {TIMEOUT_TRANSITION: 300};
+        context.window.setTimeout = (callback: () => void, delay: number) => { delays.push(delay); callback(); };
+        context.showMessage = () => assert.fail("A pending retry must not display an indexing error");
+        context.fetchSyncPost = async (_url: string, data: unknown) => {
+            requests.push(data);
+            return {code: codes[requests.length - 1], data: {rootID: "doc", rootTitle: "Document"}};
+        };
+        await context.openById({app: {}, id: "heading", notebookId: "notebook", retryOnUnavailable: 2,
+            scrollPosition: "start", zoomIn: true});
+        assert.equal(requests.length, 3);
+        assert.ok(requests.every((request: any) => request.id === "heading" && request.notebook === "notebook"));
+        assert.deepEqual(delays, codes.slice(0, -1).map(code => code === 3 ? 1000 : 300));
+        assert.equal(switched.length, 1);
+        assert.equal(switched[0].options.zoomIn, true);
+        assert.equal(switched[0].options.scrollPosition, "start");
+    });
+}
+
+for (const code of [-1, 3, -2]) {
+    for (const retries of [0, 2]) {
+        test(`lookup code ${code} with ${retries} retries stops within its budget`, async () => {
+            const {context, switched} = setup([]);
+            let requests = 0;
+            const messages: string[] = [];
+            context.Constants = {TIMEOUT_TRANSITION: 300};
+            context.window.setTimeout = (callback: () => void) => callback();
+            context.showMessage = (message: string) => messages.push(message);
+            context.fetchSyncPost = async () => { requests++; return {code, msg: "indexing"}; };
+            await context.openById({app: {}, id: "heading", retryOnUnavailable: retries});
+            assert.equal(requests, code === -2 ? 1 : retries + 1);
+            assert.equal(switched.length, 0);
+            assert.deepEqual(messages, code === 3 ? ["indexing"] : []);
+        });
+    }
+}

@@ -1,6 +1,6 @@
 import "vditor/dist/index.css";
 import "../assets/scss/markdown.scss";
-import type {MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "./bridge";
+import type {MarkdownAppearanceGroup, MarkdownAppearancePatch, MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "./bridge";
 import {createMarkdownEditor, MarkdownEditor, MarkdownEditorMode} from "./editor";
 import {MarkdownSession, MarkdownSessionState} from "./session";
 import {createNativeMarkdownBridge} from "./nativeBridge";
@@ -11,6 +11,7 @@ import {createMarkdownChoice, createMarkdownSubmenu, MarkdownChoice} from "./cho
 import {createMarkdownWindowChrome} from "./windowChrome";
 import {createMarkdownTooltips} from "./tooltip";
 import {createMarkdownSidebarShortcuts} from "./shortcuts";
+import {markdownWorkspaceChoice, createMarkdownAppearanceForm, createMarkdownFontAppearance} from "./appearance";
 
 declare const SIYUAN_VERSION: string;
 (window as unknown as {SIYUAN_VERSION: string}).SIYUAN_VERSION = SIYUAN_VERSION;
@@ -27,6 +28,9 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     let bootstrap: MarkdownBootstrap = initial ?? await bridge.bootstrap();
     const text = (key: string) => bootstrap.languages[key] ?? key;
     let preferences = bootstrap.preferences;
+    let appearance = bridge.appearance ? bootstrap.appearance : undefined;
+    const fontAppearance = createMarkdownFontAppearance(root);
+    const appearanceTheme = () => appearance?.theme ?? preferences.theme ?? "system";
     let activeMode = preferences.mode;
     let systemDark = bootstrap.dark;
     let editor: MarkdownEditor;
@@ -50,6 +54,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     let modeChoice: MarkdownChoice = undefined;
     let themeChoice: MarkdownChoice = undefined;
     let fontChoice: MarkdownChoice = undefined;
+    let fontsChoice: MarkdownChoice = undefined;
+    let destroyAppearanceForm: () => void;
     let appearanceMenu: ReturnType<typeof createMarkdownSubmenu> = undefined;
     let switching = false;
     let switchTask: Promise<boolean>;
@@ -83,7 +89,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             <button type="button" class="b3-menu__item" id="markdownRecovery" aria-expanded="false" aria-controls="markdownRecoveryPanel"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconHistory"></use></svg><span class="b3-menu__label" data-label="markdownRecovery"></span></button>
             <hr class="b3-menu__separator">
             <div id="markdownMode"></div>
-            <div id="markdownPreferences"><div id="markdownTheme"></div><div id="markdownFont"></div></div>
+            <div id="markdownPreferences"><div id="markdownTheme"></div><div id="markdownFont"></div><div id="markdownFonts" hidden></div></div>
             <div class="markdown-policy"><p id="markdownNotice" role="status"></p></div>
         </div>
     </details>
@@ -95,7 +101,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
 </div>
 <footer class="markdown-footer" id="markdownFooter" hidden>
     <div class="markdown-status"><span id="markdownStatus" role="status" aria-live="polite"></span><span class="markdown-status__actions" id="markdownProblemActions"><button type="button" class="b3-button b3-button--text" id="markdownRetry" data-label="retry" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownReload" data-label="markdownReload" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownOverwrite" data-label="markdownOverwrite" hidden></button></span></div>
-</footer>`;
+</footer>
+<dialog id="markdownAppearancePanel" class="b3-dialog b3-dialog--open markdown-appearance-dialog" hidden aria-labelledby="markdownAppearanceTitle"></dialog>`;
     let tooltips: ReturnType<typeof createMarkdownTooltips>;
     const sidebarShortcuts = createMarkdownSidebarShortcuts({
         platform: bootstrap.platform, keymap: bootstrap.keymap,
@@ -109,32 +116,12 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownOutlineToggle").dataset.tooltipShortcut = outline.available ? sidebarShortcuts.label("outline") : "";
     };
     root.querySelectorAll<HTMLElement>("[data-label]").forEach(element => { element.textContent = text(element.dataset.label); });
-    // Contextual explanations remain available to keyboard and touch users, not only hover.
-    for (const [id, label, explanation] of [["markdownResources", "markdownResources", "markdownPreviewPolicy"],
-        ["markdownRecovery", "markdownRecovery", "markdownPrivacy"]]) {
+    for (const [id, explanation] of [["markdownResources", "markdownPreviewPolicy"],
+        ["markdownRecovery", "markdownPrivacy"]]) {
         const action = control(id);
-        const row = document.createElement("div");
-        row.className = "markdown-menu__row";
-        const info = document.createElement("button");
-        info.type = "button";
-        info.className = "block__icon block__icon--show block__icon--tap block__icon--inset markdown-menu__info";
-        info.id = `${id}Info`;
-        info.dataset.tooltip = text(explanation);
-        info.setAttribute("aria-label", `${text(label)}: ${text("about")}`);
-        info.setAttribute("aria-expanded", "false");
-        info.setAttribute("aria-controls", `${id}Explanation`);
-        info.innerHTML = '<svg aria-hidden="true"><use href="#iconInfo"></use></svg>';
-        const description = document.createElement("p");
-        description.id = `${id}Explanation`;
-        description.className = "markdown-menu__explanation";
-        description.textContent = text(explanation);
-        description.hidden = true;
-        info.addEventListener("click", () => {
-            description.hidden = !description.hidden;
-            info.setAttribute("aria-expanded", String(!description.hidden));
-        });
-        action.replaceWith(row);
-        row.append(action, info, description);
+        action.setAttribute("aria-description", text(explanation));
+        action.insertAdjacentHTML("beforeend", `<span id="${id}Info" class="b3-menu__icon b3-menu__icon--small markdown-menu__info" data-tooltip-touch aria-hidden="true"><svg width="100%" height="100%"><use href="#iconInfo"></use></svg></span>`);
+        control(`${id}Info`).dataset.tooltip = text(explanation);
     }
     const header = root.querySelector<HTMLElement>(".markdown-header");
     header.inert = true;
@@ -202,7 +189,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     const unsubscribeInitialization = bridge.onCommand(message => { void initializationCommand(message).catch((): void => undefined); });
 
     const applyTheme = async () => {
-        const dark = preferences.theme === "dark" || (preferences.theme === "system" && systemDark);
+        const dark = appearanceTheme() === "dark" || (appearanceTheme() === "system" && systemDark);
         const sequence = ++themeSequence;
         const oldLink = document.getElementById("markdownThemeStyle") as HTMLLinkElement;
         const href = new URL(`./appearance/themes/${dark ? "midnight" : "daylight"}/theme.css`, location.href).href;
@@ -225,7 +212,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         editor?.setTheme(dark ? "dark" : "light");
         windowChrome?.refresh();
     };
-    root.style.setProperty("--markdown-font-size", `${preferences.fontSize}px`);
+    root.style.setProperty("--markdown-font-size", `${appearance?.fontSize ?? preferences.fontSize ?? 16}px`);
 
     const render = (state: MarkdownSessionState) => {
         if (disposed) return;
@@ -307,6 +294,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownActions").inert = frozen;
         control("markdownPreferences").inert = frozen;
         control("markdownRecoveryPanel").inert = frozen;
+        control("markdownAppearancePanel").inert = frozen;
         control("markdownProblemActions").inert = frozen && !pendingSwitch;
         tree?.freeze(frozen);
         render(session.getState());
@@ -318,6 +306,14 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     const initializeDocument = async (next: MarkdownBootstrap) => {
         const generation = ++documentGeneration;
         const current = () => !disposed && generation === documentGeneration;
+        if (bridge.appearance && next.appearance && next.appearance !== appearance) {
+            appearance = next.appearance;
+            root.style.setProperty("--markdown-font-size", `${appearance.fontSize}px`);
+            fontAppearance.apply(appearance);
+            await applyTheme();
+            if (!current()) return;
+            if (appearanceMenu) workspaceChoices();
+        }
         clearTimeout(autoSave);
         editor?.destroy();
         editor = undefined;
@@ -348,7 +344,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                 cdn: new URL("./vditor", location.href).href, lang: next.lang,
                 mobile: ["android", "ios", "harmony"].includes(next.platform),
                 outline: outline.enabled,
-                theme: preferences.theme === "dark" || (preferences.theme === "system" && systemDark) ? "dark" : "light",
+                theme: appearanceTheme() === "dark" || (appearanceTheme() === "system" && systemDark) ? "dark" : "light",
                 onHistoryChange(state) {if (!current()) return; history = state; render(documentSession.getState());},
                 onOutlineChange(state) {if (!current()) return; outline = state; render(documentSession.getState());},
                 resolveResource: async reference => {
@@ -418,6 +414,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             throw new Error("Required Markdown WebView capabilities are unavailable");
         }
         tooltips = createMarkdownTooltips(root);
+        if (appearance) fontAppearance.apply(appearance);
         await applyTheme();
         if (initializationClosing) throw new Error("Markdown initialization was closed");
         await initializeDocument(bootstrap);
@@ -427,6 +424,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownEditor").textContent = text("markdownLoadError");
         control("markdownEditor").setAttribute("aria-busy", "false");
         tooltips?.destroy();
+        fontAppearance.destroy();
         throw error;
     }
 
@@ -589,16 +587,77 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     });
     appearanceMenu = createMarkdownSubmenu({
         element: control("markdownPreferences"), label: text("appearance"), icon: "iconTheme",
-        onClose() {themeChoice?.close(); fontChoice?.close();},
+        onClose() {themeChoice?.close(); fontChoice?.close(); fontsChoice?.close();},
     });
     modeChoice = createMarkdownChoice({
         element: control("markdownMode"), label: text("markdownEditMode"), icon: "iconEdit", value: activeMode,
         values: [["ir", "markdownModeIR"], ["wysiwyg", "wysiwyg"], ["sv", "markdownModeSV"]].map(([value, label]) => ({value, label: text(label)})),
         onChange(mode) {if (!frozen) {closeMore(); editor.setMode(mode as MarkdownEditorMode);}},
     });
-    themeChoice = preferenceChoice("markdownTheme", "appearanceMode", [["system", "themeOS"], ["light", "themeLight"], ["dark", "themeDark"]], preferences.theme, value => ({theme: value as MarkdownPreferences["theme"]}));
-    fontChoice = preferenceChoice("markdownFont", "fontSize", [14, 16, 18, 20, 24, 28, 32].map(value => [String(value), String(value)]), String(preferences.fontSize), value => ({fontSize: Number(value)}));
-    fontChoice.menu.classList.add("markdown-choice__menu--compact");
+    let appearanceUpdates = Promise.resolve();
+    const updateAppearance = (patch: MarkdownAppearancePatch) => {
+        const task = appearanceUpdates.then(async () => {
+            if (disposed) return;
+            const next = await bridge.appearance(patch);
+            if (disposed) return;
+            appearance = next;
+            root.style.setProperty("--markdown-font-size", `${appearance.fontSize}px`);
+            fontAppearance.apply(appearance);
+            await applyTheme();
+            if (!disposed) workspaceChoices();
+        });
+        appearanceUpdates = task.catch((): void => undefined);
+        runAction(() => task, false, true);
+        return task;
+    };
+    const configureAppearance = (group: MarkdownAppearanceGroup) => {
+        if (disposed || frozen) return;
+        closeMore(false);
+        const panel = control<HTMLDialogElement>("markdownAppearancePanel");
+        destroyAppearanceForm?.();
+        panel.hidden = false;
+        destroyAppearanceForm = createMarkdownAppearanceForm(panel, group, appearance.independent ?? {}, text,
+            async independent => {if (!disposed && !frozen) await updateAppearance({sources: {[group]: "independent"}, independent});},
+            () => {panel.hidden = true; panel.replaceChildren(); if (!disposed) moreButton.focus();},
+            () => bridge.systemFonts ? bridge.systemFonts() : Promise.reject(new Error("System fonts unavailable")));
+        panel.showModal();
+    };
+    const workspaceChoices = () => {
+        themeChoice?.destroy(); fontChoice?.destroy(); fontsChoice?.destroy();
+        const choice = (id: string, label: string, group: MarkdownAppearanceGroup, icon: string) => {
+            const element = control(id);
+            element.replaceChildren();
+            element.hidden = false;
+            const source = appearance.sources[group];
+            const values = [{value: "independent", label: text("markdownIndependentAppearance")}, ...appearance.workspaces.map(markdownWorkspaceChoice)];
+            if (!source || !values.some(value => value.value === source)) {
+                values.unshift({value: source, label: text(source ? "markdownWorkspaceUnavailable" : "default")});
+            }
+            const result = createMarkdownChoice({element, label: text(label), icon, values, value: source, maxHeight: 320,
+                onChange(value) {
+                    if (frozen || disposed || value !== "independent" && !appearance.workspaces.some(workspace => workspace.id === value)) return;
+                    if (value === "independent") {configureAppearance(group); return;}
+                    closeMore();
+                    void updateAppearance({sources: {[group]: value}}).catch((): void => undefined);
+                },
+            });
+            result.menu.classList.add("markdown-choice__menu--workspace");
+            result.menu.querySelectorAll<HTMLButtonElement>("button").forEach(button => {
+                button.disabled = button.dataset.value !== "independent" && !appearance.workspaces.some(workspace => workspace.id === button.dataset.value);
+            });
+            return result;
+        };
+        themeChoice = choice("markdownTheme", "appearanceMode", "theme", "iconMode");
+        fontChoice = choice("markdownFont", "fontSize", "fontSize", "iconFont");
+        fontsChoice = choice("markdownFonts", "fontFamily", "fonts", "iconFont");
+    };
+    if (appearance) {
+        workspaceChoices();
+    } else {
+        themeChoice = preferenceChoice("markdownTheme", "appearanceMode", [["system", "themeOS"], ["light", "themeLight"], ["dark", "themeDark"]], preferences.theme ?? "system", value => ({theme: value as MarkdownPreferences["theme"]}));
+        fontChoice = preferenceChoice("markdownFont", "fontSize", [14, 16, 18, 20, 24, 28, 32].map(value => [String(value), String(value)]), String(preferences.fontSize ?? 16), value => ({fontSize: Number(value)}));
+        fontChoice.menu.classList.add("markdown-choice__menu--compact");
+    }
 
     const protectExit = async (kind: "close" | "prepare-quit"): Promise<boolean> => {
         const sequence = ++exitSequence;
@@ -794,6 +853,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     unsubscribeInitialization();
     const unsubscribe = bridge.onCommand(message => { void command(message).catch(reportError); });
     const shortcut = (event: KeyboardEvent) => {
+        if (control<HTMLDialogElement>("markdownAppearancePanel").open) return;
         if (sidebarShortcuts.handle(event)) return;
         const modifier = bootstrap.platform === "darwin" || bootstrap.platform === "ios" ? event.metaKey : event.ctrlKey;
         if (!modifier || event.altKey || event.isComposing || !/^[nos]$/i.test(event.key)) return;
@@ -813,7 +873,9 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         clearTimeout(autoSave); unsubscribe();
         document.removeEventListener("keydown", shortcut, true);
         removeMenuListeners();
-        tree?.destroy(); modeChoice?.destroy(); appearanceMenu?.destroy(); themeChoice?.destroy(); fontChoice?.destroy();
+        tree?.destroy(); modeChoice?.destroy(); appearanceMenu?.destroy(); themeChoice?.destroy(); fontChoice?.destroy(); fontsChoice?.destroy();
+        fontAppearance.destroy();
+        destroyAppearanceForm?.();
         windowChrome?.destroy();
         editor?.destroy();
     }

@@ -24,6 +24,7 @@ import {
     isInEmbedBlock
 } from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
+import {isCustomTabUninstalled} from "../plugin/customTabOwner";
 /// #if !BROWSER
 import {ipcRenderer, webFrame} from "electron";
 import {setModelsHash} from "../window/setHeader";
@@ -718,8 +719,11 @@ export class Wnd {
         if (currentTab && currentTab.headElement) {
             const initData = currentTab.headElement.getAttribute("data-initdata");
             if (initData) {
-                currentTab.addModel(newModelByInitData(this.app, currentTab, JSON.parse(initData)));
-                currentTab.headElement.removeAttribute("data-initdata");
+                const model = newModelByInitData(this.app, currentTab, JSON.parse(initData));
+                if (model) {
+                    currentTab.addModel(model);
+                    currentTab.headElement.removeAttribute("data-initdata");
+                }
                 if (isSaveLayout) {
                     saveLayout();
                 }
@@ -1002,7 +1006,12 @@ export class Wnd {
                 }
             });
         }
-        model.destroy();
+        try {
+            model.destroy();
+        } catch (error) {
+            if (!(model instanceof Custom)) { throw error; }
+            console.error("Plugin tab destroy failed:", error);
+        }
         model.send("closews", {});
     }
 
@@ -1020,7 +1029,7 @@ export class Wnd {
             /// #endif
             window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] =
                 sanitizeClosedTabs(window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
-            if (item.headElement && !isSensitiveTab(item)) {
+            if (item.headElement && !isSensitiveTab(item) && !isCustomTabUninstalled(item)) {
                 const tabJSON = {};
                 layoutToJSON(item, tabJSON);
                 window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].push(tabJSON);
@@ -1030,7 +1039,11 @@ export class Wnd {
             }
             setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             if (item.model instanceof Custom && item.model.beforeDestroy) {
-                item.model.beforeDestroy();
+                try {
+                    item.model.beforeDestroy();
+                } catch (error) {
+                    console.error("Plugin tab beforeDestroy failed:", error);
+                }
             }
             if (!sourceRemoved && item.model instanceof Editor) {
                 saveBackScroll(item.model.editor.protyle);

@@ -47,6 +47,7 @@ type File struct {
 	TitleEmpty       bool   `json:"titleEmpty,omitempty"`
 	TitleFormat      string `json:"titleFormat,omitempty"`
 	TitleRevision    string `json:"titleRevision,omitempty"`
+	SpecTooNew       bool   `json:"specTooNew,omitempty"` // 源版本高于当前版本，标题等属性仅来自占位读取
 	Icon             string `json:"icon"`
 	Name1            string `json:"name1"` // 命名，即 ial["name"]
 	Alias            string `json:"alias"`
@@ -136,42 +137,52 @@ func docSortModeFromIAL(ial map[string]string) *int {
 	return &sortMode
 }
 
-func (box *Box) docIAL(p string) (ret map[string]string) {
+// docIALWithSpec 返回属性并标记源版本是否高于当前版本。
+// 版本过新的属性只用于文档树占位展示，调用方不得写回、缓存或据此修复源。
+func (box *Box) docIALWithSpec(p string) (ret map[string]string, specTooNew bool) {
 	name := strings.ToLower(filepath.Base(p))
 	if !strings.HasSuffix(name, ".sy") {
-		return nil
+		return nil, false
 	}
 
 	if _, err := box.validateBoxPath(p); err != nil {
-		return nil
+		return nil, false
 	}
 
 	if IsEncryptedBox(box.ID) {
 		HoldBoxReadLock(box.ID)
 		defer ReleaseBoxReadLock(box.ID)
 		if _, err := GetDEKIfUnlocked(box.ID); err != nil {
-			return nil
+			return nil, false
 		}
 	}
 
 	ret = cache.GetDocIALInBox(p, box.ID)
 	if nil != ret {
-		return ret
+		return ret, false
 	}
 
 	filePath := filepath.Join(util.DataDir, box.ID, p)
 	var readErr error
 	ret, readErr = filesys.DocIAL(filePath)
+	if errors.Is(readErr, treenode.ErrSpecTooNew) {
+		// 不写入缓存：升级后的进程需要重新判定版本，不能沿用占位属性。
+		if 1 > len(ret) {
+			logging.LogWarnf("read document properties [%s] failed: %s", filePath, readErr)
+			return nil, true
+		}
+		return ret, true
+	}
 	if readErr != nil && !errors.Is(readErr, filesys.ErrInvalidDocIAL) {
 		if !errors.Is(readErr, os.ErrNotExist) {
 			logging.LogWarnf("read document properties [%s] failed: %s", filePath, readErr)
 		}
-		return nil
+		return nil, false
 	}
 	if 1 > len(ret) {
 		// 目录枚举后文档可能已被删除，不将不存在的文件视为损坏。
 		if _, statErr := os.Stat(filePath); errors.Is(statErr, os.ErrNotExist) {
-			return nil
+			return nil, false
 		}
 		// 加密笔记本的 .sy 解密失败（DEK 未缓存或 box 未解锁）时不应视为损坏，
 		// 否则文件会被 moveCorruptedData 移走导致数据丢失。
@@ -179,14 +190,23 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 		actualBoxID := util.BoxIDFromDataPath(filePath)
 		if (actualBoxID != "" && IsEncryptedBox(actualBoxID)) || IsEncryptedBox(box.ID) {
 			logging.LogWarnf("properties not found in encrypted file [%s], skip moveCorruptedData", filePath)
-			return nil
+			return nil, false
 		}
 		logging.LogWarnf("properties not found in file [%s]", filePath)
 		box.moveCorruptedData(filePath)
-		return nil
+		return nil, false
 	}
 	cache.PutDocIALInBox(p, box.ID, ret)
-	return ret
+	return ret, false
+}
+
+// docIAL 只返回当前版本可完整读取的属性；需要为更新版本的文档占位时使用 docIALWithSpec。
+func (box *Box) docIAL(p string) (ret map[string]string) {
+	ret, specTooNew := box.docIALWithSpec(p)
+	if specTooNew {
+		return nil
+	}
+	return
 }
 
 func (box *Box) moveCorruptedData(filePath string) {
@@ -556,7 +576,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 			if nil == parentDocFile {
 				continue
 			}
-			if ial := box.docIAL(parentDocPath); nil != ial {
+			if ial, specTooNew := box.docIALWithSpec(parentDocPath); nil != ial {
 				if !showHidden && "true" == ial[DocHiddenAttr] {
 					continue
 				}
@@ -564,6 +584,10 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				doc := box.docFromFileInfo(parentDocFile, ial)
 				if nil == doc {
 					continue
+				}
+				doc.SpecTooNew = specTooNew
+				if specTooNew && "" == doc.Name {
+					doc.TitleEmpty = true
 				}
 				doc.SubFileCount, _ = visibleDocCount(box.ID, file.path, box.docIAL, nil)
 
@@ -594,7 +618,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 			continue
 		}
 
-		if ial := box.docIAL(file.path); nil != ial {
+		if ial, specTooNew := box.docIALWithSpec(file.path); nil != ial {
 			if !showHidden && "true" == ial[DocHiddenAttr] {
 				continue
 			}
@@ -602,6 +626,10 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 			doc := box.docFromFileInfo(file, ial)
 			if nil == doc {
 				continue
+			}
+			doc.SpecTooNew = specTooNew
+			if specTooNew && "" == doc.Name {
+				doc.TitleEmpty = true
 			}
 
 			if flashcard {

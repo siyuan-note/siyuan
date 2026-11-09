@@ -58,6 +58,12 @@ const runElectron = async options => {
                 setTimeout(check, 25);
             }; check();
         })`);
+        assert.equal(window.getTitle(), "A.md", "page initialization keeps the native filename title");
+        const pageTitleChanged = once(window, "page-title-updated", {signal: AbortSignal.timeout(5000)});
+        await window.webContents.executeJavaScript("document.title = 'SiYuan'; void 0;");
+        await pageTitleChanged;
+        assert.equal(window.getTitle(), "A.md", "a temporary page title cannot replace the native filename");
+        await window.webContents.executeJavaScript("document.title = 'A.md'; void 0;");
         const security = await window.webContents.executeJavaScript(`({node: typeof require, process: typeof process,
             host: typeof window.siyuanMarkdown.host.write, unsafe: typeof window.siyuanMarkdown.invoke,
             origin: location.href, text: document.querySelector('#markdownEditor').innerText,
@@ -82,7 +88,28 @@ const runElectron = async options => {
         assert.match(security.contentTheme, /\/dark\.css$/);
         assert.ok(security.textColor.match(/\d+/g).slice(0, 3).every(value => Number(value) > 128),
             `dark sandbox heading remains readable: ${security.textColor}`);
-        assert.equal(await fs.readFile(options.document, "utf8"), "# Original document\n");
+        assert.equal(await fs.readFile(options.document, "utf8"), options.initialContent);
+        await window.webContents.executeJavaScript(`new Promise((resolve,reject) => {
+            const deadline = Date.now() + 10000;
+            const check = () => {
+                const code = document.querySelector('#markdownEditor .vditor-ir__marker--pre > code');
+                if (code?.querySelector('.hljs-title') && code.querySelector('.hljs-string') &&
+                    document.getElementById('vditorHljsStyle')?.sheet) return resolve();
+                if (Date.now() > deadline) return reject(new Error('Production code highlighting is unavailable'));
+                setTimeout(check, 25);
+            }; check();
+        })`);
+        const codeState = await window.webContents.executeJavaScript(`(() => {
+            const code = document.querySelector('#markdownEditor .vditor-ir__marker--pre > code');
+            code.parentElement.parentElement.querySelector('.vditor-ir__preview').click();
+            return {text: code.textContent, foreground: getComputedStyle(code).color,
+                title: getComputedStyle(code.querySelector('.hljs-title')).color,
+                string: getComputedStyle(code.querySelector('.hljs-string')).color};
+        })()`);
+        assert.equal(codeState.text, "document.body.insertAdjacentHTML('afterbegin', ``);\n");
+        assert.notEqual(codeState.title, codeState.foreground);
+        assert.notEqual(codeState.string, codeState.foreground);
+        assert.equal(await fs.readFile(options.document, "utf8"), options.initialContent);
         for (const heading of ["Original document1", "Original document", "Third external version"]) {
             const content = `# ${heading}\n`;
             await fs.writeFile(options.document, content);
@@ -216,7 +243,7 @@ const runElectron = async options => {
     }
 };
 
-test("the real sandboxed page saves, switches files and displays network images without loading active content", {
+test("the production sandboxed page highlights code and preserves save, switch and resource isolation", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 90000,
 }, async () => {
@@ -229,7 +256,7 @@ test("the real sandboxed page saves, switches files and displays network images 
         const sharedLute = path.join(root, "stage/protyle/js/lute/lute.min.js");
         fs.mkdirSync(path.dirname(sharedLute), {recursive: true});
         fs.copyFileSync(path.resolve(__dirname, "../../stage/protyle/js/lute/lute.min.js"), sharedLute);
-        const config = require("../../webpack.markdown")({}, {mode: "development"});
+        const config = require("../../webpack.markdown")({}, {mode: "production"});
         config.context = path.resolve(__dirname, "../.."); config.watch = false; config.devtool = false;
         config.output = {...config.output, path: output};
         await compile(config);
@@ -245,10 +272,11 @@ test("the real sandboxed page saves, switches files and displays network images 
         fs.mkdirSync(documents);
         const document = path.join(documents, "A.md");
         const secondDocument = path.join(documents, "B.md");
-        fs.writeFileSync(document, "# Original document\n");
+        const initialContent = "# Original document\n\n```js\ndocument.body.insertAdjacentHTML('afterbegin', ``);\n```\n";
+        fs.writeFileSync(document, initialContent);
         fs.writeFileSync(secondDocument, "# Second document\n");
         const script = path.join(temporary, "run.cjs");
-        fs.writeFileSync(script, `const __name = value => value;\n(${runElectron.toString()})(${JSON.stringify({root, document, secondDocument,
+        fs.writeFileSync(script, `const __name = value => value;\n(${runElectron.toString()})(${JSON.stringify({root, document, secondDocument, initialContent,
     manager: path.join(runtime, "windows.js"), devTools: path.join(runtime, "devTools.js"),
     windowControlsStub: path.join(__dirname, "../fixtures/windowControlsStub.cjs"),
     profile: path.join(temporary, "profile"), config: path.join(temporary, "config")})});`);

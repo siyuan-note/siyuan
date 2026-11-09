@@ -60,8 +60,14 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
         }
     };
     let width = "560px";
+    let actionHTML = `<div class="b3-dialog__action">
+<button class="b3-button b3-button--cancel" data-type="cancel">${escapeHtml(window.siyuan.languages.cancel)}</button>
+<div class="fn__space"></div><button class="b3-button" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button></div>`;
     /// #if MOBILE
     width = "100vw";
+    actionHTML = `<div class="b3-dialog__action mobile-sheet-action-bar"><div class="mobile-sheet-action-group mobile-sheet-action-group--compact">
+<button class="b3-button b3-button--touch b3-button--wrap b3-button--cancel b3-button--secondary" data-type="cancel">${escapeHtml(window.siyuan.languages.cancel)}</button>
+<button class="b3-button b3-button--touch b3-button--wrap" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button></div></div>`;
     /// #endif
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
@@ -71,8 +77,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
         containerClassName: "mobile-document-title-sheet",
         hideCloseIcon: true,
         /// #endif
-        content: `<div class="document-title-dialog"></div><div class="b3-dialog__action">
-<button class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button></div>`,
+        content: `<div class="document-title-dialog"></div>${actionHTML}`,
         beforeClose: () => {
             if (closePending && !canClose) return false;
             closing = true;
@@ -124,7 +129,6 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
             render: {background: false, title: true, titleShowTop: false, breadcrumb: false, gutter: false, scroll: false},
             after: (protyle) => {
                 if (!closing && !disposed) {
-                    /// #if MOBILE
                     const owner = protyle.protyle;
                     let field = owner.element.querySelector<HTMLElement>(":scope > .document-title-dialog__editor");
                     if (!field) {
@@ -133,6 +137,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
                         owner.element.appendChild(field);
                     }
                     owner.title?.mountEditorOnly(field);
+                    /// #if MOBILE
                     editorReady = true;
                     void focusTitle().catch(error => console.error(error));
                     /// #else
@@ -148,5 +153,6 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
     registerMobileSecondaryEditor(editor, closeInvalidated);
     /// #endif
     dialog.element.querySelector('[data-type="confirm"]').addEventListener("click", () => void close());
+    dialog.element.querySelector('[data-type="cancel"]').addEventListener("click", () => dialog.destroy());
     return dialog;
 };

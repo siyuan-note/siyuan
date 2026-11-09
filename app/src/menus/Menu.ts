@@ -5,6 +5,7 @@ import {getAnchoredMenuPosition} from "./menuPosition";
 import {bindMenuMouseScroll} from "./menuMouseScroll";
 import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGroup";
 import {getVisibleSheetViewport, waitForSheetViewport} from "./sheetOpen";
+import {bindKeyboardSheetState} from "../mobile/util/keyboardSheetState";
 import {setSheetExpanded} from "./sheetActions";
 import {getMobileSheetBounds, moveSheetGesture, SheetGesture} from "../mobile/util/mobileSheetGesture";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -60,6 +61,7 @@ export class Menu {
     private sheetViewport = "";
     private sheetSafeArea: HTMLElement;
     private sheetViewportObserver: MutationObserver;
+    private disposeKeyboardSheetState: () => void;
     private sheetClosing = false;
     private suppressSheetClick = false;
     private targetPositionFrame: number | undefined;
@@ -270,7 +272,7 @@ export class Menu {
         this.sheetTouchStartTime = performance.now();
         this.sheetCanDrag = this.canDragSheet(event.target as HTMLElement);
         this.sheetDragging = false;
-        this.sheetStartHeight = this.element.clientHeight;
+        this.sheetStartHeight = this.element.getBoundingClientRect().height;
         this.sheetTouchIdentifier = touch.identifier;
         this.sheetResize = undefined;
         if (this.sheetCanDrag && (event.target as HTMLElement).closest(".b3-menu__title") === this.element.firstElementChild) {
@@ -777,15 +779,16 @@ export class Menu {
             this.position.h = rect.height;
             this.position.w = rect.width;
         }
-        const scrollPositions = Array.from(this.element.querySelectorAll<HTMLElement>(".b3-menu__items"),
-            items => ({items, top: items.scrollTop}));
+        const scrollPositions = new Map(Array.from(this.element.querySelectorAll<HTMLElement>(".b3-menu__items"),
+            items => [items, items.scrollTop] as const));
         this.setPopupPosition();
+        // 父菜单恢复滚动后再测量子菜单的锚点，逐层恢复以定位更深的子菜单。
+        scrollPositions.forEach((top, items) => { items.scrollTop = top; });
         this.element.querySelectorAll(".b3-menu__item--show > .b3-menu__submenu").forEach((item: HTMLElement) => {
-            // 可能有多层子菜单，都要重新定位
             this.showSubMenu(item);
+            const itemsElement = item.lastElementChild as HTMLElement;
+            itemsElement.scrollTop = scrollPositions.get(itemsElement) || 0;
         });
-        // 测量时会临时取消限高，恢复滚动位置以保留异步菜单加载期间的浏览进度。
-        scrollPositions.forEach(({items, top}) => { items.scrollTop = top; });
     }
 
     private startTrackingTargetPosition() {
@@ -797,6 +800,7 @@ export class Menu {
 
     private startTrackingSheetViewport() {
         this.stopTrackingTargetPosition();
+        this.disposeKeyboardSheetState = bindKeyboardSheetState(this.element);
         this.sheetSafeArea = document.createElement("div");
         this.sheetSafeArea.style.cssText = "display:none;padding-top:var(--mobile-top-safe-area, env(safe-area-inset-top))";
         document.body.append(this.sheetSafeArea);
@@ -812,6 +816,8 @@ export class Menu {
     }
 
     private stopTrackingTargetPosition() {
+        this.disposeKeyboardSheetState?.();
+        this.disposeKeyboardSheetState = undefined;
         this.sheetSafeArea?.remove();
         this.sheetSafeArea = undefined;
         this.sheetViewportObserver?.disconnect();

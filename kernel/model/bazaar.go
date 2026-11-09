@@ -144,6 +144,18 @@ func filterUpdatableBazaarPackages(packages []*UpdatedPackage) (updatable []*Upd
 	return
 }
 
+// excludeBazaarBatchPackages 仅影响批量更新，保留单项更新和更新提示。
+func excludeBazaarBatchPackages(packages []*UpdatedPackage, excluded map[string]bool) []*UpdatedPackage {
+	result := make([]*UpdatedPackage, 0, len(packages))
+	for _, pkg := range packages {
+		if pkg.Installed != nil && excluded[pkg.Installed.Name] {
+			continue
+		}
+		result = append(result, pkg)
+	}
+	return result
+}
+
 // BatchUpdatePackagesContext 取消时保留已提交的包，并停止当前下载和后续更新。
 func BatchUpdatePackagesContext(ctx context.Context, frontend string) error {
 	if err := ctx.Err(); err != nil {
@@ -153,6 +165,12 @@ func BatchUpdatePackagesContext(ctx context.Context, frontend string) error {
 	if err != nil {
 		return err
 	}
+	excluded := Conf.Bazaar.Load().BatchUpdateExcluded
+	plugins = excludeBazaarBatchPackages(plugins, excluded["plugins"])
+	themes = excludeBazaarBatchPackages(themes, excluded["themes"])
+	widgets = excludeBazaarBatchPackages(widgets, excluded["widgets"])
+	icons = excludeBazaarBatchPackages(icons, excluded["icons"])
+	templates = excludeBazaarBatchPackages(templates, excluded["templates"])
 	unmetRequirementCount := 0
 	var count int
 	plugins, count = filterUpdatableBazaarPackages(plugins)

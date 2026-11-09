@@ -100,3 +100,7 @@ export const withMountedBazaar = async (callback: (module: BazaarModule) => void
     callback(module);
     return true;
 };
+
+export const refreshMountedBazaarFilters = async (): Promise<void> => {
+    await withMountedBazaar(({bazaar}) => bazaar._refreshCompatibilityFilters());
+};

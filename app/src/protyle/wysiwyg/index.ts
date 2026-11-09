@@ -171,7 +171,6 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {
     addDragFill,
-    cellValueIsEmpty,
     dragFillCellsValue,
     getAVCellData,
     getAVSelectedCellData,
@@ -210,6 +209,7 @@ import {
     getSemanticInlineVisibleText,
     getTextWithoutSemanticMarkers,
     hasSemanticInlineType,
+    normalizeSemanticCaretAfterClick,
     normalizeSemanticInlineHTML,
     stripSemanticMarkersFromRangeText,
     transformSemanticInlineHTML
@@ -1320,7 +1320,7 @@ export class WYSIWYG {
             const customElement = hasClosestByClassName(target, "protyle-custom");
             // 富文本预览以 b3-typography 作为渲染边界，先回到单元格再查找数据库块。
             let nodeElement = hasClosestBlock(avCellElement || target) as HTMLElement;
-            if (nodeElement?.classList.contains("av")) {
+            if (nodeElement && nodeElement.classList.contains("av")) {
                 prepareAVColumnWindow(nodeElement);
             }
             let clickedTableNode = !customElement && nodeElement && nodeElement.dataset.type === "NodeTable" ?
@@ -1361,14 +1361,6 @@ export class WYSIWYG {
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
             const galleryItemElement = hasClosestByClassName(target, "av__gallery-item");
             const rowElement = hasClosestByClassName(target, "av__row");
-            const selectFilledTextCell = Boolean(!isMobile() && avCellElement &&
-                avCellElement.dataset.dtype === "text" &&
-                !avCellElement.classList.contains("av__cell--select") &&
-                !cellValueIsEmpty(genCellValueByElement("text", avCellElement)) &&
-                !target.closest(".av__cell-action, .av__celltext--rich [data-type~='block-ref'][data-id], " +
-                    ".av__celltext--rich [data-type~='file-annotation-ref'][data-id], " +
-                    ".av__celltext--rich [data-type~='tag'], .av__celltext--rich [data-type~='a'], " +
-                    ".av__celltext--rich a[href]"));
             const avElement = getAVSelectionRoot(target);
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
@@ -2001,7 +1993,7 @@ export class WYSIWYG {
                     }
                 };
 
-                documentSelf.onmouseup = (upEvent: MouseEvent) => {
+                documentSelf.onmouseup = () => {
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
                     documentSelf.ondragstart = null;
@@ -2011,10 +2003,6 @@ export class WYSIWYG {
                         selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
                         focusBlock(nodeElement);
                         addDragFill(lastCellElement);
-                        this.preventClick = true;
-                    } else if (selectFilledTextCell &&
-                        hasClosestByClassName(upEvent.target as HTMLElement, "av__cell") === avCellElement) {
-                        focusBlock(nodeElement);
                         this.preventClick = true;
                     }
                     return false;
@@ -2028,6 +2016,7 @@ export class WYSIWYG {
                 }
                 const html = nodeElement.outerHTML;
                 const isIFrame = ["NodeIFrame", "NodeWidget"].includes(nodeElement.dataset.type);
+                const isVideo = nodeElement.dataset.type === "NodeVideo";
                 const isMermaid = nodeElement.dataset.subtype === "mermaid";
                 let isCenter = true;
                 if (isMermaid) {
@@ -2035,11 +2024,9 @@ export class WYSIWYG {
                         return;
                     }
                     isCenter = nodeElement.style.textAlign === "center";
-                } else if ("NodeVideo" === nodeElement.dataset.type) {
+                } else if (isVideo) {
                     nodeElement.classList.add("iframe--drag");
-                    if (["left", "right", ""].includes(nodeElement.style.textAlign)) {
-                        isCenter = false;
-                    }
+                    isCenter = getComputedStyle(nodeElement).textAlign === "center";
                 } else if (["NodeIFrame", "NodeWidget"].includes(nodeElement.dataset.type)) {
                     nodeElement.classList.add("iframe--drag");
                     if (!nodeElement.style.margin) {
@@ -2051,6 +2038,7 @@ export class WYSIWYG {
                 const imageFrame = target.closest(".protyle-image-resize");
                 const dragElement = isMermaid ? nodeElement :
                     isIFrame ? nodeElement.querySelector<HTMLElement>(":scope > .iframe-content > iframe") :
+                    isVideo ? nodeElement.querySelector<HTMLVideoElement>(":scope > .iframe-content > video") :
                     imageFrame ? imageFrame.parentElement.querySelector<HTMLImageElement>(":scope > img") :
                         target.previousElementSibling as HTMLElement;
                 if (!dragElement) {
@@ -2060,8 +2048,8 @@ export class WYSIWYG {
                 const mermaidStyle = isMermaid ? getComputedStyle(nodeElement) : null;
                 const dragWidth = isMermaid ? parseFloat(mermaidStyle.width) : dragElement.clientWidth;
                 const dragHeight = dragElement.clientHeight;
-                const resizeAxis = isMermaid ? "width" : isIFrame || dragElement.tagName === "IMG" ?
-                    target.dataset.resizeAxis || (isIFrame ? "both" : "width") : "both";
+                const resizeAxis = isMermaid ? "width" : isIFrame || isVideo || dragElement.tagName === "IMG" ?
+                    target.dataset.resizeAxis || (isIFrame || isVideo ? "both" : "width") : "both";
                 if (target.classList.contains("protyle-block-resize")) {
                     target.classList.add("touch-resize-active");
                 }
@@ -2110,6 +2098,26 @@ export class WYSIWYG {
                         dragElement.removeAttribute("width");
                         dragElement.removeAttribute("height");
                         dragElement.parentElement.style.width = width + "px";
+                        return;
+                    }
+                    if (isVideo) {
+                        const video = dragElement as HTMLVideoElement;
+                        const ratio = video.videoWidth && video.videoHeight ? video.videoWidth / video.videoHeight :
+                            dragWidth > 0 && dragHeight > 0 ? dragWidth / dragHeight : 1;
+                        const maxHeight = parseFloat(getComputedStyle(video).maxHeight);
+                        const blockStyle = getComputedStyle(nodeElement);
+                        const multiple = isCenter ? 2 : 1;
+                        const maxWidth = Math.min(nodeElement.clientWidth - parseFloat(blockStyle.paddingLeft) -
+                            parseFloat(blockStyle.paddingRight),
+                            Number.isFinite(maxHeight) ? maxHeight * ratio : Infinity);
+                        const width = getImageResizeWidth(dragWidth, dragWidth / ratio,
+                            (moveEvent.clientX - x) / imageScale, (moveEvent.clientY - y) / imageScale,
+                            resizeAxis, multiple, maxWidth);
+                        video.removeAttribute("width");
+                        video.removeAttribute("height");
+                        video.style.width = width + "px";
+                        video.style.height = "auto";
+                        video.style.aspectRatio = `auto ${ratio}`;
                         return;
                     }
                     if (resizeAxis !== "height" && moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {
@@ -5527,6 +5535,10 @@ export class WYSIWYG {
                 return;
             }
 
+            if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && !event.altKey && event.detail === 1 &&
+                normalizeSemanticCaretAfterClick(range, event.clientX)) {
+                focusByRange(range);
+            }
             // 需在工具栏渲染前记录鼠标释放位置，避免浮层覆盖选区末端
             const pointerElement = document.elementFromPoint(event.clientX, event.clientY);
             const isDirectCalloutClick = isDirectCalloutStructureClick(this.mouseDownTarget, event.target,

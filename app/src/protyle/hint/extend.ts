@@ -617,8 +617,8 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
     const inTableCell = cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element;
     return resolveSlashMenuItems(allList.filter((item) => {
         const builtinStyleID = slashBuiltinStyleIDs[item.entryKey];
-        return (!inTitle || (item.entryKey === item.id && TITLE_INLINE_SLASH_IDS.has(item.id))) &&
-            (!inTableCell || TABLE_CELL_SLASH_IDS.has(item.id)) &&
+        return (!inTitle || item.html === "separator" || (item.entryKey === item.id && TITLE_INLINE_SLASH_IDS.has(item.id))) &&
+            (!inTableCell || item.html === "separator" || TABLE_CELL_SLASH_IDS.has(item.id)) &&
             getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey)) &&
             (!builtinStyleID || isBuiltinInlineStyleVisible("style1", builtinStyleID));
     }), {
@@ -760,7 +760,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
             createItemCount += dateHints.length;
             if (response.newDoc) {
                 const newFileName = Lute.UnEscapeHTMLStr(response.k);
-                if (!hideConfiguredCreate) {
+                if (!hideConfiguredCreate && getConfiguredEntryVisibility("editor.ref.newFile")) {
                     dataList.push({
                         value: `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
                         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
@@ -768,18 +768,22 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
                     });
                     createItemCount++;
                 }
-                dataList.push({
-                    value: `((newSubDoc "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
-                    html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+                if (getConfiguredEntryVisibility("editor.ref.newSubDoc")) {
+                    dataList.push({
+                        value: `((newSubDoc "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
+                        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.k}</mark></span></div>`,
-                });
-                createItemCount++;
-                dataList.push({
-                    value: `((newFileAtPath "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
-                    html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
+                    });
+                    createItemCount++;
+                }
+                if (getConfiguredEntryVisibility("editor.ref.newFileAtPath")) {
+                    dataList.push({
+                        value: `((newFileAtPath "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
+                        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.k}</mark></span></div>`,
-                });
-                createItemCount++;
+                    });
+                    createItemCount++;
+                }
             }
             response.blocks.forEach((item: IBlock) => {
                 const name = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replaceAll(Constants.ZWSP, "");

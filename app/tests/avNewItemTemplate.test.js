@@ -186,20 +186,30 @@ const runCases = async (sources, mobile) => {
         "./cell": {popTextCell: () => assert.fail("the editable primary has an input")},
     });
     const root = document.createElement("div");
-    root.innerHTML = '<input id="toolbarName" value="Mobile title"><div contenteditable="true">Document title</div>' +
+    root.innerHTML = '<div id="toolbarNameReadonly" contenteditable="true">Mobile title</div><div contenteditable="true">Document title</div>' +
         '<div data-av-id="database"><div data-primary="true"><div data-row-id="created"><input value="Primary title"></div></div></div>';
     document.body.append(root);
-    const title = root.querySelector("[contenteditable]");
-    const titleInput = root.querySelector("#toolbarName");
+    const title = mobile ? root.querySelector("#toolbarNameReadonly") : root.querySelector("div:nth-child(2)");
     const input = root.querySelector("[data-row-id] input");
-    const target = {...protyle, notebookId: "document", block: {rootID: "document"}, title: {editElement: title}};
+    let titleOpenings = 0;
+    const target = {...protyle, notebookId: "document", block: {rootID: "document"}, title: {editElement: title,
+        openEditor: async isValid => {
+            assert.equal(isValid(), true);
+            titleOpenings++;
+            title.focus();
+            const range = document.createRange();
+            range.selectNodeContents(title);
+            range.collapse(false);
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+        }}};
+    if (mobile) window.siyuan.mobile = {editor: {protyle: target}};
     const focusRequest = () => ({avID: "database", itemID: "created", boundBlockID: "document", focusPrimary: true, focusTitle: true});
     const request = focusRequest();
     primary.focusDatabasePrimary(root, target, request);
-    assert.equal(document.activeElement, mobile ? titleInput : title);
-    if (mobile) {
-        assert.equal(titleInput.selectionStart, titleInput.value.length);
-    } else {
+    assert.equal(document.activeElement, title);
+    assert.equal(titleOpenings, 1, "notebook documents focus through the full title editor");
+    {
         const beforeCaret = document.createRange();
         beforeCaret.selectNodeContents(title);
         beforeCaret.setEnd(getSelection().anchorNode, getSelection().anchorOffset);
@@ -208,11 +218,11 @@ const runCases = async (sources, mobile) => {
     input.focus();
     primary.focusDatabasePrimary(root, target, request);
     assert.equal(document.activeElement, input, "refresh must not focus the title again");
-    (mobile ? titleInput : title).style.display = "none";
+    title.style.display = "none";
     document.activeElement.blur();
     primary.focusDatabasePrimary(root, target, focusRequest());
     assert.equal(document.activeElement, input, "hidden titles fall back to the primary key");
-    (mobile ? titleInput : title).style.display = "";
+    title.style.display = "";
     document.activeElement.blur();
     primary.focusDatabasePrimary(root, {...target, block: {rootID: "carrier"}}, focusRequest());
     assert.equal(document.activeElement, input, "standalone row previews must not focus the carrier title");
@@ -220,7 +230,7 @@ const runCases = async (sources, mobile) => {
         document.activeElement.blur();
         window.siyuan.isPublish = mode === "publish";
         primary.focusDatabasePrimary(root, {...target, disabled: mode === "disabled", options: {history: {[mode]: "archive"}}}, focusRequest());
-        assert.notEqual(document.activeElement, mobile ? titleInput : title);
+        assert.notEqual(document.activeElement, title);
         assert.notEqual(document.activeElement, input);
     }
     root.remove();

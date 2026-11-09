@@ -28,10 +28,10 @@ import {
 } from "./table";
 import {
     constrainTableResizeCount,
+    getTableAddColumnEdge,
     getTableResizeControlCenter,
     getTableResizeCount,
     isTableCellContentEmpty,
-    isTableResizeControlVisible,
     TABLE_ADD_CONTROL_GAP,
     TABLE_ADD_CONTROL_THICKNESS,
 } from "./tableResize";
@@ -1125,7 +1125,8 @@ export class TableControl {
         const targetTable = targetCell?.closest("table") as HTMLTableElement;
         const targetViewportRect = targetTable ? this.getTableGridViewportRect(targetTable) : undefined;
         const edgeHover = !targetCell || (targetViewportRect &&
-            event.clientX <= targetViewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE) ?
+            (event.clientX <= targetViewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE ||
+                event.clientX >= targetViewportRect.right - TABLE_ADD_CONTROL_GAP - TABLE_ADD_CONTROL_THICKNESS)) ?
             this.getEdgeHover(event.clientX, event.clientY) : undefined;
         const cell = edgeHover?.cell || targetCell;
         const node = getTableNode(cell);
@@ -1624,12 +1625,11 @@ export class TableControl {
                 return;
             }
             const gridRect = getTableGridRect(table);
-            const addColumnEdge = gridRect.right;
             const viewportRect = this.getTableGridViewportRect(table, gridRect);
+            const addColumnEdge = getTableAddColumnEdge(gridRect.right, viewportRect.right, contentRect.right);
             const addRowEdge = this.getTableAddRowEdge(table);
-            const columnControlVisible = addColumnEdge <= viewportRect.right + 1 &&
-                isTableResizeControlVisible(addColumnEdge, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
-                    TABLE_ADD_CONTROL_GAP);
+            const columnControlVisible = viewportRect.width > 0 && viewportRect.height > 0 &&
+                addColumnEdge >= viewportRect.left;
             if (columnControlVisible && addColumnEdge >= viewportRect.left &&
                 addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1 &&
                 clientX >= addColumnEdge &&
@@ -1733,16 +1733,15 @@ export class TableControl {
         });
         this.selectionElements.forEach(item => item.classList.add("fn__none"));
         const gridRect = getTableGridRect(state.table);
-        const addColumnEdge = gridRect.right;
         const viewportRect = this.getTableGridViewportRect(state.table, gridRect);
         const tableViewportRect = this.getTableViewportRect(state.table);
         const addRowEdge = this.getTableAddRowEdge(state.table);
         const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
+        const addColumnEdge = getTableAddColumnEdge(gridRect.right, viewportRect.right, contentRect.right);
         const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
             TABLE_ADD_CONTROL_THICKNESS, TABLE_ADD_CONTROL_GAP);
-        const columnControlVisible = addColumnEdge <= viewportRect.right + 1 &&
-            isTableResizeControlVisible(addColumnEdge, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
-                TABLE_ADD_CONTROL_GAP);
+        const columnControlVisible = viewportRect.width > 0 && viewportRect.height > 0 &&
+            addColumnEdge >= viewportRect.left;
         if (addRowButton && (state.mode === "row" || state.mode === "both")) {
             addRowButton.classList.remove("fn__none");
             addRowButton.classList.add("protyle-table-control__add--active");
@@ -1866,16 +1865,15 @@ export class TableControl {
         }
         if (visible && !this.touch) {
             const gridRect = getTableGridRect(table);
-            const addColumnEdge = gridRect.right;
             const viewportRect = this.getTableGridViewportRect(table, gridRect);
             const tableViewportRect = this.getTableViewportRect(table);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
+            const addColumnEdge = getTableAddColumnEdge(gridRect.right, viewportRect.right, contentRect.right);
             const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
                 TABLE_ADD_CONTROL_THICKNESS, TABLE_ADD_CONTROL_GAP);
-            const columnControlVisible = addColumnEdge <= viewportRect.right + 1 &&
-                isTableResizeControlVisible(addColumnEdge, contentRect.right, TABLE_ADD_CONTROL_THICKNESS,
-                    TABLE_ADD_CONTROL_GAP);
+            const columnControlVisible = viewportRect.width > 0 && viewportRect.height > 0 &&
+                addColumnEdge >= viewportRect.left;
             const cached = this.gridCache.get(table);
             const grid = this.selection?.table === table && this.selectionGrid ? this.selectionGrid : cached.grid;
             const cellInfo = grid === cached.grid ? cached.cells.get(cell) : grid.cellInfos.find(item => item.cell === cell);
@@ -2919,6 +2917,9 @@ export class TableControl {
             this.hoverCell = cell;
         }
         updateTransaction(this.protyle, state.node, state.oldHTML);
+        if (state.targetColumns > state.startColumns) {
+            state.table.parentElement.scrollLeft = state.table.parentElement.scrollWidth;
+        }
         this.suppressAddClick = true;
         setTimeout(() => {
             this.suppressAddClick = false;
@@ -3040,6 +3041,9 @@ export class TableControl {
             }
             updateTransaction(this.protyle, node, oldHTML);
             this.clear();
+        }
+        if (type !== "add-row") {
+            table.parentElement.scrollLeft = table.parentElement.scrollWidth;
         }
     }
 

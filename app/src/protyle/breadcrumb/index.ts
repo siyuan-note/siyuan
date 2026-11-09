@@ -36,6 +36,7 @@ import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid, isInHarmony, isIPad, isMac, isPhablet, updateHotkeyTip} from "../util/compatibility";
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {getGlobalBreadcrumb, isBreadcrumbNotebookAvailable, type GlobalBreadcrumb} from "./globalPath";
+import {getBreadcrumbCustomIcon} from "./icon";
 import {listIndent, listOutdent} from "../wysiwyg/list";
 import {improveBreadcrumbAppearance} from "./appearance";
 import {getCloudURL} from "../../config/util/about";
@@ -71,6 +72,7 @@ export class Breadcrumb {
     private startingRecord = false;
     private stoppingRecord = false;
     private renderRequestID = 0;
+    private renderedRequestID = 0;
     private menuRequestID = 0;
     private globalBreadcrumb: boolean;
     private destroyed = false;
@@ -501,6 +503,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         const items: IMenu[] = files.filter(Boolean).map(file => ({
             id: file.id,
             icon: file.subFileCount > 0 ? "iconFolder" : "iconFile",
+            iconHTML: getBreadcrumbCustomIcon(file.icon, "b3-menu__icon protyle-breadcrumb__graphic"),
             label: getDocDisplayName(file.name, file.titleEmpty, true),
             current: currentPathIDs.has(file.id),
             click: isMobile() && file.subFileCount > 0 ? undefined : () => this.openDocument(protyle, file.id, notebook, rootID),
@@ -842,6 +845,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                         menu.addItem({
                             current: isCurrent,
                             icon: item.globalType === "notebook" ? "iconNotebook" : getIconByType(item.type, item.subType),
+                            iconHTML: global ? getBreadcrumbCustomIcon(item.icon, "b3-menu__icon protyle-breadcrumb__graphic") : undefined,
                             label: item.name,
                             click: item.globalType ? undefined : () => zoomOut({protyle, id: item.id}),
                             loadSubmenu: item.globalType ? async () => {
@@ -1352,7 +1356,8 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         }
         const id = blockElement.getAttribute("data-node-id");
         const global = window.siyuan.config.editor.globalBreadcrumb;
-        if (id === this.id && !update && this.globalBreadcrumb === global) {
+        if (id === this.id && !update && this.globalBreadcrumb === global &&
+            this.renderedRequestID === this.renderRequestID) {
             protyle.breadcrumb.element.querySelectorAll(".protyle-breadcrumb__item--active").forEach(item => {
                 item.classList.remove("protyle-breadcrumb__item--active");
             });
@@ -1398,15 +1403,18 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                 }
                 const attributes = item.globalType === "notebook" ? 'data-global-type="notebook"' :
                     `data-node-id="${item.id}"${item.globalType ? ' data-global-type="document"' : ""}`;
-                const icon = item.globalType === "notebook" ?
+                const customIcon = global && getBreadcrumbCustomIcon(item.icon, "protyle-breadcrumb__graphic");
+                const icon = customIcon ? (item.globalType === "notebook" ? customIcon :
+                    `<span class="popover__block protyle-breadcrumb__graphic" data-id="${item.id}">${customIcon}</span>`) :
+                    item.globalType === "notebook" ?
                     '<svg><use xlink:href="#iconNotebook"></use></svg>' :
                     `<svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
                 if (index === 0 && !global && !protyle.options.render.breadcrumbDocName) {
-                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}" role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || window.siyuan.languages.untitled)}"${response.data.length === 1 ? ' style="max-width:none"' : ""}>
+                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}" role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || (item.type === "NodeDocument" ? window.siyuan.languages._kernel[16] : window.siyuan.languages.untitled))}"${response.data.length === 1 ? ' style="max-width:none"' : ""}>
     <svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
 </span>`;
                 } else {
-                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" ${attributes} role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || window.siyuan.languages.untitled)}"${(paths.length === 1 || index === 0) ? ' style="max-width:none"' : ""}>
+                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" ${attributes} role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || (item.type === "NodeDocument" ? window.siyuan.languages._kernel[16] : window.siyuan.languages.untitled))}"${(paths.length === 1 || index === 0) ? ' style="max-width:none"' : ""}>
     ${icon}
     ${item.name ? `<span class="protyle-breadcrumb__text" title="${escapeAttr(escapeHtml(decodeHTML(item.name)))}">${escapeSearchHighlight(item.name)}</span>` : ""}
 </span>`;
@@ -1416,6 +1424,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                 }
             });
             this.element.innerHTML = html;
+            this.renderedRequestID = requestID;
             improveBreadcrumbAppearance(this.element.parentElement);
         });
         /// #endif

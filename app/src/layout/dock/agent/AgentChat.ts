@@ -26,6 +26,7 @@ import {
     applyAgentUserEdit,
     buildAgentPresentationEntries,
     findAgentUserEntryIndex,
+    formatAgentThinkingStats,
     getAgentThinkingDisplaySeconds,
     getAgentThinkingToolGroups,
     getAgentTurnContent,
@@ -296,6 +297,11 @@ export class AgentChat extends Model {
     private settingDialogObserver: MutationObserver | null = null;
     private scrollBottomBtn: HTMLElement;
     private navRail: HTMLElement;
+    // 导航预览按指针纵坐标解析，重复移入同一标记时不重建提示框。
+    private navPointer: {y: number} | null = null;
+    private navPreviewMarker: HTMLElement | null = null;
+    private navPreviewId = "";
+    private navPreviewShown = false;
     // 镜像态：当前会话正由其他实例流式对话，本实例处于只读占位锁定，期间不重绘当前视图。
     // 由 ws 的 streamStart/streamEnd 事件驱动，与发起者的 isStreaming 互斥（发起者走 SSE）。
     private mirrorLocked = false;
@@ -928,20 +934,32 @@ export class AgentChat extends Model {
     private initNavRail(wrap: HTMLElement) {
         this.navRail = document.createElement("div");
         this.navRail.className = "agent-chat__nav-rail";
+        this.navPointer = null;
+        this.resetNavPreview();
 
+        // 预览条目由指针纵坐标解析，不采信浏览器的命中测试：分数缩放下相邻标记的接缝会被反复改判，
+        // 每次改判都重建提示框，表现为预览在两条消息之间高频闪烁。
         this.navRail.addEventListener("mouseover", (event: MouseEvent) => {
-            const marker = (event.target as HTMLElement).closest(".agent-chat__nav-rail-marker");
-            if (!marker) {
-                return;
-            }
-            // 单条消息预览复用提示框，不扩大导航的点击区域。
+            // 指针落在标记之外的留白时，不能交给全局提示逻辑隐藏预览。
             event.stopPropagation();
-            showTooltip(escapeHtmlTextAndAttr(marker.getAttribute("aria-label") || ""), marker, "agent-nav", event);
         });
-        this.navRail.addEventListener("mouseleave", hideTooltip);
-        this.navRail.addEventListener("scroll", hideTooltip, {passive: true});
+        this.navRail.addEventListener("mousemove", (event: MouseEvent) => {
+            this.navPointer = {y: event.clientY};
+            this.showNavPreview(event.clientY, event);
+        });
+        this.navRail.addEventListener("mouseleave", () => {
+            this.navPointer = null;
+            this.resetNavPreview();
+        });
+        this.navRail.addEventListener("scroll", () => {
+            // 滚动改变标记位置，按新位置重新解析，避免预览停在已移走的条目上。
+            if (this.navPointer && this.navRail.matches(":hover")) {
+                this.showNavPreview(this.navPointer.y);
+            }
+        }, {passive: true});
         this.navRail.addEventListener("click", (e: MouseEvent) => {
-            const marker = (e.target as HTMLElement).closest(".agent-chat__nav-rail-marker") as HTMLElement;
+            // 与预览共用坐标解析，接缝处不会出现「预览上一条、跳转下一条」。
+            const marker = this.resolveNavMarker(e.clientY);
             if (!marker) {
                 return;
             }
@@ -951,13 +969,56 @@ export class AgentChat extends Model {
         wrap.appendChild(this.navRail);
     }
 
+    private resolveNavMarker(clientY: number): HTMLElement | null {
+        const markers = this.navRail.children;
+        if (markers.length === 0) {
+            return null;
+        }
+        // 取第一条底边越过指针的标记，接缝归下方条目；其余位置沿用相邻条目。
+        for (let i = 0; i < markers.length; i++) {
+            if (clientY < (markers[i] as HTMLElement).getBoundingClientRect().bottom) {
+                return markers[i] as HTMLElement;
+            }
+        }
+        return markers[markers.length - 1] as HTMLElement;
+    }
+
+    private showNavPreview(clientY: number, event?: MouseEvent) {
+        const marker = this.resolveNavMarker(clientY);
+        if (!marker) {
+            this.resetNavPreview();
+            return;
+        }
+        const id = marker.dataset.messageId || "";
+        if (this.navPreviewShown && marker === this.navPreviewMarker && id === this.navPreviewId) {
+            return;
+        }
+        this.navPreviewMarker = marker;
+        this.navPreviewId = id;
+        this.navPreviewShown = true;
+        // 单条消息预览复用提示框，不扩大导航的点击区域。
+        showTooltip(escapeHtmlTextAndAttr(marker.getAttribute("aria-label") || ""), marker, "agent-nav", event);
+    }
+
+    private resetNavPreview() {
+        this.navPreviewMarker = null;
+        this.navPreviewId = "";
+        if (!this.navPreviewShown) {
+            return;
+        }
+        this.navPreviewShown = false;
+        hideTooltip();
+    }
+
     private rebuildNavMarkers() {
-        if (this.navRail.childElementCount > 0 && this.navRail.matches(":hover")) {
-            hideTooltip();
+        const pointer = this.navPointer !== null && this.navRail.matches(":hover") ? this.navPointer : null;
+        if (!pointer) {
+            this.resetNavPreview();
         }
         this.navRail.innerHTML = "";
         const userEntries = this.entries.filter((entry): entry is UserEntry => entry.type === "user");
         if (userEntries.length === 0) {
+            this.resetNavPreview();
             return;
         }
 
@@ -973,6 +1034,12 @@ export class AgentChat extends Model {
             this.navRail.appendChild(marker);
         }
         this.updateActiveMarker();
+        if (pointer) {
+            // 标记元素已重建，按指针位置重新解析以保留预览。
+            this.navPreviewMarker = null;
+            this.navPreviewId = "";
+            this.showNavPreview(pointer.y);
+        }
     }
 
     private updateActiveMarker() {
@@ -980,10 +1047,12 @@ export class AgentChat extends Model {
         if (userMsgs.length === 0) {
             return;
         }
-        const threshold = this.messagesContainer.scrollTop + 50;
+        // 跳转把消息居中，当前轮次也按视区中线判断；坐标统一使用视口，兼容不同定位容器。
+        const threshold = this.messagesContainer.getBoundingClientRect().top +
+            this.messagesContainer.clientTop + this.messagesContainer.clientHeight / 2;
         let activeId = "";
         for (let i = 0; i < userMsgs.length; i++) {
-            if ((userMsgs[i] as HTMLElement).offsetTop <= threshold) {
+            if (userMsgs[i].getBoundingClientRect().top <= threshold) {
                 activeId = userMsgs[i].getAttribute("data-message-id") || "";
             } else {
                 break;
@@ -991,6 +1060,10 @@ export class AgentChat extends Model {
         }
         if (!activeId && userMsgs.length > 0) {
             activeId = userMsgs[0].getAttribute("data-message-id") || "";
+        }
+        const {scrollTop, scrollHeight, clientHeight} = this.messagesContainer;
+        if (scrollHeight > clientHeight + 1 && scrollHeight - scrollTop - clientHeight <= 1) {
+            activeId = userMsgs[userMsgs.length - 1].getAttribute("data-message-id") || "";
         }
         const markers = this.navRail.children;
         for (let i = 0; i < markers.length; i++) {
@@ -3127,6 +3200,7 @@ export class AgentChat extends Model {
             this.currentToolLine.appendChild(toolElement);
             this.renderedToolCalls.set(toolCall, {element: toolElement, startedAt: Date.now()});
         });
+        this.refreshThinkingHeaderText();
         this.scrollToBottom();
     }
 
@@ -3231,7 +3305,6 @@ export class AgentChat extends Model {
             const durSec = this.currentThinkingDuration ||
                 (this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0);
             this.currentThinkingDuration = durSec;
-            const doneText = this.formatThinkingHeader(durSec);
             const oldCards = this.messagesContainer.querySelectorAll(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)");
             for (let i = 0; i < oldCards.length; i++) {
                 const card = oldCards[i] as HTMLElement;
@@ -3244,7 +3317,7 @@ export class AgentChat extends Model {
                 card.querySelector(".agent-chat__thinking-latest")?.classList.add("fn__none");
                 const txtEl = card.querySelector(".agent-chat__thinking-text");
                 if (txtEl) {
-                    txtEl.textContent = doneText;
+                    txtEl.textContent = this.formatThinkingHeader(durSec, card.querySelectorAll(".agent-chat__thinking-tool").length);
                 }
             }
             if (this.currentThinkingSteps.length > 0) {
@@ -4340,7 +4413,9 @@ export class AgentChat extends Model {
             }
         }
 
-        const headerText = this.formatThinkingHeader(duration);
+        // 重载后按该卡片已落盘的工具名数量恢复调用次数。
+        const toolCount = toolGroups.reduce((total, names) => total + names.length, 0);
+        const headerText = this.formatThinkingHeader(duration, toolCount);
 
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--thinking agent-chat__msg--thinking-done";
@@ -4365,14 +4440,9 @@ export class AgentChat extends Model {
         postRender(el, this.app, this.host.onNavigate);
     }
 
-    // 由 duration 经 i18n 生成"已思考：Xs"标题文本；无 duration 时回退到"思考中..."。
-    private formatThinkingHeader(duration?: number): string {
-        const L = window.siyuan.languages;
-        const displaySeconds = getAgentThinkingDisplaySeconds(duration);
-        if (displaySeconds !== undefined) {
-            return L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", displaySeconds + "s") : (L.agentThinking || "Thinking");
-        }
-        return L.agentThinking || "Thinking";
+    // 由 duration 与工具调用次数经 i18n 生成"已思考 Xs，调用 n 次工具"标题文本；无 duration 时回退到"思考中"。
+    private formatThinkingHeader(duration?: number, toolCount = 0): string {
+        return formatAgentThinkingStats(getAgentThinkingDisplaySeconds(duration), toolCount, window.siyuan.languages);
     }
 
     // 刷新底部 token 圆环显示。contextTokens 为 0 时隐藏（含切换到无统计的旧会话场景）。
@@ -4584,22 +4654,27 @@ export class AgentChat extends Model {
         if (!this.requestStartTime) {
             return;
         }
+        const tick = () => this.refreshThinkingHeaderText();
+        tick();
+        this.thinkingTimerId = window.setInterval(tick, 1000);
+    }
+
+    // 按当前耗时与工具调用次数刷新未完成思考卡的标题，工具调用到达时也立即刷新而不等待下一次计时。
+    private refreshThinkingHeaderText() {
         const cards = this.messagesContainer.querySelectorAll<HTMLElement>(
             ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-text"
         );
-        const tick = () => {
-            const sec = Math.floor((Date.now() - this.requestStartTime) / 1000);
-            const L = window.siyuan.languages;
-            const live = (L.agentThinking || "Thinking") + " " + sec + "s";
-            for (let i = 0; i < cards.length; i++) {
-                if (this.messagesContainer.contains(cards[i]) &&
-                    !cards[i].closest(".agent-chat__msg--thinking-done")) {
-                    cards[i].textContent = live;
-                }
+        if (cards.length === 0) {
+            return;
+        }
+        const seconds = this.requestStartTime ? Math.floor((Date.now() - this.requestStartTime) / 1000) : 0;
+        for (let i = 0; i < cards.length; i++) {
+            if (this.messagesContainer.contains(cards[i])) {
+                const toolCount = cards[i].closest(".agent-chat__msg--thinking")
+                    .querySelectorAll(".agent-chat__thinking-tool").length;
+                cards[i].textContent = formatAgentThinkingStats(seconds, toolCount, window.siyuan.languages, true);
             }
-        };
-        tick();
-        this.thinkingTimerId = window.setInterval(tick, 1000);
+        }
     }
 
     // 停止思考计时器（思考结束/切换会话/停止生成时调用，避免泄漏）。
@@ -4616,7 +4691,6 @@ export class AgentChat extends Model {
         // 耗时存为数值（用于持久化 entry.duration），"已思考：Xs" 文本只在 DOM 显示、不落盘。
         const durSec = this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0;
         this.currentThinkingDuration = durSec;
-        const doneText = this.formatThinkingHeader(durSec);
 
         const items = this.messagesContainer.querySelectorAll(
             ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
@@ -4648,6 +4722,7 @@ export class AgentChat extends Model {
             }
             el.classList.add("agent-chat__msg--thinking-done");
             el.querySelector(".agent-chat__thinking-latest")?.classList.add("fn__none");
+            const doneText = this.formatThinkingHeader(durSec, el.querySelectorAll(".agent-chat__thinking-tool").length);
             if (doneText) {
                 const textEl = el.querySelector(".agent-chat__thinking-text");
                 if (textEl) {

@@ -57,6 +57,7 @@ const fixture = () => {
         getUndoFocusContext: () => ({undoFocusId: "block"}),
         setPosition: () => {},
         registerBuiltinSlashHint: value => value,
+        getConfiguredEntryVisibility: () => true,
         path: path,
     };
     Object.assign(deps, load("protyle/hint/searchRef", deps, window, Lute));

@@ -58,7 +58,8 @@ const browserCases = async (sources: Record<string, string>, snippets: Record<st
     };
     const evaluate = (source: string, names: string[]) => new Function(...Object.keys(deps), source +
         `\nreturn {${names.join(",")}};`)(...Object.values(deps));
-    Object.assign(deps, evaluate(snippets.block, ["getContenteditableElement", "hasNextSibling", "hasPreviousSibling"]));
+    Object.assign(deps, evaluate(snippets.block, ["getContenteditableElement", "hasNextSibling", "hasPreviousSibling",
+        "getPreviousBlockSibling", "getNextBlockSibling"]));
     Object.assign(deps, evaluate(snippets.style, ["setFontStyle", "hasSameTextStyle", "mergeSameInlineElement"]));
     Object.assign(deps, evaluate(snippets.transaction, ["updateTransaction"]));
     Object.assign(deps, load("protyle/wysiwyg/blockSelection"), {
@@ -120,6 +121,8 @@ const browserCases = async (sources: Record<string, string>, snippets: Record<st
                 for (const sample of [
                     {html: "inline-code", type: "code", initial: false},
                     {html: "inline-code", type: "kbd", initial: false},
+                    {html: "inline-code", type: "sup", initial: false},
+                    {html: "inline-code", type: "sub", initial: false},
                     {html: '<span data-type="strong">inline-code</span>', type: "code", initial: false, keep: "strong"},
                     {html: '<span data-type="code strong">inline-code</span>', type: "strong", initial: true, keep: "code"},
                     {html: '<span data-type="kbd mark">inline-code</span>', type: "mark", initial: true, keep: "kbd"},
@@ -130,7 +133,7 @@ const browserCases = async (sources: Record<string, string>, snippets: Record<st
                         type: "code", initial: false, keep: "block-ref"})),
                 ]) {
                     const fixture = setup(sample.html);
-                    const buttons = ["code", "kbd", "strong", "mark"].map(type => `<button data-type="${type}"></button>`).join("");
+                    const buttons = ["code", "kbd", "sup", "sub", "strong", "mark"].map(type => `<button data-type="${type}"></button>`).join("");
                     fixture.toolbar.element.innerHTML = buttons;
                     mobileToolbar.querySelector(".keyboard__dynamic").innerHTML = buttons;
                     marker.normalizeSemanticInlineElements(fixture.editor);
@@ -339,7 +342,8 @@ test("block references and inline formatting survive repeated toggles, paste ord
         selection: extract("protyle/util/selection", ["selectAll"]) +
             extract("protyle/util/selectionOffsets", ["selectIsEditor", "getSelectionOffset"]),
         toolbar: compile(`class ReviewToolbar {${methods}}`),
-        block: extract("protyle/wysiwyg/getBlock", ["getContenteditableElement", "hasNextSibling", "hasPreviousSibling"]),
+        block: extract("protyle/wysiwyg/getBlock", ["getContenteditableElement", "hasNextSibling", "hasPreviousSibling",
+            "getPreviousBlockSibling", "getNextBlockSibling"]),
         style: extract("protyle/toolbar/Font", ["setFontStyle", "hasSameTextStyle"]) +
             extract("protyle/toolbar/util", ["mergeSameInlineElement"]) + extract("util/functions", ["isArrayEqual"]),
         transaction: extract("protyle/wysiwyg/transaction", ["updateTransaction"]),

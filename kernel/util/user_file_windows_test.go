@@ -2,14 +2,15 @@
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package util
+package util_test
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 
-	"golang.org/x/sys/windows"
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestUserFilesReturnExclusiveAccessErrors(t *testing.T) {
@@ -21,28 +22,24 @@ func TestUserFilesReturnExclusiveAccessErrors(t *testing.T) {
 	if err := os.WriteFile(file, []byte("original"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	p, err := windows.UTF16PtrFromString(file)
-	if err != nil {
-		t.Fatal(err)
-	}
-	handle, err := windows.CreateFile(p, windows.GENERIC_READ, 0, nil, windows.OPEN_EXISTING, windows.FILE_ATTRIBUTE_NORMAL, 0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer windows.CloseHandle(handle)
-	if _, err = ReadUserFile(file); err == nil {
+	release := testutil.LockUserFile(t, file)
+	if _, err := util.ReadUserFile(file); err == nil {
 		t.Fatal("exclusive file read succeeded")
 	}
-	if err = CopyUserFile(file, filepath.Join(t.TempDir(), "copy")); err == nil {
+	if err := util.CopyUserFile(file, filepath.Join(t.TempDir(), "copy")); err == nil {
 		t.Fatal("exclusive file copy succeeded")
 	}
-	if err = CopyUserFile(source, file); err == nil {
+	if err := util.CopyUserFile(source, file); err == nil {
 		t.Fatal("copy to exclusive file succeeded")
 	}
-	if err = WriteUserFile(file, []byte("replacement")); err == nil {
+	if err := util.WriteUserFile(file, []byte("replacement")); err == nil {
 		t.Fatal("exclusive file write succeeded")
 	}
-	if _, ok := GetMimeTypeByPath(file); ok {
+	if _, ok := util.GetMimeTypeByPath(file); ok {
 		t.Fatal("exclusive file MIME detection succeeded")
+	}
+	release()
+	if data, err := util.ReadUserFile(file); err != nil || string(data) != "original" {
+		t.Fatalf("locked file changed: %q, %v", data, err)
 	}
 }

@@ -2,6 +2,7 @@ import type {Dialog} from "../../dialog";
 import {bindBottomSheetDrag} from "./bindBottomSheetDrag";
 import {waitForSheetViewport} from "../../menus/sheetOpen";
 import type {MobileSheetMode} from "./mobileSheetLayout";
+import {bindKeyboardSheetState} from "./keyboardSheetState";
 
 export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void | boolean>, afterResize?: () => void,
                                      afterOpen?: () => void, layoutOptions?: {mode?: MobileSheetMode, canStart?: () => boolean}) => {
@@ -13,6 +14,7 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     sheet.style.transform = "translateY(100%)";
     sheet.style.visibility = "hidden";
     sheet.classList.add("mobile-bottom-sheet");
+    const disposeKeyboardState = bindKeyboardSheetState(sheet);
     const dragState: {cancel?: () => void} = {};
     const layout = (require("./mobileSheetLayout") as typeof import("./mobileSheetLayout")).bindMobileSheetLayout(dialog.element.querySelector<HTMLElement>(".b3-dialog"),
         sheet, {...layoutOptions, onResize: afterResize, onGeometryChange: () => dragState.cancel?.()});
@@ -87,6 +89,7 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     });
     dragState.cancel = disposeDrag.cancel;
     const dispose = () => {
+        disposeKeyboardState();
         cancelOpen?.();
         layout.dispose();
         observer.disconnect();

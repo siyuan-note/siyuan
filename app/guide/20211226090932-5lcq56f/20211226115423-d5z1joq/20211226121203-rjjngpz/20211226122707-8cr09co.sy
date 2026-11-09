@@ -643,6 +643,19 @@
 			]
 		},
 		{
+			"ID": "20261109120000-hist01a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109120000-hist01a"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每個時間分組右側顯示符合目前搜尋和篩選條件的文件歷史筆數，並非文字變更量。展開分組後，捲動到底部會自動載入後續記錄。"
+				}
+			]
+		},
+		{
 			"ID": "20211226122720-u1qd8zw",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,

@@ -18,9 +18,10 @@ import {focusByOffset, getUndoFocusContext} from "../util/selection";
 import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {getAdjacentRichTableCell, isTableCellCaretAtBoundary, leaveRichTableCell} from "../util/tableCellRichNavigation";
 import {focusEditableAtGoalX, getCaretGoalX} from "../wysiwyg/verticalCaret";
+import {scheduleCaretScroll} from "../wysiwyg/caretScroll";
 import {fixTable} from "../util/table";
 import {updateTableCellContentLayout} from "../util/tableCellRich";
-import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
+import {filterTableCellSlashMenuItems} from "../util/tableCellRichMenu";
 import {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection} from "../util/tableCellRichSelection";
 import {matchHotKey} from "../util/hotKey";
 import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
@@ -231,7 +232,7 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     owner.gutter?.render(owner, table, host);
     const toolbar = getDefaultToolbar(isMobile()).filter(item => typeof item === "string" ? item !== "ai" : item.name !== "ai");
     const safeSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, hintSource: THintSource) =>
-        hintSlash(key, protyle, hintSource, {allowCreateRef: true}).filter(item => TABLE_CELL_SLASH_IDS.has(item.id)));
+        filterTableCellSlashMenuItems(hintSlash(key, protyle, hintSource, {allowCreateRef: true})));
     const hint: IProtyleOptions["hint"] = {
         extend: [{key: "((", hint: hintRef}, {key: "【【", hint: hintRef}, {key: "（（", hint: hintRef},
             {key: "[[", hint: hintRef}, {key: "#", hint: hintTag}, {key: "/", hint: safeSlash}, {key: "、", hint: safeSlash},
@@ -565,6 +566,9 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
                     if (leaveRichTableCell(owner, table, event.key, goalX)) {
                         finish();
                         owner.toolbar.range = getSelection().getRangeAt(0).cloneRange();
+                        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                            scheduleCaretScroll(owner, event.key === "ArrowUp" ? "up" : "down");
+                        }
                     }
                 }
                 return;
@@ -645,6 +649,9 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
         return;
     }
     if (navigation) {
+        if (navigation.key === "ArrowUp" || navigation.key === "ArrowDown") {
+            scheduleCaretScroll(fragment.protyle, navigation.key === "ArrowUp" ? "up" : "down");
+        }
         const editables = fragment.wysiwyg.querySelectorAll<HTMLElement>('[contenteditable="true"]');
         const backward = navigation.key === "ArrowLeft" || navigation.key === "ArrowUp";
         const edit = backward ? editables[editables.length - 1] : editables[0];

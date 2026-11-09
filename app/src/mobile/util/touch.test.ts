@@ -50,7 +50,7 @@ const fixture = (text = "\u200b\n", collapsed = false, inside = true) => {
         },
     };
     const mobile: any = {};
-    const element = {tagName: "DIV", dataset: {}, contains: () => inside, closest: (): null => null};
+    const element = {tagName: "DIV", dataset: {} as DOMStringMap, contains: () => inside, closest: (): null => null};
     const editor = {protyle: {wysiwyg: {element}, options: {render: {gutter: false}}, toolbar: {
         isMultiSelectMode: () => multiSelectCount > 0,
         showMultiSelectMode: () => multiSelectCount++,
@@ -71,7 +71,9 @@ const fixture = (text = "\u200b\n", collapsed = false, inside = true) => {
         },
         "../editor": {getCurrentEditor: () => editor},
         "../../constants": {Constants: {TIMEOUT_MULTIPLE_SELECT: 1500, TIMEOUT_LONGPRESS: 460, SIZE_DRAG_THRESHOLD: 5}},
-        "../../protyle/util/hasClosest": {hasClosestBlock: () => blockTouch ? element : null, hasClosestByAttribute: (): null => null,
+        "../../protyle/util/hasClosest": {hasClosestBlock: () => blockTouch ? element : null,
+            hasClosestByAttribute: (target: typeof element, name: string) =>
+                name === "data-prevent-swipe" && target.dataset.preventSwipe === "true" ? target : null,
             hasClosestByClassName: (): null => null},
         "../../protyle/util/compatibility": {isIPhone: () => false, isIOSDevice: () => nativeMenu,
             isInAndroid: () => false, isInHarmony: () => false},
@@ -114,6 +116,21 @@ const fixture = (text = "\u200b\n", collapsed = false, inside = true) => {
         multiSelectCount: () => multiSelectCount,
         hideKeyboard: () => { keyboardHidden = true; }, focusCount: () => focusCount, blurCount: () => blurCount};
 };
+
+test("video resize handles own the touch gesture without blurring playback or entering block selection", () => {
+    for (const finish of ["handleTouchUp", "handleTouchCancel"]) {
+        const f = fixture("", true);
+        f.element.tagName = "SPAN";
+        f.element.dataset.preventSwipe = "true";
+        f.startBlockTouch();
+        f.delay();
+        f.flushTimers();
+        f.exports[finish]();
+        assert.equal(f.multiSelectCount(), 0);
+        assert.equal(f.blurCount(), 0);
+        assert.equal(f.focusCount(), 0);
+    }
+});
 
 test("release cancels pending multi-select even when processing is delayed beyond the threshold", () => {
     const f = fixture("", true);

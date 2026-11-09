@@ -26,6 +26,8 @@ test("Markdown resource policy accepts only relative inputs and same-session dis
 const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string) => {
     const check: typeof assert = require("node:assert/strict");
     const api = (window as unknown as {MarkdownEditorTest: typeof import("./editor") & typeof import("./resourcePolicy")}).MarkdownEditorTest;
+    check.equal(matchMedia("(prefers-reduced-motion: reduce)").matches, false,
+        "animation cases explicitly use normal motion regardless of the host preference");
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
     const waitFor = async (predicate: () => boolean, message: string) => {
         for (let attempt = 0; attempt < 100 && !predicate(); attempt++) {
@@ -154,6 +156,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         check.equal((fold.parentElement.nextElementSibling as HTMLElement).style.display, "none");
         editor.setOutline(false);
         const reversingClose = panel.getAnimations()[0];
+        check.ok(reversingClose, `outline closing animates before reversal in ${mode}`);
         reversingClose.pause(); reversingClose.currentTime = 60;
         await new Promise(resolve => requestAnimationFrame(resolve));
         editor.setOutline(true);
@@ -178,6 +181,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         editor.setOutline(false); await finishOutline();
         editor.setOutline(true);
         const growingParent = panel.getAnimations()[0];
+        check.ok(growingParent, `outline opening animates before parent resizing in ${mode}`);
         growingParent.pause(); growingParent.currentTime = 60;
         wrapper.style.width = "700px";
         growingParent.currentTime = 199.99;
@@ -196,20 +200,41 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
         const width = Object.getOwnPropertyDescriptor(window, "innerWidth");
         try {
-            Object.defineProperty(window, "innerWidth", {configurable: true, value: 519});
-            window.dispatchEvent(new Event("resize"));
-            check.deepEqual(states.at(-1), {enabled: true, visible: false, available: false});
-            Object.defineProperty(window, "innerWidth", {configurable: true, value: 520});
-            window.dispatchEvent(new Event("resize"));
-            check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
+            for (const viewportWidth of [360, 519, 520]) {
+                Object.defineProperty(window, "innerWidth", {configurable: true, value: viewportWidth});
+                wrapper.style.width = `${viewportWidth}px`;
+                window.dispatchEvent(new Event("resize"));
+                check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
+                editor.setOutline(false); await finishOutline();
+                editor.setOutline(true); await finishOutline();
+                check.ok(panel.checkVisibility(), `${mode} outline can reopen at ${viewportWidth}px`);
+                check.equal(panel.inert, false);
+                const folded = panel.querySelector<SVGElement>(".vditor-outline__action");
+                folded.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+                check.equal((folded.parentElement.nextElementSibling as HTMLElement).style.display, "none");
+                folded.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+                const surface = element.querySelector<HTMLElement>(`.vditor-${mode} .vditor-reset`);
+                surface.scrollTop = 0;
+                Array.from(panel.querySelectorAll<HTMLElement>("[data-target-id]")).find(item => item.textContent === "Last").click();
+                check.ok(surface.scrollTop > 0, `${mode} outline navigates at ${viewportWidth}px`);
+                editor.setMode("sv");
+                check.deepEqual(states.at(-1), {enabled: true, visible: false, available: false});
+                editor.setMode(mode);
+                check.deepEqual(states.at(-1), {enabled: true, visible: true, available: true});
+                check.ok(panel.checkVisibility(), `${mode} outline returns after switching modes at ${viewportWidth}px`);
+                check.deepEqual(editor.flush(), {content: source, edited: false, composing: false});
+            }
         } finally {
             Object.defineProperty(window, "innerWidth", width);
+            wrapper.style.width = "";
+            window.dispatchEvent(new Event("resize"));
         }
         const surface = element.querySelector<HTMLElement>(`.vditor-${mode} .vditor-reset`);
         const heading = surface.querySelector("h1");
         const headingText = heading.lastChild;
         editor.setOutline(false);
         const editingClose = panel.getAnimations()[0];
+        check.ok(editingClose, `outline closing animates before heading input in ${mode}`);
         editingClose.pause(); editingClose.currentTime = 60;
         await new Promise(resolve => requestAnimationFrame(resolve));
         surface.focus();
@@ -253,6 +278,38 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         window.dispatchEvent(new Event("resize"));
         check.equal(states.length, stateCount, "destroy removes the outline resize listener");
         wrapper.remove();
+    }
+    await require("electron").ipcRenderer.invoke("markdown-reduced-motion", true);
+    try {
+        check.equal(matchMedia("(prefers-reduced-motion: reduce)").matches, true);
+        for (const mode of ["ir", "wysiwyg"] as const) {
+            const element = document.createElement("div");
+            element.style.height = "360px";
+            document.body.append(element);
+            const source = "# Heading\n\n## Child\n";
+            const states: Array<import("./editor").MarkdownOutlineState> = [];
+            const editor = await api.createMarkdownEditor({element, initialValue: source, mode, cdn, lutePath,
+                onEdit: () => { throw new Error("Reduced-motion outline changes must not edit the document"); },
+                onOutlineChange: state => states.push(state)});
+            const panel = element.querySelector<HTMLElement>(".vditor-outline");
+            try {
+                check.deepEqual(states.at(-1), {enabled: false, visible: false, available: true});
+                for (const enabled of [true, false, true, false]) {
+                    editor.setOutline(enabled);
+                    check.deepEqual(states.at(-1), {enabled, visible: enabled, available: true});
+                    check.equal(panel.getAnimations().length, 0, `reduced-motion outline transitions do not animate in ${mode}`);
+                    check.equal(panel.getBoundingClientRect().width > 0, enabled,
+                        `reduced-motion outline visibility settles immediately in ${mode}`);
+                    if (enabled) check.ok(panel.querySelector("ul ul"), "reduced motion retains nested headings");
+                    check.deepEqual(editor.flush(), {content: source, edited: false, composing: false});
+                }
+            } finally {
+                editor.destroy();
+                element.remove();
+            }
+        }
+    } finally {
+        await require("electron").ipcRenderer.invoke("markdown-reduced-motion", false);
     }
     outlineStyle.remove();
     for (const mobile of [false, true]) {
@@ -607,7 +664,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     return "Markdown editor DOM cases passed";
 };
 
-test("Vditor 4.0.2-alpha.3 adapter preserves content and isolates programmatic, input, composition and preview events", {
+test("Vditor 4.0.2-alpha.8 adapter preserves content and isolates programmatic, input, composition and preview events", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -643,6 +700,8 @@ app.whenReady().then(async () => {
     const imagesOrigin = "http://127.0.0.1:"+server.address().port;
     const win = new BrowserWindow({show:false, width:1000, height:720, webPreferences:{nodeIntegration:true, contextIsolation:false, offscreen:true}});
     ipcMain.handle("markdown-undo-input", (_event, text) => win.webContents.debugger.sendCommand("Input.insertText", {text}));
+    ipcMain.handle("markdown-reduced-motion", (_event, reduced) => win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia",
+        {features:[{name:"prefers-reduced-motion",value:reduced ? "reduce" : "no-preference"}]}));
     const external = [];
     win.webContents.session.webRequest.onBeforeRequest({urls:["http://*/*","https://*/*"]}, (details, callback) => {
         if (details.resourceType !== "image") external.push(details.url);
@@ -652,6 +711,8 @@ app.whenReady().then(async () => {
         await win.loadFile(${JSON.stringify(html)});
         win.webContents.debugger.attach("1.3");
         await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled", {enabled: true});
+        await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia",
+            {features:[{name:"prefers-reduced-motion",value:"no-preference"}]});
         await win.webContents.executeJavaScript(${JSON.stringify("globalThis.Vditor = require(" + JSON.stringify(path.resolve(__dirname, "../../node_modules/vditor")) + "); void 0;")});
         await win.webContents.executeJavaScript(${JSON.stringify(bundle + "\nvoid 0;")});
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(

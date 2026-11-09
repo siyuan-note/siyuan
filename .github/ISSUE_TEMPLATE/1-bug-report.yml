@@ -75,6 +75,7 @@ body:
         - Version:
         - Operating system:
         - Browser (if used):
+      render: text
     validations:
       required: true
   - type: textarea

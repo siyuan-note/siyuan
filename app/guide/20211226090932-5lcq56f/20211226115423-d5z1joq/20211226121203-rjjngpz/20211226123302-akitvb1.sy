@@ -694,6 +694,34 @@
 									"Data": "Markdown"
 								}
 							]
+						},
+						{
+							"ID": "20261108001000-75f0e0f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108001000-75f0e0f",
+								"updated": "20261108001000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "匯出"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中的「匯出 Markdown 包含標題區塊自動編號」預設關閉：複製和匯出 Markdown 時省略編號，但不修改文件或編輯器設定。開啟後，文件啟用編號時 Markdown 輸出會包含編號。複製直接沿用此持久設定，不彈出編號選擇視窗；其他匯出格式不受影響。"
+								}
+							]
 						}
 					]
 				},

@@ -2,6 +2,7 @@
 export const TITLE_INLINE_SLASH_IDS = new Set([
     "ref", "emoji", "link", "bold", "italic", "underline", "strike", "mark", "sup", "sub",
     "inlineCode", "kbd", "tag", "inlineMath",
+    "assets", "newFileRef", "insertAsset", "insertIOSPhotos", "insertImgURL",
 ]);
 
 export const isTitleSlashContext = (protyle: IProtyle) => {

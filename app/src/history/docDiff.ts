@@ -143,7 +143,7 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
 </div>`,
         width: isMobile() ? "100vw" : "90vw",
         height: isMobile() ? "100dvh" : "80vh",
-        containerClassName: "b3-dialog__container--theme",
+        containerClassName: "b3-dialog__container--theme history__doc-compare-dialog",
         destroyCallback() {
             isDestroyed = true;
             requestId++;

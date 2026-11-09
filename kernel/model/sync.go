@@ -1050,7 +1050,8 @@ func formatRepoErrorMsg(err error) string {
 		} else if strings.Contains(msgLowerCase, "region was not a valid") {
 			msg = Conf.language(254)
 		} else if strings.Contains(msgLowerCase, "device or resource busy") || strings.Contains(msg, "is being used by another") {
-			msg = fmt.Sprintf(Conf.Language(85), err)
+			// 错误文本可能来自远端 HTTP 响应，必须沿用已转义的 msg
+			msg = fmt.Sprintf(Conf.Language(85), msg)
 		} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {
 			msg = Conf.Language(135)
 		} else if isDNSError(msgLowerCase) {

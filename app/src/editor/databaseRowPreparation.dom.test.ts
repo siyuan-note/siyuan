@@ -98,7 +98,7 @@ const cases = async (source: string, css: string) => {
 };
 
 test("database row preparation preserves browser layout, target sizing and cleanup", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
     timeout: 45000,
 }, async () => {
     const {parse} = require("ifdef-loader/preprocessor");
@@ -114,7 +114,7 @@ app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, width: 800, height: 600, useContentSize: true,
-        webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
+        webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false, offscreen: true}});
     win.removeMenu();
     win.setContentSize(800, 600);
     try {
@@ -126,7 +126,9 @@ app.whenReady().then(async () => {
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
-        const {stdout} = await promisify(execFile)(require("electron") as unknown as string, [script],
+        const headless = process.env.SIYUAN_ELECTRON_HEADLESS ?
+            ["--ozone-platform=headless", "--ozone-override-screen-size=1920,1080"] : [];
+        const {stdout} = await promisify(execFile)(require("electron") as unknown as string, [...headless, script],
             {env, windowsHide: true, timeout: 40000});
         assert.match(stdout, /Database row preparation layout cases passed/);
     } finally {

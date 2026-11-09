@@ -25,7 +25,9 @@ const setup = (groupID = "") => {
     const view = {id: groupID || "view", columns, rows};
     const data = {id: "database", viewID: "view", viewType: "table", view: groupID ?
         {id: "view", groups: [view]} : view};
-    const block = {dataset: {avId: "database", avType: "table"}, querySelectorAll: () => [], querySelector: () => null};
+    const block = {dataset: {avId: "database", avType: "table", nodeId: "host-block"},
+        getAttribute: name => name === "updated" ? "20260101000000" : null,
+        querySelectorAll: () => [], querySelector: () => null};
     const modules = {
         "./virtualScroll": {getAVData: () => data},
         "./row": {updateAVSelectionStatus() {}},
@@ -51,6 +53,8 @@ const setup = (groupID = "") => {
     const transactions = [];
     const fill = runInNewContext(compile(fillSource.getText(cellSource).replace(/^export /, "")) + "\ndragFillCellsValue;", {
         ...selection, ...load("./capabilities"), ...load("./cellValue"), ...load("./dragFillValue"),
+        getAVHostBlockID: load("./host").getAVHostBlockID,
+        dayjs: () => ({format: () => "20260102000000"}),
         getAVData: () => data, canEditAVHost: () => true,
         updateAttrViewCellInOtherElements() {}, focusBlock() {},
         transaction: (_protyle, operations, undo) => transactions.push({operations, undo}),
@@ -76,12 +80,20 @@ for (const groupID of ["", "group-a"]) {
             f.fill();
             assert.equal(f.transactions.length, 1);
             const {operations, undo} = f.transactions[0];
-            assert.equal(operations.length, 6);
+            assert.equal(operations.length, 7);
+            assert.equal(undo.length, 7);
+            assert.equal(operations[6].action, "doUpdateUpdated");
+            assert.equal(operations[6].id, "host-block");
+            assert.equal(operations[6].data, "20260102000000");
+            assert.equal(undo[6].action, "doUpdateUpdated");
+            assert.equal(undo[6].id, "host-block");
+            assert.equal(undo[6].data, "20260101000000");
             expectedRows.forEach((rowIndex, patternIndex) => [1, 2].forEach((columnIndex, offset) => {
                 const operation = operations[patternIndex * 2 + offset];
                 assert.equal(operation.rowID, `r${rowIndex}`);
                 assert.equal(operation.keyID, `c${columnIndex}`);
                 assert.equal(operation.id, `r${rowIndex}-c${columnIndex}`);
+                assert.equal(operation.blockID, "host-block");
                 assert.equal(operation.data.number.content, (patternIndex % 2 + 3) * 10 + columnIndex);
                 assert.equal(undo[patternIndex * 2 + offset].data.number.content, rowIndex * 10 + columnIndex);
                 assert.equal(f.rows[rowIndex].cells[columnIndex].value.number.content, operation.data.number.content);
@@ -100,7 +112,8 @@ test("reversing a fill drag uses the latest complete rectangle and rejects anoth
     assert.equal(f.select(4), false);
     assert.equal(f.select(0), true);
     f.fill();
-    assert.deepEqual(Array.from(f.transactions[0].operations, operation => operation.rowID),
+    assert.deepEqual(Array.from(f.transactions[0].operations.filter(operation => operation.action === "updateAttrViewCell"),
+        operation => operation.rowID),
         ["r0", "r0", "r1", "r1", "r2", "r2"]);
 });
 

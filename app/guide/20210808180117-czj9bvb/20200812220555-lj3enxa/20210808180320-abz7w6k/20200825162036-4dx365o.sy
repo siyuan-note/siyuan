@@ -5342,6 +5342,20 @@
 			}
 		},
 		{
+			"ID": "20261109120000-7763dd5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109120000-7763dd5",
+				"updated": "20261109120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "拖动视频右侧、底部或右下角的把手可等比例调整大小，也支持触摸拖动。"
+				}
+			]
+		},
+		{
 			"ID": "20210608113645-k19wsmr",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

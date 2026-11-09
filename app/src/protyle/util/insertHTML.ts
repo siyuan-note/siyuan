@@ -67,7 +67,7 @@ import {getAVSelectedTableCells, getAvBodyData} from "../render/av/virtualScroll
 import {resetCodeBlockRenderState} from "./codeBlockRenderState";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
-import {renderIFrameResize} from "../render/iframeResize";
+import {renderMediaResize} from "../render/mediaResize";
 import {genEmptyElement} from "../../block/util";
 import {resumeMobileEditorAfterInsertion} from "../../mobile/util/keyboardToolbar";
 
@@ -1576,7 +1576,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             } else {
                 blockElement.after(item);
             }
-            renderIFrameResize(item);
+            renderMediaResize(item);
         }
         if (!lastElement && !hasParentHeading) {
             lastElement = item;

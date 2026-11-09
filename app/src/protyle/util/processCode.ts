@@ -16,7 +16,7 @@ import {normalizeInlineElementBoundaries} from "./inlineElementBoundary";
 import {renderLongTextRuns} from "./longTextWrap";
 import {renderImageActions} from "../render/imageActions";
 import {renderImageDisplay} from "../render/imageDisplay";
-import {renderIFrameResize} from "../render/iframeResize";
+import {renderMediaResize} from "../render/mediaResize";
 import {renderBlockDirection} from "../render/blockDirection";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
@@ -93,7 +93,7 @@ export const processRender = (previewPanel: Element) => {
         mathRender(previewPanel);
         return;
     }
-    renderIFrameResize(previewPanel);
+    renderMediaResize(previewPanel);
     customBlockRender(previewPanel);
     mindmapRender(previewPanel);
     const language = previewPanel.getAttribute("data-subtype");

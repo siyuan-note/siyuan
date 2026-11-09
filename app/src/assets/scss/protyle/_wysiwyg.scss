@@ -762,7 +762,14 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         }
       }
 
-      &:not([data-type="NodeIFrame"]):not([data-type="NodeWidget"]) .protyle-action__drag {
+      &[data-type="NodeVideo"] > .iframe-content {
+        position: relative;
+        display: inline-block;
+        max-width: 100%;
+        vertical-align: bottom;
+      }
+
+      &:not([data-type="NodeIFrame"]):not([data-type="NodeWidget"]):not([data-type="NodeVideo"]) .protyle-action__drag {
         height: 32px;
         width: 4px;
         background-color: var(--b3-theme-surface);

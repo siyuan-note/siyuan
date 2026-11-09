@@ -35,7 +35,7 @@ const browserCases = (source: string) => {
         normalizeHTMLAssetIFrameSources: () => {},
         markFoldHeadingChildren: () => {},
         resetCodeBlockRenderState: () => {},
-        renderIFrameResize: () => {},
+        renderMediaResize: () => {},
         focusInsertedBlock: () => {},
         updateListOrder: () => {},
         dayjs: () => ({format: () => "20261109000000"}),

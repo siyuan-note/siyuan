@@ -5605,6 +5605,20 @@
 			}
 		},
 		{
+			"ID": "20261109120000-065e12a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109120000-065e12a",
+				"updated": "20261109120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag the handles on the right, bottom, or bottom-right corner of a video to resize it proportionally. Touch dragging is also supported."
+				}
+			]
+		},
+		{
 			"ID": "20210608121327-5vbk32w",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

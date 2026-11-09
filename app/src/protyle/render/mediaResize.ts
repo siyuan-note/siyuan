@@ -1,6 +1,6 @@
-// 尺寸把手属于派生界面，沿用编辑器动作类以避免写入 iframe 正文。
-export const renderIFrameResize = (root: Element) => {
-    const selector = '[data-type="NodeIFrame"], [data-type="NodeWidget"]';
+// 尺寸把手属于派生界面，沿用编辑器动作类以避免写入媒体正文。
+export const renderMediaResize = (root: Element) => {
+    const selector = '[data-type="NodeIFrame"], [data-type="NodeWidget"], [data-type="NodeVideo"]';
     const blocks = Array.from(root.querySelectorAll<HTMLElement>(selector));
     if (root.matches(selector)) {
         blocks.unshift(root as HTMLElement);
@@ -10,7 +10,7 @@ export const renderIFrameResize = (root: Element) => {
             return;
         }
         const content = block.querySelector<HTMLElement>(":scope > .iframe-content");
-        if (!content?.querySelector(":scope > iframe")) {
+        if (!content?.querySelector(block.dataset.type === "NodeVideo" ? ":scope > video" : ":scope > iframe")) {
             return;
         }
         for (const axis of ["both", "width", "height"]) {

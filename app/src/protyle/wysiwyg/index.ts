@@ -2016,6 +2016,7 @@ export class WYSIWYG {
                 }
                 const html = nodeElement.outerHTML;
                 const isIFrame = ["NodeIFrame", "NodeWidget"].includes(nodeElement.dataset.type);
+                const isVideo = nodeElement.dataset.type === "NodeVideo";
                 const isMermaid = nodeElement.dataset.subtype === "mermaid";
                 let isCenter = true;
                 if (isMermaid) {
@@ -2023,11 +2024,9 @@ export class WYSIWYG {
                         return;
                     }
                     isCenter = nodeElement.style.textAlign === "center";
-                } else if ("NodeVideo" === nodeElement.dataset.type) {
+                } else if (isVideo) {
                     nodeElement.classList.add("iframe--drag");
-                    if (["left", "right", ""].includes(nodeElement.style.textAlign)) {
-                        isCenter = false;
-                    }
+                    isCenter = getComputedStyle(nodeElement).textAlign === "center";
                 } else if (["NodeIFrame", "NodeWidget"].includes(nodeElement.dataset.type)) {
                     nodeElement.classList.add("iframe--drag");
                     if (!nodeElement.style.margin) {
@@ -2039,6 +2038,7 @@ export class WYSIWYG {
                 const imageFrame = target.closest(".protyle-image-resize");
                 const dragElement = isMermaid ? nodeElement :
                     isIFrame ? nodeElement.querySelector<HTMLElement>(":scope > .iframe-content > iframe") :
+                    isVideo ? nodeElement.querySelector<HTMLVideoElement>(":scope > .iframe-content > video") :
                     imageFrame ? imageFrame.parentElement.querySelector<HTMLImageElement>(":scope > img") :
                         target.previousElementSibling as HTMLElement;
                 if (!dragElement) {
@@ -2048,8 +2048,8 @@ export class WYSIWYG {
                 const mermaidStyle = isMermaid ? getComputedStyle(nodeElement) : null;
                 const dragWidth = isMermaid ? parseFloat(mermaidStyle.width) : dragElement.clientWidth;
                 const dragHeight = dragElement.clientHeight;
-                const resizeAxis = isMermaid ? "width" : isIFrame || dragElement.tagName === "IMG" ?
-                    target.dataset.resizeAxis || (isIFrame ? "both" : "width") : "both";
+                const resizeAxis = isMermaid ? "width" : isIFrame || isVideo || dragElement.tagName === "IMG" ?
+                    target.dataset.resizeAxis || (isIFrame || isVideo ? "both" : "width") : "both";
                 if (target.classList.contains("protyle-block-resize")) {
                     target.classList.add("touch-resize-active");
                 }
@@ -2098,6 +2098,26 @@ export class WYSIWYG {
                         dragElement.removeAttribute("width");
                         dragElement.removeAttribute("height");
                         dragElement.parentElement.style.width = width + "px";
+                        return;
+                    }
+                    if (isVideo) {
+                        const video = dragElement as HTMLVideoElement;
+                        const ratio = video.videoWidth && video.videoHeight ? video.videoWidth / video.videoHeight :
+                            dragWidth > 0 && dragHeight > 0 ? dragWidth / dragHeight : 1;
+                        const maxHeight = parseFloat(getComputedStyle(video).maxHeight);
+                        const blockStyle = getComputedStyle(nodeElement);
+                        const multiple = isCenter ? 2 : 1;
+                        const maxWidth = Math.min(nodeElement.clientWidth - parseFloat(blockStyle.paddingLeft) -
+                            parseFloat(blockStyle.paddingRight),
+                            Number.isFinite(maxHeight) ? maxHeight * ratio : Infinity);
+                        const width = getImageResizeWidth(dragWidth, dragWidth / ratio,
+                            (moveEvent.clientX - x) / imageScale, (moveEvent.clientY - y) / imageScale,
+                            resizeAxis, multiple, maxWidth);
+                        video.removeAttribute("width");
+                        video.removeAttribute("height");
+                        video.style.width = width + "px";
+                        video.style.height = "auto";
+                        video.style.aspectRatio = `auto ${ratio}`;
                         return;
                     }
                     if (resizeAxis !== "height" && moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {

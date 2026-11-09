@@ -5,9 +5,10 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
+import {compile as compileSCSS, Logger} from "sass";
 import {createSourceFile, isIfStatement, isMethodDeclaration, Node, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string) => {
+const browserCases = async (source: string, css: string) => {
     const check = require("node:assert/strict");
     const focused: Element[] = [];
     const api = new Function("focusBlock", "hideElements", source +
@@ -17,11 +18,16 @@ const browserCases = async (source: string) => {
     const editor = document.createElement("div");
     editor.className = "protyle-wysiwyg";
     document.body.append(editor);
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.append(style);
     try {
         for (const extension of ["svg", "png"]) {
             for (const titleHTML of [
                 `<img class="emoji" src="/emojis/custom.${extension}">`,
                 `<img src="/assets/image.${extension}">`,
+                "<span contenteditable=\"false\" data-type=\"img\" class=\"img\"><span> </span><span>" +
+                `<img src="/assets/large.${extension}" width="600" height="900"></span><span> </span></span>`,
                 `A<img class="emoji" src="/emojis/custom.${extension}">B`,
                 `<img class="emoji" src="/emojis/custom.${extension}"><img class="emoji" src="/emojis/second.${extension}">`,
                 "&#x1f600;", "", "<strong>A</strong><br>B",
@@ -33,6 +39,14 @@ const browserCases = async (source: string) => {
                 api.tabsRender(editor, {label: "Untitled"});
                 const title = editor.querySelector<HTMLElement>(".tab-item-title");
                 const label = editor.querySelector(".tabs-tab-label");
+                check.ok(editor.querySelector(".tabs-tab").getAttribute("aria-label").trim(), "image-only tabs have a tooltip");
+                label.querySelectorAll("img").forEach(image => {
+                    check.ok(image.getBoundingClientRect().height <= 22, "tab label images fit the header height");
+                });
+                editor.querySelector(".tab-item-info").classList.add("tabs-title-editor");
+                title.querySelectorAll("img").forEach(image => {
+                    check.ok(image.getBoundingClientRect().height <= 22, "title editor images fit the header height");
+                });
                 check.equal(label.querySelectorAll("img").length, title.querySelectorAll("img").length);
                 check.equal(label.textContent, titleHTML.includes("<br>") ? "A B" :
                     title.textContent || (titleHTML ? "" : "Untitled"));
@@ -165,6 +179,7 @@ const browserCases = async (source: string) => {
     } finally {
         api.destroyTabsRender(editor);
         editor.remove();
+        style.remove();
     }
     return "tabs-emoji-ok";
 };
@@ -228,6 +243,7 @@ test("titles prioritize hint selection and preserve custom emoji and editing bou
             ${handler}
         };`);
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-tabs-emoji-"));
+    const css = compileSCSS("src/assets/scss/protyle/_tabs.scss", {logger: Logger.silent}).css;
     const script = path.join(directory, "main.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(directory, "profile"))});
@@ -237,7 +253,7 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("about:blank");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; try { (${browserCases.toString()})(${JSON.stringify(source)}) } catch (error) { error.stack }`)}));
+        `const __name = value => value; try { (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}) } catch (error) { error.stack }`)}));
         app.exit(0);
     } catch (error) { console.error(error); app.exit(1); }
 });`, "utf8");

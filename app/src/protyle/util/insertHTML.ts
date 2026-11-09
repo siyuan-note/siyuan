@@ -1181,7 +1181,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     let oldHTML = crossBlockOldHTML ?? blockElement.outerHTML;
     const type = blockElement.getAttribute("data-type");
     const isNodeCodeBlock = type === "NodeCodeBlock";
-    const editableElement = getContenteditableElement(blockElement);
+    const editableElement = getContenteditableElement(blockElement, range.startContainer);
     const crossBlockDoOperations: IOperation[] = [];
     const crossBlockUndoOperations: IOperation[] = [];
     const processCrossBlockData = () => {
@@ -1405,7 +1405,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 }
             });
             // 相邻标签之间插入空格区隔，避免后续 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
-            fixAdjacentTags(getContenteditableElement(blockElement));
+            fixAdjacentTags(getContenteditableElement(blockElement, range.startContainer));
             protyle.wysiwyg.lastHTMLs[id] = oldHTML;
             input(protyle, blockElement as HTMLElement, range, true, undefined, isCrossBlockRange || undoContext ? {
                 doOperations: crossBlockDoOperations,

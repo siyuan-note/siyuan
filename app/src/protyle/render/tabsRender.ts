@@ -318,7 +318,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             button.innerHTML = '<span class="tabs-tab-label"></span>';
                             button.firstElementChild.textContent = label;
                         }
-                        button.setAttribute("aria-label", escapeHtml(button.textContent));
+                        const tooltip = button.textContent.trim() || Array.from(button.querySelectorAll("img"), image => image.alt)
+                            .filter(Boolean).join(" ") || controller.options.label || "Tab";
+                        button.setAttribute("aria-label", escapeHtml(tooltip));
                         button.setAttribute("data-position", "north");
                         const marker = getTabTask(item);
                         if (marker !== null) {

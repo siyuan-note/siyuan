@@ -10,7 +10,7 @@ import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} fr
 const compile = (source: string) => transpileModule(source.replace(/^import [\s\S]*?;\r?\n/gm, "")
     .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
-const browserCases = (source: string) => {
+const browserCases = async (source: string) => {
     const check: typeof assert = require("node:assert/strict");
     const root = document.createElement("div");
     root.className = "protyle-wysiwyg";
@@ -34,15 +34,23 @@ const browserCases = (source: string) => {
             insertedRange = range.cloneRange();
             inputCount++;
         },
+        getUploadInsertRange: (protyle: IProtyle) => protyle.toolbar.range,
+        getAssetUploadSuccesses: (data: {succFiles: unknown[]}) => data.succFiles,
+        pathPosix: () => ({extname: () => ".png"}),
+        isBrowserRenderableImagePath: () => true,
+        getHostCapabilities: () => ({localFileSystem: false}),
+        setTimeout: () => 0,
     };
-    const api = new Function(...Object.keys(dependencies), source + "; return {insertHTML};")(
+    Object.assign(dependencies.Constants, {SIYUAN_ASSETS_IMAGE: [".png"], SIYUAN_ASSETS_AUDIO: [], SIYUAN_ASSETS_VIDEO: []});
+    const api = new Function(...Object.keys(dependencies), source + "; return {insertHTML, genUploadedLabel};")(
         ...Object.values(dependencies));
     const protyle = {lute, wysiwyg: {element: root, lastHTMLs: {} as Record<string, string>},
+        options: {upload: {filename: (name: string) => name}},
         toolbar: {range: undefined as Range, getCurrentType: (): string[] => []}};
     try {
         for (const kind of ["tab", "callout", "paragraph"]) {
             for (const content of ["", "12", "AB", ":custom:", "12:custom:", "/emoji", "**AB**"]) {
-                for (const payload of [":custom:", ":vector:", '<span data-type="strong">Bold</span>']) {
+                for (const payload of [":custom:", ":vector:", '<span data-type="strong">Bold</span>', "upload-image"]) {
                     for (const useProtyleRange of [false, true]) {
                         const markdown = kind === "tab" ? `::: tabs\n@tab ${content}\n\nBody\n\n:::\n` :
                             kind === "callout" ? `> [!NOTE] ${content}\n> Body` : content || "Placeholder";
@@ -69,9 +77,16 @@ const browserCases = (source: string) => {
                         protyle.toolbar.range = range;
                         const originalHTML = root.innerHTML;
                         const priorInputCount = inputCount;
-                        api.insertHTML(lute.SpinBlockDOM(payload), protyle, false, useProtyleRange);
+                        if (payload === "upload-image") {
+                            await api.genUploadedLabel(JSON.stringify({code: 0, data: {succFiles: [
+                                {name: "image.png", path: "assets/image.png", index: 0},
+                            ]}}), protyle, useProtyleRange ? {insertPosition: {}} : undefined);
+                        } else {
+                            api.insertHTML(lute.SpinBlockDOM(payload), protyle, false, useProtyleRange);
+                        }
                         check.equal(inputCount, priorInputCount + 1);
-                        const selector = payload.includes("<span") ? '[data-type="strong"]' :
+                        const selector = payload === "upload-image" ? 'img[src="assets/image.png"]' :
+                            payload.includes("<span") ? '[data-type="strong"]' :
                             `img.emoji[src="/emojis/${payload === ":custom:" ? "custom.png" : "vector.svg"}"]`;
                         check.ok(title.querySelector(selector), `${kind}: inserted element remains inside title`);
                         if (kind !== "paragraph") {
@@ -87,7 +102,8 @@ const browserCases = (source: string) => {
                         check.ok(savedTitle.querySelector(selector),
                             `${kind} ${content} ${payload}: serialization preserves the inserted element: ${serialized.innerHTML}`);
                         if (content === "AB" || content === "**AB**") {
-                            check.equal(savedTitle.textContent, payload.includes("<span") ? "ABoldB" : "AB");
+                            check.equal(savedTitle.textContent, payload.includes("<span") ? "ABoldB" :
+                                payload === "upload-image" ? "A  B" : "AB");
                         }
                         check.equal(savedTitle.textContent.includes("/emoji"), false, "the selected command is replaced");
                         const blockID = title.closest("[data-node-id]").getAttribute("data-node-id");
@@ -103,7 +119,7 @@ const browserCases = (source: string) => {
     }
 };
 
-test("real Lute titles keep inserted emoji and rich text inside their editable container", {
+test("real Lute titles keep uploaded images, emoji and rich text inside their editable container", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -112,8 +128,17 @@ test("real Lute titles keep inserted emoji and rich text inside their editable c
     const insert = ast.statements.find(node => isVariableStatement(node) &&
         node.declarationList.declarations.some(declaration => declaration.name.getText(ast) === "insertHTML"));
     assert.ok(insert);
+    const uploadAst = createSourceFile("upload.ts", readFileSync("src/protyle/upload/index.ts", "utf8"), ScriptTarget.Latest, true);
+    const upload = uploadAst.statements.find(node => isVariableStatement(node) &&
+        node.declarationList.declarations.some(declaration => declaration.name.getText(uploadAst) === "genUploadedLabel"));
+    assert.ok(upload);
+    const assetAst = createSourceFile("renderAssets.ts", readFileSync("src/asset/renderAssets.ts", "utf8"), ScriptTarget.Latest, true);
+    const asset = assetAst.statements.find(node => isVariableStatement(node) &&
+        node.declarationList.declarations.some(declaration => declaration.name.getText(assetAst) === "genAssetHTML"));
+    assert.ok(asset);
     const source = ["src/protyle/util/hasClosest.ts", "src/protyle/wysiwyg/getBlock.ts"]
-        .map(file => compile(readFileSync(file, "utf8"))).join("\n") + compile(insert.getText(ast));
+        .map(file => compile(readFileSync(file, "utf8"))).join("\n") + compile(insert.getText(ast)) +
+        compile(asset.getText(assetAst)) + compile(upload.getText(uploadAst));
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-title-inline-"));
     const script = path.join(directory, "main.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");

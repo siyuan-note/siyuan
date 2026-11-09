@@ -2341,6 +2341,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     if (type === "NodeVideo") {
         subMenus.push({
             id: "loop",
+            icon: "iconRefresh",
             label: window.siyuan.languages.videoLoop,
             checked: videoElement.hasAttribute("loop"),
             click() {

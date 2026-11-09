@@ -42,7 +42,7 @@ export interface MarkdownBootstrap {
     recovered?: {revision: number; targetGeneration: number};
     preferences: MarkdownPreferences;
     appearance?: MarkdownAppearance;
-    capabilities?: {systemFonts?: boolean};
+    capabilities?: {systemFonts?: boolean; workspaceAppearance?: boolean};
     languages: Record<string, string>;
     lang: string;
     platform: string;

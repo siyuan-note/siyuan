@@ -29,6 +29,7 @@ export const createNativeMarkdownBridge = (target: NativeEnvironment | Window): 
     const earlyCommands: MarkdownCommand[] = [];
     let preferences: MarkdownPreferences;
     let supportsFonts = false;
+    let supportsWorkspaceAppearance = false;
     const appearance = (): MarkdownAppearance => {
         const independent = {theme: preferences.theme ?? "system", fontSize: preferences.fontSize ?? 16,
             fonts: preferences.fonts ?? {global: [], editor: [], code: []}};
@@ -108,8 +109,12 @@ export const createNativeMarkdownBridge = (target: NativeEnvironment | Window): 
         },
         bootstrap: async () => {
             const bootstrap = await invoke<MarkdownBootstrap>("bootstrap");
+            const workspaceAppearance = bootstrap.capabilities?.workspaceAppearance === true;
+            if (workspaceAppearance && !bootstrap.appearance) throw new Error("Workspace appearance unavailable");
             preferences = bootstrap.preferences;
             supportsFonts = bootstrap.capabilities?.systemFonts === true;
+            supportsWorkspaceAppearance = workspaceAppearance;
+            if (supportsWorkspaceAppearance) return bootstrap;
             return supportsFonts ? {...bootstrap, appearance: appearance()} : bootstrap;
         },
         newDocument: () => invoke("new"),
@@ -126,6 +131,7 @@ export const createNativeMarkdownBridge = (target: NativeEnvironment | Window): 
         },
         systemFonts: () => supportsFonts ? invoke("system-fonts") : Promise.reject(new Error("System fonts unavailable")),
         appearance: async patch => {
+            if (supportsWorkspaceAppearance) return invoke("appearance", patch ?? null);
             if (!supportsFonts) throw new Error("Independent appearance unavailable");
             if (patch?.sources && Object.values(patch.sources).some(source => source !== "independent")) {
                 throw new Error("Workspace appearance unavailable");

@@ -306,6 +306,14 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     const initializeDocument = async (next: MarkdownBootstrap) => {
         const generation = ++documentGeneration;
         const current = () => !disposed && generation === documentGeneration;
+        if (bridge.appearance && next.appearance && next.appearance !== appearance) {
+            appearance = next.appearance;
+            root.style.setProperty("--markdown-font-size", `${appearance.fontSize}px`);
+            fontAppearance.apply(appearance);
+            await applyTheme();
+            if (!current()) return;
+            if (appearanceMenu) workspaceChoices();
+        }
         clearTimeout(autoSave);
         editor?.destroy();
         editor = undefined;

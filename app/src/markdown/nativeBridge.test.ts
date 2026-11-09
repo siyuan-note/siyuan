@@ -1,7 +1,54 @@
 import {test} from "node:test";
 import * as assert from "node:assert/strict";
 import {createNativeMarkdownBridge} from "./nativeBridge";
-import type {MarkdownIndependentAppearance} from "./bridge";
+import type {MarkdownAppearance, MarkdownIndependentAppearance} from "./bridge";
+
+test("workspace appearance capabilities preserve native sources, independent values and font grants", async () => {
+    const sent: Array<{id: string; action: string; payload?: unknown}> = [];
+    const native = {postMessage(message: string) {sent.push(JSON.parse(message));}, onmessage: undefined as (event: {data: string}) => void};
+    const bridge = createNativeMarkdownBridge({siyuanMarkdownNative: native});
+    const reply = (result: unknown) => native.onmessage({data: JSON.stringify({type: "reply", id: sent.at(-1).id, result})});
+    const appearance: MarkdownAppearance = {theme: "dark", fontSize: 24, fonts: {global: [], editor: [], code: []},
+        independent: {theme: "light", fontSize: 16, fonts: {global: [{family: "Saved", weight: 400}], editor: [], code: []}},
+        sources: {theme: "workspace-id", fontSize: "workspace-id", fonts: "independent"},
+        workspaces: [{id: "workspace-id", name: "/trusted/workspaces/main"}],
+        customFonts: [{family: "SiYuanCustomFont-test", weight: 400, url: "siyuan-markdown://session/appearance-font/token"}]};
+    const bootstrap = bridge.bootstrap();
+    reply({preferences: {mode: "ir", theme: "system", fontSize: 16}, capabilities: {systemFonts: true, workspaceAppearance: true}, appearance});
+    assert.deepEqual((await bootstrap).appearance, appearance);
+    const refresh = bridge.appearance();
+    assert.equal(sent.at(-1).action, "appearance");
+    assert.equal(sent.at(-1).payload, null);
+    reply(appearance);
+    assert.deepEqual(await refresh, appearance);
+    const patch = {sources: {fonts: "workspace-id"}, independent: {fontSize: 20}};
+    const save = bridge.appearance(patch);
+    assert.equal(sent.at(-1).action, "appearance");
+    assert.deepEqual(sent.at(-1).payload, patch);
+    const saved = {...appearance, sources: {...appearance.sources, fonts: "workspace-id"}};
+    reply(saved);
+    assert.deepEqual(await save, saved);
+    const failed = bridge.appearance({sources: {fonts: "missing"}});
+    const current = sent.at(-1);
+    native.onmessage({data: JSON.stringify({type: "reply", id: sent.at(-2).id, result: appearance})});
+    native.onmessage({data: JSON.stringify({type: "reply", id: current.id, error: "Unavailable appearance source"})});
+    await assert.rejects(failed, /Unavailable appearance source/);
+});
+
+test("workspace capability requires a native snapshot and is not inferred from unadvertised data", async () => {
+    const sent: Array<{id: string}> = [];
+    const native = {postMessage(message: string) {sent.push(JSON.parse(message));}, onmessage: undefined as (event: {data: string}) => void};
+    const bridge = createNativeMarkdownBridge({siyuanMarkdownNative: native});
+    const failed = bridge.bootstrap();
+    native.onmessage({data: JSON.stringify({type: "reply", id: sent.at(-1).id,
+        result: {preferences: {}, capabilities: {workspaceAppearance: true}}})});
+    await assert.rejects(failed, /Workspace appearance unavailable/);
+    const retry = bridge.bootstrap();
+    native.onmessage({data: JSON.stringify({type: "reply", id: sent.at(-1).id,
+        result: {preferences: {theme: "light"}, capabilities: {systemFonts: true}, appearance: {theme: "dark"}}})});
+    assert.equal((await retry).appearance.theme, "light");
+    await assert.rejects(bridge.appearance({sources: {theme: "untrusted"}}), /Workspace appearance unavailable/);
+});
 
 test("native font capabilities enable independent appearance without inventing workspace access", async () => {
     const sent: Array<{id: string; action: string; payload?: unknown}> = [];

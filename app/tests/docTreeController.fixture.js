@@ -354,6 +354,49 @@ exports.cases = async sources => {
         fixture.destroy();
     }
     {
+        const fixture = make(2);
+        const {controller, directories, locates, requests, source} = fixture;
+        directories.set("", [file("a", "", 1), file("b", "", 1)]);
+        directories.set("a", [file("aa", "a", 100)]);
+        directories.set("b", [file("bb", "b", 100)]);
+        const range = source.range;
+        const releases = [];
+        source.range = request => ["a", "b"].includes(request.parentID) ? new Promise(resolve => {
+            releases.push(async () => resolve(await range(request)));
+        }) : range(request);
+        const restoring = controller.restoreExpanded(["box", "a", "b", "aa", "bb"].map(id => ({
+            notebookId: "box", id, kind: id === "box" ? "notebook" : "document",
+        })));
+        for (let i = 0; i < 30 && releases.length < 2; i++) { await Promise.resolve(); }
+        check.equal(releases.length, 2, "independent directories restore concurrently within a level");
+        await Promise.all(releases.map(release => release()));
+        await restoring;
+        check.equal(locates.length, 0, "parent batches resolve sibling expansions without locating each ID");
+        check.equal(requests.filter(request => request.parentID === "").length, 1, "shared ancestors load once");
+        check.ok(!requests.some(request => ["aa", "bb"].includes(request.parentID)),
+            "offscreen expanded directories use child counts without prefetching their contents");
+        check.equal(controller.model.directory(controller.getItem("notebook:box/a/aa")).total, 100);
+        check.ok(controller.isExpanded("notebook:box/b/bb"));
+        fixture.destroy();
+    }
+    {
+        const fixture = make(100);
+        const {controller, directories, locates} = fixture;
+        directories.get("")[80].subFileCount = 1;
+        directories.set("d80", [file("far-child", "d80")]);
+        await controller.restoreExpanded([
+            {notebookId: "box", id: "box", kind: "notebook"},
+            {notebookId: "box", id: "missing", kind: "document"},
+            {notebookId: "box", id: "d80", kind: "document"},
+        ]);
+        check.ok(controller.isExpanded("notebook:box/d80"), "a missing saved branch does not block a far sibling");
+        check.deepEqual(locates, ["missing", "d80"], "first-page misses use bounded locate fallback");
+        locates.length = 0;
+        await controller.restoreExpanded(controller.getExpandedItems());
+        check.equal(locates.length, 0, "runtime occurrence keys reuse cached paths");
+        fixture.destroy();
+    }
+    {
         const fixture = make(100);
         const {controller, source} = fixture;
         const original = source.locate;

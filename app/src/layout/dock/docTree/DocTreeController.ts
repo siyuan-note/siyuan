@@ -574,27 +574,61 @@ export class DocTreeController {
         }));
     }
 
-    public async restoreExpanded(items: readonly (Pick<IDocTreeExpansion, "notebookId" | "id" | "kind"> & Partial<IDocTreeExpansion>)[]) {
+    public async restoreExpanded(items: readonly (Pick<IDocTreeExpansion, "notebookId" | "id" | "kind"> & Partial<IDocTreeExpansion>)[],
+                                 isCurrent: () => boolean = () => true) {
         const generation = this.generation;
         const interaction = this.interaction;
-        for (const item of items) {
-            if (this.disposed || generation !== this.generation || interaction !== this.interaction) {
-                return;
-            }
-            const key = item.occurrenceKey || (item.kind === "notebook" ? `notebook:${item.notebookId}` : undefined);
-            let current = this.model.getItem(key);
-            if (!current) {
-                await this.locate(item.notebookId, item.id, {select: false, scroll: false,
-                    rootKey: item.occurrenceKey?.split("/")[0]});
-                if (this.disposed || generation !== this.generation || interaction !== this.interaction) { return; }
-                current = this.findItem(item.notebookId, item.id, item.occurrenceKey?.split("/")[0]);
-                if (current && key && key !== current.occurrenceKey) {
-                    this.model.expanded.delete(key);
+        const current = () => !this.disposed && generation === this.generation &&
+            interaction === this.interaction && isCurrent();
+        const pending = new Set(new Map(items.map(item => [
+            JSON.stringify([item.notebookId, item.kind, item.occurrenceKey || item.id]), item,
+        ])).values());
+        const resolve = (item: typeof items[number]) => this.model.getItem(item.occurrenceKey) ||
+            this.findItem(item.notebookId, item.id, item.occurrenceKey?.split("/")[0]);
+        while (pending.size && current()) {
+            const known = Array.from(pending, item => ({saved: item, item: resolve(item)})).filter(entry => entry.item);
+            if (!known.length) {
+                // 旧状态只有 ID；首批外或已移动的目标按需定位，避免遍历宽目录的全部批次。
+                const saved = pending.values().next().value;
+                try {
+                    await this.locate(saved.notebookId, saved.id, {select: false, scroll: false,
+                        rootKey: saved.occurrenceKey?.split("/")[0]});
+                } catch (error) {
+                    console.error(error);
                 }
+                if (!current()) { return; }
+                if (!resolve(saved)) { pending.delete(saved); }
+                continue;
             }
-            if (current && !current.unavailable) {
-                await this.toggle(current.occurrenceKey, true, false);
-            }
+            const depth = known.reduce((minimum, entry) => Math.min(minimum, entry.item.depth), Infinity);
+            const level = known.filter(entry => entry.item.depth === depth);
+            level.forEach(entry => pending.delete(entry.saved));
+            await Promise.all(level.map(async ({saved, item}) => {
+                if (!current() || item.unavailable) { return; }
+                try {
+                    const directory = this.model.directory(item);
+                    if (item.kind === "notebook" || this.refreshingDirectories.has(directory)) {
+                        await this.toggle(item.occurrenceKey, true, false);
+                    } else {
+                        // 父批次携带经过相同过滤的子文档数，足以投影未加载的子目录。
+                        directory.total ??= item.subFileCount;
+                        this.model.expanded.set(item.occurrenceKey, item);
+                    }
+                    if (!current()) { return; }
+                    if (saved.occurrenceKey && saved.occurrenceKey !== item.occurrenceKey) {
+                        this.model.expanded.delete(saved.occurrenceKey);
+                    }
+                    const needsChildren = Array.from(pending).some(target => target.notebookId === item.notebookId &&
+                        (!target.occurrenceKey || target.occurrenceKey.startsWith(item.occurrenceKey + "/")) && !resolve(target));
+                    if (needsChildren && directory.total !== 0) { await this.load(item, 0); }
+                } catch (error) {
+                    // 已保存的分支可能已删除或失去访问权限，其他同层目录仍可继续恢复。
+                    console.error(error);
+                }
+            }));
+            if (!current()) { return; }
+            this.model.project();
+            this.scheduleRender();
         }
     }
 

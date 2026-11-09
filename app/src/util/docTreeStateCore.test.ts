@@ -71,33 +71,32 @@ test("document tree restoration tolerates removed anchors and malformed local st
     assert.deepEqual(f.calls, ["locate:box/gone"]);
 });
 
-test("a superseded document tree restoration stops before later expansions and anchor changes", async () => {
+test("document tree restoration passes the whole batch and cancellation guard before restoring the anchor", async () => {
     const f = fixture();
     let current = true;
-    f.controller.restoreExpanded = async items => {
+    f.controller.restoreExpanded = async (items, isCurrent) => {
+        assert.equal(isCurrent(), true);
         f.restored.push(...items);
         current = false;
+        assert.equal(isCurrent(), false);
     };
     await restoreDocTreeStateData(f.controller, [{notebookId: "box", openPaths: [], version: 2,
         expandedIDs: [{id: "first", kind: "document"}, {id: "second", kind: "document"}],
         scrollAnchor: {id: "far", offset: 5}}], () => current);
-    assert.deepEqual(f.restored.map(item => item.id), ["first"]);
+    assert.deepEqual(f.restored.map(item => item.id), ["first", "second"]);
     assert.deepEqual(f.calls, []);
     assert.equal(f.anchor.value, undefined);
 });
 
-test("an unavailable saved branch does not prevent restoring later branches", async t => {
+test("document tree restoration reports an unexpected controller failure", async t => {
     const errors: unknown[] = [];
     t.mock.method(console, "error", (error: unknown) => errors.push(error));
     const f = fixture();
-    f.controller.restoreExpanded = async items => {
-        if (items[0].id === "gone") {
-            throw new Error("not found");
-        }
-        f.restored.push(...items);
+    f.controller.restoreExpanded = async () => {
+        throw new Error("not found");
     };
     await restoreDocTreeStateData(f.controller, [{notebookId: "box", openPaths: [], version: 2,
         expandedIDs: [{id: "gone", kind: "document"}, {id: "retained", kind: "document"}]}]);
-    assert.deepEqual(f.restored.map(item => item.id), ["retained"]);
+    assert.deepEqual(f.restored, []);
     assert.equal(errors.length, 1);
 });

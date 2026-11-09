@@ -118,7 +118,9 @@ func TestIOSRelocationAndStableIDs(t *testing.T) {
 	for _, platform := range []string{"ios", "android"} {
 		t.Run(platform, func(t *testing.T) {
 			r, root, _, id := fixture(t, platform)
-			writeJSON(t, filepath.Join(root, "home", ".config", "siyuan", "workspace.json"), []string{"/private/var/mobile/Containers/Data/Application/OLD/Documents/workspace"})
+			// Model an old sandbox with a host-absolute path, including its volume on Windows.
+			oldWorkspace := filepath.Join(filepath.VolumeName(root)+string(filepath.Separator), "private", "var", "mobile", "Containers", "Data", "Application", "OLD", "Documents", "workspace")
+			writeJSON(t, filepath.Join(root, "home", ".config", "siyuan", "workspace.json"), []string{oldWorkspace})
 			ret := resolve(t, r, `{"mode":"ir","sources":{"fontSize":"`+id+`"}}`, "")
 			if platform == "ios" {
 				if ret.Appearance.FontSize != 23 || len(ret.Appearance.Workspaces) != 1 || ret.Appearance.Workspaces[0].ID != id {

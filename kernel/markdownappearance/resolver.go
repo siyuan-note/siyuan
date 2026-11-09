@@ -177,10 +177,10 @@ func (r *Resolver) workspaces() []Workspace {
 		name = filepath.Clean(name)
 		if r.platform == "ios" {
 			if _, err := relativeWithin(r.originalRoot, name); err != nil {
-				marker := "/Documents/"
+				marker := string(filepath.Separator) + "Documents" + string(filepath.Separator)
 				if index := strings.Index(name, marker); index >= 0 {
 					name = filepath.Join(r.originalRoot, name[index+len(marker):])
-				} else if strings.HasSuffix(name, "/Documents") {
+				} else if strings.HasSuffix(name, string(filepath.Separator)+"Documents") {
 					name = r.originalRoot
 				}
 			}

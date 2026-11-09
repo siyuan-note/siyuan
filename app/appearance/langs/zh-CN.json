@@ -1,4 +1,7 @@
 {
+	"markdownAppearanceSettings": "外观设置",
+	"markdownFontSizeSettings": "字号设置",
+	"markdownFontSettings": "字体设置",
 	"markdownAppearanceError": "设置未能完整应用，部分更改可能已保存，请重试",
 	"pluginTabUnavailable": "此页签的插件暂不可用或无法确定归属，请启用插件后重试",
 	"markdownSystemFontsUnavailable": "无法加载系统字体，请重试",

@@ -1,6 +1,7 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
 import {createMarkdownAppearanceForm} from "./appearance";
+import {loadModule} from "../testSupport/loadModule";
 
 class Element {
     children: Element[] = [];
@@ -80,4 +81,20 @@ test("closing or destroying the dialog preserves cancellation and ignores obsole
     resolve(); await Promise.resolve();
     assert.equal(dismissed, 1);
     assert.equal(dialog.listeners.has("cancel"), false);
+});
+
+
+test("appearance dialogs use concise complete translated titles for each setting", () => {
+    const module = loadModule<typeof import("./appearance")>("src/markdown/appearance.ts", {
+        document: {createElement: (tag: string) => new Element(tag)},
+        require: () => ({createMarkdownFontPicker: () => ({destroy() {}, value: (): unknown[] => []})}),
+    });
+    const labels = {markdownAppearanceSettings: "外观设置", markdownFontSizeSettings: "字号设置", markdownFontSettings: "字体设置"};
+    for (const [group, key] of [["theme", "markdownAppearanceSettings"], ["fontSize", "markdownFontSizeSettings"], ["fonts", "markdownFontSettings"]] as const) {
+        const dialog = new Element("dialog");
+        const destroy = module.createMarkdownAppearanceForm(dialog as unknown as HTMLDialogElement, group, {}, name => labels[name as keyof typeof labels] || name,
+            async () => {}, () => {});
+        assert.equal(dialog.all().find(item => item.className === "b3-dialog__header").textContent, labels[key]);
+        destroy();
+    }
 });

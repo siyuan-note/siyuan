@@ -1,4 +1,7 @@
 {
+	"markdownAppearanceSettings": "הגדרות מראה",
+	"markdownFontSizeSettings": "הגדרות גודל גופן",
+	"markdownFontSettings": "הגדרות גופן",
 	"markdownAppearanceError": "לא ניתן להשלים את החלת ההגדרות. ייתכן שחלק מהשינויים כבר נשמרו; יש לנסות שוב",
 	"pluginTabUnavailable": "התוסף של לשונית זו אינו זמין או שלא ניתן לזהותו; יש להפעיל את התוסף ולנסות שוב",
 	"markdownSystemFontsUnavailable": "לא ניתן לטעון את גופני המערכת; נסה שוב",

@@ -1,4 +1,7 @@
 {
+	"markdownAppearanceSettings": "Nastavenia vzhľadu",
+	"markdownFontSizeSettings": "Nastavenia veľkosti písma",
+	"markdownFontSettings": "Nastavenia písma",
 	"markdownAppearanceError": "Nastavenia sa nepodarilo úplne použiť. Niektoré zmeny už mohli byť uložené; skúste to znova",
 	"pluginTabUnavailable": "Doplnok tejto karty nie je dostupný alebo ho nemožno určiť; povoľte doplnok a skúste to znova",
 	"markdownSystemFontsUnavailable": "Systémové písma sa nepodarilo načítať; skúste to znova",

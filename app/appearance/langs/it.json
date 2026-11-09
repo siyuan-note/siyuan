@@ -1,4 +1,7 @@
 {
+	"markdownAppearanceSettings": "Impostazioni dell’aspetto",
+	"markdownFontSizeSettings": "Impostazioni della dimensione del carattere",
+	"markdownFontSettings": "Impostazioni dei caratteri",
 	"markdownAppearanceError": "Impossibile completare l’applicazione delle impostazioni. Alcune modifiche potrebbero essere già state salvate; riprova",
 	"pluginTabUnavailable": "Il plugin di questa scheda non è disponibile o non può essere identificato; attivalo e riprova",
 	"markdownSystemFontsUnavailable": "Impossibile caricare i caratteri di sistema; riprova",

@@ -1,4 +1,7 @@
 {
+	"markdownAppearanceSettings": "Ajustes de apariencia",
+	"markdownFontSizeSettings": "Ajustes de tamaño de fuente",
+	"markdownFontSettings": "Ajustes de fuente",
 	"markdownAppearanceError": "No se pudieron aplicar todos los ajustes. Es posible que algunos cambios ya se hayan guardado; vuelve a intentarlo",
 	"pluginTabUnavailable": "El complemento de esta pestaña no está disponible o no se puede identificar; actívalo e inténtalo de nuevo",
 	"markdownSystemFontsUnavailable": "No se pudieron cargar las fuentes del sistema; inténtalo de nuevo",

@@ -1,4 +1,7 @@
 {
+	"markdownAppearanceSettings": "外觀設定",
+	"markdownFontSizeSettings": "字型大小設定",
+	"markdownFontSettings": "字型設定",
 	"markdownAppearanceError": "設定未能完整套用，部分變更可能已儲存，請重試",
 	"pluginTabUnavailable": "此頁籤的外掛暫時無法使用或無法確定歸屬，請啟用外掛後重試",
 	"markdownSystemFontsUnavailable": "無法載入系統字型，請重試",

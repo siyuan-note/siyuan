@@ -1,4 +1,7 @@
 {
+	"markdownAppearanceSettings": "Подешавања изгледа",
+	"markdownFontSizeSettings": "Подешавања величине фонта",
+	"markdownFontSettings": "Подешавања фонта",
 	"markdownAppearanceError": "Подешавања нису у потпуности примењена. Неке промене су можда већ сачуване; покушајте поново",
 	"pluginTabUnavailable": "Додатак ове картице није доступан или није могуће утврдити коме припада; омогућите додатак и покушајте поново",
 	"markdownSystemFontsUnavailable": "Није могуће учитати системске фонтове; покушајте поново",

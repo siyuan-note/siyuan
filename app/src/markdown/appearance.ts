@@ -25,7 +25,7 @@ export const createMarkdownAppearanceForm = (element: HTMLDialogElement, group: 
     content.className = "b3-dialog__content markdown-appearance-form";
     const title = document.createElement("strong");
     title.id = "markdownAppearanceTitle"; title.className = "b3-dialog__header";
-    title.textContent = `${text("markdownIndependentAppearance")} · ${text({theme: "appearanceMode", fontSize: "fontSize", fonts: "fontFamily"}[group])}`;
+    title.textContent = text({theme: "markdownAppearanceSettings", fontSize: "markdownFontSizeSettings", fonts: "markdownFontSettings"}[group]);
     form.append(title, content);
     const field = (label: string, input: HTMLElement) => {
         const wrapper = document.createElement("label");

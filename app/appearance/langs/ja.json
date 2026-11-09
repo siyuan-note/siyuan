@@ -1,4 +1,7 @@
 {
+	"markdownAppearanceSettings": "外観設定",
+	"markdownFontSizeSettings": "文字サイズ設定",
+	"markdownFontSettings": "フォント設定",
 	"markdownAppearanceError": "設定を完全に適用できませんでした。一部の変更は保存済みの可能性があります。再試行してください",
 	"pluginTabUnavailable": "このタブのプラグインは利用できないか、所有元を特定できません。プラグインを有効にして再試行してください",
 	"markdownSystemFontsUnavailable": "システムフォントを読み込めませんでした。再試行してください",

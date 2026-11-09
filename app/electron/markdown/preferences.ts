@@ -4,15 +4,19 @@ import {createMarkdownTemporaryFile} from "./temporaryFile";
 import type {MarkdownPreferences} from "../../src/markdown/bridge";
 import type {MarkdownIOError} from "./types";
 
-const defaults: Readonly<MarkdownPreferences> = Object.freeze({mode: "ir", theme: "system", fontSize: 16});
+const defaults: Readonly<MarkdownPreferences> = Object.freeze({mode: "ir"});
 const normalize = (value: unknown): MarkdownPreferences => {
     const data = value as Record<string, unknown> | undefined;
-    if (!data || typeof data.mode !== "string" || !["ir", "wysiwyg", "sv"].includes(data.mode) ||
-        typeof data.theme !== "string" || !["system", "light", "dark"].includes(data.theme) ||
-        typeof data.fontSize !== "number" || !Number.isInteger(data.fontSize) || data.fontSize < 12 || data.fontSize > 32) {
+    if (!data || typeof data.mode !== "string" || !["ir", "wysiwyg", "sv"].includes(data.mode)) {
         throw new Error("Invalid Markdown preferences");
     }
-    return {mode: data.mode as MarkdownPreferences["mode"], theme: data.theme as MarkdownPreferences["theme"], fontSize: data.fontSize};
+    const sources = data.sources as MarkdownPreferences["sources"];
+    if (sources !== undefined && (!sources || typeof sources !== "object" || Array.isArray(sources) ||
+        Object.keys(sources).some(key => !["theme", "fontSize", "fonts"].includes(key)) ||
+        Object.values(sources).some(value => typeof value !== "string" || !/^[a-f0-9]{64}$/.test(value)))) {
+        throw new Error("Invalid Markdown appearance sources");
+    }
+    return {mode: data.mode as MarkdownPreferences["mode"], ...(sources === undefined ? {} : {sources: {...sources}})};
 };
 
 const createMarkdownPreferences = (directory: string) => {
@@ -34,10 +38,11 @@ const createMarkdownPreferences = (directory: string) => {
     return {
         read: () => queue.then(read),
         update(patch: Partial<MarkdownPreferences>) {
-            const copy = {...patch};
+            const copy = {...patch, ...(patch.sources === undefined ? {} : {sources: {...patch.sources}})};
             const task = queue.then(async () => {
                 const current = await read();
-                const preferences = normalize({...current, ...copy});
+                const preferences = normalize({...current, ...copy,
+                    ...(copy.sources === undefined ? {} : {sources: {...current.sources, ...copy.sources}})});
                 await fs.mkdir(directory, {recursive: true, mode: 0o700});
                 const staged = await createMarkdownTemporaryFile(file + ".", 0o600);
                 const temporary = staged.path;

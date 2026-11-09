@@ -5,8 +5,20 @@ import type {SidebarKeymap} from "../util/dockKeymap";
 
 export interface MarkdownPreferences {
     mode: "ir" | "wysiwyg" | "sv";
+    theme?: "system" | "light" | "dark";
+    fontSize?: number;
+    sources?: Partial<Record<MarkdownAppearanceGroup, string>>;
+}
+
+export type MarkdownAppearanceGroup = "theme" | "fontSize" | "fonts";
+export interface MarkdownFont {family: string; weight: number;}
+export interface MarkdownAppearance {
     theme: "system" | "light" | "dark";
     fontSize: number;
+    sources: Record<MarkdownAppearanceGroup, string>;
+    workspaces: Array<{id: string; name: string}>;
+    fonts: {global: MarkdownFont[]; editor: MarkdownFont[]; code: MarkdownFont[]};
+    customFonts: Array<MarkdownFont & {url: string}>;
 }
 
 export interface MarkdownBootstrap {
@@ -16,6 +28,7 @@ export interface MarkdownBootstrap {
     format?: MarkdownFormat;
     recovered?: {revision: number; targetGeneration: number};
     preferences: MarkdownPreferences;
+    appearance?: MarkdownAppearance;
     languages: Record<string, string>;
     lang: string;
     platform: string;
@@ -52,6 +65,7 @@ export interface MarkdownBridge {
     resolveResource(reference: string): Promise<string | undefined>;
     openLink(url: string): Promise<void>;
     preferences(patch: Partial<MarkdownPreferences>): Promise<MarkdownPreferences>;
+    appearance?(patch?: Partial<Record<MarkdownAppearanceGroup, string>>): Promise<MarkdownAppearance>;
     confirm(action: "reload" | "overwrite" | "save-as"): Promise<boolean>;
     confirmClose(): Promise<"keep" | "save-as" | "cancel">;
     recoveries(): Promise<Array<{id: string; displayName: string; updatedAt: number}>>;

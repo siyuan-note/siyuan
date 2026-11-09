@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "مساحة العمل غير متاحة؛ تُستخدم الإعدادات الافتراضية",
 	"automationInsertField": "إدراج مرجع حقل",
 	"automationTemplateSourceLimit": "مصدر القالب محدود بـ 8 KiB",
 	"automationRunSummary": "نجح ${succeeded}، فشل ${failed}، متبقٍ ${pending}، تم تخطي ${skipped}",

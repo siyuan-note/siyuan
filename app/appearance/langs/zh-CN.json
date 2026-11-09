@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "工作空间不可用，使用默认值",
 	"automationInsertField": "插入字段引用",
 	"automationTemplateSourceLimit": "模板源码最多 8 KiB",
 	"automationRunSummary": "成功 ${succeeded} 条，失败 ${failed} 条，待处理 ${pending} 条，跳过 ${skipped} 条",

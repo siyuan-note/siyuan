@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "พื้นที่ทำงานไม่พร้อมใช้งาน กำลังใช้ค่าเริ่มต้น",
 	"automationInsertField": "แทรกการอ้างอิงฟิลด์",
 	"automationTemplateSourceLimit": "ซอร์สเทมเพลตมีขนาดได้ไม่เกิน 8 KiB",
 	"automationRunSummary": "สำเร็จ ${succeeded} รายการ ล้มเหลว ${failed} รายการ เหลือ ${pending} รายการ ข้าม ${skipped} รายการ",

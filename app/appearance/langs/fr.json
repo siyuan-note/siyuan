@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "Espace de travail indisponible ; valeurs par défaut utilisées",
 	"automationInsertField": "Insérer une référence de champ",
 	"automationTemplateSourceLimit": "Le code du modèle est limité à 8 Kio",
 	"automationRunSummary": "${succeeded} réussies, ${failed} échouées, ${pending} restantes, ${skipped} ignorées",

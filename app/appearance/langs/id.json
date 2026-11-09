@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "Ruang kerja tidak tersedia; menggunakan pengaturan bawaan",
 	"automationInsertField": "Sisipkan referensi bidang",
 	"automationTemplateSourceLimit": "Sumber templat dibatasi hingga 8 KiB",
 	"automationRunSummary": "${succeeded} berhasil, ${failed} gagal, ${pending} tersisa, ${skipped} dilewati",

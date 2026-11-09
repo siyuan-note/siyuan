@@ -18,6 +18,10 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
     await fs.mkdir(path.join(appDirectory, "appearance", "langs"), {recursive: true});
     await fs.writeFile(path.join(appDirectory, "appearance", "langs", "en.json"), JSON.stringify({markdownEditor: "Markdown editor", untitled: "Untitled"}));
     if (options.theme) {
+        const workspace = path.join(directory, "workspace");
+        await fs.mkdir(path.join(workspace, "conf"), {recursive: true});
+        await fs.writeFile(path.join(workspace, "conf", "conf.json"), JSON.stringify({appearance: {modeOS: options.theme === "system", mode: options.theme === "dark" ? 1 : 0}}));
+        await fs.writeFile(path.join(directory, "workspace.json"), JSON.stringify([workspace]));
         await fs.mkdir(path.join(directory, "config"), {recursive: true});
         await fs.writeFile(path.join(directory, "config", "preferences.json"), JSON.stringify({version: 1, mode: "ir", fontSize: 16, theme: options.theme}));
     }
@@ -938,4 +942,21 @@ test("workspace asset opens preserve expected identity through window creation a
     await manager.open(file, {...expected, path: path.join(directory, "other.md")});
     assert.equal(windows.length, 1);
     assert.equal(host.sessions.size, 1);
+});
+
+test("workspace appearance capability persists independent source selections without changing edit mode", async t => {
+    const {directory, manager, call} = await fixture(t, {theme: "dark"});
+    const window = await manager.open();
+    const initial = await call(window, "bootstrap");
+    assert.equal(initial.appearance.theme, "dark");
+    const id = initial.appearance.workspaces[0].id;
+    const result = await call(window, "appearance", {fonts: id});
+    assert.equal(result.sources.fonts, id);
+    await assert.rejects(call(window, "appearance", {theme: "../secret"}));
+    await assert.rejects(call(window, "preferences", {theme: "light"}));
+    await call(window, "preferences", {mode: "sv"});
+    const persisted = JSON.parse(await fs.readFile(path.join(directory, "config", "preferences.json"), "utf8"));
+    assert.equal(persisted.mode, "sv");
+    assert.deepEqual(persisted.sources, {fonts: id});
+    assert.equal(persisted.theme, undefined);
 });

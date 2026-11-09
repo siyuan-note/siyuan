@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "Area di lavoro non disponibile; vengono usati i valori predefiniti",
 	"automationInsertField": "Inserisci riferimento al campo",
 	"automationTemplateSourceLimit": "Il codice del modello è limitato a 8 KiB",
 	"automationRunSummary": "${succeeded} riuscite, ${failed} non riuscite, ${pending} rimanenti, ${skipped} saltate",

@@ -17,11 +17,11 @@ const fixture = async t => {
 test("independent preferences serialize updates and survive reopening", async t => {
     const {directory, preferences} = await fixture(t);
     assert.deepEqual(await preferences.read(), defaults);
-    await Promise.all([preferences.update({mode: "sv"}), preferences.update({theme: "dark"}), preferences.update({fontSize: 24})]);
-    assert.deepEqual(await createMarkdownPreferences(directory).read(), {mode: "sv", theme: "dark", fontSize: 24});
+    await Promise.all([preferences.update({mode: "sv"}), preferences.update({sources: {theme: "a".repeat(64)}}), preferences.update({sources: {fontSize: "b".repeat(64)}})]);
+    assert.deepEqual(await createMarkdownPreferences(directory).read(), {mode: "sv", sources: {theme: "a".repeat(64), fontSize: "b".repeat(64)}});
     assert.deepEqual(await fs.readdir(directory), ["preferences.json"]);
-    await assert.rejects(preferences.update({fontSize: 100}));
-    assert.equal((await preferences.read()).fontSize, 24);
+    await assert.rejects(preferences.update({sources: {fonts: "invalid"}}));
+    assert.equal((await preferences.read()).sources.fontSize, "b".repeat(64));
 });
 
 test("unknown or corrupt preferences are preserved instead of overwritten", async t => {
@@ -30,7 +30,15 @@ test("unknown or corrupt preferences are preserved instead of overwritten", asyn
     for (const original of ["{broken", JSON.stringify({version: 2, ...defaults}), " ".repeat(4097)]) {
         await fs.writeFile(file, original);
         await assert.rejects(preferences.read());
-        await assert.rejects(preferences.update({theme: "dark"}));
+        await assert.rejects(preferences.update({sources: {theme: "a".repeat(64)}}));
         assert.equal(await fs.readFile(file, "utf8"), original);
     }
+});
+
+test("legacy appearance settings are not migrated while independent edit mode is retained", async t => {
+    const {directory, preferences} = await fixture(t);
+    await fs.writeFile(path.join(directory, "preferences.json"), JSON.stringify({version: 1, mode: "sv", theme: "dark", fontSize: 28}));
+    assert.deepEqual(await preferences.read(), {mode: "sv"});
+    await preferences.update({sources: {fonts: "c".repeat(64)}});
+    assert.deepEqual(JSON.parse(await fs.readFile(path.join(directory, "preferences.json"), "utf8")), {version: 1, mode: "sv", sources: {fonts: "c".repeat(64)}});
 });

@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "工作空間無法使用，使用預設值",
 	"automationInsertField": "插入欄位引用",
 	"automationTemplateSourceLimit": "範本原始碼最多 8 KiB",
 	"automationRunSummary": "成功 ${succeeded} 筆，失敗 ${failed} 筆，待處理 ${pending} 筆，略過 ${skipped} 筆",

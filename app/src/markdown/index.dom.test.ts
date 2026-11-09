@@ -1274,6 +1274,54 @@ const browserCases = async (languages: Record<string, string>) => {
         check.equal(root.dataset.windowControls, undefined);
     }
     delete bridge.window;
+    const inherited: import("./bridge").MarkdownAppearance = {
+        theme: "light", fontSize: 23, sources: {theme: "one", fontSize: "one", fonts: "one"},
+        workspaces: [{id: "one", name: "Workspace One"}, {id: "two", name: "Workspace Two"}],
+        fonts: {global: [{family: "serif", weight: 500}], editor: [{family: "monospace", weight: 400}], code: [{family: "serif", weight: 600}]}, customFonts: [],
+    };
+    let appearanceSnapshot = inherited;
+    const appearancePatches: Array<Partial<Record<import("./bridge").MarkdownAppearanceGroup, string>>> = [];
+    let finishAppearance: () => void;
+    bridge.appearance = async patch => {
+        appearancePatches.push(patch);
+        if (appearancePatches.length === 1) await new Promise<void>(resolve => {finishAppearance = resolve;});
+        appearanceSnapshot = {...appearanceSnapshot, sources: {...appearanceSnapshot.sources, ...patch},
+            theme: patch.theme === "two" ? "dark" : appearanceSnapshot.theme,
+            fontSize: patch.fontSize === "two" ? 31 : appearanceSnapshot.fontSize};
+        return appearanceSnapshot;
+    };
+    bridge.bootstrap = async () => ({...bootstrap, sessionId: "workspace-appearance", preferences: {mode: "ir"}, appearance: appearanceSnapshot});
+    const inheritedApp = await api.mountMarkdownApplication(bridge);
+    const inheritedEditor = inheritedApp.editor;
+    const inheritedText = inheritedApp.editor.flush().content;
+    check.equal(document.querySelectorAll("#markdownFonts button").length, 2);
+    check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').getAttribute("data-value"), "one");
+    check.equal(getComputedStyle(document.querySelector(".vditor-ir .vditor-reset")).fontSize, "23px");
+    check.ok(getComputedStyle(document.getElementById("markdownApp")).fontFamily.includes("serif"));
+    const oldPreferencesCount = preferenceUpdates.length;
+    document.querySelector<HTMLButtonElement>('#markdownTheme button[data-value="two"]').click();
+    document.querySelector<HTMLButtonElement>('#markdownFont button[data-value="two"]').click();
+    await tick();
+    check.equal(appearancePatches.length, 1, "workspace preference requests are serialized");
+    finishAppearance(); await tick(); await tick();
+    check.equal(appearancePatches.length, 2);
+    check.equal(document.documentElement.dataset.themeMode, "dark");
+    check.equal(getComputedStyle(document.querySelector(".vditor-ir .vditor-reset")).fontSize, "31px");
+    check.equal(document.querySelector('#markdownFonts [aria-checked="true"]').getAttribute("data-value"), "one", "each appearance group has its own source");
+    check.equal(inheritedApp.editor, inheritedEditor, "appearance changes do not recreate the document");
+    check.equal(inheritedApp.editor.flush().content, inheritedText);
+    check.equal(preferenceUpdates.length, oldPreferencesCount, "workspace selections do not overwrite independent edit-mode preferences");
+    inheritedApp.destroy();
+    check.equal(document.getElementById("markdownApp").style.getPropertyValue("--markdown-editor-font-family"), "");
+    appearanceSnapshot = {...inherited, sources: {theme: "missing", fontSize: "", fonts: ""}, workspaces: [], theme: "system", fontSize: 16,
+        fonts: {global: [], editor: [], code: []}};
+    const unavailableAppearance = await api.mountMarkdownApplication(bridge);
+    check.equal(document.getElementById("markdownTheme").getAttribute("aria-disabled"), "true");
+    check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').textContent, languages.markdownWorkspaceUnavailable);
+    check.equal(document.querySelector('#markdownFont [aria-checked="true"]').textContent, languages.default);
+    unavailableAppearance.destroy();
+    delete bridge.appearance;
+    bridge.bootstrap = async () => ({...bootstrap, sessionId: "native-appearance-fallback"});
     const beforeFailureClear = clears;
     const failureBootstrap = await bridge.bootstrap();
     bridge.bootstrap = async () => ({...failureBootstrap, dark: true, sessionId: "failed-ui", recovered: {revision: 7, targetGeneration: 3}});
@@ -1308,7 +1356,7 @@ test("Markdown file tree and compact menus preserve edits across switching, stal
     const compileSource = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "index.ts"].map(compileSource).join("\n") +
+    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "appearance.ts", "index.ts"].map(compileSource).join("\n") +
         "\nwindow.MarkdownApplicationTest = {mountMarkdownApplication, createMarkdownTree, MARKDOWN_RENDER_BYTES}; void 0;";
     const style = compile(path.resolve(__dirname, "../assets/scss/markdown.scss")).css;
     const template = readFileSync(path.resolve(__dirname, "../assets/template/markdown/index.tpl"), "utf8")

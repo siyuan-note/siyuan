@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "Espaço de trabalho indisponível; usando os padrões",
 	"automationInsertField": "Inserir referência de campo",
 	"automationTemplateSourceLimit": "O código do modelo é limitado a 8 KiB",
 	"automationRunSummary": "${succeeded} concluídas, ${failed} falharam, ${pending} restantes, ${skipped} ignoradas",

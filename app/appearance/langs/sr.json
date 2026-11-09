@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "Радни простор није доступан; користе се подразумеване вредности",
 	"automationInsertField": "Уметни референцу поља",
 	"automationTemplateSourceLimit": "Извор шаблона је ограничен на 8 KiB",
 	"automationRunSummary": "Успешно: ${succeeded}, неуспешно: ${failed}, преостало: ${pending}, прескочено: ${skipped}",

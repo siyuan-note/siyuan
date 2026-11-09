@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "Pracovný priestor nie je dostupný; používajú sa predvolené hodnoty",
 	"automationInsertField": "Vložiť odkaz na pole",
 	"automationTemplateSourceLimit": "Zdroj šablóny je obmedzený na 8 KiB",
 	"automationRunSummary": "Úspešné: ${succeeded}, zlyhané: ${failed}, zostávajúce: ${pending}, preskočené: ${skipped}",

@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "Obszar roboczy niedostępny; używane są wartości domyślne",
 	"automationInsertField": "Wstaw odwołanie do pola",
 	"automationTemplateSourceLimit": "Kod szablonu jest ograniczony do 8 KiB",
 	"automationRunSummary": "Udane: ${succeeded}, błędy: ${failed}, pozostałe: ${pending}, pominięte: ${skipped}",

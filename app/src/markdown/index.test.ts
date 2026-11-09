@@ -59,6 +59,7 @@ const setup = () => {
         let actionMessage = "", resourceUnavailable = false, editPending = false, sourceOnly = false, history;
         let outline = {enabled: false, visible: false, available: false};
         let preferences = {mode: "ir", theme: "light"}, systemDark = false, preparing = false, prepared = false;
+        const appearanceTheme = () => preferences.theme;
         let activeMode = preferences.mode;
         let switching = true, frozen = true, exitSequence = 0, switchFailed = false;
         const freeze = value => {frozen = value;};

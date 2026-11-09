@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "Çalışma alanı kullanılamıyor; varsayılanlar kullanılıyor",
 	"automationInsertField": "Alan başvurusu ekle",
 	"automationTemplateSourceLimit": "Şablon kaynağı en fazla 8 KiB olabilir",
 	"automationRunSummary": "${succeeded} başarılı, ${failed} başarısız, ${pending} kalan, ${skipped} atlanan",

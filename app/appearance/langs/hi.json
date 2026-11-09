@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "कार्यस्थान उपलब्ध नहीं है; डिफ़ॉल्ट का उपयोग किया जा रहा है",
 	"automationInsertField": "फ़ील्ड संदर्भ डालें",
 	"automationTemplateSourceLimit": "टेम्पलेट स्रोत अधिकतम 8 KiB है",
 	"automationRunSummary": "सफल ${succeeded}, विफल ${failed}, शेष ${pending}, छोड़े गए ${skipped}",

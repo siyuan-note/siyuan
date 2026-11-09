@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "Werkruimte niet beschikbaar; standaardwaarden worden gebruikt",
 	"automationInsertField": "Veldverwijzing invoegen",
 	"automationTemplateSourceLimit": "Sjabloonbron is beperkt tot 8 KiB",
 	"automationRunSummary": "${succeeded} geslaagd, ${failed} mislukt, ${pending} resterend, ${skipped} overgeslagen",

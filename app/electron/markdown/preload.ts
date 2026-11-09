@@ -44,6 +44,7 @@ const bridge: MarkdownBridge = {
     resolveResource: reference => invoke("resource", reference),
     openLink: url => invoke("link", url),
     preferences: patch => invoke("preferences", patch),
+    appearance: patch => invoke("appearance", patch),
     confirm: action => invoke("confirm", action),
     confirmClose: () => invoke("confirm-close"),
     recoveries: () => invoke("recoveries"),

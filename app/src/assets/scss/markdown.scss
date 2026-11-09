@@ -37,6 +37,8 @@ button {
   display: flex;
   flex-direction: column;
   --markdown-font-size: 16px;
+  font-family: var(--markdown-global-font-family, var(--b3-font-family));
+  font-weight: var(--markdown-global-font-weight, 400);
 }
 
 .markdown-header {
@@ -418,12 +420,14 @@ button {
 .markdown-editor .vditor-reset,
 .markdown-editor .vditor-sv {
   font-size: var(--markdown-font-size);
-  font-family: var(--b3-font-family-protyle);
+  font-family: var(--markdown-editor-font-family, var(--b3-font-family-protyle));
+  font-weight: var(--markdown-editor-font-weight, 400);
 }
 
 .markdown-editor .vditor-reset code,
 .markdown-editor .vditor-sv {
-  font-family: var(--b3-font-family-code);
+  font-family: var(--markdown-code-font-family, var(--b3-font-family-code));
+  font-weight: var(--markdown-code-font-weight, 400);
 }
 
 .markdown-editor .vditor-reset table code:not(.hljs):not(.highlight-chroma) {

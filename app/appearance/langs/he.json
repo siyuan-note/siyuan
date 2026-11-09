@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "סביבת העבודה אינה זמינה; נעשה שימוש בברירות המחדל",
 	"automationInsertField": "הוספת הפניה לשדה",
 	"automationTemplateSourceLimit": "מקור התבנית מוגבל ל־8 KiB",
 	"automationRunSummary": "הצליחו ${succeeded}, נכשלו ${failed}, נותרו ${pending}, דולגו ${skipped}",

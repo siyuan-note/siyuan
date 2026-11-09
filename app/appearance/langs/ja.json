@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "ワークスペースが利用できないため既定値を使用",
 	"automationInsertField": "フィールド参照を挿入",
 	"automationTemplateSourceLimit": "テンプレートのソースは最大 8 KiB",
 	"automationRunSummary": "成功 ${succeeded} 件、失敗 ${failed} 件、残り ${pending} 件、スキップ ${skipped} 件",

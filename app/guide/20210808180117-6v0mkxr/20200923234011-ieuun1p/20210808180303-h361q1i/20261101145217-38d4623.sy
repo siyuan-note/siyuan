@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261106132257"
+		"updated": "20261109070428"
 	},
 	"Children": [
 		{
@@ -66,7 +66,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101154840-193b541",
-				"updated": "20261105055849"
+				"updated": "20261109070428"
 			},
 			"Children": [
 				{
@@ -80,7 +80,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " menu. There is no separate formatting toolbar. Desktop windows use an integrated title bar. File actions, editing modes, image insertion, resource authorization, recovery, theme, and font size are grouped there. The status bar shows additional actions only when needed. On desktop, toggle developer tools with "
+					"Data": " menu. There is no separate formatting toolbar. Desktop windows use an integrated title bar. File actions, editing modes, image insertion, resource authorization, recovery, appearance mode, font size, and fonts are grouped there. The status bar shows additional actions only when needed. On desktop, toggle developer tools with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -245,7 +245,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-3d23d38",
-				"updated": "20261101171827"
+				"updated": "20261109070428"
 			},
 			"Children": [
 				{
@@ -268,7 +268,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to select instant rendering, WYSIWYG, or split view; a check mark identifies the current mode. Switching modes alone does not save the file. Editing may normalize Markdown formatting while retaining its content. Theme and font size are selected from the same style of checked submenus under "
+					"Data": " to select instant rendering, WYSIWYG, or split view; a check mark identifies the current mode. The editing mode is stored independently. Switching modes alone does not save the file. Editing may normalize Markdown formatting while retaining its content. On desktop, use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -286,7 +286,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and are stored independently of workspace settings."
+					"Data": " to choose a source workspace separately for appearance mode, font size, and fonts. A single available workspace is used by default. With multiple workspaces, each setting can use a different source; without a selection, the most recently used available workspace is used. Fonts include global default, editor, and monospace settings, including custom fonts stored in that workspace. Workspace theme CSS and scripts are not loaded. If the selected workspace is unavailable, the affected setting uses its default; missing or failed fonts fall back in font order. On mobile, appearance mode and font size remain independent settings."
 				}
 			]
 		},

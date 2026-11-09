@@ -1,4 +1,5 @@
 {
+	"markdownWorkspaceUnavailable": "Рабочее пространство недоступно; используются значения по умолчанию",
 	"automationInsertField": "Вставить ссылку на поле",
 	"automationTemplateSourceLimit": "Исходный код шаблона ограничен 8 КиБ",
 	"automationRunSummary": "Успешно: ${succeeded}, ошибки: ${failed}, осталось: ${pending}, пропущено: ${skipped}",

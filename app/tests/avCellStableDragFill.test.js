@@ -108,6 +108,30 @@ for (const upward of [false, true]) {
     });
 }
 
+for (const type of ["select", "mSelect", "mAsset"]) {
+    test(`empty ${type} fill clears stored values and retains undo payloads`, () => {
+        const f = fixture({types: [type]});
+        const property = type === "select" ? "mSelect" : type;
+        for (const values of Object.values(f.originData)) {
+            for (const value of values) {
+                delete value[type];
+            }
+        }
+        for (const row of f.rows.filter(row => row.id.startsWith("target"))) {
+            row.cells[0].value[property] = [{content: row.id}];
+        }
+        f.fill();
+        assert.equal(f.transactions.length, 1);
+        const {operations, undo} = f.transactions[0];
+        assert.equal(operations.length, 3);
+        operations.forEach((operation, index) => {
+            assert.deepEqual(Array.from(operation.data[property]), []);
+            assert.equal(undo[index].data[property][0].content, `target-${index}`);
+            assert.deepEqual(Array.from(f.rows.find(row => row.id === operation.rowID).cells[0].value[property]), []);
+        });
+    });
+}
+
 test("drag fill uses current target cell identity and value for undo after a rerender", () => {
     const f = fixture();
     const target = f.rows.find(row => row.id === "target-0");

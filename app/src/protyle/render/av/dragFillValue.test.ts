@@ -71,3 +71,23 @@ describe("rebindAVCellValue", () => {
         assert.equal(source.blockID, "source-row");
     });
 });
+
+describe("empty drag fill values", () => {
+    for (const [type, property, empty] of [
+        ["select", "mSelect", []], ["mSelect", "mSelect", []], ["mAsset", "mAsset", []],
+        ["text", "text", {content: ""}], ["number", "number", {content: 0, isNotEmpty: false}],
+        ["checkbox", "checkbox", {checked: false}],
+        ["relation", "relation", {blockIDs: [], contents: []}],
+    ] as const) {
+        it(`clears an existing ${type} value when the source omits its empty payload`, () => {
+            const source = {type, keyID: "column", blockID: "source"} as IAVCellValue;
+            const value = genAVDragFillValue(source, {id: "target-value", keyID: "column", blockID: "target"});
+            const persisted = {type, [property]: {content: "old"}};
+            Object.assign(persisted, JSON.parse(JSON.stringify(value)));
+            assert.deepEqual(persisted[property], empty);
+            assert.equal(value.id, "target-value");
+            assert.equal(value.blockID, "target");
+            assert.deepEqual(source, {type, keyID: "column", blockID: "source"});
+        });
+    }
+});

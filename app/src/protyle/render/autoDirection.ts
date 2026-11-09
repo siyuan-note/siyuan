@@ -21,7 +21,9 @@ export const setTitleAutoDirection = (element: HTMLElement, enabled: boolean) =>
         return;
     }
     if (enabled) {
-        element.dir = "auto";
+        if (element.dir !== "auto") {
+            element.dir = "auto";
+        }
     } else {
         element.removeAttribute("dir");
     }

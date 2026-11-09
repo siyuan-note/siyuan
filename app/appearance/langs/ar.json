@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "إضافة علامة التبويب غير متاحة أو لا يمكن تحديد مالكها؛ فعّل الإضافة وأعد المحاولة",
 	"markdownSystemFontName": "أدخل اسم خط نظام، وليس SiYuanCustomFont-",
 	"markdownIndependentAppearance": "إعدادات مستقلة",
 	"markdownFontWeight": "وزن الخط",

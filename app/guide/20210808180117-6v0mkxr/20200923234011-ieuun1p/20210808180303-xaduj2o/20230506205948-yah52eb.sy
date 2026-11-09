@@ -6,7 +6,7 @@
 		"id": "20230506205948-yah52eb",
 		"title": "Plugins",
 		"type": "doc",
-		"updated": "20261024160716"
+		"updated": "20261109164000"
 	},
 	"Children": [
 		{
@@ -146,6 +146,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20261109164000-b185358",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109164000-b185358",
+				"updated": "20261109164000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop, disabling a plugin keeps its custom tabs, including after restarting. If a tab shows that its plugin is unavailable, enable the plugin, wait for it to load, then select Retry. Uninstalling closes tabs that can be clearly identified as belonging to that plugin and removes their closed-tab records. Tabs whose owner cannot be determined are kept."
 				}
 			]
 		},

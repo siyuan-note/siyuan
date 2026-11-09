@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "התוסף של לשונית זו אינו זמין או שלא ניתן לזהותו; יש להפעיל את התוסף ולנסות שוב",
 	"markdownSystemFontName": "יש להזין שם גופן מערכת, ולא SiYuanCustomFont-",
 	"markdownIndependentAppearance": "הגדרות עצמאיות",
 	"markdownFontWeight": "משקל גופן",

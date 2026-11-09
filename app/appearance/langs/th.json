@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "ปลั๊กอินของแท็บนี้ไม่พร้อมใช้งานหรือไม่สามารถระบุเจ้าของได้ โปรดเปิดใช้งานปลั๊กอินแล้วลองอีกครั้ง",
 	"markdownSystemFontName": "ป้อนชื่อแบบอักษรระบบ ไม่ใช่ SiYuanCustomFont-",
 	"markdownIndependentAppearance": "การตั้งค่าอิสระ",
 	"markdownFontWeight": "น้ำหนักแบบอักษร",

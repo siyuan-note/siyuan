@@ -660,6 +660,7 @@ export const newTab = (options: IOpenFileOptions, afterInitProtyle?: Constructor
                     });
                     if (model) {
                         tab.addModel(model);
+                        tab.headElement.removeAttribute("data-initdata");
                     }
                 } else {
                     // plugin 0.8.3 历史兼容

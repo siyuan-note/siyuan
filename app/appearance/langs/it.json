@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "Il plugin di questa scheda non è disponibile o non può essere identificato; attivalo e riprova",
 	"markdownSystemFontName": "Inserisci un nome di carattere di sistema, non SiYuanCustomFont-",
 	"markdownIndependentAppearance": "Impostazioni indipendenti",
 	"markdownFontWeight": "Spessore del carattere",

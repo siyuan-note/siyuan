@@ -1,7 +1,8 @@
 import type {App} from "../index";
 import type {Plugin} from "./index";
 /// #if !MOBILE
-import {getAllModels} from "../layout/getAll";
+import {getAllModels, getAllTabs} from "../layout/getAll";
+import {Custom} from "../layout/dock/Custom";
 import {resizeTopBar} from "../layout/util";
 import {setTabPosition} from "../layout/tabUtil";
 /// #endif
@@ -18,11 +19,12 @@ import {unregisterPluginCommands} from "./commandAdapter";
 import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
 import {releaseTrackedRangesByPlugin} from "../protyle/util/trackedRange";
 import {isSettingsWindow} from "../config/setting/windowContext";
+import {markCustomTabUninstalled, rememberCustomTabPlugins, resolveCustomTabOwner} from "./customTabOwner";
 /// #if !MOBILE
 import {applyTopBarEntryVisibility} from "../config/entryVisibility/runtime";
 /// #endif
 
-const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
+const runCleanup = (plugin: Pick<Plugin, "name">, step: string, callback: () => unknown) => {
     try {
         const result = callback();
         if (result && typeof (result as Promise<void>).then === "function") {
@@ -35,6 +37,47 @@ const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
     }
 };
 
+export const destroyPluginByName = (app: App, name: string) => {
+    const plugin = {name};
+    rememberCustomTabPlugins(app, [name]);
+    if (!isSettingsWindow()) {
+        runCleanup(plugin, "dock storage", () => {
+            const pluginDocks = window.siyuan.storage?.[Constants.LOCAL_PLUGIN_DOCKS] || {};
+            delete pluginDocks[name];
+            if (window.siyuan.storage) { window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS] = pluginDocks; }
+            setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, pluginDocks);
+        });
+        /// #if !MOBILE
+        getAllTabs().forEach(tab => runCleanup(plugin, "custom tab", () => {
+            if (!tab.headElement) { return; }
+            const data = tab.headElement.getAttribute("data-initdata");
+            const saved = data ? JSON.parse(data) as ILayoutJSON : undefined;
+            const type = tab.model instanceof Custom ? tab.model.type :
+                saved?.instance === "Custom" ? saved.customModelType : undefined;
+            if (resolveCustomTabOwner(app, type, tab) === name) {
+                markCustomTabUninstalled(tab);
+                tab.parent.removeTab(tab.id, false, false);
+            }
+        }));
+        runCleanup(plugin, "closed tabs", () => {
+            const belongsToPlugin = (data: ILayoutJSON): boolean => {
+                if (data.instance === "Custom" && resolveCustomTabOwner(app, data.customModelType) === name) { return true; }
+                const children = Array.isArray(data.children) ? data.children : data.children ? [data.children] : [];
+                return children.some(child => belongsToPlugin(child));
+            };
+            const closed = window.siyuan.storage?.[Constants.LOCAL_CLOSED_TABS];
+            if (Array.isArray(closed)) {
+                const retained = closed.filter(item => !belongsToPlugin(item));
+                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] = retained;
+                setStorageVal(Constants.LOCAL_CLOSED_TABS, retained);
+            }
+        });
+        /// #endif
+    }
+    runCleanup(plugin, "icons", () => document.querySelector(`svg[data-name="${name}"]`)?.remove());
+    runCleanup(plugin, "style", () => document.getElementById("pluginsStyle" + name)?.remove());
+};
+
 export const beginPluginTeardown = (plugin: Plugin) => {
     runCleanup(plugin, "commands", () => unregisterPluginCommands(plugin));
     runCleanup(plugin, "asset upload", () => cancelAssetUploadsByPlugin(plugin));
@@ -45,26 +88,14 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
     beginPluginTeardown(plugin);
     runCleanup(plugin, "kernel", () => plugin.kernel.destroy());
     runCleanup(plugin, "event bus", () => destroyEventBus(plugin.eventBus));
-    if (isUninstall && !isSettingsWindow()) {
-        runCleanup(plugin, "dock storage", () => {
-            const pluginDocks = window.siyuan.storage?.[Constants.LOCAL_PLUGIN_DOCKS] || {};
-            pluginDocks[plugin.name] = {};
-            if (window.siyuan.storage) {
-                window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS] = pluginDocks;
-            }
-            setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, pluginDocks);
-        });
-    }
+    if (isUninstall) { destroyPluginByName(app, plugin.name); }
     // 移除插件页签。
     /// #if !MOBILE
     runCleanup(plugin, "custom tabs", () => {
-        const modelsKeys = Object.keys(plugin.models);
         getAllModels().custom.forEach(custom => {
-            if (modelsKeys.includes(custom.type)) {
+            if (!isUninstall && custom.tab?.headElement && resolveCustomTabOwner(app, custom.type, custom.tab) === plugin.name) {
                 runCleanup(plugin, "custom tab", () => {
-                    if (isUninstall) {
-                        custom.parent.parent.removeTab(custom.parent.id);
-                    } else if (custom.update) {
+                    if (custom.update) {
                         return custom.update();
                     }
                 });

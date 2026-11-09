@@ -119,6 +119,28 @@ const createHarness = (overrides: Partial<IPluginLifecycleAdapter<ITestPluginDat
 };
 
 describe("plugin lifecycle coordinator", () => {
+    it("uninstall after disable cleans resources by name without constructing another instance", async () => {
+        const removed: string[] = [];
+        const {coordinator, events} = createHarness({disposeMissingInstance: name => removed.push(name)});
+        coordinator.start();
+        await coordinator.requestLoad("sample", getSampleData());
+        await coordinator.requestUnload("sample");
+        assert.equal(coordinator.getInstance("sample"), undefined);
+        await coordinator.requestUninstall("sample");
+        assert.deepEqual(removed, ["sample"]);
+        assert.equal(events.filter(event => event.startsWith("create:")).length, 1);
+        assert.equal(events.includes("uninstall:sample"), false);
+    });
+
+    it("a missing-instance cleanup failure is reported without blocking later plugin loads", async () => {
+        const {coordinator, events} = createHarness({disposeMissingInstance: () => { throw new Error("cleanup"); }});
+        coordinator.start();
+        await coordinator.requestUninstall("sample");
+        assert.equal(events.includes("error:sample:dispose"), true);
+        await coordinator.requestLoad("sample", getSampleData());
+        assert.ok(coordinator.getInstance("sample"));
+    });
+
     it("a reconnect snapshot cannot unload or replace a newer plugin instance", async () => {
         const {coordinator} = createHarness();
         coordinator.start();

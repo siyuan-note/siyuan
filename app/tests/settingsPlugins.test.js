@@ -23,6 +23,7 @@ const runCases = async sources => {
     const settingsApps = load(sources.settingsApp, {});
     const {GlobalPluginStateCoordinator} = load(sources.globalCoordinator, {});
     const events = load(sources.events, {});
+    const customTabOwner = load(sources.customTabOwner, {});
     const owner = {appId: "owner", plugins: [{name: "dynamic", data: {color: "owner"}}]};
     const app = settingsApps.createSettingsPluginApp("settings");
     const host = {app: owner, applyPluginReload: data => { notifications.push(data); return Promise.resolve(); },
@@ -34,6 +35,7 @@ const runCases = async sources => {
     const dependencies = {
         Constants: {INLINE_TYPE: [], TIMEOUT_INPUT: 0},
         ...events,
+        ...customTabOwner,
         Kernel: class {init() {} destroy() {}},
         isSettingsWindow: windowContext.isSettingsWindow, getSettingsWindowHost: windowContext.getSettingsWindowHost,
         isWindow: () => true, isMobile: () => false,
@@ -212,7 +214,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             const sources = Object.fromEntries(Object.entries({loader: "loader", plugin: "index", lifecycle: "lifecycle",
                 settingsApp: "settingsApp", global: "globalState", globalCoordinator: "globalStateCoordinator",
-                events: "EventBusCore", uninstall: "uninstall"}).map(([key, file]) => [key,
+                events: "EventBusCore", uninstall: "uninstall", customTabOwner: "customTabOwner"}).map(([key, file]) => [key,
                 ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/plugin", file + ".ts"), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
                 }).outputText]));

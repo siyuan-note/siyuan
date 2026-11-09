@@ -35,6 +35,7 @@ export interface IPluginLifecycleAdapter<TData, TPlugin> {
     uninstall(plugin: TPlugin): Promise<void> | void;
     markDisposed(plugin: TPlugin): void;
     dispose(plugin: TPlugin, uninstall: boolean): void;
+    disposeMissingInstance?(name: string): void;
     onError(name: string, hook: TPluginLifecycleHook, error: unknown): void;
 }
 
@@ -483,6 +484,14 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         const plugin = record.instance;
         if (!plugin) {
             record.state = "absent";
+            if (uninstall) {
+                try {
+                    this.adapter.disposeMissingInstance?.(record.name);
+                } catch (error) {
+                    this.adapter.onError(record.name, "dispose", error);
+                }
+                this.markPendingUninstallsHandled(record, task);
+            }
             return;
         }
         // 加载阶段收到的拆除请求与后续拆除钩子共用首次请求建立的超时预算。

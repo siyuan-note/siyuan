@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "Le plugin de cet onglet est indisponible ou ne peut pas être identifié ; activez-le et réessayez",
 	"markdownSystemFontName": "Saisissez un nom de police système, pas SiYuanCustomFont-",
 	"markdownIndependentAppearance": "Réglages indépendants",
 	"markdownFontWeight": "Graisse de police",

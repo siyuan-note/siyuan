@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "此頁籤的外掛暫時無法使用或無法確定歸屬，請啟用外掛後重試",
 	"markdownSystemFontName": "請輸入系統字型名稱，不支援 SiYuanCustomFont- 開頭的名稱",
 	"markdownIndependentAppearance": "獨立設定",
 	"markdownFontWeight": "字重",

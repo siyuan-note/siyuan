@@ -18,6 +18,7 @@ import {openStandaloneDatabaseItemByURI} from "../protyle/render/av/openStandalo
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {normalizeSiYuanUri, type ParsedSiYuanUri} from "./normalizeSiYuanUri";
 import {showMessage} from "../dialog/message";
+import {resolveCustomModelFactory} from "../plugin/customTabOwner";
 
 const bazaarTypes = new Set<TBazaarType>(["plugins", "themes", "icons", "templates", "widgets"]);
 
@@ -98,8 +99,9 @@ const processSiYuanUriPlugins = (app: App, uriObj: ParsedSiYuanUri): boolean => 
         // siyuan://plugins/plugin-name/foo?bar=baz
         plugin.eventBus.emit("open-siyuan-url-plugin", { url: uriObj.href });
     } else {
-        if (!app.plugins.some(item => item.models[pluginNameOrTabType])) {
-            return false;
+        if (!resolveCustomModelFactory(app, pluginNameOrTabType)) {
+            showMessage(window.siyuan.languages.pluginTabUnavailable);
+            return true;
         }
         // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
         /// #if !MOBILE

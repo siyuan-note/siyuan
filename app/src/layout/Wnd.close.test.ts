@@ -4,6 +4,7 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {isCustomTabUninstalled, markCustomTabUninstalled} from "../plugin/customTabOwner";
 
 const wndSource = transpileModule(readFileSync(join(__dirname, "Wnd.ts"), "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -44,7 +45,11 @@ const createCloseFixture = () => {
         destroy() { calls.modelDestroyed++; }
         send(command: string) { if (command === "closews") calls.socketClosed++; }
     }
-    class Custom {}
+    class Custom {
+        beforeDestroy() { throw new Error("plugin beforeDestroy"); }
+        destroy() { calls.modelDestroyed++; throw new Error("plugin destroy"); }
+        send(command: string) { if (command === "closews") calls.socketClosed++; }
+    }
     const window = {siyuan: {
         config: {readonly: false, fileTree: {maxOpenTabCount: 2}}, layout: {}, storage: {closedTabs: [] as object[]}, blockPanels: [] as object[],
         languages: {newFile: "New", switchTab: "Switch", uploading: "Uploading", settingsPendingSaveError: "Save failed"},
@@ -58,6 +63,7 @@ const createCloseFixture = () => {
     const dependencies: Record<string, object> = {
         "../editor": {Editor},
         "./dock/Custom": {Custom},
+        "../plugin/customTabOwner": {isCustomTabUninstalled},
         "../util/genID": {genUUID: () => "window"},
         "../constants": {Constants: {LOCAL_CLOSED_TABS: "closedTabs", SIZE_UNDO: 10}},
         "../dialog/message": {showMessage},
@@ -108,11 +114,27 @@ const createCloseFixture = () => {
     };
     Object.assign(tab, {parent: wnd});
     const remove = (sourceRemoved = false, animate = false) => wnd.removeTab(tab.id, false, animate, false, sourceRemoved);
-    return {wnd, tab, calls, messages, timers, remove,
+    return {wnd, tab, calls, messages, timers, remove, window,
+        useCustom: () => { Object.assign(tab, {model: new Custom()}); },
         editor, batchClose, batchCloseRequests,
         resolveTitle: () => resolveTitle(), rejectTitle: () => rejectTitle(new Error("Conflict")),
         setUploading: (value: boolean) => { uploading = value; }};
 };
+
+test("plugin callbacks cannot leave a tab behind and uninstall closes without adding undo entries", () => {
+    for (const uninstall of [false, true]) {
+        const fixture = createCloseFixture();
+        fixture.useCustom();
+        if (uninstall) { markCustomTabUninstalled(fixture.tab as unknown as import("./Tab").Tab); }
+        assert.equal(fixture.remove(), true);
+        assert.equal(fixture.wnd.children.includes(fixture.tab), false);
+        assert.equal(fixture.calls.headerRemovals, 1);
+        assert.equal(fixture.calls.panelRemovals, 1);
+        assert.equal(fixture.calls.modelDestroyed, 1);
+        assert.equal(fixture.calls.socketClosed, 1);
+        assert.equal(fixture.window.siyuan.storage.closedTabs.length, uninstall ? 0 : 1);
+    }
+});
 
 const settleClose = () => new Promise<void>(resolve => setImmediate(resolve));
 

@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "Das Plugin dieses Tabs ist nicht verfügbar oder nicht eindeutig zuzuordnen; aktiviere das Plugin und versuche es erneut",
 	"markdownSystemFontName": "Systemschriftname eingeben, nicht SiYuanCustomFont-",
 	"markdownIndependentAppearance": "Unabhängige Einstellungen",
 	"markdownFontWeight": "Schriftstärke",

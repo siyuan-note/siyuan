@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "O plugin desta aba está indisponível ou não pode ser identificado; ative o plugin e tente novamente",
 	"markdownSystemFontName": "Digite um nome de fonte do sistema, não SiYuanCustomFont-",
 	"markdownIndependentAppearance": "Configurações independentes",
 	"markdownFontWeight": "Peso da fonte",

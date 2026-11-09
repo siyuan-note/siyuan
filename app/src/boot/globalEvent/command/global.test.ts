@@ -50,6 +50,24 @@ for (const {name, flags} of [
     {name: "desktop", flags: {MOBILE: false, BROWSER: false}},
     {name: "browser", flags: {MOBILE: false, BROWSER: true}},
 ]) {
+    test(`closed custom tabs reopen their saved data without requiring a registered factory (${name})`, () => {
+        const opened: Array<{custom: {id: string; data: object}}> = [];
+        const saved = {instance: "Custom", customModelType: "lazy-pluginview", customModelData: {value: "saved"}};
+        const window = {siyuan: {storage: {closed: [{children: saved}]}}};
+        const api = {} as typeof import("./global");
+        const dependencies = {
+            Constants: {LOCAL_CLOSED_TABS: "closed"},
+            sanitizeClosedTabs: (tabs: unknown[]) => tabs, setStorageVal() {},
+            openFile: (options: {custom: {id: string; data: object}}) => opened.push(options),
+        };
+        runInNewContext(compile("src/boot/globalEvent/command/global.ts", flags), {exports: api, window,
+            require: () => dependencies});
+        assert.equal(api.globalCommand("recentClosed", {plugins: []} as unknown as import("../../../index").App), true);
+        assert.equal(opened.length, 1);
+        assert.equal(opened[0].custom.id, saved.customModelType);
+        assert.equal(opened[0].custom.data, saved.customModelData);
+    });
+
     test(`reopening a closed asset tab checks the file without its URL fragment (${name})`, () => {
         for (const [assetPath, statPath] of [
             ["assets/image.png", "assets/image.png"],

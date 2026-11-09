@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "इस टैब का प्लगइन उपलब्ध नहीं है या उसकी पहचान नहीं हो सकती; प्लगइन सक्षम करके फिर प्रयास करें",
 	"markdownSystemFontName": "सिस्टम फ़ॉन्ट का नाम दर्ज करें, SiYuanCustomFont- नहीं",
 	"markdownIndependentAppearance": "स्वतंत्र सेटिंग्स",
 	"markdownFontWeight": "फ़ॉन्ट वज़न",

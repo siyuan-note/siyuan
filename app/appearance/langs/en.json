@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "This tab's plugin is unavailable or its owner cannot be determined; enable the plugin and retry",
 	"markdownSystemFontName": "Enter a system font name, not SiYuanCustomFont-",
 	"markdownIndependentAppearance": "Independent settings",
 	"markdownFontWeight": "Font weight",

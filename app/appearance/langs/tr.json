@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "Bu sekmenin eklentisi kullanılamıyor veya sahibi belirlenemiyor; eklentiyi etkinleştirip yeniden deneyin",
 	"markdownSystemFontName": "SiYuanCustomFont- yerine bir sistem yazı tipi adı girin",
 	"markdownIndependentAppearance": "Bağımsız ayarlar",
 	"markdownFontWeight": "Yazı tipi kalınlığı",

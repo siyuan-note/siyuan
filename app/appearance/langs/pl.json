@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "Wtyczka tej karty jest niedostępna lub nie można jej zidentyfikować; włącz wtyczkę i spróbuj ponownie",
 	"markdownSystemFontName": "Wpisz nazwę czcionki systemowej, nie SiYuanCustomFont-",
 	"markdownIndependentAppearance": "Ustawienia niezależne",
 	"markdownFontWeight": "Grubość czcionki",

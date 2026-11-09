@@ -1,4 +1,5 @@
 {
+	"pluginTabUnavailable": "Doplnok tejto karty nie je dostupný alebo ho nemožno určiť; povoľte doplnok a skúste to znova",
 	"markdownSystemFontName": "Zadajte názov systémového písma, nie SiYuanCustomFont-",
 	"markdownIndependentAppearance": "Nezávislé nastavenia",
 	"markdownFontWeight": "Hrúbka písma",

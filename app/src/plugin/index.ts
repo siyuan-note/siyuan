@@ -41,6 +41,7 @@ import {isBuiltinToolbarItemName} from "../protyle/toolbar/defaults";
 import {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "./topBarKey";
 import {applyTopBarEntryVisibility} from "../config/entryVisibility/runtime";
 import {getSettingsWindowHost, isSettingsWindow} from "../config/setting/windowContext";
+import {resolveCustomTabOwner, setCustomTabOwner} from "./customTabOwner";
 
 export type TPluginDataChangeReason = "sync" | "overwrite";
 
@@ -594,12 +595,13 @@ export class Plugin {
         const tabs: { [key: string]: Custom[] } = {};
         const modelKeys = Object.keys(this.models);
         modelKeys.forEach(item => {
-            tabs[item.replace(this.name, "")] = [];
+            tabs[item.startsWith(this.name) ? item.slice(this.name.length) : item] = [];
         });
         /// #if !MOBILE
-        getAllModels().custom.find(item => {
-            if (modelKeys.includes(item.type)) {
-                tabs[item.type.replace(this.name, "")].push(item);
+        getAllModels().custom.forEach(item => {
+            if (item.tab?.headElement && resolveCustomTabOwner(this.app, item.type, item.tab) === this.name) {
+                const type = item.type.startsWith(this.name) ? item.type.slice(this.name.length) : item.type;
+                (tabs[type] ||= []).push(item);
             }
         });
         /// #endif
@@ -620,6 +622,7 @@ export class Plugin {
         /// #if !MOBILE
         const type2 = this.name + options.type;
         this.models[type2] = (arg: { data: any, tab: Tab }) => {
+            setCustomTabOwner(arg.tab, this.name);
             const customObj = new Custom({
                 app: this.app,
                 tab: arg.tab,

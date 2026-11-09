@@ -1,4 +1,4 @@
-import type {MarkdownBridge, MarkdownCommand} from "./bridge";
+import type {MarkdownAppearance, MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "./bridge";
 import {createMarkdownInstanceId} from "./identity";
 
 interface NativeReply {
@@ -27,6 +27,14 @@ export const createNativeMarkdownBridge = (target: NativeEnvironment | Window): 
     const pending = new Map<string, {resolve(value: unknown): void; reject(error: Error): void; timer?: ReturnType<typeof setTimeout>}>();
     const listeners = new Set<(command: MarkdownCommand) => void>();
     const earlyCommands: MarkdownCommand[] = [];
+    let preferences: MarkdownPreferences;
+    let supportsFonts = false;
+    const appearance = (): MarkdownAppearance => {
+        const independent = {theme: preferences.theme ?? "system", fontSize: preferences.fontSize ?? 16,
+            fonts: preferences.fonts ?? {global: [], editor: [], code: []}};
+        return {...independent, independent, sources: {theme: "independent", fontSize: "independent", fonts: "independent"},
+            workspaces: [], customFonts: []};
+    };
     const receive = (reply: NativeReply) => {
         if (!reply || typeof reply.id !== "string") return;
         const task = pending.get(reply.id);
@@ -60,8 +68,8 @@ export const createNativeMarkdownBridge = (target: NativeEnvironment | Window): 
     };
     const invoke = <T>(action: string, payload?: unknown): Promise<T> => new Promise((resolve, reject) => {
         const id = `${instanceId}:${++sequence}`;
-        // 仅初始化快照与幂等绑定确认设超时；普通文件写入仍须等待宿主给出明确结果。
-        const timeout = action === "tree-commit-open" ? 5000 : action === "bootstrap" ? 30000 : 0;
+        // 只读枚举、初始化快照与幂等绑定确认设超时；普通文件写入仍须等待宿主给出明确结果。
+        const timeout = action === "tree-commit-open" ? 5000 : ["bootstrap", "system-fonts"].includes(action) ? 30000 : 0;
         const timer = timeout ? setTimeout(() => {
             if (pending.delete(id)) reject(new Error("Markdown host acknowledgement timed out"));
         }, timeout) : undefined;
@@ -98,7 +106,12 @@ export const createNativeMarkdownBridge = (target: NativeEnvironment | Window): 
             clearDraft: request => invoke("host:clearDraft", request),
             releaseSession: request => invoke("host:releaseSession", request),
         },
-        bootstrap: () => invoke("bootstrap"),
+        bootstrap: async () => {
+            const bootstrap = await invoke<MarkdownBootstrap>("bootstrap");
+            preferences = bootstrap.preferences;
+            supportsFonts = bootstrap.capabilities?.systemFonts === true;
+            return supportsFonts ? {...bootstrap, appearance: appearance()} : bootstrap;
+        },
         newDocument: () => invoke("new"),
         openDocument: () => invoke("open"),
         chooseSaveAs: format => invoke("save-as", format),
@@ -107,7 +120,19 @@ export const createNativeMarkdownBridge = (target: NativeEnvironment | Window): 
         insertImage: () => invoke("insert-image"),
         resolveResource: reference => invoke("resource", reference),
         openLink: url => invoke("link", url),
-        preferences: patch => invoke("preferences", patch),
+        preferences: async patch => {
+            preferences = await invoke("preferences", patch);
+            return preferences;
+        },
+        systemFonts: () => supportsFonts ? invoke("system-fonts") : Promise.reject(new Error("System fonts unavailable")),
+        appearance: async patch => {
+            if (!supportsFonts) throw new Error("Independent appearance unavailable");
+            if (patch?.sources && Object.values(patch.sources).some(source => source !== "independent")) {
+                throw new Error("Workspace appearance unavailable");
+            }
+            if (patch?.independent) preferences = await invoke("preferences", patch.independent);
+            return appearance();
+        },
         confirm: action => invoke("confirm", action),
         confirmClose: () => invoke("confirm-close"),
         recoveries: () => invoke("recoveries"),

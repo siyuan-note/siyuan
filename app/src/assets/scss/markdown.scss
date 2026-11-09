@@ -594,6 +594,10 @@ button {
   overflow-y: auto;
 }
 
+.markdown-font-picker__chip {
+  max-width: calc(100% - 8px);
+}
+
 .markdown-font-picker__weights {
   position: fixed;
   z-index: 10;

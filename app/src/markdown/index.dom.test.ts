@@ -1337,7 +1337,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(fontSections[0].querySelectorAll(".b3-list-item").length, 1);
     fontSections[0].querySelector<HTMLButtonElement>('.b3-list-item[data-family="Arial"]').click();
     const chip = fontSections[0].querySelector<HTMLElement>(".b3-chip");
-    chip.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
+    chip.querySelector<HTMLButtonElement>('[aria-haspopup="menu"]').click();
     check.deepEqual(Array.from(fontSections[0].querySelectorAll("[data-weight]")).map(item => item.getAttribute("data-weight")), ["400", "700"]);
     fontSections[0].querySelector<HTMLButtonElement>('[data-weight="700"]').click();
     check.equal(fontSections[2].querySelectorAll(".b3-list-item").length, 1);

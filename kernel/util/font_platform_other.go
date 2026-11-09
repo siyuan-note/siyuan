@@ -2,7 +2,7 @@
 // Copyright (c) 2020-present, b3log.org
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-//go:build (!darwin && !windows && !linux) || ios || android
+//go:build (!darwin && !windows && !linux) || ios
 
 package util
 

@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"os"
+	"runtime"
 	"slices"
 	"sort"
 	"strconv"
@@ -107,6 +108,12 @@ var macFontLanguageIDs = map[string]sfnt.PlatformLanguageID{
 
 func loadFonts() (ret []*Font) {
 	ret = []*Font{}
+	if runtime.GOOS == "android" {
+		for _, font := range loadPlatformFonts() {
+			ret = addFont(ret, font)
+		}
+		return
+	}
 	for _, fontPath := range findfont.List() {
 		if strings.HasSuffix(strings.ToLower(fontPath), ".ttc") {
 			families := parseTTCFontFamily(fontPath)

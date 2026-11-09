@@ -9,6 +9,7 @@ export interface MarkdownPreferences {
     fontSize?: number;
     sources?: Partial<Record<MarkdownAppearanceGroup, string>>;
     independent?: MarkdownIndependentAppearance;
+    fonts?: MarkdownIndependentAppearance["fonts"];
 }
 
 export type MarkdownAppearanceGroup = "theme" | "fontSize" | "fonts";
@@ -41,6 +42,7 @@ export interface MarkdownBootstrap {
     recovered?: {revision: number; targetGeneration: number};
     preferences: MarkdownPreferences;
     appearance?: MarkdownAppearance;
+    capabilities?: {systemFonts?: boolean};
     languages: Record<string, string>;
     lang: string;
     platform: string;

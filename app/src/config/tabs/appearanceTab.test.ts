@@ -9,6 +9,87 @@ const {loadMenuToggle} = require("../../../tests/menu-toggle-fixture.cjs");
 
 const {parse} = require("ifdef-loader/preprocessor");
 
+test("mobile workspace global font picker shows system fonts without custom fonts and persists selection", async () => {
+    const font = {family: "Mobile System Sans", displayName: "Mobile System Sans Regular", weight: 400};
+    const config = {appearance: {globalFontFamilies: [] as typeof font[]}, editor: {fontFamilies: [] as typeof font[], codeFontFamilies: [] as typeof font[]}};
+    const window = {siyuan: {config, languages: new Proxy({}, {get: (_, key) => String(key)})}};
+    const load = (file: string, modules: Record<string, unknown>, suffix = "") => {
+        const exports: Record<string, any> = {};
+        runInNewContext(transpileModule(readFileSync(file, "utf8") + suffix, {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+        }).outputText, {exports, window, console, CSS: {escape: (value: string) => value},
+            document: {createTextNode: (value: string) => value, querySelectorAll: (): unknown[] => []},
+            require: (name: string) => modules[name] || {}});
+        return exports;
+    };
+    let systemLoads = 0;
+    let customLoads = 0;
+    const available = load("src/util/availableFont.ts", {
+        "./systemFont": {loadSystemFonts: async () => {systemLoads++; return [font];}},
+        "./customFont": {supportsCustomFonts: () => true, loadCustomFonts: async (): Promise<unknown[]> => {customLoads++; return [];}, syncCustomFonts() {}},
+    });
+    let open: (event: unknown) => Promise<void>;
+    let click: (event: unknown) => void;
+    let checked = false;
+    let hidden = false;
+    const label = {dataset: {family: font.family, weight: "400", name: font.displayName, search: font.displayName.toLowerCase()},
+        replaceChildren() {}, parentElement: undefined as unknown};
+    const item = {dataset: {}, querySelector: (selector: string) => selector === ".b3-menu__label" ? label :
+        checked ? {remove: () => {checked = false;}} : undefined,
+    insertAdjacentHTML: () => {checked = true;},
+    classList: {add() {}, remove() {}, toggle: (_name: string, value: boolean) => {hidden = value;}}};
+    label.parentElement = item;
+    const list = {querySelectorAll: (selector: string) => selector === ".b3-list-item" ? [item] : [label],
+        querySelector: () => item, addEventListener: (name: string, handler: typeof click) => {if (name === "click") click = handler;}};
+    const search = {value: "", addEventListener() {}, focus: () => assert.fail("mobile picker must not force keyboard focus")};
+    const menuBody = {querySelector: (selector: string) => selector === '[data-type="available-fonts"]' ? list :
+        selector === '[data-type="font-search"]' ? search : undefined};
+    const selected = {innerHTML: "", classList: {toggle() {}}, querySelectorAll: (): unknown[] => [], addEventListener() {}};
+    const input = {value: "", isConnected: true, style: {removeProperty() {}},
+        addEventListener: (_name: string, callback: typeof open) => {open = callback;},
+        getBoundingClientRect: () => ({left: 0, bottom: 100, height: 28})};
+    const fontElement = {querySelector: (selector: string) => selector === '[data-type="selected-fonts"]' ? selected : input};
+    const writes: Array<{key: string; fonts: typeof font[]}> = [];
+    let opened = false;
+    class FontMenu {
+        isOpen = false;
+        element = menuBody;
+        addItem(option: {label: string; bind(element: unknown): void}) {
+            assert.ok(option.label.includes(`data-family="${font.family}"`), "system family is rendered in the menu");
+            assert.ok(!option.label.includes('data-type="delete-font"'), "system fonts are not treated as imported custom fonts");
+            option.bind(menuBody);
+        }
+        open() {opened = true;}
+    }
+    const appearance = load("src/config/tabs/appearanceTab.ts", {
+        "../../util/availableFont": available,
+        "../../menus/menuToggle": {toggleMenu: async (options: {build(menu: unknown, session: unknown): Promise<void>}) =>
+            options.build(undefined, {isCurrent: () => true, show: (callback: () => void) => callback()})},
+        "../../menus/Menu": {markMenuInnerScroll() {}},
+        "../../plugin/Menu": {Menu: FontMenu},
+        "../../util/functions": {isMobile: () => true},
+        "../../util/escape": {escapeAttr: (value: string) => value, escapeHtml: (value: string) => value},
+        "../../util/fontPreview": {observeFontPreview: () => () => {}},
+        "./appearanceRuntime": {appearanceConfigApi: {patch: (key: string, fonts: typeof font[], refresh: () => void) => {
+            writes.push({key, fonts}); config.appearance.globalFontFamilies = fonts; refresh(); return Promise.resolve();
+        }}},
+        "./editorRuntime": {editorConfigApi: {patch: () => assert.fail("global font must use appearance configuration")}},
+    }, "\nexports.mountAppearanceFontFamily = mountAppearanceFontFamily;");
+    appearance.mountAppearanceFontFamily({querySelector: () => fontElement}, "globalFontFamilies");
+    await open({stopPropagation() {}});
+    assert.equal(opened, true);
+    assert.equal(systemLoads, 1);
+    assert.equal(customLoads, 1);
+    assert.equal(hidden, false);
+    click({target: {closest: (selector: string) => selector === ".b3-list-item" ? item : undefined}});
+    assert.equal(writes.length, 1);
+    assert.equal(writes[0].key, "globalFontFamilies");
+    assert.deepEqual(JSON.parse(JSON.stringify(writes[0].fonts)), [font]);
+    assert.equal(checked, true);
+    assert.ok(selected.innerHTML.includes(font.family));
+    assert.equal(input.value, font.displayName);
+});
+
 for (const mobile of [true, false]) {
     test(`appearance settings expose toolbar controls and all color managers (mobile=${mobile})`, () => {
         const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appearanceTab.ts"), "utf8");

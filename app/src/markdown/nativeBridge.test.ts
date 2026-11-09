@@ -1,6 +1,64 @@
 import {test} from "node:test";
 import * as assert from "node:assert/strict";
 import {createNativeMarkdownBridge} from "./nativeBridge";
+import type {MarkdownIndependentAppearance} from "./bridge";
+
+test("native font capabilities enable independent appearance without inventing workspace access", async () => {
+    const sent: Array<{id: string; action: string; payload?: unknown}> = [];
+    const native = {postMessage(message: string) {sent.push(JSON.parse(message));}, onmessage: undefined as (event: {data: string}) => void};
+    const bridge = createNativeMarkdownBridge({siyuanMarkdownNative: native});
+    const reply = (result: unknown) => native.onmessage({data: JSON.stringify({type: "reply", id: sent.at(-1).id, result})});
+    const bootstrap = bridge.bootstrap();
+    reply({preferences: {mode: "ir", theme: "dark", fontSize: 24}, capabilities: {systemFonts: true}});
+    const snapshot = (await bootstrap).appearance;
+    assert.equal(snapshot.theme, "dark");
+    assert.equal(snapshot.fontSize, 24);
+    assert.deepEqual(snapshot.fonts, {global: [], editor: [], code: []});
+    assert.deepEqual(snapshot.workspaces, []);
+    assert.equal(snapshot.sources.fonts, "independent");
+    const fonts: MarkdownIndependentAppearance["fonts"] = {global: [], editor: [{family: "Sans", weight: 700}], code: []};
+    const save = bridge.appearance({sources: {fonts: "independent"}, independent: {fonts}});
+    assert.equal(sent.at(-1).action, "preferences");
+    assert.deepEqual(sent.at(-1).payload, {fonts});
+    reply({mode: "ir", theme: "dark", fontSize: 24, fonts});
+    assert.deepEqual((await save).fonts, fonts);
+    await assert.rejects(bridge.appearance({sources: {fonts: "workspace"}}), /Workspace appearance unavailable/);
+    const enumerate = bridge.systemFonts();
+    assert.equal(sent.at(-1).action, "system-fonts");
+    const result = [{family: "Sans", weight: 700, displayName: "Sans Bold"}];
+    reply(result);
+    assert.deepEqual(await enumerate, result);
+});
+
+test("legacy native hosts retain their existing appearance UI and reject unsupported font enumeration", async () => {
+    const sent: Array<{id: string; action: string}> = [];
+    const native = {postMessage(message: string) {sent.push(JSON.parse(message));}, onmessage: undefined as (event: {data: string}) => void};
+    const bridge = createNativeMarkdownBridge({siyuanMarkdownNative: native});
+    const bootstrap = bridge.bootstrap();
+    native.onmessage({data: JSON.stringify({type: "reply", id: sent[0].id, result: {preferences: {mode: "ir"}}})});
+    assert.equal((await bootstrap).appearance, undefined);
+    await assert.rejects(bridge.systemFonts(), /System fonts unavailable/);
+    await assert.rejects(bridge.appearance(), /Independent appearance unavailable/);
+    assert.equal(sent.length, 1);
+});
+
+test("font enumeration timeout permits retry and ignores a late previous response", async context => {
+    context.mock.timers.enable({apis: ["setTimeout"]});
+    const sent: Array<{id: string; action: string}> = [];
+    const native = {postMessage(message: string) {sent.push(JSON.parse(message));}, onmessage: undefined as (event: {data: string}) => void};
+    const bridge = createNativeMarkdownBridge({siyuanMarkdownNative: native});
+    const bootstrap = bridge.bootstrap();
+    native.onmessage({data: JSON.stringify({type: "reply", id: sent[0].id,
+        result: {preferences: {mode: "ir"}, capabilities: {systemFonts: true}}})});
+    await bootstrap;
+    const failed = assert.rejects(bridge.systemFonts(), /acknowledgement timed out/);
+    context.mock.timers.tick(30000);
+    await failed;
+    const retry = bridge.systemFonts();
+    native.onmessage({data: JSON.stringify({type: "reply", id: sent[1].id, result: [{family: "Stale"}]})});
+    native.onmessage({data: JSON.stringify({type: "reply", id: sent[2].id, result: []})});
+    assert.deepEqual(await retry, []);
+});
 
 test("Android replies match their own request despite out-of-order and duplicate delivery", async () => {
     const sent: Array<{id: string; action: string; payload?: unknown}> = [];

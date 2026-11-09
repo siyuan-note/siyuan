@@ -127,9 +127,10 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
         closeWeights?.(); chips.replaceChildren();
         selected.forEach((font, index) => {
             const chip = document.createElement("span");
-            chip.className = "b3-chip"; chip.tabIndex = 0; chip.draggable = true; chip.dataset.family = font.family;
+            chip.className = "b3-chip markdown-font-picker__chip"; chip.tabIndex = 0; chip.draggable = true; chip.dataset.family = font.family;
             chip.setAttribute("aria-label", `${getFontFamilyDisplayName(fonts, font.family)} (${font.weight})`);
-            const label = document.createElement("span"); label.textContent = `${getFontFamilyDisplayName(fonts, font.family)} (${font.weight})`; chip.append(label);
+            const label = document.createElement("span"); label.className = "fn__ellipsis";
+            label.textContent = `${getFontFamilyDisplayName(fonts, font.family)} (${font.weight})`; chip.append(label);
             const action = (key: string, symbol: string, callback: () => void) => {
                 const button = document.createElement("button"); button.type = "button"; button.className = "block__icon block__icon--show";
                 button.setAttribute("aria-label", text(key)); button.title = text(key); button.append(icon(symbol));
@@ -139,6 +140,8 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
                 selected = reorderMarkdownFonts(selected, index, to); renderChips();
                 chips.querySelectorAll<HTMLElement>(".b3-chip").forEach(item => {if (item.dataset.family === font.family) item.focus();});
             };
+            const weight = action("markdownFontWeight", "iconFont", () => weights(weight, font.family));
+            weight.setAttribute("aria-haspopup", "menu");
             action("moveToUp", "iconUp", () => move(index - 1)).disabled = index === 0;
             action("moveToDown", "iconDown", () => move(index + 1)).disabled = index === selected.length - 1;
             action("remove", "iconClose", () => {selected.splice(index, 1); renderChips(); renderList();});

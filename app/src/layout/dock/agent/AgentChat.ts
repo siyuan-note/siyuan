@@ -1047,10 +1047,12 @@ export class AgentChat extends Model {
         if (userMsgs.length === 0) {
             return;
         }
-        const threshold = this.messagesContainer.scrollTop + 50;
+        // 跳转把消息居中，当前轮次也按视区中线判断；坐标统一使用视口，兼容不同定位容器。
+        const threshold = this.messagesContainer.getBoundingClientRect().top +
+            this.messagesContainer.clientTop + this.messagesContainer.clientHeight / 2;
         let activeId = "";
         for (let i = 0; i < userMsgs.length; i++) {
-            if ((userMsgs[i] as HTMLElement).offsetTop <= threshold) {
+            if (userMsgs[i].getBoundingClientRect().top <= threshold) {
                 activeId = userMsgs[i].getAttribute("data-message-id") || "";
             } else {
                 break;
@@ -1058,6 +1060,10 @@ export class AgentChat extends Model {
         }
         if (!activeId && userMsgs.length > 0) {
             activeId = userMsgs[0].getAttribute("data-message-id") || "";
+        }
+        const {scrollTop, scrollHeight, clientHeight} = this.messagesContainer;
+        if (scrollHeight > clientHeight + 1 && scrollHeight - scrollTop - clientHeight <= 1) {
+            activeId = userMsgs[userMsgs.length - 1].getAttribute("data-message-id") || "";
         }
         const markers = this.navRail.children;
         for (let i = 0; i < markers.length; i++) {

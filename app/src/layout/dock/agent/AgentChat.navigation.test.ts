@@ -43,6 +43,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     const wrap = document.querySelector<HTMLElement>(".agent-chat__messages-wrap");
     chat.messagesContainer = document.querySelector(".agent-chat__messages");
     chat.initNavRail(wrap);
+    chat.messagesContainer.addEventListener("scroll", () => chat.updateActiveMarker());
     chat.entries = [
         {type: "user", id: "first", content: 'First <img src=x> & "quoted" %2F'},
         {type: "assistant", id: "answer", content: "Answer"},
@@ -168,6 +169,48 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
         true, "clicking above the seam jumps to the upper message");
     check.equal(chat.messagesContainer.querySelector('[data-message-id="second"]').classList.contains("agent-chat__msg--jumped"),
         false, "clicking above the seam never jumps to the lower message");
+
+    // 短问题居中后仍在顶部判断线下方，后续长回答保证跳转不受底部夹限影响。
+    chat.messagesContainer.innerHTML = "";
+    chat.entries = ["first", "second", "third"].map(id => ({type: "user", id, content: id}));
+    for (const entry of chat.entries) {
+        const message = document.createElement("div");
+        message.className = "agent-chat__msg agent-chat__msg--user";
+        message.dataset.messageId = entry.id;
+        message.textContent = entry.content;
+        const answer = document.createElement("div");
+        answer.style.cssText = "height:800px;flex-shrink:0";
+        chat.messagesContainer.append(message, answer);
+    }
+    chat.rebuildNavMarkers();
+    for (const fontSize of [14, 32]) {
+        panel.style.fontSize = `${fontSize}px`;
+        await new Promise(resolve => setTimeout(resolve, 400));
+        for (const index of [2, 0, 1]) {
+            const marker = rail.children[index] as HTMLElement;
+            const bounds = marker.getBoundingClientRect();
+            rail.dispatchEvent(new MouseEvent("click", {bubbles: true, clientY: bounds.top + bounds.height / 2}));
+            await new Promise(resolve => setTimeout(resolve, 800));
+            check.equal(marker.classList.contains("agent-chat__nav-rail-marker--active"), true,
+                `centered short question ${index} is active at font size ${fontSize}: ` + JSON.stringify({
+                    top: chat.messagesContainer.scrollTop, height: chat.messagesContainer.clientHeight,
+                    messageTop: chat.messagesContainer.querySelector(`[data-message-id="${chat.entries[index].id}"]`)
+                        .getBoundingClientRect().top, containerTop: chat.messagesContainer.getBoundingClientRect().top,
+                    active: rail.querySelector(".agent-chat__nav-rail-marker--active")?.getAttribute("data-message-id"),
+                }));
+        }
+    }
+    const questions = chat.messagesContainer.querySelectorAll<HTMLElement>(".agent-chat__msg--user");
+    const center = chat.messagesContainer.getBoundingClientRect().top + chat.messagesContainer.clientHeight / 2;
+    chat.messagesContainer.scrollTop += questions[2].getBoundingClientRect().top - center + 2;
+    await tick();
+    check.equal(rail.children[2].classList.contains("agent-chat__nav-rail-marker--active"), true,
+        "manual scrolling updates the active turn");
+    questions[2].nextElementSibling.remove();
+    chat.messagesContainer.scrollTop = chat.messagesContainer.scrollHeight;
+    await tick();
+    check.equal(rail.children[2].classList.contains("agent-chat__nav-rail-marker--active"), true,
+        "the last short question stays active when scrolling is clamped at the bottom");
     return "Navigation cases passed";
 };
 

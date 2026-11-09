@@ -188,6 +188,9 @@ func TestDocIALPreservesUnsupportedSpec(t *testing.T) {
 		`{"Properties":{"title":"Future"},"Spec":"999"}`,
 		`{"Spec":"999","Properties":{}}`,
 		`{"Properties":{"title":{"text":"Future"}},"Spec":"999"}`,
+		`{"Spec":"999","Properties":{"title":"Future"},"Children":[`,
+		`{"Properties":{"title":"Future"},"Spec":"999","Children":[`,
+		`{"Spec":"999","Properties":{"title":`,
 		`{"Properties":{"title":"Invalid version"},"Spec":{}}`,
 	} {
 		cache.RemoveDocIALInBox(fixture.sourcePath, fixture.box.ID)
@@ -223,6 +226,7 @@ func TestListDocTreeShowsNewerSpecAsPlaceholder(t *testing.T) {
 		wantEmpty bool
 	}{
 		{"title", `{"Spec":"999","Properties":{"title":"Future"}}`, "Future", false},
+		{"escaped title", `{"Spec":"999","Properties":{"title":"A &amp; B"}}`, "A & B", false},
 		{"no title", `{"Spec":"999","Properties":{"id":"` + fixture.sourceID + `"}}`, "", true},
 	} {
 		t.Run(test.name, func(t *testing.T) {

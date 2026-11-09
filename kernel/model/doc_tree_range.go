@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -112,7 +113,59 @@ func readDocTreeIAL(box *Box, p string) (ial map[string]string, specTooNew bool,
 	return ial, false, nil
 }
 
-func newDocTreeQuery(notebook, parentID string, access DocTreeAccess) (*docTreeQuery, error) {
+func docTreePath(ctx context.Context, box *Box, id string, visible func(string, string) bool) (ret string, err error) {
+	if doc := treenode.GetBlockTreeInExactBox(id, box.ID); doc != nil {
+		if doc.Type != "d" || doc.RootID != id {
+			return "", errDocTreeUnavailable
+		}
+		return doc.Path, nil
+	}
+	if _, err = box.validateBoxPath("/"); err != nil {
+		return
+	}
+	// 高版本源无法建立块索引，只按文件名查找占位路径，不解析正文或发布索引。
+	root := filepath.Join(util.DataDir, box.ID)
+	err = filepath.WalkDir(root, func(name string, entry fs.DirEntry, walkErr error) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if walkErr != nil {
+			return walkErr
+		}
+		rel, relErr := filepath.Rel(root, name)
+		if relErr != nil {
+			return relErr
+		}
+		p := "/" + filepath.ToSlash(rel)
+		if entry.IsDir() {
+			if name != root && (!ast.IsNodeIDPattern(entry.Name()) || !visible(box.ID, p+".sy")) {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if entry.Name() != id+".sy" || !entry.Type().IsRegular() || !visible(box.ID, p) {
+			return nil
+		}
+		if ret != "" {
+			return errDocTreeUnavailable
+		}
+		_, specTooNew, readErr := readDocTreeIAL(box, p)
+		if readErr != nil {
+			return readErr
+		}
+		if !specTooNew {
+			return errDocTreeUnavailable
+		}
+		ret = p
+		return nil
+	})
+	if err == nil && ret == "" {
+		err = errDocTreeUnavailable
+	}
+	return
+}
+
+func newDocTreeQuery(ctx context.Context, notebook, parentID string, access DocTreeAccess) (*docTreeQuery, error) {
 	if access.Published && access.PolicyRevision != "" && access.PolicyRevision != DocTreePublishAccessRevision(GetPublishAccess()) {
 		return nil, errDocTreeChanged
 	}
@@ -129,13 +182,19 @@ func newDocTreeQuery(notebook, parentID string, access DocTreeAccess) (*docTreeQ
 		}
 	}
 	query := &docTreeQuery{box: box, parentID: parentID, listPath: "/", directory: "/", access: access, visibility: docTreeVisible(access)}
+	if !query.visibility(notebook, "/") {
+		return nil, errDocTreeUnavailable
+	}
 	if parentID != "" {
-		doc := treenode.GetBlockTreeInExactBox(parentID, notebook)
-		if doc == nil || doc.Type != "d" || doc.RootID != parentID || IsBoxDoc(notebook, parentID) {
+		if IsBoxDoc(notebook, parentID) {
 			return nil, errDocTreeUnavailable
 		}
-		query.listPath = doc.Path
-		query.directory = strings.TrimSuffix(doc.Path, ".sy")
+		p, err := docTreePath(ctx, box, parentID, query.visibility)
+		if err != nil {
+			return nil, err
+		}
+		query.listPath = p
+		query.directory = strings.TrimSuffix(p, ".sy")
 	}
 	// 逐级验证可见性并复用同一祖先属性链解析继承排序。
 	mode := util.SortModeUnassigned
@@ -168,9 +227,6 @@ func newDocTreeQuery(notebook, parentID string, access DocTreeAccess) (*docTreeQ
 	}
 	query.sortMode = mode
 	query.refSort = mode == util.SortModeRefCountASC || mode == util.SortModeRefCountDESC
-	if !query.visibility(notebook, "/") {
-		return nil, errDocTreeUnavailable
-	}
 	key, err := json.Marshal([]interface{}{util.DataDir, notebook, parentID, query.listPath, mode, Conf.Lang, access.Published, access.Policy, access.RefBoxes})
 	if err != nil {
 		return nil, err
@@ -431,7 +487,7 @@ func ListDocTreeRange(ctx context.Context, notebook, parentID string, offset, li
 		if !stable {
 			continue
 		}
-		query, err := newDocTreeQuery(notebook, parentID, access)
+		query, err := newDocTreeQuery(ctx, notebook, parentID, access)
 		if err != nil {
 			return nil, err
 		}
@@ -498,16 +554,20 @@ func LocateDocTreeItem(ctx context.Context, notebook, id string, access DocTreeA
 		if !stable {
 			continue
 		}
-		target := treenode.GetBlockTreeInExactBox(id, notebook)
-		if target == nil || target.Type != "d" || target.RootID != id {
-			return nil, errDocTreeUnavailable
+		rootQuery, err := newDocTreeQuery(ctx, notebook, "", access)
+		if err != nil {
+			return nil, err
 		}
-		ids := strings.Split(strings.Trim(strings.TrimSuffix(target.Path, ".sy"), "/"), "/")
+		targetPath, err := docTreePath(ctx, rootQuery.box, id, rootQuery.visibility)
+		if err != nil {
+			return nil, err
+		}
+		ids := strings.Split(strings.Trim(strings.TrimSuffix(targetPath, ".sy"), "/"), "/")
 		parentID := ""
 		steps := make([]DocTreeLocation, 0, len(ids))
 		var stepErr error
 		for _, childID := range ids {
-			query, err := newDocTreeQuery(notebook, parentID, access)
+			query, err := newDocTreeQuery(ctx, notebook, parentID, access)
 			if err != nil {
 				stepErr = err
 				break

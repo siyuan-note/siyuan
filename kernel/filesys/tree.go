@@ -538,12 +538,18 @@ func parseDocIALForMode(reader io.Reader, mode int) (ret map[string]string, err 
 		return nil, specErr
 	}
 	if iter.Error != io.EOF {
+		if specErr != nil {
+			return nil, specErr
+		}
 		return nil, ErrInvalidDocIAL
 	}
 	// 未来版本的属性表示不可信，解码失败时版本错误优先，不把源当成可修复的损坏。
 	decodeErr := jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal(properties, &ret)
 	if decodeErr != nil || len(ret) == 0 {
 		ret = nil
+	}
+	for k, v := range ret {
+		ret[k] = html.UnescapeAttrVal(v)
 	}
 	if specErr != nil {
 		// 版本过新时属性随错误一并返回，仅供调用方占位展示，不得写回、缓存或据此修复源。
@@ -559,9 +565,6 @@ func parseDocIALForMode(reader io.Reader, mode int) (ret map[string]string, err 
 		return nil, ErrInvalidDocIAL
 	}
 
-	for k, v := range ret {
-		ret[k] = html.UnescapeAttrVal(v)
-	}
 	return
 }
 

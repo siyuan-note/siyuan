@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -77,6 +78,116 @@ func TestDocTreeRangeShowsNewerSpecAsPlaceholder(t *testing.T) {
 		return
 	}
 	t.Fatalf("newer spec document [%s] was not listed", fixture.sourceID)
+}
+
+func TestDocTreeRangeExpandsUnindexedNewerSpecParent(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	ctx := context.Background()
+	parent := treenode.NewTree(fixture.box.ID, "/"+fixture.targetID+"/20260718000003-parent1.sy", "/Target/Parent", "Parent")
+	child := treenode.NewTree(fixture.box.ID, strings.TrimSuffix(parent.Path, ".sy")+"/20260718000004-child01.sy", "/Target/Parent/Child", "Child")
+	for _, tree := range []*parse.Tree{parent, child} {
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
+		t.Cleanup(func() {
+			cache.RemoveTreeData(tree.ID)
+			cache.RemoveDocIALInBox(tree.Path, fixture.box.ID)
+		})
+	}
+	const source = `{"Spec":"999","Properties":{"title":"A &amp; B","custom-sy-subdoc-sort-mode":"1"}}`
+	absPath := filepath.Join(util.DataDir, fixture.box.ID, parent.Path)
+	if err := os.WriteFile(absPath, []byte(source), 0600); err != nil {
+		t.Fatal(err)
+	}
+	cache.RemoveTreeData(parent.ID)
+	cache.RemoveDocIALInBox(parent.Path, fixture.box.ID)
+	treenode.RemoveBlockTreesByRootID(fixture.box.ID, parent.ID)
+	cache.BeginDocTreeMutation(fixture.box.ID)()
+	batch, err := ListDocTreeRange(ctx, fixture.box.ID, fixture.targetID, 0, 32, "", DocTreeAccess{})
+	if err != nil || len(batch.Files) != 1 || !batch.Files[0].SpecTooNew || batch.Files[0].Name != "A & B" || batch.Files[0].SubFileCount != 1 {
+		t.Fatalf("unindexed parent placeholder: %+v, %v", batch, err)
+	}
+	batch, err = ListDocTreeRange(ctx, fixture.box.ID, parent.ID, 0, 32, "", DocTreeAccess{})
+	if err != nil || batch.Path != parent.Path || batch.Total != 1 || len(batch.Files) != 1 || batch.Files[0].ID != child.ID || batch.SortMode != util.SortModeNameDESC {
+		t.Fatalf("expand unindexed parent: %+v, %v", batch, err)
+	}
+	for _, id := range []string{parent.ID, child.ID} {
+		steps, locateErr := LocateDocTreeItem(ctx, fixture.box.ID, id, DocTreeAccess{})
+		if locateErr != nil || len(steps) < 2 || steps[len(steps)-1].ID != id {
+			t.Fatalf("locate through unindexed parent %s: %+v, %v", id, steps, locateErr)
+		}
+	}
+	for _, policy := range []PublishAccess{
+		{{ID: fixture.box.ID, Visible: false}},
+		{{ID: fixture.targetID, Visible: false}},
+		{{ID: parent.ID, Visible: false}},
+		{{ID: parent.ID, Visible: true, Disable: true}},
+	} {
+		access := DocTreeAccess{Published: true, Policy: policy}
+		if _, err = ListDocTreeRange(ctx, fixture.box.ID, parent.ID, 0, 32, "", access); err == nil {
+			t.Fatalf("unindexed parent bypassed publish access: %+v", policy)
+		}
+		if _, err = LocateDocTreeItem(ctx, fixture.box.ID, child.ID, access); err == nil {
+			t.Fatalf("unindexed ancestor bypassed locate access: %+v", policy)
+		}
+	}
+	hidden := strings.Replace(source, `"title":`, `"`+DocHiddenAttr+`":"true","title":`, 1)
+	if err = os.WriteFile(absPath, []byte(hidden), 0600); err != nil {
+		t.Fatal(err)
+	}
+	cache.BeginDocTreeMutation(fixture.box.ID)()
+	if _, err = ListDocTreeRange(ctx, fixture.box.ID, parent.ID, 0, 32, "", DocTreeAccess{}); err == nil {
+		t.Fatal("hidden unindexed parent accepted")
+	}
+	if _, err = LocateDocTreeItem(ctx, fixture.box.ID, child.ID, DocTreeAccess{}); err == nil {
+		t.Fatal("hidden unindexed ancestor accepted")
+	}
+	retained, err := os.ReadFile(absPath)
+	if err != nil || string(retained) != hidden {
+		t.Fatalf("placeholder reads changed source: %q, %v", retained, err)
+	}
+	if treenode.GetBlockTreeInExactBox(parent.ID, fixture.box.ID) != nil || cache.GetDocIALInBox(parent.Path, fixture.box.ID) != nil {
+		t.Fatal("placeholder reads published an index or property cache")
+	}
+}
+
+func TestDocTreeRangeUnindexedParentBoundaries(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	ctx := context.Background()
+	treenode.RemoveBlockTreesByRootID(fixture.box.ID, fixture.sourceID)
+	cache.RemoveTreeData(fixture.sourceID)
+	cache.RemoveDocIALInBox(fixture.sourcePath, fixture.box.ID)
+	if _, err := ListDocTreeRange(ctx, fixture.box.ID, fixture.sourceID, 0, 32, "", DocTreeAccess{}); err == nil {
+		t.Fatal("supported unindexed source was accepted as a placeholder")
+	}
+	absPath := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)
+	const source = `{"Spec":"999","Properties":{"title":"Future"}}`
+	if err := os.WriteFile(absPath, []byte(source), 0600); err != nil {
+		t.Fatal(err)
+	}
+	cancelled, cancel := context.WithCancel(ctx)
+	cancel()
+	if _, err := docTreePath(cancelled, fixture.box, fixture.sourceID, docTreeVisible(DocTreeAccess{})); !errors.Is(err, context.Canceled) {
+		t.Fatalf("placeholder lookup ignored cancellation: %v", err)
+	}
+	other := &Box{ID: "20260718000009-other01"}
+	if err := other.SaveConf(conf.NewBoxConf()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ListDocTreeRange(ctx, other.ID, fixture.sourceID, 0, 32, "", DocTreeAccess{}); err == nil {
+		t.Fatal("placeholder lookup crossed notebook boundary")
+	}
+	duplicate := filepath.Join(util.DataDir, fixture.box.ID, fixture.targetID, fixture.sourceID+".sy")
+	if err := os.MkdirAll(filepath.Dir(duplicate), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(duplicate, []byte(source), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ListDocTreeRange(ctx, fixture.box.ID, fixture.sourceID, 0, 32, "", DocTreeAccess{}); !errors.Is(err, errDocTreeUnavailable) {
+		t.Fatalf("ambiguous placeholder path was accepted: %v", err)
+	}
 }
 
 func TestDocTreeRangeCompleteAndLocate(t *testing.T) {

@@ -91,6 +91,7 @@ func TestParseDocIALDistinguishesReadFailure(t *testing.T) {
 		failingDocIALReader{readErr},
 		io.MultiReader(strings.NewReader(`{"Type":"NodeDocument","Properties":{`), failingDocIALReader{readErr}),
 		io.MultiReader(strings.NewReader(`{"Properties":{"title":"Parent"},"Children":[`+strings.Repeat(" ", 1024)), failingDocIALReader{readErr}),
+		io.MultiReader(strings.NewReader(`{"Spec":"999","Properties":{"title":"Future"},"Children":[`+strings.Repeat(" ", 1024)), failingDocIALReader{readErr}),
 	} {
 		ial, err := parseDocIAL(reader)
 		if ial != nil || !errors.Is(err, readErr) || errors.Is(err, ErrInvalidDocIAL) {
@@ -142,11 +143,68 @@ func TestParseDocIALChecksSpecAfterProperties(t *testing.T) {
 		`{"Properties":"future format","Spec":"999"}`,
 		`{"Properties":{"title":{"text":"Future"}},"Spec":"999"}`,
 		`{"Spec":"999","Properties":{}}`,
+		`{"Spec":"999","Properties":{"title":"Future"},"Children":[`,
+		`{"Properties":{"title":"Future"},"Spec":"999","Children":[`,
+		`{"Spec":"999","Properties":{"title":`,
+		`{"Spec":"999","Properties":{"title":"Future"}} trailing`,
 	} {
 		ial, err := parseDocIAL(strings.NewReader(data))
 		if ial != nil || !errors.Is(err, treenode.ErrSpecTooNew) || errors.Is(err, ErrInvalidDocIAL) {
 			t.Fatalf("unsupported spec did not preserve version error: ial=%v err=%v", ial, err)
 		}
+	}
+}
+
+func TestDocIALDecodesNewerSpecProperties(t *testing.T) {
+	originalDataDir, originalProvider := util.DataDir, DEKProvider
+	originalAcquire, originalRelease := DEKLockAcquire, DEKLockRelease
+	util.DataDir = t.TempDir()
+	DEKProvider, DEKLockAcquire, DEKLockRelease = nil, nil, nil
+	t.Cleanup(func() {
+		util.DataDir, DEKProvider = originalDataDir, originalProvider
+		DEKLockAcquire, DEKLockRelease = originalAcquire, originalRelease
+	})
+	const boxID = "20260908000000-box0001"
+	const document = "/20260908000000-root001.sy"
+	absPath := filepath.Join(util.DataDir, boxID, document)
+	if err := os.MkdirAll(filepath.Dir(absPath), 0700); err != nil {
+		t.Fatal(err)
+	}
+	for _, encrypted := range []bool{false, true} {
+		t.Run(map[bool]string{false: "ordinary", true: "encrypted"}[encrypted], func(t *testing.T) {
+			var dek []byte
+			if encrypted {
+				dek = bytes.Repeat([]byte{23}, 32)
+				DEKProvider = func(string) ([]byte, error) { return bytes.Clone(dek), nil }
+			}
+			for _, source := range []string{
+				`{"Spec":"999","Properties":{"title":"A &amp; B","alias":"&quot;alias&quot;","memo":"&amp;amp;"}}`,
+				`{"Spec":"999","Properties":{"title":"A &amp; B"},"Children":[`,
+			} {
+				data, err := encryptDataWithDEK(boxID, document, []byte(source), dek)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err = os.WriteFile(absPath, data, 0600); err != nil {
+					t.Fatal(err)
+				}
+				ial, err := DocIAL(absPath)
+				if !errors.Is(err, treenode.ErrSpecTooNew) || errors.Is(err, ErrInvalidDocIAL) {
+					t.Fatalf("newer source lost version error: ial=%v err=%v", ial, err)
+				}
+				if strings.HasSuffix(source, "[") {
+					if ial != nil {
+						t.Fatalf("truncated source returned placeholder properties: %v", ial)
+					}
+				} else if ial["title"] != "A & B" || ial["alias"] != `"alias"` || ial["memo"] != "&amp;" {
+					t.Fatalf("placeholder properties were not decoded exactly once: %v", ial)
+				}
+				retained, err := os.ReadFile(absPath)
+				if err != nil || !bytes.Equal(retained, data) {
+					t.Fatal("attribute reads changed the original source")
+				}
+			}
+		})
 	}
 }
 

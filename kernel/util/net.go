@@ -312,7 +312,7 @@ func ssrfSafeDialContext(timeout time.Duration) func(ctx context.Context, networ
 	}
 }
 
-// isPrivateIP 判断 IP 是否为私网地址，含内嵌私网 IPv4 的 IPv6 过渡地址（NAT64、6to4、Teredo、IPv4 兼容）。
+// isPrivateIP 判断 IP 是否为私网地址，含内嵌私网 IPv4 的 IPv6 过渡地址（NAT64、6to4、Teredo、IPv4-translated、IPv4 兼容）。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-qq8m-8p8v-x4xg
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rg26-cg95-gq6p
 func isPrivateIP(ip net.IP) bool {
@@ -327,7 +327,7 @@ func isPrivateIP(ip net.IP) bool {
 	return false
 }
 
-// extractEmbeddedIPv4 提取 IPv6 过渡地址（NAT64、6to4、Teredo、IPv4 兼容）中内嵌的 IPv4 地址，非过渡地址返回 nil。
+// extractEmbeddedIPv4 提取 IPv6 过渡地址（NAT64、6to4、Teredo、IPv4-translated、IPv4 兼容）中内嵌的 IPv4 地址，非过渡地址返回 nil。
 func extractEmbeddedIPv4(ip net.IP) net.IP {
 	ip16 := ip.To16()
 	if nil == ip16 || 16 != len(ip16) {
@@ -344,6 +344,10 @@ func extractEmbeddedIPv4(ip net.IP) net.IP {
 	// Teredo（RFC 4380 2001:0000::/32）：低 32 位按位取反后为内嵌 IPv4。
 	if ip16[0] == 0x20 && ip16[1] == 0x01 && ip16[2] == 0x00 && ip16[3] == 0x00 {
 		return net.IPv4(ip16[12]^0xff, ip16[13]^0xff, ip16[14]^0xff, ip16[15]^0xff)
+	}
+	// IPv4-translated（RFC 2765 2.1 的 0::ffff:0:0:0/96，RFC 6145 已废弃）：第 64-79 位为 0xffff，低 32 位为内嵌 IPv4。
+	if isZeroIPv6(ip16[0:8]) && ip16[8] == 0xff && ip16[9] == 0xff && isZeroIPv6(ip16[10:12]) {
+		return net.IPv4(ip16[12], ip16[13], ip16[14], ip16[15])
 	}
 	// IPv4 兼容地址（RFC 4291 已废弃 ::/96）：低 32 位为内嵌 IPv4。
 	if isZeroIPv6(ip16[0:12]) {

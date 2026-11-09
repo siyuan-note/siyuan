@@ -652,7 +652,12 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
     const avID = blockElement.dataset.avId;
     const hostID = getAVHostIdentity(blockElement);
     const rootID = protyle.block.rootID;
-    const ownerElement = getAVCellEditorOwner(blockElement);
+    const attributeSelect = (type === "select" || type === "mSelect") && cellElements.every(element =>
+        element.classList.contains("custom-attr__avvalue") && !element.dataset.avBatchOriginalValue);
+    const cellOwner = getAVCellEditorOwner(blockElement);
+    const ownerElement = attributeSelect ?
+        cellOwner.closest<HTMLElement>(".protyle-db-attr, .protyle-db-row, .b3-dialog__container") || cellOwner : cellOwner;
+    const attributeID = blockElement.dataset.attributeId;
     const viewType = blockElement.dataset.avType as TAVView;
     const initialData = getAVData(blockElement);
     const viewID = initialData?.viewID || initialData?.view.id;
@@ -689,8 +694,17 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
         }
     };
     return () => {
+        if (attributeSelect && !blockElement.isConnected) {
+            // 属性栏刷新会替换数据库容器，只在原面板内恢复同一属性目标。
+            const currentBlock = ownerElement.querySelector<HTMLElement>(
+                `[data-av-id="${escapeAttr(avID)}"][data-attribute-id="${escapeAttr(attributeID || "")}"]` +
+                `[data-node-id="${escapeAttr(hostID)}"]`);
+            if (!currentBlock) return;
+            blockElement = currentBlock;
+        }
         const currentRelationHost = getAVRelationHost(blockElement);
         if (!blockElement.isConnected || !ownerElement.contains(blockElement) ||
+            (attributeSelect && blockElement.dataset.attributeId !== attributeID) ||
             blockElement.dataset.avId !== avID || getAVHostIdentity(blockElement) !== hostID ||
             blockElement.dataset.avType !== viewType || protyle.block.rootID !== rootID ||
             blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) !== viewAttribute ||
@@ -705,9 +719,18 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
         const data = getAVData(blockElement);
         if (initialData && (!data || (data.viewID || data.view.id) !== viewID)) return;
         const cells: IAVSelectedCell[] = [];
+        const values: IAVCellValue[] = [];
+        const attributeElements: HTMLElement[] = [];
         for (const target of targets) {
             if (!target.rowID || !target.colID) return;
-            if (data) {
+            if (attributeSelect) {
+                const element = blockElement.querySelector<HTMLElement>(
+                    `.custom-attr__avvalue[data-row-id="${escapeAttr(target.rowID)}"]` +
+                    `[data-col-id="${escapeAttr(target.colID)}"][data-type="${type}"]`);
+                if (!element) return;
+                attributeElements.push(element);
+                values.push(genCellValueByElement(type, element));
+            } else if (data) {
                 // 从当前模型读取撤销值和块绑定，行卸载及字段重排不会改变原编辑目标。
                 const cell = resolveCell(data.view, target);
                 if (!cell) return;
@@ -719,8 +742,12 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
                 return;
             }
         }
+        if (attributeSelect) {
+            attributeElements.forEach((element, index) => cellElements[index] = element);
+            return {cells, values, elements: attributeElements, blockElement};
+        }
         // 批量代理保存显示值供销毁回调同步，普通单元格的显示更新只绑定当前挂载的原分组条目。
-        return {cells, elements: targets.map(target => {
+        return {cells, values, blockElement, elements: targets.map(target => {
             if (!data || target.isBatch) return target.element;
             const group = target.groupID ? `.av__body[data-group-id="${escapeAttr(target.groupID)}"] ` : "";
             return blockElement.querySelector<HTMLElement>(`${group}` +

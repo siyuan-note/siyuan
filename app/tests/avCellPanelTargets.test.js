@@ -309,6 +309,134 @@ test("multi-select chip removal and repeated saves read current values while off
     assert.deepEqual(plain(f.transactions[1].undo[0].data.mSelect), [option("old-0"), option("new")]);
 });
 
+const attributeSelectFixture = () => {
+    const f = fixture("mSelect", {cached: false});
+    f.state.data = {id: "database", viewType: "table", view: {columns: f.columns}};
+    f.context.getAVData = () => undefined;
+    let currentBlock = f.block;
+    let currentCell = f.cells[0];
+    f.block.dataset.attributeId = "document";
+    currentCell.classList.add("custom-attr__avvalue");
+    const panel = element();
+    panel.contains = target => target === currentBlock && target.isConnected;
+    panel.querySelector = selector => currentBlock.isConnected &&
+        ["av-id", "attribute-id", "node-id"].every(name =>
+            selector.includes(`[data-${name}="${currentBlock.getAttribute(`data-${name}`)}"]`)) ? currentBlock : null;
+    f.owner.closest = () => panel;
+    const bindCell = () => {
+        currentBlock.contains = target => target === currentCell && target.isConnected;
+        currentBlock.querySelector = selector => currentCell.isConnected &&
+            ["row-id", "col-id", "type"].every(name =>
+                selector.includes(`[data-${name}="${currentCell.getAttribute(`data-${name}`)}"]`)) ? currentCell : null;
+    };
+    bindCell();
+    f.context.hasClosestBlock = target => currentBlock.contains(target) ? currentBlock : null;
+    f.context.updateAttrViewCellInOtherElements = (_protyle, _avID, _rowID, _colID, value, cell) => {
+        assert.equal(cell, currentCell);
+        cell.dataset.cellValue = encodeURIComponent(JSON.stringify(value));
+    };
+    f.api.captureAVCellInput(f.protyle, f.block, f.cells);
+    const repaint = (replaceBlock = true) => {
+        const dataset = {...currentCell.dataset};
+        currentCell.isConnected = false;
+        if (replaceBlock) {
+            currentBlock.isConnected = false;
+            currentBlock = element({...currentBlock.dataset});
+        }
+        currentCell = element(dataset, ["custom-attr__avvalue"]);
+        bindCell();
+        return {block: currentBlock, cell: currentCell};
+    };
+    return {...f, panel, repaint, current: () => ({block: currentBlock, cell: currentCell})};
+};
+
+for (const replaceBlock of [false, true]) {
+    test(`attribute multi-select keeps adding and removing after ${replaceBlock ? "body" : "field"} refreshes`, () => {
+        const f = attributeSelectFixture();
+        f.save();
+        f.repaint(replaceBlock);
+        const add = name => f.api.addColOptionOrCell(f.protyle, f.state.data, f.cells,
+            element({name, color: "1"}), f.menu, f.block);
+        add("second");
+        assert.equal(f.transactions.length, 2);
+        assert.deepEqual(plain(f.transactions[1].operations[0].data.mSelect),
+            [option("old-0"), option("new"), option("second")]);
+        f.repaint(replaceBlock);
+        f.api.removeCellOption(f.protyle, f.cells, element({content: "old-0"}), f.block);
+        f.repaint(replaceBlock);
+        f.api.removeCellOption(f.protyle, f.cells, element({content: "new"}), f.block);
+        f.repaint(replaceBlock);
+        add("third");
+        assert.equal(f.transactions.length, 5);
+        assert.deepEqual(plain(f.transactions[4].operations[0].data.mSelect), [option("second"), option("third")]);
+        assert.deepEqual(plain(f.transactions[3].undo[0].data.mSelect), [option("new"), option("second")]);
+        for (const transaction of f.transactions) {
+            const operation = transaction.operations[0];
+            assert.equal(operation.avID, "database");
+            assert.equal(operation.rowID, "row-0");
+            assert.equal(operation.keyID, "column");
+        }
+        assert.equal(f.cells[0], f.current().cell);
+    });
+}
+
+for (const [name, invalidate] of [
+    ["document switch", f => {f.protyle.block.rootID = "other";}],
+    ["panel removal", f => {f.panel.querySelector = () => null;}],
+    ["database change", f => {f.current().block.dataset.avId = "other";}],
+    ["display instance change", f => {f.current().block.dataset.nodeId = "other";}],
+    ["attribute target change", f => {f.current().block.dataset.attributeId = "other";}],
+    ["row change", f => {f.current().cell.dataset.rowId = "other";}],
+    ["field deletion", f => {f.current().cell.isConnected = false;}],
+    ["field retyping", f => {f.current().cell.dataset.type = "select";}],
+    ["readonly", f => {f.protyle.disabled = true;}],
+    ["global readonly", f => {f.window.siyuan.config.readonly = true;}],
+    ["history preview", f => {f.protyle.options.history = {created: true};}],
+]) {
+    test(`attribute multi-select rejects add and removal after refresh and ${name}`, () => {
+        const f = attributeSelectFixture();
+        f.save();
+        f.repaint();
+        invalidate(f);
+        f.save();
+        f.api.removeCellOption(f.protyle, f.cells, element({content: "old-0"}), f.block);
+        assert.equal(f.transactions.length, 1);
+    });
+}
+
+test("attribute multi-select does not follow an in-place change to another attribute target", () => {
+    const f = attributeSelectFixture();
+    f.current().block.dataset.attributeId = "other";
+    f.save();
+    assert.equal(f.transactions.length, 0);
+});
+
+test("attribute multi-select uses refreshed concurrent values for edits and undo", () => {
+    const f = attributeSelectFixture();
+    f.save();
+    const {cell} = f.repaint();
+    const current = JSON.parse(decodeURIComponent(cell.dataset.cellValue));
+    current.mSelect.push(option("concurrent"));
+    cell.dataset.cellValue = encodeURIComponent(JSON.stringify(current));
+    f.api.removeCellOption(f.protyle, f.cells, element({content: "new"}), f.block);
+    assert.equal(f.transactions.length, 2);
+    assert.deepEqual(plain(f.transactions[1].operations[0].data.mSelect), [option("old-0"), option("concurrent")]);
+    assert.deepEqual(plain(f.transactions[1].undo[0].data.mSelect), current.mSelect);
+});
+
+test("mobile attribute multi-select continues after refresh without reopening the keyboard", () => {
+    const f = attributeSelectFixture();
+    f.context.isMobile = () => true;
+    f.menu.querySelector("input").focus = () => assert.fail("an option tap must not focus the search input");
+    f.save();
+    f.repaint();
+    f.api.addColOptionOrCell(f.protyle, f.state.data, f.cells,
+        element({name: "second", color: "1"}), f.menu, f.block);
+    assert.equal(f.transactions.length, 2);
+    assert.deepEqual(plain(f.transactions[1].operations[0].data.mSelect),
+        [option("old-0"), option("new"), option("second")]);
+});
+
 test("asset removal reads panel state updated by the previous offscreen save", () => {
     const f = fixture("mAsset");
     f.unmount();

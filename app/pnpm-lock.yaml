@@ -267,11 +267,11 @@ importers:
         specifier: ^2.1.2
         version: 2.1.2
       sass:
-        specifier: ^1.105.2
-        version: 1.105.2
+        specifier: ^1.107.1
+        version: 1.107.1
       sass-loader:
         specifier: ^17.1.0
-        version: 17.1.0(sass@1.105.2)(webpack@5.106.2)
+        version: 17.1.0(sass@1.107.1)(webpack@5.106.2)
       sharp:
         specifier: ^0.35.5
         version: 0.35.5(@types/node@24.19.2)
@@ -2844,8 +2844,8 @@ packages:
       webpack:
         optional: true
 
-  sass@1.105.2:
-    resolution: {integrity: sha512-KxW6ZKZiBKWK3ziQ4YZ3cpqo8/1TlHXE8t9nBNvGDZFoBFbk2MD7RacxYFs8zy8hzeFwpFYkVyAhboi47uYPEQ==}
+  sass@1.107.1:
+    resolution: {integrity: sha512-aJ1/LvxOOb04YhmiBjzZn3jVwdHKol+OVhoMV6fFl02fF9T3i+5Mg9l/CnzqtM+NX5Jn5o3lAbs/ZJivTCLHfQ==}
     engines: {node: '>=20.19.0'}
     hasBin: true
 
@@ -5785,12 +5785,12 @@ snapshots:
     dependencies:
       truncate-utf8-bytes: 1.0.2
 
-  sass-loader@17.1.0(sass@1.105.2)(webpack@5.106.2):
+  sass-loader@17.1.0(sass@1.107.1)(webpack@5.106.2):
     optionalDependencies:
-      sass: 1.105.2
+      sass: 1.107.1
       webpack: 5.106.2(clean-css@5.3.3)(esbuild@0.28.1)(html-minifier-terser@6.1.0)(postcss@8.5.29)(webpack-cli@7.2.3)
 
-  sass@1.105.2:
+  sass@1.107.1:
     dependencies:
       chokidar: 5.0.0
       immutable: 5.1.5

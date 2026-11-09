@@ -26,12 +26,14 @@ test("file history displays zero histories for an empty search", () => {
     const next = {...node(), nextElementSibling: {nextElementSibling: count}};
     const list = {...node(), innerHTML: "old results"};
     const element = {
+        isConnected: true,
         setAttribute() {},
         querySelector: (selector: string) => selector === '[data-type="docnext"]' ? next : selector === ".b3-list" ? list : node(),
     };
     const dependencies = {
         window: {siyuan: {storage: {history: {}}, languages: {pageCountAndHistoryCount: "${x} pages, ${y} histories", emptyContent: "empty"}}},
         Constants: {LOCAL_HISTORY: "history"},
+        historyGroups: new WeakMap(), historyRequests: new WeakMap(),
         setStorageVal() {},
         fetchPost: (_url: string, _request: unknown, callback: (response: unknown) => void) =>
             callback({data: {pageCount: 0, totalCount: 0, histories: []}}),
@@ -39,6 +41,31 @@ test("file history displays zero histories for an empty search", () => {
     const render = new Function(...Object.keys(dependencies), extract("renderDoc") + "\nreturn renderDoc;")(...Object.values(dependencies));
     render(element, 1);
     assert.equal(count.textContent, "0 pages, 0 histories");
+    assert.match(list.innerHTML, /empty/);
+});
+
+test("file history ignores older search results after filters change", () => {
+    const node = (): any => ({value: "0", classList: {add() {}, remove() {}}, setAttribute() {}, removeAttribute() {}, querySelector: node});
+    const count = {textContent: "", classList: {remove() {}}};
+    const next = {...node(), nextElementSibling: {nextElementSibling: count}};
+    const list = {...node(), innerHTML: ""};
+    const element = {
+        isConnected: true, setAttribute() {},
+        querySelector: (selector: string) => selector === '[data-type="docnext"]' ? next : selector === ".b3-list" ? list : node(),
+    };
+    const responses: ((response: unknown) => void)[] = [];
+    const dependencies = {
+        window: {siyuan: {storage: {history: {}}, languages: {pageCountAndHistoryCount: "${x}/${y}", emptyContent: "empty"}}},
+        Constants: {LOCAL_HISTORY: "history"}, historyGroups: new WeakMap(), historyRequests: new WeakMap(),
+        setStorageVal() {},
+        fetchPost: (_url: string, _request: unknown, callback: (response: unknown) => void) => responses.push(callback),
+    };
+    const render = new Function(...Object.keys(dependencies), extract("renderDoc") + "\nreturn renderDoc;")(...Object.values(dependencies));
+    render(element, 1);
+    render(element, 1);
+    responses[1]({data: {pageCount: 0, totalCount: 0, histories: []}});
+    responses[0]({data: {pageCount: 1, totalCount: 100, histories: ["123"]}});
+    assert.equal(count.textContent, "0/0");
     assert.match(list.innerHTML, /empty/);
 });
 

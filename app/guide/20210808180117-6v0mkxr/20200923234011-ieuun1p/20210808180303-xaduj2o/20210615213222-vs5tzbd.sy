@@ -667,6 +667,19 @@
 			]
 		},
 		{
+			"ID": "20261109120000-hist02a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109120000-hist02a"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The count beside each time group shows the number of file history entries matching the current search and filters, not the amount of text changed. Expand a group and scroll to the bottom to load more entries automatically."
+				}
+			]
+		},
+		{
 			"ID": "20210104091559-kgrtuyh",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,

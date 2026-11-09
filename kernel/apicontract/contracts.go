@@ -192,6 +192,7 @@ var (
 	SetBlockAttrs = define[SetBlockAttrsRequest, Null]("setBlockAttrs", "/api/attr/setBlockAttrs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	SearchTag     = define[SearchTagRequest, SearchTagData]("searchTag", "/api/search/searchTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	ListNotebooks = define[ListNotebooksRequest, *ListNotebooksData]("lsNotebooks", "/api/notebook/lsNotebooks", AuthenticatedAccess, LegacyOptionalBody, ResponseOptions{}, "POST")
+	// SearchHistory 按时间分组分页；itemCounts 为当前筛选条件下各时间分组的文件条数，totalCount 为分组总数。
 	SearchHistory = define[SearchHistoryRequest, SearchHistoryData]("searchHistory", "/api/history/searchHistory", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 	GetBlockInfo  = define[BlockInfoRequest, BlockInfoData]("getBlockInfo", "/api/block/getBlockInfo", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{3}, Text: true}, "POST")
 )
@@ -262,9 +263,10 @@ type SearchHistoryRequest struct {
 }
 
 type SearchHistoryData struct {
-	Histories  []string `json:"histories"`
-	PageCount  int      `json:"pageCount"`
-	TotalCount int      `json:"totalCount"`
+	ItemCounts map[string]int `json:"itemCounts"`
+	Histories  []string       `json:"histories"`
+	PageCount  int            `json:"pageCount"`
+	TotalCount int            `json:"totalCount"`
 }
 
 type BlockInfoRequest struct {
@@ -824,6 +826,8 @@ var ImportSYNotebook = define[ImportDataRequest, ImportNotebookData]("importSYNo
 // 同名不同内容时返回错误并保留已有表情文件。
 var ImportSYAuto = define[ImportSYRequest, ImportAutoData]("importSYAuto", "/api/import/importSYAuto", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{DataOnError: true}, "POST")
 
+// GetHistoryItems 按路径、ID、操作和索引行号升序分页，每页 32 条，page 缺省或小于 1 时使用第一页。
+// totalCount 为该时间分组在当前筛选条件下的文件条数，pageCount 为分组内页数。
 var GetHistoryItems = define[HistoryItemsRequest, HistoryItemsData]("getHistoryItems", "/api/history/getHistoryItems", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetNotebookHistory = define[EmptyRequest, NotebookHistoryData]("getNotebookHistory", "/api/history/getNotebookHistory", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")

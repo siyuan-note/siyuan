@@ -32654,10 +32654,18 @@
               "type": "null"
             }
           ]
+        },
+        "pageCount": {
+          "type": "integer"
+        },
+        "totalCount": {
+          "type": "integer"
         }
       },
       "required": [
-        "items"
+        "items",
+        "pageCount",
+        "totalCount"
       ],
       "additionalProperties": false
     },
@@ -32681,6 +32689,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "number"
             },
             {
               "type": "null"
@@ -43090,6 +43108,19 @@
             }
           ]
         },
+        "itemCounts": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "pageCount": {
           "type": "integer"
         },
@@ -43099,6 +43130,7 @@
       },
       "required": [
         "histories",
+        "itemCounts",
         "pageCount",
         "totalCount"
       ],

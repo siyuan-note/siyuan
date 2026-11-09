@@ -1,3 +1,6 @@
+import {HistoryGroups} from "./historyGroups";
+import type {APIPOSTRoutes} from "../types/api";
+
 import {toggleMenu} from "../menus/menuToggle";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -27,6 +30,8 @@ import {MenuItem} from "../menus/Menu";
 import {renderSnapshotActions} from "./snapshotActions";
 
 let historyEditor: Protyle;
+const historyGroups = new WeakMap<Element, HistoryGroups>();
+const historyRequests = new WeakMap<Element, number>();
 const repoPanelCleanup = new WeakMap<Element, () => void>();
 const repoRequests = new WeakMap<Element, number>();
 const repoHistoryEditors = new WeakMap<Element, Protyle>();
@@ -92,7 +97,57 @@ const openSnapshotMemo = (repoElement: Element, id?: string, memo = "", fullChec
     dialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTMEMO);
 };
 
+const renderHistoryItems = (items: Extract<APIPOSTRoutes["/api/history/getHistoryItems"]["response"], {code: 0}>["data"]["items"],
+                            created: string, filter: {type: number, op: string}) => {
+    let html = "";
+    let ariaLabel = "";
+    items.forEach(docItem => {
+        let chipClass = " b3-chip b3-chip--list ";
+        if (docItem.op === "clean") {
+            chipClass += "b3-chip--primary ";
+            ariaLabel = window.siyuan.languages.historyClean;
+        } else if (docItem.op === "update") {
+            chipClass += "b3-chip--info ";
+            ariaLabel = window.siyuan.languages.historyUpdate;
+        } else if (docItem.op === "delete") {
+            chipClass += "b3-chip--error ";
+            ariaLabel = window.siyuan.languages.historyDelete;
+        } else if (docItem.op === "format") {
+            chipClass += "b3-chip--pink ";
+            ariaLabel = window.siyuan.languages.historyFormat;
+        } else if (docItem.op === "sync") {
+            chipClass += "b3-chip--success ";
+            ariaLabel = window.siyuan.languages.historySync;
+        } else if (docItem.op === "replace") {
+            chipClass += "b3-chip--secondary ";
+            ariaLabel = window.siyuan.languages.historyReplace;
+        } else if (docItem.op === "outline") {
+            chipClass += "b3-chip--warning ";
+            ariaLabel = window.siyuan.languages.historyOutline;
+        }
+        const itemType = String(filter.type) === "4" ? "av" : (String(filter.type) === "2" ? "assets" : "doc");
+        const compareHTML = itemType === "doc" && docItem.op !== "delete" ? `<span class="b3-list-item__action ariaLabel" data-type="compare" data-position="6south" aria-label="${window.siyuan.languages.compare}">
+            <svg><use xlink:href="#iconSplitLR"></use></svg>
+        </span>` : "";
+        html += `<li data-id="${docItem.id}" data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${itemType}" data-path="${docItem.path}" class="b3-list-item" style="padding-left: 22px">
+        <span class="${filter.op === "all" ? "" : "fn__none"}${chipClass}ariaLabel" data-position="6south" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
+        <span class="b3-list-item__text" title="${escapeAttr(docItem.title)}">${escapeHtml(docItem.title)}</span>
+        <span class="fn__space"></span>
+        ${compareHTML}
+        <button type="button" class="b3-list-item__action ariaLabel" data-type="rollback" data-position="6south" aria-label="${window.siyuan.languages.rollback}">
+            <svg><use xlink:href="#iconUndo"></use></svg>
+        </button>
+    </li>`;
+    });
+
+    return html;
+};
+
 const renderDoc = (element: HTMLElement, currentPage: number) => {
+    historyGroups.get(element)?.destroy();
+    historyGroups.delete(element);
+    const request = (historyRequests.get(element) || 0) + 1;
+    historyRequests.set(element, request);
     const previousElement = element.querySelector('[data-type="docprevious"]');
     const nextElement = element.querySelector('[data-type="docnext"]');
     element.setAttribute("data-page", currentPage.toString());
@@ -151,13 +206,16 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     window.siyuan.storage[Constants.LOCAL_HISTORY].type = parseInt(typeElement.value);
     window.siyuan.storage[Constants.LOCAL_HISTORY].operation = opElement.value;
     setStorageVal(Constants.LOCAL_HISTORY, window.siyuan.storage[Constants.LOCAL_HISTORY]);
-    fetchPost("/api/history/searchHistory", {
+    const filter = {
         notebook: notebookElement.value,
         query: inputElement.value,
-        page: currentPage,
         op: opElement.value,
         type: parseInt(typeElement.value)
-    }, (response) => {
+    };
+    fetchPost("/api/history/searchHistory", {...filter, page: currentPage}, (response) => {
+        if (!element.isConnected || historyRequests.get(element) !== request) {
+            return;
+        }
         if (currentPage < response.data.pageCount) {
             nextElement.removeAttribute("disabled");
         } else {
@@ -177,9 +235,22 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
             logsHTML += `<li class="b3-list-item" data-type="toggle" data-created="${item}">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
     <span style="padding-left: 4px" class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
+    <span class="counter">${response.data.itemCounts?.[item] || 0}</span>
 </li>`;
         });
         listElement.innerHTML = logsHTML;
+        historyGroups.set(element, new HistoryGroups(listElement as HTMLElement, filter, {
+            more: window.siyuan.languages.loadMore,
+            retry: window.siyuan.languages.retry,
+            render: (items, created) => renderHistoryItems(items, created, filter),
+            load: async (body, signal) => {
+                const result = await fetchSyncPost("/api/history/getHistoryItems", body, undefined, true, signal);
+                if (result.code !== 0) {
+                    throw new Error(result.msg);
+                }
+                return result.data;
+            },
+        }));
     });
 };
 
@@ -555,6 +626,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc", 
 
     if (isMobile()) {
         let mobileRepoRoot: Element;
+        let mobileHistoryRoot: Element;
         openModel({
             html: contentHTML,
             icon: "iconHistory",
@@ -562,12 +634,14 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc", 
             bindEvent(element) {
                 element.firstElementChild.setAttribute("style", "background-color:var(--b3-theme-background);height:100%");
                 bindEvent(app, element.firstElementChild);
+                mobileHistoryRoot = element.querySelector('#historyContainer [data-type="doc"]');
                 mobileRepoRoot = element.querySelector(".history__snapshots");
                 if (tab !== "doc") {
                     element.firstElementChild.querySelector(`.layout-tab-bar [data-type="${tab}"]`)?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
                 }
             },
             destroyCallback() {
+                historyGroups.get(mobileHistoryRoot)?.destroy();
                 if (mobileRepoRoot) {
                     destroyRepoPanel(mobileRepoRoot);
                 }
@@ -581,6 +655,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc", 
             containerClassName: "b3-dialog__container--theme",
             destroyCallback() {
                 historyEditor = undefined;
+                historyGroups.get(dialog.element.querySelector('#historyContainer [data-type="doc"]'))?.destroy();
                 const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
                 destroyRepoPanel(repoElement);
             }
@@ -686,6 +761,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         item.classList.remove("fn__block");
                     }
                 });
+                if (type === "doc") {
+                    historyGroups.get(firstPanelElement)?.refresh();
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -799,78 +877,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (type === "toggle") {
-                const iconElement = target.firstElementChild.firstElementChild;
-                if (iconElement.classList.contains("b3-list-item__arrow--open")) {
-                    target.nextElementSibling.classList.add("fn__none");
-                    iconElement.classList.remove("b3-list-item__arrow--open");
-                } else {
-                    if (target.nextElementSibling && target.nextElementSibling.tagName === "UL") {
-                        target.nextElementSibling.classList.remove("fn__none");
-                        iconElement.classList.add("b3-list-item__arrow--open");
-                    } else {
-                        const inputElement = firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement;
-                        const opElement = firstPanelElement.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
-                        const typeElement = firstPanelElement.querySelector('.b3-select[data-type="typeselect"]') as HTMLSelectElement;
-                        const notebookElement = firstPanelElement.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement;
-                        const created = target.getAttribute("data-created");
-                        fetchPost("/api/history/getHistoryItems", {
-                            notebook: notebookElement.value,
-                            query: inputElement.value,
-                            op: opElement.value,
-                            type: parseInt(typeElement.value),
-                            created
-                        }, (response) => {
-                            iconElement.classList.add("b3-list-item__arrow--open");
-                            let html = "";
-                            let ariaLabel = "";
-                            response.data.items.forEach((docItem: {
-                                id: string,
-                                title: string,
-                                path: string,
-                                op: string,
-                                notebook: string
-                            }) => {
-                                let chipClass = " b3-chip b3-chip--list ";
-                                if (docItem.op === "clean") {
-                                    chipClass += "b3-chip--primary ";
-                                    ariaLabel = window.siyuan.languages.historyClean;
-                                } else if (docItem.op === "update") {
-                                    chipClass += "b3-chip--info ";
-                                    ariaLabel = window.siyuan.languages.historyUpdate;
-                                } else if (docItem.op === "delete") {
-                                    chipClass += "b3-chip--error ";
-                                    ariaLabel = window.siyuan.languages.historyDelete;
-                                } else if (docItem.op === "format") {
-                                    chipClass += "b3-chip--pink ";
-                                    ariaLabel = window.siyuan.languages.historyFormat;
-                                } else if (docItem.op === "sync") {
-                                    chipClass += "b3-chip--success ";
-                                    ariaLabel = window.siyuan.languages.historySync;
-                                } else if (docItem.op === "replace") {
-                                    chipClass += "b3-chip--secondary ";
-                                    ariaLabel = window.siyuan.languages.historyReplace;
-                                } else if (docItem.op === "outline") {
-                                    chipClass += "b3-chip--warning ";
-                                    ariaLabel = window.siyuan.languages.historyOutline;
-                                }
-                                const itemType = typeElement.value === "4" ? "av" : (typeElement.value === "2" ? "assets" : "doc");
-                                const compareHTML = itemType === "doc" && docItem.op !== "delete" ? `<span class="b3-list-item__action ariaLabel" data-type="compare" data-position="6south" aria-label="${window.siyuan.languages.compare}">
-        <svg><use xlink:href="#iconSplitLR"></use></svg>
-    </span>` : "";
-                                html += `<li data-id="${docItem.id}" data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${itemType}" data-path="${docItem.path}" class="b3-list-item" style="padding-left: 22px">
-    <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}ariaLabel" data-position="6south" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
-    <span class="b3-list-item__text" title="${escapeAttr(docItem.title)}">${escapeHtml(docItem.title)}</span>
-    <span class="fn__space"></span>
-    ${compareHTML}
-    <button type="button" class="b3-list-item__action ariaLabel" data-type="rollback" data-position="6south" aria-label="${window.siyuan.languages.rollback}">
-        <svg><use xlink:href="#iconUndo"></use></svg>
-    </button>
-</li>`;
-                            });
-                            target.insertAdjacentHTML("afterend", `<ul>${html}</ul>`);
-                        });
-                    }
-                }
+                historyGroups.get(firstPanelElement)?.toggle(target as HTMLElement);
                 event.stopPropagation();
                 event.preventDefault();
                 break;

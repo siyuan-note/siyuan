@@ -651,6 +651,19 @@
 			]
 		},
 		{
+			"ID": "20261109120000-hist00a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109120000-hist00a"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每个时间分组右侧显示符合当前搜索和筛选条件的文件历史条数，并非文字改动量。展开分组后，滚动到底部会自动加载后续记录。"
+				}
+			]
+		},
+		{
 			"ID": "20210104090742-hjfornp",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,

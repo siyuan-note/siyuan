@@ -1508,9 +1508,9 @@ export type History = { "hCreated": string; "items": Array<HistoryItem | null> |
 
 export type HistoryItem = { "id": string; "notebook": string; "op": string; "path": string; "title": string; };
 
-export type HistoryItemsData = { "items": Array<HistoryItem | null> | null; };
+export type HistoryItemsData = { "items": Array<HistoryItem | null> | null; "pageCount": number; "totalCount": number; };
 
-export type HistoryItemsRequestInput = { "created": string; "notebook"?: string | null; "op"?: string | null; "query"?: string | null; "type"?: number | null; };
+export type HistoryItemsRequestInput = { "created": string; "notebook"?: string | null; "op"?: string | null; "page"?: number | null; "query"?: string | null; "type"?: number | null; };
 
 export type HistoryPathRequestInput = { "historyPath": string; };
 
@@ -2058,7 +2058,7 @@ export type SearchEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "emb
 
 export type SearchHeadingFilterInput = { "h1"?: boolean | null; "h2"?: boolean | null; "h3"?: boolean | null; "h4"?: boolean | null; "h5"?: boolean | null; "h6"?: boolean | null; };
 
-export type SearchHistoryData = { "histories": Array<string> | null; "pageCount": number; "totalCount": number; };
+export type SearchHistoryData = { "histories": Array<string> | null; "itemCounts": Record<string, number> | null; "pageCount": number; "totalCount": number; };
 
 export type SearchHistoryRequestInput = { "notebook"?: string | null; "op"?: string | null; "page"?: number | null; "query"?: string | null; "type"?: number | null; };
 
@@ -6369,6 +6369,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 按路径、ID、操作和索引行号升序分页，每页 32 条，page 缺省或小于 1 时使用第一页。
+     * totalCount 为该时间分组在当前筛选条件下的文件条数，pageCount 为分组内页数。
+     */
     "/api/history/getHistoryItems": {
         request: HistoryItemsRequestInput;
         response: { "code": 0; "data": HistoryItemsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6426,6 +6430,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 按时间分组分页；itemCounts 为当前筛选条件下各时间分组的文件条数，totalCount 为分组总数。
+     */
     "/api/history/searchHistory": {
         request: SearchHistoryRequestInput;
         response: { "code": 0; "data": SearchHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

@@ -896,35 +896,38 @@ type HistoryItem struct {
 }
 
 const fileHistoryPageSize = 32
+const fileHistoryItemsPageSize = 32
 
 func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, pageCount, totalCount int) {
+	ret, _, pageCount, totalCount = FullTextSearchHistoryGroups(query, box, op, typ, page)
+	return
+}
+
+func FullTextSearchHistoryGroups(query, box, op string, typ, page int) (ret []string, itemCounts map[string]int, pageCount, totalCount int) {
+	ret = []string{}
+	itemCounts = map[string]int{}
 	query = util.RemoveInvalid(query)
 	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}
-
-	offset := (page - 1) * fileHistoryPageSize
-
+	if page < 1 {
+		page = 1
+	}
 	table := "histories_fts_case_insensitive"
-	stmt := "SELECT DISTINCT created FROM " + table + " WHERE "
-	stmt += buildSearchHistoryQueryFilter(query, op, box, table, typ)
-	countStmt := strings.ReplaceAll(stmt, "SELECT DISTINCT created", "SELECT COUNT(DISTINCT created) AS total")
-	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(fileHistoryPageSize) + " OFFSET " + strconv.Itoa(offset)
+	filter := buildSearchHistoryQueryFilter(query, op, box, table, typ)
+	stmt := "SELECT created, COUNT(*) AS total FROM " + table + " WHERE " + filter +
+		" GROUP BY created ORDER BY created DESC LIMIT " + strconv.Itoa(fileHistoryPageSize) + " OFFSET " + strconv.Itoa((page-1)*fileHistoryPageSize)
 	result, err := sql.QueryHistory(stmt)
 	if err != nil {
 		return
 	}
 	for _, row := range result {
-		ret = append(ret, row["created"].(string))
+		created := row["created"].(string)
+		ret = append(ret, created)
+		itemCounts[created] = int(row["total"].(int64))
 	}
-	result, err = sql.QueryHistory(countStmt)
-	if err != nil {
-		return
-	}
-	if 1 > len(ret) {
-		ret = []string{}
-	}
-	if 1 > len(result) {
+	result, err = sql.QueryHistory("SELECT COUNT(DISTINCT created) AS total FROM " + table + " WHERE " + filter)
+	if err != nil || len(result) == 0 {
 		return
 	}
 	totalCount = int(result[0]["total"].(int64))
@@ -933,24 +936,36 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, 
 }
 
 func FullTextSearchHistoryItems(created, query, box, op string, typ int) (ret []*HistoryItem) {
+	ret, _, _ = FullTextSearchHistoryItemsPage(created, query, box, op, typ, 1)
+	return
+}
+
+func FullTextSearchHistoryItemsPage(created, query, box, op string, typ, page int) (ret []*HistoryItem, pageCount, totalCount int) {
+	ret = []*HistoryItem{}
+	if _, err := strconv.Atoi(created); err != nil {
+		return
+	}
 	query = util.RemoveInvalid(query)
 	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}
-
+	if page < 1 {
+		page = 1
+	}
 	table := "histories_fts_case_insensitive"
-	stmt := "SELECT * FROM " + table + " WHERE "
-	stmt += buildSearchHistoryQueryFilter(query, op, box, table, typ)
-
-	_, parseErr := strconv.Atoi(created)
-	if nil != parseErr {
-		ret = []*HistoryItem{}
+	filter := buildSearchHistoryQueryFilter(query, op, box, table, typ) + " AND created = '" + created + "'"
+	counts, err := sql.QueryHistory("SELECT COUNT(*) AS total FROM " + table + " WHERE " + filter)
+	if err != nil || len(counts) == 0 {
 		return
 	}
-
-	stmt += " AND created = '" + created + "' ORDER BY created DESC LIMIT " + fmt.Sprintf("%d", fileHistoryPageSize)
-	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
-	ret = fromSQLHistories(sqlHistories)
+	totalCount = int(counts[0]["total"].(int64))
+	pageCount = int(math.Ceil(float64(totalCount) / float64(fileHistoryItemsPageSize)))
+	if page > pageCount {
+		return
+	}
+	stmt := "SELECT * FROM " + table + " WHERE " + filter +
+		" ORDER BY path ASC, id ASC, op ASC, rowid ASC LIMIT " + strconv.Itoa(fileHistoryItemsPageSize) + " OFFSET " + strconv.Itoa((page-1)*fileHistoryItemsPageSize)
+	ret = fromSQLHistories(sql.SelectHistoriesRawStmt(stmt))
 	return
 }
 

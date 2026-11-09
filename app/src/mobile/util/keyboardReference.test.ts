@@ -57,6 +57,35 @@ test("mobile reference remains available at a caret without exposing other selec
     }
 });
 
+test("document titles hide line breaks and block movement while body and other fragments retain them", () => {
+    for (const title of [true, false]) {
+        for (const lite of [true, false]) {
+            const protyle = {lite, wysiwyg: {element: {contains: () => true}}};
+            const apply = runInNewContext(compile(entriesSource), {
+                getCurrentEditor: () => ({protyle}),
+                getSelection: () => ({rangeCount: 1, getRangeAt: () => ({})}),
+                hasClosestBlock: () => ({classList: {contains: () => false}}),
+                hasClosestByClassName: (_element: unknown, name: string) => title && name === "protyle-title__rich",
+                stripSemanticMarkersFromRangeText: () => "",
+                Constants: {ZWSP: "\u200b"}, getEntryOrder: (): string[] => [], isEntryVisible: () => true,
+                getMobileToolbarContextPath, MOBILE_TOOLBAR_NAMES: [], MOBILE_TOOLBAR_ACTION_NAMES: [],
+                MOBILE_TOOLBAR_INSERTS: [],
+                applyMobileToolbarEntries: (_element: unknown, _toolbar: unknown, options: {
+                    isAvailable: (name: string) => boolean,
+                }) => {
+                    for (const name of ["softLine", "moveup", "movedown"]) {
+                        assert.equal(options.isAvailable(name), !title);
+                    }
+                    for (const name of ["add", "undo", "redo"]) {
+                        assert.equal(options.isAvailable(name), true);
+                    }
+                },
+            });
+            apply({}, []);
+        }
+    }
+});
+
 const setup = (options: {collapsed?: boolean, type?: string, disabled?: boolean, readonly?: boolean,
     code?: boolean, editorDisabled?: boolean, moved?: boolean, missingRange?: boolean} = {}) => {
     const calls: string[] = [];

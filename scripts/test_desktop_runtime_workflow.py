@@ -56,7 +56,7 @@ class DesktopRuntimeWorkflowTests(unittest.TestCase):
 
     def test_round_trip_and_rejection_before_replacing_app(self):
         for arch in ["amd64", "arm64"]:
-            for testing_sha in ["", "b" * 40]:
+            for testing_sha in ["", "b" * 40, "invalid-test-ref"]:
                 with self.subTest(arch=arch, testing_sha=testing_sha), tempfile.TemporaryDirectory() as temporary:
                     root = Path(temporary)
                     env, kernel = self.fixture(root, arch, testing_sha)
@@ -72,10 +72,11 @@ class DesktopRuntimeWorkflowTests(unittest.TestCase):
                     self.assertTrue(link.is_symlink())
                     self.assertEqual(os.readlink(link), ".pnpm/example")
                     self.assertEqual((link / "index.js").read_text(encoding="utf-8"), "synthetic fixture")
+                    # 测试来源不可用或不匹配不能阻止同版本产品封装。
+                    self.assertEqual(self.execute(root, RESTORE, {**env, "TESTING_REF": "unavailable"}).returncode, 0)
                     # 校验失败必须发生在移除 app 之前。
                     stale.write_text("preserve on validation failure", encoding="utf-8")
-                    for key, value in [("GITHUB_SHA", "c" * 40), ("TESTING_REF", "c" * 40),
-                                       ("TESTING_REF", "invalid"), ("TARGET_OS", "linux"),
+                    for key, value in [("GITHUB_SHA", "c" * 40), ("TARGET_OS", "linux"),
                                        ("TARGET_ARCH", "arm64" if arch == "amd64" else "amd64"),
                                        ("TARGET_ARCH", "unknown")]:
                         with self.subTest(mismatch=key, value=value):
@@ -88,8 +89,7 @@ class DesktopRuntimeWorkflowTests(unittest.TestCase):
                     self.assertTrue(stale.exists())
 
     def test_snapshot_rejects_invalid_inputs(self):
-        for key, value in [("GITHUB_SHA", "c" * 40), ("TESTING_REF", "invalid"),
-                           ("TARGET_ARCH", "unknown"), ("TARGET_OS", "linux")]:
+        for key, value in [("GITHUB_SHA", "c" * 40), ("TARGET_ARCH", "unknown"), ("TARGET_OS", "linux")]:
             with self.subTest(key=key), tempfile.TemporaryDirectory() as temporary:
                 root = Path(temporary)
                 env, _ = self.fixture(root, "arm64", "b" * 40)

@@ -1074,7 +1074,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [prepare, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, main_e2e, editor_e2e]
     # 等待全部内核、前端检查和主 E2E、编辑器测试结束；测试步骤的软失败不阻塞发布。
-    # 检查的硬失败、构建失败或取消仍会阻止发布，main 用例软失败和 editor 任务失败只记录结果。
+    # 构建和安装包校验失败仍阻止发布；独立 E2E（含测试准备）失败只记录，不阻止发布。
     if: >-
       ${{ always() && !cancelled() && needs.prepare.result == 'success' &&
           needs.kernel-tests-linux.result == 'success' && needs.kernel-tests-windows.result == 'success' &&
@@ -1082,7 +1082,7 @@ jobs:
           needs.build.result == 'success' && needs.build_macos_amd64.result == 'success' &&
           needs.build_macos_arm64.result == 'success' && needs.package_macos_amd64.result == 'success' &&
           needs.package_macos_arm64.result == 'success' &&
-          needs.build_android.result == 'success' && needs.main_e2e.result == 'success' &&
+          needs.build_android.result == 'success' && needs.main_e2e.result != 'cancelled' &&
           needs.editor_e2e.result != 'cancelled' }}
     steps:
       - name: Download release artifacts

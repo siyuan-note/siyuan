@@ -47,11 +47,11 @@ jobs:
         run: |
           test "$TARGET_OS" = darwin
           [[ "$TARGET_ARCH" = amd64 || "$TARGET_ARCH" = arm64 ]]
-          [[ -z "$TESTING_REF" || "$TESTING_REF" =~ ^[0-9a-f]{40}$ ]]
           test "$(uname -m)" = arm64
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           (cd "$RUNNER_TEMP/desktop-runtime" && shasum -a 256 --check SHA256SUMS)
-          node -e 'const r = require(process.argv[1]); if (r.productSHA !== process.env.GITHUB_SHA || r.testingSHA !== process.env.TESTING_REF || r.goos !== process.env.TARGET_OS || r.goarch !== process.env.TARGET_ARCH) throw new Error("Runtime revision or target mismatch");' "$RUNNER_TEMP/desktop-runtime/revisions.json"
+          # 封装只依赖产品版本、目标架构和完整性，不依赖测试仓库状态。
+          node -e 'const r = require(process.argv[1]); if (r.productSHA !== process.env.GITHUB_SHA || r.goos !== process.env.TARGET_OS || r.goarch !== process.env.TARGET_ARCH) throw new Error("Runtime revision or target mismatch");' "$RUNNER_TEMP/desktop-runtime/revisions.json"
           # 使用本次构建的完整快照，不与 checkout 的 app 文件混合。
           rm -rf app
           tar -xzf "$RUNNER_TEMP/desktop-runtime/runtime.tar.gz"

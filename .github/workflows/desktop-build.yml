@@ -190,7 +190,6 @@ jobs:
         run: |
           test "$TARGET_OS" = darwin
           [[ "$TARGET_ARCH" = amd64 || "$TARGET_ARCH" = arm64 ]]
-          [[ -z "$TESTING_REF" || "$TESTING_REF" =~ ^[0-9a-f]{40}$ ]]
           test "$(uname -m)" = arm64
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -x "kernel/$KERNEL_PATH"
@@ -202,6 +201,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/desktop-runtime"
           # 封存打包前的 app，保留依赖链接和可执行权限；测试与封装各自解压，互不修改。
           tar -czf "$RUNNER_TEMP/desktop-runtime/runtime.tar.gz" app
+          # testingSHA 仅记录测试来源，是否可用于测试由独立 E2E 校验，不阻塞构建。
           node -e 'require("node:fs").writeFileSync(process.argv[1], JSON.stringify({productSHA: process.env.GITHUB_SHA, testingSHA: process.env.TESTING_REF, goos: process.env.TARGET_OS, goarch: process.env.TARGET_ARCH}, null, 2) + "\n")' \
             "$RUNNER_TEMP/desktop-runtime/revisions.json"
           (cd "$RUNNER_TEMP/desktop-runtime" && shasum -a 256 runtime.tar.gz revisions.json > SHA256SUMS)

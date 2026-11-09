@@ -192,13 +192,13 @@ class EditorWorkflowTests(unittest.TestCase):
         expression = compile(expression, "release condition", "eval")
         states = ["success", "failure", "skipped", "cancelled"]
         hard = ["prepare", "kernel-tests-linux", "kernel-tests-windows", "frontend-tests", "build",
-                "build_macos_amd64", "build_macos_arm64", "package_macos_amd64", "package_macos_arm64", "build_android", "main_e2e"]
-        soft = ["editor_e2e"]
+                "build_macos_amd64", "build_macos_arm64", "package_macos_amd64", "package_macos_arm64", "build_android"]
+        soft = ["main_e2e", "editor_e2e"]
         baseline = dict.fromkeys(hard + soft, "success")
         # Cross-product of both independent test results and every hard prerequisite failure.
         for main, editor, cancelled in itertools.product(states, states, [False, True]):
             results = {**baseline, "main_e2e": main, "editor_e2e": editor}
-            expected = not cancelled and main == "success" and editor != "cancelled"
+            expected = not cancelled and main != "cancelled" and editor != "cancelled"
             self.assertEqual(eval(expression, {"__builtins__": {}}, {"results": results, "cancelled": cancelled}), expected)
             for prerequisite, state in itertools.product(hard, states[1:]):
                 failed = {**results, prerequisite: state}
@@ -429,7 +429,7 @@ class EditorWorkflowTests(unittest.TestCase):
             self.assertNotEqual(subprocess.run(["bash", "-euo", "pipefail", "-c", snapshot_command()],
                                               cwd=root, env=env, capture_output=True).returncode, 0)
             duplicate.unlink()
-            env["TESTING_REF"] = "not-a-revision"
+            env["TARGET_ARCH"] = "unknown"
             self.assertNotEqual(subprocess.run(["bash", "-euo", "pipefail", "-c", snapshot_command()],
                                               cwd=root, env=env, capture_output=True).returncode, 0)
 

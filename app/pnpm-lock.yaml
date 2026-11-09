@@ -170,8 +170,8 @@ importers:
   .:
     dependencies:
       '@electron/remote':
-        specifier: ^2.1.3
-        version: 2.1.3(electron@44.10.0(supports-color@8.1.1))
+        specifier: ^2.1.4
+        version: 2.1.4(electron@44.10.0(supports-color@8.1.1))
       zxcvbn:
         specifier: 4.4.2
         version: 4.4.2
@@ -398,8 +398,8 @@ packages:
     engines: {node: '>=22.12.0'}
     hasBin: true
 
-  '@electron/remote@2.1.3':
-    resolution: {integrity: sha512-XlpxC8S4ttj/v2d+PKp9na/3Ev8bV7YWNL7Cw5b9MAWgTphEml7iYgbc7V0r9D6yDOfOkj06bchZgOZdlWJGNA==}
+  '@electron/remote@2.1.4':
+    resolution: {integrity: sha512-5NMDIu9VYoikv5isuGHnuB6Hm3IKWasEvbDxgPYs8yrCICxLiOaucocFz9tYQEokyrqZce6avBFXj0SXuowSiw==}
     peerDependencies:
       electron: '>= 13.0.0'
 
@@ -3427,7 +3427,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron/remote@2.1.3(electron@44.10.0(supports-color@8.1.1))':
+  '@electron/remote@2.1.4(electron@44.10.0(supports-color@8.1.1))':
     dependencies:
       electron: 44.10.0(supports-color@8.1.1)
 

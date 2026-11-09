@@ -273,6 +273,40 @@ func TestSSRFSafeDialerSafeMode(t *testing.T) {
 	}
 }
 
+// TestSSRFSafeDialerBlocksLinkLocal 验证非安全模式下仍拒绝链路本地与未指定地址，
+// 同时保留回环、RFC1918 私网和组播（mDNS）以支持插件访问本机或局域网服务。
+func TestSSRFSafeDialerBlocksLinkLocal(t *testing.T) {
+	previous := SafeMode
+	SafeMode = false
+	defer func() { SafeMode = previous }()
+
+	tests := []struct {
+		name    string
+		address string
+		blocked bool
+	}{
+		{name: "metadata", address: "169.254.169.254:80", blocked: true},
+		{name: "link-local", address: "169.254.1.1:80", blocked: true},
+		{name: "IPv6 link-local with zone", address: "[fe80::1%eth0]:80", blocked: true},
+		{name: "NAT64 metadata", address: "[64:ff9b::a9fe:a9fe]:80", blocked: true},
+		{name: "unspecified", address: "0.0.0.0:80", blocked: true},
+		{name: "loopback", address: "127.0.0.1:80", blocked: false},
+		{name: "private", address: "192.168.1.1:80", blocked: false},
+		{name: "multicast", address: "224.0.0.251:5353", blocked: false},
+		{name: "public", address: "8.8.8.8:80", blocked: false},
+	}
+
+	dialer := SSRFSafeDialer(30)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := dialer.Control("tcp", test.address, nil)
+			if test.blocked != (nil != err) {
+				t.Fatalf("Control(%q) error [%v], want blocked [%v]", test.address, err, test.blocked)
+			}
+		})
+	}
+}
+
 // TestSSRFSafeDialContext 验证 ssrfSafeDialContext 在连接阶段无条件拦截私网地址（不依赖 SafeMode），
 // 并拒绝解析结果全部为私网的域名，杜绝 DNS 重绑定 TOCTOU。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-x8gv-g2g3-65fj

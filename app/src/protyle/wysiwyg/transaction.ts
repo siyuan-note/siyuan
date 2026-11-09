@@ -101,6 +101,7 @@ import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./t
 import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {collectionRemovalOperations, getTagRemovalChanges, hasReferenceRemoval, previewCollectionRemoval} from "../util/collectionRemoval";
+import {preserveMobileEditorKeyboard} from "../../mobile/util/keepKeyboard";
 import {showMessage} from "../../dialog/message";
 import {canRestoreEditorFocus, getEditorFocusRange, restoreEditorFocusRange, restoreTabTitleEditing} from "../util/editorFocus";
 import {replayListMindmap} from "../render/listMindmap/render";
@@ -2679,6 +2680,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             // 等待确认时阻止交互，保留数据库控件及正文的布局占位。
             const resumeTitleEditingExit = suspendTabTitleEditingExit(
                 focusElement?.closest(".tab-item-title")?.closest<HTMLElement>(".tab-item"));
+            const keyboard = !wasDisabled && !wasInert ? preserveMobileEditorKeyboard(element) : undefined;
             selection.removeAllRanges();
             element.inert = true;
             const pending: Promise<void> = (async () => {
@@ -2712,7 +2714,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                 } finally {
                     try {
                         if (protyle.element === element && protyle.wysiwyg.element === editor) element.inert = wasInert;
-                        if (isCurrent() && !wasDisabled && !wasInert && !protyle.disabled && canRestoreEditorFocus(editor)) {
+                        if (isCurrent() && !wasDisabled && !wasInert && !protyle.disabled &&
+                            (canRestoreEditorFocus(editor) || (keyboard?.hasFocus() && editor.getClientRects().length > 0))) {
                             const titleItem = focusTitleItemID && editor.querySelector<HTMLElement>(`.tab-item[data-node-id="${focusTitleItemID}"]`);
                             // 标题可能在预检期间被切换、重载或转为只读，两条恢复路径共用同一许可。
                             const canRestoreTitle = !focusTitleItemID || (titleItem && restoreTabTitleEditing(titleItem));
@@ -2731,6 +2734,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                             content.style.removeProperty("overflow-anchor");
                         }
                     } finally {
+                        keyboard?.release();
                         resumeTitleEditingExit();
                         if (pendingCollectionRemovals.get(protyle)?.promise === pending) pendingCollectionRemovals.delete(protyle);
                     }

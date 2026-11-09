@@ -43,6 +43,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
     let previews = 0;
     const synced: IProtyle[] = [];
     const messages: string[] = [];
+    const keyboardEvents: string[] = [];
     const styles = new Map([["overflow-anchor", "auto"]]);
     const protyle = {lite: false, disabled: false, element: {inert: false, isConnected: true}, block: {rootID: "root", id: "root"},
         undo: {add: () => history++}, contentElement: {scrollTop: 120, style: {
@@ -67,6 +68,11 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
         canRestoreEditorFocus: new Function("document", compiledFocus + "\nreturn canRestoreEditorFocus;")({activeElement: null}),
         Node: {ELEMENT_NODE: 1},
         suspendTabTitleEditingExit: () => () => { titleExitResumed++; },
+        preserveMobileEditorKeyboard: () => {
+            if (mode !== "mobile") return;
+            keyboardEvents.push("hold");
+            return {hasFocus: () => true, release: () => keyboardEvents.push("release")};
+        },
         getEditorFocusRange: () => ({startContainer: {nodeType: 1, closest: (): null => null}}),
         getUndoFocusContext: (element: unknown) => mode === "cancelWithoutRange" && element === protyle.wysiwyg.element ? undefined :
             {undoFocusId: "block", undoFocusStart: element === protyle.wysiwyg.element ? "4" : "5"},
@@ -107,7 +113,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
     const transaction = new Function(...Object.keys(dependencies), compiled + "\nreturn transaction;")(...Object.values(dependencies));
     const operations: IOperation[] = [{action: "update", id: "block", data: "after"}];
     const undo: IOperation[] = [{action: "update", id: "block", data: "before<wbr>"}];
-    return {protyle, writes, messages, styles, operations, undo, cleanup, sourceVersions, synced, callbackResponse, previewed,
+    return {protyle, writes, messages, styles, operations, undo, cleanup, sourceVersions, synced, callbackResponse, previewed, keyboardEvents,
         runFrom: (editor: IProtyle) => transaction(editor, operations, undo, {awaitResponse: true}) as Promise<void>,
         run: (data = "after", awaitResponse = true, collectionRemovalSourceVersions?: Record<string, string>,
               callback?: (...args: unknown[]) => void) => transaction(protyle,
@@ -124,6 +130,40 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
 };
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
+
+test("mobile reference removal keeps the keyboard guard through preview and releases it after success or failure", async () => {
+    for (const result of ["success", "cancel", "failure"]) {
+        const f = fixture("references", "mobile");
+        const pending = f.run();
+        assert.deepEqual(f.keyboardEvents, ["hold"]);
+        assert.equal(f.protyle.element.inert, true);
+        await tick();
+        f.finishPreview(result === "cancel" ? null : []);
+        await tick();
+        if (result !== "cancel") {
+            assert.deepEqual(f.keyboardEvents, ["hold"]);
+            if (result === "failure") f.failSave();
+            else f.finishSave();
+        }
+        if (result === "success") await pending;
+        else await assert.rejects(pending);
+        assert.deepEqual(f.keyboardEvents, ["hold", "release"]);
+        assert.equal(f.protyle.element.inert, false);
+    }
+});
+
+test("a mobile keyboard guard cannot restore focus to an editor hidden during deletion", async () => {
+    const f = fixture("references", "mobile");
+    const pending = f.run();
+    await tick();
+    f.protyle.wysiwyg.element.getClientRects = () => [];
+    f.finishPreview([]);
+    await tick();
+    f.finishSave();
+    await pending;
+    assert.equal(f.counts().focusRestored, 0);
+    assert.deepEqual(f.keyboardEvents, ["hold", "release"]);
+});
 
 for (const kind of ["tags", "references", "mixed"] as const) {
     for (const mode of ["cancel", "cancelWithoutRange", "sourcesOnly", "withEntries", "previewError", "noMatches", "saveError"]) {

@@ -182,6 +182,7 @@ test("restores tab title editing after asynchronous collection-removal focus sus
     const pendingSource = transpileModule(`const restorePendingFocus = (editor, focusTitleItemID, focusRange, sourceRestored, entriesRemoved) => {
         let calls = 0; const protyle = {disabled: false, wysiwyg: {element: editor}};
         const wasDisabled = false, wasInert = false, isCurrent = () => true;
+        const keyboard = undefined;
         const focusContext = {undoFocusId: "item"}; const restoreUndoFocus = () => calls++;
         ${restoreBranch}
         return calls;

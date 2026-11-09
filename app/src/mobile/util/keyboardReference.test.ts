@@ -57,6 +57,32 @@ test("mobile reference remains available at a caret without exposing other selec
     }
 });
 
+test("mobile toolbar entries initialize before an editor exists", () => {
+    for (const editor of [undefined, {}]) {
+        for (const rangeCount of [0, 1]) {
+            const apply = runInNewContext(compile(entriesSource), {
+                getCurrentEditor: () => editor,
+                hasClosestByClassName: (): undefined => undefined,
+                getSelection: () => ({rangeCount}),
+                getEntryOrder: (): string[] => [], isEntryVisible: () => true,
+                getMobileToolbarContextPath, MOBILE_TOOLBAR_NAMES: ["strong", "block-ref"],
+                MOBILE_TOOLBAR_ACTION_NAMES: [], MOBILE_TOOLBAR_INSERTS: [],
+                applyMobileToolbarEntries: (_element: unknown, _toolbar: unknown, options: {
+                    isAvailable: (name: string) => boolean,
+                }) => {
+                    for (const name of ["softLine", "moveup", "movedown", "add", "undo", "redo"]) {
+                        assert.equal(options.isAvailable(name), true);
+                    }
+                    for (const name of ["block-type", "block-ref", "strong", "block", "indent", "outdent"]) {
+                        assert.equal(options.isAvailable(name), false);
+                    }
+                },
+            });
+            assert.doesNotThrow(() => apply({}, []));
+        }
+    }
+});
+
 test("document titles hide line breaks and block movement while body and other fragments retain them", () => {
     for (const title of [true, false]) {
         for (const lite of [true, false]) {

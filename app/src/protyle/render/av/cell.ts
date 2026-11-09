@@ -4,7 +4,7 @@ import {ensureAVColumnWindow} from "./columnWindow";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
-import {canEditAVHost, getAVHost as hasClosestBlock, getAVHostIdentity, getAVRelationHost} from "./host";
+import {canEditAVHost, getAVHost as hasClosestBlock, getAVHostBlockID, getAVHostIdentity, getAVRelationHost} from "./host";
 import {openMenuPanel} from "./openMenuPanel";
 import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
@@ -1884,6 +1884,16 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
     [key: string]: IAVCellValue[]
 }, originCellIds: string[], activeElement: Element) => {
     nodeElement.querySelector(".av__drag-fill")?.remove();
+    const blockID = getAVHostBlockID(nodeElement);
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const commit = () => {
+        if (doOperations.length === 0) return;
+        // 单元格数据保存在数据库文件中，同时更新宿主块，使填充进入该文档的撤销栈。
+        doOperations.push({action: "doUpdateUpdated", id: blockID, data: dayjs().format("YYYYMMDDHHmmss")});
+        undoOperations.push({action: "doUpdateUpdated", id: blockID, data: nodeElement.getAttribute("updated")});
+        transaction(protyle, doOperations, undoOperations);
+    };
     const selectedCells = getAVSelectedCells(nodeElement);
     if (selectedCells.length > 0) {
         const data = getAVData(nodeElement);
@@ -1897,8 +1907,6 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
             cells.push(cell);
             targetRows.set(key, cells);
         });
-        const doOperations: IOperation[] = [];
-        const undoOperations: IOperation[] = [];
         Array.from(targetRows.values()).forEach((cells, rowIndex) => {
             cells.forEach((selectedCell, colIndex) => {
                 const originValues = originData[originKeys[rowIndex % originKeys.length]];
@@ -1918,7 +1926,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                     value.isDetached = true;
                     delete value.block.id;
                 }
-                const operation = {avID: nodeElement.dataset.avId, valueID: target.cell.id,
+                const operation = {avID: nodeElement.dataset.avId, blockID, valueID: target.cell.id,
                     keyID: target.colID, rowID: target.rowID};
                 doOperations.push(createAVCellUpdateOperation({...operation, data: value}));
                 undoOperations.push(createAVCellUpdateOperation({...operation, data: oldValue}));
@@ -1929,7 +1937,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
             });
         });
         focusBlock(nodeElement);
-        if (doOperations.length > 0) transaction(protyle, doOperations, undoOperations);
+        commit();
         return;
     }
     const newData: { [key: string]: Array<IAVCellValue & { colId?: string, element?: HTMLElement }> } = {};
@@ -1952,8 +1960,6 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
         value.element = item;
         newData[rowElement.dataset.id].push(value);
     });
-    const doOperations: IOperation[] = [];
-    const undoOperations: IOperation[] = [];
     const avID = nodeElement.dataset.avId;
     const originKeys = Object.keys(originData);
     const showIcon = activeElement.querySelector(".b3-menu__avemoji") ? true : false;
@@ -1982,6 +1988,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 action: "updateAttrViewCell",
                 id: item.id,
                 avID,
+                blockID,
                 keyID,
                 rowID,
                 data
@@ -1998,6 +2005,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 action: "updateAttrViewCell",
                 id: item.id,
                 avID,
+                blockID,
                 keyID,
                 rowID,
                 data: item
@@ -2005,9 +2013,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
         });
     });
     focusBlock(nodeElement);
-    if (doOperations.length > 0) {
-        transaction(protyle, doOperations, undoOperations);
-    }
+    commit();
 };
 
 export const addDragFill = (cellElement: Element) => {

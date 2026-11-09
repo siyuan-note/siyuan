@@ -259,6 +259,18 @@ func TestBootSyncStartupLifecycle(t *testing.T) {
 	if BootSyncSucc.Load() != want || bootSyncScheduled.Load() || isSyncingStorages() {
 		t.Fatalf("startup did not finish cleanly: result=%d scheduled=%t storage=%t", BootSyncSucc.Load(), bootSyncScheduled.Load(), isSyncingStorages())
 	}
+	// BootSyncSucc is published before finishBootSync persists the result. The
+	// prepared headless path does not set bootSyncScheduled, so join its sync
+	// critical section before reading the result or removing the fixture.
+	syncLock.Lock()
+	syncLock.Unlock()
+	wantLastResult := 1
+	if want != 0 {
+		wantLastResult = 2
+	}
+	if got := Conf.Sync.Load().LastResult; got != wantLastResult {
+		t.Fatalf("startup result was not persisted: got %d, want %d", got, wantLastResult)
+	}
 	if want == 0 {
 		data, err := os.ReadFile(filepath.Join(util.DataDir, "remote.txt"))
 		if err != nil || string(data) != `{"synced":true}` {

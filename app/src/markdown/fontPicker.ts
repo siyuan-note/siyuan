@@ -29,8 +29,9 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
     let closeWeights: () => void;
     let dragging = -1;
     let sequence = 0;
+    let loading = true;
     const chips = document.createElement("div");
-    chips.className = "b3-chips";
+    chips.className = "b3-chips b3-chips__doctag";
     const controls = document.createElement("div");
     controls.className = "markdown-font-picker__controls";
     const search = document.createElement("input");
@@ -41,7 +42,7 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
     all.hidden = !codeOnly; all.setAttribute("aria-pressed", "false");
     controls.append(search, all);
     const notice = document.createElement("div");
-    notice.setAttribute("role", "status"); notice.textContent = text("loading");
+    notice.setAttribute("role", "status");
     const retry = document.createElement("button");
     retry.type = "button"; retry.className = "b3-button b3-button--text"; retry.textContent = text("retry"); retry.hidden = true;
     const list = document.createElement("div");
@@ -54,6 +55,7 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
         return span.firstChild;
     };
     const renderList = () => {
+        if (loading) return;
         preview?.();
         list.replaceChildren();
         for (const font of filterMarkdownFonts(fonts, search.value, codeOnly, selected)) {
@@ -79,6 +81,7 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
             label.style.fontWeight = String(fonts.find(font => font.family === label.dataset.family && font.weight === 400)?.weight ??
                 fonts.find(font => font.family === label.dataset.family)?.weight ?? 400);
         });
+        list.hidden = !list.children.length;
         if (!notice.dataset.error) {notice.textContent = list.children.length ? "" : text("emptyContent"); notice.hidden = !!list.children.length;}
     };
     const weights = (target: HTMLElement, family: string) => {
@@ -125,6 +128,7 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
     };
     const renderChips = () => {
         closeWeights?.(); chips.replaceChildren();
+        chips.hidden = !selected.length;
         selected.forEach((font, index) => {
             const chip = document.createElement("span");
             chip.className = "b3-chip markdown-font-picker__chip"; chip.tabIndex = 0; chip.draggable = true; chip.dataset.family = font.family;
@@ -159,15 +163,25 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
     };
     const refresh = async () => {
         const current = ++sequence;
-        notice.hidden = false; notice.textContent = text("loading"); retry.hidden = true;
+        loading = true;
+        element.setAttribute("aria-busy", "true");
+        notice.hidden = false; retry.hidden = true; list.hidden = true;
+        notice.setAttribute("aria-label", text("loading"));
+        const spinner = document.createElement("span");
+        spinner.className = "b3-loading"; spinner.setAttribute("aria-hidden", "true");
+        notice.replaceChildren(spinner);
         try {
             const loaded = await load();
             if (destroyed || current !== sequence) return;
+            loading = false;
+            element.setAttribute("aria-busy", "false"); notice.removeAttribute("aria-label");
             fonts = loaded.filter(font => !font.family.startsWith("SiYuanCustomFont-"));
             delete notice.dataset.error;
             renderChips(); renderList();
         } catch {
             if (destroyed || current !== sequence) return;
+            loading = false;
+            element.setAttribute("aria-busy", "false"); notice.removeAttribute("aria-label");
             notice.dataset.error = "true"; notice.textContent = text("markdownSystemFontsUnavailable"); retry.hidden = false;
         }
     };
@@ -175,5 +189,5 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
     all.onclick = () => {codeOnly = false; all.setAttribute("aria-pressed", "true"); all.disabled = true; renderList();};
     retry.onclick = () => {void refresh();};
     renderChips(); void refresh();
-    return {value: () => selected.map(font => ({...font})), destroy: () => {destroyed = true; sequence++; preview?.(); closeWeights?.();}};
+    return {value: () => selected.map(font => ({...font})), destroy: () => {destroyed = true; sequence++; element.setAttribute("aria-busy", "false"); preview?.(); closeWeights?.();}};
 };

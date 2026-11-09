@@ -1,4 +1,5 @@
 @use "component/button";
+@use "component/loading";
 @use "component/dialog";
 @use "component/menu";
 @use "component/list";
@@ -580,6 +581,10 @@ button {
   gap: 12px;
 }
 
+.markdown-appearance-form__fonts {
+  gap: 8px;
+}
+
 .markdown-font-picker__controls {
   display: flex;
   gap: 8px;
@@ -591,6 +596,7 @@ button {
 }
 
 .markdown-font-picker__list {
+  padding: 0;
   max-height: 180px;
   overflow-y: auto;
 }

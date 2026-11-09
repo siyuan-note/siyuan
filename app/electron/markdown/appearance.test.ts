@@ -19,12 +19,12 @@ const fixture = async t => {
     const register = (values: string[]) => fs.writeFile(path.join(root, "workspace.json"), JSON.stringify(values));
     return {root, workspace, register, host: createMarkdownAppearance(config)};
 };
-test("appearance defaults to recent workspace and resolves sources independently", async t => {
+test("appearance defaults to independent settings and resolves explicit workspace sources independently", async t => {
     const {workspace, register, host} = await fixture(t);
     const a = await workspace("a", {appearance: {mode: 1}, editor: {fontSize: 72, fontFamilies: [{family: "A", weight: 500}]}});
     const b = await workspace("b", {appearance: {modeOS: true}, editor: {fontSize: 9, fontFamily: "Legacy", fontWeight: 600}});
     await register([a, b]);
-    assert.equal((await host.load()).fontSize, 9);
+    assert.equal((await host.load()).fontSize, 16);
     const result = await host.load({theme: hash(a), fontSize: hash(a), fonts: hash(b)});
     assert.equal(result.theme, "dark");
     assert.equal(result.fontSize, 72);
@@ -39,7 +39,7 @@ test("corrupt and inaccessible workspace configurations fall back safely", async
     const {root, workspace, register, host} = await fixture(t);
     const a = await workspace("a", {editor: {fontSize: 1000, fontFamilies: [{family: "bad\nname"}, {family: "ok", weight: -1}]}});
     await register([a, path.join(root, "missing")]);
-    const result = await host.load();
+    const result = await host.load({fonts: hash(a)});
     assert.equal(result.fontSize, 16);
     assert.deepEqual(result.fonts.editor, [{family: "ok", weight: 400}]);
     await fs.writeFile(path.join(a, "conf", "conf.json"), "{broken");
@@ -58,7 +58,7 @@ test("custom fonts require selected workspace capability, valid hash and no syml
     await fs.mkdir(directory, {recursive: true});
     const file = path.join(directory, `${id}.ttf`);
     await fs.writeFile(file, bytes);
-    const initial = await host.load();
+    const initial = await host.load({fonts: hash(a)});
     const token = initial.customFonts[0].url.split("/").pop();
     assert.deepEqual((await host.readFont(token)).bytes, bytes);
     assert.equal(await host.readFont("../conf.json"), undefined);
@@ -86,16 +86,31 @@ test("independent appearance remains available without a workspace and survives 
     await register([a]);
     const mixed = await host.load({theme: "independent", fonts: "independent"}, independent);
     assert.equal(mixed.theme, "light");
-    assert.equal(mixed.fontSize, 42);
+    assert.equal(mixed.fontSize, 23);
+    assert.equal((await host.load({fontSize: hash(a)}, independent)).fontSize, 42);
     assert.deepEqual(mixed.fonts.global, independent.fonts.global);
     assert.deepEqual(mixed.customFonts, []);
     await register([]);
     const offline = await host.load({theme: hash(a)}, independent);
-    assert.equal(offline.sources.theme, hash(a));
+    assert.equal(offline.sources.theme, "independent");
     assert.equal(offline.theme, "light");
     await register([a]);
+    assert.equal((await host.load(offline.sources, independent)).theme, "light");
     assert.equal((await host.load({theme: hash(a)}, independent)).theme, "dark");
     assert.deepEqual(await host.validate({sources: {fonts: "independent"}, independent}), {sources: {fonts: "independent"}, independent});
     await assert.rejects(host.validate({independent: {fontSize: 73}}));
     await assert.rejects(host.validate({independent: {fonts: {global: [{family: `SiYuanCustomFont-${"a".repeat(64)}`, weight: 400}], editor: [], code: []}}}));
+});
+
+test("unreadable workspace configuration switches only its selected groups to independent", async t => {
+    const {workspace, register, host} = await fixture(t);
+    const a = await workspace("a", {appearance: {mode: 1}});
+    const b = await workspace("b", {editor: {fontSize: 30}});
+    await register([a, b]);
+    await fs.unlink(path.join(a, "conf", "conf.json"));
+    const result = await host.load({theme: hash(a), fontSize: hash(b)}, {theme: "light", fontSize: 20});
+    assert.equal(result.sources.theme, "independent");
+    assert.equal(result.theme, "light");
+    assert.equal(result.sources.fontSize, hash(b));
+    assert.equal(result.fontSize, 30);
 });

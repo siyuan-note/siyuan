@@ -55,10 +55,15 @@ const createMarkdownPreferences = (directory: string) => {
     };
     return {
         read: () => queue.then(read),
-        update(patch: Partial<MarkdownPreferences>) {
+        update(patch: Partial<MarkdownPreferences>, expectedSources?: MarkdownPreferences["sources"]) {
             const copy = {...patch, ...(patch.independent === undefined ? {} : {independent: normalizeIndependentAppearance(patch.independent)}), ...(patch.sources === undefined ? {} : {sources: {...patch.sources}})};
             const task = queue.then(async () => {
                 const current = await read();
+                if (expectedSources && copy.sources) {
+                    for (const group of ["theme", "fontSize", "fonts"] as const) {
+                        if (current.sources?.[group] !== expectedSources[group]) delete copy.sources[group];
+                    }
+                }
                 const preferences = normalize({...current, ...copy,
                     ...(copy.independent === undefined ? {} : {independent: {...current.independent, ...copy.independent}}),
                     ...(copy.sources === undefined ? {} : {sources: {...current.sources, ...copy.sources}})});

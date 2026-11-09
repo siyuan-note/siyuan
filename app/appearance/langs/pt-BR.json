@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "Digite um nome de fonte do sistema, não SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Não foi possível carregar as fontes do sistema; tente novamente",
 	"markdownIndependentAppearance": "Configurações independentes",
 	"markdownFontWeight": "Peso da fonte",
 	"markdownWorkspaceUnavailable": "Espaço de trabalho indisponível; usando configurações independentes",

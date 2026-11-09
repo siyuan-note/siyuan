@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "Enter a system font name, not SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Unable to load system fonts; try again",
 	"markdownIndependentAppearance": "Independent settings",
 	"markdownFontWeight": "Font weight",
 	"markdownWorkspaceUnavailable": "Workspace unavailable; using independent settings",

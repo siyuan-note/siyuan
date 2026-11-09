@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "SiYuanCustomFont-가 아닌 시스템 글꼴 이름을 입력하세요",
+	"markdownSystemFontsUnavailable": "시스템 글꼴을 불러올 수 없습니다. 다시 시도하세요",
 	"markdownIndependentAppearance": "독립 설정",
 	"markdownFontWeight": "글꼴 굵기",
 	"markdownWorkspaceUnavailable": "작업 공간을 사용할 수 없어 독립 설정 사용",

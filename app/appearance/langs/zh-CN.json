@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "请输入系统字体名称，不支持 SiYuanCustomFont- 开头的名称",
+	"markdownSystemFontsUnavailable": "无法加载系统字体，请重试",
 	"markdownIndependentAppearance": "独立设置",
 	"markdownFontWeight": "字重",
 	"markdownWorkspaceUnavailable": "工作空间不可用，使用独立设置",

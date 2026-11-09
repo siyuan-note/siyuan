@@ -1291,6 +1291,11 @@ const browserCases = async (languages: Record<string, string>) => {
             independent: {...appearanceSnapshot.independent, ...patch.independent}};
         return appearanceSnapshot;
     };
+    bridge.systemFonts = async () => [
+        {family: "Arial", displayName: "Arial", weight: 400, aliases: ["Sans"]},
+        {family: "Arial", displayName: "Arial Bold", weight: 700},
+        {family: "Courier", displayName: "Courier", weight: 400, spacing: "monospace"},
+    ];
     bridge.bootstrap = async () => ({...bootstrap, sessionId: "workspace-appearance", preferences: {mode: "ir"}, appearance: appearanceSnapshot});
     const inheritedApp = await api.mountMarkdownApplication(bridge);
     const inheritedEditor = inheritedApp.editor;
@@ -1327,13 +1332,19 @@ const browserCases = async (languages: Record<string, string>) => {
     document.querySelector<HTMLButtonElement>('#markdownFonts button[data-value="independent"]').click(); await tick();
     const fontSections = independentPanel.querySelectorAll("section");
     check.equal(fontSections.length, 3);
-    fontSections[0].querySelector("button").click();
-    const fontInputs = fontSections[0].querySelectorAll("input");
-    fontInputs[0].value = "SiYuanCustomFont-invalid"; fontInputs[0].dispatchEvent(new Event("input"));
-    check.equal(fontInputs[0].checkValidity(), false);
-    fontInputs[0].value = "Arial"; fontInputs[0].dispatchEvent(new Event("input")); fontInputs[1].value = "500";
+    const familySearch = fontSections[0].querySelector<HTMLInputElement>('input[type="search"]');
+    familySearch.value = "Sans"; familySearch.dispatchEvent(new Event("input")); await tick();
+    check.equal(fontSections[0].querySelectorAll(".b3-list-item").length, 1);
+    fontSections[0].querySelector<HTMLButtonElement>('.b3-list-item[data-family="Arial"]').click();
+    const chip = fontSections[0].querySelector<HTMLElement>(".b3-chip");
+    chip.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
+    check.deepEqual(Array.from(fontSections[0].querySelectorAll("[data-weight]")).map(item => item.getAttribute("data-weight")), ["400", "700"]);
+    fontSections[0].querySelector<HTMLButtonElement>('[data-weight="700"]').click();
+    check.equal(fontSections[2].querySelectorAll(".b3-list-item").length, 1);
+    fontSections[2].querySelector<HTMLButtonElement>('[aria-pressed="false"]').click();
+    check.equal(fontSections[2].querySelectorAll(".b3-list-item").length, 2);
     independentPanel.querySelector("form").requestSubmit(); await tick();
-    check.deepEqual(appearancePatches.at(-1).independent.fonts.global, [{family: "Arial", weight: 500}]);
+    check.deepEqual(appearancePatches.at(-1).independent.fonts.global, [{family: "Arial", weight: 700}]);
     check.deepEqual(appearancePatches.at(-1).independent.fonts.editor, []);
     check.equal(inheritedApp.editor.flush().content, inheritedText);
     inheritedApp.destroy();
@@ -1344,8 +1355,17 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelector<HTMLButtonElement>('#markdownTheme button[data-value="missing"]').disabled, true);
     check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').textContent, languages.markdownWorkspaceUnavailable);
     check.equal(document.querySelector('#markdownFont [aria-checked="true"]').textContent, languages.markdownIndependentAppearance);
+    let resolveFonts: (fonts: import("./bridge").MarkdownSystemFont[]) => void;
+    bridge.systemFonts = () => new Promise(resolve => {resolveFonts = resolve;});
+    document.querySelector<HTMLButtonElement>('#markdownFonts [data-configure="fonts"]').click(); await tick();
+    const closingPanel = document.getElementById("markdownAppearancePanel");
+    closingPanel.querySelector<HTMLButtonElement>(".b3-button--cancel").click();
+    resolveFonts([{family: "Late", displayName: "Late", weight: 400}]); await tick();
+    check.equal(closingPanel.hidden, true);
+    check.equal(closingPanel.childElementCount, 0, "a closed form cannot be repopulated by pending system-font requests");
     unavailableAppearance.destroy();
     delete bridge.appearance;
+    delete bridge.systemFonts;
     bridge.bootstrap = async () => ({...bootstrap, sessionId: "native-appearance-fallback"});
     const beforeFailureClear = clears;
     const failureBootstrap = await bridge.bootstrap();
@@ -1381,7 +1401,7 @@ test("Markdown file tree and compact menus preserve edits across switching, stal
     const compileSource = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "appearance.ts", "index.ts"].map(compileSource).join("\n") +
+    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "../util/systemFontCore.ts", "../util/fontPreview.ts", "fontPicker.ts", "appearance.ts", "index.ts"].map(compileSource).join("\n") +
         "\nwindow.MarkdownApplicationTest = {mountMarkdownApplication, createMarkdownTree, MARKDOWN_RENDER_BYTES}; void 0;";
     const style = compile(path.resolve(__dirname, "../assets/scss/markdown.scss")).css;
     const template = readFileSync(path.resolve(__dirname, "../assets/template/markdown/index.tpl"), "utf8")

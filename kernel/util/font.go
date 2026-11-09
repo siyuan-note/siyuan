@@ -37,15 +37,20 @@ func LoadSysFonts() []*Font {
 	}
 
 	start := time.Now()
-	sysFonts = loadFonts()
+	sysFonts = ReadSysFonts()
 	sysFontsLang = Lang
-
-	sort.Slice(sysFonts, func(i, j int) bool {
-		return sysFonts[i].DisplayName < sysFonts[j].DisplayName
-	})
 
 	logging.LogInfof("loaded system fonts [%d] in [%dms]", len(sysFonts), time.Since(start).Milliseconds())
 	return sysFonts
+}
+
+// 独立桌面工具与工作空间共用字体枚举、名称解析和排序，不依赖工作空间配置。
+func ReadSysFonts() []*Font {
+	fonts := loadFonts()
+	sort.Slice(fonts, func(i, j int) bool {
+		return fonts[i].DisplayName < fonts[j].DisplayName
+	})
+	return fonts
 }
 
 type Font struct {

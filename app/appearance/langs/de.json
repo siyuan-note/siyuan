@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "Systemschriftname eingeben, nicht SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Systemschriften konnten nicht geladen werden; bitte erneut versuchen",
 	"markdownIndependentAppearance": "Unabhängige Einstellungen",
 	"markdownFontWeight": "Schriftstärke",
 	"markdownWorkspaceUnavailable": "Arbeitsbereich nicht verfügbar; unabhängige Einstellungen werden verwendet",

@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "Введіть назву системного шрифту, а не SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Не вдалося завантажити системні шрифти; спробуйте ще раз",
 	"markdownIndependentAppearance": "Незалежні налаштування",
 	"markdownFontWeight": "Насиченість шрифту",
 	"markdownWorkspaceUnavailable": "Робочий простір недоступний; використовуються незалежні налаштування",

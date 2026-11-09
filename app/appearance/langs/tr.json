@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "SiYuanCustomFont- yerine bir sistem yazı tipi adı girin",
+	"markdownSystemFontsUnavailable": "Sistem yazı tipleri yüklenemedi; tekrar deneyin",
 	"markdownIndependentAppearance": "Bağımsız ayarlar",
 	"markdownFontWeight": "Yazı tipi kalınlığı",
 	"markdownWorkspaceUnavailable": "Çalışma alanı kullanılamıyor; bağımsız ayarlar kullanılıyor",

@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "SiYuanCustomFont- ではなくシステムフォント名を入力してください",
+	"markdownSystemFontsUnavailable": "システムフォントを読み込めませんでした。再試行してください",
 	"markdownIndependentAppearance": "独立設定",
 	"markdownFontWeight": "フォントの太さ",
 	"markdownWorkspaceUnavailable": "ワークスペースが利用できないため独立設定を使用",

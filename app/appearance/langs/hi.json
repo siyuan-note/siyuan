@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "सिस्टम फ़ॉन्ट का नाम दर्ज करें, SiYuanCustomFont- नहीं",
+	"markdownSystemFontsUnavailable": "सिस्टम फ़ॉन्ट लोड नहीं हो सके; फिर से प्रयास करें",
 	"markdownIndependentAppearance": "स्वतंत्र सेटिंग्स",
 	"markdownFontWeight": "फ़ॉन्ट वज़न",
 	"markdownWorkspaceUnavailable": "कार्यस्थान अनुपलब्ध; स्वतंत्र सेटिंग्स का उपयोग",

@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "Унесите назив системског фонта, не SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Није могуће учитати системске фонтове; покушајте поново",
 	"markdownIndependentAppearance": "Независна подешавања",
 	"markdownFontWeight": "Дебљина фонта",
 	"markdownWorkspaceUnavailable": "Радни простор није доступан; користе се независна подешавања",

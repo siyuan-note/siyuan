@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "Wpisz nazwę czcionki systemowej, nie SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Nie można załadować czcionek systemowych; spróbuj ponownie",
 	"markdownIndependentAppearance": "Ustawienia niezależne",
 	"markdownFontWeight": "Grubość czcionki",
 	"markdownWorkspaceUnavailable": "Obszar roboczy niedostępny; używane są ustawienia niezależne",

@@ -1,8 +1,21 @@
+import {createMarkdownFontPicker} from "./fontPicker";
+import type {IFontItem} from "../util/systemFontCore";
 import type {MarkdownAppearance, MarkdownAppearanceGroup, MarkdownFont, MarkdownIndependentAppearance} from "./bridge";
+
+export const markdownWorkspaceChoice = (workspace: {id: string; name: string}) => ({
+    value: workspace.id,
+    label: workspace.name.replace(/[\\/]+$/, "").split(/[\\/]/).pop() || workspace.name,
+    tooltip: workspace.name,
+});
 
 export const createMarkdownAppearanceForm = (element: HTMLElement, group: MarkdownAppearanceGroup,
                                              initial: MarkdownIndependentAppearance, text: (key: string) => string,
-                                             save: (value: MarkdownIndependentAppearance) => Promise<void>, close: () => void) => {
+                                             save: (value: MarkdownIndependentAppearance) => Promise<void>, close: () => void,
+                                             systemFonts: () => Promise<IFontItem[]> = async () => []) => {
+    const cleanup: Array<() => void> = [];
+    let closed = false;
+    const destroy = () => {closed = true; cleanup.forEach(dispose => dispose());};
+    const finish = () => {if (!closed) {destroy(); close();}};
     element.replaceChildren();
     const form = document.createElement("form");
     form.className = "markdown-appearance-form";
@@ -36,59 +49,36 @@ export const createMarkdownAppearanceForm = (element: HTMLElement, group: Markdo
         form.append(field(text("fontSize"), input));
         value = () => ({fontSize: input.valueAsNumber});
     } else {
-        const readers: Partial<Record<"global" | "editor" | "code", () => MarkdownFont[]>> = {};
+        const pickers: Partial<Record<"global" | "editor" | "code", ReturnType<typeof createMarkdownFontPicker>>> = {};
+        let pendingFonts: Promise<IFontItem[]>;
+        const load = () => pendingFonts ?? (pendingFonts = systemFonts().catch(error => {pendingFonts = undefined; throw error;}));
         for (const key of ["global", "editor", "code"] as const) {
             const section = document.createElement("section");
             section.className = "markdown-appearance-form__fonts";
             const heading = document.createElement("strong");
             heading.textContent = text({global: "globalDefaultFont", editor: "font", code: "monospaceFont"}[key]);
-            const rows = document.createElement("div");
-            const addRow = (font: MarkdownFont) => {
-                const row = document.createElement("div");
-                row.className = "markdown-appearance-form__row";
-                const family = document.createElement("input");
-                family.className = "b3-text-field"; family.value = font.family;
-                family.maxLength = 256; family.required = true; family.setAttribute("aria-label", text("fontFamily"));
-                const validate = () => family.setCustomValidity(!family.value.trim() || family.value.trim().startsWith("SiYuanCustomFont-") ? text("markdownSystemFontName") : "");
-                family.oninput = validate;
-                validate();
-                const weight = document.createElement("input");
-                weight.className = "b3-text-field"; weight.type = "number"; weight.value = String(font.weight);
-                weight.min = "1"; weight.max = "1000"; weight.step = "1"; weight.required = true;
-                weight.setAttribute("aria-label", text("markdownFontWeight"));
-                const remove = document.createElement("button");
-                remove.type = "button"; remove.className = "b3-button b3-button--text"; remove.textContent = text("remove");
-                remove.onclick = () => {row.remove(); add.disabled = rows.children.length >= 32;};
-                row.append(family, weight, remove); rows.append(row);
-                add.disabled = rows.children.length >= 32;
-            };
-            const add = document.createElement("button");
-            add.type = "button"; add.className = "b3-button b3-button--text"; add.textContent = text("new");
-            add.onclick = () => {addRow({family: "", weight: 400}); rows.lastElementChild.querySelector("input").focus();};
-            section.append(heading, rows, add); form.append(section);
-            for (const font of initial.fonts?.[key] ?? []) addRow(font);
-            readers[key] = () => Array.from(rows.children).map(row => {
-                const inputs = row.querySelectorAll("input");
-                return {family: inputs[0].value.trim(), weight: inputs[1].valueAsNumber};
-            }).filter(font => font.family.length > 0);
+            section.append(heading); form.append(section);
+            pickers[key] = createMarkdownFontPicker(section, initial.fonts?.[key] ?? [], key === "code", load, text);
+            cleanup.push(pickers[key].destroy);
         }
-        value = () => ({fonts: {global: readers.global(), editor: readers.editor(), code: readers.code()}});
+        value = () => ({fonts: {global: pickers.global.value(), editor: pickers.editor.value(), code: pickers.code.value()}});
     }
     const actions = document.createElement("div");
     actions.className = "markdown-recovery__actions";
     const submit = document.createElement("button");
     submit.type = "submit"; submit.className = "b3-button"; submit.textContent = text("save");
     const cancel = document.createElement("button");
-    cancel.type = "button"; cancel.className = "b3-button b3-button--cancel"; cancel.textContent = text("cancel"); cancel.onclick = close;
+    cancel.type = "button"; cancel.className = "b3-button b3-button--cancel"; cancel.textContent = text("cancel"); cancel.onclick = finish;
     actions.append(submit, cancel); form.append(actions); element.append(form);
     form.onsubmit = event => {
         event.preventDefault();
         if (!form.reportValidity() || submit.disabled) return;
         submit.disabled = true;
-        void save(value()).then(close).catch(() => {submit.disabled = false;});
+        void save(value()).then(finish).catch(() => {if (!closed) submit.disabled = false;});
     };
-    form.onkeydown = event => {if (event.key === "Escape") {event.preventDefault(); close();}};
+    form.onkeydown = event => {if (event.key === "Escape") {event.preventDefault(); finish();}};
     (form.querySelector("input, select, button") as HTMLElement)?.focus();
+    return destroy;
 };
 
 export const quoteMarkdownFont = (value: string) => `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/[\n\r\f]/g, " ")}"`;

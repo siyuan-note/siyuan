@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "Zadajte názov systémového písma, nie SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Systémové písma sa nepodarilo načítať; skúste to znova",
 	"markdownIndependentAppearance": "Nezávislé nastavenia",
 	"markdownFontWeight": "Hrúbka písma",
 	"markdownWorkspaceUnavailable": "Pracovný priestor nie je dostupný; používajú sa nezávislé nastavenia",

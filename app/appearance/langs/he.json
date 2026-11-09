@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "יש להזין שם גופן מערכת, ולא SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "לא ניתן לטעון את גופני המערכת; נסה שוב",
 	"markdownIndependentAppearance": "הגדרות עצמאיות",
 	"markdownFontWeight": "משקל גופן",
 	"markdownWorkspaceUnavailable": "סביבת העבודה אינה זמינה; נעשה שימוש בהגדרות עצמאיות",

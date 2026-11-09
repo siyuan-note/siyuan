@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "Voer een systeemlettertypenaam in, niet SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Systeemlettertypen kunnen niet worden geladen; probeer opnieuw",
 	"markdownIndependentAppearance": "Onafhankelijke instellingen",
 	"markdownFontWeight": "Letterdikte",
 	"markdownWorkspaceUnavailable": "Werkruimte niet beschikbaar; onafhankelijke instellingen worden gebruikt",

@@ -30,8 +30,8 @@ test("Markdown submenus preserve fractional borders at Windows 150 percent scali
         const appearance = createMarkdownSubmenu({element: document.getElementById("appearance"), label: "Appearance", icon: "iconTheme"});
         createMarkdownChoice({element: document.getElementById("theme"), label: "Theme", icon: "iconTheme",
             values: [{value: "light", label: "Light"}, {value: "dark", label: "Dark"}], value: "light", onChange() {}});
-        createMarkdownChoice({element: document.getElementById("font"), label: "Font size", icon: "iconFont",
-            values: [14,16,18,20,24,28,32].map(value => ({value: String(value), label: String(value)})), value: "16", onChange() {}});
+        const fontChoice = createMarkdownChoice({element: document.getElementById("font"), maxHeight: 320, label: "Font size", icon: "iconFont",
+            values: Array.from({length: 60}, (_, value) => ({value: String(value), label: String(value), tooltip: "/workspace/" + value})), value: "16", onChange() {}});
         document.getElementById("appearance").click();
         const menu = appearance.menu;
         menu.scrollTop = 10000;
@@ -39,6 +39,12 @@ test("Markdown submenus preserve fractional borders at Windows 150 percent scali
         assert.equal(menu.scrollTop, 0, "a short submenu cannot scroll even by a fractional CSS pixel");
         assert.equal(menu.scrollLeft, 0);
         assert.ok(menu.getBoundingClientRect().bottom <= innerHeight);
+        document.getElementById("font").click();
+        assert.ok(fontChoice.menu.getBoundingClientRect().height <= 321);
+        assert.ok(fontChoice.menu.scrollHeight > fontChoice.menu.clientHeight);
+        fontChoice.menu.scrollTop = 10000;
+        assert.ok(fontChoice.menu.scrollTop > 0);
+        assert.equal(fontChoice.menu.querySelector('button').dataset.tooltip, "/workspace/0");
         return "Fractional submenu layout passed";
     })()`;
     const script = path.join(directory, "run.cjs");

@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "ป้อนชื่อแบบอักษรระบบ ไม่ใช่ SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "ไม่สามารถโหลดแบบอักษรระบบได้ โปรดลองอีกครั้ง",
 	"markdownIndependentAppearance": "การตั้งค่าอิสระ",
 	"markdownFontWeight": "น้ำหนักแบบอักษร",
 	"markdownWorkspaceUnavailable": "พื้นที่ทำงานไม่พร้อมใช้งาน กำลังใช้การตั้งค่าอิสระ",

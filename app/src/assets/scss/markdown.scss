@@ -1,5 +1,7 @@
 @use "component/button";
 @use "component/menu";
+@use "component/list";
+@use "component/chip";
 @use "component/select";
 @use "component/text-field";
 @use "component/tooltips";
@@ -226,6 +228,12 @@ button {
   overflow: auto;
   overscroll-behavior: contain;
   z-index: 4;
+
+  &--workspace .b3-menu__label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   &--compact {
     min-width: 0;
@@ -571,14 +579,24 @@ button {
   gap: 12px;
 }
 
-.markdown-appearance-form__row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 64px auto;
-  gap: 4px;
-  margin-bottom: 8px;
+.markdown-font-picker__controls {
+  display: flex;
+  gap: 8px;
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
-.markdown-appearance-form__row input {
-  width: 100%;
-  min-width: 0;
+.markdown-font-picker__list {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.markdown-font-picker__weights {
+  position: fixed;
+  z-index: 10;
+  max-height: min(320px, calc(100vh - 16px));
+  overflow-y: auto;
 }

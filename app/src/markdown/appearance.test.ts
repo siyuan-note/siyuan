@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {createMarkdownFontAppearance, markdownFontStyle, quoteMarkdownFont} from "./appearance";
+import {markdownWorkspaceChoice, createMarkdownFontAppearance, markdownFontStyle, quoteMarkdownFont} from "./appearance";
 import type {MarkdownAppearance} from "./bridge";
 
 const snapshot = (): MarkdownAppearance => ({
@@ -58,4 +58,15 @@ test("Markdown custom fonts reject stale loads, retain current fonts for size ch
     await Promise.resolve();
     assert.equal(registered.size, 0);
     assert.equal(styles.size, 0);
+});
+
+test("workspace menu uses cross-platform basename and retains full-path identity and tooltip", () => {
+    for (const [name, label] of [["/home/me/Notes/", "Notes"], ["C:\\Users\\me\\Notes\\", "Notes"], ["\\\\server\\share\\Notes", "Notes"], ["/", "/"]]) {
+        assert.deepEqual(markdownWorkspaceChoice({id: "id", name}), {value: "id", label, tooltip: name});
+    }
+    const a = markdownWorkspaceChoice({id: "a", name: "/one/Notes"});
+    const b = markdownWorkspaceChoice({id: "b", name: "/two/Notes"});
+    assert.equal(a.label, b.label);
+    assert.notEqual(a.tooltip, b.tooltip);
+    assert.notEqual(a.value, b.value);
 });

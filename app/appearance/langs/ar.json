@@ -1,5 +1,5 @@
 {
-	"markdownSystemFontName": "أدخل اسم خط نظام، وليس SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "تعذر تحميل خطوط النظام، يمكنك إعادة المحاولة",
 	"markdownIndependentAppearance": "إعدادات مستقلة",
 	"markdownFontWeight": "وزن الخط",
 	"markdownWorkspaceUnavailable": "مساحة العمل غير متاحة؛ تُستخدم الإعدادات المستقلة",

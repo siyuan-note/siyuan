@@ -65,7 +65,7 @@ interface AVRichTextEditorOptions {
     onSave: (value: IAVCellValue, nodeElement: HTMLElement,
              stableCells: import("./selectionState").IAVSelectedCell[]) => void | Promise<void>;
     onDestroy?: () => void;
-    prepareNextInput?: () => (() => void) | undefined;
+    prepareNextInput?: (anchorElement: HTMLElement) => (() => void) | undefined;
 }
 
 interface ActiveEditor {
@@ -180,6 +180,8 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     let finished = false;
     let finishing = false;
     let cancelled = false;
+    let resolveClosed: () => void;
+    const whenClosed = new Promise<void>(resolve => {resolveClosed = resolve;});
     const isOwnerConnected = () => {
         if (!ownerElement.isConnected || !options.nodeElement.isConnected) {
             return false;
@@ -230,6 +232,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         if (!mobile) maskElement.remove();
         if (activeEditor?.finish === finish) activeEditor = undefined;
         endEditorSession();
+        resolveClosed();
         options.onDestroy?.();
     };
     const saveContent = async () => {
@@ -258,7 +261,11 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         if (mobile) {
             if (save) {
                 const closed = await dialog.requestClose("confirm");
-                if (closed && !cancelled && !activeEditor && isOwnerConnected()) continueInput?.();
+                if (closed && continueInput) {
+                    // 移动端关闭动画结束后才清理编辑会话，下一条输入需等待清理完成。
+                    await whenClosed;
+                    if (!cancelled && !activeEditor && isOwnerConnected()) continueInput();
+                }
             }
             else {
                 // 目标失效立即清空敏感编辑内容，不等待关闭动画或未完成的保存。
@@ -307,7 +314,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         if (fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
-            const next = options.prepareNextInput?.();
+            const next = options.prepareNextInput?.(options.anchorElement);
             if (next) {
                 event.preventDefault();
                 event.stopPropagation();

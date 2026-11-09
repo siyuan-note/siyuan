@@ -881,8 +881,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                         false, false, false, selectedCells, true, true);
                 },
                 onDestroy: options?.destroyCallback,
-                prepareNextInput: () => prepareAVContinuousInput(protyle, blockElement, cellElements,
-                    cell => popTextCell(protyle, [cell])),
+                prepareNextInput: anchorElement => cellElements.length === 1 ?
+                    prepareAVContinuousInput(protyle, blockElement, [anchorElement], cell => popTextCell(protyle, [cell])) : undefined,
             });
             return;
         }

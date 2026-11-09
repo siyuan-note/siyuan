@@ -1321,6 +1321,11 @@ const browserCases = async (languages: Record<string, string>) => {
     await tick();
     const independentPanel = document.getElementById("markdownAppearancePanel");
     check.equal(independentPanel.hidden, false);
+    check.equal((independentPanel as HTMLDialogElement).open, true);
+    check.equal(independentPanel.closest(".markdown-workspace"), null);
+    check.equal(getComputedStyle(independentPanel.querySelector(".b3-dialog__action")).justifyContent, "flex-end");
+    check.equal(appearancePatches.length, 2, "opening independent settings does not change the persisted source");
+    check.equal(document.querySelector('#markdownFont [aria-checked="true"]').getAttribute("data-value"), "two");
     const sizeInput = independentPanel.querySelector<HTMLInputElement>('input[type="number"]');
     check.equal(sizeInput.min, "9"); check.equal(sizeInput.max, "72");
     sizeInput.value = "72";
@@ -1328,6 +1333,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(appearancePatches.at(-1).independent.fontSize, 72);
     check.equal(appearancePatches.at(-1).sources.fontSize, "independent");
     check.equal(independentPanel.hidden, true);
+    check.equal(document.querySelectorAll("[data-configure]").length, 0, "independent settings have no duplicated bottom entry");
     check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').getAttribute("data-value"), "two");
     document.querySelector<HTMLButtonElement>('#markdownFonts button[data-value="independent"]').click(); await tick();
     const fontSections = independentPanel.querySelectorAll("section");
@@ -1357,7 +1363,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelector('#markdownFont [aria-checked="true"]').textContent, languages.markdownIndependentAppearance);
     let resolveFonts: (fonts: import("./bridge").MarkdownSystemFont[]) => void;
     bridge.systemFonts = () => new Promise(resolve => {resolveFonts = resolve;});
-    document.querySelector<HTMLButtonElement>('#markdownFonts [data-configure="fonts"]').click(); await tick();
+    document.querySelector<HTMLButtonElement>('#markdownFonts button[data-value="independent"]').click(); await tick();
     const closingPanel = document.getElementById("markdownAppearancePanel");
     closingPanel.querySelector<HTMLButtonElement>(".b3-button--cancel").click();
     resolveFonts([{family: "Late", displayName: "Late", weight: 400}]); await tick();

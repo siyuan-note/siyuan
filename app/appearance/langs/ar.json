@@ -1,4 +1,5 @@
 {
+	"markdownAppearanceError": "تعذر إكمال تطبيق الإعدادات؛ ربما تم حفظ بعض التغييرات بالفعل، حاول مرة أخرى",
 	"pluginTabUnavailable": "إضافة علامة التبويب غير متاحة أو لا يمكن تحديد مالكها؛ فعّل الإضافة وأعد المحاولة",
 	"markdownSystemFontsUnavailable": "تعذر تحميل خطوط النظام، يمكنك إعادة المحاولة",
 	"markdownIndependentAppearance": "إعدادات مستقلة",

@@ -1,4 +1,5 @@
 {
+	"markdownAppearanceError": "Pengaturan tidak dapat diterapkan sepenuhnya. Beberapa perubahan mungkin sudah tersimpan; coba lagi",
 	"pluginTabUnavailable": "Plugin tab ini tidak tersedia atau pemiliknya tidak dapat ditentukan; aktifkan plugin lalu coba lagi",
 	"markdownSystemFontsUnavailable": "Tidak dapat memuat font sistem; coba lagi",
 	"markdownIndependentAppearance": "Pengaturan mandiri",

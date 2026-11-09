@@ -1,4 +1,5 @@
 {
+	"markdownAppearanceError": "Impossible de terminer l’application des paramètres. Certaines modifications ont peut-être déjà été enregistrées ; réessayez",
 	"pluginTabUnavailable": "Le plugin de cet onglet est indisponible ou ne peut pas être identifié ; activez-le et réessayez",
 	"markdownSystemFontsUnavailable": "Impossible de charger les polices système ; réessayez",
 	"markdownIndependentAppearance": "Réglages indépendants",

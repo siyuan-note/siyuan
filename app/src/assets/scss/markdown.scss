@@ -1,4 +1,5 @@
 @use "component/button";
+@use "component/dialog";
 @use "component/menu";
 @use "component/list";
 @use "component/chip";
@@ -603,4 +604,28 @@ button {
   z-index: 10;
   max-height: min(320px, calc(100vh - 16px));
   overflow-y: auto;
+}
+
+// 原生模态层提供焦点约束，容器和操作区使用共享对话框样式。
+.markdown-appearance-dialog {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  max-width: none;
+  max-height: none;
+  background: transparent;
+  color: inherit;
+
+  &::backdrop {
+    background: transparent;
+  }
+}
+
+.markdown-appearance-dialog__container {
+  width: 560px;
+  max-height: 88vh;
+}
+
+.markdown-appearance-dialog__actions {
+  gap: 8px;
 }

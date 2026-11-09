@@ -8,20 +8,25 @@ export const markdownWorkspaceChoice = (workspace: {id: string; name: string}) =
     tooltip: workspace.name,
 });
 
-export const createMarkdownAppearanceForm = (element: HTMLElement, group: MarkdownAppearanceGroup,
+export const createMarkdownAppearanceForm = (element: HTMLDialogElement, group: MarkdownAppearanceGroup,
                                              initial: MarkdownIndependentAppearance, text: (key: string) => string,
                                              save: (value: MarkdownIndependentAppearance) => Promise<void>, close: () => void,
                                              systemFonts: () => Promise<IFontItem[]> = async () => []) => {
     const cleanup: Array<() => void> = [];
     let closed = false;
-    const destroy = () => {closed = true; cleanup.forEach(dispose => dispose());};
+    const destroy = () => {closed = true; cleanup.forEach(dispose => dispose()); element.close(); element.hidden = true;};
     const finish = () => {if (!closed) {destroy(); close();}};
     element.replaceChildren();
+    const scrim = document.createElement("div");
+    scrim.className = "b3-dialog__scrim";
     const form = document.createElement("form");
-    form.className = "markdown-appearance-form";
+    form.className = "b3-dialog__container markdown-appearance-dialog__container";
+    const content = document.createElement("div");
+    content.className = "b3-dialog__content markdown-appearance-form";
     const title = document.createElement("strong");
+    title.id = "markdownAppearanceTitle"; title.className = "b3-dialog__header";
     title.textContent = `${text("markdownIndependentAppearance")} · ${text({theme: "appearanceMode", fontSize: "fontSize", fonts: "fontFamily"}[group])}`;
-    form.append(title);
+    form.append(title, content);
     const field = (label: string, input: HTMLElement) => {
         const wrapper = document.createElement("label");
         wrapper.className = "markdown-appearance-form__field";
@@ -39,14 +44,14 @@ export const createMarkdownAppearanceForm = (element: HTMLElement, group: Markdo
             option.value = key; option.textContent = text(label); select.append(option);
         }
         select.value = initial.theme ?? "system";
-        form.append(field(text("appearanceMode"), select));
+        content.append(field(text("appearanceMode"), select));
         value = () => ({theme: select.value as MarkdownIndependentAppearance["theme"]});
     } else if (group === "fontSize") {
         const input = document.createElement("input");
         input.className = "b3-text-field"; input.type = "number";
         input.min = "9"; input.max = "72"; input.step = "1"; input.required = true;
         input.value = String(initial.fontSize ?? 16);
-        form.append(field(text("fontSize"), input));
+        content.append(field(text("fontSize"), input));
         value = () => ({fontSize: input.valueAsNumber});
     } else {
         const pickers: Partial<Record<"global" | "editor" | "code", ReturnType<typeof createMarkdownFontPicker>>> = {};
@@ -57,26 +62,38 @@ export const createMarkdownAppearanceForm = (element: HTMLElement, group: Markdo
             section.className = "markdown-appearance-form__fonts";
             const heading = document.createElement("strong");
             heading.textContent = text({global: "globalDefaultFont", editor: "font", code: "monospaceFont"}[key]);
-            section.append(heading); form.append(section);
+            section.append(heading); content.append(section);
             pickers[key] = createMarkdownFontPicker(section, initial.fonts?.[key] ?? [], key === "code", load, text);
             cleanup.push(pickers[key].destroy);
         }
         value = () => ({fonts: {global: pickers.global.value(), editor: pickers.editor.value(), code: pickers.code.value()}});
     }
     const actions = document.createElement("div");
-    actions.className = "markdown-recovery__actions";
+    actions.className = "b3-dialog__action markdown-appearance-dialog__actions";
     const submit = document.createElement("button");
     submit.type = "submit"; submit.className = "b3-button"; submit.textContent = text("save");
     const cancel = document.createElement("button");
     cancel.type = "button"; cancel.className = "b3-button b3-button--cancel"; cancel.textContent = text("cancel"); cancel.onclick = finish;
-    actions.append(submit, cancel); form.append(actions); element.append(form);
+        const error = document.createElement("p");
+    error.hidden = true; error.setAttribute("role", "alert"); content.append(error);
+    actions.append(cancel, submit); form.append(actions); element.append(scrim, form);
     form.onsubmit = event => {
         event.preventDefault();
         if (!form.reportValidity() || submit.disabled) return;
-        submit.disabled = true;
-        void save(value()).then(finish).catch(() => {if (!closed) submit.disabled = false;});
+        submit.disabled = true; cancel.disabled = true; error.hidden = true;
+        void save(value()).then(finish).catch(() => {
+            if (closed) return;
+            submit.disabled = false; cancel.disabled = false;
+            error.textContent = text("markdownAppearanceError"); error.hidden = false;
+        });
     };
-    form.onkeydown = event => {if (event.key === "Escape") {event.preventDefault(); finish();}};
+    const cancelDialog = (event: Event) => {event.preventDefault(); if (!submit.disabled) finish();};
+    element.addEventListener("cancel", cancelDialog);
+    cleanup.push(() => element.removeEventListener("cancel", cancelDialog));
+    scrim.onclick = cancelDialog;
+    form.onkeydown = event => {
+        if (event.key === "Escape") {event.preventDefault(); event.stopPropagation(); if (!submit.disabled) finish();}
+    };
     (form.querySelector("input, select, button") as HTMLElement)?.focus();
     return destroy;
 };

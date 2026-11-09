@@ -1,4 +1,5 @@
 {
+	"markdownAppearanceError": "Ayarlar tamamen uygulanamadı. Bazı değişiklikler zaten kaydedilmiş olabilir; yeniden deneyin",
 	"pluginTabUnavailable": "Bu sekmenin eklentisi kullanılamıyor veya sahibi belirlenemiyor; eklentiyi etkinleştirip yeniden deneyin",
 	"markdownSystemFontsUnavailable": "Sistem yazı tipleri yüklenemedi; tekrar deneyin",
 	"markdownIndependentAppearance": "Bağımsız ayarlar",

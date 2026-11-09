@@ -97,12 +97,12 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
 <div class="markdown-workspace">
     <aside class="markdown-tree" id="markdownTree" hidden></aside>
     <aside class="markdown-recovery" id="markdownRecoveryPanel" hidden><div class="markdown-recovery__heading"><strong data-label="markdownRecovery"></strong><button type="button" class="b3-button b3-button--text" id="markdownRecoveryClose" data-label="close"></button></div><p data-label="markdownPrivacy"></p><div id="markdownRecoveryList"></div></aside>
-    <aside class="markdown-recovery" id="markdownAppearancePanel" hidden></aside>
     <main class="markdown-editor" id="markdownEditor" aria-busy="true"></main>
 </div>
 <footer class="markdown-footer" id="markdownFooter" hidden>
     <div class="markdown-status"><span id="markdownStatus" role="status" aria-live="polite"></span><span class="markdown-status__actions" id="markdownProblemActions"><button type="button" class="b3-button b3-button--text" id="markdownRetry" data-label="retry" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownReload" data-label="markdownReload" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownOverwrite" data-label="markdownOverwrite" hidden></button></span></div>
-</footer>`;
+</footer>
+<dialog id="markdownAppearancePanel" class="b3-dialog b3-dialog--open markdown-appearance-dialog" hidden aria-labelledby="markdownAppearanceTitle"></dialog>`;
     let tooltips: ReturnType<typeof createMarkdownTooltips>;
     const sidebarShortcuts = createMarkdownSidebarShortcuts({
         platform: bootstrap.platform, keymap: bootstrap.keymap,
@@ -605,13 +605,14 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     const configureAppearance = (group: MarkdownAppearanceGroup) => {
         if (disposed || frozen) return;
         closeMore(false);
-        const panel = control("markdownAppearancePanel");
-        panel.hidden = false;
+        const panel = control<HTMLDialogElement>("markdownAppearancePanel");
         destroyAppearanceForm?.();
+        panel.hidden = false;
         destroyAppearanceForm = createMarkdownAppearanceForm(panel, group, appearance.independent ?? {}, text,
             async independent => {if (!disposed && !frozen) await updateAppearance({sources: {[group]: "independent"}, independent});},
             () => {panel.hidden = true; panel.replaceChildren(); if (!disposed) moreButton.focus();},
             () => bridge.systemFonts ? bridge.systemFonts() : Promise.reject(new Error("System fonts unavailable")));
+        panel.showModal();
     };
     const workspaceChoices = () => {
         themeChoice?.destroy(); fontChoice?.destroy(); fontsChoice?.destroy();
@@ -627,23 +628,15 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             const result = createMarkdownChoice({element, label: text(label), icon, values, value: source, maxHeight: 320,
                 onChange(value) {
                     if (frozen || disposed || value !== "independent" && !appearance.workspaces.some(workspace => workspace.id === value)) return;
+                    if (value === "independent") {configureAppearance(group); return;}
                     closeMore();
-                    void updateAppearance({sources: {[group]: value}}).then(() => {
-                        if (value === "independent") configureAppearance(group);
-                    }).catch((): void => undefined);
+                    void updateAppearance({sources: {[group]: value}}).catch((): void => undefined);
                 },
             });
             result.menu.classList.add("markdown-choice__menu--workspace");
             result.menu.querySelectorAll<HTMLButtonElement>("button").forEach(button => {
                 button.disabled = button.dataset.value !== "independent" && !appearance.workspaces.some(workspace => workspace.id === button.dataset.value);
             });
-            if (source === "independent") {
-                const configure = document.createElement("button");
-                configure.type = "button"; configure.className = "b3-menu__item";
-                configure.textContent = text("config"); configure.dataset.configure = group;
-                configure.onclick = event => {event.stopPropagation(); configureAppearance(group);};
-                result.menu.append(configure);
-            }
             return result;
         };
         themeChoice = choice("markdownTheme", "appearanceMode", "theme", "iconMode");
@@ -852,6 +845,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     unsubscribeInitialization();
     const unsubscribe = bridge.onCommand(message => { void command(message).catch(reportError); });
     const shortcut = (event: KeyboardEvent) => {
+        if (control<HTMLDialogElement>("markdownAppearancePanel").open) return;
         if (sidebarShortcuts.handle(event)) return;
         const modifier = bootstrap.platform === "darwin" || bootstrap.platform === "ios" ? event.metaKey : event.ctrlKey;
         if (!modifier || event.altKey || event.isComposing || !/^[nos]$/i.test(event.key)) return;

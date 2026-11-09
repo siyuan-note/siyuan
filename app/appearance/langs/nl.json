@@ -1,4 +1,5 @@
 {
+	"markdownAppearanceError": "De instellingen konden niet volledig worden toegepast. Sommige wijzigingen zijn mogelijk al opgeslagen; probeer het opnieuw",
 	"pluginTabUnavailable": "De plugin van dit tabblad is niet beschikbaar of kan niet worden vastgesteld; schakel de plugin in en probeer het opnieuw",
 	"markdownSystemFontsUnavailable": "Systeemlettertypen kunnen niet worden geladen; probeer opnieuw",
 	"markdownIndependentAppearance": "Onafhankelijke instellingen",

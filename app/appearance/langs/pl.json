@@ -1,4 +1,5 @@
 {
+	"markdownAppearanceError": "Nie udało się w pełni zastosować ustawień. Niektóre zmiany mogły już zostać zapisane; spróbuj ponownie",
 	"pluginTabUnavailable": "Wtyczka tej karty jest niedostępna lub nie można jej zidentyfikować; włącz wtyczkę i spróbuj ponownie",
 	"markdownSystemFontsUnavailable": "Nie można załadować czcionek systemowych; spróbuj ponownie",
 	"markdownIndependentAppearance": "Ustawienia niezależne",

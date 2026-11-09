@@ -1,4 +1,5 @@
 {
+	"markdownAppearanceError": "Die Einstellungen konnten nicht vollständig angewendet werden. Einige Änderungen wurden möglicherweise bereits gespeichert; bitte erneut versuchen",
 	"pluginTabUnavailable": "Das Plugin dieses Tabs ist nicht verfügbar oder nicht eindeutig zuzuordnen; aktiviere das Plugin und versuche es erneut",
 	"markdownSystemFontsUnavailable": "Systemschriften konnten nicht geladen werden; bitte erneut versuchen",
 	"markdownIndependentAppearance": "Unabhängige Einstellungen",

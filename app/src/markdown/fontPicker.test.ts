@@ -77,10 +77,10 @@ test("font picker hides empty spacing, keeps its spinner during search, and expo
     assert.equal(list.hidden, true);
     assert.equal(root.attributes.get("aria-busy"), "true");
     assert.equal(notice.attributes.get("aria-label"), "loading");
-    assert.equal(notice.children[0].className, "b3-loading");
+    assert.equal(notice.children[0].className, "b3-loading b3-loading--small");
     assert.equal(notice.children[0].textContent, "");
     search.value = "nothing"; search.oninput();
-    assert.equal(notice.children[0].className, "b3-loading");
+    assert.equal(notice.children[0].className, "b3-loading b3-loading--small");
     reject(new Error("offline")); await new Promise(resolve => setImmediate(resolve));
     assert.equal(root.attributes.get("aria-busy"), "false");
     assert.equal(notice.textContent, "markdownSystemFontsUnavailable");
@@ -89,7 +89,7 @@ test("font picker hides empty spacing, keeps its spinner during search, and expo
     assert.equal(notice.textContent, "markdownSystemFontsUnavailable");
     retry.onclick();
     assert.equal(retry.hidden, true);
-    assert.equal(notice.children[0].className, "b3-loading");
+    assert.equal(notice.children[0].className, "b3-loading b3-loading--small");
     resolve(fonts); await new Promise(resolve => setImmediate(resolve));
     assert.equal(root.attributes.get("aria-busy"), "false");
     assert.equal(notice.attributes.has("aria-label"), false);

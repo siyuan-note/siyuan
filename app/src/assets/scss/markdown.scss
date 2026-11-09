@@ -25,6 +25,11 @@ body {
 
 button {
   font-family: inherit;
+  outline: none;
+}
+
+.b3-select {
+  outline: none;
 }
 
 ::view-transition-old(root),
@@ -175,6 +180,8 @@ button {
 }
 
 .markdown-more summary:focus-visible,
+button:focus-visible,
+.b3-chip:focus-visible,
 .markdown-history:focus-visible,
 .markdown-tree-toggle:focus-visible,
 .markdown-outline-toggle:focus-visible,

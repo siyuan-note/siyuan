@@ -5,6 +5,29 @@ const sass = require("sass");
 const postcss = require("postcss");
 const {readFileSync} = require("node:fs");
 
+test("Markdown controls replace platform outlines with theme focus and use the compact shared spinner", () => {
+    const css = postcss.parse(sass.compile(path.join(__dirname, "../src/assets/scss/markdown.scss"), {
+        logger: sass.Logger.silent,
+    }).css);
+    const values = selector => {
+        const result = new Map();
+        css.walkRules(rule => {
+            if (rule.selectors.includes(selector)) rule.walkDecls(declaration => result.set(declaration.prop, declaration.value));
+        });
+        return result;
+    };
+    assert.equal(values("button").get("outline"), "none");
+    assert.equal(values(".b3-select").get("outline"), "none");
+    for (const selector of ["button:focus-visible", ".b3-chip:focus-visible"]) {
+        assert.equal(values(selector).get("outline"), "1px solid var(--b3-theme-primary)");
+    }
+    assert.equal(values(".b3-select:focus").get("box-shadow"),
+        "inset 0 0 0 1px var(--b3-theme-primary-light), 0 0 0 0.6px var(--b3-theme-primary-lighter)");
+    assert.equal(values(".b3-text-field:not(.b3-text-field--text):focus").get("outline-color"), "var(--b3-theme-primary-light)");
+    assert.equal(values(".b3-loading--small").get("width"), "var(--b3-loading-size, 16px)");
+    assert.equal(values(".b3-loading--small").get("height"), "var(--b3-loading-size, 16px)");
+});
+
 test("Markdown submenus fit their content and inset rows while preserving touch targets", () => {
     const css = postcss.parse(sass.compile(path.join(__dirname, "../src/assets/scss/markdown.scss"), {
         logger: sass.Logger.silent,

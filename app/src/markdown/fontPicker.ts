@@ -168,7 +168,7 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
         notice.hidden = false; retry.hidden = true; list.hidden = true;
         notice.setAttribute("aria-label", text("loading"));
         const spinner = document.createElement("span");
-        spinner.className = "b3-loading"; spinner.setAttribute("aria-hidden", "true");
+        spinner.className = "b3-loading b3-loading--small"; spinner.setAttribute("aria-hidden", "true");
         notice.replaceChildren(spinner);
         try {
             const loaded = await load();

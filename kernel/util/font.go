@@ -108,7 +108,7 @@ var macFontLanguageIDs = map[string]sfnt.PlatformLanguageID{
 
 func loadFonts() (ret []*Font) {
 	ret = []*Font{}
-	if runtime.GOOS == "android" {
+	if runtime.GOOS == "android" || runtime.GOOS == "ios" {
 		for _, font := range loadPlatformFonts() {
 			ret = addFont(ret, font)
 		}

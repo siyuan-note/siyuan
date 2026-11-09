@@ -249,6 +249,10 @@ export class Files extends Model {
                 return;
             }
             let target = event.target as HTMLElement;
+            if (target.closest("li[data-spec-too-new]")) {
+                showMessage(window.siyuan.languages._kernel[275]);
+                return;
+            }
             while (target && !target.isEqualNode(this.element)) {
                 if (target.tagName === "LI" && target.getAttribute("data-node-id") && !target.getAttribute("data-opening")) {
                     target.setAttribute("data-opening", "true");
@@ -270,6 +274,14 @@ export class Files extends Model {
         });
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
+            // 源版本高于当前客户端的文档仅占位显示，仍允许展开子文档和打开菜单。
+            if (target.closest<HTMLElement>("li[data-spec-too-new]") &&
+                !target.closest(".b3-list-item__toggle, .b3-list-item__action")) {
+                showMessage(window.siyuan.languages._kernel[275]);
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             if (!target.closest(".b3-list-item__text") || !isNotCtrl(event) || event.altKey || event.shiftKey) {
                 this.parentDocClick.cancel();
             }

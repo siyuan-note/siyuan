@@ -20,7 +20,8 @@ var getPinnedDocs = contractHandler(apicontract.GetPinnedDocs, func(c *gin.Conte
 		ret = append(ret, apicontract.PinnedDoc{ID: doc.ID, Notebook: doc.Notebook, Name: doc.Name, Path: doc.Path,
 			HSize: doc.HSize, HMtime: doc.HMtime, HCtime: doc.HCtime,
 			Name1: doc.Name1, Alias: doc.Alias, Memo: doc.Memo, Bookmark: doc.Bookmark,
-			Icon: doc.Icon, SubFileCount: doc.SubFileCount, Unavailable: doc.Unavailable, ChildrenSortMode: doc.ChildrenSortMode})
+			Icon: doc.Icon, SubFileCount: doc.SubFileCount, Unavailable: doc.Unavailable, SpecTooNew: doc.SpecTooNew,
+			ChildrenSortMode: doc.ChildrenSortMode})
 	}
 	return apicontract.Success(ret)
 })

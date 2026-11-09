@@ -1215,6 +1215,9 @@ func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) a
 	if errors.Is(err, model.ErrBlockNotFound) {
 		return apicontract.Failure[apicontract.FileTreeGetDocData](3, "")
 	}
+	if errors.Is(err, treenode.ErrSpecTooNew) {
+		return apicontract.Failure[apicontract.FileTreeGetDocData](1, model.Conf.Language(275))
+	}
 
 	if err != nil {
 		return apicontract.Failure[apicontract.FileTreeGetDocData](1, err.Error())

@@ -1278,7 +1278,7 @@ export type FileTreeDocTreeData = { "tree": Array<FileTreeDocFile | null> | null
 
 export type FileTreeDuplicateData = { "hPath": string; "id": string; "notebook": string; "path": string; };
 
-export type FileTreeFile = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "count": number; "ctime": number; "dueFlashcardCount": number; "flashcardCount": number; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "mtime": number; "name": string; "name1": string; "newFlashcardCount": number; "path": string; "size": number; "sort": number; "subFileCount": number; "titleEmpty"?: boolean; "titleFormat"?: "plain" | "inline-ast"; "titleRevision"?: string; };
+export type FileTreeFile = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "count": number; "ctime": number; "dueFlashcardCount": number; "flashcardCount": number; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "mtime": number; "name": string; "name1": string; "newFlashcardCount": number; "path": string; "size": number; "sort": number; "specTooNew"?: boolean; "subFileCount": number; "titleEmpty"?: boolean; "titleFormat"?: "plain" | "inline-ast"; "titleRevision"?: string; };
 
 export type FileTreeGetDocData = { "blockCount": number; "box": string; "content": string; "docInfo"?: DocInfo; "eof": boolean; "headingNumbers": Record<string, string> | null; "id": string; "isBacklinkExpand": boolean; "isSyncing": boolean; "keywords": Array<string> | null; "mode": number; "parent2ID": string; "parentID": string; "path": string; "publishAccessRequired": boolean; "reqId": JSONValue; "rootID": string; "scroll": boolean; "type": string; };
 
@@ -1822,7 +1822,7 @@ export type PerformTransactionsRequestInput = { "app"?: string; "reqId": number;
 
 export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "settingsWindow"?: boolean; "userDisabledInPublish": boolean; "version": string; };
 
-export type PinnedDoc = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "name": string; "name1": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
+export type PinnedDoc = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "name": string; "name1": string; "notebook": string; "path": string; "specTooNew"?: boolean; "subFileCount": number; "unavailable": boolean; };
 
 export type PlanDocCreateRequestInput = { "ancestorChoices"?: Array<DocumentAncestorChoiceInput>; "contextID"?: string | null; "date"?: string; "id": string; "notebook": string; "placement"?: "configured" | "child"; "purpose": "document" | "reference" | "dailyNote"; "reuse"?: boolean; "targetRevision"?: string; "time"?: string; "title"?: string; };
 

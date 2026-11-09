@@ -20,6 +20,8 @@ type PinnedDoc struct {
 	SubFileCount     int    `json:"subFileCount"`
 	Unavailable      bool   `json:"unavailable"`
 	ChildrenSortMode *int   `json:"childrenSortMode"`
+	// SpecTooNew 为 true 时源版本高于当前客户端支持的版本，名称等字段只来自占位读取，文档不可打开或编辑。
+	SpecTooNew bool `json:"specTooNew,omitempty"`
 }
 
 type UpdatePinnedDocsRequest struct {

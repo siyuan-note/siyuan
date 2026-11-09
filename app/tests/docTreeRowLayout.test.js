@@ -14,7 +14,7 @@ const stylesheets = ["../src/assets/scss/base.scss", "../src/assets/scss/mobile.
 const browserCases = (source, css, mobile) => {
     const check = require("node:assert/strict");
     document.head.innerHTML = "<style>" + css + "</style>";
-    window.siyuan = {config: {fileTree: {docIconClickMode: 1}}, languages: {}, notebooks: []};
+    window.siyuan = {config: {fileTree: {docIconClickMode: 1}}, languages: {_kernel: {275: "Upgrade SiYuan"}}, notebooks: []};
     const exports = {};
     new Function("exports", "require", source)(exports, () => ({
         escapeHtml: value => value, escapeHtmlTextAndAttr: value => value, escapeTooltipTextAttr: value => value,
@@ -25,6 +25,19 @@ const browserCases = (source, css, mobile) => {
     const step = mobile ? 30 : 24;
     const size = mobile ? 32 : 22;
     for (const pinned of [false, true]) {
+        const container = document.createElement("ul");
+        container.innerHTML = exports.renderDocTreeRowHTML({
+            id: "future", notebookId: "box", occurrenceKey: "box/future", depth: 0,
+            kind: "document", name: "Future", subFileCount: 1, file: {specTooNew: true},
+        }, {mobile, pinned});
+        const placeholder = container.firstElementChild;
+        check.equal(placeholder.draggable, false);
+        check.equal(placeholder.getAttribute("aria-disabled"), "true");
+        check.equal(placeholder.dataset.specTooNew, "true");
+        check.ok(placeholder.classList.contains("file-tree__row--spec-too-new"));
+        check.equal(placeholder.querySelector(".b3-list-item__text").getAttribute("aria-label"), "Upgrade SiYuan");
+        check.equal(placeholder.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden"), false,
+            "a placeholder with children keeps its expand arrow");
         for (const width of [240, 420]) {
             for (const fontSize of [14, 24]) {
                 document.body.style.fontSize = fontSize + "px";
@@ -103,7 +116,7 @@ if (process.versions.electron && process.type === "browser") {
         }
     });
 } else {
-    test("document tree indentation, collapse targets and drop indicators stay aligned on desktop and mobile", {
+    test("document tree placeholders, indentation, collapse targets and drop indicators work on desktop and mobile", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,
     }, async () => {

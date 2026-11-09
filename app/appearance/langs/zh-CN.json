@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "工作空间不可用，使用默认值",
+	"markdownSystemFontName": "请输入系统字体名称，不支持 SiYuanCustomFont- 开头的名称",
+	"markdownIndependentAppearance": "独立设置",
+	"markdownFontWeight": "字重",
+	"markdownWorkspaceUnavailable": "工作空间不可用，使用独立设置",
 	"automationInsertField": "插入字段引用",
 	"automationTemplateSourceLimit": "模板源码最多 8 KiB",
 	"automationRunSummary": "成功 ${succeeded} 条，失败 ${failed} 条，待处理 ${pending} 条，跳过 ${skipped} 条",

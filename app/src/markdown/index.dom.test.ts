@@ -1280,21 +1280,22 @@ const browserCases = async (languages: Record<string, string>) => {
         fonts: {global: [{family: "serif", weight: 500}], editor: [{family: "monospace", weight: 400}], code: [{family: "serif", weight: 600}]}, customFonts: [],
     };
     let appearanceSnapshot = inherited;
-    const appearancePatches: Array<Partial<Record<import("./bridge").MarkdownAppearanceGroup, string>>> = [];
+    const appearancePatches: Array<import("./bridge").MarkdownAppearancePatch> = [];
     let finishAppearance: () => void;
     bridge.appearance = async patch => {
         appearancePatches.push(patch);
         if (appearancePatches.length === 1) await new Promise<void>(resolve => {finishAppearance = resolve;});
-        appearanceSnapshot = {...appearanceSnapshot, sources: {...appearanceSnapshot.sources, ...patch},
-            theme: patch.theme === "two" ? "dark" : appearanceSnapshot.theme,
-            fontSize: patch.fontSize === "two" ? 31 : appearanceSnapshot.fontSize};
+        appearanceSnapshot = {...appearanceSnapshot, sources: {...appearanceSnapshot.sources, ...patch.sources},
+            theme: patch.sources?.theme === "two" ? "dark" : appearanceSnapshot.theme,
+            fontSize: patch.sources?.fontSize === "two" ? 31 : patch.independent?.fontSize ?? appearanceSnapshot.fontSize,
+            independent: {...appearanceSnapshot.independent, ...patch.independent}};
         return appearanceSnapshot;
     };
     bridge.bootstrap = async () => ({...bootstrap, sessionId: "workspace-appearance", preferences: {mode: "ir"}, appearance: appearanceSnapshot});
     const inheritedApp = await api.mountMarkdownApplication(bridge);
     const inheritedEditor = inheritedApp.editor;
     const inheritedText = inheritedApp.editor.flush().content;
-    check.equal(document.querySelectorAll("#markdownFonts button").length, 2);
+    check.equal(document.querySelectorAll("#markdownFonts button").length, 3);
     check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').getAttribute("data-value"), "one");
     check.equal(getComputedStyle(document.querySelector(".vditor-ir .vditor-reset")).fontSize, "23px");
     check.ok(getComputedStyle(document.getElementById("markdownApp")).fontFamily.includes("serif"));
@@ -1311,14 +1312,38 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(inheritedApp.editor, inheritedEditor, "appearance changes do not recreate the document");
     check.equal(inheritedApp.editor.flush().content, inheritedText);
     check.equal(preferenceUpdates.length, oldPreferencesCount, "workspace selections do not overwrite independent edit-mode preferences");
+    document.querySelector<HTMLButtonElement>('#markdownFont button[data-value="independent"]').click();
+    await tick();
+    const independentPanel = document.getElementById("markdownAppearancePanel");
+    check.equal(independentPanel.hidden, false);
+    const sizeInput = independentPanel.querySelector<HTMLInputElement>('input[type="number"]');
+    check.equal(sizeInput.min, "9"); check.equal(sizeInput.max, "72");
+    sizeInput.value = "72";
+    independentPanel.querySelector("form").requestSubmit(); await tick();
+    check.equal(appearancePatches.at(-1).independent.fontSize, 72);
+    check.equal(appearancePatches.at(-1).sources.fontSize, "independent");
+    check.equal(independentPanel.hidden, true);
+    check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').getAttribute("data-value"), "two");
+    document.querySelector<HTMLButtonElement>('#markdownFonts button[data-value="independent"]').click(); await tick();
+    const fontSections = independentPanel.querySelectorAll("section");
+    check.equal(fontSections.length, 3);
+    fontSections[0].querySelector("button").click();
+    const fontInputs = fontSections[0].querySelectorAll("input");
+    fontInputs[0].value = "SiYuanCustomFont-invalid"; fontInputs[0].dispatchEvent(new Event("input"));
+    check.equal(fontInputs[0].checkValidity(), false);
+    fontInputs[0].value = "Arial"; fontInputs[0].dispatchEvent(new Event("input")); fontInputs[1].value = "500";
+    independentPanel.querySelector("form").requestSubmit(); await tick();
+    check.deepEqual(appearancePatches.at(-1).independent.fonts.global, [{family: "Arial", weight: 500}]);
+    check.deepEqual(appearancePatches.at(-1).independent.fonts.editor, []);
+    check.equal(inheritedApp.editor.flush().content, inheritedText);
     inheritedApp.destroy();
     check.equal(document.getElementById("markdownApp").style.getPropertyValue("--markdown-editor-font-family"), "");
-    appearanceSnapshot = {...inherited, sources: {theme: "missing", fontSize: "", fonts: ""}, workspaces: [], theme: "system", fontSize: 16,
+    appearanceSnapshot = {...inherited, sources: {theme: "missing", fontSize: "independent", fonts: "independent"}, workspaces: [], theme: "system", fontSize: 16,
         fonts: {global: [], editor: [], code: []}};
     const unavailableAppearance = await api.mountMarkdownApplication(bridge);
-    check.equal(document.getElementById("markdownTheme").getAttribute("aria-disabled"), "true");
+    check.equal(document.querySelector<HTMLButtonElement>('#markdownTheme button[data-value="missing"]').disabled, true);
     check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').textContent, languages.markdownWorkspaceUnavailable);
-    check.equal(document.querySelector('#markdownFont [aria-checked="true"]').textContent, languages.default);
+    check.equal(document.querySelector('#markdownFont [aria-checked="true"]').textContent, languages.markdownIndependentAppearance);
     unavailableAppearance.destroy();
     delete bridge.appearance;
     bridge.bootstrap = async () => ({...bootstrap, sessionId: "native-appearance-fallback"});

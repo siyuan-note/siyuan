@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Obszar roboczy niedostępny; używane są wartości domyślne",
+	"markdownSystemFontName": "Wpisz nazwę czcionki systemowej, nie SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Ustawienia niezależne",
+	"markdownFontWeight": "Grubość czcionki",
+	"markdownWorkspaceUnavailable": "Obszar roboczy niedostępny; używane są ustawienia niezależne",
 	"automationInsertField": "Wstaw odwołanie do pola",
 	"automationTemplateSourceLimit": "Kod szablonu jest ograniczony do 8 KiB",
 	"automationRunSummary": "Udane: ${succeeded}, błędy: ${failed}, pozostałe: ${pending}, pominięte: ${skipped}",

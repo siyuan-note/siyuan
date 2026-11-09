@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Arbeitsbereich nicht verfügbar; Standardwerte werden verwendet",
+	"markdownSystemFontName": "Systemschriftname eingeben, nicht SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Unabhängige Einstellungen",
+	"markdownFontWeight": "Schriftstärke",
+	"markdownWorkspaceUnavailable": "Arbeitsbereich nicht verfügbar; unabhängige Einstellungen werden verwendet",
 	"automationInsertField": "Feldverweis einfügen",
 	"automationTemplateSourceLimit": "Vorlagenquelltext ist auf 8 KiB begrenzt",
 	"automationRunSummary": "${succeeded} erfolgreich, ${failed} fehlgeschlagen, ${pending} ausstehend, ${skipped} übersprungen",

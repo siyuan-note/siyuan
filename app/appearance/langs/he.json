@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "סביבת העבודה אינה זמינה; נעשה שימוש בברירות המחדל",
+	"markdownSystemFontName": "יש להזין שם גופן מערכת, ולא SiYuanCustomFont-",
+	"markdownIndependentAppearance": "הגדרות עצמאיות",
+	"markdownFontWeight": "משקל גופן",
+	"markdownWorkspaceUnavailable": "סביבת העבודה אינה זמינה; נעשה שימוש בהגדרות עצמאיות",
 	"automationInsertField": "הוספת הפניה לשדה",
 	"automationTemplateSourceLimit": "מקור התבנית מוגבל ל־8 KiB",
 	"automationRunSummary": "הצליחו ${succeeded}, נכשלו ${failed}, נותרו ${pending}, דולגו ${skipped}",

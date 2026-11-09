@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Çalışma alanı kullanılamıyor; varsayılanlar kullanılıyor",
+	"markdownSystemFontName": "SiYuanCustomFont- yerine bir sistem yazı tipi adı girin",
+	"markdownIndependentAppearance": "Bağımsız ayarlar",
+	"markdownFontWeight": "Yazı tipi kalınlığı",
+	"markdownWorkspaceUnavailable": "Çalışma alanı kullanılamıyor; bağımsız ayarlar kullanılıyor",
 	"automationInsertField": "Alan başvurusu ekle",
 	"automationTemplateSourceLimit": "Şablon kaynağı en fazla 8 KiB olabilir",
 	"automationRunSummary": "${succeeded} başarılı, ${failed} başarısız, ${pending} kalan, ${skipped} atlanan",

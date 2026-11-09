@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Радни простор није доступан; користе се подразумеване вредности",
+	"markdownSystemFontName": "Унесите назив системског фонта, не SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Независна подешавања",
+	"markdownFontWeight": "Дебљина фонта",
+	"markdownWorkspaceUnavailable": "Радни простор није доступан; користе се независна подешавања",
 	"automationInsertField": "Уметни референцу поља",
 	"automationTemplateSourceLimit": "Извор шаблона је ограничен на 8 KiB",
 	"automationRunSummary": "Успешно: ${succeeded}, неуспешно: ${failed}, преостало: ${pending}, прескочено: ${skipped}",

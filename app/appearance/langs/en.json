@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Workspace unavailable; using defaults",
+	"markdownSystemFontName": "Enter a system font name, not SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Independent settings",
+	"markdownFontWeight": "Font weight",
+	"markdownWorkspaceUnavailable": "Workspace unavailable; using independent settings",
 	"automationInsertField": "Insert field reference",
 	"automationTemplateSourceLimit": "Template source is limited to 8 KiB",
 	"automationRunSummary": "${succeeded} succeeded, ${failed} failed, ${pending} remaining, ${skipped} skipped",

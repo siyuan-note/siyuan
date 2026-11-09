@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "कार्यस्थान उपलब्ध नहीं है; डिफ़ॉल्ट का उपयोग किया जा रहा है",
+	"markdownSystemFontName": "सिस्टम फ़ॉन्ट का नाम दर्ज करें, SiYuanCustomFont- नहीं",
+	"markdownIndependentAppearance": "स्वतंत्र सेटिंग्स",
+	"markdownFontWeight": "फ़ॉन्ट वज़न",
+	"markdownWorkspaceUnavailable": "कार्यस्थान अनुपलब्ध; स्वतंत्र सेटिंग्स का उपयोग",
 	"automationInsertField": "फ़ील्ड संदर्भ डालें",
 	"automationTemplateSourceLimit": "टेम्पलेट स्रोत अधिकतम 8 KiB है",
 	"automationRunSummary": "सफल ${succeeded}, विफल ${failed}, शेष ${pending}, छोड़े गए ${skipped}",

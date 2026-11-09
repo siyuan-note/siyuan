@@ -8,10 +8,20 @@ export interface MarkdownPreferences {
     theme?: "system" | "light" | "dark";
     fontSize?: number;
     sources?: Partial<Record<MarkdownAppearanceGroup, string>>;
+    independent?: MarkdownIndependentAppearance;
 }
 
 export type MarkdownAppearanceGroup = "theme" | "fontSize" | "fonts";
 export interface MarkdownFont {family: string; weight: number;}
+export interface MarkdownIndependentAppearance {
+    theme?: "system" | "light" | "dark";
+    fontSize?: number;
+    fonts?: {global: MarkdownFont[]; editor: MarkdownFont[]; code: MarkdownFont[]};
+}
+export interface MarkdownAppearancePatch {
+    sources?: Partial<Record<MarkdownAppearanceGroup, string>>;
+    independent?: MarkdownIndependentAppearance;
+}
 export interface MarkdownAppearance {
     theme: "system" | "light" | "dark";
     fontSize: number;
@@ -19,6 +29,7 @@ export interface MarkdownAppearance {
     workspaces: Array<{id: string; name: string}>;
     fonts: {global: MarkdownFont[]; editor: MarkdownFont[]; code: MarkdownFont[]};
     customFonts: Array<MarkdownFont & {url: string}>;
+    independent?: MarkdownIndependentAppearance;
 }
 
 export interface MarkdownBootstrap {
@@ -65,7 +76,7 @@ export interface MarkdownBridge {
     resolveResource(reference: string): Promise<string | undefined>;
     openLink(url: string): Promise<void>;
     preferences(patch: Partial<MarkdownPreferences>): Promise<MarkdownPreferences>;
-    appearance?(patch?: Partial<Record<MarkdownAppearanceGroup, string>>): Promise<MarkdownAppearance>;
+    appearance?(patch?: MarkdownAppearancePatch): Promise<MarkdownAppearance>;
     confirm(action: "reload" | "overwrite" | "save-as"): Promise<boolean>;
     confirmClose(): Promise<"keep" | "save-as" | "cancel">;
     recoveries(): Promise<Array<{id: string; displayName: string; updatedAt: number}>>;

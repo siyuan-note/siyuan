@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261109070428"
+		"updated": "20261109071401"
 	},
 	"Children": [
 		{
@@ -245,7 +245,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-3d23d38",
-				"updated": "20261109070428"
+				"updated": "20261109071401"
 			},
 			"Children": [
 				{
@@ -286,7 +286,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to choose a source workspace separately for appearance mode, font size, and fonts. A single available workspace is used by default. With multiple workspaces, each setting can use a different source; without a selection, the most recently used available workspace is used. Fonts include global default, editor, and monospace settings, including custom fonts stored in that workspace. Workspace theme CSS and scripts are not loaded. If the selected workspace is unavailable, the affected setting uses its default; missing or failed fonts fall back in font order. On mobile, appearance mode and font size remain independent settings."
+					"Data": " to choose a workspace or independent configuration separately for appearance mode, font size, and fonts. By default, the most recently used available workspace is inherited; a single available workspace is used automatically, and independent configuration is used when none is available. Each setting can use a different source. Once you explicitly choose independent configuration, adding a workspace does not switch it automatically. If a selected workspace is temporarily unavailable, the saved independent value is used without changing the selected source. Independent configuration lets you set appearance mode, font size, and ordered lists for global default, editor, and monospace fonts, specifying system font names and weights. It does not offer a separate font-file import. Inheriting from a workspace also supports its custom fonts; missing or failed fonts fall back in font order. Workspace theme CSS and scripts are not loaded. On mobile, appearance mode and font size remain independent settings."
 				}
 			]
 		},

@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Espace de travail indisponible ; valeurs par défaut utilisées",
+	"markdownSystemFontName": "Saisissez un nom de police système, pas SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Réglages indépendants",
+	"markdownFontWeight": "Graisse de police",
+	"markdownWorkspaceUnavailable": "Espace de travail indisponible ; réglages indépendants utilisés",
 	"automationInsertField": "Insérer une référence de champ",
 	"automationTemplateSourceLimit": "Le code du modèle est limité à 8 Kio",
 	"automationRunSummary": "${succeeded} réussies, ${failed} échouées, ${pending} restantes, ${skipped} ignorées",

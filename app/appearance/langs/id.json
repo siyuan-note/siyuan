@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Ruang kerja tidak tersedia; menggunakan pengaturan bawaan",
+	"markdownSystemFontName": "Masukkan nama font sistem, bukan SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Pengaturan mandiri",
+	"markdownFontWeight": "Ketebalan font",
+	"markdownWorkspaceUnavailable": "Ruang kerja tidak tersedia; menggunakan pengaturan mandiri",
 	"automationInsertField": "Sisipkan referensi bidang",
 	"automationTemplateSourceLimit": "Sumber templat dibatasi hingga 8 KiB",
 	"automationRunSummary": "${succeeded} berhasil, ${failed} gagal, ${pending} tersisa, ${skipped} dilewati",

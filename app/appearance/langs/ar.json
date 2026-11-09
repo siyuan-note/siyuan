@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "مساحة العمل غير متاحة؛ تُستخدم الإعدادات الافتراضية",
+	"markdownSystemFontName": "أدخل اسم خط نظام، وليس SiYuanCustomFont-",
+	"markdownIndependentAppearance": "إعدادات مستقلة",
+	"markdownFontWeight": "وزن الخط",
+	"markdownWorkspaceUnavailable": "مساحة العمل غير متاحة؛ تُستخدم الإعدادات المستقلة",
 	"automationInsertField": "إدراج مرجع حقل",
 	"automationTemplateSourceLimit": "مصدر القالب محدود بـ 8 KiB",
 	"automationRunSummary": "نجح ${succeeded}، فشل ${failed}، متبقٍ ${pending}، تم تخطي ${skipped}",

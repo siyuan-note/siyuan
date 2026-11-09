@@ -950,13 +950,29 @@ test("workspace appearance capability persists independent source selections wit
     const initial = await call(window, "bootstrap");
     assert.equal(initial.appearance.theme, "dark");
     const id = initial.appearance.workspaces[0].id;
-    const result = await call(window, "appearance", {fonts: id});
+    const result = await call(window, "appearance", {sources: {fonts: id}});
     assert.equal(result.sources.fonts, id);
-    await assert.rejects(call(window, "appearance", {theme: "../secret"}));
+    await assert.rejects(call(window, "appearance", {sources: {theme: "../secret"}}));
     await assert.rejects(call(window, "preferences", {theme: "light"}));
     await call(window, "preferences", {mode: "sv"});
     const persisted = JSON.parse(await fs.readFile(path.join(directory, "config", "preferences.json"), "utf8"));
     assert.equal(persisted.mode, "sv");
     assert.deepEqual(persisted.sources, {fonts: id});
     assert.equal(persisted.theme, undefined);
+});
+
+test("independent appearance can be configured with no registered workspace", async t => {
+    const {manager, call} = await fixture(t);
+    const window = await manager.open();
+    const initial = await call(window, "bootstrap");
+    assert.equal(initial.appearance.sources.theme, "independent");
+    const result = await call(window, "appearance", {sources: {theme: "independent", fontSize: "independent"}, independent: {theme: "dark", fontSize: 27}});
+    assert.equal(result.theme, "dark");
+    assert.equal(result.fontSize, 27);
+    const next = await manager.open();
+    const restored = await call(next, "bootstrap");
+    assert.equal(restored.appearance.theme, "dark");
+    assert.equal(restored.appearance.fontSize, 27);
+    await assert.rejects(call(window, "appearance", {independent: {fontSize: 1000}}));
+    assert.equal((await call(window, "bootstrap")).appearance.fontSize, 27);
 });

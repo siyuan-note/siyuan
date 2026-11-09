@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Робочий простір недоступний; використовуються типові значення",
+	"markdownSystemFontName": "Введіть назву системного шрифту, а не SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Незалежні налаштування",
+	"markdownFontWeight": "Насиченість шрифту",
+	"markdownWorkspaceUnavailable": "Робочий простір недоступний; використовуються незалежні налаштування",
 	"automationInsertField": "Вставити посилання на поле",
 	"automationTemplateSourceLimit": "Вихідний код шаблону обмежено 8 КіБ",
 	"automationRunSummary": "Успішно: ${succeeded}, помилки: ${failed}, залишилось: ${pending}, пропущено: ${skipped}",

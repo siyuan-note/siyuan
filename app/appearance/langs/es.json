@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Espacio de trabajo no disponible; se usan los valores predeterminados",
+	"markdownSystemFontName": "Introduce un nombre de fuente del sistema, no SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Configuración independiente",
+	"markdownFontWeight": "Grosor de fuente",
+	"markdownWorkspaceUnavailable": "Espacio de trabajo no disponible; se usa la configuración independiente",
 	"automationInsertField": "Insertar referencia de campo",
 	"automationTemplateSourceLimit": "El código de la plantilla está limitado a 8 KiB",
 	"automationRunSummary": "${succeeded} correctas, ${failed} fallidas, ${pending} pendientes, ${skipped} omitidas",

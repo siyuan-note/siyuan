@@ -31,9 +31,9 @@ test("appearance defaults to recent workspace and resolves sources independently
     assert.deepEqual(result.fonts.editor, [{family: "Legacy", weight: 600}]);
     assert.equal(result.workspaces.length, 2);
     assert.equal((await host.load({fontSize: "f".repeat(64)})).fontSize, 16);
-    await assert.rejects(host.validate({theme: "f".repeat(64)}));
+    await assert.rejects(host.validate({sources: {theme: "f".repeat(64)}}));
     await assert.rejects(host.validate({unknown: hash(a)}));
-    assert.deepEqual(await host.validate({fonts: hash(a)}), {fonts: hash(a)});
+    assert.deepEqual(await host.validate({sources: {fonts: hash(a)}}), {sources: {fonts: hash(a)}});
 });
 test("corrupt and inaccessible workspace configurations fall back safely", async t => {
     const {root, workspace, register, host} = await fixture(t);
@@ -70,8 +70,32 @@ test("custom fonts require selected workspace capability, valid hash and no syml
     await fs.writeFile(outside, bytes);
     await fs.symlink(outside, file);
     assert.equal(await host.readFont(token), undefined);
-    await host.load({fonts: hash(b)});
+    await host.load({fonts: "independent"});
     assert.equal(await host.readFont(token), undefined);
     host.close();
     await assert.rejects(host.load());
+});
+
+test("independent appearance remains available without a workspace and survives mixed sources", async t => {
+    const {workspace, register, host} = await fixture(t);
+    const independent = {theme: "light" as const, fontSize: 23, fonts: {global: [{family: "Arial", weight: 400}], editor: [], code: []}};
+    const initial = await host.load({}, independent);
+    assert.equal(initial.sources.theme, "independent");
+    assert.equal(initial.fontSize, 23);
+    const a = await workspace("a", {appearance: {mode: 1}, editor: {fontSize: 42}});
+    await register([a]);
+    const mixed = await host.load({theme: "independent", fonts: "independent"}, independent);
+    assert.equal(mixed.theme, "light");
+    assert.equal(mixed.fontSize, 42);
+    assert.deepEqual(mixed.fonts.global, independent.fonts.global);
+    assert.deepEqual(mixed.customFonts, []);
+    await register([]);
+    const offline = await host.load({theme: hash(a)}, independent);
+    assert.equal(offline.sources.theme, hash(a));
+    assert.equal(offline.theme, "light");
+    await register([a]);
+    assert.equal((await host.load({theme: hash(a)}, independent)).theme, "dark");
+    assert.deepEqual(await host.validate({sources: {fonts: "independent"}, independent}), {sources: {fonts: "independent"}, independent});
+    await assert.rejects(host.validate({independent: {fontSize: 73}}));
+    await assert.rejects(host.validate({independent: {fonts: {global: [{family: `SiYuanCustomFont-${"a".repeat(64)}`, weight: 400}], editor: [], code: []}}}));
 });

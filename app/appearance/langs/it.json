@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Area di lavoro non disponibile; vengono usati i valori predefiniti",
+	"markdownSystemFontName": "Inserisci un nome di carattere di sistema, non SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Impostazioni indipendenti",
+	"markdownFontWeight": "Spessore del carattere",
+	"markdownWorkspaceUnavailable": "Area di lavoro non disponibile; vengono usate le impostazioni indipendenti",
 	"automationInsertField": "Inserisci riferimento al campo",
 	"automationTemplateSourceLimit": "Il codice del modello è limitato a 8 KiB",
 	"automationRunSummary": "${succeeded} riuscite, ${failed} non riuscite, ${pending} rimanenti, ${skipped} saltate",

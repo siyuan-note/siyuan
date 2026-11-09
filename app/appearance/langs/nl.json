@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Werkruimte niet beschikbaar; standaardwaarden worden gebruikt",
+	"markdownSystemFontName": "Voer een systeemlettertypenaam in, niet SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Onafhankelijke instellingen",
+	"markdownFontWeight": "Letterdikte",
+	"markdownWorkspaceUnavailable": "Werkruimte niet beschikbaar; onafhankelijke instellingen worden gebruikt",
 	"automationInsertField": "Veldverwijzing invoegen",
 	"automationTemplateSourceLimit": "Sjabloonbron is beperkt tot 8 KiB",
 	"automationRunSummary": "${succeeded} geslaagd, ${failed} mislukt, ${pending} resterend, ${skipped} overgeslagen",

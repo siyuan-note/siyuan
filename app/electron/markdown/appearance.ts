@@ -2,7 +2,8 @@ import * as fs from "node:fs/promises";
 import {constants} from "node:fs";
 import * as path from "node:path";
 import {createHash, randomBytes} from "node:crypto";
-import type {MarkdownAppearance, MarkdownAppearanceGroup, MarkdownFont, MarkdownPreferences} from "../../src/markdown/bridge";
+import type {MarkdownAppearance, MarkdownAppearanceGroup, MarkdownAppearancePatch, MarkdownFont, MarkdownIndependentAppearance, MarkdownPreferences} from "../../src/markdown/bridge";
+import {normalizeIndependentAppearance} from "./preferences";
 import {inside} from "./resources";
 
 const maxFontSize = 64 * 1024 * 1024;
@@ -72,15 +73,19 @@ export const createMarkdownAppearance = (configDirectory: string) => {
             return result;
         } catch { return []; }
     };
-    const load = async (sources: MarkdownPreferences["sources"] = {}): Promise<MarkdownAppearance> => {
+    const load = async (sources: MarkdownPreferences["sources"] = {}, independent: MarkdownIndependentAppearance = {}): Promise<MarkdownAppearance> => {
         if (closed) throw new Error("Markdown appearance closed");
         const available = await workspaces();
         const result = defaultMarkdownAppearance();
+        result.independent = normalizeIndependentAppearance(independent);
+        result.theme = independent.theme ?? "system";
+        result.fontSize = independent.fontSize ?? 16;
+        result.fonts = independent.fonts ?? {global: [], editor: [], code: []};
         result.workspaces = available.map(({id, name}) => ({id, name}));
         const configs = new Map<string, Record<string, unknown>>();
         let fontWorkspace: Workspace | undefined;
         for (const group of ["theme", "fontSize", "fonts"] as MarkdownAppearanceGroup[]) {
-            const id = sources[group] || available[available.length - 1]?.id || "";
+            const id = sources[group] || available[available.length - 1]?.id || "independent";
             result.sources[group] = id;
             const workspace = available.find(item => item.id === id);
             if (!workspace) continue;
@@ -95,9 +100,9 @@ export const createMarkdownAppearance = (configDirectory: string) => {
             }
             const editor = object(conf.editor);
             const appearance = object(conf.appearance);
-            if (group === "theme") result.theme = appearance.modeOS === true ? "system" : appearance.mode === 1 ? "dark" : appearance.mode === 0 ? "light" : "system";
+            if (group === "theme") result.theme = appearance.modeOS === true ? "system" : appearance.mode === 1 ? "dark" : appearance.mode === 0 ? "light" : result.theme;
             if (group === "fontSize" && typeof editor.fontSize === "number" && Number.isInteger(editor.fontSize) && editor.fontSize >= 9 && editor.fontSize <= 72) result.fontSize = editor.fontSize;
-            if (group === "fonts") {
+            if (group === "fonts" && (Array.isArray(appearance.globalFontFamilies) || Array.isArray(editor.fontFamilies) || Array.isArray(editor.codeFontFamilies) || typeof editor.fontFamily === "string")) {
                 fontWorkspace = workspace;
                 result.fonts = {global: fonts(appearance.globalFontFamilies),
                     editor: fonts(editor.fontFamilies ?? [{family: editor.fontFamily, weight: editor.fontWeight}]), code: fonts(editor.codeFontFamilies)};
@@ -170,10 +175,12 @@ export const createMarkdownAppearance = (configDirectory: string) => {
     };
     return {load, readFont: queuedReadFont, async validate(patch: unknown) {
         const values = object(patch);
-        if (patch !== values || Object.keys(values).some(key => !["theme", "fontSize", "fonts"].includes(key)) ||
-            Object.values(values).some(value => !validID(value))) throw new Error("Invalid appearance source");
+        if (patch !== values || Object.keys(values).some(key => !["sources", "independent"].includes(key))) throw new Error("Invalid appearance patch");
+        const sources = values.sources === undefined ? {} : object(values.sources);
+        if (values.sources !== undefined && sources !== values.sources || Object.keys(sources).some(key => !["theme", "fontSize", "fonts"].includes(key)) ||
+            Object.values(sources).some(value => value !== "independent" && !validID(value))) throw new Error("Invalid appearance source");
         const available = await workspaces();
-        if (Object.values(values).some(id => !available.some(item => item.id === id))) throw new Error("Unavailable appearance source");
-        return values as Partial<Record<MarkdownAppearanceGroup, string>>;
+        if (Object.values(sources).some(id => id !== "independent" && !available.some(item => item.id === id))) throw new Error("Unavailable appearance source");
+        return {sources, ...(values.independent === undefined ? {} : {independent: normalizeIndependentAppearance(values.independent)})} as MarkdownAppearancePatch;
     }, close() {closed = true; grants.clear(); fontBytes.clear(); customFonts = [];} };
 };

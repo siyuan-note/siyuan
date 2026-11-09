@@ -293,7 +293,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
         if (quitting) return;
         const appearanceHost = createMarkdownAppearance(configDirectory);
         let appearance: MarkdownAppearance;
-        try { appearance = await appearanceHost.load((await preferences.read()).sources); }
+        try { const values = await preferences.read(); appearance = await appearanceHost.load(values.sources, values.independent); }
         catch {
             const restoredSession = restored && host.sessions.get(restored.sessionId);
             if (restoredSession) restoredSession.crashed = true;
@@ -672,8 +672,8 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 const task = (record.appearanceTask || Promise.resolve(record.appearance)).catch(() => record.appearance).then(async () => {
                     if (record.window.isDestroyed()) throw new Error("Markdown window closed");
                     const patch = payload === undefined ? {} : await record.appearanceHost.validate(payload);
-                    const values = payload === undefined ? await preferences.read() : await preferences.update({sources: patch});
-                    const next = await record.appearanceHost.load(values.sources);
+                    const values = payload === undefined ? await preferences.read() : await preferences.update(patch);
+                    const next = await record.appearanceHost.load(values.sources, values.independent);
                     if (record.window.isDestroyed()) throw new Error("Markdown window closed");
                     record.appearance = next;
                     return next;

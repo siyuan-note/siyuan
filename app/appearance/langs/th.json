@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "พื้นที่ทำงานไม่พร้อมใช้งาน กำลังใช้ค่าเริ่มต้น",
+	"markdownSystemFontName": "ป้อนชื่อแบบอักษรระบบ ไม่ใช่ SiYuanCustomFont-",
+	"markdownIndependentAppearance": "การตั้งค่าอิสระ",
+	"markdownFontWeight": "น้ำหนักแบบอักษร",
+	"markdownWorkspaceUnavailable": "พื้นที่ทำงานไม่พร้อมใช้งาน กำลังใช้การตั้งค่าอิสระ",
 	"automationInsertField": "แทรกการอ้างอิงฟิลด์",
 	"automationTemplateSourceLimit": "ซอร์สเทมเพลตมีขนาดได้ไม่เกิน 8 KiB",
 	"automationRunSummary": "สำเร็จ ${succeeded} รายการ ล้มเหลว ${failed} รายการ เหลือ ${pending} รายการ ข้าม ${skipped} รายการ",

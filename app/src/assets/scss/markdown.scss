@@ -1,5 +1,7 @@
 @use "component/button";
 @use "component/menu";
+@use "component/select";
+@use "component/text-field";
 @use "component/tooltips";
 @use "business/block";
 @use "util/scroll";
@@ -559,4 +561,24 @@ button {
 .body--ios,
 .body--harmony {
   @include touch-controls;
+}
+
+.markdown-appearance-form,
+.markdown-appearance-form__field,
+.markdown-appearance-form__fonts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.markdown-appearance-form__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px auto;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.markdown-appearance-form__row input {
+  width: 100%;
+  min-width: 0;
 }

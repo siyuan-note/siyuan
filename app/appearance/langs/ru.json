@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Рабочее пространство недоступно; используются значения по умолчанию",
+	"markdownSystemFontName": "Введите имя системного шрифта, а не SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Независимые настройки",
+	"markdownFontWeight": "Насыщенность шрифта",
+	"markdownWorkspaceUnavailable": "Рабочее пространство недоступно; используются независимые настройки",
 	"automationInsertField": "Вставить ссылку на поле",
 	"automationTemplateSourceLimit": "Исходный код шаблона ограничен 8 КиБ",
 	"automationRunSummary": "Успешно: ${succeeded}, ошибки: ${failed}, осталось: ${pending}, пропущено: ${skipped}",

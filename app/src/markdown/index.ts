@@ -1,6 +1,6 @@
 import "vditor/dist/index.css";
 import "../assets/scss/markdown.scss";
-import type {MarkdownAppearanceGroup, MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "./bridge";
+import type {MarkdownAppearanceGroup, MarkdownAppearancePatch, MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "./bridge";
 import {createMarkdownEditor, MarkdownEditor, MarkdownEditorMode} from "./editor";
 import {MarkdownSession, MarkdownSessionState} from "./session";
 import {createNativeMarkdownBridge} from "./nativeBridge";
@@ -11,7 +11,7 @@ import {createMarkdownChoice, createMarkdownSubmenu, MarkdownChoice} from "./cho
 import {createMarkdownWindowChrome} from "./windowChrome";
 import {createMarkdownTooltips} from "./tooltip";
 import {createMarkdownSidebarShortcuts} from "./shortcuts";
-import {createMarkdownFontAppearance} from "./appearance";
+import {createMarkdownAppearanceForm, createMarkdownFontAppearance} from "./appearance";
 
 declare const SIYUAN_VERSION: string;
 (window as unknown as {SIYUAN_VERSION: string}).SIYUAN_VERSION = SIYUAN_VERSION;
@@ -96,6 +96,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
 <div class="markdown-workspace">
     <aside class="markdown-tree" id="markdownTree" hidden></aside>
     <aside class="markdown-recovery" id="markdownRecoveryPanel" hidden><div class="markdown-recovery__heading"><strong data-label="markdownRecovery"></strong><button type="button" class="b3-button b3-button--text" id="markdownRecoveryClose" data-label="close"></button></div><p data-label="markdownPrivacy"></p><div id="markdownRecoveryList"></div></aside>
+    <aside class="markdown-recovery" id="markdownAppearancePanel" hidden></aside>
     <main class="markdown-editor" id="markdownEditor" aria-busy="true"></main>
 </div>
 <footer class="markdown-footer" id="markdownFooter" hidden>
@@ -292,6 +293,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownActions").inert = frozen;
         control("markdownPreferences").inert = frozen;
         control("markdownRecoveryPanel").inert = frozen;
+        control("markdownAppearancePanel").inert = frozen;
         control("markdownProblemActions").inert = frozen && !pendingSwitch;
         tree?.freeze(frozen);
         render(session.getState());
@@ -584,6 +586,30 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         onChange(mode) {if (!frozen) {closeMore(); editor.setMode(mode as MarkdownEditorMode);}},
     });
     let appearanceUpdates = Promise.resolve();
+    const updateAppearance = (patch: MarkdownAppearancePatch) => {
+        const task = appearanceUpdates.then(async () => {
+            if (disposed) return;
+            const next = await bridge.appearance(patch);
+            if (disposed) return;
+            appearance = next;
+            root.style.setProperty("--markdown-font-size", `${appearance.fontSize}px`);
+            fontAppearance.apply(appearance);
+            await applyTheme();
+            if (!disposed) workspaceChoices();
+        });
+        appearanceUpdates = task.catch((): void => undefined);
+        runAction(() => task, false, true);
+        return task;
+    };
+    const configureAppearance = (group: MarkdownAppearanceGroup) => {
+        if (disposed || frozen) return;
+        closeMore(false);
+        const panel = control("markdownAppearancePanel");
+        panel.hidden = false;
+        createMarkdownAppearanceForm(panel, group, appearance.independent ?? {}, text,
+            async independent => {if (!disposed && !frozen) await updateAppearance({sources: {[group]: "independent"}, independent});},
+            () => {panel.hidden = true; panel.replaceChildren(); if (!disposed) moreButton.focus();});
+    };
     const workspaceChoices = () => {
         themeChoice?.destroy(); fontChoice?.destroy(); fontsChoice?.destroy();
         const choice = (id: string, label: string, group: MarkdownAppearanceGroup, icon: string) => {
@@ -591,32 +617,29 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             element.replaceChildren();
             element.hidden = false;
             const source = appearance.sources[group];
-            const values = appearance.workspaces.map(workspace => ({value: workspace.id, label: workspace.name}));
+            const values = [{value: "independent", label: text("markdownIndependentAppearance")}, ...appearance.workspaces.map(workspace => ({value: workspace.id, label: workspace.name}))];
             if (!source || !values.some(value => value.value === source)) {
                 values.unshift({value: source, label: text(source ? "markdownWorkspaceUnavailable" : "default")});
             }
             const result = createMarkdownChoice({element, label: text(label), icon, values, value: source,
                 onChange(value) {
-                    if (frozen || disposed || !appearance.workspaces.some(workspace => workspace.id === value)) return;
+                    if (frozen || disposed || value !== "independent" && !appearance.workspaces.some(workspace => workspace.id === value)) return;
                     closeMore();
-                    const task = appearanceUpdates.then(async () => {
-                        if (disposed) return;
-                        const next = await bridge.appearance({[group]: value});
-                        if (disposed) return;
-                        appearance = next;
-                        root.style.setProperty("--markdown-font-size", `${appearance.fontSize}px`);
-                        fontAppearance.apply(appearance);
-                        await applyTheme();
-                        if (!disposed) workspaceChoices();
-                    });
-                    appearanceUpdates = task.catch((): void => undefined);
-                    runAction(() => task, false, true);
+                    void updateAppearance({sources: {[group]: value}}).then(() => {
+                        if (value === "independent") configureAppearance(group);
+                    }).catch((): void => undefined);
                 },
             });
-            result.setDisabled(!appearance.workspaces.length);
             result.menu.querySelectorAll<HTMLButtonElement>("button").forEach(button => {
-                button.disabled = !appearance.workspaces.some(workspace => workspace.id === button.dataset.value);
+                button.disabled = button.dataset.value !== "independent" && !appearance.workspaces.some(workspace => workspace.id === button.dataset.value);
             });
+            if (source === "independent") {
+                const configure = document.createElement("button");
+                configure.type = "button"; configure.className = "b3-menu__item";
+                configure.textContent = text("config"); configure.dataset.configure = group;
+                configure.onclick = event => {event.stopPropagation(); configureAppearance(group);};
+                result.menu.append(configure);
+            }
             return result;
         };
         themeChoice = choice("markdownTheme", "appearanceMode", "theme", "iconMode");

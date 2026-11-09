@@ -1,5 +1,8 @@
 {
-	"markdownWorkspaceUnavailable": "Pracovný priestor nie je dostupný; používajú sa predvolené hodnoty",
+	"markdownSystemFontName": "Zadajte názov systémového písma, nie SiYuanCustomFont-",
+	"markdownIndependentAppearance": "Nezávislé nastavenia",
+	"markdownFontWeight": "Hrúbka písma",
+	"markdownWorkspaceUnavailable": "Pracovný priestor nie je dostupný; používajú sa nezávislé nastavenia",
 	"automationInsertField": "Vložiť odkaz na pole",
 	"automationTemplateSourceLimit": "Zdroj šablóny je obmedzený na 8 KiB",
 	"automationRunSummary": "Úspešné: ${succeeded}, zlyhané: ${failed}, zostávajúce: ${pending}, preskočené: ${skipped}",

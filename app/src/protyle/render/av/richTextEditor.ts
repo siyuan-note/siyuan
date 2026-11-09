@@ -17,6 +17,7 @@ import {getAVHostBlockID, getAVHostIdentity} from "./host";
 import {AV_CELL_EDITOR_CLOSE_EVENT} from "./cellEditor";
 import {updateOutlineCurrentBlock} from "../../util/outlineBlock";
 import {focusBlock} from "../../util/selection";
+import {isAVContinuousInputKey} from "./continuousInput";
 import {configureAVRichTextEditorLute, createAVRichTextEditorLute} from "./richTextEditorLute";
 import {
     createAVRichTextValue,
@@ -64,6 +65,7 @@ interface AVRichTextEditorOptions {
     onSave: (value: IAVCellValue, nodeElement: HTMLElement,
              stableCells: import("./selectionState").IAVSelectedCell[]) => void | Promise<void>;
     onDestroy?: () => void;
+    prepareNextInput?: () => (() => void) | undefined;
 }
 
 interface ActiveEditor {
@@ -249,12 +251,15 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             throw error;
         }
     };
-    const finish = async (save: boolean, restoreFocus = false) => {
+    const finish = async (save: boolean, restoreFocus = false, continueInput?: () => void) => {
         if (!save) {
             cancelled = true;
         }
         if (mobile) {
-            if (save) await dialog.requestClose("confirm");
+            if (save) {
+                const closed = await dialog.requestClose("confirm");
+                if (closed && !cancelled && !activeEditor && isOwnerConnected()) continueInput?.();
+            }
             else {
                 // 目标失效立即清空敏感编辑内容，不等待关闭动画或未完成的保存。
                 cleanup();
@@ -267,15 +272,21 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         }
         // 桌面保存期间阻止重复结束，但允许失效标记取消迟到提交。
         finishing = true;
+        panelElement.inert = true;
+        const active = document.activeElement;
         try {
             if (save) await saveContent();
+            const canContinue = !continueInput || document.activeElement === active ||
+                document.activeElement === document.body || panelElement.contains(document.activeElement);
             cleanup();
-            if (restoreFocus && !cancelled && !activeEditor && isOwnerConnected() &&
+            if (restoreFocus && canContinue && !cancelled && !activeEditor && isOwnerConnected() &&
                 options.protyle.wysiwyg.element.contains(options.nodeElement)) {
                 focusBlock(options.nodeElement);
+                continueInput?.();
             }
         } catch (error) {
             console.error(error);
+            if (!finished) panelElement.inert = false;
             if (!finished) showMessage(window.siyuan.languages.settingsPendingSaveError);
         } finally {
             finishing = false;
@@ -292,7 +303,27 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     if (mobile) {
         maskElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () => void finish(true));
     }
+    const continueInput = (event: Event, repeat = false) => {
+        if (fragment.hintElement.classList.contains("fn__none") &&
+            fragment.protyle.toolbar.element.classList.contains("fn__none") &&
+            fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
+            const next = options.prepareNextInput?.();
+            if (next) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!repeat) void finish(true, true, next);
+                return true;
+            }
+        }
+        return false;
+    };
+    panelElement.addEventListener("beforeinput", (event: InputEvent) => {
+        if (mobile && event.cancelable && !event.isComposing && event.inputType === "insertParagraph") {
+            continueInput(event);
+        }
+    }, true);
     panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (isAVContinuousInputKey(event, true) && continueInput(event, event.repeat)) return;
         if (event.key === "Escape" && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {

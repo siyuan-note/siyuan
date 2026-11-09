@@ -340,6 +340,11 @@ const runElectron = async () => {
         const sources = Object.fromEntries(["richTextEditor", "editorSession", "selectionState", "capabilities", "capabilities.generated"].map(name => ["./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
+        const continuousSource = ts.createSourceFile("continuousInput.ts", readFileSync(path.join(__dirname,
+            "../src/protyle/render/av/continuousInput.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+        sources["./continuousInput"] = ts.transpileModule(continuousSource.statements.filter(ts.isVariableStatement).find(statement =>
+            statement.declarationList.declarations.some(declaration => declaration.name.getText(continuousSource) === "isAVContinuousInputKey"))
+            .getText(continuousSource), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         const hintSource = ts.createSourceFile("extend.ts", readFileSync(path.join(__dirname,
             "../src/protyle/hint/extend.ts"), "utf8"), ts.ScriptTarget.Latest, true);
         const searchRefSource = readFileSync(path.join(__dirname, "../src/protyle/hint/searchRef.ts"), "utf8")

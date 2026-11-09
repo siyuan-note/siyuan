@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261106090000"
+		"updated": "20261109202618"
 	},
 	"Children": [
 		{
@@ -6148,6 +6148,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20261109202618-42779dc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109202618-42779dc",
+				"updated": "20261109202618"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In table and list views, Enter confirms an input field and immediately edits the same field in the next row of the same group. This applies to text, number, URL, email, phone and unbound primary-key input fields. The last row does not create another entry. Shift+Enter inserts a text line break; use entry details for full rich text editing. Composition and candidate selection keep their existing behavior. A failed save keeps the current draft open."
 				}
 			]
 		},

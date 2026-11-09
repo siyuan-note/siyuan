@@ -3,7 +3,10 @@ import {describe, it} from "node:test";
 import {ScriptTarget} from "typescript";
 import {loadModule} from "../../../testSupport/loadModule";
 
-const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: () => Promise<void>; save?: () => Promise<void>} = {}) => {
+const continuous = loadModule<typeof import("./continuousInput")>("src/protyle/render/av/continuousInput.ts", {require: () => ({})});
+
+const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: () => Promise<void>; save?: () => Promise<void>;
+    tableInput?: boolean; hint?: boolean} = {}) => {
     const lifecycle: string[] = [];
     const masks: Array<{
         firstElementChild: ReturnType<typeof createPanel>;
@@ -38,7 +41,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
             wysiwyg: {flushPendingInput: settings.flush || (async () => {})},
             toolbar: {element: hidden, subElement: hidden},
         },
-        hintElement: hidden,
+        hintElement: {classList: {contains: () => !settings.hint}},
         getBlockHTML: () => content,
         focus: () => {},
         destroy: () => lifecycle.push("destroy"),
@@ -51,8 +54,10 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         stableCells: [] as import("./selectionState").IAVSelectedCell[],
         onSave: () => { lifecycle.push("save"); return settings.save?.(); },
         onDestroy: () => lifecycle.push("callback"),
+        prepareNextInput: () => settings.tableInput ? () => lifecycle.push("next") : undefined,
     };
     const modules: Record<string, unknown> = {
+        "./continuousInput": continuous,
         "./host": {getAVHostIdentity: (element: typeof node) => element.dataset.nodeId,
             getAVHostBlockID: (element: typeof node) => element.dataset.nodeId},
         "./cellEditor": {AV_CELL_EDITOR_CLOSE_EVENT: "siyuan-av-cell-editor-close"},
@@ -147,6 +152,13 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         methods, lifecycle, owner, node, open,
         cancel: () => masks.at(-1).handlers.get("siyuan-av-cell-editor-close")({}),
         get inert() { return masks.at(-1).firstElementChild.inert; },
+        enter: (options: Partial<KeyboardEvent> = {}) => masks.at(-1).firstElementChild.handlers.get("keydown")({
+            key: "Enter", preventDefault: () => lifecycle.push("prevent"), stopPropagation: () => lifecycle.push("stop"), ...options,
+        }),
+        softKeyboardEnter: (options: Partial<InputEvent> = {}) => masks.at(-1).firstElementChild.handlers.get("beforeinput")({
+            inputType: "insertParagraph", cancelable: true,
+            preventDefault: () => lifecycle.push("prevent"), stopPropagation: () => lifecycle.push("stop"), ...options,
+        }),
         escape: () => masks.at(-1).firstElementChild.handlers.get("keydown")({
             key: "Escape",
             preventDefault: () => lifecycle.push("prevent"),
@@ -160,7 +172,66 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
     };
 };
 
-describe("database rich text editor Escape focus", () => {
+describe("database rich text editor lifecycle and continuous input", () => {
+    for (const mobile of [false, true]) {
+        it(`waits for a successful save before continuing input (${mobile ? "mobile" : "desktop"})`, async () => {
+            let complete: () => void;
+            const saving = new Promise<void>(resolve => complete = resolve);
+            const editor = createEditor({mobile, changed: true, tableInput: true, save: () => saving});
+            editor.enter();
+            editor.enter();
+            await editor.settle();
+            assert.equal(editor.lifecycle.filter(item => item === "save").length, 1);
+            assert.equal(editor.lifecycle.includes("next"), false);
+            complete();
+            await editor.settle();
+            assert.equal(editor.lifecycle.filter(item => item === "next").length, 1);
+            assert.ok(editor.lifecycle.indexOf("next") > editor.lifecycle.indexOf("destroy"));
+        });
+        it(`retains failed drafts and does not navigate after invalidation (${mobile ? "mobile" : "desktop"})`, async () => {
+            let fail = true;
+            const editor = createEditor({mobile, changed: true, tableInput: true, save: async () => {
+                if (fail) throw new Error("failed");
+            }});
+            editor.enter();
+            await editor.settle();
+            assert.equal(editor.lifecycle.includes("next"), false);
+            assert.equal(editor.lifecycle.includes("destroy"), false);
+            assert.equal(editor.inert, false);
+            fail = false;
+            editor.cancel();
+            editor.enter();
+            await editor.settle();
+            assert.equal(editor.lifecycle.includes("next"), false);
+        });
+    }
+    it("preserves rich text Enter outside table inputs, soft breaks, IME confirmation and reference hints", async () => {
+        for (const settings of [{}, {tableInput: true, hint: true}]) {
+            const editor = createEditor(settings);
+            editor.enter();
+            await editor.settle();
+            assert.deepEqual(editor.lifecycle, []);
+        }
+        for (const key of ["shiftKey", "ctrlKey", "metaKey", "altKey", "isComposing"]) {
+            const editor = createEditor({tableInput: true});
+            editor.enter({[key]: true});
+            await editor.settle();
+            assert.deepEqual(editor.lifecycle, [], key);
+        }
+    });
+    it("consumes held Enter without saving another cell and supports mobile beforeinput confirmation", async () => {
+        const held = createEditor({tableInput: true});
+        held.enter({repeat: true});
+        await held.settle();
+        assert.deepEqual(held.lifecycle, ["prevent", "stop"]);
+        const mobile = createEditor({mobile: true, tableInput: true, changed: true});
+        mobile.softKeyboardEnter({isComposing: true});
+        mobile.softKeyboardEnter({inputType: "insertLineBreak"});
+        assert.deepEqual(mobile.lifecycle, []);
+        mobile.softKeyboardEnter();
+        await mobile.settle();
+        assert.equal(mobile.lifecycle.includes("next"), true);
+    });
     for (const mobile of [false, true]) {
         it(`cancels owned ${mobile ? "mobile" : "desktop"} rich text immediately without saving its draft`, async () => {
             const editor = createEditor({mobile, changed: true});

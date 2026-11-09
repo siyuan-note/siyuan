@@ -5,6 +5,7 @@ const activeSubmenus = new WeakMap<HTMLElement, () => void>();
 export const createMarkdownSubmenu = (options: {
     element: HTMLElement;
     label: string;
+    maxHeight?: number;
     icon: string;
     onClose?(): void;
 }) => {
@@ -45,7 +46,7 @@ export const createMarkdownSubmenu = (options: {
         const bounds = menu.getBoundingClientRect();
         const firstItem = menu.firstElementChild?.getBoundingClientRect();
         const top = Math.max(8, anchor.top - (firstItem ? firstItem.top - bounds.top : 0));
-        const position = getAnchoredMenuPosition(top, 0, Math.ceil(bounds.height), innerHeight - 8, 8);
+        const position = getAnchoredMenuPosition(top, 0, Math.min(Math.ceil(bounds.height), options.maxHeight ?? Infinity), innerHeight - 8, 8);
         menu.style.top = `${Math.max(8, position.top)}px`;
         menu.style.maxHeight = `${position.height}px`;
         const parentMenu = element.parentElement?.closest<HTMLElement>(".markdown-choice__menu");
@@ -102,8 +103,9 @@ export const createMarkdownSubmenu = (options: {
 export const createMarkdownChoice = (options: {
     element: HTMLElement;
     label: string;
+    maxHeight?: number;
     icon: string;
-    values: Array<{value: string; label: string}>;
+    values: Array<{value: string; label: string; tooltip?: string}>;
     value: string;
     onChange(value: string): void;
 }) => {
@@ -117,6 +119,10 @@ export const createMarkdownChoice = (options: {
         button.setAttribute("role", "menuitemradio");
         button.innerHTML = '<svg class="b3-menu__icon" aria-hidden="true"><use href="#iconSelect"></use></svg><span class="b3-menu__label"></span>';
         button.querySelector(".b3-menu__label").textContent = item.label;
+        if (item.tooltip) {
+            button.dataset.tooltip = item.tooltip;
+            button.setAttribute("aria-label", `${item.label}: ${item.tooltip}`);
+        }
         button.addEventListener("click", event => {
             event.stopPropagation();
             if (options.element.getAttribute("aria-disabled") === "true") return;

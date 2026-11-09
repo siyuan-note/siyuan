@@ -83,21 +83,23 @@ export const createMarkdownAppearance = (configDirectory: string) => {
         result.fonts = independent.fonts ?? {global: [], editor: [], code: []};
         result.workspaces = available.map(({id, name}) => ({id, name}));
         const configs = new Map<string, Record<string, unknown>>();
+        const unavailable = new Set<string>();
         let fontWorkspace: Workspace | undefined;
         for (const group of ["theme", "fontSize", "fonts"] as MarkdownAppearanceGroup[]) {
-            const id = sources[group] || available[available.length - 1]?.id || "independent";
+            const id = sources[group] || "independent";
             result.sources[group] = id;
             const workspace = available.find(item => item.id === id);
-            if (!workspace) continue;
+            if (!workspace) {result.sources[group] = "independent"; continue;}
             let conf = configs.get(id);
             if (!conf) {
                 try {
                     const file = path.join(workspace.root, "conf", "conf.json");
                     if (!inside(workspace.root, await fs.realpath(file))) throw new Error("Invalid workspace configuration");
                     conf = object(await readJSON(file, 4 * 1024 * 1024));
-                } catch { conf = {}; }
+                } catch { conf = {}; unavailable.add(id); }
                 configs.set(id, conf);
             }
+            if (unavailable.has(id)) {result.sources[group] = "independent"; continue;}
             const editor = object(conf.editor);
             const appearance = object(conf.appearance);
             if (group === "theme") result.theme = appearance.modeOS === true ? "system" : appearance.mode === 1 ? "dark" : appearance.mode === 0 ? "light" : result.theme;

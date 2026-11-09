@@ -1,6 +1,6 @@
 {
 	"pluginTabUnavailable": "Le plugin de cet onglet est indisponible ou ne peut pas être identifié ; activez-le et réessayez",
-	"markdownSystemFontName": "Saisissez un nom de police système, pas SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Impossible de charger les polices système ; réessayez",
 	"markdownIndependentAppearance": "Réglages indépendants",
 	"markdownFontWeight": "Graisse de police",
 	"markdownWorkspaceUnavailable": "Espace de travail indisponible ; réglages indépendants utilisés",

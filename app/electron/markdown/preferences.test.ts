@@ -62,3 +62,12 @@ test("independent settings persist and merge without changing source selections"
     assert.throws(() => preferences.update({independent: {fonts: {global: [{family: "\ud800".repeat(256), weight: 400}], editor: [], code: []}}}));
     assert.deepEqual(await preferences.read(), defaults);
 });
+
+test("offline source fallback does not overwrite a newer explicit selection", async t => {
+    const {preferences} = await fixture(t);
+    await preferences.update({sources: {theme: "a".repeat(64), fonts: "b".repeat(64)}});
+    const prior = await preferences.read();
+    await preferences.update({sources: {theme: "c".repeat(64)}});
+    await preferences.update({sources: {theme: "independent", fonts: "independent"}}, prior.sources);
+    assert.deepEqual((await preferences.read()).sources, {theme: "c".repeat(64), fonts: "independent"});
+});

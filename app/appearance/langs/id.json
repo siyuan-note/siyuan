@@ -1,6 +1,6 @@
 {
 	"pluginTabUnavailable": "Plugin tab ini tidak tersedia atau pemiliknya tidak dapat ditentukan; aktifkan plugin lalu coba lagi",
-	"markdownSystemFontName": "Masukkan nama font sistem, bukan SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Tidak dapat memuat font sistem; coba lagi",
 	"markdownIndependentAppearance": "Pengaturan mandiri",
 	"markdownFontWeight": "Ketebalan font",
 	"markdownWorkspaceUnavailable": "Ruang kerja tidak tersedia; menggunakan pengaturan mandiri",

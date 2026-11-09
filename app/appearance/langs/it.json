@@ -1,6 +1,6 @@
 {
 	"pluginTabUnavailable": "Il plugin di questa scheda non è disponibile o non può essere identificato; attivalo e riprova",
-	"markdownSystemFontName": "Inserisci un nome di carattere di sistema, non SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Impossibile caricare i caratteri di sistema; riprova",
 	"markdownIndependentAppearance": "Impostazioni indipendenti",
 	"markdownFontWeight": "Spessore del carattere",
 	"markdownWorkspaceUnavailable": "Area di lavoro non disponibile; vengono usate le impostazioni indipendenti",

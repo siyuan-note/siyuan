@@ -23,7 +23,7 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
         await fs.writeFile(path.join(workspace, "conf", "conf.json"), JSON.stringify({appearance: {modeOS: options.theme === "system", mode: options.theme === "dark" ? 1 : 0}}));
         await fs.writeFile(path.join(directory, "workspace.json"), JSON.stringify([workspace]));
         await fs.mkdir(path.join(directory, "config"), {recursive: true});
-        await fs.writeFile(path.join(directory, "config", "preferences.json"), JSON.stringify({version: 1, mode: "ir", fontSize: 16, theme: options.theme}));
+        await fs.writeFile(path.join(directory, "config", "preferences.json"), JSON.stringify({version: 1, mode: "ir", sources: {theme: require("node:crypto").createHash("sha256").update(workspace).digest("hex")}}));
     }
     const windows = [];
     let id = 0;
@@ -957,7 +957,7 @@ test("workspace appearance capability persists independent source selections wit
     await call(window, "preferences", {mode: "sv"});
     const persisted = JSON.parse(await fs.readFile(path.join(directory, "config", "preferences.json"), "utf8"));
     assert.equal(persisted.mode, "sv");
-    assert.deepEqual(persisted.sources, {fonts: id});
+    assert.deepEqual(persisted.sources, {theme: id, fonts: id});
     assert.equal(persisted.theme, undefined);
 });
 
@@ -975,4 +975,22 @@ test("independent appearance can be configured with no registered workspace", as
     assert.equal(restored.appearance.fontSize, 27);
     await assert.rejects(call(window, "appearance", {independent: {fontSize: 1000}}));
     assert.equal((await call(window, "bootstrap")).appearance.fontSize, 27);
+});
+
+test("missing workspace sources switch to independent persistently without altering other settings", async t => {
+    const {directory, manager, call} = await fixture(t, {theme: "dark"});
+    const workspace = path.join(directory, "workspace");
+    const window = await manager.open();
+    const initial = await call(window, "bootstrap");
+    assert.equal(initial.appearance.theme, "dark");
+    await call(window, "appearance", {independent: {theme: "light", fontSize: 25}});
+    await fs.rename(workspace, workspace + "-offline");
+    const fallback = await call(window, "appearance");
+    assert.equal(fallback.sources.theme, "independent");
+    assert.equal(fallback.theme, "light");
+    assert.equal(fallback.fontSize, 25);
+    await fs.rename(workspace + "-offline", workspace);
+    const next = await manager.open();
+    assert.equal((await call(next, "bootstrap")).appearance.sources.theme, "independent");
+    assert.equal((await call(next, "bootstrap")).appearance.theme, "light");
 });

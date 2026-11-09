@@ -1,6 +1,6 @@
 {
 	"pluginTabUnavailable": "El complemento de esta pestaña no está disponible o no se puede identificar; actívalo e inténtalo de nuevo",
-	"markdownSystemFontName": "Introduce un nombre de fuente del sistema, no SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "No se pudieron cargar las fuentes del sistema; inténtalo de nuevo",
 	"markdownIndependentAppearance": "Configuración independiente",
 	"markdownFontWeight": "Grosor de fuente",
 	"markdownWorkspaceUnavailable": "Espacio de trabajo no disponible; se usa la configuración independiente",

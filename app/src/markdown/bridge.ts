@@ -12,6 +12,7 @@ export interface MarkdownPreferences {
 }
 
 export type MarkdownAppearanceGroup = "theme" | "fontSize" | "fonts";
+export interface MarkdownSystemFont {family: string; weight: number; displayName: string; aliases?: string[]; spacing?: string;}
 export interface MarkdownFont {family: string; weight: number;}
 export interface MarkdownIndependentAppearance {
     theme?: "system" | "light" | "dark";
@@ -76,6 +77,7 @@ export interface MarkdownBridge {
     resolveResource(reference: string): Promise<string | undefined>;
     openLink(url: string): Promise<void>;
     preferences(patch: Partial<MarkdownPreferences>): Promise<MarkdownPreferences>;
+    systemFonts?(): Promise<MarkdownSystemFont[]>;
     appearance?(patch?: MarkdownAppearancePatch): Promise<MarkdownAppearance>;
     confirm(action: "reload" | "overwrite" | "save-as"): Promise<boolean>;
     confirmClose(): Promise<"keep" | "save-as" | "cancel">;

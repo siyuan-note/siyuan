@@ -1,6 +1,6 @@
 {
 	"pluginTabUnavailable": "Плагин этой вкладки недоступен или его невозможно определить; включите плагин и повторите попытку",
-	"markdownSystemFontName": "Введите имя системного шрифта, а не SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Не удалось загрузить системные шрифты; повторите попытку",
 	"markdownIndependentAppearance": "Независимые настройки",
 	"markdownFontWeight": "Насыщенность шрифта",
 	"markdownWorkspaceUnavailable": "Рабочее пространство недоступно; используются независимые настройки",

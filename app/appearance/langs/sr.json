@@ -1,6 +1,6 @@
 {
 	"pluginTabUnavailable": "Додатак ове картице није доступан или није могуће утврдити коме припада; омогућите додатак и покушајте поново",
-	"markdownSystemFontName": "Унесите назив системског фонта, не SiYuanCustomFont-",
+	"markdownSystemFontsUnavailable": "Није могуће учитати системске фонтове; покушајте поново",
 	"markdownIndependentAppearance": "Независна подешавања",
 	"markdownFontWeight": "Дебљина фонта",
 	"markdownWorkspaceUnavailable": "Радни простор није доступан; користе се независна подешавања",

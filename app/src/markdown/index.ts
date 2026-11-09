@@ -11,7 +11,7 @@ import {createMarkdownChoice, createMarkdownSubmenu, MarkdownChoice} from "./cho
 import {createMarkdownWindowChrome} from "./windowChrome";
 import {createMarkdownTooltips} from "./tooltip";
 import {createMarkdownSidebarShortcuts} from "./shortcuts";
-import {createMarkdownAppearanceForm, createMarkdownFontAppearance} from "./appearance";
+import {markdownWorkspaceChoice, createMarkdownAppearanceForm, createMarkdownFontAppearance} from "./appearance";
 
 declare const SIYUAN_VERSION: string;
 (window as unknown as {SIYUAN_VERSION: string}).SIYUAN_VERSION = SIYUAN_VERSION;
@@ -55,6 +55,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     let themeChoice: MarkdownChoice = undefined;
     let fontChoice: MarkdownChoice = undefined;
     let fontsChoice: MarkdownChoice = undefined;
+    let destroyAppearanceForm: () => void;
     let appearanceMenu: ReturnType<typeof createMarkdownSubmenu> = undefined;
     let switching = false;
     let switchTask: Promise<boolean>;
@@ -606,9 +607,11 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         closeMore(false);
         const panel = control("markdownAppearancePanel");
         panel.hidden = false;
-        createMarkdownAppearanceForm(panel, group, appearance.independent ?? {}, text,
+        destroyAppearanceForm?.();
+        destroyAppearanceForm = createMarkdownAppearanceForm(panel, group, appearance.independent ?? {}, text,
             async independent => {if (!disposed && !frozen) await updateAppearance({sources: {[group]: "independent"}, independent});},
-            () => {panel.hidden = true; panel.replaceChildren(); if (!disposed) moreButton.focus();});
+            () => {panel.hidden = true; panel.replaceChildren(); if (!disposed) moreButton.focus();},
+            () => bridge.systemFonts ? bridge.systemFonts() : Promise.reject(new Error("System fonts unavailable")));
     };
     const workspaceChoices = () => {
         themeChoice?.destroy(); fontChoice?.destroy(); fontsChoice?.destroy();
@@ -617,11 +620,11 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             element.replaceChildren();
             element.hidden = false;
             const source = appearance.sources[group];
-            const values = [{value: "independent", label: text("markdownIndependentAppearance")}, ...appearance.workspaces.map(workspace => ({value: workspace.id, label: workspace.name}))];
+            const values = [{value: "independent", label: text("markdownIndependentAppearance")}, ...appearance.workspaces.map(markdownWorkspaceChoice)];
             if (!source || !values.some(value => value.value === source)) {
                 values.unshift({value: source, label: text(source ? "markdownWorkspaceUnavailable" : "default")});
             }
-            const result = createMarkdownChoice({element, label: text(label), icon, values, value: source,
+            const result = createMarkdownChoice({element, label: text(label), icon, values, value: source, maxHeight: 320,
                 onChange(value) {
                     if (frozen || disposed || value !== "independent" && !appearance.workspaces.some(workspace => workspace.id === value)) return;
                     closeMore();
@@ -630,6 +633,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                     }).catch((): void => undefined);
                 },
             });
+            result.menu.classList.add("markdown-choice__menu--workspace");
             result.menu.querySelectorAll<HTMLButtonElement>("button").forEach(button => {
                 button.disabled = button.dataset.value !== "independent" && !appearance.workspaces.some(workspace => workspace.id === button.dataset.value);
             });
@@ -869,6 +873,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         removeMenuListeners();
         tree?.destroy(); modeChoice?.destroy(); appearanceMenu?.destroy(); themeChoice?.destroy(); fontChoice?.destroy(); fontsChoice?.destroy();
         fontAppearance.destroy();
+        destroyAppearanceForm?.();
         windowChrome?.destroy();
         editor?.destroy();
     }

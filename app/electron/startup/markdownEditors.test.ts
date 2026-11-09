@@ -55,7 +55,11 @@ const setupStartup = (t: any, argv: string[], windows: MarkdownWindows) => {
     process.argv = ["electron", "main.ts", ...argv];
     t.after(() => { process.argv = originalArgv; });
     runtime.state.markdown.windows = undefined;
-    mockElectron(t, {app: {...require("electron").app, quit: () => undefined},
+    mockElectron(t, {app: {...require("electron").app, quit: () => undefined,
+        once: (event: string, listener: () => void) => {
+            assert.equal(event, "will-quit");
+            t.after(listener);
+        }},
         ipcMain: {handle: () => undefined} as unknown as IpcMain, nativeTheme: {on: () => undefined}});
     return {...editors, createMarkdownEditors: () => {
         editors.createMarkdownEditors();

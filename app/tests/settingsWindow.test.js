@@ -518,6 +518,20 @@ if (process.versions.electron && process.type === "browser") {
         const {updateTitleBarOverlay} = require("../electron/window/windowControlsOverlay");
     app.setPath("userData", process.argv[2]);
     app.whenReady().then(async () => {
+        const startedAt = Date.now();
+        const progress = name => console.log(`Settings window (${Date.now() - startedAt}ms): ${name}`);
+        const waitForLifecycle = async (promise, name) => {
+            progress(name + " started");
+            let timer;
+            try {
+                await Promise.race([promise, new Promise((_, reject) => {
+                    timer = setTimeout(() => reject(new Error(name + " did not complete within 15 seconds")), 15000);
+                })]);
+                progress(name + " completed");
+            } finally {
+                clearTimeout(timer);
+            }
+        };
         let owner;
         let code = 0;
         let ready = 0;
@@ -614,7 +628,7 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(win.isVisible(), false);
                 win.on("closed", () => { children.delete(win); shown.delete(win); });
             }, show(win) { shown.add(win); win.showInactive(); }, log() {}});
-        ipcMain.on("test-settings-phase", (_event, name) => console.log("Settings window: " + name));
+        ipcMain.on("test-settings-phase", (_event, name) => progress(name));
         ipcMain.on("test-settings-error", (_event, error) => {
             console.error(error);
             app.exit(1);
@@ -736,30 +750,34 @@ if (process.versions.electron && process.type === "browser") {
             const runRendererCases = () => owner.webContents.executeJavaScript(`const loadRendererModule = ${loadRendererModule.toString()}; const rendererModules = ${rendererModules.toString()}; (${runCases.toString()})(${JSON.stringify(sources)})`);
             console.log("Settings window: initial lifecycle");
             await runRendererCases();
+            progress("renderer lifecycle completed");
             const previousTokens = new Set([...children].map(child => new URL(child.webContents.getURL()).searchParams.get("settingsWindowToken")));
             assert.ok(previousTokens.size > 0);
             const reloaded = new Promise(resolve => owner.webContents.once("did-finish-load", resolve));
             const closedForReload = [...children].map(child => new Promise(resolve => child.once("closed", resolve)));
             owner.reload();
-            await Promise.all([reloaded, ...closedForReload]);
+            await waitForLifecycle(Promise.all([reloaded, ...closedForReload]), "owner reload and child closure");
             await new Promise(resolve => setTimeout(resolve, 100));
             assert.equal(children.size, 0, "owner reload closes settings without restoring them");
             commands.length = 0;
             ready = 0;
             console.log("Settings window: lifecycle after owner reload");
             await runRendererCases();
+            progress("renderer lifecycle completed");
             assert.ok(children.size > 0, "settings can be manually reopened after owner reload");
             for (const child of children) {
                 assert.equal(previousTokens.has(new URL(child.webContents.getURL()).searchParams.get("settingsWindowToken")), false);
             }
             const closed = [...children].map(child => new Promise(resolve => child.once("closed", resolve)));
+            progress("destroying owner");
             owner.destroy();
-            await Promise.all(closed);
+            await waitForLifecycle(Promise.all(closed), "owner destruction and child closure");
             assert.equal(children.size, 0);
         } catch (error) {
             console.error(error);
             code = 1;
         } finally {
+            progress("fixture cleanup");
             for (const child of children) child.destroy();
             for (const other of otherOwners) other.destroy();
             if (owner && !owner.isDestroyed()) owner.destroy();

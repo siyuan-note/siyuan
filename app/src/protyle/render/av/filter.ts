@@ -425,6 +425,17 @@ interface IRelationFilterScope {
 }
 const relationFilterScopes = new WeakMap<IAV, IRelationFilterScope>();
 
+// 同一面板的内联条件共享显示名与关联访问上下文，筛选值仍由各编辑器独立维护。
+export const createInlineFilterData = (data: IAV, filters: IAVFilter[]): IAV => {
+    const filterData: IAV = {...data, view: {...data.view, filters}};
+    let cache = relationFilterLabelCaches.get(data);
+    if (!cache) relationFilterLabelCaches.set(data, cache = new Map());
+    relationFilterLabelCaches.set(filterData, cache);
+    const scope = relationFilterScopes.get(data);
+    if (scope) relationFilterScopes.set(filterData, scope);
+    return filterData;
+};
+
 const getRelationFilterPath = (column: IAVColumn) => column?.type === "relation" ? [column.id] :
     column?.type === "rollup" && column.rollup?.relationKeyID && column.rollup?.keyID ?
         [column.rollup.relationKeyID, column.rollup.keyID] : [];

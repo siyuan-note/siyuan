@@ -104,6 +104,39 @@ test("selecting, removing and clearing rollup relation candidates preserves the 
     assert.equal(saves, 3);
 });
 
+test("inline filters retain their panel's selected labels and relation access scope", async () => {
+    const h = createEditor();
+    let active = true;
+    const scope = {blockID: "source-carrier", relationContext: {
+        sourceAvID: "source", sourceItemID: "entry", relationKeyID: "root",
+    }, isCurrent: () => active};
+    await h.methods.prepareFilterColumns(h.data, scope);
+    const data = h.methods.createInlineFilterData(h.data, structuredClone(h.data.view.filters));
+    assert.match(h.methods.getFiltersHTML(data, true), />Alice</);
+    const listeners = new Map<string, Array<(event: unknown) => void>>();
+    const dropdown = {dataset: {path: "0", avId: "employees-db"}};
+    const panel = {dataset: {}, querySelector: () => dropdown,
+        addEventListener: (type: string, listener: (event: unknown) => void) => {
+            listeners.set(type, [...listeners.get(type) || [], listener]);
+        }};
+    h.methods.bindInlineFilterEvents(panel as unknown as HTMLElement, data, {} as IProtyle, "source-carrier", "target", {
+        root: panel as unknown as HTMLElement, save() {},
+    });
+    const input = {isConnected: true, value: "search", dataset: {type: "relationFilterSearch", path: "0"},
+        closest: (selector: string) => selector === '[data-filter-events-bound="true"]' ? panel : dropdown};
+    for (const listener of listeners.get("input")) listener({target: input});
+    assert.deepEqual(JSON.parse(JSON.stringify(h.requests.at(-1).data)), {
+        id: "employees-db", keyword: "search", blockID: "source-carrier",
+        relationDependencyContext: {relationContext: scope.relationContext, relationKeyIDs: ["tasks", "staff"]},
+    });
+    active = false;
+    const count = h.requests.length;
+    for (const listener of listeners.get("input")) listener({target: input});
+    assert.equal(h.requests.length, count);
+    data.view.filters[0].value.rollup.contents[0].relation.blockIDs = [];
+    assert.deepEqual(Array.from(h.data.view.filters[0].value.rollup.contents[0].relation.blockIDs), ["alice"]);
+});
+
 test("related filters validate one-hop metadata and one- or two-hop labels from their root relation context", async () => {
     const h = createEditor();
     const relationContext = {sourceAvID: "source", sourceItemID: "entry", relationKeyID: "root-relation"};

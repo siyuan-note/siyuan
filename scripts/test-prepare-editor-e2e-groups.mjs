@@ -127,3 +127,45 @@ test("creates exact full-path matches and preserves focused configuration", () =
     assert.throws(() => createConfig([file, file], root), /Duplicate config files/);
     assert.throws(() => createConfig(["../outside.spec.ts"], root), /outside test root/);
 });
+
+
+test("main groups preserve all tests and dependencies without editor assumptions", () => {
+    const source = original.map(entry => entry.project === "editor"
+        ? {...entry, project: "main", file: entry.file.replace("editor-", "main-")} : entry);
+    const groups = partitionFiles(source, {}, "main");
+    const listings = groups.map(group => {
+        const files = new Set(group.files.map(entry => entry.file));
+        return source.filter(entry => entry.project !== "main" || files.has(entry.file));
+    });
+    assert.deepEqual(groups.map(group => group.weight), [2, 2]);
+    validateGroups(source, listings, groups, "main");
+    assert.throws(() => validateGroups(source, [listings[0].filter(entry => entry.id !== "a1"), listings[1]], groups, "main"),
+        /Incomplete spec file/);
+    assert.throws(() => validateGroups(source, [listings[0].filter(entry => entry.project !== "setup"), listings[1]], groups, "main"),
+        /Setup\/cleanup coverage changed/);
+    assert.throws(() => validateGroups(source, [[...listings[0], listings[0][0]], listings[1]], groups, "main"),
+        /Duplicate group 1 test identities/);
+    assert.throws(() => validateGroups(source, [[], listings[1]], groups, "main"), /is empty/);
+    const duplicate = groups.map(group => ({...group, files: [...group.files]}));
+    duplicate[1].files.push(duplicate[0].files[0]);
+    const duplicatedListings = duplicate.map(group => source.filter(entry => entry.project !== "main" ||
+        group.files.some(file => file.file === entry.file)));
+    assert.throws(() => validateGroups(source, duplicatedListings, duplicate, "main"), /appears in both/);
+    const report = {suites: [{specs: [spec("main-a.spec.ts", "a1", "main")]}]};
+    assert.equal(readListing(report, "main")[0].project, "main");
+    assert.throws(() => readListing(report), /No editor tests/);
+    const config = createConfig(["main-a.spec.ts"], path.resolve("test-root"), "main");
+    assert.match(config, /SIYUAN_E2E_SHARD !== "main"/);
+    assert.match(config, /project.name === "main"/);
+    assert.match(config, /\} : project/);
+    assert.ok(!config.includes('project.name === "editor"'));
+});
+
+test("unsupported shards cannot create configurations or reinterpret listings", () => {
+    for (const shard of ["attribute-view", "", "../main", 'main"']) {
+        assert.throws(() => readListing({}, shard), /Unsupported E2E shard/);
+        assert.throws(() => partitionFiles(original, {}, shard), /Unsupported E2E shard/);
+        assert.throws(() => validateGroups([], [], [], shard), /Unsupported E2E shard/);
+        assert.throws(() => createConfig(["a.spec.ts"], path.resolve("test-root"), shard), /Unsupported E2E shard/);
+    }
+});

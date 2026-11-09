@@ -9,6 +9,9 @@ on:
       packageManager:
         required: true
         type: string
+      runtime_only:
+        default: false
+        type: boolean
       testing_ref:
         default: ""
         type: string
@@ -175,46 +178,48 @@ jobs:
           fi
           "$KERNEL_PATH" --version
 
-      - name: Snapshot raw ARM editor runtime
-        id: editor-runtime
-        if: fromJSON(inputs.config).goos == 'darwin' && fromJSON(inputs.config).goarch == 'arm64'
-        continue-on-error: true
+      - name: Snapshot raw macOS runtime
+        id: desktop-runtime
+        if: inputs.runtime_only
         shell: bash
         env:
           TESTING_REF: ${{ inputs.testing_ref }}
+          TARGET_OS: ${{ fromJSON(inputs.config).goos }}
+          TARGET_ARCH: ${{ fromJSON(inputs.config).goarch }}
+          KERNEL_PATH: ${{ fromJSON(inputs.config).kernel_path }}
         run: |
-          [[ "$TESTING_REF" =~ ^[0-9a-f]{40}$ ]]
+          test "$TARGET_OS" = darwin
+          [[ "$TARGET_ARCH" = amd64 || "$TARGET_ARCH" = arm64 ]]
+          [[ -z "$TESTING_REF" || "$TESTING_REF" =~ ^[0-9a-f]{40}$ ]]
           test "$(uname -m)" = arm64
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test -x app/kernel-darwin-arm64/SiYuan-Kernel
+          test -x "kernel/$KERNEL_PATH"
           test -s app/stage/build/desktop/index.html
           test -s app/stage/build/markdown/index.html
           test -s app/stage/protyle/js/lute/lute.min.js
           test ! -e app/stage/build/markdown/vditor/dist/js/lute/lute.min.js
           test -d app/node_modules
-          mkdir -p "$RUNNER_TEMP/editor-runtime"
-          # 在打包脚本修改资源之前封存完整 app，tar 保留依赖链接和内核可执行权限。
-          tar -czf "$RUNNER_TEMP/editor-runtime/runtime.tar.gz" app
-          node -e 'require("node:fs").writeFileSync(process.argv[1], JSON.stringify({productSHA: process.env.GITHUB_SHA, testingSHA: process.env.TESTING_REF}, null, 2) + "\n")' \
-            "$RUNNER_TEMP/editor-runtime/revisions.json"
-          (cd "$RUNNER_TEMP/editor-runtime" && shasum -a 256 runtime.tar.gz revisions.json > SHA256SUMS)
+          mkdir -p "$RUNNER_TEMP/desktop-runtime"
+          # 封存打包前的 app，保留依赖链接和可执行权限；测试与封装各自解压，互不修改。
+          tar -czf "$RUNNER_TEMP/desktop-runtime/runtime.tar.gz" app
+          node -e 'require("node:fs").writeFileSync(process.argv[1], JSON.stringify({productSHA: process.env.GITHUB_SHA, testingSHA: process.env.TESTING_REF, goos: process.env.TARGET_OS, goarch: process.env.TARGET_ARCH}, null, 2) + "\n")' \
+            "$RUNNER_TEMP/desktop-runtime/revisions.json"
+          (cd "$RUNNER_TEMP/desktop-runtime" && shasum -a 256 runtime.tar.gz revisions.json > SHA256SUMS)
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
 
-      - name: Upload raw ARM editor runtime
-        id: upload_raw_arm_editor_runtime
-        if: steps.editor-runtime.outcome == 'success'
-        continue-on-error: true
+      - name: Upload raw macOS runtime
+        if: inputs.runtime_only
         uses: actions/upload-artifact@v7
         with:
-          name: editor-runtime-macos-arm64
-          path: ${{ runner.temp }}/editor-runtime/
+          name: desktop-runtime-macos-${{ fromJSON(inputs.config).goarch }}
+          path: ${{ runner.temp }}/desktop-runtime/
           if-no-files-found: error
           compression-level: 0
           retention-days: 2
 
       - name: Checkout siyuan-testing
         id: checkout_siyuan_testing
-        if: fromJSON(inputs.config).e2e_shards != ''
+        if: ${{ !inputs.runtime_only && fromJSON(inputs.config).e2e_shards != '' }}
         continue-on-error: true
         uses: actions/checkout@v7
         with:
@@ -224,13 +229,13 @@ jobs:
 
       - name: Install End-to-End Test Dependencies
         id: install_end_to_end_test_dependencies
-        if: fromJSON(inputs.config).e2e_shards != ''
+        if: ${{ !inputs.runtime_only && fromJSON(inputs.config).e2e_shards != '' }}
         continue-on-error: true
         run: pnpm install --frozen-lockfile
         working-directory: ${{ github.workspace }}/siyuan-testing
 
       - name: Validate End-to-End Test Shards
-        if: fromJSON(inputs.config).e2e_shards != ''
+        if: ${{ !inputs.runtime_only && fromJSON(inputs.config).e2e_shards != '' }}
         shell: bash
         run: |
           pnpm run typecheck
@@ -242,7 +247,7 @@ jobs:
 
       - name: Start Kernel for End-to-End Tests
         id: start_kernel_for_end_to_end_tests
-        if: fromJSON(inputs.config).e2e_shards != ''
+        if: ${{ !inputs.runtime_only && fromJSON(inputs.config).e2e_shards != '' }}
         continue-on-error: true
         shell: bash
         run: |
@@ -261,7 +266,7 @@ jobs:
 
       - name: Wait for End-to-End Test Kernels
         id: wait_for_end_to_end_test_kernels
-        if: fromJSON(inputs.config).e2e_shards != ''
+        if: ${{ !inputs.runtime_only && fromJSON(inputs.config).e2e_shards != '' }}
         continue-on-error: true
         shell: bash
         run: |
@@ -300,7 +305,7 @@ jobs:
 
       - name: Run End-to-End Tests
         id: run_end_to_end_tests
-        if: fromJSON(inputs.config).e2e_shards != ''
+        if: ${{ !inputs.runtime_only && fromJSON(inputs.config).e2e_shards != '' }}
         continue-on-error: true
         timeout-minutes: 50
         shell: bash
@@ -346,7 +351,7 @@ jobs:
 
       - name: Stop End-to-End Test Kernels
         id: stop_end_to_end_test_kernels
-        if: always() && fromJSON(inputs.config).e2e_shards != ''
+        if: always() && !inputs.runtime_only && fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         shell: bash
         run: |
@@ -374,7 +379,7 @@ jobs:
 
       - name: Collect End-to-End Test Logs
         id: collect_end_to_end_test_logs
-        if: always() && fromJSON(inputs.config).e2e_shards != ''
+        if: always() && !inputs.runtime_only && fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         shell: bash
         run: |
@@ -388,7 +393,7 @@ jobs:
 
       - name: Upload End-to-End Test Results
         id: upload_end_to_end_test_results
-        if: always() && fromJSON(inputs.config).e2e_shards != ''
+        if: always() && !inputs.runtime_only && fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
@@ -405,6 +410,7 @@ jobs:
         run: sudo apt-get install -y rpm
 
       - name: Building Electron App
+        if: ${{ !inputs.runtime_only }}
         run: pnpm run ${{ fromJSON(inputs.config).electron_args }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
@@ -423,7 +429,7 @@ jobs:
           done
 
       - name: Upload Build Artifacts (Non-Linux)
-        if: fromJSON(inputs.config).goos != 'linux'
+        if: ${{ !inputs.runtime_only && fromJSON(inputs.config).goos != 'linux' }}
         uses: actions/upload-artifact@v7
         with:
           name: siyuan-${{ fromJSON(inputs.config).suffix }}

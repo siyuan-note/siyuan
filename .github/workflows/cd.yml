@@ -427,8 +427,8 @@ jobs:
 
   build:
     name: ${{ matrix.config.name }}
-    # 前端测试与构建并行，发布汇总仍等待前端检查完成。
-    needs: [prepare, languages, contracts]
+    # 合约检查、前端测试与构建并行，发布汇总仍等待原有硬门禁成功。
+    needs: [prepare, languages]
     strategy:
       matrix:
         config:
@@ -462,7 +462,7 @@ jobs:
   build_macos_amd64:
     name: macos build mac.dmg
     # 原始运行时就绪后，封装与测试分别在独立 runner 上并行。
-    needs: [prepare, languages, contracts]
+    needs: [prepare, languages]
     uses: ./.github/workflows/desktop-build.yml
     with:
       config: >-
@@ -474,7 +474,7 @@ jobs:
   build_macos_arm64:
     name: macos build mac-arm64.dmg
     # 原始运行时就绪后，封装与测试分别在独立 runner 上并行。
-    needs: [prepare, languages, contracts]
+    needs: [prepare, languages]
     uses: ./.github/workflows/desktop-build.yml
     with:
       config: >-
@@ -892,7 +892,7 @@ jobs:
     env:
       GOPATH: ${{ github.workspace }}/go
     # Android 与桌面构建并行，前端检查由发布汇总等待。
-    needs: [prepare, languages, contracts]
+    needs: [prepare, languages]
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -1072,11 +1072,12 @@ jobs:
   create_release:
     name: Create Release
     runs-on: ubuntu-24.04
-    needs: [prepare, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, main_e2e, editor_e2e]
+    needs: [prepare, languages, contracts, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, main_e2e, editor_e2e]
     # 等待全部内核、前端检查和主 E2E、编辑器测试结束；测试步骤的软失败不阻塞发布。
     # 构建和安装包校验失败仍阻止发布；独立 E2E（含测试准备）失败只记录，不阻止发布。
     if: >-
       ${{ always() && !cancelled() && needs.prepare.result == 'success' &&
+          needs.languages.result == 'success' && needs.contracts.result == 'success' &&
           needs.kernel-tests-linux.result == 'success' && needs.kernel-tests-windows.result == 'success' &&
           needs.frontend-tests.result == 'success' &&
           needs.build.result == 'success' && needs.build_macos_amd64.result == 'success' &&

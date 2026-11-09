@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import path from "node:path";
+import {readFileSync} from "node:fs";
 import test from "node:test";
 import {createConfig, partitionFiles, readListing, validateGroups} from "./prepare-editor-e2e-groups.mjs";
 
@@ -168,4 +169,41 @@ test("unsupported shards cannot create configurations or reinterpret listings", 
         assert.throws(() => validateGroups([], [], [], shard), /Unsupported E2E shard/);
         assert.throws(() => createConfig(["a.spec.ts"], path.resolve("test-root"), shard), /Unsupported E2E shard/);
     }
+});
+
+
+test("main timing baseline is traceable, positive and deterministically balances new files", () => {
+    const history = JSON.parse(readFileSync(new URL("main-e2e-durations.json", import.meta.url), "utf8"));
+    assert.match(history.source, /^https:\/\/github\.com\/siyuan-note\/siyuan\/actions\/runs\/\d+$/);
+    assert.match(history.testingCommit, /^[0-9a-f]{40}$/);
+    assert.match(history.productCommit, /^[0-9a-f]{40}$/);
+    assert.match(history.measurement, /including retries/);
+    assert.match(history.measurement, /Excludes setup, cleanup and runner overhead/);
+    const entries = Object.entries(history.durationsMs);
+    assert.ok(entries.length >= 2);
+    for (const [file, duration] of entries) {
+        assert.match(file, /\.spec\.ts$/);
+        assert.ok(Number.isFinite(duration) && duration > 0, `Invalid baseline duration for ${file}`);
+    }
+    const source = [
+        ...dependencies,
+        ...entries.map(([file]) => ({file, id: file, project: "main"})),
+        {file: "new-main.spec.ts", id: "new-1", project: "main"},
+        {file: "new-main.spec.ts", id: "new-2", project: "main"},
+    ];
+    const groups = partitionFiles(source, history.durationsMs, "main");
+    assert.equal(groups.length, 2);
+    assert.deepEqual(groups, partitionFiles([...source].reverse(), history.durationsMs, "main"));
+    const rates = entries.map(([, duration]) => duration).sort((left, right) => left - right);
+    const added = groups.flatMap(group => group.files).find(entry => entry.file === "new-main.spec.ts");
+    assert.deepEqual(added, {
+        file: "new-main.spec.ts", testCount: 2,
+        weight: 2 * rates[Math.floor(rates.length / 2)], estimated: true,
+    });
+    for (const file of groups.flatMap(group => group.files).filter(entry => !entry.estimated)) {
+        assert.equal(file.weight, history.durationsMs[file.file]);
+    }
+    const listings = groups.map(group => source.filter(entry => entry.project !== "main" ||
+        group.files.some(file => file.file === entry.file)));
+    validateGroups(source, listings, groups, "main");
 });

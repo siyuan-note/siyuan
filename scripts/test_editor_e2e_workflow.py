@@ -167,7 +167,7 @@ class EditorWorkflowTests(unittest.TestCase):
     def test_builds_run_in_parallel_with_frontend_checks(self):
         for name in ["build", "build_macos_amd64", "build_macos_arm64", "build_android"]:
             dependencies = re.search(r"needs: \[(.*?)\]", job(name)).group(1).split(", ")
-            self.assertEqual(dependencies, ["prepare", "languages", "contracts"], name)
+            self.assertEqual(dependencies, ["prepare", "languages"], name)
         frontend = job("frontend-tests")
         self.assertIn("needs: prepare", frontend)
         for name, command in [
@@ -183,7 +183,7 @@ class EditorWorkflowTests(unittest.TestCase):
 
     def test_release_waits_for_all_checks_with_existing_failure_rules(self):
         release = job("create_release")
-        self.assertIn("needs: [prepare, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, main_e2e, editor_e2e]", release)
+        self.assertIn("needs: [prepare, languages, contracts, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, main_e2e, editor_e2e]", release)
         expression = re.search(r"if: >-\s*\$\{\{(.*?)\}\}", release, re.S).group(1)
         expression = expression.replace("always()", "True").replace("!cancelled()", "not cancelled")
         expression = expression.replace("&&", " and ")
@@ -191,7 +191,7 @@ class EditorWorkflowTests(unittest.TestCase):
         expression = " ".join(expression.split())
         expression = compile(expression, "release condition", "eval")
         states = ["success", "failure", "skipped", "cancelled"]
-        hard = ["prepare", "kernel-tests-linux", "kernel-tests-windows", "frontend-tests", "build",
+        hard = ["prepare", "languages", "contracts", "kernel-tests-linux", "kernel-tests-windows", "frontend-tests", "build",
                 "build_macos_amd64", "build_macos_arm64", "package_macos_amd64", "package_macos_arm64", "build_android"]
         soft = ["main_e2e", "editor_e2e"]
         baseline = dict.fromkeys(hard + soft, "success")

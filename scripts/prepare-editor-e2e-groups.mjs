@@ -162,9 +162,7 @@ export function main(args) {
     const require = createRequire(path.join(root, "package.json"));
     const cli = require.resolve("@playwright/test/cli");
     const baseline = listTests(root, cli, "config/playwright.focused.config.ts", shard);
-    const history = shard === "editor"
-        ? JSON.parse(readFileSync(new URL("editor-e2e-durations.json", import.meta.url), "utf8"))
-        : {source: "Actual discovered test counts (no main timing baseline yet)", durationsMs: {}};
+    const history = JSON.parse(readFileSync(new URL(`${shard}-e2e-durations.json`, import.meta.url), "utf8"));
     const groups = partitionFiles(baseline.tests, history.durationsMs, shard);
     const listings = groups.map((group, index) => {
         group.config = `config/playwright.${shard}-group-${index + 1}.config.ts`;

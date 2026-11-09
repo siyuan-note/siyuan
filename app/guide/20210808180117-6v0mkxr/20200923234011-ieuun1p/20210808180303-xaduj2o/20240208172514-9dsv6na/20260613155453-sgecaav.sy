@@ -1768,7 +1768,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Editing: New input follows the global Markdown inline syntax settings. Disabling syntax preserves existing rich text formatting. Enter text in the cell and use "
+									"Data": "Editing: Click a text cell once to open its editor, whether empty or filled. New input follows the global Markdown inline syntax settings. Disabling syntax preserves existing rich text formatting. Enter text in the cell and use "
 								},
 								{
 									"Type": "NodeTextMark",

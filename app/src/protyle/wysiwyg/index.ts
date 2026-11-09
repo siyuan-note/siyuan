@@ -171,7 +171,6 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {
     addDragFill,
-    cellValueIsEmpty,
     dragFillCellsValue,
     getAVCellData,
     getAVSelectedCellData,
@@ -1362,14 +1361,6 @@ export class WYSIWYG {
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
             const galleryItemElement = hasClosestByClassName(target, "av__gallery-item");
             const rowElement = hasClosestByClassName(target, "av__row");
-            const selectFilledTextCell = Boolean(!isMobile() && avCellElement &&
-                avCellElement.dataset.dtype === "text" &&
-                !avCellElement.classList.contains("av__cell--select") &&
-                !cellValueIsEmpty(genCellValueByElement("text", avCellElement)) &&
-                !target.closest(".av__cell-action, .av__celltext--rich [data-type~='block-ref'][data-id], " +
-                    ".av__celltext--rich [data-type~='file-annotation-ref'][data-id], " +
-                    ".av__celltext--rich [data-type~='tag'], .av__celltext--rich [data-type~='a'], " +
-                    ".av__celltext--rich a[href]"));
             const avElement = getAVSelectionRoot(target);
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
@@ -2002,7 +1993,7 @@ export class WYSIWYG {
                     }
                 };
 
-                documentSelf.onmouseup = (upEvent: MouseEvent) => {
+                documentSelf.onmouseup = () => {
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
                     documentSelf.ondragstart = null;
@@ -2012,10 +2003,6 @@ export class WYSIWYG {
                         selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
                         focusBlock(nodeElement);
                         addDragFill(lastCellElement);
-                        this.preventClick = true;
-                    } else if (selectFilledTextCell &&
-                        hasClosestByClassName(upEvent.target as HTMLElement, "av__cell") === avCellElement) {
-                        focusBlock(nodeElement);
                         this.preventClick = true;
                     }
                     return false;

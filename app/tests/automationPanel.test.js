@@ -960,8 +960,12 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(transactions.at(-1).perform[0].data.rules[0].name, "Renamed completion");
     get('[data-action="rules"]').focus();
     await require("electron").ipcRenderer.invoke("automation-enter");
-    await tick();
-    fieldMenu.element.querySelector('[data-id="rule"] .b3-list-item__text').click();
+    for (let attempt = 0; !fieldMenu.element.querySelector('[data-id="rule"] .b3-list-item__text') && attempt < 100; attempt++) {
+        await tick();
+    }
+    const renamedRule = fieldMenu.element.querySelector('[data-id="rule"] .b3-list-item__text');
+    assert.ok(renamedRule, "native Enter opens the rule menu before selecting an item");
+    renamedRule.click();
     await tick();
     assert.equal(get("[data-rule-name]").textContent, "Renamed completion");
     await click('[data-action="rules"]');

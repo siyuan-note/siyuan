@@ -161,7 +161,10 @@ const bootChild = async (sources) => {
     button.setAttribute("data-position", "north");
     document.body.append(tooltip, button);
     initTooltips();
-    const hover = element => element.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    const hover = element => {
+        element.dispatchEvent(new PointerEvent("pointerover", {bubbles: true, pointerType: "mouse"}));
+        element.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    };
     hover(button.querySelector("use"));
     check.equal(tooltip.classList.contains("fn__none"), false);
     check.equal(tooltip.innerHTML, '<b>Directory</b><img src="x">');
@@ -570,7 +573,7 @@ if (process.versions.electron && process.type === "browser") {
             }
             if (!child) response.setHeader("Set-Cookie", "settings-auth=authenticated; HttpOnly; SameSite=Strict; Path=/");
             response.end(`<html><head><link rel="stylesheet" href="/fixture/base.css"><link id="fixtureTheme" rel="stylesheet" href="/fixture/daylight.css"></head><body class="${child ? "body--settings" : ""}">${child ?
-                `<script>const loadRendererModule = ${loadRendererModule.toString()}; const rendererModules = ${rendererModules.toString()}; (${bootChild.toString()})(${JSON.stringify(sources)});</script>` : ""}</body></html>`);
+                `<script>const loadRendererModule = ${loadRendererModule.toString()}; const rendererModules = ${rendererModules.toString()}; (${bootChild.toString()})(${JSON.stringify(sources)}).catch(error => require("electron").ipcRenderer.send("test-settings-error", error.stack));</script>` : ""}</body></html>`);
         });
         await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
         const origin = "http://127.0.0.1:" + server.address().port;
@@ -594,6 +597,10 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(win.isVisible(), false);
                 win.on("closed", () => { children.delete(win); shown.delete(win); });
             }, show(win) { shown.add(win); }, log() {}});
+        ipcMain.on("test-settings-error", (_event, error) => {
+            console.error(error);
+            app.exit(1);
+        });
         ipcMain.handle("test-settings-initializing", event => {
             const win = [...children].find(child => child.webContents === event.sender);
             assert.ok(win);

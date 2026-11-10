@@ -816,8 +816,8 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("orderedList", "1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
     ${getSlashItem("check", "- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
     ${getSlashItem("quote", "> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
-    ${getSlashItem("horizontalSuperBlock", getSuperBlockCommand("col"), "iconSuper", window.siyuan.languages.horizontalSuperBlock, "true")}
-    ${getSlashItem("verticalSuperBlock", getSuperBlockCommand("row"), "iconSuper", window.siyuan.languages.verticalSuperBlock, "true")}
+    ${getSlashItem("horizontalSuperBlock", getSuperBlockCommand("col"), "iconSplitLR", window.siyuan.languages.horizontalSuperBlock, "true")}
+    ${getSlashItem("verticalSuperBlock", getSuperBlockCommand("row"), "iconSplitTB", window.siyuan.languages.verticalSuperBlock, "true")}
     ${getSlashItem("tabs", `::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`, "iconTabs", window.siyuan.languages.tabs, "true")}
     ${getSlashItem("mindmap", `- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
     ${getSlashItem("calloutNote", `> [!NOTE]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">✏️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span>`, "true")}

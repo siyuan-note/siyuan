@@ -70,6 +70,7 @@ import {openMobileFileById} from "../../mobile/editor";
 import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
+import {bgFade} from "../../util/highlightById";
 import {isInAndroid, isNotCtrl, isOnlyMeta} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
@@ -1675,6 +1676,12 @@ ${genHintItemHTML(item)}
                     });
                 } else {
                     focusByWbr(nodeElement, range);
+                    if (superBlockLayout) {
+                        // 新建超级块后临时高亮各子块，提示刚插入的布局范围
+                        nodeElement.querySelectorAll(":scope > [data-node-id]").forEach((childElement: HTMLElement) => {
+                            bgFade(childElement);
+                        });
+                    }
                     if (isMindmap && nodeElement.dataset.type === "NodeMindmap") {
                         mountNewListMindmap(protyle, nodeElement);
                     }

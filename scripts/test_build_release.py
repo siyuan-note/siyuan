@@ -509,6 +509,15 @@ class BuildTests(unittest.TestCase):
                 self.builder.linux()
             self.assertEqual("--with-harmony-kernel" in wsl.call_args.args[0], selected)
 
+    def test_parallel_linux_waits_for_session_process(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.builder.parallel_marker = self.root / "marker"
+        self.builder.parallel_remote = "/tmp/siyuan-release-test"
+        self.args.platforms = ["linux"]
+        with patch.object(self.builder, "wsl") as wsl, patch.object(self.builder, "collect"):
+            self.builder.linux()
+        self.assertEqual(wsl.call_args.args[0][:3], ["setsid", "--wait", "bash"])
+
     def test_mobile_packaging_overlaps_linux_and_harmony_waits_for_ready(self):
         import threading
         self.builder.wsl_root = self.root / "wsl"

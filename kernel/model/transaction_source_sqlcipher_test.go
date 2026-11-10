@@ -180,7 +180,6 @@ func TestTransactionSourceEncryptedPartialFailure(t *testing.T) {
 	if err = indexWriteTreeUpsertQueue(sourceTree); err != nil {
 		t.Fatal(err)
 	}
-	sourceBefore, targetBefore := structuredTitlesCiphertext(t, source), structuredTitlesCiphertext(t, target)
 	view := av.NewAttributeView(ast.NewNodeID())
 	view.Automations = &av.AutomationConfig{Spec: 1, Rules: []*av.AutomationRule{{
 		ID: ast.NewNodeID(), Name: "Collect", Trigger: "block", Enabled: true,
@@ -192,6 +191,8 @@ func TestTransactionSourceEncryptedPartialFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 	viewPath := filepath.Join(util.DataDir, box, "storage", "av", view.ID+".json")
+	addCollectionDatabaseBlock(t, view, target.ID)
+	sourceBefore, targetBefore := structuredTitlesCiphertext(t, source), structuredTitlesCiphertext(t, target)
 	viewBefore, err := os.ReadFile(viewPath)
 	if err != nil {
 		t.Fatal(err)

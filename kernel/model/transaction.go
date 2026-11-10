@@ -2072,7 +2072,7 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	// 粘贴被引用的块后需刷新目标文档的引用计数，否则目标文档级计数角标不会更新
 	task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, tree.Root.ID)
 
-	upsertAvBlockRel(insertedNode)
+	tx.upsertAvBlockRel(insertedNode, tree)
 
 	// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
 	insertedNode.RemoveIALAttr(av.NodeAttrNameAvs)
@@ -2372,7 +2372,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	tx.nodes[updatedNode.ID] = updatedNode
 	tx.writeTreeWithIndexChanges(tree)
 
-	upsertAvBlockRel(updatedNode)
+	tx.upsertAvBlockRel(updatedNode, tree)
 
 	return
 }
@@ -2483,7 +2483,7 @@ func getRemovedNodes(oldNode, newNode *ast.Node) (ret []*ast.Node) {
 	return
 }
 
-func upsertAvBlockRel(node *ast.Node) {
+func (tx *Transaction) upsertAvBlockRel(node *ast.Node, tree *parse.Tree) {
 	var affectedAvIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -2492,6 +2492,9 @@ func upsertAvBlockRel(node *ast.Node) {
 
 		if ast.NodeAttributeView == n.Type {
 			avID := n.AttributeViewID
+			if tx.isReplay {
+				tx.sourceMirrors = append(tx.sourceMirrors, av.BlockRelRecovery{ID: n.ID, AttributeViewID: avID, BoxID: tree.Box})
+			}
 			if changed := av.UpsertBlockRel(avID, n.ID); changed {
 				affectedAvIDs = append(affectedAvIDs, avID)
 			}
@@ -3290,6 +3293,18 @@ func (tx *Transaction) commit() (err error) {
 				publishDocumentTitleProjection(tree, tx.documentTitleWrite.title.Text)
 				break
 			}
+		}
+	}
+	if tx.isReplay && len(tx.sourceMirrors) > 0 {
+		// 恢复的加密块在提交后才进入索引，镜像映射按已写入的文档树恢复。
+		present := map[string]string{}
+		for _, tree := range orderedTrees {
+			for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
+				present[node.ID] = node.AttributeViewID
+			}
+		}
+		if err = av.ReconcileBlockRels(tx.sourceMirrors, present); err != nil {
+			return err
 		}
 	}
 	for boxID, icon := range tx.boxIcons {

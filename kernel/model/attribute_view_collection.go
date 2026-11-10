@@ -555,6 +555,45 @@ func collectionNodes(tree *parse.Tree) map[string]*ast.Node {
 	return ret
 }
 
+func (tx *Transaction) hasCollectionDatabaseBlock(avID, boxID string) (bool, error) {
+	for _, tree := range tx.trees {
+		if !IsSameCryptoBoundary(boxID, tree.Box) {
+			continue
+		}
+		for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
+			if node.AttributeViewID == avID {
+				return true, nil
+			}
+		}
+	}
+	blockIDs, err := av.GetAttributeViewBlockIDsInBox(avID, boxID)
+	if err != nil {
+		return false, err
+	}
+	for _, id := range blockIDs {
+		block := attributeViewBindingBlockTree(id, boxID)
+		if block == nil {
+			continue
+		}
+		// 事务内的树代表最终状态，磁盘和索引可能仍包含本次删除的数据库块。
+		tree := tx.trees[block.RootID]
+		if tree == nil {
+			tree, _, err = filesys.LoadTreeSnapshot(block.BoxID, block.Path, tx.luteEngine)
+			if os.IsNotExist(err) {
+				continue
+			}
+			if err != nil {
+				return false, err
+			}
+		}
+		node := treenode.GetNodeInTree(tree, id)
+		if node != nil && node.Type == ast.NodeAttributeView && node.AttributeViewID == avID {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func (tx *Transaction) runAttributeViewCollections() error {
 	state := tx.attributeViewCollections
 	if state == nil || tx.isReplay {
@@ -588,6 +627,13 @@ func (tx *Transaction) runAttributeViewCollections() error {
 	sort.Strings(viewKeys)
 	for _, viewKey := range viewKeys {
 		boxID, id, _ := strings.Cut(viewKey, "/")
+		alive, err := tx.hasCollectionDatabaseBlock(id, boxID)
+		if err != nil {
+			return err
+		}
+		if !alive {
+			continue
+		}
 		view, err := tx.readAttributeViewForMutation(id, "", boxID)
 		if err != nil {
 			return err

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261109202618"
+		"updated": "20261110124116"
 	},
 	"Children": [
 		{
@@ -5888,6 +5888,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Automatic actions do not chain into other rules. Sources and the target database must remain within the same encryption boundary; unlock an encrypted notebook before previewing or editing its rules."
+				}
+			]
+		},
+		{
+			"ID": "20261110124116-90b25e6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110124116-90b25e6",
+				"updated": "20261110124116"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Deleting the last database block, including by deleting its document, stops automatic block collection. Other mirrors keep collection active. Undoing the deletion restores collection for subsequent edits without collecting existing content automatically. Database data and rule settings are preserved."
 				}
 			]
 		},

@@ -54,6 +54,7 @@ func TestDocumentCollectionEncryptedCopiesTemplatesAndMoves(t *testing.T) {
 	if err := av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)
 	}
+	addCollectionDatabaseBlock(t, view, target.ID)
 	readView := func(want int) *av.AttributeView {
 		t.Helper()
 		stored, err := av.ParseAttributeViewForIndexInBox(view.ID, box)

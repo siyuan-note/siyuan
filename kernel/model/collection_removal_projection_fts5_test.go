@@ -508,11 +508,7 @@ func TestCollectionRemovalProjectionAllocatesMissingWriteIdentities(t *testing.T
 }
 
 func TestCollectionRemovalProjectionEmptySourceBeforeCommit(t *testing.T) {
-	fixture, view, _ := setupBlockCollectionTest(t)
-	view.Automations = nil
-	if err := av.SaveAttributeView(view); err != nil {
-		t.Fatal(err)
-	}
+	fixture, _, _, _ := setupAttributeViewItemsTest(t, false)
 	operations := []*Operation{{Action: "append", ID: fixture.childID, ParentID: fixture.targetID}}
 	projection, err := newCollectionRemovalProjection(operations)
 	if err != nil {

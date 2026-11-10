@@ -301,6 +301,7 @@ func TestGlobalTagRemovalSelectionAndUndo(t *testing.T) {
 	if err := av.SaveAttributeView(&second); err != nil {
 		t.Fatal(err)
 	}
+	addCollectionDatabaseBlock(t, &second, fixture.sourceID)
 	if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, "todo")); err != nil {
 		t.Fatal(err)
 	}

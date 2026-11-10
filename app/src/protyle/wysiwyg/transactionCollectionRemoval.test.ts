@@ -44,6 +44,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
     const synced: IProtyle[] = [];
     const messages: string[] = [];
     const keyboardEvents: string[] = [];
+    let selectionClears = 0;
     const styles = new Map([["overflow-anchor", "auto"]]);
     const protyle = {lite: false, disabled: false, element: {inert: false, isConnected: true}, block: {rootID: "root", id: "root"},
         undo: {add: () => history++}, contentElement: {scrollTop: 120, style: {
@@ -64,7 +65,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
             createElement: () => ({innerHTML: "", querySelector: () => ({})}),
             createRange: () => ({setStartBefore() {}, collapse() {}}),
         },
-        getSelection: () => ({rangeCount: 1, getRangeAt: () => ({}), removeAllRanges() {}}),
+        getSelection: () => ({rangeCount: 1, getRangeAt: () => ({}), removeAllRanges() {selectionClears++;}}),
         canRestoreEditorFocus: new Function("document", compiledFocus + "\nreturn canRestoreEditorFocus;")({activeElement: null}),
         Node: {ELEMENT_NODE: 1},
         suspendTabTitleEditingExit: () => () => { titleExitResumed++; },
@@ -114,6 +115,7 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
     const operations: IOperation[] = [{action: "update", id: "block", data: "after"}];
     const undo: IOperation[] = [{action: "update", id: "block", data: "before<wbr>"}];
     return {protyle, writes, messages, styles, operations, undo, cleanup, sourceVersions, synced, callbackResponse, previewed, keyboardEvents,
+        selectionClears: () => selectionClears,
         runFrom: (editor: IProtyle) => transaction(editor, operations, undo, {awaitResponse: true}) as Promise<void>,
         run: (data = "after", awaitResponse = true, collectionRemovalSourceVersions?: Record<string, string>,
               callback?: (...args: unknown[]) => void) => transaction(protyle,
@@ -130,6 +132,22 @@ const fixture = (kind: "tags" | "references" | "mixed", mode = "") => {
 };
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
+
+test("collection removal retains the mobile keyboard selection and clears desktop selections", async () => {
+    for (const mobile of [false, true]) {
+        const f = fixture("references", mobile ? "mobile" : "");
+        const pending = f.run();
+        assert.equal(f.selectionClears(), mobile ? 0 : 1);
+        assert.equal(f.protyle.element.inert, true);
+        await tick();
+        f.finishPreview([]);
+        await tick();
+        f.finishSave();
+        await pending;
+        assert.equal(f.protyle.element.inert, false);
+        assert.equal(f.counts().focusRestored, 1);
+    }
+});
 
 test("mobile reference removal keeps the keyboard guard through preview and releases it after success or failure", async () => {
     for (const result of ["success", "cancel", "failure"]) {

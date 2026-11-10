@@ -2681,7 +2681,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             const resumeTitleEditingExit = suspendTabTitleEditingExit(
                 focusElement?.closest(".tab-item-title")?.closest<HTMLElement>(".tab-item"));
             const keyboard = !wasDisabled && !wasInert ? preserveMobileEditorKeyboard(element) : undefined;
-            selection.removeAllRanges();
+            // Android 输入法会将清空选区视为结束编辑，临时输入框持有焦点时保留选区。
+            if (!keyboard?.hasFocus()) selection.removeAllRanges();
             element.inert = true;
             const pending: Promise<void> = (async () => {
                 let sourceRestored = false;

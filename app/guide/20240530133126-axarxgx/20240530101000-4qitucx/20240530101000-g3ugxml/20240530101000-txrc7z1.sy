@@ -2728,6 +2728,58 @@
 				"ID": "20240530101000-4xw39w3",
 				"id": "20240530101000-o2p50rl"
 			}
+		},
+		{
+			"ID": "20261110190000-96a927a",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110190000-96a927a",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プラグインのスナップショット"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110190000-ce4349a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110190000-ce4349a",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "データ履歴"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "データスナップショット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "プラグインのスナップショット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：正確なプラグインのパッケージ名を入力すると、ローカルの各スナップショットに含まれるプログラムと標準データのファイル数およびサイズを確認できます。復元時はプラグインを自動的に無効にしてバックアップを作成し、同じスナップショットから data/plugins/<パッケージ名>/ と data/storage/petal/<パッケージ名>/ を置き換えます。含まれないファイルは削除されます。先に他のクライアントを閉じ、復元後に手動で有効にしてください。他のディレクトリと共有設定は対象外です。"
+				}
+			]
 		}
 	]
 }

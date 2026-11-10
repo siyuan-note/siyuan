@@ -1,4 +1,8 @@
 {
+	"pluginSnapshots": "Instantâneos de plugins",
+	"pluginSnapshotStats": "Programa: ${programCount} arquivos, ${programSize} bytes; dados: ${dataCount} arquivos, ${dataSize} bytes",
+	"pluginSnapshotRestoreTip": "Feche os outros clientes primeiro. O plugin ${name} será desativado automaticamente. Os diretórios do programa e dos dados padrão serão substituídos por este instantâneo, removendo arquivos ausentes. Um backup será criado antes. Outros diretórios e configurações compartilhadas ficam excluídos. Ative o plugin manualmente depois",
+	"pluginSnapshotRestored": "Restaurado; o plugin continua desativado. Backup: ${id}",
 	"restoreDocPosition": "Restaurar a última posição de leitura",
 	"restoreDocPositionTip": "Quando desativado, os documentos reabrem no início; links de blocos, resultados de pesquisa e restauração de abas mantêm suas posições",
 	"markdownAppearanceSettings": "Configurações de aparência",

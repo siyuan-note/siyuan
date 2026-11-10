@@ -19,6 +19,39 @@ type CreateSnapshotRequest struct {
 	FullCheck bool `json:"fullCheck" api:"optional"`
 }
 
+type GetPluginSnapshotsRequest struct {
+	Name string `json:"name" api:"trim"`
+	Page int    `json:"page"`
+}
+
+type RestorePluginSnapshotRequest struct {
+	Name string `json:"name" api:"trim"`
+	ID   string `json:"id" api:"trim"`
+}
+
+type PluginSnapshotStat struct {
+	Count int   `json:"count"`
+	Size  int64 `json:"size"`
+}
+
+type PluginSnapshot struct {
+	ID      string             `json:"id"`
+	Created int64              `json:"created"`
+	Memo    string             `json:"memo"`
+	Program PluginSnapshotStat `json:"program"`
+	Data    PluginSnapshotStat `json:"data"`
+}
+
+type PluginSnapshotsData struct {
+	Snapshots  []*PluginSnapshot `json:"snapshots"`
+	PageCount  int               `json:"pageCount"`
+	TotalCount int               `json:"totalCount"`
+}
+
+type RestorePluginSnapshotData struct {
+	BackupID string `json:"backupID"`
+}
+
 type CreateSnapshotData struct {
 	ID      string `json:"id"`
 	Created bool   `json:"created"`

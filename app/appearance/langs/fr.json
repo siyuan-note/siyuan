@@ -1,4 +1,8 @@
 {
+	"pluginSnapshots": "Instantanés des plugins",
+	"pluginSnapshotStats": "Programme : ${programCount} fichiers, ${programSize} octets ; données : ${dataCount} fichiers, ${dataSize} octets",
+	"pluginSnapshotRestoreTip": "Fermez les autres clients. Le plugin ${name} sera désactivé automatiquement. Ses répertoires de programme et de données standard seront remplacés par cet instantané ; les fichiers absents seront supprimés. Une sauvegarde sera créée au préalable. Les autres répertoires et réglages partagés sont exclus. Réactivez ensuite le plugin manuellement",
+	"pluginSnapshotRestored": "Restauration terminée ; le plugin reste désactivé. Sauvegarde : ${id}",
 	"restoreDocPosition": "Restaurer la dernière position de lecture",
 	"restoreDocPositionTip": "Si désactivé, les documents se rouvrent au début ; les liens de bloc, les résultats de recherche et la restauration des onglets conservent leurs positions",
 	"markdownAppearanceSettings": "Paramètres d’apparence",

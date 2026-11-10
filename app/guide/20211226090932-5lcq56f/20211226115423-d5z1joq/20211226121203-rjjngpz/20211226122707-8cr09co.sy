@@ -2489,6 +2489,58 @@
 					]
 				}
 			]
+		},
+		{
+			"ID": "20261110190000-d3c48e6",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110190000-d3c48e6",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "外掛快照"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110190000-7ab2dfd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110190000-7ab2dfd",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料歷史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外掛快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：輸入完整的外掛套件名稱，查詢本機快照中該外掛在各時間點的程式和標準資料檔案數量及大小。恢復時自動停用外掛並建立備份快照，再以同一快照取代 data/plugins/<套件名稱>/ 和 data/storage/petal/<套件名稱>/ 兩個目錄，移除快照中不存在的檔案。恢復前請關閉其他用戶端，恢復後手動啟用外掛。其他目錄和共用設定不在恢復範圍內。"
+				}
+			]
 		}
 	]
 }

@@ -815,6 +815,8 @@ func registerRepoRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/tagSnapshot", contractRouteHandlers(apicontract.TagSnapshot, tagSnapshot)...)
 	ginServer.Handle("POST", "/api/repo/checkoutRepo", contractRouteHandlers(apicontract.CheckoutRepo, checkoutRepo)...)
 	ginServer.Handle("POST", "/api/repo/getRepoSnapshots", contractRouteHandlers(apicontract.GetRepoSnapshots, getRepoSnapshots)...)
+	ginServer.Handle("POST", "/api/repo/getPluginSnapshots", contractRouteHandlers(apicontract.GetPluginSnapshots, getPluginSnapshots)...)
+	ginServer.Handle("POST", "/api/repo/restorePluginSnapshot", contractRouteHandlers(apicontract.RestorePluginSnapshot, restorePluginSnapshot)...)
 	ginServer.Handle("POST", "/api/repo/searchRepoFile", contractRouteHandlers(apicontract.SearchRepoFile, searchRepoFile)...)
 	ginServer.Handle("POST", "/api/repo/getRepoDocHistory", contractRouteHandlers(apicontract.GetRepoDocHistory, getRepoDocHistory)...)
 	ginServer.Handle("POST", "/api/repo/getRepoTagSnapshots", contractRouteHandlers(apicontract.GetRepoTagSnapshots, getRepoTagSnapshots)...)

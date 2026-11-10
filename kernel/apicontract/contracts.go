@@ -1138,6 +1138,15 @@ var UploadCloudSnapshot = define[UploadCloudSnapshotRequest, Null]("uploadCloudS
 // 两端均非 0 时终点必须大于起点；ID 查询应用时间范围后仍忽略分页。
 // 要求管理员权限，返回已有的快照元数据及资源下载状态，不下载或回滚快照。
 var GetRepoSnapshots = define[GetRepoSnapshotsRequest, RepoSnapshotsData]("getRepoSnapshots", "/api/repo/getRepoSnapshots", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按插件包名查询本地快照，先筛选再按时间倒序分页，每页 32 项。仅统计 plugins/<name>/ 和 storage/petal/<name>/。
+// 包名必须是单个合法路径段；分别返回程序与标准数据的文件数和字节数，不读取正文或自动下载云端快照。
+var GetPluginSnapshots = define[GetPluginSnapshotsRequest, PluginSnapshotsData]("getPluginSnapshots", "/api/repo/getPluginSnapshots", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 从同一个完整快照恢复插件程序和标准数据目录，移除这两个目录中快照未收录的文件，缺失目录恢复为空。
+// 写入前认证全部源文件、停用插件并创建完整检查备份快照；成功后保持停用。调用方须先等待本窗口卸载插件并提示关闭其他客户端。
+// 不恢复共享配置或其他目录；失败保留备份和恢复材料。返回恢复前的备份快照 ID。
+var RestorePluginSnapshot = define[RestorePluginSnapshotRequest, RestorePluginSnapshotData]("restorePluginSnapshot", "/api/repo/restorePluginSnapshot", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var SearchRepoFile = define[SearchRepoFileRequest, RepoSearchData]("searchRepoFile", "/api/repo/searchRepoFile", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 每个文件版本包含 snapshots，按文件 ID 关联全部本地标记快照。

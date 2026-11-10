@@ -1,4 +1,8 @@
 {
+	"pluginSnapshots": "Migawki wtyczek",
+	"pluginSnapshotStats": "Program: ${programCount} plików, ${programSize} bajtów; dane: ${dataCount} plików, ${dataSize} bajtów",
+	"pluginSnapshotRestoreTip": "Najpierw zamknij inne klienty. Wtyczka ${name} zostanie wyłączona automatycznie. Jej katalogi programu i standardowych danych zostaną zastąpione migawką; brakujące w niej pliki zostaną usunięte. Wcześniej powstanie kopia zapasowa. Inne katalogi i wspólne ustawienia są wyłączone z tej operacji. Następnie włącz wtyczkę ręcznie",
+	"pluginSnapshotRestored": "Przywrócono; wtyczka pozostaje wyłączona. Kopia zapasowa: ${id}",
 	"restoreDocPosition": "Przywracaj ostatnią pozycję czytania",
 	"restoreDocPositionTip": "Po wyłączeniu dokumenty otwierają się od początku; łącza do bloków, wyniki wyszukiwania i przywracanie kart zachowują swoje pozycje",
 	"markdownAppearanceSettings": "Ustawienia wyglądu",

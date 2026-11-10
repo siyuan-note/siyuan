@@ -1,4 +1,8 @@
 {
+	"pluginSnapshots": "Instantáneas de complementos",
+	"pluginSnapshotStats": "Programa: ${programCount} archivos, ${programSize} bytes; datos: ${dataCount} archivos, ${dataSize} bytes",
+	"pluginSnapshotRestoreTip": "Cierre los otros clientes. El complemento ${name} se desactivará automáticamente. Sus directorios de programa y datos estándar se reemplazarán con esta instantánea y se eliminarán los archivos ausentes. Se creará antes una copia de seguridad. Se excluyen otros directorios y ajustes compartidos. Actívelo manualmente después",
+	"pluginSnapshotRestored": "Restaurado; el complemento sigue desactivado. Copia de seguridad: ${id}",
 	"restoreDocPosition": "Restaurar la última posición de lectura",
 	"restoreDocPositionTip": "Al desactivar, los documentos se abren al principio; los enlaces a bloques, los resultados de búsqueda y la restauración de pestañas conservan sus posiciones",
 	"markdownAppearanceSettings": "Ajustes de apariencia",

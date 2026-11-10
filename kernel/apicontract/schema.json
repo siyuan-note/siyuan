@@ -31407,6 +31407,22 @@
       ],
       "additionalProperties": false
     },
+    "GetPluginSnapshotsRequestInput": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "page"
+      ],
+      "additionalProperties": false
+    },
     "GetRepoDocHistoryRequestInput": {
       "type": "object",
       "properties": {
@@ -39455,6 +39471,87 @@
       ],
       "additionalProperties": false
     },
+    "PluginSnapshot": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/$defs/PluginSnapshotStat"
+        },
+        "id": {
+          "type": "string"
+        },
+        "memo": {
+          "type": "string"
+        },
+        "program": {
+          "$ref": "#/$defs/PluginSnapshotStat"
+        }
+      },
+      "required": [
+        "created",
+        "data",
+        "id",
+        "memo",
+        "program"
+      ],
+      "additionalProperties": false
+    },
+    "PluginSnapshotStat": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "size": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "count",
+        "size"
+      ],
+      "additionalProperties": false
+    },
+    "PluginSnapshotsData": {
+      "type": "object",
+      "properties": {
+        "pageCount": {
+          "type": "integer"
+        },
+        "snapshots": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PluginSnapshot"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "totalCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pageCount",
+        "snapshots",
+        "totalCount"
+      ],
+      "additionalProperties": false
+    },
     "PrepareNotebookArchiveRequestInput": {
       "type": "object",
       "properties": {
@@ -41686,6 +41783,34 @@
         "resolved",
         "start",
         "status"
+      ],
+      "additionalProperties": false
+    },
+    "RestorePluginSnapshotData": {
+      "type": "object",
+      "properties": {
+        "backupID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "backupID"
+      ],
+      "additionalProperties": false
+    },
+    "RestorePluginSnapshotRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
       ],
       "additionalProperties": false
     },
@@ -171487,6 +171612,85 @@
     },
     {
       "method": "POST",
+      "path": "/api/repo/getPluginSnapshots",
+      "handler": "getPluginSnapshots",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetPluginSnapshotsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/PluginSnapshotsData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/repo/getRepoDocHistory",
       "handler": "getRepoDocHistory",
       "authorization": [
@@ -172449,6 +172653,86 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/repo/restorePluginSnapshot",
+      "handler": "restorePluginSnapshot",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/RestorePluginSnapshotRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/RestorePluginSnapshotData"
               },
               "msg": {
                 "type": "string"

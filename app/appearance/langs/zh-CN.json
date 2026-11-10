@@ -1,4 +1,8 @@
 {
+	"pluginSnapshots": "插件快照",
+	"pluginSnapshotStats": "程序：${programCount} 个文件，${programSize} 字节；数据：${dataCount} 个文件，${dataSize} 字节",
+	"pluginSnapshotRestoreTip": "请先关闭其他客户端。将自动停用插件 ${name}，并以此快照替换其程序和标准数据目录，包括移除快照中不存在的文件。恢复前会创建备份快照。其他目录和共享设置不在恢复范围内，恢复后请手动启用插件",
+	"pluginSnapshotRestored": "已恢复，插件保持停用。备份快照：${id}",
 	"restoreDocPosition": "恢复上次浏览位置",
 	"restoreDocPositionTip": "关闭后从文档开头重新打开；块链接、搜索结果和页签恢复仍定位到指定位置",
 	"markdownAppearanceSettings": "外观设置",

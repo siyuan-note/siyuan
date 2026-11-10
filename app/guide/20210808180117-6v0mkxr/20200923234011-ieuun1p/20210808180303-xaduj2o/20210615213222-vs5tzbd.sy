@@ -2561,6 +2561,58 @@
 					]
 				}
 			]
+		},
+		{
+			"ID": "20261110190000-e77fae5",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110190000-e77fae5",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Plugin snapshots"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110190000-4350115",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110190000-4350115",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data history"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data snapshot"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Plugin snapshots"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ": Search local snapshots by the exact plugin package name to view the program and standard data file counts and sizes at each time point. Restoring automatically disables the plugin and creates a backup snapshot, then replaces both data/plugins/<package>/ and data/storage/petal/<package>/ from the same snapshot, removing files absent from it. Close other clients before restoring, and enable the plugin manually afterwards. Other directories and shared settings are excluded."
+				}
+			]
 		}
 	]
 }

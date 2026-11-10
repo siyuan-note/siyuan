@@ -1442,6 +1442,8 @@ export type GetInstalledWidgetRequestInput = { "keyword"?: string | null; };
 
 export type GetMirrorDatabaseBlocksRequestInput = { "avID": string; };
 
+export type GetPluginSnapshotsRequestInput = { "name": string; "page": number; };
+
 export type GetRepoDocHistoryRequestInput = { "id": string; "page": number; };
 
 export type GetRepoFileRequestInput = { "id": string; };
@@ -1842,6 +1844,12 @@ export type PluginRPCRequestFieldsInput = { "id"?: string | number | null; "json
 
 export type PluginRPCSuccess = { "id": string | number | null; "jsonrpc": "2.0"; "result": JSONValue; };
 
+export type PluginSnapshot = { "created": number; "data": PluginSnapshotStat; "id": string; "memo": string; "program": PluginSnapshotStat; };
+
+export type PluginSnapshotStat = { "count": number; "size": number; };
+
+export type PluginSnapshotsData = { "pageCount": number; "snapshots": Array<PluginSnapshot | null> | null; "totalCount": number; };
+
 export type PrepareNotebookArchiveRequestInput = { "notebooks": Array<string>; };
 
 export type PreparePasteAssetsRequestInput = { "assets": Array<string>; "notebook": string; };
@@ -1981,6 +1989,10 @@ export type ResolveDocPathRequestInput = { "notebook": string; "segments": Array
 export type ResolveDocPathResult = (ResolvedDocumentPathData & { "reason"?: never; }) | (DocumentAddressingFailure & { "candidates"?: never; "candidatesTruncated"?: never; "nameConditions"?: never; "nextIndex"?: never; "resolved"?: never; "start"?: never; "status"?: never; });
 
 export type ResolvedDocumentPathData = { "candidates": Array<DocumentPath> | null; "candidatesTruncated": boolean; "nameConditions": Array<DocumentNameCondition> | null; "nextIndex": number; "resolved": DocumentPath | null; "start": DocumentLocation; "status": "resolved" | "missing" | "ambiguous"; };
+
+export type RestorePluginSnapshotData = { "backupID": string; };
+
+export type RestorePluginSnapshotRequestInput = { "id": string; "name": string; };
 
 export type ReviewRiffCardRequestInput = { "cardID": string; "deckID": string; "rating": number; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
 
@@ -7272,6 +7284,17 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
+     * 按插件包名查询本地快照，先筛选再按时间倒序分页，每页 32 项。仅统计 plugins/<name>/ 和 storage/petal/<name>/。
+     * 包名必须是单个合法路径段；分别返回程序与标准数据的文件数和字节数，不读取正文或自动下载云端快照。
+     */
+    "/api/repo/getPluginSnapshots": {
+        request: GetPluginSnapshotsRequestInput;
+        response: { "code": 0; "data": PluginSnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
      * 每个文件版本包含 snapshots，按文件 ID 关联全部本地标记快照。
      * snapshots 按快照创建时间倒序，同一快照的多个标记合并；无关联时为空数组，不读取文件正文。
      */
@@ -7378,6 +7401,18 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 从同一个完整快照恢复插件程序和标准数据目录，移除这两个目录中快照未收录的文件，缺失目录恢复为空。
+     * 写入前认证全部源文件、停用插件并创建完整检查备份快照；成功后保持停用。调用方须先等待本窗口卸载插件并提示关闭其他客户端。
+     * 不恢复共享配置或其他目录；失败保留备份和恢复材料。返回恢复前的备份快照 ID。
+     */
+    "/api/repo/restorePluginSnapshot": {
+        request: RestorePluginSnapshotRequestInput;
+        response: { "code": 0; "data": RestorePluginSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };

@@ -145,6 +145,22 @@ var uploadCloudSnapshot = contractHandler(apicontract.UploadCloudSnapshot, func(
 	return apicontract.Success(apicontract.Null{})
 })
 
+var getPluginSnapshots = contractHandler(apicontract.GetPluginSnapshots, func(c *gin.Context, request apicontract.GetPluginSnapshotsRequest) apicontract.Response[apicontract.PluginSnapshotsData] {
+	data, err := model.GetPluginSnapshots(request.Name, request.Page)
+	if err != nil {
+		return apicontract.FailureFrom[apicontract.PluginSnapshotsData](err)
+	}
+	return apicontract.Success(data)
+})
+
+var restorePluginSnapshot = contractHandler(apicontract.RestorePluginSnapshot, func(c *gin.Context, request apicontract.RestorePluginSnapshotRequest) apicontract.Response[apicontract.RestorePluginSnapshotData] {
+	id, err := model.RestorePluginSnapshot(request.Name, request.ID)
+	if err != nil {
+		return apicontract.FailureFrom[apicontract.RestorePluginSnapshotData](err)
+	}
+	return apicontract.Success(apicontract.RestorePluginSnapshotData{BackupID: id})
+})
+
 var getRepoSnapshots = contractHandler(apicontract.GetRepoSnapshots, func(c *gin.Context, request apicontract.GetRepoSnapshotsRequest) apicontract.Response[apicontract.RepoSnapshotsData] {
 	var snapshots []*model.Snapshot
 	var pageCount, totalCount int

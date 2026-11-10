@@ -1,4 +1,8 @@
 {
+	"pluginSnapshots": "Snímky doplnkov",
+	"pluginSnapshotStats": "Program: ${programCount} súborov, ${programSize} bajtov; údaje: ${dataCount} súborov, ${dataSize} bajtov",
+	"pluginSnapshotRestoreTip": "Najprv zatvorte ostatných klientov. Doplnok ${name} sa automaticky vypne. Jeho priečinky programu a štandardných údajov sa nahradia touto snímkou; chýbajúce súbory sa odstránia. Najprv sa vytvorí záloha. Ostatné priečinky a spoločné nastavenia sú vylúčené. Potom doplnok zapnite ručne",
+	"pluginSnapshotRestored": "Obnovené; doplnok zostáva vypnutý. Záloha: ${id}",
 	"restoreDocPosition": "Obnoviť poslednú pozíciu čítania",
 	"restoreDocPositionTip": "Po vypnutí sa dokumenty otvárajú od začiatku; odkazy na bloky, výsledky vyhľadávania a obnovenie kariet si zachovajú svoje pozície",
 	"markdownAppearanceSettings": "Nastavenia vzhľadu",

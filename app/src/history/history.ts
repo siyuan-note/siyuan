@@ -28,6 +28,7 @@ import {getRepoSnapshotRange, getRepoSnapshotType, initRepoPanel, updateRepoSele
 import {repoSnapshotInRange} from "./repoRange";
 import {MenuItem} from "../menus/Menu";
 import {renderSnapshotActions} from "./snapshotActions";
+import {openPluginSnapshots} from "./pluginSnapshots";
 
 let historyEditor: Protyle;
 const historyGroups = new WeakMap<Element, HistoryGroups>();
@@ -710,7 +711,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
     });
     disabledProtyle(historyEditor.protyle);
     const repoRoot = element.querySelector<HTMLElement>('#historyContainer [data-type="repo"]');
-    repoPanelCleanup.set(repoRoot, initRepoPanel(repoRoot, renderRepo));
+    repoPanelCleanup.set(repoRoot, initRepoPanel(repoRoot, renderRepo, () => openPluginSnapshots(app)));
     const repoElement = repoRoot.querySelector('[data-repo-source="local"]');
     const historyElement = element.querySelector('#historyContainer [data-type="doc"]');
     const previewRepoFile = (itemElement: Element) => {

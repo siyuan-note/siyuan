@@ -8,8 +8,9 @@ import {isMobile} from "../util/functions";
 import {renderRepoFile} from "./repoFile";
 import dayjs from "dayjs";
 import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "./notebookDialogs";
+import {isPluginSnapshotPath} from "./pluginSnapshotPaths";
 
-export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot, notebook: string) => {
+export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot, notebook: string, plugin?: string) => {
     const lang = window.siyuan.languages;
     let editor: Protyle;
     const abort = new AbortController();
@@ -75,6 +76,9 @@ export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot
         const fragment = document.createDocumentFragment();
         let selected: HTMLElement;
         snapshot.files.forEach(file => {
+            if (plugin && !isPluginSnapshotPath(file.path, plugin)) {
+                return;
+            }
             const row = document.createElement("li");
             row.className = "b3-list-item";
             row.tabIndex = 0;

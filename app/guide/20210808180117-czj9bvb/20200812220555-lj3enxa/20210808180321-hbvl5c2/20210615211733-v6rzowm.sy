@@ -2517,6 +2517,58 @@
 					]
 				}
 			]
+		},
+		{
+			"ID": "20261110190000-700bd76",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110190000-700bd76",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插件快照"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110190000-6b4c9c6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110190000-6b4c9c6",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据历史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "插件快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：输入完整的插件包名，查询本地快照中该插件在各时间点的程序和标准数据文件数量及大小。恢复时自动停用插件并创建备份快照，再以同一快照替换 data/plugins/<包名>/ 和 data/storage/petal/<包名>/ 两个目录，移除快照中不存在的文件。恢复前请关闭其他客户端，恢复后手动启用插件。其他目录和共享设置不在恢复范围内。"
+				}
+			]
 		}
 	]
 }

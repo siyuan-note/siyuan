@@ -85,7 +85,7 @@ export const updateRepoSelection = (pane: Element) => {
     });
 };
 
-export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: number) => void) => {
+export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: number) => void, openPlugins?: () => void) => {
     const lang = window.siyuan.languages;
     const state: RepoPanelState = {selected: new Map(), managing: false, busy: false, tagged: false, range: {}};
     states.set(root, state);
@@ -97,6 +97,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     root.innerHTML = `<form class="history__snapshot-toolbar" data-role="date-range">
     <button type="button" class="b3-button b3-button--text" data-action="normal" aria-pressed="true">${lang.dataSnapshot}</button>
     <button type="button" class="b3-button b3-button--text" data-action="tagged" aria-pressed="false">${lang.repoTaggedSnapshots}</button>
+    ${openPlugins ? `<button type="button" class="b3-button b3-button--text" data-action="plugin-snapshots">${lang.pluginSnapshots}</button>` : ""}
     <span class="fn__flex-1"></span>
     <button type="button" class="b3-button b3-button--text history__snapshot-mobile-control" data-action="filters" aria-expanded="false">${lang.filter}</button>
     <div class="history__snapshot-date-controls">
@@ -229,7 +230,9 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         }
         event.stopPropagation();
         const action = button.dataset.action;
-        if (action === "filters") {
+        if (action === "plugin-snapshots") {
+            openPlugins?.();
+        } else if (action === "filters") {
             const expanded = root.classList.toggle("history__snapshots--filters");
             button.setAttribute("aria-expanded", String(expanded));
         } else if (action === "source-more") {

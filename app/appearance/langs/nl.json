@@ -1,4 +1,8 @@
 {
+	"pluginSnapshots": "Pluginmomentopnamen",
+	"pluginSnapshotStats": "Programma: ${programCount} bestanden, ${programSize} bytes; gegevens: ${dataCount} bestanden, ${dataSize} bytes",
+	"pluginSnapshotRestoreTip": "Sluit eerst andere clients. Plugin ${name} wordt automatisch uitgeschakeld. De programma- en standaardgegevensmappen worden vervangen door deze momentopname; ontbrekende bestanden worden verwijderd. Eerst wordt een back-up gemaakt. Andere mappen en gedeelde instellingen zijn uitgesloten. Schakel de plugin daarna handmatig in",
+	"pluginSnapshotRestored": "Hersteld; de plugin blijft uitgeschakeld. Back-up: ${id}",
 	"restoreDocPosition": "Laatste leespositie herstellen",
 	"restoreDocPositionTip": "Indien uitgeschakeld openen documenten opnieuw aan het begin; bloklinks, zoekresultaten en tabbladherstel behouden hun posities",
 	"markdownAppearanceSettings": "Weergave-instellingen",

@@ -22,6 +22,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/templatehttp"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -45,6 +46,8 @@ type AttributeViewRenderContext struct {
 	templateErrors             map[string]*attributeViewTemplateRenderError
 	renderingRelationTemplates bool
 	renderingRollupTargets     map[rollupTargetID]bool
+	templateBlockStats         map[string]*util.BlockStatResult
+	templateStatsGeneration    uint64
 	templateStoredValues       map[av.Collection]map[*av.Value]*av.Value // 分页前后共享原始值副本，保持 _raw 访问语义。
 	itemScope                  bool                                      // 属性面板仅物化当前条目依赖，筛选仍使用完整目标集合。
 	ReadOnly                   bool                                      // 预览只允许修正内存副本，不保存缺失字段等订正结果。
@@ -66,6 +69,35 @@ type attributeViewTemplateRenderError struct {
 // NewAttributeViewRenderContext 创建属性视图渲染上下文。
 func NewAttributeViewRenderContext() *AttributeViewRenderContext {
 	return &AttributeViewRenderContext{templateErrors: map[string]*attributeViewTemplateRenderError{}}
+}
+
+func (context *AttributeViewRenderContext) statBlock(id string) *util.BlockStatResult {
+	if context == nil {
+		return filesys.StatBlock(id)
+	}
+	block := treenode.GetBlockTree(id)
+	// 加密来源逐次经过文件读取租约校验，避免锁定后复用明文统计结果。
+	if block == nil || (IsEncryptedBoxFn != nil && IsEncryptedBoxFn(block.BoxID)) {
+		return filesys.StatBlock(id)
+	}
+	// 笔记本锁定触发全局缓存清理时，统计中包含的数据库内容也需重新读取。
+	generation := cache.GetAVCacheGeneration()
+	if context.templateStatsGeneration != generation {
+		context.templateBlockStats = nil
+		context.templateStatsGeneration = generation
+	}
+	key := block.BoxID + "\x00" + id
+	if result := context.templateBlockStats[key]; result != nil {
+		return result
+	}
+	result := filesys.StatBlock(id)
+	if result != nil {
+		if context.templateBlockStats == nil {
+			context.templateBlockStats = map[string]*util.BlockStatResult{}
+		}
+		context.templateBlockStats[key] = result
+	}
+	return result
 }
 
 // HasTemplateErrors 判断本次求值是否产生模板错误，错误结果不参与跨请求复用。
@@ -1140,6 +1172,7 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 	// 按模板内容缓存已编译模板，避免逐行重复 Parse。坏内容缓存为 nil，逐行设置 err 并继续渲染其余行。
 	tplCache := map[string]*template.Template{}
 	compileErrCache := map[string]error{}
+	templateFuncs := template.FuncMap{"statBlock": renderContext.statBlock}
 	storedValueCache := map[*av.Value]*av.Value{}
 	if keys != nil && renderContext != nil {
 		if renderContext.templateStoredValues == nil {
@@ -1204,7 +1237,7 @@ func fillAttributeViewTemplateValuesForKeys(attrView *av.AttributeView, view *av
 			var renderErr error
 			tpl, tried := tplCache[cacheKey]
 			if !tried {
-				compiled, compileErr := compileTemplateField(templateContent, httpFuncs)
+				compiled, compileErr := compileTemplateField(templateContent, templateFuncs, httpFuncs)
 				tplCache[cacheKey] = compiled // 坏内容时 compiled 为 nil，仍写入缓存
 				if nil != compileErr {
 					compileErrCache[cacheKey] = compileErr

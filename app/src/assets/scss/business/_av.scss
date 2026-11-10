@@ -630,7 +630,7 @@
   }
 
   &__views--mobile {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 4px;
     min-width: 0;
 
@@ -652,6 +652,7 @@
       span {
         flex: 1;
         text-align: left;
+        white-space: nowrap;
       }
     }
 

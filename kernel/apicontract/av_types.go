@@ -30,14 +30,16 @@ type AVBaseInstance struct {
 	Sorts             []*AVViewSort             `json:"sorts" api:"optional,nullable"`
 	Group             *AVViewGroup              `json:"group" api:"optional,nullable"`
 	PageSize          int                       `json:"pageSize" api:"optional,nullable"`
-	ShowIcon          bool                      `json:"showIcon" api:"optional,nullable"`
-	WrapField         bool                      `json:"wrapField" api:"optional,nullable"`
-	GroupKey          *AVKey                    `json:"groupKey,omitempty" api:"optional,nullable"`
-	GroupValue        *AVValue                  `json:"groupValue,omitempty" api:"optional,nullable"`
-	Groups            []AVViewInstance          `json:"groups,omitempty" api:"optional,nullable"`
-	GroupCalc         *AVGroupCalc              `json:"groupCalc,omitempty" api:"optional,nullable"`
-	GroupFolded       bool                      `json:"groupFolded" api:"optional,nullable"`
-	GroupHidden       int                       `json:"groupHidden" api:"optional,nullable"`
+	// 关联、汇总条目图标开关；返回已解析的有效值，旧版布局缺少独立设置或为 null 时取 showIcon。
+	ShowRelationIcon bool             `json:"showRelationIcon" api:"optional,nullable"`
+	ShowIcon         bool             `json:"showIcon" api:"optional,nullable"` // 主键条目图标开关
+	WrapField        bool             `json:"wrapField" api:"optional,nullable"`
+	GroupKey         *AVKey           `json:"groupKey,omitempty" api:"optional,nullable"`
+	GroupValue       *AVValue         `json:"groupValue,omitempty" api:"optional,nullable"`
+	Groups           []AVViewInstance `json:"groups,omitempty" api:"optional,nullable"`
+	GroupCalc        *AVGroupCalc     `json:"groupCalc,omitempty" api:"optional,nullable"`
+	GroupFolded      bool             `json:"groupFolded" api:"optional,nullable"`
+	GroupHidden      int              `json:"groupHidden" api:"optional,nullable"`
 }
 
 type AVViewFilter struct {
@@ -558,10 +560,12 @@ type AVLayoutTable struct {
 }
 
 type AVBaseLayout struct {
-	Spec      int    `json:"spec" api:"optional,nullable"`
-	ID        string `json:"id" api:"optional,nullable"`
-	ShowIcon  bool   `json:"showIcon" api:"optional,nullable"`
-	WrapField bool   `json:"wrapField" api:"optional,nullable"`
+	Spec int    `json:"spec" api:"optional,nullable"`
+	ID   string `json:"id" api:"optional,nullable"`
+	// 关联、汇总条目图标开关；旧版布局缺少或为 null 时沿用 showIcon。
+	ShowRelationIcon *bool `json:"showRelationIcon,omitempty" api:"optional,nullable"`
+	ShowIcon         bool  `json:"showIcon" api:"optional,nullable"` // 主键条目图标开关
+	WrapField        bool  `json:"wrapField" api:"optional,nullable"`
 }
 
 type AVViewTableColumn struct {

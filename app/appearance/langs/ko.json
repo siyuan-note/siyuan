@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "기본 키 항목 아이콘 표시",
+	"databaseShowRelationIcon": "관계 및 롤업 항목 아이콘 표시",
+	"databaseShowIconTip": "활성화하면 새 데이터베이스와 뷰에서 기본 키 항목 아이콘이 기본적으로 표시됩니다",
+	"databaseShowRelationIconTip": "활성화하면 새 데이터베이스와 뷰에서 관계 및 롤업 항목 아이콘이 기본적으로 표시됩니다",
+	"databaseIconDefaultsTip": "이 기본 설정은 기존 뷰에 영향을 주지 않습니다",
 	"quickLookLimit": "콘텐츠가 미리보기 제한을 초과합니다(256 KiB 또는 요소 20000개)",
 	"quickLookEncoding": "미리보기에는 UTF-8 또는 BOM이 있는 UTF-16이 필요합니다",
 	"quickLookTimeout": "미리보기 렌더링 시간이 초과되었습니다(15초)",

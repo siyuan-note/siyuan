@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Afficher les icônes des entrées de clé primaire",
+	"databaseShowRelationIcon": "Afficher les icônes des entrées de relation et de rollup",
+	"databaseShowIconTip": "Lorsque cette option est activée, les icônes des entrées de clé primaire sont affichées par défaut dans les nouvelles bases de données et vues",
+	"databaseShowRelationIconTip": "Lorsque cette option est activée, les icônes des entrées de relation et de rollup sont affichées par défaut dans les nouvelles bases de données et vues",
+	"databaseIconDefaultsTip": "Ces paramètres par défaut ne modifient pas les vues existantes",
 	"quickLookLimit": "Le contenu dépasse la limite de l’aperçu (256 Kio ou 20000 éléments)",
 	"quickLookEncoding": "L’aperçu nécessite UTF-8 ou UTF-16 avec BOM",
 	"quickLookTimeout": "Le rendu de l’aperçu a expiré (15 secondes)",

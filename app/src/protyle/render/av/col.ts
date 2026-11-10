@@ -1,3 +1,4 @@
+import {getAVCellShowIcon} from "./entryIcon";
 import {MobileDialog} from "../../../dialog/mobileDialog";
 import {prepareAVColumnWindow} from "./columnWindow";
 import {insertAVTableColumn} from "./columnPresentation";
@@ -831,7 +832,7 @@ export const addAttrViewColAnimation = (options: {
                 const value = genCellValue(options.type, null);
                 html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${escapeAttr(options.id)}"
 data-wrap="false" data-dtype="${escapeAttr(options.type)}" data-date-format="${escapeAttr(dateFormat)}" data-align="" style="width: 200px">${renderCell(value,
-                    parseInt(item.getAttribute("data-index")) || 0)}</div>`;
+                    parseInt(item.getAttribute("data-index")) || 0, getAVCellShowIcon(data?.view, value.type))}</div>`;
             }
             const sticky = previousElement.parentElement;
             if (sticky.classList.contains("av__colsticky") && sticky.lastElementChild === previousElement) {

@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Itempictogrammen bij de primaire sleutel tonen",
+	"databaseShowRelationIcon": "Itempictogrammen bij relaties en samenvoegingen tonen",
+	"databaseShowIconTip": "Indien ingeschakeld worden itempictogrammen bij de primaire sleutel standaard getoond in nieuwe databases en weergaven",
+	"databaseShowRelationIconTip": "Indien ingeschakeld worden itempictogrammen bij relaties en samenvoegingen standaard getoond in nieuwe databases en weergaven",
+	"databaseIconDefaultsTip": "Deze standaardinstellingen hebben geen invloed op bestaande weergaven",
 	"quickLookLimit": "Inhoud overschrijdt de voorbeeldlimiet (256 KiB of 20000 elementen)",
 	"quickLookEncoding": "Voorbeeld vereist UTF-8 of UTF-16 met BOM",
 	"quickLookTimeout": "Voorbeeldweergave duurde te lang (15 seconden)",

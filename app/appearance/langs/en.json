@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Show primary key entry icons",
+	"databaseShowRelationIcon": "Show relation and rollup entry icons",
+	"databaseShowIconTip": "When enabled, show primary key entry icons by default in new databases and views",
+	"databaseShowRelationIconTip": "When enabled, show relation and rollup entry icons by default in new databases and views",
+	"databaseIconDefaultsTip": "These defaults do not affect existing views",
 	"quickLookLimit": "Content exceeds the preview limit (256 KiB or 20000 elements)",
 	"quickLookEncoding": "Preview requires UTF-8 or UTF-16 with a BOM",
 	"quickLookTimeout": "Preview rendering timed out (15 seconds)",

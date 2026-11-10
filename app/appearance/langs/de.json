@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Eintragssymbole im Primärschlüssel anzeigen",
+	"databaseShowRelationIcon": "Eintragssymbole in Beziehungen und Rollups anzeigen",
+	"databaseShowIconTip": "Wenn aktiviert, werden Eintragssymbole im Primärschlüssel in neuen Datenbanken und Ansichten standardmäßig angezeigt",
+	"databaseShowRelationIconTip": "Wenn aktiviert, werden Eintragssymbole in Beziehungen und Rollups in neuen Datenbanken und Ansichten standardmäßig angezeigt",
+	"databaseIconDefaultsTip": "Diese Voreinstellungen wirken sich nicht auf bestehende Ansichten aus",
 	"quickLookLimit": "Inhalt überschreitet die Vorschaugrenze (256 KiB oder 20000 Elemente)",
 	"quickLookEncoding": "Vorschau benötigt UTF-8 oder UTF-16 mit BOM",
 	"quickLookTimeout": "Zeitüberschreitung beim Rendern der Vorschau (15 Sekunden)",

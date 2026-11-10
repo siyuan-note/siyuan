@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261110155812"
+		"updated": "20261110134234"
 	},
 	"Children": [
 		{
@@ -373,7 +373,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-8jwf2oj",
-				"updated": "20261024161058"
+				"updated": "20261110134234"
 			},
 			"Children": [
 				{
@@ -382,6 +382,106 @@
 				}
 			],
 			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110134234-90e4co6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110134234-90e4co6",
+				"updated": "20261110134234"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据库"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中配置 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "显示主键条目图标"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "显示关联和汇总条目图标"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。两项默认开启，仅在新建数据库及视图时生效；修改默认设置不影响已有视图。"
+				}
+			]
+		},
+		{
+			"ID": "20261110134234-tpi3ork",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110134234-tpi3ork",
+				"updated": "20261110134234"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在当前视图的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "布局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 菜单中，通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "显示主键条目图标"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "显示关联和汇总条目图标"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 分别控制两类图标。复制视图或切换布局会保留这两项设置。"
+				}
+			]
 		},
 		{
 			"ID": "20260613162748-0xbvbws",
@@ -5960,7 +6060,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-          "Data": "主键使用单一行级编辑器，合法元素与文档标题相同，包括文字样式、链接、图片、公式和引用。Enter 保存并关闭编辑器，支持连续输入时继续编辑下一行。Shift+Enter 插入行内换行，不创建新段落。表格、列表、画廊、看板、日历、条目详情、关联和汇总均显示完整内容；筛选、排序、搜索及纯文本复制使用文字投影，已有类似 Markdown 的主键文字保持字面含义。"
+					"Data": "主键使用单一行级编辑器，合法元素与文档标题相同，包括文字样式、链接、图片、公式和引用。Enter 保存并关闭编辑器，支持连续输入时继续编辑下一行。Shift+Enter 插入行内换行，不创建新段落。表格、列表、画廊、看板、日历、条目详情、关联和汇总均显示完整内容；筛选、排序、搜索及纯文本复制使用文字投影，已有类似 Markdown 的主键文字保持字面含义。"
 				}
 			]
 		},

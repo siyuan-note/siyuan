@@ -1,3 +1,4 @@
+import * as entryIcon from "./entryIcon";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -25,6 +26,7 @@ const unusedDependencies = [
 const loadModule = <T>(file: string) => {
     const methods = {} as T;
     const modules: Record<string, unknown> = {
+        "./entryIcon": entryIcon,
         ...Object.fromEntries(unusedDependencies.map(name => [name, new Proxy({}, {
             get: (_target, member) => {
                 if (member === "__esModule") return true;

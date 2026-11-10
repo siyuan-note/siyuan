@@ -1,3 +1,4 @@
+import * as entryIcon from "./entryIcon";
 import * as capabilities from "./capabilities";
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
@@ -12,6 +13,7 @@ import {resolveAVSelectedCell} from "./selectionState";
 // 使用实际行渲染与字段定位函数，检查列表沿用行列交互时的字段映射。
 const loadModule = (name: string) => {
     const mocks: Record<string, unknown> = {
+        "./entryIcon": entryIcon,
         "./subItemsState": name === "row" ? loadModule("subItemsState") : {},
         "./viewType": viewType,
         "./conditionalColor": conditionalColor,

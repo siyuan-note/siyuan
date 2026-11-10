@@ -1,3 +1,4 @@
+import {getAVCellShowIcon} from "./entryIcon";
 import {isAVTimestampType} from "./capabilities";
 import {cloneAVCellValueSnapshot} from "./cellValue";
 import {getSubItemsCellStyle, getSubItemsControlHTML} from "./subItemsState";
@@ -32,6 +33,7 @@ import {
     getAVSelectedItemInfos,
     getAVSelectedItemPoints,
     getAvBodyData,
+    getAVData,
     IAVItemInfo,
     resetAVRowSelect,
     updateAVRowSelect
@@ -116,7 +118,7 @@ data-date-format="${escapeAttr(galleryData.fields[fieldsIndex].dateFormat || "")
 ${galleryData.fields[fieldsIndex].renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, galleryData.showIcon, "gallery", galleryData.fields[fieldsIndex].options, galleryData.fields[fieldsIndex].dateFormat, galleryData.fields[fieldsIndex].renderTemplate)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, getAVCellShowIcon(galleryData, cell.value.type), "gallery", galleryData.fields[fieldsIndex].options, galleryData.fields[fieldsIndex].dateFormat, galleryData.fields[fieldsIndex].renderTemplate)}</div>`;
             if (galleryData.displayFieldName) {
                 html += `<div class="av__gallery-field av__gallery-field--name${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-name">
@@ -185,7 +187,7 @@ data-date-format="${escapeAttr(kanbanData.fields[fieldsIndex].dateFormat || "")}
 ${kanbanData.fields[fieldsIndex].renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, kanbanData.showIcon, "kanban", kanbanData.fields[fieldsIndex].options, kanbanData.fields[fieldsIndex].dateFormat, kanbanData.fields[fieldsIndex].renderTemplate)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, getAVCellShowIcon(kanbanData, cell.value.type), "kanban", kanbanData.fields[fieldsIndex].options, kanbanData.fields[fieldsIndex].dateFormat, kanbanData.fields[fieldsIndex].renderTemplate)}</div>`;
             if (kanbanData.displayFieldName) {
                 html += `<div class="av__gallery-field av__gallery-field--name${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-name">
@@ -242,7 +244,7 @@ ${index === treeColumnIndex ? 'data-sub-items-cell="true"' : ""}
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${getConditionalCellStyle(tableRow, column.id)}${isList ? "" : `width: ${escapeAttr(column.width) || "200px"};`}
 ${cell.bgColor && !tableRow.conditionalColors?.background && !tableRow.conditionalColors?.properties?.[column.id] ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${index === treeColumnIndex ? getSubItemsControlHTML(tableRow, tableData) + `<div class="av__cellcontent" style="${getSubItemsCellStyle(tableRow, tableData)}">` : ""}${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat, column.renderTemplate)}${index === treeColumnIndex ? "</div>" : ""}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${index === treeColumnIndex ? getSubItemsControlHTML(tableRow, tableData) + `<div class="av__cellcontent" style="${getSubItemsCellStyle(tableRow, tableData)}">` : ""}${renderCell(cell.value, options.rowIndex, getAVCellShowIcon(tableData, cell.value.type), "table", column.options, column.dateFormat, column.renderTemplate)}${index === treeColumnIndex ? "</div>" : ""}</div>`;
 
         if (pinIndex === index) {
             html += "</div>";
@@ -462,7 +464,7 @@ data-dtype="${escapeAttr(item.dataset.dtype)}"
 data-date-format="${escapeAttr(item.dataset.dateFormat || "")}"
 data-align="${escapeAttr(item.dataset.align || "")}"
 style="${isList ? "" : `width: ${item.style.width};`}"${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(colType, null), lineNumber,
-    true, "table", undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
+    getAVCellShowIcon(getAVData(options.blockElement as HTMLElement)?.view, colType), "table", undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
         if (pinIndex === index) {
             cellsHTML += "</div>";
         }
@@ -492,7 +494,7 @@ style="${isList ? "" : `width: ${item.style.width};`}"${colType === "block" ? ' 
                     if (updateIds.includes(cellItem.dataset.colId)) {
                         const cellValue = response.data.values[cellItem.dataset.colId];
                         const contentElement = cellItem.querySelector(".av__cellcontent") || cellItem;
-                        contentElement.innerHTML = renderCell(cellValue, 0, true, "table", undefined,
+                        contentElement.innerHTML = renderCell(cellValue, 0, getAVCellShowIcon(getAVData(options.blockElement as HTMLElement)?.view, cellValue.type), "table", undefined,
                             cellItem.dataset.dateFormat as TAVDateFormat);
                         renderCellAttr(cellItem, cellValue);
                         renderAVRichTextElements(cellItem);

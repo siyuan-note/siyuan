@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Zobraziť ikony položiek v primárnom kľúči",
+	"databaseShowRelationIcon": "Zobraziť ikony položiek vo vzťahoch a súhrnoch",
+	"databaseShowIconTip": "Po zapnutí sa ikony položiek v primárnom kľúči predvolene zobrazujú v nových databázach a zobrazeniach",
+	"databaseShowRelationIconTip": "Po zapnutí sa ikony položiek vo vzťahoch a súhrnoch predvolene zobrazujú v nových databázach a zobrazeniach",
+	"databaseIconDefaultsTip": "Tieto predvolené nastavenia neovplyvnia existujúce zobrazenia",
 	"quickLookLimit": "Obsah prekračuje limit náhľadu (256 KiB alebo 20000 prvkov)",
 	"quickLookEncoding": "Náhľad vyžaduje UTF-8 alebo UTF-16 s BOM",
 	"quickLookTimeout": "Čas vykresľovania náhľadu vypršal (15 sekúnd)",

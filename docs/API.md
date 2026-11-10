@@ -2304,6 +2304,7 @@ Ordinary HTTP template parsing or evaluation errors are returned in the affected
         "group": null,
         "pageSize": 50,
         "showIcon": true,
+        "showRelationIcon": true,
         "wrapField": false,
         "groupFolded": false,
         "groupHidden": 0,
@@ -2356,7 +2357,7 @@ Ordinary HTTP template parsing or evaluation errors are returned in the affected
   }
   ```
 
-    * `data.view`: The rendered view instance. Its shape depends on `viewType`: `table` and `list` return `columns`/`rows`/`rowCount`, while `gallery` and `kanban` return `fields`/`cards`/`cardCount`. When grouping is enabled, `groups` contains a view instance for each group, including `groupKey`/`groupValue`. `view` also includes `filters`, `sorts`, `group`, `showIcon`, `wrapField`, `groupFolded`, and `groupHidden`. Note: active filters or grouping can make the item list empty even when the total item count is greater than 0
+    * `data.view`: The rendered view instance. Its shape depends on `viewType`: `table` and `list` return `columns`/`rows`/`rowCount`, while `gallery` and `kanban` return `fields`/`cards`/`cardCount`. When grouping is enabled, `groups` contains a view instance for each group, including `groupKey`/`groupValue`. `view` also includes `filters`, `sorts`, `group`, `showIcon`, `showRelationIcon`, `wrapField`, `groupFolded`, and `groupHidden`. `showIcon` controls primary-key content icons; `showRelationIcon` controls relation and rollup content icons and falls back to `showIcon` for saved layouts without that setting. Note: active filters or grouping can make the item list empty even when the total item count is greater than 0
     * `data.view.columns[]`: Each has `id`, `name`, `type`, `icon`, `wrap`, `hidden`, `desc`, `calc`, `numberFormat`, `template`, `renderTemplate`, `pin`, `width`; `select`/`mSelect` columns additionally include `options`. Gallery and kanban fields expose the same field metadata under `data.view.fields[]`
     * `data.view.columns[].renderTemplate`: Optional display template for a normal field. It changes only the displayed content; the field's stored typed value remains unchanged
     * `data.view.rows[].id`: The table row's **item ID** (`itemID`). It also equals `value.blockID` in that row's primary-key cell. For a bound row, the bound block ID is stored in `value.block.id` in the primary-key cell; these are distinct concepts and must not be assumed equal

@@ -1,3 +1,4 @@
+import {getAVCellShowIcon} from "../entryIcon";
 import {AV_DATE_TYPES} from "../capabilities";
 import {Constants} from "../../../../constants";
 import {setStorageVal} from "../../../util/compatibility";
@@ -98,7 +99,7 @@ const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boole
         const checkClass = field.type === "checkbox" ? (cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck") : "";
         const checkbox = field.type === "checkbox" && !field.renderTemplate?.trim() ?
             ` role="checkbox" tabindex="${editable ? "0" : "-1"}" aria-checked="${!!cell.value.checkbox?.checked}" aria-disabled="${!editable}" aria-label="${escapeAttr(field.name)}"` : "";
-        const value = `<div class="av__calendar-field${checkClass}"${checkbox} data-field-id="${field.id}" data-col-id="${field.id}" data-dtype="${field.type}" data-align="${field.align || ""}" data-wrap="${field.wrap}"${field.renderTemplate?.trim() ? ' data-render-template="true"' : ""} title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, view.showIcon, "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
+        const value = `<div class="av__calendar-field${checkClass}"${checkbox} data-field-id="${field.id}" data-col-id="${field.id}" data-dtype="${field.type}" data-align="${field.align || ""}" data-wrap="${field.wrap}"${field.renderTemplate?.trim() ? ' data-render-template="true"' : ""} title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, getAVCellShowIcon(view, cell.value.type), "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
         return view.calendar.displayFieldName && field.type !== "block" ?
             `<div class="av__calendar-field-row"><span class="av__calendar-field-name fn__ellipsis" title="${escapeAttr(field.name)}">${escapeHtml(field.name)}</span>${value}</div>` : value;
     }).join("");

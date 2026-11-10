@@ -2300,6 +2300,7 @@ if (response.code === 0 && response.data) {
         "group": null,
         "pageSize": 50,
         "showIcon": true,
+        "showRelationIcon": true,
         "wrapField": false,
         "groupFolded": false,
         "groupHidden": 0,
@@ -2352,7 +2353,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-    * `data.view`: 渲染后的视图实例。结构随 `viewType` 而变：`table` 和 `list` 返回 `columns`/`rows`/`rowCount`，`gallery` 和 `kanban` 返回 `fields`/`cards`/`cardCount`。启用分组时，`groups` 包含各分组的视图实例，每个实例含 `groupKey`/`groupValue`。`view` 还包含 `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden`。注意：启用的过滤或分组可能使条目列表为空，即使条目总数大于 0
+    * `data.view`: 渲染后的视图实例。结构随 `viewType` 而变：`table` 和 `list` 返回 `columns`/`rows`/`rowCount`，`gallery` 和 `kanban` 返回 `fields`/`cards`/`cardCount`。启用分组时，`groups` 包含各分组的视图实例，每个实例含 `groupKey`/`groupValue`。`view` 还包含 `filters`/`sorts`/`group`/`showIcon`/`showRelationIcon`/`wrapField`/`groupFolded`/`groupHidden`。`showIcon` 控制主键内容图标；`showRelationIcon` 控制关联、汇总内容图标，已保存的布局缺少该设置时沿用 `showIcon`。注意：启用的过滤或分组可能使条目列表为空，即使条目总数大于 0
     * `data.view.columns[]`: 每列含 `id`/`name`/`type`/`icon`/`wrap`/`hidden`/`desc`/`calc`/`numberFormat`/`template`/`renderTemplate`/`pin`/`width`；`select`/`mSelect` 列还额外包含 `options`。画廊和看板字段在 `data.view.fields[]` 中返回相同的字段元数据
     * `data.view.columns[].renderTemplate`: 普通字段可选的显示模板，仅改变显示内容，字段原有类型的存储值保持不变
     * `data.view.rows[].id`: 表格行的**条目 ID**（`itemID`），也等于该行主键单元格的 `value.blockID`。对于绑定行，绑定块 ID 位于主键单元格的 `value.block.id`；二者是不同概念，不能假设相等

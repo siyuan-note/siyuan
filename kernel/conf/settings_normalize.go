@@ -87,6 +87,12 @@ func NormalizeEditor(editor *Editor) *Editor {
 	if editor.BackmentionSort == nil {
 		editor.BackmentionSort = defaults.BackmentionSort
 	}
+	if editor.DatabaseShowIcon == nil {
+		editor.DatabaseShowIcon = defaults.DatabaseShowIcon
+	}
+	if editor.DatabaseShowRelationIcon == nil {
+		editor.DatabaseShowRelationIcon = defaults.DatabaseShowRelationIcon
+	}
 	if editor.DatabaseAttrShow == nil {
 		editor.DatabaseAttrShow = defaults.DatabaseAttrShow
 	}

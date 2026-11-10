@@ -8,11 +8,6 @@ export const updateAVTableColumnPresentation = (view: IAVTable,
     (view.groups as IAVTable[] || []).forEach(group => updateAVTableColumnPresentation(group, properties, columnID));
 };
 
-export const updateAVTableShowIcon = (view: IAVTable, showIcon: boolean) => {
-    view.showIcon = showIcon;
-    (view.groups as IAVTable[] || []).forEach(group => updateAVTableShowIcon(group, showIcon));
-};
-
 export const removeAVTableColumn = (view: IAVTable, columnID: string) => {
     const index = view.columns.findIndex(column => column.id === columnID);
     view.columns = view.columns.filter(column => column.id !== columnID);

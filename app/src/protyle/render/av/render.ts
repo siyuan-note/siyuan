@@ -1,3 +1,4 @@
+import {updateAVViewShowIcon} from "./entryIcon";
 import {fetchAVRender, AVAutomaticRefresh} from "./httpRender";
 import {isAVSelectType} from "./capabilities";
 import {guardTemplateHTTPRequest} from "../../../template/http";
@@ -32,7 +33,7 @@ import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
 import {getAVData, getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, invalidateAVTableRowHeights, setAVData} from "./virtualScroll";
-import {updateAVTableColumnPresentation, updateAVTableShowIcon} from "./columnPresentation";
+import {updateAVTableColumnPresentation} from "./columnPresentation";
 import {disposeAVColumnWindow, prepareAVColumnWindow} from "./columnWindow";
 import {
     applyAVRenderContext,
@@ -1154,19 +1155,21 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         });
         return;
     }
-    if (operation.action === "setAttrViewShowIcon") {
+    if (operation.action === "setAttrViewShowIcon" || operation.action === "setAttrViewShowRelationIcon") {
+        const relation = operation.action === "setAttrViewShowRelationIcon";
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             prepareAVColumnWindow(item);
             const data = getAVData(item);
-            if (data && isTableLikeView(data.viewType)) {
-                updateAVTableShowIcon(data.view as IAVTable, operation.data);
+            if (data) {
+                updateAVViewShowIcon(data.view, operation.data, relation);
             }
-            item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__calendar-field[data-dtype="block"] .b3-menu__avemoji').forEach(cellItem => {
-                cellItem.classList.toggle("fn__none", !operation.data);
+            const selector = relation
+                ? '.av__cell[data-dtype="relation"] .b3-menu__avemoji, .av__cell[data-dtype="rollup"] .b3-menu__avemoji, .av__calendar-field[data-dtype="relation"] .b3-menu__avemoji, .av__calendar-field[data-dtype="rollup"] .b3-menu__avemoji'
+                : '.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__calendar-field[data-dtype="block"] .b3-menu__avemoji';
+            item.querySelectorAll(selector).forEach(icon => {
+                icon.classList.toggle("fn__none", !operation.data);
             });
-            item.querySelectorAll('.av__cell[data-dtype="relation"] .av__cell--relation, .av__calendar-field[data-dtype="relation"] .av__cell--relation').forEach(cellItem => {
-                cellItem.firstElementChild.classList.toggle("fn__none", !operation.data);
-            });
+            invalidateAVTableRowHeights(item);
         });
         return;
     }

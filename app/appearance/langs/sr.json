@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Prikaži ikonice stavki u primarnom ključu",
+	"databaseShowRelationIcon": "Prikaži ikonice stavki u relacijama i zbirnim poljima",
+	"databaseShowIconTip": "Kada je uključeno, ikonice stavki u primarnom ključu se podrazumevano prikazuju u novim bazama podataka i prikazima",
+	"databaseShowRelationIconTip": "Kada je uključeno, ikonice stavki u relacijama i zbirnim poljima se podrazumevano prikazuju u novim bazama podataka i prikazima",
+	"databaseIconDefaultsTip": "Ove podrazumevane postavke ne utiču na postojeće prikaze",
 	"quickLookLimit": "Садржај премашује ограничење прегледа (256 KiB или 20000 елемената)",
 	"quickLookEncoding": "Преглед захтева UTF-8 или UTF-16 са BOM ознаком",
 	"quickLookTimeout": "Истекло је време исцртавања прегледа (15 секунди)",

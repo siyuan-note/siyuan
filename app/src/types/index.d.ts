@@ -1269,6 +1269,7 @@ interface IAVView {
     hideAttrViewName?: boolean;
     pageSize?: number;
     showIcon?: boolean;
+    showRelationIcon?: boolean;
     wrapField?: boolean;
     groupHidden?: number,  // 0：显示，1：空白隐藏，2：手动隐藏
     groupFolded?: boolean,

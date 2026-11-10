@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Mostrar iconos de entradas en la clave primaria",
+	"databaseShowRelationIcon": "Mostrar iconos de entradas en relaciones y agregaciones",
+	"databaseShowIconTip": "Al activar esta opción, se muestran por defecto los iconos de entradas en la clave primaria de las nuevas bases de datos y vistas",
+	"databaseShowRelationIconTip": "Al activar esta opción, se muestran por defecto los iconos de entradas en relaciones y agregaciones de las nuevas bases de datos y vistas",
+	"databaseIconDefaultsTip": "Estos valores predeterminados no afectan a las vistas existentes",
 	"quickLookLimit": "El contenido supera el límite de vista previa (256 KiB o 20000 elementos)",
 	"quickLookEncoding": "La vista previa requiere UTF-8 o UTF-16 con BOM",
 	"quickLookTimeout": "La vista previa agotó el tiempo de renderizado (15 segundos)",

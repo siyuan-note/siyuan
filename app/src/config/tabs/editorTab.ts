@@ -271,6 +271,19 @@ const registerEditorImagesGroup = (tab: SettingTabBuilder) => {
 
 const registerEditorDatabaseGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("database", window.siyuan.languages.database);
+    group.switch("editor.databaseShowIcon", {
+        title: window.siyuan.languages.databaseShowIcon,
+        desc: window.siyuan.languages.databaseShowIconTip,
+    });
+    group.switch("editor.databaseShowRelationIcon", {
+        title: window.siyuan.languages.databaseShowRelationIcon,
+        desc: window.siyuan.languages.databaseShowRelationIconTip,
+    });
+    group.slot({
+        key: "databaseIconDefaultsTip",
+        keywords: [window.siyuan.languages.databaseIconDefaultsTip],
+        html: () => genStackHtml([{left: {kind: "desc", text: window.siyuan.languages.databaseIconDefaultsTip}}]),
+    });
     group.switch("editor.databaseAttrShow", {
         title: window.siyuan.languages.databaseAttrShow,
         desc: window.siyuan.languages.databaseAttrShowTip,

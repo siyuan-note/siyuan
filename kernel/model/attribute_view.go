@@ -1537,9 +1537,23 @@ func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout a
 		return av.ErrWrongLayoutType
 	}
 
+	oldBase := view.GetBaseLayout()
 	oldLayout := view.LayoutType
 	oldFields := attributeViewFieldIDs(view)
 	view.LayoutType = newLayout
+	targetExists := newLayout == av.LayoutTypeTable && view.Table != nil ||
+		newLayout == av.LayoutTypeList && view.List != nil ||
+		newLayout == av.LayoutTypeCalendar && view.Calendar != nil ||
+		newLayout == av.LayoutTypeGallery && view.Gallery != nil ||
+		newLayout == av.LayoutTypeKanban && view.Kanban != nil
+	defer func() {
+		if !targetExists && oldBase != nil {
+			if base := view.GetBaseLayout(); base != nil {
+				base.ShowIcon = oldBase.ShowIcon
+				base.ShowRelationIcon = new(oldBase.EffectiveShowRelationIcon())
+			}
+		}
+	}()
 	if oldLayout == av.LayoutTypeCalendar && view.Name == av.GetAttributeViewI18n(string(oldLayout)) {
 		view.Name = av.GetAttributeViewI18n(string(newLayout))
 	}
@@ -1673,7 +1687,36 @@ func setAttrViewShowIcon(operation *Operation) (err error) {
 	if nil == base {
 		return
 	}
-	base.ShowIcon = operation.Data.(bool)
+	base.SetShowIcon(operation.Data.(bool))
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewShowRelationIcon(operation *Operation) (ret *TxErr) {
+	err := setAttrViewShowRelationIcon(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewShowRelationIcon(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return
+	}
+
+	base := view.GetBaseLayout()
+	if nil == base {
+		return
+	}
+	base.ShowRelationIcon = new(operation.Data.(bool))
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -5403,6 +5446,7 @@ func addAttrViewViewNamed(avID, viewID, blockID, name string, layout av.LayoutTy
 		return
 	}
 
+	applyAttributeViewIconDefaults(view)
 	view.ItemIDs = firstView.ItemIDs
 	view.ID = viewID
 	if name = strings.TrimSpace(name); "" != name {

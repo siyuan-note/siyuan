@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Pokaż ikony wpisów w kluczu głównym",
+	"databaseShowRelationIcon": "Pokaż ikony wpisów w relacjach i agregacjach",
+	"databaseShowIconTip": "Po włączeniu ikony wpisów w kluczu głównym są domyślnie wyświetlane w nowych bazach danych i widokach",
+	"databaseShowRelationIconTip": "Po włączeniu ikony wpisów w relacjach i agregacjach są domyślnie wyświetlane w nowych bazach danych i widokach",
+	"databaseIconDefaultsTip": "Te ustawienia domyślne nie wpływają na istniejące widoki",
 	"quickLookLimit": "Treść przekracza limit podglądu (256 KiB lub 20000 elementów)",
 	"quickLookEncoding": "Podgląd wymaga UTF-8 lub UTF-16 ze znacznikiem BOM",
 	"quickLookTimeout": "Przekroczono czas renderowania podglądu (15 sekund)",

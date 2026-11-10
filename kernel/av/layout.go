@@ -6,6 +6,22 @@ package av
 
 import "fmt"
 
+func (base *BaseLayout) EffectiveShowRelationIcon() bool {
+	// 旧版布局使用 showIcon 同时控制主键和关联、汇总内容中的图标。
+	if base.ShowRelationIcon == nil {
+		return base.ShowIcon
+	}
+	return *base.ShowRelationIcon
+}
+
+func (base *BaseLayout) SetShowIcon(show bool) {
+	// 独立修改主键开关前固定旧版关联图标设置，避免回退值随主键开关变化。
+	if base.ShowRelationIcon == nil {
+		base.ShowRelationIcon = new(base.ShowIcon)
+	}
+	base.ShowIcon = show
+}
+
 // MissingLayoutError 标识布局类型已保存、布局配置缺失的数据。
 type MissingLayoutError struct {
 	Type   LayoutType
@@ -34,8 +50,9 @@ type BaseLayout struct {
 	Spec int    `json:"spec"` // 布局格式版本
 	ID   string `json:"id"`   // 布局 ID
 
-	ShowIcon  bool `json:"showIcon"`  // 是否显示字段图标
-	WrapField bool `json:"wrapField"` // 是否换行字段内容
+	ShowRelationIcon *bool `json:"showRelationIcon,omitempty"` // 是否显示关联、汇总条目图标；缺失或为 null 时沿用 showIcon
+	ShowIcon         bool  `json:"showIcon"`                   // 是否显示主键条目图标
+	WrapField        bool  `json:"wrapField"`                  // 是否换行字段内容
 
 	// Deprecated: 仅用于读取和升级旧版布局，过滤规则由 View.Filters 维护。
 	Filters []*ViewFilter `json:"filters,omitempty"` // 过滤规则
@@ -73,7 +90,8 @@ type BaseInstance struct {
 	Sorts             []*ViewSort             `json:"sorts"`            // 排序规则
 	Group             *ViewGroup              `json:"group"`            // 分组规则
 	PageSize          int                     `json:"pageSize"`         // 每页项目数
-	ShowIcon          bool                    `json:"showIcon"`         // 是否显示字段图标
+	ShowRelationIcon  bool                    `json:"showRelationIcon"` // 是否显示关联、汇总条目图标，已解析旧版布局的 showIcon 回退值
+	ShowIcon          bool                    `json:"showIcon"`         // 是否显示主键条目图标
 	WrapField         bool                    `json:"wrapField"`        // 是否换行字段内容
 
 	GroupKey    *Key       `json:"groupKey,omitempty"`   // 分组字段
@@ -120,9 +138,9 @@ func (view *View) GetCardSettings() *CardSettings {
 }
 
 func NewViewBaseInstance(view *View) *BaseInstance {
-	showIcon, wrapField := true, false
+	showIcon, showRelationIcon, wrapField := true, true, false
 	if base := view.GetBaseLayout(); nil != base {
-		showIcon, wrapField = base.ShowIcon, base.WrapField
+		showIcon, showRelationIcon, wrapField = base.ShowIcon, base.EffectiveShowRelationIcon(), base.WrapField
 	}
 	return &BaseInstance{
 		ConditionalColors: view.EffectiveConditionalColors(),
@@ -141,6 +159,7 @@ func NewViewBaseInstance(view *View) *BaseInstance {
 		GroupHidden:       view.GroupHidden,
 		PageSize:          view.PageSize,
 		ShowIcon:          showIcon,
+		ShowRelationIcon:  showRelationIcon,
 		WrapField:         wrapField,
 	}
 }

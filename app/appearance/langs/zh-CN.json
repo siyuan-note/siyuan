@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "显示主键条目图标",
+	"databaseShowRelationIcon": "显示关联和汇总条目图标",
+	"databaseShowIconTip": "启用后新建数据库及视图时默认显示主键条目的图标",
+	"databaseShowRelationIconTip": "启用后新建数据库及视图时默认显示关联和汇总条目的图标",
+	"databaseIconDefaultsTip": "以上默认设置不影响已有视图",
 	"quickLookLimit": "内容超出预览限制（256 KiB 或 20000 个元素）",
 	"quickLookEncoding": "预览要求 UTF-8 或带 BOM 的 UTF-16 编码",
 	"quickLookTimeout": "预览渲染超时（15 秒）",

@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "主キーフィールドのエントリアイコンを表示",
+	"databaseShowRelationIcon": "関連・集計フィールドのエントリアイコンを表示",
+	"databaseShowIconTip": "有効にすると、新しいデータベースとビューで主キーフィールドのエントリアイコンを既定で表示します",
+	"databaseShowRelationIconTip": "有効にすると、新しいデータベースとビューで関連・集計フィールドのエントリアイコンを既定で表示します",
+	"databaseIconDefaultsTip": "これらの既定設定は既存のビューに影響しません",
 	"quickLookLimit": "内容がプレビューの上限を超えています（256 KiB または 20000 要素）",
 	"quickLookEncoding": "プレビューには UTF-8 または BOM 付き UTF-16 が必要です",
 	"quickLookTimeout": "プレビューの描画がタイムアウトしました（15 秒）",

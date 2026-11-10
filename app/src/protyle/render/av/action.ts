@@ -1,3 +1,4 @@
+import {getAVCellShowIcon} from "./entryIcon";
 import {isTableLikeView} from "./viewType";
 import {prepareAVColumnWindow} from "./columnWindow";
 import {removeAVTableColumn} from "./columnPresentation";
@@ -1545,6 +1546,8 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
         }
         const viewType = blockElement.getAttribute("data-av-type") as TAVView;
         const iconElement = cellElement.querySelector(".b3-menu__avemoji");
+        const view = getAVData(blockElement)?.view;
+        const showIcon = view ? getAVCellShowIcon(view, value.type) : !!iconElement && !iconElement.classList.contains("fn__none");
         const renderTemplate = cellElement.dataset.renderTemplate;
         if (renderTemplate?.trim() && typeof value.renderedContent !== "string" &&
             cellElement.querySelector(".av__celltext--template")) {
@@ -1566,13 +1569,13 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
                     content: cellElement.getAttribute("aria-label").split('<div class="ft__on-surface">')[0],
                 };
             }
-            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
+            cellElement.innerHTML = renderCell(value, 0, showIcon,
                 viewType, undefined, cellElement.dataset.dateFormat as TAVDateFormat, renderTemplate);
             cellElement.parentElement.setAttribute("data-empty",
                 cellValueIsEmpty(value, true, renderTemplate).toString());
         } else {
             const contentElement = cellElement.querySelector(".av__cellcontent") || cellElement;
-            contentElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
+            contentElement.innerHTML = renderCell(value, 0, showIcon,
                 undefined, undefined, cellElement.dataset.dateFormat as TAVDateFormat, renderTemplate);
         }
         if (hasDragFill) {

@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20261110155812"
+		"updated": "20261110134234"
 	},
 	"Children": [
 		{
@@ -374,7 +374,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-y2nsz1y",
-				"updated": "20261024161058"
+				"updated": "20261110134234"
 			},
 			"Children": [
 				{
@@ -383,6 +383,102 @@
 				}
 			],
 			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110134234-sehsb03",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110134234-sehsb03",
+				"updated": "20261110134234"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "データベース"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主キーフィールドのエントリアイコンを表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "関連・集計フィールドのエントリアイコンを表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を設定します。どちらも既定で有効で、データベースやビューを新規作成するときにのみ適用されます。既定設定を変更しても既存のビューには影響しません。"
+				}
+			]
+		},
+		{
+			"ID": "20261110134234-zr8rs4s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110134234-zr8rs4s",
+				"updated": "20261110134234"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "現在のビューの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "レイアウト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " メニューでは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "主キーフィールドのエントリアイコンを表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "関連・集計フィールドのエントリアイコンを表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でそれぞれのアイコンを個別に切り替えられます。ビューの複製やレイアウトの変更では、両方の設定が保持されます。"
+				}
+			]
 		},
 		{
 			"ID": "20260613164213-4gv3exa",
@@ -6136,7 +6232,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-          "Data": "主キーには文書タイトルと同じインライン要素を扱う単一のエディターを使い、文字スタイル、リンク、画像、数式、参照に対応します。Enter で保存してエディターを閉じ、連続入力が利用できる場合は次の行の編集に進みます。Shift+Enter は新しい段落を作らず、行内に改行を挿入します。テーブル、リスト、ギャラリー、カンバン、カレンダー、アイテム詳細、関連、ロールアップは完全な内容を表示します。フィルター、並べ替え、検索、プレーンテキストのコピーは文字列の投影を使い、既存の Markdown 風の主キーは文字どおりに保持します。"
+					"Data": "主キーには文書タイトルと同じインライン要素を扱う単一のエディターを使い、文字スタイル、リンク、画像、数式、参照に対応します。Enter で保存してエディターを閉じ、連続入力が利用できる場合は次の行の編集に進みます。Shift+Enter は新しい段落を作らず、行内に改行を挿入します。テーブル、リスト、ギャラリー、カンバン、カレンダー、アイテム詳細、関連、ロールアップは完全な内容を表示します。フィルター、並べ替え、検索、プレーンテキストのコピーは文字列の投影を使い、既存の Markdown 風の主キーは文字どおりに保持します。"
 				}
 			]
 		},

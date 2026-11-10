@@ -1947,7 +1947,7 @@ export class WYSIWYG {
                         nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) === dragFillViewID &&
                         (stableOriginCells.length > 0 ? selectAVDragFillRange(nodeElement, stableOriginCells, lastCellElement) :
                             selectAVCellRange(nodeElement, lastCellElement))) {
-                        dragFillCellsValue(protyle, nodeElement, originData, originCellIds, lastOriginCellElement);
+                        dragFillCellsValue(protyle, nodeElement, originData, originCellIds);
                         addDragFill(lastCellElement);
                     }
                     return false;

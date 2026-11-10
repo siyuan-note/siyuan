@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Birincil anahtar girdi simgelerini göster",
+	"databaseShowRelationIcon": "İlişki ve toplama girdi simgelerini göster",
+	"databaseShowIconTip": "Etkinleştirildiğinde, yeni veritabanlarında ve görünümlerde birincil anahtar girdi simgelerini varsayılan olarak gösterir",
+	"databaseShowRelationIconTip": "Etkinleştirildiğinde, yeni veritabanlarında ve görünümlerde ilişki ve toplama girdi simgelerini varsayılan olarak gösterir",
+	"databaseIconDefaultsTip": "Bu varsayılan ayarlar mevcut görünümleri etkilemez",
 	"quickLookLimit": "İçerik önizleme sınırını aşıyor (256 KiB veya 20000 öğe)",
 	"quickLookEncoding": "Önizleme UTF-8 veya BOM içeren UTF-16 gerektirir",
 	"quickLookTimeout": "Önizleme işleme zaman aşımına uğradı (15 saniye)",

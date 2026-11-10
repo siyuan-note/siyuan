@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261110155812"
+		"updated": "20261110134234"
 	},
 	"Children": [
 		{
@@ -373,7 +373,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-ua2g4rk",
-				"updated": "20261024161058"
+				"updated": "20261110134234"
 			},
 			"Children": [
 				{
@@ -382,6 +382,106 @@
 				}
 			],
 			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110134234-au9vwem",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110134234-au9vwem",
+				"updated": "20261110134234"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "數據庫"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中設定 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示主鍵條目圖示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示關聯和匯總條目圖示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。兩項預設開啟，僅在新建資料庫及視圖時生效；修改預設設定不影響既有視圖。"
+				}
+			]
+		},
+		{
+			"ID": "20261110134234-w9u97w6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110134234-w9u97w6",
+				"updated": "20261110134234"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在目前視圖的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "佈局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選單中，透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示主鍵條目圖示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示關聯和匯總條目圖示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 分別控制兩類圖示。複製視圖或切換版面配置會保留這兩項設定。"
+				}
+			]
 		},
 		{
 			"ID": "20260613164228-p5ektpr",
@@ -5952,7 +6052,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-          "Data": "主鍵使用單一行級編輯器，合法元素與文件標題相同，包括文字樣式、連結、圖片、公式和引用。Enter 儲存並關閉編輯器，支援連續輸入時繼續編輯下一行。Shift+Enter 插入行內換行，不建立新段落。表格、列表、畫廊、看板、日曆、條目詳情、關聯和彙總均顯示完整內容；篩選、排序、搜尋及純文字複製使用文字投影，已有類似 Markdown 的主鍵文字保持字面含義。"
+					"Data": "主鍵使用單一行級編輯器，合法元素與文件標題相同，包括文字樣式、連結、圖片、公式和引用。Enter 儲存並關閉編輯器，支援連續輸入時繼續編輯下一行。Shift+Enter 插入行內換行，不建立新段落。表格、列表、畫廊、看板、日曆、條目詳情、關聯和彙總均顯示完整內容；篩選、排序、搜尋及純文字複製使用文字投影，已有類似 Markdown 的主鍵文字保持字面含義。"
 				}
 			]
 		},

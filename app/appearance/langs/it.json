@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Mostra le icone delle voci nella chiave primaria",
+	"databaseShowRelationIcon": "Mostra le icone delle voci nelle relazioni e nei rollup",
+	"databaseShowIconTip": "Se abilitato, mostra per impostazione predefinita le icone delle voci nella chiave primaria nei nuovi database e nelle nuove viste",
+	"databaseShowRelationIconTip": "Se abilitato, mostra per impostazione predefinita le icone delle voci nelle relazioni e nei rollup nei nuovi database e nelle nuove viste",
+	"databaseIconDefaultsTip": "Queste impostazioni predefinite non influiscono sulle viste esistenti",
 	"quickLookLimit": "Il contenuto supera il limite di anteprima (256 KiB o 20000 elementi)",
 	"quickLookEncoding": "L’anteprima richiede UTF-8 o UTF-16 con BOM",
 	"quickLookTimeout": "Tempo di rendering dell’anteprima scaduto (15 secondi)",

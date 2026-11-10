@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Mostrar ícones das entradas na chave primária",
+	"databaseShowRelationIcon": "Mostrar ícones das entradas nas relações e rollups",
+	"databaseShowIconTip": "Quando ativado, mostra por padrão os ícones das entradas na chave primária em novos bancos de dados e visualizações",
+	"databaseShowRelationIconTip": "Quando ativado, mostra por padrão os ícones das entradas nas relações e rollups em novos bancos de dados e visualizações",
+	"databaseIconDefaultsTip": "Esses padrões não afetam as visualizações existentes",
 	"quickLookLimit": "O conteúdo excede o limite da prévia (256 KiB ou 20000 elementos)",
 	"quickLookEncoding": "A prévia exige UTF-8 ou UTF-16 com BOM",
 	"quickLookTimeout": "O tempo de renderização da prévia expirou (15 segundos)",

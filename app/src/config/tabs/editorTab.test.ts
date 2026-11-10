@@ -27,6 +27,10 @@ test("database field layout setting follows tabs and stays available when docume
     controls.find(item => item.id === "editor.databaseAttrShow").afterMount(root);
     assert.equal(hidden.has("#editor.databaseAttrUseTabs"), true);
     assert.equal(hidden.has("#editor.databaseAttrLayout"), false);
+    for (const id of ["editor.databaseShowIcon", "editor.databaseShowRelationIcon"]) {
+        assert.ok(controls.find(item => item.id === id));
+        assert.equal(hidden.has("#" + id), false);
+    }
     show.checked = true;
     listeners[0]();
     assert.equal(hidden.size, 0);

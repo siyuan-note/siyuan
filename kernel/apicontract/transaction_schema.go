@@ -115,6 +115,7 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"setAttrViewDisplayFieldName", reflect.TypeFor[bool](), reflect.TypeFor[Null]()},
 	{"setAttrViewDisplayEmptyFields", reflect.TypeFor[bool](), reflect.TypeFor[Null]()},
 	{"setAttrViewFillColBackgroundColor", reflect.TypeFor[bool](), reflect.TypeFor[Null]()},
+	{"setAttrViewShowRelationIcon", reflect.TypeFor[bool](), reflect.TypeFor[Null]()},
 	{"setAttrViewShowIcon", reflect.TypeFor[bool](), reflect.TypeFor[Null]()},
 	{"setAttrViewWrapField", reflect.TypeFor[bool](), reflect.TypeFor[Null]()},
 	{"changeAttrViewLayout", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},

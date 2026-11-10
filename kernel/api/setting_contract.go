@@ -395,6 +395,8 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.DisplayNetImgMark = value.DisplayNetImgMark
 	result.DisplayImgName = value.DisplayImgName
 	result.DisplayImgAlt = value.DisplayImgAlt
+	result.DatabaseShowIcon = value.DatabaseShowIcon
+	result.DatabaseShowRelationIcon = value.DatabaseShowRelationIcon
 	result.DatabaseAttrShow = value.DatabaseAttrShow
 	result.DatabaseAttrClickMode = value.DatabaseAttrClickMode
 	result.DatabaseAttrViewMode = value.DatabaseAttrViewMode

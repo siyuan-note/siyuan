@@ -1,3 +1,4 @@
+import {getAVCellShowIcon} from "./entryIcon";
 import {hasAVScalarContent, isAVDateType, isAVReadonlyType, isAVRichTextType, isAVSelectType, isAVTextType, isAVTimestampType, usesAVRollupCellRenderer} from "./capabilities";
 import {isTableLikeView} from "./viewType";
 import {ensureAVColumnWindow} from "./columnWindow";
@@ -1971,7 +1972,7 @@ export const getPositionByCellElement = (cellElement: HTMLElement) => {
 
 export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, originData: {
     [key: string]: IAVCellValue[]
-}, originCellIds: string[], activeElement: Element) => {
+}, originCellIds: string[]) => {
     nodeElement.querySelector(".av__drag-fill")?.remove();
     const blockID = getAVHostBlockID(nodeElement);
     const doOperations: IOperation[] = [];
@@ -2051,7 +2052,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
     });
     const avID = nodeElement.dataset.avId;
     const originKeys = Object.keys(originData);
-    const showIcon = activeElement.querySelector(".b3-menu__avemoji") ? true : false;
+    const iconView = getAVData(nodeElement)?.view;
     Object.keys(newData).forEach((rowID, index) => {
         newData[rowID].forEach((item, cellIndex) => {
             if (isAVReadonlyType(item.type) ||
@@ -2083,7 +2084,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 data
             });
             const contentElement = item.element.querySelector(".av__cellcontent") || item.element;
-            contentElement.innerHTML = renderCell(data, 0, showIcon, "table", undefined,
+            contentElement.innerHTML = renderCell(data, 0, getAVCellShowIcon(iconView, data.type), "table", undefined,
                 item.element.dataset.dateFormat as TAVDateFormat);
             renderCellAttr(item.element, data);
             renderAVRichTextElements(item.element);

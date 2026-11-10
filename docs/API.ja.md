@@ -2294,6 +2294,7 @@ IDで文書メタデータを読み取ります。管理者権限、および開
         "group": null,
         "pageSize": 50,
         "showIcon": true,
+        "showRelationIcon": true,
         "wrapField": false,
         "groupFolded": false,
         "groupHidden": 0,
@@ -2346,7 +2347,7 @@ IDで文書メタデータを読み取ります。管理者権限、および開
   }
   ```
 
-    * `data.view`: レンダリングされたビューインスタンス。構造は `viewType` により異なります。`table` は `columns`/`rows`/`rowCount` を、`gallery` と `kanban` は `fields`/`cards`/`cardCount` を返します。グループ化が有効な場合、`groups` には `groupKey`/`groupValue` を持つグループごとのビューインスタンスが含まれます。`view` は `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden` も含みます。注意：有効なフィルターまたはグループ化により、アイテムの総数が 0 より大きくてもアイテムリストが空になることがあります
+    * `data.view`: レンダリングされたビューインスタンス。構造は `viewType` により異なります。`table` は `columns`/`rows`/`rowCount` を、`gallery` と `kanban` は `fields`/`cards`/`cardCount` を返します。グループ化が有効な場合、`groups` には `groupKey`/`groupValue` を持つグループごとのビューインスタンスが含まれます。`view` は `filters`/`sorts`/`group`/`showIcon`/`showRelationIcon`/`wrapField`/`groupFolded`/`groupHidden` も含みます。`showIcon` は主キー内容のアイコンを制御し、`showRelationIcon` はリレーションとロールアップ内容のアイコンを制御します。保存済みのレイアウトに後者の設定がない場合は `showIcon` の値を使用します。注意：有効なフィルターまたはグループ化により、アイテムの総数が 0 より大きくてもアイテムリストが空になることがあります
     * `data.view.columns[]`: 各列は `id`/`name`/`type`/`icon`/`wrap`/`hidden`/`desc`/`calc`/`numberFormat`/`template`/`renderTemplate`/`pin`/`width` を持ちます。`select`/`mSelect` 列はさらに `options` を含みます。ギャラリーとカンバンのフィールドでは、同じフィールドメタデータが `data.view.fields[]` に返されます
     * `data.view.columns[].renderTemplate`: 通常フィールドの任意の表示テンプレートです。表示内容のみを変更し、元の型付き保存値は変更しません
     * `data.view.rows[].id`: 表形式の行の**アイテム ID**（`itemID`）です。その行の主キーセルにある `value.blockID` とも同じです。紐づく行の場合、紐づくブロック ID は主キーセルの `value.block.id` にあります。両者は異なる概念であり、同一であると仮定してはいけません

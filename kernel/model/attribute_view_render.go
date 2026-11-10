@@ -606,6 +606,7 @@ func RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query string, p
 
 func newAttributeViewWithLayout(avID string, initialLayout av.LayoutType) (ret *av.AttributeView) {
 	ret = av.NewAttributeView(avID)
+	applyAttributeViewIconDefaults(ret.Views[0])
 	switch initialLayout {
 	case av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeGallery, av.LayoutTypeKanban:
 	default:

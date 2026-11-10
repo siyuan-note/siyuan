@@ -1,3 +1,4 @@
+import {getAVCellShowIcon} from "./entryIcon";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -14,7 +15,7 @@ const load = (file: string, name: string, dependencies: Record<string, unknown>)
         node.declarationList.declarations.some(declaration => declaration.name.getText(source) === name));
     return runInNewContext(ts.transpileModule(statement.getText(source).replace(/^export /, ""), {
         compilerOptions: {target: ts.ScriptTarget.ES2022},
-    }).outputText + `\n${name}`, dependencies);
+    }).outputText + `\n${name}`, {getAVCellShowIcon, getAVData: (): IAV | undefined => undefined, ...dependencies});
 };
 
 test("ordinary cell refresh preserves tree controls in a non-primary first field", () => {
@@ -47,7 +48,7 @@ test("drag filling a first field retains hierarchy controls and the normal undo 
         renderCellAttr() {}, renderAVRichTextElements() {}, updateAVSelectedCellValue() {}, focusBlock() {},
         transaction: (_protyle: IProtyle, redo: IOperation[], undo: IOperation[]) => transactions.push([redo, undo]),
     });
-    fill({}, node, {origin: [{type: "text", text: {content: "After"}}]}, [], {querySelector: (): null => null});
+    fill({}, node, {origin: [{type: "text", text: {content: "After"}}]}, []);
     assert.equal(cell.innerHTML, controls);
     assert.equal(content.innerHTML, '<span class="av__celltext">After</span>');
     assert.equal(transactions.length, 1);

@@ -78,6 +78,7 @@ func toContractAVBaseInstance(value *av.BaseInstance) *apicontract.AVBaseInstanc
 		Group:             toContractAVViewGroup(value.Group),
 		PageSize:          value.PageSize,
 		ShowIcon:          value.ShowIcon,
+		ShowRelationIcon:  value.ShowRelationIcon,
 		WrapField:         value.WrapField,
 		GroupKey:          toContractAVKey(value.GroupKey),
 		GroupValue:        toContractAVValue(value.GroupValue),
@@ -1113,10 +1114,11 @@ func toContractAVBaseLayout(value *av.BaseLayout) *apicontract.AVBaseLayout {
 		return nil
 	}
 	return &apicontract.AVBaseLayout{
-		Spec:      value.Spec,
-		ID:        value.ID,
-		ShowIcon:  value.ShowIcon,
-		WrapField: value.WrapField,
+		Spec:             value.Spec,
+		ID:               value.ID,
+		ShowIcon:         value.ShowIcon,
+		ShowRelationIcon: value.ShowRelationIcon,
+		WrapField:        value.WrapField,
 	}
 }
 func toContractAVViewTableColumn(value *av.ViewTableColumn) *apicontract.AVViewTableColumn {

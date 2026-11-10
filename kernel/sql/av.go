@@ -199,6 +199,9 @@ func RenderGroupViewWithSource(attrView *av.AttributeView, view, groupView *av.V
 // RenderGroupViewWithSourceContext 使用指定的渲染上下文渲染分组视图。
 func RenderGroupViewWithSourceContext(attrView *av.AttributeView, view, groupView *av.View, query string,
 	source *GroupViewRenderSource, ignoreRows bool, context *AttributeViewRenderContext) (ret av.Viewable) {
+	if base, groupBase := view.GetBaseLayout(), groupView.GetBaseLayout(); base != nil && groupBase != nil {
+		groupBase.ShowRelationIcon = new(base.EffectiveShowRelationIcon())
+	}
 	var err error
 	switch groupView.LayoutType {
 	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:

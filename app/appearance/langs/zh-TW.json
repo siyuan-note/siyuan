@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "顯示主鍵條目圖示",
+	"databaseShowRelationIcon": "顯示關聯和匯總條目圖示",
+	"databaseShowIconTip": "啟用後新建資料庫及視圖時預設顯示主鍵條目的圖示",
+	"databaseShowRelationIconTip": "啟用後新建資料庫及視圖時預設顯示關聯和匯總條目的圖示",
+	"databaseIconDefaultsTip": "以上預設設定不影響既有視圖",
 	"quickLookLimit": "內容超出預覽限制（256 KiB 或 20000 個元素）",
 	"quickLookEncoding": "預覽要求 UTF-8 或帶 BOM 的 UTF-16 編碼",
 	"quickLookTimeout": "預覽算繪逾時（15 秒）",

@@ -1,4 +1,9 @@
 {
+	"databaseShowIcon": "Tampilkan ikon entri kunci utama",
+	"databaseShowRelationIcon": "Tampilkan ikon entri relasi dan ringkasan",
+	"databaseShowIconTip": "Jika diaktifkan, ikon entri kunci utama ditampilkan secara default di basis data dan tampilan baru",
+	"databaseShowRelationIconTip": "Jika diaktifkan, ikon entri relasi dan ringkasan ditampilkan secara default di basis data dan tampilan baru",
+	"databaseIconDefaultsTip": "Pengaturan default ini tidak memengaruhi tampilan yang sudah ada",
 	"quickLookLimit": "Konten melebihi batas pratinjau (256 KiB atau 20000 elemen)",
 	"quickLookEncoding": "Pratinjau memerlukan UTF-8 atau UTF-16 dengan BOM",
 	"quickLookTimeout": "Waktu perenderan pratinjau habis (15 detik)",

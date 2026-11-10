@@ -63,7 +63,7 @@ const loadBehaviorSettings = (config: {docIconClickMode?: number, parentDocTitle
                 controlSelect: (id: string, options: {options: {value: number | string, label?: string}[],
                     readConfig?: () => number | string}) => controlSelect(id, {
                     options: options.options,
-                    readConfig: options.readConfig ?? (() => fileTree[id.split(".")[1] as keyof typeof fileTree]),
+                    readConfig: options.readConfig ?? (() => Number(fileTree[id.split(".")[1] as keyof typeof fileTree])),
                 }),
                 controlBoolean: (id: string, options?: {readConfig?: () => boolean}) => controlBoolean(id, {
                     readConfig: options?.readConfig ??

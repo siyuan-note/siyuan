@@ -1,4 +1,7 @@
 {
+	"invalidColor": "请输入 HEX 色值或 0 到 255 的 RGB 整数",
+	"colorPickerComposing": "请先完成输入法组合输入，再应用颜色",
+	"nativeColorUnavailable": "图形选色不可用，请使用 HEX 或 RGB 输入",
 	"pluginSnapshots": "插件快照",
 	"pluginSnapshotStats": "程序：${programCount} 个文件，${programSize} 字节；数据：${dataCount} 个文件，${dataSize} 字节",
 	"pluginSnapshotRestoreTip": "请先关闭其他客户端。将自动停用插件 ${name}，并以此快照替换其程序和标准数据目录，包括移除快照中不存在的文件。恢复前会创建备份快照。其他目录和共享设置不在恢复范围内，恢复后请手动启用插件",

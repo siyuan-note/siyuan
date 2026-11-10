@@ -1,4 +1,7 @@
 {
+	"invalidColor": "Introduzca un color HEX o valores RGB enteros de 0 a 255",
+	"colorPickerComposing": "Termine la composición del texto antes de aplicar el color",
+	"nativeColorUnavailable": "La selección gráfica no está disponible; use HEX o RGB",
 	"pluginSnapshots": "Instantáneas de complementos",
 	"pluginSnapshotStats": "Programa: ${programCount} archivos, ${programSize} bytes; datos: ${dataCount} archivos, ${dataSize} bytes",
 	"pluginSnapshotRestoreTip": "Cierre los otros clientes. El complemento ${name} se desactivará automáticamente. Sus directorios de programa y datos estándar se reemplazarán con esta instantánea y se eliminarán los archivos ausentes. Se creará antes una copia de seguridad. Se excluyen otros directorios y ajustes compartidos. Actívelo manualmente después",

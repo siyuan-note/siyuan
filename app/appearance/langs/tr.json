@@ -1,4 +1,7 @@
 {
+	"invalidColor": "HEX rengi veya 0 ile 255 arasında tam sayı RGB değerleri girin",
+	"colorPickerComposing": "Rengi uygulamadan önce metin oluşturmayı tamamlayın",
+	"nativeColorUnavailable": "Grafik renk seçimi kullanılamıyor; HEX veya RGB girin",
 	"pluginSnapshots": "Eklenti anlık görüntüleri",
 	"pluginSnapshotStats": "Program: ${programCount} dosya, ${programSize} bayt; veriler: ${dataCount} dosya, ${dataSize} bayt",
 	"pluginSnapshotRestoreTip": "Önce diğer istemcileri kapatın. ${name} eklentisi otomatik olarak devre dışı bırakılır. Program ve standart veri dizinleri bu anlık görüntüyle değiştirilir; görüntüde olmayan dosyalar kaldırılır. Önce bir yedek oluşturulur. Diğer dizinler ve paylaşılan ayarlar kapsam dışıdır. Sonra eklentiyi elle etkinleştirin",

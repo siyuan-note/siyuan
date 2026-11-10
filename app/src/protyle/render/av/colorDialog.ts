@@ -47,6 +47,7 @@ export const openAVCustomColorDialog = (options: {
     const draft = cloneCustomColors(getAVCustomColors());
     let orderDraft = [...getAVColorOrder()];
     const builtinDraft = cloneInlineStyles();
+    const baseline = JSON.stringify({av: {colors: cloneCustomColors(draft), order: normalizeAVColorOrder(orderDraft, draft)}, builtin: builtinDraft.builtin});
     const modifiedBuiltinIndexes = new Set<number>();
     const usedIndexes = new Set(options.data.usedCustomColorIndexes || []);
     const properties = getProperties("av");
@@ -184,14 +185,17 @@ export const openAVCustomColorDialog = (options: {
 
     const confirmEditor = () => {
         if (editingBuiltinKey) {
-            writeBuiltinDraft(builtinEditor.commit(getBuiltinEntry(editingBuiltinKey)));
+            const entry = builtinEditor.commit(getBuiltinEntry(editingBuiltinKey));
+            if (!entry) { return; }
+            writeBuiltinDraft(entry);
             showList();
             return;
         }
         if (typeof editingColorIndex !== "number") {
             return;
         }
-        const value = themeColorEditor.getValue("style1");
+        const value = themeColorEditor.commitDraft("style1");
+        if (!value) { return; }
         const previous = findCustomColor(editingColorIndex);
         const color: IAVCustomColor = {
             index: editingColorIndex,
@@ -304,6 +308,10 @@ export const openAVCustomColorDialog = (options: {
                     colors: cloneCustomColors(draft),
                     order: normalizeAVColorOrder(orderDraft, draft),
                 };
+                if (JSON.stringify({av: builtinDraft.av, builtin: builtinDraft.builtin}) === baseline) {
+                    dialog.destroy();
+                    return;
+                }
                 const response = await saveWorkspaceAVPalette(builtinDraft.av,
                     Array.from(modifiedBuiltinIndexes).map(index => {
                         const color = builtinDraft.builtin.colors.find(item => item.index === index);

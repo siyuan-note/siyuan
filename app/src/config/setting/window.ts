@@ -1,5 +1,6 @@
 import "../../assets/scss/base.scss";
 import {ipcRenderer} from "electron";
+import {registerColorPickerWindow} from "../../colorPicker/panel";
 import {Constants} from "../../constants";
 import {Model} from "../../layout/Model";
 import {Menus} from "../../menus";
@@ -173,6 +174,7 @@ const initialize = async () => {
         return;
     }
     window.siyuan.config = systemConfig(response.data.conf);
+    registerColorPickerWindow();
     window.siyuan.isPublish = response.data.isPublish;
     await loadDesktopHostConnection();
     if (!isActive()) return;

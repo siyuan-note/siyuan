@@ -1,4 +1,7 @@
 {
+	"invalidColor": "Voer een HEX-kleur of gehele RGB-waarden van 0 tot 255 in",
+	"colorPickerComposing": "Rond de tekstcompositie af voordat u de kleur toepast",
+	"nativeColorUnavailable": "Grafische kleurselectie is niet beschikbaar; gebruik HEX of RGB",
 	"pluginSnapshots": "Pluginmomentopnamen",
 	"pluginSnapshotStats": "Programma: ${programCount} bestanden, ${programSize} bytes; gegevens: ${dataCount} bestanden, ${dataSize} bytes",
 	"pluginSnapshotRestoreTip": "Sluit eerst andere clients. Plugin ${name} wordt automatisch uitgeschakeld. De programma- en standaardgegevensmappen worden vervangen door deze momentopname; ontbrekende bestanden worden verwijderd. Eerst wordt een back-up gemaakt. Andere mappen en gedeelde instellingen zijn uitgesloten. Schakel de plugin daarna handmatig in",

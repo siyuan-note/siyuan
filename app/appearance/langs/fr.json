@@ -1,4 +1,7 @@
 {
+	"invalidColor": "Saisissez une couleur HEX ou des entiers RGB de 0 à 255",
+	"colorPickerComposing": "Terminez la saisie en cours avant d’appliquer la couleur",
+	"nativeColorUnavailable": "Sélection graphique indisponible ; utilisez HEX ou RGB",
 	"pluginSnapshots": "Instantanés des plugins",
 	"pluginSnapshotStats": "Programme : ${programCount} fichiers, ${programSize} octets ; données : ${dataCount} fichiers, ${dataSize} octets",
 	"pluginSnapshotRestoreTip": "Fermez les autres clients. Le plugin ${name} sera désactivé automatiquement. Ses répertoires de programme et de données standard seront remplacés par cet instantané ; les fichiers absents seront supprimés. Une sauvegarde sera créée au préalable. Les autres répertoires et réglages partagés sont exclus. Réactivez ensuite le plugin manuellement",

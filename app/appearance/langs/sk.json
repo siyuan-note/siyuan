@@ -1,4 +1,7 @@
 {
+	"invalidColor": "Zadajte farbu HEX alebo celé hodnoty RGB od 0 do 255",
+	"colorPickerComposing": "Pred použitím farby dokončite skladanie textu",
+	"nativeColorUnavailable": "Grafický výber farby nie je dostupný; použite HEX alebo RGB",
 	"pluginSnapshots": "Snímky doplnkov",
 	"pluginSnapshotStats": "Program: ${programCount} súborov, ${programSize} bajtov; údaje: ${dataCount} súborov, ${dataSize} bajtov",
 	"pluginSnapshotRestoreTip": "Najprv zatvorte ostatných klientov. Doplnok ${name} sa automaticky vypne. Jeho priečinky programu a štandardných údajov sa nahradia touto snímkou; chýbajúce súbory sa odstránia. Najprv sa vytvorí záloha. Ostatné priečinky a spoločné nastavenia sú vylúčené. Potom doplnok zapnite ručne",

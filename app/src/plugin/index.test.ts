@@ -6,6 +6,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {ContractFormData} from "../util/contractFormData";
 import * as mergePathSegments from "../util/mergePathSegments";
+import * as colorPickerOwners from "../colorPicker/owners";
 
 const compile = (file: string, flags: {MOBILE: boolean; BROWSER: boolean}) => transpileModule(require("ifdef-loader/preprocessor").parse(
     readFileSync(file, "utf8"), flags, false, true), {
@@ -21,6 +22,7 @@ const loadPlugin = (flags = {MOBILE: false, BROWSER: false}) => {
     const exports: Record<string, any> = {};
     runInNewContext(compile("src/plugin/index.ts", flags), {exports, window, Promise, File, Blob,
         require: (id: string) => id === "../util/pathName" ? pathName :
+            id === "../colorPicker/owners" ? colorPickerOwners :
             id === "../util/contractFormData" ? {ContractFormData} :
             id === "./toolbarItem" ? {clearPluginToolbarItems: () => {}} :
             id === "../constants" ? {Constants: {SIYUAN_APPID: "app"}} : id === "../util/fetch" ? {

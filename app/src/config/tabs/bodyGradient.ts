@@ -1,32 +1,41 @@
 import {setBodyHighlight} from "../../util/assets";
 import {IBodyGradient, normalizeBodyGradient} from "../../util/bodyGradient";
 import {appearanceConfigApi} from "./appearanceRuntime";
+import {openInternalColorPicker} from "../../colorPicker";
 
-const mountedConfigs = new WeakMap<HTMLElement, {
-    config: IBodyGradient;
-    revision: number;
-    editing: boolean;
-}>();
+type GradientPath = "mode" | "light.color" | "dark.color" | "light.opacity" | "dark.opacity";
+interface GradientState {
+    drafts: Map<GradientPath, string | number>;
+    revisions: Map<GradientPath, number>;
+    sequence: number;
+    preview?: {theme: "light" | "dark"; color: string; sequence: number};
+}
+const mountedConfigs = new WeakMap<HTMLElement, GradientState>();
+
+const projectGradient = (config: Parameters<typeof normalizeBodyGradient>[0], state?: GradientState) => {
+    const result = normalizeBodyGradient(config);
+    state?.drafts.forEach((value, path) => {
+        if (path === "mode") { result.mode = value as IBodyGradient["mode"]; return; }
+        const [theme, property] = path.split(".") as ["light" | "dark", "color" | "opacity"];
+        if (property === "color") { result[theme].color = value as string; }
+        else { result[theme].opacity = value as number; }
+    });
+    if (state?.preview) { result[state.preview.theme].color = state.preview.color; }
+    return result;
+};
 
 export const syncBodyGradient = (gradient = window.siyuan.config.appearance.bodyGradient) => {
     document.querySelectorAll<HTMLElement>("[data-body-gradient]").forEach(element => {
-        const mountedConfig = mountedConfigs.get(element);
-        // 保留尚未确认的本地编辑，避免较早的推送覆盖连续切换或拖动中的数值。
-        const config = mountedConfig?.editing ? mountedConfig.config : normalizeBodyGradient(gradient);
-        if (mountedConfig && !mountedConfig.editing) {
-            Object.assign(mountedConfig.config, config);
-        }
-        if (mountedConfig?.editing) {
-            setBodyHighlight(config);
-        }
+        const config = projectGradient(gradient, mountedConfigs.get(element));
         element.querySelector<HTMLSelectElement>("[data-gradient-mode]").value = config.mode;
         element.querySelector("[data-gradient-colors]").classList.toggle("fn__none", config.mode !== "custom");
         element.querySelectorAll<HTMLElement>("[data-gradient-theme]").forEach(row => {
             const theme = row.dataset.gradientTheme as "light" | "dark";
-            row.querySelector<HTMLInputElement>("input[type=color]").value = config[theme].color;
+            row.querySelector<HTMLButtonElement>("[data-gradient-color]").textContent = config[theme].color;
             row.querySelector<HTMLInputElement>("input[type=range]").value = String(config[theme].opacity);
             row.querySelector("output").textContent = `${config[theme].opacity}%`;
         });
+        setBodyHighlight(config);
     });
 };
 
@@ -48,10 +57,10 @@ export const genBodyGradientHtml = () => {
     </div>
     <div data-gradient-colors class="${config.mode === "custom" ? "" : "fn__none"}">
         ${(["light", "dark"] as const).map(theme => `<div class="config-body-gradient" data-gradient-theme="${theme}">
-            <label class="config-body-gradient__color" for="bodyGradient-${theme}-color">
+            <div class="config-body-gradient__color">
                 <span class="fn__flex-1">${theme === "light" ? lang.themeLight : lang.themeDark}</span>
-                <input id="bodyGradient-${theme}-color" class="b3-text-field" type="color" value="${config[theme].color}"${disabled}>
-            </label>
+                <button type="button" class="b3-button b3-button--outline" data-gradient-color aria-label="${lang.color}"${disabled}>${config[theme].color}</button>
+            </div>
             <div class="config-body-gradient__strength">
                 <label for="bodyGradient-${theme}-opacity">${lang.bodyGradientStrength}</label>
                 <input id="bodyGradient-${theme}-opacity" class="b3-slider" type="range" min="0" max="100" step="1" value="${config[theme].opacity}"${disabled}>
@@ -64,53 +73,50 @@ export const genBodyGradientHtml = () => {
 
 export const mountBodyGradient = (root: HTMLElement) => {
     const element = root.querySelector<HTMLElement>("[data-body-gradient]");
-    if (!element || window.siyuan.config.readonly) {
-        return;
-    }
-    const config = normalizeBodyGradient(window.siyuan.config.appearance.bodyGradient);
-    const state = {config, revision: 0, editing: false};
+    if (!element || window.siyuan.config.readonly) { return; }
+    const state: GradientState = {drafts: new Map(), revisions: new Map(), sequence: 0};
     mountedConfigs.set(element, state);
-    const preview = () => {
-        state.revision++;
-        state.editing = true;
-        setBodyHighlight(config);
-    };
-    const save = () => {
-        const revision = state.revision;
-        // 队列保存独立快照，后续编辑和推送不能修改已排队的配置。
-        void appearanceConfigApi.patch("bodyGradient", normalizeBodyGradient(config), (data) => {
-            if (state.revision === revision) {
-                state.editing = false;
-                syncBodyGradient(data.bodyGradient);
-                setBodyHighlight(config);
-            }
-        }).finally(() => {
-            // 保存失败时解除编辑保护，恢复已确认的配置，后续推送仍可正常同步。
-            if (state.revision === revision && state.editing) {
-                state.editing = false;
-                syncBodyGradient();
-                setBodyHighlight(config);
-            }
+    const refresh = () => syncBodyGradient();
+    const save = (path: GradientPath, value: string | number) => {
+        const revision = (state.revisions.get(path) || 0) + 1;
+        state.revisions.set(path, revision);
+        state.drafts.set(path, value);
+        refresh();
+        void appearanceConfigApi.patch("bodyGradient." + path, value).catch(() => {}).finally(() => {
+            if (state.revisions.get(path) === revision && state.drafts.get(path) === value) { state.drafts.delete(path); }
+            refresh();
         });
     };
-    element.querySelector<HTMLSelectElement>("[data-gradient-mode]").addEventListener("change", (event) => {
-        config.mode = (event.target as HTMLSelectElement).value as typeof config.mode;
-        element.querySelector("[data-gradient-colors]").classList.toggle("fn__none", config.mode !== "custom");
-        preview();
-        save();
+    element.querySelector<HTMLSelectElement>("[data-gradient-mode]").addEventListener("change", event => {
+        save("mode", (event.target as HTMLSelectElement).value);
     });
-    element.querySelectorAll<HTMLInputElement>("input").forEach(input => {
-        input.addEventListener("input", () => {
-            const row = input.closest<HTMLElement>("[data-gradient-theme]");
-            const theme = row.dataset.gradientTheme as "light" | "dark";
-            if (input.type === "color") {
-                config[theme].color = input.value;
-            } else {
-                config[theme].opacity = Number(input.value);
-                row.querySelector("output").textContent = `${input.value}%`;
-            }
-            preview();
+    element.querySelectorAll<HTMLElement>("[data-gradient-theme]").forEach(row => {
+        const theme = row.dataset.gradientTheme as "light" | "dark";
+        const color = row.querySelector<HTMLButtonElement>("[data-gradient-color]");
+        color.addEventListener("click", () => {
+            if (window.siyuan.config.readonly) { return; }
+            const sequence = ++state.sequence;
+            const config = projectGradient(window.siyuan.config.appearance.bodyGradient, state);
+            const picker = openInternalColorPicker({ownerElement: color, value: config[theme].color, title: window.siyuan.languages.color,
+                onPreview: value => {
+                    if (sequence === state.sequence && !window.siyuan.config.readonly) {
+                        state.preview = {theme, color: value.hex, sequence}; refresh();
+                    }
+                },
+                onPreviewEnd: () => {
+                    if (state.preview?.sequence === sequence) { state.preview = undefined; refresh(); }
+                },
+            });
+            void picker.result.then(result => {
+                if (result.type === "confirm" && result.changed && sequence === state.sequence && element.isConnected &&
+                    !window.siyuan.config.readonly) { save(`${theme}.color`, result.value.hex); }
+            });
         });
-        input.addEventListener("change", save);
+        const opacity = row.querySelector<HTMLInputElement>("input[type=range]");
+        opacity.addEventListener("input", () => {
+            state.revisions.set(`${theme}.opacity`, (state.revisions.get(`${theme}.opacity`) || 0) + 1);
+            state.drafts.set(`${theme}.opacity`, Number(opacity.value)); refresh();
+        });
+        opacity.addEventListener("change", () => save(`${theme}.opacity`, Number(opacity.value)));
     });
 };

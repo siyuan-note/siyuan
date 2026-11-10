@@ -1,4 +1,5 @@
 import {addScript} from "../protyle/util/addScript";
+import {registerColorPickerWindow} from "../colorPicker/panel";
 import {ensureLute} from "../protyle/util/lute";
 import {completeStartup, guardStartup, reportStartupError, setStartupLanguage, setStartupStage} from "../boot/startupError";
 import {Constants} from "../constants";
@@ -96,6 +97,7 @@ class App {
             completeStartup();
             return;
         }
+        registerColorPickerWindow();
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
         initHarmonyTextSelectionMenu();

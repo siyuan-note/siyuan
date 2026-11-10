@@ -1,4 +1,7 @@
 {
+	"invalidColor": "Masukkan warna HEX atau nilai RGB bilangan bulat dari 0 hingga 255",
+	"colorPickerComposing": "Selesaikan komposisi teks sebelum menerapkan warna",
+	"nativeColorUnavailable": "Pemilihan warna grafis tidak tersedia; gunakan HEX atau RGB",
 	"pluginSnapshots": "Snapshot plugin",
 	"pluginSnapshotStats": "Program: ${programCount} berkas, ${programSize} byte; data: ${dataCount} berkas, ${dataSize} byte",
 	"pluginSnapshotRestoreTip": "Tutup klien lain terlebih dahulu. Plugin ${name} akan dinonaktifkan otomatis. Direktori program dan data standarnya diganti dengan snapshot ini; berkas yang tidak ada akan dihapus. Snapshot cadangan dibuat terlebih dahulu. Direktori lain dan pengaturan bersama dikecualikan. Aktifkan plugin secara manual setelahnya",

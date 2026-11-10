@@ -1,4 +1,5 @@
 import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
+import {cancelPluginColorPickers, registerColorPickerOwner} from "../colorPicker/owners";
 import type {App} from "../index";
 import {EventBus} from "./EventBus";
 import type {subMenu} from "../menus/Menu";
@@ -58,6 +59,7 @@ const getPluginStoragePath = (plugin: Plugin, storageName: string) => {
 const getInvalidStorageNameError = (): IWebSocketData => ({code: 400, msg: "Invalid storage name", data: null});
 
 export const markPluginDisposed = (plugin: Plugin) => {
+    cancelPluginColorPickers(plugin);
     disposedPlugins.add(plugin);
     clearPluginToolbarItems(plugin);
 };
@@ -123,6 +125,7 @@ export class Plugin {
         displayName: string,
         i18n: Record<string, import("../types/api").JSONValue>
     }) {
+        registerColorPickerOwner(this);
         this.app = options.app;
         this.i18n = options.i18n;
         this.displayName = options.displayName;

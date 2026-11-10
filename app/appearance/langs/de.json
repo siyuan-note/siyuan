@@ -1,4 +1,7 @@
 {
+	"invalidColor": "HEX-Farbe oder ganzzahlige RGB-Werte von 0 bis 255 eingeben",
+	"colorPickerComposing": "Schließen Sie die Texteingabe ab, bevor Sie die Farbe anwenden",
+	"nativeColorUnavailable": "Grafische Farbauswahl nicht verfügbar; HEX oder RGB eingeben",
 	"pluginSnapshots": "Plugin-Schnappschüsse",
 	"pluginSnapshotStats": "Programm: ${programCount} Dateien, ${programSize} Bytes; Daten: ${dataCount} Dateien, ${dataSize} Bytes",
 	"pluginSnapshotRestoreTip": "Schließen Sie zuerst andere Clients. Das Plugin ${name} wird automatisch deaktiviert. Programm- und Standarddatenverzeichnis werden durch diesen Schnappschuss ersetzt; darin fehlende Dateien werden entfernt. Zuvor wird eine Sicherung erstellt. Andere Verzeichnisse und gemeinsame Einstellungen sind ausgenommen. Aktivieren Sie das Plugin anschließend manuell",

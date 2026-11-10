@@ -1,4 +1,7 @@
 {
+	"invalidColor": "Enter a HEX color or integer RGB values from 0 to 255",
+	"colorPickerComposing": "Finish composing before applying the color",
+	"nativeColorUnavailable": "Graphical color selection is unavailable; use HEX or RGB input",
 	"pluginSnapshots": "Plugin snapshots",
 	"pluginSnapshotStats": "Program: ${programCount} files, ${programSize} bytes; data: ${dataCount} files, ${dataSize} bytes",
 	"pluginSnapshotRestoreTip": "Close other clients before continuing. The plugin ${name} will be disabled automatically. Both its program and standard data directories will be replaced with this snapshot, including removal of files absent from the snapshot. A backup snapshot is created first. Other directories and shared settings are excluded. Enable the plugin manually after restoration",

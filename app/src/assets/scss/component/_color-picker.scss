@@ -1,0 +1,42 @@
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__swatch {
+    display: inline-flex;
+    align-items: end;
+    width: 72px;
+    min-height: 44px;
+    border: 1px solid var(--b3-border-color);
+  }
+
+  &__fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 56px;
+    min-width: 0;
+
+    &--hex {
+      flex-basis: 100%;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+}

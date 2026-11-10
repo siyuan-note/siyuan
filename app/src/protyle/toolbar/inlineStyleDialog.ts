@@ -62,6 +62,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         return;
     }
     const draft = cloneInlineStyles();
+    const baseline = JSON.stringify(normalizeInlineStyles(draft));
     const persistedStyleIDs = new Set(draft.styles.map(style => style.id));
     const properties = getProperties(initialType);
     let editingKey: string | undefined;
@@ -202,7 +203,9 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
 
     const confirmEditor = () => {
         if (editingKind === "builtin" && editingKey) {
-            writeBuiltinEntry(draft, initialType, builtinEditor.commit(getBuiltinEntry(editingKey)));
+            const entry = builtinEditor.commit(getBuiltinEntry(editingKey));
+            if (!entry) { return; }
+            writeBuiltinEntry(draft, initialType, entry);
             showList();
             return;
         }
@@ -218,7 +221,8 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
             return;
         }
         const previous = editingKey ? getInlineStyleByID(editingKey, draft) : undefined;
-        const value = customThemeEditor.getValue(initialType);
+        const value = customThemeEditor.commitDraft(initialType);
+        if (!value) { return; }
         const style: IInlineStyle = {
             id: previous?.id || Lute.NewNodeID(),
             name,
@@ -329,6 +333,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         } else if (action === "save") {
             await dialog.runPending(async () => {
                 try {
+                    if (JSON.stringify(normalizeInlineStyles(draft)) === baseline) { return true; }
                     const response = await saveInlineStyles(draft);
                     if (response?.code !== 0) {
                         showMessage(response?.msg || window.siyuan.languages.invalid, 6000, "error");

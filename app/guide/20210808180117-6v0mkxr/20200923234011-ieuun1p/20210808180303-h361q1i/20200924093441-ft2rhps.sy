@@ -6978,6 +6978,35 @@
 					"Data": "Manual block and inline directions take priority. Each list item, including nested items, independently follows the direction of its own first text block: checkboxes, bullets, numbers, and indentation move to the corresponding side. Manual list directions take priority. Table column order keeps its existing setting. Preview and HTML/PDF export also use automatic text direction."
 				}
 			]
+		},
+		{
+			"ID": "20261110200000-db26feb",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110200000-db26feb",
+				"updated": "20261110200000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Editing colors"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110200000-b9cb565",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110200000-b9cb565",
+				"updated": "20261110200000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Color fields support three- or six-digit HEX (with or without #) and integer RGB values from 0 to 255. The original color and draft are shown separately. The system or browser provides graphical color selection; HEX/RGB inputs remain available when graphical selection is unavailable. Incomplete, invalid or composing input cannot be applied. Closing the native panel only updates the draft; use the SiYuan editor’s confirmation or cancellation to decide whether to apply it. Inline styles and database colors use their parent panel’s confirmation, and cancelling that panel discards its drafts. Background gradients and dynamic icons use a separate color dialog. Existing quick color palettes still apply directly."
+				}
+			]
 		}
 	]
 }

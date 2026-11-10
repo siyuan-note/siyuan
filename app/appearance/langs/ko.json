@@ -1,4 +1,7 @@
 {
+	"invalidColor": "HEX 색상 또는 0~255의 RGB 정수를 입력하세요",
+	"colorPickerComposing": "색상을 적용하기 전에 조합 중인 입력을 완료하세요",
+	"nativeColorUnavailable": "그래픽 색상 선택을 사용할 수 없습니다. HEX 또는 RGB를 입력하세요",
 	"pluginSnapshots": "플러그인 스냅샷",
 	"pluginSnapshotStats": "프로그램: ${programCount}개 파일, ${programSize}바이트; 데이터: ${dataCount}개 파일, ${dataSize}바이트",
 	"pluginSnapshotRestoreTip": "먼저 다른 클라이언트를 닫으세요. 플러그인 ${name}을 자동으로 비활성화합니다. 프로그램과 표준 데이터 폴더를 이 스냅샷으로 교체하며, 포함되지 않은 파일은 삭제합니다. 복원 전에 백업 스냅샷을 만듭니다. 다른 폴더와 공유 설정은 제외됩니다. 복원 후 플러그인을 수동으로 활성화하세요",

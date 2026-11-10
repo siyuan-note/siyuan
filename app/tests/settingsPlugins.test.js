@@ -24,6 +24,7 @@ const runCases = async sources => {
     const {GlobalPluginStateCoordinator} = load(sources.globalCoordinator, {});
     const events = load(sources.events, {});
     const customTabOwner = load(sources.customTabOwner, {});
+    const colorPickerOwners = load(sources.colorPickerOwners, {});
     const owner = {appId: "owner", plugins: [{name: "dynamic", data: {color: "owner"}}]};
     const app = settingsApps.createSettingsPluginApp("settings");
     const host = {app: owner, applyPluginReload: data => { notifications.push(data); return Promise.resolve(); },
@@ -36,6 +37,7 @@ const runCases = async sources => {
         Constants: {INLINE_TYPE: [], TIMEOUT_INPUT: 0},
         ...events,
         ...customTabOwner,
+        ...colorPickerOwners,
         Kernel: class {init() {} destroy() {}},
         isSettingsWindow: windowContext.isSettingsWindow, getSettingsWindowHost: windowContext.getSettingsWindowHost,
         isWindow: () => true, isMobile: () => false,
@@ -218,6 +220,10 @@ if (process.versions.electron && process.type === "browser") {
                 ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/plugin", file + ".ts"), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
                 }).outputText]));
+            sources.colorPickerOwners = ts.transpileModule(fs.readFileSync(path.join(__dirname,
+                "../src/colorPicker/owners.ts"), "utf8"), {
+                compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
+            }).outputText;
             sources.windowContext = ts.transpileModule(fs.readFileSync(path.join(__dirname,
                 "../src/config/setting/windowContext.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},

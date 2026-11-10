@@ -352,7 +352,8 @@ button:focus-visible,
 
   > .b3-list {
     margin: 0;
-    padding: 0;
+    // 首末行各有 1px 外边距，与列表项两侧的 8px 留白对齐。
+    padding: 7px 0;
     display: flex;
     flex-direction: column;
 
@@ -435,6 +436,7 @@ button:focus-visible,
 
 .markdown-editor .vditor-outline {
   max-width: 40%;
+  font-family: var(--markdown-global-font-family, var(--b3-font-family));
 }
 
 // 先按标题字号计算实际行高，让小字号的 H1-H6 标识继承同一行高。

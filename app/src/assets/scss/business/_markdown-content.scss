@@ -5,7 +5,9 @@
   font-weight: var(--markdown-editor-font-weight, 400);
 }
 
+// 匹配 Vditor 普通代码样式的选择器优先级，同时覆盖带高亮类的代码块。
 .markdown-editor .vditor-reset code,
+.markdown-editor .vditor-reset code:not(.hljs):not(.highlight-chroma),
 .markdown-editor .vditor-sv {
   font-family: var(--markdown-code-font-family, var(--b3-font-family-code));
   font-weight: var(--markdown-code-font-weight, 400);

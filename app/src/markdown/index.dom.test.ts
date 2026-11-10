@@ -227,6 +227,11 @@ const browserCases = async (languages: Record<string, string>) => {
     menuAction("markdownRevealFile"); await tick();
     check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, true, "successful actions without session updates clear stale error DOM");
     check.equal(document.querySelector(".markdown-tree__heading"), null);
+    const initialTreeViewport = document.querySelector(".markdown-tree__viewport");
+    const treeBounds = initialTreeViewport.getBoundingClientRect();
+    const firstTreeRow = initialTreeViewport.querySelector(".markdown-tree__row").getBoundingClientRect();
+    check.equal(firstTreeRow.top - treeBounds.top, firstTreeRow.left - treeBounds.left,
+        "the first file tree row has matching top and side insets");
     check.deepEqual(Array.from(document.querySelectorAll<HTMLElement>(".markdown-header button, .markdown-header select, .markdown-header summary"))
         .filter(element => element.checkVisibility()).map(element => element.id), ["markdownTreeToggle", "markdownOutlineToggle", "markdownUndo", "markdownRedo", "markdownMoreButton"]);
     const outlineToggle = document.querySelector<HTMLButtonElement>("#markdownOutlineToggle");
@@ -1296,14 +1301,20 @@ const browserCases = async (languages: Record<string, string>) => {
         {family: "Arial", displayName: "Arial Bold", weight: 700},
         {family: "Courier", displayName: "Courier", weight: 400, spacing: "monospace"},
     ];
-    bridge.bootstrap = async () => ({...bootstrap, sessionId: "workspace-appearance", preferences: {mode: "ir"}, appearance: appearanceSnapshot});
+    bridge.bootstrap = async () => ({...bootstrap, content: original + "\nInline `code`\n", sessionId: "workspace-appearance",
+        preferences: {mode: "ir"}, appearance: appearanceSnapshot});
     const inheritedApp = await api.mountMarkdownApplication(bridge);
     const inheritedEditor = inheritedApp.editor;
     const inheritedText = inheritedApp.editor.flush().content;
     check.equal(document.querySelectorAll("#markdownFonts button").length, 3);
     check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').getAttribute("data-value"), "one");
     check.equal(getComputedStyle(document.querySelector(".vditor-ir .vditor-reset")).fontSize, "23px");
-    check.ok(getComputedStyle(document.getElementById("markdownApp")).fontFamily.includes("serif"));
+    const appFont = getComputedStyle(document.getElementById("markdownApp")).fontFamily;
+    check.ok(appFont.includes("serif"));
+    check.equal(getComputedStyle(document.querySelector(".vditor-outline__title")).fontFamily, appFont);
+    const inlineCode = getComputedStyle(document.querySelector(".vditor-ir .vditor-reset p code"));
+    check.match(inlineCode.fontFamily, /\bserif\b/);
+    check.equal(inlineCode.fontWeight, "600");
     const oldPreferencesCount = preferenceUpdates.length;
     document.querySelector<HTMLButtonElement>('#markdownTheme button[data-value="two"]').click();
     document.querySelector<HTMLButtonElement>('#markdownFont button[data-value="two"]').click();
@@ -1343,6 +1354,15 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(fontSections[0].querySelectorAll(".b3-list-item").length, 1);
     fontSections[0].querySelector<HTMLButtonElement>('.b3-list-item[data-family="Arial"]').click();
     const chip = fontSections[0].querySelector<HTMLElement>(".b3-chip");
+    const selectedRow = fontSections[0].querySelector('[aria-checked="true"]');
+    const checkmark = selectedRow.querySelector("svg").getBoundingClientRect();
+    check.ok(checkmark.width > 0 && checkmark.width <= 16, "the font selection checkmark uses list icon dimensions");
+    check.ok(selectedRow.getBoundingClientRect().height <= 32);
+    for (const action of chip.querySelectorAll("button")) {
+        const button = action.getBoundingClientRect();
+        const icon = action.querySelector("svg").getBoundingClientRect();
+        check.ok(Math.abs((icon.left + icon.right) - (button.left + button.right)) < 1, "chip button icons are centered");
+    }
     chip.querySelector<HTMLButtonElement>('[aria-haspopup="menu"]').click();
     check.deepEqual(Array.from(fontSections[0].querySelectorAll("[data-weight]")).map(item => item.getAttribute("data-weight")), ["400", "700"]);
     fontSections[0].querySelector<HTMLButtonElement>('[data-weight="700"]').click();

@@ -1,3 +1,4 @@
+import {isMobile} from "../util/functions";
 import {bindAnchoredInputPosition} from "./anchoredInputPosition";
 import {callMobileAppShowKeyboard} from "../mobile/util/mobileAppUtil";
 
@@ -8,6 +9,7 @@ export const getAnchoredInputMask = () => activeInput?.mask;
 export const closeAnchoredInput = (save: boolean) => activeInput?.close(save, true);
 
 export const openAnchoredInput = (options: {
+    mobileSheet?: boolean,
     anchor: HTMLElement,
     value: string,
     label: string,
@@ -15,6 +17,13 @@ export const openAnchoredInput = (options: {
     save: (value: string) => void
 }) => {
     activeInput?.close(true);
+    if (options.mobileSheet && isMobile()) {
+        const sheet = (require("./mobileAnchoredInput") as typeof import("./mobileAnchoredInput")).openMobileAnchoredInput(options, () => {
+            if (activeInput === sheet) activeInput = undefined;
+        });
+        activeInput = sheet;
+        return sheet.close;
+    }
     const mask = document.createElement("div");
     mask.className = "b3-text-field__mask";
     mask.style.zIndex = (++window.siyuan.zIndex).toString();

@@ -14,10 +14,11 @@ const setup = (type = "local") => {
     let timerID = 0;
     let focused = false;
     let visible = true;
+    const panelFocus = [];
     const timers = new Map();
     runInNewContext(compiled, {
         exports,
-        require: () => ({Model: class {}, hasAVEditorSession: () => false,
+        require: () => ({Model: class {}, hasAVEditorSession: () => false, setPanelFocus: element => panelFocus.push(element),
             shouldDeferBottomBacklinkRefresh: (focus, ignore) => focus && !ignore}),
         document: {activeElement: {}},
         window: {
@@ -51,9 +52,21 @@ const setup = (type = "local") => {
         panel.markIndexDirty({backlinkChanged: true, rootIDs: [rootID]});
         panel.refreshAfterIndex();
     };
-    return {panel, requests, timers, advance, change,
+    return {panel, requests, timers, advance, change, panelFocus,
         focus: value => { focused = value; }, show: value => { visible = value; }};
 };
+
+test("popover controls retain the owning document layout while local tab panels can take focus", () => {
+    const {panel, panelFocus} = setup();
+    const owner = {};
+    panel.element.parentElement = {parentElement: owner};
+    panel.surface = "popover";
+    panel.setFocus();
+    assert.deepEqual(panelFocus, []);
+    panel.surface = "local";
+    panel.setFocus();
+    assert.deepEqual(panelFocus, [owner]);
+});
 
 for (const type of ["local", "bottom"]) {
     test(`${type} database field changes invalidate all filtered contexts`, () => {

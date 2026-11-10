@@ -20,7 +20,10 @@ test("row navigation replaces only its original desktop preview across bound and
     let checkSource: () => void;
     const element = () => {
         const classes = new Set<string>();
-        const root = {isConnected: true, dataset: {}, querySelector: (): unknown => root, dispatchEvent() {},
+        const root = {isConnected: true, dataset: {}, style: {visibility: ""}, querySelector: (): unknown => root, dispatchEvent() {},
+            parentElement: undefined as {style: {visibility: string}, isConnected: boolean} | undefined,
+            getBoundingClientRect: () => ({left: 10, top: 20, width: 600, height: 400}),
+            append(child: {parentElement: {style: {visibility: string}, isConnected: boolean}}) { child.parentElement = root; },
             remove() { root.isConnected = false; },
             classList: {add: (name: string) => classes.add(name), remove: (name: string) => classes.delete(name),
                 contains: (name: string) => classes.has(name)}};
@@ -57,7 +60,7 @@ test("row navigation replaces only its original desktop preview across bound and
     class Editor {
         public app = app;
         public parent: ReturnType<typeof makeTab>;
-        public editor = {resize() {}, protyle: {element: element(), contentElement: {scrollTop: 20}, upload: {isUploading: false},
+        public editor = {resize() {}, isUploading() { return this.protyle.upload.isUploading; }, protyle: {element: element(), contentElement: {scrollTop: 20}, upload: {isUploading: false},
             databaseAttributePanel: {expand() {}, afterRender(callback: (element: unknown) => void) { attributesLoaded = callback; }}}};
         public destroy() {}
         public send() {}
@@ -88,7 +91,10 @@ test("row navigation replaces only its original desktop preview across bound and
                 return latest;
             },
         },
-        "../../../util/fetch": {fetchSyncPost: () => new Promise(resolve => { request = resolve; })},
+        "../../../util/fetch": {fetchSyncPost: (_url: string, payload: {notebook: string}) => {
+            assert.equal(payload.notebook, "notebook");
+            return new Promise(resolve => { request = resolve; });
+        }},
         "../../../dialog/message": {showMessage() {}},
         "../../../layout/util": {saveLayout() {}},
         "./rowReadonly": {inheritDatabaseRowReadonly() {}},
@@ -106,7 +112,7 @@ test("row navigation replaces only its original desktop preview across bound and
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText, {exports, require: (name: string) => modules[name] || {},
         window: {setTimeout, clearTimeout, siyuan: {config: {editor: {databaseAttrShow: true}}, languages: {untitled: "Untitled"}}},
-        document: {body: {append() {}}},
+        document: {body: {append() {}}, createElement: element},
         MutationObserver: class {
             constructor(callback: () => void) { checkSource = callback; }
             public observe() {}
@@ -128,15 +134,20 @@ test("row navigation replaces only its original desktop preview across bound and
     request({code: 0, data: {rootID: "another-document", rootTitle: "Document"}});
     await new Promise(setImmediate);
     assert.equal(removed.length, 0, "the current preview stays until document and attributes load");
-    assert.equal(latest.panelElement.classList.contains("fn__none"), true);
+    assert.equal(latest.panelElement.classList.contains("fn__none"), false);
+    const preparation = latest.panelElement.parentElement;
+    assert.equal(preparation.style.visibility, "hidden");
     documentLoaded();
     await new Promise(setImmediate);
     assert.equal(removed.length, 0);
     attributesLoaded({querySelector: () => ({})});
     assert.equal(await move, true);
+    assert.equal(latest.panelElement.style.visibility, "");
+    assert.equal(preparation.isConnected, false, "the staging container is removed after the tab is installed");
     assert.deepEqual(removed, ["initial"]);
     assert.equal(latest.parent, wnd);
     assert.equal(created[0].id, "bound");
+    assert.equal(created[0].notebookId, "notebook");
     assert.equal(created[0].rootID, "another-document");
     assert.equal(created[0].zoomIn, true);
     let bound = latest.model as Editor;

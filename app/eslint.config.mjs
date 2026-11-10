@@ -17,6 +17,7 @@ const compat = new FlatCompat({
 export default [{
     ignores: [
         "build",
+        "electron-dist",
         "node_modules",
         "src/asset/pdf",
         "src/types/dist",
@@ -55,5 +56,23 @@ export default [{
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-require-imports": "off",
+    },
+}, {
+    // 窗口账本的读写统一走 windowRegistry，避免绕过它导致崩溃预期与初始化状态失真。
+    // 直接访问 `state.windows` 的只有该模块与 runtime 的初始化 / 重置，因此这里是错误而不是告警。
+    files: ["electron/**/*.ts"],
+    ignores: ["electron/window/windowRegistry.ts", "electron/shared/runtime.ts", "electron/**/*.test.ts"],
+    rules: {
+        "no-restricted-syntax": ["error", {
+            // 覆盖 `state.windows.targets`、`state["windows"]` 与 `const {windows} = state` 三种写法。
+            selector: "MemberExpression[object.name=\"state\"][property.name=\"windows\"]",
+            message: "窗口账本请通过 windowRegistry 的读写函数访问",
+        }, {
+            selector: "MemberExpression[object.name=\"state\"][computed=true][property.value=\"windows\"]",
+            message: "窗口账本请通过 windowRegistry 的读写函数访问",
+        }, {
+            selector: "VariableDeclarator[init.name=\"state\"] Property[key.name=\"windows\"]",
+            message: "窗口账本请通过 windowRegistry 的读写函数访问",
+        }],
     },
 }];

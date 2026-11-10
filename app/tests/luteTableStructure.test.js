@@ -15,6 +15,39 @@ const createLute = () => {
 };
 
 describe("Markdown table structure", () => {
+    it("preserves multi-row headers and merged cells through internal round trips and HTML interchange", () => {
+        const lute = createLute();
+        for (const [head, rowCount] of [
+            ["<tr><th>A</th><th>B</th><th>C</th></tr><tr><th>D</th><th>E</th><th>F</th></tr>", 2],
+            ['<tr style="height: 60px;"><th rowspan="3">group</th><th colspan="2">metrics</th></tr>' +
+                '<tr><th rowspan="2" style="text-align: right;">child</th><th>one</th></tr><tr><th>two</th></tr>', 3],
+        ]) {
+            let dom = lute.HTML2BlockDOM(`<table><thead>${head}</thead><tbody>` +
+                "<tr><td>a</td><td>b</td><td>c</td></tr></tbody></table>");
+            for (let round = 0; round < 3; round++) {
+                dom = lute.SpinBlockDOM(dom);
+                const header = dom.match(/<thead>(.*?)<\/thead>/s)[1];
+                assert.equal((header.match(/<tr[\s>]/g) || []).length, rowCount);
+                assert.match(dom, /<tbody><tr><td>a<\/td><td>b<\/td><td>c<\/td><\/tr><\/tbody>/);
+                if (rowCount === 3) {
+                    assert.match(header, /rowspan="3"/);
+                    assert.match(header, /rowspan="2"/);
+                    assert.match(header, /colspan="2"/);
+                    assert.match(header, /height: 60px/);
+                    assert.match(header, /text-align: right/);
+                }
+                dom = lute.Md2BlockDOM(lute.BlockDOM2Md(dom));
+            }
+            if (rowCount === 3) {
+                const markdown = lute.BlockDOM2StdMd(dom);
+                assert.match(markdown, /<thead>/);
+                assert.match(markdown, /rowspan="3"/);
+                const restored = lute.HTML2BlockDOM(markdown);
+                assert.equal((restored.match(/<thead>(.*?)<\/thead>/s)[1].match(/<tr[\s>]/g) || []).length, 3);
+            }
+        }
+    });
+
     it("normalizes omitted merged-cell slots without adding visible cells", () => {
         const lute = createLute();
         const head = "<thead><tr><th>A</th><th>B</th><th>C</th></tr></thead>";

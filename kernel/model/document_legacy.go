@@ -29,10 +29,14 @@ func legacyDocumentPathError(reason string, candidates *treenode.LegacyDocumentC
 }
 
 func legacyDocumentCandidates(boxID string, hpaths []string) (map[string]*treenode.LegacyDocumentCandidates, error) {
+	return legacyDocumentCreationCandidates(boxID, hpaths, nil)
+}
+
+func legacyDocumentCreationCandidates(boxID string, hpaths []string, pending *treenode.BlockTree) (map[string]*treenode.LegacyDocumentCandidates, error) {
 	if err := checkDocumentPathNotebook(boxID); err != nil {
 		return nil, err
 	}
-	ret, err := treenode.ClassifyLegacyDocumentPaths(boxID, hpaths)
+	ret, err := treenode.ClassifyLegacyDocumentPathsForCreate(boxID, hpaths, pending)
 	if err != nil {
 		return nil, documentAddressingError("indexUnavailable", err)
 	}
@@ -76,16 +80,31 @@ func ResolveLegacyDocumentPath(boxID, hpath string, create bool) (*treenode.Bloc
 // legacyDocumentCreationParents checks every requested parent prefix before any
 // source is created. A matching parent ID selects its real clean ancestor chain;
 // it never bypasses slash/empty-title conflicts. The caller holds hpathRefresh.
-func legacyDocumentCreationParents(boxID, hpath, parentID string) (map[string]*treenode.BlockTree, error) {
-	hpath = util.TrimSpaceInPath(strings.TrimSuffix(hpath, ".sy"))
-	parts := strings.Split(hpath, "/")[1:]
+func legacyDocumentCreationParents(boxID, hpath, parentID string, pending *treenode.BlockTree) (string, map[string]*treenode.BlockTree, error) {
+	parts := strings.Split(strings.TrimSuffix(hpath, ".sy"), "/")[1:]
 	hpaths := []string{}
-	for i := 1; i < len(parts); i++ {
-		hpaths = append(hpaths, "/"+strings.Join(parts[:i], "/"))
+	for i, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if part != trimmed && i < len(parts)-1 {
+			// 保留已有富标题的原始空白；仅缺失的分段沿已选祖先使用旧版 trim 规则。
+			hp := "/" + strings.Join(parts[:i+1], "/")
+			groups, err := legacyDocumentCreationCandidates(boxID, []string{hp}, pending)
+			if err != nil {
+				return "", nil, err
+			}
+			if candidates := groups[hp]; len(candidates.Clean)+len(candidates.Unsupported) > 0 {
+				trimmed = part
+			}
+		}
+		parts[i] = trimmed
+		if i < len(parts)-1 {
+			hpaths = append(hpaths, "/"+strings.Join(parts[:i+1], "/"))
+		}
 	}
-	groups, err := legacyDocumentCandidates(boxID, hpaths)
+	hpath = "/" + strings.Join(parts, "/")
+	groups, err := legacyDocumentCreationCandidates(boxID, hpaths, pending)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	ret := map[string]*treenode.BlockTree{}
 	var preferred *treenode.BlockTree
@@ -99,7 +118,7 @@ func legacyDocumentCreationParents(boxID, hpath, parentID string) (map[string]*t
 	for _, hp := range hpaths {
 		candidates := groups[hp]
 		if len(candidates.Unsupported) > 0 {
-			return nil, legacyDocumentPathError("pathAmbiguous", candidates)
+			return "", nil, legacyDocumentPathError("pathAmbiguous", candidates)
 		}
 		if preferred != nil {
 			for _, candidate := range candidates.Clean {
@@ -109,15 +128,15 @@ func legacyDocumentCreationParents(boxID, hpath, parentID string) (map[string]*t
 				}
 			}
 			if ret[hp] == nil {
-				return nil, documentAddressingError("indexUnavailable", treenode.ErrDocumentMetadataUnavailable)
+				return "", nil, documentAddressingError("indexUnavailable", treenode.ErrDocumentMetadataUnavailable)
 			}
 		} else if len(candidates.Clean) > 1 {
-			return nil, legacyDocumentPathError("pathAmbiguous", candidates)
+			return "", nil, legacyDocumentPathError("pathAmbiguous", candidates)
 		} else if len(candidates.Clean) == 1 {
 			ret[hp] = candidates.Clean[0]
 		}
 	}
-	return ret, nil
+	return hpath, ret, nil
 }
 
 func cleanupRetiredDocumentAddressing() error {

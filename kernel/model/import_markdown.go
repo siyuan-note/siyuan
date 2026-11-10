@@ -18,7 +18,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -179,7 +178,7 @@ func (spool *markdownImportSpool) load(index int) (*parse.Tree, error) {
 	if err != nil {
 		return nil, err
 	}
-	tree, err := dataparser.ParseJSONWithoutFix(raw, util.NewLute().ParseOptions)
+	tree, err := treenode.ParseJSONWithoutFix(raw, util.NewLute().ParseOptions)
 	if err != nil {
 		return nil, err
 	}

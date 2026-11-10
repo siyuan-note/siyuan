@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     compactAVCellOperations,
+    getAVNestedPasteItemIDs,
     getAVPasteCellValue,
     getAVPasteContentRowCount,
     getAVPasteValueForType,
@@ -11,6 +12,14 @@ import {
     isAVPasteHeaderCandidate,
     shouldShowAVPasteSkeleton,
 } from "./paste";
+
+it("tree paste addresses the visible page order, includes context and deduplicates repeated occurrences", () => {
+    const rows = [{id: "context", hierarchy: {context: true}}, {id: "child-201"},
+        {id: "child-202"}, {id: "child-201"}, {id: "next-root"}] as IAVRow[];
+    assert.deepEqual(getAVNestedPasteItemIDs(rows, "context", 3), ["context", "child-201", "child-202"]);
+    assert.deepEqual(getAVNestedPasteItemIDs(rows, "child-201", 8), ["child-201", "child-202", "next-root"]);
+    assert.deepEqual(getAVNestedPasteItemIDs(rows, "unloaded-child", 2), []);
+});
 
 describe("inferAVPasteColumnType", () => {
     it("infers strict numbers while preserving identifiers with leading zeros", () => {

@@ -42,7 +42,7 @@ const matchesContext = (item: INativeCommandCatalogItem, context: ICommandContex
         return Boolean(context.protyle);
     }
     if (item.requirement === "editorOrFileTree") {
-        return Boolean(context.protyle || context.fileTree?.elements.length);
+        return Boolean(context.protyle || context.fileTree?.items?.length || context.fileTree?.elements.length);
     }
     return true;
 };

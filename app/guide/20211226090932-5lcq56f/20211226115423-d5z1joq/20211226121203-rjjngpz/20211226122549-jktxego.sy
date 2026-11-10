@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261026090134"
+		"updated": "20261101154840"
 	},
 	"Children": [
 		{
@@ -3597,12 +3597,76 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-3q2xsbj",
-				"updated": "20261024163013"
+				"updated": "20261026142807"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "文檔"
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-0pp1wdu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-0pp1wdu",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件樹按需載入，繼續捲動可瀏覽全部可存取文件。可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "檔案管理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件樹單次載入數量"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 調整每次載入量，它不限制可瀏覽的文件總數。最大列出數量繼續限制標籤清單和包含子文件的合併匯出。"
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-y0xzszs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-y0xzszs",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端文件樹中，Home 和 End 分別選取已展開文件樹的第一列和最後一列。按住 Shift 再按上、下方向鍵或 Home、End 可延伸選取範圍，包括畫面外的項目。定位文件時會自動載入目標所在位置。"
 				}
 			]
 		},
@@ -17130,7 +17194,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220619002039-klsrtup",
-				"updated": "20261024163828"
+				"updated": "20261030123846"
 			},
 			"Children": [
 				{
@@ -18425,7 +18489,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-zliquo3",
-				"updated": "20261016202635"
+				"updated": "20261030123846"
 			},
 			"Children": [
 				{
@@ -18439,7 +18503,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922150640-nft4e80",
-				"updated": "20261016202635"
+				"updated": "20261030123846"
 			},
 			"Children": [
 				{
@@ -18462,7 +18526,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 後，在文件樹或置頂文件區可決定點擊或點按執行的操作：選擇「展開或折疊子文件」立即展開或折疊；選擇「點擊展開或折疊子文件、按兩下開啟父文件」則按兩下或連續點按兩次開啟父文件並保持展開或折疊狀態，點擊需等待約 300 毫秒以判斷是否按兩下，仍可透過文件選單開啟父文件。沒有子文件時點擊或點按標題仍直接開啟；點擊有可開啟文件的文件圖示則開啟文件，否則修改圖示；筆記本圖示一律用於修改圖示。"
+					"Data": " 後，在文件樹或置頂文件區可決定點擊或點按執行的操作：選擇「展開或折疊子文件」無需等待按兩下的判定；選擇「點擊展開或折疊子文件、按兩下開啟父文件」則按兩下或連續點按兩次開啟父文件並保持展開或折疊狀態，點擊需等待約 300 毫秒以判斷是否按兩下，仍可透過文件選單開啟父文件。展開時先載入子文件，資料就緒後再顯示；等待較久時箭頭位置顯示載入圓環，載入期間再次點擊箭頭可取消展開。沒有子文件時點擊或點按標題仍直接開啟；點擊有可開啟文件的文件圖示則開啟文件，否則修改圖示；筆記本圖示一律用於修改圖示。"
 				}
 			]
 		},
@@ -19939,6 +20003,364 @@
 			"Properties": {
 				"id": "20220902195830-i3ncplk"
 			}
+		},
+		{
+			"ID": "20261101145217-db4b837",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101145217-db4b837",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "獨立 Markdown 編輯器"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-7d60a98",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-7d60a98",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "以下快捷鍵僅在獨立 Markdown 編輯器中生效，分別列出 Windows/Linux 與 macOS 按鍵，不改變工作空間快捷鍵。"
+				}
+			]
+		},
+		{
+			"ID": "20261101153939-368d18a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101153939-368d18a",
+				"updated": "20261101153939"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "行動端可以使用更多選單與模式選擇器。使用外接鍵盤時，新建、開啟、儲存及另存為在 iOS 使用 Cmd，在 Android 和 HarmonyOS 使用 Ctrl；這些快捷鍵僅在獨立編輯器取得焦點時生效。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-4446b52",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20261101145217-4446b52",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "操作"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Windows / Linux"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "macOS"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "新建視窗"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+N"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+N"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "開啟檔案"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+O"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+O"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "儲存"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+S"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+S"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "另存為"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Shift+S"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+Shift+S"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "所見即所得"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Alt+7"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+Option+7"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "即時渲染"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Alt+8"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+Option+8"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "分割預覽"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Alt+9"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+Option+9"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-775a2fc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-775a2fc",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存、復原與預覽限制請參閱 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261101145217-411811d",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "獨立 Markdown 編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
 		}
 	]
 }

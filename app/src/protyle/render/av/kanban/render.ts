@@ -1,7 +1,10 @@
 import {afterRenderCards, captureAVCardRenderState, getAVCardHTML} from "../cardLayout";
+import {fetchAVRender, AVAutomaticRefresh} from "../httpRender";
+import {guardTemplateHTTPRequest} from "../../../../template/http";
 import {isAVDateType, isAVSelectType} from "../capabilities";
 import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
+import {getSubItemsRequest, reconcileSubItems, restoreSubItemsView} from "../subItemsState";
 import {getPublishAVView} from "../publishState";
 import {getReadonlyAVView, getReadonlyAVSortRequest, reconcileReadonlyAVSort} from "../readonlyState";
 import {hasClosestByAttribute} from "../../../util/hasClosest";
@@ -57,8 +60,10 @@ export const renderKanban = async (options: {
     cb?: (data: IAV) => void,
     renderAll: boolean,
     data?: IAV,
+    automaticRefresh?: AVAutomaticRefresh,
+    renderToken?: symbol,
 }) => {
-    const renderToken = beginAVRender(options.blockElement);
+    const renderToken = options.renderToken || beginAVRender(options.blockElement, {preserveAVMetadata: true, preserveManualAutomation: true});
     const resetData = captureAVCardRenderState(options, "kanban");
     const virtualData = resetData.virtualData;
     if (options.blockElement.firstElementChild.innerHTML === "") {
@@ -78,29 +83,36 @@ export const renderKanban = async (options: {
         const avPageSize = getPageSize(options.blockElement);
         const locateParams = getAVLocateParams(options.blockElement, !created && !snapshot);
         const common = {
+            nested: getSubItemsRequest(options.blockElement, options.protyle, locateParams?.viewID, resetData.query.trim()),
             id: options.blockElement.getAttribute("data-av-id"),
             blockID: standalone ? "" : options.blockElement.getAttribute("data-node-id"),
             viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(options.blockElement) :
                 options.protyle.disabled ? getReadonlyAVView(options.blockElement) : ""),
         };
         const paging = {
+            page: avPageSize.unGroupPage,
             pageSize: avPageSize.unGroupPageSize,
             groupPaging: avPageSize.groupPageSize,
             query: resetData.query.trim(),
         };
         const carrierViewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
+        const requestGuard = guardTemplateHTTPRequest(() => isCurrentAVRender(options.blockElement, renderToken), options.blockElement);
         const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
             ...common, ...paging, created, carrierViewID,
         }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
-            ...common, snapshot, carrierViewID,
-        }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
+            ...common, ...paging, snapshot, carrierViewID,
+        }, undefined, false) : fetchAVRender({
             ...common, ...paging,
+            automaticRefresh: !!options.automaticRefresh,
+            preserveHTTPResults: options.automaticRefresh === "presentation",
             initialLayout: options.blockElement.getAttribute("data-av-type"),
             createIfNotExist: !window.siyuan.isPublish && !standalone,
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
             temporarySort: getReadonlyAVSortRequest(options.blockElement, options.protyle, common.viewID),
-        }, undefined, false));
+        }, requestGuard.signal, options.blockElement, () => isCurrentAVRender(options.blockElement, renderToken),
+        preview => avRender(options.blockElement, options.protyle, undefined, true, preview,
+            options.automaticRefresh, renderToken))).finally(requestGuard.dispose);
         if (!isCurrentAVRender(options.blockElement, renderToken)) {
             return;
         }
@@ -111,6 +123,10 @@ export const renderKanban = async (options: {
             return;
         }
         data = response.data;
+        if (restoreSubItemsView(options.blockElement, options.protyle, data, common.nested, resetData.query.trim())) {
+            await renderKanban(options);
+            return;
+        }
     }
     if (!isCurrentAVRender(options.blockElement, renderToken)) {
         return;
@@ -120,18 +136,19 @@ export const renderKanban = async (options: {
     }
     reconcileReadonlyAVSort(options.blockElement, data);
     applyAVRenderContext(options.blockElement, data);
+    reconcileSubItems(options.blockElement, options.protyle, data, resetData.query.trim());
     prepareAVLocate(options.blockElement, data, resetData);
     if (isTableLikeView(data.viewType) || data.viewType === "calendar") {
-        avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
+        await avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data, options.automaticRefresh, renderToken);
         return;
     }
     if (data.viewType === "gallery") {
-        renderGallery({
+        await renderGallery({
             blockElement: options.blockElement,
             protyle: options.protyle,
             cb: options.cb,
             renderAll: options.renderAll,
-            data
+            data, automaticRefresh: options.automaticRefresh, renderToken,
         });
         return;
     }
@@ -161,7 +178,7 @@ export const renderKanban = async (options: {
             }
             bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}" data-group-id="${group.id}" data-previous-group-id="${view.groups[groupIndex - 1]?.id || ""}" data-group-config="${groupConfig}"${selectBg}>
     ${getKanbanTitleHTML(group, group.cardCount, groupDraggable)}
-    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body">${getAVCardHTML("kanban", group, options.blockElement, virtualData[group.id])}</div>
+    <div data-group-id="${escapeAttr(group.id)}" data-page-size="${group.pageSize}" data-dtype="${escapeAttr(group.groupKey.type)}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body">${getAVCardHTML("kanban", group, options.blockElement, virtualData[group.id])}</div>
 </div>`;
         }
     });

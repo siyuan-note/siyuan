@@ -102,6 +102,55 @@ func TestValidateBlockReplacement(t *testing.T) {
 	}
 }
 
+func TestFixNestedDocumentNodes(t *testing.T) {
+	root := &ast.Node{Type: ast.NodeDocument, ID: "root"}
+	before, after := &ast.Node{Type: ast.NodeParagraph, ID: "before"}, &ast.Node{Type: ast.NodeParagraph, ID: "after"}
+	nested := &ast.Node{Type: ast.NodeDocument, ID: "nested", Spec: "2"}
+	nested.SetIALAttr("id", nested.ID)
+	nested.SetIALAttr("title", "Nested title")
+	nested.SetIALAttr("type", "doc")
+	nested.SetIALAttr("updated", "20260701091344")
+	nested.SetIALAttr("custom-test", "preserved")
+	paragraph := &ast.Node{Type: ast.NodeParagraph, ID: "paragraph"}
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Body")})
+	empty := &ast.Node{Type: ast.NodeDocument, ID: "empty"}
+	nested.AppendChild(paragraph)
+	nested.AppendChild(empty)
+	root.AppendChild(before)
+	root.AppendChild(nested)
+	root.AppendChild(after)
+	if !FixNestedDocumentNodes(root) {
+		t.Fatal("nested document was not repaired")
+	}
+	if root.Type != ast.NodeDocument || root.ID != "root" || before.Next != nested || nested.Next != after {
+		t.Fatal("document identity or sibling order changed")
+	}
+	if nested.Type != ast.NodeSuperBlock || nested.ID != "nested" || nested.Spec != "2" ||
+		nested.IALAttr("id") != nested.ID || nested.IALAttr("title") != "Nested title" ||
+		nested.IALAttr("type") != "doc" || nested.IALAttr("updated") != "20260701091344" ||
+		nested.IALAttr("custom-test") != "preserved" {
+		t.Fatal("nested document lost its attributes")
+	}
+	if nested.FirstChild.Type != ast.NodeSuperBlockOpenMarker ||
+		nested.FirstChild.Next.Type != ast.NodeSuperBlockLayoutMarker || string(nested.FirstChild.Next.Tokens) != "row" ||
+		nested.FirstChild.Next.Next != paragraph || paragraph.Next != empty ||
+		empty.Next != nested.LastChild || nested.LastChild.Type != ast.NodeSuperBlockCloseMarker ||
+		string(paragraph.FirstChild.Tokens) != "Body" {
+		t.Fatal("nested document lost its body or super block markers")
+	}
+	if empty.Type != ast.NodeSuperBlock || empty.ID != "empty" ||
+		empty.FirstChild.Next.Next.Type != ast.NodeParagraph ||
+		empty.FirstChild.Next.Next.Next != empty.LastChild {
+		t.Fatal("empty nested document does not contain an editable paragraph")
+	}
+	if err := ValidateBlockSubtree(root); err != nil {
+		t.Fatal("repaired document has invalid containment", err)
+	}
+	if FixNestedDocumentNodes(root) || FixNestedDocumentNodes(nil) {
+		t.Fatal("repair is not idempotent")
+	}
+}
+
 func TestFixInvalidListChildren(t *testing.T) {
 	document := &ast.Node{Type: ast.NodeDocument, ID: "document"}
 	list := &ast.Node{Type: ast.NodeList, ID: "list", ListData: &ast.ListData{Typ: 1, Start: 4}}

@@ -5,6 +5,7 @@
 package util
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -22,6 +23,10 @@ func TestWorkspaceExitMarker(t *testing.T) {
 	}
 	before := time.Now().UnixMilli()
 	marked := MarkWorkspaceExiting()
+	created, err := workspaceExitProcessStart(context.Background(), os.Getpid())
+	if err != nil {
+		t.Fatal(err)
+	}
 	data, err := os.ReadFile(marker)
 	if err != nil {
 		t.Fatal(err)
@@ -33,6 +38,9 @@ func TestWorkspaceExitMarker(t *testing.T) {
 	if state.Version != 2 || state.PID != os.Getpid() || state.StartedAt < before || state.Phase != "exiting" || state.Port != ServerPort {
 		t.Fatalf("invalid exit marker: %s", data)
 	}
+	if state.ProcessStartedAt != created || created <= 0 {
+		t.Fatalf("process identity lost: %s", data)
+	}
 	marked.SetPhase("waiting")
 	data, err = os.ReadFile(marker)
 	if err != nil {
@@ -41,7 +49,7 @@ func TestWorkspaceExitMarker(t *testing.T) {
 	if err = json.Unmarshal(data, &state); err != nil {
 		t.Fatal(err)
 	}
-	if state.Phase != "waiting" || state.StartedAt != marked.StartedAt {
+	if state.Phase != "waiting" || state.StartedAt != marked.StartedAt || state.ProcessStartedAt != created {
 		t.Fatalf("exit batch lost: %s", data)
 	}
 	ClearWorkspaceExitMarker()

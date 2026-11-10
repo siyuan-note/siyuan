@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261028120132"
+		"updated": "20261109202618"
 	},
 	"Children": [
 		{
@@ -3160,7 +3160,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " choose One column, Two columns (by row), or Two columns (by column) under Database panel field layout. The default is Two columns (by row). This applies to the database panel at the top of a document and the standalone item panel. Panels automatically use one column when space is limited. Switching layouts preserves the field order."
+					"Data": " choose One column, Two columns (by row), or Two columns (by column) under Database panel field layout. The default is Two columns (by row). This applies to the database panel at the top of a document and the standalone item panel. Panels automatically use one column when space is limited. Switching layouts preserves the field order. After binding an unbound entry in its panel, the panel opens the bound block editor when database attributes are enabled. Bound entries do not offer rebinding in the panel; use the database view to change their binding."
 				}
 			]
 		},
@@ -3354,21 +3354,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261025205717-wu88xyc",
-				"updated": "20261025205717"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In an entry template, enable "
+					"Data": "In an entry template, choose "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Open item in split view after creation"
+					"TextMarkTextContent": "Open item after creation"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to open each new bound or unbound entry on the right after creating it from a database view. A bound document focuses its title when available; otherwise, the primary key is focused. Unbound entries focus the primary key. Mobile uses the existing page or dialog."
+					"Data": " to select Do not open (default), Open in the current pane, or Split Right. Bound and unbound entries are supported. Bound documents focus the editable title when available; other entries focus the primary key. Mobile uses the existing page or dialog for both opening options."
 				}
 			]
 		},
@@ -3377,12 +3377,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261025205717-d3xd5xk",
-				"updated": "20261025205717"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "New templates have this option off. Turn it off to stop automatic opening. Existing templates retain their previous behavior until you change this switch, including automatic opening in calendars. Empty entries created without a template keep the view’s existing behavior; to configure them, create an empty unbound-entry template and make it the default."
+					"Data": "Existing templates retain their opening behavior until you change this selection. Empty creation without a template follows the view’s behavior; use a default empty unbound-entry template to configure it."
 				}
 			]
 		},
@@ -3571,12 +3571,97 @@
 			]
 		},
 		{
+			"ID": "20261103024717-p6dmwp4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261103024717-p6dmwp4",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Related database views in entry details"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-lbrh01e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-lbrh01e",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable “Show related table” in a relation field’s configuration and use “Related database view” to select an existing table view in the related database. When creating or changing the relation target, configure the related table in the same menu and click “Confirm” to save both settings together. This field-level setting applies to every entry, including new entries. Disabling the display does not delete relations or target entries."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-qzavrxh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-qzavrxh",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The related table appears at the bottom of the database properties in entry details, before the body when one exists. Document-bound, content-block-bound and detached entries are supported. When a block belongs to multiple databases, tabs select the active database by default. Turn off “Display multiple databases in tabs” to display each database’s properties and related tables together in separate groups. Membership stays separate for each source database, entry and relation field."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-qvz73ar",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-qvz73ar",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The table contains only entries already linked through the current entry’s relation field, further limited by the selected view’s filters. One-way relations do not require a reverse relation field. The target view’s column layout is shared; the current entry’s membership restriction is never saved into shared filters. Search, “Sort in this panel” and “Additional filters in this panel” apply only to the current panel."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-fnh8dej",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-fnh8dej",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Editing a target field changes the real entry and updates its other references. “Remove association” removes only the current entry’s relation in the current field; it does not delete the target entry. “Add existing entry” follows the relation candidate filters. “Create and link entry” uses the target database’s creation rules, creating a detached entry when no default template is configured."
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-a6ld1fe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-a6ld1fe",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "An empty relation displays an empty table. An invalid field or target view, or a locked database, displays an unavailable state instead of the unfiltered database. This feature initially supports tables and does not recursively expand further related tables inside them. History and snapshot previews do not expand live related views."
+				}
+			]
+		},
+		{
 			"ID": "20240208173416-t51ome2",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208173416-t51ome2",
-				"updated": "20261024164212"
+				"updated": "20261030030559"
 			},
 			"Children": [
 				{
@@ -4051,6 +4136,31 @@
 			"AttributeViewType": "table"
 		},
 		{
+			"ID": "20261030030559-92mvhui",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030030559-92mvhui",
+				"updated": "20261030030559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Template fields can use httpGet to read external API data. Execution requires confirmation in the current window; rows share request budgets. See "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261030003500-nv4y9r3",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Read external API data"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
 			"ID": "20260830120000-a1dspen",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -4195,7 +4305,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -4582,12 +4692,243 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-coesny2",
-				"updated": "20261024161816"
+				"updated": "20261109002000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Results are stored once, and redo reuses them. SQL, files, network access, loops, and recursion are unavailable. Source is limited to 8 KiB; each input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
+					"Data": "Results are stored once, and redo reuses them. SQL, files, loops, and recursion are unavailable. Rules containing HTTP run after the edit is saved. Source is limited to 8 KiB; each field input and output to 64 KiB. Saving templates requires a client supporting automation format 2; older clients explicitly reject the database. Existing format 1 rules remain compatible."
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-kueu1ko",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-kueu1ko",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the template editor, select a source field by name and click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Insert field reference"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to insert a stable field ID reference at the cursor. Renaming the field keeps the reference valid. Click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Copy ID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to copy the selected field ID. The picker also works on mobile."
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-cjr8luh",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261108182000-cjr8luh",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manual execution"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261108182000-ggfyqb8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-ggfyqb8",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Manual"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", add an edit-field action targeting an ordinary field, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and enable the rule. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Run now"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to process all saved rows matching the rule conditions. Results remain available offline and reopening the database does not fetch them again. Scheduled execution is not provided."
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-w2cs6vs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-w2cs6vs",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A manual rule can use httpGet and fromJson in .action{...} expressions. For example, this writes the returned slideshow title to a text field:"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-362kkdg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-362kkdg",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{$r := httpGet \"https://httpbingo.org/json\"}.action{(fromJson $r.body).slideshow.title}"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-i0uewmx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-i0uewmx",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Network requests require confirmation in the current window and follow the template HTTP limits. Persistent permission is bound to the saved rule version and can be revoked in the automation panel. The manual interface saves each matching entry independently: all actions for one entry succeed together or leave that entry unchanged; other successful entries stay saved. Each entry reads a fresh stored snapshot, shared by all its actions; changes during fetching reject stale results. Undo and redo reuse saved results without HTTP. HTTP limits apply across batches, with at most 1,000 field writes and row additions per round. Manual templates have no field preview. Manual rules require automation format 9; formats 1–8 remain readable, and older clients reject format 9 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-hyg3j9f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-hyg3j9f",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Execution displays saved, failed, remaining and skipped counts, with an expandable failure list. Retry failed and remaining entries continues only those entries; it does not repeat successful additions. Batches share request, response-size, elapsed-time and write limits. Reaching a limit, denying permission or closing the panel stops further work and preserves committed results. Explicit retry starts a new budget round. A lost response is checked through progress before any further writes. Progress is bound to the current main window for fifteen minutes and is cleared when notebooks begin locking. Check saved values before restarting after progress expires. Existing API calls retain whole-run atomic behavior and null data unless rows mode is explicitly requested."
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-pq3tbas",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-pq3tbas",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A checkbox can serve as a refresh switch: watch its changes, require it to be checked, and save HTTP results together with clearing the checkbox. A successful result does not trigger another automation. On failure the checkbox and old results remain unchanged; uncheck and check it again to trigger another attempt."
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-ys4550m",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261109002000-ys4550m",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic HTTP and formatting functions"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261109002000-xsz4h51",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-xsz4h51",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For item-added and field-changed triggers, a rule containing httpGet runs all its actions after the edit is saved. Continuous edits in one database are combined, and the current window handles network confirmation. Failure preserves the saved edit and previous results; changes to a database used by the execution discard stale results. Results are saved together as a separate undo step. Undoing the result keeps the input edit; undoing again reverts that edit. Redo reuses saved results without HTTP, and result writes do not trigger other automations. Without an interactive window, API writes save their edits without running rules that contain HTTP. Scheduled execution is not provided."
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-o3lyz6m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-o3lyz6m",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "All automation templates support printf, urlquery, dict, toString and fromJson. printf supports common format verbs with bounded width and precision for scalar arguments, without dynamic width (*) or argument indexes; dict requires string keys and complete key/value pairs. These helpers accept at most 64 arguments and 64 KiB of serialized input, and string output is limited to 64 KiB. New formatting functions and event HTTP rules require automation format 10. Existing formats 1–9 remain readable, including disabled unfinished templates; older clients reject format 10 without rewriting the database."
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-jr9ehz4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-jr9ehz4",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, construct a URL from a source field (replace FIELD_ID with its field ID):"
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-0vr0465",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-0vr0465",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{printf \"https://example.com?q=%s\" (urlquery (field \"FIELD_ID\"))}"
 				}
 			]
 		},
@@ -5026,7 +5367,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261015141042-fm4qoja",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5040,7 +5381,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-6bomil1",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5209,12 +5550,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261026103001-47dxurt",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Reference sources use the same grouping rules as backlinks, including list items, blockquotes, super blocks, callouts, and document or heading propagation from a first paragraph containing only block references. Type and attribute conditions apply to the final grouped block; tag conditions apply to the reference source. The tag collection target option does not apply while a reference target is set. Clear the reference target to return to ordinary collection. Removing a reference preserves existing entries and fields; preview collection management to collect older matches. Reference targets require automation format 8; formats 1–7 remain readable, and older clients reject format 8 without rewriting the database."
+					"Data": "Reference sources use the same grouping rules as backlinks, including list items, blockquotes, super blocks, callouts, and document or heading propagation from a first paragraph containing only block references. Type and attribute conditions apply to the final grouped block; tag conditions apply to the reference source. The tag collection target option does not apply while a reference target is set. Clear the reference target to return to ordinary collection. Deleting body block references can also remove automatically collected entries after confirmation, as described below. Preview collection management to collect older matches. Reference targets require automation format 8; formats 1–7 remain readable, and older clients reject format 8 without rewriting the database."
 				}
 			]
 		},
@@ -5265,7 +5606,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-jv7dnxb",
-				"updated": "20261024164212"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5384,6 +5725,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "When a block first matches, a new entry is added. Automatic collection only adds entries. Source changes, moving out of scope, changing conditions or collection targets, and disabling or deleting rules preserve existing entries and their field values. Matching again preserves the same entry and manually edited fields."
+				}
+			]
+		},
+		{
+			"ID": "20261102195537-zlurrk5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102195537-zlurrk5",
+				"updated": "20261106090000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Deleting body block references, or tags from the body, document tags, or the tag panel, checks whether automatically collected entries no longer match any enabled collection rule. If entries are affected, one dialog lists the databases and entry counts, even when tags and references are deleted together. Affected databases are selected by default. Confirming with Also remove selected entries deletes the tags or references and removes the selected entries and their field values. Deselect a database to keep its entries and fields. Depending on the deleted content, Delete tags only, Delete references only, or Delete tags and references only keeps all database entries and fields. Canceling abandons the deletion. The source content is kept; undo restores the tags or references, original entries, and field values together. Manually added entries and entries still matching through another reference to the same target or another enabled rule are kept. Renaming a tag or changing only reference anchor text does not open this dialog."
 				}
 			]
 		},
@@ -5537,6 +5892,214 @@
 			]
 		},
 		{
+			"ID": "20261028142713-yv18520",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028142713-yv18520",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Sub-items"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261028142713-lyyg6cb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-lyyg6cb",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Sub-items"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the database settings, then choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enable sub-items"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to create parent and child relation fields automatically on first activation. To reuse existing relations, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Use existing relation fields"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", select a reciprocal relation pair and review the hierarchy using real items. If needed, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reverse direction"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reverse the hierarchy direction, then confirm enabling. The preview covers only some loaded items; enabling validates all relations. After enabling the feature, every client accessing this database must support the new format. Databases without the feature remain unaffected."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-73q7plg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-73q7plg",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "An item has at most one parent and can contain multiple levels of children. An item cannot use itself or a descendant as its parent. All database views and mirrors share the relations, which do not change the document or block hierarchy."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-sb1l5ya",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-sb1l5ya",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Table and list views offer "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Nested display"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Flat display"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". In nested table display, use the control before the first visible field to expand or collapse children; its position follows field order and visibility. In lists, the control appears before the primary field. Items without children show a non-interactive gray dot in place of the expansion button, keeping items at the same level aligned. Item icons stay in the primary field. Gallery, kanban, and calendar views remain flat; item properties expose and edit the relations."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-rbsadma",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-rbsadma",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The item menu provides "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Add sub-item"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Change parent"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Promote one level"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Moving a parent also moves its descendants. Reparenting does not automatically change child statuses, dates, or other fields. With automatic sorting enabled, sort rules determine sibling order. In tree display, inserting entries above or below an entry creates siblings with the same parent."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-1vm606a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-1vm606a",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a filter matches a child, its ancestor path remains visible as context, while nonmatching siblings are hidden. Nested groups follow the root item, but children retain their own group-field values. Flat views group each item by its own values."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-rlnm22x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-rlnm22x",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Nested views page root items and load children on expansion, with previous and next page controls for long child lists. Collapsing does not change statistics, and ancestors shown only for context do not count as filter matches. Pasting multiple rows writes to the current page's visible items, including context ancestors; excess rows create top-level items without overwriting collapsed items or items on other pages."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-977oeu1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-977oeu1",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Deleting a parent promotes its surviving direct children by one level without deleting descendants or bound documents and blocks. Duplicating a parent copies its entire subtree, including collapsed or filtered-out descendants. Copies receive new item identities; a copy of a bound item is unbound and does not duplicate its body. Structural operations support undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-wvifawj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-wvifawj",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Switching to flat display or disabling sub-items preserves relation fields and values without automatically downgrading the database format. Re-enabling validates the existing relations again. If the designated fields were deleted or no longer form a reciprocal self-relation while disabled, automatic enabling creates a new pair and preserves other fields and values. Cycles and multiple parents are rejected with a specific explanation. Changing an option in the sub-items menu keeps it open and refreshes its state. Expansion state for encrypted databases is cleared when the notebook locks or closes."
+				}
+			]
+		},
+		{
 			"ID": "20240818174922-r0eubvc",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -5585,6 +6148,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20261109202618-42779dc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109202618-42779dc",
+				"updated": "20261109202618"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In table and list views, Enter confirms an input field and immediately edits the same field in the next row of the same group. This applies to text, number, URL, email, phone and unbound primary-key input fields. The last row does not create another entry. Shift+Enter inserts a text line break; use entry details for full rich text editing. Composition and candidate selection keep their existing behavior. A failed save keeps the current draft open."
 				}
 			]
 		},

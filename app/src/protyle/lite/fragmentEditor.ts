@@ -24,6 +24,7 @@ export interface ProtyleLiteFragmentOptions {
     protyleOptions?: Partial<IProtyleOptions>;
     runtimeCapabilities?: ProtyleRuntimeCapabilities;
     onChange?: () => void;
+    observeAttributes?: boolean;
     afterSetContent?: (protyle: IProtyle, element: HTMLElement) => void;
 }
 
@@ -145,7 +146,9 @@ export const mountProtyleLiteFragment = (host: HTMLElement,
         updateEmptyState();
         options.onChange?.();
     });
-    contentObserver.observe(wysiwyg, {childList: true, characterData: true, subtree: true});
+    contentObserver.observe(wysiwyg, {
+        childList: true, characterData: true, subtree: true, attributes: options.observeAttributes === true,
+    });
 
     const cloneContent = (prepareClone?: (element: HTMLElement) => void) => {
         const clone = wysiwyg.cloneNode(true) as HTMLElement;

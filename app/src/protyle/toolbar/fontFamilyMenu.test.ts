@@ -70,7 +70,7 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     const toolbar = document.createElement("div");
     toolbar.id = "keyboardToolbar";
     toolbar.className = "keyboard";
-    toolbar.style.height = "300px";
+    toolbar.style.height = "max(48px, calc(100vh - 550px))";
     toolbar.innerHTML = '<div class="keyboard__bar"><button class="keyboard__action protyle-toolbar__item--current" data-type="text">Appearance</button></div><div class="keyboard__util"></div>';
     const util = toolbar.querySelector<HTMLElement>(".keyboard__util");
     util.innerHTML = new Function("disableFontFamily", "escapeHtml", "getInlineFontFamilyLabel", "fontFamilyState",
@@ -96,7 +96,7 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
         renderTextMenu: () => { button.querySelector("span").textContent = "Font 12"; },
         restoreKeyboardToolbarRange: () => restored++,
         activeBlur: () => (document.activeElement as HTMLElement)?.blur(),
-        keyboardPanelTop: 200,
+        keyboardPanelTop: 550,
         notifyMobileKeyboardChange() {},
         hideKeyboardToolbarUtil: () => check.fail("font searches must preserve the appearance panel"),
         hasClosestByClassName: load("protyle/util/hasClosest").hasClosestByClassName,
@@ -121,7 +121,7 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     const search = () => menuElement.querySelector<HTMLInputElement>('[data-type="font-family-search"]');
     const swipeDown = async () => {
         const rect = menuElement.firstElementChild.getBoundingClientRect();
-        await require("electron").ipcRenderer.invoke("font-swipe", rect.left + rect.width / 2, rect.top + rect.height / 2);
+        await require("electron").ipcRenderer.invoke("font-swipe", rect.left + rect.width / 2, rect.top + rect.height / 2, innerHeight - 1);
         await settle();
     };
     for (const theme of themes) {
@@ -160,7 +160,11 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     check.equal(menuElement.getAttribute("data-sheet-expandable"), "true", "gesture and viewport behavior remain enabled");
     check.ok(util.contains(button), "font list opens outside the original appearance panel");
     check.notEqual(document.activeElement, search(), "opening does not summon the search keyboard");
-    check.ok(menuElement.getBoundingClientRect().top > 100, "font sheet opens from the bottom");
+    const sheetBounds = menuElement.getBoundingClientRect();
+    const toolbarTop = toolbar.getBoundingClientRect().top;
+    check.ok(Math.abs(sheetBounds.bottom - toolbarTop) <= 1, "font sheet stays above the keyboard toolbar");
+    check.ok(Math.abs(sheetBounds.height - Math.min(innerHeight * .56, toolbarTop)) <= 1,
+        "font sheet uses the standard height within the available viewport");
     await swipeDown();
     check.ok(menuElement.classList.contains("fn__none"), "a downward touch gesture closes the font sheet");
     check.ok(util.contains(button));
@@ -172,9 +176,10 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     controls.hideKeyboardToolbarUtilOnEditorClick();
     await require("electron").ipcRenderer.invoke("font-resize", 350);
     await settle();
-    // 断言跟随本次 resize 传入的高度，不是与 innerHeight 自比；设备像素取整会差 1px。
-    check.ok(Math.abs(parseFloat(menuElement.style.height) - 350) <= 1,
-        "font sheet still tracks the available viewport while searching");
+    check.equal(innerHeight, 350, "keyboard resize changes the layout viewport");
+    check.ok(Math.abs(menuElement.getBoundingClientRect().height - (350 - toolbar.getBoundingClientRect().height)) <= 1,
+        "font sheet tracks the viewport above the preserved appearance panel");
+    check.ok(Math.abs(menuElement.getBoundingClientRect().bottom - toolbar.getBoundingClientRect().top) <= 1);
     check.ok(search().getBoundingClientRect().top >= menuElement.getBoundingClientRect().top);
     check.ok(search().getBoundingClientRect().bottom <= innerHeight);
     search().value = "Font 12";
@@ -263,21 +268,22 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     search().dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     check.equal(document.activeElement, button, "desktop Escape returns focus to the dropdown");
     check.ok(menuElement.classList.contains("fn__none"));
-    check.equal(menuElement.hasAttribute("data-sheet-actions"), false, "closing clears the font-only action preference");
     mobile = true;
     menuElement.setAttribute("data-sheet-expandable", "true");
     menu.addItem({label: "Other menu"});
     menu.fullscreen("bottom");
     await settle();
-    check.ok(menuElement.querySelector('[data-type="sheet-expand"]'), "other expandable menus keep their fullscreen button");
-    await tap(menuElement.querySelector('[data-type="sheet-close"]'));
+    check.equal(menuElement.querySelector('[data-type="sheet-expand"]'), null, "all drawers omit fullscreen buttons");
+    check.equal(menuElement.querySelector('[data-type="sheet-close"]'), null);
+    menuElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+    await settle();
     check.ok(menuElement.classList.contains("fn__none"));
     return "Font menu touch and layout cases passed";
 };
 
 test("font menus show loading for list requests and previews while retaining mobile and desktop interactions", {timeout: 45000}, async () => {
     const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
-        "menus/menuToggle", "plugin/Menu", "util/setPosition", "protyle/util/hasClosest", "protyle/toolbar/fontFamilyMenu",
+        "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "menus/menuToggle", "plugin/Menu", "util/setPosition", "protyle/util/hasClosest", "protyle/toolbar/fontFamilyMenu",
         "protyle/toolbar/fontFamilyCore", "util/systemFontCore", "util/fontPreview", "util/escape", "util/upDownHint"];
     const sources = Object.fromEntries(names.map(name => [name, transpileModule(readFileSync(path.join(__dirname, "../..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
@@ -315,9 +321,9 @@ app.whenReady().then(async () => {
         await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchStart", touchPoints:[{x,y}]});
         await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchEnd", touchPoints:[]});
     });
-    ipcMain.handle("font-swipe", async (_event, x, y) => {
+    ipcMain.handle("font-swipe", async (_event, x, y, endY) => {
         await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchStart", touchPoints:[{x,y}]});
-        await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchMove", touchPoints:[{x,y:y+150}]});
+        await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchMove", touchPoints:[{x,y:endY}]});
         await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchEnd", touchPoints:[]});
     });
     ipcMain.handle("font-resize", (_event, height) => win.setContentSize(420, height));

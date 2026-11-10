@@ -225,6 +225,20 @@
 			]
 		},
 		{
+			"ID": "20261107234500-xt6srxp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107234500-xt6srxp",
+				"updated": "20261107234500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "行動端主題可以透過 #keyboardToolbar.keyboard--sheet-open 為應用程式同時顯示鍵盤工具列與底部選單或對話框抽屜的狀態設定樣式。此狀態以應用程式顯隱為準，不受此類別衍生的主題樣式影響。工具列隱藏或所有抽屜關閉後會移除該類別。"
+				}
+			]
+		},
+		{
 			"ID": "20240317202310-219htvn",
 			"Type": "NodeParagraph",
 			"Properties": {

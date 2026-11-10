@@ -13,6 +13,7 @@ import {hasPluginSetting} from "../../plugin";
 import {getWorkspaceName} from "../../util/processTitle";
 import {getDockEntryOrderSnapshot} from "../entryVisibility/dockOrder";
 import {getEditorToolbarCatalogSnapshot} from "../../protyle/toolbar/catalogSnapshot";
+import {getBreadcrumbButtonCatalogSnapshot} from "../../plugin/breadcrumbButtonRegistry";
 import {hasNativeSettingTasks} from "./taskBlocker";
 import {openBazaarPath} from "../bazaar/openPath";
 import {acceptSettingInterfaceRevision, watchSettingInterface} from "./interface";
@@ -107,6 +108,13 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
     hosts.set(token, {key, dispose});
     const host: ISettingsWindowHost = {
         app, title, isActive, dispose: close,
+        reopenSettings: async settingsWindow => {
+            const {openSetting} = await import("../index");
+            if (!isActive()) return;
+            window.siyuan.config.system.settingsWindow = settingsWindow;
+            openSetting(app, "app");
+            ipcRenderer.send(Constants.SIYUAN_CMD, "show");
+        },
         exportLayout: options => { assertActive(); return exportLayout(options); },
         suspendLayoutSaving: () => { assertActive(); return suspendLayoutSaving(); },
         reload: () => { assertActive(); return reloadUI(); },
@@ -115,6 +123,10 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
         getEditorToolbarCatalogSnapshot: () => {
             assertActive();
             return getEditorToolbarCatalogSnapshot(app.plugins);
+        },
+        getBreadcrumbButtonCatalogSnapshot: () => {
+            assertActive();
+            return getBreadcrumbButtonCatalogSnapshot();
         },
         openBazaarPath: (type, name, storage) => { assertActive(); openBazaarPath(type, name, storage); },
         exit: setCurrentWorkspace => { assertActive(); return exitSiYuan(setCurrentWorkspace); },

@@ -3,6 +3,8 @@ import * as assert from "node:assert/strict";
 import {
     clampGroupTableVirtualData,
     getGroupTableRenderPlan,
+    getTableRowBudget,
+    getTableBufferRatio,
     getGroupTableViewportWindow,
     getUninitializedGroupRowCounts,
 } from "./groupTableVirtual";
@@ -16,6 +18,44 @@ const createGroup = (id: string, rowCount: number, options: {
     groupFolded: options.folded || false,
     groupHidden: options.hidden || 0,
 }) as IAVTable;
+
+const wideTable = (rows: number, columns: number, hidden = 0) => ({
+    ...createGroup("wide", rows),
+    columns: Array.from({length: columns + hidden}, (_, index) => ({hidden: index >= columns})),
+}) as IAVTable;
+
+describe("wide table cell budget", () => {
+    it("activates for the reported sizes without counting hidden columns", () => {
+        assert.equal(getTableRowBudget(wideTable(60, 35)), 25);
+        assert.equal(getTableRowBudget(wideTable(100, 22)), 40);
+        assert.equal(getTableRowBudget(wideTable(60, 10, 25)), 90);
+        assert.equal(getTableBufferRatio(wideTable(60, 10, 25)), 1);
+        assert.equal(getTableBufferRatio(wideTable(60, 35)), 0.25);
+        assert.equal(getTableBufferRatio(wideTable(25, 35)), 1);
+        assert.equal(getTableRowBudget(wideTable(60, 1000)), 1);
+        assert.equal(getTableRowBudget(wideTable(60, 0)), 100);
+    });
+
+    it("shares the cell budget across expanded groups", () => {
+        const groups = [wideTable(30, 35), {...wideTable(30, 35), id: "second"}];
+        const plan = getGroupTableRenderPlan(groups);
+        assert.equal(plan.virtualized, true);
+        assert.deepEqual(plan.renderedRowCounts, {wide: 24, second: 1});
+        assert.deepEqual(getUninitializedGroupRowCounts([groups[1]], 24), {second: 1});
+    });
+
+    it("keeps the full viewport and a quarter-screen buffer when rebuilding", () => {
+        const result = getGroupTableViewportWindow({
+            dataStart: 0, dataEnd: 99, bodyTop: 100, headerHeight: 40,
+            viewportTop: 1760, viewportBottom: 2120, rowHeight: 36, bufferRatio: 0.25,
+        });
+        assert.equal(result.renderedStart, 42);
+        assert.equal(result.renderedEnd, 57);
+        assert.equal(result.topSpacerHeight, 42 * 36);
+        assert.ok(140 + result.renderedStart * 36 < 1760);
+        assert.ok(140 + (result.renderedEnd + 1) * 36 > 2120);
+    });
+});
 
 describe("grouped table initial render planning", () => {
     it("renders every visible expanded row when the total is within budget", () => {

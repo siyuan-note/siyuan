@@ -6,6 +6,7 @@ package tools
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html"
 	"path/filepath"
@@ -33,12 +34,12 @@ var SkillTool = &Tool{
 		},
 		Required: []string{"action"},
 	},
-	EffectScope: EffectScopeLocal,
+	EffectScope: EffectScopeMixed,
 	ActionEffects: map[string]ToolEffects{
 		"":        {LocalRead: true},
 		"load":    {LocalRead: true},
 		"save":    {LocalWrite: true},
-		"install": {LocalWrite: true},
+		"install": {LocalWrite: true, DataEgress: true},
 		"remove":  {LocalWrite: true},
 		"rename":  {LocalWrite: true},
 		"list":    {LocalRead: true},
@@ -345,7 +346,10 @@ func skillRename(args map[string]any) (CallToolResult, error) {
 }
 
 func skillList(_ map[string]any) (CallToolResult, error) {
-	skills := util.DiscoverSkills(model.EnabledUserSkills())
+	skills, err := util.DiscoverSkillInstallations(model.EnabledUserSkills())
+	if err != nil {
+		return skillError("cannot read skill installation records: " + err.Error()), nil
+	}
 	if len(skills) == 0 {
 		return CallToolResult{
 			Content: []ContentItem{{Type: "text", Text: "no skills available"}},
@@ -359,6 +363,17 @@ func skillList(_ map[string]any) (CallToolResult, error) {
 		sb.WriteString(s.Name)
 		sb.WriteString("**: ")
 		sb.WriteString(s.Description)
+		if s.Installation == nil {
+			sb.WriteString(" (installation: unknown)")
+		} else {
+			metadata, _ := json.Marshal(s.Installation)
+			sb.WriteString(" (installation record, not current content verification: ")
+			sb.Write(metadata)
+			sb.WriteString(")")
+			if s.Installation.SourceScope == "manifest-only" {
+				sb.WriteString(" [source URL applies only to SKILL.md; retained resources have unknown origin; digest covers the entire installed directory]")
+			}
+		}
 		sb.WriteString("\n")
 	}
 	return CallToolResult{

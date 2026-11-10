@@ -116,9 +116,11 @@ func TestStructuredTitlesCreationAndIdentity(t *testing.T) {
 		markdown, title string
 		typeOf          ast.NodeType
 		convert         func(string, string, string, string, bool) (string, string, error)
+		spec, format    string
 	}{
-		{"# Heading/part\n\nBody", "Heading/part", ast.NodeHeading, Heading2Doc},
-		{"- Item/part", "Item/part", ast.NodeListItem, ListItem2Doc},
+		{"# Heading/part\n\nBody", "Heading/part", ast.NodeHeading, Heading2Doc, treenode.DocumentTitleSpec, "plain"},
+		{"# **Heading**/part\n\nBody", "Heading/part", ast.NodeHeading, Heading2Doc, treenode.RichDocumentTitleSpec, "inline-ast"},
+		{"- Item/part", "Item/part", ast.NodeListItem, ListItem2Doc, treenode.DocumentTitleSpec, "plain"},
 	} {
 		source, createErr := CreateDocByParent(DocumentCreateRequest{Notebook: box.ID, ID: ast.NewNodeID(),
 			TitleFormat: "plain", Title: "Conversion source", Markdown: test.markdown})
@@ -142,9 +144,13 @@ func TestStructuredTitlesCreationAndIdentity(t *testing.T) {
 			t.Fatal(convertErr)
 		}
 		converted, loadErr := filesys.LoadTree(box.ID, convertedPath, util.NewLute())
-		if loadErr != nil || treenode.ReadDocumentTitle(converted.Root).Text != test.title ||
-			converted.Root.Spec != treenode.DocumentTitleSpec {
-			t.Fatal("conversion changed literal title or source spec", test.title, loadErr)
+		if loadErr != nil {
+			t.Fatal(loadErr)
+		}
+		title := treenode.ReadDocumentTitle(converted.Root)
+		if title.Text != test.title || title.Format != test.format || converted.Root.Spec != test.spec {
+			t.Fatalf("conversion changed title or source spec: got %+v, spec %q; want %q, format %q, spec %q",
+				title, converted.Root.Spec, test.title, test.format, test.spec)
 		}
 	}
 

@@ -1,6 +1,21 @@
 @use "../util/mixin";
 @use "../util/function";
 
+.file-tree__row {
+  --file-tree-indent: 24px;
+  --file-tree-toggle-size: 22px;
+  --file-tree-toggle-padding: 4px;
+  --file-tree-toggle-left: calc(var(--file-tree-depth) * var(--file-tree-indent) + var(--file-tree-toggle-padding));
+  --file-toggle-width: calc(var(--file-tree-depth) * var(--file-tree-indent) + var(--file-tree-toggle-size));
+  --file-action-offset: var(--file-toggle-width);
+}
+
+// 源版本高于当前客户端支持的文档只能占位显示，避免被当作可编辑文档。
+.file-tree__row--spec-too-new .b3-list-item__text {
+  color: var(--b3-theme-on-surface-light);
+  cursor: not-allowed;
+}
+
 .file-tree__pins {
   --file-toggle-width: 0px;
   padding-bottom: 8px;
@@ -131,6 +146,10 @@
     margin: 1px 8px;
 
     &[data-treetype="outline"] > .b3-list-item__text {
+      span[data-type~="inline-math"] {
+        display: inline-block;
+      }
+
       span[data-type~="sup"],
       span[data-type~="sub"] {
         position: relative;
@@ -255,7 +274,8 @@
       display: flex;
       align-items: center;
       height: 22px;
-      padding: 0 2px;
+      padding: 0 var(--file-tree-toggle-padding, 2px);
+      padding-left: var(--file-tree-toggle-left, 2px);
       color: var(--b3-theme-on-surface-light);
       transition: color .2s cubic-bezier(0, 0, .2, 1), background-color .2s cubic-bezier(0, 0, .2, 1);
       border-radius: var(--b3-border-radius);

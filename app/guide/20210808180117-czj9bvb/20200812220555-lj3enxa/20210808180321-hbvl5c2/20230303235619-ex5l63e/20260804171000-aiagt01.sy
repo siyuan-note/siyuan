@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261027140312"
+		"updated": "20261106140529"
 	},
 	"Children": [
 		{
@@ -289,7 +289,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-76js6ua",
-				"updated": "20261027140312"
+				"updated": "20261105133947"
 			},
 			"Children": [
 				{
@@ -510,7 +510,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-6hkjcgx",
-				"updated": "20261027140312"
+				"updated": "20261105133947"
 			},
 			"Children": [
 				{
@@ -524,7 +524,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170040-qf65tjk",
-				"updated": "20260820190627"
+				"updated": "20261105133947"
 			},
 			"Children": [
 				{
@@ -560,7 +560,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "智能体运行时可以点击停止按钮中止当前任务。描述目标、范围和期望输出位置越明确，执行结果通常越稳定。"
+					"Data": "智能体运行时可以点击停止按钮中止当前任务。自动重试时会保留并续写原思考卡。停止后会保留已显示的内容，等待服务端完成保存和恢复，但不会撤销已执行的操作。连接过慢时生成可能中断，可重新打开会话恢复已保存的内容。描述目标、范围和期望输出位置越明确，执行结果通常越稳定。"
 				}
 			]
 		},
@@ -662,7 +662,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "读取和搜索通常直接执行。创建、修改、移动、删除或导入数据等操作会显示确认卡片，并标明可能产生的本地写入、数据外发和外部费用。可以确认执行、拒绝，或选择 "
+					"Data": "仅在本地读取和搜索通常直接执行。创建、修改、移动、删除、导入数据或发送网络请求等操作会按能力设置显示确认卡片，并标明可能产生的本地写入、数据外发和外部费用。在线搜索、网页抓取、云端收集箱和集市在线查询也会外发请求；直接网页抓取和 HTTP 请求还可能将下载文件写入工作空间。费用标记表示可能涉及付费服务，不表示每次调用必然收费。补齐按需资源或创建写前快照也可能访问同步提供方并写入本地资源。若确认后新增本地写入、数据外发或费用，调用会中止，需要按当前配置重新确认。可以确认执行、拒绝，或选择 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -790,7 +790,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-qxi11l2",
-				"updated": "20260816130653"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -873,7 +873,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，正文用于说明智能体应遵循的步骤和要求。输入 "
+					"Data": "，正文用于说明智能体应遵循的步骤和要求。启用斜杠菜单时，输入 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -882,7 +882,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 可以搜索并选择已经安装的技能。"
+					"Data": " 可以搜索并选择已经安装的技能。移动端默认关闭斜杠菜单，可通过键盘工具栏的加号面板选择技能；加号面板不受斜杠菜单开关影响。"
 				}
 			]
 		},
@@ -891,7 +891,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170053-wp08ijl",
-				"updated": "20260804180000"
+				"updated": "20261102182306"
 			},
 			"Children": [
 				{
@@ -928,12 +928,255 @@
 			]
 		},
 		{
+			"ID": "20261102182306-1riwqwy",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261102182306-1riwqwy",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安装外部技能"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261102182306-tr4vch2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-tr4vch2",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "npx skills add owner/repo -g"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和仓库地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）按整个仓库安装，先尝试 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "main"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，下载失败后尝试 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "master"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。命令形式只用于提取仓库名，不会执行命令，也不会应用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--skill"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 等筛选参数。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-u0m5uzc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-u0m5uzc",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "分支级 tree 地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/dev"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）安装该引用的仓库技能；子目录 tree 地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/tree/main/skills/example"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）只安装该目录下的技能。单技能目录安装一个，集合目录安装其下的技能。支持名称中包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 的分支；解析时优先选择最长有效引用前缀，也支持标签和提交引用。指定目录不存在或没有技能时会报错，不会退回整仓安装。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-23bwvsw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-23bwvsw",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "仓库归档和 release ZIP 地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/releases/download/v1.0/skills.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）会解压并递归查找技能目录中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，集合仓库可能一次安装多个技能。找到技能目录后不再向其内部查找其他技能；会复制该技能目录及配套资源。下载大小上限为 10 MB，子目录 tree 安装仍需下载仓库归档。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-t57plt6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-t57plt6",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "blob 地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://github.com/owner/repo/blob/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）和 raw 地址（如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://raw.githubusercontent.com/owner/repo/main/skills/example/SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）只安装单个 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，不会下载配套的脚本或参考资料。单文件安装要求 Front Matter 中包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "name"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。需要配套资源时请使用技能目录的 tree 地址或 ZIP。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-55xmyz6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-55xmyz6",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安装按技能名写入工作空间技能目录：ZIP 安装会替换同名技能的整个目录；blob/raw 单文件安装只覆盖同名技能的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，保留已有的其他文件。重新安装前请备份本地修改。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 安装器在技能目录之外的 data/storage/ai/agent/skills.json 中保存安装记录。技能列表提供去除凭据的来源 URL、可确定的仓库引用与子目录、已知时的完整提交 SHA、安装时间、思源版本，以及全部普通文件和相对路径的确定性 SHA-256 摘要。摘要标识安装完成时的目录快照，不证明当前内容未被修改或值得信任。单文件安装的 sourceScope 为 manifest-only：来源 URL 仅对应 SKILL.md，摘要还包含保留的资源，但本次安装无法确定这些资源的来源。ZIP 安装使用 directory 范围。目录重命名会同步记录，删除会移除记录；没有记录的旧技能或手动创建的技能显示 unknown。覆盖安装中断时可能留下未知来源，而不会保留错误绑定。迁移时请复制整个工作空间，包括该记录文件。这些记录不会自动启用、更新或批准技能。"
+				}
+			]
+		},
+		{
+			"ID": "20261102182306-oav6ptj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102182306-oav6ptj",
+				"updated": "20261102182306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "目前没有检查技能更新的入口；请自行比对上游版本，确认后重新安装。"
+				}
+			]
+		},
+		{
 			"ID": "20260804170054-w5eqebc",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-w5eqebc",
-				"updated": "20261026182118"
+				"updated": "20261102193434"
 			},
 			"Children": [
 				{
@@ -947,12 +1190,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261026182118-hsjdn1t",
-				"updated": "20261026182118"
+				"updated": "20261102193434"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "外部 MCP 工具按需加载。智能体默认只接收服务清单，在需要时加载指定服务的工具定义，从下一轮模型请求开始可用；你也可以在消息中点明要使用的服务。加载状态仅保留在当前用户请求及其工具执行轮次中，发送下一条消息时重新开始；可同时加载多个服务，不设固定数量上限，模型可卸载不再需要的服务以节省上下文。已禁用的工具不会被加载，执行确认策略仍然生效。在智能体能力设置中禁用内置 mcp 工具可恢复全量发送外部工具定义，重新启用则恢复按需加载。"
+					"Data": "外部 MCP 工具按需加载。智能体默认只接收服务清单，在需要时加载指定服务的工具定义，从下一轮模型请求开始可用；你也可以在消息中点明要使用的服务。加载状态仅保留在当前用户请求及其工具执行轮次中，发送下一条消息时重新开始；可同时加载多个服务，不设固定数量上限，模型可卸载不再需要的服务以节省上下文。已禁用的工具不会被加载，执行确认策略仍然生效。在智能体能力设置中禁用内置 mcp 工具可恢复全量发送外部工具定义，重新启用则恢复按需加载。调用 mcp 发现工具时，应使用精确的服务 ID，而非显示名称。使用 action=list 且不传 server 可列出可用服务的 ID；失败提示会区分服务名称、未知 ID、服务禁用、连接或工具可用性问题以及能力策略限制。"
 				}
 			]
 		},
@@ -1074,7 +1317,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261018102417-ch6z3dh",
-				"updated": "20261018104335"
+				"updated": "20261028114540"
 			},
 			"Children": [
 				{
@@ -1136,6 +1379,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中可以分别选择搜索和抓取服务，默认使用 Exa 搜索和直接抓取。使用 DeepSeek 时，填写 Search 和 Fetch 共用的 DeepSeek API 密钥，此设置与对话模型无关。DeepSeek Search 请求 5 条结果且不包含网页正文，单条摘要最多 800 个字符，总输出最多 8,000 个字符。需要正文时再抓取具体网页。"
+				}
+			]
+		},
+		{
+			"ID": "20261028114540-78xw9yq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028114540-78xw9yq",
+				"updated": "20261028114540"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Exa API 密钥留空时使用有限流的匿名服务，填写自己的密钥后使用相应账户额度。搜索词会发送给 Exa，请求可能产生费用。Exa 与 DeepSeek 的密钥分别保存，切换服务时保留；清空 Exa 密钥即可恢复匿名模式。带密钥的请求失败时会返回错误，不会自动退回匿名模式或切换其他服务。密钥在本地配置中加密保存，导出配置时不会包含密钥。"
 				}
 			]
 		},
@@ -1267,6 +1524,77 @@
 			]
 		},
 		{
+			"ID": "20261106140529-6ralr09",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261106140529-6ralr09",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文档与数据库写入"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261106140529-umtf2qe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-umtf2qe",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "创建和移动文档时，优先使用父文档 ID 指定位置，根目录使用空的 parentID，标题单独提供。不要根据显示路径推断文档身份。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-ivz1doc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-ivz1doc",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新块的 ID 由系统生成，更新前先读取原内容并保留已有块 ID。工具会拒绝格式错误、重复或与现存块冲突的 ID。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-zm84q4k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-zm84q4k",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "批量维护数据库时，可使用 database.items_add 一次添加最多 100 行，并为每行同时提供其他字段的值；使用 database.items_update 一次更新最多 1000 个单元格。每次调用在一个事务中提交，未指定的单元格保持不变。先读取字段信息，再按字段类型填写值，并核对返回的保存结果。执行结果未知时，不要自动重试新增操作。"
+				}
+			]
+		},
+		{
+			"ID": "20261106140529-cxn53mz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106140529-cxn53mz",
+				"updated": "20261106140529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数字和日期值需要对应的 number 或 date 对象；提供 content 时还需明确指定 isNotEmpty，true 表示设置值，false 表示清空。不要把仅含 content 的对象作为整个单元格值。计算字段不能直接写入。"
+				}
+			]
+		},
+		{
 			"ID": "20260804170109-njpec5z",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1291,7 +1619,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "智能体在一轮任务中首次写入工作空间数据前会自动创建数据快照，每轮最多创建一次。确认修改结果不符合预期时，可以在会话中的快照提示上执行回滚。"
+					"Data": "智能体在一轮任务中首次写入工作空间数据前会自动创建数据快照，每轮最多创建一次。请求写入前须先初始化本地数据仓库密钥，无需云端账号。未初始化时，智能体会在请求写入确认前提示此前置条件，只读操作仍然可用。确认修改结果不符合预期时，可以在会话中的快照提示上执行回滚。"
 				}
 			]
 		},

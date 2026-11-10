@@ -17,6 +17,10 @@ const browserCases = async ({css, modules, languages}) => {
     style.textContent = css;
     document.head.append(style);
     window.siyuan = {languages, config: {readonly: false, lang: "en_US"}, storage: {collapsed: ["settings"]}};
+    const unexpectedMarkdownOpen = () => { throw new Error("The main menu must not launch the Markdown editor"); };
+    window.JSAndroid = {openMarkdownEditor: unexpectedMarkdownOpen};
+    window.JSHarmony = {openMarkdownEditor: unexpectedMarkdownOpen};
+    window.webkit = {messageHandlers: {openMarkdownEditor: {postMessage: unexpectedMarkdownOpen}}};
     let blurs = 0;
     let mounts = 0;
     let unmounts = 0;
@@ -59,6 +63,10 @@ const browserCases = async ({css, modules, languages}) => {
             const menu = document.getElementById("menu");
             menu.style.width = `${width}px`;
             menu.innerHTML = dependencies.renderMobileMainMenuHTML();
+            check.equal(menu.querySelector("#menuMarkdownEditor"), null);
+            check.equal(dependencies.getMobileMainMenuHandler("menuMarkdownEditor"), undefined);
+            check.ok(menu.querySelector("#menuTemplateManager"));
+            check.ok(menu.querySelector("#menuCard"));
             const toolbar = menu.querySelector(".toolbar");
             const input = menu.querySelector(".mobile-main-menu__search input");
             const open = menu.querySelector('[data-type="menu-search-open"]');

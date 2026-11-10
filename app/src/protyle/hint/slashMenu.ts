@@ -17,9 +17,10 @@ interface IResolveSlashMenuOptions {
     visible: (entryKey: string) => boolean;
     lite?: boolean;
     canUpload?: boolean;
+    allowCreateRef?: boolean;
 }
 
-const isSeparator = (item?: TSlashMenuItem) => item?.html === "separator";
+const isSeparator = (item?: IHintData) => item?.html === "separator";
 
 // 命中质量，数字越小越靠前：与输入完全相等、以输入开头、在中间包含
 const MATCH_EXACT = 0;
@@ -56,8 +57,8 @@ const LITE_SLASH_IDS = new Set([
     "infoStyle", "successStyle", "warningStyle", "errorStyle", "clearFontStyle",
 ]);
 
-export const normalizeSlashMenuSeparators = (items: TSlashMenuItem[]) => {
-    const result: TSlashMenuItem[] = [];
+export const normalizeSlashMenuSeparators = <T extends IHintData>(items: T[]) => {
+    const result: T[] = [];
     items.forEach((item) => {
         if (isSeparator(item)) {
             if (result.length > 0 && !isSeparator(result[result.length - 1])) {
@@ -88,6 +89,7 @@ export const resolveSlashMenuItems = (items: TSlashMenuItem[], options: IResolve
     const orderedItems = reorderEntrySlots(uniqueItems, options.order, (item) => item.entryKey);
     const visibleItems = orderedItems.filter((item) => (!options.lite || isSeparator(item) ||
         (item.entryKey === item.id ? LITE_SLASH_IDS.has(item.id) ||
+            (options.allowCreateRef && item.id === "newFileRef") ||
             (options.canUpload && ["insertAsset", "insertIOSPhotos", "insertHTMLFile"].includes(item.id)) : item.showInLite === true)) &&
         options.visible(item.entryKey) &&
         !(options.hideConfiguredCreate && item.entryKey === "newFileRef"));

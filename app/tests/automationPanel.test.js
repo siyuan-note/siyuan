@@ -9,12 +9,21 @@ const runCases = async (sources, css, mobile) => {
     const tick = () => new Promise(resolve => setTimeout(resolve, 30));
     const waitForDialogLayout = async dialog => {
         const container = dialog.element.querySelector(".b3-dialog__container");
-        for (let attempt = 0; !dialog.element.classList.contains("b3-dialog--open") && attempt < 100; attempt++) {
+        for (let attempt = 0; (!dialog.element.classList.contains("b3-dialog--open") ||
+            getComputedStyle(container).visibility === "hidden") && attempt < 100; attempt++) {
             await tick();
         }
         assert.equal(dialog.element.classList.contains("b3-dialog--open"), true, "the dialog has opened before measuring its layout");
         await Promise.all(container.getAnimations().map(animation => animation.finished));
-        assert.equal(getComputedStyle(container).transform, "none", "the dialog opening animation has finished");
+        for (let attempt = 0; attempt < 100; attempt++) {
+            const transform = getComputedStyle(container).transform;
+            if (transform === "none" || new DOMMatrixReadOnly(transform).m42 === 0) break;
+            await tick();
+        }
+        const transform = getComputedStyle(container).transform;
+        assert.ok(transform === "none" || new DOMMatrixReadOnly(transform).m42 === 0,
+            "the dialog opening animation has finished: " + JSON.stringify({transform,style:container.style.cssText,
+                className:dialog.element.className,visibility:getComputedStyle(container).visibility}));
     };
     document.head.innerHTML = "";
     document.body.innerHTML = '<div class="av__panel"><div class="b3-menu"></div></div>';
@@ -47,11 +56,13 @@ const runCases = async (sources, css, mobile) => {
     const searches = [];
     const scopePreviews = [];
     const scopeRequests = [];
+    const copied = [];
     let fieldMenu;
     let collectionTypeInput;
     let nextID = 0;
     window.Lute = {NewNodeID: () => `generated-${++nextID}`};
     window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, dialogs: [], storage: {}, blockPanels: [],
+        mobile: {size: {portrait: {height1: innerHeight}, landscape: {height1: innerWidth}}},
         menus: {menu: {element: document.createElement("div"), remove() {
             document.querySelectorAll("body > .b3-menu").forEach(popup => popup.remove());
         }}}};
@@ -85,13 +96,14 @@ const runCases = async (sources, css, mobile) => {
             showSubMenu() {}
         }},
         "util/functions": {isMobile: () => mobile},
+        "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => false, writeText: value => copied.push(value)},
         "constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_CONFIRM: "confirm"}},
         "util/genID": {genUUID: () => `dialog-${++nextID}`},
         "util/zIndex": {getZIndex: () => 0, isAbove: () => false},
         "dialog/moveResize": {moveResize() {}},
         "dialog/anchoredInput": {getAnchoredInputMask() {}},
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
-        "dialog/inputDialog": {openInputDialog: options => { collectionTypeInput = options; }},
+        "dialog/mobileInputDialog": {mobileInputDialog: options => { collectionTypeInput = options; }},
         "block/Panel": {BlockPanel: class {constructor(options) {scopePreviews.push(options);}}},
         "util/pathName": {movePathTo: options => scopeRequests.push(options)},
         "util/fetch": {fetchSyncPost: async (url, request) => {
@@ -514,6 +526,15 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(transactions.at(-1).perform[0].data.spec, 2, "templates use the new format");
     assert.ok(latest().timeZone, "the rule records the frontend timezone");
     const editor = get("[data-template]");
+    editor.value = "prefix suffix";
+    editor.setSelectionRange(7, 13);
+    get("[data-template-field]").value = "finished";
+    await click("[data-template-insert]");
+    assert.equal(editor.value, 'prefix .action{field "finished"}');
+    assert.equal(latest().actions[0].fields.finished.template, editor.value, "field insertion persists a stable ID reference");
+    assert.equal(document.activeElement, editor, "inserting a field restores editor focus");
+    await click("[data-template-copy]");
+    assert.equal(copied.at(-1), "finished");
     editor.value = '.action{((now).AddDate 0 0 7).Format "2006-01-02"}';
     editor.dispatchEvent(new Event("input", {bubbles: true}));
     editor.dispatchEvent(new Event("change", {bubbles: true}));
@@ -939,8 +960,12 @@ const runCases = async (sources, css, mobile) => {
     assert.equal(transactions.at(-1).perform[0].data.rules[0].name, "Renamed completion");
     get('[data-action="rules"]').focus();
     await require("electron").ipcRenderer.invoke("automation-enter");
-    await tick();
-    fieldMenu.element.querySelector('[data-id="rule"] .b3-list-item__text').click();
+    for (let attempt = 0; !fieldMenu.element.querySelector('[data-id="rule"] .b3-list-item__text') && attempt < 100; attempt++) {
+        await tick();
+    }
+    const renamedRule = fieldMenu.element.querySelector('[data-id="rule"] .b3-list-item__text');
+    assert.ok(renamedRule, "native Enter opens the rule menu before selecting an item");
+    renamedRule.click();
     await tick();
     assert.equal(get("[data-rule-name]").textContent, "Renamed completion");
     await click('[data-action="rules"]');
@@ -1002,7 +1027,7 @@ if (process.versions.electron && process.type === "browser") {
             const sass = require("sass");
             const sources = {icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                 languages: JSON.parse(fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"))};
-            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "collectionConditions", "collectionReference", "collectionReview", "selectPosition", "filterDropdown"]) {
+            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "automationTemplateFunctions", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "collectionConditions", "collectionReference", "collectionReview", "selectPosition", "filterDropdown"]) {
                 sources[`protyle/render/av/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
                 }).outputText;
@@ -1010,7 +1035,9 @@ if (process.versions.electron && process.type === "browser") {
             sources["menus/aliasInput"] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/menus/aliasInput.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
             }).outputText;
-            for (const name of ["dialog/index", "dialog/confirmDialog"]) {
+            for (const name of ["dialog/index", "dialog/confirmDialog", "dialog/mobileConfirmDialog", "dialog/mobileDialog",
+                "mobile/util/keyboardSheetState", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/mobileSheetLayout",
+                "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetOpen", "menus/sheetActions"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname,
                     `../src/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},

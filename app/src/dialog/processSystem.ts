@@ -1,7 +1,8 @@
 import {Constants} from "../constants";
+import {clearReloadSnapshot} from "../layout/reloadSnapshot";
 import {renderBazaarInstall, updateBazaarInstallProgress} from "../config/bazaar/installTask";
 import {getSettingsWindowHost} from "../config/setting/windowContext";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
@@ -12,9 +13,9 @@ import {getAllEditor, getAllModels} from "../layout/getAll";
 import {ipcRenderer} from "electron";
 /// #endif
 import {hideMessage, showMessage} from "./message";
-import {Dialog} from "./index";
+import {MobileDialog as Dialog} from "./mobileDialog";
 import {isMobile} from "../util/functions";
-import {confirmDialog} from "./confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "./mobileConfirmDialog";
 import {escapeHtml} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
@@ -22,8 +23,9 @@ import {saveMobileLayout} from "../mobile/util/saveLayout";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {emitToPlugins} from "../plugin/EventBusCore";
 import {createHostQuitGuard} from "./hostQuit";
-import {requestSystemExit} from "./exitRequest";
+import {requestSystemExit, updateExitProgressStatus} from "./exitRequest";
 import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities";
+import {updateReindexProgressStatus} from "./progress";
 /// #if MOBILE
 import {getMobileBacklinkPanels} from "../mobile/util/backlinkPanels";
 /// #endif
@@ -45,6 +47,10 @@ export const processBacklinkIndexCommit = (data: {
     getAllModels().backlink.forEach(item => {
         item.markIndexDirty(data);
         item.refreshAfterIndex();
+    });
+    window.siyuan.blockPanels.forEach(item => {
+        item.backlink?.markIndexDirty(data);
+        item.backlink?.refreshAfterIndex();
     });
     /// #endif
 };
@@ -209,6 +215,7 @@ const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean)
 };
 
 export const exitSiYuan = async (setCurrentWorkspace = true) => {
+    clearReloadSnapshot();
     const host = getSettingsWindowHost();
     if (host) {
         await host.exit(setCurrentWorkspace);
@@ -323,6 +330,8 @@ export const refreshFileTree = (cb?: () => void) => {
 
 let statusTimeout: number;
 export const progressStatus = (data: IWebSocketData) => {
+    updateExitProgressStatus(data.msg);
+    updateReindexProgressStatus(sanitizeKernelHTML(data.msg));
     const msgElement = document.querySelector("#status .status__msg");
     if (msgElement) {
         clearTimeout(statusTimeout);
@@ -373,6 +382,13 @@ export const bootSync = () => {
                 dialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
+                if (isMobile()) {
+                    void dialog.runPending(async () => {
+                        const result = await fetchSyncPost("/api/sync/performBootSync", {});
+                        return result.code === 0;
+                    });
+                    return;
+                }
                 if (btnsElement[1].getAttribute("disabled")) {
                     return;
                 }
@@ -394,11 +410,20 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     }
 };
 
+let lastSyncResult: number;
+
 export const processSync = (data?: IWebSocketData) => {
+    if (data?.code === 1 || data?.code === 2) {
+        lastSyncResult = data.code;
+    }
     if (data?.code === 1) {
         window.dispatchEvent(new CustomEvent("siyuan-sync-success"));
     }
     const syncDisabled = !window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""));
+    // A configuration response started before the latest event must not overwrite its result.
+    const result = lastSyncResult ?? window.siyuan.config.sync.lastResult;
+    const syncIcon = syncDisabled ? "#iconCloudOff" : result === 2 ? "#iconCloudError" :
+        result === 1 ? "#iconCloudSucc" : "#iconCloud";
     /// #if MOBILE
     const menuSyncUseElement = document.querySelector("#menuSyncNow use");
     const barSyncUseElement = document.querySelector("#toolbarSync use");
@@ -407,8 +432,8 @@ export const processSync = (data?: IWebSocketData) => {
             // 同步进行中时保持旋转状态，待同步完成后由同步结果消息更新图标 https://github.com/siyuan-note/siyuan/issues/18597
             return;
         }
-        menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
-        barSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        menuSyncUseElement?.setAttribute("xlink:href", syncIcon);
+        barSyncUseElement?.setAttribute("xlink:href", syncIcon);
         return;
     }
     menuSyncUseElement?.parentElement?.classList.remove("fn__rotate");
@@ -419,11 +444,11 @@ export const processSync = (data?: IWebSocketData) => {
         menuSyncUseElement?.setAttribute("xlink:href", "#iconRefresh");
         barSyncUseElement?.setAttribute("xlink:href", "#iconRefresh");
     } else if (data.code === 2) {    // error
-        menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
-        barSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
+        menuSyncUseElement?.setAttribute("xlink:href", syncIcon);
+        barSyncUseElement?.setAttribute("xlink:href", syncIcon);
     } else if (data.code === 1) {   // success
-        menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
-        barSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        menuSyncUseElement?.setAttribute("xlink:href", syncIcon);
+        barSyncUseElement?.setAttribute("xlink:href", syncIcon);
     }
     /// #else
     const iconElement = document.querySelector("#barSync");
@@ -437,7 +462,7 @@ export const processSync = (data?: IWebSocketData) => {
             return;
         }
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        useElement.setAttribute("xlink:href", syncIcon);
         return;
     }
     iconElement.firstElementChild.classList.remove("fn__rotate");
@@ -447,10 +472,10 @@ export const processSync = (data?: IWebSocketData) => {
         useElement.setAttribute("xlink:href", "#iconRefresh");
     } else if (data.code === 2) {    // error
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
+        useElement.setAttribute("xlink:href", syncIcon);
     } else if (data.code === 1) {   // success
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        useElement.setAttribute("xlink:href", syncIcon);
     }
     /// #endif
     if (data.code === 0) {

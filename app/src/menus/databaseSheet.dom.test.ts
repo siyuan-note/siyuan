@@ -48,11 +48,13 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         "protyle/render/av/panels/inputs": {bindAVPanelInputs() {}},
         "protyle/render/av/viewType": {}, "protyle/wysiwyg/transaction": {}, "util/fetch": {},
         "protyle/render/av/automationPosition": {}, "protyle/render/av/select": {}, "protyle/render/av/filter": {},
+        "protyle/render/av/cell": {},
         "protyle/ui/hideElements": {}, "protyle/render/av/view": {getFieldsByData: (): IAVColumn[] => []},
         "protyle/util/selection": {focusBlock() {}}, "protyle/render/av/row": {},
         "protyle/render/av/groups": {getPageSize: () => ({})},
         "protyle/render/av/color": {applyAVColorPalette() {}, getAVCustomColors: (): string[] => []},
         "protyle/render/av/panelTarget": {}, "protyle/render/av/selectPosition": {},
+        "dialog/message": {showMessage() {}},
     };
     const load = (name: string): any => {
         if (name in externals) {
@@ -106,18 +108,10 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     await settle();
     const title = common.firstElementChild;
     const titleLabel = title.querySelector(".b3-menu__label").getBoundingClientRect();
-    const titleActions = title.querySelector(".b3-menu__actions").getBoundingClientRect();
-    check.ok(titleLabel.right <= titleActions.left);
-    check.ok(titleActions.right <= innerWidth);
+    check.ok(titleLabel.right <= innerWidth);
+    check.equal(title.querySelector(".b3-menu__actions"), null);
+    check.equal(common.querySelector('[data-type="sheet-expand"]'), null);
     common.dispatchEvent(new CustomEvent("click", {detail: "back"}));
-    await settle();
-    const expand = common.querySelector<HTMLButtonElement>('[data-type="sheet-expand"]');
-    expand.click();
-    await settle();
-    check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight) < 1);
-    check.equal(expand.getAttribute("aria-expanded"), "true");
-    check.ok(expand.getBoundingClientRect().width > 20);
-    expand.click();
     await settle();
     check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight * .56) < 1);
 
@@ -138,9 +132,19 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     const back = menu.querySelector<HTMLButtonElement>('[data-type="sheet-back"]');
     check.equal(back.classList.contains("fn__none"), false);
     check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight * .56) < 1);
-    menu.querySelector<HTMLButtonElement>('[data-type="sheet-expand"]').click();
+    check.equal(menu.querySelector('[data-type="sheet-expand"]'), null);
+    const touch = (type: string, y: number, target: Element = menu.firstElementChild) => {
+        const event = new Event(type, {bubbles: true, cancelable: true});
+        Object.assign(event, {touches: [{clientX: 80, clientY: y}], changedTouches: [{clientX: 80, clientY: y}]});
+        target.dispatchEvent(event);
+    };
+    touch("touchstart", menu.getBoundingClientRect().top + 8);
+    touch("touchmove", 0);
+    touch("touchend", 0);
     await settle();
     check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight) < 1);
+    // 等待拖动后的点击抑制结束，再测试业务返回入口。
+    await new Promise(resolve => setTimeout(resolve, 320));
     const input = menu.querySelector("input");
     input.focus();
     input.value = "Changed";
@@ -155,6 +159,16 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     const items = menu.querySelector<HTMLElement>(".b3-menu__items");
     check.ok(items.clientHeight > 200 && items.scrollHeight > items.clientHeight);
     check.equal(common.classList.contains("fn__none"), false);
+    items.scrollTop = 40;
+    const beforeScrollGesture = menu.getBoundingClientRect().height;
+    touch("touchstart", 100, items);
+    touch("touchmove", 280, items);
+    touch("touchend", 280, items);
+    await settle();
+    check.equal(saves, 0);
+    check.ok(Math.abs(menu.getBoundingClientRect().height - beforeScrollGesture) < 1,
+        "scrolling content does not resize the sheet");
+    items.scrollTop = 0;
 
     Object.assign(viewport, {height: innerHeight - 260, offsetTop: 0});
     viewport.dispatchEvent(new Event("resize"));
@@ -165,28 +179,39 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     viewport.dispatchEvent(new Event("resize"));
     await settle();
     check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight) < 1);
-    const touch = (type: string, y: number) => {
-        const event = new Event(type, {bubbles: true, cancelable: true});
-        Object.assign(event, {touches: [{clientX: 80, clientY: y}], changedTouches: [{clientX: 80, clientY: y}]});
-        menu.firstElementChild.dispatchEvent(event);
-    };
     touch("touchstart", 100);
     touch("touchmove", 280);
     touch("touchend", 280);
     await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight * .56) < 1);
+    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 180)) < 1,
+        `drag height ${menu.getBoundingClientRect().height}, expected ${innerHeight - 180}`);
     touch("touchstart", 200);
     touch("touchmove", 60);
     touch("touchend", 60);
     await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight) < 1);
+    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 40)) < 1,
+        `resized height ${menu.getBoundingClientRect().height}, expected ${innerHeight - 40}`);
+    Object.assign(viewport, {height: innerHeight - 300});
+    viewport.dispatchEvent(new Event("resize"));
+    await settle();
+    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 300)) < 1);
+    Object.assign(viewport, {height: innerHeight});
+    viewport.dispatchEvent(new Event("resize"));
+    await settle();
+    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 40)) < 1,
+        "keyboard dismissal restores the manually selected height");
     await new Promise(resolve => setTimeout(resolve, 310));
-    menu.querySelector<HTMLButtonElement>('[data-type="sheet-close"]').click();
+    check.equal(menu.querySelector('[data-type="sheet-close"]'), null);
+    menu.classList.remove("b3-menu--expanded");
+    touch("touchstart", 100);
+    touch("touchmove", innerHeight + 300);
+    touch("touchend", innerHeight + 300);
     await settle();
     check.equal(saves, 1);
     check.equal(panel.isConnected, false);
     check.equal(common.classList.contains("fn__none"), false);
-    common.querySelector<HTMLButtonElement>('[data-type="sheet-close"]').click();
+    check.equal(common.querySelector('[data-type="sheet-close"]'), null);
+    common.dispatchEvent(new CustomEvent("click", {detail: "back"}));
     await settle();
     check.equal(common.classList.contains("fn__none"), true);
     check.equal(common.hasAttribute("data-sheet-expandable"), false);
@@ -203,9 +228,9 @@ test("mobile database sheets expand, preserve navigation and edits, and fit the 
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
-    const sources = Object.fromEntries(["menus/Menu", "menus/menuGroup", "menus/menuPosition", "menus/sheetOpen", "menus/sheetActions",
+    const sources = Object.fromEntries(["menus/Menu", "menus/menuGroup", "menus/menuPosition", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
         "util/escape", "util/setPosition", "protyle/util/hasClosest", "protyle/render/av/openMenuPanel",
-        "protyle/render/av/mobilePanel"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
+        "protyle/render/av/mobilePanel", "protyle/render/av/host", "protyle/render/av/renderData"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText]));
     const css = compile(path.join(__dirname, "../assets/scss/mobile.scss"), {logger: Logger.silent}).css;

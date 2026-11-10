@@ -18,6 +18,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -145,15 +146,35 @@ func RenameBox(boxID, name string) (err error) {
 		return
 	}
 
+	if box.Exist(boxDocPath(boxID)) {
+		current, readErr := GetDocTitle(boxID, boxID)
+		if readErr != nil {
+			return readErr
+		}
+		if current.Source != nil {
+			summary := current.Text
+			if summary == "" {
+				summary = Conf.Language(16)
+			}
+			if summary != name {
+				return &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(446), cause: treenode.ErrRichDocumentTitleWrite}
+			}
+			return nil
+		}
+		paragraph := &ast.Node{Type: ast.NodeParagraph}
+		paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(name)})
+		source, sourceErr := render.NewDocumentTitle(paragraph)
+		if sourceErr != nil {
+			return sourceErr
+		}
+		return PerformTxSync(&Transaction{DoOperations: []*Operation{{Action: "setDocTitle", ID: boxID,
+			Data: map[string]any{"source": source, "expectedRevision": current.Revision}}}})
+	}
 	boxConf := box.GetConf()
 	boxConf.Name = name
 	box.Name = name
 	if err = box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
-		return
-	}
-	if err = renameBoxDoc(boxID, name); err != nil {
-		logging.LogErrorf("rename box document [box=%s] failed: %s", boxID, err)
 		return
 	}
 	IncSync()
@@ -162,9 +183,9 @@ func RenameBox(boxID, name string) (err error) {
 }
 
 func normalizeBoxName(name string) string {
-	name = normalizeDocTitle(name)
+	name = normalizeTitleText(name)
 	if "" == name {
-		name = normalizeDocTitle(Conf.language(105))
+		name = normalizeTitleText(Conf.language(105))
 	}
 	return name
 }

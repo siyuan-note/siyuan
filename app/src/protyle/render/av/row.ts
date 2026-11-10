@@ -1,8 +1,10 @@
 import {isAVTimestampType} from "./capabilities";
+import {getSubItemsCellStyle, getSubItemsControlHTML} from "./subItemsState";
 import {getConditionalItemStyle, getConditionalCellStyle} from "./conditionalColor";
 import {isTableLikeView} from "./viewType";
 import {updateFrozenColumns} from "./frozenColumns";
-import {hasClosestBlock, hasClosestByClassName, hasTopClosestByAttribute} from "../../util/hasClosest";
+import {hasClosestByClassName, hasTopClosestByAttribute} from "../../util/hasClosest";
+import {getAVHost as hasClosestBlock} from "./host";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {openViewSettingMenu} from "./viewSettingMenu";
@@ -27,6 +29,7 @@ import {getCompressURL} from "../../../util/image";
 import {
     getAVSelectStat,
     getAVSelectedItemInfos,
+    getAVSelectedItemPoints,
     getAvBodyData,
     IAVItemInfo,
     resetAVRowSelect,
@@ -67,7 +70,7 @@ export const getRowHTML = (options: {
         const primaryHidden = galleryData.fields.find(field => field.type === "block")?.hidden === true;
         const hasVisibleFields = galleryData.fields.some(field => !field.hidden);
         const emptyClass = !hasVisibleFields && galleryData.coverFrom === 0 ? " av__gallery-item--empty" : "";
-        html += `<div data-id="${galleryRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${emptyClass}" style="${getConditionalItemStyle(galleryRow)}">`;
+        html += `<div data-id="${escapeAttr(galleryRow.id)}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${emptyClass}" style="${getConditionalItemStyle(galleryRow)}">`;
         if (galleryData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + galleryData.cardAspectRatio;
             if (galleryRow.coverURL) {
@@ -105,10 +108,10 @@ export const getRowHTML = (options: {
 data-wrap="${galleryData.fields[fieldsIndex].wrap}"
 aria-label="${ariaLabel}" 
 data-position="5west"
-data-id="${cell.id}" 
-data-field-id="${galleryData.fields[fieldsIndex].id}"
-data-dtype="${cell.valueType}" 
-data-date-format="${galleryData.fields[fieldsIndex].dateFormat || ""}"
+data-id="${escapeAttr(cell.id)}" 
+data-field-id="${escapeAttr(galleryData.fields[fieldsIndex].id)}"
+data-dtype="${escapeAttr(cell.valueType)}" 
+data-date-format="${escapeAttr(galleryData.fields[fieldsIndex].dateFormat || "")}"
 ${galleryData.fields[fieldsIndex].renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
@@ -138,7 +141,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     if (options.type === "kanban") {
         const kanbanRow = options.row as IAVGalleryItem;
         const kanbanData = options.data as IAVKanban;
-        html += `<div data-id="${kanbanRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item" style="${getConditionalItemStyle(kanbanRow)}">`;
+        html += `<div data-id="${escapeAttr(kanbanRow.id)}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item" style="${getConditionalItemStyle(kanbanRow)}">`;
         if (kanbanData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
             if (kanbanRow.coverURL) {
@@ -174,10 +177,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
 data-wrap="${kanbanData.fields[fieldsIndex].wrap}" 
 aria-label="${ariaLabel}" 
 data-position="5west"
-data-id="${cell.id}" 
-data-field-id="${kanbanData.fields[fieldsIndex].id}" 
-data-dtype="${cell.valueType}" 
-data-date-format="${kanbanData.fields[fieldsIndex].dateFormat || ""}"
+data-id="${escapeAttr(cell.id)}" 
+data-field-id="${escapeAttr(kanbanData.fields[fieldsIndex].id)}" 
+data-dtype="${escapeAttr(cell.valueType)}" 
+data-date-format="${escapeAttr(kanbanData.fields[fieldsIndex].dateFormat || "")}"
 ${kanbanData.fields[fieldsIndex].renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
@@ -208,8 +211,10 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     const tableData = options.data as IAVTable;
     const isList = options.type === "list";
     const pinIndex = isList ? -1 : options.pinIndex;
+    const treeColumnIndex = tableRow.hierarchy ? tableData.columns.findIndex(column =>
+        !column.hidden && (!isList || column.type === "block")) : -1;
 
-    html = `<div class="av__row${tableRow.conditionalColors ? " av__row--conditional" : ""}" data-index="${options.rowIndex}" data-id="${tableRow.id}" style="${getConditionalItemStyle(tableRow)}">`;
+    html = `<div class="av__row${tableRow.conditionalColors ? " av__row--conditional" : ""}${tableRow.hierarchy?.context ? " av__row--context" : ""}" data-index="${options.rowIndex}" data-id="${escapeAttr(tableRow.id)}"${tableRow.hierarchy ? ` data-parent-id="${escapeAttr(tableRow.hierarchy.parentID || "")}" data-depth="${tableRow.hierarchy.depth}"${tableRow.hierarchy.context ? ` aria-label="${window.siyuan.languages.avSubItemsContext}"` : ""}` : ""} style="${getConditionalItemStyle(tableRow)}">`;
     if (pinIndex > -1) {
         html += `<div class="av__colsticky av__colsticky--freeze"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg>${getFreezeDragHTML()}</div>`;
     } else {
@@ -226,16 +231,17 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
         if (cell.valueType === "checkbox") {
             checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
         }
-        html += `<div class="av__cell${checkClass}${isList ? " ariaLabel" : ""}" data-id="${cell.id}" data-col-id="${column.id}" ${isList ? `aria-label="${escapeAriaLabel(column.name)}" data-position="north"` : ""}
+        html += `<div class="av__cell${checkClass}${isList ? " ariaLabel" : ""}" data-id="${escapeAttr(cell.id)}" data-col-id="${escapeAttr(column.id)}" ${isList ? `aria-label="${escapeAriaLabel(column.name)}" data-position="north"` : ""}
 data-wrap="${column.wrap}" 
-data-dtype="${column.type}" 
-data-date-format="${column.dateFormat || ""}"
+data-dtype="${escapeAttr(column.type)}" 
+data-date-format="${escapeAttr(column.dateFormat || "")}"
 ${column.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
-data-align="${column.align || ""}"
+data-align="${escapeAttr(column.align || "")}"
+${index === treeColumnIndex ? 'data-sub-items-cell="true"' : ""}
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${getConditionalCellStyle(tableRow, column.id)}${isList ? "" : `width: ${escapeAttr(column.width) || "200px"};`}
 ${cell.bgColor && !tableRow.conditionalColors?.background && !tableRow.conditionalColors?.properties?.[column.id] ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat, column.renderTemplate)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${index === treeColumnIndex ? getSubItemsControlHTML(tableRow, tableData) + `<div class="av__cellcontent" style="${getSubItemsCellStyle(tableRow, tableData)}">` : ""}${renderCell(cell.value, options.rowIndex, tableData.showIcon, "table", column.options, column.dateFormat, column.renderTemplate)}${index === treeColumnIndex ? "</div>" : ""}</div>`;
 
         if (pinIndex === index) {
             html += "</div>";
@@ -334,7 +340,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
 
 export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
-    let selectCount = 0;
+    const selectCount = new Set(getAVSelectedItemPoints(blockElement).map(item => item.itemID)).size;
     if (isTableLikeView(avType)) {
         blockElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
             if (hasClosestByClassName(bodyElement, "av") !== blockElement) {
@@ -345,7 +351,6 @@ export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
             const bodySelectCount = stat ? stat.selectCount :
                 bodyElement.querySelectorAll(".av__row--select[data-id]").length;
             const count = stat ? stat.loadedCount : bodyElement.querySelectorAll(".av__row[data-id]").length;
-            selectCount += bodySelectCount;
             const headElement = bodyElement.firstElementChild as HTMLElement;
             const headUseElement = headElement?.querySelector("use");
             if (!headElement || !headUseElement) {
@@ -361,15 +366,6 @@ export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
                 headElement.classList.add("av__row--select");
                 headUseElement.setAttribute("xlink:href", "#iconIndeterminateCheck");
             }
-        });
-    } else {
-        // 卡片/看板视图按分组（.av__body）聚合选中数，看板与分组卡片视图存在多个 body。
-        blockElement.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
-            if (hasClosestByClassName(bodyItem, "av") !== blockElement) {
-                return;
-            }
-            const stat = getAVSelectStat(bodyItem);
-            selectCount += stat ? stat.selectCount : bodyItem.querySelectorAll(".av__gallery-item--select").length;
         });
     }
 
@@ -390,6 +386,9 @@ export const updateAVSelectionStatus = (blockElement: HTMLElement) => {
 };
 
 export const setPage = (blockElement: Element) => {
+    if (blockElement.hasAttribute("data-sub-items-nested")) {
+        return;
+    }
     const avType = blockElement.getAttribute("data-av-type") as TAVView;
     blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
         const pageSize = item.dataset.pageSize;
@@ -456,11 +455,11 @@ export const insertAttrViewBlockAnimation = (options: {
                 lineNumber = parseInt(lineNumberValue);
             }
         }
-        cellsHTML += `<div class="av__cell${colType === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${item.dataset.colId}" 
+        cellsHTML += `<div class="av__cell${colType === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${escapeAttr(item.dataset.colId)}" 
 data-wrap="${item.dataset.wrap}" 
-data-dtype="${item.dataset.dtype}" 
-data-date-format="${item.dataset.dateFormat || ""}"
-data-align="${item.dataset.align || ""}"
+data-dtype="${escapeAttr(item.dataset.dtype)}" 
+data-date-format="${escapeAttr(item.dataset.dateFormat || "")}"
+data-align="${escapeAttr(item.dataset.align || "")}"
 style="${isList ? "" : `width: ${item.style.width};`}"${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(colType, null), lineNumber,
     true, "table", undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
         if (pinIndex === index) {
@@ -491,7 +490,8 @@ style="${isList ? "" : `width: ${item.style.width};`}"${colType === "block" ? ' 
                     }
                     if (updateIds.includes(cellItem.dataset.colId)) {
                         const cellValue = response.data.values[cellItem.dataset.colId];
-                        cellItem.innerHTML = renderCell(cellValue, 0, true, "table", undefined,
+                        const contentElement = cellItem.querySelector(".av__cellcontent") || cellItem;
+                        contentElement.innerHTML = renderCell(cellValue, 0, true, "table", undefined,
                             cellItem.dataset.dateFormat as TAVDateFormat);
                         renderCellAttr(cellItem, cellValue);
                         renderAVRichTextElements(cellItem);
@@ -512,13 +512,14 @@ const applyFixedClip = (el: HTMLElement, scrollEl: HTMLElement) => {
 };
 
 const applyFixedViewportClip = (el: HTMLElement, left = 0, right = 0) => {
-    // 固定栏按编辑器与分屏的交集裁剪，避免分屏缩小时覆盖相邻文档。
+    // 固定栏按编辑器、浮窗与分屏的交集裁剪，避免覆盖相邻编辑区。
     const viewport = el.closest(".protyle-content");
+    const panel = el.closest(".block__content");
     const pane = el.closest(".layout-tab-container");
     const rect = el.getBoundingClientRect();
     let top = 0;
     let bottom = 0;
-    [viewport, pane].forEach(element => {
+    [viewport, panel, pane].forEach(element => {
         if (!element) {
             return;
         }
@@ -963,7 +964,8 @@ export const insertRows = (options: {
     protyle: IProtyle,
     count: number,
     previousID: string,
-    groupID?: string
+    groupID?: string,
+    parentID?: string
 }) => {
     const avID = options.blockElement.getAttribute("data-av-id");
     const srcIDs: string[] = [];
@@ -983,6 +985,7 @@ export const insertRows = (options: {
     transaction(options.protyle, [{
         action: "insertAttrViewBlock",
         avID,
+        parentID: options.parentID,
         previousID: options.previousID,
         srcs,
         blockID: options.blockElement.dataset.nodeId,
@@ -1025,6 +1028,13 @@ export const insertRows = (options: {
 
 export const duplicateRows = (blockElement: HTMLElement, protyle: IProtyle, rowIDs: string[]) => {
     if (rowIDs.length === 0) {
+        return;
+    }
+    if (blockElement.hasAttribute("data-sub-items")) {
+        const operation: IOperation = {action: "duplicateAttrViewSubtree", avID: blockElement.dataset.avId,
+            blockID: blockElement.dataset.nodeId, viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+            srcIDs: rowIDs, context: getAVFilteredTipContext("target", protyle)};
+        transaction(protyle, [operation], [{...operation}]);
         return;
     }
     const avID = blockElement.getAttribute("data-av-id");

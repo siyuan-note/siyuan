@@ -135,9 +135,12 @@ func TestAttributeViewItemIconBindingInheritance(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err = setNodeAttrs(node, tree, map[string]string{"icon": "1f680"}); err != nil {
+			node.SetIALAttr("icon", "1f680")
+			if err = indexWriteTreeUpsertQueue(tree); err != nil {
 				t.Fatal(err)
 			}
+			// 外部编辑及主键刷新均已落盘，再验证撤销不会覆盖新图标。
+			updateAttributeViewBlockText(map[string]*ast.Node{node.ID: node})
 			if err = PerformTxSync(&Transaction{DoOperations: entry.UndoOperationsForReplay(), isReplay: true}); err != nil {
 				t.Fatal(err)
 			}

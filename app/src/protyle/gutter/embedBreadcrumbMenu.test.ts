@@ -1,3 +1,4 @@
+import * as dockKeymap from "../../util/dockKeymap";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -8,7 +9,7 @@ test("breadcrumb submenus persist overrides and delete attributes when returning
     const constants = {} as typeof import("../../constants");
     runInNewContext(transpileModule(readFileSync("src/constants.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
-    }).outputText, {exports: constants, SIYUAN_VERSION: "test", NODE_ENV: "test"});
+    }).outputText, {exports: constants, SIYUAN_VERSION: "test", NODE_ENV: "test", require: () => dockKeymap});
     const attributes = new Map<string, string>([["data-node-id", "embed"]]);
     const nodeElement = {
         getAttribute: (name: string) => attributes.get(name) ?? null,
@@ -39,7 +40,7 @@ test("breadcrumb submenus persist overrides and delete attributes when returning
         for (const [id, value] of [["disable", "false"], ["enable", "true"], ["default", null]]) {
             const parent = open()[index];
             assert.equal(parent.type, "submenu");
-            assert.equal(parent.iconHTML, "", "no placeholder icon is rendered");
+            assert.equal(parent.iconHTML, undefined, "parent menus reserve the standard icon space");
             const option = parent.submenu.find(item => item.id === id);
             assert.equal(option.iconHTML, "");
             attributes.set("data-render", "true");

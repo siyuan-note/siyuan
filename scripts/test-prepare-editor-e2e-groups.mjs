@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import path from "node:path";
+import {readFileSync} from "node:fs";
 import test from "node:test";
 import {createConfig, partitionFiles, readListing, validateGroups} from "./prepare-editor-e2e-groups.mjs";
 
@@ -126,4 +127,83 @@ test("creates exact full-path matches and preserves focused configuration", () =
     assert.throws(() => createConfig([], root), /empty editor group/);
     assert.throws(() => createConfig([file, file], root), /Duplicate config files/);
     assert.throws(() => createConfig(["../outside.spec.ts"], root), /outside test root/);
+});
+
+
+test("main groups preserve all tests and dependencies without editor assumptions", () => {
+    const source = original.map(entry => entry.project === "editor"
+        ? {...entry, project: "main", file: entry.file.replace("editor-", "main-")} : entry);
+    const groups = partitionFiles(source, {}, "main");
+    const listings = groups.map(group => {
+        const files = new Set(group.files.map(entry => entry.file));
+        return source.filter(entry => entry.project !== "main" || files.has(entry.file));
+    });
+    assert.deepEqual(groups.map(group => group.weight), [2, 2]);
+    validateGroups(source, listings, groups, "main");
+    assert.throws(() => validateGroups(source, [listings[0].filter(entry => entry.id !== "a1"), listings[1]], groups, "main"),
+        /Incomplete spec file/);
+    assert.throws(() => validateGroups(source, [listings[0].filter(entry => entry.project !== "setup"), listings[1]], groups, "main"),
+        /Setup\/cleanup coverage changed/);
+    assert.throws(() => validateGroups(source, [[...listings[0], listings[0][0]], listings[1]], groups, "main"),
+        /Duplicate group 1 test identities/);
+    assert.throws(() => validateGroups(source, [[], listings[1]], groups, "main"), /is empty/);
+    const duplicate = groups.map(group => ({...group, files: [...group.files]}));
+    duplicate[1].files.push(duplicate[0].files[0]);
+    const duplicatedListings = duplicate.map(group => source.filter(entry => entry.project !== "main" ||
+        group.files.some(file => file.file === entry.file)));
+    assert.throws(() => validateGroups(source, duplicatedListings, duplicate, "main"), /appears in both/);
+    const report = {suites: [{specs: [spec("main-a.spec.ts", "a1", "main")]}]};
+    assert.equal(readListing(report, "main")[0].project, "main");
+    assert.throws(() => readListing(report), /No editor tests/);
+    const config = createConfig(["main-a.spec.ts"], path.resolve("test-root"), "main");
+    assert.match(config, /SIYUAN_E2E_SHARD !== "main"/);
+    assert.match(config, /project.name === "main"/);
+    assert.match(config, /\} : project/);
+    assert.ok(!config.includes('project.name === "editor"'));
+});
+
+test("unsupported shards cannot create configurations or reinterpret listings", () => {
+    for (const shard of ["attribute-view", "", "../main", 'main"']) {
+        assert.throws(() => readListing({}, shard), /Unsupported E2E shard/);
+        assert.throws(() => partitionFiles(original, {}, shard), /Unsupported E2E shard/);
+        assert.throws(() => validateGroups([], [], [], shard), /Unsupported E2E shard/);
+        assert.throws(() => createConfig(["a.spec.ts"], path.resolve("test-root"), shard), /Unsupported E2E shard/);
+    }
+});
+
+
+test("main timing baseline is traceable, positive and deterministically balances new files", () => {
+    const history = JSON.parse(readFileSync(new URL("main-e2e-durations.json", import.meta.url), "utf8"));
+    assert.match(history.source, /^https:\/\/github\.com\/siyuan-note\/siyuan\/actions\/runs\/\d+$/);
+    assert.match(history.testingCommit, /^[0-9a-f]{40}$/);
+    assert.match(history.productCommit, /^[0-9a-f]{40}$/);
+    assert.match(history.measurement, /including retries/);
+    assert.match(history.measurement, /Excludes setup, cleanup and runner overhead/);
+    const entries = Object.entries(history.durationsMs);
+    assert.ok(entries.length >= 2);
+    for (const [file, duration] of entries) {
+        assert.match(file, /\.spec\.ts$/);
+        assert.ok(Number.isFinite(duration) && duration > 0, `Invalid baseline duration for ${file}`);
+    }
+    const source = [
+        ...dependencies,
+        ...entries.map(([file]) => ({file, id: file, project: "main"})),
+        {file: "new-main.spec.ts", id: "new-1", project: "main"},
+        {file: "new-main.spec.ts", id: "new-2", project: "main"},
+    ];
+    const groups = partitionFiles(source, history.durationsMs, "main");
+    assert.equal(groups.length, 2);
+    assert.deepEqual(groups, partitionFiles([...source].reverse(), history.durationsMs, "main"));
+    const rates = entries.map(([, duration]) => duration).sort((left, right) => left - right);
+    const added = groups.flatMap(group => group.files).find(entry => entry.file === "new-main.spec.ts");
+    assert.deepEqual(added, {
+        file: "new-main.spec.ts", testCount: 2,
+        weight: 2 * rates[Math.floor(rates.length / 2)], estimated: true,
+    });
+    for (const file of groups.flatMap(group => group.files).filter(entry => !entry.estimated)) {
+        assert.equal(file.weight, history.durationsMs[file.file]);
+    }
+    const listings = groups.map(group => source.filter(entry => entry.project !== "main" ||
+        group.files.some(file => file.file === entry.file)));
+    validateGroups(source, listings, groups, "main");
 });

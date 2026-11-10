@@ -1,4 +1,5 @@
 import bundledLanguages from "../../appearance/boot/startup-languages.json";
+import {finishStartupReads, getStartupReadDiagnostic} from "./startupRead";
 
 const stageKeys = {
     page: "startupStagePage",
@@ -13,6 +14,17 @@ const stageKeys = {
 export type TStartupStage = keyof typeof stageKeys;
 type TStartupStrings = typeof bundledLanguages.en;
 const languages: Record<string, TStartupStrings> = bundledLanguages;
+let suppressedErrors = 0;
+
+/** 同步插入用户脚本期间隔离其全局错误，嵌套调用结束后恢复启动诊断。 */
+export const withStartupErrorSuppressed = <T>(run: () => T): T => {
+    suppressedErrors++;
+    try {
+        return run();
+    } finally {
+        suppressedErrors--;
+    }
+};
 
 export const resolveStartupLanguage = (preferred: readonly string[]) => {
     for (const value of preferred) {
@@ -34,11 +46,14 @@ export const setStartupLanguage = (language: string) =>
     window.dispatchEvent(new CustomEvent("siyuan-startup-language", {detail: language}));
 
 export const reportStartupError = (error: unknown) => {
-    console.error("Mobile startup failed:", error);
+    console.error("SiYuan startup failed:", error);
     window.dispatchEvent(new CustomEvent("siyuan-startup-error", {detail: error}));
 };
 
-export const completeStartup = () => window.dispatchEvent(new Event("siyuan-startup-ready"));
+export const completeStartup = () => {
+    finishStartupReads();
+    window.dispatchEvent(new Event("siyuan-startup-ready"));
+};
 
 // 启动回调自行接住异步错误，不改变通用请求工具的回调语义。
 export const guardStartup = <T>(callback: (value: T) => unknown) => (value: T) => {
@@ -50,6 +65,7 @@ export const installStartupError = (target: Window, version: string, timeout = 3
     let language = resolveStartupLanguage(target.navigator.languages || [target.navigator.language]);
     let stage: TStartupStage = "page";
     let failure: {stage: TStartupStage; error: string} | undefined;
+    let runtimeError = "";
     let ready = false;
     let timer: number;
 
@@ -142,8 +158,14 @@ export const installStartupError = (target: Window, version: string, timeout = 3
     const armTimeout = () => {
         target.clearTimeout(timer);
         if (!ready && !failure && !document.hidden) {
-            timer = target.setTimeout(() => fail(languages[language].startupTimeout), timeout);
+            timer = target.setTimeout(() => fail(`${languages[language].startupTimeout}\n${runtimeError}\n${getStartupReadDiagnostic()}`), timeout);
         }
+    };
+    const recordRuntimeError = (error: unknown) => {
+        if (suppressedErrors > 0 || runtimeError) return;
+        // 全局错误可能来自扩展的异步代码，只有启动超时才将其纳入失败诊断。
+        const value = error && typeof error === "object" && "stack" in error ? error.stack : error;
+        runtimeError = String(value || error).slice(0, 16000);
     };
     const setStage = (event: CustomEvent<TStartupStage>) => {
         if (!(event.detail in stageKeys)) return;
@@ -159,13 +181,15 @@ export const installStartupError = (target: Window, version: string, timeout = 3
         if (event.target !== target) {
             const element = event.target as HTMLScriptElement;
             // 只有主程序资源属于启动必需项，图片和扩展资源失败不终止启动。
-            if (element?.tagName !== "SCRIPT" || !element.src.includes("/stage/build/mobile/")) return;
-            fail(new Error(new URL(element.src, target.location.href).pathname));
+            if (element?.tagName !== "SCRIPT") return;
+            const resource = new URL(element.src, target.location.href);
+            if (!/\/stage\/build\/(?:app|desktop|mobile)\//.test(resource.pathname)) return;
+            fail(new Error(resource.pathname));
         } else {
-            fail(event.error || `${event.message}\n${event.filename}:${event.lineno}:${event.colno}`);
+            recordRuntimeError(event.error || `${event.message}\n${event.filename}:${event.lineno}:${event.colno}`);
         }
     };
-    const onRejection = (event: PromiseRejectionEvent) => fail(event.reason);
+    const onRejection = (event: PromiseRejectionEvent) => recordRuntimeError(event.reason);
     const onFailure = (event: CustomEvent<unknown>) => fail(event.detail);
     const complete = () => {
         ready = true;

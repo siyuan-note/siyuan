@@ -11,6 +11,8 @@ import (
 )
 
 type RenderTemplateRequest struct {
+	// HTTPConfirmToken 仅供同窗口、同模板和目标在预览成功后30秒内插入一次；只复用确认，重新获取数据。
+	HTTPConfirmToken                            string  `json:"httpConfirmToken" api:"optional"`
 	Path                                        string  `json:"path"`
 	ID                                          string  `json:"id"`
 	Mode                                        *string `json:"mode" api:"optional"`
@@ -61,9 +63,11 @@ type TemplatePlan struct {
 }
 
 type RenderTemplateData struct {
-	Path        string        `json:"path"`
-	Content     string        `json:"content"`
-	DocTreePlan *TemplatePlan `json:"docTreePlan,omitempty"`
+	// HTTPConfirmToken 是服务端签发的一次性确认交接标识；失效或上下文变化时按常规重新确认。
+	HTTPConfirmToken string        `json:"httpConfirmToken,omitempty"`
+	Path             string        `json:"path"`
+	Content          string        `json:"content"`
+	DocTreePlan      *TemplatePlan `json:"docTreePlan,omitempty"`
 }
 
 func init() {
@@ -76,6 +80,9 @@ func init() {
 			return request, err
 		}
 		if request.ID, err = legacyField[string](fields, "id", "String", true); err != nil {
+			return request, err
+		}
+		if request.HTTPConfirmToken, err = legacyField[string](fields, "httpConfirmToken", "String", false); err != nil {
 			return request, err
 		}
 		if raw, exists := fields["mode"]; exists {

@@ -17,7 +17,19 @@ import (
 
 var DocumentTool = &Tool{
 	Name:        "document",
-	Description: "Document operations. Actions: get(id), create(notebook, parentID, title, markdown?), list(notebook, parentID=notebook root by default), delete(id), rename(id, title), move(id, notebook, parentID), duplicate(id), search_docs(keyword), info(id). Use parentID=\"\" for the notebook root. Titles are independent literal text. The legacy path=hPath parameter checks each candidate ancestor chain; ambiguous paths, empty or slash-containing ancestor titles and unavailable indexes return explicit errors. Never derive identity or hierarchy from a display hPath.",
+	Description: "Document operations. Actions: get(id), create(notebook, parentID, title, markdown?), list(notebook, parentID=notebook root by default), delete(id), rename(id, title), move(id, notebook, parentID), duplicate(id), search_docs(keyword), info(id). Use block.get for individual block content and block.get_kramdown for document body or stored block Markdown. document.get provides metadata and the document title, not the document body. Use export for export-formatted output. search_docs discovers documents by title path (hPath) or exact document ID, also matching notebook names and configured name/alias/memo fields; use search.fulltext for block content and sql.query for structured filters or statistics. list returns at most 128 visible direct child documents, excluding hidden documents, not a recursive tree, and reports truncation when more children exist. Use parentID=\"\" for the notebook root. Titles are independent literal text. The legacy path=hPath parameter checks each candidate ancestor chain; ambiguous paths, empty or slash-containing ancestor titles and unavailable indexes return explicit errors. Never derive identity or hierarchy from a display hPath.",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"get":         {LocalRead: true},
+		"list":        {LocalRead: true},
+		"search_docs": {LocalRead: true},
+		"info":        {LocalRead: true},
+		"create":      {LocalWrite: true},
+		"delete":      {LocalWrite: true},
+		"rename":      {LocalWrite: true},
+		"move":        {LocalWrite: true},
+		"duplicate":   {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -156,6 +168,9 @@ func documentTargetFailure(err error) CallToolResult {
 func resolveDocumentTarget(notebook string, args map[string]any, create, defaultRoot bool) (*documentTarget, error) {
 	parent, hasParent := args["parentID"]
 	legacy, hasPath := args["path"]
+	if _, ok := parent.(string); ok && legacy == "" {
+		hasPath = false
+	}
 	if hasParent && hasPath {
 		return nil, errors.New("parentID and path cannot be combined")
 	}
@@ -213,7 +228,7 @@ func documentList(args map[string]any) (CallToolResult, error) {
 		return documentTargetFailure(err), nil
 	}
 
-	files, _, err := model.ListDocTree(notebook, target.path, 0, false, false, 128)
+	files, total, err := model.ListDocTree(notebook, target.path, 0, false, false, 128)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("list docs failed: %s", err)}}, IsError: true}, nil
 	}
@@ -222,6 +237,9 @@ func documentList(args map[string]any) (CallToolResult, error) {
 	fmt.Fprintf(&sb, "Documents in %s (hPath: %s):\n\n", notebook, target.hPath)
 	for _, f := range files {
 		fmt.Fprintf(&sb, "- %s (id: %s, hPath: %s)\n", f.Name, f.ID, strings.TrimRight(target.hPath, "/")+"/"+f.Name)
+	}
+	if total > len(files) {
+		fmt.Fprintf(&sb, "\nTruncated: showing %d of %d visible direct child documents (limit: 128). This is not a complete listing.\n", len(files), total)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

@@ -62,6 +62,8 @@ type Block struct {
 
 	RiffCardID string    `json:"riffCardID"`
 	RiffCard   *RiffCard `json:"riffCard"`
+
+	backlinkDocumentContext bool // 首段引用归并为文档上下文，与文档标题引用来源区分。
 }
 
 type RiffCard struct {
@@ -163,7 +165,8 @@ func CheckBlockRefInBox(ids, exactIDs, deletedIDs []string, boxID string) (ret b
 		if _, deleted := deletedIDSet[bt.ID]; deleted {
 			group.deletedBlockIDs[bt.ID] = struct{}{}
 		}
-		if _, exact := exactIDSet[bt.ID]; exact {
+		// 段落不能包含子块，只需检查自身，避免为普通删除读取整篇文档。
+		if _, exact := exactIDSet[bt.ID]; exact || "p" == bt.Type {
 			continue
 		}
 		if nil == selectedByRoot[bt.BoxID] {

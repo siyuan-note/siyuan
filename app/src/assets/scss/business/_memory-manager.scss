@@ -1,0 +1,51 @@
+.memory-manager.b3-dialog__content { word-break: normal; }
+
+.memory-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: auto;
+  max-height: 78vh;
+  box-sizing: border-box;
+
+  [hidden] { display: none; }
+
+  &__hint {
+    color: var(--b3-theme-on-surface);
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0;
+    overflow-wrap: anywhere;
+    &:empty { display: none; }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    .b3-button { min-height: 32px; }
+  }
+
+  input { min-width: 0; flex-shrink: 0; }
+
+  &__content {
+    max-height: min(360px, 40vh);
+    overflow: auto;
+    overflow-wrap: anywhere;
+    min-height: 0;
+    flex-shrink: 1;
+    &:empty { display: none; }
+  }
+
+  .b3-loading { margin-right: 8px; }
+
+}
+
+@media (max-width: 600px) {
+  .memory-manager {
+    padding: 16px;
+    &__actions .b3-button { min-height: 36px; white-space: normal; }
+  }
+}

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -15,7 +16,13 @@ import (
 
 var AttrTool = &Tool{
 	Name:        "attr",
-	Description: "Block custom-attribute operations. Actions: get(id), set(id, attrs object), batch-get(ids comma-separated).",
+	Description: "Block custom-attribute operations. Actions: get(id), set(id, attrs object), batch-get(ids comma-separated). Set a document's tags attribute to replace that document's comma-separated tag list; read its current attributes first when adding/removing selected tags, and call set separately for each target document. Use tag.rename/remove for workspace-wide changes to a tag label, not selected-document edits. Inline body tags are content: edit them with block tools.",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"get":       {LocalRead: true},
+		"batch-get": {LocalRead: true},
+		"set":       {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -55,7 +62,12 @@ func attrGet(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 
-	attrs := sql.GetBlockAttrs(id)
+	model.FlushTxQueue()
+	tree, err := loadExistingToolBlock(id)
+	if err != nil {
+		return blockToolError(err.Error())
+	}
+	attrs := sql.BatchGetBlockAttrsWitTrees([]string{id}, map[string]*parse.Tree{id: tree})[id]
 	if len(attrs) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no custom attributes"}}}, nil
 	}
@@ -112,23 +124,47 @@ func attrBatchGet(args map[string]any) (CallToolResult, error) {
 	if idsStr == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids (comma-separated) is required"}}, IsError: true}, nil
 	}
-	idList := strings.Split(idsStr, ",")
-	for i := range idList {
-		idList[i] = strings.TrimSpace(idList[i])
+	var idList []string
+	seen := map[string]bool{}
+	for _, id := range strings.Split(idsStr, ",") {
+		id = strings.TrimSpace(id)
+		if id == "" {
+			return blockToolError("ids must contain non-empty block IDs")
+		}
+		if !seen[id] {
+			idList = append(idList, id)
+			seen[id] = true
+		}
 	}
 
-	attrs := sql.BatchGetBlockAttrs(idList)
-	if len(attrs) == 0 {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no attributes found"}}}, nil
+	model.FlushTxQueue()
+	trees := map[string]*parse.Tree{}
+	failures := map[string]error{}
+	for _, id := range idList {
+		tree, err := loadExistingToolBlock(id)
+		if err != nil {
+			failures[id] = err
+			continue
+		}
+		trees[id] = tree
 	}
+	attrs := sql.BatchGetBlockAttrsWitTrees(idList, trees)
 
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Batch attributes (%d blocks):\n\n", len(attrs))
-	for id, kv := range attrs {
+	fmt.Fprintf(&sb, "Batch attributes (%d blocks):\n\n", len(idList))
+	for _, id := range idList {
 		fmt.Fprintf(&sb, "--- %s ---\n", id)
-		for k, v := range kv {
+		if err := failures[id]; err != nil {
+			fmt.Fprintf(&sb, "%s\n", err)
+			continue
+		}
+		if len(attrs[id]) == 0 {
+			sb.WriteString("no custom attributes\n")
+			continue
+		}
+		for k, v := range attrs[id] {
 			fmt.Fprintf(&sb, "- %s: %s\n", k, v)
 		}
 	}
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}, IsError: len(failures) > 0}, nil
 }

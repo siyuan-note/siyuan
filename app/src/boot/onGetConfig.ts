@@ -6,9 +6,9 @@ import {initNativeDialogOverride} from "../protyle/util/compatibility";
 /// #endif
 /// #if !BROWSER
 import {ipcRenderer, webFrame} from "electron";
-import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
+import {savePDF} from "../protyle/export/savePDF";
 import {onWindowsMsg} from "../window/onWindowsMsg";
 import {applyWindowState, initWindowControls} from "./windowControls";
 /// #endif
@@ -22,7 +22,6 @@ import {exitSiYuan} from "../dialog/processSystem";
 import {isWindow, setToolbarLeftMac} from "../util/functions";
 import {initStatus} from "../layout/status";
 import {showMessage} from "../dialog/message";
-import {replaceLocalPath} from "../editor/rename";
 import {initBar} from "../layout/topBar";
 import {openSetting} from "../config";
 import {mountHelp} from "../util/mount";
@@ -32,6 +31,7 @@ import {initWindowEvent} from "./globalEvent/event";
 import {sendGlobalShortcut} from "./globalEvent/globalShortcut";
 import {closeWindow} from "../window/closeWin";
 import {correctHotkey, syncAppMenuShortcuts} from "./globalEvent/commonHotkey";
+import {syncMarkdownKeymap} from "../markdown/keymapSync";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
 import {processSiYuanUri} from "../util/uri";
 import {getAllEditor} from "../layout/getAll";
@@ -160,6 +160,7 @@ export const initWindow = async (app: App) => {
     /// #if !BROWSER
     // 主窗口和独立窗口都先同步本地化菜单，不依赖后续异步窗口状态查询。
     syncAppMenuShortcuts();
+    syncMarkdownKeymap(true);
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setSpellCheckerLanguages",
         languages: window.siyuan.config.editor.spellcheckLanguages
@@ -239,7 +240,11 @@ export const initWindow = async (app: App) => {
         if (!getHostCapabilities().importExport) {
             return;
         }
-        const savePath = ipcData.filePaths[0];
+        const pdfFilePath = ipcData.filePath;
+        if (!pdfFilePath) {
+            return;
+        }
+        const savePath = path.dirname(pdfFilePath);
         setLastExportPath(savePath);
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
         window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
@@ -279,25 +284,24 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 pdfOptions: ipcData.pdfOptions,
                 webContentsId: ipcData.webContentsId
             });
-            let pdfFilePath = path.join(savePath, replaceLocalPath(ipcData.rootTitle) + ".pdf");
-            const responseUnique = await fetchSyncPost("/api/file/getUniqueFilename", {path: pdfFilePath});
-            if (responseUnique.code !== 0 || !responseUnique.data) {
-                return;
-            }
-            pdfFilePath = responseUnique.data.path;
-            fs.writeFileSync(pdfFilePath, pdfData);
-            const processed = await fetchSyncPost("/api/export/processPDF", {
-                id: ipcData.rootId,
-                exportAssets: true,
-                merge: ipcData.mergeSubdocs,
-                mergeDocHeadingMode: ipcData.mergeDocHeadingMode,
-                mergeContentHeadingMode: ipcData.mergeContentHeadingMode,
-                path: pdfFilePath,
-                removeAssets: ipcData.removeAssets,
-                watermark: ipcData.watermark
+            const saved = await savePDF(pdfFilePath, pdfData, async (temporaryPath) => {
+                const processed = await fetchSyncPost("/api/export/processPDF", {
+                    id: ipcData.rootId,
+                    exportAssets: true,
+                    merge: ipcData.mergeSubdocs,
+                    mergeDocHeadingMode: ipcData.mergeDocHeadingMode,
+                    mergeContentHeadingMode: ipcData.mergeContentHeadingMode,
+                    path: temporaryPath,
+                    removeAssets: ipcData.removeAssets,
+                    watermark: ipcData.watermark
+                });
+                if (processed.code !== 0) {
+                    showMessage(processed.msg, 0, "error", msgId);
+                    return false;
+                }
+                return true;
             });
-            if (processed.code !== 0) {
-                showMessage(processed.msg, 0, "error", msgId);
+            if (!saved) {
                 return;
             }
             ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});

@@ -762,7 +762,14 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         }
       }
 
-      &:not([data-type="NodeIFrame"]):not([data-type="NodeWidget"]) .protyle-action__drag {
+      &[data-type="NodeVideo"] > .iframe-content {
+        position: relative;
+        display: inline-block;
+        max-width: 100%;
+        vertical-align: bottom;
+      }
+
+      &:not([data-type="NodeIFrame"]):not([data-type="NodeWidget"]):not([data-type="NodeVideo"]) .protyle-action__drag {
         height: 32px;
         width: 4px;
         background-color: var(--b3-theme-surface);
@@ -1065,8 +1072,12 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[data-readonly="false"] {
   &[contenteditable="true"] [data-node-id].table {
-    padding-right: 30px;
     padding-bottom: 30px;
+
+    // 增列操作空间随表格内容滚动，仅在末尾露出。
+    > div:first-child > table {
+      margin-right: 26px;
+    }
   }
 
   caption {
@@ -1156,6 +1167,10 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
     .av__gallery-add,
     .av__new {
       display: none;
+    }
+
+    .av__views:not(.av__views--mobile) > .av__readonly-sort + .fn__space {
+      display: inline-block;
     }
 
     .av__row--util:not(.av__readonly--show) + .av__row--footer.av__readonly--show {

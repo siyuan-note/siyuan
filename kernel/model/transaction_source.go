@@ -9,6 +9,7 @@ import (
 	"errors"
 	"os"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -63,7 +64,7 @@ func (tx *Transaction) watchSourceDatabase(view *av.AttributeView) {
 	if tx == nil || view == nil || !tx.usesDocumentSourceJournal() {
 		return
 	}
-	filename, boundary := av.FindAttributeViewPath(view.ID)
+	filename, boundary := view.StoragePath()
 	key := boundary + "/" + view.ID
 	if tx.sourceDatabaseBefore == nil {
 		tx.sourceDatabaseBefore = map[string]*documentSourceFile{}
@@ -107,25 +108,35 @@ func (tx *Transaction) watchSourceDatabase(view *av.AttributeView) {
 
 // Relation configuration can save several databases without touching a document.
 // Establish the durable boundary before its first save, including old targets.
-func (tx *Transaction) prepareRelationSourceJournal(op *Operation) error {
+func (tx *Transaction) prepareRelationSourceJournal(op *Operation, contexts ...*AttributeViewRelationContext) error {
 	if !tx.usesDocumentSourceJournal() {
 		return nil
 	}
-	source, err := av.ParseAttributeView(op.AvID)
+	var source *av.AttributeView
+	var err error
+	exactContext := len(contexts) > 0 && contexts[0] != nil && contexts[0].storageKnown
+	if exactContext {
+		source, err = av.ParseAttributeViewWithStorageContext(op.AvID, contexts[0].storageBoxID)
+	} else {
+		source, err = tx.parseAttributeViewForOperation(op.AvID, op.BlockID)
+	}
 	if err != nil {
 		return err
 	}
-	_, boundary := av.FindAttributeViewPath(source.ID)
+	_, boundary := source.StoragePath()
 	ids := []string{source.ID, op.ID}
 	if key, _ := source.GetKey(op.KeyID); key != nil && key.Relation != nil && key.Relation.IsTwoWay {
 		ids = append(ids, key.Relation.AvID)
 	}
 	for _, id := range ids {
-		_, box := av.FindAttributeViewPath(id)
+		box := boundary
+		if _, scoped := tx.attributeViewStorageContexts[op.AvID]; !scoped && !exactContext {
+			_, box = av.FindAttributeViewPath(id)
+		}
 		if box != boundary {
 			return errors.New("cross-boundary database relation")
 		}
-		if _, err = tx.readAttributeViewForMutation(id, "", box); err != nil {
+		if _, err = tx.readAttributeViewForMutation(id, "", box, exactContext); err != nil {
 			return err
 		}
 	}
@@ -200,6 +211,12 @@ func (tx *Transaction) rememberDocumentSourceBytes(tree *parse.Tree, original []
 	if !tx.usesDocumentSourceJournal() || tx.documentSource(tree) != nil {
 		return nil
 	}
+	if expected, ok := tx.tagRemovalSources[tree.ID]; ok && !bytes.Equal(expected, original) {
+		return util.ErrFileChanged
+	}
+	if expected, ok := tx.collectionRemovalVersions[tree.ID]; ok && expected != collectionSourceVersion(original) {
+		return util.ErrFileChanged
+	}
 	if tx.sourceLeases == nil {
 		tx.sourceLeases = map[string]bool{}
 	}
@@ -261,6 +278,34 @@ func (tx *Transaction) commitDocumentSources() error {
 	return nil
 }
 
+func (tx *Transaction) stageSourceBlockAttrs(before map[string]string, node *ast.Node) {
+	if tx.sourceBlockAttrs == nil {
+		tx.sourceBlockAttrs = map[string]*Operation{}
+	}
+	if previous := tx.sourceBlockAttrs[node.ID]; previous != nil {
+		before = previous.Data.(map[string]any)["old"].(map[string]string)
+	}
+	tx.sourceBlockAttrs[node.ID] = blockAttrsOperation(before, node)
+}
+
+func (tx *Transaction) publishSourceBlockAttrs() {
+	ids := make([]string, 0, len(tx.sourceBlockAttrs))
+	for id := range tx.sourceBlockAttrs {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	var operations []*Operation
+	for _, id := range ids {
+		operations = append(operations, tx.sourceBlockAttrs[id])
+	}
+	if len(operations) > 0 {
+		tx.DoOperations = append(tx.DoOperations, operations...)
+		event := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+		event.Data = []*Transaction{{DoOperations: operations, UndoOperations: []*Operation{}}}
+		util.PushEvent(event)
+	}
+}
+
 func (tx *Transaction) rollbackDocumentSources() {
 	if tx.sourceJournal == nil {
 		return
@@ -284,8 +329,10 @@ func (tx *Transaction) rollbackDocumentSources() {
 	}
 	// Rebuild from actual authenticated sources, including failure before the first save.
 	// Queue replacement after any already-enqueued partial saves so SQL converges to the rollback.
+	presentMirrors := map[string]string{}
+	mirrorSourcesValid := true
 	for _, file := range j.Files {
-		if file.Kind == "relations" || file.Kind == "flashcard" {
+		if file.Kind == "relations" || file.Kind == "flashcard" || file.Kind == "notebook" {
 			continue
 		}
 		if file.Kind == "database" {
@@ -302,16 +349,30 @@ func (tx *Transaction) rollbackDocumentSources() {
 			continue
 		}
 		if err == nil {
+			if IsBoxDoc(tree.Box, tree.ID) {
+				if projectionErr := syncBoxDocTitleName(tree); projectionErr != nil {
+					tx.sourceRollbackErr = errors.Join(tx.sourceRollbackErr, projectionErr)
+				}
+			}
+			for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
+				presentMirrors[node.ID] = node.AttributeViewID
+			}
 			clearAttrs(tree)
 			sql.UpsertTreeQueue(tree)
 			err = treenode.ReplaceBlockTree(tree)
 		}
 		if err != nil {
+			mirrorSourcesValid = false
+			tx.sourceRollbackErr = errors.Join(tx.sourceRollbackErr, err)
+		}
+	}
+	if mirrorSourcesValid {
+		if err := av.ReconcileBlockRels(tx.sourceMirrors, presentMirrors); err != nil {
 			tx.sourceRollbackErr = errors.Join(tx.sourceRollbackErr, err)
 		}
 	}
 	if tx.sourceRollbackErr == nil {
-		if err := os.Remove(j.filename()); err != nil {
+		if err := j.remove(); err != nil {
 			tx.sourceRollbackErr = err
 		}
 	}
@@ -324,8 +385,9 @@ func (tx *Transaction) releaseDocumentSources(committed bool) {
 	tx.sourceWatchers = nil
 	tx.sourceDatabaseBefore = nil
 	tx.sourceRelationBoundaries = nil
+	tx.sourceMirrors, tx.sourceBlockAttrs = nil, nil
 	if committed && tx.sourceJournal != nil {
-		if err := os.Remove(tx.sourceJournal.filename()); err != nil {
+		if err := tx.sourceJournal.remove(); err != nil {
 			logging.LogWarnf("retain committed transaction recovery [%s]: %s", tx.sourceJournal.ID, err)
 		}
 	}

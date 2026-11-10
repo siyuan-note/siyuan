@@ -64,7 +64,7 @@ func TestCreateAttributeViewItemPreservesFilteredGroups(t *testing.T) {
 				groupID := group.ID
 				template := &av.NewItemTemplate{
 					ID: ast.NewNodeID(), Name: "Entry", TargetType: target, HideInFileTree: target == av.NewItemTargetDocument,
-					OpenAfterCreate: new(true),
+					OpenAfterCreate: new(true), OpenInCurrentTab: true,
 				}
 				attrView.NewItemTemplates = []*av.NewItemTemplate{template}
 				if err := av.SaveAttributeView(attrView); err != nil {
@@ -74,6 +74,9 @@ func TestCreateAttributeViewItemPreservesFilteredGroups(t *testing.T) {
 				created, err := CreateAttributeViewItem(attrView.ID, database.nodes[0].ID, view.ID, template.ID, "", "")
 				if err != nil {
 					t.Fatal(err)
+				}
+				if !created.OpenInCurrentTab {
+					t.Fatal("current pane preference lost")
 				}
 				if created.OpenAfterCreate == nil || !*created.OpenAfterCreate {
 					t.Fatal("creation did not return the template opening preference")

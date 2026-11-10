@@ -7,12 +7,15 @@ package tools
 import (
 	"fmt"
 
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
 var SyncTool = &Tool{
-	Name:        "sync",
-	Description: "Data sync operations. Actions: perform() (full upload+download), upload(), download(), status().",
+	Name:           "sync",
+	Description:    "Synchronize with the user's configured provider: SiYuan Cloud, S3, WebDAV or a local directory. Actions: perform() merges local and remote changes in both directions; upload() publishes local data to the target; download() applies target data locally; status() reads local configuration/status without syncing. Upload can overwrite target data and download can overwrite local data. SiYuan Cloud requires a subscription; third-party storage may charge separately. Remote providers send requests and data externally; local-directory sync uses local storage, with peer network traffic when LAN sync is enabled. Review the direction and target before proceeding.",
+	EffectScope:    EffectScopeMixed,
+	ResolveEffects: syncToolEffects,
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -21,6 +24,29 @@ var SyncTool = &Tool{
 		Required: []string{"action"},
 	},
 	Handler: syncHandler,
+}
+
+func syncToolEffects(action string) (ToolEffects, bool) {
+	if action == "status" {
+		return ToolEffects{LocalRead: true}, true
+	}
+	if action != "perform" && action != "upload" && action != "download" {
+		return ToolEffects{}, false
+	}
+	// 上传也会更新本地仓库与同步状态；配置不可读时按可能外发和计费处理。
+	effects := ToolEffects{LocalRead: true, LocalWrite: true, DataEgress: true, ExternalCost: true}
+	if model.Conf == nil {
+		return effects, true
+	}
+	config := model.Conf.Sync.Load()
+	if config == nil {
+		return effects, true
+	}
+	if config.Provider == conf.ProviderLocal {
+		effects.DataEgress = config.LAN != nil && config.LAN.Enabled
+		effects.ExternalCost = false
+	}
+	return effects, true
 }
 
 func init() {

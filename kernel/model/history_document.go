@@ -22,8 +22,18 @@ import (
 // A relocated restore commits only after the previous source has been removed.
 // On failure, restore the target's authenticated before-image and original index
 // before the caller rolls back the database mutation and releases its leases.
-func writeHistoryDocument(tree *parse.Tree, workingDoc *treenode.BlockTree, removeOldDoc func(string, []byte) error) error {
+func writeHistoryDocument(tree *parse.Tree, workingDoc *treenode.BlockTree, removeOldDoc func(string, []byte) error, recoveries ...*attributeViewHistoryRecovery) error {
+	var recovery *attributeViewHistoryRecovery
+	if len(recoveries) > 0 {
+		recovery = recoveries[0]
+	}
 	if workingDoc == nil || workingDoc.Type != "d" || workingDoc.BoxID != tree.Box || workingDoc.Path == tree.Path {
+		if recovery != nil {
+			return recovery.writeTree(tree, func() error {
+				_, err := filesys.WriteTree(tree)
+				return err
+			})
+		}
 		_, err := filesys.WriteTree(tree)
 		return err
 	}
@@ -41,11 +51,25 @@ func writeHistoryDocument(tree *parse.Tree, workingDoc *treenode.BlockTree, remo
 	var written []byte
 	err = filesys.RecordTreeWrites(tree, before, func(data []byte) error {
 		written = bytes.Clone(data)
+		if recovery != nil {
+			return recovery.recordTree(tree, before, data)
+		}
 		return nil
 	}, func() error {
 		_, writeErr := filesys.WriteTree(tree)
 		return writeErr
 	})
+	if err == nil {
+		if recovery != nil {
+			file, recordErr := recovery.remember(&documentSourceFile{Box: workingDoc.BoxID, Path: workingDoc.Path,
+				Before: bytes.Clone(originalSource), After: bytes.Clone(originalSource)})
+			if recordErr != nil {
+				err = recordErr
+			} else {
+				err = recovery.record(file, originalSource, nil)
+			}
+		}
+	}
 	if err == nil {
 		err = removeOldDoc(filepath.Join(util.DataDir, tree.Box, workingDoc.Path), originalSource)
 	}

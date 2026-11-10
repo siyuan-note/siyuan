@@ -24,6 +24,7 @@ import type {ListMindmapListInput} from "./listInput";
 import {finishListMindmaps} from "./index";
 import {getUndoFocusContext, restoreFocusContext} from "../../util/selection";
 import {canEnterCodeBlock} from "../../wysiwyg/codeBlockEnter";
+import {cleanTableCellRichHTML} from "../../util/tableCellRich";
 
 interface ListMindmapEditorOptions {
     owner: IProtyle;
@@ -45,15 +46,18 @@ interface ListMindmapEditorOptions {
 const nestedBranchType = (node: ListMindmapNode) =>
     node.element?.parentElement?.getAttribute("data-type") === "NodeMindmap" ? "NodeMindmap" : "NodeList";
 
+// 单元格编辑界面不能进入节点源快照，否则再次编辑时会被当作正文读取。
+const cleanEditorHTML = (html: string) => cleanListMindmapHTML(cleanTableCellRichHTML(html));
+
 const nodeContent = (node: ListMindmapNode) => Array.from(node.element?.children || []).filter(child =>
     child.hasAttribute("data-node-id") && child.getAttribute("data-type") !== nestedBranchType(node))
-    .map(child => cleanListMindmapHTML(child.outerHTML)).join("");
+    .map(child => cleanEditorHTML(child.outerHTML)).join("");
 
 const independentBlockSelector = '[data-type="NodeAttributeView"], [data-type="NodeBlockQueryEmbed"]';
 
 const comparableContent = (html: string) => {
     const template = document.createElement("template");
-    template.innerHTML = cleanListMindmapHTML(html);
+    template.innerHTML = cleanEditorHTML(html);
     template.content.querySelectorAll<HTMLElement>(independentBlockSelector).forEach(block => {
         if (block.dataset.type === "NodeAttributeView") {
             const identity = document.createElement("div");
@@ -115,7 +119,7 @@ const getListMindmapListInput = (wysiwyg: HTMLElement, range: Range, key: string
         !["NodeParagraph", "NodeHeading"].includes(block.dataset.type)) {
         return;
     }
-    const html = cleanListMindmapHTML(wysiwyg.innerHTML);
+    const html = cleanEditorHTML(wysiwyg.innerHTML);
     if (key === "Tab") {
         return {kind: shift ? "outdent" : "indent", html};
     }
@@ -149,8 +153,8 @@ const getListMindmapListInput = (wysiwyg: HTMLElement, range: Range, key: string
     const suffix = genEmptyElement(false, false);
     suffix.querySelector('[contenteditable="true"]').replaceChildren(after.cloneContents());
     const following = Array.from(wysiwyg.children).slice(1).map(block => block.outerHTML).join("");
-    return {kind: "split", html, before: cleanListMindmapHTML(prefix.outerHTML),
-        after: cleanListMindmapHTML(suffix.outerHTML + following)};
+    return {kind: "split", html, before: cleanEditorHTML(prefix.outerHTML),
+        after: cleanEditorHTML(suffix.outerHTML + following)};
 };
 
 // 编辑器挂载到节点内容区，预览与编辑沿用同一尺寸和排版。
@@ -252,7 +256,8 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         },
     });
     fragment.protyle.block.rootID = rootID;
-    const overlays = [fragment.hintElement, fragment.protyle.toolbar.element, fragment.protyle.toolbar.subElement];
+    const overlays = [fragment.hintElement, fragment.protyle.toolbar.element, fragment.protyle.toolbar.subElement,
+        ...Array.from(host.querySelectorAll<HTMLElement>(":scope > .protyle-table-control"))];
     const overlayRoot = host.closest(".mindmap-view") || document.body;
     // 菜单使用未缩放的容器定位，同时保持在原生全屏元素内可见。
     overlays.forEach(element => overlayRoot.appendChild(element));
@@ -321,7 +326,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
                 ["NodeList", nestedBranchType(node)].includes(element.getAttribute("data-type")))) {
             return false;
         }
-        const html = cleanListMindmapHTML(fragment.getBlockHTML());
+        const html = cleanEditorHTML(fragment.getBlockHTML());
         const version = comparableContent(html);
         if (version === lastHTML) {
             changed = false;
@@ -571,8 +576,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         }
     }), {capture: true, signal});
     const belongs = (target: Node) => {
-        if (host.contains(target) || fragment.hintElement.contains(target) ||
-            fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target)) {
+        if (host.contains(target) || overlays.some(element => element.contains(target))) {
             return true;
         }
         if (!(target instanceof Element)) {
@@ -583,7 +587,8 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             `[data-type="NodeAttributeView"][data-node-id="${avOverlay.dataset.avBlockId}"]`)) {
             return true;
         }
-        return !!target.closest("#keyboardToolbar, #commonMenu, .b3-dialog, .protyle-breadcrumb__history");
+        return !!target.closest("#keyboardToolbar, #commonMenu, .b3-dialog") ||
+            isMobile() && !!target.closest(".protyle-breadcrumb [data-type=\"more\"]");
     };
     document.addEventListener("pointerdown", event => {
         if (options.isPanTarget?.(event)) {

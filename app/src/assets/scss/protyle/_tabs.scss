@@ -118,6 +118,13 @@
     pointer-events: none;
   }
 
+  .tabs-tab-label img,
+  .tabs-title-editor .tab-item-title img {
+    max-height: 22px;
+    width: auto;
+    vertical-align: middle;
+  }
+
   .tabs-task {
     display: inline-flex;
     align-items: center;

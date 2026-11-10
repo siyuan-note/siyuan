@@ -466,6 +466,17 @@
   cursor: pointer;
   color: var(--b3-theme-on-surface-light);
   user-select: none;
+  // 展开的长思考会随对话一起滚走，标题粘在自己这张卡片内吸顶，随时可以点它折叠；
+  // 粘性元素的包含块就是卡片本身，不会越过卡片浮到相邻消息上。
+  // 粘性偏移以滚动容器的内容盒为参照，而 .agent-chat__messages 有 12px 上内边距，
+  // top: 0 会把标题停在内容盒上沿、面板顶部露出 12px 的缝，因此用同样的负值顶到容器边缘。
+  position: sticky;
+  top: -12px;
+  // 正文带 contain:layout paint（自带层叠上下文），标题要压住滚过去的内容；
+  // 仍低于消息区的浮动按钮（回到底部按钮 5、导航轨 6）。
+  z-index: 2;
+  // 标题浮在正文之上，必须有不透明底色，否则会和滚过去的文字叠在一起。
+  background-color: var(--b3-theme-background);
 }
 
 .agent-chat__thinking-text {
@@ -1142,7 +1153,6 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: var(--nav-gap, 3px);
   z-index: 6;
   padding: 4px 2px;
 }
@@ -1152,12 +1162,12 @@
   width: 10px;
   height: 2px;
   flex-shrink: 0;
-  padding: 3px 5px;
+  padding: calc(3px + var(--nav-gap, 0px) / 2) 5px;
+  // Rounded corners can make content-box backgrounds paint the padding at fractional zoom.
   background-clip: content-box;
   background-color: var(--b3-theme-on-surface);
   opacity: 0.3;
   cursor: pointer;
-  border-radius: var(--b3-border-radius-b);
   transition: opacity 150ms ease-out;
 
   &:hover {
@@ -1171,6 +1181,7 @@
 }
 
 .tooltip--agent-nav {
+  animation: none;
   pointer-events: none;
   max-height: min(160px, 90vh);
   overflow: hidden;
@@ -1291,7 +1302,7 @@
   }
 
   .agent-chat__input-area {
-    margin: 0 max(8px, env(safe-area-inset-right)) max(16px, calc(env(safe-area-inset-bottom) + 8px)) max(8px, env(safe-area-inset-left));
+    margin: 0 max(8px, env(safe-area-inset-right)) max(16px, calc(var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)) + 8px)) max(8px, env(safe-area-inset-left));
   }
 
   .agent-chat__button-options {

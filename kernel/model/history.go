@@ -25,7 +25,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -200,7 +199,7 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 	if err = treenode.CheckSpecJSON(data); nil != err {
 		return
 	}
-	historyTree, err := dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	historyTree, err := treenode.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse tree from file [%s] failed: %s", historyPath, err)
 		return
@@ -212,6 +211,15 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 	rootID = historyTree.Root.ID
 	if ciphertext && rootID+".sy" != filepath.Base(historyPath) {
 		return "", "", "", false, errors.New("encrypted document history root ID does not match its filename")
+	}
+	if historyTree.Root.DocumentTitle != nil {
+		title, titleErr := treenode.DocumentTitleParagraph(historyTree.Root)
+		if titleErr != nil {
+			return "", "", "", false, titleErr
+		}
+		title.Parent = nil
+		title.Type, title.HeadingLevel, title.ID = ast.NodeHeading, 1, rootID
+		historyTree.Root.PrependChild(title)
 	}
 
 	if !isLargeDoc {
@@ -320,8 +328,8 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 	srcPath := historyPath
 	var destPath, parentHPath string
 	rootID := util.GetTreeID(historyPath)
-	workingDoc := treenode.GetBlockTree(rootID)
-	if needResetTree || workingDoc != nil && (workingDoc.Type != "d" || workingDoc.BoxID != boxID) {
+	workingDoc := treenode.GetBlockTreeInExactBox(rootID, boxID)
+	if needResetTree || workingDoc != nil && workingDoc.Type != "d" {
 		workingDoc = nil
 	}
 
@@ -371,12 +379,34 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 	if encrypted && tree.Root.ID+".sy" != filepath.Base(historyPath) {
 		return errors.New("encrypted document history root ID does not match its filename")
 	}
-	boundRecovery := &Transaction{trees: map[string]*parse.Tree{}}
-	defer func() { boundRecovery.finishAttributeViewMutation(err != nil) }()
+	var unlockBoxTitle func()
+	if !needResetTree && IsBoxDoc(boxID, tree.ID) {
+		boxDocTitleNameLock.Lock()
+		unlockBoxTitle = boxDocTitleNameLock.Unlock
+		defer func() {
+			if unlockBoxTitle != nil {
+				unlockBoxTitle()
+			}
+		}()
+		// 恢复的标题源优先于配置投影，纯文本历史同样需要在重开时保留。
+		tree.Root.SetIALAttr(boxDocTitleSourceAttr, "document")
+	}
+	boundRecovery := &Transaction{trees: map[string]*parse.Tree{}, historyRecovery: newAttributeViewHistoryRecovery()}
+	defer boundRecovery.finishHistoryRecovery(&err)
 	if nil != tree {
 		historyDir := filepath.Join(util.HistoryDir, parts[0])
 
 		avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+		for _, avNode := range avNodes {
+			avBoxID := ""
+			if encrypted {
+				avBoxID = boxID
+			}
+			if err = boundRecovery.preflightEmbeddedAttributeViewHistory(
+				boundAttributeViewHistoryPath(historyDir, avBoxID, avNode.AttributeViewID), avBoxID, avNode.AttributeViewID); err != nil {
+				return
+			}
+		}
 		for _, avNode := range avNodes {
 			srcAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
 			// 加密笔记本的 AV 定义在笔记本级目录
@@ -410,7 +440,9 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 	tree.HPath = parentHPath + "/" + treenode.ReadDocumentTitle(tree.Root).Text
 
 	if needResetTree {
-		resetTree(tree, "", true)
+		if err = resetTree(tree, "", true); err != nil {
+			return
+		}
 	}
 
 	// 重置重复的块 ID https://github.com/siyuan-note/siyuan/issues/14358
@@ -427,13 +459,13 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 	for nodeID := range nodes {
 		ids = append(ids, nodeID)
 	}
-	idMap := treenode.ExistBlockTrees(ids)
+	idMap := treenode.ExistBlockTreesInBox(ids, boxID)
 	var duplicatedIDs []string
 	for nodeID, exist := range idMap {
 		if exist {
 			// 被替换文档自身的块保留 ID，其他文档中的重复块才需要重新分配 ID。
 			if workingDoc != nil && workingDoc.Type == "d" {
-				bt := treenode.GetBlockTree(nodeID)
+				bt := treenode.GetBlockTreeInBox(nodeID, boxID)
 				if bt != nil && bt.BoxID == boxID && bt.RootID == workingDoc.RootID {
 					continue
 				}
@@ -461,8 +493,24 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 			return
 		}
 	}
-	if err = writeHistoryDocument(tree, workingDoc, removeOldDoc); err != nil {
+	var boxName string
+	if IsBoxDoc(tree.Box, tree.ID) {
+		if boxName, err = boundRecovery.historyRecovery.writeBoxDocTitleName(tree, writeHistoryNotebookConf); err != nil {
+			return
+		}
+	}
+	if err = writeHistoryDocument(tree, workingDoc, removeOldDoc, boundRecovery.historyRecovery); err != nil {
 		return
+	}
+	if err = boundRecovery.historyRecovery.commit(); err != nil {
+		return
+	}
+	if IsBoxDoc(tree.Box, tree.ID) {
+		box.Name = boxName
+	}
+	if unlockBoxTitle != nil {
+		unlockBoxTitle()
+		unlockBoxTitle = nil
 	}
 	invalidateDocumentHistory(tree.ID)
 	if workingDoc != nil && workingDoc.Type == "d" && workingDoc.BoxID == boxID && workingDoc.RootID != tree.ID {
@@ -487,7 +535,9 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 	}
 
 	restoredID := tree.ID
+	backgroundRefreshWaitGroup.Add(1)
 	go func() {
+		defer backgroundRefreshWaitGroup.Done()
 		sql.FlushQueue()
 
 		tree, _ = LoadTreeByBlockID(restoredID)
@@ -505,7 +555,7 @@ func rollbackDocHistory(historyPath string, removeOldDoc func(string, []byte) er
 			"id":      tree.Root.ID,
 			"path":    tree.Path,
 			"title":   treenode.ReadDocumentTitle(tree.Root).Text,
-			"empty":   "" != tree.Root.IALAttr(NodeAttrTitleEmpty),
+			"empty":   "true" == tree.Root.IALAttr(NodeAttrTitleEmpty),
 			"refText": refText,
 		}
 		util.PushEvent(evt)
@@ -525,7 +575,7 @@ func loadTreeByData0(data []byte) (ret *parse.Tree, err error) {
 	if err = treenode.CheckSpecJSON(data); nil != err {
 		return
 	}
-	ret, err = dataparser.ParseJSONWithoutFix(data, util.NewLute().ParseOptions)
+	ret, err = treenode.ParseJSONWithoutFix(data, util.NewLute().ParseOptions)
 	if nil == err {
 		err = treenode.RefreshTableCellRichProjection(ret.Root)
 	}
@@ -814,9 +864,15 @@ func RollbackAttributeViewHistory(historyPath string) (err error) {
 	FlushTxQueue()
 	flushLock.Lock()
 	defer flushLock.Unlock()
-	recovery := &Transaction{trees: map[string]*parse.Tree{}}
-	defer func() { recovery.finishAttributeViewMutation(err != nil) }()
+	recovery := &Transaction{trees: map[string]*parse.Tree{}, historyRecovery: newAttributeViewHistoryRecovery()}
+	defer recovery.finishHistoryRecovery(&err)
+	if err = recovery.preflightEmbeddedAttributeViewHistory(from, avBoxID, avID); err != nil {
+		return
+	}
 	if err = recovery.restoreEmbeddedAttributeViewHistory(from, avBoxID, avID); err != nil {
+		return
+	}
+	if err = recovery.historyRecovery.commit(); err != nil {
 		return
 	}
 	queueExternalAttributeViewRefIndex(avID, avBoxID)
@@ -840,35 +896,38 @@ type HistoryItem struct {
 }
 
 const fileHistoryPageSize = 32
+const fileHistoryItemsPageSize = 32
 
 func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, pageCount, totalCount int) {
+	ret, _, pageCount, totalCount = FullTextSearchHistoryGroups(query, box, op, typ, page)
+	return
+}
+
+func FullTextSearchHistoryGroups(query, box, op string, typ, page int) (ret []string, itemCounts map[string]int, pageCount, totalCount int) {
+	ret = []string{}
+	itemCounts = map[string]int{}
 	query = util.RemoveInvalid(query)
 	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}
-
-	offset := (page - 1) * fileHistoryPageSize
-
+	if page < 1 {
+		page = 1
+	}
 	table := "histories_fts_case_insensitive"
-	stmt := "SELECT DISTINCT created FROM " + table + " WHERE "
-	stmt += buildSearchHistoryQueryFilter(query, op, box, table, typ)
-	countStmt := strings.ReplaceAll(stmt, "SELECT DISTINCT created", "SELECT COUNT(DISTINCT created) AS total")
-	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(fileHistoryPageSize) + " OFFSET " + strconv.Itoa(offset)
+	filter := buildSearchHistoryQueryFilter(query, op, box, table, typ)
+	stmt := "SELECT created, COUNT(*) AS total FROM " + table + " WHERE " + filter +
+		" GROUP BY created ORDER BY created DESC LIMIT " + strconv.Itoa(fileHistoryPageSize) + " OFFSET " + strconv.Itoa((page-1)*fileHistoryPageSize)
 	result, err := sql.QueryHistory(stmt)
 	if err != nil {
 		return
 	}
 	for _, row := range result {
-		ret = append(ret, row["created"].(string))
+		created := row["created"].(string)
+		ret = append(ret, created)
+		itemCounts[created] = int(row["total"].(int64))
 	}
-	result, err = sql.QueryHistory(countStmt)
-	if err != nil {
-		return
-	}
-	if 1 > len(ret) {
-		ret = []string{}
-	}
-	if 1 > len(result) {
+	result, err = sql.QueryHistory("SELECT COUNT(DISTINCT created) AS total FROM " + table + " WHERE " + filter)
+	if err != nil || len(result) == 0 {
 		return
 	}
 	totalCount = int(result[0]["total"].(int64))
@@ -877,24 +936,36 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, 
 }
 
 func FullTextSearchHistoryItems(created, query, box, op string, typ int) (ret []*HistoryItem) {
+	ret, _, _ = FullTextSearchHistoryItemsPage(created, query, box, op, typ, 1)
+	return
+}
+
+func FullTextSearchHistoryItemsPage(created, query, box, op string, typ, page int) (ret []*HistoryItem, pageCount, totalCount int) {
+	ret = []*HistoryItem{}
+	if _, err := strconv.Atoi(created); err != nil {
+		return
+	}
 	query = util.RemoveInvalid(query)
 	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}
-
+	if page < 1 {
+		page = 1
+	}
 	table := "histories_fts_case_insensitive"
-	stmt := "SELECT * FROM " + table + " WHERE "
-	stmt += buildSearchHistoryQueryFilter(query, op, box, table, typ)
-
-	_, parseErr := strconv.Atoi(created)
-	if nil != parseErr {
-		ret = []*HistoryItem{}
+	filter := buildSearchHistoryQueryFilter(query, op, box, table, typ) + " AND created = '" + created + "'"
+	counts, err := sql.QueryHistory("SELECT COUNT(*) AS total FROM " + table + " WHERE " + filter)
+	if err != nil || len(counts) == 0 {
 		return
 	}
-
-	stmt += " AND created = '" + created + "' ORDER BY created DESC LIMIT " + fmt.Sprintf("%d", fileHistoryPageSize)
-	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
-	ret = fromSQLHistories(sqlHistories)
+	totalCount = int(counts[0]["total"].(int64))
+	pageCount = int(math.Ceil(float64(totalCount) / float64(fileHistoryItemsPageSize)))
+	if page > pageCount {
+		return
+	}
+	stmt := "SELECT * FROM " + table + " WHERE " + filter +
+		" ORDER BY path ASC, id ASC, op ASC, rowid ASC LIMIT " + strconv.Itoa(fileHistoryItemsPageSize) + " OFFSET " + strconv.Itoa((page-1)*fileHistoryItemsPageSize)
+	ret = fromSQLHistories(sql.SelectHistoriesRawStmt(stmt))
 	return
 }
 

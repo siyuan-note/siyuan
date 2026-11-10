@@ -1,0 +1,363 @@
+import * as assert from "node:assert/strict";
+import {execFile} from "node:child_process";
+import {mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {tmpdir} from "node:os";
+import * as path from "node:path";
+import {test} from "node:test";
+import {promisify} from "node:util";
+import {ScriptTarget, transpileModule} from "typescript";
+import {compile} from "sass";
+
+const browserCases = async (sources: string[], lutePath: string, styles: string[]) => {
+    const check: typeof assert = require("node:assert/strict");
+    Object.assign(window, {siyuan: {languages: {block: "Block", documentTitleInlineOnly: "Inline only", settingsPendingSaveError: "Save failed",
+        _kernel: {16: "Untitled document"}}}});
+    const unwrap = new Function(sources[0] + "\nreturn unwrapLongTextRuns;")();
+    const restore = new Function("unwrapLongTextRuns", sources[1] + "\nreturn restoreInlineElementBoundaries;")(unwrap);
+    const {prepareDocumentTitleBlockDOM: prepare, prepareDocumentTitleInitialDOM: initial, getDocumentTitleUnsupportedPasteBlocks: unsupported,
+        getDocumentTitleDOMFingerprint: fingerprint, getDocumentTitleLute: wrap} =
+        new Function("restoreInlineElementBoundaries", sources[2] +
+            "\nreturn {prepareDocumentTitleBlockDOM, prepareDocumentTitleInitialDOM, getDocumentTitleUnsupportedPasteBlocks, getDocumentTitleDOMFingerprint, getDocumentTitleLute};")(restore);
+    const paragraph = (content: string, id = "20260101000000-abcdefg") =>
+        `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true" spellcheck="false">${content}</div></div>`;
+    const source = paragraph(`<span data-type="strong em" style="color: red" data-custom="retained">Styled</span>
+<span data-type="block-ref" data-id="20260101000001-abcdefg" data-subtype="d">Dynamic</span>
+<span data-type="block-ref" data-id="20260101000002-abcdefg" data-subtype="s">Static</span>
+<span data-type="a" data-href="https://example.org" data-title="Link title">Link</span>
+<span data-type="tag">Tag</span><span data-type="inline-memo" data-inline-memo-content="memo &amp; text">Memo</span>
+<span data-type="file-annotation-ref" data-id="assets/a.pdf/annotation">Annotation</span>
+<span class="render-node" data-type="inline-math" data-subtype="math" data-content="x^2" contenteditable="false"></span>
+<span class="img" contenteditable="false"><span><img src="assets/p.png" alt="Picture" style="width: 42px" title="Image title"></span></span>
+<span data-type="kbd">Ctrl</span><span data-type="code">code</span><span data-type="u s mark sup sub">More styles</span>`);
+    const rendered = prepare(source, "20260101000003-abcdefg");
+    check.equal(unsupported(rendered).length, 0);
+    const template = document.createElement("template");
+    template.innerHTML = rendered;
+    check.equal(template.content.firstElementChild.getAttribute("data-node-id"), "20260101000003-abcdefg");
+    check.equal(template.content.querySelector('[data-custom="retained"]').textContent, "Styled");
+    check.equal(template.content.querySelector("img").getAttribute("src"), "assets/p.png");
+    check.equal(template.content.querySelector("img").style.width, "42px");
+    check.equal(template.content.querySelector('[data-type="inline-memo"]').getAttribute("data-inline-memo-content"), "memo & text");
+    check.equal(template.content.querySelector('[data-type="file-annotation-ref"]').getAttribute("data-id"), "assets/a.pdf/annotation");
+    for (const invalid of [source + paragraph("Another"), '<div data-type="NodeHeading"><div contenteditable="true">Heading</div></div>',
+        `<div data-type="NodeList">${source}</div>`, '<div data-type="NodeTable"></div>']) {
+        check.equal(unsupported(invalid).length, 1);
+        check.throws(() => prepare(invalid), /Inline only/);
+    }
+    const originalFingerprint = fingerprint(source);
+    const math = template.content.querySelector('[data-type="inline-math"]');
+    math.setAttribute("data-render", "true");
+    math.innerHTML = '<span class="katex"><span>Rendered equation</span></span>';
+    template.content.querySelector('[contenteditable="true"]').classList.add("protyle-title__input");
+    template.content.querySelectorAll("[contenteditable]").forEach(item => item.setAttribute("contenteditable", "false"));
+    template.content.querySelector(".img").classList.add("img--select");
+    template.content.querySelector(".img").insertAdjacentHTML("beforeend", '<span class="img__alt">Picture</span>');
+    check.equal(fingerprint(template.innerHTML), originalFingerprint, "render caches and readonly switching do not save source");
+    template.content.querySelector<HTMLElement>('[data-custom="retained"]').style.color = "blue";
+    check.notEqual(fingerprint(template.innerHTML), originalFingerprint, "format-only changes are source edits");
+    check.notEqual(fingerprint(paragraph('<span data-type="block-ref" data-id="other" data-subtype="d">Dynamic</span>')),
+        fingerprint(paragraph('<span data-type="block-ref" data-id="original" data-subtype="d">Dynamic</span>')),
+        "reference identity remains significant");
+
+    require(lutePath);
+    const lute = wrap(Lute.New());
+    lute.SetTextMark(true);
+    lute.SetProtyleWYSIWYG(true);
+    lute.SetTag(true);
+    lute.SetInlineMath(true);
+    lute.SetKramdownIAL(true);
+    for (const prefix of ["Plain", '<span data-type="em">Styled</span>']) {
+        for (const suffix of [" (Duplicated 2026-11-08 00:02:47)", " (Conflicted 2026-11-08 00:02:47)"]) {
+            template.innerHTML = initial(paragraph(prefix + suffix), "20260101000000-abcdefg");
+            check.equal(template.content.querySelector('[data-type="backslash"], [data-type="text"]'), null,
+                "initialized copy suffixes remain plain text");
+            for (let cycle = 0; cycle < 3; cycle++) {
+                template.content.querySelector("[contenteditable]").append(document.createTextNode(" x"));
+                template.innerHTML = lute.SpinBlockDOM(template.innerHTML);
+                check.equal(template.content.querySelector('[data-type="backslash"], [data-type="text"]'), null,
+                    "editing and reloading cannot introduce suffix escape nodes or spans");
+                check.equal(template.content.querySelector("[contenteditable]").textContent,
+                    (prefix === "Plain" ? "Plain" : "Styled") + suffix + " x".repeat(cycle + 1));
+                template.innerHTML = initial(prepare(template.innerHTML), "20260101000000-abcdefg");
+            }
+        }
+    }
+    for (const text of ["# Heading", "- List", "1. Ordered", "> Quote", "```code", "---", "first\nsecond", "line\n\nline"]) {
+        const spun = lute.SpinBlockDOM(paragraph(text));
+        template.innerHTML = spun;
+        check.equal(template.content.querySelectorAll('[data-type^="Node"]').length, 1, text);
+        check.equal(template.content.firstElementChild.getAttribute("data-type"), "NodeParagraph", text);
+        check.equal(template.content.querySelector("[contenteditable]").textContent, text, text);
+    }
+    template.innerHTML = lute.SpinBlockDOM(paragraph("**Bold** and `code`"));
+    check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "Bold");
+    check.equal(template.content.querySelector('[data-type~="code"]').textContent.replaceAll("\u2060", ""), "code");
+    const legacyText = "**literal** [link](https://example.org) $x$ #tag# ((20260101000000-abcdefg)) \\path";
+    template.innerHTML = initial(paragraph(legacyText), "20260101000000-abcdefg");
+    template.content.querySelector("[contenteditable]").append(document.createTextNode(" and **new bold**"));
+    template.innerHTML = lute.SpinBlockDOM(template.innerHTML);
+    check.equal(template.content.querySelector("[contenteditable]").textContent, legacyText + " and new bold");
+    check.equal(template.content.querySelectorAll('[data-type~="strong"]').length, 1);
+    check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "new bold");
+    check.equal(template.content.querySelectorAll('[data-type~="a"], [data-type~="tag"], [data-type~="inline-math"], [data-type~="block-ref"]').length, 0,
+        "ordinary edits must not reinterpret legacy literal syntax");
+    template.innerHTML = lute.SpinBlockDOM(paragraph('<span data-type="strong" style="color: red">**literal** [link](url) $x$</span> and **new**'));
+    check.equal(template.content.querySelectorAll('[data-type~="strong"]').length, 2);
+    check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "**literal** [link](url) $x$");
+    check.equal(template.content.querySelector('[data-type~="strong"]').getAttribute("style"), "color: red");
+    const liveTitle = document.createElement("div");
+    liveTitle.innerHTML = paragraph('<span data-type="inline-math" data-subtype="math" data-content="x^2" ' +
+        'data-render="true" class="render-node"><span class="katex">Rendered equation</span></span>');
+    const stableLute = wrap(lute, () => liveTitle);
+    const formula = '<span data-type="inline-math" data-subtype="math" data-content="x^2" ' +
+        'contenteditable="false" class="render-node"></span>';
+    template.innerHTML = stableLute.SpinBlockDOM(paragraph(formula + "123"));
+    check.equal(template.content.querySelector(".katex").textContent, "Rendered equation");
+    check.equal(template.content.querySelector('[data-type="inline-math"]').getAttribute("data-render"), "true");
+    check.equal(template.content.querySelector("[contenteditable]").classList.contains("protyle-title__input"), true);
+    template.innerHTML = stableLute.SpinBlockDOM(paragraph(formula.replace("x^2", "x^3")));
+    check.equal(template.content.querySelector(".katex"), null, "changed formula must render its new source");
+    liveTitle.replaceChildren();
+    template.innerHTML = stableLute.SpinBlockDOM(paragraph(formula.replace("</span>",
+        '<span class="katex">Untrusted cache</span></span>')));
+    check.equal(template.content.querySelector(".katex"), null, "input HTML cannot supply trusted render caches");
+
+    const Editor = new Function("getDocumentTitleDOMFingerprint", sources[3] + "\nreturn DocumentTitleEditor;")(fingerprint);
+    const Title = new Function(sources[4] + "\nreturn Title;")();
+    const disable = new Function(sources[5] + "\nreturn disabledWYSIWYG;")();
+    const root = document.createElement("div");
+    root.className = "protyle";
+    root.innerHTML = '<div class="protyle-content" data-padding-mode="responsive"><div class="protyle-top">' +
+        '<div class="protyle-title"><div class="protyle-title__rich protyle protyle-lite-fragment">' +
+        '<div class="protyle-content" data-padding-mode="responsive" data-fullwidth="true">' +
+        '<div class="protyle-wysiwyg"></div></div></div></div></div></div>';
+    document.body.appendChild(root);
+    const contentElement = root.firstElementChild as HTMLElement;
+    const container = root.querySelector<HTMLElement>(".protyle-title");
+    const wysiwyg = container.querySelector<HTMLElement>(".protyle-wysiwyg");
+    const editor = Object.assign(Object.create(Editor.prototype), {fragment: {wysiwyg}, onEditable: () => {}});
+    const style = document.createElement("style");
+    document.head.appendChild(style);
+    const plainTitle = document.createElement("div");
+    plainTitle.className = "protyle-title";
+    plainTitle.innerHTML = '<div class="protyle-title__input" data-tip="Untitled document"></div>';
+    const plainInput = plainTitle.firstElementChild as HTMLElement;
+    const bodyParagraph = document.createElement("div");
+    bodyParagraph.className = "protyle-wysiwyg";
+    bodyParagraph.innerHTML = paragraph("Body text");
+    container.parentElement.appendChild(plainTitle);
+    contentElement.appendChild(bodyParagraph);
+    const bodyInput = bodyParagraph.querySelector<HTMLElement>("[contenteditable]");
+    const textStart = (element: HTMLElement) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return range.getClientRects()[0]?.left ?? element.getBoundingClientRect().left +
+            parseFloat(getComputedStyle(element).paddingLeft);
+    };
+    const textWidth = (element: HTMLElement) => {
+        const computed = getComputedStyle(element);
+        return element.clientWidth - parseFloat(computed.paddingLeft) - parseFloat(computed.paddingRight);
+    };
+    for (const css of styles) {
+        style.textContent = css;
+        for (const fontSize of [16, 32]) {
+            document.body.style.setProperty("--b3-font-size-editor", `${fontSize}px`);
+            for (const width of [240, 720, 1000]) {
+                root.style.width = `${width}px`;
+                for (const fullWidth of [false, true]) {
+                    contentElement.toggleAttribute("data-fullwidth", fullWidth);
+                    for (const horizontalPadding of [4, 0, 8]) {
+                        style.textContent = css + `.protyle-wysiwyg > [data-type="NodeParagraph"] {
+padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
+                        for (const content of ["", "Named title", '<span data-type="strong">Formatted title </span>'.repeat(12)]) {
+                            wysiwyg.innerHTML = lute.SpinBlockDOM(paragraph(content));
+                            editor.updateEditable();
+                            const editable = editor.editable as HTMLElement;
+                            plainInput.innerHTML = editable.innerHTML;
+                            const context = JSON.stringify({fontSize, width, fullWidth, horizontalPadding, content});
+                            const actual = editable.getBoundingClientRect();
+                            check.ok(Math.abs(textStart(editable) - textStart(bodyInput)) < 1,
+                                "rich title text aligns with body text, including theme paragraph spacing: " + context);
+                            if (horizontalPadding === 4) {
+                                check.ok(Math.abs(textStart(editable) - textStart(plainInput)) < 1,
+                                    "loading the title source preserves its text origin: " + context);
+                            }
+                            check.ok(Math.abs(actual.top - container.getBoundingClientRect().top) < 1,
+                                "the title paragraph adds no vertical inset: " + context);
+                            check.ok(Math.abs(container.getBoundingClientRect().height - actual.height) < 1,
+                                "rich title height follows its content without paragraph padding: " + context);
+                            check.ok(Math.abs(textWidth(editable) - textWidth(bodyInput)) < 1,
+                                "title wrapping uses the body's text column width: " + context);
+                            check.equal(getComputedStyle(bodyParagraph.firstElementChild).paddingTop, "4px",
+                                "ordinary body paragraphs retain their vertical spacing");
+                        }
+                    }
+                }
+            }
+        }
+        style.textContent = css;
+        // Loading, clearing and restoring a title all replace its temporary paragraph.
+        for (const content of ["", "Named title", "", "image", ""]) {
+            wysiwyg.innerHTML = lute.SpinBlockDOM(content === "image" ? lute.Md2BlockDOM("![](assets/p.png)") : paragraph(content));
+            if (content === "image") check.ok(wysiwyg.querySelector("img"), "the native empty-alt image remains in the title");
+            const savedFingerprint = fingerprint(wysiwyg.innerHTML);
+            editor.updateEditable();
+            const editable = editor.editable as HTMLElement;
+            check.equal(editable.dataset.tip, "Untitled document");
+            const placeholder = getComputedStyle(editable, "::after").content;
+            if (content === "") {
+                check.equal(placeholder, '"Untitled document"', "empty titles retain the localized placeholder");
+                editable.contentEditable = "false";
+                check.equal(getComputedStyle(editable, "::after").content, placeholder, "readonly titles retain the placeholder");
+            } else {
+                check.ok(placeholder === "none" || placeholder === "normal",
+                    `text and empty-alt images are not empty titles: ${JSON.stringify({content, placeholder, html: editable.innerHTML})}`);
+            }
+            check.equal(fingerprint(wysiwyg.innerHTML), savedFingerprint, "placeholder decoration cannot dirty the title source");
+            check.ok(!prepare(wysiwyg.innerHTML).includes("data-tip"), "placeholder text is not serialized into title content");
+            const observer = new MutationObserver(() => {});
+            observer.observe(editable, {attributes: true});
+            editor.updateEditable();
+            check.equal(observer.takeRecords().length, 0, "repeated decoration cannot create an observer feedback loop");
+            observer.disconnect();
+        }
+    }
+    for (const initiallyReadonly of [false, true]) {
+        wysiwyg.innerHTML = paragraph('<span data-type="strong" style="color: red">Title</span>');
+        const owner = {disabled: initiallyReadonly};
+        const saved = fingerprint(wysiwyg.innerHTML);
+        const richEditor = Object.assign(Object.create(Editor.prototype), {
+            owner, saved, disposed: false, composing: false,
+            fragment: {
+                wysiwyg, getBlockHTML: () => wysiwyg.innerHTML, protyle: {},
+                instance: {
+                    disable: () => disable(wysiwyg),
+                    enable: () => {
+                        wysiwyg.style.userSelect = "";
+                        wysiwyg.querySelectorAll("[spellcheck]").forEach(element => element.setAttribute("contenteditable", "true"));
+                    },
+                },
+            },
+        });
+        const title = Object.assign(Object.create(Title.prototype), {
+            protyle: owner, richEditor, editElement: richEditor.editable,
+        });
+        title.setReadonly(initiallyReadonly);
+        check.equal(fingerprint(wysiwyg.innerHTML), saved, "initial readonly decoration preserves the saved title");
+        for (let cycle = 0; cycle < 2; cycle++) {
+            owner.disabled = true;
+            title.setReadonly(true);
+            check.equal(title.editElement.contentEditable, "false");
+            check.equal(fingerprint(wysiwyg.innerHTML), saved, "locking an unchanged title cannot block sync preparation");
+            await richEditor.flush();
+            owner.disabled = false;
+            title.setReadonly(false);
+            check.equal(title.editElement.contentEditable, "true");
+            check.equal(fingerprint(wysiwyg.innerHTML), saved, "unlocking cannot create a title save");
+        }
+        title.editElement.querySelector("span").style.color = "blue";
+        const draft = wysiwyg.innerHTML;
+        owner.disabled = true;
+        title.setReadonly(true);
+        await check.rejects(richEditor.flush(), /Save failed/, "a real formatting draft still blocks sync while readonly");
+        check.equal(title.editElement.querySelector("span").style.color, "blue", "readonly handoff retains the draft");
+        check.equal(richEditor.saved, saved);
+        check.notEqual(fingerprint(draft), saved);
+    }
+    const {hideElements, hideAllElements} = new Function(sources[6] + "\nreturn {hideElements, hideAllElements};")();
+    for (const mobile of [false, true]) {
+        for (const draft of [false, true]) {
+            const host = document.createElement("div");
+            host.innerHTML = '<div class="protyle-wysiwyg">' + paragraph("<strong>Selected</strong> title") +
+                '</div><div class="protyle-toolbar"><button>Bold</button></div><div class="protyle-util">Menu</div>';
+            root.appendChild(host);
+            const titleWysiwyg = host.querySelector<HTMLElement>(".protyle-wysiwyg");
+            const toolbar = host.querySelector<HTMLElement>(".protyle-toolbar");
+            const subElement = host.querySelector<HTMLElement>(".protyle-util");
+            const protyle = {block: {}, undo: {}, toolbar: {element: toolbar, subElement}};
+            const fragment = {protyle, wysiwyg: titleWysiwyg, getBlockHTML: () => titleWysiwyg.innerHTML,
+                instance: {enable() {}, disable() {}}, destroy() {}};
+            const dependencies = {
+                isMobile: () => mobile, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
+                hintRef: () => {}, hintTag: () => {},
+                getDocumentTitleLute: () => lute, getAgentLute: () => lute,
+                prepareDocumentTitleInitialDOM: (html: string) => html,
+                prepareDocumentTitleBlockDOM: prepare, getDocumentTitleUnsupportedPasteBlocks: unsupported,
+                getDocumentTitleDOMFingerprint: fingerprint, mountProtyleLiteFragment: () => fragment,
+                setMobileToolbarUndo: () => {}, hideElements, hideAllElements,
+            };
+            const MountedEditor = new Function(...Object.keys(dependencies), sources[3] + "\nreturn DocumentTitleEditor;")(
+                ...Object.values(dependencies));
+            const ownerElement = document.createElement("div");
+            ownerElement.classList.toggle("document-title-dialog", draft);
+            const mounted = new MountedEditor({element: ownerElement, block: {rootID: "document"}}, host,
+                {blockDOM: titleWysiwyg.innerHTML, revision: "revision"}, () => {}, () => {});
+            const editable = mounted.editable as HTMLElement;
+            const range = document.createRange();
+            range.selectNodeContents(editable.querySelector("strong"));
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+            let escaped = false;
+            const onMouseDown = () => { escaped = true; };
+            root.addEventListener("mousedown", onMouseDown);
+            toolbar.style.display = "block";
+            editable.querySelector("strong").dispatchEvent(new MouseEvent("mousedown", {bubbles: true}));
+            check.equal(toolbar.classList.contains("fn__none"), true, "title presses dismiss the selection toolbar locally");
+            check.equal(toolbar.style.display, "", "dismissal clears the toolbar display override");
+            check.equal(escaped, false, "title presses stay isolated from the owner editor");
+            check.equal(getSelection().toString(), "Selected", "dismissal preserves the range for the ensuing selection gesture");
+            toolbar.classList.remove("fn__none");
+            toolbar.querySelector("button").dispatchEvent(new MouseEvent("mousedown", {bubbles: true}));
+            check.equal(toolbar.classList.contains("fn__none"), false, "format buttons keep the toolbar available");
+            check.equal(getSelection().toString(), "Selected", "format buttons retain their selection");
+            check.equal(subElement.classList.contains("fn__none"), false, "selection dismissal does not close formatting menus");
+            root.removeEventListener("mousedown", onMouseDown);
+            mounted.destroy();
+            host.remove();
+        }
+    }
+    root.remove();
+    style.remove();
+    return "Document title DOM cases passed";
+};
+
+test("native document title DOM preserves content, layout, readonly handoff and local toolbar dismissal", {
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    timeout: 30000,
+}, async () => {
+    const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts", "documentTitleEditor.ts",
+        "Title.ts", "../util/disabledWYSIWYG.ts", "../ui/hideElements.ts"].map(file =>
+        transpileModule(readFileSync(path.join(__dirname, file), "utf8")
+            .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);
+    const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-title-dom-test-"));
+    const script = path.join(temporary, "run.cjs");
+    const styles = ["base", "mobile"].map(entry => compile(path.resolve(__dirname,
+        "../../assets/scss", `${entry}.scss`), {logger: {warn() {}, debug() {}}}).css);
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," +
+        JSON.stringify(path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js")) + "," + JSON.stringify(styles) + ")";
+    writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
+app.commandLine.appendSwitch("disable-gpu");
+app.whenReady().then(async () => {
+    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    win.webContents.on("console-message", event => console.error(event.message));
+    try {
+        await win.loadURL("data:text/html,<html><body></body></html>");
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
+        win.destroy(); app.exit(0);
+    } catch (error) { console.error(error); win.destroy(); app.exit(1); }
+});`, "utf8");
+    const env = {...process.env};
+    delete env.ELECTRON_RUN_AS_NODE;
+    try {
+        const result = await promisify(execFile)(require("electron") as unknown as string, [script],
+            {env, windowsHide: true, timeout: 25000});
+        assert.match(result.stdout, /Document title DOM cases passed/);
+    } finally {
+        if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) &&
+            path.basename(temporary).startsWith("siyuan-title-dom-test-")) {
+            rmSync(temporary, {recursive: true, force: true});
+        }
+    }
+});

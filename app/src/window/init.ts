@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {ipcRenderer, webFrame} from "electron";
 import {fetchPost} from "../util/fetch";
 import {adjustLayout, getInstanceById, JSONToCenter} from "../layout/util";
-import {newCenterEmptyTab, resizeTabs} from "../layout/tabUtil";
+import {newCenterEmptyTab, resizeTabs, setTabPosition} from "../layout/tabUtil";
 import {initStatus} from "../layout/status";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {enqueueAppearanceUpdate, initAssets, setInlineStyle} from "../util/assets";
@@ -97,6 +97,7 @@ export const init = async (app: App) => {
         resizeTimeout = window.setTimeout(() => {
             adjustLayout(window.siyuan.layout.centerLayout);
             resizeTabs();
+            setTabPosition(true);
             window.siyuan.menus.menu.resetPosition();
             if (window.siyuan.menus.menu.element.classList.contains("fn__none") &&
                 getSelection().rangeCount > 0) {

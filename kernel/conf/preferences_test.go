@@ -17,7 +17,7 @@ func TestPreferenceDefaultsAndNormalization(t *testing.T) {
 			t.Fatal(err)
 		}
 		NormalizeAppearance(appearance, false)
-		if appearance.CompactMode || appearance.MenuMouseScroll || appearance.OutlineKeepCurrentExpand ||
+		if appearance.ShowFloatingStatusBar || appearance.CompactMode || appearance.MenuMouseScroll || appearance.OutlineKeepCurrentExpand ||
 			!reflect.DeepEqual(appearance.PDFTheme, NewPDFTheme()) || !reflect.DeepEqual(appearance.MobileBars, NewMobileBars()) {
 			t.Fatalf("unexpected preference defaults: %+v", appearance)
 		}
@@ -51,5 +51,38 @@ func TestPreferenceDefaultsAndNormalization(t *testing.T) {
 	// 新工作空间默认启用菜单鼠标滚动，已有工作空间缺少该字段时保持解析后的 false。
 	if !NewAppearance().MenuMouseScroll || (&Appearance{}).MenuMouseScroll {
 		t.Fatal("menu mouse scroll default changed")
+	}
+	if NewAppearance().ShowFloatingStatusBar {
+		t.Fatal("floating status bar must default to disabled")
+	}
+}
+
+func TestFloatingDockBarPreference(t *testing.T) {
+	if value := NewAppearance().ShowFloatingDockBar; value == nil || !*value {
+		t.Fatal("new workspace must enable floating dock bars")
+	}
+	for _, raw := range []string{`{}`, `{"showFloatingDockBar":null}`, `{"showFloatingDockBar":true}`, `{"showFloatingDockBar":false}`} {
+		appearance := &Appearance{}
+		if err := json.Unmarshal([]byte(raw), appearance); err != nil {
+			t.Fatal(err)
+		}
+		expected := raw != `{"showFloatingDockBar":false}`
+		for range 2 {
+			NormalizeAppearance(appearance, false)
+			if appearance.ShowFloatingDockBar == nil || *appearance.ShowFloatingDockBar != expected {
+				t.Fatalf("preference lost for %s", raw)
+			}
+		}
+		encoded, err := json.Marshal(appearance)
+		if err != nil {
+			t.Fatal(err)
+		}
+		restored := &Appearance{}
+		if err := json.Unmarshal(encoded, restored); err != nil {
+			t.Fatal(err)
+		}
+		if restored.ShowFloatingDockBar == nil || *restored.ShowFloatingDockBar != expected {
+			t.Fatal("round trip lost choice")
+		}
 	}
 }

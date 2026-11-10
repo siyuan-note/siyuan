@@ -18,8 +18,9 @@ import (
 
 var databaseActions = []string{
 	"create", "search", "get", "render", "keys", "key_add", "key_update", "key_set_template", "key_remove", "item_add", "item_remove", "item_update",
-	"view_get", "view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_visibility_set",
+	"view_get", "view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_field_move", "view_visibility_set",
 	"view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set", "unused", "clean",
+	"items_add", "items_update",
 }
 
 var databaseKeyTypes = []string{
@@ -34,7 +35,7 @@ type databaseToolOutput struct {
 
 var DatabaseTool = &Tool{
 	Name:        "database",
-	Description: "Attribute view (database) operations. Every successful call returns {action, data}. Actions: create(parentID, name?, primaryKeyName?, layout=table, keys?, previousID?, nextID?), search(keyword), get(id), render(id, viewID?, query?, page=1, pageSize=50), keys(id), key_add(id, name, type, icon?, prev?), key_update(id, keyID, config), key_set_template(id, keyID, template), key_remove(id, keyID, removeRelationDest?), item_add(id, blockID?, content?, viewID?, groupID?, previousID?, detached?, ignoreDefaultFill?), item_remove(id, itemIDs), item_update(id, keyID, itemID, value), view_get(id, blockID, viewID), view_add(id, blockID, layout?, name?), view_duplicate(id, blockID, viewID, name?), view_remove(id, blockID, viewID), view_update(id, blockID, viewID, name?, icon?, desc?), view_move(id, blockID, viewID, previousID), view_visibility_set(id, blockID, viewIDs), view_filters_set(id, blockID, viewID, revision, filters), view_sorts_set(id, blockID, viewID, revision, sorts), view_group_set(id, blockID, viewID, revision, group), view_layout_set(id, blockID, viewID, revision, layout), unused(), clean(id?). view_get returns metadata, ordered views and the carrier block's visibleViewIDs. view_update preserves omitted fields; empty icon or desc clears it. View metadata and order affect all mirrors; visibility affects only blockID and requires at least one visible view. Read view_get before replacing filters, sorts or visibleViewIDs, preserving unmodified entries. Pass its revision for filter, sort, group and layout changes. An empty filters or sorts array clears that setting. Supported layouts: table, list, gallery, kanban, calendar. The layout string is validated by the kernel. clean only removes unused databases returned by unused(); referenced databases are rejected.",
+	Description: "Attribute view (database) operations. Every successful call returns {action, data}. Actions: create(parentID, name?, primaryKeyName?, layout=table, keys?, previousID?, nextID?), search(keyword), get(id), render(id, viewID?, query?, page=1, pageSize=50), keys(id), key_add(id, name, type, icon?, prev?), key_update(id, keyID, config), key_set_template(id, keyID, template), key_remove(id, keyID, removeRelationDest?), item_add(id, blockID?, content?, viewID?, groupID?, previousID?, detached?, ignoreDefaultFill?), item_remove(id, itemIDs), item_update(id, keyID, itemID, value), view_get(id, blockID, viewID), view_add(id, blockID, layout?, name?), view_duplicate(id, blockID, viewID, name?), view_remove(id, blockID, viewID), view_update(id, blockID, viewID, name?, icon?, desc?), view_move(id, blockID, viewID, previousID), view_field_move(id, blockID, viewID, keyID, previousID), view_visibility_set(id, blockID, viewIDs), view_filters_set(id, blockID, viewID, revision, filters), view_sorts_set(id, blockID, viewID, revision, sorts), view_group_set(id, blockID, viewID, revision, group), view_layout_set(id, blockID, viewID, revision, layout), unused(), clean(id?). view_field_move moves a field after previousID (empty string means first), preserving types, values, width and visibility; it changes only the specified view, shared by its mirrors. Read fieldIDs from view_get first and verify the returned fieldIDs. Across databases, match fields by name/type rather than reusing source IDs. view_get returns ordered fieldIDs (including hidden fields), metadata, ordered views and the carrier block's visibleViewIDs. view_update preserves omitted fields; empty icon or desc clears it. View metadata and order affect all mirrors; visibility affects only blockID and requires at least one visible view. Read view_get before replacing filters, sorts or visibleViewIDs, preserving unmodified entries. Pass its revision for filter, sort, group and layout changes. An empty filters or sorts array clears that setting. Supported layouts: table, list, gallery, kanban, calendar. The layout string is validated by the kernel. clean only removes unused databases returned by unused(); referenced databases are rejected.",
 	EffectScope: EffectScopeLocal,
 	ActionEffects: map[string]ToolEffects{
 		"create":              {LocalWrite: true},
@@ -49,12 +50,15 @@ var DatabaseTool = &Tool{
 		"item_add":            {LocalWrite: true},
 		"item_remove":         {LocalWrite: true},
 		"item_update":         {LocalWrite: true},
+		"items_add":           {LocalWrite: true},
+		"items_update":        {LocalWrite: true},
 		"view_get":            {LocalRead: true},
 		"view_add":            {LocalWrite: true},
 		"view_duplicate":      {LocalWrite: true},
 		"view_remove":         {LocalWrite: true},
 		"view_update":         {LocalWrite: true},
 		"view_move":           {LocalWrite: true},
+		"view_field_move":     {LocalWrite: true},
 		"view_visibility_set": {LocalWrite: true},
 		"view_filters_set":    {LocalWrite: true},
 		"view_sorts_set":      {LocalWrite: true},
@@ -72,7 +76,7 @@ var DatabaseTool = &Tool{
 			"id":             {Type: "string", Description: "Attribute view ID for database and view actions"},
 			"parentID":       {Type: "string", Description: "Parent block ID for the new database (for create)"},
 			"nextID":         {Type: "string", Description: "Next sibling block ID for positioning the new database (for create, optional)"},
-			"viewID":         {Type: "string", Description: "Exact view ID (required for view_get, view_duplicate, view_remove, view_update, view_move and view setting changes)"},
+			"viewID":         {Type: "string", Description: "Exact view ID (required for view_get, view_duplicate, view_remove, view_update, view_move, view_field_move and view setting changes)"},
 			"viewIDs":        {Type: "array", Description: "Complete visible view ID list for view_visibility_set on blockID; preserve other visible views from view_get and keep at least one", Items: &Property{Type: "string"}},
 			"query":          {Type: "string", Description: "Filter query (for render)"},
 			"page":           {Type: "integer", Description: "Page number (default 1)"},
@@ -96,7 +100,7 @@ var DatabaseTool = &Tool{
 			"icon":               {Type: "string", Description: "Key icon (key_add) or view icon (view_update); an empty string clears the view icon"},
 			"desc":               {Type: "string", Description: "View description for view_update; an empty string clears it, omission preserves it"},
 			"prev":               {Type: "string", Description: "Previous key ID for ordering (for key_add; omit to append)"},
-			"keyID":              {Type: "string", Description: "Key ID (for key_update, key_set_template, key_remove, item_update)"},
+			"keyID":              {Type: "string", Description: "Key ID (for key_update, key_set_template, key_remove, item_update, view_field_move)"},
 			"template":           {Type: "string", Description: "Formula for key_set_template on an existing template field, e.g. .action{add .Number 1}; empty string clears it. Use keys to inspect field names and IDs, then render to verify results. Do not write calculated template cells with item_update"},
 			"config":             databaseKeyConfigProperty,
 			"removeRelationDest": {Type: "boolean", Description: "Also remove related data in linked databases (for key_remove, optional)"},
@@ -107,12 +111,14 @@ var DatabaseTool = &Tool{
 			"group":              {Type: "object", Description: "Native ViewGroup for view_group_set with field (key ID), method, order and hideEmpty; number/date fields support additional methods. {} clears grouping outside kanban"},
 			"content":            {Type: "string", Description: "Block column text content (for item_add, optional)"},
 			"groupID":            {Type: "string", Description: "Group ID for positioning (for item_add, optional)"},
-			"previousID":         {Type: "string", Description: "Previous sibling database block (create), previous item (item_add), or previous view (view_move, required); an empty string moves the view to the first position"},
+			"previousID":         {Type: "string", Description: "Previous sibling database block (create), previous item (item_add), previous view (view_move), or previous field (view_field_move); required for moves, empty string means first"},
 			"detached":           {Type: "boolean", Description: "Create detached row (for item_add, optional)"},
 			"ignoreDefaultFill":  {Type: "boolean", Description: "Skip filling default values (for item_add, optional)"},
 			"itemID":             {Type: "string", Description: "Item ID (for item_update)"},
 			"itemIDs":            {Type: "array", Description: "Item IDs (for item_remove)", Items: &Property{Type: "string"}},
-			"value":              {Type: "object", Description: "Typed cell value (for item_update)"},
+			"value":              databaseCellValueProperty,
+			"items":              databaseItemsProperty,
+			"updates":            databaseUpdatesProperty,
 		},
 		Required: []string{"action"},
 	},
@@ -128,6 +134,7 @@ var DatabaseTool = &Tool{
 }
 
 func init() {
+	DatabaseTool.Description += " Batch writes: items_add(id, items) creates 1-100 rows with optional typed values in one transaction; items_update(id, updates) updates up to 1000 cells in one transaction. Prefer these actions for multi-row work. Read keys first and inspect the returned saved values."
 	register(DatabaseTool)
 }
 
@@ -158,7 +165,9 @@ func databaseHandler(args map[string]any) (CallToolResult, error) {
 		return databaseItemRemove(args)
 	case "item_update":
 		return databaseItemUpdate(args)
-	case "view_get", "view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_visibility_set",
+	case "items_add", "items_update":
+		return databaseItemsWrite(args)
+	case "view_get", "view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_field_move", "view_visibility_set",
 		"view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set":
 		return databaseViewAction(action, args)
 	case "unused":
@@ -350,7 +359,7 @@ func databasePreviousKeyID(attrView *av.AttributeView, args map[string]any) (ret
 	if nil != err {
 		return "", err
 	}
-	fieldIDs := databaseViewFieldIDs(view)
+	fieldIDs := model.AttributeViewViewFieldIDs(view)
 	if value, specified := args["prev"]; specified {
 		prev, ok := value.(string)
 		if !ok {
@@ -382,39 +391,6 @@ func databaseKeySetTemplate(args map[string]any) (CallToolResult, error) {
 	}
 	model.ReloadAttrView(id)
 	return databaseSuccess("key_set_template", map[string]any{"id": id, "keyID": keyID, "template": templateContent})
-}
-
-func databaseViewFieldIDs(view *av.View) (ret []string) {
-	if nil == view {
-		return
-	}
-	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
-		if layout := view.GetTableLayout(); nil != layout {
-			for _, column := range layout.Columns {
-				if nil != column && "" != column.ID {
-					ret = append(ret, column.ID)
-				}
-			}
-		}
-	case av.LayoutTypeGallery:
-		if nil != view.Gallery {
-			for _, field := range view.Gallery.CardFields {
-				if nil != field && "" != field.ID {
-					ret = append(ret, field.ID)
-				}
-			}
-		}
-	case av.LayoutTypeKanban:
-		if nil != view.Kanban {
-			for _, field := range view.Kanban.Fields {
-				if nil != field && "" != field.ID {
-					ret = append(ret, field.ID)
-				}
-			}
-		}
-	}
-	return
 }
 
 func databaseKeyRemove(args map[string]any) (CallToolResult, error) {
@@ -500,8 +476,17 @@ func databaseItemUpdate(args map[string]any) (CallToolResult, error) {
 	if id == "" || keyID == "" || itemID == "" || nil == valueData {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id, keyID, itemID and value are required"}}, IsError: true}, nil
 	}
-	if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "updateAttrViewCell", AvID: id,
-		KeyID: keyID, RowID: itemID, Data: valueData}}); err != nil {
+	err := model.PerformPreparedAttributeViewOperations(func() ([]*model.Operation, error) {
+		view, err := av.ParseAttributeView(id)
+		if err != nil {
+			return nil, err
+		}
+		if err = validateDatabaseCellValue(view, keyID, valueData); err != nil {
+			return nil, err
+		}
+		return []*model.Operation{{Action: "updateAttrViewCell", AvID: id, KeyID: keyID, RowID: itemID, Data: valueData}}, nil
+	})
+	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "update cell failed: " + err.Error()}}, IsError: true}, nil
 	}
 	view, err := av.ParseAttributeView(id)

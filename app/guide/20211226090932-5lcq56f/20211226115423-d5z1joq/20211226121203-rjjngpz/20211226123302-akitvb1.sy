@@ -6,7 +6,7 @@
 		"id": "20211226123302-akitvb1",
 		"title": "導入和導出",
 		"type": "doc",
-		"updated": "20261024163013"
+		"updated": "20261104002100"
 	},
 	"Children": [
 		{
@@ -694,6 +694,34 @@
 									"Data": "Markdown"
 								}
 							]
+						},
+						{
+							"ID": "20261108001000-75f0e0f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108001000-75f0e0f",
+								"updated": "20261108001000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "匯出"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中的「匯出 Markdown 包含標題區塊自動編號」預設關閉：複製和匯出 Markdown 時省略編號，但不修改文件或編輯器設定。開啟後，文件啟用編號時 Markdown 輸出會包含編號。複製直接沿用此持久設定，不彈出編號選擇視窗；其他匯出格式不受影響。"
+								}
+							]
 						}
 					]
 				},
@@ -873,6 +901,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "PDF 導出也支援獨立的「匯出題頭圖」開關，預設開啟，與圖片導出分別記住選擇，不影響文件標題或正文圖片。桌面端在 PDF 預覽視窗中設定，導出時儲存選擇；行動端在列印設定對話框中設定，確認時儲存選擇。"
+				}
+			]
+		},
+		{
+			"ID": "20261104002100-t0nx0ql",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261104002100-t0nx0ql",
+				"updated": "20261104002100"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端導出 PDF 時，儲存對話框預設以文件標題作為檔案名稱，檔案類型為 PDF。你可以修改檔案名稱和儲存位置；選擇已有的同名 PDF 時，系統會提示確認覆寫。"
 				}
 			]
 		},

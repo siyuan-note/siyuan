@@ -190,7 +190,7 @@ func TestPluginPublishResources(t *testing.T) {
 			t.Fatalf("unauthorized resource %s", resource)
 		}
 	}
-	petals := LoadPetals("browser-desktop", true)
+	petals := LoadPetals("browser-desktop", true, nil)
 	if len(petals) != 1 || petals[0].JS != "frontend" || petals[0].Kernel.JS != "" {
 		t.Fatalf("unexpected publish payload: %+v", petals)
 	}

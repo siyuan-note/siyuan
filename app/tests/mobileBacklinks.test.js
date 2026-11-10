@@ -9,8 +9,9 @@ const sources = () => {
     const modules = {};
     for (const name of ["menus/menuToggle", "layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
         "layout/dock/GlobalBacklinkList", "layout/dock/globalBacklinkPaging",
-        "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
+        "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkContextBatch", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
         "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/MobileEditorDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "menus/sheetOpen", "protyle/util/transactionQueue",
+        "mobile/util/mobileSheetLayout", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetActions", "protyle/util/editorSave", "protyle/util/browserCompatibility",
         "util/escape", "util/zIndex", "dialog/index", "layout/dock/panelSearch", "protyle/wysiwyg/backlinkTypeFold",
         "layout/dock/backlinkMentionCache", "layout/dock/bottomBacklinkScroll", "protyle/gutter/layout"]) {
         modules[name] = ts.transpileModule(preprocess(
@@ -58,7 +59,7 @@ const runCases = async (sources) => {
             requests.push({url, data, reply: response => resolve({code: 0, data: response})});
         })},
         "constants": {Constants: {TIMEOUT_LOAD: 0, TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
-        "protyle/util/compatibility": {updateHotkeyAfterTip: () => "", isNotCtrl: () => true},
+        "protyle/util/compatibility": {updateHotkeyAfterTip: () => "", isNotCtrl: () => true, isInMobileApp: () => true},
         "protyle/index": {Protyle: class {
             constructor(app, element, options) {
                 element.className = "protyle";
@@ -67,6 +68,10 @@ const runCases = async (sources) => {
                     wysiwyg: {element: element.firstElementChild, flushPendingInput: async () => {}}};
             }
             destroy() {load("mobile/util/secondaryEditors").unregisterMobileSecondaryEditor(this); this.destroyed = true;}
+            async flushPendingTransactions() {
+                await this.protyle.wysiwyg.flushPendingInput();
+                await load("protyle/util/transactionQueue").waitForPendingTransactions(this.protyle);
+            }
         }},
         "menus/Menu": {MenuItem: class {}},
         "protyle/render/searchMarkRender": {isSupportCSSHL: () => true, searchMarkRender: noop},
@@ -134,6 +139,7 @@ const runCases = async (sources) => {
     window.siyuan = {config: {editor: {backlinkSort: 0, backmentionSort: 0, backlinkExpandCount: 0,
         backmentionExpandCount: 0}, keymap: {editor: {general: {expand: key, collapse: key}}, general: {closeTab: key}}},
     languages: new Proxy({}, {get: (target, property) => property}), dialogs: [], zIndex: 10,
+    mobile: {size: {isLandscape: false, portrait: {height1: window.innerHeight}, landscape: {height1: window.innerHeight}}},
     menus: {menu: {remove: noop, element: document.createElement("div")}}};
     const {BacklinkContent} = load("layout/dock/BacklinkContent");
     const registry = load("mobile/util/secondaryEditors");
@@ -185,6 +191,8 @@ const runCases = async (sources) => {
     editor.protyle.wysiwyg.flushPendingInput = () => new Promise(resolve => {finishInput = resolve;});
     editor.protyle.wysiwyg.element.focus();
     toolbar.focus();
+    await tick();
+    assert.equal(typeof finishInput, "function", "focusout must start flushing the active editor");
     editor.protyle.wysiwyg.flushPendingInput = async () => {};
     let flushed = false;
     const flushing = registry.flushMobileSecondaryEditor(editor).then(() => {flushed = true;});

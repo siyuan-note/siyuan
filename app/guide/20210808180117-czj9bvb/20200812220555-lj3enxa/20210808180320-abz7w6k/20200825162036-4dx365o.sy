@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261028111611"
+		"updated": "20261107150237"
 	},
 	"Children": [
 		{
@@ -32,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091228-ttcj9nm",
-				"updated": "20261019194453"
+				"updated": "20261107150237"
 			},
 			"Children": [
 				{
@@ -366,7 +366,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210604220948-4e5cfij"
+						"id": "20210604220948-4e5cfij",
+						"updated": "20261107150237"
 					},
 					"Children": [
 						{
@@ -381,6 +382,20 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "sub",
 									"TextMarkTextContent": "下标"
+								}
+							]
+						},
+						{
+							"ID": "20261107150237-oarlsov",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261107150237-oarlsov",
+								"updated": "20261107150237"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在上下标的左右边界处，可使用左右方向键将光标移入或移出；在边界外输入或粘贴文字时使用普通文本格式"
 								}
 							]
 						}
@@ -2055,7 +2070,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261028111611"
+				"updated": "20261031115926"
 			},
 			"Children": [
 				{
@@ -2094,7 +2109,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-k1vwtue",
-				"updated": "20261028111611"
+				"updated": "20261031115926"
 			},
 			"Children": [
 				{
@@ -2119,16 +2134,66 @@
 			]
 		},
 		{
-			"ID": "20261028111611-9011ee1",
+			"ID": "20261103001150-wlpseo4",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261028111611-9011ee1",
-				"updated": "20261028111611"
+				"id": "20261103001150-wlpseo4",
+				"updated": "20261103001150"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "移动端可使用文档面包屑栏中的撤销、重做按钮，收起键盘或将思维导图全屏后也能操作。它们共用文档的撤销历史，也可能撤销导图以外的修改。没有可撤销或重做的操作时，以及文档只读时，按钮隐藏。"
+					"Data": "桌面端按住 Alt（macOS 上为 ⌥）点击思维导图中的块引用或思源块链接，可在右侧分屏打开；按住 Shift 点击可在下方分屏打开。"
+				}
+			]
+		},
+		{
+			"ID": "20261028111611-9011ee1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028111611-9011ee1",
+				"updated": "20261031115926"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移动端可通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "撤销"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重做"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 操作文档历史，收起键盘或将思维导图全屏后也能使用。编辑工具栏中也保留这两个入口。它们共用文档的撤销历史，也可能撤销导图以外的修改。没有对应历史时，菜单项禁用；文档只读时不提供这两个菜单项。"
 				}
 			]
 		},
@@ -2305,6 +2370,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "，可在底栏上方打开节点样式及样式管理面板。不适用的操作会置灰。"
+				}
+			]
+		},
+		{
+			"ID": "20261105113000-feee4ba",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105113000-feee4ba",
+				"updated": "20261105113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在非文字编辑状态下选中单个节点，可用鼠标或触屏拖动节点左右边缘的手柄调整宽度。拖动时预览，松手后保存一次可撤销的修改；按 Esc 或取消指针操作可恢复原宽度。只读和锁定视图不显示这些手柄。仍可通过底部宽度面板精确输入和恢复自动宽度。"
 				}
 			]
 		},
@@ -4756,7 +4835,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-1bq55o9",
-				"updated": "20261022190543"
+				"updated": "20261101195702"
 			},
 			"Children": [
 				{
@@ -4770,12 +4849,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908091355-rch0004",
-				"updated": "20260908091355"
+				"updated": "20261106130000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "单元格默认支持编辑段落、标题、列表、引述、代码和公式，无需手动转换。已有文字中的 Markdown 标记保持原样，原有加粗、链接等格式也会保留。"
+					"Data": "单元格默认支持编辑段落、标题、列表、引述、代码和公式，无需手动转换。已有文字中的 Markdown 标记保持原样，原有加粗、链接等格式也会保留。可通过斜杠菜单或加号菜单插入图片、新建文档并引用，以及设置行级样式。"
 				}
 			]
 		},
@@ -4857,7 +4936,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022190543-t8zgv8r",
-				"updated": "20261022190543"
+				"updated": "20261101195702"
 			},
 			"Children": [
 				{
@@ -4871,7 +4950,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 可恢复自动高度。行高随文档保存，标准 Markdown 导出不保证保留行高。"
+					"Data": " 可恢复自动高度。行高随文档保存，标准 Markdown 导出不保证保留行高。调整行高或列宽时会取消单元格框选，并在指针左上方显示尺寸；桌面端在分隔线上稍作停留会显示指示线，拖动时指示线跟随边界。"
 				}
 			]
 		},
@@ -5261,6 +5340,20 @@
 				"id": "20210608113914-zvtw5kj",
 				"updated": "20210608113914"
 			}
+		},
+		{
+			"ID": "20261109120000-7763dd5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109120000-7763dd5",
+				"updated": "20261109120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "拖动视频右侧、底部或右下角的把手可等比例调整大小，也支持触摸拖动。"
+				}
+			]
 		},
 		{
 			"ID": "20210608113645-k19wsmr",

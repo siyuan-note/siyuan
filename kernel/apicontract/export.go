@@ -45,6 +45,8 @@ func (r ExportNotebooksRequest) IDs() (ids []string) {
 }
 
 type ExportMarkdownOptions struct {
+	// false 仅在本次 Markdown 导出中省略标题编号；省略或 null 沿用导出设置（默认不包含编号）；true 保留文档编号。
+	HeadingNumber         *bool    `json:"headingNumber" api:"optional"`
 	AddTitle              *bool    `json:"addTitle" api:"optional"`
 	InlineMemo            *bool    `json:"inlineMemo" api:"optional"`
 	BlockRefMode          *float64 `json:"blockRefMode" api:"optional"`
@@ -81,6 +83,8 @@ type ExportNotebooksMarkdownRequest struct {
 }
 
 type ExportMarkdownContentOptions struct {
+	// false 仅在本次 Markdown 复制中省略标题编号；省略或 null 沿用导出设置（默认不包含编号）；true 保留文档编号。
+	HeadingNumber      *bool    `json:"headingNumber" api:"optional"`
 	RefMode            *float64 `json:"refMode" api:"optional"`
 	EmbedMode          *float64 `json:"embedMode" api:"optional"`
 	YFM                *bool    `json:"yfm" api:"optional"`

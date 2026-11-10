@@ -29,6 +29,7 @@ func TestWebSocketDesktopSessionAuthentication(t *testing.T) {
 	sessionStore = cookie.NewStore([]byte("desktop-websocket-session-test-key"))
 	util.WorkspaceDir, util.Container = "Note1", util.ContainerStd
 	srv := newWebSocketTestServer(t)
+	model.Conf.CookieKey = "desktop-websocket-cookie-key"
 	model.Conf.AccessAuthCode = "desktop-password"
 	for _, state := range []string{"current", "remembered", "expired"} {
 		t.Run(state, func(t *testing.T) {
@@ -37,7 +38,7 @@ func TestWebSocketDesktopSessionAuthentication(t *testing.T) {
 			engine.GET("/login", func(c *gin.Context) {
 				session := util.GetSession(c)
 				ws := util.GetWorkspaceSession(session)
-				ws.AccessAuthCode = model.Conf.AccessAuthCode
+				model.SetAccessCodeSession(ws, model.Conf.AccessAuthCode)
 				model.BindDesktopSession(c, ws, state == "remembered")
 				if state == "expired" {
 					ws.DesktopSessionID = "previous-kernel-boot"
@@ -205,6 +206,12 @@ func TestIsLocalWebSocketRequest(t *testing.T) {
 		{"localhost without port", newRequest("127.0.0.1:5000", "localhost", nil), true},
 		{"remote peer", newRequest("192.168.1.9:5000", "192.168.1.9:6806", nil), false},
 		{"forwarded remote client", newRequest("127.0.0.1:5000", "127.0.0.1:6806", map[string]string{"X-Forwarded-For": "203.0.113.9"}), false},
+		{"spoofed loopback forwarding", newRequest("127.0.0.1:5000", "127.0.0.1:6806", map[string]string{"X-Forwarded-For": "127.0.0.1"}), false},
+		{"local proxy loopback client", newRequest("127.0.0.1:5000", "127.0.0.1:6806", map[string]string{util.LocalProxyHeader: util.LocalProxyToken, "X-Forwarded-For": "127.0.0.1"}), true},
+		{"local proxy remote client", newRequest("127.0.0.1:5000", "127.0.0.1:6806", map[string]string{util.LocalProxyHeader: util.LocalProxyToken, "X-Forwarded-For": "203.0.113.9"}), false},
+		{"local proxy spoofed chain", newRequest("127.0.0.1:5000", "127.0.0.1:6806", map[string]string{util.LocalProxyHeader: util.LocalProxyToken, "X-Forwarded-For": "127.0.0.1, 203.0.113.9"}), false},
+		{"local proxy chained spoof", newRequest("127.0.0.1:5000", "127.0.0.1:6806", map[string]string{util.LocalProxyHeader: util.LocalProxyToken, "X-Forwarded-For": "127.0.0.1, 203.0.113.9, 127.0.0.1"}), false},
+		{"local proxy chained loopback", newRequest("127.0.0.1:5000", "127.0.0.1:6806", map[string]string{util.LocalProxyHeader: util.LocalProxyToken, "X-Forwarded-For": "127.0.0.1, 127.0.0.1"}), true},
 		{"lan host header", newRequest("127.0.0.1:5000", "192.168.1.9:6806", nil), false},
 		{"remote forwarded host", newRequest("127.0.0.1:5000", "127.0.0.1:6806", map[string]string{"X-Forwarded-Host": "evil.example"}), false},
 		{"remote origin", newRequest("127.0.0.1:5000", "127.0.0.1:6806", map[string]string{"Origin": "https://evil.example"}), false},

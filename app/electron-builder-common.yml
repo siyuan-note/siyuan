@@ -1,0 +1,39 @@
+# 支持的语言都要保留，否则影响开发者工具字体显示。Electron locale 缺失时回退到 en-US。
+electronLanguages:
+  - ar
+  - de
+  - en
+  - es
+  - fr
+  - he
+  - hi
+  - id
+  - it
+  - ja
+  - ko
+  - nl
+  - pl
+  - pt-BR
+  - ru
+  - sk
+  - sr
+  - th
+  - tr
+  - uk
+  - zh-CN
+  - zh-TW
+
+# Windows registers Open With in nsis/installer.nsh without changing defaults.
+linux:
+  fileAssociations:
+    - &markdownAssociation
+      ext: ["md", "markdown"]
+      name: "SiYuan Markdown"
+      description: "Markdown document"
+      mimeType: "text/markdown"
+      role: "Editor"
+      rank: "Alternate"
+mac:
+  fileAssociations:
+    - <<: *markdownAssociation
+      icon: "src/assets/markdown.icns"

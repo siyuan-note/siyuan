@@ -661,6 +661,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	escapedKey = strings.ReplaceAll(escapedKey, "&#39;", "'")
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	renameRootTitles := map[string]string{}
+	sourceRootTitles := map[string]treenode.DocumentTitle{}
 	cachedTrees := map[string]*parse.Tree{}
 	originals := map[string][]byte{}
 
@@ -752,8 +753,19 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 
 			title := treenode.ReadDocumentTitle(node).Text
 			tags := node.IALAttr("tags")
+			sourceAware := node.DocumentTitle != nil || !IsBoxDoc(tree.Box, node.ID)
+			if sourceAware {
+				previous := treenode.ReadDocumentTitle(node)
+				changed, replaceErr := replaceDocumentTitleText(node, method, keyword, replacement, r)
+				if replaceErr != nil {
+					return replaceErr
+				}
+				if changed {
+					sourceRootTitles[node.ID] = previous
+				}
+			}
 			if 0 == method {
-				if newTitle, matched := replaceSearchText(title, method, keyword, strings.ReplaceAll(replacement, "/", "／"), r); matched {
+				if newTitle, matched := replaceSearchText(title, method, keyword, replacement, r); matched && !sourceAware {
 					renameRootTitles[node.ID] = newTitle
 				}
 
@@ -764,9 +776,8 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 					ReloadTag()
 				}
 			} else if 3 == method {
-				if nil != r && r.MatchString(title) {
-					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
-					renameRootTitles[node.ID] = r.ReplaceAllString(title, docTitleReplacement)
+				if nil != r && r.MatchString(title) && !sourceAware {
+					renameRootTitles[node.ID] = r.ReplaceAllString(title, replacement)
 				}
 
 				if nil != r && r.MatchString(tags) {
@@ -1082,7 +1093,11 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	for _, rootID := range changedRoots {
 		tree := cachedTrees[rootID]
 		title, rename := renameRootTitles[rootID]
-		if err = writeReplacementTree(tree, originals[rootID], title, rename); err != nil {
+		var sourceTitleBefore *treenode.DocumentTitle
+		if previous, changed := sourceRootTitles[rootID]; changed {
+			sourceTitleBefore = &previous
+		}
+		if err = writeReplacementTree(tree, originals[rootID], title, rename, sourceTitleBefore); err != nil {
 			return
 		}
 		reloadTreeIDs = append(reloadTreeIDs, rootID)
@@ -1092,7 +1107,7 @@ func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 }
 
 // 每个文档只提交一次；文件、缓存、索引及撤销失效与编辑器事务串行，标题也使用同一份扫描基线。
-func writeReplacementTree(tree *parse.Tree, original []byte, title string, rename bool) error {
+func writeReplacementTree(tree *parse.Tree, original []byte, title string, rename bool, sourceTitleBefore *treenode.DocumentTitle) error {
 	FlushTxQueue()
 	flushLock.Lock()
 	defer flushLock.Unlock()
@@ -1105,7 +1120,18 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 	}
 	var size uint64
 	var titleChanged, emptyAttrUpdated bool
-	if rename {
+	if sourceTitleBefore != nil {
+		current := treenode.ReadDocumentTitle(tree.Root)
+		titleChanged, emptyAttrUpdated = current.Text != sourceTitleBefore.Text, current.Empty != sourceTitleBefore.Empty
+		if titleChanged {
+			parentHPath, pathErr := documentParentDisplayPath(tree.Box, tree.Path)
+			if pathErr != nil {
+				return pathErr
+			}
+			tree.HPath = parentHPath + "/" + current.Text
+		}
+		tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	} else if rename {
 		if IsBoxDocPath(tree.Box, tree.Path) {
 			title = normalizeBoxName(title)
 		}
@@ -1138,6 +1164,9 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 	}
 	invalidateDocumentHistory(tree.ID)
 	publishDocRename(tree, titleChanged, emptyAttrUpdated)
+	if sourceTitleBefore != nil && !titleChanged && !emptyAttrUpdated {
+		IncSync()
+	}
 	if rename && IsBoxDocPath(tree.Box, tree.Path) {
 		box := Conf.Box(tree.Box)
 		boxConf := box.GetConf()
@@ -2397,7 +2426,7 @@ func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, bo
 		return
 	}
 
-	quotedKeyword := stringQuery(keyword)
+	quotedKeyword := strings.ReplaceAll(stringQuery(keyword), "'", "''")
 	table := "blocks_fts"
 
 	projections := "id, parent_id, root_id, hash, box, path, " +
@@ -2955,10 +2984,14 @@ func buildDocumentSearchStatement(rawQuery string, keywords []string, typeFilter
 	blockLikeFilter := buildSearchDocumentLikeFilter(contentField, keywords)
 	docContentField := "MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END)"
 	docMatchScore := buildDocumentMatchScore(docContentField, keywords)
+	candidateFilter := ""
+	if candidates := buildDocumentSearchCandidates(keywords, typeFilter, searchHPath); candidates != "" {
+		candidateFilter = " AND root_id IN (" + candidates + ")"
+	}
 	dMatchStmt := "SELECT root_id, " + docContentField + " AS docContent, " +
 		"CASE WHEN " + contentDocumentLikeFilter + " THEN 0 ELSE 1 END AS matchSource, " +
 		docMatchScore + " AS docMatchScore, MAX(created) AS docCreated, MAX(updated) AS docUpdated" +
-		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter + candidateFilter +
 		" GROUP BY root_id HAVING " + documentLikeFilter
 	limit := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	pagedDocsStmt := "SELECT root_id AS docRootID, docContent, matchSource, docMatchScore, docCreated, docUpdated FROM docBlocks" +
@@ -3452,7 +3485,6 @@ func stringQuery(query string) string {
 	}
 
 	query = strings.ReplaceAll(query, "\"", "\"\"")
-	query = strings.ReplaceAll(query, "'", "''")
 
 	if strings.Contains(trimmedQuery, " ") {
 		buf := bytes.Buffer{}

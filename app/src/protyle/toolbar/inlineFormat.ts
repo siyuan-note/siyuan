@@ -1,4 +1,5 @@
 import {getSemanticMarkerPrefixLengthForNode} from "../util/inlineElementMarker";
+import {getTextWithLegacyInlineBoundary} from "../util/inlineElementBoundary";
 
 export const INLINE_FORMAT_TYPES = ["strong", "em", "u", "s", "mark", "sup", "sub", "code", "kbd"];
 
@@ -11,7 +12,7 @@ export const getRangeInlineFormats = (editableElement: Element, range: Range): s
             const start = range.startContainer === textNode ? range.startOffset : 0;
             const end = range.endContainer === textNode ? range.endOffset : textNode.data.length;
             const visibleStart = Math.max(start, getSemanticMarkerPrefixLengthForNode(textNode));
-            if (visibleStart < end && textNode.data.substring(visibleStart, end).split("\u200b").join("")) {
+            if (visibleStart < end && getTextWithLegacyInlineBoundary(textNode).substring(visibleStart, end).split("\u200b").join("")) {
                 const types: string[] = [];
                 let element = textNode.parentElement;
                 let image = false;

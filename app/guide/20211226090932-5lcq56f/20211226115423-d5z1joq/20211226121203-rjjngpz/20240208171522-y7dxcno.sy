@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261028120132"
+		"updated": "20261109202806"
 	},
 	"Children": [
 		{
@@ -3160,7 +3160,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中透過「資料庫面板欄位佈局」選擇「單欄」「雙欄（按行）」或「雙欄（按列）」，預設為「雙欄（按行）」。此設定同時作用於文件頂部資料庫面板和獨立項目面板，空間不足時自動使用單欄，切換佈局不會改變欄位順序。"
+					"Data": " 中透過「資料庫面板欄位佈局」選擇「單欄」「雙欄（按行）」或「雙欄（按列）」，預設為「雙欄（按行）」。此設定同時作用於文件頂部資料庫面板和獨立項目面板，空間不足時自動使用單欄，切換佈局不會改變欄位順序。在面板中綁定未綁定項目後，如果已啟用資料庫屬性顯示，面板會開啟綁定區塊的編輯器。已綁定項目的面板不提供重新綁定按鈕，請在資料庫檢視中更換綁定。"
 				}
 			]
 		},
@@ -3312,21 +3312,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261025205717-hk9622e",
-				"updated": "20261025205717"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在條目範本中啟用 "
+					"Data": "在條目範本中透過 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "建立後分割畫面開啟條目"
+					"TextMarkTextContent": "建立後開啟條目"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 後，從資料庫視圖使用該範本新增綁定或游離條目時，會自動在右側開啟。綁定文檔的標題可編輯時聚焦標題，否則聚焦主鍵；游離條目聚焦主鍵。行動端使用既有的頁面或彈出層開啟。"
+					"Data": " 下拉選單選擇「不開啟」（預設）、「開啟」（目前分割畫面）或「向右分割畫面」。綁定與游離條目均支援；綁定文檔優先聚焦可編輯標題，其他情況聚焦主鍵。行動端兩種開啟方式均使用既有頁面或彈出層。"
 				}
 			]
 		},
@@ -3335,12 +3335,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261025205717-tlxui8k",
-				"updated": "20261025205717"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "新範本預設關閉此選項，關閉開關即可停止自動開啟。既有範本在未變更此開關時保留原行為，包括日曆中的自動開啟。不使用範本的空白新增沿用視圖原有行為；如需設定，可建立空白游離條目範本並設為預設。"
+					"Data": "既有範本在未修改此選項時維持原有開啟行為。不使用範本的空白新增沿用視圖行為；如需設定，可建立空白游離條目範本並設為預設。"
 				}
 			]
 		},
@@ -3515,12 +3515,97 @@
 			]
 		},
 		{
+			"ID": "20261103024717-td2pcbf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261103024717-td2pcbf",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "條目詳情中的關聯資料庫檢視"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-ri2wnbi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-ri2wnbi",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在關聯欄位的設定中啟用「顯示關聯表格」，透過「關聯資料庫視圖」選擇關聯資料庫中既有的表格檢視。建立或更換關聯目標時，可在同一選單中設定關聯表格，再點擊「確定」一起儲存。設定屬於該欄位，所有條目共用；新條目自動繼承。關閉顯示不會刪除關聯或目標條目。"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-ekdwy31",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-ekdwy31",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "關聯表格顯示在條目詳情的資料庫屬性區底部，有正文時位於正文之前。綁定文件、內容區塊和未綁定條目都可以使用。同一區塊屬於多個資料庫時，預設透過頁籤切換；關閉「多個資料庫使用頁籤顯示」後，各資料庫的屬性和關聯表格分組顯示。不同資料庫、條目和關聯欄位的成員範圍彼此獨立。"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-qlbohfy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-qlbohfy",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表格只顯示目前條目在該欄位中已關聯的條目，並同時套用所選檢視的篩選。單向關聯也可以使用，不需要反向關聯欄位。目標檢視的欄配置是共用的；目前條目範圍不會寫入共用篩選。面板內的搜尋、「本面板排序」和「本面板附加篩選」僅用於目前面板。"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-pw9e4yd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-pw9e4yd",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編輯表格中的欄位會修改實際的目標條目，其他引用會同步更新。「移除關聯」只取消目前條目在目前欄位中的關聯，不刪除目標條目。「新增既有條目」遵守關聯候選篩選；「建立並關聯條目」沿用目標資料庫的新增規則，未設定範本時新增未綁定條目。"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-b432bi7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-b432bi7",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "目前關聯為空時顯示空表。欄位或目標檢視失效、資料庫鎖定時顯示無法使用的狀態，不會展示未篩選的整個資料庫。此功能首先支援表格；表格內不會自動遞迴展開更多關聯表格。歷史與快照預覽不展開即時關聯視圖。"
+				}
+			]
+		},
+		{
 			"ID": "20240208172038-fewwv8i",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208172038-fewwv8i",
-				"updated": "20260902120000"
+				"updated": "20261030030559"
 			},
 			"Children": [
 				{
@@ -3995,6 +4080,31 @@
 			"AttributeViewType": "table"
 		},
 		{
+			"ID": "20261030030559-99ma3mg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030030559-99ma3mg",
+				"updated": "20261030030559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "範本欄位可使用 httpGet 讀取外部介面資料，執行時需要在目前視窗確認；各列共用請求預算。用法見"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261030003500-hjsgtsl",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "讀取外部介面資料"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
 			"ID": "20260830120200-a1dsptw",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -4125,7 +4235,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-f9wjtlr",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -4470,12 +4580,243 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024164212-c9mzs9w",
-				"updated": "20261024164212"
+				"updated": "20261109002000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "模板結果只在觸發時寫入，重做沿用首次結果。模板不支援 SQL、檔案、網路、迴圈或遞迴；原始碼最多 8 KiB，單一輸入與輸出最多 64 KiB。儲存模板後，該資料庫需要支援自動化版本 2 的用戶端讀取，舊版會明確拒絕讀取；既有版本 1 的規則保持相容。"
+					"Data": "模板結果只在觸發時寫入，重做沿用首次結果。模板不支援 SQL、檔案、迴圈或遞迴；含 HTTP 的規則在編輯儲存後執行。原始碼最多 8 KiB，單一欄位輸入與輸出最多 64 KiB。儲存模板後，該資料庫需要支援自動化版本 2 的用戶端讀取，舊版會明確拒絕讀取；原有版本 1 的規則保持相容。"
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-hr674s7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-hr674s7",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在模板編輯器中按名稱選擇來源欄位，點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "插入欄位引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 會在游標處插入穩定的欄位 ID 引用，欄位改名後引用仍有效；點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "複製 ID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可複製選中欄位的 ID。行動端也提供此入口。"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-glsiyob",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261108182000-glsiyob",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動執行"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261108182000-1ul4n1x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-1ul4n1x",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "手動"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 觸發器，新增寫入一般欄位的動作，將賦值方式設為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "模板"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，然後啟用規則。點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "立即執行"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 處理全部符合規則條件的已儲存條目。結果可離線檢視，重新開啟資料庫不會再次取數。目前不提供定時執行。"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-whgwxfd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-whgwxfd",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動規則的 .action{...} 運算式支援 httpGet 和 fromJson。例如，以下模板將傳回的投影片標題寫入文字欄位："
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-cpbv0q1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-cpbv0q1",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{$r := httpGet \"https://httpbingo.org/json\"}.action{(fromJson $r.body).slideshow.title}"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-50aoyyj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-50aoyyj",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "網路請求需要目前視窗確認，並遵循模板 HTTP 限制。持久許可綁定已儲存的規則版本，可在自動化面板撤銷。手動執行介面按符合條件的項目獨立儲存：同一項目的全部動作一起成功或全部保留原值，其他成功項目不受影響。每筆記錄讀取當時的儲存快照，該筆的全部動作共用此快照；取數期間涉及的資料庫變更會拒絕過期結果。復原和重做沿用已儲存結果，不重新取數。各批次共用 HTTP 限制，每輪最多進行 1,000 次欄位寫入和項目新增。手動模板不提供欄位預覽。手動規則需要自動化格式 9，既有格式 1–8 仍可讀取，舊用戶端拒絕格式 9 且不改寫資料庫。"
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-dzbzzx8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-dzbzzx8",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "執行時顯示成功、失敗、待處理和略過數量，可展開失敗項目清單。「重試失敗及未完成項目」只處理這些項目，不重複已成功的新增動作。各批次共用請求、回應大小、總耗時和寫入上限；達到上限、拒絕授權或關閉面板會停止後續處理，保留已提交的結果。明確重試會開啟新的預算輪次。回應遺失時先查詢進度再繼續寫入。進度綁定目前主視窗，十五分鐘內有效，筆記本進入鎖定流程時清除；過期後請先核對已儲存的值再重新開始。既有 API 呼叫未明確啟用逐筆模式時，仍保持整批原子提交及 null 回應。"
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-e44fiy0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-e44fiy0",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可將覈取方塊作為重新整理開關：監聽其變更，以已勾選為條件，在同一條規則中儲存 HTTP 結果並清除覈取方塊。成功寫入不會再次觸發其他自動化；失敗時保留覈取方塊和原有結果，可取消勾選後再次勾選重試。"
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-91ltnmy",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261109002000-91ltnmy",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動連線和格式化函數"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261109002000-3l1cmtj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-3l1cmtj",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新增條目、欄位變更觸發器中，包含 httpGet 的整條規則會在編輯儲存後執行全部動作。同一資料庫的連續編輯合併處理，由目前視窗確認網路許可。失敗時保留已儲存的編輯和原有結果；等待期間涉及的資料庫變更會捨棄過期結果。取數結果統一儲存並單獨形成一步復原：先復原結果會保留輸入，再復原才還原輸入。重做沿用儲存結果，不重新連線；結果寫入不觸發其他自動化。無互動視窗的 API 寫入只儲存編輯，不執行含 HTTP 的規則。目前不提供定時執行。"
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-9vm1k37",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-9vm1k37",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "所有自動化模板均支援 printf、urlquery、dict、toString 和 fromJson。printf 支援常用格式符並限制純量參數的寬度和精度，不支援動態寬度（*）或參數索引；dict 要求字串鍵和完整的鍵值配對。這些輔助函數最多接受 64 個參數，序列化輸入和字串輸出最多 64 KiB。新的格式化函數和事件 HTTP 規則需要自動化格式 10。既有格式 1–9 仍可讀取，停用的未完成模板原樣保留；舊用戶端拒絕格式 10 且不改寫資料庫。"
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-i3qzcm3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-i3qzcm3",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例如，根據來源欄位組合 URL（將 FIELD_ID 替換為欄位 ID）："
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-aefjd6y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-aefjd6y",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{printf \"https://example.com?q=%s\" (urlquery (field \"FIELD_ID\"))}"
 				}
 			]
 		},
@@ -4914,7 +5255,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261015141042-sk1ubzp",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -4928,7 +5269,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-n6h5527",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5055,12 +5396,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261026103001-jv2ou95",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "引用來源依反鏈規則合併，包括列表項、引述區塊、超級區塊、提示區塊，以及文件首段或標題後首段為純區塊引用時的傳遞規則。區塊類型和自訂屬性限制合併後的最終區塊，標籤條件限制引用來源區塊；設定引用目標後，標籤的收集對象選項不參與選擇。清除引用目標可恢復一般收集。移除引用會保留既有項目和欄位，歷史引用可透過收集管理預覽並補收。引用目標需要自動化格式 8，既有格式 1–7 仍可讀取，舊用戶端會拒絕格式 8 且不改寫資料庫。"
+					"Data": "引用來源依反鏈規則合併，包括列表項、引述區塊、超級區塊、提示區塊，以及文件首段或標題後首段為純區塊引用時的傳遞規則。區塊類型和自訂屬性限制合併後的最終區塊，標籤條件限制引用來源區塊；設定引用目標後，標籤的收集對象選項不參與選擇。清除引用目標可恢復一般收集。刪除正文區塊引用時，可依下方說明確認是否同步移出自動收集的條目。歷史引用可透過收集管理預覽並補收。引用目標需要自動化格式 8，既有格式 1–7 仍可讀取，舊用戶端會拒絕格式 8 且不改寫資料庫。"
 				}
 			]
 		},
@@ -5097,7 +5438,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-ecomado",
-				"updated": "20261024163013"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5174,6 +5515,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "區塊首次符合條件時新增條目。自動收集只新增條目；原文變化、移出監控範圍、修改條件或收集對象、停用或刪除規則，均保留既有條目及欄位。再次匹配時仍使用原條目，保留手動填寫或修改的欄位。"
+				}
+			]
+		},
+		{
+			"ID": "20261102195537-6j7poh9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102195537-6j7poh9",
+				"updated": "20261106090000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "從正文、文件標籤或標籤面板刪除標籤，或刪除正文區塊引用時，會檢查自動收集的條目是否不再符合任何啟用的收集規則。如有影響，會在同一個對話方塊中列出資料庫及條目數量，同時刪除標籤和引用也只確認一次。預設勾選所有受影響的資料庫，確認「同時移出所選條目」會刪除標籤或引用，並同步移出所選條目及其欄位值。取消勾選可保留對應資料庫的條目和欄位；依刪除內容選擇「僅刪除標籤」「僅刪除引用」或「僅刪除標籤和引用」，可保留所有資料庫條目和欄位。取消對話方塊則不執行刪除。原文保留，復原會一起還原標籤或引用、原條目及欄位值。手動加入的條目，以及仍透過同一目標的其他引用或其他啟用規則匹配的條目均保留。重新命名標籤或僅修改引用錨文字不會彈出此對話方塊。"
 				}
 			]
 		},
@@ -5285,6 +5640,214 @@
 			]
 		},
 		{
+			"ID": "20261028142713-43ejq28",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028142713-43ejq28",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "父子條目"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261028142713-hifua3k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-hifua3k",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在資料庫設定中開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "父子條目"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "啟用父子條目"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 即可在首次啟用時自動建立父項與子項關聯欄位。需要重用現有關聯時，進入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用現有關聯欄位"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，選擇一組雙向關聯，並檢查真實項目的階層預覽。需要調整上下層方向時，點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "反轉方向"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，確認方向後啟用。預覽僅顯示目前已載入項目中的部分關聯，啟用時仍會驗證全部關聯。啟用後，存取此資料庫的各端需要支援新格式。未啟用的資料庫不受影響。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-0o36gge",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-0o36gge",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "一個條目最多有一個父項，可以包含多層子項。不能將自己或後代設為父項。父子關係由資料庫的所有檢視及鏡像共用，不改變文件或區塊原有的層級。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-tdkilch",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-tdkilch",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表格與清單可以選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "樹狀顯示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "平鋪顯示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。樹狀顯示中，表格透過第一個可見欄位前的按鈕展開或摺疊子項，按鈕位置隨欄位排序及顯示狀態調整；列表的按鈕位於主欄位前。沒有子項的條目在展開按鈕的位置顯示不可點擊的灰色圓點，同級條目保持對齊。條目圖示保留在主欄位中。卡片、看板及日曆仍維持平鋪，可以透過條目屬性查看及修改父子關係。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-oc3lgae",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-oc3lgae",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "條目選單提供 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新增子項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "變更父項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 及 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "提升一級"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。移動父項時，其後代一起移動；變更父項不會自動修改子項的狀態、日期等欄位。啟用自動排序時，同級順序由排序規則決定。在樹狀顯示中，透過條目選單在上方或下方插入時，新條目與目前條目位於同一階層並共用父項。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-l5t4o62",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-l5t4o62",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "篩選符合子項時，會保留它的祖先路徑作為上下文，不顯示未符合的同級條目。樹狀分組跟隨頂層父項，子項仍保留自己的分組欄位值。平鋪分組依每個條目自己的欄位值處理。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-vnrl3n5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-vnrl3n5",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "樹狀檢視以頂層條目分頁，展開時載入子項，子項較多時可以前後翻頁。摺疊不會改變統計結果，僅作為上下文顯示的祖先不計入篩選符合數量。多行貼上只覆寫目前頁面的可見條目，包括上下文祖先；超出可見範圍的行新增為頂層條目，不會覆寫摺疊條目或其他頁面的條目。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-v5npi7a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-v5npi7a",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "刪除父項後，未刪除的直接子項提升一級，不會連帶刪除後代或綁定的文件、區塊。複製父項會複製整棵子樹，包括摺疊或被篩選隱藏的後代；副本使用新的條目身分，綁定條目的副本為未綁定條目，不複製正文。結構操作支援復原與重做。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-nyhwdet",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-nyhwdet",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "切換為平鋪或停用父子條目不會刪除關聯欄位或資料，也不會自動降低資料庫格式版本。再次啟用會重新檢查現有關係。停用期間若指定欄位被刪除或不再構成雙向自關聯，自動啟用會建立一組新關聯欄位，保留其餘欄位和值。父子循環或多個父項會提示具體原因並拒絕儲存。在父子條目選單中切換選項後，選單保持開啟並更新狀態。加密資料庫的展開狀態在鎖定或關閉筆記本後清除。"
+				}
+			]
+		},
+		{
 			"ID": "20240818174403-xnbqd38",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -5333,6 +5896,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20261109202806-f206cea",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109202806-f206cea",
+				"updated": "20261109202806"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在表格和清單的文字、數字、網址、電子郵件、電話及未綁定主鍵輸入框中，按 Enter 儲存後立即編輯同組下一列的相同字段，最後一列不會自動新增項目。文字可用 Shift+Enter 換行，需要編輯多段落、清單等複雜富文字時，請開啟項目詳情。輸入法組字與候選選擇維持原有行為，儲存失敗時保留目前草稿。"
 				}
 			]
 		}

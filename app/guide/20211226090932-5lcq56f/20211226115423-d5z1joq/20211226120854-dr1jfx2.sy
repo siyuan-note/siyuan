@@ -7,7 +7,7 @@
 		"id": "20211226120854-dr1jfx2",
 		"title": "編輯器",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261107224449"
 	},
 	"Children": [
 		{
@@ -224,6 +224,23 @@
 			]
 		},
 		{
+			"ID": "20261101145217-55e7aeb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-55e7aeb",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261101145217-411811d",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "獨立 Markdown 編輯器"
+				}
+			]
+		},
+		{
 			"ID": "20260920102915-zr83okq",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -400,7 +417,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-4gm4g2v",
-				"updated": "20261024164212"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -415,12 +432,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260927164841-7yj0cwc",
-				"updated": "20261024161816"
+				"updated": "20261030103731"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "編輯自訂方案時，可透過分類選擇框切換工具列與斜線選單。拖曳項目左側的六點把手調整順序，使用項目開關調整顯隱；拖至清單邊緣可捲動。排序前需清空搜尋，修改後確認儲存方案。內建方案唯讀，可複製後自訂，再啟用儲存的方案。方案儲存在本裝置，不跨裝置同步。基於簡潔或完整建立的新自訂方案，未修改過的入口顯隱會跟隨後續版本的預設值；手動切換過的入口保留使用者選擇。"
+					"Data": "新工作空間預設使用完整方案，方案清單中完整方案排在簡潔方案之前。既有工作空間保留目前啟用的方案和已儲存的顯隱及排序設定。編輯自訂方案時，可透過分類選擇框切換工具列與斜線選單。拖曳項目左側的六點把手調整順序，使用項目開關調整顯隱；拖至清單邊緣可捲動。排序前需清空搜尋，修改後確認儲存方案。內建方案唯讀，可複製後自訂，再啟用儲存的方案。方案儲存在本裝置，不跨裝置同步。基於簡潔或完整建立的新自訂方案，未修改過的入口顯隱會跟隨後續版本的預設值；手動切換過的入口保留使用者選擇。"
 				}
 			]
 		},
@@ -449,6 +466,92 @@
 				{
 					"Type": "NodeText",
 					"Data": "清空搜尋後，可點擊欄標題或停靠欄分組標題上的重設圖示重設該層級。重設全部排序時，桌面端可點擊「位置」欄標題右側的重新整理圖示，提示為「重設全部排序」；行動端可點擊底部的重設全部排序按鈕。確認後儲存，取消則放棄修改。重設排序會保留顯隱和停靠欄入口所在位置，重設後的層級持續跟隨後續版本的預設排序。"
+				}
+			]
+		},
+		{
+			"ID": "20261107104457-iip2m2r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107104457-iip2m2r",
+				"updated": "20261107224449"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端和行動端開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "選單和按鈕的顯隱與排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，編輯自訂方案並選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 分類，可分別隱藏區塊引用搜尋候選中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建子文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "選擇位置新增文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，三項預設顯示。儲存並啟用方案後生效。"
 				}
 			]
 		},

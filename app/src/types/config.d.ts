@@ -127,6 +127,7 @@ declare namespace Config {
      * Artificial Intelligence (AI) related configuration
      */
     export interface IAI {
+        memory: IMemory;
         web: IAIWeb;
         providers: IProvider[];
         editing: IEditing;
@@ -138,13 +139,23 @@ declare namespace Config {
         decision: IDecision;
     }
 
+    /** 工作空间长期记忆；笔记来源覆盖全部非加密笔记本，模型选择独立且不自动回退，配置不随记忆 Markdown 同步。 */
+    export interface IMemory {
+        /** 默认关闭；统一控制记忆使用、自动整理和后续已提交用户消息采集，不扫描历史或采集助手输出。 */
+        enabled: boolean;
+        modelId: string;
+        reasoningEffort: string;
+    }
+
     /** 网页服务独立于对话模型；省略配置时搜索使用 Exa、抓取使用直接请求。 */
     export interface IAIWeb {
         searchProvider: string;
         fetchProvider: string;
         /** DeepSeek Search 与 Fetch 共用的凭证，由内核加密保存。 */
         apiKey: string;
-        /** DeepSeek 请求超时秒数，默认 30，范围 1–600。 */
+        /** 独立 Exa 凭据，由内核加密保存；空值使用匿名模式，非空可能产生费用。 */
+        exaApiKey: string;
+        /** 网页请求超时秒数，默认 30，范围 1–600。 */
         timeout: number;
     }
 
@@ -359,10 +370,13 @@ declare namespace Config {
          * Whether to hide toolbar
          */
         hideToolbar: boolean;
+        /** Allow temporary left/right dock bars when hidden and floating. Defaults to true, including older configurations without this field. */
+        showFloatingDockBar?: boolean;
         /**
          * Whether to hide status bar
          */
         hideStatusBar: boolean;
+        showFloatingStatusBar?: boolean;
         /**
          * The name of the icon currently in use
          */
@@ -493,6 +507,15 @@ declare namespace Config {
      * SiYuan bazaar related configuration
      */
     export interface IBazaar {
+        /** Package names excluded from batch updates only; manual updates remain available. */
+        batchUpdateExcluded?: Partial<Record<"plugins" | "themes" | "icons" | "templates" | "widgets", Record<string, boolean>>>;
+        /**
+         * 集市各分类的兼容性筛选偏好；两个开关默认 false，配置补丁可分别更新类型和开关。
+         */
+        compatibilityFilters?: Partial<Record<"plugins" | "themes" | "icons" | "templates" | "widgets", {
+            hideUnsupportedVersion?: boolean;
+            hideIncompatiblePlatform?: boolean;
+        }>>;
         /**
          * Whether to disable all plug-ins
          */
@@ -704,6 +727,8 @@ declare namespace Config {
          * Whether the embedded block displays breadcrumbs
          */
         embedBlockBreadcrumb: boolean;
+        /** 是否将笔记本、文档和块路径合并为一条面包屑，默认关闭 */
+        globalBreadcrumb: boolean;
         embedBlockBreadcrumbParentPath: boolean;
         /**
          * Whether to display automatic heading numbers
@@ -853,6 +878,8 @@ declare namespace Config {
      * SiYuan export related configuration
      */
     export interface IExport {
+        /** Preserve document heading numbering for Markdown copy/export; defaults to false. */
+        headingNumber?: boolean;
         /**
          * Add article title (insert the article title as a first-level title at the beginning of
          * the document)
@@ -1003,10 +1030,15 @@ declare namespace Config {
          */
         docCreateTemplatePath: string;
         /**
-         * The maximum number of documents listed
+         * 标签列表、包含子文档的导出及旧版列表接口的数量上限，不限制文档树浏览。
          * 有效范围为 1–10240；小于 1 回退 512，大于 10240 截断至 10240
          */
         maxListCount: number;
+        /**
+         * 文档树单次按需加载数量，默认 512，有效范围为 1–10240。
+         * 首次升级继承原最大列出数量；设置为 null 时恢复默认值，不重新继承。
+         */
+        docTreeBatchSize: number;
         /**
          * The maximum number of open tabs
          */
@@ -1955,6 +1987,8 @@ declare namespace Config {
          * The prompt information of the last synchronization
          */
         stat: string;
+        /** Last completed sync result: 0 unknown (also for legacy settings), 1 success, 2 failure or automatic pause. Kernel-maintained. */
+        lastResult: number;
         /**
          * The time of the last synchronization (Unix timestamp)
          */

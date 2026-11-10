@@ -6,6 +6,7 @@ package api
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -33,9 +34,9 @@ func avGroupPaging(values map[string]*apicontract.AVGroupPaging) map[string]any 
 func avArchiveRenderData(attrView *av.AttributeView, view av.Viewable) apicontract.AVArchiveRenderData {
 	var views []*apicontract.AVViewData
 	for _, v := range attrView.Views {
-		views = append(views, &apicontract.AVViewData{ID: v.ID, Icon: v.Icon, Name: v.Name, Desc: v.Desc, HideAttrViewName: v.HideAttrViewName, Type: string(v.LayoutType), PageSize: v.PageSize})
+		views = append(views, &apicontract.AVViewData{ID: v.ID, Icon: v.Icon, Name: v.Name, Desc: v.Desc, HideAttrViewName: v.HideAttrViewName, Type: string(v.LayoutType), PageSize: v.PageSize, SubItemsDisplay: v.SubItemsDisplay})
 	}
-	return apicontract.AVArchiveRenderData{Name: attrView.Name, ID: attrView.ID, CustomColors: avContractSlice(attrView.Palette(), toContractAVAttributeViewCustomColor), ColorOrder: attrView.PaletteOrder(), UsedCustomColorIndexes: attrView.UsedCustomColorIndexes(), ViewType: string(view.GetType()), ViewID: view.GetID(), Views: views, View: avContractView(view), IsMirror: av.IsMirror(attrView.ID), NewItemTemplates: avContractSlice(attrView.NewItemTemplates, toContractAVNewItemTemplate), DefaultTemplateID: attrView.DefaultTemplateID}
+	return apicontract.AVArchiveRenderData{SubItems: toContractAVSubItemsConfig(attrView.SubItems), Name: attrView.Name, ID: attrView.ID, CustomColors: avContractSlice(attrView.Palette(), toContractAVAttributeViewCustomColor), ColorOrder: attrView.PaletteOrder(), UsedCustomColorIndexes: attrView.UsedCustomColorIndexes(), ViewType: string(view.GetType()), ViewID: view.GetID(), Views: views, View: avContractView(view), IsMirror: av.IsMirror(attrView.ID), NewItemTemplates: avContractSlice(attrView.NewItemTemplates, toContractAVNewItemTemplate), DefaultTemplateID: attrView.DefaultTemplateID}
 }
 
 func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string, filter func(av.Viewable) av.Viewable, hideContext bool, renderOptions ...model.AttributeViewRenderOptions) apicontract.Response[apicontract.AVRenderResult] {
@@ -44,6 +45,7 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		options = renderOptions[0]
 	}
 	options.ReadOnly = options.ReadOnly || filter != nil
+	options.ScopeFilter = filter
 	view, attrView, target, err := model.RenderAttributeViewWithTargetOptions(blockID, avID, viewID, query, page, pageSize, groupPaging, initialLayout, createIfNotExist, ignoreRows, targetItemID, targetGroupID, options)
 	if err != nil {
 		message := err.Error()
@@ -55,11 +57,15 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		}
 		return apicontract.Failure[apicontract.AVRenderResult](-1, message)
 	}
-	contextFilter, err := model.GetAttributeViewContextFilter(attrView, blockID)
+	contextBlockID := blockID
+	if options.RelationContext != nil {
+		contextBlockID = ""
+	}
+	contextFilter, err := model.GetAttributeViewContextFilter(attrView, contextBlockID)
 	if err != nil {
 		return apicontract.Failure[apicontract.AVRenderResult](-1, err.Error())
 	}
-	data := apicontract.AVRenderData{AVArchiveRenderData: avArchiveRenderData(attrView, view), ContextFilter: toContractAVAttributeViewContextFilter(contextFilter), ContextFilterFields: avContractSlice(model.GetAttributeViewContextFilterFields(attrView, blockID), toContractAVAttributeViewContextFilterField), Target: toContractAVAttributeViewRenderTarget(target)}
+	data := apicontract.AVRenderData{AVArchiveRenderData: avArchiveRenderData(attrView, view), ContextFilter: toContractAVAttributeViewContextFilter(contextFilter), ContextFilterFields: avContractSlice(model.GetAttributeViewContextFilterFields(attrView, contextBlockID), toContractAVAttributeViewContextFilterField), Target: toContractAVAttributeViewRenderTarget(target)}
 	if filter != nil {
 		view = filter(view)
 		if calendar, ok := view.(*av.Calendar); ok {
@@ -87,11 +93,17 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		data.ContextFilter = nil
 		data.ContextFilterFields = []*apicontract.AVAttributeViewContextFilterField{}
 	}
+	data.PendingHTTPTemplates = options.HTTPPreview.Pending()
 	return apicontract.Success(apicontract.NewAVRenderResult(data))
 }
 
-func createAVItemResponse(result *model.CreateAttributeViewItemResult, err error, app, session string) apicontract.Response[apicontract.AVCreateItemResult] {
+func createAVItemResponse(c *gin.Context, result *model.CreateAttributeViewItemResult, err error, app, session string) apicontract.Response[apicontract.AVCreateItemResult] {
 	if err != nil {
+		if failure, leaseErr := documentSelectionFailure(c, err); leaseErr != nil {
+			return apicontract.Failure[apicontract.AVCreateItemResult](-1, leaseErr.Error())
+		} else if failure != nil {
+			return apicontract.CreateAttributeViewItem.FailureWithData(-1, err.Error(), apicontract.NewAVCreateItemSelectionFailure(*failure))
+		}
 		if errors.Is(err, model.ErrBoxNotFound) {
 			return apicontract.CreateAttributeViewItem.FailureWithData(1, "", apicontract.NewAVCreateItemResultError(apicontract.AVUnavailableNotebook{UnavailableNotebook: true}))
 		}

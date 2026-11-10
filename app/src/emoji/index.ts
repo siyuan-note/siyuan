@@ -1,42 +1,20 @@
+import {getDocTreeItem} from "../layout/dock/docTree/rowData";
+import {updateNotebookBreadcrumbIcon} from "../protyle/breadcrumb/iconRefresh";
 import {config as configApi} from "../config/util/configApi";
 import {getRandom, isMobile} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import {Constants} from "../constants";
-/// #if !MOBILE
-import {Files} from "../layout/dock/Files";
-import {getDockByType} from "../layout/tabUtil";
-/// #endif
 import {getAllEditor, getAllModels} from "../layout/getAll";
 import {Dialog} from "../dialog";
 import {setPosition} from "../util/setPosition";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {getLuteInstance} from "../protyle/render/setLute";
 import dayjs from "dayjs";
-import {
-    bindDynamicIconTarget,
-    getIconSearchText,
-    getIconValueKind,
-    getNetworkIconName,
-    normalizeNetworkIconURL,
-    normalizeRecentIconValue,
-    parseBase64Image,
-    unicode2Emoji,
-    updateRecentIconValues,
-} from "./iconValue";
+import {bindDynamicIconTarget, getIconSearchText, getIconValueKind, getNetworkIconName, normalizeNetworkIconURL, normalizeRecentIconValue, parseBase64Image, unicode2Emoji, updateRecentIconValues} from "./iconValue";
 import {showMessage} from "../dialog/message";
 import {escapeAttr, escapeHtml} from "../util/escape";
-import {
-    collectEmojiMatches,
-    getActiveEmojiCategory,
-    getEmojiItemMap,
-    getEmojiPanelResizeAction,
-    getEmojiVirtualChunks,
-    getRandomEmojiCategories,
-    groupCustomEmojiItems,
-    type TEmojiPanelPageMode,
-    type TRandomEmojiScope,
-} from "./panel";
+import {collectEmojiMatches, getActiveEmojiCategory, getEmojiItemMap, getEmojiPanelResizeAction, getEmojiVirtualChunks, getRandomEmojiCategories, groupCustomEmojiItems, type TEmojiPanelPageMode, type TRandomEmojiScope} from "./panel";
 import {getFileTreeIconHTML, updateFileTreeItemIcon} from "./fileTreeIcon";
 import {bindBottomSheetDialog} from "../mobile/util/bindBottomSheetDialog";
 import {activeBlur} from "../mobile/util/keyboardToolbar";
@@ -901,7 +879,7 @@ export const openEmojiPanel = (
         }
     };
 
-    let disposeSheet: (() => void) | undefined;
+    let disposeSheet: ReturnType<typeof bindBottomSheetDialog> | undefined;
     let disposeSelection: (() => void) | undefined;
     const dialog = new Dialog({
         disableAnimation: !isMobile(),
@@ -1076,12 +1054,13 @@ export const openEmojiPanel = (
     if (isMobile()) {
         const destroyDialog = dialog.destroy.bind(dialog);
         dialog.destroy = (destroyOptions?: IObject) => {
+            disposeSheet?.freeze();
             if (dialog.element.contains(document.activeElement)) {
                 activeBlur(true);
             }
             destroyDialog(destroyOptions);
         };
-        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
+        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy(), undefined, undefined, {mode: "standard"});
         if (type === "insert" && options?.insertRange) {
             disposeSelection = bindEmojiSheetSelection(
                 dialog.element.querySelector(".b3-dialog__container"), options.insertRange.cloneRange());
@@ -1615,42 +1594,17 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
             return;
         }
         if (notebook) {
-            notebook.icon = unicode;
+            updateNotebookBreadcrumbIcon(id, unicode);
             if (notebook.encrypted && notebook.closed) {
                 return;
             }
         }
     }
-    let emojiElement;
-    /// #if MOBILE
-    if (!isNotebookIcon) {
-        emojiElement = document.querySelector(
-            `[data-type="sidebar-file"] [data-node-id="${id}"] .b3-list-item__icon`
-        );
-    } else {
-        emojiElement = document.querySelector(
-            `[data-type="sidebar-file"] ul[data-url="${id}"] > li[data-type="navigation-root"] .b3-list-item__icon`
-        ) || document.querySelector(
-            `[data-type="sidebar-file"] li[data-url="${id}"] .b3-list-item__icon`
-        );
-    }
-    /// #else
-    const dockFile = getDockByType("file");
-    if (dockFile) {
-        const files = dockFile.data.file as Files;
-        if (!isNotebookIcon) {
-            emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`);
-        } else {
-            emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`) || files.element.querySelector(`[data-url="${id}"] .b3-list-item__icon`) || files.closeElement.querySelector(`[data-url="${id}"] .b3-list-item__icon`);
+    document.querySelectorAll<HTMLElement>(".sy__file li[data-tree-key], [data-type=sidebar-file] li[data-tree-key], .file-tree__pins li[data-tree-key]").forEach(row => {
+        const item = getDocTreeItem(row);
+        if (item?.id === id && ((item.kind === "notebook") === isNotebookIcon || row.closest(".file-tree__pins"))) {
+            updateFileTreeItemIcon(row, unicode, isNotebookIcon ? "notebook" : undefined);
         }
-    }
-    /// #endif
-    const liElement = emojiElement?.closest("li") as HTMLElement | null;
-    if (liElement) {
-        updateFileTreeItemIcon(liElement, unicode, isNotebookIcon ? "notebook" : undefined);
-    }
-    document.querySelectorAll<HTMLElement>(`.file-tree__pins [data-pin-row][data-node-id="${id}"]`).forEach(row => {
-        updateFileTreeItemIcon(row, unicode);
     });
 };
 

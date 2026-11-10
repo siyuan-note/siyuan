@@ -302,8 +302,26 @@ const getRangeListItemElements = (editorElement: HTMLElement, range: Range) => {
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     let forwardBlockRemovalPending = false;
+    let forwardBlockRemovalComplete: Promise<boolean>;
     bindVerticalNavigationReset(editorElement);
     editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
+        if (forwardBlockRemovalPending && event.key === "Enter" && !event.isComposing) {
+            event.preventDefault();
+            event.stopPropagation();
+            // 合并完成并恢复光标后执行回车，避免分割即将被异步删除的段落。
+            try {
+                await forwardBlockRemovalComplete;
+            } catch {
+                return;
+            }
+            if (editorElement.isConnected && !protyle.disabled) {
+                editorElement.dispatchEvent(new KeyboardEvent("keydown", {
+                    key: event.key, code: event.code, keyCode: event.keyCode, bubbles: true, cancelable: true,
+                    shiftKey: event.shiftKey, ctrlKey: event.ctrlKey, altKey: event.altKey, metaKey: event.metaKey,
+                }));
+            }
+            return;
+        }
         if (event.target.localName === "protyle-html" || event.target.localName === "input") {
             event.stopPropagation();
             return;
@@ -340,7 +358,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (handleReadonlyAttributeHotkey(protyle, event)) {
             return true;
         }
-        if (protyle.disabled || event.target.closest(".tabs-header")) {
+        if (protyle.disabled || event.target.closest('.tabs-header, [data-document-title="true"]')) {
             return;
         }
         if (!protyle.selectElement.classList.contains("fn__none") &&
@@ -462,6 +480,29 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (calloutTitleElement && !event.isComposing && !blockSelectionModeElement) {
+            if (!event.altKey && !event.shiftKey &&
+                ((event.key.startsWith("Arrow") && isNotCtrl(event)) || event.key === "Enter") &&
+                !protyle.hint.element.classList.contains("fn__none") && protyle.hint.select(event, protyle)) {
+                return;
+            }
+            const getTitleOffset = (titleRange: Range) => {
+                const offset = getSelectionOffset(calloutTitleElement, nodeElement, titleRange);
+                const before = titleRange.cloneRange();
+                before.selectNodeContents(calloutTitleElement);
+                before.setEnd(titleRange.startContainer, titleRange.startOffset);
+                // 通用选区偏移已计算表情图片，标题边界还需计入普通图片。
+                const countImages = (fragment: DocumentFragment) => fragment.querySelectorAll("img").length -
+                    fragment.querySelectorAll("img.emoji").length;
+                const beforeImages = countImages(before.cloneContents());
+                offset.start += beforeImages;
+                offset.end += beforeImages + countImages(titleRange.cloneContents());
+                return offset;
+            };
+            const getTitleLength = () => {
+                const titleRange = range.cloneRange();
+                titleRange.selectNodeContents(calloutTitleElement);
+                return getTitleOffset(titleRange).end;
+            };
             if (matchHotKey("⌘A", event)) {
                 range.selectNodeContents(calloutTitleElement);
                 focusByRange(range);
@@ -478,9 +519,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (event.key === "Backspace" || event.key === "Delete") {
-                const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
+                const offset = getTitleOffset(range);
                 if (range.collapsed && ((event.key === "Backspace" && offset.start === 0) ||
-                    (event.key === "Delete" && offset.end === calloutTitleElement.textContent.length))) {
+                    (event.key === "Delete" && offset.end === getTitleLength()))) {
                     event.preventDefault();
                 }
                 event.stopPropagation();
@@ -492,9 +533,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.key === "Home" || event.key === "End") {
                 if (calloutTitleElement.classList.contains("tab-item-title") && range.collapsed &&
                     !event.altKey && !event.shiftKey && isNotCtrl(event)) {
-                    const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
+                    const offset = getTitleOffset(range);
                     if (event.key === "ArrowLeft" && offset.start === 0 ||
-                        event.key === "ArrowRight" && offset.end === calloutTitleElement.textContent.length) {
+                        event.key === "ArrowRight" && offset.end === getTitleLength()) {
                         event.preventDefault();
                     }
                 }
@@ -1482,8 +1523,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     event.preventDefault();
                                     forwardBlockRemovalPending = true;
                                     try {
-                                        await removeBlock(protyle, nextBlockElement, nextRange, "Delete",
+                                        forwardBlockRemovalComplete = removeBlock(protyle, nextBlockElement, nextRange, "Delete",
                                             false, false, undoFocusContext);
+                                        await forwardBlockRemovalComplete;
                                     } finally {
                                         forwardBlockRemovalPending = false;
                                         if (caretElement.isConnected) {

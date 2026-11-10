@@ -226,6 +226,20 @@
 			]
 		},
 		{
+			"ID": "20261107234500-jycrwul",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107234500-jycrwul",
+				"updated": "20261107234500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "モバイルテーマでは #keyboardToolbar.keyboard--sheet-open を使用して、アプリがキーボードツールバーと下部メニューまたはダイアログシートを同時に表示する状態のスタイルを設定できます。この状態はアプリの表示設定に従い、このクラスから派生したテーマスタイルには影響されません。ツールバーが非表示になるか、すべてのシートが閉じると、このクラスは削除されます。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-uh55ojh",
 			"Type": "NodeParagraph",
 			"Properties": {

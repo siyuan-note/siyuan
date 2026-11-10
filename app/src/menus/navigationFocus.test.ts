@@ -12,7 +12,8 @@ const compiled = transpileModule(declaration.getText(source), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const fixture = (tablet: boolean, alreadyZoomed = false, missingTarget = false) => {
+const fixture = (tablet: boolean, alreadyZoomed = false, missingTarget = false,
+                 breadcrumbID = "target", showAll = false) => {
     const loads: any[] = [];
     const pending: Promise<void>[] = [];
     let focused = 0;
@@ -48,10 +49,10 @@ const fixture = (tablet: boolean, alreadyZoomed = false, missingTarget = false) 
     });
     const protyle = {
         options: {},
-        block: {rootID: "root"},
+        block: {rootID: "root", id: showAll ? "target" : "root", showAll},
         breadcrumb: alreadyZoomed ? {element: {
             parentElement: {querySelector: (): undefined => undefined},
-            querySelector: () => ({getAttribute: () => "target"}),
+            querySelector: () => ({getAttribute: () => breadcrumbID}),
         }} : undefined,
         wysiwyg: {element: {querySelector: () => missingTarget ? undefined : target}},
     };
@@ -120,6 +121,31 @@ test("desktop breadcrumb navigation retains focus", () => {
     f.zoom();
     assert.equal(f.focused(), 1);
     assert.equal(f.scrolled(), 1);
+});
+
+test("exit focus loads the full document when its breadcrumb is active in a focused tab item", async () => {
+    for (const tablet of [false, true]) {
+        const f = fixture(tablet, true, false, "root", true);
+        let callbacks = 0;
+        f.zoom({id: "root", focusId: "target", suppressFocus: tablet,
+            callback: () => callbacks++});
+        await f.settle();
+        assert.equal(f.loads.length, 1);
+        assert.equal(f.loads[0].action.includes("all"), false);
+        assert.equal(f.loads[0].scrollAttr.focusId, "target");
+        assert.equal(f.loads[0].suppressFocus, tablet);
+        f.loads[0].afterCB();
+        assert.equal(callbacks, 1);
+        assert.equal(f.focused(), tablet ? 0 : 1);
+        assert.equal(f.scrolled(), tablet ? 1 : 0);
+    }
+});
+
+test("clicking the document breadcrumb in the full document avoids reloading", () => {
+    const f = fixture(false, true, false, "root");
+    f.zoom({id: "root"});
+    assert.equal(f.loads.length, 0);
+    assert.equal(f.focused(), 0);
 });
 
 test("mobile backlinks follow focus and exit-focus after rendering without dropping the caller callback", () => {

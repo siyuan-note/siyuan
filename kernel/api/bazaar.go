@@ -528,6 +528,7 @@ func bazaarPackage(value *bazaar.Package) *apicontract.BazaarPackage {
 	ret.HasStorageData = value.HasStorageData
 	ret.Outdated = value.Outdated
 	ret.Current = value.Current
+	ret.Created = value.Created
 	ret.Updated = value.Updated
 	ret.Stars = value.Stars
 	ret.OpenIssues = value.OpenIssues
@@ -542,6 +543,7 @@ func bazaarPackage(value *bazaar.Package) *apicontract.BazaarPackage {
 	ret.Downloads = value.Downloads
 	ret.DisallowInstall = value.DisallowInstall
 	ret.DisallowUpdate = value.DisallowUpdate
+	ret.BazaarVersionUnsupported = value.BazaarVersionUnsupported
 	ret.UpdateRequiredMinAppVer = value.UpdateRequiredMinAppVer
 	ret.InvalidReason = value.InvalidReason
 	ret.RatingAvailable = value.RatingAvailable
@@ -558,6 +560,7 @@ func bazaarAppearance(value *conf.Appearance) *apicontract.BazaarAppearance {
 		return nil
 	}
 	ret := &apicontract.BazaarAppearance{}
+	ret.ShowFloatingDockBar = value.ShowFloatingDockBar
 	ret.CompactMode = value.CompactMode
 	ret.MenuMouseScroll = value.MenuMouseScroll
 	ret.OutlineKeepCurrentExpand = value.OutlineKeepCurrentExpand
@@ -606,6 +609,7 @@ func bazaarAppearance(value *conf.Appearance) *apicontract.BazaarAppearance {
 	ret.CloseButtonBehavior = value.CloseButtonBehavior
 	ret.HideToolbar = value.HideToolbar
 	ret.HideStatusBar = value.HideStatusBar
+	ret.ShowFloatingStatusBar = value.ShowFloatingStatusBar
 	ret.StatusBar = bazaarStatusBar(value.StatusBar)
 	ret.Notifications = bazaarNotifications(value.Notifications)
 	ret.EntryVisibility = bazaarEntryVisibility(value.EntryVisibility)

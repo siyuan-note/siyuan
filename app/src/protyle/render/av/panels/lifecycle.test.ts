@@ -11,6 +11,7 @@ const createPanel = (mobile = false) => {
     const events = new Map<string, (event: unknown) => unknown>();
     const observers: Array<() => void> = [];
     const positions: Array<{left: number, top: number}> = [];
+    const requests: Array<{url: string, data: {ignoreRows: boolean}}> = [];
     let onMenuRemove = () => {};
     let context: IAVPanelContext;
     let existing = false;
@@ -28,7 +29,14 @@ const createPanel = (mobile = false) => {
             querySelector: () => ({textContent: "", getBoundingClientRect: () => ({right: 300, bottom: 40, height: 20})})} as unknown as Element,
         destroyCallback: () => calls.push("destroy")};
     const dependencies = new Proxy({
+        getAVRelationHost: (): undefined => undefined,
+        getAVHostIdentity: (element: HTMLElement) => element.getAttribute("data-node-id"),
+        isAVRenderData: (data: {view?: unknown}) => !!data?.view,
         getPageSize: () => ({}), getFieldsByData: (data: IAV & {fields: IAVColumn[]}) => data.fields,
+        fetchPost: (url: string, data: {ignoreRows: boolean}, callback: (response: unknown) => void) => {
+            requests.push({url, data});
+            callback({code: 0, data: {id: "av", viewType: "table", fields: [], view: {rows: []}}});
+        },
         escapeAttr: (value: string) => value, isMobile: () => mobile,
         getMobileAVPanelBackTarget: () => backTarget,
         getAVPanelDescriptor: () => ({render: (value: IAVPanelContext) => { context = value; value.html = "panel"; return true; },
@@ -55,13 +63,34 @@ const createPanel = (mobile = false) => {
     });
     const open = exports.openMenuPanel as typeof import("../openMenuPanel").openMenuPanel;
     const click = (detail: unknown) => events.get("click")({detail, target: {dataset: {}, closest: (): null => null}, preventDefault: () => {}, stopPropagation: () => {}});
-    return {open, options, calls, click, observers, menuClasses, positions, resize: () => events.get("resize")({}),
+    return {open, options, calls, click, observers, menuClasses, positions, requests, resize: () => events.get("resize")({}),
         onMenuRemove: (callback: () => void) => { onMenuRemove = callback; },
         setBackTarget: () => {
             backTarget = {dataset: {type: "go-properties"}, closest: (): null => null} as unknown as HTMLElement;
         },
         get context() { return context; }, setExisting: () => { existing = true; }};
 };
+
+for (const mobile of [false, true]) {
+    for (const type of ["select", "date", "edit"] as const) {
+        test(`${type} editors load metadata without moving the cell panel on resize (${mobile ? "mobile" : "desktop"})`, () => {
+            const h = createPanel(mobile);
+            h.options.type = type;
+            h.options.data = undefined;
+            h.options.cellElements = [{getBoundingClientRect: () => ({left: 20, bottom: 80, height: 24})} as HTMLElement];
+            h.options.blockElement = {
+                ...h.options.blockElement, contains: () => true,
+            } as unknown as Element;
+            h.open(h.options);
+            assert.equal(h.requests.length, 1);
+            assert.equal(h.requests[0].url, "/api/av/renderAttributeView");
+            assert.equal(h.requests[0].data.ignoreRows, true);
+            assert.equal(h.context.options.cellElements, h.options.cellElements);
+            assert.ok(h.calls.includes(type === "select" ? "setSelectMenuPosition" : "setPosition"));
+            assert.ok(!h.calls.includes("resize.bind"));
+        });
+    }
+}
 
 test("window resizing uses the automation height constraint only while its panel is open", () => {
     const h = createPanel();

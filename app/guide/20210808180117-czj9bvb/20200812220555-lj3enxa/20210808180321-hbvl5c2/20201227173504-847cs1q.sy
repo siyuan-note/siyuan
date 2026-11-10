@@ -6,7 +6,7 @@
 		"id": "20201227173504-847cs1q",
 		"title": "Docker 伺服",
 		"type": "doc",
-		"updated": "20261016202635"
+		"updated": "20261101194733"
 	},
 	"Children": [
 		{
@@ -294,7 +294,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227174908-s19h988",
-				"updated": "20261016202635"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -345,6 +345,56 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261101194733-4cy2195",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101194733-4cy2195",
+				"updated": "20261101194733"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "当主服务使用的端口不是 6806 时，思源还会在 6806 可用时启动反向代理，方便浏览器扩展通过固定地址连接。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "serve"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 命令中添加 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可关闭这个额外反代，默认值为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。主服务仍监听 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 指定的端口，包括 6806，发布服务也不受影响。关闭后，原先通过该反代连接的客户端需要改用主服务的实际端口。移除该参数或将其设为 true 并重启内核即可恢复反代。"
 				}
 			]
 		},
@@ -901,6 +951,52 @@
 					"Properties": {
 						"id": "20260921003419-qnv6oha",
 						"updated": "20260921003419"
+					}
+				},
+				{
+					"ID": "20261105165001-xffitem",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261105165001-xffpara",
+							"Type": "NodeParagraph",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在两处代理配置中设置 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "proxy_set_header X-Forwarded-For $remote_addr;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，让内核获取真实客户端地址。不要原样透传调用方提供的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "X-Forwarded-For"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，否则远程客户端可能被误判为本机管理员"
+								}
+							],
+							"Properties": {
+								"id": "20261105165001-xffpara",
+								"updated": "20261105165001"
+							}
+						}
+					],
+					"Properties": {
+						"id": "20261105165001-xffitem",
+						"updated": "20261105165001"
 					}
 				}
 			]

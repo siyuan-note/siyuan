@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
@@ -20,7 +21,6 @@ import {
     normalizeBazaarUserRating,
     sortBazaarPackages,
 } from "../../util/bazaarPackage";
-import {Dialog} from "../../dialog";
 import {BAZAAR_PACKAGE_CONFIG, BAZAAR_PACKAGE_TYPES, isBazaarPackageType} from "./packageConfig";
 
 type TBazaarController = typeof import("../bazaar").bazaar;
@@ -580,7 +580,8 @@ export const openRatingDialog = (controller: TBazaarController, bazaarType: TBaz
 <svg class="config-bazaar__rating-star config-bazaar__rating-star--outline" aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
 </button>`;
     }).join("");
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {beforeClose: () => !submitting},
         title: window.siyuan.languages.bazaarRatePackage,
         content: `<div class="b3-dialog__content">
 <div class="config-bazaar__rating-picker" role="radiogroup" aria-label="${escapeAttr(window.siyuan.languages.bazaarYourRating)}">${buttons}</div>
@@ -593,7 +594,7 @@ ${canRemoveRating ? `<button type="button" class="b3-button b3-button--remove" d
 </div>`,
         width: isMobile() ? "92vw" : "360px",
         destroyCallback: () => {
-            if (previousActiveElement?.isConnected) {
+            if (!isMobile() && previousActiveElement?.isConnected) {
                 previousActiveElement.focus({preventScroll: true});
             }
         },
@@ -678,6 +679,7 @@ ${canRemoveRating ? `<button type="button" class="b3-button b3-button--remove" d
         setSubmitting(true);
         submitPackageRating(controller, bazaarType, packageName, 0, (success) => {
             if (success) {
+                setSubmitting(false);
                 dialog.destroy();
             } else {
                 setSubmitting(false);
@@ -691,11 +693,12 @@ ${canRemoveRating ? `<button type="button" class="b3-button b3-button--remove" d
         setSubmitting(true);
         submitPackageRating(controller, bazaarType, packageName, selectedRating, (success) => {
             if (success) {
+                setSubmitting(false);
                 dialog.destroy();
             } else {
                 setSubmitting(false);
             }
         });
     });
-    (picker.querySelector('[tabindex="0"]') as HTMLButtonElement)?.focus({preventScroll: true});
+    dialog.focusWhenReady(() => picker.querySelector<HTMLButtonElement>('[tabindex="0"]'));
 };

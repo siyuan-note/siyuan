@@ -59,14 +59,14 @@ test("web provider descriptions follow the selected services on opening and swit
     }
 });
 
-test("the shared DeepSeek key appears for either provider and retains saved and draft values when hidden", () => {
+test("independent Exa and DeepSeek keys follow provider selection and retain saved and draft values when hidden", () => {
     const code = transpileModule(readFileSync("src/config/tabs/ai/aiWeb.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
     }).outputText;
     for (const searchProvider of ["exa", "deepseek"]) {
         for (const fetchProvider of ["direct", "deepseek"]) {
             const controls = new Map<string, ProviderControl>();
-            const web = {searchProvider, fetchProvider, apiKey: "saved-key"};
+            const web = {searchProvider, fetchProvider, apiKey: "saved-key", exaApiKey: "saved-exa-key"};
             const exports = {} as {registerAiWebGroup: (tab: unknown) => void};
             runInNewContext(code, {exports, window: {siyuan: {config: {ai: {web}},
                 languages: new Proxy({}, {get: (_, key) => String(key)})}}});
@@ -80,16 +80,24 @@ test("the shared DeepSeek key appears for either provider and retains saved and 
             const search = select("search", searchProvider);
             const fetch = select("fetch", fetchProvider);
             let hidden = false;
+            let exaHidden = false;
             const key = {value: "draft-key", closest: () => ({classList: {toggle: (name: string, value: boolean) => {
                 assert.equal(name, "fn__none");
                 hidden = value;
             }}})};
+            const exaKey = {value: "draft-exa-key", closest: () => ({classList: {toggle: (name: string, value: boolean) => {
+                assert.equal(name, "fn__none");
+                exaHidden = value;
+            }}})};
             const root = {querySelector: (selector: string) => selector.includes("searchProvider") ? search :
-                selector.includes("fetchProvider") ? fetch : selector.includes("apiKey") ? key : null};
+                selector.includes("fetchProvider") ? fetch : selector.includes("exaApiKey") ? exaKey :
+                    selector.includes("apiKey") ? key : null};
             controls.get("ai.web.searchProvider").afterMount(root);
             controls.get("ai.web.fetchProvider").afterMount(root);
             controls.get("ai.web.apiKey").afterMount(root);
+            controls.get("ai.web.exaApiKey").afterMount(root);
             assert.equal(hidden, searchProvider !== "deepseek" && fetchProvider !== "deepseek");
+            assert.equal(exaHidden, searchProvider !== "exa");
             for (const [searchValue, fetchValue, expectedHidden] of [
                 ["deepseek", "direct", false], ["deepseek", "deepseek", false],
                 ["exa", "deepseek", false], ["exa", "direct", true], ["deepseek", "direct", false],
@@ -99,8 +107,11 @@ test("the shared DeepSeek key appears for either provider and retains saved and 
                 fetch.value = fetchValue;
                 listeners.get("fetch")();
                 assert.equal(hidden, expectedHidden);
+                assert.equal(exaHidden, searchValue !== "exa");
                 assert.equal(key.value, "draft-key");
+                assert.equal(exaKey.value, "draft-exa-key");
                 assert.equal(web.apiKey, "saved-key");
+                assert.equal(web.exaApiKey, "saved-exa-key");
             }
         }
     }

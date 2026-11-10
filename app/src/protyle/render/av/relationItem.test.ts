@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
+import {getAVHostBlockID, getAVRelationHost} from "./host";
 
 const source = createSourceFile("relation.ts", readFileSync(join(__dirname, "relation.ts"), "utf8"), ScriptTarget.ES2021, true);
 const load = (names: string[], dependencies: Record<string, unknown>) => {
@@ -22,6 +23,32 @@ const languages = {
     newRelationItemWithInputName: "Create with input name in ${x}: <b>${y}</b>",
     newItemTemplateUnavailableNotebookTip: "Notebook unavailable",
 };
+
+it("parent relation editing replaces the parent atomically without optimistically merging multiple parents", async () => {
+    for (const selected of [false, true]) {
+        const calls: unknown[][] = [];
+        let closed = false;
+        const menu = {querySelector: (selector: string) => selector === ".av__relation" ?
+            {dataset: {subItemsParent: "true"}} : undefined,
+        closest: () => ({remove: () => { closed = true; }})};
+        const node = {contains: () => true, getAttribute: () => "list", dataset: {}};
+        const target = {classList: {contains: () => true}, getAttribute: () => "new-parent",
+            dataset: {relationType: selected ? "selected" : "candidate"}};
+        const {setRelationCell} = load(["getRelationCellScope", "setRelationCell"], {
+            hasClosestByClassName: () => menu,
+            getAVRelationHost,
+            getFieldIdByCellElement: (cell: {rowID: string}) => cell.rowID,
+            reparentSubItems: (...args: unknown[]) => calls.push(args),
+        });
+        await setRelationCell({}, node, target, ["a", "b"].map(rowID =>
+            ({rowID, closest: () => ({dataset: {groupId: "selected-group"}})})));
+        assert.equal(calls.length, 1);
+        assert.deepEqual(calls[0][2], ["a", "b"]);
+        assert.equal(calls[0][3], selected ? "" : "new-parent");
+        assert.equal(calls[0][6], "selected-group");
+        assert.equal(closed, true);
+    }
+});
 
 it("always offers creation, previews the template name, and escapes database names and titles", () => {
     const previews = new WeakMap();
@@ -86,9 +113,10 @@ const creationFixture = (mobile: boolean, response: Promise<unknown>, useInputNa
         dispatchEvent: (event: {type: string}) => events.push(event.type),
     };
     const node = {dataset: {avId: "source", nodeId: "source-carrier"}, contains: () => true};
-    const protyle = {app: {appId: "app"}, id: "editor"};
+    const protyle = {app: {appId: "app"}, id: "editor", block: {rootID: "root"}};
     const previews = new WeakMap([[menu, {keyword: "Task A", preview}]]);
-    const {setRelationCell} = load(["genCreatedRelationRowHTML", "setRelationCell"], {
+    const {setRelationCell} = load(["getRelationCellScope", "genCreatedRelationRowHTML", "setRelationCell"], {
+        getAVRelationHost, getAVHostBlockID,
         relationItemPreviews: previews,
         hasClosestByClassName: () => menu,
         getRelationValue: () => ({blockIDs: ["existing"], contents: [{type: "block", block: {content: "Existing"}}]}),
@@ -108,6 +136,7 @@ const creationFixture = (mobile: boolean, response: Promise<unknown>, useInputNa
             requests.push(data);
             return response;
         },
+        fetchWithDocumentSelection: (submit: () => Promise<unknown>) => submit(),
         Lute: {NewNodeID: () => "pending"},
         getAVBlockIconHTML: ({isDetached}: {isDetached: boolean}) => isDetached ? "detached-icon" : "document-icon",
         escapeAttr, escapeHtml, escapeHtmlTextAndAttr,

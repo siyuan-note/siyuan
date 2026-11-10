@@ -189,6 +189,34 @@ export const getTableCellPlainText = (cell: Element) => {
     return getTextWithoutSemanticMarkers(clone).replace(/\u200b/g, "").replace(/\n+$/g, "");
 };
 
+const prepareTableCellRichPreviews = (cells: Element[]) => {
+    if (!tableCellPreviewCache) {
+        // 同一轮快照和事务清理复用静态预览，微任务边界释放单元格源与预览内容。
+        tableCellPreviewCache = new Map();
+        queueMicrotask(() => { tableCellPreviewCache = undefined; });
+    }
+    const missing = new Set<string>();
+    cells.forEach(cell => {
+        const encoded = cell.getAttribute(TABLE_CELL_RICH_ATTRIBUTE);
+        if (encoded !== null && !tableCellPreviewCache.has(encoded) && !missing.has(encoded)) {
+            decodeTableCellRich(encoded);
+            missing.add(encoded);
+        }
+    });
+    if (missing.size > 0) {
+        const template = document.createElement("template");
+        // 单元格预览共享一次表格解析，事务、剪贴板和静态渲染使用同一套源数据协议。
+        template.innerHTML = getAVRichTextLute().SpinBlockDOM(
+            `<div data-type="NodeTable" data-node-id="${Lute.NewNodeID()}"><div contenteditable="true">` +
+            "<table><thead><tr>" + Array.from(missing, encoded =>
+                `<th ${TABLE_CELL_RICH_ATTRIBUTE}="${encoded}"></th>`).join("") + "</tr></thead></table></div></div>");
+        const previews = template.content.querySelector("table").tHead.rows[0].cells;
+        Array.from(missing).forEach((encoded, index) => {
+            tableCellPreviewCache.set(encoded, previews[index].innerHTML);
+        });
+    }
+};
+
 export const renderTableCellRich = (cell: Element) => {
     const encoded = cell.getAttribute(TABLE_CELL_RICH_ATTRIBUTE);
     if (encoded === null) {
@@ -199,24 +227,9 @@ export const renderTableCellRich = (cell: Element) => {
         }
         return;
     }
+    prepareTableCellRichPreviews([cell]);
     cell.removeAttribute(TABLE_CELL_INLINE_ATTRIBUTE);
-    if (!tableCellPreviewCache) {
-        // 同一轮快照和事务清理复用静态预览，微任务边界释放单元格源与预览内容。
-        tableCellPreviewCache = new Map();
-        queueMicrotask(() => { tableCellPreviewCache = undefined; });
-    }
-    let preview = tableCellPreviewCache.get(encoded);
-    if (preview === undefined) {
-        decodeTableCellRich(encoded);
-        const template = document.createElement("template");
-        // 由 Lute 从源数据产生预览，事务、剪贴板和静态渲染使用同一套单元格协议。
-        template.innerHTML = getAVRichTextLute().SpinBlockDOM(
-            `<div data-type="NodeTable" data-node-id="${Lute.NewNodeID()}"><div contenteditable="true">` +
-            `<table><thead><tr><th ${TABLE_CELL_RICH_ATTRIBUTE}="${encoded}"></th></tr></thead></table></div></div>`);
-        preview = template.content.querySelector("th").innerHTML;
-        tableCellPreviewCache.set(encoded, preview);
-    }
-    cell.innerHTML = preview;
+    cell.innerHTML = tableCellPreviewCache.get(encoded);
     cell.setAttribute("contenteditable", "false");
     cell.closest('[data-type="NodeTable"]')?.setAttribute(Constants.CUSTOM_SY_TABLE_RICH, "1");
 };
@@ -268,9 +281,10 @@ export const cleanTableCellRichHTML = (html: string) => {
     }
     const template = document.createElement("template");
     template.innerHTML = html;
-    template.content.querySelectorAll(`th[${TABLE_CELL_RICH_ATTRIBUTE}], td[${TABLE_CELL_RICH_ATTRIBUTE}], ` +
-        `th[${TABLE_CELL_INLINE_ATTRIBUTE}], td[${TABLE_CELL_INLINE_ATTRIBUTE}]`)
-        .forEach(cell => renderTableCellRich(cell));
+    const cells = Array.from(template.content.querySelectorAll(`th[${TABLE_CELL_RICH_ATTRIBUTE}], td[${TABLE_CELL_RICH_ATTRIBUTE}], ` +
+        `th[${TABLE_CELL_INLINE_ATTRIBUTE}], td[${TABLE_CELL_INLINE_ATTRIBUTE}]`));
+    prepareTableCellRichPreviews(cells);
+    cells.forEach(cell => renderTableCellRich(cell));
     return template.innerHTML;
 };
 
@@ -280,8 +294,10 @@ export const getTableBlockHTML = (table: Element) => {
         return cleanTableCellRichHTML(table.outerHTML);
     }
     const replacements = new Map<Element, string>();
-    table.querySelectorAll(`th[${TABLE_CELL_RICH_ATTRIBUTE}], td[${TABLE_CELL_RICH_ATTRIBUTE}], ` +
-        `th[${TABLE_CELL_INLINE_ATTRIBUTE}], td[${TABLE_CELL_INLINE_ATTRIBUTE}]`).forEach(cell => {
+    const cells = Array.from(table.querySelectorAll(`th[${TABLE_CELL_RICH_ATTRIBUTE}], td[${TABLE_CELL_RICH_ATTRIBUTE}], ` +
+        `th[${TABLE_CELL_INLINE_ATTRIBUTE}], td[${TABLE_CELL_INLINE_ATTRIBUTE}]`));
+    prepareTableCellRichPreviews(cells);
+    cells.forEach(cell => {
         const clone = cell.cloneNode(false) as Element;
         renderTableCellRich(clone);
         replacements.set(cell, clone.outerHTML);

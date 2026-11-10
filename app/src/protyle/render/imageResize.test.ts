@@ -63,6 +63,48 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
         measuring = false;
         check.equal(reads, 24 * 4, "each image is measured once in the batch");
         check.equal(batch.querySelectorAll(".protyle-image-resize[style]").length, 24);
+        let initializations = 0;
+        let configurations = 0;
+        batch.querySelectorAll("img").forEach(image => {
+            const classes = image.parentElement.classList;
+            const add = classes.add.bind(classes);
+            classes.add = (...tokens: string[]) => {
+                if (tokens.includes("protyle-image-container")) {
+                    configurations++;
+                }
+                add(...tokens);
+            };
+        });
+        const editable = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "contentEditable");
+        batch.querySelectorAll<HTMLElement>(".protyle-image-resize").forEach(frame => {
+            Object.defineProperty(frame, "contentEditable", {
+                get: () => editable.get.call(frame),
+                set: value => {
+                    initializations++;
+                    editable.set.call(frame, value);
+                },
+            });
+        });
+        batch.querySelectorAll(".img > span").forEach(container => {
+            for (let i = 0; i < 4; i++) {
+                container.append(document.createTextNode(" "));
+            }
+        });
+        await settle();
+        check.equal(configurations, 0, "stable image controls survive unrelated child mutations without reconfiguration");
+        check.ok(initializations <= 24, `a mutation batch initializes each image at most once: ${initializations}`);
+        check.equal(batch.querySelectorAll(".protyle-image-resize").length, 24);
+        const caption = batch.querySelector(".protyle-action__title");
+        caption.textContent = "new caption";
+        await settle();
+        check.equal(configurations, 1, "caption changes configure only their image");
+        check.equal(caption.classList.contains("protyle-image-caption"), true);
+        const brokenFrame = batch.querySelector(".protyle-image-resize");
+        brokenFrame.firstElementChild.remove();
+        // 控件内部变更由布局节点变更触发校验。
+        brokenFrame.parentElement.append(document.createTextNode(" "));
+        await settle();
+        check.equal(brokenFrame.childElementCount, 3, "an incomplete frame is repaired");
         stop();
         batch.remove();
     }
@@ -553,7 +595,7 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     return "Image resize cases passed";
 };
 
-test("image handles retain selection, touch visibility, source, aspect ratio and replay compatibility", {
+test("image handles batch mutations and retain selection, touch visibility, source, aspect ratio and replay compatibility", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 60000,
 }, async () => {

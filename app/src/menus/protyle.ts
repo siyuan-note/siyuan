@@ -19,16 +19,17 @@ import {
     deleteColumn,
     deleteRow,
     getColIndex,
-    getOrCreateTableBody,
     insertColumn,
     insertRow,
     insertRowAbove,
+    insertTableHeaderRow,
     isTableHeaderEnabled,
     moveColumnToLeft,
     moveColumnToRight,
     moveRowToDown,
     moveRowToUp,
     setTableAlign,
+    splitTableCell,
     toggleTableHeader,
     transposeTable,
     updateTableTitle
@@ -100,6 +101,14 @@ import {
     stripSemanticMarkersFromRangeText,
 } from "../protyle/util/inlineElementMarker";
 
+const renderAssetPreview = (element: HTMLElement, path: string) => {
+    if (element.dataset.assetPreviewPath === path) {
+        return;
+    }
+    element.dataset.assetPreviewPath = path;
+    element.innerHTML = path ? renderAssetsPreview(path) : window.siyuan.languages.emptyContent;
+};
+
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = [], session?: IMenuSession,
                          initial = false) => {
     fetchPost("/api/search/searchAsset", {
@@ -116,14 +125,10 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
         });
 
         const listElement = element.querySelector(".b3-list");
-        const previewElement = element.querySelector("#preview");
+        const previewElement = element.querySelector<HTMLElement>("#preview");
         const inputElement = element.querySelector("input");
         listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-        if (response.data.length > 0) {
-            previewElement.innerHTML = renderAssetsPreview(response.data[0].path);
-        } else {
-            previewElement.innerHTML = window.siyuan.languages.emptyContent;
-        }
+        renderAssetPreview(previewElement, response.data[0]?.path || "");
         const show = () => {
             /// #if MOBILE
             if (initial) {
@@ -162,10 +167,11 @@ const buildAssetMenu = (protyle: IProtyle, position: IPosition, callback?: (url:
     if (menu.isOpen) {
         return;
     }
+    const showPreview = !isMobile() && window.outerWidth >= window.outerWidth / 2 + 260;
     menu.addItem({
         iconHTML: "",
         type: "readonly",
-        label: `<div class="fn__flex" style="max-height: ${isMobile() ? "80" : "50"}vh">
+        label: `<div class="fn__flex${showPreview ? " asset-menu--preview" : ""}" style="max-height: ${isMobile() ? "80" : "50"}vh">
 <div class="fn__flex-column" style="${isMobile() ? "width:100%" : "min-width: 260px;max-width:420px"}">
     <div class="fn__flex" style="margin: 0 8px 4px 8px">
         <input class="b3-text-field fn__flex-1"/>
@@ -176,19 +182,19 @@ const buildAssetMenu = (protyle: IProtyle, position: IPosition, callback?: (url:
     </div>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div></div>
 </div>
-<div id="preview" style="width: 360px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;word-break: break-all;"></div>
+<div id="preview" style="width: 360px;display: ${showPreview ? "flex" : "none"};min-height: 0;padding: 8px;overflow: auto;justify-content: center;align-items: center;word-break: break-all;"></div>
 </div>`,
         bind(element) {
             element.style.maxWidth = "none";
             const listElement = element.querySelector(".b3-list");
-            const previewElement = element.querySelector("#preview");
+            const previewElement = element.querySelector<HTMLElement>("#preview");
             listElement.addEventListener("mouseover", (event) => {
                 const target = event.target as HTMLElement;
                 const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
                 if (!hoverItemElement) {
                     return;
                 }
-                previewElement.innerHTML = renderAssetsPreview(hoverItemElement.getAttribute("data-value"));
+                renderAssetPreview(previewElement, hoverItemElement.getAttribute("data-value"));
             });
             const inputElement = element.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -199,7 +205,7 @@ const buildAssetMenu = (protyle: IProtyle, position: IPosition, callback?: (url:
                 if (!isEmpty) {
                     const currentElement = upDownHint(listElement, event);
                     if (currentElement) {
-                        previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"));
+                        renderAssetPreview(previewElement, currentElement.getAttribute("data-value"));
                         event.stopPropagation();
                     }
                 }
@@ -1115,7 +1121,8 @@ export const zoomOut = (options: {
         }
     }
     const breadcrumbHLElement = options.protyle.breadcrumb?.element.querySelector(".protyle-breadcrumb__item--active");
-    if (!options.reload && breadcrumbHLElement && breadcrumbHLElement.getAttribute("data-node-id") === options.id) {
+    if (!options.reload && breadcrumbHLElement && breadcrumbHLElement.getAttribute("data-node-id") === options.id &&
+        (options.id !== options.protyle.block.rootID || !options.protyle.block.showAll)) {
         if (options.id === options.protyle.block.rootID) {
             return;
         }
@@ -1965,6 +1972,10 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     let inputElement: HTMLInputElement;
     const oldHTML = nodeElement.outerHTML;
     window.siyuan.menus.menu.removeCB = () => {
+        // 菜单动作可能替换或删除标签，此时关闭菜单只清理状态。
+        if (!nodeElement.contains(tagElement)) {
+            return;
+        }
         tagElement.textContent = Constants.WORD_JOINER + (inputElement.value || "");
         if (!inputElement.value) {
             removeSemanticInlineExternalBoundaries(tagElement);
@@ -2107,12 +2118,14 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         icon: "iconTrashcan",
         label: window.siyuan.languages.remove,
         click() {
+            const scrollTop = protyle.contentElement.scrollTop;
             removeSemanticInlineExternalBoundaries(tagElement);
             tagElement.insertAdjacentHTML("afterend", "<wbr>");
             tagElement.remove();
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, nodeElement, oldHTML);
             focusByWbr(nodeElement, protyle.toolbar.range);
+            protyle.contentElement.scrollTop = scrollTop;
+            updateTransaction(protyle, nodeElement, oldHTML);
         }
     }).element);
 
@@ -2325,6 +2338,19 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             });
         }
     }];
+    if (type === "NodeVideo") {
+        subMenus.push({
+            id: "loop",
+            icon: "iconRefresh",
+            label: window.siyuan.languages.videoLoop,
+            checked: videoElement.hasAttribute("loop"),
+            click() {
+                videoElement.toggleAttribute("loop");
+                updateTransaction(protyle, nodeElement, html);
+                html = nodeElement.outerHTML;
+            }
+        });
+    }
     if (src && src.startsWith("assets/")) {
         subMenus.push({
             id: "separator_rename",
@@ -2370,55 +2396,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                     return;
                 }
                 const oldHTML = nodeElement.outerHTML;
-                let rowSpan = cellElement.rowSpan;
-                let currentRowElement: Element = cellElement.parentElement;
-                const orgColSpan = cellElement.colSpan;
-                while (rowSpan > 0 && currentRowElement) {
-                    let currentCellElement = currentRowElement.children[colIndex] as HTMLTableCellElement;
-                    let colSpan = orgColSpan;
-                    while (colSpan > 0 && currentCellElement) {
-                        currentCellElement.classList.remove("fn__none");
-                        currentCellElement.removeAttribute("colspan");
-                        currentCellElement.removeAttribute("rowspan");
-                        currentCellElement = currentCellElement.nextElementSibling as HTMLTableCellElement;
-                        colSpan--;
-                    }
-                    currentRowElement = currentRowElement.nextElementSibling;
-                    rowSpan--;
-                }
-                cellElement.removeAttribute("colspan");
-                cellElement.removeAttribute("rowspan");
-                if (cellElement.tagName === "TH") {
-                    let prueTrElement: HTMLElement;
-                    Array.from(nodeElement.querySelectorAll("thead tr")).find((item: HTMLElement) => {
-                        prueTrElement = item;
-                        Array.from(item.children).forEach((cellElement: HTMLTableCellElement) => {
-                            if (cellElement.rowSpan !== 1 || cellElement.classList.contains("fn__none")) {
-                                prueTrElement = undefined;
-                            }
-                        });
-                        if (prueTrElement) {
-                            return true;
-                        }
-                    });
-                    if (prueTrElement) {
-                        const tbodyElement = getOrCreateTableBody(nodeElement.querySelector("table"));
-                        const theadElement = nodeElement.querySelector("thead");
-                        while (prueTrElement !== theadElement.lastElementChild) {
-                            theadElement.lastElementChild.querySelectorAll("th").forEach(item => {
-                                const td = document.createElement("td");
-                                Array.from(item.attributes).forEach(attr => {
-                                    td.setAttribute(attr.name, attr.value);
-                                });
-                                while (item.firstChild) {
-                                    td.appendChild(item.firstChild);
-                                }
-                                item.replaceWith(td);
-                            });
-                            tbodyElement.insertAdjacentElement("afterbegin", theadElement.lastElementChild);
-                        }
-                    }
-                }
+                splitTableCell(cellElement);
                 focusByRange(range);
                 updateTransaction(protyle, nodeElement, oldHTML);
             }
@@ -2643,6 +2621,14 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         }
     });
     const insertMenus = [];
+    if (cellElement.parentElement.parentElement.tagName === "THEAD") {
+        insertMenus.push({
+            id: "insertTableHeaderRow",
+            icon: "iconBefore",
+            label: window.siyuan.languages.insertTableHeaderRow,
+            click: () => insertTableHeaderRow(protyle, range, cellElement, nodeElement),
+        });
+    }
     insertMenus.push({
         id: "insertRowAbove",
         icon: "iconBefore",

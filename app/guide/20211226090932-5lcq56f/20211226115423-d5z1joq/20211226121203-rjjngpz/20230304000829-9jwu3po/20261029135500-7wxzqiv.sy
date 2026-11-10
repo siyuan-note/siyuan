@@ -1,0 +1,439 @@
+{
+	"ID": "20261029135500-7wxzqiv",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261029135500-7wxzqiv",
+		"title": "長期記憶",
+		"type": "doc",
+		"updated": "20261101174653"
+	},
+	"Children": [
+		{
+			"ID": "20261029135500-210ys17",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-210ys17",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-mfqp3ld",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-mfqp3ld",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "長期記憶將適合長期保留的事實、偏好、背景和決策整理為工作空間共用記錄，供後續智能體對話參考。它不是聊天歷史備份，也不是對全部筆記的複製。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-gfz8hnp",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-gfz8hnp",
+				"updated": "20261030063122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "啟用與設定"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-98tc6lf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-98tc6lf",
+				"updated": "20261031133741"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "先在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API 提供商"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中設定並啟用提供商和模型，再開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "長期記憶"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（位於人工智能設定底部、重排之後）。總開關預設關閉，開啟後可使用長期記憶並顯示管理按鈕；點擊管理可開啟記憶管理器。關閉總開關會隱藏管理按鈕，停止記憶使用、自動整理及新使用者訊息蒐集，但不會刪除已有記錄。"
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-cllodkr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-cllodkr",
+				"updated": "20261029155830"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選擇專用處理模型及推理強度，切換對話模型不會改變此選擇。推理選項與智能體一致：預設、none、low、medium、high、xhigh、max，不按模型名稱猜測能力；具體接受哪些值由供應商決定。模型處理會把允許的內容傳送給所選供應商，並可能產生費用。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-eo36x09",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-eo36x09",
+				"updated": "20261030115757"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "管理與整理"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-8agfotn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-8agfotn",
+				"updated": "20261031105717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟管理入口中的「記憶摘要」後，輸入需要整理或修正的事實、偏好及其適用條件，再點擊使用模型整理，或在輸入框中按 Enter。介面顯示統一概覽，處理中僅顯示載入轉圈，錯誤統一顯示在右上角訊息區；整理結果不會因為提交成功就被當作已記住。任務成功完成後（包括無需變更），僅清空提交後未再編輯的原輸入；失敗、部分失敗或提交後有新編輯時保留輸入。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-wopg5gg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-wopg5gg",
+				"updated": "20261030101455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "只有目前可用的生效記憶會用於對話，尚未確認、已停用、已過期或來源失效的記錄不會被使用。管理介面不展示記憶數量、逐筆記錄及其內部分類。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-bg1prjm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-bg1prjm",
+				"updated": "20261030113607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例如，可輸入「撰寫專案週報時，先列結論，再列風險和下一步」並使用模型整理。只在某個專案成立的約定應在輸入中保留專案限定，不能改寫成適用於所有任務的偏好。整理結束後查看更新後的概覽。"
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-kbn046t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-kbn046t",
+				"updated": "20261030213309"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "需要忘記某筆具體記憶時，可在「記憶摘要」中單獨提交直接明確的請求，例如「忘記我關於專案週報先列結論的偏好」，不要與新增內容混在一起。引用、含糊或清空全部的請求不構成刪除授權。所選模型會再次核驗目標，可能產生額外費用；應核對結果，不能假定每次請求都成功。正式記錄的停用和忘記能力仍由相應 API提供。停用保留記錄但停止使用，忘記先儲存撤回標記再移除正文。舊備份可能仍含原文；其他裝置收到同步的撤回狀態後才受保護，因此忘記不代表清除全部歷史備份。無法確認意圖或目標時，不會將忘記請求改成相反事實儲存；右上角會顯示錯誤訊息，可明確說明後重試。忘記一項事實會保留同一來源中其他已儲存的不同事實。同步撤回資訊前，請將所有裝置更新至支援目前記憶格式的版本。舊撤回標記仍保留原有的來源限制；若它已排除無關事實，請明確重新提交該事實，不要刪除撤回標記。"
+				}
+			]
+		},
+		{
+			"ID": "20261031130026-2tvwaye",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261031130026-2tvwaye",
+				"updated": "20261031130026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在記憶摘要右上角開啟更多選單，選擇「刪除所有記憶並關閉記憶功能」。確認後先關閉長期記憶並阻止執行中的任務繼續寫入，再刪除目前全部記憶記錄和摘要。原筆記、對話、歷史備份和撤回標記會保留，此操作不呼叫模型。若清理未完成，記憶仍保持關閉，可以重試。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-8q0yjfm",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-8q0yjfm",
+				"updated": "20261030063122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "來源與可靠性"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-lrrl5le",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-lrrl5le",
+				"updated": "20261101151527"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "只有通過來源、適用範圍和有效期檢查的生效記憶才會被使用。不確定的建議不會自動生效。確認來源內容變更或刪除時，相關記憶轉為待核對；暫時讀取故障只暫停本次使用並保留原狀態，讀取恢復後無需重新新增。無法存取的來源不會傳送給模型，舊概覽不能恢復失效內容。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-92qa01n",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-92qa01n",
+				"updated": "20261030113607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模型整理任務"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-8qk1fmj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-8qk1fmj",
+				"updated": "20261030113607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "管理器自動查詢任務，不需要手動重新整理，也不顯示行內任務狀態或完成文字。暫時查詢失敗會自動重查同一任務，不會自動重新傳送付費整理請求；任務無法恢復時，可以明確重新整理記憶。關閉管理器不會取消背景任務，背景工作仍受逾時限制。未設定模型或模型無法使用時，會提示先設定模型；已有概覽仍可讀取，不能將模型失敗解釋為儲存成功。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-x5umkpd",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-x5umkpd",
+				"updated": "20261030025512"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "蒐集範圍"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-44flsri",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-44flsri",
+				"updated": "20261101120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動擷取僅處理此後成功提交的使用者訊息，不擷取 AI 回覆、歷史對話或筆記。整理筆記需明確提出要求，且僅限允許存取的非加密來源。既有記憶保留並持續驗證來源；筆記變更僅使相關記錄失效，不再擷取新事實。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-fkzm8qc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-fkzm8qc",
+				"updated": "20261101120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動整理先判斷整則訊息是否明確表達你本人的長期偏好、背景或約定。外部文章、第三人陳述、個人與外部材料混合或歸屬不明確的訊息整則略過。希望立即提交明確事實時，可在管理器中使用「使用模型整理」並核對結果。"
+				}
+			]
+		},
+		{
+			"ID": "20261031130026-xf5flfe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261031130026-xf5flfe",
+				"updated": "20261031130026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "長期記憶開啟且工作空間可寫時，背景會自動管理候選。事實和完整依據相同的重複候選會合併；後續模型複核時，只有事實未變、目前來源有效且有逐字依據的候選才可生效。連續 30 天沒有實質更新的自動候選會被清理，重複提交相同提案不會重新計時。手動提交、明確確認及已生效的記憶不受這項清理影響，清理本身不呼叫模型。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135900-vsifyte",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135900-vsifyte",
+				"updated": "20261101120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "歸屬判斷沿用現有關鍵字請求，不額外增加模型呼叫；僅明確屬於使用者本人的內容進入提案階段，判斷結果缺失或格式錯誤時停止處理。使用者明確認可的本人引述可以參與，不能僅憑引述區塊格式判斷作者身分。未標明來源的第一人稱貼上內容仍可能被誤判，自動判斷無法保證作者身分。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-4wafk37",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-4wafk37",
+				"updated": "20261030101455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本機記錄、概覽與同步"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-soo530w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-soo530w",
+				"updated": "20261101174653"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "正式記錄儲存在目前工作空間的 data/storage/ai/memory/records/ 中，而不是一般筆記本裡的使用者文件。記錄隨工作空間資料同步；其他裝置需要完成同步才能看到最新記錄、修正和撤回狀態。同步衝突的記錄不會被靜默當作有效記憶使用。"
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-iedwd6q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-iedwd6q",
+				"updated": "20261030063122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MEMORY.md 是唯一生效的唯讀派生概覽，統一包含使用者背景、偏好和常用脈絡，不是另一份可編輯的正式記錄。舊版 USER.md 和 MEMORY.md 遷移前會保全原文，只合併仍與目前有效記錄一致的內容；失效原文僅作恢復備份，不會重新用於對話。概覽產生失敗不撤銷已儲存的正式記錄。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-hwcdjqh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-hwcdjqh",
+				"updated": "20261030101455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "管理器在輸入框上方顯示統一概覽，不顯示檔案名稱和技術性記錄引用。概覽只選取部分已驗證記錄，不是全部記憶的清單。記憶已啟用、工作空間可寫且已設定處理模型時，會依介面語言顯示概覽；模型處理期間顯示載入狀態，失敗則保留原文。顯示處理僅向設定的記憶模型傳送概覽，不改變儲存的原文。快取會減少重複呼叫，但重新啟動後已有概覽可能需要再次呼叫模型。需要整理或修正內容時，使用下方輸入框，不直接編輯概覽檔案。"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-uacgmew",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-uacgmew",
+				"updated": "20261030094544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "費用與隱私"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-0p7n2mf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-0p7n2mf",
+				"updated": "20261030094544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本機儲存不等於離線處理：自動整理、手動模型整理、概覽產生和顯示處理可能向所選模型供應商傳送相關文字、來源依據及已有記憶，並產生 API 費用；在對話中使用記憶也可能將相關記憶傳送給對話模型。啟用前請確認供應商的資料政策，避免提交不希望外傳的敏感內容。加密筆記本不參與自動蒐集，但你手動貼上的文字仍會按模型整理請求處理。"
+				}
+			]
+		}
+	]
+}

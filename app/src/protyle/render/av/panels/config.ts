@@ -10,7 +10,16 @@ import { transaction } from "../../../wysiwyg/transaction";
 import { setPageSize } from "../row";
 import { setGalleryCover, setGallerySize, setGalleryRatio } from "../gallery/util";
 import { goGroupsDate, goGroupsSort, setGroupMethod, getGroupsHTML, bindGroupsEvent, getGroupsMethodHTML, getGroupsNumberHTML, bindGroupsNumber } from "../groups";
-import type { IAVPanelDescriptor, TAVPanelActionResult } from "./types";
+import type { IAVPanelContext, IAVPanelDescriptor, TAVPanelActionResult } from "./types";
+import {bindSubItemsSettings, getSubItemsSettingsHTML} from "../subItems";
+const openSubItemsSettings = (context: IAVPanelContext, existing = false) => {
+    context.menuElement.innerHTML = getSubItemsSettingsHTML(context.data, existing);
+    setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth, context.tabRect.bottom, context.tabRect.height, 0, true);
+    bindSubItemsSettings(context.menuElement, context.options.protyle, context.options.blockElement as HTMLElement, context.data, existing, () => {
+        if (!isMobile()) setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth, context.tabRect.bottom, context.tabRect.height, 0, true);
+    });
+    window.siyuan.menus.menu.remove();
+};
 export const configPanel: IAVPanelDescriptor = {
     render: context => {
         context.html = getViewHTML(context.data);
@@ -20,6 +29,18 @@ export const configPanel: IAVPanelDescriptor = {
         bindViewEvent({ protyle: context.options.protyle, data: context.data, menuElement: context.menuElement, blockElement: context.options.blockElement });
     },
     actions: {
+        "go-sub-items": (context, action) => {
+            openSubItemsSettings(context);
+            action.event.preventDefault();
+            action.event.stopPropagation();
+            return "handled";
+        },
+        "go-sub-items-existing": (context, action) => {
+            openSubItemsSettings(context, true);
+            action.event.preventDefault();
+            action.event.stopPropagation();
+            return "handled";
+        },
         "automations": (context, action) => {
             window.siyuan.menus.menu.remove();
             void openAutomationMenu({

@@ -4,6 +4,7 @@ import {resolve} from "node:path";
 import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {toScriptLiteral} from "./scriptLiteral";
 
 const exportSource = readFileSync(resolve(process.cwd(), "src/protyle/export/index.ts"), "utf8");
 
@@ -35,7 +36,7 @@ test("mind map export labels preserve localized text without closing the generat
     const compiled = transpileModule(`(${declaration.initializer.getText(source)})()`, {
         compilerOptions: {target: ScriptTarget.ES2020},
     }).outputText;
-    const serialized = runInNewContext(compiled, {window: {siyuan: {languages}}});
+    const serialized = runInNewContext(compiled, {window: {siyuan: {languages}}, toScriptLiteral});
     assert.ok(!serialized.includes("</script>"));
     assert.ok(!serialized.includes("\u2028"));
     assert.ok(!serialized.includes("\u2029"));

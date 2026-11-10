@@ -1,8 +1,9 @@
-import {Dialog} from "../dialog";
+import {MobileDialog} from "../dialog/mobileDialog";
 import {showMessage} from "../dialog/message";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {writeText} from "../protyle/util/compatibility";
 import {invalidateImageOCRStatus} from "./imageOCRStatus";
+import {isMobile} from "../util/functions";
 
 const clearing = new Set<string>();
 
@@ -35,7 +36,7 @@ export const openImageOCR = (path: string) => {
     let closed = false;
     let originalText = "";
     const controller = new AbortController();
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         title: window.siyuan.languages.ocrResult,
         transparent: true,
         disableClose: true,
@@ -61,6 +62,10 @@ export const openImageOCR = (path: string) => {
     const copy = dialog.element.querySelector<HTMLButtonElement>('[data-action="copy"]');
     const save = dialog.element.querySelector<HTMLButtonElement>('[data-action="save"]');
     const close = () => {
+        if (isMobile()) {
+            void dialog.requestClose("cancel");
+            return;
+        }
         closed = true;
         controller.abort();
         dialog.destroy();
@@ -78,13 +83,20 @@ export const openImageOCR = (path: string) => {
             close();
             return;
         }
-        save.disabled = true;
-        try {
+        const submit = async () => {
             const response = await fetchSyncPost("/api/asset/setImageOCRText", {path, text: textarea.value});
             if (response.code === 0) {
                 invalidateImageOCRStatus(path);
             }
-            if (!closed && response.code === 0) {
+            return !closed && response.code === 0;
+        };
+        if (isMobile()) {
+            await dialog.runPending(submit);
+            return;
+        }
+        save.disabled = true;
+        try {
+            if (await submit()) {
                 close();
             }
         } finally {
@@ -108,6 +120,6 @@ export const openImageOCR = (path: string) => {
         textarea.disabled = false;
         copy.disabled = false;
         save.disabled = false;
-        textarea.focus();
+        dialog.focusWhenReady(() => textarea);
     }, undefined, undefined, controller.signal);
 };

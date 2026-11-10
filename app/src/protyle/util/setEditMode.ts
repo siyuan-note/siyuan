@@ -19,10 +19,23 @@ export const updateMobileTitleReadonly = (protyle: IProtyle) => {
     if (readonly && !inputElement.readOnly && document.activeElement === inputElement) {
         inputElement.blur();
     }
-    inputElement.readOnly = readonly;
-    readonlyElement.textContent = inputElement.value;
-    inputElement.classList.toggle("fn__none", readonly);
-    readonlyElement.classList.toggle("fn__none", !readonly);
+    const inlineEditor = readonlyElement.querySelector(".mobile-document-title-editor");
+    if (inlineEditor) {
+        if (readonly && inlineEditor.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
+        protyle.title?.setReadonly(readonly);
+    }
+    inputElement.readOnly = true;
+    if (!readonly && !inlineEditor) {
+        readonlyElement.tabIndex = 0;
+    } else {
+        if (document.activeElement === readonlyElement) readonlyElement.blur();
+        readonlyElement.removeAttribute("tabindex");
+    }
+    if (!inlineEditor) readonlyElement.setAttribute("role", "button");
+    else readonlyElement.removeAttribute("role");
+    readonlyElement.setAttribute("aria-disabled", String(readonly));
+    inputElement.classList.add("fn__none");
+    readonlyElement.classList.remove("fn__none");
 };
 /// #endif
 

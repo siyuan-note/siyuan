@@ -441,6 +441,10 @@ func CommitDataImport(id, mode, password string) (skipped []string, err error) {
 			return nil, err
 		}
 	}
+	// 整批导入可覆盖同 ID 的模板和数据库，不继承导入前的本机许可。
+	if err = RevokeAllTemplateHTTPPermissions(); err != nil {
+		return
+	}
 	if err = applyDataImport(directory, install, copyDataImportFile); err != nil {
 		return
 	}

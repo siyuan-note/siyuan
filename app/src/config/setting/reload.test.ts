@@ -15,11 +15,12 @@ const code = transpileModule(source.statements.filter(statement => isVariableSta
 const setup = (options: {host?: object; fail?: boolean; readonly?: boolean; storageFail?: boolean;
     save?: () => Promise<void>} = {}) => {
     const calls: string[] = [];
-    const api = {} as {reloadUI: () => Promise<void>; resetLayout: () => Promise<void>};
+    const api = {} as {reloadUI: (resetScroll?: boolean) => Promise<void>; resetLayout: () => Promise<void>};
     class Element { blur() { calls.push("blur"); } }
     const storage: Record<string, unknown> = {};
     let failedStorage = false;
     runInNewContext(code, {
+        clearReloadSnapshot: () => {},
         exports: api, console: {error() {}}, HTMLElement: Element,
         document: {activeElement: new Element()},
         window: {siyuan: {config: {readonly: options.readonly}, storage, languages: {}},
@@ -41,11 +42,26 @@ const setup = (options: {host?: object; fail?: boolean; readonly?: boolean; stor
         suspendLayoutSaving: async () => { calls.push("suspend"); return () => calls.push("resume"); },
         resetUILayout: async () => { calls.push("clear"); return {code: options.fail ? -1 : 0}; },
         Constants: {LOCAL_FILEPOSITION: "file", LOCAL_DIALOGPOSITION: "dialog"},
-        setStorageVal: async (key: string) => { calls.push(key); failedStorage ||= options.storageFail; },
+        setStorageVal: async (key: string, _value: unknown, callback?: () => void) => {
+            calls.push(key);
+            failedStorage ||= options.storageFail;
+            if (!failedStorage) callback?.();
+        },
         showMessage: () => calls.push("error"),
     });
     return {api, calls, storage};
 };
+
+test("reload scroll reset waits for confirmed storage success and allows retry after failure", async () => {
+    const f = setup({storageFail: true});
+    await f.api.reloadUI(true);
+    assert.equal(f.calls.includes("reload"), false);
+    assert.equal(f.calls.includes("layout"), false);
+    assert.equal(f.calls.at(-1), "error");
+    const success = setup();
+    await success.api.reloadUI(true);
+    assert.deepEqual(success.calls, ["blur", "settings", "file", "layout", "saved", "reload"]);
+});
 
 test("settings reload and layout reset execute in their owner", async () => {
     const owner: string[] = [];

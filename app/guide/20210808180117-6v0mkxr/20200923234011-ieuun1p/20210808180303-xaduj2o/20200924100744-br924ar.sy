@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261106023628"
 	},
 	"Children": [
 		{
@@ -132,7 +132,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-v2rmiaq",
-				"updated": "20261024164212"
+				"updated": "20261106023628"
 			},
 			"Children": [
 				{
@@ -493,6 +493,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Hover over an image to see its file name, format, loaded original dimensions, title, and tooltip text, even if it has no title. Local workspace images also show file size when available. File size is omitted for remote and encrypted notebook images."
+				}
+			]
+		},
+		{
+			"ID": "20261105133656-ez7ztx2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105133656-ez7ztx2",
+				"updated": "20261106023628"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the image preview for a document or database, select Copy image URL in the bottom toolbar to copy the current image address. Copied appears after a successful copy. If copying fails, a clipboard error message appears instead. Local assets keep their assets/... path so you can search for them in documents and databases."
 				}
 			]
 		},
@@ -1309,12 +1323,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001000112-ogz08vw",
-				"updated": "20261001000112"
+				"updated": "20261105210000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The selected provider handles both automatic and manual recognition. Switching preserves existing results; use the image menu to rerun OCR explicitly. Failures preserve the previous result and do not switch providers. Text remains available for image text search and editing. Encrypted notebooks do not participate in OCR."
+					"Data": "The selected provider handles both automatic and manual recognition. Switching preserves existing results; use the image menu to rerun OCR explicitly. Failures preserve the previous result and do not switch providers. Text remains available for image text search and editing. Encrypted notebooks do not participate in OCR. If automatic AI OCR encounters an account or model configuration error (HTTP 401, 402, 403, or 404), it shows one notification and pauses all automatic OCR requests for that provider for 10 minutes. It then retries automatically, including after topping up the balance. Updating the provider configuration or toggling automatic OCR clears the pause; manual recognition remains available from the image menu."
 				}
 			]
 		},
@@ -1613,7 +1627,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When automatic OCR is enabled, the kernel processes images that have no existing OCR result. Extracted text is used by search to locate images by their text."
+					"Data": "When automatic OCR is enabled, the kernel processes images that have no existing OCR result. Extracted text is used by search to locate images by their text. Images that exceed size or pixel limits, or have an unsupported format, are skipped after a permanent failure, including after restarting the kernel. Replacing the image, changing recognition settings, or turning automatic OCR off and on allows another attempt. Manual recognition can always retry. Temporary failures are retried after ten minutes."
 				}
 			]
 		},
@@ -2094,6 +2108,44 @@
 				{
 					"Type": "NodeText",
 					"Data": "Hiding hints does not delete text or change search results. No OCR text does not necessarily mean recognition has failed. Failure hints reflect recognition failures during the current session; successful recognition or saving text clears them, and they are not retained after restarting the kernel. Mobile devices do not show these hover tooltips."
+				}
+			]
+		},
+		{
+			"ID": "20261030095654-cl5w6xj",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261030095654-cl5w6xj",
+				"updated": "20261030095654"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Document cover"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261030095654-awrf6rs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030095654-awrf6rs",
+				"updated": "20261030095654"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Above the document title, click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Add cover"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose Upload, Link, Assets, or Built-in. The cover is saved only after you select an image or confirm a link. Closing the menu or canceling a picker leaves the document unchanged and does not import an image. To reuse an existing image without uploading it again, choose Assets."
 				}
 			]
 		}

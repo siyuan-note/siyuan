@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261107131528"
 	},
 	"Children": [
 		{
@@ -1474,7 +1474,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20261024164212"
+				"updated": "20261101144749"
 			},
 			"Children": [
 				{
@@ -1990,7 +1990,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Tap the plus controls at the table edges to add rows or columns, or drag the edge controls to add several at once or remove trailing empty rows and columns. Shrinking preserves nonempty content and merged cells."
+					"Data": "Tap the plus controls at the table edges to add rows or columns, or drag the edge controls to add several at once or remove trailing empty rows and columns. Shrinking preserves nonempty content and merged cells. When a table exceeds the visible width, the add-column and bottom-right controls stay at its visible right edge. Hover over that edge on desktop or tap a cell on mobile to show them. New columns are appended to the end of the whole table and scrolled into view after the operation. Space for the controls scrolls with the table content and appears only at the right end."
 				}
 			]
 		},
@@ -3068,7 +3068,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Each tab item has a title and body and supports nested content and block references. To toggle task mode for the group, open the block icon menu and select "
+					"Data": "Each tab item has a title and body and supports nested content and block references. The title's slash menu and mobile plus menu support inline elements, including images, attachments, and creating a document with a reference. The title input stays visible while the menu is open. To toggle task mode for the group, open the block icon menu and select "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3312,7 +3312,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-clx67q4",
-				"updated": "20261024161816"
+				"updated": "20261101144749"
 			},
 			"Children": [
 				{
@@ -3355,7 +3355,109 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Document titles allow ASCII / by default, without a setting to enable it. For example, A/B can be one document title and is different from a document B inside A. Existing titles and document links stay unchanged; ／ and %2F remain literal text."
+					"Data": "Document titles allow ASCII / by default, without a setting to enable it. For example, A/B can be one document title and is different from a document B inside A. Existing titles and document links stay unchanged; ／ and %2F remain literal text. Duplicating a document preserves rich title formatting and adds the copy suffix to its title. Empty titles remain empty without a suffix, regardless of the interface language. When duplicating a document with its children, only the copied root receives the suffix."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-2qcn948",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-2qcn948",
+				"updated": "20261107131528"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Document titles support all native inline elements, including combined text styles, images, links, tags, block references, inline formulas, memos, and file annotation references. Edit the complete title directly above the document or in the mobile top bar; new mobile documents focus the top bar for immediate typing. The Rename action opens a centered dialog on desktop or a bottom drawer on mobile. Both use a standalone single-line rich-text field, without document block icons or corner badges. The field uses the interface font size and the shared input's theme background; long titles scroll horizontally. Opening the drawer automatically focuses the title and opens the keyboard. The drawer follows the visible area above the keyboard. Changes in the rename dialog are saved only after confirmation; dismissing it cancels the draft. File trees, tabs, and the desktop tab dropdown render inline styles and images, while plain titles use ordinary text. Window titles and document breadcrumbs show a plain-text summary. Notebook documents also support rich titles. Their notebook names follow the title’s plain-text summary, including image alternative text. Renaming a notebook edits its complete title when notebook documents are enabled."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-906zkkq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-906zkkq",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "References inside a title belong to the document block. They appear in the target’s backlinks; opening a title backlink locates the title editor. Dynamic reference text follows its target. Cyclic references use stable local text so the title does not grow repeatedly."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-qe3qpaf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-qe3qpaf",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Converting a heading to a document preserves its inline content in the document title. Converting it back restores that content to the heading. Existing body paragraphs are kept even when their text matches the title."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-9zbidaj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-9zbidaj",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Notebook names can also contain literal / and remain plain text. A slash in the name does not create a hierarchy; exported names are made safe for the filesystem without changing the saved name."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-8tt9np8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-8tt9np8",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If another editor changes the title, your draft is kept. Review the latest title before saving your draft over it, or copy your draft and load the latest title when rich clipboard copying is available."
+				}
+			]
+		},
+		{
+			"ID": "20261025133233-izaioat",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261025133233-izaioat",
+				"updated": "20261025133233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the title editor, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " enters the document body and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " inserts a line break. Existing inline formatting shortcuts also work here; block conversion shortcuts are unavailable."
 				}
 			]
 		},
@@ -3370,48 +3472,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "A displayed path is for reading. Use document links or block references to navigate to the intended document. Plugins that locate documents by splitting title paths need to support structured addressing."
-				}
-			]
-		},
-		{
-			"ID": "20261023112115-9dsprn2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261023112115-9dsprn2",
-				"updated": "20261024161816"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Before opening the workspace with the new version, quit older SiYuan versions on every device, upgrade every device that accesses this workspace or syncs its data to a version that supports the new title format, and check plugin compatibility. Do not open the workspace or resume syncing until all devices have been upgraded."
-				}
-			]
-		},
-		{
-			"ID": "20261024161816-y5ag66f",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261024161816-y5ag66f",
-				"updated": "20261024161816"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Devices that are temporarily offline must also be upgraded before accessing or syncing this data. Migration runs automatically and resumes after interruption. After upgrading, do not use older versions to open, edit, restore, or sync the same data. An older version may reject documents using the new title format (Spec 6) but still read and write documents that retain an earlier format."
-				}
-			]
-		},
-		{
-			"ID": "20261024161816-s0b7spt",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261024161816-s0b7spt",
-				"updated": "20261024161816"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "It may also write back a stale editor copy from an open page, overwriting newer titles or content and syncing the overwritten data to other devices. Some documents being blocked does not mean the data is protected."
 				}
 			]
 		},

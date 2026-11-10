@@ -1,0 +1,168 @@
+import {it} from "node:test";
+import * as assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {join} from "node:path";
+import {runInNewContext} from "node:vm";
+import * as ts from "typescript";
+
+const setup = () => {
+    const writes: unknown[] = [];
+    const storage: Record<string, unknown> = {};
+    const module = {exports: {}};
+    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "subItemsState.ts"), "utf8"), {
+        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
+    }).outputText, {module, exports: module.exports,
+        require: (id: string) => ({
+            "../../../constants": {Constants: {CUSTOM_SY_AV_VIEW: "view"}},
+            "../../util/compatibility": {setStorageVal: (_key: string, value: unknown) => writes.push(value)},
+            "../../../util/pathName": {isEncryptedBox: (id: string) => id === "encrypted"},
+        }[id]),
+        window: {siyuan: {storage, languages: {expand: "Expand", collapse: "Collapse", previous: "Previous", next: "Next"}}},
+    });
+    return {api: module.exports as typeof import("./subItemsState"), writes, storage};
+};
+
+const block = () => {
+    let search = "";
+    const attributes = new Map([["view", "v"], ["data-av-id", "db"]]);
+    const element = {
+        getAttribute: (name: string) => attributes.get(name),
+        setAttribute: (name: string, value: string) => attributes.set(name, value),
+        toggleAttribute: (name: string, value: boolean) => value ? attributes.set(name, "") : attributes.delete(name),
+        querySelector: () => ({textContent: search}),
+        querySelectorAll: (): HTMLElement[] => [],
+    } as unknown as HTMLElement;
+    return {element, search: (value: string) => { search = value; }, view: (value: string) => attributes.set("view", value)};
+};
+
+const protyle = (notebookId = "plain") => ({notebookId, options: {}} as IProtyle);
+
+it("restores the kernel-selected initial view without writing state or repeatedly rereading", () => {
+    const {api, storage, writes} = setup();
+    storage["local-av-sub-items"] = {"db/v": {"": ["parent"]}};
+    const a = block();
+    a.view("");
+    const requested = api.getSubItemsRequest(a.element, protyle());
+    const data = {viewID: "v", view: {nested: {}}} as IAV;
+    assert.equal(api.restoreSubItemsView(a.element, protyle(), data, requested, ""), true);
+    assert.equal(a.element.getAttribute("view"), "v");
+    const restored = api.getSubItemsRequest(a.element, protyle());
+    assert.deepEqual([...restored.groupExpandedIDs[""]], ["parent"]);
+    assert.equal(api.restoreSubItemsView(a.element, protyle(), data, restored, ""), false);
+    assert.equal(writes.length, 0);
+});
+
+it("clears another view's expansions and keeps encrypted and search reads out of saved ordinary state", () => {
+    const {api, storage} = setup();
+    storage["local-av-sub-items"] = {"db/v": {"": ["saved"]}};
+    const a = block().element;
+    const requested = api.getSubItemsRequest(a, protyle());
+    const other = {viewID: "other", view: {nested: {}}} as IAV;
+    assert.equal(api.restoreSubItemsView(a, protyle(), other, requested, ""), true);
+    assert.deepEqual(Object.keys(api.getSubItemsRequest(a, protyle()).groupExpandedIDs), []);
+    for (const editor of [protyle("encrypted"), {...protyle(), options: {history: {created: "past"}}} as IProtyle]) {
+        const b = block();
+        b.view("");
+        const initial = api.getSubItemsRequest(b.element, editor);
+        assert.equal(api.restoreSubItemsView(b.element, editor, {viewID: "v", view: {nested: {}}} as IAV, initial, ""), false);
+    }
+    const c = block();
+    c.view("");
+    assert.equal(api.restoreSubItemsView(c.element, protyle(), {viewID: "v", view: {nested: {}}} as IAV,
+        api.getSubItemsRequest(c.element, protyle(), "", "needle"), "needle"), false);
+});
+
+it("stores ordinary folds by database, view and group while keeping child pages local to each carrier", () => {
+    const {api, writes} = setup();
+    const a = block().element;
+    const b = block().element;
+    api.toggleSubItems(a, protyle(), "g1", "parent", true);
+    api.toggleSubItems(a, protyle(), "g2", "parent", false);
+    api.loadMoreSubItems(a, protyle(), "g1", "parent", 51, 200);
+    assert.equal(writes.length, 2);
+    const saved = api.getSubItemsRequest(b, protyle());
+    assert.deepEqual([...saved.groupExpandedIDs.g1], ["parent"]);
+    assert.deepEqual([...saved.groupExpandedIDs.g2], []);
+    assert.deepEqual(Object.keys(saved.childPaging), []);
+    assert.equal(api.getSubItemsRequest(a, protyle()).childPaging["g1/parent"].page, 51);
+});
+
+it("keeps encrypted folds in memory and clears them when the notebook closes", () => {
+    const {api, writes} = setup();
+    const a = block().element;
+    api.toggleSubItems(a, protyle("encrypted"), "", "secret", true);
+    assert.equal(writes.length, 0);
+    assert.deepEqual([...api.getSubItemsRequest(a, protyle("encrypted")).groupExpandedIDs[""]], ["secret"]);
+    api.clearSubItemsState({querySelectorAll: () => [a]} as unknown as Element);
+    assert.deepEqual(Object.keys(api.getSubItemsRequest(a, protyle("encrypted")).groupExpandedIDs), []);
+});
+
+it("does not persist or carry search expansion into the normal view", () => {
+    const {api, writes} = setup();
+    const a = block();
+    api.toggleSubItems(a.element, protyle(), "", "normal", true);
+    a.search("needle");
+    api.toggleSubItems(a.element, protyle(), "", "search-parent", true);
+    assert.equal(writes.length, 1);
+    a.search("");
+    assert.deepEqual([...api.getSubItemsRequest(a.element, protyle()).groupExpandedIDs[""]], ["normal"]);
+});
+
+it("renders accessible fold and bounded previous/next child-page controls for a wide tree", () => {
+    const {api} = setup();
+    const row = {id: "parent", hierarchy: {depth: 3, childCount: 10001, expanded: true, context: false}} as IAVRow;
+    const view = {columns: [], rows: [], rowCount: 10001, nested: {page: 1, pageSize: 50,
+        rootCount: 1, rootLoaded: 1, matchedCount: 10001,
+        childPaging: {parent: {page: 26, pageSize: 200, total: 10001, loaded: 200}}}} as IAVTable;
+    const html = api.getSubItemsControlHTML(row, view);
+    assert.match(html, /padding-left:60px/);
+    assert.match(html, /aria-expanded="true"/);
+    assert.match(html, /data-page="25"/);
+    assert.match(html, /data-page="27"/);
+    assert.equal(api.getSubItemsCellStyle(row, view), "margin-left:136px;");
+    view.nested.childPaging.parent.page = 51;
+    const last = api.getSubItemsControlHTML(row, view);
+    assert.match(last, /data-page="50"/);
+    assert.doesNotMatch(last, /data-page="52"/);
+    assert.equal(api.getSubItemsCellStyle(row, view), "margin-left:112px;");
+    row.hierarchy.expanded = false;
+    assert.doesNotMatch(api.getSubItemsControlHTML(row, view), /data-page=/);
+    assert.equal(api.getSubItemsCellStyle(row, view), "margin-left:88px;");
+    assert.equal(api.getSubItemsCellStyle({} as IAVRow, view), "");
+});
+
+it("marks leaves at each depth without exposing an expansion control or changing peer alignment", () => {
+    const {api} = setup();
+    const view = {columns: [], rows: []} as IAVTable;
+    for (const depth of [0, 2]) {
+        const leaf = {id: "leaf", hierarchy: {depth, childCount: 0, expanded: false, context: false}} as IAVRow;
+        const parent = {...leaf, hierarchy: {...leaf.hierarchy, childCount: 2}};
+        const html = api.getSubItemsControlHTML(leaf, view);
+        assert.match(html, /aria-hidden="true"/);
+        assert.match(html, /xlink:href="#iconDot"/);
+        assert.doesNotMatch(html, /<button|data-type=|aria-expanded=|tabindex=/);
+        assert.equal(api.getSubItemsCellStyle(leaf, view), api.getSubItemsCellStyle(parent, view));
+        assert.match(api.getSubItemsControlHTML(parent, view), /data-type="av-sub-items-toggle"/);
+        assert.doesNotMatch(api.getSubItemsControlHTML(parent, view), /#iconDot/);
+    }
+    assert.equal(api.getSubItemsControlHTML({} as IAVRow, view), "");
+});
+
+it("restores a deep expanded row inside only its group with a bounded virtual window", () => {
+    const {api} = setup();
+    const element = block().element;
+    const rows = Array.from({length: 500}, (_, index) => ({id: `row-${index}`}));
+    const data = {view: {groups: [{id: "first", rows, nested: {}}, {id: "second", rows, nested: {}}]}} as unknown as IAV;
+    const windows: Record<string, IAVVirtualData> = {};
+    api.setSubItemsViewportAnchor(element, "row-400", "second", 40);
+    api.prepareSubItemsViewport(element, data, windows);
+    assert.deepEqual(Object.keys(windows), ["second"]);
+    assert.equal(windows.second.renderedStart, 350);
+    assert.equal(windows.second.renderedEnd, 449);
+    assert.equal(windows.second.topSpacerHeight, 14000);
+    api.setSubItemsViewportAnchor(element, "row-2", "second", 40);
+    (data.view.groups[1] as IAVTable).rows = rows.slice(0, 3) as IAVRow[];
+    const collapsed: Record<string, IAVVirtualData> = {};
+    api.prepareSubItemsViewport(element, data, collapsed);
+    assert.deepEqual(Object.keys(collapsed), []);
+});

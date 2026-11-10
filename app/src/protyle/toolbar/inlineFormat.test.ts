@@ -3,7 +3,7 @@ import * as assert from "node:assert/strict";
 import {getRangeInlineFormats, getRangesInlineFormats, INLINE_FORMAT_TYPES} from "./inlineFormat";
 
 before(() => {
-    Object.assign(globalThis, {Node: {TEXT_NODE: 3}, NodeFilter: {SHOW_TEXT: 4}});
+    Object.assign(globalThis, {Node: {ELEMENT_NODE: 1, TEXT_NODE: 3}, NodeFilter: {SHOW_TEXT: 4}});
 });
 
 const selection = (segments: {text: string, types?: string, outerTypes?: string}[],
@@ -45,7 +45,7 @@ const selection = (segments: {text: string, types?: string, outerTypes?: string}
         endOffset: endOffset ?? nodes[nodes.length - 1]?.data.length ?? 0,
         intersectsNode: () => true,
     } as unknown as Range;
-    return {editableElement, range};
+    return {editableElement, range, nodes};
 };
 
 const formats = (selected: ReturnType<typeof selection>) =>
@@ -102,6 +102,37 @@ describe("inline format selection coverage", () => {
 
     it("keeps ordinary selected whitespace in the coverage check", () => {
         assert.deepEqual(formats(selection([{text: "bold", types: "strong"}, {text: " "}])), []);
+    });
+
+    it("ignores owned word-joiner boundaries before semantic inline elements", () => {
+        for (const type of ["code", "kbd", "tag", "sup", "sub"]) {
+            for (const withWbr of [false, true]) {
+                const selected = selection([
+                    {text: "\u2060"}, {text: "\u2060value", types: `strong ${type}`}, {text: "\u200b"},
+                ]);
+                const [node, semantic] = selected.nodes;
+                const element = semantic.parentElement;
+                Object.assign(element, {nodeType: 1, hasAttribute: (name: string) => name === "data-inline-boundary"});
+                Object.assign(node, {nextSibling: withWbr ? {nodeName: "WBR", nextSibling: element} : element});
+                const expected = INLINE_FORMAT_TYPES.filter(format => ["strong", type].includes(format));
+                assert.deepEqual(formats(selected), expected);
+                assert.equal(node.textContent, "\u2060");
+                assert.equal(semantic.textContent, "\u2060value");
+                assert.deepEqual(getRangesInlineFormats([selected, selection([{text: "other", types: `strong ${type}`}])]), expected);
+            }
+        }
+    });
+
+    it("keeps unowned word joiners and ordinary text beside owned boundaries significant", () => {
+        assert.deepEqual(formats(selection([{text: "\u2060"}, {text: "\u2060value", types: "code"}])), []);
+        for (const prefix of [" ", "plain ", "\u2060"]) {
+            const selected = selection([{text: prefix + "\u2060"}, {text: "\u2060value", types: "code"}]);
+            const element = selected.range.endContainer.parentElement;
+            Object.assign(element, {nodeType: 1, hasAttribute: (name: string) => name === "data-inline-boundary"});
+            Object.assign(selected.range.startContainer, {nextSibling: element});
+            assert.deepEqual(formats(selected), []);
+            assert.equal(selected.range.startContainer.textContent, prefix + "\u2060");
+        }
     });
 
     it("ignores image helper text but checks text in semantic elements", () => {

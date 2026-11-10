@@ -1,4 +1,4 @@
-import {confirmDialog} from "../../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {genNotebookOption} from "../../menus/onGetnotebookconf";
 import {fetchPost} from "../../util/fetch";
 import {editorConfigApi} from "./editorRuntime";
@@ -284,7 +284,7 @@ const registerFileManagementGroup = (tab: SettingTabBuilder) => {
 </div>`,
         afterMount: (root) => {
             root.querySelector("#clearHistory")?.addEventListener("click", () => {
-                confirmDialog(
+                mobileConfirmDialog(
                     window.siyuan.languages.clearHistory,
                     window.siyuan.languages.confirmClearHistory,
                     () => {
@@ -299,6 +299,12 @@ const registerFileManagementGroup = (tab: SettingTabBuilder) => {
         }],
     });
 
+    group.number("fileTree.docTreeBatchSize", {
+        title: window.siyuan.languages.docTreeBatchSize,
+        desc: window.siyuan.languages.docTreeBatchSizeTip,
+        min: 1,
+        max: 10240,
+    });
     group.number("fileTree.maxListCount", {
         title: window.siyuan.languages.fileTree16,
         desc: window.siyuan.languages.fileTree17,

@@ -81,10 +81,27 @@
     transition: opacity 150ms linear;
 
     &--progress {
+      touch-action: none;
+
       @supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
         background-color: rgba(255, 255, 255, .08);
         -webkit-backdrop-filter: blur(8px) saturate(105%);
         backdrop-filter: blur(8px) saturate(105%);
+
+        #exitProgress & {
+          animation: exit-progress-blur 5s ease-in-out;
+        }
+
+        @keyframes exit-progress-blur {
+          from {
+            -webkit-backdrop-filter: blur(0) saturate(100%);
+            backdrop-filter: blur(0) saturate(100%);
+          }
+          to {
+            -webkit-backdrop-filter: blur(8px) saturate(105%);
+            backdrop-filter: blur(8px) saturate(105%);
+          }
+        }
 
         :root[data-theme-mode="dark"] & {
           background-color: rgba(0, 0, 0, .06);
@@ -97,6 +114,12 @@
           background-color: var(--b3-mask-background);
           -webkit-backdrop-filter: none;
           backdrop-filter: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce), (prefers-reduced-transparency: reduce), (forced-colors: active) {
+        #exitProgress & {
+          animation: none;
         }
       }
     }
@@ -182,7 +205,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     box-sizing: border-box;
-    width: min(560px, calc(100vw - 32px));
+    width: min(720px, calc(100vw - 32px));
     max-height: calc(100vh - 32px);
     max-height: calc(100dvh - 32px);
     overflow: auto;
@@ -197,6 +220,16 @@
   &__progress-label {
     text-align: right;
     font-variant-numeric: tabular-nums;
+  }
+
+  &__loading-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+
+    .b3-button {
+      max-width: 100%;
+    }
   }
 
   &__progress {

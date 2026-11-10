@@ -849,6 +849,20 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   }
 }
 
+.pdf-mobile-dialog {
+  .row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .buttonRow {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}
+
 #passwordOverlay > dialog {
   text-align: center;
 }

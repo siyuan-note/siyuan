@@ -48,7 +48,7 @@ const refreshEditorFontSize = async () => {
 
 const showEditorFontSizeMessage = (fontSize: number) => {
     showMessage(window.siyuan.languages.editorFontSize + " " + fontSize + "px<span class=\"fn__space\"></span>" +
-        "<button class=\"b3-button b3-button--white\">" + window.siyuan.languages.resetEditorFontSize + "</button>",
+        "<button class=\"b3-button b3-button--white b3-button--wrap b3-snackbar__action\">" + window.siyuan.languages.resetEditorFontSize + "</button>",
     undefined, undefined, MESSAGE_ID);
     document.querySelector<HTMLButtonElement>("#message [data-id=\"" + MESSAGE_ID + "\"] button")
         ?.addEventListener("click", () => {

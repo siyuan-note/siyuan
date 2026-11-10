@@ -126,7 +126,7 @@ const setup = (options: {
     tabsApi.MobileTabs.prototype.openOverview = () => {};
     const tabs = new tabsApi.MobileTabs({});
     window.siyuan.mobile.tabs = tabs;
-    return {tabs, window, writes, loads, scrollCalls, complete,
+    return {toolbar, tabs, window, writes, loads, scrollCalls, complete,
         saveLayout: layoutApi.saveMobileLayout as () => Promise<boolean>,
         get current(): any { return tabs.state.tabs.find((item: any) => item.id === tabs.state.activeTabID)?.current; },
         get protyle(): any { return window.siyuan.mobile.editor?.protyle; },
@@ -403,4 +403,14 @@ test("saving a closed session cannot revive the last rendered document", async (
     assert.equal(await state.tabs.save(), true);
     assert.deepEqual(state.persisted.tabs, []);
     assert.equal(state.persisted.activeTabID, undefined);
+});
+
+test("clearing the live mobile title persists the empty value rather than the stale title", async () => {
+    const state = setup({stored: saved()});
+    await state.tabs.restore();
+    await flush();
+    state.toolbar.value = "";
+    assert.equal(await state.tabs.save(), true);
+    assert.equal(state.current.title, "");
+    assert.equal(state.persisted.tabs[0].current.title, "");
 });

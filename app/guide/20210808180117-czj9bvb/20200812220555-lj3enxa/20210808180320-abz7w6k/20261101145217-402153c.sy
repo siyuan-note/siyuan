@@ -1,0 +1,686 @@
+{
+	"ID": "20261101145217-402153c",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261101145217-402153c",
+		"title": "独立 Markdown 编辑器",
+		"type": "doc",
+		"updated": "20261109092557"
+	},
+	"Children": [
+		{
+			"ID": "20261101145217-9478b69",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101145217-9478b69",
+				"updated": "20261106132257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打开和编辑"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-8818916",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-8818916",
+				"updated": "20261103211019"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Windows、macOS 和 Linux 桌面端，启动思源时传入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--markdown"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 参数可打开独立窗口，无需打开工作空间或启动本地内核。独立窗口打开期间，仍可正常启动思源，进入工作空间主界面。"
+				}
+			]
+		},
+		{
+			"ID": "20261101153939-cd9d1d3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101153939-cd9d1d3",
+				"updated": "20261101153939"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android、iOS 和 HarmonyOS 移动端，系统文件管理器提供 Markdown 文件的打开方式时，可以选择思源打开独立编辑页面。文档访问权限由系统选择器授予，部分文件提供方仅授予临时权限，重启后可能需要重新选择文件。"
+				}
+			]
+		},
+		{
+			"ID": "20261101154840-d4791f0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101154840-d4791f0",
+				"updated": "20261109070428"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "窗口名称显示当前文件名，未保存的新文档显示“未命名”。标题行显示文件面板按钮、大纲按钮、文件名、撤销、重做和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 菜单。正文不单独显示格式工具栏，桌面窗口采用无边框标题栏。新建、打开、保存、另存为、编辑模式、插入图片、授权资源目录、恢复草稿以及外观模式、字号和字体设置均收在此处。状态栏仅在需要时显示处理操作。桌面端使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切换开发者工具，macOS 使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Alt+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261106121753-4c0bbea",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106121753-4c0bbea",
+				"updated": "20261106121753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "撤销和重做按每次已完成的编辑操作进行。快速连续输入的字符可分别撤销，输入法一次确认的文字作为一次编辑撤销。"
+				}
+			]
+		},
+		{
+			"ID": "20261106132257-21729ff",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261106132257-21729ff",
+				"updated": "20261106132257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "即时渲染和所见即所得模式中的代码块在编辑时也会显示语法高亮。点击或轻触其他位置可关闭代码块语言候选框。"
+				}
+			]
+		},
+		{
+			"ID": "20261105055849-ea7f4b4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105055849-ea7f4b4",
+				"updated": "20261105091714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击左上角文件面板按钮旁的大纲按钮，可显示或隐藏标题大纲。Windows、Linux 默认使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt+2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，macOS 使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Control+2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "；自定义快捷键以按钮提示为准。大纲随编辑实时更新，可展开或折叠下级标题，点击标题可跳转到对应位置。大纲在即时渲染或所见即所得模式下可用，支持移动端和窄窗口。源码或分屏预览模式会隐藏大纲，按钮禁用并通过提示说明原因。大纲的启用状态仅在当前窗口中跨文档保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261102172700-upqhi5s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102172700-upqhi5s",
+				"updated": "20261102172700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在本机工作空间中，普通 Markdown 资源链接的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打开"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用内置 Markdown 编辑器打开"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 菜单可直接编辑原资源文件。远端工作空间、加密笔记本资源和外部文件链接不提供此入口，以免将远端路径或解密临时副本误当成原文件。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-70bc725",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-70bc725",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "该编辑器直接编辑普通 UTF-8 编码的 .md 和 .markdown 文件，不会将文件导入笔记本、转换为 .sy 文档或加入工作空间的搜索、块引用及同步。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-469fa4c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-469fa4c",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安装支持文件关联的桌面安装包后，可在系统的打开方式中选择思源。安装只添加候选应用，不接管已有的默认应用。也可以向思源桌面程序传入 --markdown 新建空白文档，或传入 --markdown=\"文件路径.md\" 打开文件。在编辑器中可使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打开"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或拖入 Markdown 文件。再次打开其他编辑窗口正在使用的文件时，会切换到已有窗口。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-b11bea3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-b11bea3",
+				"updated": "20261109092557"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑模式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 选择即时渲染、所见即所得或分屏预览，当前模式以勾选标识。编辑模式独立保存。仅切换模式不会保存文件；实际编辑可能整理 Markdown 格式，但应保留内容。在支持外观来源选择的版本中，可通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 为外观模式、字号和字体分别选择工作空间或独立配置。点击来源菜单顶部的独立配置可直接打开设置对话框，保存后才切换为独立配置，取消则保留原来源；点击并列的工作空间选项会立即继承其设置。列表只显示工作空间文件夹名称，悬停可查看完整路径；工作空间较多时可滚动列表。默认使用独立配置，也可按需选择继承工作空间。各项可选择不同来源，明确选择独立配置后，不会因新增工作空间而自动切换。所选工作空间缺失或无法访问时，对应项会切换并保存为独立配置，使用已保存的独立值，其他项不变；工作空间恢复后也不会自动切回。独立配置可设置外观模式、字号，以及全局默认字体、编辑器字体和等宽字体的有序列表。桌面端可在系统字体列表中搜索、预览并勾选字体，通过已选字体标签移除或调整顺序，并选择可用字重。等宽字体列表默认筛选等宽字体，也可切换为显示全部。该选择器无需打开工作空间，不提供独立的字体文件导入。继承工作空间时也支持其中的自定义字体；字体缺失或加载失败时按字体顺序回退。不加载工作空间的主题 CSS 或脚本。支持外观来源选择的 Android、iOS 和 HarmonyOS 版本也默认使用独立配置，可为外观模式、字号和字体分别选择本机已注册且可访问的工作空间，继承规则和缺失时的回退规则与桌面端一致。字体选择器列出移动系统提供的字体，点击已选字体的字重按钮可选择可用字重，通过上下按钮调整顺序。可用字体及其显示效果取决于系统和 WebView。"
+				}
+			]
+		},
+		{
+			"ID": "20261101171827-bec9d7c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101171827-bec9d7c",
+				"updated": "20261105091714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "浏览 Markdown 文件"
+				}
+			]
+		},
+		{
+			"ID": "20261101171827-4c95500",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101171827-4c95500",
+				"updated": "20261102140506"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打开 A.md 时，默认以它所在的目录作为文件树根目录。文件树显示真实文件夹以及 .md、.markdown 文件，展开文件夹时才加载其内容。文件夹排在前面，名称按自然顺序排列，例如 file2.md 排在 file10.md 之前。文件夹展开和折叠时使用平滑过渡，并遵守系统的减少动态效果设置。空子文件夹不显示占位子行。选定的根目录没有可显示的文件夹或 Markdown 文件时，面板显示“当前文件夹没有可显示的 Markdown 文件”的提示。"
+				}
+			]
+		},
+		{
+			"ID": "20261101171827-699f344",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101171827-699f344",
+				"updated": "20261105091714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击左上角的文件面板按钮可打开或关闭桌面侧栏或移动端文件抽屉，各端文件名仅用于显示，请使用文件面板按钮切换文件树。Windows、Linux 默认使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt+1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，macOS 使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Control+1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。从工作空间打开时，文件面板和大纲沿用该工作空间的快捷键，实际按键以按钮提示为准；未从工作空间打开时使用默认值。两个面板的开关使用平滑过渡，并遵守系统的减少动态效果设置。桌面端拖动分隔线可以调整宽度。如果移动平台只授予单个文件的权限，请按提示选择文件所在目录以启用文件树。取消目录授权不会影响当前文档编辑。文件树授权不会同时授权本地图片。"
+				}
+			]
+		},
+		{
+			"ID": "20261101171827-b620191",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101171827-b620191",
+				"updated": "20261101171827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "单击文件会在同一编辑容器中切换。编辑器先检查目标文件，再通过保存或保留恢复草稿保护当前文档；取消时仍停留在当前文档。根目录内切换文件会保留原根目录，通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打开文件夹"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可以重新选择导航根目录而不改变正文。即使当前文档不在所选根目录内，也会保留你的选择。另存为仍在根目录内时保持原根目录，保存到根目录外后跟随新文件的父目录。"
+				}
+			]
+		},
+		{
+			"ID": "20261101171827-9a646b9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101171827-9a646b9",
+				"updated": "20261101171827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "展开状态与桌面面板宽度会记忆，目录变化或重新聚焦编辑器时会刷新文件树。目录条目过多时，请选择更小的目录。该面板只用于导航，不提供重命名、删除或拖动整理文件的操作。桌面端还可从菜单在系统文件管理器中定位当前已保存文件。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-d2748c2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101145217-d2748c2",
+				"updated": "20261103224054"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保存与处理冲突"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-60eadd7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-60eadd7",
+				"updated": "20261103224054"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可写文件在停止输入后自动保存。通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 立即请求保存，新建文档需先选择保存位置。日常编辑和保存时隐藏底部状态栏，自动保存照常进行；仅在冲突、失败、恢复错误等需要关注或处理时显示。"
+				}
+			]
+		},
+		{
+			"ID": "20261101153939-f4b2413",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101153939-f4b2413",
+				"updated": "20261101174206"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Android 的另存为通过系统文件选择器选择保存位置和文件名；iOS 和 HarmonyOS 先选择目标目录，再输入文件名。保存成功后保持状态栏隐藏，云端同步由对应网盘管理。应用进入后台时，会尝试持久化最新已提交的输入并保存待写入修改；系统直接结束进程时，只能恢复已经落盘的内容。iOS 的 Markdown 场景与工作空间共用应用进程，进程崩溃或终止会影响两者。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-dc883f2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-dc883f2",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "其他应用修改文件后，本地没有编辑时可以重新加载。如果已有编辑或保存仍在进行，自动写回会暂停。请核对内容，再选择重新加载、明确确认覆盖或另存为。权限丢失、文件删除或写入结果不确定也会暂停写回，可在提供相应操作时重试或另存为。重载结果不会替换读取期间的新输入。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-799e153",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-799e153",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "另存为在写入前预留目标，确认保存成功后才切换当前会话。其他编辑窗口已占用的目标不能直接覆盖。另存到其他目录会保留原有相对资源链接，不会自动复制资源；请阅读提示，并按需移动资源或调整链接。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-ea6a342",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-ea6a342",
+				"updated": "20261101175356"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保存时保留原有 UTF-8 BOM 和所选换行方式。包含混合换行的文件可能在首次实际编辑后统一换行。打开、查看及切换模式不会改写原文件。非支持编码或大于 8 MiB 的文件会被拒绝，原文件不变。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-edb7eca",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101145217-edb7eca",
+				"updated": "20261103141758"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "图片与预览"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-821dacb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-821dacb",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入图片前请先保存 Markdown 文档，再使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "插入图片"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 选择来源图片和新的资源保存位置。编辑器确认复制成功后才插入相对引用，不会覆盖已有图片，也不支持保存到其他盘符。这一操作只授权所选图片，不会扩大为整个目录的访问权限。Android 会先选择来源图片，必要时授权 Markdown 文档所在目录，再输入该目录内尚未使用的新文件名；插入的图片单独获得预览授权。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-e97ec63",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-e97ec63",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "授权资源目录"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 选择相对路径图片所在的本地目录，只显示明确授权目录内支持的图片。图片缺失或未获授权时，保留原始 Markdown 引用并提示资源不可用。临时预览地址不会写入正文，目录授权仅属于当前编辑会话。Android 需选择 Markdown 文档的直接父目录，可显示该目录及其子目录内支持的图片；包含 .. 的父级目录引用不可用。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-a2b4469",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-a2b4469",
+				"updated": "20261103141758"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HTTP 和 HTTPS 网络图片直接显示，包括 SVG 徽章，无需目录授权；协议相对图片地址使用 HTTPS。图片加载不会修改 Markdown 中的原始链接。音视频、嵌入页面、脚本和远端图表服务仍被阻止。普通 HTTP、HTTPS 和邮件链接仅在点击后交给系统打开。数学公式使用本地资源，动态图表源码按代码显示。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-b275328",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101145217-b275328",
+				"updated": "20261103213209"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地恢复与隐私"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-307a7a6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-307a7a6",
+				"updated": "20261101162448"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新建且从未编辑的空白文档关闭时不弹出确认，也不生成恢复草稿。实际编辑后尚未保存的修改（包括编辑后清空正文）、非空副本和恢复草稿仍保留恢复与关闭保护。关闭这些文档时若保存失败或文档尚未命名，可以保留可恢复草稿、另存为或取消关闭。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "恢复草稿"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中查看并恢复记录，恢复不会直接覆盖原文件。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-8d7a8b3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-8d7a8b3",
+				"updated": "20261103213209"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移动端统一使用 home/.config/siyuan/markdown/recovery/ 目录，其中 home 为应用已有的模拟用户目录，编辑偏好和文件树状态保存在 recovery 的上级目录。恢复草稿以未加密形式保存在本机 Markdown 编辑器的私有目录中，位于工作空间之外，不受加密笔记本保护，也不参与思源同步。桌面端的操作系统备份或其他备份软件可能包含此目录。移动端会将 Markdown 私有目录排除在系统备份之外；用户选择的原文件仍遵循其文件提供方的备份和同步规则。"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-97eb770",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-97eb770",
+				"updated": "20261103203708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "支持打开和保存不超过 8 MiB 的 UTF-8 文件。超过 256 KiB 时自动使用源码编辑并关闭预览，删减到阈值以内后可以恢复富文本模式。自动降级仅影响当前文档，不改变默认编辑模式；主动选择的编辑模式才会记忆。文件预算包含 BOM 和编码后的换行。单篇恢复草稿另设 16 MiB 正文预算，恢复记录总计 256 MiB、最多 1024 条。超过文件上限的恢复草稿仍可复制或删减，降到上限以内后才能写回。达到预算会报告失败，不删除未恢复草稿，草稿不会自动过期。"
+				}
+			]
+		},
+		{
+			"ID": "20261101154840-e537ee1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101154840-e537ee1",
+				"updated": "20261101154840"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "包含密集表格或代码的复杂文档在渲染、切换模式或保存时仍可能出现停顿；大小限制并不保证所有文档都能流畅操作。"
+				}
+			]
+		}
+	]
+}

@@ -268,26 +268,28 @@ type BazaarPackage struct {
 	PreviewURL string `json:"previewURL"`
 	IconURL    string `json:"iconURL"`
 
-	Installed               bool   `json:"installed"`
-	HasStorageData          bool   `json:"hasStorageData,omitempty"`
-	Outdated                bool   `json:"outdated"`
-	Current                 bool   `json:"current"`
-	Updated                 string `json:"updated"`
-	Stars                   int    `json:"stars"`
-	OpenIssues              int    `json:"openIssues"`
-	Size                    int64  `json:"size"`
-	HSize                   string `json:"hSize"`
-	InstallSize             int64  `json:"installSize"`
-	HInstallSize            string `json:"hInstallSize"`
-	InstallTime             int64  `json:"installTime"`
-	UpdateTime              int64  `json:"updateTime"`
-	HInstallDate            string `json:"hInstallDate"`
-	HUpdated                string `json:"hUpdated"`
-	Downloads               int    `json:"downloads"`
-	DisallowInstall         bool   `json:"disallowInstall"`
-	DisallowUpdate          bool   `json:"disallowUpdate"`
-	UpdateRequiredMinAppVer string `json:"updateRequiredMinAppVer,omitempty"`                                                  // 升级目标要求的最小应用版本
-	InvalidReason           string `json:"invalidReason,omitempty" api:"enum=missing-manifest|invalid-manifest|name-mismatch"` // 本地安装包异常原因
+	Installed                bool   `json:"installed"`
+	HasStorageData           bool   `json:"hasStorageData,omitempty"`
+	Outdated                 bool   `json:"outdated"`
+	Current                  bool   `json:"current"`
+	Created                  string `json:"created,omitempty"` // 在线集市首次上架时间，缺失时未知，不以更新时间补齐
+	Updated                  string `json:"updated"`
+	Stars                    int    `json:"stars"`
+	OpenIssues               int    `json:"openIssues"`
+	Size                     int64  `json:"size"`
+	HSize                    string `json:"hSize"`
+	InstallSize              int64  `json:"installSize"`
+	HInstallSize             string `json:"hInstallSize"`
+	InstallTime              int64  `json:"installTime"`
+	UpdateTime               int64  `json:"updateTime"`
+	HInstallDate             string `json:"hInstallDate"`
+	HUpdated                 string `json:"hUpdated"`
+	Downloads                int    `json:"downloads"`
+	DisallowInstall          bool   `json:"disallowInstall"`
+	DisallowUpdate           bool   `json:"disallowUpdate"`
+	BazaarVersionUnsupported bool   `json:"bazaarVersionUnsupported,omitempty"`                                                 // 在线包最低应用版本高于当前版本；与平台兼容性独立
+	UpdateRequiredMinAppVer  string `json:"updateRequiredMinAppVer,omitempty"`                                                  // 升级目标要求的最小应用版本
+	InvalidReason            string `json:"invalidReason,omitempty" api:"enum=missing-manifest|invalid-manifest|name-mismatch"` // 本地安装包异常原因
 
 	RatingAvailable bool                 `json:"ratingAvailable"`  // 在线集市公开评分是否可用
 	Rating          *BazaarPackageRating `json:"rating,omitempty"` // 在线集市公开评分
@@ -300,6 +302,8 @@ type BazaarPackage struct {
 	Modes                 *[]string `json:"modes,omitempty"`                 // 主题：支持的模式列表
 }
 type BazaarAppearance struct {
+	// ShowFloatingDockBar 控制隐藏停靠栏时是否临时显示左右浮动停靠栏，旧配置缺失时默认开启。
+	ShowFloatingDockBar      *bool                    `json:"showFloatingDockBar"`
 	LockScreenWallpaper      bool                     `json:"lockScreenWallpaper"`
 	CompactMode              bool                     `json:"compactMode"`              // 桌面端紧凑模式，默认关闭
 	MenuMouseScroll          bool                     `json:"menuMouseScroll"`          // 桌面端菜单鼠标滚动，新工作空间默认启用
@@ -325,6 +329,7 @@ type BazaarAppearance struct {
 	CloseButtonBehavior      int                      `json:"closeButtonBehavior"`      // 关闭按钮行为，0：退出，1：最小化到托盘
 	HideToolbar              bool                     `json:"hideToolbar"`              // 是否隐藏顶栏工具栏
 	HideStatusBar            bool                     `json:"hideStatusBar"`            // 是否隐藏底部状态栏
+	ShowFloatingStatusBar    bool                     `json:"showFloatingStatusBar"`    // 隐藏状态栏时在右下角悬停显示
 	StatusBar                *BazaarStatusBar         `json:"statusBar"`                // 底部状态栏配置
 	Notifications            *BazaarNotifications     `json:"notifications"`            // 外观通知开关配置
 	EntryVisibility          *BazaarEntryVisibility   `json:"entryVisibility"`          // 桌面端入口可见性配置

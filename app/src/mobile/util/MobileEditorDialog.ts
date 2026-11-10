@@ -6,6 +6,7 @@ export type MobileEditorDialog = Dialog & {
     beforeClose: () => Promise<void>;
     register: () => void;
     close: () => Promise<void>;
+    isClosePending: () => boolean;
     discard: () => void;
 };
 
@@ -32,6 +33,10 @@ const createMobileEditorDialog = (): MobileEditorDialogConstructor => {
 
         public register() {
             sheets.add(this);
+        }
+
+        public isClosePending() {
+            return !!this.closing || this.discarded;
         }
 
         public close(): Promise<void> {

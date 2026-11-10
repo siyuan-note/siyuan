@@ -17,6 +17,31 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestSkillListInstallationRecords(t *testing.T) {
+	root := setSkillToolTestEnvironment(t)
+	writeSkillToolTestFile(t, filepath.Join(root, "sample", "SKILL.md"), "---\nname: sample\n---\nbody")
+	result, err := skillList(nil)
+	if err != nil || result.IsError || !strings.Contains(result.Content[0].Text, "installation: unknown") {
+		t.Fatalf("legacy source: %+v %v", result, err)
+	}
+	recordPath := filepath.Join(filepath.Dir(root), "skills.json")
+	writeSkillToolTestFile(t, recordPath, `{"version":1,"skills":{"sample":{"name":"sample","url":"https://example.com/SKILL.md","sourceScope":"manifest-only","digest":"sha256-v1:test"}}}`)
+	result, err = skillList(nil)
+	if err != nil || result.IsError {
+		t.Fatalf("list: %+v %v", result, err)
+	}
+	for _, expected := range []string{`"sourceScope":"manifest-only"`, `"digest":"sha256-v1:test"`, "not current content verification"} {
+		if !strings.Contains(result.Content[0].Text, expected) {
+			t.Fatalf("missing %s: %+v", expected, result)
+		}
+	}
+	writeSkillToolTestFile(t, recordPath, "corrupt")
+	result, err = skillList(nil)
+	if err != nil || !result.IsError {
+		t.Fatalf("corrupt record hidden: %+v %v", result, err)
+	}
+}
+
 func TestBuiltinSkillRejectsForgedContextAndMutations(t *testing.T) {
 	root := setSkillToolTestEnvironment(t)
 	for _, action := range []string{"load", "save", "remove", "rename", "install"} {

@@ -31,6 +31,7 @@ func TestContractSetAccessAuthCodeDesktopSession(t *testing.T) {
 	for _, mode := range []string{"new", "bound", "remembered", "expired"} {
 		t.Run(mode, func(t *testing.T) {
 			model.Conf = model.NewAppConf()
+			model.Conf.CookieKey = "desktop-setting-test-cookie-key"
 			model.Conf.AccessAuthCode = "old-password"
 			engine := gin.New()
 			engine.Use(ginSessions.Sessions("siyuan", cookie.NewStore([]byte("desktop-setting-test-key"))))
@@ -38,7 +39,7 @@ func TestContractSetAccessAuthCodeDesktopSession(t *testing.T) {
 				session := util.GetSession(c)
 				ws := util.GetWorkspaceSession(session)
 				if mode != "new" {
-					ws.AccessAuthCode = model.Conf.AccessAuthCode
+					model.SetAccessCodeSession(ws, model.Conf.AccessAuthCode)
 					model.BindDesktopSession(c, ws, mode == "remembered")
 					if mode == "expired" {
 						ws.DesktopSessionID = "previous-boot"
@@ -72,11 +73,15 @@ func TestContractSetAccessAuthCodeDesktopSession(t *testing.T) {
 				t.Fatalf("setting password failed: %s, %v", result.Body.String(), err)
 			}
 			var ws util.WorkspaceSession
-			if err := json.Unmarshal(call("GET", "/session", "", result.Result().Cookies()).Body.Bytes(), &ws); err != nil {
+			sessionBody := call("GET", "/session", "", result.Result().Cookies()).Body.Bytes()
+			if err := json.Unmarshal(sessionBody, &ws); err != nil {
 				t.Fatal(err)
 			}
 			if (ws.DesktopSessionID != "") != (mode != "remembered") || !model.IsAccessCodeSessionAuthenticated(&ws) {
 				t.Fatalf("password setting lost session policy: %+v", ws)
+			}
+			if strings.Contains(string(sessionBody), "new-password") {
+				t.Fatalf("session stores the access authorization code: %s", sessionBody)
 			}
 		})
 	}
@@ -341,7 +346,7 @@ func TestGetConfUILayoutByRole(t *testing.T) {
 func TestPreserveImportedAISecrets(t *testing.T) {
 	currentMCP := &conf.MCP{Servers: []conf.MCPServer{{ID: "server", Headers: map[string]string{"Authorization": "secret"}}}}
 	current := &conf.AI{
-		Web: &conf.AIWeb{APIKey: "web-key"},
+		Web: &conf.AIWeb{APIKey: "web-key", ExaAPIKey: "exa-key"},
 		Providers: []*conf.Provider{
 			{ID: "matching", APIKey: "local-key", BaseURL: "https://example.com", Protocol: "openai"},
 			{ID: "changed-endpoint", APIKey: "endpoint-key", BaseURL: "https://local.example.com"},
@@ -364,12 +369,12 @@ func TestPreserveImportedAISecrets(t *testing.T) {
 	}
 
 	preserveImportedAISecrets(imported, current)
-	if imported.Web.APIKey != "web-key" || imported.Web.FetchProvider != "deepseek" || imported.Web.SearchProvider != "exa" {
+	if imported.Web.ExaAPIKey != "exa-key" || imported.Web.APIKey != "web-key" || imported.Web.FetchProvider != "deepseek" || imported.Web.SearchProvider != "exa" {
 		t.Fatal("web credential or independent provider selection lost on import")
 	}
-	providedWeb := &conf.AI{Web: &conf.AIWeb{APIKey: "provided-web-key"}}
+	providedWeb := &conf.AI{Web: &conf.AIWeb{APIKey: "provided-web-key", ExaAPIKey: "provided-exa-key"}}
 	preserveImportedAISecrets(providedWeb, current)
-	if providedWeb.Web.APIKey != "provided-web-key" {
+	if providedWeb.Web.ExaAPIKey != "provided-exa-key" || providedWeb.Web.APIKey != "provided-web-key" {
 		t.Fatal("provided web credential was overwritten")
 	}
 

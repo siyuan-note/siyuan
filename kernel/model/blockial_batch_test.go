@@ -6,8 +6,10 @@ package model
 
 import (
 	"errors"
+	"maps"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -17,7 +19,7 @@ import (
 
 func TestBatchBlockAttrsValidationDoesNotPublishChanges(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	cache.PutBlockIALInBox(fixture.childID, fixture.box.ID, map[string]string{"custom-test": "old"})
+	putBatchBlockAttrsTestIAL(t, fixture.childID, fixture.box.ID, map[string]string{"custom-test": "old"})
 	err := batchSetBlockAttrs([]map[string]any{
 		{"id": fixture.childID, "attrs": map[string]string{"custom-test": "new"}},
 		{"id": fixture.targetID, "attrs": map[string]string{"data-task": "x"}},
@@ -40,7 +42,7 @@ func TestBatchBlockAttrsValidationDoesNotPublishChanges(t *testing.T) {
 func TestBatchBlockAttrsPublishesOnlyPersistedDocuments(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	for _, id := range []string{fixture.childID, fixture.sourceID, fixture.targetID} {
-		cache.PutBlockIALInBox(id, fixture.box.ID, map[string]string{"custom-test": "old"})
+		putBatchBlockAttrsTestIAL(t, id, fixture.box.ID, map[string]string{"custom-test": "old"})
 	}
 	injected := errors.New("injected second document failure")
 	writes := 0
@@ -73,6 +75,30 @@ func TestBatchBlockAttrsPublishesOnlyPersistedDocuments(t *testing.T) {
 		tree, loadErr := LoadTreeByBlockID(id)
 		if loadErr != nil || treenode.GetNodeInTree(tree, id).IALAttr("custom-test") != wantDisk {
 			t.Fatalf("unexpected persisted document %s: %v", id, loadErr)
+		}
+	}
+}
+
+func putBatchBlockAttrsTestIAL(t *testing.T, id, boxID string, attrs map[string]string) {
+	t.Helper()
+	cache.RemoveBlockIALInBox(id, boxID)
+	cache.PutBlockIALInBox(id, boxID, attrs)
+	t.Cleanup(func() { cache.RemoveBlockIALInBox(id, boxID) })
+
+	// 首次写入异步入缓存；必须先确认夹具可见，再检查被测操作是否发布了属性。
+	timeout := time.NewTimer(5 * time.Second)
+	defer timeout.Stop()
+	ticker := time.NewTicker(time.Millisecond)
+	defer ticker.Stop()
+	for {
+		got := cache.GetBlockIALInBox(id, boxID)
+		if maps.Equal(got, attrs) {
+			return
+		}
+		select {
+		case <-ticker.C:
+		case <-timeout.C:
+			t.Fatalf("cache fixture was not published for block %s: got %v, want %v", id, got, attrs)
 		}
 	}
 }

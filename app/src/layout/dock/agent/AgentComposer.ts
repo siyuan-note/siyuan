@@ -12,6 +12,8 @@ import {removeCompressURL} from "../../../util/image";
 import {mountProtyleLiteFragment} from "../../../protyle/lite/fragmentEditor";
 import {AGENT_SKILL_SELECTOR, deleteAgentSkill, expandAgentSkillSelection, normalizeAgentSkills} from "./agentSkill";
 import {focusByRange} from "../../../protyle/util/selectionOffsets";
+import {getConfiguredEntryVisibility} from "../../../config/entryVisibility/runtime";
+import {SLASH_MENU_ROOT_PATH} from "../../../config/entryVisibility/catalog";
 
 export interface AgentComposerData {
     text: string;
@@ -72,11 +74,18 @@ const hintAgentRef = (key: string, protyle: IProtyle, source: THintSource): IHin
     return hintRef(key, protyle, source);
 };
 
+const isSkillHintEnabled = (protyle: IProtyle) => getConfiguredEntryVisibility(SLASH_MENU_ROOT_PATH,
+    protyle.hint.element.closest("#keyboardToolbar") ? SLASH_MENU_ROOT_PATH : undefined);
+
 // / 技能菜单：异步拉取 lsSkills，选中后把技能名作为带持久标识的智能体行级元素插入。
 // 返回 [] 占位，数据在 fetch 回调里通过 protyle.hint.genHTML 填充（与 hintRef 异步模式一致）。
 const hintSkill = registerBuiltinSlashHint((key: string, protyle: IProtyle): IHintData[] => {
     const requestID = (skillHintRequestIDs.get(protyle) || 0) + 1;
     skillHintRequestIDs.set(protyle, requestID);
+    if (!isSkillHintEnabled(protyle)) {
+        protyle.hint.genHTML([], protyle, true, "hint");
+        return [];
+    }
     if (shouldYieldSkillHint(key, protyle.options.hint.extend.map((item) => item.key))) {
         protyle.hint.enableExtend = false;
         protyle.hint.genHTML([], protyle, true, "hint");
@@ -103,6 +112,10 @@ const hintSkill = registerBuiltinSlashHint((key: string, protyle: IProtyle): IHi
             hidden: protyle.hint.element.classList.contains("fn__none"),
             connected: protyle.hint.element.isConnected,
         })) {
+            return;
+        }
+        if (!isSkillHintEnabled(protyle)) {
+            protyle.hint.genHTML([], protyle, true, "hint");
             return;
         }
         const rawSkills = (response && response.data) ? response.data : [];

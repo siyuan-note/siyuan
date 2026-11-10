@@ -7,12 +7,11 @@
 package model
 
 import (
-	"bytes"
 	"context"
 	gosql "database/sql"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -75,19 +74,12 @@ func TestIndexBoxBatches(t *testing.T) {
 				id := ast.NewNodeID()
 				tree := treenode.NewTree(box.ID, "/"+id+".sy", "/Batch", "Batch")
 				tree.Root.AppendChild(&ast.Node{Type: ast.NodeAttributeView, ID: ast.NewNodeID(), AttributeViewID: avID})
+				if tc.padding > 0 {
+					// Keep the source size stable when indexing rewrites the document.
+					tree.Root.SetIALAttr("custom-test-padding", strings.Repeat(" ", tc.padding))
+				}
 				if _, err := filesys.WriteTree(tree); err != nil {
 					t.Fatal(err)
-				}
-				if tc.padding > 0 {
-					file, err := os.OpenFile(filepath.Join(util.DataDir, box.ID, tree.Path), os.O_APPEND|os.O_WRONLY, 0644)
-					if err != nil {
-						t.Fatal(err)
-					}
-					_, err = file.Write(bytes.Repeat([]byte(" "), tc.padding))
-					file.Close()
-					if err != nil {
-						t.Fatal(err)
-					}
 				}
 			}
 			for range 2 {

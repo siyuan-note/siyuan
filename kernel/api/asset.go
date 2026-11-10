@@ -179,15 +179,19 @@ var getDocAssets = contractHandler(apicontract.GetDocAssets, func(c *gin.Context
 		retainQueryStr = *request.RetainQueryStr
 	}
 
-	assets, err := model.DocAssets(id, retainQueryStr)
-	if err != nil {
-		return apicontract.Failure[[]string](-1, err.Error())
-	}
+	var assets []string
+	var err error
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		if !model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id) {
 			return apicontract.Failure[[]string](-1, fmt.Sprintf(model.Conf.Language(15), id))
 		}
+		assets, err = model.DocAssetsForPublishAccess(c, publishAccess, id, retainQueryStr)
+	} else {
+		assets, err = model.DocAssets(id, retainQueryStr)
+	}
+	if err != nil {
+		return apicontract.Failure[[]string](-1, err.Error())
 	}
 	return apicontract.Success(assets)
 })

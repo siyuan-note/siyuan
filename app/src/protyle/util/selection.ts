@@ -199,6 +199,16 @@ export const getRangeByPoint = (x: number, y: number) => {
 
 export const getEditorRange = (element: Element): Range => {
     let range: Range;
+    if (getSelection().rangeCount === 0) {
+        const mindmap = element.querySelector(".protyle-wysiwyg--select > .mindmap-view")?.parentElement;
+        if (mindmap) {
+            // 整块脑图操作只需要逻辑范围，原生光标留空以避免遍历和绘制画布内的光标位置。
+            range = document.createRange();
+            range.setStart(mindmap, 0);
+            range.collapse(true);
+            return range;
+        }
+    }
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
         if (element === range.startContainer || element.contains(range.startContainer)) {
@@ -885,7 +895,17 @@ export const focusByWbr = (element: Element, range: Range, preserveWbr = false) 
     } else {
         const wbrPreviousSibling = hasPreviousSibling(wbrElement);
         if (wbrPreviousSibling && wbrElement.previousElementSibling === wbrPreviousSibling) {
-            if (wbrElement.previousElementSibling.lastChild?.nodeType === 3) {
+            if (wbrElement.previousElementSibling.getAttribute("data-type")?.split(" ").includes("inline-math")) {
+                // 公式外的文本边界承载组合输入，空节点之间的父元素选区会使浏览器丢失组合替换范围。
+                let text = wbrElement.previousSibling;
+                if (text.nodeType !== Node.TEXT_NODE) {
+                    text = document.createTextNode(Constants.ZWSP);
+                    wbrElement.before(text);
+                } else if (text.textContent === "") {
+                    text.textContent = Constants.ZWSP;
+                }
+                range.setStart(text, text.textContent.length);
+            } else if (wbrElement.previousElementSibling.lastChild?.nodeType === 3) {
                 // <em>text</em><wbr> 需把光标放在里面，因为 chrome 点击后也是默认在里面
                 range.setStart(wbrElement.previousElementSibling.lastChild, wbrElement.previousElementSibling.lastChild.textContent.length);
             } else if (wbrPreviousSibling.nodeType !== 3 && (wbrPreviousSibling as HTMLElement).classList.contains("img")) {

@@ -454,6 +454,11 @@ var getTreeStat = contractHandler(apicontract.GetTreeStat, func(c *gin.Context, 
 })
 
 var getDOMText = contractHandler(apicontract.GetDOMText, func(c *gin.Context, request apicontract.DOMTextRequest) apicontract.Response[string] {
+	if model.GetGinContextRole(c) == model.RoleReader {
+		// 读者不能通过调用方构造的 DOM 读取未发布资源的 OCR 文本
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-vmvr-gf8m-x483
+		return apicontract.Success(model.GetDOMTextWithoutOCRAssets(request.DOM))
+	}
 	return apicontract.Success(model.GetDOMText(request.DOM))
 })
 

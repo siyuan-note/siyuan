@@ -123,7 +123,10 @@ export const restoreListMindmapFocus = (root: Element, source: Element, context?
             candidateIDs.push(id);
         }
     }
-    const selection = readListMindmapSelection(context?.undoFocusMindmapSelection);
+    let selection = readListMindmapSelection(context?.undoFocusMindmapSelection);
+    if (typeof context?.undoFocusMindmapViewport === "string") {
+        selection = {...selection, undoFocusMindmapViewport: context.undoFocusMindmapViewport};
+    }
     registered.restoreFocus(list.dataset.nodeId, candidateIDs, selection, list);
     return true;
 };

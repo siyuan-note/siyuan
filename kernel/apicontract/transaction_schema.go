@@ -16,6 +16,7 @@ type transactionActionPayload struct {
 }
 
 var transactionActionPayloads = []transactionActionPayload{
+	{"setDocTitle", reflect.TypeFor[TransactionDocumentTitle](), reflect.TypeFor[string]()},
 	{"updateAttrs", reflect.TypeFor[TransactionAttributeChange](), reflect.TypeFor[Null]()},
 	{"create", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
 	{"restoreCreatedDoc", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
@@ -38,6 +39,11 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"removeFlashcards", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
 	{"setAttrViewName", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
 	{"setAttrViewNewItemTemplates", reflect.TypeFor[TransactionNewItemTemplates](), reflect.TypeFor[Null]()},
+	{"setAttrViewSubItems", reflect.TypeFor[TransactionSubItems](), reflect.TypeFor[Null]()},
+	{"setAttrViewSubItemsDisplay", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
+	{"reparentAttrViewItems", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
+	{"promoteAttrViewItems", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
+	{"duplicateAttrViewSubtree", reflect.TypeFor[Null](), reflect.TypeFor[TransactionInsertedItems]()},
 	{"setAttrViewAutomations", reflect.TypeFor[AVAutomationConfig](), reflect.TypeFor[Null]()},
 	{"collectAttrViewBlocks", reflect.TypeFor[AVCollectBlocks](), reflect.TypeFor[Null]()},
 	{"cleanupAttrViewBlocks", reflect.TypeFor[AVCollectionCleanup](), reflect.TypeFor[Null]()},
@@ -45,6 +51,8 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"setAttrViewFilters", reflect.TypeFor[[]*AVViewFilter](), reflect.TypeFor[Null]()},
 	{"setAttrViewContextFilter", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
 	{"setAttrViewColRelationFilters", reflect.TypeFor[[]*AVViewFilter](), reflect.TypeFor[Null]()},
+	{"setAttrViewRelationDetail", reflect.TypeFor[*AVRelationDetailView](), reflect.TypeFor[Null]()},
+	{"updateAttrViewRelationItems", reflect.TypeFor[AVRelationItemsChange](), reflect.TypeFor[Null]()},
 	{"setAttrViewColRollupFilters", reflect.TypeFor[[]*AVViewFilter](), reflect.TypeFor[Null]()},
 	{"setAttrViewSorts", reflect.TypeFor[[]*AVViewSort](), reflect.TypeFor[Null]()},
 	{"setAttrViewPageSize", reflect.TypeFor[float64](), reflect.TypeFor[Null]()},

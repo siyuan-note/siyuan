@@ -53,3 +53,22 @@ export class BreadcrumbButtonRegistry {
         }
     }
 }
+
+export interface IBreadcrumbButtonCatalogEntry {
+    key: string;
+    label: string;
+}
+
+// Dots must not become configuration path separators.
+export const getPluginBreadcrumbEntryKey = (pluginName: string, id: string) => {
+    const encode = (value: string) => encodeURIComponent(value).replace(/\./g, "%2E");
+    return `plugin:${encode(pluginName)}:${encode(id)}`;
+};
+
+export const breadcrumbButtonRegistry = new BreadcrumbButtonRegistry();
+
+export const getBreadcrumbButtonCatalogSnapshot = (): IBreadcrumbButtonCatalogEntry[] =>
+    breadcrumbButtonRegistry.getAll().map(({pluginName, options}) => ({
+        key: getPluginBreadcrumbEntryKey(pluginName, options.id),
+        label: `${pluginName} - ${options.title}`,
+    }));

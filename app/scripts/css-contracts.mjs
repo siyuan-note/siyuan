@@ -103,7 +103,7 @@ export const collectClassContract = () => {
     const defined = new Set();
     const used = new Map();
     const compiled = {};
-    for (const entry of ["base", "mobile", "export", "startup"]) {
+    for (const entry of ["base", "mobile", "export", "startup", "markdown"]) {
         compiled[entry] = sass.compile(path.join(root, "src/assets/scss", `${entry}.scss`), {logger: sass.Logger.silent}).css;
         cssClasses(compiled[entry]).forEach(name => defined.add(name));
     }

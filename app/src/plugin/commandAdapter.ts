@@ -1,5 +1,6 @@
 import {getCommandRegistry} from "../command/service";
 import type {ICommandContextSnapshot, ICommandDefinition, TCommandSource} from "../command/types";
+import {hasCommandFileTreeTarget} from "../command/contextTargets";
 
 interface IPluginCommandOwner {
     name: string;
@@ -67,6 +68,16 @@ const resolvePluginCommandExecution = (
     return command.execute ? command.execute(pluginContext) : legacyCallback(pluginContext);
 };
 
+const resolveFileTreeCommandExecution = (command: ICommand, context: ICommandContextSnapshot) => {
+    const isCurrent = () => !context.fileTree.controller || hasCommandFileTreeTarget(context);
+    if (!isCurrent()) {
+        return undefined;
+    }
+    const execute = resolvePluginCommandExecution(command, context, pluginContext =>
+        command.fileTreeCallback(context.fileTree.model as import("../layout/dock/Files").Files, pluginContext));
+    return () => isCurrent() ? execute() : undefined;
+};
+
 export const resolvePluginCommandCallback = (command: ICommand, context: ICommandContextSnapshot) => {
     if (context.source === "globalShortcut") {
         if (!command.globalCallback) {
@@ -85,12 +96,7 @@ export const resolvePluginCommandCallback = (command: ICommand, context: IComman
                 });
             }
             if (context.focus === "fileTree" && context.fileTree?.model && command.fileTreeCallback) {
-                return resolvePluginCommandExecution(command, context, pluginContext => {
-                    return command.fileTreeCallback(
-                        context.fileTree.model as import("../layout/dock/Files").Files,
-                        pluginContext,
-                    );
-                });
+                return resolveFileTreeCommandExecution(command, context);
             }
             if (context.focus === "dock" && hasPluginDockContext(context) && command.dockCallback) {
                 return resolvePluginCommandExecution(command, context, pluginContext => {
@@ -114,12 +120,7 @@ export const resolvePluginCommandCallback = (command: ICommand, context: IComman
         });
     }
     if (context.source === "fileTreeShortcut" && context.fileTree?.model && command.fileTreeCallback) {
-        return resolvePluginCommandExecution(command, context, pluginContext => {
-            return command.fileTreeCallback(
-                context.fileTree.model as import("../layout/dock/Files").Files,
-                pluginContext,
-            );
-        });
+        return resolveFileTreeCommandExecution(command, context);
     }
     if (context.source === "dockShortcut" && hasPluginDockContext(context) && command.dockCallback) {
         return resolvePluginCommandExecution(command, context, pluginContext => {

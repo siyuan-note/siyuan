@@ -1,0 +1,17 @@
+{
+	"ID": "20261023000000-title01",
+	"Spec": "6",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261023000000-title01",
+		"title": "Legacy/A **literal**",
+		"type": "doc",
+		"updated": "20261023000000"
+	},
+	"Children": [{
+		"ID": "20261023000001-body001",
+		"Type": "NodeParagraph",
+		"Properties": {"id": "20261023000001-body001", "updated": "20261023000001"},
+		"Children": [{"Type": "NodeText", "Data": "Original body"}]
+	}]
+}

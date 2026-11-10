@@ -16,6 +16,7 @@ import {
     STATUS_BAR_ROOT_PATH,
     WINDOW_TOP_BAR_ROOT_PATH,
     SLASH_MENU_ROOT_PATH,
+    BREADCRUMB_ROOT_PATH,
 } from "./catalog";
 import {
     mergeEntryOrderPreservingUnknown,
@@ -71,6 +72,7 @@ export const getEntryProfileDefaultVisibility = (profile: Config.IEntryVisibilit
 export const isEntryVisible = (path: string): boolean => {
     /// #if MOBILE
     if (!path.startsWith(`${TOOLBAR_ENTRY_ROOT_PATH}.`) &&
+        path !== BREADCRUMB_ROOT_PATH && !path.startsWith(`${BREADCRUMB_ROOT_PATH}.`) &&
         path !== SLASH_MENU_ROOT_PATH && !path.startsWith(`${SLASH_MENU_ROOT_PATH}.`) &&
         path !== "editor.image" && !path.startsWith("editor.image.") &&
         path !== "editor.blockEmbed" && !path.startsWith("editor.blockEmbed.")) {
@@ -483,6 +485,21 @@ export const applyWindowTopBarEntryVisibility = () => {
     /// #endif
 };
 
+export const applyBreadcrumbEntryVisibility = (element: HTMLElement) => {
+    const children = Array.from(element.children) as HTMLElement[];
+    reorderEntrySlots(children, getEntryOrder(BREADCRUMB_ROOT_PATH), item => item.dataset.breadcrumbEntry)
+        .forEach(item => element.append(item));
+    children.forEach(item => {
+        const key = item.dataset.breadcrumbEntry;
+        if (key && getEntryCatalogNode(`${BREADCRUMB_ROOT_PATH}.${key}`) &&
+            !isEntryVisible(`${BREADCRUMB_ROOT_PATH}.${key}`)) {
+            item.setAttribute("data-entry-hidden", "true");
+        } else {
+            item.removeAttribute("data-entry-hidden");
+        }
+    });
+};
+
 export const applyStatusBarEntryVisibility = () => {
     /// #if !MOBILE
     const status = document.getElementById("status");
@@ -518,6 +535,7 @@ const applyEntryVisibilityLocal = (config: Config.IEntryVisibility) => {
     applyDockEntryVisibility();
     document.querySelectorAll<HTMLElement>(".protyle-toolbar").forEach(applyToolbarEntryVisibility);
     /// #endif
+    document.querySelectorAll<HTMLElement>(".protyle-breadcrumb__actions").forEach(applyBreadcrumbEntryVisibility);
     window.dispatchEvent(new CustomEvent("siyuan-entry-visibility"));
 };
 

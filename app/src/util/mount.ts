@@ -1,12 +1,12 @@
-import {openInputDialog} from "../dialog/inputDialog";
+import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "./functions";
 import {fetchPost, fetchSyncPost} from "./fetch";
 import {ContractFormData} from "./contractFormData";
-import {Dialog} from "../dialog";
+import {MobileDialog as Dialog} from "../dialog/mobileDialog";
 import {getOpenNotebookCount} from "./pathName";
-import {replaceFileName, validateName} from "../editor/rename";
+import {normalizeNotebookName, validateName} from "../editor/rename";
 import {escapeHtml} from "../util/escape";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {openFileById} from "../editor/util";
@@ -14,18 +14,26 @@ import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
 import {genNotebookOptionsHTML, getLastDailyNoteNotebookId} from "./dailyNote";
 import {getHostCapabilities} from "./hostCapabilities";
+import {fetchWithDocumentSelection} from "./documentSelectionRequest";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import {importObsidianVault} from "../menus/importObsidian";
 import * as path from "path";
 /// #endif
 
+const pendingDailyNotes = new Map<string, Promise<void>>();
+
 export const fetchNewDailyNote = (app: App, notebook: string) => {
-    fetchPost("/api/filetree/createDailyNote", {
+    const pending = pendingDailyNotes.get(notebook);
+    if (pending) {
+        return pending;
+    }
+    const request = fetchWithDocumentSelection(selection => fetchSyncPost("/api/filetree/createDailyNote", {
+        selection,
         notebook,
         app: Constants.SIYUAN_APPID,
-    }, (response) => {
-        if (response.code !== 0) {
+    }, undefined, false), {notebooks: [notebook]}).then(response => {
+        if (!response || response.code !== 0 || !("id" in response.data)) {
             return;
         }
         /// #if MOBILE
@@ -33,7 +41,9 @@ export const fetchNewDailyNote = (app: App, notebook: string) => {
         /// #else
         openFileById({app, id: response.data.id, action: [Constants.CB_GET_SCROLL, Constants.CB_GET_FOCUS]});
         /// #endif
-    });
+    }).finally(() => pendingDailyNotes.delete(notebook));
+    pendingDailyNotes.set(notebook, request);
+    return request;
 };
 
 const openDailyNote = (app: App, useLastNotebook: boolean) => {
@@ -176,7 +186,14 @@ export const newNotebook = () => {
         if (!validateName(name)) {
             return false;
         }
-        name = replaceFileName(name);
+        name = normalizeNotebookName(name);
+        if (isMobile()) {
+            void dialog.runPending(async () => {
+                const response = await fetchSyncPost("/api/notebook/createNotebook", {name});
+                return response.code === 0;
+            });
+            return;
+        }
         fetchPost("/api/notebook/createNotebook", {
             name
         });
@@ -192,10 +209,21 @@ export const newNotebook = () => {
             notebookNameElement.value = name;
         }
         if (!validateName(name)) {
-            notebookNameElement.focus();
+            dialog.focusWhenReady(() => notebookNameElement);
             return;
         }
-        fetchPost("/api/notebook/createNotebook", {name: replaceFileName(name)}, (response) => {
+        if (isMobile()) {
+            let notebookID: string;
+            void dialog.runPending(async () => {
+                const response = await fetchSyncPost("/api/notebook/createNotebook", {name: normalizeNotebookName(name)});
+                notebookID = response.code === 0 ? response.data?.notebook?.id : undefined;
+                return !!notebookID;
+            }).then(success => {
+                if (success) callback(notebookID);
+            });
+            return;
+        }
+        fetchPost("/api/notebook/createNotebook", {name: normalizeNotebookName(name)}, (response) => {
             const notebookID = response.data?.notebook?.id as string | undefined;
             if (!notebookID) {
                 return;
@@ -368,9 +396,17 @@ export const newEncryptedNotebook = () => {
                 showMessage(window.siyuan.languages.masterPassword);
                 return false;
             }
+            if (isMobile()) {
+                return dialog.runPending(async () => {
+                    const response = await fetchSyncPost("/api/notebook/createEncryptedNotebook", {
+                        name: normalizeNotebookName(name), password,
+                    });
+                    return response.code === 0;
+                });
+            }
             btnsElement[1].disabled = true;
             const response = await fetchSyncPost("/api/notebook/createEncryptedNotebook", {
-                name: replaceFileName(name),
+                name: normalizeNotebookName(name),
                 password
             });
             if (response.code === 0) {
@@ -396,6 +432,7 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
         type: "password",
         placeholder: window.siyuan.languages.masterPassword,
         description: window.siyuan.languages.encryptedNotebookRiskTip,
+        awaitConfirm: true,
         onConfirm: async (password, dialog) => {
             const inputElement = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
             const confirmElement = dialog.element.querySelector<HTMLButtonElement>("[data-input-confirm]");
@@ -410,10 +447,13 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
             });
             if (response.code === 0) {
                 dialog.destroy();
+                return true;
             } else {
                 confirmElement.disabled = false;
                 inputElement.value = "";
-                inputElement.focus();
+                if (isMobile()) dialog.focusWhenReady(() => inputElement);
+                else inputElement.focus();
+                return false;
             }
         },
     });

@@ -1,7 +1,8 @@
 import type {Protyle} from "../../protyle";
-import {waitForPendingTransactions} from "../../protyle/util/transactionQueue";
+import {registerEditorSave} from "../../protyle/util/editorSave";
 
-const editors = new Map<Protyle, {dispose: () => void, remove: () => void, flushing?: Promise<void>}>();
+const editors = new Map<Protyle, {dispose: () => void, remove: () => void, flushing?: Promise<void>,
+    save: ReturnType<typeof registerEditorSave>}>();
 let activeEditor: Protyle;
 let listening = false;
 
@@ -20,17 +21,45 @@ export const clearActiveMobileSecondaryEditor = () => {
     activeEditor = undefined;
 };
 
+export const createMobileSecondaryEditorCloseGuard = (getEditor: () => Protyle, ready = () => true) => async () => {
+    if (!ready()) return false;
+    const editor = getEditor();
+    if (editor) {
+        if (editor.isUploading()) throw new Error(window.siyuan.languages.uploading);
+        await flushMobileSecondaryEditor(editor);
+    }
+    return true;
+};
+
 export const flushMobileSecondaryEditor = (editor: Protyle) => {
     const record = editors.get(editor);
-    const flushing = Promise.all([record?.flushing, editor.protyle.wysiwyg.flushPendingInput()])
-        .then(() => waitForPendingTransactions(editor.protyle));
+    const flushing = Promise.resolve(record?.flushing).catch((): undefined => undefined).then(async () => {
+        await editor.flushPendingTransactions();
+        await record?.save.flush(async ids => {
+            const {transaction} = await import("../../protyle/wysiwyg/transaction");
+            const protyle = editor.protyle;
+            if (editors.get(editor) !== record || !protyle.element.isConnected || protyle.disabled ||
+                window.siyuan.config.readonly) {
+                throw new Error(window.siyuan.languages.settingsPendingSaveError);
+            }
+            const blocks = Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>("[data-node-id]"));
+            // 只从仍有效的编辑 DOM 重建失败文本更新，不保留或重放结构事务。
+            const operations: IOperation[] = ids.map(id => {
+                const block = blocks.find(item => item.dataset.nodeId === id);
+                if (!block) throw new Error(window.siyuan.languages.settingsPendingSaveError);
+                return {action: "update", id, data: block.outerHTML};
+            });
+            await transaction(protyle, operations, undefined, {awaitResponse: true});
+        });
+    });
     if (record) {
         record.flushing = flushing;
-        void flushing.then(() => {
+        const release = () => {
             if (record.flushing === flushing) {
                 record.flushing = undefined;
             }
-        }, (): undefined => undefined);
+        };
+        void flushing.then(release, release);
     }
     return flushing;
 };
@@ -67,6 +96,7 @@ export const registerMobileSecondaryEditor = (editor: Protyle, remove: () => voi
         document.addEventListener("focusin", followFocus, true);
     }
     unregisterMobileSecondaryEditor(editor);
+    const save = registerEditorSave(editor.protyle);
     const activate = () => { activeEditor = editor; };
     const flush = () => {
         void flushMobileSecondaryEditor(editor).catch(error => console.error(error));
@@ -77,7 +107,9 @@ export const registerMobileSecondaryEditor = (editor: Protyle, remove: () => voi
     element.addEventListener("focusout", flush, true);
     editors.set(editor, {
         remove,
+        save,
         dispose: () => {
+            save.dispose();
             element.removeEventListener("pointerdown", activate, true);
             element.removeEventListener("focusin", activate, true);
             element.removeEventListener("focusout", flush, true);

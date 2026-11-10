@@ -1,4 +1,5 @@
 import {createAVLocationReplacement} from "./locationValue";
+import {genEmptyAVCellValue} from "./cellValue";
 
 interface IAVCellValueTarget {
     id: string;
@@ -23,4 +24,5 @@ export const rebindAVCellValue = (source: IAVCellValue, target: IAVCellValueTarg
     return value;
 };
 
-export const genAVDragFillValue = rebindAVCellValue;
+export const genAVDragFillValue = (source: IAVCellValue, target: IAVCellValueTarget) =>
+    rebindAVCellValue({...genEmptyAVCellValue(source.type), ...source}, target);

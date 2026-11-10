@@ -20,26 +20,46 @@ const browserCases = async (source: string) => {
         let revision: string | undefined = "original-revision";
         let rejectNetwork = false;
         let delayClose = false;
+        let closeDecision = "save";
         const original = [{id: "one", name: "Original", type: "css", content: "body{}", enabled: true, disabledInPublish: false}];
         const exports = {} as typeof import("./snippets");
         class FakeDialog {
             element: HTMLElement;
             closed = false;
-            constructor(public options: {content: string; destroyCallback?: (options?: IObject) => void}) {
+            pending = false;
+            checking = false;
+            constructor(public options: {content: string; destroyCallback?: (options?: IObject) => void;
+                mobileSheet?: {beforeClose: () => Promise<boolean>}}) {
                 this.element = document.createElement("div");
                 this.element.innerHTML = options.content;
                 document.body.appendChild(this.element);
                 dialogs.push(this);
             }
             destroy(options?: IObject) {
-                if (this.closed) return;
-                this.closed = true;
+                if (this.closed || this.pending || this.checking) return;
                 const finish = () => {
+                    this.closed = true;
                     this.element.remove();
                     this.options.destroyCallback?.(options);
                 };
-                if (delayClose) setTimeout(finish, 20);
-                else finish();
+                const close = () => {
+                    if (delayClose) setTimeout(finish, 20);
+                    else finish();
+                };
+                if (mobile && this.options.mobileSheet?.beforeClose) {
+                    this.checking = true;
+                    void this.options.mobileSheet.beforeClose().then(allowed => { if (allowed) close(); })
+                        .finally(() => { this.checking = false; });
+                } else close();
+            }
+            async runPending(task: () => Promise<boolean>, options: {close?: boolean} = {}) {
+                if (this.pending || this.checking || this.closed) return false;
+                this.pending = true;
+                let success = false;
+                try { success = await task(); }
+                finally { this.pending = false; }
+                if (success && options.close !== false) this.destroy();
+                return success;
             }
         }
         Object.defineProperty(window, "siyuan", {configurable: true, writable: true, value: {
@@ -51,10 +71,18 @@ const browserCases = async (source: string) => {
                 settingsWrites++;
                 Object.assign(window.siyuan.config.snippet, value);
             }},
-            Dialog: FakeDialog, isMobile: () => mobile,
+            MobileDialog: FakeDialog, isMobile: () => mobile,
             Constants: {DIALOG_SNIPPETS: "snippets"},
             objEquals: (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b),
-            confirmDialog: (_title: string, _text: string, confirm: () => void) => confirm(),
+            mobileConfirmDialog: (_title: string, _text: string, confirm: () => void, cancel?: () => void,
+                                 _remove?: boolean, _extra?: unknown, _confirmLabel?: string,
+                                 options?: {mobileSheet?: {beforeClose?: (reason: string) => boolean}}) => {
+                if (closeDecision === "save") confirm();
+                else {
+                    options?.mobileSheet?.beforeClose?.(closeDecision);
+                    cancel?.();
+                }
+            },
             showMessage: (text: string) => messages.push(text),
             refreshHeadingNumberMeasurements: () => {},
             getHostCapabilities: () => ({customAppearance: true}),
@@ -76,6 +104,26 @@ const browserCases = async (source: string) => {
         const edit = (value: string) => {
             current().element.querySelector<HTMLTextAreaElement>("textarea").value = value;
         };
+
+        if (mobile) {
+            for (const reason of ["back", "scrim", "drag", "escape", "programmatic"]) {
+                closeDecision = reason;
+                exports.openSnippets();
+                const parent = current();
+                edit(`keep draft after ${reason}`);
+                parent.destroy();
+                await settle();
+                check.equal(parent.element.isConnected, true, `${reason} dismisses only the save prompt`);
+                check.equal(parent.element.querySelector("textarea").value, `keep draft after ${reason}`);
+                check.equal(parent.checking, false, "dismissal releases the close guard for further editing");
+                check.equal(writes.length, 0, "dismissal must not save the draft");
+                closeDecision = "cancel";
+                parent.destroy();
+                await settle();
+                check.equal(parent.closed, true, "explicit cancellation still discards the draft");
+            }
+            closeDecision = "save";
+        }
 
         exports.openSnippets();
         edit("local draft");
@@ -99,7 +147,8 @@ const browserCases = async (source: string) => {
         });
         dialog.destroy();
         await settle();
-        check.notEqual(current(), dialog, "closing before a conflict must restore a draft editor");
+        if (mobile) check.equal(current(), dialog, "mobile closing failure keeps the same draft editor");
+        else check.notEqual(current(), dialog, "desktop closing before a conflict restores a draft editor");
         check.equal(current().element.isConnected, true);
         check.deepEqual(Array.from(current().element.querySelectorAll("textarea")).map(item => item.value), ["code-0", "code-1", "code-2"]);
         check.deepEqual(Array.from(current().element.querySelectorAll<HTMLInputElement>("[data-id] input.b3-text-field")).map(item => item.value), ["draft-0", "draft-1", "draft-2"]);

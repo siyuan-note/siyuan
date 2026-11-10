@@ -17,12 +17,23 @@ func TestWebToolProviderConfirmation(t *testing.T) {
 	model.Conf = model.NewAppConf()
 	model.Conf.AI.Store(conf.NewAI())
 	for _, name := range []string{"web_search", "web_fetch"} {
-		if needsConfirm(name, "", nil) || needsLocalSnapshot(name, "") {
-			t.Fatal("legacy web provider confirmation changed")
+		if !needsConfirm(name, "", nil) || needsLocalSnapshot(name, "") != (name == "web_fetch") {
+			t.Fatal("web requests need approval; only direct fetch can write local downloads")
 		}
 	}
+	model.Conf.AI.Load().Web.ExaAPIKey = "exa-key"
+	if !needsConfirm("web_search", "", nil) || !needsConfirm("web_fetch", "", nil) || needsLocalSnapshot("web_search", "") {
+		t.Fatal("authenticated Exa needs external request approval without affecting direct fetch")
+	}
+	if needsConfirm("web_search", "", map[string]bool{"web_search::": true}) {
+		t.Fatal("explicit Exa approval was ignored")
+	}
+	model.Conf.AI.Load().Web.ExaAPIKey = ""
+	if !needsConfirm("web_search", "", nil) {
+		t.Fatal("anonymous search still sends the query externally")
+	}
 	model.Conf.AI.Load().Web.SearchProvider = "deepseek"
-	if !needsConfirm("web_search", "", nil) || needsConfirm("web_fetch", "", nil) {
+	if !needsConfirm("web_search", "", nil) || !needsLocalSnapshot("web_fetch", "") {
 		t.Fatal("search confirmation did not follow independent provider selection")
 	}
 	model.Conf.AI.Load().Web.FetchProvider = "deepseek"

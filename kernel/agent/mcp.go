@@ -12,7 +12,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
+	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 )
 
 type mcpService struct {
@@ -127,7 +129,7 @@ func (state *mcpToolState) discover(ctx context.Context, args map[string]any) (t
 		}
 	}
 	if len(available) == 0 {
-		return mcpDiscoveryError("MCP service has no available allowed tools; check the service ID, connection and capability settings"), nil
+		return state.discoveryFailure(server), nil
 	}
 	switch action {
 	case "list":
@@ -138,6 +140,59 @@ func (state *mcpToolState) discover(ctx context.Context, args map[string]any) (t
 	default:
 		return mcpDiscoveryError("unknown MCP discovery action"), nil
 	}
+}
+
+func (state *mcpToolState) discoveryFailure(server string) tools.CallToolResult {
+	ai := kernelModel.Conf.LoadAI()
+	if ai == nil || ai.MCP == nil {
+		return mcpDiscoveryError("unknown MCP service ID; use mcp with action=list and no server to list available service IDs")
+	}
+	known, enabled := false, false
+	var matches []map[string]string
+	for _, configured := range ai.MCP.Servers {
+		if configured.ID == server {
+			known, enabled = true, configured.Enabled
+		}
+		if configured.Name == server {
+			matches = append(matches, map[string]string{"id": configured.ID, "name": configured.Name})
+		}
+	}
+	if !known {
+		if len(matches) > 0 {
+			sort.Slice(matches, func(i, j int) bool { return matches[i]["id"] < matches[j]["id"] })
+			data, _ := json.Marshal(matches)
+			return mcpDiscoveryError("server is an MCP service name; use an exact service ID from: " + string(data))
+		}
+		return mcpDiscoveryError("unknown MCP service ID; use mcp with action=list and no server to list available service IDs")
+	}
+	if !enabled {
+		return mcpDiscoveryError("MCP service is disabled; enable it in the MCP service settings")
+	}
+	registered, available := false, false
+	for _, tool := range tools.GetAllTools() {
+		if tool.OwnerID != server || (tool.Source != "mcp" && tool.Runtime != "mcp") {
+			continue
+		}
+		registered = true
+		if tool.IsAvailable() {
+			available = true
+		}
+	}
+	if available {
+		return mcpDiscoveryError("MCP service tools are not allowed by the agent capability policy; check the capability settings")
+	}
+	if registered {
+		return mcpDiscoveryError("MCP service tools are currently unavailable; check the tool availability settings")
+	}
+	for _, status := range client.MCPStatus() {
+		if status.ID == server {
+			if status.Status == "connected" {
+				return mcpDiscoveryError("MCP service is connected but has no registered tools")
+			}
+			return mcpDiscoveryError(fmt.Sprintf("MCP service is not connected (status: %s); check the MCP connection settings", status.Status))
+		}
+	}
+	return mcpDiscoveryError("MCP service has no registered tools; check that the service is connected and provides tools")
 }
 
 func mcpDiscoveryResult(value any) tools.CallToolResult {

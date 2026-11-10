@@ -1,12 +1,12 @@
 import type {BlockQueryRequestInput} from "../types/api";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {getDisplayName, getNotebookName, isEncryptedBox} from "../util/pathName";
-import {confirmDialog} from "../dialog/confirmDialog";
-import {hasTopClosestByTag} from "../protyle/util/hasClosest";
+import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {Constants} from "../constants";
 import {checkBlockRef, getBlockRefWarningHTML} from "../util/checkBlockRef";
-import {getDocTreeDeleteTargets} from "../menus/navigationSelection";
+import {getDocTreeDeleteItems} from "../menus/navigationSelection";
+import {getDocTreeItem} from "../layout/dock/docTree/rowData";
 
 export const deleteFile = async (notebookId: string, pathString: string) => {
     const hasRef = await checkBlockRef({
@@ -77,13 +77,23 @@ export const deleteNotebooks = async (notebookIds: string[]) => {
     }, undefined, true);
 };
 
-export const deleteFiles = async (liElements: Element[]) => {
-    if (liElements.length === 1) {
-        const itemTopULElement = hasTopClosestByTag(liElements[0], "UL");
-        if (itemTopULElement) {
-            const itemNotebookId = liElements[0].getAttribute("data-notebook") || itemTopULElement.getAttribute("data-url");
-            if (liElements[0].getAttribute("data-type") === "navigation-file") {
-                deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"));
+export const deleteFiles = (liElements: Element[]) => deleteDocTreeItems(liElements.flatMap(element => {
+    const item = getDocTreeItem(element);
+    return item ? [item] : [];
+}));
+
+export const deleteDocTreeItems = async (selected: readonly {
+    id: string, notebookId: string, path: string, kind: string, name: string,
+}[]) => {
+    const items = getDocTreeDeleteItems(selected);
+    if (items.some(item => item.kind === "document" && item.id === item.notebookId)) {
+        return;
+    }
+    if (items.length === 1) {
+        const itemNotebookId = items[0].notebookId;
+        if (itemNotebookId) {
+            if (items[0].kind === "document") {
+                deleteFile(itemNotebookId, items[0].path);
             } else {
                 const isHelpNotebook = Object.values(Constants.HELP_PATH).includes(itemNotebookId);
                 if (isHelpNotebook) {
@@ -114,7 +124,8 @@ export const deleteFiles = async (liElements: Element[]) => {
             }
         }
     } else {
-        const {notebookIds, paths} = getDocTreeDeleteTargets(liElements);
+        const notebookIds = Array.from(new Set(items.filter(item => item.kind === "notebook").map(item => item.notebookId)));
+        const paths = Array.from(new Set(items.filter(item => item.kind === "document").map(item => item.path)));
         if (notebookIds.length > 0 && paths.length === 0) {
             deleteNotebooks(notebookIds);
             return;
@@ -136,16 +147,14 @@ export const deleteFiles = async (liElements: Element[]) => {
             if (refResults.some((result) => result === undefined)) {
                 return;
             }
-            const itemNames = liElements.map((item) => {
-                const name = item.querySelector(".b3-list-item__text")?.textContent?.trim();
-                if (name) {
-                    return escapeHtml(name);
+            const itemNames = items.map((item) => {
+                if (item.name) {
+                    return escapeHtml(item.name);
                 }
-                if (item.getAttribute("data-type") === "navigation-root") {
-                    const notebook = item.closest("ul[data-url]")?.getAttribute("data-url");
-                    return notebook ? escapeHtml(getNotebookName(notebook)) : "";
+                if (item.kind === "notebook") {
+                    return escapeHtml(getNotebookName(item.notebookId));
                 }
-                return escapeHtml(getDisplayName(item.getAttribute("data-path"), true, true));
+                return escapeHtml(getDisplayName(item.path, true, true));
             }).filter(Boolean).join(", ");
             let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", itemNames)}
 <div class="fn__hr"></div>

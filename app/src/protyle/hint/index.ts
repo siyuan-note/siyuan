@@ -42,7 +42,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
-import {renderIFrameResize} from "../render/iframeResize";
+import {renderMediaResize} from "../render/mediaResize";
 import {spinListMindmapDOM} from "../render/listMindmap/create";
 import {mountNewListMindmap} from "../render/listMindmap";
 import {assetMenu, imgMenu} from "../../menus/protyle";
@@ -70,7 +70,7 @@ import {openMobileFileById} from "../../mobile/editor";
 import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
-import {isNotCtrl, isOnlyMeta} from "../util/compatibility";
+import {isInAndroid, isNotCtrl, isOnlyMeta} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
@@ -81,6 +81,7 @@ import {genCellValueByElement} from "../render/av/cell";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
+import {getConfiguredEntryVisibility} from "../../config/entryVisibility/runtime";
 import {
     endsWithMultiCharHintPrefix,
     getBlockHintTriggerOffset,
@@ -816,7 +817,7 @@ export class Hint {
             }
         }
         if (this.source === "hint" && this.element.closest("#keyboardToolbar")) {
-            return getLiteSlashMenuHTML(data);
+            return getLiteSlashMenuHTML(data, !!isInAndroid());
         }
         let hintsHTML = '<div style="flex: 1;overflow:auto;">';
         if (this.source !== "hint") {
@@ -897,7 +898,10 @@ export class Hint {
                 }
                 upDownHint(this.element.lastElementChild, event);
                 if (event.key === "Enter") {
-                    this.fill(decodeURIComponent(this.element.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, false, isNotCtrl(event));
+                    const value = this.element.querySelector(".b3-list-item--focus")?.getAttribute("data-value");
+                    if (value) {
+                        this.fill(decodeURIComponent(value), protyle, false, isNotCtrl(event));
+                    }
                     event.preventDefault();
                 } else if (event.key === "Escape") {
                     this.bindingDismissController?.abort();
@@ -945,19 +949,23 @@ export class Hint {
                     return;
                 }
                 let searchHTML = "";
-                if (response.newDoc && !hideConfiguredCreate) {
+                if (response.newDoc && !hideConfiguredCreate && getConfiguredEntryVisibility("editor.ref.newFile")) {
                     const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.k}${Lute.Caret}'))`;
                     searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${response.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.k}</mark></span></div></button>`;
                 }
                 if (response.newDoc) {
                     const newFileName = Lute.UnEscapeHTMLStr(response.k);
-                    const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
-                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${hideConfiguredCreate && response.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+                    if (getConfiguredEntryVisibility("editor.ref.newSubDoc")) {
+                        const subDocRefText = `((newSubDoc "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
+                        searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${searchHTML === "" && response.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(subDocRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newSubDoc} <mark>${response.k}</mark></span></div></button>`;
-                    const pathRefText = `((newFileAtPath "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
-                    searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="${encodeURIComponent(pathRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
+                    }
+                    if (getConfiguredEntryVisibility("editor.ref.newFileAtPath")) {
+                        const pathRefText = `((newFileAtPath "${oldValue}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`;
+                        searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${searchHTML === "" && response.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(pathRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.k}</mark></span></div></button>`;
+                    }
                 }
                 response.blocks.forEach((item: IBlock, index: number) => {
                     let blockRefHTML;
@@ -1636,7 +1644,7 @@ ${genHintItemHTML(item)}
                 } else if (value.startsWith("```")) {
                     highlightRender(nodeElement);
                 } else if (value.startsWith("<iframe") || value.startsWith("<video") || value.startsWith("<audio")) {
-                    renderIFrameResize(nodeElement);
+                    renderMediaResize(nodeElement);
                     protyle.gutter.renderMenu(protyle, nodeElement);
                     const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetVideo"], [data-id="assetAudio"], [data-id="assetIFrame"]');
                     if (isMobile()) {

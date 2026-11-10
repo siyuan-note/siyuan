@@ -17,6 +17,7 @@ import (
 // 字段快照只包含本次操作的变化，不进入接口响应或数据库持久化格式。
 type attributeViewFieldsSnapshot struct {
 	avID, keyID, blockID, boxID string
+	storageKnown                bool
 	changes                     map[string]*attributeViewFieldChange
 	relationValues              map[string]map[string]attributeViewRelationValues
 	fieldTypes                  map[string]map[string]av.KeyType
@@ -62,6 +63,9 @@ func (tx *Transaction) removeAttributeViewField(op *Operation) error {
 	}
 	if resolved == nil {
 		return av.ErrViewNotFound
+	}
+	if resolved.IsSubItemsKey(op.ID) {
+		return errors.New("disable database sub-items before deleting their fields")
 	}
 	state := &attributeViewFieldsSnapshot{avID: op.AvID, keyID: op.ID, blockID: blockID,
 		boxID: av.GetAVBoxID(op.AvID), changes: map[string]*attributeViewFieldChange{}, relationValues: map[string]map[string]attributeViewRelationValues{}}
@@ -232,7 +236,7 @@ func (tx *Transaction) replayAttributeViewFields(op *Operation) error {
 	}
 	before, after := map[string]*av.AttributeView{}, map[string]*av.AttributeView{}
 	for _, id := range sortedAttributeViewFieldKeys(state.changes) {
-		current, err := tx.readAttributeViewForMutation(id, state.blockID, state.boxID)
+		current, err := tx.readAttributeViewForMutation(id, state.blockID, state.boxID, state.storageKnown)
 		if err != nil {
 			return err
 		}
@@ -268,6 +272,11 @@ func (tx *Transaction) replayAttributeViewFields(op *Operation) error {
 		if err = json.Unmarshal(encoded, restored); err != nil {
 			return err
 		}
+		if boxID, known := current.StorageContext(); known {
+			if err = restored.SetStorageContext(boxID); err != nil {
+				return err
+			}
+		}
 		for _, kv := range restored.KeyValues {
 			if _, keyErr := current.GetKey(kv.Key.ID); keyErr == nil {
 				continue
@@ -284,10 +293,18 @@ func (tx *Transaction) replayAttributeViewFields(op *Operation) error {
 }
 
 func (tx *Transaction) saveAttributeViewFieldChanges(state *attributeViewFieldsSnapshot, before, after map[string]*av.AttributeView) error {
+	ids := sortedAttributeViewFieldKeys(after)
+	for _, id := range ids {
+		for _, view := range []*av.AttributeView{before[id], after[id]} {
+			boxID, known := view.StorageContext()
+			if known && boxID != state.boxID || state.storageKnown && !known {
+				return fmt.Errorf("database [%s] changed storage context", id)
+			}
+		}
+	}
 	if err := tx.rememberAttributeViewMutationTree(state.blockID); err != nil {
 		return err
 	}
-	ids := sortedAttributeViewFieldKeys(after)
 	for _, id := range ids {
 		key := state.boxID + "/" + id
 		if tx.attributeViewRollback.views[key] == nil {
@@ -295,14 +312,22 @@ func (tx *Transaction) saveAttributeViewFieldChanges(state *attributeViewFieldsS
 		}
 	}
 	for _, id := range ids {
-		av.SetAVBoxID(id, state.boxID)
+		if _, known := after[id].StorageContext(); !known {
+			av.SetAVBoxID(id, state.boxID)
+		}
 		if err := av.SaveAttributeView(after[id]); err != nil {
 			return err
 		}
 		tx.invalidateAttributeViewHistory(id)
 	}
 	for _, id := range ids {
-		syncAttributeViewRelationIndexes(before[id], after[id])
+		if tx.historyRecovery != nil {
+			if err := syncAttributeViewRelationIndexesWithErr(before[id], after[id]); err != nil {
+				return err
+			}
+		} else {
+			syncAttributeViewRelationIndexes(before[id], after[id])
+		}
 		ReloadAttrView(id)
 	}
 	return nil
@@ -315,5 +340,10 @@ func cloneAttributeViewForFieldMutation(view *av.AttributeView) (*av.AttributeVi
 	}
 	ret := &av.AttributeView{RenderedViewables: map[string]av.Viewable{}}
 	err = json.Unmarshal(data, ret)
+	if err == nil {
+		if boxID, known := view.StorageContext(); known {
+			err = ret.SetStorageContext(boxID)
+		}
+	}
 	return ret, err
 }

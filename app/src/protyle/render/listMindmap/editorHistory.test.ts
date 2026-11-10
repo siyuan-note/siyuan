@@ -40,7 +40,7 @@ const create = (initial: string, initialSelection: Record<string, string>) => {
         let saveTimer, lastHTML = state.html, source = state.source;
         let undoSelection = state.selection, lastSelection = state.selection;
         const clearTimeout = () => {}, window = {setTimeout: () => 1};
-        const comparableContent = value => value, cleanListMindmapHTML = value => value;
+        const comparableContent = value => value, cleanEditorHTML = value => value;
         const retainIndependentBlocks = value => value, captureSelection = () => state.selection;
         const node = {element: {isConnected: true}}, nodeContent = () => state.source;
         const recover = () => assert.fail('Unexpected source conflict');

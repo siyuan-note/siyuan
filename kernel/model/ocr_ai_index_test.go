@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -39,6 +40,7 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 	}()
 	calls := 0
 	providerFailure := false
+	accountStatus := 0
 	var beforeResponse func()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		calls++
@@ -46,6 +48,11 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 			beforeResponse()
 		}
 		w.Header().Set("Content-Type", "application/json")
+		if accountStatus != 0 {
+			w.WriteHeader(accountStatus)
+			_, _ = io.WriteString(w, `{"error":{"message":"Insufficient Balance","type":"account_error"}}`)
+			return
+		}
 		if providerFailure {
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = io.WriteString(w, `{"error":{"message":"unsupported reasoning effort","type":"invalid_request_error"}}`)
@@ -161,6 +168,22 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 		t.Fatal(err)
 	}
 	cache.LoadAssets()
+	accountStatus = http.StatusPaymentRequired
+	beforeFailure := calls
+	autoOCRAssets()
+	for range 3 {
+		autoOCRAssets()
+	}
+	if calls != beforeFailure+1 || util.ExistsAssetText(path) || util.ExistsAssetText(extra) {
+		t.Fatal("account failure did not pause automatic requests across images")
+	}
+	ocrRetry.Lock()
+	if !ocrRetry.providerNotified || len(ocrRetry.entries) != 0 {
+		t.Error("account failure did not notify or created asset retry entries")
+	}
+	ocrRetry.providerRetryAfter = time.Now().Add(-time.Second)
+	ocrRetry.Unlock()
+	accountStatus = 0
 	previousCalls := calls
 	autoOCRAssets()
 	if calls != previousCalls+1 || util.ExistsAssetText(path) == util.ExistsAssetText(extra) {

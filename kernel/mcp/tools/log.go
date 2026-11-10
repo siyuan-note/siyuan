@@ -13,7 +13,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -394,9 +393,5 @@ func truncateAgentLogOutput(text string) string {
 		return text
 	}
 	marker := "\n[output truncated]\n"
-	end := agentLogMaxOutputBytes - len(marker)
-	for end > 0 && !utf8.ValidString(text[:end]) {
-		end--
-	}
-	return text[:end] + marker
+	return util.TruncateUTF8Bytes(text, agentLogMaxOutputBytes-len(marker)) + marker
 }

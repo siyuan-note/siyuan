@@ -6,7 +6,7 @@
 		"id": "20260612192417-fb4ueux",
 		"title": "コマンドラインインターフェース",
 		"type": "doc",
-		"updated": "20261024162311"
+		"updated": "20261101194733"
 	},
 	"Children": [
 		{
@@ -1813,7 +1813,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123956-poyqeb5",
-				"updated": "20261024162311"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -12869,7 +12869,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260809180000-e111750",
-				"updated": "20261016112115"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -13010,12 +13010,67 @@
 			]
 		},
 		{
+			"ID": "20261101194733-w8z54lm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101194733-w8z54lm",
+				"updated": "20261101194733"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " のデフォルトは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " です。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を指定すると、ブラウザー拡張機能用の追加の 6806 ポートプロキシを無効にできます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " や公開サービスは変更されず、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port 6806"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を指定したメインサービスは引き続き 6806 で待ち受けます。このプロキシを利用していたクライアントの接続先は、メインサービスの実際のポートに変更してください。このオプションを削除するか true に設定してカーネルを再起動すると、プロキシを再び有効にできます。"
+				}
+			]
+		},
+		{
 			"ID": "20260809180000-c7d60a1",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260809180000-c7d60a1",
-				"updated": "20261016112115"
+				"updated": "20261101194733"
 			},
 			"Children": [
 				{
@@ -13028,7 +13083,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan serve --workspace /path/to/workspace --port 6806\nsiyuan serve --workspace /path/to/workspace --port 6806 --readonly true\nsiyuan serve --workspace /path/to/workspace --port 6806 --wd /path/to/resources --lang ja --ssl\n"
+					"Data": "siyuan serve --workspace /path/to/workspace --port 6806\nsiyuan serve --workspace /path/to/workspace --port 6806 --readonly true\nsiyuan serve --workspace /path/to/workspace --port 6806 --wd /path/to/resources --lang ja --ssl\nsiyuan serve --workspace /path/to/workspace --port 6807 --fixed-port=false\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

@@ -160,6 +160,9 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 	testAPIContractMindmapMigration(t, engine, box.ID, docID)
 	testAPIContractListConversion(t, engine, docID)
 	testAPIContractTransactionCompletion(t, engine, docID, paragraphID)
+	testAPIContractDocumentTitle(t, engine, box.ID, docID)
+	testAPIContractNotebookTitle(t, box.ID)
+
 	testAPIContractHistoryQueueOrder(t, engine, docID, paragraphID)
 	testAPIContractRiffMutations(t, paragraphID)
 	for _, entry := range []struct {

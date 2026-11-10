@@ -10,11 +10,21 @@ type SettingSnpt struct {
 }
 
 type SettingBazaar struct {
-	Trust         bool `json:"trust" api:"optional,nullable"`
-	PetalDisabled bool `json:"petalDisabled" api:"optional,nullable"`
+	// BatchUpdateExcluded 按 plugins/themes/widgets/icons/templates 保存跳过批量更新的包名，true 跳过，false 恢复。
+	// 仍检查并显示更新，手动单项更新不受影响；省略保留，null 恢复默认空映射。
+	BatchUpdateExcluded  map[string]map[string]bool                   `json:"batchUpdateExcluded" api:"optional,nullable"`
+	Trust                bool                                         `json:"trust" api:"optional,nullable"`
+	PetalDisabled        bool                                         `json:"petalDisabled" api:"optional,nullable"`
+	CompatibilityFilters map[string]*SettingBazaarCompatibilityFilter `json:"compatibilityFilters" api:"optional,nullable"`
+}
+
+type SettingBazaarCompatibilityFilter struct {
+	HideUnsupportedVersion   bool `json:"hideUnsupportedVersion" api:"optional,nullable"`
+	HideIncompatiblePlatform bool `json:"hideIncompatiblePlatform" api:"optional,nullable"`
 }
 
 type SettingAI struct {
+	Memory          *SettingMemory          `json:"memory" api:"optional,nullable"`
 	Web             *SettingAIWeb           `json:"web" api:"optional,nullable"`
 	MCP             *SettingMCP             `json:"mcp" api:"optional,nullable"`
 	Embedding       *SettingEmbedding       `json:"embedding" api:"optional,nullable"`
@@ -26,7 +36,21 @@ type SettingAI struct {
 	Providers       []*SettingProvider      `json:"providers" api:"optional,nullable"`
 }
 
+// SettingMemory 独立选择长期记忆模型，不跟随对话模型，不为失效引用选择替代模型。
+// enabled 初始关闭，统一控制记忆使用和自动整理；笔记来源覆盖全部非加密笔记本，包含新建笔记本。
+// 旧版 sources、autoMaintain 和 conversations 字段被忽略；启用不扫描历史，自动整理要求模型配置有效。
+// modelId 与 reasoningEffort 初始为空，未知模型仅支持默认推理设置；具体能力由内核返回。
+// 省略字段保留当前值，null 恢复该字段默认值；配置变化使旧维护任务在提交前失效。
+// enabled 同时控制后续成功提交会话中的用户原话采集，不采集助手输出。
+type SettingMemory struct {
+	Enabled         bool   `json:"enabled" api:"optional,nullable"`
+	ModelID         string `json:"modelId" api:"optional,nullable"`
+	ReasoningEffort string `json:"reasoningEffort" api:"optional,nullable"`
+}
+
 // SettingAIWeb 初始搜索为 exa，抓取为 direct；可分别选择 deepseek，共用独立 API 密钥。
+// exaApiKey 独立于 DeepSeek 的 apiKey；留空使用匿名 Exa，非空通过 x-api-key 认证并可能产生费用。
+// 省略密钥保留当前值，null 或空字符串清除；认证或限流失败不会回退到匿名模式或其他服务。
 // 超时默认 30 秒，上限 600 秒。
 // DeepSeek Search 返回 5 条摘要且不取正文；Fetch 仅获取网页正文，不下载文件。
 // Search 发送查询词，Fetch 发送目标 URL；不发送原始问题、浏览器凭证或额外笔记内容。
@@ -34,6 +58,7 @@ type SettingAIWeb struct {
 	SearchProvider string `json:"searchProvider" api:"optional,nullable"`
 	FetchProvider  string `json:"fetchProvider" api:"optional,nullable"`
 	APIKey         string `json:"apiKey" api:"optional,nullable"`
+	ExaAPIKey      string `json:"exaApiKey" api:"optional,nullable"`
 	Timeout        int    `json:"timeout" api:"optional,nullable"`
 }
 
@@ -253,6 +278,8 @@ type SettingEditor struct {
 	KaTexMacros                     string               `json:"katexMacros" api:"optional,nullable"`
 	ReadOnly                        bool                 `json:"readOnly" api:"optional,nullable"`
 	EmbedBlockBreadcrumb            bool                 `json:"embedBlockBreadcrumb" api:"optional,nullable"`
+	// 默认关闭；开启后将笔记本、文档和块路径合并为一条面包屑。省略保留当前值，null 恢复默认。
+	GlobalBreadcrumb bool `json:"globalBreadcrumb" api:"optional,nullable"`
 	// 默认显示文档上层路径；省略保留当前值，null 恢复默认，块级显式设置优先。
 	EmbedBlockBreadcrumbParentPath *bool `json:"embedBlockBreadcrumbParentPath" api:"optional,nullable"`
 	ListLogicalOutdent             bool  `json:"listLogicalOutdent" api:"optional,nullable"`
@@ -327,6 +354,8 @@ type SettingMarkdown struct {
 }
 
 type SettingExport struct {
+	// Markdown 复制和导出保留文档标题编号，默认 false，不影响其他格式；省略保留现值，null 恢复默认。
+	HeadingNumber           *bool  `json:"headingNumber" api:"optional,nullable"`
 	ParagraphBeginningSpace bool   `json:"paragraphBeginningSpace" api:"optional,nullable"`
 	AddTitle                bool   `json:"addTitle" api:"optional,nullable"`
 	BlockRefMode            int    `json:"blockRefMode" api:"optional,nullable"`
@@ -364,28 +393,30 @@ type SettingFileTree struct {
 	// 点击父文档标题的行为：0 打开文档，1 展开或折叠子文档，2 单击展开或折叠子文档、双击打开父文档。
 	// 没有子文档时各取值均直接打开文档；取 2 时单击需等待约 300 毫秒以判断是否双击。超出取值范围的输入按 0 处理。
 	// 已废弃的 parentDocClickExpand 与 parentDocDoubleClickOpen 不再读取，旧配置升级后回到 0。
-	ParentDocTitleClickMode  int    `json:"parentDocTitleClickMode" api:"optional,nullable"`
-	BoxDocEnabled            *bool  `json:"boxDocEnabled" api:"optional,nullable"`
-	UseSVGDefaultIcon        *bool  `json:"useSVGDefaultIcon" api:"optional,nullable"`
-	RefCreateSaveBox         string `json:"refCreateSaveBox" api:"optional,nullable"`
-	RefCreateSavePath        string `json:"refCreateSavePath" api:"optional,nullable"`
-	DocCreateSaveBox         string `json:"docCreateSaveBox" api:"optional,nullable"`
-	DocCreateSavePath        string `json:"docCreateSavePath" api:"optional,nullable"`
-	DocCreateTemplatePath    string `json:"docCreateTemplatePath" api:"optional,nullable"`
-	ShorthandSaveBox         string `json:"shorthandSaveBox" api:"optional,nullable"`
-	ShorthandSavePath        string `json:"shorthandSavePath" api:"optional,nullable"`
-	MaxListCount             int    `json:"maxListCount" api:"optional,nullable"`
-	MaxOpenTabCount          int    `json:"maxOpenTabCount" api:"optional,nullable"`
-	AllowCreateDeeper        bool   `json:"allowCreateDeeper" api:"optional,nullable"`
-	RemoveDocWithoutConfirm  bool   `json:"removeDocWithoutConfirm" api:"optional,nullable"`
-	CloseTabsOnStart         bool   `json:"closeTabsOnStart" api:"optional,nullable"`
-	TabStartupMode           *int   `json:"tabStartupMode" api:"optional,nullable"`
-	UseSingleLineSave        bool   `json:"useSingleLineSave" api:"optional,nullable"`
-	LargeFileWarningSize     int    `json:"largeFileWarningSize" api:"optional,nullable"`
-	CreateDocAtTop           *bool  `json:"createDocAtTop" api:"optional,nullable"`
-	Sort                     int    `json:"sort" api:"optional,nullable"`
-	RecentDocsMaxListCount   int    `json:"recentDocsMaxListCount" api:"optional,nullable"`
-	NoSplitScreenWhenOpenTab bool   `json:"noSplitScreenWhenOpenTab" api:"optional,nullable"`
+	ParentDocTitleClickMode int    `json:"parentDocTitleClickMode" api:"optional,nullable"`
+	BoxDocEnabled           *bool  `json:"boxDocEnabled" api:"optional,nullable"`
+	UseSVGDefaultIcon       *bool  `json:"useSVGDefaultIcon" api:"optional,nullable"`
+	RefCreateSaveBox        string `json:"refCreateSaveBox" api:"optional,nullable"`
+	RefCreateSavePath       string `json:"refCreateSavePath" api:"optional,nullable"`
+	DocCreateSaveBox        string `json:"docCreateSaveBox" api:"optional,nullable"`
+	DocCreateSavePath       string `json:"docCreateSavePath" api:"optional,nullable"`
+	DocCreateTemplatePath   string `json:"docCreateTemplatePath" api:"optional,nullable"`
+	ShorthandSaveBox        string `json:"shorthandSaveBox" api:"optional,nullable"`
+	ShorthandSavePath       string `json:"shorthandSavePath" api:"optional,nullable"`
+	MaxListCount            int    `json:"maxListCount" api:"optional,nullable"`
+	// 文档树单次加载数量，默认 512，范围 1..10240；省略保留现值，null 恢复默认。
+	DocTreeBatchSize         *int  `json:"docTreeBatchSize" api:"optional,nullable"`
+	MaxOpenTabCount          int   `json:"maxOpenTabCount" api:"optional,nullable"`
+	AllowCreateDeeper        bool  `json:"allowCreateDeeper" api:"optional,nullable"`
+	RemoveDocWithoutConfirm  bool  `json:"removeDocWithoutConfirm" api:"optional,nullable"`
+	CloseTabsOnStart         bool  `json:"closeTabsOnStart" api:"optional,nullable"`
+	TabStartupMode           *int  `json:"tabStartupMode" api:"optional,nullable"`
+	UseSingleLineSave        bool  `json:"useSingleLineSave" api:"optional,nullable"`
+	LargeFileWarningSize     int   `json:"largeFileWarningSize" api:"optional,nullable"`
+	CreateDocAtTop           *bool `json:"createDocAtTop" api:"optional,nullable"`
+	Sort                     int   `json:"sort" api:"optional,nullable"`
+	RecentDocsMaxListCount   int   `json:"recentDocsMaxListCount" api:"optional,nullable"`
+	NoSplitScreenWhenOpenTab bool  `json:"noSplitScreenWhenOpenTab" api:"optional,nullable"`
 }
 
 type SettingSearch struct {
@@ -433,6 +464,9 @@ type SettingSearch struct {
 }
 
 type SettingAppearance struct {
+	// ShowFloatingDockBar 控制隐藏停靠栏时是否临时显示左右浮动停靠栏，旧配置缺失时默认开启。
+	// 部分更新省略字段时保留当前值，null 恢复默认开启。
+	ShowFloatingDockBar *bool `json:"showFloatingDockBar" api:"optional,nullable"`
 	// LockScreenWallpaper 默认关闭；图片单独保存在 conf/lockscreen/wallpaper.jpg，不进入设置导出或笔记同步。
 	LockScreenWallpaper bool `json:"lockScreenWallpaper" api:"optional,nullable"`
 	// 以下用户偏好保存在 conf.json，支持配置导入导出；不读取或迁移 local.json 旧键。
@@ -461,6 +495,7 @@ type SettingAppearance struct {
 	CloseButtonBehavior      int                       `json:"closeButtonBehavior" api:"optional,nullable"`
 	HideToolbar              bool                      `json:"hideToolbar" api:"optional,nullable"`
 	HideStatusBar            bool                      `json:"hideStatusBar" api:"optional,nullable"`
+	ShowFloatingStatusBar    bool                      `json:"showFloatingStatusBar" api:"optional,nullable"`
 	StatusBar                *SettingStatusBar         `json:"statusBar" api:"optional,nullable"`
 	Notifications            *SettingNotifications     `json:"notifications" api:"optional,nullable"`
 	EntryVisibility          *SettingEntryVisibility   `json:"entryVisibility" api:"optional,nullable"`

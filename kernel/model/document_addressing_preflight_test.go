@@ -144,6 +144,14 @@ func writeCheckoutSourceTestFile(t *testing.T, repo *dejavu.Repo, name string, d
 }
 
 func TestDocumentAddressingCheckoutSourcePreflight(t *testing.T) {
+	for _, sync := range []bool{false, true} {
+		t.Run(map[bool]string{false: "snapshot", true: "sync"}[sync], func(t *testing.T) {
+			testDocumentAddressingCheckoutSourcePreflight(t, sync)
+		})
+	}
+}
+
+func testDocumentAddressingCheckoutSourcePreflight(t *testing.T, sync bool) {
 	ordinary := `{"Spec":"2","Properties":{"title":"Ordinary"}}`
 	future := `{"Spec":"999","Properties":{"title":"Future"}}`
 	title := `{"Spec":"2","Properties":{"title":{"format":"future"}}}`
@@ -167,6 +175,10 @@ func TestDocumentAddressingCheckoutSourcePreflight(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			repo := newCheckoutSourceTestRepo(t)
+			if sync {
+				repo.SetCheckoutHooks(dejavu.CheckoutHooks{Preflight: syncDocumentPreflight(repo)})
+				test.wantErr = nil
+			}
 			document := test.document
 			if document == "" {
 				document = checkoutSourceBox + "/" + checkoutSourceDocument
@@ -249,9 +261,20 @@ func TestDocumentAddressingCheckoutSourcePreflight(t *testing.T) {
 }
 
 func TestDocumentAddressingCheckoutSourceRemoval(t *testing.T) {
+	for _, sync := range []bool{false, true} {
+		t.Run(map[bool]string{false: "snapshot", true: "sync"}[sync], func(t *testing.T) {
+			testDocumentAddressingCheckoutSourceRemoval(t, sync)
+		})
+	}
+}
+
+func testDocumentAddressingCheckoutSourceRemoval(t *testing.T, sync bool) {
 	for _, whole := range []bool{false, true} {
 		t.Run(map[bool]string{false: "partial", true: "whole notebook"}[whole], func(t *testing.T) {
 			repo := newCheckoutSourceTestRepo(t)
+			if sync {
+				repo.SetCheckoutHooks(dejavu.CheckoutHooks{Preflight: syncDocumentPreflight(repo)})
+			}
 			writeCheckoutSourceTestFile(t, repo, "assets/retained.txt", []byte("unchanged"), 10)
 			if !whole {
 				writeCheckoutSourceTestFile(t, repo, checkoutSourceBox+"/"+documentaddressing.ConfigPath, []byte(`{}`), 10)
@@ -273,9 +296,9 @@ func TestDocumentAddressingCheckoutSourceRemoval(t *testing.T) {
 				t.Fatal(err)
 			}
 			_, _, err = repo.Checkout(target.ID, nil)
-			if whole {
+			if whole || sync {
 				if err != nil {
-					t.Fatal("whole notebook deletion was blocked", err)
+					t.Fatal("accepted deletion was blocked", err)
 				}
 				if _, err = os.Stat(filepath.Join(repo.DataPath, checkoutSourceBox, checkoutSourceDocument)); !os.IsNotExist(err) {
 					t.Fatal("whole notebook deletion retained its document", err)

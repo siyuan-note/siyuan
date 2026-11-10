@@ -1,0 +1,135 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+package conf
+
+import (
+	"encoding/json"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+func TestAIMemoryLegacyControlsIgnored(t *testing.T) {
+	for _, sources := range []string{`[]`, `["not-a-notebook"]`, `["20261029000000-source1"]`, `null`} {
+		ai := NewAI()
+		if err := json.Unmarshal([]byte(`{"memory":{"enabled":true,"autoMaintain":false,"conversations":false,"sources":`+sources+`}}`), ai); err != nil {
+			t.Fatal(err)
+		}
+		NormalizeAI(ai)
+		if !ai.Memory.Enabled {
+			t.Fatal("legacy notebook selection changed independent controls")
+		}
+		data, err := json.Marshal(ai.Memory)
+		if err != nil || strings.Contains(string(data), `"sources"`) || strings.Contains(string(data), `"autoMaintain"`) || strings.Contains(string(data), `"conversations"`) {
+			t.Fatalf("obsolete memory controls persisted: %s %v", data, err)
+		}
+	}
+}
+
+func TestAIMemoryDefaultsAndSelection(t *testing.T) {
+	ai := NormalizeAI(&AI{})
+	if ai.Memory == nil || ai.Memory.Enabled || ai.Memory.ModelID != "" || ai.Memory.ReasoningEffort != "" {
+		t.Fatal("unsafe memory defaults")
+	}
+	ai.Providers = []*Provider{{ID: "20261029000000-provide", Enabled: true, Models: []*Model{{ID: "20261029000000-modelid", Name: "gpt-5", Enabled: true}}}}
+	ai.Memory = &Memory{Enabled: true, ModelID: " removed-model ", ReasoningEffort: " HIGH "}
+	NormalizeAI(ai)
+	if ai.Memory.ModelID != "removed-model" || ai.Memory.ReasoningEffort != "high" {
+		t.Fatal("normalization replaced selection")
+	}
+	if _, _, err := ai.GetMemoryModel(); err == nil {
+		t.Fatal("invalid selection silently fell back")
+	}
+	ai.Memory.ModelID = ai.Providers[0].Models[0].Name
+	if _, _, err := ai.GetMemoryModel(); err == nil {
+		t.Fatal("memory selection accepted ambiguous model name instead of ID")
+	}
+	ai.Memory.ModelID = ai.Providers[0].Models[0].ID
+	if err := ai.ValidateMemoryModel(); err != nil {
+		t.Fatal(err)
+	}
+	ai.Agent.ModelID = "different"
+	NormalizeAI(ai)
+	if ai.Memory.ModelID != ai.Providers[0].Models[0].ID {
+		t.Fatal("agent selection changed independent memory model")
+	}
+	ai.Providers[0].Models[0].Enabled = false
+	NormalizeAI(ai)
+	if ai.Memory.ModelID == "" {
+		t.Fatal("disabled model reference was silently cleared")
+	}
+	if ai.ValidateMemoryModel() == nil {
+		t.Fatal("disabled model accepted")
+	}
+}
+
+func TestAIMemoryReasoningCapabilities(t *testing.T) {
+	for _, tc := range []struct {
+		protocol, name, effort string
+		valid                  bool
+	}{
+		{util.OpenAIProtocolResponses, "gpt-5", "high", true},
+		{util.OpenAIProtocolResponses, "custom", "high", true},
+		{util.OpenAIProtocolResponses, "gpt-5-custom", "high", true},
+		{util.OpenAIProtocolResponses, "custom", "", true},
+		{util.OpenAIProtocolResponses, "gpt-5", "invented", false},
+		{"unknown", "gpt-5", "low", false},
+		{"unknown", "gpt-5", "", true},
+		{util.AnthropicProtocolMessages, "claude-sonnet-4-5", "medium", true},
+	} {
+		ai := NewAI()
+		ai.Memory.ModelID, ai.Memory.ReasoningEffort = "chosen", tc.effort
+		ai.Providers = []*Provider{{Enabled: true, Protocol: tc.protocol, Models: []*Model{{ID: "chosen", Name: tc.name, Enabled: true}}}}
+		if (ai.ValidateMemoryModel() == nil) != tc.valid {
+			t.Errorf("unexpected support: %#v", tc)
+		}
+	}
+}
+
+func TestAIMemoryReasoningMatchesAgentOptions(t *testing.T) {
+	want := []string{"none", "low", "medium", "high", "xhigh", "max"}
+	for _, protocol := range []string{"", util.OpenAIProtocolChatCompletions, util.OpenAIProtocolResponses,
+		util.AnthropicProtocolMessages, util.GeminiProtocolInteractions} {
+		for _, name := range []string{"deepseek-flash", "gpt-5.4", "claude-opus-4-6", "gemini-3-flash-preview", "custom-model"} {
+			t.Run(protocol+"/"+name, func(t *testing.T) {
+				provider := &Provider{Enabled: true, Protocol: protocol, Models: []*Model{{ID: "chosen", Name: name, Enabled: true}}}
+				if got := MemoryReasoningEfforts(provider, provider.Models[0]); !reflect.DeepEqual(got, want) {
+					t.Fatalf("standard options = %v, want %v", got, want)
+				}
+				ai := NewAI()
+				ai.Providers = []*Provider{provider}
+				ai.Memory.ModelID = "chosen"
+				for _, effort := range append([]string{""}, want...) {
+					ai.Memory.ReasoningEffort = effort
+					if err := ai.ValidateMemoryModel(); err != nil {
+						t.Fatalf("effort %q: %v", effort, err)
+					}
+				}
+			})
+		}
+	}
+	if len(MemoryReasoningEfforts(nil, nil)) != 0 {
+		t.Fatal("missing model exposed reasoning options")
+	}
+}
+
+func TestAIMemoryPersistence(t *testing.T) {
+	ai := NewAI()
+	ai.Memory = &Memory{Enabled: true, ModelID: "chosen", ReasoningEffort: "high"}
+	data, err := json.Marshal(ai)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var restored AI
+	if err = json.Unmarshal(data, &restored); err != nil {
+		t.Fatal(err)
+	}
+	NormalizeAI(&restored)
+	if !reflect.DeepEqual(ai.Memory, restored.Memory) {
+		t.Fatal("memory selection changed after reload")
+	}
+}

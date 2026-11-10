@@ -24,6 +24,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestSyncCheckoutIndexProgressSurvivesPeriodicPush(t *testing.T) {
+	task := prepareSyncCheckoutStateTest(t)
+	task.progress = dejavu.CheckoutProgress{Path: "document.sy", Written: 100, Size: 100}
+	task.beginIndexing()
+	updateSyncCheckoutIndexMessage("Indexing document")
+	task.push()
+	state := GetSyncCheckout("", "").Task
+	if state.Message != "Indexing document" || state.Current != 0 || state.Total != 0 {
+		t.Fatalf("indexing retained completed file progress: %+v", state)
+	}
+	task.Lock()
+	task.indexing = false
+	task.Unlock()
+	updateSyncCheckoutIndexMessage("Unrelated status")
+	if state := GetSyncCheckout("", "").Task; state.Message != "Indexing document" {
+		t.Fatalf("non-indexing status replaced task message: %+v", state)
+	}
+}
+
 func TestSyncCheckoutPreparationStartsTimeoutOnlyAfterUIReady(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		task := prepareSyncCheckoutStateTest(t)
@@ -273,28 +292,51 @@ func TestSyncCheckoutPreparationRetriesWithAdmittedWrite(t *testing.T) {
 	dataImportAccess.RLock()
 	err := task.prepareApply()
 	dataImportAccess.RUnlock()
-	if !errors.Is(err, dejavu.ErrIndexFileChanged) || task.releaseWrites != nil {
+	if !errors.Is(err, errSyncCheckoutBusy) || errors.Is(err, dejavu.ErrIndexFileChanged) || task.releaseWrites != nil {
 		t.Fatalf("preparation waited on a write holding the sync lock: %v", err)
 	}
-	if !strings.Contains(err.Error(), "Write requests are still running; retry later") {
+	if !strings.Contains(formatRepoErrorMsg(err), "Write requests are still running; retry later") {
 		t.Fatalf("write contention was reported as an editor save failure: %v", err)
 	}
 }
 
 func TestSyncCheckoutControllersReleaseAdmissionBeforePreparing(t *testing.T) {
 	prepareSyncDirectoryTest(t)
-	for _, path := range []string{"/api/sync/performSync", "/api/sync/performBootSync", "/api/notebook/enableEncryptedNotebooks"} {
-		engine := gin.New()
-		admitted := false
-		engine.POST(path, func(c *gin.Context) { c.Set(RoleContextKey, RoleAdministrator) }, CheckReadonly, func(c *gin.Context) {
-			admitted = dataImportAccess.TryLock()
-			if admitted {
-				dataImportAccess.Unlock()
-			}
-		})
-		engine.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest("POST", path, nil))
-		if !admitted {
-			t.Fatalf("%s retained its read lease while preparing local application", path)
+	previousReadonly := util.ReadOnly
+	t.Cleanup(func() { util.ReadOnly = previousReadonly })
+	for _, path := range []string{
+		"/api/sync/performSync", "/api/sync/performBootSync", "/api/sync/getSyncSourceState",
+		"/api/sync/setCloudSyncDir", "/api/sync/removeCloudSyncDir", "/api/sync/setSyncProvider",
+		"/api/sync/setSyncProviderS3", "/api/sync/setSyncProviderWebDAV", "/api/sync/setSyncProviderLocal",
+		"/api/sync/importSyncProviderS3", "/api/sync/importSyncProviderWebDAV", "/api/sync/clearSyncProviderConfig",
+		"/api/notebook/enableEncryptedNotebooks",
+	} {
+		for _, entry := range []struct {
+			name     string
+			readonly bool
+			role     Role
+			allowed  bool
+		}{
+			{"writable", false, RoleAdministrator, true},
+			{"readonly kernel", true, RoleAdministrator, false},
+			{"reader", false, RoleReader, false},
+		} {
+			t.Run(path+"/"+entry.name, func(t *testing.T) {
+				util.ReadOnly = entry.readonly
+				engine := gin.New()
+				called, admitted := false, false
+				engine.POST(path, func(c *gin.Context) { c.Set(RoleContextKey, entry.role) }, CheckReadonly, func(c *gin.Context) {
+					called = true
+					admitted = dataImportAccess.TryLock()
+					if admitted {
+						dataImportAccess.Unlock()
+					}
+				})
+				engine.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest("POST", path, nil))
+				if called != entry.allowed || admitted != entry.allowed {
+					t.Fatalf("controller admission: called=%t admitted=%t allowed=%t", called, admitted, entry.allowed)
+				}
+			})
 		}
 	}
 }

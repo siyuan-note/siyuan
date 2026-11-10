@@ -209,8 +209,8 @@ func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err e
 	FlushTxQueue()
 
 	ret = []*Path{}
-	tree, _ := loadTreeByBlockIDInBox(rootID, boxID)
-	if nil == tree {
+	tree, err := loadTreeByBlockIDInBox(rootID, boxID)
+	if err != nil {
 		return
 	}
 	headingNumbers := map[string]string{}

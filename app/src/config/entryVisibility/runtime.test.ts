@@ -16,6 +16,29 @@ import {
     mergeDockEntryOrderSnapshot,
 } from "./dockOrder";
 
+test("obsolete application preferences preserve the workspace menu's fixed slots and separators", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8")
+        .replace(/\/\/\/ #if MOBILE[\s\S]*?\/\/\/ #endif/g, "");
+    const compiled = transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
+    const runtime = {} as typeof import("./runtime");
+    const config = {active: "custom", profiles: [{id: "custom", entries: {"application.markdownEditor": false}}]};
+    const window = {siyuan: {config: {appearance: {entryVisibility: config}}}};
+    runInNewContext(compiled, {exports: runtime, window, require: () => ({
+        ...catalog, ...profileVisibility, Constants: {MENU_BAR_WORKSPACE: "barWorkspace"},
+    })});
+    const ids = ["config", "separator_1", "workspaceList", "layout", "separator_2", "safeQuit"];
+    const children = ids.map(id => ({
+        id, removed: false,
+        getAttribute: () => id,
+        classList: {contains: (name: string) => name === (id.startsWith("separator") ? "b3-menu__separator" : "b3-menu__item")},
+        querySelector: (): undefined => undefined,
+        remove() { this.removed = true; },
+    }));
+    const menu = {dataset: {name: "barWorkspace"}, querySelector: () => ({children})};
+    runtime.applyMenuEntryVisibility(menu as unknown as HTMLElement);
+    assert.deepEqual(children.filter(item => !item.removed).map(item => item.id), ids);
+});
+
 test("new profiles follow changed catalog defaults while explicit and legacy values stay fixed", () => {
     const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8");
     const compiled = transpileModule(source + "\nexports.writable = getWritableEntryProfile;", {

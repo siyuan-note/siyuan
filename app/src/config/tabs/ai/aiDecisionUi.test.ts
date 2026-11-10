@@ -90,7 +90,7 @@ const loadUI = (provider = "openai", enabled = true, withSwitch = true) => {
         require: (name: string) => {
             if (name.endsWith("/escape")) { return {escapeHtmlTextAndAttr: (value: string) => value}; }
             if (name.endsWith("/fragments")) { return {genConfigItemMainHtml: () => "", bindPasswordIconaToggle() {}}; }
-            if (name.endsWith("/confirmDialog")) { return {confirmDialog: () => confirms++}; }
+            if (name.endsWith("/mobileConfirmDialog")) { return {mobileConfirmDialog: () => confirms++}; }
             if (name.endsWith("/fetch")) {
                 return {fetchPost: (_url: string, body: any, complete: (response: any) => void, _headers: unknown, fail: () => void) =>
                     new Promise<void>(done => requests.push({body, complete, fail, done}))};

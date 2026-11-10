@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
-const runCases = async (sources, css, mobile, manifest, languages, image) => {
+const runCases = async (sources, css, mobile, manifest, languages, image, mobileRuntimeSource) => {
     const assert = require("node:assert/strict");
     const settle = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     document.body.replaceChildren();
@@ -69,6 +69,7 @@ const runCases = async (sources, css, mobile, manifest, languages, image) => {
         }
         return cache[name];
     };
+    stubs["dialog/mobileDialog"] = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(load("dialog").Dialog, mobile);
     const {Background} = load("protyle/header/Background");
     const owner = document.createElement("div");
     const background = new Background({element: owner, block: {rootID: "cover-document"}, disabled: false});
@@ -78,6 +79,7 @@ const runCases = async (sources, css, mobile, manifest, languages, image) => {
     document.body.append(owner);
     background.element.querySelector('[data-type="show-random"]').click();
     await settle();
+    await new Promise(resolve => setTimeout(resolve, 350));
     const dialog = window.siyuan.dialogs[0];
     assert.ok(dialog, "the built-in cover action opens the production dialog");
     const body = dialog.element.querySelector(".b3-dialog__body");
@@ -102,12 +104,23 @@ const runCases = async (sources, css, mobile, manifest, languages, image) => {
             const actual = rects[index].top - rects[index - columns].bottom;
             assert.ok(Math.abs(actual - gap) < 1, `row ${index}: expected ${gap}px gap, got ${actual}px`);
         }
-        assert.ok(list.clientHeight > 100, "the picture region remains usable");
+        assert.ok(list.clientHeight > 100, `the picture region remains usable: ${JSON.stringify({mobile, viewport: innerHeight,
+            list: list.clientHeight, body: body.clientHeight, cover: body.firstElementChild.clientHeight,
+            tabs: tabs.clientHeight, tabsMax: getComputedStyle(tabs).maxHeight, dialog: dialog.element.getBoundingClientRect().toJSON()})}`);
+        assert.ok(tabs.clientHeight >= tabs.firstElementChild.offsetHeight,
+            "the category region keeps at least one complete touch target visible");
         assert.ok(body.scrollHeight <= body.clientHeight + 1, "the dialog body does not scroll with the picture list");
     };
     assert.equal(list.children.length, manifest.length);
     await loadImages();
     checkGaps();
+    if (tabs.scrollHeight > tabs.clientHeight) {
+        tabs.scrollTop = tabs.scrollHeight;
+        await settle();
+        assert.ok(tabs.lastElementChild.getBoundingClientRect().bottom <= tabs.getBoundingClientRect().bottom + 1,
+            "the last category remains reachable while the picture region stays visible");
+        tabs.scrollTop = 0;
+    }
     const tabsTop = tabs.getBoundingClientRect().top;
     list.scrollTop = list.scrollHeight;
     await settle();
@@ -244,7 +257,8 @@ const runElectron = async () => {
                 win.setContentSize(width, height);
                 await win.loadURL("data:text/html,<html><body></body></html>");
                 await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)},
-                    ${JSON.stringify(css)}, ${mobile}, ${JSON.stringify(manifest)}, ${JSON.stringify(languages)}, ${JSON.stringify(image)})`);
+                    ${JSON.stringify(css)}, ${mobile}, ${JSON.stringify(manifest)}, ${JSON.stringify(languages)}, ${JSON.stringify(image)},
+                    ${JSON.stringify(require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource())})`);
             }
         }
         console.log("Cover picker layout cases passed");

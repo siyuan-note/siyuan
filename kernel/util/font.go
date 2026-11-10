@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"os"
+	"runtime"
 	"slices"
 	"sort"
 	"strconv"
@@ -37,15 +38,20 @@ func LoadSysFonts() []*Font {
 	}
 
 	start := time.Now()
-	sysFonts = loadFonts()
+	sysFonts = ReadSysFonts()
 	sysFontsLang = Lang
-
-	sort.Slice(sysFonts, func(i, j int) bool {
-		return sysFonts[i].DisplayName < sysFonts[j].DisplayName
-	})
 
 	logging.LogInfof("loaded system fonts [%d] in [%dms]", len(sysFonts), time.Since(start).Milliseconds())
 	return sysFonts
+}
+
+// 独立桌面工具与工作空间共用字体枚举、名称解析和排序，不依赖工作空间配置。
+func ReadSysFonts() []*Font {
+	fonts := loadFonts()
+	sort.Slice(fonts, func(i, j int) bool {
+		return fonts[i].DisplayName < fonts[j].DisplayName
+	})
+	return fonts
 }
 
 type Font struct {
@@ -102,6 +108,12 @@ var macFontLanguageIDs = map[string]sfnt.PlatformLanguageID{
 
 func loadFonts() (ret []*Font) {
 	ret = []*Font{}
+	if runtime.GOOS == "android" || runtime.GOOS == "ios" {
+		for _, font := range loadPlatformFonts() {
+			ret = addFont(ret, font)
+		}
+		return
+	}
 	for _, fontPath := range findfont.List() {
 		if strings.HasSuffix(strings.ToLower(fontPath), ".ttc") {
 			families := parseTTCFontFamily(fontPath)

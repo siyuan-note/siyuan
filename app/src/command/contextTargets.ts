@@ -1,8 +1,17 @@
 import type {ICommandContextSnapshot} from "./types";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
+import {getDocTreeActionItems} from "../menus/navigationSelection";
 
 export const getCommandBlocks = (context: ICommandContextSnapshot) =>
     context.selectedBlocks.length ? context.selectedBlocks : context.block ? [context.block] : [];
+
+export const hasCommandFileTreeTarget = (context: ICommandContextSnapshot) => {
+    const tree = context.fileTree;
+    if (context.focus !== "fileTree" || !tree) {
+        return false;
+    }
+    return Boolean(tree.controller && tree.items && tree.controller.validateSelection(tree.selectionVersion, tree.items));
+};
 
 export const hasCommandEditorTarget = (context: ICommandContextSnapshot) => {
     const editor = context.protyle?.wysiwyg?.element;
@@ -29,21 +38,19 @@ export const hasCommandEditorTarget = (context: ICommandContextSnapshot) => {
 
 export const getCommandDocument = (context: ICommandContextSnapshot) => {
     if (context.focus === "fileTree") {
-        const elements = context.fileTree?.elements;
-        if (elements?.length !== 1) {
-            return undefined;
+        const tree = context.fileTree;
+        if (tree?.controller) {
+            if (!hasCommandFileTreeTarget(context)) {
+                return undefined;
+            }
+            const items = getDocTreeActionItems(tree.items);
+            if (items.length !== 1 || items[0].kind !== "document") {
+                return undefined;
+            }
+            const {id, path, notebookId} = items[0];
+            return {id, path, notebookId};
         }
-        const element = elements[0];
-        if (!element.isConnected || element.getAttribute("data-type") !== "navigation-file" ||
-            element.getAttribute("data-node-id") !== context.fileTree.ids[0] ||
-            element.getAttribute("data-path") !== context.fileTree.paths[0]) {
-            return undefined;
-        }
-        return {
-            id: context.fileTree.ids[0],
-            path: context.fileTree.paths[0],
-            notebookId: element.getAttribute("data-notebook-id") || element.closest("ul[data-url]")?.getAttribute("data-url"),
-        };
+        return undefined;
     }
     const protyle = context.protyle;
     const doc = context.document;

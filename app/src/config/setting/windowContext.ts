@@ -4,6 +4,7 @@ import type {IPluginReloadData} from "../../plugin/loader";
 import type {IGlobalPluginStateSnapshot} from "../../plugin/globalStateCoordinator";
 import type {TDockOrderSnapshot} from "../entryVisibility/dockOrder";
 import type {IToolbarCatalogEntry} from "../../protyle/toolbar/defaults";
+import type {IBreadcrumbButtonCatalogEntry} from "../../plugin/breadcrumbButtonRegistry";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -15,8 +16,10 @@ export interface ISettingsWindowHost {
     dispose: () => void;
     reload: () => Promise<void>;
     resetLayout: () => Promise<void>;
+    reopenSettings: (settingsWindow: boolean) => Promise<void>;
     getDockOrderSnapshot: () => TDockOrderSnapshot;
     getEditorToolbarCatalogSnapshot: () => IToolbarCatalogEntry[];
+    getBreadcrumbButtonCatalogSnapshot: () => IBreadcrumbButtonCatalogEntry[];
     openBazaarPath: (type: TBazaarType, name: string, storage?: boolean) => void;
     exportLayout: (options: {cb: () => void; errorExit: boolean}) => Promise<void>;
     suspendLayoutSaving: () => Promise<() => void>;

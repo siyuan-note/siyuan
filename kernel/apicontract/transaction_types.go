@@ -60,11 +60,13 @@ func (value TransactionOperationData) MarshalJSON() ([]byte, error) {
 }
 
 type TransactionOperationFields struct {
-	Action     string `json:"action" api:"optional,nullable"`
-	ID         string `json:"id" api:"optional,nullable"`
-	RootID     string `json:"rootID" api:"optional,nullable"`
-	ParentID   string `json:"parentID" api:"optional,nullable"`
-	PreviousID string `json:"previousID" api:"optional,nullable"`
+	// 关联明细中的目标单元格修改必须携带上下文；内核重新校验条目仍属于该关系。
+	RelationContext *AVRelationContext `json:"relationContext,omitempty" api:"optional,nullable"`
+	Action          string             `json:"action" api:"optional,nullable"`
+	ID              string             `json:"id" api:"optional,nullable"`
+	RootID          string             `json:"rootID" api:"optional,nullable"`
+	ParentID        string             `json:"parentID" api:"optional,nullable"`
+	PreviousID      string             `json:"previousID" api:"optional,nullable"`
 	// NextID 用于 insert、move 的前置同级锚点，优先于 previousID 和 parentID。
 	// move 保留源块及折叠标题下辖块的顺序，不将整列表自动解包为列表项。
 	NextID            string                   `json:"nextID" api:"optional,nullable"`
@@ -100,10 +102,22 @@ type TransactionOperation struct {
 }
 
 type Transaction struct {
-	Timestamp             int64                   `json:"timestamp" api:"optional,nullable"`
-	DoOperations          []*TransactionOperation `json:"doOperations" api:"optional,nullable"`
-	UndoOperations        []*TransactionOperation `json:"undoOperations" api:"optional,nullable"`
-	TemplateDocTreePlanID string                  `json:"templateDocTreePlanID,omitempty" api:"optional,nullable"`
+	// 仅响应返回的单次联网任务；输入中的同名字段不参与执行，任务绑定提交窗口且五分钟内有效。
+	HTTPAutomationJobs []*AVHTTPAutomationJob `json:"httpAutomationJobs,omitempty" api:"optional"`
+	// 来源删除预览的认证字节摘要，包含仅删除来源及未选择移出条目的分支；过期时拒绝整笔编辑。
+	CollectionRemovalSourceVersions map[string]string       `json:"collectionRemovalSourceVersions,omitempty" api:"optional"`
+	Timestamp                       int64                   `json:"timestamp" api:"optional,nullable"`
+	DoOperations                    []*TransactionOperation `json:"doOperations" api:"optional,nullable"`
+	UndoOperations                  []*TransactionOperation `json:"undoOperations" api:"optional,nullable"`
+	TemplateDocTreePlanID           string                  `json:"templateDocTreePlanID,omitempty" api:"optional,nullable"`
+}
+
+type AVHTTPAutomationJob struct {
+	BoxID    string `json:"boxID,omitempty" api:"optional"`
+	ID       string `json:"id"`
+	AVID     string `json:"avID"`
+	BlockID  string `json:"blockID"`
+	Sequence int64  `json:"sequence"`
 }
 
 type PerformTransactionsRequest struct {
@@ -176,6 +190,16 @@ func (value TransactionHistoryResult) MarshalJSON() ([]byte, error) {
 type TransactionNewItemTemplates struct {
 	Templates         []*AVNewItemTemplate `json:"templates" api:"optional,nullable"`
 	DefaultTemplateID string               `json:"defaultTemplateID,omitempty" api:"optional,nullable"`
+}
+
+// TransactionSubItems 启用双向自身关联字段，省略字段 ID 时创建新字段。
+// 停用保留关联值；结构变更保证原子性并支持撤销，parentID 为空表示顶层条目。
+type TransactionSubItems struct {
+	Enabled       bool   `json:"enabled"`
+	ParentKeyID   string `json:"parentKeyID" api:"optional"`
+	ChildrenKeyID string `json:"childrenKeyID" api:"optional"`
+	ParentName    string `json:"parentName" api:"optional"`
+	ChildrenName  string `json:"childrenName" api:"optional"`
 }
 type TransactionRollup struct {
 	Calc *AVRollupCalc `json:"calc" api:"optional"`

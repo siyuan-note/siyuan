@@ -8,29 +8,34 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type collectionReview struct {
-	tx        *Transaction
-	boxID     string
-	rules     []*av.AutomationRule
-	uncertain bool
-	version   string
-	trees     map[string]*parse.Tree
-	matches   map[string]map[string]bool
-	present   map[string]map[string]bool
+	tx               *Transaction
+	boxID            string
+	rules            []*av.AutomationRule
+	uncertain        bool
+	bindingSensitive bool
+	version          string
+	trees            map[string]*parse.Tree
+	matches          map[string]map[string]bool
+	present          map[string]map[string]bool
+	resolve          func(string, string) *treenode.BlockTree
 }
 
 func (tx *Transaction) newCollectionReview(view *av.AttributeView, boxID string) *collectionReview {
 	data, _ := json.Marshal(view.Automations)
 	ret := &collectionReview{tx: tx, boxID: boxID, version: fmt.Sprintf("%x", sha256.Sum256(data)),
-		trees: map[string]*parse.Tree{}, matches: map[string]map[string]bool{}, present: map[string]map[string]bool{}}
+		trees: map[string]*parse.Tree{}, matches: map[string]map[string]bool{}, present: map[string]map[string]bool{},
+		resolve: collectionReferenceResolver(tx.trees)}
 	if view.Automations != nil {
 		for _, rule := range view.Automations.Rules {
 			if rule == nil || !rule.Enabled || rule.Trigger != "block" {
@@ -40,10 +45,36 @@ func (tx *Transaction) newCollectionReview(view *av.AttributeView, boxID string)
 				ret.uncertain = true
 				continue
 			}
+			if rule.BlockSource.ReferenceID != "" && ret.resolve(rule.BlockSource.ReferenceID, boxID) == nil {
+				ret.uncertain = true
+				continue
+			}
+			for _, attr := range rule.BlockSource.Attributes {
+				if collectionAttributeMatchesBinding(attr) {
+					ret.bindingSensitive = true
+					break
+				}
+			}
 			ret.rules = append(ret.rules, rule)
 		}
 	}
 	return ret
+}
+
+func collectionAttributeMatchesBinding(attr *av.AutomationBlockAttribute) bool {
+	pattern, err := validateCollectionAttribute(attr)
+	if err != nil {
+		return false
+	}
+	switch attr.NameOperator {
+	case "", "equals":
+		return attr.Name == av.NodeAttrNameAvs
+	case "contains":
+		return strings.Contains(av.NodeAttrNameAvs, attr.Name)
+	case "regex":
+		return pattern.MatchString(av.NodeAttrNameAvs)
+	}
+	return false
 }
 
 // 仅有明确的不匹配结论才能进入清理预览；不可读取和没有规则均不解释为不匹配。
@@ -70,7 +101,7 @@ func (review *collectionReview) item(row *av.Value) *apicontract.AVCollectionRev
 		return ret
 	}
 	ret.Reason = "unavailable"
-	bt := attributeViewBindingBlockTree(row.Block.ID, review.boxID)
+	bt := review.resolve(row.Block.ID, review.boxID)
 	if bt == nil || !IsSameCryptoBoundary(review.boxID, bt.BoxID) {
 		return ret
 	}
@@ -90,7 +121,7 @@ func (review *collectionReview) item(row *av.Value) *apicontract.AVCollectionRev
 		}
 		matches := map[string]bool{}
 		for _, rule := range review.rules {
-			for id := range collectionMatches(rule.BlockSource, tree) {
+			for id := range collectionMatchesWithReferences(rule.BlockSource, tree, review.resolve, nil) {
 				matches[id] = true
 			}
 		}
@@ -180,6 +211,10 @@ func (tx *Transaction) doCleanupAttrViewBlocks(op *Operation) *TxErr {
 	if request.RuleVersion == "" || request.RuleVersion != review.version {
 		return fail(fmt.Errorf("collection rules changed; refresh the review before cleaning up"))
 	}
+	// 解绑会改变规则依赖的 custom-avs，来源清理保留已有条目，避免同一事务重新收集时重置字段。
+	if request.AutomaticOnly && review.bindingSensitive {
+		return nil
+	}
 	var removals []*av.Value
 	seen := map[string]bool{}
 	for _, item := range request.Items {
@@ -189,6 +224,9 @@ func (tx *Transaction) doCleanupAttrViewBlocks(op *Operation) *TxErr {
 		seen[item.ItemID] = true
 		row := view.GetBlockValue(item.ItemID)
 		if row == nil || row.Block == nil || row.Block.ID != item.BlockID {
+			continue
+		}
+		if request.AutomaticOnly && row.Block.CollectionRuleID == "" {
 			continue
 		}
 		if review.item(row).Status == "unmatched" {

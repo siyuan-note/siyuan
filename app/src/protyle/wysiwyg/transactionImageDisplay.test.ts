@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = (transactionSource: string, displaySource: string, luteSource: string) => {
+const browserCases = (transactionSource: string, displaySource: string, luteSource: string, hostSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     new Function(luteSource)();
     const lute = Lute.New();
@@ -26,6 +26,8 @@ const browserCases = (transactionSource: string, displaySource: string, luteSour
     let queued = 0;
     const identity = (html: string) => html;
     const dependencies = {
+        getTagRemovalChanges: (): [] => [],
+        hasReferenceRemoval: () => false,
         renderImageDisplay,
         Constants: {ATTRIBUTE_EDITING: "data-editing"},
         prepareViewFoldTransaction: (_protyle: unknown, doOperations: unknown, undoOperations: unknown) =>
@@ -46,8 +48,11 @@ const browserCases = (transactionSource: string, displaySource: string, luteSour
         queueTransactionBatch: () => queued++,
         processRender: () => { throw new Error("Local image edits must preserve the current DOM"); },
     };
+    const host = {} as typeof import("../render/av/host");
+    new Function("exports", "require", hostSource)(host, () => ({}));
     const exports = {} as typeof import("./transaction");
-    new Function("exports", "require", transactionSource)(exports, () => dependencies);
+    new Function("exports", "require", transactionSource)(exports, (name: string) =>
+        name === "../render/av/host" ? host : dependencies);
     const root = document.createElement("div");
     root.className = "protyle-wysiwyg";
     document.body.append(root);
@@ -125,10 +130,13 @@ test("local image insertions and updates display names and descriptions before s
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText).join("\n");
     const luteSource = readFileSync("stage/protyle/js/lute/lute.min.js", "utf8");
+    const hostSource = transpileModule(readFileSync(path.join(__dirname, "../render/av/host.ts"), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-image-transaction-test-"));
     const script = path.join(temporary, "run.cjs");
     const code = "(() => { try { const __name = value => value; return (" + browserCases.toString() + ")(" +
-        JSON.stringify(transactionSource) + "," + JSON.stringify(displaySource) + "," + JSON.stringify(luteSource) +
+        JSON.stringify(transactionSource) + "," + JSON.stringify(displaySource) + "," + JSON.stringify(luteSource) + "," + JSON.stringify(hostSource) +
         "); } catch (error) { return error.stack; } })()";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});

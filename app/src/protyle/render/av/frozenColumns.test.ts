@@ -48,7 +48,8 @@ test("cell navigation reveals previously frozen cells when freezing is suspended
         require: () => ({hasClosestByClassName: (_element: unknown, name: string) => name === "av__row" ? row : null}),
     });
     const block = {querySelector: (name: string) => name === ".av__scroll" ? scroll : null};
-    const cell = {getBoundingClientRect: () => ({left: -184, right: 16, width: 200})};
+    const cell = {getAttribute: (): null => null, closest: (): null => null,
+        getBoundingClientRect: () => ({left: -184, right: 16, width: 200})};
     exports.cellScrollIntoView(block, cell, false);
     assert.equal(scroll.scrollLeft, 400);
     suspended = false;

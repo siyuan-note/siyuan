@@ -1,3 +1,5 @@
+import * as dockKeymap from "../../util/dockKeymap";
+import * as shortcut from "../../util/shortcut";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -15,7 +17,7 @@ const evaluate = (source: string, globals: Record<string, unknown>) => {
 };
 
 const constants = evaluate(readFileSync("src/constants.ts", "utf8"), {
-    SIYUAN_VERSION: "test", NODE_ENV: "test",
+    SIYUAN_VERSION: "test", NODE_ENV: "test", require: () => dockKeymap,
 }).Constants;
 
 const loadFunction = (path: string, name: string, globals: Record<string, unknown>) => {
@@ -36,13 +38,13 @@ const menuPaths = [
 for (const mac of [false, true]) {
     const {matchHotKey} = evaluate(readFileSync("src/protyle/util/hotKey.ts", "utf8"), {
         require: (name: string) => name.endsWith("compatibility") ? {
-            isMac: () => mac,
+            isMac: () => mac, isInIOS: () => false,
             isOnlyMeta: (event: KeyboardEvent) => mac ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey,
             isNotCtrl: (event: KeyboardEvent) => !event.ctrlKey && !event.metaKey,
-        } : name.endsWith("constants") ? {Constants: constants} : bindings,
+        } : name.endsWith("constants") ? {Constants: constants} : name.endsWith("shortcut") ? shortcut : bindings,
     });
     for (const path of menuPaths) {
-        test(`context menu respects defaults, rebindings and unbinding: ${path}, mac=${mac}`, () => {
+        test(`context menu respects defaults, rebindings and unbinding: ${path}, mac=${mac}`, async () => {
             const source = createSourceFile(path, readFileSync(path, "utf8"), ScriptTarget.ES2021, true);
             let branch = "";
             const find = (node: import("typescript").Node) => {
@@ -55,9 +57,10 @@ for (const mac of [false, true]) {
             find(source);
             assert.ok(branch);
             const item = bindings.mergeKeymapDefault(undefined, constants.SIYUAN_KEYMAP.general.openContextMenu);
-            const run = (keyCode: number) => {
+            const run = async (keyCode: number) => {
                 let opened = 0;
                 let prevented = false;
+                let pending: Promise<void>;
                 const element = {getBoundingClientRect: () => ({left: 1, top: 2, right: 3, bottom: 4}),
                     querySelector: () => element};
                 const menu = {popup: () => { opened++; }};
@@ -70,18 +73,25 @@ for (const mac of [false, true]) {
                     protyle: {wysiwyg: {element: {querySelectorAll: () => [element]}}, gutter: {renderMenu() {}}},
                     avContextmenu: () => { opened++; }, currentList: element, id: "block",
                     initSearchMenu: () => menu, initFileMenu: () => menu,
+                    controller: {getSelectedItems: () => [{occurrenceKey: "box/doc"}], selectionVersion: 1,
+                        ensureRendered: async () => element, validateSelection: () => true},
+                    toggleMenu: (options: {build: (menu: unknown, session: unknown) => Promise<void>}) => {
+                        pending = options.build(menu, {isCurrent: () => true, show: (callback: () => void) => callback()});
+                        return pending;
+                    },
                     isFile: true, app: {}, notebookId: "box", pathString: "/doc.sy",
                 });
+                await pending;
                 return {opened, prevented};
             };
-            assert.equal(run(191).opened, 1);
+            assert.equal((await run(191)).opened, 1);
             bindings.setKeymapBindings(item, ["⌘K", "⌘L"]);
-            assert.equal(run(191).opened, 0);
-            assert.equal(run(75).opened, 1);
-            assert.equal(run(76).opened, 1);
+            assert.equal((await run(191)).opened, 0);
+            assert.equal((await run(75)).opened, 1);
+            assert.equal((await run(76)).opened, 1);
             bindings.setKeymapBindings(item, []);
-            assert.equal(run(191).opened, 0);
-            assert.equal(run(75).opened, 0);
+            assert.equal((await run(191)).opened, 0);
+            assert.equal((await run(75)).opened, 0);
         });
     }
 }

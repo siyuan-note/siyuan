@@ -221,6 +221,30 @@ test("long pressing database menu content still allows sorting", () => {
     assert.equal(bridge.runtime.touchDragActive, false);
 });
 
+test("a synthesized long-press menu releases the file candidate before menu scrolling", () => {
+    const bridge = createBridge("b3-list-item", "sy__file", false, {browser: true, container: "android"});
+    bridge.row.dataset.type = "navigation-file";
+    bridge.dispatch("touchstart", bridge.label);
+    assert.equal(bridge.row.draggable, "false");
+    assert.equal(bridge.dispatch("contextmenu", bridge.label, 100, 0, false, 1, {isTrusted: true}), true);
+    assert.equal(bridge.row.draggable, "false");
+    // 全局 touchend 合成长按菜单后会阻断后续监听器，桥接器不能依赖自己的 touchend 清理。
+    assert.equal(bridge.dispatch("contextmenu", bridge.label, 100, 500, false, 1, {isTrusted: false}), false);
+    assert.equal(bridge.row.draggable, "true");
+    const menu = new TestHTMLElement(["b3-menu"]);
+    bridge.dispatch("touchstart", menu);
+    assert.equal(bridge.dispatch("touchmove", menu, 170, 500), false);
+    bridge.dispatch("touchend", menu, 170);
+    assert.deepEqual(bridge.row.events, []);
+    assert.equal(bridge.runtime.touchDragActive, false);
+    bridge.dispatch("touchstart", bridge.label);
+    assert.equal(bridge.dispatch("touchmove", bridge.label, 140, 500), true);
+    assert.equal(bridge.runtime.touchDragActive, true);
+    bridge.dispatch("contextmenu", bridge.label, 140, 0, false, 1, {isTrusted: false});
+    assert.equal(bridge.runtime.touchDragActive, true);
+    bridge.dispatch("touchcancel", bridge.label);
+});
+
 test("dragging the database menu handle starts sorting without a long press", () => {
     const bridge = createBridge();
     bridge.dispatch("touchstart", bridge.handleIcon);

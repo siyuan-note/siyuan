@@ -6,6 +6,9 @@ package apicontract
 
 type LoadPetalsRequest struct {
 	Frontend string `json:"frontend" api:"trim"`
+	// 省略或 null 时加载全部符合条件的插件；空数组不加载插件，其他值按安装名称精确筛选并忽略重复项。
+	// 不存在、禁用、不兼容或无权访问的名称不会返回，筛选不能绕过信任和发布权限检查。
+	Names []string `json:"names,omitempty" api:"optional,nullable"`
 	// 为 true 时仅返回 plugin.json 声明 settingsWindow: true 的已启用兼容插件；省略或 false 保持原有行为。
 	// 设置窗口仍使用 desktop 的前端兼容性，不影响插件的 frontends 声明和发布权限检查。
 	SettingsWindow bool `json:"settingsWindow,omitempty" api:"optional"`

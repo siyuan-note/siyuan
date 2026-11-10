@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
 /// #if !BROWSER
 import {escapeHtml} from "../../util/escape";
 import * as path from "path";
@@ -6,7 +7,6 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {renderExportJSEmbeds} from "./jsEmbed";
 import {ContractFormData} from "../../util/contractFormData";
-import {Dialog} from "../../dialog";
 import {addScript} from "../util/addScript";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
@@ -19,14 +19,14 @@ import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabiliti
 import {copyPNGByLink, writePNGBlob} from "../../menus/util";
 import {getExportImageSize, isExportImageSizeSupported, observeExportImageLayout, updateExportImageLayout} from "./imageLayout";
 import {getExportImageFontCSS, getExportImageLocalFontCSS} from "./imageFonts";
+import {suspendAVColumnWindows} from "../render/av/columnWindow";
 
 const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
-    showMessage(`${window.siyuan.languages.exported} ${escapeHtml(exportPath)}
-<div class="fn__space"></div>
-<button class="b3-button b3-button--white">${window.siyuan.languages.showInFolder}</button>`, 6000, "info", msgId);
+    showMessage(`<div class="b3-snackbar__actions"><div class="b3-snackbar__body">${window.siyuan.languages.exported} ${escapeHtml(exportPath)}</div>
+<button class="b3-button b3-button--white b3-button--wrap b3-snackbar__action">${window.siyuan.languages.showInFolder}</button></div>`, 6000, "info", msgId);
     document.querySelector(`#message [data-id="${msgId}"] button`).addEventListener("click", () => {
         useShell("showItemInFolder", path.join(exportPath));
         hideMessage(msgId);
@@ -39,7 +39,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         return;
     }
     let stopObservingLayout: () => void;
-    const exportDialog = new Dialog({
+    const exportDialog = new MobileDialog({
         disableAnimation: true,
         destroyCallback() {
             stopObservingLayout?.();
@@ -128,71 +128,76 @@ export const exportImage = (id: string, copyOnly = false) => {
         });
     };
     const renderImageBlob = async () => {
-        const plantumlElements = previewElement.querySelectorAll("[data-subtype='plantuml']");
-        for (let i = 0; i < plantumlElements.length; i++) {
-            const objectElement = plantumlElements[i].querySelector("object");
-            if (objectElement) {
-                const res = await fetch(objectElement.getAttribute("data"));
-                const response = await res.text();
-                objectElement.insertAdjacentHTML("beforebegin", sanitizeKernelHTML(response));
-                objectElement.remove();
+        const releaseColumns = suspendAVColumnWindows(previewElement);
+        try {
+            const plantumlElements = previewElement.querySelectorAll("[data-subtype='plantuml']");
+            for (let i = 0; i < plantumlElements.length; i++) {
+                const objectElement = plantumlElements[i].querySelector("object");
+                if (objectElement) {
+                    const res = await fetch(objectElement.getAttribute("data"));
+                    const response = await res.text();
+                    objectElement.insertAdjacentHTML("beforebegin", sanitizeKernelHTML(response));
+                    objectElement.remove();
+                }
             }
-        }
-        previewElement.querySelectorAll(".protyle-linenumber__rows").forEach((rowsElement) => {
-            // 每个代码块的行号都需要从 1 开始计数，不能跨代码块累加
-            rowsElement.querySelectorAll("span").forEach((item, index) => {
-                item.textContent = (index + 1).toString();
+            previewElement.querySelectorAll(".protyle-linenumber__rows").forEach((rowsElement) => {
+                // 每个代码块的行号都需要从 1 开始计数，不能跨代码块累加
+                rowsElement.querySelectorAll("span").forEach((item, index) => {
+                    item.textContent = (index + 1).toString();
+                });
             });
-        });
-        await new Promise((resolve) => {
-            setTimeout(resolve, Constants.TIMEOUT_LOAD);
-        });
-        await document.fonts.ready;
-        await Promise.all(Array.from(previewElement.querySelectorAll("img")).map(item => {
-            item.loading = "eager";
-            return item.decode().catch(() => {});
-        }));
-        updateExportImageLayout(exportDialog.element.querySelector(".export-img"));
-        const contentElement = exportDialog.element.querySelector<HTMLElement>(".b3-dialog__content");
-        const size = getExportImageSize(contentElement);
-        const pixelRatio = window.devicePixelRatio || 1;
-        if (!isExportImageSizeSupported(size, pixelRatio)) {
-            throw new Error(window.siyuan.languages.exportImageTooLarge);
-        }
-        // 截图克隆完整内容区，预览窗口保持原有宽度和滚动位置。
-        const style = {boxSizing: "border-box", overflow: "hidden"};
-        if (isIPhone() || isIPad() || isSafari()) {
-            // modern-screenshot 通过缓存默认样式提高 WebKit/WKWebView 环境下的导出性能。
-            await addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.7.0`, "protyleModernScreenshot");
-            const localFontCSS = getExportImageLocalFontCSS(contentElement.ownerDocument);
-            return window.modernScreenshot.domToBlob(
+            await new Promise((resolve) => {
+                setTimeout(resolve, Constants.TIMEOUT_LOAD);
+            });
+            await document.fonts.ready;
+            await Promise.all(Array.from(previewElement.querySelectorAll("img")).map(item => {
+                item.loading = "eager";
+                return item.decode().catch(() => {});
+            }));
+            updateExportImageLayout(exportDialog.element.querySelector(".export-img"));
+            const contentElement = exportDialog.element.querySelector<HTMLElement>(".b3-dialog__content");
+            const size = getExportImageSize(contentElement);
+            const pixelRatio = window.devicePixelRatio || 1;
+            if (!isExportImageSizeSupported(size, pixelRatio)) {
+                throw new Error(window.siyuan.languages.exportImageTooLarge);
+            }
+            // 截图克隆完整内容区，预览窗口保持原有宽度和滚动位置。
+            const style = {boxSizing: "border-box", overflow: "hidden"};
+            if (isIPhone() || isIPad() || isSafari()) {
+                // modern-screenshot 通过缓存默认样式提高 WebKit/WKWebView 环境下的导出性能。
+                await addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.7.0`, "protyleModernScreenshot");
+                const localFontCSS = getExportImageLocalFontCSS(contentElement.ownerDocument);
+                return await window.modernScreenshot.domToBlob(
+                    contentElement, {
+                        ...size,
+                        style,
+                        type: "image/png",
+                        scale: pixelRatio,
+                        onCreateForeignObjectSvg: (svgElement: SVGSVGElement) => {
+                            if (localFontCSS) {
+                                const fontStyle = document.createElementNS(svgElement.namespaceURI, "style");
+                                fontStyle.textContent = localFontCSS;
+                                svgElement.insertBefore(fontStyle, svgElement.firstChild);
+                            }
+                        },
+                        fetch: {placeholderImage: IMAGE_PLACEHOLDER}
+                    });
+            }
+            await addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image");
+            return await window.htmlToImage.toBlob(
                 contentElement, {
                     ...size,
                     style,
-                    type: "image/png",
-                    scale: pixelRatio,
-                    onCreateForeignObjectSvg: (svgElement: SVGSVGElement) => {
-                        if (localFontCSS) {
-                            const fontStyle = document.createElementNS(svgElement.namespaceURI, "style");
-                            fontStyle.textContent = localFontCSS;
-                            svgElement.insertBefore(fontStyle, svgElement.firstChild);
-                        }
-                    },
-                    fetch: {placeholderImage: IMAGE_PLACEHOLDER}
+                    pixelRatio,
+                    fontEmbedCSS: await getExportImageFontCSS(contentElement),
+                    imagePlaceholder: IMAGE_PLACEHOLDER,
+                    onImageErrorHandler: (event: Event) => {
+                        (event.target as HTMLImageElement).src = IMAGE_PLACEHOLDER;
+                    }
                 });
+        } finally {
+            releaseColumns();
         }
-        await addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image");
-        return window.htmlToImage.toBlob(
-            contentElement, {
-                ...size,
-                style,
-                pixelRatio,
-                fontEmbedCSS: await getExportImageFontCSS(contentElement),
-                imagePlaceholder: IMAGE_PLACEHOLDER,
-                onImageErrorHandler: (event: Event) => {
-                    (event.target as HTMLImageElement).src = IMAGE_PLACEHOLDER;
-                }
-            });
     };
     const outputImage = async (type: "copy" | "export") => {
         if (outputting) {

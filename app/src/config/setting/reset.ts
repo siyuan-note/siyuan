@@ -1,4 +1,4 @@
-import {confirmDialog} from "../../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {fetchSyncPost} from "../../util/fetch";
 import {getAllEditor, getAllModels} from "../../layout/getAll";
 import {setNativeSettingTask} from "./taskBlocker";
@@ -109,7 +109,7 @@ export const confirmResetSettings = () => {
     /// #if !BROWSER
     exit = getHostCapabilities().ownsKernel;
     /// #endif
-    confirmDialog(window.siyuan.languages.resetSettings,
+    mobileConfirmDialog(window.siyuan.languages.resetSettings,
         window.siyuan.languages.resetSettingsConfirm + "<br><br>" +
         window.siyuan.languages[exit ? "resetSettingsExit" : "resetSettingsReload"], async () => {
             try {

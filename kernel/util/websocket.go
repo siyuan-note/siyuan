@@ -5,6 +5,7 @@
 package util
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -161,6 +162,7 @@ func AddPushChan(session *melody.Session) {
 		return
 	}
 	session.Set("id", id)
+	session.Set("interactiveDone", &interactiveSessionDone{done: make(chan struct{})})
 
 	typ := strings.TrimSpace(session.Request.URL.Query().Get("type"))
 	if "" == typ {
@@ -227,6 +229,10 @@ func IsAuthSession(session *melody.Session) bool {
 }
 
 func RemovePushChan(session *melody.Session) {
+	if value, ok := session.Get("interactiveDone"); ok {
+		state := value.(*interactiveSessionDone)
+		state.once.Do(func() { close(state.done) })
+	}
 	app, _ := session.Get("app")
 	id, _ := session.Get("id")
 
@@ -746,4 +752,115 @@ func IsIdle(idleThreshold time.Duration) bool {
 // IsIndexFixDirty 返回是否存在未订正的变更（上次订正后有新用户活动）。
 func IsIndexFixDirty() bool {
 	return indexFixVersion.Load() != indexFixCleanVersion.Load()
+}
+
+// InteractiveSession 仅接受已就绪的非发布主窗口；空标识不能退化成广播。
+func InteractiveSession(app, id string) (*melody.Session, <-chan struct{}) {
+	session, done := BindableInteractiveSession(app, id)
+	if session == nil || !IsSessionReady(session) {
+		return nil, nil
+	}
+	return session, done
+}
+
+// WaitInteractiveSession 最多等待 10 秒让原主窗口报告界面就绪，连接替换、断开或请求失效时终止等待。
+func WaitInteractiveSession(ctx context.Context, app, id string, expected *melody.Session) bool {
+	session, done := BindableInteractiveSession(app, id)
+	if session == nil || session != expected {
+		return false
+	}
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		if ctx.Err() != nil {
+			return false
+		}
+		select {
+		case <-done:
+			return false
+		default:
+		}
+		current, _ := BindableInteractiveSession(app, id)
+		if current != session {
+			return false
+		}
+		if IsSessionReady(session) {
+			return true
+		}
+		select {
+		case <-ctx.Done():
+			return false
+		case <-done:
+			return false
+		case <-ticker.C:
+		}
+	}
+}
+
+// WaitBindableInteractiveSession 处理升级握手已完成但认证连接尚未登记的短暂窗口。
+// 已登记的无效连接立即拒绝；请求取消后不得等待后续同名连接。
+func WaitBindableInteractiveSession(ctx context.Context, app, id string) (*melody.Session, <-chan struct{}) {
+	if app == "" || id == "" {
+		return nil, nil
+	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		if ctx.Err() != nil {
+			return nil, nil
+		}
+		if session, done, registered := bindableInteractiveSession(app, id); registered {
+			if ctx.Err() != nil {
+				return nil, nil
+			}
+			return session, done
+		}
+		// 授权页使用独立注册表，不能被当成尚未完成登记的交互窗口。
+		if value, ok := authSessions.Load(app); ok {
+			if _, exists := value.(*sync.Map).Load(id); exists {
+				return nil, nil
+			}
+		}
+		select {
+		case <-ctx.Done():
+			return nil, nil
+		case <-ticker.C:
+		}
+	}
+}
+
+// BindableInteractiveSession 只绑定当前有效的非发布主窗口，界面就绪检查由联网确认阶段执行。
+func BindableInteractiveSession(app, id string) (*melody.Session, <-chan struct{}) {
+	session, done, _ := bindableInteractiveSession(app, id)
+	return session, done
+}
+
+func bindableInteractiveSession(app, id string) (*melody.Session, <-chan struct{}, bool) {
+	if app == "" || id == "" {
+		return nil, nil, false
+	}
+	value, ok := sessions.Load(app)
+	if !ok {
+		return nil, nil, false
+	}
+	value, ok = value.(*sync.Map).Load(id)
+	if !ok {
+		return nil, nil, false
+	}
+	session := value.(*melody.Session)
+	typ, _ := session.Get("type")
+	state, exists := session.Get("interactiveDone")
+	if typ != "main" || !exists || isPublishSession(session) || session.IsClosed() {
+		return nil, nil, true
+	}
+	return session, state.(*interactiveSessionDone).done, true
+}
+
+type interactiveSessionDone struct {
+	once sync.Once
+	done chan struct{}
 }

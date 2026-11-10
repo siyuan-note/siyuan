@@ -105,6 +105,7 @@ const runCases = async (sources, platform, topBarHTML) => {
     });
     window.Lute = {Caret: "‸"};
     current = {element: document.getElementById("editor"), editable, contentElement: root.parentElement,
+        block: {rootID: "notebook"}, notebookId: "notebook",
         wysiwyg: {element: root}, preview: {element: preview},
         options: {toolbar: load("protyle/toolbar/defaults").getDefaultToolbar(true)},
         toolbar: {isMultiSelectMode: () => false, getCurrentToolbarType: () => [], setInlineMark: () => editable.focus()},
@@ -376,6 +377,7 @@ const runCases = async (sources, platform, topBarHTML) => {
     titleInput.classList.remove("fn__hidden");
     readonlyTitle.classList.remove("fn__hidden");
     titleInput.value = "Alpha beta gamma";
+    readonlyTitle.innerHTML = '<span data-type="strong">Alpha</span> beta gamma';
     window.siyuan.mobile.editor = {protyle: current};
     const {updateMobileTitleReadonly} = load("protyle/util/setEditMode");
     for (const container of [topBar, breadcrumb.firstElementChild]) {
@@ -384,14 +386,15 @@ const runCases = async (sources, platform, topBarHTML) => {
             current.disabled = mode === "readonly";
             preview.classList.toggle("fn__none", mode !== "preview");
             updateMobileTitleReadonly(current);
-            assert.equal(titleInput.readOnly, mode !== "edit");
-            assert.equal(getComputedStyle(titleInput).display === "none", mode !== "edit");
-            assert.equal(getComputedStyle(readonlyTitle).display === "none", mode === "edit");
+            assert.equal(titleInput.readOnly, true);
+            assert.equal(getComputedStyle(titleInput).display === "none", true);
+            assert.equal(getComputedStyle(readonlyTitle).display === "none", false);
             if (mode === "edit") {
-                titleInput.focus();
-                titleInput.setSelectionRange(0, 5);
-                assert.equal(titleInput.value.slice(titleInput.selectionStart, titleInput.selectionEnd), "Alpha");
-                titleInput.blur();
+                assert.equal(readonlyTitle.getAttribute("role"), "button");
+                assert.equal(readonlyTitle.tabIndex, 0);
+                readonlyTitle.focus();
+                assert.equal(document.activeElement, readonlyTitle);
+                readonlyTitle.blur();
                 continue;
             }
             const keyboardShowsBeforeTitle = keyboardShows;
@@ -412,6 +415,11 @@ const runCases = async (sources, platform, topBarHTML) => {
             assert.equal(readonlyTitle.textContent, titleInput.value);
         }
     }
+    current.block.rootID = "document";
+    current.disabled = false;
+    preview.classList.add("fn__none");
+    updateMobileTitleReadonly(current);
+    assert.equal(titleInput.readOnly, true, "document title summaries stay readonly while the rich title editor owns editing");
 };
 
 const runElectron = async () => {

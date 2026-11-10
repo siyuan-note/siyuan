@@ -35,7 +35,7 @@ const browserCases = async (sources: string[], css: string, languages: Record<st
         "./anchoredInput": {},
     });
     const clear = load(sources[2], {
-        "../dialog/confirmDialog": {}, "../dialog/message": {}, "../util/fetch": {},
+        "../dialog/mobileConfirmDialog": {}, "../dialog/message": {}, "../util/fetch": {},
         "../util/escape": {escapeHtmlTextAndAttr: (value: string) => value},
     });
     let detached = false;

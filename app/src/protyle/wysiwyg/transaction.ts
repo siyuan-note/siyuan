@@ -1,8 +1,11 @@
+import {suspendTabTitleEditingExit} from "../render/tabsRender";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
+import {refreshBreadcrumbForIconChanges} from "../breadcrumb/iconRefresh";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import dayjs from "dayjs";
 import {restoreInlineElementBoundaryHTML} from "../util/inlineElementBoundary";
 import {getEditorTransaction} from "../util/transactionContract";
+import {prepareAVHostTransaction} from "../render/av/host";
 import {
     focusBlock,
     focusByWbr,
@@ -37,6 +40,7 @@ import {disabledProtyle, enableProtyle} from "../util/onGet";
 import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {avRender, refreshAV} from "../render/av/render";
+import {queueDatabaseRowRefreshForOperations} from "../render/av/databaseRowRefresh";
 import {removeFoldHeading} from "../util/heading";
 import {cancelSB, genEmptyElement, genSBElement, refreshSbResize} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
@@ -59,6 +63,7 @@ import {
     getPartialUpdateCleanupElements,
     shouldDeferCodeBlockCaretRestore,
     shouldReloadForHeadingBatch,
+    shouldReloadForEmbedConversion,
 } from "./transactionUpdate";
 import {getMoveAffectedEmbedElements, shouldSyncMoveCopies} from "./transactionEmbed";
 import {getVisibleMoveElements} from "./transactionMove";
@@ -95,6 +100,10 @@ import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
+import {collectionRemovalOperations, getTagRemovalChanges, hasReferenceRemoval, previewCollectionRemoval} from "../util/collectionRemoval";
+import {preserveMobileEditorKeyboard} from "../../mobile/util/keepKeyboard";
+import {showMessage} from "../../dialog/message";
+import {canRestoreEditorFocus, getEditorFocusRange, restoreEditorFocusRange, restoreTabTitleEditing} from "../util/editorFocus";
 import {replayListMindmap} from "../render/listMindmap/render";
 import {
     invalidateTrackedRangesByOperations,
@@ -174,8 +183,12 @@ const canSyncListFoldInPlace = (embedElement: Element, operation: Extract<IOpera
         (attrs.fold === "1" || item.childElementCount > 3));
 };
 
-const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>) => {
+const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>, protyle?: IProtyle) => {
     const attrs = JSON.parse(operation.data);
+    if (Object.prototype.hasOwnProperty.call(attrs, "tags") && operation.id === protyle?.block.rootID && protyle.background) {
+        protyle.background.ial.tags = attrs.tags;
+        protyle.background.render(protyle.background.ial, operation.id);
+    }
     const hasFold = Object.prototype.hasOwnProperty.call(attrs, "fold");
     const hasStyle = Object.prototype.hasOwnProperty.call(attrs, "style");
     const hasMindmapView = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_LIST_MINDMAP);
@@ -265,7 +278,9 @@ const promiseTransaction = (options: {
     skipSync: boolean,
     callback?: () => void,
     templateDocTreePlanID?: string,
+    collectionRemovalSourceVersions?: Record<string, string>,
     trackedRangeInsertion?: ITrackedRangeInsertion,
+    awaitResponse?: boolean,
 }) => {
     const protyle = options.protyle;
     // 受影响的嵌入块需推迟到事务提交后再渲染，否则其查询请求会早于写入到达内核而拿到旧数据
@@ -591,7 +606,7 @@ const promiseTransaction = (options: {
                 return;
             }
             if (operation.action === "setAttrs") {
-                syncBlockAttrs(protyle.wysiwyg.element, operation);
+                syncBlockAttrs(protyle.wysiwyg.element, operation, protyle);
                 const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
                 if (gutterFoldElement) {
                     gutterFoldElement.removeAttribute("disabled");
@@ -639,6 +654,7 @@ const promiseTransaction = (options: {
             doOperations: options.doOperations,
             undoOperations: options.undoOperations,// 目前用于 ws 推送更新大纲
             templateDocTreePlanID: options.templateDocTreePlanID,
+            collectionRemovalSourceVersions: options.collectionRemovalSourceVersions,
         },
         callback: (responseTransaction: {doOperations: IOperation[]}) => {
             // 新增和更新的数据库载体必须在事务成功后渲染，确保内核已登记块及其笔记本归属。
@@ -681,7 +697,7 @@ const promiseTransaction = (options: {
                         return;
                     }
                     if (operation.action === "setAttrs") {
-                        syncBlockAttrs(protyle.wysiwyg.element, operation);
+                        syncBlockAttrs(protyle.wysiwyg.element, operation, protyle);
                     }
                     // 冻结范围依赖列的 DOM 分组，新增列事务落盘后使用完整数据重建分组。
                     if (operation.action === "addAttrViewCol" &&
@@ -705,26 +721,43 @@ const promiseTransaction = (options: {
             options.callback?.();
         },
     };
-    const submitTransactions = (items: typeof queuedTransaction[]) => fetchPost("/api/transactions", {
-        reqId: Date.now(),
-        session: protyle.id,
-        app: Constants.SIYUAN_APPID,
-        transactions: items.map(item => item.transaction),
-    }, (response) => {
-        items.forEach((item, index) => {
-            const result = response.data?.[index];
-            if (result) {
-                item.callback(getEditorTransaction(result));
-            }
-        });
-    });
+    const submitTransactions = (items: typeof queuedTransaction[]) => {
+        const request = {
+            reqId: Date.now(),
+            session: protyle.id,
+            app: Constants.SIYUAN_APPID,
+            transactions: items.map(item => item.transaction),
+        };
+        const applied = (response: Awaited<ReturnType<typeof fetchSyncPost<"/api/transactions">>>) => {
+            if (!Array.isArray(response.data)) return;
+            const transactions = response.data;
+            items.forEach((item, index) => {
+                const result = transactions[index];
+                if (result) {
+                    const transaction = getEditorTransaction(result);
+                    item.callback(transaction);
+                    queueDatabaseRowRefreshForOperations(protyle.id, transaction.doOperations);
+                }
+            });
+        };
+        if (options.awaitResponse) {
+            return fetchSyncPost("/api/transactions", request).then(response => {
+                if (response.code !== 0) throw new Error(response.msg);
+                if (response.data?.length !== items.length || response.data.some(item => !Array.isArray(item.doOperations))) {
+                    throw new Error(window.siyuan.languages.transactionSaveUnconfirmed);
+                }
+                applied(response);
+            });
+        }
+        return fetchPost("/api/transactions", request, applied);
+    };
     // 仅批量提交无回调的普通块更新，结构事务需要保持逐笔提交语义。
-    const batchable = !options.callback && !options.templateDocTreePlanID && options.doOperations.length === 1 &&
+    const batchable = !options.awaitResponse && !options.callback && !options.templateDocTreePlanID && options.doOperations.length === 1 &&
         options.doOperations[0].action === "update";
     if (batchable) {
-        queueTransactionBatch(protyle, "blockUpdates", queuedTransaction, submitTransactions);
+        return queueTransactionBatch(protyle, "blockUpdates", queuedTransaction, submitTransactions);
     } else {
-        queueTransaction(protyle, () => submitTransactions([queuedTransaction]));
+        return queueTransaction(protyle, () => submitTransactions([queuedTransaction]));
     }
 };
 
@@ -894,6 +927,12 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     if (protyle.wysiwyg.element.firstElementChild?.classList.contains("protyle-password")) {
         return;
     }
+    if (protyle.breadcrumb) refreshBreadcrumbForIconChanges(protyle, operations);
+    if (shouldReloadForEmbedConversion(protyle.block.rootID, operations)) {
+        // 隐藏子块可能已在内核删除，直接重载可避免回放时定位失效 ID，并恢复折叠边界外的内容。
+        reloadProtyle(protyle, false);
+        return;
+    }
     if (!preserveTrackedRanges) {
         invalidateTrackedRangesByOperations(protyle, operations);
     }
@@ -902,6 +941,12 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     const deferUndoFocus = !!undoFocusContext?.undoFocusEmbedId;
     const pendingUndoEmbedElements = new Set<Element>();
     operations.forEach(operation => {
+        if (operation.action === "setDocTitle") {
+            if (operation.id === protyle.block.rootID) {
+                void protyle.title?.refresh().catch(error => console.error(error));
+            }
+            return;
+        }
         if (operation.action === "convertList") {
             refreshListConversion(protyle, operation.retData, isUndo);
             return;
@@ -925,7 +970,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             updateElements.push(item);
         });
         if (operation.action === "setAttrs") {
-            syncBlockAttrs(protyle.wysiwyg.element, operation);
+            syncBlockAttrs(protyle.wysiwyg.element, operation, protyle);
             return;
         }
         if (operation.action === "unfoldHeading") {
@@ -1531,7 +1576,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             protyle.databaseAttributePanel?.refreshForOperation(operation);
             return;
         }
-        if (["addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
+        if (["setAttrViewRelationDetail", "updateAttrViewRelationItems", "setAttrViewSubItems", "setAttrViewSubItemsDisplay", "reparentAttrViewItems", "promoteAttrViewItems", "duplicateAttrViewSubtree",
+            "addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
             "updateAttrViewColOption", "updateAttrViewCell", "updateAttrViewCells", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
             "setAttrViewColWrap", "setAttrViewColWidth", "setAttrViewColsWidth", "setAttrViewColAlign", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
             "setAttrViewSorts", "setAttrViewNewItemTemplates", "setAttrViewAutomations", "collectAttrViewBlocks", "setAttrViewCustomColors", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "setAttrViewColDateFormat", "removeAttrViewBlock",
@@ -2338,6 +2384,7 @@ export const turnsOneInto = async (options: {
     type: string,
     level?: number,
     callout?: Pick<ICalloutPreset, "type" | "title" | "icon">,
+    awaitUpdate?: boolean,
     undoElement?: {
         id: string,
         html: string,
@@ -2448,6 +2495,18 @@ export const turnsOneInto = async (options: {
         previousID: previousId,
         parentID: parentId,
     }) : undefined;
+    if (options.awaitUpdate) {
+        try {
+            await transaction(options.protyle, [{action: "update", id: options.id, data: newHTML}],
+                [{action: "update", id: options.id, data: oldHTML}], {awaitResponse: true});
+        } catch (error) {
+            options.nodeElement.querySelector("wbr")?.remove();
+            throw error;
+        }
+        if (!options.protyle.wysiwyg.element.contains(options.nodeElement)) {
+            return;
+        }
+    }
     disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);
     options.nodeElement = options.nodeElement.nextElementSibling as HTMLElement;
@@ -2492,7 +2551,7 @@ export const turnsOneInto = async (options: {
         const doFoldOperations = foldOperations.map((operation) => ({...operation}));
         const undoFoldOperations = foldOperations.map((operation) => ({...operation}));
         transaction(options.protyle, doOperations.concat(doFoldOperations), undoOperations.concat(undoFoldOperations));
-    } else {
+    } else if (!options.awaitUpdate) {
         updateTransaction(options.protyle, options.nodeElement, oldHTML);
     }
     focusByWbr(options.protyle.wysiwyg.element, getEditorRange(options.protyle.wysiwyg.element));
@@ -2509,17 +2568,31 @@ export const turnsOneInto = async (options: {
     avRender(options.protyle.wysiwyg.element, options.protyle);
 };
 
+const pendingCollectionRemovals = new WeakMap<IProtyle, {
+    promise: Promise<void>, signature: string, callback?: () => void, trackedRangeInsertion?: ITrackedRangeInsertion,
+}>();
+
 export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoOperations?: IOperation[],
                             options?: {
                                 skipSync?: boolean,
                                 callback?: () => void,
                                 templateDocTreePlanID?: string,
                                 trackedRangeInsertion?: ITrackedRangeInsertion,
-                            }) => {
+                                collectionRemovalConfirmed?: boolean,
+                                collectionRemovalSourceVersions?: Record<string, string>,
+                                awaitResponse?: boolean,
+                            }): Promise<void> | void => {
+    const hostDoOperations = prepareAVHostTransaction(protyle, doOperations);
+    const hostUndoOperations = prepareAVHostTransaction(protyle, undoOperations);
+    if (!hostDoOperations || (undoOperations && !hostUndoOperations)) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        return;
+    }
+    doOperations = hostDoOperations;
+    undoOperations = hostUndoOperations;
     const owner = protyle?.lite && getProtyleTransactionOwner(protyle, doOperations);
     if (owner && !owner.lite && owner !== protyle) {
-        transaction(owner, doOperations, undoOperations, options);
-        return;
+        return transaction(owner, doOperations, undoOperations, options);
     }
     if (protyle) {
         const prepared = prepareViewFoldTransaction(protyle, doOperations, undoOperations);
@@ -2546,6 +2619,135 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     });
     cleanHeadingNumberOperations(doOperations);
     cleanHeadingNumberOperations(undoOperations);
+    if (protyle && !protyle.lite && !options?.collectionRemovalConfirmed) {
+        const existing = pendingCollectionRemovals.get(protyle);
+        if (existing) {
+            const signature = JSON.stringify([doOperations, undoOperations, options?.skipSync,
+                options?.templateDocTreePlanID, options?.collectionRemovalSourceVersions]);
+            if (existing.signature === signature && existing.callback === options?.callback &&
+                existing.trackedRangeInsertion === options?.trackedRangeInsertion) {
+                return existing.promise;
+            }
+            const message = window.siyuan.languages.sourceRemovalPending;
+            showMessage(message);
+            const rejected = Promise.reject(new DOMException(message, "InvalidStateError"));
+            void rejected.catch(() => {});
+            return rejected;
+        }
+        const changes = getTagRemovalChanges(doOperations, undoOperations);
+        const referencesRemoved = hasReferenceRemoval(doOperations, undoOperations);
+        if (changes.length || referencesRemoved) {
+            const signature = JSON.stringify([doOperations, undoOperations, options?.skipSync,
+                options?.templateDocTreePlanID, options?.collectionRemovalSourceVersions]);
+            const wasDisabled = protyle.disabled;
+            const element = protyle.element;
+            const wasInert = element.inert;
+            const editor = protyle.wysiwyg.element;
+            const rootID = protyle.block.rootID;
+            const blockID = protyle.block.id;
+            const isCurrent = () => protyle.element === element && element.isConnected && protyle.wysiwyg.element === editor &&
+                protyle.block.rootID === rootID && protyle.block.id === blockID;
+            const content = protyle.contentElement;
+            const scrollTop = content.scrollTop;
+            const overflowAnchor = content.style.getPropertyValue("overflow-anchor");
+            const anchorPriority = content.style.getPropertyPriority("overflow-anchor");
+            content.style.setProperty("overflow-anchor", "none");
+            const selection = getSelection();
+            const focusRange = getEditorFocusRange(protyle.wysiwyg.element,
+                selection.rangeCount ? selection.getRangeAt(0) : undefined);
+            const focusElement = focusRange?.startContainer.nodeType === Node.ELEMENT_NODE ?
+                focusRange.startContainer as Element : focusRange?.startContainer.parentElement;
+            const focusTitleItemID = focusElement?.closest(".tab-item-title")?.closest<HTMLElement>(".tab-item")?.dataset.nodeId;
+            let focusContext = getUndoFocusContext(protyle.wysiwyg.element, focusRange, true);
+            const operationFocus = (operations?: IOperation[]) => {
+                const operation = operations?.find(item => item.action === "update" &&
+                    (!focusContext || item.id === focusContext.undoFocusId) &&
+                    typeof item.data === "string" && item.data.includes("<wbr"));
+                if (!operation || typeof operation.data !== "string") {
+                    return;
+                }
+                const container = document.createElement("div");
+                container.innerHTML = operation.data;
+                const marker = container.querySelector("wbr");
+                if (marker) {
+                    const range = document.createRange();
+                    range.setStartBefore(marker);
+                    range.collapse(true);
+                    return getUndoFocusContext(container, range, true);
+                }
+            };
+            focusContext = focusContext || operationFocus(doOperations);
+            // 等待确认时阻止交互，保留数据库控件及正文的布局占位。
+            const resumeTitleEditingExit = suspendTabTitleEditingExit(
+                focusElement?.closest(".tab-item-title")?.closest<HTMLElement>(".tab-item"));
+            const keyboard = !wasDisabled && !wasInert ? preserveMobileEditorKeyboard(element) : undefined;
+            selection.removeAllRanges();
+            element.inert = true;
+            const pending: Promise<void> = (async () => {
+                let sourceRestored = false;
+                let entriesRemoved = false;
+                let callbackArgs: Parameters<NonNullable<typeof options.callback>> | undefined;
+                const restore = () => new Promise<void>(resolve => {
+                    if (!isCurrent()) {
+                        resolve();
+                        return;
+                    }
+                    sourceRestored = true;
+                    focusContext = operationFocus(undoOperations) || focusContext;
+                    reloadProtyle(protyle, false, false, resolve, resolve);
+                });
+                try {
+                    await waitForPendingTransactions(protyle);
+                    if (!isCurrent()) throw new DOMException(window.siyuan.languages.cancel, "AbortError");
+                    const preview = await previewCollectionRemoval(doOperations, changes, referencesRemoved, isCurrent);
+                    if (!isCurrent() || preview === null) throw new DOMException(window.siyuan.languages.cancel, "AbortError");
+                    const cleanup = collectionRemovalOperations(preview.collections);
+                    entriesRemoved = cleanup.length > 0;
+                    await transaction(protyle, [...doOperations, ...cleanup], [...(undoOperations || []), ...cleanup],
+                        {...options, collectionRemovalConfirmed: true,
+                            collectionRemovalSourceVersions: preview.sourceVersions, awaitResponse: true,
+                            callback: options?.callback ? (...args) => { callbackArgs ??= args; } : undefined});
+                } catch (error) {
+                    if (isCurrent() && error.name !== "AbortError") showMessage(error.message);
+                    await restore();
+                    throw error;
+                } finally {
+                    try {
+                        if (protyle.element === element && protyle.wysiwyg.element === editor) element.inert = wasInert;
+                        if (isCurrent() && !wasDisabled && !wasInert && !protyle.disabled &&
+                            (canRestoreEditorFocus(editor) || (keyboard?.hasFocus() && editor.getClientRects().length > 0))) {
+                            const titleItem = focusTitleItemID && editor.querySelector<HTMLElement>(`.tab-item[data-node-id="${focusTitleItemID}"]`);
+                            // 标题可能在预检期间被切换、重载或转为只读，两条恢复路径共用同一许可。
+                            const canRestoreTitle = !focusTitleItemID || (titleItem && restoreTabTitleEditing(titleItem));
+                            if (canRestoreTitle && (sourceRestored || entriesRemoved || !restoreEditorFocusRange(protyle.wysiwyg.element, focusRange)) && focusContext) {
+                                protyle.wysiwyg.element.focus({preventScroll: true});
+                                restoreUndoFocus(protyle, [{action: "update", id: focusContext.undoFocusId, context: focusContext}]);
+                            }
+                        }
+                        if (isCurrent()) {
+                            content.scrollTop = scrollTop;
+                            protyle.scroll.lastScrollTop = scrollTop;
+                        }
+                        if (overflowAnchor) {
+                            content.style.setProperty("overflow-anchor", overflowAnchor, anchorPriority);
+                        } else {
+                            content.style.removeProperty("overflow-anchor");
+                        }
+                    } finally {
+                        keyboard?.release();
+                        resumeTitleEditingExit();
+                        if (pendingCollectionRemovals.get(protyle)?.promise === pending) pendingCollectionRemovals.delete(protyle);
+                    }
+                }
+                if (callbackArgs) options?.callback?.(...callbackArgs);
+            })();
+            pendingCollectionRemovals.set(protyle, {promise: pending, signature, callback: options?.callback,
+                trackedRangeInsertion: options?.trackedRangeInsertion});
+            // 编辑器事件通常不等待事务，调用方仍可通过原 Promise 识别取消或保存失败。
+            void pending.catch(() => {});
+            return pending;
+        }
+    }
     if (!protyle) {
         // 文档树中点开属性->数据库后的变更操作 & 文档树添加到数据库
         fetchPost("/api/transactions", {
@@ -2563,7 +2765,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             protyle.model.headElement.classList.remove("item--unupdate");
         }
         protyle.updated = true;
-        protyle.undo.add(doOperations, undoOperations, protyle);
+        if (protyle.lite || !options?.awaitResponse) protyle.undo.add(doOperations, undoOperations, protyle);
     }
     // 本地插入和正在编辑的块保留现有 DOM，立即补充图片文件名和提示文本。
     doOperations.forEach(operation => {
@@ -2578,14 +2780,16 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         }
         return;
     }
-    promiseTransaction({
+    const pending = promiseTransaction({
         protyle: protyle,
         doOperations: doOperations,
         undoOperations: undoOperations,
         skipSync: options?.skipSync,
         callback: options?.callback,
         templateDocTreePlanID: options?.templateDocTreePlanID,
+        collectionRemovalSourceVersions: options?.collectionRemovalSourceVersions,
         trackedRangeInsertion: options?.trackedRangeInsertion,
+        awaitResponse: options?.awaitResponse,
     });
     // 插入块后会导致高度变化，从而产生再次定位 https://github.com/siyuan-note/siyuan/issues/11798
     doOperations.find(item => {
@@ -2594,6 +2798,11 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             return true;
         }
     });
+    if (options?.awaitResponse) {
+        return pending.then(() => {
+            if (undoOperations) protyle.undo.add(doOperations, undoOperations, protyle);
+        });
+    }
 };
 
 const restoreGutterAfterFold = (protyle: IProtyle, id: string) => {

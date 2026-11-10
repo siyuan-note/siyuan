@@ -25,6 +25,7 @@ import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragov
 import {escapeHtml} from "../../util/escape";
 import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {syncDocTitleIAL} from "../../protyle/util/docTitleIAL";
+import {renderDocumentTitlePreview} from "../../protyle/header/documentTitlePreview";
 import {canBatchConvertHeadings, showHeadingBatchDialog} from "../../protyle/util/headingBatch";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
 import {waitForPendingTransactions} from "../../protyle/util/transactionQueue";
@@ -81,7 +82,7 @@ export class MobileOutline extends Model {
     <svg data-type="expandLevel" class="toolbar__icon"><use xlink:href="#iconExpandLevel"></use></svg>
 </div>
 <div class="b3-list-item fn__none" data-type="doc-title"></div>
-<div class="fn__flex-1" style="padding: 3px 0 calc(8px + env(safe-area-inset-bottom))"></div>`;
+<div class="fn__flex-1" style="padding: 3px 0 calc(8px + var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)))"></div>`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
         const showSearch = bindPanelSearch(inputElement,
             this.element.querySelector('[data-type="search"]'), () => this.setFilter(), {
@@ -637,9 +638,18 @@ export class MobileOutline extends Model {
             iconHTML = docTitleElement.firstElementChild.outerHTML;
         }
         const title = getDocDisplayName(ial.title, ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
-        docTitleElement.innerHTML = `${iconHTML}<span class="b3-list-item__text">${escapeHtml(title)}</span>${docTitleElement.querySelector(".counter")?.outerHTML || ""}`;
+        const previous = docTitleElement.querySelector<HTMLElement>(".b3-list-item__text");
+        const label = previous?.dataset.documentTitleId === this.blockId && this.blockId ? previous.outerHTML :
+            `<span class="b3-list-item__text">${escapeHtml(title)}</span>`;
+        docTitleElement.innerHTML = `${iconHTML}${label}${docTitleElement.querySelector(".counter")?.outerHTML || ""}`;
         docTitleElement.setAttribute("title", title);
         docTitleElement.classList.remove("fn__none");
+        if (this.blockId) {
+            const id = this.blockId;
+            docTitleElement.querySelector(".b3-list-item__text").classList.add("outline-document-title");
+            renderDocumentTitlePreview(docTitleElement.querySelector(".b3-list-item__text"), id,
+                this.notebookId, () => this.blockId === id);
+        }
         if (typeof count === "number" && count !== -1) {
             const counterElement = docTitleElement.querySelector(".counter") as HTMLElement;
             if (count > 0) {

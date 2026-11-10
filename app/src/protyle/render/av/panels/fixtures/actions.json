@@ -2,6 +2,8 @@
   "automations",
   "go-config",
   "go-properties",
+  "go-sub-items",
+  "go-sub-items-existing",
   "fieldVisibility",
   "go-layout",
   "goConditionalColors",

@@ -22,6 +22,18 @@ import (
 // durable source journal retains exact bytes (ciphertext for encrypted notebooks)
 // and compensates both document writes, including interrupted conversions.
 func commitDocumentConversion(source, target *parse.Tree, sourceBefore, targetBefore []byte, removeSource bool, write func(*parse.Tree) error) (err error) {
+	return commitDocumentConversionWithIO(source, target, sourceBefore, targetBefore, removeSource, false,
+		func(tree *parse.Tree, _ []byte) error { return write(tree) },
+		func(tree *parse.Tree, expected []byte) error {
+			return filesys.MutateDocumentSources(headingConversionDocument(tree), func() error {
+				return removeIndexRepairSourceIfUnchanged(filepath.Join(util.DataDir, tree.Box, tree.Path), expected)
+			})
+		})
+}
+
+// 两类转换共用持久化恢复日志；标题转换先写目标，避免源移除后尚无目标副本。
+func commitDocumentConversionWithIO(source, target *parse.Tree, sourceBefore, targetBefore []byte, removeSource, targetFirst bool,
+	write func(*parse.Tree, []byte) error, remove func(*parse.Tree, []byte) error) (err error) {
 	if source.Box == target.Box && source.Path == target.Path {
 		return errors.New("conversion source and target must differ")
 	}
@@ -66,24 +78,29 @@ func commitDocumentConversion(source, target *parse.Tree, sourceBefore, targetBe
 		return filesys.RecordTreeWrites(tree, file.Before, func(data []byte) error {
 			file.After = data
 			return j.save()
-		}, func() error { return write(tree) })
+		}, func() error { return write(tree, file.Before) })
+	}
+	if targetFirst {
+		if err = save(target, targetFile); err != nil {
+			return err
+		}
 	}
 	if removeSource {
 		sourceFile.After = nil
 		if err = j.save(); err != nil {
 			return err
 		}
-		err = filesys.MutateDocumentSources([]*treenode.BlockTree{{ID: source.ID, RootID: source.ID, BoxID: source.Box, Path: source.Path}}, func() error {
-			return removeIndexRepairSourceIfUnchanged(filepath.Join(util.DataDir, source.Box, source.Path), sourceBefore)
-		})
+		err = remove(source, sourceBefore)
 		if err != nil {
 			return err
 		}
 	} else if err = save(source, sourceFile); err != nil {
 		return err
 	}
-	if err = save(target, targetFile); err != nil {
-		return err
+	if !targetFirst {
+		if err = save(target, targetFile); err != nil {
+			return err
+		}
 	}
 	if removeSource {
 		treenode.RemoveBlockTreesByRootID(source.Box, source.ID)

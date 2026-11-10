@@ -6,7 +6,7 @@
 		"id": "20211226120349-rbkmozu",
 		"title": "在内容區塊中遨遊",
 		"type": "doc",
-		"updated": "20261024163013"
+		"updated": "20261106164550"
 	},
 	"Children": [
 		{
@@ -123,7 +123,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120415-oalx1x3",
-				"updated": "20260809232000"
+				"updated": "20261106164550"
 			},
 			"Children": [
 				{
@@ -201,6 +201,85 @@
 			]
 		},
 		{
+			"ID": "20261105154152-v8bjzso",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261105154152-v8bjzso",
+				"updated": "20261106164550"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全域導覽路徑"
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-yb81e6w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105154152-yb81e6w",
+				"updated": "20261105154152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "啟用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "全域導覽路徑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後，桌面版編輯器頂部會在目前文件及其區塊路徑前顯示筆記本和父文件，合併為同一條導覽路徑。此設定預設關閉。行動版的導覽路徑選單會顯示相同的階層。"
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-l6qe35h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105154152-l6qe35h",
+				"updated": "20261106164550"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面版點擊父文件可開啟該文件，透過筆記本或父文件旁的箭頭可選擇子文件。行動版點擊父文件會顯示子文件，選擇「打開」可開啟父文件本身；沒有子文件的文件會直接開啟。現有的區塊導覽方式保持不變。筆記本和文件項目會顯示其既有的表情或自訂圖示，子文件選單中的項目也是如此。未設定圖示或圖示無效時使用預設圖示。"
+				}
+			]
+		},
+		{
 			"ID": "20211226120415-akhb2fd",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -267,7 +346,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120415-p3ajlx2",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -476,7 +555,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120415-kqk522d",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -490,7 +569,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120415-k8yvb62",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -522,7 +601,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中設置搜索範圍），搜索結果為包含這些關鍵字的內容區塊。"
+					"Data": " 中選擇關鍵字來源），搜索結果為包含這些關鍵字的內容區塊。"
 				}
 			]
 		},
@@ -531,7 +610,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211228134547-inyam43",
-				"updated": "20260730184353"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -545,18 +624,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​：提及搜索僅會在普通文字中搜索，不會在粗體、斜體等行級元素和代碼區塊、圖表等區塊級元素中搜索，這一點和"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20211226122825-w6wxq0c",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "虛擬引用探測規則"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "是相同的。"
+					"Data": "​：提及會比對正文，以及其他文檔的標題、文檔命名和別名；文檔命中以標題預覽顯示，目前文檔自身不參與。標題與正文的比對規則一致：粗體、斜體和超連結文字可參與，行內程式碼、公式、程式碼區塊、圖表和區塊引用錨文字不參與。命名、別名是否參與比對，遵循已啟用的區塊級屬性搜尋選項；反連提及選項用於選擇關鍵字來源。"
 				}
 			]
 		}

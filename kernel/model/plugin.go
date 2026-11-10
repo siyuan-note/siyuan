@@ -5,10 +5,11 @@
 package model
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
+	"slices"
 	"strings"
 	"sync"
 
@@ -174,11 +175,30 @@ func petalsEnabled(confBazaarSnapshot *conf.Bazaar) bool {
 	return true
 }
 
-func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
+func normalizePetalNames(names []string) []string {
+	if names == nil {
+		return nil
+	}
+	ret := append([]string{}, names...)
+	slices.Sort(ret)
+	return slices.Compact(ret)
+}
+
+func loadPetalsKey(frontend string, isPublish bool, names []string) string {
+	key, _ := json.Marshal(struct {
+		Frontend  string
+		IsPublish bool
+		Names     []string
+	}{frontend, isPublish, names})
+	return "loadPetals:" + string(key)
+}
+
+func LoadPetals(frontend string, isPublish bool, names []string) (ret []*Petal) {
 	// 调用 setPetalEnabled 接口之后推送消息到所有前端实例，接着会同时调用 loadPetals 接口，合并相同类型的请求为一次执行
-	key := "loadPetals:" + frontend + ":" + strconv.FormatBool(isPublish)
+	names = normalizePetalNames(names)
+	key := loadPetalsKey(frontend, isPublish, names)
 	v, err, _ := loadPetalsFlight.Do(key, func() (any, error) {
-		return loadPetals(frontend, isPublish, false), nil
+		return loadPetals(frontend, isPublish, false, names), nil
 	})
 	if err != nil {
 		return []*Petal{}
@@ -188,7 +208,7 @@ func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 
 func LoadKernelPetals() (ret []*Petal) {
 	v, err, _ := loadPetalsFlight.Do("loadKernelPetals", func() (any, error) {
-		return loadPetals("", false, true), nil
+		return loadPetals("", false, true, nil), nil
 	})
 	if err != nil {
 		return []*Petal{}
@@ -197,9 +217,9 @@ func LoadKernelPetals() (ret []*Petal) {
 }
 
 // LoadSettingsWindowPetals 保留启用、信任、前端兼容和发布权限检查，只返回主动声明支持设置窗口的插件。
-func LoadSettingsWindowPetals(frontend string, isPublish bool) (ret []*Petal) {
+func LoadSettingsWindowPetals(frontend string, isPublish bool, names []string) (ret []*Petal) {
 	ret = []*Petal{}
-	for _, petal := range LoadPetals(frontend, isPublish) {
+	for _, petal := range LoadPetals(frontend, isPublish, names) {
 		manifest, err := bazaar.ParsePackageJSON(filepath.Join(util.DataDir, "plugins", petal.Name, "plugin.json"))
 		if err == nil && bazaar.IsValidInstalledPackage(manifest, petal.Name) && manifest.SettingsWindow {
 			copy := *petal
@@ -210,16 +230,28 @@ func LoadSettingsWindowPetals(frontend string, isPublish bool) (ret []*Petal) {
 	return
 }
 
-func loadPetals(frontend string, isPublish, isKernel bool) (ret []*Petal) {
+func loadPetals(frontend string, isPublish, isKernel bool, names []string) (ret []*Petal) {
 	ret = []*Petal{}
 
 	if !IsPetalsEnabled() {
 		return
 	}
+	if names != nil && len(names) == 0 {
+		return
+	}
+	selected := make(map[string]struct{}, len(names))
+	for _, name := range names {
+		selected[name] = struct{}{}
+	}
 
 	var petalNames []string
 	petals := getPetals()
 	for _, petal := range petals {
+		if names != nil {
+			if _, ok := selected[petal.Name]; !ok {
+				continue
+			}
+		}
 		found, version, displayName, incompatible, disabledInPublish, disallowInstall, kernelIncompatible :=
 			bazaar.ParseInstalledPlugin(petal.Name, frontend)
 		if !found {

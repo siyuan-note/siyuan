@@ -1,5 +1,5 @@
+import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
 import type {SettingTabBuilder} from "../../setting/builder";
-import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
 import {
@@ -36,6 +36,7 @@ import {openAgentInstructions} from "./aiInstructions";
 import {genDecisionCardsHtml, mountDecisionCards} from "./aiDecisionUi";
 import {genMcpOAuthHtml, mountMcpOAuth} from "./mcpOAuthUi";
 import {registerAiWebGroup} from "./aiWeb";
+import {registerAiMemoryGroup} from "./aiMemory";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -312,7 +313,7 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
         icon: "iconRefresh",
         afterMount: (root) => {
             root.querySelector("#rebuildEmbeddingIndex")?.addEventListener("click", () => {
-                confirmDialog(window.siyuan.languages.rebuildEmbeddingIndex,
+                mobileConfirmDialog(window.siyuan.languages.rebuildEmbeddingIndex,
                     window.siyuan.languages.rebuildEmbeddingIndexConfirmTip, () => {
                     fetchPost("/api/ai/reindexEmbedding", {}, () => {
                         showMessage(window.siyuan.languages.rebuildEmbeddingIndexStarted);
@@ -390,4 +391,5 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiMcpGroup(tab);
     registerAiEmbeddingGroup(tab);
     registerAiRerankGroup(tab);
+    registerAiMemoryGroup(tab);
 };

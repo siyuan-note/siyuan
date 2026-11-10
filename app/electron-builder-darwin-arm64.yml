@@ -1,3 +1,4 @@
+extends: "./electron-builder-common.yml"
 productName: "SiYuan"
 appId: "org.b3log.siyuan"
 publish: null
@@ -6,11 +7,11 @@ compression: "normal"
 copyright: "© 2020-present Yunnan Liandi Technology Co., Ltd."
 artifactName: "siyuan-${version}-${os}-arm64.${ext}"
 extraMetadata:
-  main: "electron/main.js"
+  main: "electron-dist/main.js"
 directories:
   output: "build"
 files:
-  - "electron"
+  - "electron-dist"
 afterPack: "./scripts/afterPack.js"
 beforePack: "./scripts/beforePack.js"
 extraFiles:
@@ -44,6 +45,7 @@ mac:
 extraResources:
   - from: "changelogs"
     to: "changelogs"
+    filter: ["v${version}/**"]
   - from: "stage"
     to: "stage"
     filter: ["**/*", "!ocr/runtime/**/*"]

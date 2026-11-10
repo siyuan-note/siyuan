@@ -1,9 +1,11 @@
+import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {guardTemplateHTTPRequest} from "../../../template/http";
 import {clearAVAttributeDropTarget, getAVAttributeDropTarget, getAVAttributePreviousID, getAVAttributeSort, IAVAttributeDropTarget} from "./attributePanelDrag";
 import {observeAVAttributeLayout, updateAVAttributeLayout} from "./attributePanelLayout";
 import {isAVTextType} from "./capabilities";
 import {fetchPost} from "../../../util/fetch";
 import {addCol, getColIconByType} from "./col";
-import {escapeAttr, escapeHtml} from "../../../util/escape";
+import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {cellValueIsEmpty, openAVCellIcon, popTextCell, updateCellsValue} from "./cell";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {unicode2Emoji} from "../../../emoji";
@@ -21,10 +23,10 @@ import {removeCompressURL} from "../../../util/image";
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {openAVBindBlock} from "./bindBlock";
 import {preserveAVBindingRange} from "./binding";
-import {confirmDialog} from "../../../dialog/confirmDialog";
 import {
     createEmptyAVValue,
     genAVAttributeRowHTML,
+    genAVValueHTML,
     getAVTemplateInteractiveElement,
     isAVTemplateLink
 } from "./attributeValue";
@@ -33,6 +35,7 @@ import {cloneAVCellValueSnapshot} from "./cellValue";
 import {getEditorFocusRange, restoreEditorFocusRange} from "../../util/editorFocus";
 import {getHostCapabilities} from "../../../util/hostCapabilities";
 import {getAVRichTextSafeURL, renderAVRichTextElements} from "./richText";
+import {mountRelatedAVViews, preserveRelatedAVViews, syncRelatedAVViews} from "./relatedView";
 /// #if !MOBILE
 import {openGlobalSearch} from "../../../search/util";
 import {openFileById} from "../../../editor/util";
@@ -130,14 +133,21 @@ const handleRichTextInteraction = (protyle: IProtyle, event: MouseEvent) => {
 };
 
 export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IProtyle, cb?: (element: HTMLElement) => void,
-                                  row?: { avID: string, itemID: string, valueID: string, databaseBlockID: string }) => {
+                                  row?: { avID: string, itemID: string, valueID: string, databaseBlockID: string },
+                                  lifecycle?: {owner: Element, isCurrent: () => boolean}, automaticRefresh = false) => {
     const renderID = (++attributeViewRenderID).toString();
     element.dataset.avAttributeRenderId = renderID;
-    fetchPost("/api/av/getAttributeViewKeys", row ? {id, avID: row.avID, itemID: row.itemID, valueID: row.valueID} : {id}, (response) => {
+    const owner = lifecycle?.owner || element;
+    const requestGuard = protyle.disabled || protyle.options.history?.created || protyle.options.history?.snapshot ?
+        undefined : guardTemplateHTTPRequest(() => owner.isConnected &&
+            element.dataset.avAttributeRenderId === renderID && (lifecycle?.isCurrent() ?? true), owner);
+    fetchPost("/api/av/getAttributeViewKeys", row ? {id, avID: row.avID, itemID: row.itemID, valueID: row.valueID,
+        blockID: row.databaseBlockID, automaticRefresh} : {id, automaticRefresh}, (response) => {
         if (element.dataset.avAttributeRenderId !== renderID) {
             return;
         }
         const restoreBindingRange = preserveAVBindingRange(protyle, element);
+        preserveRelatedAVViews(element);
         let html = "";
         const tables = Array.isArray(response.data) ? response.data : [];
         tables.forEach((table) => {
@@ -149,7 +159,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             let innerHTML = `<div class="custom-attr__avheader">
     <div class="block__logo block__logo--icon popover__block" style="max-width:calc(100% - 40px)" data-id='${JSON.stringify(table.blockIDs)}'>
         <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg>
-        <span class="fn__ellipsis">${table.avName || window.siyuan.languages.database}</span>
+        <span class="fn__ellipsis">${table.avName ? escapeHtmlTextAndAttr(table.avName) : window.siyuan.languages.database}</span>
     </div>
     <div class="fn__flex-1"></div>
     ${element.classList.contains("protyle-db-attr__body") ? "" : `<button type="button" data-type="toggle-panel-visibility" class="block__icon block__icon--show ariaLabel${hasHiddenFields ? "" : " fn__none"}" data-position="4west" aria-label="${window.siyuan.languages.edit}" aria-pressed="${showAll}"><svg><use xlink:href="#iconEdit"></use></svg></button>`}
@@ -392,6 +402,16 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 event.preventDefault();
             });
             element.addEventListener("click", (event) => {
+                const showAllElement = (event.target as HTMLElement).closest<HTMLElement>('[data-type="av-relation-show-all"]');
+                if (showAllElement?.parentElement.matches('.custom-attr__avvalue[data-type="relation"]')) {
+                    const cellElement = showAllElement.parentElement;
+                    const value = JSON.parse(decodeURIComponent(cellElement.dataset.cellValue)) as IAVCellValue;
+                    cellElement.dataset.relationExpanded = "true";
+                    cellElement.innerHTML = genAVValueHTML(value);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 const visibilityElement = (event.target as HTMLElement).closest<HTMLElement>('[data-type="toggle-panel-visibility"]');
                 if (visibilityElement) {
                     const databaseElement = visibilityElement.closest<HTMLElement>("[data-av-id]");
@@ -572,7 +592,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                         }];
                         const restoreEditorRange = () => restoreEditorFocusRange(protyle.wysiwyg.element,
                             editorRange);
-                        confirmDialog(window.siyuan.languages.removeAV, window.siyuan.languages.confirmDelete + "?", () => {
+                        mobileConfirmDialog(window.siyuan.languages.removeAV, window.siyuan.languages.confirmDelete + "?", () => {
                             if (protyle.disabled) {
                                 return;
                             }
@@ -637,15 +657,17 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             });
         }
         observeAVAttributeLayout(element);
+        mountRelatedAVViews(element, tables, protyle, row ? row.databaseBlockID : id, automaticRefresh);
         renderAttributeViewBacklinks(element, id, renderID, row, rendered => {
             cb?.(rendered);
+            syncRelatedAVViews(element);
             updateAVAttributeLayout(element);
         });
-    });
+    }, undefined, undefined, requestGuard?.signal).finally(() => requestGuard?.dispose());
 };
 
 const renderAttributeViewBacklinks = (element: HTMLElement, id: string, renderID: string,
-                                      row?: { avID: string, itemID: string, valueID: string },
+                                      row?: { avID: string, itemID: string, valueID: string, databaseBlockID: string },
                                       cb?: (element: HTMLElement) => void) => {
     const oldBacklinksElement = element.querySelector<HTMLElement>(".custom-attr__avbacklinks");
     const expanded = oldBacklinksElement?.dataset.expanded === "true";
@@ -654,6 +676,7 @@ const renderAttributeViewBacklinks = (element: HTMLElement, id: string, renderID
         avID: row.avID,
         itemID: row.itemID,
         valueID: row.valueID,
+        blockID: row.databaseBlockID,
     } : {id}, (response) => {
         if (element.dataset.avAttributeRenderId !== renderID) {
             return;
@@ -764,7 +787,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
             event.preventDefault();
             break;
         } else if ((isAVTextType(type) && type !== "template") &&
-            (target.querySelector(":scope > .av__celltext--template, :scope > .av__cellprimary > .av__celltext--template") ||
+            (target.querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template") ||
                 (type === "text" && target.querySelector(":scope > .av__celltext")))) {
             popTextCell(protyle, [target], type as TAVCol);
             event.stopPropagation();

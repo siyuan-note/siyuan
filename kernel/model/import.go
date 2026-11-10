@@ -33,7 +33,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	util2 "github.com/88250/lute/util"
-	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
@@ -47,7 +46,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/webp"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -435,7 +433,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	}
 	// 全部标题源通过检查后才导入表情、创建笔记本或重新分配身份。
 	for _, syPath := range syPaths {
-		data, readErr := filelock.ReadFile(syPath)
+		data, readErr := util.ReadUserFile(syPath)
 		if readErr != nil {
 			return "", readErr
 		}
@@ -454,7 +452,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	hasImportedBoxConf := filelock.IsExist(importedConfPath)
 	var importedMetadataErr error
 	if hasImportedBoxConf {
-		confData, readErr := filelock.ReadFile(importedConfPath)
+		confData, readErr := util.ReadUserFile(importedConfPath)
 		if readErr == nil {
 			importedBoxConf = conf.NewBoxConf()
 			if unmarshalErr := gulu.JSON.UnmarshalJSON(confData, importedBoxConf); unmarshalErr != nil {
@@ -475,7 +473,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	importedBoxDocPath := filepath.Join(unzipRootPath, ".siyuan", boxDocMetaName)
 	hasImportedBoxDocMeta := filelock.IsExist(importedBoxDocPath)
 	if hasImportedBoxDocMeta {
-		metaData, readErr := filelock.ReadFile(importedBoxDocPath)
+		metaData, readErr := util.ReadUserFile(importedBoxDocPath)
 		if readErr == nil {
 			meta := &boxDocMeta{}
 			if unmarshalErr := gulu.JSON.UnmarshalJSON(metaData, meta); unmarshalErr != nil {
@@ -586,7 +584,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		if err = treenode.CheckSpecJSON(data); nil != err {
 			return
 		}
-		tree, _, parseErr := dataparser.ParseJSON(data, luteEngine.ParseOptions)
+		tree, _, parseErr := treenode.ParseJSON(data, luteEngine.ParseOptions)
 		if nil != parseErr {
 			logging.LogErrorf("parse .sy [%s] failed: %s", syPath, parseErr)
 			err = parseErr
@@ -745,10 +743,11 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	storage := filepath.Join(unzipRootPath, "storage")
 	storageAvDir := filepath.Join(storage, "av")
 	avIDs := map[string]string{}
+	var avIdentityMappings map[string]map[string]string
 	renameAvPaths := map[string]string{}
 	if gulu.File.IsExist(storageAvDir) {
 		// 重新生成数据库数据
-		filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, err error) error {
+		err = filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
@@ -775,22 +774,38 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			avIDs[oldAvID] = newAvID
 			return nil
 		})
+		if err != nil {
+			return
+		}
+		// 在修改任何临时数据库前完成整包读取及校验，失败时保留原始归档。
+		importedData := map[string][]byte{}
+		for oldPath := range renameAvPaths {
+			id := strings.TrimSuffix(filepath.Base(oldPath), ".json")
+			importedData[id], err = os.ReadFile(oldPath)
+			if err != nil {
+				return
+			}
+		}
+		var remappedData map[string][]byte
+		remappedData, avIdentityMappings, err = remapImportedSubItemsDatabases(importedData, avIDs, blockIDs)
+		if err != nil {
+			return
+		}
 
 		// 重命名数据库文件
 		for oldPath, newPath := range renameAvPaths {
-			data, readErr := os.ReadFile(oldPath)
-			if nil != readErr {
-				logging.LogErrorf("read av file [%s] failed: %s", oldPath, readErr)
-				err = readErr
-				return
-			}
+			oldID := strings.TrimSuffix(filepath.Base(oldPath), ".json")
+			data := importedData[oldID]
 
 			// 将数据库文件中的 ID 替换为新的 ID
-			newData := data
-			for oldAvID, newAvID := range avIDs {
-				newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
+			newData := remappedData[oldID]
+			if newData == nil {
+				newData = data
+				for oldAvID, newAvID := range avIDs {
+					newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
+				}
+				newData = []byte(blockIDReplacer.Replace(string(newData)))
 			}
-			newData = []byte(blockIDReplacer.Replace(string(newData)))
 			newData, err = isolateImportedAttributeViewBindings(newData, importedBlockIDs, encryptedTarget)
 			if err != nil {
 				return
@@ -814,11 +829,15 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			}
 		}
 
+		// 导入来源不继承本机已有来源身份，包括相同 ID 和相同字节的覆盖。
+		if err = RevokeAllTemplateHTTPPermissions(); err != nil {
+			return
+		}
 		// 加密笔记本的 AV 定义不能拷到全局目录（明文泄漏 + 路由冲突），
 		// 需要先加密写入 <boxID>/storage/av/，后续 mirror/relation 操作才能正确路由
 		if !IsEncryptedBox(boxID) {
 			targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
-			if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
+			if copyErr := util.CopyUserFile(storageAvDir, targetStorageAvDir); nil != copyErr {
 				logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
 				err = copyErr
 				return
@@ -852,6 +871,29 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 				}
 
 				if ast.NodeAttributeView == n.Type {
+					if identities := avIdentityMappings[n.AttributeViewID]; identities != nil {
+						if encoded := n.IALAttr(av.NodeAttrContextFilter); encoded != "" {
+							if context, contextErr := av.ParseAttributeViewContextFilter(encoded); contextErr == nil && context != nil {
+								if id := identities[context.KeyID]; id != "" {
+									context.KeyID = id
+									if updated, encodeErr := context.Marshal(); encodeErr == nil {
+										n.SetIALAttr(av.NodeAttrContextFilter, updated)
+									}
+								}
+							}
+						}
+						for _, name := range []string{av.NodeAttrView, av.NodeAttrVisibleViewIDs} {
+							if existing := n.IALAttr(name); existing != "" {
+								ids := strings.Split(existing, ",")
+								for i, id := range ids {
+									if replacement := identities[id]; replacement != "" {
+										ids[i] = replacement
+									}
+								}
+								n.SetIALAttr(name, strings.Join(ids, ","))
+							}
+						}
+					}
 					n.AttributeViewID = avIDs[n.AttributeViewID]
 				}
 				if encryptedTarget {
@@ -1086,6 +1128,8 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		baseTargetPath = strings.TrimSuffix(block.Path, ".sy")
 	}
 
+	finishDocTreeChange := cache.BeginDocTreeMutation(boxID)
+	defer finishDocTreeChange()
 	targetDir := filepath.Join(util.DataDir, boxID, baseTargetPath)
 	if err = os.MkdirAll(targetDir, 0755); err != nil {
 		return
@@ -1116,7 +1160,10 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		return nil
 	})
 
-	if err = filelock.Copy(unzipRootPath, targetDir); err != nil {
+	if err = RevokeAllTemplateHTTPPermissions(); err != nil {
+		return
+	}
+	if err = util.CopyUserFile(unzipRootPath, targetDir); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", unzipRootPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return
@@ -1210,7 +1257,7 @@ func importSYAssets(unzipRootPath, boxID string) (assetPathMap map[string]string
 					return nil, relErr
 				}
 				sourceAssetPath := canonicalAssetReferencePath(path.Join("assets", filepath.ToSlash(relPath)))
-				data, readErr := filelock.ReadFile(assetFile)
+				data, readErr := util.ReadUserFile(assetFile)
 				if readErr != nil {
 					return nil, readErr
 				}
@@ -1222,7 +1269,7 @@ func importSYAssets(unzipRootPath, boxID string) (assetPathMap map[string]string
 
 				annotationPath := assetFile + ".sya"
 				if filelock.IsExist(annotationPath) {
-					annotationData, annotationReadErr := filelock.ReadFile(annotationPath)
+					annotationData, annotationReadErr := util.ReadUserFile(annotationPath)
 					if annotationReadErr != nil {
 						return nil, annotationReadErr
 					}
@@ -1259,7 +1306,7 @@ func importSYAssets(unzipRootPath, boxID string) (assetPathMap map[string]string
 		}); err != nil {
 			return nil, err
 		}
-		if err = filelock.Copy(assetsDir, dataAssets); err != nil {
+		if err = util.CopyUserFile(assetsDir, dataAssets); err != nil {
 			logging.LogErrorf("copy assets from [%s] to [%s] failed: %s", assetsDir, dataAssets, err)
 			return nil, err
 		}
@@ -1317,6 +1364,8 @@ func validateImportedNotebookIdentities(tmpDataPath string) ([]string, error) {
 }
 
 func ImportData(zipPath string) (err error) {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
@@ -1375,7 +1424,10 @@ func ImportData(zipPath string) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = filelock.Copy(tmpDataPath, util.DataDir); err != nil {
+	if err = RevokeAllTemplateHTTPPermissions(); err != nil {
+		return
+	}
+	if err = util.CopyUserFile(tmpDataPath, util.DataDir); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return
@@ -1695,7 +1747,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				var name string
 				if "" == existName {
 					baseName := filepath.Base(absolutePath)
-					data, readErr := filelock.ReadFile(absolutePath)
+					data, readErr := util.ReadUserFile(absolutePath)
 					if readErr != nil {
 						logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
 						return ast.WalkContinue
@@ -1832,7 +1884,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			var name string
 			if "" == existName {
 				baseName := filepath.Base(absolutePath)
-				data, readErr := filelock.ReadFile(absolutePath)
+				data, readErr := util.ReadUserFile(absolutePath)
 				if readErr != nil {
 					logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
 					return ast.WalkContinue
@@ -1958,7 +2010,7 @@ func parseStdMd(markdown []byte, footnotes bool) (ret *parse.Tree, yfmRootID, yf
 	if first := ret.Root.FirstChild; first != nil && first.Type == ast.NodeYamlFrontMatter {
 		attrs := map[string]any{}
 		if content := first.ChildByType(ast.NodeYamlFrontMatterContent); content != nil {
-			if err := yaml.Unmarshal(content.Tokens, &attrs); err != nil {
+			if err := loadFrontMatter(content.Tokens, &attrs); err != nil {
 				// 无效的元数据按普通 Markdown 解析，保留开头分隔线之间的正文。
 				luteEngine.SetYamlFrontMatter(false)
 				ret = parse.Parse("", markdown, luteEngine.ParseOptions)

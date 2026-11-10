@@ -5,7 +5,7 @@ import {
     getEditorRange,
 } from "../util/selection";
 import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {normalizeDocumentTitle, truncateDocumentTitle, validateName} from "../../editor/rename";
 import {MenuItem} from "../../menus/Menu";
 import {openFileAttr,} from "../../menus/commonMenuItem";
@@ -32,6 +32,14 @@ import {getParentDocumentID} from "../util/parentDocument";
 import {getTextSiyuanFromClipboardData} from "../util/clipboardData";
 import {enterDocumentFromTitle} from "./titleEnter";
 import {setTitleAutoDirection} from "../render/autoDirection";
+import {DocumentTitleEditor} from "./documentTitleEditor";
+import {renderDocumentTitlePreview} from "./documentTitlePreview";
+import type {DocumentTitleEditorValue} from "./documentTitleEditor";
+import {waitForPendingTransactions} from "../util/transactionQueue";
+/// #if MOBILE
+import {updateMobileDocumentTitle} from "../../mobile/util/mobileDocumentTitle";
+import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
+/// #endif
 
 export class Title {
     public element: HTMLElement;
@@ -39,6 +47,13 @@ export class Title {
     private timeout: number;
     private pendingRename?: () => void;
     private composing = false;
+    private richEditor?: DocumentTitleEditor;
+    private plainEditElement?: HTMLElement;
+    private sourceLoading?: Promise<void>;
+    private sourceRequest = 0;
+    private destroyed = false;
+    private summary = "";
+    private mobileInlineElement?: HTMLElement;
 
     constructor(private protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -78,6 +93,7 @@ export class Title {
             });
             this.editElement.addEventListener("click", () => {
                 protyle.toolbar?.element.classList.add("fn__none");
+                void this.openEditor().catch(error => console.error(error));
             });
             this.editElement.addEventListener("input", (event: InputEvent) => {
                 if (event.isComposing) {
@@ -345,16 +361,19 @@ export class Title {
     }
 
     private rename(protyle: IProtyle) {
+        if (this.needsSourceEditor()) {
+            return false;
+        }
         clearTimeout(this.timeout);
         this.pendingRename = undefined;
-        if (!validateName(this.editElement.textContent, this.editElement, true)) {
+        if (!validateName(this.editElement.textContent, this.editElement)) {
             const original = this.editElement.textContent;
             // 字数过长会导致滚动
             const offset = getSelectionOffset(this.editElement);
             this.setTitle(truncateDocumentTitle(this.editElement.textContent));
             focusByOffset(this.editElement, offset.start, offset.end);
             if (this.editElement.textContent === original ||
-                !validateName(this.editElement.textContent, this.editElement, true)) {
+                !validateName(this.editElement.textContent, this.editElement)) {
                 return false;
             }
         }
@@ -378,6 +397,9 @@ export class Title {
     }
 
     public flushPendingInput() {
+        if (this.richEditor) {
+            return this.richEditor.flush();
+        }
         if (this.composing) {
             this.rename(this.protyle);
         }
@@ -394,6 +416,12 @@ export class Title {
     }
 
     public setTitle(title: string, empty = false) {
+        this.summary = empty ? "" : title;
+        if (this.richEditor) {
+            this.setSummary(title, empty);
+            void this.richEditor.refresh().catch(error => console.error(error));
+            return;
+        }
         /// #if MOBILE
         if (this.editElement) {
             if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {
@@ -404,16 +432,263 @@ export class Title {
             if (nbsp2space(title) !== nbsp2space(inputElement.value)) {
                 inputElement.value = empty ? "" : title;
             }
-            document.getElementById("toolbarNameReadonly").textContent = inputElement.value;
+            updateMobileDocumentTitle(this.protyle);
         }
         /// #else
         if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {
             this.editElement.textContent = empty ? "" : title;
         }
         /// #endif
+        if (this.element && this.element.dataset.nodeId === this.protyle.block?.rootID) {
+            void this.loadSource().catch(error => console.error(error));
+        }
+    }
+
+    private setSummary(title: string, empty: boolean, value?: DocumentTitleEditorValue) {
+        this.summary = empty ? "" : title;
+        if (this.protyle.model?.parent) {
+            this.protyle.model.parent.updateTitle(getDocDisplayName(title, empty));
+            if (value) {
+                const id = this.protyle.block.rootID;
+                const notebook = this.protyle.notebookId;
+                const tab = this.protyle.model.parent;
+                renderDocumentTitlePreview(tab.headElement.querySelector(".item__text"), id, notebook,
+                    () => this.protyle.block.rootID === id && this.protyle.notebookId === notebook && !this.destroyed,
+                    {...value, format: value.format || "inline-ast"});
+            }
+        }
+        /// #if MOBILE
+        if (window.siyuan.mobile.editor?.protyle === this.protyle) {
+            const input = document.getElementById("toolbarName") as HTMLInputElement;
+            input.value = empty ? "" : title;
+            updateMobileDocumentTitle(this.protyle);
+        }
+        /// #endif
+    }
+
+    public getText() {
+        return this.richEditor ? this.summary : this.editElement?.textContent || this.summary;
+    }
+
+    public isUploading() {
+        return this.richEditor?.fragment.protyle.upload?.isUploading || false;
+    }
+
+    public mountEditorOnly(container: HTMLElement) {
+        const input = this.richEditor?.fragment.protyle.element || this.editElement;
+        if (!input) return;
+        if (input.parentElement !== container) container.appendChild(input);
+        const top = this.element.parentElement;
+        this.element.remove();
+        if (top?.classList.contains("protyle-top") && !top.childElementCount) top.remove();
+    }
+
+    public prepareForDocumentSwitch(rootID: string) {
+        const editor = this.richEditor;
+        if (!editor || !rootID || rootID === this.element.dataset.nodeId) {
+            return;
+        }
+        return (async () => {
+            await editor.flush();
+            await this.protyle.wysiwyg.flushPendingInput();
+            await waitForPendingTransactions(this.protyle);
+            if (this.destroyed || this.richEditor !== editor) {
+                throw new Error(window.siyuan.languages.settingsPendingSaveError);
+            }
+            // 正文事务排空期间仍可继续输入，交接前再次确认标题源。
+            await editor.flush();
+        })();
+    }
+
+    private async loadSource() {
+        const id = this.protyle.block.rootID;
+        if (this.richEditor || !id || !this.editElement ||
+            this.destroyed) {
+            return;
+        }
+        if (this.sourceLoading) {
+            return this.sourceLoading;
+        }
+        const request = ++this.sourceRequest;
+        // 完整源到达之前禁止旧纯文本监听器保存，避免覆盖尚未读取的行级内容。
+        this.editElement.contentEditable = "false";
+        this.sourceLoading = (async () => {
+            const response = await fetchSyncPost("/api/block/getDocTitle", {id, notebook: this.protyle.notebookId});
+            if (response.code !== 0 || !response.data || request !== this.sourceRequest || this.destroyed ||
+                this.protyle.block.rootID !== id) {
+                return;
+            }
+            this.cancelPendingInput();
+            const host = document.createElement("div");
+            this.plainEditElement = this.editElement;
+            const selection = getSelection();
+            const range = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+            const offsets = range && this.editElement.contains(range.commonAncestorContainer) ?
+                getSelectionOffset(this.editElement, undefined, range) : undefined;
+            this.editElement.replaceWith(host);
+            this.richEditor = new DocumentTitleEditor(this.protyle, host, response.data,
+                element => {
+                    this.editElement = element;
+                    setTitleAutoDirection(element, window.siyuan.config.editor.autoDirection);
+                }, (text, empty, value) => this.setSummary(text, empty, value));
+            this.setSummary(response.data.text, response.data.empty, response.data);
+            if (offsets) {
+                focusByOffset(this.editElement, offsets.start, offsets.end);
+            }
+        })();
+        try {
+            await this.sourceLoading;
+        } finally {
+            if (request === this.sourceRequest) {
+                this.sourceLoading = undefined;
+            }
+        }
+    }
+
+    public async refresh() {
+        if (this.richEditor) {
+            return this.richEditor.refresh();
+        }
+        return this.loadSource();
+    }
+
+    public setReadonly(readonly: boolean) {
+        if (this.richEditor) {
+            this.richEditor.setReadonly(readonly);
+            return;
+        }
+        if (this.editElement) {
+            this.editElement.setAttribute("contenteditable", String(!readonly && !this.needsSourceEditor()));
+            this.editElement.style.userSelect = readonly ? "text" : "";
+        }
+    }
+
+    private needsSourceEditor() {
+        return !this.richEditor && !!this.protyle.block?.rootID;
+    }
+
+    public async openEditor(isValid?: () => boolean) {
+        return this.openEditorWithSelection(isValid);
+    }
+
+    private async openEditorWithSelection(isValid?: () => boolean, selectAll = false) {
+        const id = this.protyle.block.rootID;
+        const notebook = this.protyle.notebookId;
+        let sourceRequest = this.sourceRequest;
+        const canOpen = () => !this.destroyed && !this.protyle.disabled && !window.siyuan.isPublish &&
+            /// #if MOBILE
+            (window.siyuan.mobile.editor?.protyle !== this.protyle || this.protyle.preview.element.classList.contains("fn__none")) &&
+            /// #endif
+            !window.siyuan.config.readonly && !this.protyle.options.history?.created &&
+            !this.protyle.options.history?.snapshot && this.protyle.element.isConnected &&
+            this.protyle.block.rootID === id && this.protyle.notebookId === notebook &&
+            this.sourceRequest === sourceRequest && (!isValid || isValid());
+        if (!canOpen()) {
+            return;
+        }
+        if (!this.editElement) {
+            /// #if MOBILE
+            if (window.siyuan.mobile.editor?.protyle === this.protyle) {
+                const label = document.getElementById("toolbarNameReadonly");
+                if (!label) return;
+                const container = document.createElement("div");
+                container.className = "mobile-document-title-editor";
+                container.dataset.documentTitleId = id;
+                container.dataset.notebookId = notebook;
+                const editable = document.createElement("div");
+                editable.textContent = this.summary;
+                container.appendChild(editable);
+                label.replaceChildren(container);
+                label.removeAttribute("role");
+                label.removeAttribute("tabindex");
+                this.mobileInlineElement = container;
+                this.editElement = editable;
+            }
+            /// #endif
+        }
+        if (!this.editElement) {
+            const {openDocumentTitleDialog} = await import("./documentTitleDialog");
+            if (canOpen()) {
+                openDocumentTitleDialog({id, notebook, app: this.protyle.app});
+            }
+            return;
+        }
+        const loading = this.loadSource();
+        sourceRequest = this.sourceRequest;
+        await loading;
+        if (canOpen()) {
+            this.richEditor?.focus();
+            /// #if MOBILE
+            if (this.mobileInlineElement && this.editElement) {
+                this.editElement.focus({preventScroll: true});
+                callMobileAppShowKeyboard();
+            }
+            /// #endif
+            if (selectAll && this.editElement) {
+                this.editElement.focus();
+                const range = this.editElement.ownerDocument.createRange();
+                range.selectNodeContents(this.editElement);
+                focusByRange(range);
+            }
+        }
+    }
+
+    private async selectNewTitle() {
+        const id = this.protyle.block.rootID;
+        const ownerDocument = this.editElement.ownerDocument;
+        const activeElement = ownerDocument.activeElement;
+        let cancelled = false;
+        const cancelOutside = (event: Event) => {
+            if (!this.element.contains(event.target as Node)) {
+                cancelled = true;
+            }
+        };
+        ownerDocument.addEventListener("pointerdown", cancelOutside, true);
+        ownerDocument.addEventListener("beforeinput", cancelOutside, true);
+        try {
+            // 新建文档的正文启用与标题源读取分别完成，不能在只读的旧标题节点上定位。
+            await this.loadSource();
+            if (!this.richEditor) {
+                return;
+            }
+            await this.openEditorWithSelection(() => !cancelled && this.protyle.block.rootID === id &&
+                this.element.getClientRects().length > 0 &&
+                (ownerDocument.activeElement === activeElement || this.element.contains(ownerDocument.activeElement) ||
+                    !activeElement?.isConnected && ownerDocument.activeElement === ownerDocument.body), true);
+        } finally {
+            ownerDocument.removeEventListener("pointerdown", cancelOutside, true);
+            ownerDocument.removeEventListener("beforeinput", cancelOutside, true);
+        }
+    }
+
+    public destroy() {
+        this.destroyed = true;
+        this.sourceRequest++;
+        this.cancelPendingInput();
+        this.richEditor?.destroy();
+        this.richEditor = undefined;
+        this.mobileInlineElement?.remove();
+        this.mobileInlineElement = undefined;
     }
 
     public render(protyle: IProtyle, response: IWebSocketData) {
+        if (this.element.dataset.nodeId && this.element.dataset.nodeId !== protyle.block.rootID) {
+            this.sourceRequest++;
+            this.sourceLoading = undefined;
+            if (this.richEditor) {
+                const host = this.richEditor.fragment.protyle.element;
+                this.richEditor.destroy();
+                this.richEditor = undefined;
+                if (this.plainEditElement) host.replaceWith(this.plainEditElement);
+                this.editElement = this.plainEditElement;
+            }
+            if (this.mobileInlineElement) {
+                this.mobileInlineElement.remove();
+                this.mobileInlineElement = undefined;
+                this.editElement = undefined;
+            }
+            this.plainEditElement = undefined;
+        }
         if (protyle.options.render.hideTitleOnZoom) {
             if (protyle.block.showAll) {
                 this.element.classList.add("fn__none");
@@ -458,15 +733,14 @@ export class Title {
             }
             nodeAttrHTML += `<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg>${avTitle}</div>`;
         }
-        this.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
+        this.element.querySelector(":scope > .protyle-attr").innerHTML = nodeAttrHTML;
         if (response.data.refCount !== 0) {
-            this.element.querySelector(".protyle-attr").insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block">${response.data.refCount}</div>`);
+            this.element.querySelector(":scope > .protyle-attr").insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block">${response.data.refCount}</div>`);
         }
         // 存在设置新建文档名模板，不能使用 Untitled 进行判断，https://ld246.com/article/1649301009888
-        if (this.editElement && Date.now() - dayjs(response.data.id.split("-")[0]).toDate().getTime() < 2000) {
-            const range = this.editElement.ownerDocument.createRange();
-            range.selectNodeContents(this.editElement);
-            focusByRange(range);
+        if (this.editElement && (protyle.block.action?.includes(Constants.CB_GET_OPENNEW) ||
+            Date.now() - dayjs(response.data.id.split("-")[0]).toDate().getTime() < 2000)) {
+            void this.selectNewTitle().catch(error => console.error(error));
         }
     }
 }

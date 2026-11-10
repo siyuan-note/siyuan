@@ -9,14 +9,15 @@ import {createSourceFile, isClassDeclaration, isMethodDeclaration, ScriptTarget,
 
 const browserCases = async (source: string, hintSource: string) => {
     const check: typeof assert = require("node:assert/strict");
-    const {mount, render, paddingElement} = new Function("getFrequentSlashItems", "getSlashEntryKey", "escapeAttr", source + hintSource +
+    let android = false;
+    const {mount, render, paddingElement} = new Function("getFrequentSlashItems", "getSlashEntryKey", "escapeAttr", "isInAndroid", source + hintSource +
         "\nreturn {mount: mountLiteSlashMenu, render: Hint.prototype.getHTMLByData, paddingElement: getMobileToolbarPaddingElement};")(
-        (): IHintData[] => [], (item: {entryKey?: string}) => item.entryKey || "", (value: string) => value) as {
+        (): IHintData[] => [], (item: {entryKey?: string}) => item.entryKey || "", (value: string) => value, () => android) as {
         mount: typeof import("./liteSlashMenu").mountLiteSlashMenu,
         render: (data: IHintData[]) => string,
         paddingElement: typeof import("../../protyle/lite/mobileToolbar").getMobileToolbarPaddingElement,
     };
-    window.siyuan = {languages: {emptyContent: "Empty"}} as unknown as typeof window.siyuan;
+    window.siyuan = {languages: {emptyContent: "Empty", insertImage: "Image", insertPhoto: "Photo"}} as unknown as typeof window.siyuan;
     const element = document.createElement("div");
     element.className = "protyle-hint fn__none";
     document.body.appendChild(element);
@@ -51,6 +52,26 @@ const browserCases = async (source: string, hintSource: string) => {
         {value: "", html: "separator"}];
     const provider = {key: "/", hint: (): IHintData[] => items};
     const protyle = {hint, options: {hint: {extend: [provider]}}} as unknown as IProtyle;
+    const upload = {id: "insertAsset", entryKey: "insertAsset", value: "upload", html: itemHTML("File") +
+        '<input class="b3-form__upload" type="file" multiple accept="*/*">'};
+    for (android of [false, true]) {
+        provider.hint = () => [upload];
+        const restore = mount(protyle, panel);
+        const inputs = panel.querySelectorAll<HTMLInputElement>('input[type="file"]');
+        check.equal(inputs.length, android ? 3 : 1);
+        if (android) {
+            check.equal(inputs[0].accept, "image/*,application/x-siyuan-image-picker");
+            check.equal(inputs[0].dataset.nativePhotos, "true");
+            check.equal(inputs[1].getAttribute("capture"), "user");
+            check.equal(inputs[1].accept, "image/*");
+            check.equal(inputs[2].accept, "*/*");
+            check.deepEqual(Array.from(panel.querySelectorAll("button"), button => button.dataset.slashEntryKey),
+                ["insertAsset", "insertAsset", "insertAsset"]);
+        }
+        restore();
+    }
+    android = false;
+    provider.hint = () => items;
     let unmount = mount(protyle, panel);
     check.equal(panel.querySelectorAll("button.keyboard__slash-item[data-value]").length, 3);
     check.equal(panel.querySelectorAll(".keyboard__slash-block").length, 2);
@@ -162,7 +183,7 @@ test("mobile slash panel retains synchronous and asynchronous candidates and rel
 }, async () => {
     const source = transpileModule((readFileSync(path.join(__dirname, "liteSlashMenu.ts"), "utf8") + "\n" +
         readFileSync(path.join(__dirname, "../../protyle/lite/mobileToolbar.ts"), "utf8"))
-        .replace(/^import type .*;\n/gm, "").replace(/^export /gm, ""),
+        .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""),
     {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const hintFile = createSourceFile("hint.ts", readFileSync(path.join(__dirname, "../../protyle/hint/index.ts"), "utf8"),
         ScriptTarget.Latest, true);

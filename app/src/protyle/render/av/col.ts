@@ -1,3 +1,8 @@
+import {MobileDialog} from "../../../dialog/mobileDialog";
+import {prepareAVColumnWindow} from "./columnWindow";
+import {insertAVTableColumn} from "./columnPresentation";
+import {getTablePinIndex} from "./groupTableVirtual";
+import {bindTemplateHTTPPermission, templateHTTPPermissionHTML} from "../../../template/httpPermission";
 import {hasAVCapability, isAVReadonlyType, isAVSelectType, isAVTimestampType} from "./capabilities";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
@@ -12,6 +17,7 @@ import {getPropertiesHTML} from "./panels/properties";
 import {getLabelByNumberFormat} from "./number";
 import {getDefaultDateFormat, getLabelByDateFormat} from "./dateFormat";
 import {bindDateCalendarMenu} from "./dateCalendarMenu";
+import {bindRelatedViewConfig, getRelatedViewConfigHTML} from "./relatedViewConfig";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
@@ -21,7 +27,6 @@ import {Constants} from "../../../constants";
 import dayjs from "dayjs";
 import {setPosition} from "../../../util/setPosition";
 import {duplicateNameAddOne, isMobile} from "../../../util/functions";
-import {Dialog} from "../../../dialog";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {getFieldsByData} from "./view";
 import {hasClosestByClassName} from "../../util/hasClosest";
@@ -119,6 +124,8 @@ export const getEditHTML = (options: {
             return true;
         }
     });
+    const protectedSubItem = options.data.subItems?.enabled &&
+        [options.data.subItems.parentKeyID, options.data.subItems.childrenKeyID].includes(options.colId);
     let html = `<button class="b3-menu__item" data-type="nobg" data-col-id="${options.colId}">
     <span class="block__icon block__icon--menu-back${options.isCustomAttr ? " fn__none" : ""}" data-type="go-properties">
         <svg><use xlink:href="#iconLeft"></use></svg>
@@ -142,7 +149,7 @@ export const getEditHTML = (options: {
         <div class="fn__hr--small"></div>
     </div>
 </button>
-<button class="b3-menu__item" data-type="goUpdateColType" ${colData.type === "block" ? "disabled" : ""}>
+<button class="b3-menu__item" data-type="goUpdateColType" ${colData.type === "block" || protectedSubItem ? "disabled" : ""}>
     <span class="b3-menu__label">${window.siyuan.languages.type}</span>
     <span class="fn__space"></span>
     <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>
@@ -172,11 +179,11 @@ export const getEditHTML = (options: {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
 <button class="b3-menu__item" data-type="nobg">
     <textarea spellcheck="false" rows="${Math.min(colData.template.split("\n").length, 8)}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${escapeHtml(colData.template)}</textarea>
-</button>`;
+</button>${templateHTTPPermissionHTML("template")}`;
     } else if (colData.type === "relation") {
         const isSelf = colData.relation?.avID === options.data.id;
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
-<button class="b3-menu__item" data-type="goSearchAV" data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
+<button class="b3-menu__item" data-type="goSearchAV" ${protectedSubItem ? "disabled" : ""} data-av-id="${colData.relation?.avID || ""}" data-old-value='${JSON.stringify(colData.relation || {})}'>
     <span class="b3-menu__label">${window.siyuan.languages.relatedTo}</span>
     <span class="b3-menu__accelerator">${isSelf ? window.siyuan.languages.thisDatabase : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -189,14 +196,14 @@ export const getEditHTML = (options: {
     <span class="fn__flex-center">${window.siyuan.languages.backRelation}</span>
     <svg class="b3-menu__icon b3-menu__icon--small fn__none"><use xlink:href="#iconHelp"></use></svg>
     <span class="fn__space fn__flex-1"></span>
-    <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${colData.relation?.isTwoWay ? "checked" : ""}>
+    <input data-type="backRelation" type="checkbox" class="b3-switch b3-switch--menu" ${protectedSubItem ? "disabled" : ""} ${colData.relation?.isTwoWay ? "checked" : ""}>
 </label>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
     <input data-old-value="" data-type="colName" style="margin: 8px 0 4px" class="b3-text-field fn__block" placeholder="${escapeAttr(options.data.name)} ${escapeAttr(colData.name)}">
 </div>
 <div class="b3-menu__item fn__flex-column fn__none" data-type="nobg">
     <button style="margin: 4px 0 8px;" class="b3-button fn__block" data-type="updateRelation">${window.siyuan.languages.confirm}</button>
-    </div>`;
+    </div>${getRelatedViewConfigHTML(colData, options.protyle)}`;
     } else if (colData.type === "rollup") {
         html += '<button class="b3-menu__separator" data-id="separator_2"></button>' +
             getRollupHTML({data: options.data, colData});
@@ -236,7 +243,7 @@ export const getEditHTML = (options: {
         html += `<button class="b3-menu__separator" data-id="separator_render_template"></button>
 <button class="b3-menu__item" data-type="nobg">
     <textarea spellcheck="false" rows="${Math.min(renderTemplate.split("\n").length, 8)}" placeholder="${window.siyuan.languages.template}" data-type="updateRenderTemplate" style="margin: 4px 0" class="fn__block b3-text-field">${escapeHtml(renderTemplate)}</textarea>
-</button>`;
+</button>${templateHTTPPermissionHTML("renderTemplate")}`;
     }
     html += `<button class="b3-menu__separator" data-id="separator_3"></button>
 <label class="b3-menu__item">
@@ -260,10 +267,13 @@ export const getEditHTML = (options: {
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.duplicateCopy}</span>
 </button>
-<button class="b3-menu__item  b3-menu__item--warning" data-type="removeCol">
+<button class="b3-menu__item  b3-menu__item--warning" data-type="removeCol" ${protectedSubItem ? "disabled" : ""}>
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
 </button>`;
+    }
+    if (protectedSubItem) {
+        html += `<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label ft__secondary">${window.siyuan.languages.avSubItemsProtectedTip}</span></div>`;
     }
     return `<div class="b3-menu__items">
     ${html}
@@ -307,6 +317,12 @@ export const bindEditEvent = (options: {
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
     bindDateCalendarMenu(options.protyle, avID, colData, options.menuElement);
+    if (colData.type === "relation") {
+        void bindRelatedViewConfig(options.protyle, avID, colData, options.menuElement, options.blockID);
+    }
+    (["template", "renderTemplate"] as const).forEach(slot => {
+        bindTemplateHTTPPermission(options.menuElement, {kind: "av", avID, keyID: colId, slot});
+    });
     const visibilityElement = options.menuElement.querySelector('[data-type="attributePanelVisibility"]');
     if (visibilityElement) {
         const choices: Array<[IAVColumn["attributePanelVisibility"], string]> = [
@@ -764,7 +780,7 @@ export const getColIconByType = (type: TAVCol) => {
     }
 };
 
-const addAttrViewColAnimation = (options: {
+export const addAttrViewColAnimation = (options: {
     blockElement: Element,
     protyle: IProtyle,
     type: TAVCol,
@@ -782,6 +798,16 @@ const addAttrViewColAnimation = (options: {
     const colData = options.data ? getFieldsByData(options.data).find(item => item.id === options.id) : undefined;
     const dateFormat = options.dateFormat ?? colData?.dateFormat ?? getDefaultDateFormat(options.type);
     const insertTableColumn = (blockElement: Element) => {
+        prepareAVColumnWindow(blockElement as HTMLElement);
+        const data = getAVData(blockElement as HTMLElement);
+        if (data && isTableLikeView(data.viewType)) {
+            const column = {...colData, id: options.id, name: options.name, type: options.type,
+                icon: options.icon || "", dateFormat, width: "200px", wrap: false, hidden: false, pin: false} as IAVColumn;
+            insertAVTableColumn(data.view as IAVTable, column, options.previousID, rowID => ({
+                id: "", color: "", bgColor: "", valueType: options.type,
+                value: createEmptyAVValue(options.id, options.type, rowID),
+            }));
+        }
         blockElement.querySelectorAll(".av__row").forEach((item) => {
             let previousElement;
             if (options.previousID) {
@@ -796,18 +822,27 @@ const addAttrViewColAnimation = (options: {
             }
             let html = "";
             if (item.classList.contains("av__row--header")) {
-                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${escapeAttr(options.icon || "")}" data-col-id="${options.id}" data-dtype="${options.type}" data-date-format="${dateFormat}" data-wrap="false" data-align="" style="width: 200px;">
+                html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${escapeAttr(options.icon || "")}" data-col-id="${escapeAttr(options.id)}" data-dtype="${escapeAttr(options.type)}" data-date-format="${escapeAttr(dateFormat)}" data-wrap="false" data-align="" style="width: 200px;">
     ${options.icon ? unicode2Emoji(options.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>`}
-    <span class="av__celltext fn__flex-1">${options.name}</span>
+    <span class="av__celltext fn__flex-1">${escapeHtml(options.name)}</span>
     <div class="av__widthdrag"></div>
 </div>`;
             } else {
                 const value = genCellValue(options.type, null);
-                html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${options.id}"
-data-wrap="false" data-dtype="${options.type}" data-date-format="${dateFormat}" data-align="" style="width: 200px">${renderCell(value,
+                html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${escapeAttr(options.id)}"
+data-wrap="false" data-dtype="${escapeAttr(options.type)}" data-date-format="${escapeAttr(dateFormat)}" data-align="" style="width: 200px">${renderCell(value,
                     parseInt(item.getAttribute("data-index")) || 0)}</div>`;
             }
-            previousElement.insertAdjacentHTML("afterend", html);
+            const sticky = previousElement.parentElement;
+            if (sticky.classList.contains("av__colsticky") && sticky.lastElementChild === previousElement) {
+                sticky.insertAdjacentHTML("afterend", html);
+            } else {
+                previousElement.insertAdjacentHTML("afterend", html);
+            }
+            if (data && item.classList.contains("av__row--header")) {
+                const icons = item.querySelector<HTMLElement>(":scope > .block__icons");
+                if (icons) icons.dataset.pinindex = getTablePinIndex(data.view as IAVTable).toString();
+            }
         });
     };
     if (options.blockElement.classList.contains("av")) {
@@ -1470,6 +1505,9 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             id: "delete",
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
+            disabled: Boolean(getAVData(blockElement as HTMLElement)?.subItems?.enabled &&
+                [getAVData(blockElement as HTMLElement).subItems.parentKeyID,
+                    getAVData(blockElement as HTMLElement).subItems.childrenKeyID].includes(colId)),
             async click() {
                 if (type === "relation") {
                     const response = await fetchSyncPost("/api/av/getAttributeView", {id: avID});
@@ -1484,7 +1522,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         if (relResponse.code !== 0) {
                             return;
                         }
-                        const dialog = new Dialog({
+                        const dialog = new MobileDialog({
                             title: window.siyuan.languages.removeColConfirm,
                             content: `<div class="b3-dialog__content">
     ${window.siyuan.languages.confirmRemoveRelationField
@@ -1542,7 +1580,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                 target = target.parentElement;
                             }
                         });
-                        dialog.element.querySelector("button").focus();
+                        dialog.focusWhenReady(() => dialog.element.querySelector("button"));
                         dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
                         return;
                     }

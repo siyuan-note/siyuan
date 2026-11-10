@@ -1,9 +1,11 @@
+import {fetchStartupRead} from "./startupRead";
+
 export const loadLanguages = async (lang: string, version: string, onLoaded: (languages: IObject) => void,
                                     onError?: (error: unknown) => void): Promise<void> => {
     const url = `/appearance/langs/${lang}.json?v=${version}`;
     let languages: IObject;
     try {
-        const response = await fetch(url, {cache: "no-store"});
+        const response = await fetchStartupRead(url, {cache: "no-store"});
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }

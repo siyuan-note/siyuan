@@ -35,6 +35,7 @@ export interface IPluginLifecycleAdapter<TData, TPlugin> {
     uninstall(plugin: TPlugin): Promise<void> | void;
     markDisposed(plugin: TPlugin): void;
     dispose(plugin: TPlugin, uninstall: boolean): void;
+    disposeMissingInstance?(name: string): void;
     onError(name: string, hook: TPluginLifecycleHook, error: unknown): void;
 }
 
@@ -72,6 +73,7 @@ interface IPluginLifecycleRecord<TData, TPlugin> {
     latestStructuralKind?: TPluginStructuralTaskKind;
     interrupt: IPluginLifecycleInterrupt;
     removalDeadline?: number;
+    removalDeadlineReached?: boolean;
 }
 
 export interface IPluginLifecycleOptions {
@@ -482,14 +484,22 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         const plugin = record.instance;
         if (!plugin) {
             record.state = "absent";
+            if (uninstall) {
+                try {
+                    this.adapter.disposeMissingInstance?.(record.name);
+                } catch (error) {
+                    this.adapter.onError(record.name, "dispose", error);
+                }
+                this.markPendingUninstallsHandled(record, task);
+            }
             return;
         }
         // 加载阶段收到的拆除请求与后续拆除钩子共用首次请求建立的超时预算。
         // Promise 无法取消；预算耗尽后仍尽力调用后续钩子，但不再为它们追加等待时间。
         const deadline = record.removalDeadline ?? this.now() + this.teardownTimeout;
-        let deadlineReached = false;
+        let deadlineReached = record.removalDeadlineReached === true;
         record.state = "unloading";
-        if (!await this.runTeardownHook(record.name, "onunload", () => this.adapter.onunload(plugin), deadline)) {
+        if (!await this.runTeardownHook(record.name, "onunload", () => this.adapter.onunload(plugin), deadline, deadlineReached)) {
             deadlineReached = true;
             this.reportTimeout(record.name, "onunload");
         }
@@ -561,6 +571,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
                         return;
                     }
                     settled = true;
+                    record.removalDeadlineReached = true;
                     this.reportTimeout(record.name, hook);
                     resolve(false);
                 }, remaining);
@@ -633,6 +644,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     private resetInterrupt(record: IPluginLifecycleRecord<TData, TPlugin>) {
         record.interrupt = createInterrupt();
         record.removalDeadline = undefined;
+        record.removalDeadlineReached = false;
     }
 
     private hasPendingTeardown(record: IPluginLifecycleRecord<TData, TPlugin>) {

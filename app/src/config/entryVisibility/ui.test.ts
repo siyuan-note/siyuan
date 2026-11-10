@@ -4,10 +4,32 @@ import {resolve} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
-import {entryCatalog, TOP_BAR_ROOT_PATH} from "./catalog";
+import {entryCatalog, TOP_BAR_ROOT_PATH, BREADCRUMB_ROOT_PATH} from "./catalog";
 import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import * as dockOrder from "./dockOrder";
 import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
+
+test("entry profile cards show Full first without changing the active saved profile", () => {
+    const code = transpileModule(readFileSync("src/config/entryVisibility/ui.ts", "utf8") +
+        "\nexports.render = renderProfileCards;", {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    for (const active of ["full", "simple", "custom"]) {
+        const config = {active, profiles: [{id: "custom", name: "Custom", entries: {}, orders: {}}]};
+        const original = JSON.stringify(config);
+        const container = {innerHTML: ""};
+        const exports = {} as {render: (root: unknown) => void};
+        runInNewContext(code, {exports, window: {siyuan: {languages: {}, config: {appearance: {entryVisibility: config}}}},
+            require: () => ({ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple",
+                escapeAttr: (text: string) => text, escapeHtml: (text: string) => text,
+                getHostCapabilities: () => ({importExport: false}), DOCK_ORDER_SCOPES_BY_SIDE: {}})});
+        exports.render({querySelector: () => container});
+        assert.deepEqual(Array.from(container.innerHTML.matchAll(/data-profile-id="([^"]+)"/g), match => match[1]),
+            ["full", "simple", "custom"]);
+        assert.equal(container.innerHTML.match(/b3-card b3-card--current" data-profile-id="([^"]+)"/)[1], active);
+        assert.equal(JSON.stringify(config), original);
+    }
+});
 
 test("entry settings show exit only on native tablets without changing the persisted catalog", () => {
     const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/ui.ts"), "utf8");
@@ -20,9 +42,10 @@ test("entry settings show exit only on native tablets without changing the persi
     runInNewContext(compiled, {
         exports,
         require: () => ({
-            entryCatalog, TOP_BAR_ROOT_PATH, MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH, MOBILE_TOOLBAR_CONTEXT_KEYS,
+            entryCatalog, TOP_BAR_ROOT_PATH, BREADCRUMB_ROOT_PATH, MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH, MOBILE_TOOLBAR_CONTEXT_KEYS,
             isMobile: () => mobile,
             isInMobileApp: () => nativeTablet,
+            isIPad: () => false, isInAndroid: () => false, isInHarmony: () => false,
             DOCK_ORDER_SCOPES_BY_SIDE: {},
         }),
     });
@@ -36,7 +59,10 @@ test("entry settings show exit only on native tablets without changing the persi
     assert.equal(hasExit(exports.catalog()), true);
     mobile = true;
     const catalog = exports.catalog();
-    assert.deepEqual(Array.from(catalog, item => item.key), [TOOLBAR_ENTRY_ROOT_PATH, "editor.blockEmbed", "editor.image", "editor.slash"]);
+    assert.deepEqual(Array.from(catalog, item => item.key), [TOOLBAR_ENTRY_ROOT_PATH, BREADCRUMB_ROOT_PATH,
+        "editor.ref", "editor.blockEmbed", "editor.image", "editor.slash"]);
+    const breadcrumbKeys = catalog.find(item => item.key === BREADCRUMB_ROOT_PATH).children.map(item => item.key);
+    assert.deepEqual(Array.from(breadcrumbKeys), ["command-panel", "readonly", "doc", "more"]);
     assert.equal(catalog.find(item => item.key === "editor.slash"), entryCatalog.find(item => item.key === "editor.slash"));
     assert.deepEqual(Array.from(catalog[0].children, item => item.key), MOBILE_TOOLBAR_CONTEXT_KEYS);
     for (const name of ["undo", "indent", "heading1", "table", "template"]) {
@@ -67,6 +93,31 @@ test("detached entry settings read the owner's plugin toolbar catalog", () => {
     host = undefined;
     exports.refreshToolbar(plugins);
     assert.equal(seen[1][0].key, "local");
+});
+
+test("detached entry settings read the owner's registered breadcrumb buttons", () => {
+    const code = transpileModule(readFileSync("src/config/entryVisibility/ui.ts", "utf8") +
+        "\nexports.refresh = refreshBreadcrumbEntryCatalog;", {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    const local = [{key: "plugin:local:button", label: "Local"}];
+    const owner = [{key: "plugin:owner:button", label: "Owner"}];
+    let host: {getBreadcrumbButtonCatalogSnapshot: () => typeof owner} | undefined = {
+        getBreadcrumbButtonCatalogSnapshot: () => owner,
+    };
+    let seen: typeof local;
+    const exports = {} as {refresh: () => void};
+    runInNewContext(code, {exports, require: () => ({
+        getBreadcrumbButtonCatalogSnapshot: () => local,
+        getSettingsWindowHost: () => host,
+        refreshBreadcrumbCatalog: (entries: typeof local) => { seen = entries; },
+        DOCK_ORDER_SCOPES_BY_SIDE: {},
+    })});
+    exports.refresh();
+    assert.equal(seen, owner);
+    host = undefined;
+    exports.refresh();
+    assert.equal(seen, local);
 });
 
 const loadDockSnapshot = () => {

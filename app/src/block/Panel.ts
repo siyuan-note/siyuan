@@ -19,6 +19,7 @@ import {checkFold} from "../util/noRelyPCFunction";
 import {updateHotkeyAfterTip} from "../protyle/util/compatibility";
 import {getTopBarHeight} from "../layout/getTopBarHeight";
 import {activateAVLocateWithRetry} from "../protyle/render/av/locate";
+import {stickyRow} from "../protyle/render/av/row";
 import {
     IBlockPanelItemInfo,
     IBlockPanelRemovalOptions,
@@ -28,6 +29,9 @@ import {
 import {getBlockPanelLoadPlan} from "./panelLoad";
 import {positionBlockPanel} from "./panelPosition";
 import {isBlockPanelTargetAvailable, registerBlockPanelOwner} from "./panelOwnership";
+/// #if !MOBILE
+import {BacklinkContent} from "../layout/dock/BacklinkContent";
+/// #endif
 
 const BLOCK_PANEL_EDITOR_MIN_HEIGHT = 155;
 
@@ -40,11 +44,16 @@ export class BlockPanel {
     public x: number;
     public y: number;
     private isBacklink: boolean;
-    public editors: Protyle[] = [];
+    private previewEditors: Protyle[] = [];
+    public backlink?: BacklinkContent;
+    public get editors() {
+        return this.backlink?.editors || this.previewEditors;
+    }
     private observerResize: ResizeObserver;
     private observerLoad: IntersectionObserver;
     private originalRefBlockIDs: Record<string, string>;
     private editorResizeCleanup?: () => void;
+    private stickyFrame: number;
     private refDefElements = new Map<IRefDefs, HTMLElement>();
     private refDefEditors = new Map<IRefDefs, Protyle>();
     private refDefInfos = new Map<IRefDefs, IBlockPanelItemInfo>();
@@ -61,6 +70,7 @@ export class BlockPanel {
         x?: number,
         y?: number,
         canShow?: () => boolean,
+        backlink?: {blockId: string, rootId: string, notebookId: string},
     }) {
         this.id = genUUID();
         this.targetElement = options.targetElement;
@@ -104,7 +114,7 @@ export class BlockPanel {
         this.element.addEventListener("dblclick", (event) => {
             const target = event.target as HTMLElement;
             const iconsElement = hasClosestByClassName(target, "block__icons");
-            if (iconsElement) {
+            if (iconsElement && (!this.backlink || iconsElement === this.element.firstElementChild)) {
                 const pingElement = iconsElement.querySelector('[data-type="pin"]');
                 if (this.element.getAttribute("data-pin") === "true") {
                     pingElement.setAttribute("aria-label", window.siyuan.languages.pin);
@@ -126,7 +136,8 @@ export class BlockPanel {
 
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
-                if (target.classList.contains("block__icon") || target.classList.contains("block__logo")) {
+                if ((target.classList.contains("block__icon") || target.classList.contains("block__logo")) &&
+                    (!this.backlink || target.parentElement === this.element.firstElementChild)) {
                     const type = target.getAttribute("data-type");
                     if (type === "close") {
                         this.destroy();
@@ -167,9 +178,10 @@ export class BlockPanel {
         /// #if !MOBILE
         moveResize(this.element, () => {
             this.pin();
+            this.scheduleStickyRows();
         });
         /// #endif
-        this.render();
+        this.render(options.backlink);
     }
 
     private pin() {
@@ -193,10 +205,25 @@ export class BlockPanel {
 
     private resizeEditor(editor: Protyle) {
         resize(editor.protyle);
+        this.scheduleStickyRows();
         editor.protyle.scroll.element.parentElement.style.setProperty(
             "--b3-dynamicscroll-width",
             Math.min(editor.protyle.contentElement.clientHeight - 49, 200) + "px"
         );
+    }
+
+    private scheduleStickyRows() {
+        cancelAnimationFrame(this.stickyFrame);
+        this.stickyFrame = requestAnimationFrame(() => {
+            if (!this.element) {
+                return;
+            }
+            this.editors.forEach(({protyle}) => {
+                protyle.wysiwyg.element.querySelectorAll('.av[data-render="true"]').forEach((item: HTMLElement) => {
+                    stickyRow(item, protyle.contentElement, "all");
+                });
+            });
+        });
     }
 
     private getEditor(editorElement: HTMLElement) {
@@ -278,6 +305,16 @@ export class BlockPanel {
 
     public removeEditors(options: IBlockPanelRemovalOptions) {
         if (!this.element) {
+            return;
+        }
+        if (this.backlink) {
+            if (matchesBlockPanelRemoval({notebookId: this.backlink.notebookId, rootID: this.backlink.rootId}, options) ||
+                this.editors.some(editor => matchesBlockPanelRemoval({
+                    notebookId: editor.protyle.notebookId, rootID: editor.protyle.block.rootID,
+                }, options)) || Array.from(this.element.querySelectorAll("[data-notebook-id]"))
+                .some(element => element.getAttribute("data-notebook-id") === options.notebookId)) {
+                this.dispose();
+            }
             return;
         }
         const removalPlan = planBlockPanelRemoval(this.refDefs, (refDef) => {
@@ -481,6 +518,7 @@ export class BlockPanel {
                     if (this.refDefs.length > 1 && editor.protyle.element.dataset.resized !== "true") {
                         this.setAutoEditorHeight(editor);
                     }
+                    this.scheduleStickyRows();
                     // 由于 afterCB 中高度的设定，需在之后再进行设定
                     // 49 = 16（上图标）+16（下图标）+8（padding）+9（底部距离）
                     editor.protyle.scroll.element.parentElement.setAttribute("style", `--b3-dynamicscroll-width:${Math.min(editor.protyle.contentElement.clientHeight - 49, 200)}px;`);
@@ -495,7 +533,32 @@ export class BlockPanel {
         if (!this.element || this.destroying) {
             return;
         }
+        if (this.backlink && this.editors.length) {
+            this.destroying = true;
+            this.pin();
+            this.element.setAttribute("inert", "");
+            const menuZIndex = window.siyuan.menus.menu.element.style.zIndex;
+            void Promise.all(this.editors.map(editor => editor.flushPendingTransactions())).then(() => {
+                this.dispose(removeMenu && window.siyuan.menus.menu.element.style.zIndex === menuZIndex);
+            }).catch(error => {
+                if (!this.element) {
+                    return;
+                }
+                this.destroying = false;
+                this.element.removeAttribute("inert");
+                showMessage(error.message);
+            });
+            return;
+        }
+        this.dispose(removeMenu);
+    }
+
+    private dispose(removeMenu = true) {
+        if (!this.element) {
+            return;
+        }
         this.destroying = true;
+        cancelAnimationFrame(this.stickyFrame);
         this.editorResizeCleanup?.();
         this.observerResize?.disconnect();
         this.observerLoad?.disconnect();
@@ -505,13 +568,16 @@ export class BlockPanel {
                 return true;
             }
         });
-        if (this.editors.length > 0) {
+        if (this.backlink) {
+            this.backlink.destroy();
+            this.backlink = undefined;
+        } else if (this.editors.length > 0) {
             this.editors.forEach(item => {
                 // https://github.com/siyuan-note/siyuan/issues/8199
                 hideElements(["util"], item.protyle);
                 item.destroy();
             });
-            this.editors = [];
+            this.previewEditors = [];
         }
         this.refDefElements.clear();
         this.refDefEditors.clear();
@@ -528,13 +594,13 @@ export class BlockPanel {
         }
     }
 
-    private render() {
+    private render(backlink?: {blockId: string, rootId: string, notebookId: string}) {
         if (!document.body.contains(this.element)) {
             this.destroy();
             return;
         }
         let openHTML = "";
-        if (this.refDefs.length === 1) {
+        if (!backlink && this.refDefs.length === 1) {
             openHTML = `<span data-type="stickTab" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openInNewTab}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.openInNewTab.custom)}"><svg><use xlink:href="#iconOpen"></use></svg></span>
 <span class="fn__space"></span>`;
             /// #if !BROWSER
@@ -549,7 +615,9 @@ export class BlockPanel {
     <span data-type="close" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.close}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href="#iconClose"></use></svg></span>
 </div>
 <div class="block__content">`;
-        if (this.refDefs.length === 0) {
+        if (backlink) {
+            html += '<div class="block__backlinks fn__flex-1"></div>';
+        } else if (this.refDefs.length === 0) {
             html += `<div class="ft__smaller ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>`;
         } else {
             let editorResizeHTML = "";
@@ -568,10 +636,33 @@ export class BlockPanel {
         }
         this.element.innerHTML = html;
         /// #if !MOBILE
+        if (backlink) {
+            this.element.classList.add("block__popover--backlinks");
+            this.backlink = new BacklinkContent({
+                app: this.app,
+                element: this.element.querySelector(".block__backlinks"),
+                ...backlink,
+                type: "local",
+                onlyBacklinks: true,
+                surface: "popover",
+            });
+            positionBlockPanel(this.element, this.targetElement.getBoundingClientRect());
+            this.element.classList.add("block__popover--open");
+            this.element.style.zIndex = (++window.siyuan.zIndex).toString();
+            this.targetElement.style.cursor = "";
+            this.observerResize = new ResizeObserver(() => {
+                this.editors.forEach(editor => editor.resize());
+            });
+            this.observerResize.observe(this.element);
+            return;
+        }
+        /// #endif
+        /// #if !MOBILE
         this.bindEditorResize();
         /// #endif
         let resizeTimeout: number;
         this.observerResize = new ResizeObserver(() => {
+            this.scheduleStickyRows();
             clearTimeout(resizeTimeout);
             resizeTimeout = window.setTimeout(() => {
                 this.editors.forEach(item => {
@@ -644,6 +735,7 @@ export class BlockPanel {
         }
 
         this.element.querySelector(".block__content").addEventListener("scroll", () => {
+            this.scheduleStickyRows();
             this.editors.forEach(item => {
                 hideElements(["gutter"], item.protyle);
             });

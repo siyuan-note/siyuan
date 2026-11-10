@@ -134,4 +134,15 @@ export const commonClick = (event: MouseEvent & {
         event.stopPropagation();
         return true;
     }
+    const titleElement = event.target.closest<HTMLElement>('[data-document-title="true"]');
+    if (titleElement) {
+        const id = titleElement.dataset.nodeId;
+        if (id) {
+            void import("../header/documentTitleDialog").then(({openDocumentTitleDialog}) =>
+                openDocumentTitleDialog({id, app: protyle.app}));
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
 };

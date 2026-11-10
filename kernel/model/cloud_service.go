@@ -480,6 +480,10 @@ type cloudAssetSourceError struct {
 }
 
 func (err *cloudAssetSourceError) Error() string {
+	var incomplete *incompleteAssetDownloadsError
+	if errors.As(err.cause, &incomplete) {
+		return Conf.Language(465)
+	}
 	return err.cause.Error()
 }
 
@@ -824,7 +828,7 @@ func Login(userName, password, captcha string, cloudRegion int) (data *apicontra
 	previousCloudRegion := util.CurrentCloudRegion
 	if Conf.Sync.Load().Provider == conf.ProviderSiYuan && previousCloudRegion != cloudRegion {
 		if err := requireCompleteAssetDownloads(); err != nil {
-			return nil, -1, err.Error()
+			return nil, -1, (&cloudAssetSourceError{cause: err}).Error()
 		}
 	}
 	cloudAccountMu.Lock()

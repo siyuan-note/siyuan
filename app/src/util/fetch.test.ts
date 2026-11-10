@@ -9,10 +9,12 @@ import {flushSettingSaves, settingSaveFailures, trackSettingRequest} from "../co
 import {trackEditorSaveRequest} from "../protyle/util/editorSave";
 
 const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() => {}),
-                       processResponse: (response: IWebSocketData) => boolean = () => true) => {
+                       processResponse: (response: IWebSocketData) => boolean = () => true,
+                       templateRequest?: {signal: AbortSignal; headers: Record<string, string>; isCurrent: () => boolean; finish: () => void}, interactive = false) => {
     const sends: unknown[][] = [];
     const timeouts: number[] = [];
     const notifications: unknown[][] = [];
+    const scheduled: unknown[][] = [];
     let kernelChecks = 0;
     const exports: {
         fetchPost?: (...args: any[]) => Promise<void>;
@@ -26,6 +28,9 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
         require: (name: string) => {
             switch (name) {
                 case "./fetchWithAppId": return {fetchWithAppId: fetchImplementation};
+                case "../template/http": return {beginTemplateHTTPRequest: () => templateRequest,
+                    getTemplateHTTPWindow: () => ({app: "app", session: "main"})};
+                case "../protyle/render/av/automaticHTTP": return {scheduleAutomaticHTTP: (jobs: unknown[]) => scheduled.push(jobs)};
                 case "../constants": return {Constants: {SIYUAN_QUIT: "quit"}};
                 case "electron": return {ipcRenderer: {send: (...args: unknown[]) => sends.push(args)}};
                 case "./processMessage": return {processMessage: processResponse};
@@ -46,11 +51,30 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
         FormData,
         location: {port: "6806"},
         console: {warn: () => {}},
-        window: {siyuan: {languages: {transactionSaveUnconfirmed: "Save unconfirmed"}}},
+        window: {siyuan: {ws: interactive ? {ws: {}} : undefined, languages: {transactionSaveUnconfirmed: "Save unconfirmed"}}},
     });
-    return {fetchPost: exports.fetchPost, fetchSyncPost: exports.fetchSyncPost, sends, timeouts, notifications,
+    return {fetchPost: exports.fetchPost, fetchSyncPost: exports.fetchSyncPost, sends, timeouts, notifications, scheduled,
         kernelChecks: () => kernelChecks};
 };
+
+it("editing transport attaches the live main window and schedules HTTP only after acknowledging the save", async () => {
+    const job = {id: "task", avID: "database", blockID: "carrier", sequence: 1};
+    const state = loadFetchPost(async (_url, options) => {
+        const headers = new Headers(options.headers);
+        assert.equal(headers.get("X-Siyuan-Template-App"), "app");
+        assert.equal(headers.get("X-Siyuan-Template-Session"), "main");
+        assert.equal(headers.get("X-Siyuan-Template-Execution"), null);
+        return new Response(JSON.stringify({code: 0, msg: "", data: [{doOperations: [], httpAutomationJobs: [job]}]}),
+            {headers: {"Content-Type": "application/json"}});
+    }, () => true, undefined, true);
+    let saved = false;
+    await state.fetchPost("/api/transactions", {transactions: []}, () => {
+        assert.equal(state.scheduled.length, 0);
+        saved = true;
+    });
+    assert.equal(saved, true);
+    assert.deepEqual(state.scheduled, [[job]]);
+});
 
 it("invokes the failure callback once when a request stalls", async () => {
     const {fetchPost, sends} = loadFetchPost();
@@ -62,6 +86,48 @@ it("invokes the failure callback once when a request stalls", async () => {
         }, undefined, 30000);
     assert.equal(failures, 1);
     assert.equal(sends.length, 0);
+});
+
+it("checks template ownership synchronously before callbacks and sync response consumers", async () => {
+    for (const mode of ["callback", "sync"]) {
+        const controller = new AbortController();
+        let checks = 0;
+        let finished = 0;
+        const state = loadFetchPost(async () => new Response(JSON.stringify({code: 0, msg: "", data: {content: "old"}}), {
+            headers: {"Content-Type": "application/json"},
+        }), () => true, {signal: controller.signal, headers: {}, isCurrent: () => {
+            checks++;
+            controller.abort();
+            return false;
+        }, finish: () => {finished++;}});
+        if (mode === "callback") {
+            await state.fetchPost("/api/template/render", {id: "old"}, () => assert.fail("obsolete response applied"));
+        } else {
+            const response = await state.fetchSyncPost("/api/av/renderAttributeView", {id: "old"});
+            assert.equal(response.code, -1);
+            assert.equal(response.data, null);
+        }
+        assert.equal(checks, 1);
+        assert.equal(finished, 1);
+        assert.equal(controller.signal.aborted, true);
+    }
+});
+
+it("manual automation transport carries confirmation identity and releases the execution", async () => {
+    const controller = new AbortController();
+    let finished = 0;
+    const headers = {"X-Siyuan-Template-Execution": "manual-execution"};
+    const state = loadFetchPost(async (url, options) => {
+        assert.equal(url, "/api/av/runAttributeViewAutomation");
+        assert.equal(options.headers, headers);
+        assert.equal(options.signal, controller.signal);
+        return new Response(JSON.stringify({code: 0, msg: "", data: null}));
+    }, () => true, {signal: controller.signal, headers, isCurrent: () => true, finish: () => {finished++;}});
+    const response = await state.fetchSyncPost("/api/av/runAttributeViewAutomation", {
+        avID: "database", blockID: "carrier", ruleID: "rule",
+    }, undefined, false, controller.signal);
+    assert.equal(response.code, 0);
+    assert.equal(finished, 1);
 });
 
 it("keeps positive business errors in the callback and filters negative errors", async () => {

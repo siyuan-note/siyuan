@@ -8,7 +8,7 @@ const compiled = transpileModule(readFileSync("src/dialog/exitRequest.ts", "utf8
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const fixture = () => {
+const fixture = (mobile = false) => {
     let resolve: (value: unknown) => void;
     let reject: (error: Error) => void;
     let expire: () => void;
@@ -24,7 +24,7 @@ const fixture = () => {
         exports,
         AbortController,
         window: {siyuan: {languages: {exitWaiting: "Saving",
-            exitWaitFailed: "Exit could not be confirmed", close: "Close", retry: "Retry", sync: "Sync",
+            exitWaitFailed: "Exit could not be confirmed", close: "Close", cancel: "Cancel", retry: "Retry", sync: "Sync",
             skipExitSync: "Skip sync and exit", skipExitSyncConfirm: "Unsynced changes remain on this device"}},
             setTimeout: (callback: () => void, timeout: number) => {
                 assert.equal(timeout, 12000);
@@ -36,6 +36,7 @@ const fixture = () => {
             removeEventListener: (type: string) => inputListeners.delete(type)},
         console: {warn: () => {}},
         require: (name: string) => {
+            if (name === "../util/functions") return {isMobile: () => mobile};
             if (name === "./progress") return {progressLoading: (data: {code: number}, id: string,
                                                                action?: {callback: () => void}) => {
                 if (data.code === 2) { activeProgress.delete(id); actions.delete(id); }
@@ -45,7 +46,7 @@ const fixture = () => {
                 }
                 if (action) actions.set(id, action.callback);
             }};
-            if (name === "./confirmDialog") return {confirmDialog: (_title: string, text: string,
+            if (name === "./mobileConfirmDialog") return {mobileConfirmDialog: (_title: string, text: string,
                 confirm: () => void, cancel: () => void, _delete: boolean, _extra: unknown, label: string) => {
                 assert.equal(label, "Skip sync and exit");
                 assert.match(text, /Unsynced/);
@@ -54,6 +55,7 @@ const fixture = () => {
                 return {element: {contains: () => false}, destroy: confirmation.cancel};
             }};
             if (name === "../util/escape") return {escapeHtml: (value: string) => value};
+            if (name === "../util/hostCapabilities") return {sanitizeKernelHTML: (value: string) => value};
             if (name === "../util/fetch") return {fetchSyncPost: (...args: unknown[]) => {
                 requests.push(args);
                 return new Promise((done, fail) => {
@@ -68,7 +70,7 @@ const fixture = () => {
                     expire = () => fail(new Error("Timeout"));
                 })]);
             }};
-            if (name === "./index") return {Dialog: class {
+            if (name === "./mobileDialog") return {MobileDialog: class {
                 state = {
                     destroyed: false,
                     buttons: [0, 1].map(() => ({
@@ -87,6 +89,7 @@ const fixture = () => {
                     this.state.content.innerHTML = options.content;
                     dialogs.push(this.state);
                 }
+                focusWhenReady(target: () => {focus: () => void}) { target().focus(); }
                 destroy() { this.state.destroyed = true; }
             }};
             throw new Error(name);
@@ -97,6 +100,19 @@ const fixture = () => {
         resolve: (value: unknown) => resolve(value), reject: (error: Error) => reject(error),
         expire: () => expire()};
 };
+
+test("mobile exit failure retains an explicit cancel action while desktop retains Close", async () => {
+    for (const mobile of [false, true]) {
+        const state = fixture(mobile);
+        const pending = state.request({force: false}, () => {});
+        await Promise.resolve();
+        state.reject(new Error("Exit failed"));
+        await pending;
+        assert.match(state.dialogs[0].content.innerHTML, mobile ? />Cancel</ : />Close</);
+        state.dialogs[0].buttons[0].click();
+        assert.equal(state.dialogs[0].destroyed, true);
+    }
+});
 
 test("slow exit retains endless progress and delivers success, sync failure and update confirmation", async () => {
     for (const code of [0, 1, 2]) {

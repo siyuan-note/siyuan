@@ -1,3 +1,4 @@
+import {MobileDialog} from "../dialog/mobileDialog";
 import {getFrontend, isMobile} from "../util/functions";
 import {Dialog} from "../dialog";
 import {closeNativeSettings, openNativeSettings} from "../config/setting/nativeWindow";
@@ -68,7 +69,7 @@ export class Setting {
             return;
         }
         const windowRoot = isSettingsWindow() && window.siyuan.dialogs.length === 0;
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
             title: name,
             content: `<div class="b3-dialog__content">
 </div>
@@ -121,7 +122,7 @@ export class Setting {
                 if (["INPUT", "TEXTAREA"].includes(actionElement.tagName)) {
                     dialog.bindInput(actionElement as HTMLInputElement, () => {
                         btnsElement[1].dispatchEvent(new CustomEvent("click"));
-                    }, actionElement.tagName === "INPUT");
+                    }, actionElement.tagName === "INPUT", false);
                 }
                 if (item.direction === "row") {
                     contentElement.lastElementChild.lastElementChild.insertAdjacentElement("beforeend", actionElement);
@@ -136,16 +137,15 @@ export class Setting {
                 }
             }
         });
-        (contentElement.querySelector("input, textarea") as HTMLElement)?.focus();
         const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();
         });
         btnsElement[1].addEventListener("click", () => {
-            if (this.confirmCallback) {
-                this.confirmCallback();
-            }
-            dialog.destroy();
+            void dialog.runPending(async () => {
+                await this.confirmCallback?.();
+                return true;
+            });
         });
         this.dialog = dialog;
         if (windowRoot) {

@@ -769,7 +769,7 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 
 				displayU := u
 				if 64 < len(displayU) {
-					displayU = displayU[:64] + "..."
+					displayU = util.TruncateUTF8Bytes(displayU, 64) + "..."
 				}
 
 				util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(119), displayU), 15000)

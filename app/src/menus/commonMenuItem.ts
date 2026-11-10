@@ -1,6 +1,6 @@
 import {toggleMenu} from "./menuToggle";
 import type {BlockQueryRequestInput} from "../types/api";
-import {confirmDialog} from "../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {isMobile, isValidCustomAttrName} from "../util/functions";
 import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
@@ -21,11 +21,13 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {loadTemplateDirectories, openTemplateManager} from "../template/manager";
 import {Dialog} from "../dialog";
-import {openInputDialog} from "../dialog/inputDialog";
+import {MobileDialog} from "../dialog/mobileDialog";
+import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
 import {bindAliasInput} from "./aliasInput";
 import {focusBlock, getEditorRange} from "../protyle/util/selection";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 /// #if !MOBILE
+import {canOpenMarkdownAsset, openMarkdownAsset} from "../editor/markdownAsset";
 import {openAsset, openAssetInBackground, openBy} from "../editor/util";
 /// #endif
 import {rename, replaceFileName} from "../editor/rename";
@@ -73,7 +75,7 @@ export const openWechatNotify = (nodeElement: Element) => {
     if (reminder) {
         reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
     }
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         width: isMobile() ? "92vw" : "50vw",
         title: window.siyuan.languages.wechatReminder,
         content: `<div class="b3-dialog__content custom-attr">
@@ -99,6 +101,15 @@ export const openWechatNotify = (nodeElement: Element) => {
         dialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
+        if (isMobile()) {
+            void dialog.runPending(async () => {
+                const response = await fetchSyncPost("/api/block/setBlockReminder", {id, timed: "0"});
+                if (response.code !== 0) return false;
+                nodeElement.removeAttribute(Constants.CUSTOM_REMINDER_WECHAT);
+                return true;
+            });
+            return;
+        }
         if (btnsElement[1].getAttribute("disabled")) {
             return;
         }
@@ -113,6 +124,16 @@ export const openWechatNotify = (nodeElement: Element) => {
         if (date) {
             if (new Date(date) <= new Date()) {
                 showMessage(window.siyuan.languages.reminderTip);
+                return;
+            }
+            if (isMobile()) {
+                void dialog.runPending(async () => {
+                    const timed = dayjs(date).format("YYYYMMDDHHmmss");
+                    const response = await fetchSyncPost("/api/block/setBlockReminder", {id, timed});
+                    if (response.code !== 0) return false;
+                    nodeElement.setAttribute(Constants.CUSTOM_REMINDER_WECHAT, timed);
+                    return true;
+                });
                 return;
             }
             if (btnsElement[2].getAttribute("disabled")) {
@@ -143,7 +164,7 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
         if (reminder) {
             reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
         }
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
             width: isMobile() ? "92vw" : "50vw",
             title: window.siyuan.languages.wechatReminder,
             content: `<div class="b3-dialog__content custom-attr">
@@ -166,6 +187,13 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
             dialog.destroy();
         });
         btnsElement[1].addEventListener("click", () => {
+            if (isMobile()) {
+                void dialog.runPending(async () => {
+                    const response = await fetchSyncPost("/api/block/setBlockReminder", {id, timed: "0"});
+                    return response.code === 0;
+                });
+                return;
+            }
             fetchPost("/api/block/setBlockReminder", {id, timed: "0"}, () => {
                 dialog.destroy();
             });
@@ -175,6 +203,15 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
             if (date) {
                 if (new Date(date) <= new Date()) {
                     showMessage(window.siyuan.languages.reminderTip);
+                    return;
+                }
+                if (isMobile()) {
+                    void dialog.runPending(async () => {
+                        const response = await fetchSyncPost("/api/block/setBlockReminder", {
+                            id, timed: dayjs(date).format("YYYYMMDDHHmmss"),
+                        });
+                        return response.code === 0;
+                    });
                     return;
                 }
                 fetchPost("/api/block/setBlockReminder", {
@@ -243,7 +280,7 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         width: isMobile() ? "100vw" : "50vw",
         containerClassName: "b3-dialog__container--theme" + (isMobile() ? " mobile-attributes-sheet" : ""),
         hideCloseIcon: isMobile(),
-        height: isMobile() ? "60vh" : "80vh",
+        height: isMobile() ? undefined : "80vh",
         content: `<div class="fn__flex-column">
     <div class="layout-tab-bar fn__flex" style="flex-shrink:0;border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
         <div class="item item--full item--focus" data-type="attr">
@@ -322,7 +359,8 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         }
         destroyDialog(options);
     };
-    const disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
+    const disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy(), undefined, undefined,
+        {mode: "standard"});
     /// #endif
     dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);
     dialog.element.querySelectorAll<HTMLElement>(".custom-attr").forEach(item => {
@@ -595,8 +633,10 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
             label: window.siyuan.languages.copyMarkdown,
             accelerator: undefined,
             click: async () => {
+                const headingNumber = window.siyuan.config.export.headingNumber === true;
                 const response = await fetchSyncPost("/api/export/exportMdContent", {
                     id: stdMarkdownId,
+                    headingNumber,
                     refMode: 3,
                     embedMode: 1,
                     yfm: false,
@@ -659,15 +699,16 @@ export const exportMd = (id: string) => {
                 const dialog = openInputDialog({
                     title: window.siyuan.languages.fileName,
                     value: name,
+                    awaitConfirm: true,
                     extraContent: `
 <div class="fn__hr"></div>
 <label>${window.siyuan.languages.savePath}<div class="fn__hr"></div><select class="b3-select fn__block" data-template-directory><option value="">/</option></select></label>
 <div class="fn__hr"></div>
 <button type="button" class="b3-button b3-button--outline" data-template-manager>${window.siyuan.languages.templateManager}</button>
 ${databaseOptions}`,
-                    onConfirm: (value, dialog) => {
+                    onConfirm: async (value, dialog) => {
                         if (!directoriesReady) {
-                            return;
+                            return false;
                         }
                         const inputElement = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
                         let templateName = value.trim() === "" ? window.siyuan.languages.untitled :
@@ -687,6 +728,25 @@ ${databaseOptions}`,
                             overwrite: false,
                             databaseMode,
                         };
+                        if (isMobile()) {
+                            const response = await fetchSyncPost("/api/template/docSaveAsTemplate", requestData);
+                            if (response.code === 0) {
+                                showMessage(window.siyuan.languages.exportTplSucc);
+                                return true;
+                            }
+                            if (response.code === 1) {
+                                confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, async () => {
+                                    const result = await fetchSyncPost("/api/template/docSaveAsTemplate", {
+                                        ...requestData, overwrite: true,
+                                    });
+                                    if (result.code !== 0) return false;
+                                    showMessage(window.siyuan.languages.exportTplSucc);
+                                    dialog.destroy();
+                                    return true;
+                                }, undefined, false, undefined, undefined, {awaitConfirm: true});
+                            }
+                            return false;
+                        }
                         fetchPost("/api/template/docSaveAsTemplate", requestData, response => {
                             if (response.code === 1) {
                                 // 重名
@@ -705,6 +765,7 @@ ${databaseOptions}`,
                             showMessage(window.siyuan.languages.exportTplSucc);
                         });
                         dialog.destroy();
+                        return true;
                     },
                 });
                 dialog.element.setAttribute("data-key", Constants.DIALOG_EXPORTTEMPLATE);
@@ -1071,6 +1132,14 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             /// #endif
         } else {
             /// #if !BROWSER
+            if (canOpenMarkdownAsset(src)) {
+                submenu.push({
+                    id: "openMarkdownEditor",
+                    icon: "iconEdit",
+                    label: window.siyuan.languages.openMarkdownEditor,
+                    click: () => { void openMarkdownAsset(src); }
+                });
+            }
             if (getHostCapabilities().localFileSystem) {
                 submenu.push({
                     id: "useDefault",
@@ -1185,8 +1254,9 @@ export const movePathToMenu = (paths: string[], sourceNotebookIds: string[] = []
                 rootIDs.push(pathPosix().basename(item).replace(".sy", ""));
             });
             movePathTo({
+                awaitConfirm: true,
                 cb: (toPath, toNotebook) => {
-                    moveToPath(paths, toNotebook[0], toPath[0]);
+                    return moveToPath(paths, toNotebook[0], toPath[0]);
                 },
                 paths,
                 flashcard: false,

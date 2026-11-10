@@ -84,7 +84,7 @@ type RequestContent struct {
 
 	/* Request Headers */
 	Headers map[string][]string `json:"headers"` // e.g. {"Content-Type": ["application/json"], "Accept": ["*/*"]}
-	Cookies map[string][]string `json:"cookies"` // e.g. {"siyuan": ["abc123"]}
+	Cookies map[string][]string `json:"cookies"` // e.g. {"plugin-sample": ["abc123"]}，不含思源的会话 Cookie
 
 	ContentType   string `json:"contentType"`   // e.g. "application/json"
 	ContentLength int64  `json:"contentLength"` // e.g. 123
@@ -487,6 +487,10 @@ func parseRequest(c *gin.Context) (request *Request, err error) {
 
 	cookies := make(map[string][]string)
 	for _, cookie := range c.Request.Cookies() {
+		// 会话 Cookie 是内核的登录凭据，不交给插件
+		if util.SessionCookieName == cookie.Name {
+			continue
+		}
 		cookies[cookie.Name] = append(cookies[cookie.Name], cookie.Value)
 	}
 

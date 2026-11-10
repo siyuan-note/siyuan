@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261028111611"
+		"updated": "20261107150237"
 	},
 	"Children": [
 		{
@@ -32,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091509-8csaq4j",
-				"updated": "20261019194432"
+				"updated": "20261107150237"
 			},
 			"Children": [
 				{
@@ -364,7 +364,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210604224541-bgxj0zh"
+						"id": "20210604224541-bgxj0zh",
+						"updated": "20261107150237"
 					},
 					"Children": [
 						{
@@ -379,6 +380,20 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "sub",
 									"TextMarkTextContent": "Subscript"
+								}
+							]
+						},
+						{
+							"ID": "20261107150237-u2e8pfi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261107150237-u2e8pfi",
+								"updated": "20261107150237"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "At either boundary of superscript or subscript, use the left and right arrow keys to move the caret inside or outside. Text typed or pasted outside the boundary uses normal formatting"
 								}
 							]
 						}
@@ -2052,7 +2067,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261028111611"
+				"updated": "20261031115926"
 			},
 			"Children": [
 				{
@@ -2168,7 +2183,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-f51bzy4",
-				"updated": "20261028111611"
+				"updated": "20261031115926"
 			},
 			"Children": [
 				{
@@ -2193,16 +2208,66 @@
 			]
 		},
 		{
-			"ID": "20261028111611-1147a49",
+			"ID": "20261103001150-j9f1qhb",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261028111611-1147a49",
-				"updated": "20261028111611"
+				"id": "20261103001150-j9f1qhb",
+				"updated": "20261103001150"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On mobile, use Undo and Redo in the document breadcrumb bar, even when the keyboard is closed or a mind map is full screen. These actions use the document history and can also undo changes outside the mind map. The buttons are hidden when both histories are empty or the document is read-only."
+					"Data": "On desktop, hold Alt (⌥ on macOS) and click a block reference or SiYuan block link in a mind map to open it in a right split. Hold Shift and click to open it in a bottom split."
+				}
+			]
+		},
+		{
+			"ID": "20261028111611-1147a49",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028111611-1147a49",
+				"updated": "20261031115926"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Undo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Redo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to undo or redo when the keyboard is closed or a mind map is full screen. The editing toolbar also provides these actions. They share the document history and can affect changes outside the mind map. Menu items without available history are disabled; read-only documents do not offer these actions."
 				}
 			]
 		},
@@ -2387,6 +2452,20 @@
 				}
 			],
 			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261105113000-0e7c2f1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105113000-0e7c2f1",
+				"updated": "20261105113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select a single node outside text editing, then drag its left or right edge handle to adjust its width with a mouse or touch. Dragging previews the result; releasing saves one undoable change. Press Esc or cancel the pointer operation to restore the original width. Read-only and locked views hide these handles. The bottom width panel still supports precise values and restoring automatic width."
+				}
+			]
 		},
 		{
 			"ID": "20261022181804-c0rm54w",
@@ -4994,7 +5073,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-qr9enpx",
-				"updated": "20261024164212"
+				"updated": "20261101195702"
 			},
 			"Children": [
 				{
@@ -5008,12 +5087,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908091355-rch0007",
-				"updated": "20260908091355"
+				"updated": "20261106130000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Table cells support paragraphs, headings, lists, blockquotes, code, and math without manual conversion. Existing Markdown-looking text stays literal, and existing bold text, links, and other inline formatting are preserved."
+					"Data": "Table cells support paragraphs, headings, lists, blockquotes, code, and math without manual conversion. Existing Markdown-looking text stays literal, and existing bold text, links, and other inline formatting are preserved. Use the slash or plus menu to insert images, create a document and reference it, or apply inline styles."
 				}
 			]
 		},
@@ -5123,7 +5202,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261022190543-c7n71wx",
-				"updated": "20261022190543"
+				"updated": "20261101195702"
 			},
 			"Children": [
 				{
@@ -5137,7 +5216,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " from its menu to restore automatic height. Row heights are saved with the document; standard Markdown export does not guarantee that they are retained."
+					"Data": " from its menu to restore automatic height. Row heights are saved with the document; standard Markdown export does not guarantee that they are retained. Resizing a row or column clears the cell selection and shows the size above and to the left of the pointer. On desktop, pausing over a divider shows a guide that follows the boundary during dragging."
 				}
 			]
 		},
@@ -5524,6 +5603,20 @@
 				"id": "20220909095340-rr23xv7",
 				"updated": "20220909095340"
 			}
+		},
+		{
+			"ID": "20261109120000-065e12a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109120000-065e12a",
+				"updated": "20261109120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag the handles on the right, bottom, or bottom-right corner of a video to resize it proportionally. Touch dragging is also supported."
+				}
+			]
 		},
 		{
 			"ID": "20210608121327-5vbk32w",

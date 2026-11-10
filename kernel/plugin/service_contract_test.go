@@ -122,12 +122,13 @@ func TestPluginServiceHTTPBranches(t *testing.T) {
 }
 
 func TestPluginServiceAdmissionAndDispatch(t *testing.T) {
-	p, _ := newServiceTestPlugin(t, `globalThis.siyuan={server:{private:{http:{handler:(r)=>({statusCode:207,headers:{"X-Path":[r.context.path]},body:{data:{type:"JSON",data:{method:r.request.method,cookie:r.request.cookies.test,authorization:r.request.headers.Authorization,path:r.context.path}}}})}}}};`)
+	p, _ := newServiceTestPlugin(t, `globalThis.siyuan={server:{private:{http:{handler:(r)=>({statusCode:207,headers:{"X-Path":[r.context.path]},body:{data:{type:"JSON",data:{method:r.request.method,cookie:r.request.cookies.test,session:r.request.cookies.siyuan,authorization:r.request.headers.Authorization,path:r.context.path}}}})}}}};`)
 	engine := gin.New()
 	engine.Any("/plugin/private/:name/*path", serviceTestHandler)
 	request := httptest.NewRequest("POST", "/plugin/private/"+p.Name+"/value", strings.NewReader("raw body"))
 	request.Header.Set("Authorization", "secret")
 	request.AddCookie(&http.Cookie{Name: "test", Value: "cookie"})
+	request.AddCookie(&http.Cookie{Name: util.SessionCookieName, Value: "kernel-session"})
 	recorder := httptest.NewRecorder()
 	engine.ServeHTTP(recorder, request)
 	if recorder.Code != 207 || recorder.Header().Get("X-Path") != "/value" {
@@ -136,12 +137,13 @@ func TestPluginServiceAdmissionAndDispatch(t *testing.T) {
 	var data struct {
 		Method        string          `json:"method"`
 		Cookie        []string        `json:"cookie"`
+		Session       json.RawMessage `json:"session"`
 		Authorization json.RawMessage `json:"authorization"`
 	}
 	if err := json.Unmarshal(recorder.Body.Bytes(), &data); err != nil {
 		t.Fatal(err)
 	}
-	if data.Method != "POST" || len(data.Cookie) != 1 || len(data.Authorization) != 0 {
+	if data.Method != "POST" || len(data.Cookie) != 1 || len(data.Session) != 0 || len(data.Authorization) != 0 {
 		t.Fatalf("request filtering changed: %s", recorder.Body.String())
 	}
 	for _, tt := range []struct {

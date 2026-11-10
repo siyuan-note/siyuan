@@ -6,6 +6,7 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {SIYUAN_APP_ID_HEADER, withAPIAppId} from "./fetchAppId";
 import {ContractFormData} from "./contractFormData";
 import {trackEditorSaveRequest} from "../protyle/util/editorSave";
+import {fetchStartupRead} from "../boot/startupRead";
 
 const load = (path: string, globals: Record<string, unknown>, dependencies: Record<string, unknown>) => {
     const exports = {};
@@ -33,6 +34,8 @@ const fixture = () => {
     const {fetchWithAppId} = load("src/util/fetchWithAppId.ts", {fetch, document, location}, {
         "../constants": {Constants: {SIYUAN_APPID: "window-id"}},
         "./fetchAppId": {withAPIAppId},
+        "../boot/startupRead": {fetchStartupRead: (input: RequestInfo | URL, init?: RequestInit) =>
+            fetchStartupRead(input, init, fetch)},
     }) as typeof import("./fetchWithAppId");
     return {calls, response, fetchWithAppId};
 };

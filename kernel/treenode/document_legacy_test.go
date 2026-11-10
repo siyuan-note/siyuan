@@ -157,3 +157,50 @@ func TestLegacyDocumentCandidatesAfterSourceMetadataCommit(t *testing.T) {
 		t.Fatal("source metadata commit missed a new collision", groups, err)
 	}
 }
+
+func TestLegacyDocumentCreationCandidatesExcludeOnlyOwnPendingRoot(t *testing.T) {
+	for _, state := range []string{"own pending", "different path", "different display path", "committed", "other pending", "building", "recovery pending"} {
+		t.Run(state, func(t *testing.T) {
+			box := withDocumentMetadataDB(t, false)
+			tree := NewTree(box, "/20261026000001-parent1.sy", "/Parent", "Parent")
+			if err := SetDocumentMetadataState(box, "ready"); err != nil {
+				t.Fatal(err)
+			}
+			UpsertBlockTreePending(tree)
+			pending := &BlockTree{ID: tree.ID, BoxID: box, Path: tree.Path, HPath: tree.HPath}
+			switch state {
+			case "different path":
+				pending.Path = "/20261026000002-other01/" + tree.ID + ".sy"
+			case "different display path":
+				pending.HPath = "/Other"
+			case "committed":
+				UpsertBlockTree(tree)
+			case "other pending":
+				UpsertBlockTreePending(NewTree(box, "/20261026000002-other01.sy", "/Parent", "Parent"))
+			case "building":
+				if err := SetDocumentMetadataState(box, "building"); err != nil {
+					t.Fatal(err)
+				}
+			case "recovery pending":
+				if _, err := BeginDocumentMetadataRecovery(GetBlockTreeInExactBox(tree.ID, box)); err != nil {
+					t.Fatal(err)
+				}
+			}
+			groups, err := ClassifyLegacyDocumentPathsForCreate(box, []string{"/Parent"}, pending)
+			switch state {
+			case "own pending":
+				if err != nil || len(groups["/Parent"].Clean) != 0 {
+					t.Fatal("own pending root blocked its creation", groups, err)
+				}
+			case "committed":
+				if err != nil || len(groups["/Parent"].Clean) != 1 || groups["/Parent"].Clean[0].ID != tree.ID {
+					t.Fatal("committed candidate was hidden", groups, err)
+				}
+			default:
+				if !errors.Is(err, ErrDocumentMetadataUnavailable) {
+					t.Fatal("unready or unrelated candidate was hidden", groups, err)
+				}
+			}
+		})
+	}
+}

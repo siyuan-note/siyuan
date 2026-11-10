@@ -7,6 +7,7 @@ package util
 import (
 	"bytes"
 	"io/fs"
+	"net/netip"
 	"net/url"
 	"os"
 	"path"
@@ -227,7 +228,15 @@ func NormalizeEndpoint(endpoint string) string {
 	endpoint = strings.Replace(endpoint, "http://http(s)://", "https://", 1)
 	endpoint = strings.Replace(endpoint, "http(s)://", "https://", 1)
 	if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
-		endpoint = "http://" + endpoint
+		scheme := "http://"
+		if address, err := url.Parse("//" + endpoint); err == nil {
+			host := address.Hostname()
+			// 含点的域名默认使用 TLS；IP 和单标签主机保留本地服务的 HTTP 默认值。
+			if _, ipErr := netip.ParseAddr(host); ipErr != nil && strings.Contains(host, ".") {
+				scheme = "https://"
+			}
+		}
+		endpoint = scheme + endpoint
 	}
 	if idx := strings.Index(endpoint, "://"); 0 <= idx {
 		head := endpoint[:idx+len("://")]
@@ -459,6 +468,50 @@ func IsSensitivePath(p string) bool {
 	return false
 }
 
+// IsSensitiveWritePath 判断工作空间外的写入目标是否敏感。
+//
+// 除共用的敏感路径规则外，写方向额外拒绝家目录下第一层以 . 开头的路径：这些位置是 shell 初始化、
+// 用户数据与浏览器配置的入口，写入即可获得持久化能力，而正常导出不会选择点目录。
+// 工作空间内的目标不受这条规则影响，避免工作空间本身位于家目录点目录时误伤。
+func IsSensitiveWritePath(p string) bool {
+	if p == "" {
+		return false
+	}
+	if IsSensitivePath(p) {
+		return true
+	}
+	p = resolveNamespaceAlias(p)
+	resolved := ResolveLongestExistingParent(p)
+	if gulu.File.IsSubPath(WorkspaceDir, p) || gulu.File.IsSubPath(WorkspaceDir, resolved) {
+		return false
+	}
+	return isHomeDotPath(p) || isHomeDotPath(resolved)
+}
+
+// isHomeDotPath 判断路径是否位于家目录下的点条目中，即家目录内的第一层名称以 . 开头。
+func isHomeDotPath(p string) bool {
+	if p == "" {
+		return false
+	}
+	for _, homeDir := range sensitiveHomeDirs() {
+		if homeDir == "" {
+			continue
+		}
+		rel, err := filepath.Rel(homeDir, p)
+		if err != nil || rel == "." || rel == ".." || filepath.IsAbs(rel) {
+			continue
+		}
+		if strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			continue
+		}
+		first, _, _ := strings.Cut(rel, string(filepath.Separator))
+		if strings.HasPrefix(first, ".") {
+			return true
+		}
+	}
+	return false
+}
+
 // IsSensitiveHTMLAssetPath 允许剪贴板引用用户文档及系统临时文件，仍检查凭据、工作空间私有目录和符号链接目标。
 func IsSensitiveHTMLAssetPath(p string) bool {
 	if p == "" {
@@ -578,12 +631,17 @@ func isHTMLAssetUserPath(p string) bool {
 	return false
 }
 
-// sensitiveHomeDotEntries 是家目录下默认敏感的凭据条目，按名称前缀匹配。
+// sensitiveHomeDotEntries 是家目录下默认敏感的凭据、用户数据与 shell 初始化条目，按名称前缀匹配。
 // .env 使用前缀匹配，以覆盖 .env.local、.env.production 等派生文件。
+// shell 初始化条目覆盖 bash 与 zsh 的登录、交互及每次启动读取的全部入口，避免只拦住
+// .bashrc、.zshrc、.profile 而把同族文件留作持久化入口。
 var sensitiveHomeDotEntries = []string{
 	".env",
-	".ssh", ".config", ".bashrc", ".zshrc", ".profile", ".git-credentials", ".netrc", ".pgpass",
+	".ssh", ".config", ".git-credentials", ".netrc", ".pgpass",
 	".kube", ".docker", ".gnupg", ".aws", ".azure", ".npmrc", ".pypirc",
+	".bashrc", ".bash_profile", ".bash_login", ".profile",
+	".zshrc", ".zshenv", ".zprofile", ".zlogin",
+	".local", ".mozilla", ".thunderbird",
 }
 
 // sensitiveHomeEntry 是家目录下的敏感条目，按名称前缀匹配。
@@ -595,10 +653,18 @@ type sensitiveHomeEntry struct {
 }
 
 // platformSensitiveHomeEntries 是家目录下按平台附加的敏感条目：macOS 的用户资源库包含钥匙串等凭据，
-// Windows 的漫游与本地应用数据包含各类 CLI 与桌面应用的凭据。
+// Windows 的漫游与本地应用数据包含各类 CLI 与桌面应用的凭据，PowerShell 配置文件在每次会话启动时执行。
 var platformSensitiveHomeEntries = map[string][]sensitiveHomeEntry{
-	"darwin":  {{name: "Library"}},
-	"windows": {{name: filepath.Join("AppData", "Roaming")}, {name: filepath.Join("AppData", "Local"), exemptSystemTemp: true}},
+	"darwin": {{name: "Library"}},
+	"windows": {
+		{name: filepath.Join("AppData", "Roaming")},
+		{name: filepath.Join("AppData", "Local"), exemptSystemTemp: true},
+		// 文档目录可能被重定向到 OneDrive，两种前缀都要覆盖 PowerShell 配置文件。
+		{name: filepath.Join("Documents", "WindowsPowerShell")},
+		{name: filepath.Join("Documents", "PowerShell")},
+		{name: filepath.Join("OneDrive", "Documents", "WindowsPowerShell")},
+		{name: filepath.Join("OneDrive", "Documents", "PowerShell")},
+	},
 }
 
 // isSystemTempPath 判断小写路径是否位于系统临时目录中。
@@ -609,6 +675,66 @@ func isSystemTempPath(lowerPath string) bool {
 		}
 		root = strings.ToLower(filepath.Clean(root))
 		if lowerPath == root || strings.HasPrefix(lowerPath, root+string(filepath.Separator)) {
+			return true
+		}
+	}
+	return false
+}
+
+// sensitiveHomeDirs 返回敏感路径检查使用的家目录。自定义配置主目录不能使系统用户主目录中的凭据
+// 失去保护，主目录自身也可能是别名，因此同时返回其真实路径。
+func sensitiveHomeDirs() []string {
+	homeDirs := []string{HomeDir}
+	if homeDirOverridden && systemHomeDir != "" && systemHomeDir != HomeDir {
+		homeDirs = append(homeDirs, systemHomeDir)
+		if resolved, err := ResolveRealPath(systemHomeDir); err == nil && resolved != systemHomeDir {
+			homeDirs = append(homeDirs, resolved)
+		}
+	}
+	if HomeDir != "" {
+		if resolved, err := ResolveRealPath(HomeDir); err == nil && resolved != HomeDir {
+			homeDirs = append(homeDirs, resolved)
+		}
+	}
+	return homeDirs
+}
+
+// userHomeParents 是各平台用户家目录的父目录。路径比较前已统一为小写，因此这里同样使用小写。
+var userHomeParents = []string{"/home", "/users", `c:\users`}
+
+// isForeignUserHomePath 判断小写绝对路径是否位于其他 OS 用户的家目录。家目录父目录下的首个路径段
+// 即该用户的家目录名，与内核进程自身的家目录（含系统家目录及其真实路径）不同时视为其他用户。
+// 多用户主机、共享服务器与容器挂载宿主机目录时，其他用户家目录中的凭据不属于本工作空间的数据。
+func isForeignUserHomePath(lowerPath string) bool {
+	homeDirs := sensitiveHomeDirs()
+	// 自定义配置主目录不改变内核进程所属的 OS 用户，其系统家目录始终属于自己。
+	if "" != systemHomeDir {
+		homeDirs = append(homeDirs, systemHomeDir)
+		if resolved, err := ResolveRealPath(systemHomeDir); err == nil && resolved != systemHomeDir {
+			homeDirs = append(homeDirs, resolved)
+		}
+	}
+	for _, parent := range userHomeParents {
+		rest, ok := strings.CutPrefix(lowerPath, parent+string(filepath.Separator))
+		if !ok {
+			continue
+		}
+		user, _, _ := strings.Cut(rest, string(filepath.Separator))
+		if "" == user {
+			return true
+		}
+		userHome := parent + string(filepath.Separator) + user
+		ownHome := false
+		for _, homeDir := range homeDirs {
+			if "" == homeDir {
+				continue
+			}
+			if strings.EqualFold(strings.ToLower(filepath.Clean(homeDir)), userHome) {
+				ownHome = true
+				break
+			}
+		}
+		if !ownHome {
 			return true
 		}
 	}
@@ -655,6 +781,10 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 			"/usr",
 			"/opt",
 			"/sbin",
+			// 挂载点与外部介质没有必须由内核复制的合法来源，避免把宿主机或其他系统的数据复制进工作空间。
+			"/mnt",
+			"/media",
+			"/snap",
 		}
 		for _, pre := range prefixes {
 			if strings.HasPrefix(toCheckPathLower, pre) {
@@ -683,6 +813,12 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 				return true
 			}
 		}
+
+		// 其他 OS 用户的家目录同样不属于工作空间外的合法导入来源。逐个家目录列出凭据条目无法覆盖
+		// 多用户主机与容器挂载宿主机目录的情况，因此按家目录父目录与内核自身家目录的差异整体拒绝。
+		if isForeignUserHomePath(toCheckPathLower) {
+			return true
+		}
 	}
 
 	// 工作空间/conf 目录（小写比较）
@@ -702,21 +838,8 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 	// 覆盖常见凭据 dotfile、dotenv 配置文件与平台应用数据目录，防止接受工作空间外绝对路径的接口
 	// 把内核用户家目录下的凭据复制进工作空间后外泄：Git push token、HTTP/API 凭据、Postgres 密码、
 	// K8s/Docker/容器仓库配置、GPG 私钥环、云厂商 CLI 凭据、包管理器 token 等。
-	homeDirs := []string{HomeDir}
-	// 自定义配置主目录不能使系统用户主目录中的凭据失去保护。
-	if homeDirOverridden && systemHomeDir != "" && systemHomeDir != HomeDir {
-		homeDirs = append(homeDirs, systemHomeDir)
-		if resolved, err := ResolveRealPath(systemHomeDir); err == nil && resolved != systemHomeDir {
-			homeDirs = append(homeDirs, resolved)
-		}
-	}
+	homeDirs := sensitiveHomeDirs()
 	homeCheckPaths := []string{toCheckPathLower}
-	if HomeDir != "" {
-		// 主目录自身也可能是别名，工作空间规范路径必须同时匹配其真实目录中的敏感位置。
-		if resolved, err := ResolveRealPath(HomeDir); err == nil && resolved != HomeDir {
-			homeDirs = append(homeDirs, resolved)
-		}
-	}
 	// 工作空间别名可能位于自定义主目录中，但指向系统主目录中的敏感位置。
 	// 只映射工作空间根目录，保留对尚未创建的目标及工作空间内路径的检查。
 	if inWorkspace && workspaceDir == WorkspaceDir {

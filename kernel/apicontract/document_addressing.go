@@ -135,7 +135,7 @@ func (value CreateDocByParentResult) MarshalJSON() ([]byte, error) {
 }
 
 type DocumentTitle struct {
-	Format string `json:"format" api:"enum=plain"`
+	Format string `json:"format" api:"enum=plain|inline-ast"`
 	Text   string `json:"text"`
 	Empty  bool   `json:"empty"`
 }
@@ -159,13 +159,15 @@ type DocumentPath struct {
 }
 
 type GetDocPathsRequest struct {
-	Notebook string   `json:"notebook"`
-	IDs      []string `json:"ids"`
+	Notebook     string   `json:"notebook"`
+	IDs          []string `json:"ids"`
+	IncludeIcons bool     `json:"includeIcons,omitempty" api:"optional,nonnullable"`
 }
 
 type DocumentPathsData struct {
-	Documents  []DocumentPath `json:"documents"`
-	MissingIDs []string       `json:"missingIDs"`
+	Documents  []DocumentPath    `json:"documents"`
+	MissingIDs []string          `json:"missingIDs"`
+	Icons      map[string]string `json:"icons,omitempty"`
 }
 
 type DocumentPathStart struct {
@@ -289,6 +291,8 @@ func documentAddressingSchema(b *schemaBuilder, t reflect.Type, input bool) (*Sc
 		valueType, failureType = reflect.TypeFor[LegacyDocumentTarget](), reflect.TypeFor[StructuredDocumentTarget]()
 	case reflect.TypeFor[CreateDocByParentResult]():
 		valueType, failureType = reflect.TypeFor[CreatedDocumentData](), reflect.TypeFor[DocumentCreateFailure]()
+	case reflect.TypeFor[DailyNoteCreateResult]():
+		valueType, failureType = reflect.TypeFor[FileTreeCreateData](), reflect.TypeFor[DocumentSelectionFailure]()
 	case reflect.TypeFor[DocumentPathsResult]():
 		valueType = reflect.TypeFor[DocumentPathsData]()
 	case reflect.TypeFor[ResolveDocPathResult]():

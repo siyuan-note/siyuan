@@ -30,6 +30,7 @@ type DocHistoryContentData struct {
 }
 
 type HistoryItemsRequest struct {
+	Page     *float64 `json:"page" api:"optional"`
 	Created  string   `json:"created" api:"trim"`
 	Notebook string   `json:"notebook" api:"optional,nullable"`
 	Query    string   `json:"query" api:"optional,nullable"`
@@ -51,7 +52,9 @@ type History struct {
 }
 
 type HistoryItemsData struct {
-	Items []*HistoryItem `json:"items"`
+	PageCount  int            `json:"pageCount"`
+	TotalCount int            `json:"totalCount"`
+	Items      []*HistoryItem `json:"items"`
 }
 
 type NotebookHistoryData struct {

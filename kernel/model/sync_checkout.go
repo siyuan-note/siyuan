@@ -28,6 +28,7 @@ type syncCheckoutTask struct {
 	phase                string
 	revision             int64
 	message              string
+	indexing             bool
 	canceling            bool
 	clients              map[*melody.Session]*syncCheckoutClient
 	confirmations        chan bool
@@ -67,7 +68,7 @@ func startSyncCheckout(repo *dejavu.Repo) *syncCheckoutTask {
 	activeSyncCheckout.Unlock()
 	repo.SetCheckoutHooks(dejavu.CheckoutHooks{
 		Context: ctx, Apply: task.prepareApply, Applied: task.completeApply, Before: checkCheckoutSpace, Cleaned: notifyCheckoutCleanup,
-		Preflight: documentAddressingPreflight(repo),
+		Preflight: syncDocumentPreflight(repo),
 		Progress: func(progress dejavu.CheckoutProgress) {
 			task.Lock()
 			newFile := task.progress.Path != progress.Path
@@ -141,6 +142,10 @@ func (task *syncCheckoutTask) push() {
 	task.Lock()
 	defer task.Unlock()
 	p := task.progress
+	if task.indexing {
+		task.broadcastLocked(0)
+		return
+	}
 	if p.Path == "" {
 		task.message = Conf.Language(81)
 		task.broadcastLocked(0)
@@ -219,6 +224,7 @@ func (task *syncCheckoutTask) finish(repo *dejavu.Repo, syncErr *error) {
 	}
 	// 恢复索引期间继续保留任务遮罩，防止部分落盘后立即编辑旧的内存状态。
 	if *syncErr != nil && (len(task.upserts) > 0 || len(task.removes) > 0) {
+		task.beginIndexing()
 		changes := &dejavu.MergeResult{Time: time.Now()}
 		for _, file := range task.upserts {
 			changes.Upserts = append(changes.Upserts, file)

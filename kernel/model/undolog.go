@@ -5,6 +5,7 @@
 package model
 
 import (
+	"encoding/json"
 	"fmt"
 	"maps"
 	"regexp"
@@ -419,6 +420,23 @@ func cloneOperations(ops []*Operation) []*Operation {
 	ret := make([]*Operation, len(ops))
 	for i, op := range ops {
 		cloned := *op
+		cloned.relationCellReplay = op.relationCellReplay.clone()
+		if op.attributeViewFields != nil {
+			state := *op.attributeViewFields
+			cloned.attributeViewFields = &state
+		}
+		if op.relationCellContext != nil {
+			context := *op.relationCellContext
+			context.SourceItemIDs = slices.Clone(op.relationCellContext.SourceItemIDs)
+			cloned.relationCellContext = &context
+		}
+		if op.relationDetailConfig != nil {
+			state := *op.relationDetailConfig
+			cloned.relationDetailConfig = &state
+			if data, ok := op.Data.(json.RawMessage); ok {
+				cloned.Data = append(json.RawMessage(nil), data...)
+			}
+		}
 		cloned.BlockIDs = cloneOperationBlockIDs(op.BlockIDs)
 		if nil != op.Context {
 			cloned.Context = make(map[string]any, len(op.Context))

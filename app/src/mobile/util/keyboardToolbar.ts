@@ -88,9 +88,10 @@ import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
 import {isMobileLandscape} from "./orientation";
 import {restoreGutterBySelection} from "../../protyle/gutter/restore";
 import {isGutterTouchDragging} from "../../protyle/ui/gutterVisibility";
-import {getFrequentSlashButtons, mountLiteSlashMenu, prependFrequentSlashButtons} from "./liteSlashMenu";
+import {getLiteSlashMenuHTML, getFrequentSlashButtons, mountLiteSlashMenu, prependFrequentSlashButtons} from "./liteSlashMenu";
 import {getPluginSlashEntryKey, SLASH_MENU_ROOT_PATH} from "../../config/entryVisibility/catalog";
 import {hintSlash} from "../../protyle/hint/extend";
+import {isTitleSlashContext} from "../../protyle/hint/titleSlash";
 import {getFrequentSlashItems} from "../../protyle/hint/frequentSlashStorage";
 import {finishTableCellEditing, getTableCellRichContext, prepareTableCellMenuItems} from "../../protyle/util/tableCellRichContext";
 import {insertEmptyBlock} from "../../block/util";
@@ -121,6 +122,10 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
         order: getEntryOrder(contextPath),
         isVisible: key => isEntryVisible(`${contextPath}.${key}`),
         isAvailable: name => {
+            if (protyle && ["softLine", "moveup", "movedown"].includes(name) &&
+                hasClosestByClassName(protyle.wysiwyg.element, "protyle-title__rich")) {
+                return false;
+            }
             if (hasText && (name === "block-type" || MOBILE_TOOLBAR_ACTION_NAMES.includes(name))) {
                 return false;
             }
@@ -459,19 +464,22 @@ const updateKeyboardPanelHeight = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     // 与展开入口保持相同高度口径，避免边框和整数取整导致交接时上下跳动。
     const barHeight = toolbarElement.querySelector<HTMLElement>(".keyboard__bar").clientHeight;
-    const height = getKeyboardPanelHeight(getKeyboardViewportBottom(), keyboardPanelTop, barHeight);
+    const native = isInMobileApp();
+    const bottomOffset = native ? parseFloat(getComputedStyle(toolbarElement).bottom) || 0 : 0;
+    const height = getKeyboardPanelHeight(getKeyboardViewportBottom(), keyboardPanelTop, barHeight, bottomOffset);
     if (keyboardPanelClosing && height <= barHeight) {
         keyboardPanelClosing = false;
         hideKeyboardToolbarUtil();
         return;
     }
     // 原生端占位随视口同步变化，避免等待 resize 时编辑器短暂增高，导致滚动位置被截断。
-    const panelHeight = isInMobileApp() ?
-        `max(${barHeight}px, calc(100vh - ${keyboardPanelTop}px))` : `${height}px`;
+    const panelHeight = native ?
+        `max(${barHeight}px, calc(100vh - var(--android-navigation-bar-height, 0px) - ${keyboardPanelTop}px))` : `${height}px`;
     toolbarElement.style.height = panelHeight;
     const editor = getCurrentEditor();
     if (editor) {
-        getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = panelHeight;
+        const padding = native ? `calc(${panelHeight} + var(--android-navigation-bar-height, 0px))` : panelHeight;
+        getMobileToolbarPaddingElement(editor.protyle)?.style.setProperty("padding-bottom", padding);
     }
 };
 
@@ -743,6 +751,15 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
         unmountLiteSlashMenu = mountLiteSlashMenu(protyle, toolbarElement.querySelector(".keyboard__util"));
         return;
     }
+    if (isTitleSlashContext(protyle)) {
+        const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
+        const items = hintSlash("", protyle, false, {visibilityRoot: SLASH_MENU_ROOT_PATH});
+        utilElement.innerHTML = getLiteSlashMenuHTML(items, !!isInAndroid());
+        const buttons = getFrequentSlashButtons(utilElement, items.map(item => item.entryKey));
+        prependFrequentSlashButtons(utilElement, getFrequentSlashItems(buttons, button => button.dataset.slashEntryKey));
+        protyle.hint.bindUploadEvent(protyle, utilElement);
+        return;
+    }
     let pluginHTML = "";
     protyle.app.plugins.forEach((plugin) => {
         plugin.protyleSlash.forEach(slash => {
@@ -971,7 +988,7 @@ const hideKeyboardToolbarUtil = (restoreKeyboard = false) => {
     updateKeyboardToolbarPosition();
     const editor = getCurrentEditor();
     if (editor) {
-        getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = "48px";
+        getMobileToolbarPaddingElement(editor.protyle)?.style.setProperty("padding-bottom", "48px");
     }
     resetKeyboardToolbarUtilButtons();
 };
@@ -1185,7 +1202,7 @@ const showKeyboardToolbarElement = () => {
         keyboardPanelClosing = false;
         hideKeyboardToolbarUtil();
         if (toolbarProtyle) {
-            getMobileToolbarPaddingElement(toolbarProtyle).style.paddingBottom = "";
+            getMobileToolbarPaddingElement(toolbarProtyle)?.style.setProperty("padding-bottom", "");
         }
         toolbarProtyle = protyle;
         updateMobilePluginToolbar(protyle);
@@ -1211,7 +1228,7 @@ const showKeyboardToolbarElement = () => {
     const editor = getCurrentEditor();
     if (editor) {
         if (editor.protyle.wysiwyg.element.contains(range.startContainer)) {
-            getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = "48px";
+            getMobileToolbarPaddingElement(editor.protyle)?.style.setProperty("padding-bottom", "48px");
         }
         forEachPluginSubscriber("mobile-keyboard-show", eventBus => {
             eventBus.emit("mobile-keyboard-show");
@@ -1347,7 +1364,7 @@ export const hideKeyboardToolbar = (keyboardClosed = true) => {
     toolbarElement.style.height = "";
     const editor = getCurrentEditor();
     if (editor) {
-        getMobileToolbarPaddingElement(editor.protyle).style.paddingBottom = "";
+        getMobileToolbarPaddingElement(editor.protyle)?.style.setProperty("padding-bottom", "");
         if (!toolbarHidden) {
             forEachPluginSubscriber("mobile-keyboard-hide", eventBus => {
                 eventBus.emit("mobile-keyboard-hide");
@@ -1441,7 +1458,7 @@ export const initKeyboardToolbar = () => {
     window.addEventListener("siyuan-mobile-toolbar-focus", renderKeyboardToolbar);
     window.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => {
         if (event.detail) {
-            getMobileToolbarPaddingElement(event.detail).style.paddingBottom = "";
+            getMobileToolbarPaddingElement(event.detail)?.style.setProperty("padding-bottom", "");
             if (toolbarProtyle === event.detail) {
                 toolbarProtyle = undefined;
             }
@@ -1945,7 +1962,9 @@ export const initKeyboardToolbar = () => {
             const oldScrollTop = protyle.contentElement.scrollTop;
             renderSlashMenu(protyle, toolbarElement);
             showKeyboardToolbarUtil(oldScrollTop);
-            (document.activeElement as HTMLElement)?.blur();
+            const panel = toolbarElement.querySelector<HTMLElement>(".keyboard__util");
+            panel.tabIndex = -1;
+            panel.focus({preventScroll: true});
             hideAndroidKeyboardForPanel(protyle);
             return;
         } else if (type === "block") {

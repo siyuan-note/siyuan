@@ -14,6 +14,15 @@ import (
 // 在插件事件循环上只尝试加锁，不等待导入提交，避免阻塞事件循环中的其他回调。
 // 调用者必须在方法真正结束后释放；HTTP 等待者取消不能提前释放仍在执行的方法。
 func AcquirePluginRPCWrite() (release func(), err error) {
+	return acquireWorkspaceWrite()
+}
+
+// AcquireMCPToolWrite 在工具实际执行及结果转换期间保护工作空间，不覆盖空闲传输等待。
+func AcquireMCPToolWrite() (release func(), err error) {
+	return acquireWorkspaceWrite()
+}
+
+func acquireWorkspaceWrite() (release func(), err error) {
 	if util.ReadOnly {
 		return nil, errors.New(Conf.Language(34))
 	}

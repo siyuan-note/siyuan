@@ -14,6 +14,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -160,6 +161,10 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 }
 
 func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath string, err error) {
+	return doc2Heading(srcID, targetID, after, defaultHeadingConversionIO())
+}
+
+func doc2Heading(srcID, targetID string, after bool, io headingConversionIO) (srcTreeBox, srcTreePath string, err error) {
 	if !ast.IsNodeIDPattern(srcID) || !ast.IsNodeIDPattern(targetID) {
 		return
 	}
@@ -206,6 +211,9 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		// 目标块不存在时忽略处理
 		return
 	}
+	if targetTree.ID == srcTree.ID {
+		return "", "", errors.New("cannot convert a document into itself")
+	}
 
 	// 禁止跨加密边界：Doc2Heading 会合并 srcTree 和 targetTree 的内容，
 	// 不同加密笔记本各有独立 DEK，跨边界合并会导致密文用错 DEK 损坏数据
@@ -219,13 +227,14 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		err = ErrBlockNotFound
 		return
 	}
+	titleParagraph, titleErr := treenode.DocumentTitleParagraph(srcTree.Root)
+	if titleErr != nil {
+		err = titleErr
+		return
+	}
 
 	// 生成文档历史 https://github.com/siyuan-note/siyuan/issues/14359
 	generateOpTypeHistory(srcTree, HistoryOpUpdate)
-
-	// 移动前先删除引用 https://github.com/siyuan-note/siyuan/issues/7819
-	sql.DeleteRefsTreeQueue(srcTree)
-	sql.DeleteRefsTreeQueue(targetTree)
 
 	if ast.NodeListItem == pivot.Type {
 		pivot = pivot.LastChild
@@ -256,8 +265,13 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	srcTree.Root.RemoveIALAttr("tags")
 	heading := &ast.Node{ID: srcTree.Root.ID, Type: ast.NodeHeading, HeadingLevel: headingLevel, KramdownIAL: srcTree.Root.KramdownIAL}
 	heading.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(treenode.ReadDocumentTitle(srcTree.Root).Text)})
+	for child := titleParagraph.FirstChild; child != nil; {
+		next := child.Next
+		heading.AppendChild(child)
+		child = next
+	}
 	heading.RemoveIALAttr("title")
+	heading.RemoveIALAttr(treenode.DocumentTitleEmptyAttr)
 	heading.Box, heading.Path = targetTree.Box, targetTree.Path
 	if "" != tagIAL && 0 < len(tags) {
 		// 带标签的文档块转换为标题块时将标签移动到标题块下方 https://github.com/siyuan-note/siyuan/issues/6550
@@ -311,7 +325,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	}
 
 	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	if err = commitDocumentConversion(srcTree, targetTree, sourceBefore, targetBefore, true, indexWriteTreeUpsertQueue); err != nil {
+	if err = commitHeadingConversion(srcTree, targetTree, sourceBefore, targetBefore, true, io); err != nil {
 		return "", "", err
 	}
 	box := Conf.Box(srcTree.Box)
@@ -324,7 +338,9 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 
 	srcTreeBox, srcTreePath = srcTree.Box, srcTree.Path // 返回旧的文档块位置，前端后续会删除旧的文档块
 	IncSync()
+	backgroundRefreshWaitGroup.Add(1)
 	go func() {
+		defer backgroundRefreshWaitGroup.Done()
 		time.Sleep(util.SQLFlushInterval)
 		RefreshBacklink(srcTree.ID)
 		RefreshBacklink(targetTree.ID)
@@ -334,6 +350,10 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 }
 
 func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toTop bool) (srcRootBlockID, newTargetPath string, err error) {
+	return heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath, toTop, defaultHeadingConversionIO())
+}
+
+func heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toTop bool, io headingConversionIO) (srcRootBlockID, newTargetPath string, err error) {
 	targetPath = normalizeBoxDocTarget(targetBoxID, targetPath)
 	FlushTxQueue()
 	flushLock.Lock()
@@ -358,14 +378,26 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 		return
 	}
 	headingNode := treenode.GetNodeInTree(srcTree, srcHeadingID)
-	if nil == headingNode {
+	if nil == headingNode || headingNode.Type != ast.NodeHeading {
 		err = ErrBlockNotFound
 		return
 	}
 
 	box := Conf.Box(targetBoxID)
-	headingText := getNodeRefText0(headingNode, Conf.Editor.Load().BlockRefDynamicAnchorTextMaxLen, true)
-	headingText = normalizeDocumentTitle(headingText)
+	if box == nil {
+		err = ErrBlockNotFound
+		return
+	}
+	if !IsSameCryptoBoundary(srcTree.Box, targetBoxID) {
+		err = errors.New(Conf.Language(391))
+		return
+	}
+	titleParagraph, titleErr := headingDocTitle(headingNode)
+	if titleErr != nil {
+		err = titleErr
+		return
+	}
+	headingText := treenode.DocumentTitleText(titleParagraph)
 
 	moveToRoot := "/" == targetPath
 	toHP := "/" + headingText
@@ -400,10 +432,8 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 	}
 
 	newTargetPath = path.Join(toFolder, srcHeadingID+".sy")
-	if !box.Exist(toFolder) {
-		if err = box.MkdirAll(toFolder); err != nil {
-			return
-		}
+	if box.Exist(newTargetPath) {
+		return "", "", errors.New("heading conversion destination already exists")
 	}
 
 	// 标题转换为文档时清理旧版标题折叠派生状态，并保留下方块各自的折叠状态。
@@ -422,20 +452,24 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 
 	luteEngine := util.NewLute()
 	newTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument, ID: srcHeadingID}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
-	if paragraph := headingDocParagraph(headingNode, headingText); nil != paragraph {
-		newTree.Root.AppendChild(paragraph)
+	for _, ial := range headingNode.KramdownIAL {
+		newTree.Root.KramdownIAL = append(newTree.Root.KramdownIAL, append([]string(nil), ial...))
+	}
+	newTree.Root.SetIALAttr("type", "doc")
+	newTree.Root.SetIALAttr("id", srcHeadingID)
+	newTree.Root.RemoveIALAttr(DocHiddenAttr)
+	if err = treenode.SetDocumentTitleParagraph(newTree.Root, titleParagraph); err != nil {
+		return
 	}
 	for _, c := range children {
 		newTree.Root.AppendChild(c)
 	}
+	if newTree.Root.FirstChild == nil {
+		newTree.Root.AppendChild(treenode.NewParagraph(""))
+	}
 	newTree.ID = srcHeadingID
 	newTree.Path = newTargetPath
 	newTree.HPath = toHP
-	headingNode.SetIALAttr("type", "doc")
-	headingNode.SetIALAttr("id", srcHeadingID)
-	headingNode.SetIALAttr("title", headingText)
-	headingNode.RemoveIALAttr(DocHiddenAttr)
-	newTree.Root.KramdownIAL = headingNode.KramdownIAL
 
 	topLevel := treenode.TopHeadingLevel(newTree)
 	for c := newTree.Root.FirstChild; nil != c; c = c.Next {
@@ -452,7 +486,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	newTree.Root.Spec = treenode.BaseSpec
-	if err = commitDocumentConversion(srcTree, newTree, sourceBefore, nil, false, indexWriteTreeUpsertQueue); err != nil {
+	if err = commitHeadingConversion(srcTree, newTree, sourceBefore, nil, false, io); err != nil {
 		return "", "", err
 	}
 	if "" != previousPath {
@@ -463,7 +497,9 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 		box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
 	}
 	IncSync()
+	backgroundRefreshWaitGroup.Add(1)
 	go func() {
+		defer backgroundRefreshWaitGroup.Done()
 		RefreshBacklink(srcTree.ID)
 		RefreshBacklink(newTree.ID)
 		ResetVirtualBlockRefCache()
@@ -471,30 +507,11 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 	return
 }
 
-// headingDocParagraph 在文档名无法完整表达标题内容时，将原标题的行内节点移入新段落。
-func headingDocParagraph(heading *ast.Node, title string) *ast.Node {
-	var text strings.Builder
-	preserve := false
-	for c := heading.FirstChild; nil != c; c = c.Next {
-		if ast.NodeHeadingC8hMarker == c.Type || ast.NodeHeadingID == c.Type {
-			continue
-		}
-		if ast.NodeText != c.Type {
-			preserve = true
-		}
-		text.Write(c.Tokens)
+// headingDocTitle 验证并复制全部行级源，保留原块与正文，临时片段不具有独立块身份。
+func headingDocTitle(heading *ast.Node) (*ast.Node, error) {
+	source, err := render.NewDocumentTitle(heading)
+	if err != nil {
+		return nil, err
 	}
-	if !preserve && util.EscapeHTML(util.UnescapeHTML(text.String())) == title {
-		return nil
-	}
-
-	paragraph := treenode.NewParagraph("")
-	for c := heading.FirstChild; nil != c; {
-		next := c.Next
-		if ast.NodeHeadingC8hMarker != c.Type && ast.NodeHeadingID != c.Type {
-			paragraph.AppendChild(c)
-		}
-		c = next
-	}
-	return paragraph
+	return parse.ParseDocumentTitle(source)
 }

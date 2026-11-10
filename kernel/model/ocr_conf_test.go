@@ -8,8 +8,12 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
+	"time"
 
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/ocr"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestOCRSmallMigrationPreservesPreferences(t *testing.T) {
@@ -56,4 +60,37 @@ func TestOCRModelFilesChanged(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAutomaticOCRRetrySettingsReaction(t *testing.T) {
+	previousTempDir := util.TempDir
+	previousConf := Conf
+	Conf = NewAppConf()
+	util.TempDir = t.TempDir()
+	t.Cleanup(func() { util.TempDir = previousTempDir; Conf = previousConf; ocrRetry = automaticOCRRetryCache{} })
+	old := conf.NewOCR()
+	old.Auto = true
+	asset := &cache.Asset{Path: "assets/ocr-retry-settings.png", Updated: 1}
+	assets := map[string]*cache.Asset{asset.Path: asset}
+	version := automaticOCRAssetVersion{Modified: 1000000001, Size: 42}
+	for _, reaction := range ocrSectionSpec().Reactions {
+		if reaction.Name != "retry" {
+			continue
+		}
+		now := time.Now()
+		generation := ocrRetry.prepare(*old, assets)
+		ocrRetry.record(generation, asset, version, ocr.ErrPermanent, now)
+		next := *old
+		next.Auto = false
+		if !reaction.Changed(old, &next) {
+			t.Fatal("turning off automatic recognition did not trigger reset")
+		}
+		reaction.Apply(old, &next)
+		generation = ocrRetry.prepare(*old, assets)
+		if !ocrRetry.ready(generation, asset, version, now) {
+			t.Fatal("settings reaction retained a permanent failure")
+		}
+		return
+	}
+	t.Fatal("OCR settings have no retry reset reaction")
 }

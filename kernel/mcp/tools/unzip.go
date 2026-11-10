@@ -21,10 +21,14 @@ import (
 // UnzipTool 提供工作区内 zip 文件解压能力。
 // zipPath 和 destPath 均为工作区相对路径，通过 resolvePath 校验防逃逸；解压时对每个成员的最终
 // 输出路径再做一次授权，防止成员覆盖敏感文件。
-// 解压是写操作，自动触发 UI 确认和仓库快照（不在 safeActions 中）。
+// 解压声明本地写入效果，按能力确认策略执行并创建仓库快照。
 var UnzipTool = &Tool{
 	Name:        "unzip",
 	Description: "Extract a zip archive within the workspace. Provide the workspace-relative path to the zip file and the destination directory (also workspace-relative). The destination will be created if it does not exist.",
+	EffectScope: EffectScopeLocal,
+	ActionEffects: map[string]ToolEffects{
+		"": {LocalRead: true, LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

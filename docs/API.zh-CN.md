@@ -20,6 +20,9 @@
     * [保存笔记本配置](#保存笔记本配置)
 * [文档](#文档)
     * [通过 Markdown 创建文档](#通过-markdown-创建文档)
+    * [通过父文档 ID 创建文档](#通过父文档-id-创建文档)
+    * [通过标题段解析文档路径](#通过标题段解析文档路径)
+    * [通过 IDs 获取文档路径](#通过-ids-获取文档路径)
     * [重命名文档](#重命名文档)
     * [删除文档](#删除文档)
     * [移动文档](#移动文档)
@@ -230,6 +233,10 @@ if (response.code === 0 && response.data) {
 
 ### 重命名笔记本
 
+`name` 是纯文本显示名称，保留半角 `/` 并与 `／` 区分，不会因此创建目录；笔记本身份仍由 ID 确定。
+
+存在笔记本文档时，重命名会同步其纯文本标题。对于富文本标题，原样回传当前笔记本名称不作修改，其他名称会被拒绝，以保留样式、图片和引用。编辑完整标题须以笔记本 ID 调用 `getDocTitle`，再提交带 `expectedRevision` 的 `setDocTitle` 事务。
+
 * `/api/notebook/renameNotebook`
 * 参数
 
@@ -252,6 +259,8 @@ if (response.code === 0 && response.data) {
   ```
 
 ### 创建笔记本
+
+`name` 中的半角 `/` 属于同一个纯文本显示名称，不作为 Markdown、富文本或文件系统路径解释。
 
 * `/api/notebook/createNotebook`
 * 参数
@@ -303,7 +312,7 @@ if (response.code === 0 && response.data) {
 
 ### 获取笔记本配置
 
-管理员响应还可包含只读的 `documentCapabilities` 对象，用于报告结构化接口支持、标题格式、索引状态和能力摘要。所有笔记本使用结构化标题规则，无需模式设置或迁移；`literalSlash` 仅在索引就绪时为 `true`。使用前须将所有同步设备统一升级到支持本次功能的版本。既有权限过滤保持不变。
+管理员响应还可包含只读的 `documentCapabilities` 对象，用于报告结构化接口支持、标题格式、索引状态和能力摘要。所有笔记本使用结构化标题规则，无需模式设置或迁移；`literalSlash` 仅在索引就绪时为 `true`。兼容性取决于每篇文档的源规格和标题表示。同步按原始字节传输文档，不解释不支持的源格式。读取、索引和编辑仍需要支持该格式的版本；快照恢复继续保留源规格预检。既有权限过滤保持不变。
 
 * `/api/notebook/getNotebookConf`
 * 参数
@@ -336,9 +345,11 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。`titleFormats` 列出支持的标题格式，`indexState` 报告索引状态，`revision` 标识能力声明。`literalSlash` 仅在索引就绪时为 `true`。使用前须将所有同步设备统一升级到支持本次功能的版本。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
+管理员响应还包含可选只读对象 `documentCapabilities`。`structuredPaths` 表示服务端支持 ID 与路径段接口，不授予关闭或锁定笔记本的访问权限。`titleFormats` 列出支持的标题格式，`indexState` 报告索引状态，`revision` 标识能力声明。`literalSlash` 仅在索引就绪时为 `true`。兼容性取决于每篇文档的源规格和标题表示。同步按原始字节传输文档，不解释不支持的源格式。读取、索引和编辑仍需要支持该格式的版本；快照恢复继续保留源规格预检。旧服务端缺少此对象与请求失败含义不同，不能在请求失败后回退到旧路径接口继续写入。
 
 ### 保存笔记本配置
+
+`name` 字段沿用 `renameNotebook` 的笔记本文档标题联动及富文本保护规则。修改其他设置时可省略此字段；重命名被拒绝时，也不会保存同次请求中的其他配置修改。
 
 * `/api/notebook/setNotebookConf`
 * 参数
@@ -379,7 +390,7 @@ if (response.code === 0 && response.data) {
 
 ### 通过 Markdown 创建文档
 
-旧字符串创建接口在写入前检查全部父路径前缀。祖先含斜杠或空标题时返回 `code: -1`、`data.reason: "pathAmbiguous"`；多个干净父级需要有效且匹配的 `parentID`，否则同样报歧义。元数据未就绪返回 `indexUnavailable`。建议使用 `/api/filetree/createDocByParent`，分别传递父身份和标题。
+旧字符串创建接口在写入前检查全部父路径前缀。祖先含斜杠或空标题时返回 `code: -1`、`data.reason: "pathAmbiguous"`；多个干净父级需要有效且匹配的 `parentID`，否则同样报歧义。元数据未就绪返回 `indexUnavailable`。建议[通过父文档 ID 创建文档](#通过父文档-id-创建文档)，分别传递父身份和标题。
 
 * `/api/filetree/createDocWithMd`
 * 参数
@@ -411,7 +422,250 @@ if (response.code === 0 && response.data) {
     * `data`：创建好的文档 ID
     * 如果使用同一个 `path` 重复调用该接口，不会覆盖已有文档
 
+### 通过父文档 ID 创建文档
+
+在已有父文档下创建一个文档。需要管理员权限、可写工作空间，以及已打开且文档元数据就绪的笔记本；加密笔记本须已解锁。
+
+* `/api/filetree/createDocByParent`
+* 参数
+
+  ```json
+  {
+    "notebook": "20210817205410-2kvfpfn",
+    "parentID": null,
+    "id": "20261030150000-abc1234",
+    "title": {
+      "format": "plain",
+      "text": "C/C++"
+    },
+    "markdown": "Hello"
+  }
+  ```
+
+    * `notebook`：目标笔记本 ID
+    * `parentID`：该笔记本中已有父文档的 ID，根位置传 `null`；必填，不能传空字符串
+    * `id`：发送前生成并保存的新文档 ID，思源前端可使用 `Lute.NewNodeID()`；每个新文档须替换示例 ID
+    * `title`：标题对象，`format` 必须为 `plain`，`text` 必填；Markdown 标记按字面文字处理，`/` 保留在标题中
+    * `title.text`：最多 512 个 Unicode 码点；空文字会生成空标题标记和显示占位文字；首尾空白、无效字符、`.` 和 `..` 会被拒绝
+    * `markdown`：GFM 正文内容，可为空字符串
+    * `expectedParentRevision`：路径查询返回的父文档版本，可选；根位置使用 `resolveDocPath` 的 `data.start.revision`；不匹配时返回 `planChanged`
+    * `nameConditions`：最多 128 个 `{parentID, title, expectedID}` 对象，可选；每个对象的三个字段均必填；`parentID: null` 表示根位置；`expectedID: null` 要求不存在同名子文档，否则要求只有一个同名子文档且 ID 匹配；条件范围为目标父级及其祖先
+    * `expectedTarget`：根据配置生成的创建计划中的 `{notebook, purpose, revision}`，可选；`purpose` 为 `document`、`reference` 或 `dailyNote`；配置变化时返回 `planChanged`
+    * `tags`：逗号分隔的文档标签，可选，默认为空字符串，受笔记本功能限制
+    * `withMath`：是否开启行内公式解析，可选，默认为 `false`
+    * `clippingHref`：剪藏来源地址，可选，默认为空字符串；社区文章地址会启用对应 Markdown 语法选项
+    * `sorts`：按自定义顺序排列的兄弟文档存储路径数组，可选，默认为 `[]`；不能与 `sortTargetID` 同时使用
+    * `sortTargetID`：相对排序的目标兄弟文档 ID，可选，须与 `sortPosition` 一起提供
+    * `sortPosition`：`before` 或 `after`，可选，须与 `sortTargetID` 一起提供；未指定排序选项时使用笔记本的新建文档排序设置
+    * `docCreateTemplatePath`：正文模板路径，可选，默认为空字符串，仅在 `markdown` 为空时应用
+    * `listDocTree`：创建通知中的文档树刷新标记，可选，默认为 `false`
+    * 只有 `parentID` 接受 `null`，`path`、`hPath` 等未知字段会被拒绝
+    * 缺失的父文档不会自动创建；父 ID 无效、指向正文块或属于其他笔记本时返回错误
+    * 已有 ID 返回 `documentIDConflict`；未受名称条件限制时，不同 ID 可以创建同名文档
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "id": "20261030150000-abc1234",
+      "document": {
+        "notebook": "20210817205410-2kvfpfn",
+        "id": "20261030150000-abc1234",
+        "parentID": null,
+        "path": "/20261030150000-abc1234.sy",
+        "title": {
+          "format": "plain",
+          "text": "C/C++",
+          "empty": false
+        },
+        "segments": [
+          {
+            "id": "20261030150000-abc1234",
+            "text": "C/C++",
+            "empty": false
+          }
+        ],
+        "depth": 1,
+        "displayPath": "/C/C++",
+        "revision": "opaque-revision"
+      }
+    }
+  }
+  ```
+
+    * `data.id`：创建好的文档 ID
+    * `data.document`：文档元数据，后文的路径查询接口也使用该结构
+    * `data.document.parentID`：父文档 ID，根位置为 `null`
+    * `data.document.path`：基于 ID 的 `.sy` 存储路径
+    * `data.document.title`：标题摘要，`format` 为 `plain` 或 `inline-ast`，`text` 为显示文字，`empty` 表示显式空标题
+    * `data.document.segments`：包含当前文档的祖先链，每段包含 `id`、`text`、`empty`
+    * `data.document.depth`：路径段数
+    * `data.document.displayPath`：显示路径；标题可含 `/`，不能拆分后反推文档 ID
+    * `data.document.revision`：后续校验使用的版本字符串，调用时须用实际返回值替换示例中的 `opaque-revision`
+
+在上述文档下创建子文档的参数示例：
+
+```json
+{
+  "notebook": "20210817205410-2kvfpfn",
+  "parentID": "20261030150000-abc1234",
+  "id": "20261030150001-def5678",
+  "title": {
+    "format": "plain",
+    "text": "Child"
+  },
+  "markdown": "Child content",
+  "expectedParentRevision": "opaque-revision",
+  "nameConditions": [
+    {
+      "parentID": "20261030150000-abc1234",
+      "title": "Child",
+      "expectedID": null
+    }
+  ]
+}
+```
+
+`expectedParentRevision` 使用返回的父文档版本。名称条件要求 `Child` 尚不存在。多级父文档的补建参见[路径解析](#通过标题段解析文档路径)。
+
+* 创建失败返回 `code: -1`，可提供失败步骤信息时返回以下 `data`
+
+  ```json
+  {
+    "code": -1,
+    "msg": "parent document changed after planning",
+    "data": {
+      "reason": "planChanged",
+      "commitState": "none",
+      "stage": "source",
+      "completed": []
+    }
+  }
+  ```
+
+    * `data.reason`：错误原因
+        * `invalidTitle`：标题无效
+        * `unsupportedTitleFormat`：创建格式不是 `plain`
+        * `parentUnavailable`：父文档不可用
+        * `planChanged`：父级版本、名称条件、配置目标或排序目标变化
+        * `documentIDConflict`：ID 已占用
+        * `indexUnavailable`：元数据未就绪或不一致
+        * `writeFailed`：其他创建、排序或模板错误
+    * `data.commitState`：`none` 表示本次调用未保存文档，`committed` 表示文档已保存但后续步骤可能失败，`unknown` 表示无法确定是否已保存
+    * `data.id`：已确认保存的文档 ID，可选
+    * `data.stage`：失败阶段，如 `validate`、`source`、`sort`、`template`
+    * `data.completed`：已完成阶段，如 `source`、`sort`
+    * 请求解析、鉴权和笔记本访问错误可能只返回普通错误结构
+
+排序或模板失败时保留已保存的文档。超时、响应丢失或结果为 `unknown` 时，待元数据就绪后[查询原 ID](#通过-ids-获取文档路径)，核对父级、标题、正文和未完成步骤，再决定如何重试。仅 ID 匹配不能证明全部步骤成功；应保留原 ID，避免自动重复执行模板或回退到旧路径接口写入。
+
+### 通过标题段解析文档路径
+
+从指定位置逐级解析标题，不创建文档。需要管理员权限，以及已打开、已解锁且文档元数据就绪的笔记本。
+
+* `/api/filetree/resolveDocPath`
+* 参数
+
+  ```json
+  {
+    "notebook": "20210817205410-2kvfpfn",
+    "start": {
+      "kind": "root"
+    },
+    "segments": [
+      "Notes",
+      "C/C++"
+    ]
+  }
+  ```
+
+    * `notebook`：笔记本 ID
+    * `start`：根位置使用不带 `id` 的 `{kind: "root"}`，已有文档使用 `{kind: "document", id: "existing-document-id"}`；笔记本根文档 ID 视为逻辑根位置
+    * `segments`：0 至 128 个非空标题组成的数组，逐级精确匹配；标题内的 `/` 为字面字符，不作 Unicode 归一化、宽窄转换或百分号解码
+    * 空标题文档须通过文档 ID 指定起点；段数组为空时返回起点文档或根位置
+* 返回值
+
+  以下返回值示例假定 `Notes` 不存在。
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "status": "missing",
+      "start": {
+        "notebook": "20210817205410-2kvfpfn",
+        "id": null,
+        "revision": "opaque-root-revision"
+      },
+      "resolved": null,
+      "nextIndex": 0,
+      "candidates": [],
+      "candidatesTruncated": false,
+      "nameConditions": [
+        {
+          "parentID": null,
+          "title": "Notes",
+          "expectedID": null
+        }
+      ]
+    }
+  }
+  ```
+
+    * `data.status`：`resolved`（已解析）、`missing`（缺失）或 `ambiguous`（歧义），三种情况均返回 `code: 0`
+    * `data.start`：起点笔记本、文档 ID（根位置为 `null`）及版本
+    * `data.resolved`：最后一个唯一解析到的文档，结构同上文的文档元数据，根位置为 `null`
+    * `data.nextIndex`：缺失或歧义段的零基索引，全部解析成功时等于 `segments.length`
+    * `data.candidates`：歧义段的同名候选，按 ID 排序，最多 128 项，须明确选择文档 ID
+    * `data.candidatesTruncated`：是否还有更多候选
+    * `data.nameConditions`：唯一匹配及第一个缺失名称，创建时回传可检查查询后发生的变化
+    * 错误返回 `code: -1`，可能包含 `data.reason`；错误不表示文档缺失
+
+导入 `/Notes/2026-10-30/Article` 时，父标题段为 `["Notes", "2026-10-30"]`，最终标题为 `"Article"`：
+
+1. 从根位置解析父标题段；若为 `ambiguous`，通过 ID 明确选择父文档
+2. 若为 `missing`，以 `markdown: ""` 创建 `segments[nextIndex]`；`parentID` 使用 `resolved.id`，`resolved` 为 `null` 时使用 `start.id`；将对应版本作为 `expectedParentRevision`，并回传 `nameConditions`，保存分配的文档 ID
+3. 成功后重新解析父标题段，重复补建直至全部解析成功；每次创建后更新名称条件
+4. 在解析得到的父文档下创建 `Article`，传入父级版本及最终 Markdown 正文；若要求最终标题唯一，加入 `{parentID, title: "Article", expectedID: null}`，条件总数不超过 128
+
+每个文档分别保存。后续失败时保留已有父文档，核对失败步骤的结果后再继续；整个路径不会作为一个操作统一提交或回滚。
+
+### 通过 IDs 获取文档路径
+
+按 ID 读取文档元数据。需要管理员权限，以及已打开、已解锁且文档元数据就绪的笔记本。
+
+* `/api/filetree/getDocPaths`
+* 参数
+
+  ```json
+  {
+    "notebook": "20210817205410-2kvfpfn",
+    "ids": [
+      "20261030150000-abc1234",
+      "20261030150001-def5678"
+    ]
+  }
+  ```
+
+    * `notebook`：笔记本 ID
+    * `ids`：1 至 128 个有效文档 ID，按首次出现顺序去重
+    * `includeIcons`：可选布尔值，默认 `false`；为 `true` 时读取返回文档及其祖先的图标
+* 返回值
+
+    * `data.documents`：按请求顺序返回的文档元数据数组，结构见[创建结果](#通过父文档-id-创建文档)
+    * `data.missingIDs`：不存在、属于其他笔记本或指向正文块的 ID
+    * `data.icons`：可选映射，以文档或祖先 ID 为键，值为原始存储图标，未设置时为空字符串。仅在 `includeIcons` 为 `true` 时返回；图标不影响路径修订值。源文件读取失败时返回错误，不补建缺失文档
+    * 任一数组可为空；元数据未就绪或不一致时返回错误，不作为缺失结果
+    * 单个文档读取保持一致，批量查询不保证同一快照
+
+该接口不返回正文。核对不确定的创建结果时，先用原 ID 定位文档，再单独读取正文并检查剩余排序、模板或导入步骤。
+
 ### 重命名文档
+
+以下两个重命名接口接受普通标题。对于富文本标题，原样回传当前纯文本摘要不产生修改，传入不同摘要则拒绝写入以保护完整源内容。编辑富文本标题应使用生成的 API 契约中声明的标题源事务。
 
 * `/api/filetree/renameDoc`
 * 参数
@@ -839,6 +1093,8 @@ if (response.code === 0 && response.data) {
     * `succMap`：为兼容现有调用方保留的成功文件映射，key 为上传时的文件名，value 为 assets/foo-id.png；同一批文件包含同名文件时，同名 key 仅保留最后一项
 
 ## 块
+
+插入、前插、追加和更新块时，会在保存前校验提交子树中所有块的 ID。缺失的 ID 由系统生成；显式指定的 ID 必须符合 `YYYYMMDDhhmmss-xxxxxxx` 格式（连字符后为七位小写字母或数字），在输入中唯一，且不与现存块冲突。更新时可以保留被替换子树中的 ID。非法写入返回错误，不保存该次修改。
 
 ### 插入块
 
@@ -1349,6 +1605,8 @@ if (response.code === 0 && response.data) {
 ### 渲染模板
 
 * `/api/template/render`
+
+没有可交互的在线窗口时，`httpGet` 返回 `interaction_required`，不会发送网络请求。“本次允许”授权当前执行中的同一模板版本访问多个公网目标，包括后续请求和重定向，可向外部服务发送其有权读取的笔记内容，但不扩大读取权限。持久许可仅适用于内核识别的文件或数据库字段模板来源及内容版本，在当前工作空间本地生效，不限当前目标文档或已解锁笔记本，不随内置导出或同步传递，可在模板管理或数据库字段配置中撤销。引用的子模板文件不继承父模板许可；修改、复制或导入后需重新确认。后台执行、发布页面或笔记本锁定时不能凭这些许可绕过交互或访问检查。
 * 参数
 
   ```json
@@ -1362,6 +1620,7 @@ if (response.code === 0 && response.data) {
     * `id`：调用渲染所在的文档 ID
     * `path`：模板文件绝对路径
     * `mode`：可选渲染模式。目前仅支持 `"preview"` 和 `"editorInsert"`。预览模式生成文档树计划但不写入文件；编辑器插入模式生成可在确认后通过对应编辑器事务应用的计划
+    * `httpConfirmToken`：可选的确认令牌，由成功的预览返回，无需选择始终允许。在 30 秒内以 `mode: "editorInsert"` 提交，可用于同一窗口内的一次插入，要求模板源码及依赖、目标文档和笔记本、实际请求均未变化。仅复用确认，插入会重新取数。上下文变化或撤销、过期或已使用的令牌回到正常模板许可检查。关闭或切换预览、锁定笔记本、断开连接后交接失效；`/api/template/cancelHTTP` 也接受可选的 `httpConfirmToken` 以撤销交接。该交接不适用于数据库或日记执行
     * 省略 `mode` 时，仍支持旧的布尔参数 `preview`：`preview: true` 等价于 `mode: "preview"`；否则模板按普通内容渲染，并禁用 `createDocTree`
 * 返回值
 
@@ -1396,6 +1655,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
+    * `httpConfirmToken`：可选的一次性确认令牌，在交互式预览成功后签发；适用范围和 30 秒有效期见请求字段说明
     * `docTreePlan`：模板通过 `createDocTree` 声明子文档树时返回
         * `id`：预览模式下为空，且不会写入文件。编辑器插入模式下为短期有效的一次性计划令牌；确认后，将其作为对应事务对象的顶层 `templateDocTreePlanID` 字段提交
         * `count`：计划中的子文档总数
@@ -1616,6 +1876,7 @@ if (response.code === 0 && response.data) {
   ```
 
     * `id`：要导出的文档块 ID
+    * `headingNumber`：可选布尔值，`false` 仅在本次复制 Markdown 时省略自动标题编号；省略或 `null` 沿用导出设置（默认不包含编号）；`true` 保留文档编号，不会为未启用编号的文档强制添加编号
     * `preserveTaskMarkers`：用于复制 Markdown 的可选布尔值，`true` 时保留 `[/]`、`[-]` 等任务标记；省略、`null` 或 `false` 时保持标准 Markdown 兼容行为，将非标准标记归一化为 `[X]`
 * 返回值
 
@@ -1964,6 +2225,11 @@ if (response.code === 0 && response.data) {
 ### 渲染
 
 * `/api/av/renderAttributeView`
+
+普通 HTTP 模板解析或求值错误在对应字段中返回，数据库仍可显示；取消、笔记本锁定和执行超限仍终止渲染。
+
+`deferHTTPTemplates` 默认为 `false`。设为 `true` 时先返回未执行联网模板的视图，`pendingHTTPTemplates` 列出待求值字段 ID；同库模板一并延后。筛选、分组、统计、日历或嵌套布局依赖模板结果时，仅返回结构，不返回临时行集。仅排序依赖模板时先返回条目，查询完成后确定顺序。不带该标记再次请求，获取最终结果并按正常流程确认联网。`preserveHTTPResults` 默认为 `false`；配合 `automaticRefresh: true`，排序、搜索等展示操作可复用模板当前成功快照，包括读取外部块或 SQL 的模板。来源、行输入、权限和缓存边界仍生效；单独设置该标记不会覆盖手动刷新。
+
 * 参数
 
   ```json
@@ -1987,11 +2253,15 @@ if (response.code === 0 && response.data) {
     * `viewID`: 明确指定要渲染的视图。值无效时返回错误；省略时先通过 `blockID` 解析，无法解析则使用第一个可用视图
     * `page`: 页码，从 1 开始。默认为 `1`
     * `pageSize`: 每页条目数。`-1` 或省略表示使用视图默认值（`50`）
+    * 可选 `automaticRefresh`，默认 `false`。启用交互模板执行时，`true` 仅复用来源、模板及其引用输入未变的行的成功内存结果。手动刷新应省略或传 `false`。笔记本锁定或撤销模板许可会清除这些结果，此选项不扩大读取权限
     * `query`: 可选的主键值全文过滤关键字
     * `groupPaging`: 分组（看板）视图的可选分页配置
     * `targetItemID`: 可选的待定位数据库条目 ID。指定后，返回值中包含目标定位信息
     * `targetGroupID`: 与 `targetItemID` 配合使用的可选分组提示
+    * `nested`：启用父子条目且设置为树形显示的表格、列表视图的可选树形读取请求，省略时保持平铺返回。`expandedIDs` 控制展开项，`groupExpandedIDs` 可按分组覆盖；`childPaging` 使用 `parentID`（分组内使用 `groupID/parentID`）映射到 `{page, pageSize}`，页码从 1 开始，子项每页最多 200 条。根条目使用 `page`/`pageSize` 分页。响应的 `view.nested` 返回实际页码、根数量和匹配条目数，`rows[].hierarchy` 标识可见层级及仅用于上下文的祖先。定位会展开祖先并切换到对应页面，不返回不可访问的祖先身份
     * `temporarySort`: 可选的单字段排序，例如 `{"column":"field-id","order":"DESC"}`。省略或为 `null` 时使用已保存规则；指定时仅覆盖本次请求的排序，在分页前生效，不创建或保存数据库，也不改变载体默认视图。`order` 必须为 `ASC` 或 `DESC`；字段缺失或不支持排序时恢复已保存规则。支持现有的 `valueSource` 和 `dateEndpoint` 选项
+    * `relationContext`: 可选的条目详情范围：`{"sourceAvID":"源数据库 ID","sourceItemID":"源条目 ID","relationKeyID":"关联字段 ID"}`。源字段必须已启用关联视图配置，`id` 必须与该字段的目标数据库一致。提供 `blockID` 时，它必须是真实的源数据库块或源条目绑定块，不能用条目 ID 伪装块 ID；未绑定条目可传空值。此模式只支持平铺表格，不接受 `nested`。显式 `viewID` 可选择同一目标数据库中已有的表格视图，省略时使用字段配置的视图。源数据库、字段或视图无效或不可用时返回错误，不退化为展示整个目标数据库。发布阅读者请求不支持此模式
+    * `temporaryFilters`: `relationContext` 模式下可选的附加筛选规则，仅本次请求与目标视图的已保存筛选按 AND 合并。源条目的当前关联成员范围在筛选、排序、分组、分页、计数和目标条目定位之前强制生效。添加关联时使用的候选筛选不会排除既有关联成员。此渲染模式不持久化成员范围、附加筛选、临时排序或视图选择；无效的临时排序会返回错误
     * `createIfNotExist`: 为 `true`（默认）时，若数据库不存在则创建包含默认视图的数据库
     * `persistView`: 已废弃的兼容参数。接口仍接受该参数但会忽略，因为数据库定义不再存储顶层当前视图
 * 返回值（真实响应，表格布局，展示一行）：
@@ -2165,6 +2435,10 @@ if (response.code === 0 && response.data) {
   ```
 
     * `id`: 数据库 ID
+    * 可选 `blockID`：当前数据库的真实载体区块；使用以下任一关联上下文时改为真实来源载体或确实绑定在来源数据库中的区块，由内核推导并验证存储边界，不接受客户端任意指定笔记本
+    * 可选 `relationFieldContext`：`{ "sourceAvID": "...", "relationKeyID": "..." }`，读取来源关联字段实际指向的目标配置，允许在尚未开启关联视图时使用
+    * 可选 `relationDependencyContext`：`{ "relationContext": { "sourceAvID": "...", "sourceItemID": "...", "relationKeyID": "..." }, "relationKeyIDs": ["..."] }`，从关联表的目标数据库沿一至两个真实关联字段读取筛选元数据，每一步及最终请求的 `id` 都必须匹配
+    * 两种关联上下文互斥，均只返回配置和字段元数据，不含条目值；上下文无效或加密域不可用时返回错误，不回退到其他数据库
 * 返回值（真实响应，已裁剪——`keyValues`/`views` 数组做了截断）：
 
   ```json
@@ -2244,9 +2518,11 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-    * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`），以及所有视图的原始布局配置（`table`/`list`/`gallery`/`kanban`）和条目顺序（`itemIds`）。兼容字段 `viewID` 动态取第一个可用视图，不会持久化。返回值不含渲染后的行或分页；需要计算后的行数据请使用 [渲染](#渲染)
+    * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`），以及所有视图的原始布局配置（`table`/`list`/`gallery`/`kanban`）和条目顺序（`itemIds`）。可选的层级配置位于 `subItems`，各视图的显示方式位于 `subItemsDisplay`；分组可包含独立的树形手动顺序 `subItemsItemIds`，不改变平铺成员顺序 `groupItemIds`。兼容字段 `viewID` 动态取第一个可用视图，不会持久化。返回值不含渲染后的行或分页；需要计算后的行数据请使用 [渲染](#渲染)
 
-    * `data.av.automations` 可选，保存数据库共享的规则（`spec: 1` 至 `8`）。`block` 触发器通过 `blockSource` 指定笔记本/文档范围、块类型、标签和自定义属性，`collect` 动作将符合条件的原块绑定到当前数据库。通过 `setAttrViewAutomations` 保存新增范围时，笔记本与文档分别去重后合计最多 32 项。既有超限范围仍可读取和使用，可保留或删减；超限时新增范围会被拒绝。撤销重做保留原范围。主类型包含全部子类型；格式 3 支持 `h:h1` 至 `h:h6`、`l:u/o/t`、`i:u/o/t` 和 `callout:TYPE`（区分大小写，允许自定义提示类型）。类型为空不限制，多个类型取任一匹配。自动创建的主键值可能包含由内核维护的 `block.collectionRuleID`。自动收集只添加条目，原文变化及规则条件、范围、对象或启用状态变化均保留已有条目和字段，再次匹配仍使用原条目。主动清理按全部启用的收集规则统一检查手动和自动绑定条目，保留匹配或无法判断的条目，执行前复查后仅移出确认不匹配的条目；撤销恢复原条目及全部字段。 `blockSource.tagMatch` 和 `attributeMatch` 缺省为 `and`，格式 3 支持各组独立设置 `or`；组间仍取与关系，空组不限制。 每条规则的可选 `notifyOnSuccess` 缺省或 `null` 为 `true`，实际变更在事务提交成功后合并通知；关闭不影响错误提示。无变化、手动收集、撤销重做及回滚事务不发送成功通知。 格式 4 增加可选的 `blockSource.tagTarget`：缺省或空字符串使用默认选择，优先收集合格列表项而非其首个内容块，`block` 收集标签所在块，`container` 选择最近的符合类型和属性条件的容器并按块 ID 去重；文档需显式选择 `d`。全部标签须在同一个来源块中，无标签条件时此选项不影响筛选。预览与实际收集对象一致，切换保留已有条目及字段。 格式 5 增加可选的 `blockSource.documentDepth`：缺省或 `null` 表示不限，`0` 仅包含每个选中文档本身，`1` 还包含一级子文档，其他非负整数指定最大相对后代深度。该设置统一限制文档范围，不影响笔记本范围，各范围仍取并集。修改深度保留已有条目和字段，不自动补收存量内容。 格式 6 为每条属性条件增加可选的 `nameOperator`：缺省、空字符串或 `equals` 保持完整名称精确匹配，`contains` 按字面子串匹配且无需输入 `custom-` 前缀，`regex` 使用 Go 正则语法匹配包含该前缀的完整名称。仅匹配自定义属性，名称和值区分大小写，且必须由同一条属性同时满足；`exists` 要求至少一个名称匹配，`notExists` 要求没有名称匹配，两者忽略属性值。名称模式最多 256 字节，非法正则拒绝保存。既有格式 1–5 的行为保持不变，旧读取器拒绝格式 6 且不改写数据库。 格式 7 增加可选的 `blockSource.includeSelectedDocuments`：缺省、`null` 或 `true` 包含每个所选文档自身；`false` 排除该文档及其内部所有块，子文档仍按 `documentDepth` 匹配。该设置由所有文档范围共用，不影响笔记本范围或其他重叠文档范围，各范围仍取并集。`false` 与深度 `0` 组合时，对应文档范围为空。修改后保留已有条目和字段，不自动补收或移出。格式 1–6 仍可读取，旧读取器拒绝格式 7 且不改写数据库。 格式 8 增加可选的 `blockSource.referenceID`：匹配正文中指向该块的块引用，文档目标还包含内部内容块，不含子文档；不包含嵌入块、普通链接和数据库富文本字段中的引用。标签约束同一引用来源块，来源按反链父块规则归并后再匹配类型和属性，`tagTarget` 不参与选择。目标必须位于同一加密边界。移除引用或更改目标会保留已有条目和字段，历史内容需预览后显式补收。既有格式 1–7 仍可读取，旧客户端会拒绝格式 8 且不改写数据库。
+    * `data.av.automations` 可选，保存数据库共享的规则（`spec: 1` 至 `10`）。`block` 触发器通过 `blockSource` 指定笔记本/文档范围、块类型、标签和自定义属性，`collect` 动作将符合条件的原块绑定到当前数据库。通过 `setAttrViewAutomations` 保存新增范围时，笔记本与文档分别去重后合计最多 32 项。既有超限范围仍可读取和使用，可保留或删减；超限时新增范围会被拒绝。撤销重做保留原范围。主类型包含全部子类型；格式 3 支持 `h:h1` 至 `h:h6`、`l:u/o/t`、`i:u/o/t` 和 `callout:TYPE`（区分大小写，允许自定义提示类型）。类型为空不限制，多个类型取任一匹配。自动创建的主键值可能包含由内核维护的 `block.collectionRuleID`。自动收集只添加条目，原文变化及规则条件、范围、对象或启用状态变化均保留已有条目和字段，再次匹配仍使用原条目。主动清理按全部启用的收集规则统一检查手动和自动绑定条目，保留匹配或无法判断的条目，执行前复查后仅移出确认不匹配的条目；撤销恢复原条目及全部字段。 `blockSource.tagMatch` 和 `attributeMatch` 缺省为 `and`，格式 3 支持各组独立设置 `or`；组间仍取与关系，空组不限制。 每条规则的可选 `notifyOnSuccess` 缺省或 `null` 为 `true`，实际变更在事务提交成功后合并通知；关闭不影响错误提示。无变化、手动收集、撤销重做及回滚事务不发送成功通知。 格式 4 增加可选的 `blockSource.tagTarget`：缺省或空字符串使用默认选择，优先收集合格列表项而非其首个内容块，`block` 收集标签所在块，`container` 选择最近的符合类型和属性条件的容器并按块 ID 去重；文档需显式选择 `d`。全部标签须在同一个来源块中，无标签条件时此选项不影响筛选。预览与实际收集对象一致，切换保留已有条目及字段。 格式 5 增加可选的 `blockSource.documentDepth`：缺省或 `null` 表示不限，`0` 仅包含每个选中文档本身，`1` 还包含一级子文档，其他非负整数指定最大相对后代深度。该设置统一限制文档范围，不影响笔记本范围，各范围仍取并集。修改深度保留已有条目和字段，不自动补收存量内容。 格式 6 为每条属性条件增加可选的 `nameOperator`：缺省、空字符串或 `equals` 保持完整名称精确匹配，`contains` 按字面子串匹配且无需输入 `custom-` 前缀，`regex` 使用 Go 正则语法匹配包含该前缀的完整名称。仅匹配自定义属性，名称和值区分大小写，且必须由同一条属性同时满足；`exists` 要求至少一个名称匹配，`notExists` 要求没有名称匹配，两者忽略属性值。名称模式最多 256 字节，非法正则拒绝保存。既有格式 1–5 的行为保持不变，旧读取器拒绝格式 6 且不改写数据库。 格式 7 增加可选的 `blockSource.includeSelectedDocuments`：缺省、`null` 或 `true` 包含每个所选文档自身；`false` 排除该文档及其内部所有块，子文档仍按 `documentDepth` 匹配。该设置由所有文档范围共用，不影响笔记本范围或其他重叠文档范围，各范围仍取并集。`false` 与深度 `0` 组合时，对应文档范围为空。修改后保留已有条目和字段，不自动补收或移出。格式 1–6 仍可读取，旧读取器拒绝格式 7 且不改写数据库。 格式 8 增加可选的 `blockSource.referenceID`：匹配正文中指向该块的块引用，文档目标还包含内部内容块，不含子文档；不包含嵌入块、普通链接和数据库富文本字段中的引用。标签约束同一引用来源块，来源按反链父块规则归并后再匹配类型和属性，`tagTarget` 不参与选择。目标必须位于同一加密边界。自动收集本身在移除引用或更改目标后保留已有条目和字段，历史内容需预览后显式补收。编辑器删除正文块引用时，可在确认后同步移出明确不再符合任何启用收集规则的自动收集条目；手动条目、仍符合任一启用规则的条目及无法判断的条目保留，撤销会原子恢复被删引用、原条目及字段值。既有格式 1–7 仍可读取，旧客户端会拒绝格式 8 且不改写数据库。 格式 9 增加显式的 `manual` 触发器，已启用且已保存的规则仅在交互式手动执行时处理符合条件的存储条目；模板支持 `httpGet` 和严格的 `fromJson`，沿用现有 HTTP 权限和执行预算。全部请求与类型转换成功后，结果原子写入普通字段，网络等待期间不持有编辑事务锁。来源或目标数据库变化会拒绝执行，失败保留原值。所有动作读取执行开始时的存储快照，撤销重做复用已保存结果，不发起 HTTP 请求或自动化级联。每次最多进行 1,000 次字段写入和条目新增，不提供定时执行或持久化模板结果缓存。格式 1–8 仍可读取，旧客户端拒绝格式 9 且不改写数据库。 格式 10 增加有界的 `printf`、`urlquery`、`dict`、`toString` 和事件模板中的 `fromJson`/`httpGet`。含 HTTP 的整条规则在编辑提交后，仅对触发条目执行，并将结果单独提交和撤销；失败保留编辑及原结果。发起编辑的有效主窗口继续事务响应中的单次任务，无窗口的 API 写入不执行含 HTTP 的规则。连续编辑合并处理，过期结果丢弃，撤销重做不重新联网。格式化最多 64 个参数，序列化输入和字符串输出最多 64 KiB；`printf` 限制标量参数的宽度和精度，不支持动态宽度或参数索引，`dict` 要求字符串键及完整键值对。既有格式 1–9（含停用的未完成模板）仍可读取，旧客户端拒绝格式 10 且不改写来源。
+
+      手动执行界面通过 rows: true 启用逐条执行；既有调用仍保持整批原子执行及 null 响应。先以空 runID 开始，再以 runID 和 step 续批；status 只查询进度，重复序号不重放动作。每批最多处理 32 条符合条件的记录，每条全部动作原子提交。code 1 返回部分进度，包含成功、失败、待处理及跳过的条目 ID。各批共享一轮网络预算及 1,000 次操作上限；显式 retry 只为失败和未完成条目开始新一轮。进度绑定主窗口，十五分钟内有效，不含字段明文，并在笔记本开始锁定时清除。模板编辑器支持按名称选择并插入稳定字段引用及复制字段 ID。
 
 ### 获取主键值
 
@@ -2818,6 +3094,8 @@ if (response.code === 0 && response.data) {
 ### 设置视图内字段排序
 
 在单个视图的布局内重排列（例如表格的列顺序），不改变全局字段顺序。
+
+未知视图 ID 或字段 ID 返回错误。移动字段保留列宽、显隐设置、字段类型和已存储的数据。
 
 * `/api/av/sortAttributeViewViewKey`
 * 参数

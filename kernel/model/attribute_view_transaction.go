@@ -25,7 +25,7 @@ type attributeViewRollback struct {
 	leases       map[string]bool
 }
 
-func (tx *Transaction) readAttributeViewForMutation(avID, blockID, boxID string) (*av.AttributeView, error) {
+func (tx *Transaction) readAttributeViewForMutation(avID, blockID, boxID string, exactStorage ...bool) (*av.AttributeView, error) {
 	carrierBoxID, exact, err := resolveAttributeViewCarrierBoxID(blockID)
 	if err != nil {
 		return nil, err
@@ -43,11 +43,30 @@ func (tx *Transaction) readAttributeViewForMutation(avID, blockID, boxID string)
 		}
 		tx.attributeViewRollback.leases[boxID] = true
 	}
-	current, err := av.ParseAttributeViewForIndexInBox(avID, boxID)
+	var current *av.AttributeView
+	storageKnown := tx.attributeViewStorageContexts != nil || len(exactStorage) > 0 && exactStorage[0]
+	if tx.historyRecovery != nil {
+		current, err = tx.historyRecovery.readCurrent(avID, boxID)
+	} else if storageKnown {
+		current, err = av.ParseAttributeViewWithStorageContext(avID, boxID)
+	} else {
+		current, err = av.ParseAttributeViewForIndexInBox(avID, boxID)
+	}
 	if err == nil && current == nil {
 		err = av.ErrViewNotFound
 	}
 	if err == nil {
+		if tx.attributeViewStorageContexts != nil {
+			if previous, exists := tx.attributeViewStorageContexts[avID]; exists && previous != boxID {
+				return nil, fmt.Errorf("ambiguous database storage context [%s]", avID)
+			}
+			tx.attributeViewStorageContexts[avID] = boxID
+		}
+		if storageKnown {
+			if err = current.SetStorageContext(boxID); err != nil {
+				return nil, err
+			}
+		}
 		tx.watchSourceDatabase(current)
 	}
 	return current, err
@@ -77,18 +96,13 @@ func (tx *Transaction) rememberAttributeViewMutationTree(blockID string) error {
 }
 
 func syncAttributeViewRelationIndexes(before, after *av.AttributeView) {
-	targets := func(view *av.AttributeView) map[string]bool {
-		ret := map[string]bool{}
-		if view != nil {
-			for _, kv := range view.KeyValues {
-				if kv.Key.Type == av.KeyTypeRelation && kv.Key.Relation != nil && kv.Key.Relation.AvID != "" {
-					ret[kv.Key.Relation.AvID] = true
-				}
-			}
+	if _, scoped := after.StorageContext(); scoped {
+		if err := syncAttributeViewRelationIndexesWithErr(before, after); err != nil {
+			logging.LogErrorf("restore database relation indexes [%s]: %s", after.ID, err)
 		}
-		return ret
+		return
 	}
-	beforeTargets, afterTargets := targets(before), targets(after)
+	beforeTargets, afterTargets := attributeViewRelationTargets(before), attributeViewRelationTargets(after)
 	for id := range beforeTargets {
 		if !afterTargets[id] {
 			av.RemoveAvRel(after.ID, id)
@@ -97,6 +111,41 @@ func syncAttributeViewRelationIndexes(before, after *av.AttributeView) {
 	for id := range afterTargets {
 		av.UpsertAvBackRel(after.ID, id)
 	}
+}
+
+func attributeViewRelationTargets(view *av.AttributeView) map[string]bool {
+	ret := map[string]bool{}
+	if view != nil {
+		for _, kv := range view.KeyValues {
+			if kv.Key.Type == av.KeyTypeRelation && kv.Key.Relation != nil && kv.Key.Relation.AvID != "" {
+				ret[kv.Key.Relation.AvID] = true
+			}
+		}
+	}
+	return ret
+}
+
+func syncAttributeViewRelationIndexesWithErr(before, after *av.AttributeView) error {
+	beforeTargets, afterTargets := attributeViewRelationTargets(before), attributeViewRelationTargets(after)
+	remove := func(id string) error { return av.RemoveAvRelWithErr(after.ID, id) }
+	upsert := func(id string) error { return av.UpsertAvBackRelWithErr(after.ID, id) }
+	if boxID, scoped := after.StorageContext(); scoped {
+		remove = func(id string) error { return av.RemoveAvRelInBoxWithErr(after.ID, id, boxID) }
+		upsert = func(id string) error { return av.UpsertAvBackRelInBoxWithErr(after.ID, id, boxID) }
+	}
+	for id := range beforeTargets {
+		if !afterTargets[id] {
+			if err := remove(id); err != nil {
+				return err
+			}
+		}
+	}
+	for id := range afterTargets {
+		if err := upsert(id); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // 非编辑器变更在提交成功后清理失效历史；无事务的写入在保存后立即清理。
@@ -157,12 +206,19 @@ func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 				continue
 			}
 			boxID, _, _ := strings.Cut(key, "/")
-			current, _ := av.ParseAttributeViewForIndexInBox(original.ID, boxID)
+			var current *av.AttributeView
+			if _, scoped := original.StorageContext(); scoped {
+				current, _ = av.ParseAttributeViewWithStorageContext(original.ID, boxID)
+			} else {
+				current, _ = av.ParseAttributeViewForIndexInBox(original.ID, boxID)
+			}
 			if tx.sourceDatabase(original.ID, boxID) != nil {
 				syncAttributeViewRelationIndexes(current, original)
 				continue
 			}
-			av.SetAVBoxID(original.ID, boxID)
+			if _, scoped := original.StorageContext(); !scoped {
+				av.SetAVBoxID(original.ID, boxID)
+			}
 			if err := av.SaveAttributeView(original); err != nil {
 				logging.LogErrorf("restore database [%s] after transaction failure: %s", original.ID, err)
 			} else {
@@ -171,7 +227,12 @@ func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 		}
 		for key, filename := range state.createdViews {
 			boxID, id, _ := strings.Cut(key, "/")
-			view, _ := av.ParseAttributeViewForIndexInBox(id, boxID)
+			var view *av.AttributeView
+			if tx.attributeViewStorageContexts != nil {
+				view, _ = av.ParseAttributeViewWithStorageContext(id, boxID)
+			} else {
+				view, _ = av.ParseAttributeViewForIndexInBox(id, boxID)
+			}
 			if err := filelock.Remove(filename); err != nil {
 				logging.LogErrorf("remove restored database [%s] after transaction failure: %s", id, err)
 			} else {
@@ -180,7 +241,13 @@ func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 			if view != nil {
 				for _, kv := range view.KeyValues {
 					if kv.Key.Relation != nil {
-						av.RemoveAvRel(id, kv.Key.Relation.AvID)
+						if tx.attributeViewStorageContexts != nil {
+							if err := av.RemoveAvRelInBoxWithErr(id, kv.Key.Relation.AvID, boxID); err != nil {
+								logging.LogErrorf("remove restored database relation [%s]: %s", id, err)
+							}
+						} else {
+							av.RemoveAvRel(id, kv.Key.Relation.AvID)
+						}
 					}
 				}
 			}

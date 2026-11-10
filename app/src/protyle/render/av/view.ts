@@ -1,4 +1,5 @@
 import {isTableLikeView} from "./viewType";
+import {locateRequests} from "./locateState";
 import {Menu} from "../../../plugin/Menu";
 import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
@@ -14,6 +15,7 @@ import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "./viewVisibility";
 import {isNotEditBlock} from "../../wysiwyg/getBlock";
 import {countFilterLeaves} from "./filterTree";
 import {isMobile} from "../../../util/functions";
+import {copyBlockSelection} from "../../util/blockClipboard";
 
 export const setAVBlockVisibleViewIDs = (
     protyle: IProtyle,
@@ -49,21 +51,24 @@ const copyViewMirror = (blockElement: Element, viewID: string) => {
     const oldViewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
     blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, viewID);
     blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, viewID);
-    if (isNotEditBlock(blockElement)) {
-        focusBlock(blockElement);
-    } else {
-        focusByRange(getEditorRange(blockElement));
-    }
-    document.execCommand("copy");
-    if (null === oldVisibleViewIDs) {
-        blockElement.removeAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS);
-    } else {
-        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, oldVisibleViewIDs);
-    }
-    if (null === oldViewID) {
-        blockElement.removeAttribute(Constants.CUSTOM_SY_AV_VIEW);
-    } else {
-        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, oldViewID);
+    try {
+        if (isNotEditBlock(blockElement)) {
+            focusBlock(blockElement);
+        } else {
+            focusByRange(getEditorRange(blockElement));
+        }
+        copyBlockSelection(blockElement);
+    } finally {
+        if (null === oldVisibleViewIDs) {
+            blockElement.removeAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS);
+        } else {
+            blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, oldVisibleViewIDs);
+        }
+        if (null === oldViewID) {
+            blockElement.removeAttribute(Constants.CUSTOM_SY_AV_VIEW);
+        } else {
+            blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, oldViewID);
+        }
     }
 };
 
@@ -297,6 +302,11 @@ export const getViewHTML = (data: IAV) => {
     <span class="b3-menu__accelerator">${fields.filter((item: IAVColumn) => !item.hidden).length}/${fields.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
+<button class="b3-menu__item" data-type="go-sub-items">
+    <svg class="b3-menu__icon"><use xlink:href="#iconListTree"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.avSubItems}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
 <button class="b3-menu__item" data-type="goFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
@@ -354,6 +364,7 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
         if (event.key === "Enter") {
             const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
             if (currentElement) {
+                locateRequests.delete(options.blockElement as HTMLElement);
                 const currentViewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
                     options.blockElement.querySelector(".av__views .item--focus")?.getAttribute("data-id");
                 if (currentElement.dataset.id !== currentViewID) {

@@ -190,7 +190,8 @@ type AISSETurn struct {
 }
 type AISSEThinking struct {
 	Reasoning string `json:"reasoning"`
-	RoundID   string `json:"roundID"`
+	// 同一模型轮次的重试和上下文压缩沿用 roundID；旧会话仍可能没有轮次标识。
+	RoundID string `json:"roundID"`
 }
 type AISSEConfirm struct {
 	Name      string               `json:"name"`

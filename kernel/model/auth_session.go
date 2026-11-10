@@ -31,7 +31,7 @@ func BindDesktopSession(c *gin.Context, workspaceSession *util.WorkspaceSession,
 }
 
 func isWorkspaceSessionCurrent(workspaceSession *util.WorkspaceSession) bool {
-	// 旧版 Cookie 没有启动批次，保留其有效性；重新登录时按所选的记住策略建立绑定。
+	// 记住登录及非本机桌面的会话没有启动批次，跨内核重启保持有效；重新登录时按所选的记住策略建立绑定。
 	return workspaceSession != nil && (workspaceSession.DesktopSessionID == "" ||
 		hmac.Equal([]byte(workspaceSession.DesktopSessionID), []byte(desktopSessionID)))
 }
@@ -45,8 +45,24 @@ func IsWorkspaceSessionAuthenticated(workspaceSession *util.WorkspaceSession) bo
 }
 
 func IsAccessCodeSessionAuthenticated(workspaceSession *util.WorkspaceSession) bool {
-	return isWorkspaceSessionCurrent(workspaceSession) && Conf.AccessAuthCode != "" &&
-		util.AuthCodeEquals(Conf.AccessAuthCode, workspaceSession.AccessAuthCode)
+	version := accessAuthCodeVersion(Conf.AccessAuthCode)
+	return isWorkspaceSessionCurrent(workspaceSession) && version != "" &&
+		hmac.Equal([]byte(workspaceSession.AccessAuthCodeVersion), []byte(version))
+}
+
+// SetAccessCodeSession 将会话绑定到指定的锁屏密码，会话只保存密码的 HMAC 摘要。
+func SetAccessCodeSession(workspaceSession *util.WorkspaceSession, accessAuthCode string) {
+	workspaceSession.AccessAuthCodeVersion = accessAuthCodeVersion(accessAuthCode)
+}
+
+func accessAuthCodeVersion(accessAuthCode string) string {
+	if Conf == nil || Conf.CookieKey == "" || accessAuthCode == "" {
+		return ""
+	}
+	mac := hmac.New(sha256.New, []byte(Conf.CookieKey))
+	mac.Write([]byte("siyuan-access-auth-code-v1\x00"))
+	mac.Write([]byte(accessAuthCode))
+	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
 }
 
 func IsOIDCSessionAuthenticated(workspaceSession *util.WorkspaceSession) bool {

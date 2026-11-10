@@ -26,6 +26,7 @@ export const setEmpty = (app: App) => {
     document.getElementById("mobileTopBar").classList.remove("fn__none");
     document.getElementById("toolbarName").classList.add("fn__hidden");
     document.getElementById("toolbarNameReadonly").classList.add("fn__hidden");
+    document.getElementById("toolbarNameReadonly").replaceChildren();
     document.getElementById("editor").classList.add("fn__none");
     window.siyuan.mobile.docks.outline?.reload();
     updateMobileTopBarLayout();

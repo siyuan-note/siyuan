@@ -118,6 +118,166 @@ func TestAttributeViewRelationItemEncrypted(t *testing.T) {
 	if err != nil || total != 1 || len(candidates) != 1 || candidates[0].ID != created.ItemID {
 		t.Fatalf("encrypted candidates lost source context: total=%d, err=%v", total, err)
 	}
+	detailSource, err := av.ParseAttributeViewInBox(fixture.source.ID, boxID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	detailKey, _ := detailSource.GetKey(fixture.keyID)
+	detailKey.Relation.DetailView = &av.RelationDetailView{Spec: 1, Enabled: true, ViewID: fixture.target.Views[0].ID}
+	if err = av.SaveAttributeView(detailSource); err != nil {
+		t.Fatal(err)
+	}
+	detailContext := &AttributeViewRelationContext{SourceAvID: fixture.source.ID, SourceItemID: fixture.itemIDs[1], RelationKeyID: fixture.keyID}
+	if err = PerformTxSync(&Transaction{DoOperations: []*Operation{{Action: "updateAttrViewRelationItems", AvID: fixture.source.ID,
+		BlockID: fixture.sourceBlockID, RowID: detailContext.SourceItemID, KeyID: fixture.keyID,
+		Data: AttributeViewRelationItemsChange{AddItemIDs: []string{created.ItemID}}}}}); err != nil {
+		t.Fatal(err)
+	}
+	if err = PerformTxSync(&Transaction{DoOperations: []*Operation{{Action: "updateAttrViewCell", AvID: fixture.target.ID,
+		BlockID: fixture.sourceBlockID, RowID: created.ItemID, KeyID: fixture.textKeyID, RelationContext: detailContext,
+		Data: &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "Encrypted scoped edit"}}}}}); err != nil {
+		t.Fatal(err)
+	}
+	detailView, _, _, err := RenderAttributeViewWithTargetOptions(fixture.sourceBlockID, fixture.target.ID, "", "", 1, 50, nil,
+		"", false, false, "", "", AttributeViewRenderOptions{RelationContext: detailContext})
+	if err != nil || detailView.(*av.Table).RowCount != 1 || detailView.(*av.Table).Rows[0].ID != created.ItemID {
+		t.Fatalf("encrypted relation detail lost its scope: %v", err)
+	}
+	detailTarget, err := av.ParseAttributeViewInBox(fixture.target.ID, boxID)
+	if err != nil || detailTarget.GetValue(fixture.textKeyID, created.ItemID).Text.Content != "Encrypted scoped edit" {
+		t.Fatalf("source carrier saved scoped target edit to a different boundary: %v", err)
+	}
+	t.Run("native-carrier-domain-with-ordinary-twin", func(t *testing.T) {
+		checkEncryptedRelationNativeTwin(t, fixture, detailTarget, created.ItemID, boxID)
+	})
+	t.Run("sub-items-reparent-undo-automation-domain", func(t *testing.T) {
+		checkEncryptedRelationSubItems(t, fixture, created.ItemID, boxID)
+		checkRelationDetailSubItemsCellUndo(t, fixture, created.ItemID, boxID)
+	})
+	checkEncryptedRelationSelfMembership(t, fixture, created.ItemID, boxID)
+	// 空载体仍以已验证的来源边界操作；中途全局 ID 映射变化不能改写保存目标。
+	if err = detailContext.ResolveStorage(""); err != nil {
+		t.Fatal(err)
+	}
+	previousSaved := av.AttributeViewSaved
+	av.AttributeViewSaved = func(id, savedBox string) {
+		av.SetAVBoxID(fixture.source.ID, "")
+		av.SetAVBoxID(fixture.target.ID, "")
+		if previousSaved != nil {
+			previousSaved(id, savedBox)
+		}
+	}
+	defer func() { av.AttributeViewSaved = previousSaved }()
+	plainContextEdit := &Operation{Action: "updateAttrViewCell", AvID: fixture.target.ID, RowID: created.ItemID,
+		KeyID: fixture.textKeyID, RelationContext: detailContext, Data: &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "Detached encrypted scope"}}}
+	if err = PerformTxSync(&Transaction{DoOperations: []*Operation{plainContextEdit}}); err != nil {
+		t.Fatal(err)
+	}
+	av.AttributeViewSaved = previousSaved
+	detailTarget, err = av.ParseAttributeViewWithStorageContext(fixture.target.ID, boxID)
+	if err != nil || detailTarget.GetValue(fixture.textKeyID, created.ItemID).Text.Content != "Detached encrypted scope" {
+		t.Fatalf("interleaved map changed encrypted target: %v", err)
+	}
+	dependency, loadErr := attributeViewContextFilterLoader(detailTarget, "")(fixture.source.ID)
+	if loadErr != nil || dependency == nil {
+		t.Fatalf("context metadata loader lost encrypted pin: %v", loadErr)
+	}
+	if domain, known := dependency.StorageContext(); !known || domain != boxID {
+		t.Fatal("metadata dependency crossed domain")
+	}
+	av.SetAVBoxID(fixture.source.ID, boxID)
+	av.SetAVBoxID(fixture.target.ID, boxID)
+	t.Run("carrierless-document-template", func(t *testing.T) {
+		av.RemoveBlockRel(fixture.target.ID, fixture.targetBlockID, func(string) bool { return true })
+		template := &av.NewItemTemplate{ID: ast.NewNodeID(), Name: "Document", TargetType: av.NewItemTargetDocument,
+			PrimaryKeyTemplate: "Encrypted planned document", SaveLocation: &av.NewItemSaveLocation{PathTemplate: "/Encrypted parent/"}}
+		if err := detailTarget.SetNewItemTemplates(&av.NewItemTemplatesConfig{Templates: []*av.NewItemTemplate{template}, DefaultTemplateID: template.ID}); err != nil {
+			t.Fatal(err)
+		}
+		if err := av.SaveAttributeView(detailTarget); err != nil {
+			t.Fatal(err)
+		}
+		p := PreviewAttributeViewRelationItem(fixture.source.ID, "", fixture.keyID, "Input", detailContext)
+		if p.Error != "" {
+			t.Fatalf("carrierless encrypted preview: %+v", p)
+		}
+		result, err := CreateAttributeViewRelationDetailItem(fixture.source.ID, "", fixture.keyID, "Input", []*AttributeViewRelationItemCell{{ItemID: detailContext.SourceItemID}}, p, true, detailContext)
+		if err != nil || result.IsDetached {
+			t.Fatalf("encrypted document creation: %+v, %v", result, err)
+		}
+		tree, err := LoadTreeByBlockIDInExactBox(result.BlockID, boxID)
+		if err != nil || tree.Box != boxID || tree.Root.IALAttr("title") != "Input" {
+			t.Fatalf("encrypted document target: %v", err)
+		}
+		if err = PerformTxSync(&Transaction{DoOperations: []*Operation{{Action: "updateAttrViewCell", AvID: fixture.target.ID,
+			RowID: result.ItemID, KeyID: detailTarget.GetBlockKey().ID, RelationContext: detailContext,
+			Data: &av.Value{Type: av.KeyTypeBlock, Block: &av.ValueBlock{Content: "Static encrypted anchor"}}}}}); err != nil {
+			t.Fatal(err)
+		}
+		tree, err = LoadTreeByBlockIDInExactBox(result.BlockID, boxID)
+		if err != nil || tree.Root.IALAttr("title") != "Input" {
+			t.Fatal("primary edit changed bound document title")
+		}
+		current, err := av.ParseAttributeViewWithStorageContext(fixture.target.ID, boxID)
+		if err != nil || current.GetBlockValue(result.ItemID).Block.Content != "Static encrypted anchor" {
+			t.Fatalf("encrypted static anchor not updated: %v", err)
+		}
+		countDocs := func() int {
+			count := 0
+			_ = filepath.WalkDir(filepath.Join(util.DataDir, boxID), func(path string, entry os.DirEntry, err error) error {
+				if err == nil && !entry.IsDir() && filepath.Ext(path) == ".sy" {
+					count++
+				}
+				return err
+			})
+			return count
+		}
+		source, err := av.ParseAttributeViewWithStorageContext(fixture.source.ID, boxID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		key, _ := source.GetKey(fixture.keyID)
+		key.Relation.CandidateFilters = []*av.ViewFilter{{Column: current.GetBlockKey().ID, Operator: av.FilterOperatorContains, Value: &av.Value{Type: av.KeyTypeBlock, Block: &av.ValueBlock{Content: "never eligible"}}}}
+		if err = av.SaveAttributeView(source); err != nil {
+			t.Fatal(err)
+		}
+		before := countDocs()
+		p = PreviewAttributeViewRelationItem(fixture.source.ID, "", fixture.keyID, "Rejected", detailContext)
+		if p.Error != "" {
+			t.Fatal(p.Error)
+		}
+		if _, err = CreateAttributeViewRelationDetailItem(fixture.source.ID, "", fixture.keyID, "Rejected", []*AttributeViewRelationItemCell{{ItemID: detailContext.SourceItemID}}, p, true, detailContext); err == nil {
+			t.Fatal("ineligible encrypted document linked")
+		}
+		if countDocs() != before {
+			t.Fatal("encrypted failed link retained new document")
+		}
+		key.Relation.CandidateFilters = nil
+		if err = av.SaveAttributeView(source); err != nil {
+			t.Fatal(err)
+		}
+		current, err = av.ParseAttributeViewWithStorageContext(fixture.target.ID, boxID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		template.SaveLocation.BoxID = ast.NewNodeID()
+		if err = current.SetNewItemTemplates(&av.NewItemTemplatesConfig{Templates: []*av.NewItemTemplate{template}, DefaultTemplateID: template.ID}); err != nil {
+			t.Fatal(err)
+		}
+		if err = av.SaveAttributeView(current); err != nil {
+			t.Fatal(err)
+		}
+		if rejected := PreviewAttributeViewRelationItem(fixture.source.ID, "", fixture.keyID, "Rejected", detailContext); rejected.Error == "" {
+			t.Fatal("encrypted plan crossed domain")
+		}
+		template.SaveLocation.BoxID = ""
+		if err = current.SetNewItemTemplates(&av.NewItemTemplatesConfig{Templates: []*av.NewItemTemplate{template}, DefaultTemplateID: template.ID}); err != nil {
+			t.Fatal(err)
+		}
+		if err = av.SaveAttributeView(current); err != nil {
+			t.Fatal(err)
+		}
+	})
 	paths := map[string][]byte{}
 	for _, view := range []*av.AttributeView{fixture.source, fixture.target} {
 		path := filepath.Join(util.DataDir, boxID, "storage", "av", view.ID+".json")

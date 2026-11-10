@@ -29,12 +29,12 @@ const NON_METRIC_LOCALES = ["en-us", "en-lr", "my"];
 // which are l10n-ids, should be lowercase.
 // See https://en.wikipedia.org/wiki/Paper_size
 const US_PAGE_NAMES = {
-  "8.5x11": "pdfjs-document-properties-page-size-name-letter",
-  "8.5x14": "pdfjs-document-properties-page-size-name-legal",
+  "8.5x11": "document_properties_page_size_name_letter",
+  "8.5x14": "document_properties_page_size_name_legal",
 };
 const METRIC_PAGE_NAMES = {
-  "297x420": "pdfjs-document-properties-page-size-name-a-three",
-  "210x297": "pdfjs-document-properties-page-size-name-a-four",
+  "297x420": "document_properties_page_size_name_a3",
+  "210x297": "document_properties_page_size_name_a4",
 };
 
 function getPageName(size, isPortrait, pageNames) {
@@ -162,7 +162,7 @@ class PDFDocumentProperties {
       version: info.PDFFormatVersion,
       pageCount: this.pdfDocument.numPages,
       pageSize,
-      linearized: this.#parseLinearization(info.IsLinearized),
+      linearized: await this.#parseLinearization(info.IsLinearized),
       _currentPageNumber: currentPageNumber,
       _pagesRotation: pagesRotation,
     });
@@ -355,9 +355,8 @@ class PDFDocumentProperties {
   #parseLinearization(isLinearized) {
     return this.l10n.get(
       isLinearized
-          // NOTE
-        ? "Yes"
-        : "No"
+        ? "pdfLinearizedYes"
+        : "pdfLinearizedNo"
     );
   }
 }

@@ -3,6 +3,7 @@ import { getAVVisibleViewIDs, getAVVisibleViewIDsAfterHidingAll } from "../viewV
 import { Constants } from "../../../../constants";
 import { clearSelect } from "../../../util/clear";
 import { transaction } from "../../../wysiwyg/transaction";
+import { locateRequests } from "../locateState";
 import type { IAVPanelDescriptor } from "./types";
 export const switcherPanel: IAVPanelDescriptor = {
     render: context => {
@@ -54,6 +55,7 @@ export const switcherPanel: IAVPanelDescriptor = {
         },
         "av-view-switch": (context, action) => {
             if (!action.target.parentElement.classList.contains("b3-menu__item--current")) {
+                locateRequests.delete(context.options.blockElement as HTMLElement);
                 const previousViewID = context.data.viewID;
                 context.data.viewID = action.target.parentElement.dataset.id;
                 context.options.blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, context.data.viewID);
@@ -85,6 +87,7 @@ export const switcherPanel: IAVPanelDescriptor = {
                 });
             }
             else {
+                locateRequests.delete(context.options.blockElement as HTMLElement);
                 const previousViewID = context.data.viewID;
                 context.data.viewID = action.target.parentElement.dataset.id;
                 context.options.blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, context.data.viewID);

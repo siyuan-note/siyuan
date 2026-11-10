@@ -42,6 +42,7 @@ const setup = (mobile = false) => {
         embed: undefined as {allowChildOperation: boolean, targetElement?: HTMLElement} | undefined};
     const menu = {close: (): void => undefined};
     const commonMenu = {
+        finishSheetTouch: () => {},
         data: undefined as Element,
         remove: () => { menu.close(); commonMenu.data = undefined; },
         closeSheet: () => sheetExports.close.call(commonMenu),

@@ -20,10 +20,11 @@ import {deleteFile} from "../editor/deleteFile";
 import {newFileInTree} from "../util/newFile";
 import {newNotebook} from "../util/mount";
 import {pathPosix} from "../util/pathName";
-import {isCustomFileTreeList} from "../util/fileTreeSort";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {Tab} from "../layout/Tab";
+import {getDockByType} from "../layout/tabUtil";
+import {Files} from "../layout/dock/Files";
 /// #endif
 
 const initialized = new WeakSet<object>();
@@ -109,9 +110,21 @@ export const ensureContextCommands = (app: App) => {
             return false;
         }
         const doc = getCommandDocument(context);
-        const element = context.fileTree?.elements[0] || document.querySelector(
-            `.sy__file li[data-node-id="${doc.id}"]`);
-        return Boolean(element && isCustomFileTreeList(element.parentElement));
+        if (context.fileTree?.controller) {
+            return context.fileTree.items[0].effectiveSortMode === 6;
+        }
+        let tree: import("../layout/dock/docTree/DocTreeController").DocTreeController;
+        /// #if MOBILE
+        tree = window.siyuan.mobile.docks.file?.docTree;
+        /// #else
+        const model = getDockByType("file")?.data.file;
+        tree = model instanceof Files ? model.docTree : undefined;
+        /// #endif
+        const item = tree?.findItem(doc.notebookId, doc.id);
+        if (item) {
+            return item.effectiveSortMode === 6;
+        }
+        return false;
     }, context => {
         const doc = getCommandDocument(context);
         newFileInTree(app, doc.notebookId, pathPosix().dirname(doc.path), {

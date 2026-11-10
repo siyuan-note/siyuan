@@ -13,7 +13,7 @@ const harness = () => {
     const hidden = new Set<string>();
     const button = {disabled: false, classList: {toggle: (name: string, value: boolean) => value ? hidden.add(name) : hidden.delete(name)},
         addEventListener: (_name: string, callback: () => void) => { click = callback; }};
-    const confirmations: Array<{confirm: () => Promise<void>, cancel: () => void}> = [];
+    const confirmations: Array<{confirm: () => Promise<boolean>, cancel: () => void}> = [];
     const requests: Array<{resolve: (response: {code: number}) => void, reject: (error: Error) => void}> = [];
     const errors: string[] = [];
     const siyuan = {config: {readonly: false}, isPublish: false,
@@ -22,7 +22,7 @@ const harness = () => {
     runInNewContext(transpileModule(readFileSync("src/business/clearRecentDocs.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText, {exports, window: {siyuan}, require: createMockRequire({
-        "../dialog/confirmDialog": {confirmDialog: (_title: string, _text: string, confirm: () => Promise<void>, cancel: () => void) =>
+        "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _text: string, confirm: () => Promise<boolean>, cancel: () => void) =>
             confirmations.push({confirm, cancel})},
         "../dialog/message": {showMessage: (message: string) => errors.push(message)},
         "../util/fetch": {fetchSyncPost: (url: string) => {

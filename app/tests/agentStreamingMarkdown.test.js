@@ -330,7 +330,8 @@ const runCases = async (sources, css, luteScript) => {
         document.body.appendChild(messages);
         Object.assign(chat, {
             host: {}, entries: [], currentAIElement: null, currentContent: "", fullContent: "",
-            currentToolCalls: [], currentThinkingSteps: [], pendingConfirms: [], renderedToolNames: {},
+            currentToolCalls: [], currentThinkingSteps: [], pendingConfirms: [], currentToolLine: null,
+            renderedToolCalls: new WeakMap(),
             currentThinkingText: "", currentThinkingEntryId: "", currentAssistantEntryId: "", currentRoundID: "",
             sessionId: "session", sessionRuns: {get: () => undefined}, sessionErrors: new Map(),
             messagesContainer: messages, streamingMarkdownEnabled: enabled, layoutVisible: true,

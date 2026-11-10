@@ -17,10 +17,12 @@ import {openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
 import {openStandaloneDatabaseItemByURI} from "../protyle/render/av/openStandaloneDatabaseItem";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {normalizeSiYuanUri, type ParsedSiYuanUri} from "./normalizeSiYuanUri";
+import {showMessage} from "../dialog/message";
+import {resolveCustomModelFactory} from "../plugin/customTabOwner";
 
 const bazaarTypes = new Set<TBazaarType>(["plugins", "themes", "icons", "templates", "widgets"]);
 
-const processSiYuanUriBlocks = (app: App, uriObj: ParsedSiYuanUri): boolean => {
+const processSiYuanUriBlocks = (app: App, uriObj: ParsedSiYuanUri, event?: MouseEvent, ctrlIsPressed = false): boolean => {
     const blockInfo = parseSiYuanUriInfo(uriObj.href);
     if (blockInfo != null) {
         const {id, focus} = blockInfo;
@@ -45,6 +47,8 @@ const processSiYuanUriBlocks = (app: App, uriObj: ParsedSiYuanUri): boolean => {
                             action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
                                 [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                             zoomIn: zoomIn || focus,
+                            position: event?.shiftKey ? "bottom" : event?.altKey ? "right" : undefined,
+                            keepCursor: !event?.shiftKey && !event?.altKey && ctrlIsPressed,
                         });
                         /// #else
                         openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
@@ -56,6 +60,8 @@ const processSiYuanUriBlocks = (app: App, uriObj: ParsedSiYuanUri): boolean => {
                 /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_CMD, "show");
                 /// #endif
+            } else {
+                showMessage(window.siyuan.languages._kernel[15].replace("%s", id));
             }
             forEachPluginSubscriber("open-siyuan-url-block", eventBus => {
                 eventBus.emit("open-siyuan-url-block", {
@@ -93,8 +99,9 @@ const processSiYuanUriPlugins = (app: App, uriObj: ParsedSiYuanUri): boolean => 
         // siyuan://plugins/plugin-name/foo?bar=baz
         plugin.eventBus.emit("open-siyuan-url-plugin", { url: uriObj.href });
     } else {
-        if (!app.plugins.some(item => item.models[pluginNameOrTabType])) {
-            return false;
+        if (!resolveCustomModelFactory(app, pluginNameOrTabType)) {
+            showMessage(window.siyuan.languages.pluginTabUnavailable);
+            return true;
         }
         // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
         /// #if !MOBILE
@@ -162,7 +169,7 @@ const processSiYuanUriBazaar = (app: App, uriObj: ParsedSiYuanUri): boolean => {
     return false;
 };
 
-export const processSiYuanUri = (app: App, uri: string) => {
+export const processSiYuanUri = (app: App, uri: string, event?: MouseEvent, ctrlIsPressed = false) => {
     let uriObj: ParsedSiYuanUri;
     try {
         const parsedURI = new URL(uri);
@@ -175,7 +182,7 @@ export const processSiYuanUri = (app: App, uri: string) => {
     }
     switch (uriObj.hostname) {
         case "blocks":
-            return processSiYuanUriBlocks(app, uriObj);
+            return processSiYuanUriBlocks(app, uriObj, event, ctrlIsPressed);
         case "plugins":
             return processSiYuanUriPlugins(app, uriObj);
         case "bazaar":

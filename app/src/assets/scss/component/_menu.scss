@@ -1,6 +1,11 @@
 @use "../util/mixin";
 @use "../component/list";
 
+.asset-menu--preview {
+  // 图片加载和切换不参与菜单高度计算，避免资源列表随重新定位移动。
+  height: 50vh;
+}
+
 .b3-menu {
   position: fixed;
   border-radius: var(--b3-border-radius-b);
@@ -176,7 +181,7 @@
     & > .b3-menu__items--menu,
     .b3-menu__submenu > .b3-menu__items--menu {
       box-sizing: border-box;
-      padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+      padding: 8px 16px max(16px, var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)));
     }
 
     & > .b3-menu__items--menu > .b3-menu__item,
@@ -278,13 +283,6 @@
         }
       }
 
-      &__actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-left: auto;
-      }
-
       &__items {
         min-height: 0;
       }
@@ -326,7 +324,7 @@
     box-sizing: border-box;
     height: 100%;
     overflow: auto;
-    padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+    padding: 8px 16px max(16px, var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)));
   }
 
   &--fullscreen &__groups {
@@ -503,6 +501,15 @@
 
       & > .b3-menu__action {
         opacity: 1;
+      }
+    }
+
+    &--wrap {
+      white-space: normal;
+      overflow-wrap: anywhere;
+
+      > .b3-menu__label {
+        min-width: 0;
       }
     }
 

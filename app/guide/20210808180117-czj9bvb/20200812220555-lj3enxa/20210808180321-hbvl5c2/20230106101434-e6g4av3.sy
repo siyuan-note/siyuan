@@ -6,7 +6,7 @@
 		"id": "20230106101434-e6g4av3",
 		"title": "工作空间",
 		"type": "doc",
-		"updated": "20261021005205"
+		"updated": "20261105180144"
 	},
 	"Children": [
 		{
@@ -35,6 +35,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "工作空间用于保存数据、历史、配置和运行时所需要的文件。"
+				}
+			]
+		},
+		{
+			"ID": "20261105180144-xp0kbf6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105180144-xp0kbf6",
+				"updated": "20261105180144"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端关闭窗口或退出应用的请求持续 15 秒未完成，且窗口在随后 1 秒内仍无响应时，会显示系统对话框，可继续等待或确认退出。退出可能丢失界面中尚未发送到内核的编辑。本机内核正常退出成功后才关闭窗口；失败时保留窗口，可再次尝试。关闭远程连接不会停止远程内核。托盘和应用退出入口同样支持此恢复方式；仍有响应的窗口继续按正常流程保存、确认和同步。"
 				}
 			]
 		},
@@ -170,6 +184,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "--workspace=&quot;工作空间绝对路径&quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace &quot;工作空间绝对路径&quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -829,6 +852,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "第三方主题保存在 data/themes/，图标包保存在 data/icons/，参与数据同步和快照。各设备的外观选择仍保存在本机 conf/conf.json 中；内置外观资源不参与同步。升级迁移将原目录移入数据目录，迁移后移除源副本。"
+				}
+			]
+		},
+		{
+			"ID": "20261030093418-iki0mer",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030093418-iki0mer",
+				"updated": "20261030093418"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "未完成事务的恢复记录与后来修改、移动或删除的文件冲突时，启动会自动保留当前文件并重建相关索引，不会重新创建已删除的文档。原始恢复记录保留在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "conf/document-source-recovery/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中供排查，无需手动清理或确认。文件访问错误、不支持的格式和认证失败仍会报错并保留原始数据。"
 				}
 			]
 		}

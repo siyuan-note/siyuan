@@ -45,6 +45,32 @@ import {
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
+test("reference creation visibility has stable paths and preserves existing defaults", () => {
+    const path = "editor.ref";
+    assert.deepEqual(getEntryCatalogChildren(path).map(item => item.key), ["newFile", "newSubDoc", "newFileAtPath"]);
+    assert.equal(isEntryOrderSortable(path), false);
+    for (const key of ["newFile", "newSubDoc", "newFileAtPath"]) {
+        const entryPath = `${path}.${key}`;
+        const entry = getEntryCatalogNode(entryPath);
+        assert.equal(entry.type, "entry");
+        assert.equal(getEntryParentPath(entryPath), path);
+        assert.equal(entry.simple, true);
+        assert.equal(entry.sortable, false);
+        assert.equal(getEntryCatalogDefaultVisibility(entryPath), true);
+        assert.equal(getEntryCatalogCustomDefaultVisibility(entryPath), true);
+        assert.equal(getBuiltinProfileEntryVisibility("simple", entry.simple), true);
+        assert.equal(getBuiltinProfileEntryVisibility("full", entry.simple), true);
+    }
+});
+
+test("the workspace menu has no standalone Markdown entry or configurable application section", () => {
+    assert.equal(getEntryCatalogNode("application.markdownEditor"), undefined);
+    assert.equal(getEntryCatalogSection("application"), undefined);
+    const source = readFileSync(resolve(process.cwd(), "src/menus/workspace.ts"), "utf8");
+    assert.doesNotMatch(source, /id: "markdownEditor"/);
+    assert.ok(source.indexOf('id: "workspaceList"') < source.indexOf('id: "layout"'));
+});
+
 test("image OCR actions retain their configurable paths and order", t => {
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
     Object.defineProperty(globalThis, "window", {configurable: true, value: {siyuan: {languages: {}}}});
@@ -104,9 +130,14 @@ test("embedded heading levels follow display modes and expose all levels in Simp
     const path = "gutter.single.blockEmbed";
     assert.deepEqual(getEntryCatalogChildren(path).map(entry => entry.key), [
         "refresh", "update", "refPopover", "separator_breadcrumb", "embedBlockBreadcrumb", "embedBlockBreadcrumbParentPath",
-        "headingEmbedMode", "embedHeadingLevel",
+        "headingEmbedMode", "embedHeadingLevel", "separator_conversion", "convertToBlocks", "convertToReferences",
     ]);
     const levelPath = `${path}.embedHeadingLevel`;
+    for (const key of ["convertToBlocks", "convertToReferences"]) {
+        assert.equal(getEntryCatalogNode(`${path}.${key}`).simple, true);
+        assert.equal(getEntryParentPath(`${path}.${key}`), path);
+    }
+    assert.equal(getEntryCatalogNode(`${path}.separator_conversion`).type, "separator");
     assert.equal(getEntryCatalogNode(`${path}.embedBlockBreadcrumbParentPath`)?.simple, true);
     assert.equal(getEntryParentPath(`${path}.embedBlockBreadcrumbParentPath`), path);
     for (const key of ["embedBlockBreadcrumb", "embedBlockBreadcrumbParentPath"]) {
@@ -989,6 +1020,11 @@ test("table block width actions keep current-column and whole-table scopes toget
 });
 
 test("table catalog follows the menu arrays and conditional declarations", () => {
+    for (const parent of ["gutter.single.table", "inline.text"]) {
+        const keys = getEntryCatalogChildren(parent).map(item => item.key);
+        assert.equal(keys.indexOf("insertTableHeaderRow") + 1, keys.indexOf("insertRowAbove"));
+        assert.equal(getEntryCatalogNode(`${parent}.insertTableHeaderRow`).type, "entry");
+    }
     const source = readFileSync(resolve(process.cwd(), "src/menus/protyle.ts"), "utf8");
     const table = source.slice(source.indexOf("export const tableMenu ="));
     const pushedIDs = (array: string) => Array.from(table.matchAll(
@@ -1468,4 +1504,10 @@ test("database block menu groups actions after its stable separator", () => {
     const source = readFileSync(resolve(process.cwd(), "src/protyle/gutter/index.ts"), "utf8");
     const section = source.slice(source.indexOf("const submenu: IMenu[] = [];", source.indexOf('type === "NodeAttributeView"')));
     assert.ok(section.indexOf('id: "exportCSV"') < section.indexOf('id: "showDatabaseInFolder"'));
+});
+
+
+test("the built-in Markdown asset action has a stable nested link menu identity", () => {
+    assert.ok(getEntryCatalogNode("inline.link.openBy.openMarkdownEditor"));
+    assert.deepEqual(getEntryCatalogChildren("inline.link.openBy").map(item => item.key), ["openMarkdownEditor"]);
 });

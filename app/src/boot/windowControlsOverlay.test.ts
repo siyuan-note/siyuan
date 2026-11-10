@@ -195,9 +195,13 @@ test("native Windows captions reserve geometry, preserve legacy controls and kee
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-window-controls-overlay-"));
     const script = path.join(temporary, "run.cjs");
     const html = path.join(temporary, "index.html");
+    // 主进程模块是 TypeScript，Electron 子进程无法直接 require，先转译到同一临时目录再加载。
+    const overlayModule = path.join(temporary, "windowControlsOverlay.cjs");
+    writeFileSync(overlayModule, transpileModule(readFileSync("electron/window/windowControlsOverlay.ts", "utf8"),
+        {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText, "utf8");
     writeFileSync(html, "<!doctype html><html><head></head><body></body></html>", "utf8");
     writeFileSync(script, `const {app,BrowserWindow,ipcMain}=require("electron");
-const {updateTitleBarOverlay}=require(${JSON.stringify(path.resolve("electron/windowControlsOverlay.js"))});
+const {updateTitleBarOverlay}=require(${JSON.stringify(overlayModule)});
 app.setPath("userData",${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async()=>{
  const win=new BrowserWindow({show:false,width:800,height:600,frame:false,titleBarStyle:"hidden",

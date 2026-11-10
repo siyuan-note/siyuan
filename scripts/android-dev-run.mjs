@@ -20,7 +20,7 @@ function usage() {
   console.log("  --flavor=<flavor>      Flavor: cn / googleplay / huawei / official (default: official)");
   console.log("  --android-dir=<path>   Path to the siyuan-android project (default: next to the siyuan project)");
   console.log("  --device=<serial>      Specify an adb connection (required for different or unidentified devices)");
-  console.log("  --skip-ui              Skip pnpm build:mobile and use the existing stage/build/mobile output");
+  console.log("  --skip-ui              Reuse the existing stage/build/{mobile,markdown} output");
   console.log("  --skip-kernel          Skip the gomobile build and use the existing kernel/kernel.aar");
   console.log("  --skip-gradle          Skip the Gradle build and reinstall the most recently built APK");
   console.log("  -h, --help             Show help");
@@ -222,10 +222,11 @@ const startedAt = Date.now();
 console.log(`[1/6] Environment check complete: sdk=${sdkDir} ndk=${ndkDir} device=${serial} flavor=${flavor}`);
 
 if (!skipUi) {
-  console.log("[2/6] Building the mobile frontend (pnpm run build:mobile)...");
+  console.log("[2/6] Building the mobile and standalone Markdown frontends...");
   run("pnpm", ["run", "build:mobile"], {cwd: appDir, shell: true});
+  run("pnpm", ["run", "build:markdown"], {cwd: appDir, shell: true});
 } else {
-  console.log("[2/6] Skipping the frontend build and using the existing stage/build/mobile output");
+  console.log("[2/6] Skipping the frontend build and using the existing mobile/Markdown output");
 }
 const mobileIndex = path.join(appDir, "stage", "build", "mobile", "index.html");
 if (!existsSync(mobileIndex)) {

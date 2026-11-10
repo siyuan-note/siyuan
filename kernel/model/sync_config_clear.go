@@ -26,6 +26,9 @@ func ClearSyncProviderConfig(provider int) error {
 		if err := requireCompleteAssetDownloads(); err != nil {
 			return err
 		}
+		if err := prepareSyncSourceChange(); err != nil {
+			return err
+		}
 		if err := clearAssetDownloadState(); err != nil {
 			return err
 		}
@@ -68,6 +71,7 @@ func persistClearedSyncProviderConfig(provider int) error {
 	if err = atomicWriteFile(filepath.Join(util.ConfDir, "conf.json"), data); err != nil {
 		return err
 	}
+	util.RestrictConfFilePermissions()
 	recordPersistedConf(data)
 	Conf.Sync.Store(next.Sync.Load())
 	return nil

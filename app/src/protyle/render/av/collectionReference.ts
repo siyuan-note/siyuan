@@ -1,5 +1,5 @@
+import {mobileInputDialog} from "../../../dialog/mobileInputDialog";
 import type {AVAutomationBlockSourceInput} from "../../../types/api";
-import {openInputDialog} from "../../../dialog/inputDialog";
 import {fetchSyncPost} from "../../../util/fetch";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {BlockPanel} from "../../../block/Panel";
@@ -54,7 +54,7 @@ export const mountCollectionReference = (host: HTMLElement, source: AVAutomation
         } else if (target.hasAttribute("data-reference-document")) {
             void setReference(protyle.block.rootID);
         } else if (target.hasAttribute("data-reference")) {
-            openInputDialog({title: lang.automationCollectionReference, value: source.referenceID || "",
+            mobileInputDialog({title: lang.automationCollectionReference, value: source.referenceID || "",
                 description: lang.automationCollectionReferenceTip,
                 onConfirm: async (value, dialog) => {
                     const id = parseCollectionReference(value);

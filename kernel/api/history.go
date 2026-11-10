@@ -24,8 +24,8 @@ var searchHistory = contractHandler(apicontract.SearchHistory, func(c *gin.Conte
 	if request.Page != nil {
 		page = int(*request.Page)
 	}
-	histories, pageCount, totalCount := model.FullTextSearchHistory(request.Query, request.Notebook, request.Op, typ, page)
-	return apicontract.Success(apicontract.SearchHistoryData{Histories: histories, PageCount: pageCount, TotalCount: totalCount})
+	histories, itemCounts, pageCount, totalCount := model.FullTextSearchHistoryGroups(request.Query, request.Notebook, request.Op, typ, page)
+	return apicontract.Success(apicontract.SearchHistoryData{ItemCounts: itemCounts, Histories: histories, PageCount: pageCount, TotalCount: totalCount})
 })
 
 var getHistoryItems = contractHandler(apicontract.GetHistoryItems, func(c *gin.Context, request apicontract.HistoryItemsRequest) apicontract.Response[apicontract.HistoryItemsData] {
@@ -33,8 +33,12 @@ var getHistoryItems = contractHandler(apicontract.GetHistoryItems, func(c *gin.C
 	if request.Type != nil {
 		typ = int(*request.Type)
 	}
-	histories := model.FullTextSearchHistoryItems(request.Created, request.Query, request.Notebook, request.Op, typ)
-	return apicontract.Success(apicontract.HistoryItemsData{Items: historyItemContracts(histories)})
+	page := 1
+	if request.Page != nil {
+		page = int(*request.Page)
+	}
+	histories, pageCount, totalCount := model.FullTextSearchHistoryItemsPage(request.Created, request.Query, request.Notebook, request.Op, typ, page)
+	return apicontract.Success(apicontract.HistoryItemsData{Items: historyItemContracts(histories), PageCount: pageCount, TotalCount: totalCount})
 })
 
 var reindexHistory = contractHandler(apicontract.ReindexHistory, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {

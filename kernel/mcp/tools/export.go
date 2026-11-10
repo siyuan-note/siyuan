@@ -12,13 +12,27 @@ import (
 
 var ExportTool = &Tool{
 	Name:        "export",
-	Description: "Export operations. Actions: md(id), html(id), preview(id), docx(id, output path), sy(id) → .sy.zip, md-zip(id), data() → full workspace backup.",
+	Description: "Export operations. Actions: md(id), html(id), preview(id), docx(id, output directory), sy(id) → .sy.zip, md-zip(id), data() → full workspace backup. Use for export-formatted content or export files; prefer block.get/get_kramdown for reading current document/block content. md/html/preview return text, not files. Only docx uses output; other actions ignore it.",
+	EffectScope: EffectScopeLocal,
+	ResolveEffects: deferredAssetEffects(map[string]ToolEffects{
+		"html": {LocalRead: true}, "docx": {LocalWrite: true}, "sy": {LocalWrite: true},
+		"md-zip": {LocalWrite: true}, "data": {LocalWrite: true},
+	}),
+	ActionEffects: map[string]ToolEffects{
+		"md":      {LocalRead: true},
+		"html":    {LocalRead: true},
+		"preview": {LocalRead: true},
+		"docx":    {LocalWrite: true},
+		"sy":      {LocalWrite: true},
+		"md-zip":  {LocalWrite: true},
+		"data":    {LocalWrite: true},
+	},
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
 			"action": {Type: "string", Description: "Operation", Enum: []string{"md", "html", "preview", "docx", "sy", "md-zip", "data"}},
 			"id":     {Type: "string", Description: "Document block ID (for md, html, preview, docx, sy, md-zip)"},
-			"output": {Type: "string", Description: "Output file path (required for docx, optional for others)"},
+			"output": {Type: "string", Description: "Destination directory on the kernel host, required only for docx and ignored by other actions. Use an absolute path; relative paths resolve from the kernel process working directory, not the workspace. The document title determines the .docx filename; an existing filename is made unique"},
 		},
 		Required: []string{"action"},
 	},
@@ -108,7 +122,7 @@ func exportDocx(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 	if output == "" {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "output file path is required for docx"}}, IsError: true}, nil
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "output directory is required for docx"}}, IsError: true}, nil
 	}
 	fullPath, err := model.ExportDocx(id, output, false, false)
 	if err != nil {

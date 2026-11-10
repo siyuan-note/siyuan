@@ -19,6 +19,7 @@ for (const mobile of [false, true]) {
             const installs: unknown[][] = [];
             let quits = 0;
             const context: any = {
+                clearReloadSnapshot: () => {},
                 getSettingsWindowHost: (): undefined => undefined,
                 hideAllElements: () => {},
                 saveMobileLayout: async () => true,

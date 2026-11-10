@@ -21,14 +21,35 @@ import {getPageSize} from "./groups";
 import {applyAVColorPalette, getAVCustomColors} from "./color";
 import {setAVCellPanelTarget} from "./panelTarget";
 import {setSelectMenuPosition} from "./selectPosition";
+import {getAVHostIdentity, getAVRelationHost} from "./host";
+import {showMessage} from "../../../dialog/message";
+import {isAVRenderData} from "./renderData";
+import {captureAVCellInput, type IAVCellInputElements} from "./cell";
 
 export const openMenuPanel = (options: IOpenAVPanelOptions) => {
+    const relationHost = getAVRelationHost(options.blockElement);
+    if ((options.blockElement as HTMLElement).dataset?.avHost && !relationHost) return;
+    const relationReadonly = relationHost?.readonly();
+    const isCurrentRelationHost = () => !relationHost ||
+        (getAVRelationHost(options.blockElement) === relationHost && options.blockElement.isConnected &&
+            relationHost.active && relationHost.available && relationHost.readonly() === relationReadonly &&
+            (options.type === "filters" || !options.protyle.disabled));
+    if (!isCurrentRelationHost()) return;
+    if (relationHost && !["select", "date", "asset", "relation", "rollup"].includes(options.type) &&
+        !(options.type === "filters" && options.filterOperation?.save)) {
+        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
+        return;
+    }
     let avPanelElement = document.querySelector(".av__panel");
     if (avPanelElement) {
         avPanelElement.remove();
         options.destroyCallback?.();
         return;
     }
+    if (options.cellElements?.length && ["select", "date", "asset", "relation"].includes(options.type)) {
+        captureAVCellInput(options.protyle, options.blockElement as HTMLElement, options.cellElements);
+    }
+    const resolveInput = (options.cellElements as IAVCellInputElements)?.resolveAVCellInput;
     let anchorRect = options.anchorRect;
     const getAnchorRect = () => {
         const rect = options.anchorElement?.getBoundingClientRect();
@@ -41,20 +62,23 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
     getAnchorRect();
     const avID = options.data?.id || options.blockElement.getAttribute("data-av-id");
     const avPageSize = getPageSize(options.blockElement);
-    // config/properties/sorts/filters/contextFilter/switcher 菜单只需要字段/视图元数据，不需要行数据，
-    // 跳过行渲染以提升大体量视图下的响应速度。
-    const ignoreRows = ["config", "properties", "sorts", "filters", "contextFilter", "switcher"].includes(options.type);
+    // 字段编辑仅加载配置，日期和选项编辑从单元格读取当前值，避免计算整库模板与汇总。
+    const ignoreRows = ["config", "properties", "sorts", "filters", "contextFilter", "switcher", "select", "date", "edit"].includes(options.type);
     const fetchPayload = {
         id: avID,
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
         pageSize: avPageSize.unGroupPageSize,
         groupPaging: avPageSize.groupPageSize,
-        blockID: options.blockElement.getAttribute("data-node-id"),
+        blockID: relationHost ? relationHost.sourceBlockID : options.blockElement.getAttribute("data-node-id"),
+        viewID: relationHost?.viewID,
+        relationContext: relationHost?.relationContext,
+        createIfNotExist: !relationHost,
         ignoreRows,
     };
     let relationDataRetryCount = 0;
     // 接收视图数据并构建面板 DOM、绑定事件。fetch 回调与 options.data 复用两条路径都走这里
     const renderData = async (responseData: IAV) => {
+        if (!isCurrentRelationHost() || resolveInput && !resolveInput()) return;
         const response = {data: responseData} as IWebSocketData;
         avPanelElement = document.querySelector(".av__panel");
         if (avPanelElement) {
@@ -64,7 +88,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
         if (!options.keepMenuOpen) {
             window.siyuan.menus.menu.remove();
         }
-        const blockID = options.blockElement.getAttribute("data-node-id");
+        const blockID = relationHost ? relationHost.sourceBlockID : options.blockElement.getAttribute("data-node-id");
         const saveFilters = (newFilters: IAVFilter[], oldFilters: IAVFilter[]) => {
             if (options.filterOperation?.save) {
                 options.filterOperation.save(newFilters);
@@ -83,7 +107,9 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
         const isCustomAttr = !options.blockElement.classList.contains("av");
         let data = response.data as IAV;
         if (options.type === "filters") {
-            await prepareFilterColumns(data);
+            await prepareFilterColumns(data, relationHost ? {blockID: relationHost.sourceBlockID,
+                relationContext: {...relationHost.relationContext}, isCurrent: isCurrentRelationHost} : undefined);
+            if (!isCurrentRelationHost() || document.querySelector(".av__panel")) return;
         }
         let html: string | undefined;
         let panelCellRect: DOMRect;
@@ -130,13 +156,13 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
             return;
         }
 
-        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" data-av-block-id="${escapeAttr(blockID)}" style="z-index: ${++window.siyuan.zIndex};">
+        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" data-av-block-id="${escapeAttr(getAVHostIdentity(options.blockElement as HTMLElement))}" style="z-index: ${++window.siyuan.zIndex};">
     <div class="b3-dialog__scrim" data-type="close"></div>
     <div class="b3-menu${options.type === "filters" ? " av__filter-panel" : ""}${options.type === "relation" ? " av__relation-panel" : ""}" ${options.keepMenuOpen ? "data-menu=\"true\"" : ""} ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${options.type === "relation" ? `width: 760px;max-width: ${isMobile() ? "90vw" : "calc(100vw - 32px)"};` : isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         if (options.cellElements?.length) {
-            setAVCellPanelTarget(avPanelElement, options.blockElement);
+            setAVCellPanelTarget(avPanelElement, options.blockElement, options.cellElements);
         }
         applyAVColorPalette(avPanelElement as HTMLElement, getAVCustomColors());
         let closeCB: () => void;
@@ -160,7 +186,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
         };
         let tabRect = getAnchorRect() ||
             options.blockElement.querySelector(`.av__views, .av__row[data-col-id="${options.colId}"] > .block__logo`)?.getBoundingClientRect();
-        const resizeMenu = ignoreRows && !isMobile() ? () => {
+        const resizeMenu = ignoreRows && !options.cellElements?.length && !isMobile() ? () => {
             if (!menuElement.isConnected) {
                 return;
             }
@@ -310,6 +336,9 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
     if (options.data) {
         renderData(options.data);
     } else {
-        fetchPost("/api/av/renderAttributeView", fetchPayload, response => renderData(response.data as IAV));
+        fetchPost("/api/av/renderAttributeView", fetchPayload, response => {
+            if (response.code === 0 && isAVRenderData(response.data)) void renderData(response.data);
+            else if (relationHost) showMessage(window.siyuan.languages._attrView.relatedDatabaseViewUnavailable);
+        });
     }
 };

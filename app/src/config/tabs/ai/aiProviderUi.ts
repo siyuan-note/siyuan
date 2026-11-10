@@ -1,9 +1,9 @@
+import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
 import {toggleMenu} from "../../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../../menus/Menu";
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import type {AIModelTestData} from "../../../types/api";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../../render/fragments";
-import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
 import {aiConfigApi} from "./aiRuntime";
@@ -193,7 +193,7 @@ const saveProviders = (root: HTMLElement, providers: Config.IProvider[], onAppli
 };
 
 const showDeleteProviderConfirm = (root: HTMLElement, provider: Config.IProvider) => {
-    confirmDialog(
+    mobileConfirmDialog(
         window.siyuan.languages.deleteOpConfirm,
         window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHTML(getProviderTitle(provider))),
         () => saveProviders(root, window.siyuan.config.ai.providers.filter((item) => item.id !== provider.id)),
@@ -327,6 +327,7 @@ const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[], 
                         });
                         firstVisibleItem?.classList.add("b3-list-item--focus");
                         emptyElement.classList.toggle("fn__none", !!firstVisibleItem);
+                        window.siyuan.menus.menu.resetPosition();
                     };
                     filterModels();
                     searchInput.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -802,7 +803,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
 
     const closeDetail = () => {
         if (JSON.stringify(draft) !== initialJSON || headersInput.value !== initialHeadersText) {
-            confirmDialog(
+            mobileConfirmDialog(
                 window.siyuan.languages.confirm,
                 window.siyuan.languages.discardUnsavedChanges,
                 leaveDetail,

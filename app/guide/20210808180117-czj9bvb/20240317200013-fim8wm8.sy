@@ -225,6 +225,20 @@
 			]
 		},
 		{
+			"ID": "20261107234500-gpvukun",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107234500-gpvukun",
+				"updated": "20261107234500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移动端主题可以通过 #keyboardToolbar.keyboard--sheet-open 为应用同时显示键盘工具栏与底部菜单或对话框抽屉的状态设置样式。该状态以应用显隐为准，不受此类派生的主题样式影响。工具栏隐藏或所有抽屉关闭后会移除该类。"
+				}
+			]
+		},
+		{
 			"ID": "20240317201610-467kw9x",
 			"Type": "NodeParagraph",
 			"Properties": {

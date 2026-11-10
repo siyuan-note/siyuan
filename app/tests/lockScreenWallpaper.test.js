@@ -3,7 +3,7 @@ const {readFileSync} = require("node:fs");
 const {test} = require("node:test");
 const {runInNewContext} = require("node:vm");
 
-const sources = ["stage/auth.html", "electron/remote-auth.html"].map(file => ({file,
+const sources = ["stage/auth.html", "electron/static/remote-auth.html"].map(file => ({file,
     source: readFileSync(file, "utf8"),
 }));
 const loader = source => /const loadLockScreenWallpaper = \(\) => \{[\s\S]*?\n {4}\};/.exec(source)[0];

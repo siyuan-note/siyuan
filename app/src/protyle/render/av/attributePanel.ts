@@ -7,6 +7,7 @@ import {
     isHeightAnimating
 } from "../../../util/heightAnimation";
 import {transaction} from "../../wysiwyg/transaction";
+import {disposeRelatedAVViews, preserveRelatedAVViews, syncRelatedAVViews} from "./relatedView";
 
 const updateEmptyState = (element: HTMLElement, hideEmpty: boolean) => {
     element.classList.toggle("protyle-db-attr--hide-empty", hideEmpty);
@@ -15,10 +16,11 @@ const updateEmptyState = (element: HTMLElement, hideEmpty: boolean) => {
 const preparedBodies = new WeakMap<IProtyle, {id: string, element: HTMLElement}>();
 
 // 在替换正文前准备属性，提交时由同一个编辑器接管事件和只读状态。
-export const prepareDatabaseAttributePanel = (protyle: IProtyle, id: string) => {
+export const prepareDatabaseAttributePanel = (protyle: IProtyle, id: string, isCurrent = () => true) => {
     return new Promise<(() => void) | undefined>(resolve => {
         const element = document.createElement("div");
         element.className = "custom-attr protyle-db-attr__body";
+        const sourceID = protyle.block.id;
         let finished = false;
         const timeout = window.setTimeout(() => {
             finished = true;
@@ -26,16 +28,22 @@ export const prepareDatabaseAttributePanel = (protyle: IProtyle, id: string) => 
         }, 60000);
         renderAVAttribute(element, id, protyle, rendered => {
             if (finished) {
+                disposeRelatedAVViews(rendered);
                 return;
             }
             finished = true;
             window.clearTimeout(timeout);
             resolve(() => preparedBodies.set(protyle, {id, element: rendered}));
-        });
+        }, undefined, {owner: protyle.element,
+            isCurrent: () => !finished && protyle.block.id === sourceID && isCurrent()});
     });
 };
 
 const refreshActions = new Set<TOperation>([
+    "setAttrViewSubItems",
+    "reparentAttrViewItems",
+    "promoteAttrViewItems",
+    "duplicateAttrViewSubtree",
     "addAttrViewCol",
     "removeAttrViewCol",
     "updateAttrViewCol",
@@ -44,6 +52,8 @@ const refreshActions = new Set<TOperation>([
     "setAttrViewColIcon",
     "setAttrViewColDesc",
     "setAttrViewColAttributePanelVisibility",
+    "setAttrViewRelationDetail",
+    "updateAttrViewRelationItems",
     "setAttrViewName",
     "setAttrViewCustomColors",
     "updateAttrViewColTemplate",
@@ -107,7 +117,7 @@ export class AVAttributePanel {
         this.updateEmptyState();
     }
 
-    public render(force = false) {
+    public render(force = false, automaticRefresh = false) {
         if (!window.siyuan.config.editor.databaseAttrShow) {
             this.hideByDisplayConfig();
             return;
@@ -135,16 +145,19 @@ export class AVAttributePanel {
         bodyElement.className = "custom-attr protyle-db-attr__body";
         if (!keepCurrentBody) {
             this.updateCollapsedState();
+            disposeRelatedAVViews(currentBodyElement);
             currentBodyElement.replaceWith(bodyElement);
             this.bodyElement = bodyElement;
         }
         const rendered = (renderedElement: HTMLElement) => {
             if (token !== this.renderToken) {
+                disposeRelatedAVViews(renderedElement);
                 return;
             }
             this.renderingTargetID = "";
             if (keepCurrentBody || renderedElement !== bodyElement) {
                 this.updateCollapsedState();
+                preserveRelatedAVViews(this.bodyElement, renderedElement);
                 this.bodyElement.replaceWith(renderedElement);
                 this.bodyElement = renderedElement;
             }
@@ -152,13 +165,15 @@ export class AVAttributePanel {
             this.updateTabs();
             this.updateReadonly();
             this.element.classList.toggle("fn__none", !renderedElement.querySelector("[data-av-id], .custom-attr__avbacklinks"));
+            syncRelatedAVViews(this.bodyElement);
             const callbacks = this.renderCallbacks.splice(0);
             callbacks.forEach(callback => callback(this.bodyElement));
         };
         if (prepared?.id === targetID) {
             rendered(prepared.element);
         } else {
-            renderAVAttribute(bodyElement, targetID, this.protyle, rendered);
+            renderAVAttribute(bodyElement, targetID, this.protyle, rendered, undefined,
+                {owner: this.protyle.element, isCurrent: () => token === this.renderToken}, automaticRefresh);
         }
     }
 
@@ -174,12 +189,12 @@ export class AVAttributePanel {
         this.render();
     }
 
-    public refresh() {
+    public refresh(automaticRefresh = false) {
         if (typeof this.refreshTimeout !== "undefined") {
             clearTimeout(this.refreshTimeout);
             this.refreshTimeout = undefined;
         }
-        this.render(true);
+        this.render(true, automaticRefresh);
     }
 
     public updateDisplayConfig() {
@@ -189,8 +204,10 @@ export class AVAttributePanel {
         }
         this.updateTabs();
         this.updateEmptyState();
+        syncRelatedAVViews(this.bodyElement);
         if (this.element.dataset.rendered === "true") {
             this.element.classList.toggle("fn__none", !this.bodyElement.querySelector("[data-av-id], .custom-attr__avbacklinks"));
+            syncRelatedAVViews(this.bodyElement);
         } else {
             this.render();
         }
@@ -210,6 +227,7 @@ export class AVAttributePanel {
             item.draggable = !this.protyle.disabled;
         });
         this.updateEmptyState();
+        syncRelatedAVViews(this.bodyElement);
     }
 
     public hasDatabase(avID: string) {
@@ -231,38 +249,30 @@ export class AVAttributePanel {
         }
         if (operation.action === "replaceAttrViewBlock" &&
             (this.hasDatabase(avID) || this.hasItem(operation.previousID) || operation.nextID === this.targetID)) {
-            this.refresh();
+            this.refresh(true);
             return;
         }
         if (operation.action === "insertAttrViewBlock" && operation.srcs?.some(item => item.id === this.targetID)) {
-            this.refresh();
+            this.refresh(true);
             return;
         }
         if (refreshActions.has(operation.action) && this.hasDatabase(avID)) {
-            this.refresh();
+            this.refresh(true);
             return;
         }
-        if (operation.action === "updateAttrViewCell" && operation.rowID && this.hasItem(operation.rowID) &&
-            ((operation.data?.type === "block" || operation.data?.type === "number") || this.hasRenderTemplate(avID))) {
+        if (operation.action === "updateAttrViewCell" && operation.rowID && this.hasItem(operation.rowID)) {
             this.queueRefresh();
             return;
         }
         if (operation.action === "updateAttrViewCells" && operation.cellUpdates?.some(cell =>
-            this.hasItem(cell.rowID) && ((cell.data?.type === "block" || cell.data?.type === "number") ||
-                this.hasRenderTemplate(avID)))) {
+            this.hasItem(cell.rowID))) {
             this.queueRefresh();
             return;
         }
         if (operation.action === "removeAttrViewBlock" &&
             (this.hasDatabase(operation.avID) || operation.srcIDs?.some(item => this.hasItem(item)))) {
-            this.refresh();
+            this.refresh(true);
         }
-    }
-
-    private hasRenderTemplate(avID: string) {
-        const databaseElement = this.bodyElement.querySelector<HTMLElement>(`[data-av-id="${avID}"]`);
-        return Array.from(databaseElement?.querySelectorAll<HTMLElement>("[data-render-template]") || [])
-            .some(item => Boolean(item.dataset.renderTemplate?.trim()));
     }
 
     private queueRefresh() {
@@ -271,7 +281,7 @@ export class AVAttributePanel {
         }
         this.refreshTimeout = setTimeout(() => {
             this.refreshTimeout = undefined;
-            this.refresh();
+            this.refresh(true);
         }, 100);
     }
 
@@ -300,6 +310,7 @@ export class AVAttributePanel {
         this.element.classList.toggle("protyle-db-attr--collapsed", this.collapsed);
         this.updateCollapsedControls();
         this.updateEmptyState();
+        syncRelatedAVViews(this.bodyElement);
     }
 
     private updateCollapsedControls() {
@@ -317,6 +328,7 @@ export class AVAttributePanel {
             return;
         }
         this.collapsed = collapsed;
+        if (collapsed) syncRelatedAVViews(this.bodyElement, true);
         if (!animate) {
             this.updateCollapsedState();
             return;
@@ -327,10 +339,12 @@ export class AVAttributePanel {
             collapseHeight(this.bodyElement, () => {
                 if (this.collapsed) {
                     this.element.classList.add("protyle-db-attr--collapsed");
+                    syncRelatedAVViews(this.bodyElement);
                 }
             });
         } else {
             this.element.classList.remove("protyle-db-attr--collapsed");
+            syncRelatedAVViews(this.bodyElement);
             expandHeight(this.bodyElement);
         }
     }
@@ -367,6 +381,7 @@ export class AVAttributePanel {
         this.bodyElement.querySelectorAll(':scope > .protyle-db-attr__tabs [data-type="av-tab"]').forEach(item => {
             item.classList.toggle("item--focus", item.getAttribute("data-id") === this.activeAvID);
         });
+        syncRelatedAVViews(this.bodyElement);
     }
 
     private bindTabDrag(tabsElement: HTMLElement) {
@@ -542,5 +557,6 @@ export class AVAttributePanel {
         }
         this.element.removeAttribute("data-rendered");
         this.element.classList.add("fn__none");
+        syncRelatedAVViews(this.bodyElement);
     }
 }

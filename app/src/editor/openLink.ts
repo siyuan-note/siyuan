@@ -139,7 +139,7 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
             return;
         }
     }
-    if (processSiYuanUri(app, linkAddress)) {
+    if (processSiYuanUri(app, linkAddress, event, ctrlIsPressed)) {
         return;
     }
     /// #if MOBILE

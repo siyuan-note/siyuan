@@ -7,7 +7,7 @@
 		"id": "20210808180303-h361q1i",
 		"title": "Editor",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261107224449"
 	},
 	"Children": [
 		{
@@ -249,6 +249,23 @@
 			]
 		},
 		{
+			"ID": "20261101145217-981860a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-981860a",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261101145217-38d4623",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Standalone Markdown editor"
+				}
+			]
+		},
+		{
 			"ID": "20260920102915-4hhz1ko",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -439,7 +456,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-3cctil8",
-				"updated": "20261024164212"
+				"updated": "20261107224449"
 			},
 			"Children": [
 				{
@@ -468,12 +485,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-5rsqqov",
-				"updated": "20261024161816"
+				"updated": "20261030103731"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices. New custom profiles based on Simple or Full follow future visibility defaults for entries you have not changed. An entry you toggle remains an explicit choice."
+					"Data": "New workspaces use the Full profile by default. Full appears before Simple in the profile list. Existing workspaces keep their selected profile and saved visibility and order settings. Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices. New custom profiles based on Simple or Full follow future visibility defaults for entries you have not changed. An entry you toggle remains an explicit choice."
 				}
 			]
 		},
@@ -516,6 +533,92 @@
 				{
 					"Type": "NodeText",
 					"Data": "Confirm to save; Cancel discards the changes. Resetting order preserves visibility and dock placement, and reset levels continue to follow future default order changes."
+				}
+			]
+		},
+		{
+			"ID": "20261107104457-nrq65rr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261107104457-nrq65rr",
+				"updated": "20261107224449"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop and mobile, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Menu and button visibility and order"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", edit a custom profile, and select "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ref"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". You can hide "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "New Doc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Create sub doc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Choose location and create document"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " independently in reference search candidates; all three are shown by default. Save and activate the profile to apply the settings."
 				}
 			]
 		},

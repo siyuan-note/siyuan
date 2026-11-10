@@ -10,6 +10,7 @@ const webProviderDescription = (kind: "search" | "fetch", provider: string) => {
 const updateWebKeyVisibility = (root: HTMLElement) => {
     const search = root.querySelector<HTMLSelectElement>("[id=\"ai.web.searchProvider\"]");
     const fetch = root.querySelector<HTMLSelectElement>("[id=\"ai.web.fetchProvider\"]");
+    root.querySelector("[id=\"ai.web.exaApiKey\"]")?.closest(".config-item")?.classList.toggle("fn__none", search?.value !== "exa");
     const usesDeepSeek = search?.value === "deepseek" || fetch?.value === "deepseek";
     root.querySelector("[id=\"ai.web.apiKey\"]")?.closest(".config-item")?.classList.toggle("fn__none", !usesDeepSeek);
 };
@@ -41,6 +42,13 @@ export const registerAiWebGroup = (tab: SettingTabBuilder) => {
         desc: webProviderDescription("fetch", window.siyuan.config.ai.web?.fetchProvider),
         options: [{value: "direct", label: window.siyuan.languages.aiWebFetchDirect}, {value: "deepseek", label: "DeepSeek"}],
         afterMount: root => mountWebProviderDescription(root, "fetch"),
+    });
+    group.textBlock("ai.web.exaApiKey", {
+        title: window.siyuan.languages.aiWebExaKey,
+        desc: window.siyuan.languages.aiWebExaKeyTip,
+        spellcheck: false,
+        mode: "input-password",
+        afterMount: updateWebKeyVisibility,
     });
     group.textBlock("ai.web.apiKey", {
         title: window.siyuan.languages.aiWebDeepSeekKey,

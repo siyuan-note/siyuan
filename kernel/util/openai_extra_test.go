@@ -5,6 +5,7 @@
 package util
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -82,6 +83,31 @@ func TestExtraBodyTransport_ChatPostMerged(t *testing.T) {
 	}
 }
 
+func TestExtraBodyTransportTemperatureOverride(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var payload map[string]json.RawMessage
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Error(err)
+		}
+		if string(payload["temperature"]) != "0.5" || string(payload["seed"]) != "9007199254740993" {
+			t.Errorf("extra body temperature must take precedence: %#v", payload)
+		}
+		w.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+	transport := &extraBodyTransport{base: server.Client(), extraBody: map[string]any{"temperature": 0.5}}
+	ctx := ContextWithOpenAIChatTemperature(context.Background(), 0)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, server.URL+"/v1/chat/completions", strings.NewReader(`{"model":"test","seed":9007199254740993}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := transport.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+}
+
 func TestExtraBodyTransport_NonChatPassthrough(t *testing.T) {
 	// 非 chat 请求（如 GET /v1/models）应原样透传，不注入任何字段。
 	var receivedBody []byte
@@ -101,6 +127,7 @@ func TestExtraBodyTransport_NonChatPassthrough(t *testing.T) {
 
 	origBody := `{"hello":"world"}`
 	req, _ := http.NewRequest(http.MethodGet, server.URL+"/v1/models", strings.NewReader(origBody))
+	req = req.WithContext(ContextWithOpenAIChatTemperature(context.Background(), 0))
 	resp, err := transport.Do(req)
 	if err != nil {
 		t.Fatalf("Do failed: %v", err)

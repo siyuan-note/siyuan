@@ -131,9 +131,16 @@ const browserCases = async (sources: Record<string, string>, libraries: Record<s
             this.element.remove();
         }
     }
+    const suspendedColumns = new Set<HTMLElement>();
     const dependencies: Record<string, unknown> = {
         "./imageLayout": layout, "./imageFonts": fonts,
-        "../../dialog": {Dialog: ExportDialog},
+        "../render/av/columnWindow": {suspendAVColumnWindows: (element: HTMLElement) => {
+            check.equal(element, dialog.element.querySelector(".protyle-wysiwyg"));
+            check.equal(suspendedColumns.has(element), false);
+            suspendedColumns.add(element);
+            return () => check.equal(suspendedColumns.delete(element), true);
+        }},
+        "../../dialog/mobileDialog": {MobileDialog: ExportDialog},
         "../../dialog/message": {showMessage: (text: string) => messages.push(text), hideMessage: () => {}},
         "../../util/fetch": {fetchPost: (url: string, data: {file: File}, callback: (response: unknown) => void) => {
             if (url === "/api/export/exportPreviewHTML") {
@@ -216,6 +223,7 @@ const browserCases = async (sources: Record<string, string>, libraries: Record<s
                     (dialog.element.querySelector('[data-type="export"]') as HTMLButtonElement).click();
                 }
                 await waitFor(() => !!captured);
+                check.equal(suspendedColumns.size, 0, "capture restores column virtualization");
                 await verifyPNG();
                 await waitFor(() => !dialog.element.isConnected);
             }

@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -126,7 +127,8 @@ func (config *AppConf) SetOCR(value conf.OCR) error {
 
 func ocrSectionSpec() *SectionSpec[*conf.OCR] {
 	spec := newSectionSpec("ocr", &Conf.OCR, conf.NormalizeOCR,
-		Reaction[*conf.OCR]{Name: "provider", Changed: func(old, next *conf.OCR) bool { return old.Provider != next.Provider || old.Model != next.Model }, Apply: func(old, next *conf.OCR) { go nativePaddle.Close() }})
+		Reaction[*conf.OCR]{Name: "provider", Changed: func(old, next *conf.OCR) bool { return old.Provider != next.Provider || old.Model != next.Model }, Apply: func(old, next *conf.OCR) { go nativePaddle.Close() }},
+		Reaction[*conf.OCR]{Name: "retry", Changed: func(old, next *conf.OCR) bool { return automaticOCRRetryConfig(*old) != automaticOCRRetryConfig(*next) }, Apply: func(old, next *conf.OCR) { ocrRetry.reset() }})
 	spec.Validate = func(value *conf.OCR) []Issue {
 		if err := validateOCRSetting(value); err != nil {
 			return []Issue{{Field: "ocr", Severity: "error", Message: err.Error()}}
@@ -286,7 +288,7 @@ func OCRAssetsJob() {
 	task.AppendTaskWithTimeout(task.OCRImage, automaticOCRTimeout(value), autoOCRAssets)
 }
 
-var ocrRetry sync.Map
+var ocrRetry automaticOCRRetryCache
 
 func autoOCRAssets() {
 	defer logging.Recover()
@@ -302,6 +304,7 @@ func autoOCRAssets() {
 		}
 		return util.IsTesseractExtractable(asset.Path)
 	})
+	generation := ocrRetry.prepare(value, assets)
 	limit := 7
 	if value.Provider == "ai" {
 		limit = 1
@@ -314,22 +317,36 @@ func autoOCRAssets() {
 		if util.ExistsAssetText(asset.Path) {
 			continue
 		}
-		key := fmt.Sprintf("%s:%s:%s:%s:%s", value.Provider, value.Model, value.AIModelID, value.ReasoningEffort, asset.Path)
-		if retry, exists := ocrRetry.Load(key); exists && time.Now().Before(retry.(time.Time)) {
-			continue
-		}
 		absPath, err := GetAssetAbsPathInBox(asset.Path, "")
 		if err != nil || IsEncryptedAssetPath(absPath) {
 			continue
 		}
+		info, err := os.Stat(absPath)
+		if err != nil {
+			continue
+		}
+		// 资源索引的更新时间只有秒精度，额外比较文件大小和纳秒时间以识别同秒替换。
+		version := automaticOCRAssetVersion{Modified: info.ModTime().UnixNano(), Size: info.Size()}
+		if !ocrRetry.ready(generation, asset, version, time.Now()) {
+			continue
+		}
 		processed++
 		if _, _, err = ocrAsset(ctx, asset.Path, value, true); err != nil {
-			ocrRetry.Store(key, time.Now().Add(10*time.Minute))
-			if !errors.Is(err, ocr.ErrUnsupportedImage) {
+			if ocrRetry.record(generation, asset, version, err, time.Now()) && !errors.Is(err, ocr.ErrUnsupportedImage) {
 				logging.LogWarnf("automatic OCR [provider=%s, path=%s] failed: %s", value.Provider, asset.Path, err)
+				if value.Provider == "ai" && automaticOCRProviderFailure(err) {
+					provider, _ := getOCRAIModel(value)
+					if provider != nil {
+						name := provider.DisplayName
+						if name == "" {
+							name = provider.ID
+						}
+						util.PushErrMsg(html.EscapeString(fmt.Sprintf(Conf.Language(466), name, err)), 0)
+					}
+				}
 			}
 		} else {
-			ocrRetry.Delete(key)
+			ocrRetry.record(generation, asset, version, nil, time.Now())
 		}
 	}
 	if _, err := DeferredSyncAssets(); err != nil {

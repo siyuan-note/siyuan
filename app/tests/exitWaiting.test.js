@@ -35,8 +35,11 @@ const createExitDialog = (sources, languages, mobile) => {
         "../block/panelOwnership": {destroyDialogBlockPanels() {}, getDialogBlockPanel() {}},
         "./anchoredInput": {getAnchoredInputMask() {}},
     });
-    const {requestSystemExit} = load(sources.exit, {
-        "./index": {Dialog},
+    const mobileRuntime = new Function("Dialog", "mobile", "return " + sources.mobileRuntime)(Dialog, mobile);
+    const {requestSystemExit, updateExitProgressStatus} = load(sources.exit, {
+        "../util/functions": {isMobile: () => mobile},
+        "./mobileDialog": mobileRuntime,
+        "./mobileConfirmDialog": mobileRuntime,
         "./progress": progress,
         "../util/fetch": {fetchSyncPost: () => new Promise((resolve, reject) => {
             window.finishExit = resolve;
@@ -44,10 +47,18 @@ const createExitDialog = (sources, languages, mobile) => {
         })},
         "../util/fetchTimeout": {withFetchTimeout: request => request()},
         "../util/escape": {escapeHtml},
+        "../util/hostCapabilities": {sanitizeKernelHTML: escapeHtml},
     });
+    window.updateExitProgressStatus = updateExitProgressStatus;
+    const schedule = window.setTimeout;
+    window.setTimeout = (callback, delay, ...args) => {
+        if (delay === 12000) window.offerExitSync = callback;
+        return schedule(callback, delay, ...args);
+    };
     window.exitResult = requestSystemExit({force: false, setCurrentWorkspace: true}, response => {
         window.exitResponse = response;
     });
+    window.setTimeout = schedule;
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -63,7 +74,9 @@ if (process.versions.electron && process.type === "browser") {
             .map(([key, file]) => [key, ts.transpileModule(fs.readFileSync(path.join(root, "src", file), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText]));
+        sources.mobileRuntime = require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource();
         const css = require("sass").compile(path.join(root, "src/assets/scss/base.scss"), {logger: {warn() {}, debug() {}}}).css;
+        const mobileCSS = require("sass").compile(path.join(root, "src/assets/scss/mobile.scss"), {logger: {warn() {}, debug() {}}}).css;
         const icons = pathToFileURL(path.join(root, "appearance/icons/litheness/icon.js")).href;
         const languages = JSON.parse(fs.readFileSync(path.join(root, "appearance/langs/zh-CN.json"), "utf8"));
         for (const mode of ["light", "dark"]) {
@@ -74,8 +87,12 @@ if (process.versions.electron && process.type === "browser") {
                 win.webContents.on("console-message", event => {
                     if (event.level === "error") console.error(event.message);
                 });
-                await win.loadFile(path.join(root, "electron/boot.html"), {query: {lang: "zh-CN", v: "test",
+                await win.loadFile(path.join(root, "electron/static/boot.html"), {query: {lang: "zh-CN", v: "test",
                     previousExitWaiting: languages.previousExitWaiting}});
+                win.webContents.debugger.attach("1.3");
+                await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                    features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+                });
                 const startup = await win.webContents.executeJavaScript(`new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve({
                     logo: !!document.querySelector("#bg svg"), message: document.getElementById("details").textContent,
                     progress: document.getElementById("progress").style.width,
@@ -130,7 +147,7 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(resumed.details, "ready");
                 assert.equal(resumed.progress, "100%");
                 assert.equal(resumed.samePage, true);
-                const html = `<html><head><style>${theme}\n${css}</style></head><body><script src="${icons}"></script></body></html>`;
+                const html = `<html><head><style>${theme}\n${width === 360 ? mobileCSS : css}</style></head><body><script src="${icons}"></script></body></html>`;
                 const file = path.join(process.argv[2], "dialog.html");
                 fs.writeFileSync(file, html);
                 await win.loadFile(file);
@@ -170,8 +187,49 @@ if (process.versions.electron && process.type === "browser") {
                 assert.ok(merged.status.includes(languages._kernel[81]));
                 assert.equal(merged.duplicates, 0);
                 assert.ok(merged.error.includes("Unrelated warning"));
+                const detail = "Uploading 2/10 <notes> " + "long-file-name-".repeat(30);
+                const statusUpdate = await win.webContents.executeJavaScript(`(() => {
+                    window.updateExitProgressStatus("Scanning files");
+                    window.updateExitProgressStatus(${JSON.stringify(detail)});
+                    const root = document.getElementById("exitProgress");
+                    const status = root.querySelector('[data-type="status-message"]');
+                    const bounds = root.querySelector(".b3-dialog__loading").getBoundingClientRect();
+                    return {text: status.textContent, count: root.querySelectorAll('[data-type="status-message"]').length,
+                        markup: status.querySelector("notes"), overflow: status.scrollWidth > status.clientWidth,
+                        waiting: root.querySelector('[data-type="message"]').textContent,
+                        visible: bounds.left >= 0 && bounds.right <= innerWidth && bounds.top >= 0 && bounds.bottom <= innerHeight};
+                })()`);
+                assert.equal(statusUpdate.text, detail);
+                assert.equal(statusUpdate.count, 1);
+                assert.equal(statusUpdate.markup, null);
+                assert.equal(statusUpdate.overflow, false);
+                assert.equal(statusUpdate.visible, true);
+                assert.ok(statusUpdate.waiting.includes(languages.exitWaiting));
                 await capture("exit");
+                await win.webContents.executeJavaScript("window.offerExitSync();");
+                const afterAction = await win.webContents.executeJavaScript(`(() => {
+                    const button = document.querySelector("#exitProgress button");
+                    window.updateExitProgressStatus("Uploading 3/10");
+                    return {text: document.querySelector('#exitProgress [data-type="status-message"]').textContent,
+                        sameButton: button === document.querySelector("#exitProgress button"),
+                        focused: document.activeElement === button};
+                })()`);
+                assert.equal(afterAction.text, "Uploading 3/10");
+                assert.equal(afterAction.sameButton, true);
+                assert.equal(afterAction.focused, true);
+                await capture("exit-action");
                 await win.webContents.executeJavaScript("window.failExit(new Error('offline')); window.exitResult;");
+                await win.webContents.executeJavaScript(`new Promise((resolve, reject) => {
+                    const deadline = performance.now() + 3000;
+                    const wait = () => {
+                        const container = document.querySelector('.b3-dialog__container');
+                        if (container && getComputedStyle(container).visibility !== 'hidden' &&
+                            !container.getAnimations().some(animation => animation.playState === 'running')) resolve();
+                        else if (performance.now() > deadline) reject(new Error('Failure dialog finishes opening'));
+                        else requestAnimationFrame(wait);
+                    };
+                    requestAnimationFrame(wait);
+                })`);
                 const failed = await win.webContents.executeJavaScript(`(() => {
                     const buttons = [...document.querySelectorAll("button")];
                     const key = new KeyboardEvent("keydown", {key: "a", bubbles: true, cancelable: true});
@@ -186,6 +244,8 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(failed.focus, true);
                 assert.equal(failed.message, languages.exitWaitFailed);
                 assert.equal(failed.response, undefined);
+                await win.webContents.executeJavaScript('window.updateExitProgressStatus("Late status");');
+                assert.equal(await win.webContents.executeJavaScript('!!document.getElementById("exitProgress")'), false);
                 await capture("failure");
                 win.destroy();
             }

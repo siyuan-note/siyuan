@@ -7,12 +7,12 @@ package tools
 import (
 	"unicode/utf8"
 
-	"github.com/88250/gulu"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func truncateText(text string, maxLen int) string {
 	if utf8.RuneCountInString(text) <= maxLen {
 		return text
 	}
-	return gulu.Str.SubStr(text, maxLen) + "..."
+	return util.TruncateRunes(text, maxLen) + "..."
 }

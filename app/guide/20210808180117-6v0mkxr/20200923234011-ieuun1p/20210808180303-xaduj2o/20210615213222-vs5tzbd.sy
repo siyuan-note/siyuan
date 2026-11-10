@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20261024203645"
+		"updated": "20261102161000"
 	},
 	"Children": [
 		{
@@ -663,6 +663,19 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261109120000-hist02a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109120000-hist02a"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The count beside each time group shows the number of file history entries matching the current search and filters, not the amount of text changed. Expand a group and scroll to the bottom to load more entries automatically."
 				}
 			]
 		},
@@ -1967,6 +1980,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "There is a rollback button on the right side of the snapshot time list entry. After clicking, a confirmation dialog box will pop up. If the rollback is confirmed, the existing data will be completely replaced with the snapshot data."
+				}
+			]
+		},
+		{
+			"ID": "20261102161000-d285b6d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102161000-d285b6d",
+				"updated": "20261102161000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Snapshot rollback pauses synchronization. If it fails before any files could have been changed, the original sync setting is restored and a full index rebuild is skipped. If files may already have been changed, synchronization stays paused and the error explains how to re-enable it; check the recovered data first. The error also includes the failed stage and available object details. The backup created before rollback is retained."
 				}
 			]
 		},

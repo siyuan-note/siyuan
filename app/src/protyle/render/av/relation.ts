@@ -1,12 +1,14 @@
 import {isTableLikeView} from "./viewType";
+import {reparentSubItems} from "./subItems";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint} from "../../../util/upDownHint";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
+import {fetchWithDocumentSelection} from "../../../util/documentSelectionRequest";
 import type {AVRelationItemPreview, AVRelationItemCellInput} from "../../../types/api";
 import {escapeAttr, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
-import {genCellValueByElement, getCellValueText, renderCell, updateCellsValue} from "./cell";
+import {genCellValueByElement, getCellValueText, renderCell, updateCellsValue, type IAVCellInputElements} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
@@ -29,6 +31,8 @@ import {unicode2Emoji} from "../../../emoji";
 import {bindRelationLayout} from "./relationLayout";
 import {getRelationKeyboardTarget} from "./relationKeyboard";
 import {getTopBarHeight} from "../../../layout/getTopBarHeight";
+import {canEditAVHost, getAVHostBlockID, getAVRelationHost} from "./host";
+import {getPendingRelatedViewConfig} from "./relatedViewConfig";
 
 interface IAVItem {
     avID: string;
@@ -320,6 +324,11 @@ export const updateRelation = (options: {
             });
         });
     }
+    const detailView = getPendingRelatedViewConfig(options.avElement);
+    if (detailView && targetChanged) {
+        doOperations.push({action: "setAttrViewRelationDetail", avID: options.avID, keyID: colId, blockID,
+            data: detailView});
+    }
     doOperations.push({
         action: "doUpdateUpdated",
         id: blockID,
@@ -335,6 +344,10 @@ export const updateRelation = (options: {
         name: inputElement.dataset.oldValue,
         format: colData.name
     }];
+    if (targetChanged && (colData.relation.detailView || detailView)) {
+        undoOperations.push({action: "setAttrViewRelationDetail", avID: options.avID,
+            keyID: colId, data: structuredClone(colData.relation.detailView || null)});
+    }
     if (colData.relation.avID) {
         undoOperations.push({
             action: "setAttrViewColRelationFilters",
@@ -527,12 +540,29 @@ const genRelationLoaderHTML = (loading: boolean, visible = loading) => {
     return `<div data-relation-type="loader" class="fn__flex${loading ? "" : " fn__none"}" style="${visible ? "" : "visibility: hidden;"}height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>`;
 };
 
+const getRelationCellScope = (protyle: IProtyle, nodeElement: HTMLElement, cellElements: HTMLElement[]) => {
+    const host = getAVRelationHost(nodeElement);
+    const resolveInput = (cellElements as IAVCellInputElements).resolveAVCellInput;
+    const isCurrentInput = () => !resolveInput || !!resolveInput();
+    if (!host && !nodeElement.dataset.avHost) return {context: undefined, isCurrent: isCurrentInput};
+    const sourceItemIDs = [...new Set(cellElements.map(cell =>
+        getFieldIdByCellElement(cell, nodeElement.getAttribute("data-av-type") as TAVView)))];
+    return {
+        context: host ? {relationContext: {...host.relationContext}, sourceItemIDs} : undefined,
+        isCurrent: () => isCurrentInput() && !!host && !!sourceItemIDs.length && sourceItemIDs.every(Boolean) &&
+            getAVRelationHost(nodeElement) === host && canEditAVHost(nodeElement, protyle),
+    };
+};
+
 export const bindRelationEvent = (options: {
     menuElement: HTMLElement,
     protyle: IProtyle,
     blockElement: Element,
     cellElements: HTMLElement[]
 }) => {
+    const cellScope = getRelationCellScope(options.protyle, options.blockElement as HTMLElement, options.cellElements);
+    const sourceIsCurrent = () => cellScope.isCurrent() && (!cellScope.context || options.menuElement.isConnected);
+    if (!sourceIsCurrent()) return;
     const inputElement = options.menuElement.querySelector("input");
     const listElement = options.menuElement.querySelector(".b3-menu__items") as HTMLElement;
     // 移动端菜单顶部会插入抓手标题，关联面板根节点按类名定位
@@ -741,6 +771,7 @@ ${genRelationLoaderHTML(false)}`;
         updateCopyRelatedItems(options.menuElement);
     };
     const loadPage = (reset: boolean) => {
+        if (!sourceIsCurrent()) return;
         if (state.loading && !reset) {
             return;
         }
@@ -762,16 +793,20 @@ ${genRelationLoaderHTML(false)}`;
         let succeeded = false;
         fetchPost("/api/av/getAttributeViewRelationCandidates", {
             includeNewItemPreview: true,
-            blockID: options.blockElement.getAttribute("data-node-id"),
+            blockID: getAVHostBlockID(options.blockElement as HTMLElement),
+            ...(cellScope.context ? {relationCellContext: cellScope.context} : {}),
             avID: relationElement.getAttribute("data-source-av-id"),
             keyID: relationElement.getAttribute("data-key-id"),
             keyword,
             page,
             pageSize: RELATION_PAGE_SIZE,
             selectedBlockIDs: selectedItems.map((item) => item.id),
+            excludeItemIDs: relationElement.dataset.subItemsParent === "true" ? options.cellElements.map(cell =>
+                getFieldIdByCellElement(cell, options.blockElement.getAttribute("data-av-type") as TAVView)) : undefined,
             sort: state.sort,
         }, response => {
-            if (controller.signal.aborted || keyword !== state.keyword) {
+            if (controller.signal.aborted || keyword !== state.keyword || !sourceIsCurrent() ||
+                response.code !== 0 || !response.data) {
                 return;
             }
             const rows = response.data.rows as IAVRow[] || [];
@@ -991,7 +1026,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
         }
     });
     if (colRelationData && colRelationData.avID) {
-        return `<div data-av-id="${colRelationData.avID}" data-source-av-id="${data.id}" data-key-id="${colId}" class="fn__flex-column av__relation">
+        return `<div data-av-id="${colRelationData.avID}" data-source-av-id="${data.id}" data-key-id="${colId}"${data.subItems?.enabled && colId === data.subItems.parentKeyID ? ' data-sub-items-parent="true"' : ""} class="fn__flex-column av__relation">
 <div>
 <div class="b3-menu__item" data-type="nobg">
     <div class="b3-form__icona fn__flex-1" style="overflow: visible">
@@ -1012,9 +1047,9 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     }
 };
 
-const getRelationValue = (menuElement: HTMLElement) => {
+const getRelationValue = (menuElement: HTMLElement, items?: HTMLElement[]) => {
     const value: IAVCellRelationValue = {blockIDs: [], contents: []};
-    menuElement.querySelectorAll('[data-relation-type="selected"]').forEach((item: HTMLElement) => {
+    (items || menuElement.querySelectorAll<HTMLElement>('[data-relation-type="selected"]')).forEach(item => {
         const blockElement = item.querySelector(".b3-menu__label") as HTMLElement;
         value.blockIDs.push(item.dataset.rowId);
         value.contents.push({
@@ -1055,10 +1090,13 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
     if (menuElement.querySelector(".dragover__bottom, .dragover__top")) {
         return;
     }
+    const cellScope = getRelationCellScope(protyle, nodeElement, cellElements);
+    const sourceIsCurrent = () => cellScope.isCurrent() && (!cellScope.context || menuElement.isConnected);
+    if (!sourceIsCurrent()) return;
     // 移动端菜单顶部会插入抓手标题，关联面板根节点按类名定位
     const relationElement = menuElement.querySelector(".av__relation") as HTMLElement;
 
-    if (!nodeElement.contains(cellElements[0])) {
+    if (!(cellElements as IAVCellInputElements).resolveAVCellInput && !nodeElement.contains(cellElements[0])) {
         const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
         const rowID = getFieldIdByCellElement(cellElements[0], viewType);
         if (isTableLikeView(viewType)) {
@@ -1071,6 +1109,38 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
 
     if (target.classList.contains("b3-menu__item")) {
         const rowId = target.getAttribute("data-row-id");
+        if (rowId && relationElement.dataset.subItemsParent === "true") {
+            if (getAVRelationHost(nodeElement) || nodeElement.dataset.avHost) {
+                const relationHost = getAVRelationHost(nodeElement);
+                const valid = () => menuElement.isConnected && getAVRelationHost(nodeElement) === relationHost &&
+                    canEditAVHost(nodeElement, protyle);
+                if (relationElement.dataset.saving === "true" || !valid()) return;
+                relationElement.dataset.saving = "true";
+                try {
+                    // 父字段始终整值替换，不能按批量关联的增减模式合并，也不能提交物理层级命令。
+                    const value: IAVCellValue = {type: "relation", relation: getRelationValue(menuElement,
+                        target.dataset.relationType === "selected" ? [] : [target])};
+                    const operations = await updateCellsValue(protyle, nodeElement, value, cellElements,
+                        undefined, undefined, true, false, false, undefined, false);
+                    if (!valid()) return;
+                    if (operations.doOperations?.length) {
+                        await transaction(protyle, operations.doOperations, operations.undoOperations, {awaitResponse: true});
+                    }
+                    if (valid()) menuElement.closest(".av__panel")?.remove();
+                } catch (error) {
+                    if (valid()) showMessage(window.siyuan.languages._attrView.relatedDatabaseViewUnavailable);
+                } finally {
+                    delete relationElement.dataset.saving;
+                }
+                return;
+            }
+            reparentSubItems(protyle, nodeElement, cellElements.map(cell =>
+                getFieldIdByCellElement(cell, nodeElement.getAttribute("data-av-type") as TAVView)),
+            target.dataset.relationType === "selected" ? "" : rowId, undefined, undefined,
+            cellElements[0].closest<HTMLElement>(".av__body")?.dataset.groupId);
+            menuElement.closest(".av__panel")?.remove();
+            return;
+        }
         if (target.dataset.relationType === "selected") {
             target.dataset.relationType = "candidate";
             target.removeAttribute("draggable");
@@ -1102,6 +1172,10 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                 // 用临时 ID 计算批量关系合并结果，仅成功创建后更新面板。
                 const pendingID = Lute.NewNodeID();
                 const value = getRelationValue(menuElement);
+                if (relationElement.dataset.subItemsParent === "true") {
+                    value.blockIDs = [];
+                    value.contents = [];
+                }
                 value.blockIDs.push(pendingID);
                 value.contents.push({type: "block", block: {content: useInputName ?
                     (entry.preview.inputPrimaryKey ?? entry.keyword.trim()) : entry.preview.primaryKey}, isDetached: true});
@@ -1114,12 +1188,20 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                             relatedItemIDs: operation.data.relation.blockIDs.filter(id => id !== pendingID)});
                     }
                 });
-                if (!cells.length) {
+                if (relationElement.dataset.subItemsParent === "true") {
+                    cells.splice(0, cells.length, ...cellElements.map((cell): AVRelationItemCellInput => ({
+                        itemID: getFieldIdByCellElement(cell, nodeElement.getAttribute("data-av-type") as TAVView),
+                        relatedItemIDs: [],
+                    })));
+                }
+                if (!cells.length || !sourceIsCurrent()) {
                     return;
                 }
-                const response = await fetchSyncPost("/api/av/createAttributeViewRelationItem", {
+                const rootID = protyle.block.rootID;
+                const request = {
                     avID: nodeElement.dataset.avId,
-                    blockID: nodeElement.dataset.nodeId,
+                    blockID: getAVHostBlockID(nodeElement),
+                    ...(cellScope.context ? {relationCellContext: cellScope.context} : {}),
                     keyID: relationElement.dataset.keyId,
                     keyword: entry.keyword,
                     useInputName,
@@ -1127,10 +1209,16 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                     preview: entry.preview,
                     app: protyle.app.appId,
                     session: protyle.id,
-                });
+                };
+                const response = await fetchWithDocumentSelection(selection => fetchSyncPost("/api/av/createAttributeViewRelationItem", {...request, selection}, undefined, false),
+                    {notebooks: [protyle.notebookId], isValid: () => nodeElement.isConnected && menuElement.isConnected &&
+                    protyle.block.rootID === rootID && !protyle.disabled && sourceIsCurrent()});
+                if (!response || !sourceIsCurrent()) return;
                 if (response.code !== 0 || !response.data || !("itemID" in response.data)) {
                     if (response.code === 1 && response.data && "unavailableNotebook" in response.data && response.data.unavailableNotebook) {
                         showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
+                    } else if (cellScope.context) {
+                        showMessage(window.siyuan.languages._attrView.relatedDatabaseViewUnavailable);
                     }
                     return;
                 }
@@ -1138,19 +1226,23 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                     showMessage(response.data.warnings.map(item => escapeHtml(item)).join("<br>"));
                 }
                 if (menuElement.isConnected && !menuElement.querySelector(`[data-relation-type="selected"][data-row-id="${response.data.itemID}"]`)) {
+                    if (relationElement.dataset.subItemsParent === "true") {
+                        menuElement.querySelector('[data-relation-type="selectedRows"]').innerHTML = "";
+                    }
                     menuElement.querySelector('[data-relation-type="selectedRows"]').insertAdjacentHTML("beforeend",
                         genCreatedRelationRowHTML(menuElement, response.data.itemID, response.data.content,
                             response.data.blockID, response.data.isDetached));
                 }
             } catch (error) {
-                showMessage(escapeHtml(error.message), 6000, "error");
+                if (sourceIsCurrent()) showMessage(escapeHtml(error.message), 6000, "error");
             } finally {
                 delete relationElement.dataset.creating;
                 target.removeAttribute("disabled");
-                menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
+                if (sourceIsCurrent()) menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
             }
         }
     }
+    if (!sourceIsCurrent()) return;
     updateCopyRelatedItems(menuElement);
     menuElement.dispatchEvent(new CustomEvent("relationresize"));
 };

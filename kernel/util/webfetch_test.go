@@ -13,6 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/88250/gulu"
 )
 
 func TestWebFetchHTML(t *testing.T) {
@@ -117,6 +119,64 @@ func TestWebFetchDownloadAndTruncation(t *testing.T) {
 	text, err = readWebFetchResponse(response.Result(), "https://example.com/", "text")
 	if err != nil || !strings.HasPrefix(text, strings.Repeat("\u4e2d", maxWebFetchChars)+"\n\n...content truncated") {
 		t.Fatalf("Unicode truncation failed: %v", err)
+	}
+}
+
+// 下载文件名来自远端 URL，反斜杠在 Windows 上是路径分隔符，必须始终落在 import 目录内。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hq2c-hh95-vrr6
+func TestImportedFileStaysInsideImportDir(t *testing.T) {
+	previousTempDir := TempDir
+	TempDir = filepath.Join(t.TempDir(), "temp")
+	t.Cleanup(func() { TempDir = previousTempDir })
+	importDir := filepath.Join(TempDir, "import")
+
+	for _, rawURL := range []string{
+		"http://attacker.example/..%5C..%5Cescaped.exe",
+		"http://attacker.example/..%5C..%5C..%5C..%5C..%5CWindows%5CTemp%5Cpwned.exe",
+		"http://attacker.example/..%5C..%5Cconf%5Cconf.json",
+		"http://attacker.example/..%2F..%2Fslash.txt",
+		"http://attacker.example/report.pdf",
+	} {
+		name := extractFilename(rawURL, "application/octet-stream")
+		if !isValidImportName(name) || strings.ContainsAny(name, `/\`) {
+			t.Fatalf("filename %q from %s is not a plain file name", name, rawURL)
+		}
+		if !gulu.File.IsSubPath(importDir, filepath.Join(importDir, name)) {
+			t.Fatalf("filename %q from %s escapes the import dir", name, rawURL)
+		}
+	}
+}
+
+func TestAgentDownloadWritesOnlyIntoImportDir(t *testing.T) {
+	previousTempDir, previousClient := TempDir, ssrfSafeClient
+	TempDir = filepath.Join(t.TempDir(), "temp")
+	t.Cleanup(func() { TempDir = previousTempDir; ssrfSafeClient = previousClient })
+	ssrfSafeClient = &http.Client{Transport: webFetchRoundTripper(func(*http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"application/octet-stream"}},
+			Body: io.NopCloser(strings.NewReader("attacker bytes"))}, nil
+	})}
+	importDir := filepath.Join(TempDir, "import")
+	const rawURL = "http://203.0.113.10/..%5C..%5Cescaped.exe"
+
+	text, err := WebFetch(rawURL, "markdown")
+	if err != nil || !strings.HasPrefix(text, "Saved to: ") {
+		t.Fatalf("web fetch download = %q, %v", text, err)
+	}
+	if _, _, text, err = HTTPRequest(http.MethodGet, rawURL, nil, ""); err != nil || !strings.HasPrefix(text, "Saved to: ") {
+		t.Fatalf("http request download = %q, %v", text, err)
+	}
+
+	entries, err := os.ReadDir(importDir)
+	if err != nil || len(entries) == 0 {
+		t.Fatalf("no downloaded file in import dir: %v", err)
+	}
+	for _, entry := range entries {
+		if strings.ContainsAny(entry.Name(), `/\`) || !entry.Type().IsRegular() {
+			t.Fatalf("unexpected entry %q in import dir", entry.Name())
+		}
+	}
+	if _, err = os.Stat(filepath.Join(filepath.Dir(TempDir), "escaped.exe")); err == nil {
+		t.Fatal("downloaded file escaped the import dir")
 	}
 }
 

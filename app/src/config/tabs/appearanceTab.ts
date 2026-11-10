@@ -1,3 +1,5 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {toggleMenu} from "../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../menus/Menu";
 /// #if !BROWSER
@@ -20,7 +22,6 @@ import {openLink} from "../../editor/openLink";
 import {openSnippets} from "../util/snippets";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {Dialog} from "../../dialog";
 import {Menu} from "../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {genListSwitchItemHtml} from "../render/fragments";
@@ -537,7 +538,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                             }
                             if (target.closest('[data-type="delete-font"]')) {
                                 const id = itemElement.dataset.id;
-                                confirmDialog(
+                                mobileConfirmDialog(
                                     window.siyuan.languages.deleteOpConfirm,
                                     window.siyuan.languages.deleteFontConfirm.replace(
                                         "${x}", `<b>${escapeHtml(itemEl.dataset.name)}</b>`),
@@ -937,6 +938,10 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.appearance19,
         desc: window.siyuan.languages.appearance20,
     });
+    group.switch("appearance.showFloatingDockBar", {
+        title: window.siyuan.languages.showFloatingDockBar,
+        desc: window.siyuan.languages.showFloatingDockBarTip,
+    });
     /// #endif
     group.stack({
         key: "statusBar",
@@ -944,6 +949,7 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.appearance16,
             window.siyuan.languages.appearance17,
             window.siyuan.languages.appearance18,
+            window.siyuan.languages.showFloatingStatusBar,
         ],
         afterMount: mountAppearanceSetStatusBar,
     }, (stack) => {
@@ -951,6 +957,11 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         stack.switch("appearance.hideStatusBar", {
             desc: window.siyuan.languages.appearance17,
         });
+        /// #if !MOBILE
+        stack.switch("appearance.showFloatingStatusBar", {
+            desc: window.siyuan.languages.showFloatingStatusBar,
+        });
+        /// #endif
         stack.desc(window.siyuan.languages.appearance18);
         stack.button({
             id: "statusBarSetting",
@@ -1002,7 +1013,7 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     group.slot({
         key: "entryVisibility",
         keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip,
-            window.siyuan.languages.entryToolbar, window.siyuan.languages.entrySlashMenu,
+            window.siyuan.languages.entryToolbar, window.siyuan.languages.entrySlashMenu, window.siyuan.languages.breadcrumb,
             ...(isMobile() ? [window.siyuan.languages.mobileToolbarEntryTip] : [])],
         html: genEntryVisibilityHtml,
         afterMount: mountEntryVisibility,
@@ -1193,17 +1204,21 @@ const readStatusBarMsgFromDialog = (root: HTMLElement): Config.IAppearanceStatus
 
 const mountAppearanceSetStatusBar = (root: HTMLElement) => {
     root.querySelector("#statusBarSetting")?.addEventListener("click", () => {
-        const dialog = new Dialog({
+        const save = async () => {
+            const statusBar = readStatusBarMsgFromDialog(dialog.element);
+            if (!objEquals(statusBar, window.siyuan.config.appearance.statusBar)) {
+                await appearanceConfigApi.patch("statusBar", statusBar);
+            }
+            return true;
+        };
+        const dialog = new MobileDialog({
+            mobileSheet: {beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
             title: "🔇 " + window.siyuan.languages.appearance18,
             content: genStatusBarMsgDialogHtml(),
             destroyCallback() {
-                const statusBar = readStatusBarMsgFromDialog(dialog.element);
-                if (objEquals(statusBar, window.siyuan.config.appearance.statusBar)) {
-                    return;
-                }
-                void appearanceConfigApi.patch("statusBar", statusBar);
+                if (!isMobile()) void save();
             }
         });
     });
@@ -1251,17 +1266,21 @@ const readNotificationsFromDialog = (root: HTMLElement): Config.IAppearanceNotif
 
 const mountAppearanceSetNotifications = (root: HTMLElement) => {
     root.querySelector("#notificationsSetting")?.addEventListener("click", () => {
-        const dialog = new Dialog({
+        const save = async () => {
+            const notifications = readNotificationsFromDialog(dialog.element);
+            if (!objEquals(notifications, window.siyuan.config.appearance.notifications)) {
+                await appearanceConfigApi.patch("notifications", notifications);
+            }
+            return true;
+        };
+        const dialog = new MobileDialog({
+            mobileSheet: {beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
             title: "🔔 " + window.siyuan.languages.notifications,
             content: genNotificationsDialogHtml(),
             destroyCallback() {
-                const notifications = readNotificationsFromDialog(dialog.element);
-                if (objEquals(notifications, window.siyuan.config.appearance.notifications)) {
-                    return;
-                }
-                void appearanceConfigApi.patch("notifications", notifications);
+                if (!isMobile()) void save();
             }
         });
     });

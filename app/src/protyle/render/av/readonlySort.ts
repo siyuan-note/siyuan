@@ -21,7 +21,7 @@ export const openReadonlyAVSortMenu = (element: HTMLElement, protyle: IProtyle, 
         }
         setReadonlyAVSort(element, data.viewID, value);
         element.removeAttribute("data-render");
-        void avRender(element, protyle);
+        void avRender(element, protyle, undefined, true, undefined, "presentation");
     };
     toggleMenu({
         target,

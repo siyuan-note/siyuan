@@ -243,7 +243,7 @@ func (TesseractProvider) Recognize(parent context.Context, imgAbsPath string) (r
 	defer tesseractOCRLock.Unlock()
 
 	if !IsTesseractExtractable(imgAbsPath) {
-		err = errors.New("unsupported Tesseract image format")
+		err = fmt.Errorf("%w: unsupported Tesseract image format", ocr.ErrPermanent)
 		return
 	}
 
@@ -253,7 +253,7 @@ func (TesseractProvider) Recognize(parent context.Context, imgAbsPath string) (r
 	}
 
 	if TesseractMaxSize < uint64(info.Size()) {
-		err = errors.New("image exceeds Tesseract size limit")
+		err = fmt.Errorf("%w: image exceeds Tesseract size limit: %d bytes", ocr.ErrPermanent, TesseractMaxSize)
 		return
 	}
 

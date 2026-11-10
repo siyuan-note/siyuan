@@ -59,6 +59,32 @@ func TestExportMarkdownTaskMarkerOption(t *testing.T) {
 	}
 }
 
+func TestExportHeadingNumberContract(t *testing.T) {
+	for _, extra := range []string{"", `,"headingNumber":null`, `,"headingNumber":false`, `,"headingNumber":true`} {
+		content, err := ExportMdContent.Decode(strings.NewReader(`{"id":"id"` + extra + `}`))
+		if err != nil || content.Validate() != nil {
+			t.Fatalf("invalid content option: %+v %v", content, err)
+		}
+		md, err := ExportMd.Decode(strings.NewReader(`{"id":"id"` + extra + `}`))
+		if err != nil || md.Validate() != nil {
+			t.Fatalf("invalid archive option: %+v %v", md, err)
+		}
+		for _, value := range []*bool{content.HeadingNumber, md.HeadingNumber} {
+			if extra == "" || strings.Contains(extra, "null") {
+				if value != nil {
+					t.Fatal("omitted selection must retain the document default")
+				}
+			} else if value == nil || *value != strings.Contains(extra, "true") {
+				t.Fatalf("heading number selection was not retained: %s", extra)
+			}
+		}
+	}
+	request, err := ExportMdContent.Decode(strings.NewReader(`{"id":"id","headingNumber":"true"}`))
+	if err != nil || request.Validate() == nil || request.Validate().Error() != "Field [headingNumber] should be of type [Boolean]" {
+		t.Fatalf("heading number validation must remain deferred: %+v %v", request, err)
+	}
+}
+
 func TestExportNotebookFiltering(t *testing.T) {
 	for _, body := range []string{`{}`, `{"notebooks":null}`, `{"notebooks":true}`, `{"notebooks":{}}`} {
 		request, err := ExportNotebooksSY.Decode(strings.NewReader(body))

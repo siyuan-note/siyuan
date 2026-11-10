@@ -176,6 +176,10 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 	}
 
 	messages := buildAIEditorMessages(prompt, history, editing.MaxHistoryMessages)
+	memoryContext, memoryErr := BuildAIMemoryContext(ctx, prompt, ids, 6000)
+	if memoryErr == nil && memoryContext != "" {
+		messages = append(messages[:1], append([]openai.ChatCompletionMessage{{Role: openai.ChatMessageRoleUser, Content: memoryContext}}, messages[1:]...)...)
+	}
 
 	req := openai.ChatCompletionRequest{
 		Model:               m.Name,
@@ -186,6 +190,7 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 	}
 	streamCtx, cancel := context.WithCancel(ctx)
 	streamCtx = util.ContextWithOpenAIResponsesBaseURL(streamCtx, prov.BaseURL)
+	streamCtx = util.ContextWithOpenAIChatTemperature(streamCtx, req.Temperature)
 	requestTimeout := time.Duration(prov.RequestTimeout) * time.Second
 	requestTimer, requestTimerDone := startAIEditorCancelTimer(requestTimeout, cancel)
 	client := NewAIProviderClient(prov, m.Name)

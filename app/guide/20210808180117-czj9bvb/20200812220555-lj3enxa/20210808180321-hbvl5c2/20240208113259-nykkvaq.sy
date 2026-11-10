@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261028120132"
+		"updated": "20261109202806"
 	},
 	"Children": [
 		{
@@ -3160,7 +3160,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中通过「数据库面板字段布局」选择「单栏」「双栏（按行）」或「双栏（按列）」，默认「双栏（按行）」。该设置同时作用于文档顶部数据库面板和独立条目面板，空间不足时自动使用单栏，切换布局不会改变字段顺序。"
+					"Data": " 中通过「数据库面板字段布局」选择「单栏」「双栏（按行）」或「双栏（按列）」，默认「双栏（按行）」。该设置同时作用于文档顶部数据库面板和独立条目面板，空间不足时自动使用单栏，切换布局不会改变字段顺序。在面板中绑定非绑定条目后，如果已启用数据库属性显示，面板会打开绑定块的编辑器。已绑定条目的面板不提供换绑按钮，请在数据库视图中更换绑定。"
 				}
 			]
 		},
@@ -3312,21 +3312,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261025205717-sfr9z2f",
-				"updated": "20261025205717"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在条目模板中启用 "
+					"Data": "在条目模板中通过 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "创建后分屏打开条目"
+					"TextMarkTextContent": "创建后打开条目"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 后，从数据库视图使用该模板新建绑定或游离条目时，会自动在右侧打开。绑定文档的标题可编辑时聚焦标题，否则聚焦主键；游离条目聚焦主键。移动端使用已有的页面或弹层打开。"
+					"Data": " 下拉菜单选择「不打开」（默认）、「打开」（当前分屏）或「向右分屏」。绑定和游离条目均支持；绑定文档优先聚焦可编辑标题，其他情况聚焦主键。移动端两种打开方式均使用已有页面或弹层。"
 				}
 			]
 		},
@@ -3335,12 +3335,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261025205717-vkvh44q",
-				"updated": "20261025205717"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "新模板默认关闭此选项，关闭开关即可停止自动打开。已有模板在未改动此开关时保留原行为，包括日历中的自动打开。不使用模板的空白新建沿用视图原有行为；若需配置，可创建空白游离条目模板并设为默认。"
+					"Data": "已有模板在未修改此选项时保持原有打开行为。不使用模板的空白新建沿用视图行为；需要配置时可创建空白游离条目模板并设为默认。"
 				}
 			]
 		},
@@ -3515,12 +3515,97 @@
 			]
 		},
 		{
+			"ID": "20261103024717-caxvng5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261103024717-caxvng5",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "条目详情中的关联数据库视图"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-pa1lgjl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-pa1lgjl",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在关联字段的配置中启用“显示关联表格”，通过“关联数据库视图”选择关联数据库中已有的表格视图。创建或更换关联目标时，可在同一菜单中配置关联表格，再点击“确定”一起保存。设置属于该字段，所有条目共用；新条目自动继承。关闭显示不会删除关联或目标条目。"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-anovaio",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-anovaio",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "关联表格显示在条目详情的数据库属性区底部，有正文时位于正文之前。绑定文档、内容块和未绑定条目都可以使用。同一块属于多个数据库时，默认通过页签切换；关闭“多个数据库使用页签展示”后，各数据库的属性和关联表格分组显示。不同数据库、条目和关联字段的成员范围彼此独立。"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-o5mvav4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-o5mvav4",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表格只显示当前条目在该字段中已关联的条目，并同时应用所选视图的筛选。单向关联也可以使用，不需要反向关联字段。目标视图的列布局是共享的；当前条目范围不会写入共享筛选。面板内的搜索、“本面板排序”和“本面板附加筛选”仅用于当前面板。"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-2kldkfq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-2kldkfq",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编辑表格中的字段会修改真实的目标条目，其他引用会同步更新。“移除关联”只取消当前条目在当前字段中的关联，不删除目标条目。“添加已有条目”遵守关联候选筛选；“新建并关联条目”沿用目标数据库的新建规则，未配置模板时新建未绑定条目。"
+				}
+			]
+		},
+		{
+			"ID": "20261103024717-eehys7t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103024717-eehys7t",
+				"updated": "20261103024717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "当前关联为空时显示空表。字段或目标视图失效、数据库锁定时显示不可用状态，不会展示未筛选的整个数据库。此功能首先支持表格；表格内不会自动递归展开更多关联表格。历史与快照预览不展开实时关联视图。"
+				}
+			]
+		},
+		{
 			"ID": "20240208120846-72y7j0d",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208120846-72y7j0d",
-				"updated": "20260902120000"
+				"updated": "20261030030559"
 			},
 			"Children": [
 				{
@@ -3995,6 +4080,31 @@
 			"AttributeViewType": "table"
 		},
 		{
+			"ID": "20261030030559-etrddmk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261030030559-etrddmk",
+				"updated": "20261030030559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模板字段可使用 httpGet 读取外部接口数据，执行时需要在当前窗口确认；各行共享请求预算。用法见"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261030003500-xwa7tv2",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "从外部接口读取数据"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
 			"ID": "20260830120100-a1dspcn",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -4125,7 +4235,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-l8jclpi",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -4470,12 +4580,243 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024164212-gnpd7xm",
-				"updated": "20261024164212"
+				"updated": "20261109002000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "模板结果只在触发时写入，重做复用首次结果。模板不支持 SQL、文件、网络、循环或递归；源码最多 8 KiB，单个输入和输出最多 64 KiB。保存模板后，该数据库需要支持自动化版本 2 的客户端读取，旧版会明确拒绝读取；原有版本 1 的规则保持兼容。"
+					"Data": "模板结果只在触发时写入，重做复用首次结果。模板不支持 SQL、文件、循环或递归；含 HTTP 的规则在编辑保存后执行。源码最多 8 KiB，单个字段输入和输出最多 64 KiB。保存模板后，该数据库需要支持自动化版本 2 的客户端读取，旧版会明确拒绝读取；原有版本 1 的规则保持兼容。"
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-sodg3g8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-sodg3g8",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在模板编辑器中按名称选择来源字段，点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "插入字段引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 会在光标处插入稳定的字段 ID 引用，字段改名后引用仍有效；点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "复制 ID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可复制选中字段的 ID。移动端也提供此入口。"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-il2fq3j",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261108182000-il2fq3j",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手动执行"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261108182000-zauhsiq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-zauhsiq",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "手动"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 触发器，添加写入普通字段的动作，将赋值方式设为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "模板"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，然后启用规则。点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "立即执行"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 处理全部符合规则条件的已保存条目。结果可离线查看，重新打开数据库不会再次取数。目前不提供定时执行。"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-z5dzzsc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-z5dzzsc",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手动规则的 .action{...} 表达式支持 httpGet 和 fromJson。例如，下面的模板将返回的幻灯片标题写入文本字段："
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-howdc75",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-howdc75",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{$r := httpGet \"https://httpbingo.org/json\"}.action{(fromJson $r.body).slideshow.title}"
+				}
+			]
+		},
+		{
+			"ID": "20261108182000-zu1yqrl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261108182000-zu1yqrl",
+				"updated": "20261108182000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "网络请求需要当前窗口确认，并遵循模板 HTTP 限制。持久许可绑定已保存的规则版本，可在自动化面板撤销。手动执行界面按符合条件的条目独立保存：同一条目的全部动作一起成功或全部保留原值，其他成功条目不受影响。每条记录读取当时的存储快照，该条的全部动作共用此快照；取数期间涉及的数据库变化会拒绝过期结果。撤销和重做复用已保存结果，不重新取数。各批次共享 HTTP 限制，每轮最多进行 1,000 次字段写入和条目新增。手动模板不提供字段预览。手动规则需要自动化格式 9，既有格式 1–8 仍可读取，旧客户端拒绝格式 9 且不改写数据库。"
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-yzneb2e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-yzneb2e",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "执行时显示成功、失败、待处理和跳过数量，可展开失败条目列表。「重试失败及未完成条目」只处理这些条目，不重复已成功的新增动作。各批次共享请求、响应大小、总耗时和写入上限；达到上限、拒绝授权或关闭面板会停止后续处理，保留已经提交的结果。显式重试会开启新的预算轮次。响应丢失时先查询进度再继续写入。进度绑定当前主窗口，十五分钟内有效，笔记本进入锁定流程时清除；过期后请先核对已保存的值再重新开始。既有 API 调用未显式启用逐条模式时，仍保持整批原子提交及 null 响应。"
+				}
+			]
+		},
+		{
+			"ID": "20261109112907-oj4b44w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109112907-oj4b44w",
+				"updated": "20261109112907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可将复选框作为刷新开关：监听其变化，以已勾选为条件，在同一条规则中保存 HTTP 结果并清除复选框。成功写入不会再次触发其他自动化；失败时保留复选框和原有结果，可取消勾选后再次勾选重试。"
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-bdvqfu1",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261109002000-bdvqfu1",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自动联网和格式化函数"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261109002000-i8jo1cw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-i8jo1cw",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新增条目、字段变化触发器中，包含 httpGet 的整条规则会在编辑保存后执行全部动作。同一数据库的连续编辑合并处理，由当前窗口确认联网权限。失败时保留已保存的编辑和原有结果；等待期间涉及的数据库变化会丢弃过期结果。取数结果统一保存并单独形成一步撤销：先撤销结果会保留输入，再撤销才还原输入。重做复用保存结果，不重新联网；结果写入不触发其他自动化。无交互窗口的 API 写入只保存编辑，不执行含 HTTP 的规则。目前不提供定时执行。"
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-yizjf9b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-yizjf9b",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "所有自动化模板均支持 printf、urlquery、dict、toString 和 fromJson。printf 支持常用格式符并限制标量参数的宽度和精度，不支持动态宽度（*）或参数索引；dict 要求字符串键和完整的键值对。这些辅助函数最多接受 64 个参数，序列化输入和字符串输出最多 64 KiB。新的格式化函数和事件 HTTP 规则需要自动化格式 10。既有格式 1–9 仍可读取，停用的未完成模板原样保留；旧客户端拒绝格式 10 且不改写数据库。"
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-dwbxsvv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-dwbxsvv",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例如，根据来源字段拼接 URL（将 FIELD_ID 替换为字段 ID）："
+				}
+			]
+		},
+		{
+			"ID": "20261109002000-00king4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109002000-00king4",
+				"updated": "20261109002000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{printf \"https://example.com?q=%s\" (urlquery (field \"FIELD_ID\"))}"
 				}
 			]
 		},
@@ -4914,7 +5255,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261015141042-j06dkl9",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -4928,7 +5269,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-33obidb",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5055,12 +5396,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261026103001-quehwxj",
-				"updated": "20261026103001"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "引用来源按反链规则归并，包括列表项、引述块、超级块、提示块，以及文档首段或标题后首段为纯块引用时的传递规则。块类型和自定义属性约束归并后的最终块，标签条件约束引用来源块；设置引用目标后，标签的收集对象选项不参与选择。清除引用目标可恢复普通收集。移除引用会保留已有条目和字段，历史引用可通过收集管理预览并补收。引用目标需要自动化格式 8，既有格式 1–7 仍可读取，旧客户端会拒绝格式 8 且不改写数据库。"
+					"Data": "引用来源按反链规则归并，包括列表项、引述块、超级块、提示块，以及文档首段或标题后首段为纯块引用时的传递规则。块类型和自定义属性约束归并后的最终块，标签条件约束引用来源块；设置引用目标后，标签的收集对象选项不参与选择。清除引用目标可恢复普通收集。删除正文块引用时，可按下方说明确认是否同步移出自动收集的条目。历史引用可通过收集管理预览并补收。引用目标需要自动化格式 8，既有格式 1–7 仍可读取，旧客户端会拒绝格式 8 且不改写数据库。"
 				}
 			]
 		},
@@ -5097,7 +5438,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024163013-earatc9",
-				"updated": "20261024163013"
+				"updated": "20261106090000"
 			},
 			"Children": [
 				{
@@ -5174,6 +5515,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "块首次符合条件时新增条目。自动收集只添加条目；原文变化、移出监控范围、修改条件或收集对象、停用或删除规则，均保留已有条目及字段。再次匹配时仍使用原条目，保留手动填写或修改的字段。"
+				}
+			]
+		},
+		{
+			"ID": "20261102195537-f6c3ww2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102195537-f6c3ww2",
+				"updated": "20261106090000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "从正文、文档标签或标签面板删除标签，或删除正文块引用时，会检查自动收集的条目是否不再符合任何启用的收集规则。如有影响，会在同一个对话框中列出数据库及条目数量，同时删除标签和引用也只确认一次。默认勾选所有受影响的数据库，确认「同时移出所选条目」会删除标签或引用，并同步移出所选条目及其字段值。取消勾选可保留对应数据库的条目和字段；根据删除内容选择「仅删除标签」「仅删除引用」或「仅删除标签和引用」，可保留所有数据库条目和字段。取消对话框则不执行删除。原文保留，撤销会一起恢复标签或引用、原条目及字段值。手动加入的条目，以及仍通过同一目标的其他引用或其他启用规则匹配的条目均保留。重命名标签或仅修改引用锚文本不会弹出此对话框。"
 				}
 			]
 		},
@@ -5285,6 +5640,214 @@
 			]
 		},
 		{
+			"ID": "20261028142713-3x4gx5d",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261028142713-3x4gx5d",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "父子条目"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261028142713-88hjqza",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-88hjqza",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在数据库设置中打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "父子条目"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "启用父子条目"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 即可在首次启用时自动创建父项和子项关联字段。需要复用已有关联字段时，进入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用已有关联字段"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，选择一组双向关联字段，并检查真实条目的层级预览。需要调整上下级方向时，点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "反转方向"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，确认方向后启用。预览仅展示当前已加载条目中的部分关系，启用时仍会校验全部关系。启用后，访问这个数据库的各端需要支持新格式。未启用的数据库不受影响。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-c3m185q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-c3m185q",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "一个条目最多有一个父项，可以包含多层子项。不能把自己或后代设为父项。父子关系由数据库的所有视图和镜像共享，不改变文档或块的原有层级。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-yqwfcri",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-yqwfcri",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表格和列表可以选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "树形显示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "平铺显示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。树形显示中，表格通过第一个可见字段前的按钮展开和折叠子项，按钮位置随字段排序和显示状态调整；列表的按钮位于主字段前。没有子项的条目在展开按钮的位置显示不可点击的灰色圆点，同级条目保持对齐。条目图标保留在主字段中。卡片、看板和日历仍保持平铺，可以通过条目属性查看和修改父子关系。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-2xkabyi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-2xkabyi",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "条目菜单提供 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新增子项"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更改父项"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "提升一级"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。移动父项时，其后代一起移动；改父项不会自动修改子项的状态、日期等字段。自动排序开启时，同级顺序由排序规则决定。在树形显示中，通过条目菜单在上方或下方插入时，新条目与当前条目处于同一层级并共用父项。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-uxlly8l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-uxlly8l",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "筛选命中子项时，会保留它的祖先路径作为上下文，不显示未命中的兄弟条目。树形分组跟随顶层父项，子项仍保留自己的分组字段值。平铺分组按每个条目自己的字段值处理。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-ctns6ab",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-ctns6ab",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "树形视图按顶层条目分页，展开时加载子项，子项较多时可以前后翻页。折叠不会改变统计结果，仅为上下文显示的祖先不计入筛选匹配数量。多行粘贴只覆盖当前页可见条目，包括上下文祖先；超出可见范围的行新增为顶层条目，不会覆盖折叠条目或其他页的条目。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-v7h0fce",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-v7h0fce",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "删除父项后，未删除的直接子项提升一级，不会连带删除后代或绑定的文档、块。复制父项会复制整棵子树，包括折叠或被筛选隐藏的后代；副本使用新的条目身份，绑定条目的副本为未绑定条目，不复制正文。结构操作支持撤销和重做。"
+				}
+			]
+		},
+		{
+			"ID": "20261028142713-o25vwu0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261028142713-o25vwu0",
+				"updated": "20261028142713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "切换为平铺或停用父子条目不会删除关联字段或关联数据，也不会自动降低数据库格式版本。再次启用会重新检查已有关系。停用期间若指定字段被删除或不再构成双向自关联，自动启用会新建一组关联字段，保留其余字段和值。父子循环或多个父项会提示具体原因并拒绝保存。在父子条目菜单中切换选项后，菜单保持打开并刷新状态。加密数据库的展开状态在锁定或关闭笔记本后清除。"
+				}
+			]
+		},
+		{
 			"ID": "20240818174119-3zag9wr",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -5333,6 +5896,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20261109202806-fbc477e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261109202806-fbc477e",
+				"updated": "20261109202806"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在表格和列表的文本、数字、网址、邮箱、电话和未绑定主键输入框中，按回车保存后立即编辑同组下一行的相同字段，末行不会自动新增条目。文本可用 Shift+Enter 换行，需要编辑多段落、列表等复杂富文本时，请打开条目详情。输入法组合输入和候选选择保持原有行为，保存失败时保留当前草稿。"
 				}
 			]
 		},

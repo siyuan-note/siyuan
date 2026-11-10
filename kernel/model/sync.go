@@ -34,7 +34,18 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func SyncDataDownload() (err error) {
+// publishSyncResult persists the completed outcome before publishing it to every frontend.
+func publishSyncResult(code int, syncErr error) {
+	UpdateSyncConf(func(s *conf.Sync) {
+		s.LastResult = code
+		if syncErr != nil {
+			s.Stat = formatSyncRepoErrorMsg(syncErr)
+		}
+	})
+	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+}
+
+func SyncDataDownload(decisions ...SyncSourceDecision) (err error) {
 	err = errors.New("sync download did not complete")
 	defer logging.Recover()
 
@@ -47,22 +58,22 @@ func SyncDataDownload() (err error) {
 		return
 	}
 	defer unlock()
-	err = syncDataDownloadLocked()
+	err = syncDataDownloadLocked(decisions...)
 	return
 }
 
-func syncDataDownloadLocked() (err error) {
+func syncDataDownloadLocked(decisions ...SyncSourceDecision) (err error) {
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
 	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
-	err = syncRepoDownloadWithDNSRetry()
+	err = syncRepoDownloadWithDNSRetry(decisions...)
 	code := 1
 	if err != nil {
 		code = 2
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+	publishSyncResult(code, err)
 	// Download-only completion does not publish local changes, including an empty remote.
 	// Keep the pending hint until an upload or full sync actually publishes them.
 	if 1 == code {
@@ -109,7 +120,7 @@ func completeCurrentSyncRemoteRequest(scope string) {
 	syncRemoteRequests.complete(scope, latest.ID)
 }
 
-func SyncDataUpload() (err error) {
+func SyncDataUpload(decisions ...SyncSourceDecision) (err error) {
 	err = errors.New("sync upload did not complete")
 	defer logging.Recover()
 
@@ -128,12 +139,12 @@ func SyncDataUpload() (err error) {
 	now := util.CurrentTimeMillis()
 	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
-	err = syncRepoUploadWithDNSRetry()
+	err = syncRepoUploadWithDNSRetry(decisions...)
 	code := 1
 	if err != nil {
 		code = 2
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+	publishSyncResult(code, err)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 	return
 }
@@ -167,6 +178,14 @@ func SyncDataJob() {
 
 func BootSyncData() {
 	defer logging.Recover()
+	if err := prepareDocumentSourceBootSync(); err != nil {
+		if util.IsBooted() {
+			logging.LogErrorf("prepare recovered document sources before sync failed: %s", err)
+		} else {
+			logging.LogFatalf(logging.ExitCodeFileSysErr, "prepare recovered document sources before sync failed: %s", err)
+		}
+		return
+	}
 	if scheduleBootSync() {
 		return
 	}
@@ -239,7 +258,7 @@ func finishBootSync(revision uint64, cloudPublished bool, err error) {
 	} else {
 		BootSyncSucc.Store(0)
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+	publishSyncResult(code, err)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 	if 1 == code {
 		// 启动同步成功后消费本地速记临时文件，避免移动端开启云同步时需手动触发同步才能刷新闪念速记
@@ -377,7 +396,7 @@ func syncDataLockedContext(ctx context.Context, exit, byHand bool) (err error) {
 	} else {
 		BootSyncSucc.Store(0)
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+	publishSyncResult(code, err)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 
 	if !exit && 1 == code {
@@ -494,6 +513,8 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 }
 
 func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	bootProgressPart := int32(10 / float64(len(removeFilePaths)))
 	for _, removeFile := range removeFilePaths {
 		if !strings.HasSuffix(removeFile, ".sy") {
@@ -504,6 +525,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 		removeRootIDs = append(removeRootIDs, rootID)
 
 		msg := fmt.Sprintf(Conf.Language(39), rootID)
+		updateSyncCheckoutIndexMessage(msg)
 		util.IncBootProgress(bootProgressPart, msg)
 		pushSyncStatusBar(msg)
 
@@ -529,6 +551,8 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 }
 
 func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
+	finishDocTreeChange := cache.BeginDocTreeMutation("")
+	defer finishDocTreeChange()
 	luteEngine := util.NewLute()
 	bootProgressPart := int32(10 / float64(len(upsertFilePaths)))
 	for _, upsertFile := range upsertFilePaths {
@@ -559,6 +583,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 			hpathRefresh.Lock()
 			defer hpathRefresh.Unlock()
 			msg := fmt.Sprintf(Conf.Language(40), util.GetTreeID(p))
+			updateSyncCheckoutIndexMessage(msg)
 			util.IncBootProgress(bootProgressPart, msg)
 			pushSyncStatusBar(msg)
 
@@ -566,6 +591,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 			cache.RemoveTreeData(rootID)
 			tree, err0 := filesys.LoadTree(box, p, luteEngine)
 			if nil != err0 {
+				unindexUnsupportedSyncDocument(box, p, rootID, err0)
 				return "", false
 			}
 			oldDoc := treenode.GetBlockTreeInBox(rootID, box)
@@ -622,6 +648,9 @@ func SetCloudSyncDir(name string) error {
 		return err
 	}
 
+	if err := prepareSyncSourceChange(); err != nil {
+		return err
+	}
 	UpdateSyncConf(func(s *conf.Sync) { s.CloudName = name })
 	refreshLANSyncManager()
 	return nil
@@ -685,6 +714,9 @@ func SetSyncProvider(provider int, completeAssets bool) (err error) {
 		if err != nil {
 			return
 		}
+		if err = prepareSyncSourceChange(); err != nil {
+			return
+		}
 	}
 	UpdateSyncConf(func(s *conf.Sync) { s.Provider = provider })
 	refreshLANSyncManager()
@@ -709,6 +741,9 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	if Conf.Sync.Load().Provider == conf.ProviderS3 && (Conf.Sync.Load().S3 == nil ||
 		Conf.Sync.Load().S3.Endpoint != s3.Endpoint || Conf.Sync.Load().S3.Bucket != s3.Bucket) {
 		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+		if err = prepareSyncSourceChange(); err != nil {
 			return
 		}
 	}
@@ -787,6 +822,9 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 		if err = requireCompleteAssetDownloads(); err != nil {
 			return
 		}
+		if err = prepareSyncSourceChange(); err != nil {
+			return
+		}
 	}
 
 	UpdateSyncConf(func(s *conf.Sync) { s.WebDAV = webdav })
@@ -809,6 +847,9 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 	if Conf.Sync.Load().Provider == conf.ProviderLocal && (Conf.Sync.Load().Local == nil ||
 		filepath.Clean(Conf.Sync.Load().Local.Endpoint) != filepath.Clean(local.Endpoint)) {
 		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+		if err = prepareSyncSourceChange(); err != nil {
 			return
 		}
 	}
@@ -865,6 +906,9 @@ func RemoveCloudSyncDir(name string) (err error) {
 	defer release()
 	if name == Conf.Sync.Load().CloudName {
 		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+		if err = prepareSyncSourceChange(); err != nil {
 			return
 		}
 	}
@@ -953,6 +997,15 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 
 func formatRepoErrorMsg(err error) string {
 	msg := html.EscapeString(err.Error())
+	if errors.Is(err, dejavu.ErrSyncSourceChanged) {
+		return Conf.Language(463)
+	}
+	if errors.Is(err, dejavu.ErrSyncSourcePreviewChanged) {
+		return Conf.Language(464)
+	}
+	if errors.Is(err, treenode.ErrSpecTooNew) {
+		return Conf.Language(275) + ": " + msg
+	}
 	if errors.Is(err, cloud.ErrCloudAuthFailed) {
 		msg = Conf.Language(31)
 	} else if errors.Is(err, cloud.ErrCloudObjectNotFound) {
@@ -966,6 +1019,8 @@ func formatRepoErrorMsg(err error) string {
 		msg = Conf.Language(189)
 	} else if errors.Is(err, dejavu.ErrRepoFatal) {
 		msg = Conf.Language(23)
+	} else if errors.Is(err, errSyncCheckoutBusy) {
+		msg = Conf.Language(239)
 	} else if errors.Is(err, dejavu.ErrIndexFileChanged) {
 		// 同步索引期间工作空间文件被修改，明确提示用户稍后重试 https://ld246.com/article/1789052153692
 		msg = Conf.Language(384)
@@ -995,11 +1050,12 @@ func formatRepoErrorMsg(err error) string {
 		} else if strings.Contains(msgLowerCase, "region was not a valid") {
 			msg = Conf.language(254)
 		} else if strings.Contains(msgLowerCase, "device or resource busy") || strings.Contains(msg, "is being used by another") {
-			msg = fmt.Sprintf(Conf.Language(85), err)
+			// 错误文本可能来自远端 HTTP 响应，必须沿用已转义的 msg
+			msg = fmt.Sprintf(Conf.Language(85), msg)
 		} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {
 			msg = Conf.Language(135)
 		} else if isDNSError(msgLowerCase) {
-			msg = Conf.Language(24)
+			msg = Conf.Language(408)
 		} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") || strings.Contains(msgLowerCase, "timeout") || strings.Contains(msgLowerCase, "context cancellation while reading body") {
 			msg = Conf.Language(24)
 		} else if strings.Contains(msgLowerCase, "connection") || strings.Contains(msgLowerCase, "refused") || strings.Contains(msgLowerCase, "socket") || strings.Contains(msgLowerCase, "eof") || strings.Contains(msgLowerCase, "closed") || strings.Contains(msgLowerCase, "network") {
@@ -1025,9 +1081,15 @@ var (
 	lastDNSFlushTimeMu sync.Mutex
 )
 
-// flushAndRetryOnDNSError 在确认是 DNS 类错误且距上次刷新超过 5 分钟时，刷新系统 DNS 缓存并返回 true
-// 以触发上层重试一次同步；否则返回 false。节流是为了避免高频自动同步反复 fork 系统命令。
+// flushAndRetryOnDNSError 在 DNS 类错误后请求上层重试一次，成功刷新后节流五分钟。
 func flushAndRetryOnDNSError(err error) bool {
+	return flushAndRetryOnDNSErrorWithFlush(err, flushDNS)
+}
+
+func flushAndRetryOnDNSErrorWithFlush(err error, flush func() error) bool {
+	if err == nil {
+		return false
+	}
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return false
 	}
@@ -1041,10 +1103,12 @@ func flushAndRetryOnDNSError(err error) bool {
 		logging.LogInfof("sync failed with DNS error, but DNS cache was flushed recently, skip retry")
 		return false
 	}
+	if flushErr := flush(); flushErr != nil {
+		logging.LogInfof("sync failed with DNS error [%s], DNS cache was not flushed [%s], retrying once", err, flushErr)
+		return true
+	}
 	lastDNSFlushTime = time.Now()
-
-	logging.LogInfof("sync failed with DNS error [%s], flushing DNS cache and retrying once", err)
-	flushDNS()
+	logging.LogInfof("sync failed with DNS error [%s], flushed DNS cache, retrying once", err)
 	return true
 }
 
@@ -1063,19 +1127,19 @@ func syncRepoWithDNSRetryContext(ctx context.Context, exit, byHand bool) (cloudP
 }
 
 // syncRepoDownloadWithDNSRetry 仅下载同步，DNS 类错误时刷新系统 DNS 缓存后重试一次。
-func syncRepoDownloadWithDNSRetry() (err error) {
-	err = syncRepoDownload()
+func syncRepoDownloadWithDNSRetry(decisions ...SyncSourceDecision) (err error) {
+	err = syncRepoDownloadWithDecision(decisions)
 	if nil != err && flushAndRetryOnDNSError(err) {
-		err = syncRepoDownload()
+		err = syncRepoDownloadWithDecision(decisions)
 	}
 	return
 }
 
 // syncRepoUploadWithDNSRetry 仅上传同步，DNS 类错误时刷新系统 DNS 缓存后重试一次。
-func syncRepoUploadWithDNSRetry() (err error) {
-	err = syncRepoUpload()
+func syncRepoUploadWithDNSRetry(decisions ...SyncSourceDecision) (err error) {
+	err = syncRepoUploadWithDecision(decisions)
 	if nil != err && flushAndRetryOnDNSError(err) {
-		err = syncRepoUpload()
+		err = syncRepoUploadWithDecision(decisions)
 	}
 	return
 }

@@ -8,6 +8,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"io"
+	"net/url"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -35,6 +36,72 @@ func TestExportNotebookMarkdownPathsKeepsDuplicateNamesSeparate(t *testing.T) {
 	expectedThird := "notes-" + boxes[2].ID
 	if paths[boxes[2].ID] != expectedThird {
 		t.Fatalf("unexpected third notebook path: %q", paths[boxes[2].ID])
+	}
+}
+
+func TestExportNotebookNamesPreserveSlashesAndAvoidFilesystemCollisions(t *testing.T) {
+	const boxID = "20261025000000-box0001"
+	setupExportRelatedTest(t, boxID)
+	box := Conf.Box(boxID)
+	boxConf := box.GetConf()
+	boxConf.Name = "Research/2026／Notes"
+	if err := box.SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	archivePath := ExportNotebookSY(boxID)
+	if archivePath != "/export/"+url.PathEscape("Research_2026／Notes.sy.zip") {
+		t.Fatalf("notebook name became a path: %q", archivePath)
+	}
+	absPath, err := exportedFilePath(archivePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	notebook, err := inspectSYNotebookArchive(absPath)
+	if err != nil || notebook.name != boxConf.Name {
+		t.Fatalf("archive lost the original notebook name: %+v, %v", notebook, err)
+	}
+	decodedArchivePath, err := url.PathUnescape(archivePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	archive := openExportArchive(t, decodedArchivePath)
+	for _, file := range archive.File {
+		if !strings.HasPrefix(file.Name, "Research_2026／Notes/") {
+			t.Fatalf("unexpected export root: %s", file.Name)
+		}
+	}
+
+	boxes := []*Box{
+		{ID: "20261025000000-box0001", Name: "A/B"},
+		{ID: "20261025000000-box0002", Name: "A_B"},
+		{ID: "20261025000000-box0003", Name: "A／B"},
+		{ID: "20261025000000-box0004", Name: "É"},
+		{ID: "20261025000000-box0005", Name: "e\u0301"},
+		{ID: "20261025000000-box0006", Name: "CON"},
+		{ID: "20261025000000-box0007", Name: "_CON"},
+		{ID: "20261025000000-box0008", Name: strings.Repeat("long", 40)},
+		{ID: "20261025000000-box0009", Name: strings.Repeat("long", 40)},
+	}
+	boxPaths := exportNotebookMarkdownPaths(boxes, nil)
+	var locations []exportDocumentLocation
+	for _, box := range boxes {
+		locations = append(locations, exportDocumentLocation{identity: exportDocumentIdentity{box: box.ID, id: box.ID},
+			parent: exportDocumentIdentity{box: box.ID}, title: "Document"})
+	}
+	paths, err := allocateExportDocumentPaths(locations, boxPaths, ".md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	for _, box := range boxes {
+		name := boxPaths[box.ID]
+		if strings.ContainsAny(name, `/\`) || seen[exportPathComparison(name)] {
+			t.Fatalf("unsafe or colliding notebook directory: %q", name)
+		}
+		seen[exportPathComparison(name)] = true
+		if got := paths.get(box.ID, box.ID); got != "/"+name+"/Document.md" {
+			t.Fatalf("allocated notebook name changed before link generation: %q", got)
+		}
 	}
 }
 

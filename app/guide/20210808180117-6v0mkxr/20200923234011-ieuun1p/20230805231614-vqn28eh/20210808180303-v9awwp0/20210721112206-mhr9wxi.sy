@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261026115057"
+		"updated": "20261105042900"
 	},
 	"Children": [
 		{
@@ -48,12 +48,26 @@
 			]
 		},
 		{
+			"ID": "20261102100000-9iwlyi8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102100000-9iwlyi8",
+				"updated": "20261102100000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Synchronization transfers documents in their original format even when this version cannot read them. Unsupported documents cannot be opened or edited and are excluded from the local content index; upgrade to a version supporting their format to read them. Other compatible documents continue to synchronize normally. This does not guarantee safe mixed use with older clients: editing caches in older versions may still overwrite newer content."
+				}
+			]
+		},
+		{
 			"ID": "20210721112403-77frbcy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721112403-77frbcy",
-				"updated": "20261024164212"
+				"updated": "20261103163507"
 			},
 			"Children": [
 				{
@@ -84,6 +98,29 @@
 				{
 					"Type": "NodeText",
 					"Data": ", then choose a storage provider, configure a sync target, and enable synchronization. Use the sync button to open the setup wizard if you need guidance."
+				}
+			]
+		},
+		{
+			"ID": "20261103104841-cb869f1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261103104841-cb869f1",
+				"updated": "20261103110957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If creating, switching or deleting a cloud sync directory fails, the directory list is preserved so you can retry. If the list itself fails to load, click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Retry"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reload it. If enabling synchronization or submitting a sync direction fails, the wizard keeps the current page and selection for retry."
 				}
 			]
 		},
@@ -321,7 +358,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261011151543-4pvea6y",
-				"updated": "20261024164212"
+				"updated": "20261103163507"
 			},
 			"Children": [
 				{
@@ -409,6 +446,34 @@
 			]
 		},
 		{
+			"ID": "20261102160000-9592b55",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102160000-9592b55",
+				"updated": "20261102160000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For S3 and WebDAV endpoints without a protocol, dotted hostnames use HTTPS by default; IP addresses, localhost, and single-label hostnames use HTTP. To connect to an HTTP-only service using a dotted hostname, enter http:// explicitly. Explicit http:// and https:// addresses are preserved, including saved configurations."
+				}
+			]
+		},
+		{
+			"ID": "20261102113000-c64909d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261102113000-c64909d",
+				"updated": "20261103163507"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before changing the sync provider, endpoint, or directory, SiYuan saves open editors and creates a complete snapshot of the current data. When the new source is nonempty, automatic merging stops. Click Sync to review the local and source file counts, source time and device, and the number of files to upload, overwrite, or delete. Choose either upload from local data or restore from the source; neither direction is selected by default. Uploading publishes the current local snapshot without deleting extra stored objects in the source; restoring replaces local data according to the source. An empty source receives local data directly. If the first sync fails before saving recoverable progress or committing the data, review and confirm the source again. Saved progress resumes in the selected direction; asset downloads that fail after the data is committed can be retried directly. The snapshot created before the change remains available in Data history."
+				}
+			]
+		},
+		{
 			"ID": "20261011151543-h1km9eh",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -450,12 +515,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261020231029-lr7z60a",
-				"updated": "20261024164212"
+				"updated": "20261101195843"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Automatic sync normally runs in the background without opening a panel. Click the sync icon to view the current file, written bytes, speed, and estimated remaining time. "
+					"Data": "Automatic sync normally runs in the background without opening a panel. Click the sync icon to view the current file, written bytes, speed, and estimated remaining time. While restoring indexes after files are written, both expanded and collapsed views show the current indexing status with an animated progress bar until index restoration completes. "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -474,6 +539,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " reopens them."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " The sync icon retains the last completed result: a check mark means success, an error mark means failure or automatic sync paused, and a plain cloud means the result is unknown. The result is retained after restarting and changes after the next completed sync. While syncing, the icon keeps rotating; disabling sync shows the disabled icon."
 				}
 			]
 		},
@@ -520,7 +589,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260905184908-022q2es",
-				"updated": "20260905191024"
+				"updated": "20261105042900"
 			},
 			"Children": [
 				{
@@ -631,12 +700,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905184908-1wxzlh9",
-				"updated": "20260905184908"
+				"updated": "20261105042900"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before changing the sync target, resetting the data repository, or opening this workspace with an older version, switch to Download all and finish downloading to preserve access to assets that are not yet stored locally."
+					"Data": "Before changing the sync target, resetting the data repository, or opening this workspace with an older version, switch to Download all and finish downloading to preserve access to assets that are not yet stored locally. After signing out, if only the account or cloud region was selected incorrectly and the other sync settings are unchanged, sign in to the original account in its original cloud region, then switch to Download all. If the download state is valid and all chunks needed by current assets and retained snapshots are already local, you can also switch while signed out or with sync disabled. If the cloud directory or repository key has changed, or the asset download state is missing or damaged, preserve the workspace and original backups. Do not delete the state file or repository marker to bypass the checks; signing in alone cannot repair these states."
 				}
 			]
 		},
@@ -964,7 +1033,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If exiting takes more than 12 seconds, you can choose \"Skip sync and exit\" and confirm to cancel synchronization and finish exiting. Unsynced changes remain saved on this device. Cancel the confirmation to continue waiting for synchronization."
+					"Data": "While waiting to exit, the exit dialog displays incoming status bar messages so you can follow the current sync status. If exiting takes more than 12 seconds, you can choose \"Skip sync and exit\" and confirm to cancel synchronization and finish exiting. Unsynced changes remain saved on this device. Cancel the confirmation to continue waiting for synchronization."
 				}
 			]
 		},
@@ -1324,7 +1393,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " prefers encrypted data objects from reachable LAN devices using the same repository key and cloud sync target. Cloud storage remains authoritative, with fallback to the cloud if LAN transfers are unavailable; this is not a fully offline peer-to-peer replacement."
+					"Data": " prefers encrypted data objects from reachable LAN devices using the same repository key and cloud sync target. For S3, Endpoint, Bucket, and Region must match on both devices. Even if auto and an explicit Region can access the same cloud repository, LAN discovery will not match them; set Region to the same value on both devices. Cloud storage remains authoritative, with fallback to the cloud if LAN transfers are unavailable; this is not a fully offline peer-to-peer replacement."
 				}
 			]
 		},

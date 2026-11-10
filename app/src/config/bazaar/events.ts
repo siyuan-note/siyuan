@@ -1,7 +1,7 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {showMessage} from "../../dialog/message";
 import {openPluginPublishData} from "./pluginPublish";
 import {fetchPost} from "../../util/fetch";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {getFrontend, isMobile} from "../../util/functions";
 import {setStorageVal, writeText} from "../../protyle/util/compatibility";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
@@ -13,6 +13,7 @@ import {openBazaarPath} from "./openPath";
 import {previewImages} from "../../protyle/preview/image";
 import {isBazaarPackageRatingEditable, sortBazaarPackages} from "../../util/bazaarPackage";
 import {Constants} from "../../constants";
+import {bindBazaarFilterMenu} from "./filterMenu";
 import {
     BAZAAR_PACKAGE_CONFIG,
     getBazaarTypeByMyType,
@@ -93,6 +94,10 @@ const handleDownloadedTab: TBazaarActionHandler = (context, target) => {
 };
 
 const ACTION_HANDLERS = {
+    "skip-batch-update": (({controller, pkgType, packageName}, target) => {
+        if (pkgType && packageName) void controller._toggleBatchUpdatePreference(pkgType, packageName, target);
+        return HANDLED;
+    }) satisfies TBazaarActionHandler,
     "rate-package": ((context) => {
         const {controller, packageSource, packageName, pkgType, installedItem, pkgItem} = context;
         const packageInstalled = Boolean(installedItem) ||
@@ -193,9 +198,9 @@ const ACTION_HANDLERS = {
             }
             if (pkgType === "plugins") {
                 if (window.siyuan.config.bazaar.petalDisabled) {
-                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
+                    mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
                 } else {
-                    confirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
+                    mobileConfirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
                         controller._setPluginEnabled(app, installItem, true, () => {
                             if (controller._isMountCurrent(mount)) {
                                 controller._genMyHTML(pkgType, app, false);
@@ -218,13 +223,15 @@ const ACTION_HANDLERS = {
     }) satisfies TBazaarActionHandler,
     "install-all": ((context) => {
         const {controller, mount} = context;
+        if (controller._batchUpdatePreferenceSaving) return HANDLED;
         if (getBazaarBatchUpdate()) {
             cancelBazaarBatchUpdate();
             renderBazaarInstall(mount.element);
             return HANDLED;
         }
-        confirmDialog("⬆️ " + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
-            const batch = beginBazaarBatchUpdate(controller._getUpdatedItems());
+        mobileConfirmDialog("⬆️ " + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
+            if (controller._batchUpdatePreferenceSaving) return;
+            const batch = beginBazaarBatchUpdate(controller._getBatchUpdateItems());
             if (!batch) {
                 return;
             }
@@ -261,7 +268,7 @@ const ACTION_HANDLERS = {
         }
         if (!target.classList.contains("b3-button--progress") && !target.hasAttribute("disabled") &&
             packageName && pkgType) {
-            confirmDialog("⬆️ " + window.siyuan.languages.update, window.siyuan.languages.confirmUpdate, () => {
+            mobileConfirmDialog("⬆️ " + window.siyuan.languages.update, window.siyuan.languages.confirmUpdate, () => {
                 const updateItem = availableItem || updatedItem?.available || pkgItem;
                 const task = beginBazaarInstall(pkgType, packageName, updateItem.repoURL);
                 if (!task) {
@@ -310,7 +317,7 @@ const ACTION_HANDLERS = {
         const uninstallName = installedItem.name;
         const config = BAZAAR_PACKAGE_CONFIG[pkgType];
         const keyword = (mount.element.querySelector(`.config-bazaar__panel[data-type="${config.tabType}"] .b3-text-field`) as HTMLInputElement).value;
-        confirmDialog("⚠️ " + window.siyuan.languages.uninstall,
+        mobileConfirmDialog("⚠️ " + window.siyuan.languages.uninstall,
             window.siyuan.languages.confirmUninstall.replace("${name}", escapeHtml(uninstallName)), () => {
                 const request = controller._beginBazaarRequest(pkgType, mount);
                 fetchPost(config.api.uninstall, {
@@ -689,4 +696,5 @@ export const bindBazaarEvents = (
     bindBazaarClickEvent(controller, app, mount);
     bindBazaarSearchEvents(controller, app, mount);
     bindBazaarSelectEvents(controller);
+    bindBazaarFilterMenu(controller.element);
 };

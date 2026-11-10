@@ -4,14 +4,38 @@
 
 package apicontract
 
+// AVAutomationRunResult 仅包含条目标识和固定错误码，不缓存取数正文或字段明文。
+// 每批最多处理 32 条记录，网络和写入预算在同一轮批次间累计；retry 显式开始新一轮，仅处理失败及未完成项。
+// step 是下一批序号；重复或过期序号只返回当前进度，不重复执行已提交的动作。
+type AVAutomationRunResult struct {
+	RunID     string                    `json:"runID"`
+	Step      int                       `json:"step"`
+	Total     int                       `json:"total"`
+	Succeeded []string                  `json:"succeeded"`
+	Failed    []*AVAutomationRunFailure `json:"failed"`
+	Pending   []string                  `json:"pending"`
+	Skipped   []string                  `json:"skipped"`
+	Paused    string                    `json:"paused"`
+	Running   bool                      `json:"running"`
+}
+
+type AVAutomationRunFailure struct {
+	ItemID string `json:"itemID"`
+	Code   string `json:"code"`
+}
+
 // AVAutomationConfig 通过 setAttrViewAutomations 事务操作整体保存，所有镜像和视图共享。
-// spec 为 1 至 8；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4，有限文档深度至少使用 5。
+// spec 为 1 至 10；模板赋值至少使用 2，块子类型至少使用 3，标签收集对象至少使用 4，有限文档深度至少使用 5。
+// manual 触发至少使用 9，仅显式执行时取数并写入普通字段；存量版本 1–8 保持兼容。
+// printf、urlquery、dict、toString 及事件模板中的 httpGet/fromJson 至少使用 10；存量停用模板原样读取。
 // 属性名包含或正则匹配至少使用 6；缺省或 equals 保持既有的精确匹配。
 // 旧读取器拒绝新版本，防止配置静默丢失。
 // 缺省配置不会触发自动化，既有版本的主类型匹配含义不变。
 // 普通条目新增、字段编辑及对应 API 会触发启用的规则，
 // 导入、同步、历史恢复和撤销重放不会再次触发，自动化之间不串联。
 // 自动操作与源修改一同提交、失败回滚及撤销；单笔事务最多产生 1000 个自动操作。
+// 含 httpGet 的新增或修改规则在源编辑提交后执行整条规则，结果单独提交及撤销，失败保留编辑和原值。
+// 仅发起编辑的有效主窗口能继续联网任务，无窗口的 API 写入不联网；连续编辑合并，过期快照丢弃。
 // 字段失效或目标数据库被删除时，后续条目写入会停用规则并保留配置，源修改仍可提交。
 // 停用提示在提交后发送，包含规则名及失效引用；修复后需手动启用，撤销源修改不会重新启用规则。
 // 跨库操作仅限同一加密边界，锁定、认证失败、损坏或实际写入失败仍使触发事务回滚。
@@ -24,7 +48,7 @@ type AVAutomationRule struct {
 	ID          string                   `json:"id"`
 	Name        string                   `json:"name"`
 	Enabled     bool                     `json:"enabled"`
-	Trigger     string                   `json:"trigger" api:"enum=added|changed|block"`
+	Trigger     string                   `json:"trigger" api:"enum=added|changed|block|manual"`
 	KeyID       string                   `json:"keyID,omitempty" api:"optional"`
 	Conditions  []*AVViewFilter          `json:"conditions,omitempty" api:"optional"`
 	Actions     []*AVAutomationAction    `json:"actions"`
@@ -202,4 +226,9 @@ type AVCollectionCleanupItem struct {
 type AVCollectionCleanup struct {
 	RuleVersion string                     `json:"ruleVersion"`
 	Items       []*AVCollectionCleanupItem `json:"items"`
+	// automaticOnly 为 true 时仅处理仍带收集来源标记的条目，供删除来源确认使用。
+	AutomaticOnly bool `json:"automaticOnly,omitempty" api:"optional"`
+	// sourceVersions 将文档 ID 映射到预览时已认证源字节的 SHA-256 摘要；不匹配时拒绝整笔编辑。
+	// 省略时保持独立收集管理的兼容行为，撤销重做不重复校验旧摘要。
+	SourceVersions map[string]string `json:"sourceVersions,omitempty" api:"optional"`
 }

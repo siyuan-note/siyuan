@@ -194,43 +194,8 @@ func TestDatabasePreviousKeyIDDefaultsToViewEnd(t *testing.T) {
 	}
 }
 
-func TestDatabaseViewFieldIDsSupportsLayouts(t *testing.T) {
-	tests := []*av.View{
-		{
-			LayoutType: av.LayoutTypeList,
-			List: &av.LayoutList{Columns: []*av.ViewTableColumn{
-				{BaseField: &av.BaseField{ID: "list-1"}}, {BaseField: &av.BaseField{ID: "list-2", Hidden: true}},
-			}},
-		},
-		{
-			LayoutType: av.LayoutTypeTable,
-			Table: &av.LayoutTable{Columns: []*av.ViewTableColumn{
-				{BaseField: &av.BaseField{ID: "table-1"}}, {BaseField: &av.BaseField{ID: "table-2"}},
-			}},
-		},
-		{
-			LayoutType: av.LayoutTypeGallery,
-			Gallery: &av.LayoutGallery{CardFields: []*av.ViewGalleryCardField{
-				{BaseField: &av.BaseField{ID: "gallery-1"}}, {BaseField: &av.BaseField{ID: "gallery-2"}},
-			}},
-		},
-		{
-			LayoutType: av.LayoutTypeKanban,
-			Kanban: &av.LayoutKanban{Fields: []*av.ViewKanbanField{
-				{BaseField: &av.BaseField{ID: "kanban-1"}}, {BaseField: &av.BaseField{ID: "kanban-2"}},
-			}},
-		},
-	}
-	for _, view := range tests {
-		fieldIDs := databaseViewFieldIDs(view)
-		if len(fieldIDs) != 2 {
-			t.Fatalf("unexpected fields for layout [%s]: %v", view.LayoutType, fieldIDs)
-		}
-	}
-}
-
 func TestDatabaseActionEffects(t *testing.T) {
-	for _, action := range []string{"create", "key_add", "key_update", "key_set_template", "key_remove", "item_add", "item_remove", "item_update", "clean"} {
+	for _, action := range []string{"create", "key_add", "key_update", "key_set_template", "key_remove", "item_add", "item_remove", "item_update", "items_add", "items_update", "clean"} {
 		effects, ok := DatabaseTool.EffectsFor(action)
 		if !ok || !effects.LocalWrite {
 			t.Fatalf("database action [%s] should declare a local write", action)

@@ -6,7 +6,7 @@
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20261024163013"
+		"updated": "20261029135500"
 	},
 	"Children": [
 		{
@@ -435,6 +435,46 @@
 					"TextMarkType": "block-ref",
 					"TextMarkTextContent": "MCP 服务",
 					"TextMarkBlockRefID": "20260804223000-mcpsv01",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-uuq2yxs",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261029051700-uuq2yxs",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "长期记忆"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-l46jymy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-l46jymy",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "长期记忆可保留跨对话使用的事实和偏好。启用、管理及隐私说明请参阅 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "长期记忆",
+					"TextMarkBlockRefID": "20261029135500-4d2w42o",
 					"TextMarkBlockRefSubtype": "s"
 				},
 				{

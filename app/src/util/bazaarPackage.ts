@@ -356,12 +356,24 @@ export const sortBazaarPackagesByRating = <T extends {
 
 export const sortBazaarPackages = <T extends {
     updated: string;
+    created?: string;
     downloads: number;
     ratingAvailable?: boolean;
     rating?: IBazaarRating;
 }>(packages: T[], sortValue: string): T[] => {
     if (["4", "5"].includes(sortValue)) {
         return sortBazaarPackagesByRating(packages, sortValue === "4");
+    }
+    if (["6", "7"].includes(sortValue)) {
+        return packages.map((item, index) => ({item, index, created: Date.parse(item.created || "")})).sort((a, b) => {
+            const aKnown = Number.isFinite(a.created);
+            const bKnown = Number.isFinite(b.created);
+            if (aKnown !== bKnown) {
+                return aKnown ? -1 : 1;
+            }
+            const result = aKnown ? (sortValue === "6" ? b.created - a.created : a.created - b.created) : 0;
+            return result || a.index - b.index;
+        }).map(({item}) => item);
     }
     const indexed = packages.map((item, index) => ({item, index}));
     return indexed.sort((a, b) => {

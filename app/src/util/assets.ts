@@ -36,6 +36,7 @@ import {initSelectionStyle} from "./selectionStyle";
 import {applyCompactMode} from "../config/tabs/compactMode";
 
 let headingNumberMeasurementRefreshTimer: number;
+let pendingDefaultStyleElement: HTMLLinkElement;
 let appearanceUpdate = Promise.resolve();
 let appearanceReloadPending = false;
 const appearancePackageRevisions = new Map<string, string>();
@@ -135,6 +136,10 @@ export const refreshThemeStyle = (themeAddress: string) => {
 };
 
 export const loadAssets = async (appearance: Config.IAppearance) => {
+    // 跟随当前前端的系统模式，仅更新运行时状态，避免共用内核的不同设备反复写回配置。
+    if (appearance.modeOS) {
+        appearance.mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? 1 : 0;
+    }
     initSelectionStyle();
     const scriptLoads: Promise<unknown>[] = [];
     setBodyHighlight(appearance.bodyGradient);
@@ -159,34 +164,51 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     htmlElement.setAttribute("data-light-theme", data.themeLight);
     htmlElement.setAttribute("data-dark-theme", data.themeDark);
     const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    if (window.siyuan.config.appearance.modeOS && (
-        (window.siyuan.config.appearance.mode === 1 && OSTheme === "light") ||
-        (window.siyuan.config.appearance.mode === 0 && OSTheme === "dark")
-    )) {
-        configApi.set("appearance.mode", OSTheme === "light" ? 0 : 1);
-        window.siyuan.config.appearance.mode = (OSTheme === "light" ? 0 : 1);
-    }
     if (previousThemeMode && previousThemeMode !== themeMode) {
         refreshChartTheme(document.body);
         refreshMermaidTheme(document.body);
     }
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
     const defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
+    if (pendingDefaultStyleElement && (!defaultStyleElement || !pendingDefaultStyleElement.isConnected ||
+        pendingDefaultStyleElement.getAttribute("href") !== defaultThemeAddress)) {
+        pendingDefaultStyleElement.onload = null;
+        pendingDefaultStyleElement.onerror = null;
+        pendingDefaultStyleElement.remove();
+        pendingDefaultStyleElement = undefined;
+    }
     if (defaultStyleElement) {
-        if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress)) {
+        if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress) && !pendingDefaultStyleElement) {
             const newStyleElement = document.createElement("link");
+            pendingDefaultStyleElement = newStyleElement;
             changedThemeStyleElements.push(newStyleElement);
             themeStylesChanged = true;
-            // 等待新样式表加载完成再移除旧样式表
-            new Promise((resolve) => {
-                newStyleElement.rel = "stylesheet";
-                newStyleElement.href = defaultThemeAddress;
-                newStyleElement.onload = resolve;
-                defaultStyleElement.parentNode.insertBefore(newStyleElement, defaultStyleElement);
-            }).then(() => {
-                defaultStyleElement.remove();
-                newStyleElement.id = "themeDefaultStyle";
-            });
+            const complete = (loaded: boolean) => {
+                newStyleElement.onload = null;
+                newStyleElement.onerror = null;
+                if (pendingDefaultStyleElement !== newStyleElement) {
+                    return;
+                }
+                pendingDefaultStyleElement = undefined;
+                const currentStyleElement = document.getElementById("themeDefaultStyle");
+                if (currentStyleElement && currentStyleElement !== defaultStyleElement) {
+                    newStyleElement.remove();
+                    return;
+                }
+                if (loaded) {
+                    defaultStyleElement.remove();
+                    newStyleElement.id = "themeDefaultStyle";
+                } else {
+                    newStyleElement.remove();
+                    console.error("load default theme stylesheet failed: " + defaultThemeAddress);
+                }
+            };
+            // 新样式表加载失败时保留旧样式表，避免界面失去基础样式。
+            newStyleElement.rel = "stylesheet";
+            newStyleElement.href = defaultThemeAddress;
+            newStyleElement.onload = () => complete(true);
+            newStyleElement.onerror = () => complete(false);
+            defaultStyleElement.parentNode.insertBefore(newStyleElement, defaultStyleElement);
         }
     } else {
         addStyle(defaultThemeAddress, "themeDefaultStyle");

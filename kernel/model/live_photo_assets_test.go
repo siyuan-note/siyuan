@@ -7,6 +7,7 @@ package model
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -23,10 +24,28 @@ import (
 )
 
 func TestLivePhotoRichTableResourceRewritePersistence(t *testing.T) {
+	for _, encrypted := range []bool{false, true} {
+		name := "plain"
+		if encrypted {
+			name = "encrypted"
+		}
+		t.Run(name, func(t *testing.T) {
+			testLivePhotoRichTableResourceRewritePersistence(t, encrypted)
+		})
+	}
+}
+
+func testLivePhotoRichTableResourceRewritePersistence(t *testing.T, encrypted bool) {
 	previousData, previousProvider := util.DataDir, filesys.DEKProvider
 	previousAcquire, previousRelease := filesys.DEKLockAcquire, filesys.DEKLockRelease
 	util.DataDir = t.TempDir()
-	filesys.DEKProvider = func(string) ([]byte, error) { return nil, nil }
+	filesys.DEKProvider = func(string) ([]byte, error) {
+		if encrypted {
+			// 每次返回新的密钥副本，文件操作结束时会清零持有的副本。
+			return bytes.Repeat([]byte{0x42}, 32), nil
+		}
+		return nil, nil
+	}
 	filesys.DEKLockAcquire, filesys.DEKLockRelease = nil, nil
 	t.Cleanup(func() {
 		cache.ClearTreeCache()
@@ -75,6 +94,13 @@ func TestLivePhotoRichTableResourceRewritePersistence(t *testing.T) {
 			rewrite(tree)
 			if _, err := filesys.WriteTree(tree); err != nil {
 				t.Fatalf("save rewritten rich table: %v", err)
+			}
+			diskData, err := os.ReadFile(filepath.Join(util.DataDir, tree.Box, tree.Path))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if json.Valid(diskData) == encrypted {
+				t.Fatalf("unexpected persisted format: encrypted=%t, valid JSON=%t", encrypted, json.Valid(diskData))
 			}
 			cache.ClearTreeCache()
 			loaded, err := filesys.LoadTree(tree.Box, tree.Path, util.NewLute())

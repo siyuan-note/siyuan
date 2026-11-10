@@ -92,15 +92,15 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
         document: {querySelector: () => ({closest: (selector: string) =>
             selector.split(", ").includes(mobile ? ".config" : ".config__tab-container") ? replacement : null})},
         require(name: string) {
-            if (name === "../../dialog") {
-                return {Dialog: class {
+            if (name === "../../dialog/mobileDialog") {
+                return {MobileDialog: class {
                     element = element;
                     constructor(options: any) {dialog = {destroy: () => this.destroy()}; dialogOptions = options;}
                     destroy() {closed++; dialogOptions.destroyCallback();}
                 }};
             }
-            if (name === "../../dialog/confirmDialog") {
-                return {confirmDialog: (_title: string, _text: string, confirm: () => void, cancel: () => void) => confirmations.push({confirm, cancel})};
+            if (name === "../../dialog/mobileConfirmDialog") {
+                return {mobileConfirmDialog: (_title: string, _text: string, confirm: () => void, cancel: () => void) => confirmations.push({confirm, cancel})};
             }
             if (name === "../util/configApi") {
                 return {config: {set: (path: string, value: unknown, applied: () => void) => {

@@ -1,4 +1,4 @@
-import {openInputDialog} from "../../../dialog/inputDialog";
+import {mobileInputDialog} from "../../../dialog/mobileInputDialog";
 import {showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
 
@@ -6,7 +6,8 @@ export const openAgentInstructions = () => {
     fetchPost("/api/ai/agent/getInstructions", {}, (response) => {
         const revision = response.data.revision;
         let saving = false;
-        const dialog = openInputDialog({
+        const dialog = mobileInputDialog({
+            mobileSheet: {beforeClose: () => !saving},
             title: window.siyuan.languages.agentInstructions,
             value: response.data.content,
             multiline: true,
@@ -28,6 +29,7 @@ export const openAgentInstructions = () => {
                 input.disabled = true;
                 // 失败时保留编辑内容和原修订，禁止静默覆盖其他窗口或同步产生的新版本。
                 fetchPost("/api/ai/agent/setInstructions", {content, revision}, () => {
+                    saving = false;
                     currentDialog.destroy();
                 }).finally(() => {
                     saving = false;

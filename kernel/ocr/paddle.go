@@ -27,10 +27,10 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/siyuan-note/logging"
+	"go.yaml.in/yaml/v4"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff"
 	_ "golang.org/x/image/webp"
-	"gopkg.in/yaml.v3"
 )
 
 // PaddleConfig 指定一组检测和识别模型，Linux 使用原生辅助进程以兼容静态内核。
@@ -115,7 +115,7 @@ func readModelConfig(directory, kind string) (modelConfig, error) {
 	if err != nil {
 		return config, err
 	}
-	err = yaml.Unmarshal(data, &config)
+	err = yaml.Load(data, &config)
 	if err != nil {
 		return config, err
 	}
@@ -365,7 +365,7 @@ func validateImage(file *os.File) error {
 		return err
 	}
 	if info.Size() > 32*1024*1024 {
-		return errors.New("OCR image exceeds 32 MiB")
+		return fmt.Errorf("%w: OCR image exceeds 32 MiB", ErrPermanent)
 	}
 	cfg, format, err := image.DecodeConfig(file)
 	if err != nil {
@@ -375,7 +375,7 @@ func validateImage(file *os.File) error {
 		return err
 	}
 	if cfg.Width <= 0 || cfg.Height <= 0 || int64(cfg.Width)*int64(cfg.Height) > 24000000 {
-		return errors.New("OCR image exceeds 24 million pixels")
+		return fmt.Errorf("%w: OCR image exceeds 24 million pixels", ErrPermanent)
 	}
 	if format == "webp" {
 		// VP8X 块的动画标志表示图像数据位于 ANMF 块，静态 WebP 解码器不支持此格式。

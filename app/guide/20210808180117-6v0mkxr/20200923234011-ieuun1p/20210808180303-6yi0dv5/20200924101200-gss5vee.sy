@@ -6,7 +6,7 @@
 		"id": "20200924101200-gss5vee",
 		"title": "Navigate between content blocks",
 		"type": "doc",
-		"updated": "20261024163828"
+		"updated": "20261106164550"
 	},
 	"Children": [
 		{
@@ -146,7 +146,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210428225947-bkizd86",
-				"updated": "20260809232000"
+				"updated": "20261106164550"
 			},
 			"Children": [
 				{
@@ -235,6 +235,85 @@
 			]
 		},
 		{
+			"ID": "20261105154152-q9zc4in",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261105154152-q9zc4in",
+				"updated": "20261106164550"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Global breadcrumb"
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-ukxnob5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105154152-ukxnob5",
+				"updated": "20261105154152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Behavior"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Global breadcrumb"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to show the notebook and parent documents before the current document and its block path in one breadcrumb at the top of the desktop editor. This setting is disabled by default. On mobile, the breadcrumb menu shows the same hierarchy."
+				}
+			]
+		},
+		{
+			"ID": "20261105154152-ehgvfln",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261105154152-ehgvfln",
+				"updated": "20261106164550"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop, click a parent document to open it, or use the arrows beside the notebook or parent documents to select child documents. On mobile, tap a parent document to show its child documents, then choose Open to open the parent itself; leaf documents open directly. Existing block navigation remains unchanged. Notebook and document entries use their existing emoji or custom icons, including entries in child-document menus. Missing or invalid icons use the default icon."
+				}
+			]
+		},
+		{
 			"ID": "20200924101210-zwf8ags",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -312,7 +391,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200924101210-3qfiiat",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -525,7 +604,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106204950-gjw62fp",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -543,12 +622,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210106204954-rpwfh3i",
-				"updated": "20261024163013"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Mentions are searched using the content block name, alias, reference anchor text and document name in the current document as keywords (the search scope can be set in "
+					"Data": "Mentions are searched using the content block name, alias, reference anchor text and document name in the current document as keywords (keyword sources can be selected in "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -575,7 +654,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ), the search results are blocks of content that contain these keywords."
+					"Data": "), the search results are blocks of content that contain these keywords."
 				}
 			]
 		},
@@ -584,7 +663,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221026222024-1ug5zq4",
-				"updated": "20221026222138"
+				"updated": "20261030083650"
 			},
 			"Children": [
 				{
@@ -598,18 +677,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​: Mention search will only search in normal text, not in line-level elements such as bold and italics, and block-level elements such as code blocks and charts. The rule are the same as the "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20211010212319-oy401ib",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "detection rules of virtual reference"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "."
+					"Data": "​: Mentions search the body and the titles, document-level names, and aliases of other documents. Document matches use a title preview; the current document is excluded. Titles use the same matching rules as the body: bold, italic, and link text can match, while inline code, formulas, code blocks, charts, and reference anchor text do not. Enabled block-attribute search options control names and aliases; backlink-mention options select the keyword sources."
 				}
 			]
 		}

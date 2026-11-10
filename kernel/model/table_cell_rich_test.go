@@ -254,7 +254,7 @@ func TestAttributeViewRichTextExport(t *testing.T) {
 		Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
 		Content: "**foo**\n\n- 123\n  - 123",
 	}}
-	if err := appendAttributeViewRichTextExport(cell, value); err != nil {
+	if err := appendAttributeViewRichTextExport(cell, value, true); err != nil {
 		t.Fatal(err)
 	}
 	preview := normalizeExportPreviewTree(tree, luteEngine)
@@ -288,9 +288,11 @@ func TestAttributeViewRichTextExport(t *testing.T) {
 		})
 	}
 	invalid := &av.ValueText{Rich: &av.ValueTextRich{Spec: 99, Format: av.ValueTextRichFormatKramdown}}
-	empty := &ast.Node{Type: ast.NodeTableCell}
-	if err := appendAttributeViewRichTextExport(empty, invalid); err == nil || empty.FirstChild != nil {
-		t.Fatal("invalid rich text must return an error without populating the cell")
+	for _, richTableCells := range []bool{false, true} {
+		empty := &ast.Node{Type: ast.NodeTableCell}
+		if err := appendAttributeViewRichTextExport(empty, invalid, richTableCells); err == nil || empty.FirstChild != nil {
+			t.Fatal("invalid rich text must return an error without populating the cell")
+		}
 	}
 }
 

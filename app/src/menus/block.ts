@@ -1,6 +1,7 @@
 import {MenuItem} from "./Menu";
-import {openInputDialog} from "../dialog/inputDialog";
-import {fetchPost} from "../util/fetch";
+import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
 
 export const transferBlockRef = (id: string) => {
@@ -14,12 +15,20 @@ export const transferBlockRef = (id: string) => {
                 value: "",
                 placeholder: window.siyuan.languages.targetBlockID,
                 description: window.siyuan.languages.transferBlockRefTip,
-                onConfirm: (value, dialog) => {
-                    fetchPost("/api/block/transferBlockRef", {
+                awaitConfirm: true,
+                onConfirm: async (value, dialog) => {
+                    if (!isMobile()) {
+                        fetchPost("/api/block/transferBlockRef", {fromID: id, toID: value});
+                        dialog.destroy();
+                        return true;
+                    }
+                    const response = await fetchSyncPost("/api/block/transferBlockRef", {
                         fromID: id,
                         toID: value,
                     });
+                    if (response.code !== 0) return false;
                     dialog.destroy();
+                    return true;
                 },
             });
             renameDialog.element.setAttribute("data-key", Constants.DIALOG_TRANSFERBLOCKREF);

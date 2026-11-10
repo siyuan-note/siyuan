@@ -48,10 +48,11 @@ const runtime = createSectionRuntime<Config.IEditor>({
             setTitleAutoDirection(document.getElementById("toolbarName"), next.autoDirection);
             /// #endif
             getAllEditor().forEach(({protyle}) => {
+                if (old.globalBreadcrumb !== next.globalBreadcrumb) protyle.breadcrumb?.render(protyle, true);
                 if (old.blockGutterMode !== next.blockGutterMode) protyle.gutter?.element.classList.add("fn__none");
                 if (old.keepLoadedContent !== next.keepLoadedContent) protyle.scroll.keepLoadedContent = next.keepLoadedContent;
                 protyle.databaseAttributePanel?.updateDisplayConfig();
-                reloadProtyle(protyle, false);
+                reloadProtyle(protyle, old.readOnly !== next.readOnly && protyle.element.contains(document.activeElement));
                 const fullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH) || String(next.fullWidth);
                 if (fullWidth === "true" && protyle.contentElement.getAttribute("data-fullwidth") === "true") return;
                 resize(protyle);

@@ -9,13 +9,14 @@ import {escapeAttr, escapeHtml} from "../../util/escape";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {genUUID} from "../../util/genID";
 import {newFile} from "../../util/newFile";
-import {isEncryptedBox} from "../../util/pathName";
+import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {loadMobileFileById, updateRecentDocSwitchTime} from "../editor";
 import {openModel} from "../menu/model";
 import {closeModel} from "../util/closePanel";
 import {setEmpty} from "../util/setEmpty";
 import {saveMobileStorage} from "../util/saveLayout";
 import {canCloseTab, moveTab, orderTabsForOverview, toggleTabPin, trimTabsToLimit} from "./mobileTabsState";
+import {renderDocumentTitlePreview} from "../../protyle/header/documentTitlePreview";
 
 const MAX_HISTORY = 32;
 
@@ -112,7 +113,7 @@ const sanitizeTab = (tab: MobileTab): MobileTab => {
     };
 };
 
-const getTabTitle = (tab: MobileTab) => tab.current?.title || window.siyuan.languages.newTab;
+const getTabTitle = (tab: MobileTab) => tab.current ? getDocDisplayName(tab.current.title, tab.current.title.trim() === "") : window.siyuan.languages.newTab;
 
 const getTabIconHTML = (tab: MobileTab) => getDocumentIconHTML(
     tab.current?.icon || "",
@@ -245,7 +246,7 @@ export class MobileTabs {
                 return;
             }
             tab.current.scroll = scroll;
-            tab.current.title = (document.getElementById("toolbarName") as HTMLInputElement)?.value || tab.current.title;
+            tab.current.title = (document.getElementById("toolbarName") as HTMLInputElement)?.value ?? tab.current.title;
             tab.current.id = protyle.block.showAll ? protyle.block.id : protyle.block.rootID;
             tab.current.notebookID = protyle.notebookId;
             tab.current.path = protyle.path;
@@ -260,7 +261,7 @@ export class MobileTabs {
             rootID: protyle.block.rootID,
             notebookID: protyle.notebookId,
             path: protyle.path,
-            title: (document.getElementById("toolbarName") as HTMLInputElement)?.value || window.siyuan.languages.untitled,
+            title: (document.getElementById("toolbarName") as HTMLInputElement)?.value ?? "",
             icon: protyle.background?.ial?.icon || "",
             action,
             scroll: saveScroll(protyle, true) as IScrollAttr | undefined,
@@ -924,6 +925,14 @@ export class MobileTabs {
     </div>
 </div>`,
             bindEvent: (element) => {
+                this.state.tabs.forEach(tab => {
+                    const entry = tab.current;
+                    if (!entry?.rootID) return;
+                    const row = Array.from(element.querySelectorAll<HTMLElement>("[data-tab-id]"))
+                        .find(item => item.dataset.tabId === tab.id);
+                    renderDocumentTitlePreview(row?.querySelector(".mobile-tabs__item-title"), entry.rootID, entry.notebookID,
+                        () => this.state.tabs.includes(tab) && tab.current === entry);
+                });
                 this.bindOverviewEvents(element.firstElementChild as HTMLElement);
             },
             destroyCallback: () => {

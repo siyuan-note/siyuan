@@ -24,7 +24,7 @@ func expandBacklinkDocumentEntries(blocks []*Block, refs []*sql.Ref, defRootID s
 	}
 	var result []*Block
 	for _, block := range blocks {
-		if block.Type != "NodeDocument" {
+		if block.Type != "NodeDocument" || originalRefBlockIDs[block.ID] == "" {
 			result = append(result, block)
 			continue
 		}

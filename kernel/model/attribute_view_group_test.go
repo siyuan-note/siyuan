@@ -5,12 +5,93 @@
 package model
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestRenderAttributeViewGroupsReuseRollupDependencies(t *testing.T) {
+	setupAttributeViewValidationTest(t)
+	target, _ := newDeferredTemplateTestAttributeView()
+	target.ID = "20261101120000-target0"
+	source, view := newDeferredTemplateTestAttributeView()
+	source.ID = "20261101120000-source0"
+	view.Group = &av.ViewGroup{Field: "text", Method: av.GroupMethodValue, Order: av.GroupOrderAsc}
+	view.Filters = []*av.ViewFilter{{Column: "text", Operator: av.FilterOperatorIsNotEmpty,
+		Value: &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{}}}}
+	relation := &av.Key{ID: "relation", Name: "Related", Type: av.KeyTypeRelation,
+		Relation: &av.Relation{AvID: target.ID}}
+	rollup := &av.Key{ID: "rollup", Name: "Rollup", Type: av.KeyTypeRollup,
+		Rollup: &av.Rollup{RelationKeyID: relation.ID, KeyID: "template"}}
+	rollupFilter := &av.ViewFilter{Column: rollup.ID, Qualifier: av.FilterQuantifierAny,
+		Operator: av.FilterOperatorIsNotEmpty, Value: &av.Value{Type: av.KeyTypeRollup, Rollup: &av.ValueRollup{}}}
+	view.Filters = append(view.Filters, rollupFilter)
+	view.ConditionalColors = []*av.ConditionalColorRule{{ID: "rollup-color", Filter: rollupFilter,
+		Target: "item", Color: &av.ValueSelect{Color: "1"}}}
+	relations := &av.KeyValues{Key: relation}
+	for _, itemID := range view.ItemIDs {
+		relations.Values = append(relations.Values, &av.Value{
+			ID: itemID + "-relation", KeyID: relation.ID, BlockID: itemID, Type: av.KeyTypeRelation,
+			Relation: &av.ValueRelation{BlockIDs: []string{itemID}},
+		})
+	}
+	source.KeyValues = append(source.KeyValues, relations, &av.KeyValues{Key: rollup})
+	view.Table.Columns = append(view.Table.Columns,
+		&av.ViewTableColumn{BaseField: &av.BaseField{ID: relation.ID}},
+		&av.ViewTableColumn{BaseField: &av.BaseField{ID: rollup.ID}})
+	data, err := json.Marshal(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	previousPalette := av.LoadWorkspacePalette
+	t.Cleanup(func() { av.LoadWorkspacePalette = previousPalette })
+	loads := 0
+	av.LoadWorkspacePalette = func() ([]*av.AttributeViewCustomColor, []string) {
+		loads++
+		return nil, nil
+	}
+	for _, content := range []string{"first", "updated"} {
+		for _, value := range target.KeyValues[1].Values {
+			value.Text.Content = content
+		}
+		if err := av.SaveAttributeView(target); err != nil {
+			t.Fatal(err)
+		}
+		database, err := av.ParseAttributeViewData(source.ID, data)
+		if err != nil {
+			t.Fatal(err)
+		}
+		loads = 0
+		instance, err := renderAttributeView(database, "", view.ID, "", "", 1, 1, nil, false, false, nil, "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		// 字段生成和筛选各读取一次目标数据库，各分组共用筛选依赖。
+		if loads != 2 {
+			t.Fatalf("target database loaded %d times for one grouped render, want 2", loads)
+		}
+		rows := 0
+		for _, group := range av.TableFromViewable(instance).Groups {
+			for _, item := range group.(av.Collection).GetItems() {
+				rows++
+				value := item.GetValue(rollup.ID)
+				if value == nil || value.String(true) != content {
+					t.Fatalf("group rollup did not use the current target value %q: %+v", content, value)
+				}
+				colors := item.(*av.TableRow).ConditionalColors
+				if colors == nil || colors.Background == nil || colors.Background.Color != "1" {
+					t.Fatalf("group rollup conditional color was not applied: %+v", colors)
+				}
+			}
+		}
+		if rows != 2 {
+			t.Fatalf("groups lost off-page items: got %d rows", rows)
+		}
+	}
+}
 
 func TestSetAttributeViewGroupClearsPersistedGroups(t *testing.T) {
 	view := &av.View{

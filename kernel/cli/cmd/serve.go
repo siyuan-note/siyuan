@@ -29,6 +29,7 @@ var (
 	serveAttachUI       bool
 	serveSafeMode       bool
 	serveEnablePprof    bool
+	serveFixedPort      bool
 )
 
 var serveCmd = &cobra.Command{
@@ -52,12 +53,12 @@ var serveCmd = &cobra.Command{
 		// --workspace 使用 rootCmd 的 persistent flag，环境变量回退与默认值由 util.BootWithFlags 处理。
 		ws := workspacePath
 
-		util.BootWithFlags(ws, serveWdPath, servePort, serveReadOnly, serveAccessAuthCode, serveLang, serveMode, serveSSL, serveAttachUI, serveSafeMode, serveEnablePprof)
+		util.BootWithFlags(ws, serveWdPath, servePort, serveReadOnly, serveAccessAuthCode, serveLang, serveMode, serveSSL, serveAttachUI, serveSafeMode, serveEnablePprof, serveFixedPort)
 
 		model.InitJwtKey()
 		model.InitConf()
-		go server.Serve(false, model.Conf.CookieKey)
 		model.InitAppearance()
+		go server.Serve(false, model.Conf.CookieKey)
 		sql.InitDatabase(false)
 		sql.InitHistoryDatabase(false)
 		sql.InitAssetContentDatabase(false)
@@ -93,6 +94,7 @@ func init() {
 	// 与 rootCmd.PersistentPreRunE 走同一个 resolveWorkingDir()，确保两条启动路径行为一致。
 	serveCmd.Flags().StringVar(&serveWdPath, "wd", resolveWorkingDir(), "working directory of SiYuan")
 	serveCmd.Flags().StringVar(&servePort, "port", "0", "port of the HTTP server")
+	serveCmd.Flags().BoolVar(&serveFixedPort, "fixed-port", true, "enable the extra port 6806 proxy for browser extensions (does not change --port)")
 	serveCmd.Flags().StringVar(&serveReadOnly, "readonly", "false", "read-only mode")
 	serveCmd.Flags().StringVar(&serveAccessAuthCode, "accessAuthCode", "", "access auth code")
 	serveCmd.Flags().StringVar(&serveLang, "lang", "", "ar/de/en/es/fr/he/hi/id/it/ja/ko/nl/pl/pt-BR/ru/sk/sr/th/tr/uk/zh-CN/zh-TW")

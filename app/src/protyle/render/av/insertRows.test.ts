@@ -40,7 +40,7 @@ for (const viewType of ["table", "list", "gallery", "kanban"]) {
                 insertGalleryItemAnimation: () => {},
                 insertAttrViewBlockAnimation: () => {},
             });
-            exports.insertRows({blockElement, protyle: {}, count, previousID: "previous", groupID: "group"});
+            exports.insertRows({blockElement, protyle: {}, count, previousID: "previous", groupID: "group", parentID: "parent"});
             const rows = new Set(["existing"]);
             const apply = (items: any[]) => items.forEach(operation => {
                 if (operation.action === "insertAttrViewBlock") {
@@ -57,6 +57,7 @@ for (const viewType of ["table", "list", "gallery", "kanban"]) {
             }
             assert.equal(operations[0].previousID, "previous");
             assert.equal(operations[0].groupID, "group");
+            assert.equal(operations[0].parentID, "parent");
         });
     }
 }

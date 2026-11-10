@@ -182,10 +182,15 @@ func indexNode(tx *sql.Tx, id, boxID string) (err error) {
 }
 
 func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath, fullAttrView bool) string {
-	return nodeStaticContent(node, excludeTypes, includeTextMarkATitleURL, includeAssetPath, fullAttrView, false)
+	return nodeStaticContent(node, excludeTypes, includeTextMarkATitleURL, includeAssetPath, fullAttrView, false, true)
 }
 
-func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath, fullAttrView, unescapeBlockRef bool) string {
+// NodeStaticContentWithoutOCRAssets 与 NodeStaticContent 相同，但不读取资源的 OCR 文本。
+func NodeStaticContentWithoutOCRAssets(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath, fullAttrView bool) string {
+	return nodeStaticContent(node, excludeTypes, includeTextMarkATitleURL, includeAssetPath, fullAttrView, false, false)
+}
+
+func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath, fullAttrView, unescapeBlockRef, includeOCRAssets bool) string {
 	if nil == node {
 		return ""
 	}
@@ -230,7 +235,7 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 			if ast.NodeTabItem == n.Type {
 				if title := treenode.TabTitleParagraph(n); nil != title {
 					buf.WriteString(nodeStaticContent(title, excludeTypes, includeTextMarkATitleURL,
-						includeAssetPath, fullAttrView, unescapeBlockRef))
+						includeAssetPath, fullAttrView, unescapeBlockRef, includeOCRAssets))
 					buf.WriteByte(' ')
 				}
 			}
@@ -291,7 +296,9 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 			var linkDestStr, ocrText string
 			if nil != linkDest {
 				linkDestStr = linkDest.TokensStr()
-				ocrText = util.GetAssetText(linkDestStr)
+				if includeOCRAssets {
+					ocrText = util.GetAssetText(linkDestStr)
+				}
 			}
 
 			linkText := n.ChildByType(ast.NodeLinkText)

@@ -1,3 +1,4 @@
+import {MobileDialog} from "../../dialog/mobileDialog";
 import {prepareInlineElementBoundaryMutation} from "./inlineElementBoundary";
 import {
     hasClosestBlock,
@@ -43,6 +44,7 @@ import {setFold} from "./blockFold";
 import {removeFoldHeading} from "./heading";
 import {
     compactAVCellOperations,
+    getAVNestedPasteItemIDs,
     getAVPasteCellValue,
     getAVPasteContentRowCount,
     getAVPasteValueForType,
@@ -57,16 +59,15 @@ import {
 import {isAVReadonlyType} from "../render/av/capabilities";
 import {getAVColumnFitWidth, getAVColumnTextMeasurer} from "../render/av/columnWidth";
 import {cloneAVCellValueSnapshot} from "../render/av/cellValue";
-import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
 import {getAVFilteredTipContext} from "../render/av/filteredTip";
 import {getAVSelectedCells, IAVSelectedCell} from "../render/av/selectionState";
-import {getAVSelectedTableCells} from "../render/av/virtualScroll";
+import {getAVSelectedTableCells, getAvBodyData} from "../render/av/virtualScroll";
 import {resetCodeBlockRenderState} from "./codeBlockRenderState";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
-import {renderIFrameResize} from "../render/iframeResize";
+import {renderMediaResize} from "../render/mediaResize";
 import {genEmptyElement} from "../../block/util";
 import {resumeMobileEditorAfterInsertion} from "../../mobile/util/keyboardToolbar";
 
@@ -252,7 +253,7 @@ const confirmAVPasteHeader = () => {
                 resolve(useHeader);
             }
         };
-        const dialog = new Dialog({
+        const dialog = new MobileDialog({
             title: window.siyuan.languages.avPasteHeaderTitle,
             content: `<div class="b3-dialog__content">
     <div class="ft__breakword">${window.siyuan.languages.avPasteHeaderTip}</div>
@@ -288,7 +289,7 @@ const confirmAVPasteHeader = () => {
             }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
-        (dialog.element.querySelector('[data-action="header"]') as HTMLButtonElement).focus();
+        dialog.focusWhenReady(() => dialog.element.querySelector<HTMLButtonElement>('[data-action="header"]'));
     });
 };
 
@@ -319,6 +320,11 @@ const pasteAVMatrix = async (options: {
     }
 
     const groupID = bodyElement.dataset.groupId || "";
+    const nestedItemIDs = options.blockElement.hasAttribute("data-sub-items-nested") ?
+        getAVNestedPasteItemIDs((getAvBodyData(bodyElement) as IAVTable)?.rows || [], startItemID, options.values.length) : undefined;
+    if (nestedItemIDs && !nestedItemIDs.length) {
+        return;
+    }
     const response = await fetchSyncPost("/api/av/getAttributeViewPasteRows", {
         avID: options.blockElement.dataset.avId,
         blockID: options.blockElement.dataset.nodeId,
@@ -327,6 +333,7 @@ const pasteAVMatrix = async (options: {
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent || "",
         startItemID,
         count: Math.max(options.values.length, 1),
+        itemIDs: nestedItemIDs,
     });
     if (response.code !== 0) {
         return;
@@ -1060,6 +1067,22 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         return;
     }
     const isCrossBlockRange = blockRanges.length > 1 && blockRanges[0].blockElement === blockElement;
+    const tempElement = document.createElement("template");
+    if (html.includes("NodeList")) tempElement.innerHTML = html;
+    const pastedType = tempElement.content.firstElementChild?.getAttribute("data-type");
+    // 空父项粘贴会把原子列表并入新项，必须按整个列表更新，避免先插入相同子块 ID 再删除旧项。
+    // 仅扩展单点粘贴；跨容器选区仍使用原来的跨块事务。
+    const emptyListItem = range.collapsed && blockElement.previousElementSibling?.classList.contains("protyle-action") ?
+        hasClosestByClassName(blockElement, "li") || undefined : undefined;
+    const emptyListEditable = emptyListItem ? getContenteditableElement(blockElement) : undefined;
+    const preserveNestedList = emptyListEditable && emptyListItem?.querySelector(":scope > [data-type='NodeList']") &&
+        getTextWithoutSemanticMarkers(emptyListEditable).split(Constants.ZWSP).join("").trim() === "";
+    const selectedList = (!range.collapsed || preserveNestedList) && (pastedType === "NodeList" || pastedType === "NodeListItem") ?
+        hasClosestByAttribute(range.commonAncestorContainer, "data-type", "NodeList") : undefined;
+    const selectedListOldHTML = selectedList && protyle.wysiwyg.element.contains(selectedList) ?
+        selectedList.outerHTML : undefined;
+    const selectedListUndoContext = selectedListOldHTML ?
+        getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
     // 序号重排会更新整个列表项，撤销快照必须在跨块删除前保存。
     const orderedListItemOldHTML = new Map<string, string>();
     if (isCrossBlockRange) {
@@ -1165,7 +1188,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     let oldHTML = crossBlockOldHTML ?? blockElement.outerHTML;
     const type = blockElement.getAttribute("data-type");
     const isNodeCodeBlock = type === "NodeCodeBlock";
-    const editableElement = getContenteditableElement(blockElement);
+    const editableElement = getContenteditableElement(blockElement, range.startContainer);
     const crossBlockDoOperations: IOperation[] = [];
     const crossBlockUndoOperations: IOperation[] = [];
     const processCrossBlockData = () => {
@@ -1308,8 +1331,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         });
         processCrossBlockData();
     }
-    const tempElement = document.createElement("template");
-
     // https://github.com/siyuan-note/siyuan/issues/14162 & https://github.com/siyuan-note/siyuan/issues/14965
     if (/^\s*&gt;|\*|-|\+|\d*.|\[ \]|[x]/.test(html) &&
         getTextWithoutSemanticMarkers(editableElement).split(Constants.ZWSP).join("") !== "") {
@@ -1348,7 +1369,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             // 粘贴带样式的行内元素到另一个行内元素中需进行切割
             const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer as HTMLElement;
             const splitElements: HTMLElement[] = [];
-            if (spanElement.tagName === "SPAN" && spanElement === (range.endContainer.nodeType === 3 ? range.endContainer.parentElement : range.endContainer) &&
+            if (spanElement.tagName === "SPAN" && !spanElement.classList.contains("callout-title") &&
+                spanElement === (range.endContainer.nodeType === 3 ? range.endContainer.parentElement : range.endContainer) &&
                 // 粘贴纯文本不需切割 https://ld246.com/article/1665556907936
                 // emoji 图片需要切割 https://github.com/siyuan-note/siyuan/issues/9370
                 tempElement.content.querySelector("span, img")
@@ -1390,7 +1412,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 }
             });
             // 相邻标签之间插入空格区隔，避免后续 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
-            fixAdjacentTags(getContenteditableElement(blockElement));
+            fixAdjacentTags(getContenteditableElement(blockElement, range.startContainer));
             protyle.wysiwyg.lastHTMLs[id] = oldHTML;
             input(protyle, blockElement as HTMLElement, range, true, undefined, isCrossBlockRange || undoContext ? {
                 doOperations: crossBlockDoOperations,
@@ -1554,7 +1576,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             } else {
                 blockElement.after(item);
             }
-            renderIFrameResize(item);
+            renderMediaResize(item);
         }
         if (!lastElement && !hasParentHeading) {
             lastElement = item;
@@ -1736,5 +1758,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             }
         });
     });
+    if (isListPaste && selectedList && selectedListOldHTML && selectedList.isConnected && selectedList.contains(lastElement)) {
+        // 同一列表内的覆盖或空父项粘贴同时改变列表项、子列表和序号，按列表提交保留块身份和撤销顺序。
+        const listID = selectedList.getAttribute("data-node-id");
+        transaction(protyle, [{action: "update", id: listID, data: selectedList.outerHTML}], [{
+            action: "update", id: listID, data: selectedListOldHTML,
+            context: crossBlockUndoFocusContext || selectedListUndoContext || undoContext,
+        }], transactionOptions);
+        return;
+    }
     transaction(protyle, doOperation, undoOperation, transactionOptions);
 };

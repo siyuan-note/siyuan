@@ -174,9 +174,15 @@ func TestBuildRootIDExclusionFilter(t *testing.T) {
 }
 
 func TestNormalizeBoxName(t *testing.T) {
-	name := "  notebook/name\x00  "
-	if normalized := normalizeBoxName(name); "notebookname" != normalized {
-		t.Fatalf("unexpected normalized notebook name: %q", normalized)
+	for name, expected := range map[string]string{
+		"  notebook/name\x00  ": "notebook/name",
+		"A／B/C/%2F":             "A／B/C/%2F",
+		"../Notebook/":          "../Notebook/",
+		"👩‍💻/Notes":             "👩‍💻/Notes",
+	} {
+		if normalized := normalizeBoxName(name); expected != normalized {
+			t.Fatalf("unexpected normalized notebook name: %q, want %q", normalized, expected)
+		}
 	}
 }
 
@@ -746,7 +752,7 @@ func TestBuildDocumentMatchOrderBy(t *testing.T) {
 
 func TestDocumentSearchFinalOrderPrioritizesDirectMatches(t *testing.T) {
 	setSearchCaseSensitive(t, true)
-	testDB := newSearchHPathTestDB(t)
+	testDB := newDocumentSearchTestDB(t)
 	insertSearchHPathTestBlock(t, testDB, "path-only", "path-only", "/从这里开始/会员特权/资源文件图床", "资源文件图床", "d")
 	insertSearchHPathTestBlock(t, testDB, "direct", "direct", "/从这里开始/会员特权", "会员特权", "d")
 	if _, err := testDB.Exec("UPDATE blocks SET created = '20260731120002' WHERE id = 'path-only'"); err != nil {

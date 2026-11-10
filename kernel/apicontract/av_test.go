@@ -11,6 +11,34 @@ import (
 	"testing"
 )
 
+func TestAVAutomaticTemplateRefreshContract(t *testing.T) {
+	for _, test := range []struct {
+		body      string
+		automatic bool
+	}{
+		{`{"id":"database"}`, false}, {`{"id":"database","automaticRefresh":null}`, false},
+		{`{"id":"database","automaticRefresh":false}`, false}, {`{"id":"database","automaticRefresh":true}`, true},
+	} {
+		render, err := RenderAttributeView.Decode(strings.NewReader(test.body))
+		if err != nil || render.AutomaticRefresh != test.automatic {
+			t.Fatal(render, err)
+		}
+		keys, err := GetAttributeViewKeys.Decode(strings.NewReader(test.body))
+		if err != nil || keys.AutomaticRefresh != test.automatic {
+			t.Fatal(keys, err)
+		}
+	}
+	for _, value := range []string{`"true"`, `1`, `{}`} {
+		body := `{"id":"database","automaticRefresh":` + value + `}`
+		if _, err := RenderAttributeView.Decode(strings.NewReader(body)); err == nil {
+			t.Fatal("invalid render refresh accepted", body)
+		}
+		if _, err := GetAttributeViewKeys.Decode(strings.NewReader(body)); err == nil {
+			t.Fatal("invalid keys refresh accepted", body)
+		}
+	}
+}
+
 func TestAVNewItemTemplateOpenAfterCreateContract(t *testing.T) {
 	endpoint := Endpoint[AVNewItemTemplate, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
 	for _, test := range []struct {
@@ -321,6 +349,46 @@ func TestAVResponseSchemas(t *testing.T) {
 	}
 }
 
+func TestDocumentSelectionResponseSchemas(t *testing.T) {
+	bundle, err := BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	failure := DocumentSelectionFailure{Notebook: "notebook", Ambiguity: DocumentAncestorAmbiguity{
+		Index: 1, Title: "Repeated", Candidates: []DocumentPath{}, Time: "2026-10-31T00:00:00+08:00", TargetRevision: "revision",
+	}}
+	item, err := json.Marshal(CreateAttributeViewItem.FailureWithData(-1, "ambiguous", NewAVCreateItemSelectionFailure(failure)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	docs, err := json.Marshal(CreateAttributeViewItemDocs.FailureWithData(-1, "ambiguous", NewAVCreateItemDocsSelectionFailure(failure)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	daily, err := json.Marshal(CreateDailyNote.FailureWithData(-1, "ambiguous", NewDailyNoteSelectionFailure(failure)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		path string
+		body []byte
+	}{
+		{"/api/av/createAttributeViewItem", item},
+		{"/api/av/createAttributeViewItemWithMarkdown", item},
+		{"/api/av/createAttributeViewRelationItem", item},
+		{"/api/av/createAttributeViewItemDocs", docs},
+		{"/api/filetree/createDailyNote", daily},
+	} {
+		if err = bundle.ValidateResponse("POST", test.path, test.body); err != nil {
+			t.Fatalf("%s selection response: %s %v", test.path, test.body, err)
+		}
+		var decoded struct{ Data DocumentSelectionFailure }
+		if err = json.Unmarshal(test.body, &decoded); err != nil || !reflect.DeepEqual(decoded.Data, failure) {
+			t.Fatalf("%s selection lost: %s %v", test.path, test.body, err)
+		}
+	}
+}
+
 func TestAVRelationItemInputContract(t *testing.T) {
 	valid := `{"avID":" av ","blockID":"block","keyID":"key","cells":[{"itemID":"item","relatedItemIDs":[]}],"preview":{"templateID":"","primaryKey":"Task","createdAt":123}}`
 	request, err := CreateAttributeViewRelationItem.Decode(strings.NewReader(valid))
@@ -359,6 +427,22 @@ func TestAVParsedRequestErrors(t *testing.T) {
 	keys, err := GetAttributeViewKeysByID.Decode(strings.NewReader(`{"avID":"av","keyIDs":[null]}`))
 	if err != nil || keys.KeyIDsError == nil {
 		t.Fatalf("key ID validation was not deferred: %+v %v", keys, err)
+	}
+}
+
+func TestAVContractHTTPPreviewRequest(t *testing.T) {
+	for _, fields := range []string{"", `,"deferHTTPTemplates":null,"preserveHTTPResults":null`, `,"deferHTTPTemplates":false,"preserveHTTPResults":false`, `,"deferHTTPTemplates":true,"preserveHTTPResults":true,"automaticRefresh":true`} {
+		request, err := RenderAttributeView.Decode(strings.NewReader(`{"id":"database"` + fields + `}`))
+		if err != nil {
+			t.Fatal(err)
+		}
+		expected := strings.Contains(fields, ":true")
+		if request.DeferHTTPTemplates != expected || request.PreserveHTTPResults != expected {
+			t.Fatalf("incorrect preview decoding: %+v", request)
+		}
+	}
+	if _, err := RenderAttributeView.Decode(strings.NewReader(`{"id":"database","deferHTTPTemplates":"yes"}`)); err == nil {
+		t.Fatal("invalid preview flag accepted")
 	}
 }
 

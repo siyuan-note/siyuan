@@ -10,7 +10,7 @@ const source = ts.transpileModule(readFileSync(join(__dirname, "Wnd.ts"), "utf8"
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
 }).outputText;
 
-const fixture = () => {
+const fixture = (closeAction = false) => {
     const document = {activeElement: undefined as any};
     class Element {
         classes = new Set<string>();
@@ -28,6 +28,9 @@ const fixture = () => {
     let menuName: string;
     let popupCount = 0;
     let switched: unknown;
+    let closeResult: boolean | Promise<boolean> = false;
+    const removedRows: number[] = [];
+    const previews: unknown[] = [];
     const menuElement = Object.assign(new Element(), {
         getAttribute: () => menuName,
         setAttribute: (_name: string, value: string) => { menuName = value; },
@@ -55,6 +58,7 @@ const fixture = () => {
         },
     };
     const header = (title: string, active: boolean) => ({
+        getAttribute: () => title,
         querySelector: (selector: string) => selector === ".item__text" ? {textContent: title} : null,
         classList: {contains: () => active},
     });
@@ -67,13 +71,21 @@ const fixture = () => {
         "../constants": {Constants: {MENU_TAB_LIST: "tab-list"}},
         "../util/escape": {escapeHtml: (value: string) => value},
         "../emoji/fileTreeIcon": {getFileTreeIconHTML: () => ""},
-        "../protyle/util/hasClosest": {hasClosestByClassName: () => false},
+        "../protyle/util/hasClosest": {hasClosestByClassName: () => closeAction},
+        "../util/setPosition": {setPosition() {}},
+        "../protyle/header/documentTitlePreview": {copyDocumentTitlePreview: (source: unknown, target: unknown) => previews.push({source, target})},
         "../menus/Menu": {MenuItem: class {
             element = new Element();
             constructor(options: any) {
                 const item = {element: this.element, options, click: undefined as ((event: any) => void) | undefined};
                 items.push(item);
-                options.bind({addEventListener: (_type: string, callback: typeof item.click) => { item.click = callback; }});
+                const index = items.length - 1;
+                options.bind({querySelector: () => this.element,
+                    addEventListener: (_type: string, callback: typeof item.click) => { item.click = callback; },
+                    get isConnected() { return !removedRows.includes(index); },
+                    previousElementSibling: index > 0 ? {} : null,
+                    nextElementSibling: index === 0 ? {} : null,
+                    remove: () => removedRows.push(index)});
             }
         }},
     };
@@ -86,7 +98,9 @@ const fixture = () => {
     wnd.headersElement = {children: headers, parentElement: {querySelector: () => anchor}};
     wnd.switchTab = (tab: unknown) => { switched = tab; new Element().focus(); };
     wnd.showHeading = () => {};
-    return {wnd, menu, items, original, document, headers, anchor,
+    wnd.removeTab = () => closeResult;
+    return {wnd, menu, items, original, document, headers, anchor, previews,
+        removedRows, setCloseResult: (value: boolean | Promise<boolean>) => { closeResult = value; },
         popupCount: () => popupCount, switched: () => switched};
 };
 
@@ -96,6 +110,7 @@ describe("tab switcher keyboard entry", () => {
         f.wnd.renderTabList(undefined, true);
         assert.deepEqual(f.items.map(item => item.options.label), ["first", "second"]);
         assert.equal(f.document.activeElement, f.items[1].element);
+        assert.equal(f.previews.length, 2, "each menu label can reuse its corresponding tab preview");
         assert.equal(f.items[1].element.classList.contains("b3-menu__item--current"), true);
         f.menu.remove();
         assert.equal(f.document.activeElement, f.original);
@@ -139,5 +154,61 @@ describe("tab switcher keyboard entry", () => {
         f.wnd.headersElement.parentElement.querySelector = (): null => null;
         f.wnd.renderTabList(undefined, true);
         assert.equal(f.popupCount(), 1);
+    });
+});
+
+describe("tab switcher close acknowledgement", () => {
+    const click = (f: ReturnType<typeof fixture>) =>
+        f.items[0].click({target: {}, preventDefault() {}, stopPropagation() {}});
+
+    it("keeps a row when upload blocks closing and removes it after synchronous success", () => {
+        const f = fixture(true);
+        f.wnd.renderTabList(f.anchor);
+        click(f);
+        assert.deepEqual(f.removedRows, []);
+        f.setCloseResult(true);
+        click(f);
+        assert.deepEqual(f.removedRows, [0]);
+    });
+
+    for (const success of [true, false]) {
+        it(`waits for persistence and handles asynchronous ${success ? "success" : "failure"}`, async () => {
+            const f = fixture(true);
+            let finish: (value: boolean) => void;
+            f.setCloseResult(new Promise(resolve => { finish = resolve; }));
+            f.wnd.renderTabList(f.anchor);
+            click(f);
+            assert.deepEqual(f.removedRows, []);
+            finish(success);
+            await new Promise<void>(resolve => setImmediate(resolve));
+            assert.deepEqual(f.removedRows, success ? [0] : []);
+        });
+    }
+
+    it("ignores late success after the menu is replaced", async () => {
+        const f = fixture(true);
+        let finish: (value: boolean) => void;
+        f.setCloseResult(new Promise(resolve => { finish = resolve; }));
+        f.wnd.renderTabList(f.anchor);
+        click(f);
+        f.menu.remove();
+        f.wnd.renderTabList(f.anchor);
+        finish(true);
+        await new Promise<void>(resolve => setImmediate(resolve));
+        assert.deepEqual(f.removedRows, []);
+        assert.equal(f.items.length, 2);
+    });
+
+    it("repeated clicks on a pending close remove the row only once", async () => {
+        const f = fixture(true);
+        let finish: (value: boolean) => void;
+        f.setCloseResult(new Promise(resolve => { finish = resolve; }));
+        f.wnd.renderTabList(f.anchor);
+        click(f);
+        click(f);
+        finish(true);
+        await new Promise<void>(resolve => setImmediate(resolve));
+        assert.deepEqual(f.removedRows, [0]);
+        assert.equal(f.menu.element.classList.contains("fn__none"), false);
     });
 });

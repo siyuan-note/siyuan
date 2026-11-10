@@ -63,12 +63,17 @@ func checkDocumentPathNotebook(boxID string) error {
 
 // GetDocPaths 仅查询指定笔记本；缺失身份与索引、源格式错误分别返回。
 func GetDocPaths(boxID string, ids []string) (documents []*treenode.DocumentPath, missing []string, err error) {
+	documents, missing, _, err = GetDocPathsWithIcons(boxID, ids, false)
+	return
+}
+
+func GetDocPathsWithIcons(boxID string, ids []string, includeIcons bool) (documents []*treenode.DocumentPath, missing []string, icons map[string]string, err error) {
 	if len(ids) == 0 || len(ids) > 128 {
-		return nil, nil, errors.New("ids must contain 1 to 128 document IDs")
+		return nil, nil, nil, errors.New("ids must contain 1 to 128 document IDs")
 	}
 	for _, id := range ids {
 		if !ast.IsNodeIDPattern(id) {
-			return nil, nil, errors.New("invalid document ID")
+			return nil, nil, nil, errors.New("invalid document ID")
 		}
 	}
 	if err = checkDocumentPathNotebook(boxID); err != nil {
@@ -80,7 +85,7 @@ func GetDocPaths(boxID string, ids []string) (documents []*treenode.DocumentPath
 	defer ReleaseEncryptedBoxOperation(boxID)
 	mode, modeErr := filesys.DocumentAddressingMode(boxID)
 	if modeErr != nil {
-		return nil, nil, modeErr
+		return nil, nil, nil, modeErr
 	}
 	documents, missing = []*treenode.DocumentPath{}, []string{}
 	seen := map[string]bool{}
@@ -95,9 +100,35 @@ func GetDocPaths(boxID string, ids []string) (documents []*treenode.DocumentPath
 			continue
 		}
 		if readErr != nil {
-			return nil, nil, documentAddressingError("indexUnavailable", readErr)
+			return nil, nil, nil, documentAddressingError("indexUnavailable", readErr)
 		}
 		documents = append(documents, document)
+	}
+	if includeIcons {
+		icons = map[string]string{}
+		for _, document := range documents {
+			iconIDs := []string{document.ID}
+			for _, segment := range document.Segments {
+				iconIDs = append(iconIDs, segment.ID)
+			}
+			for _, id := range iconIDs {
+				if _, exists := icons[id]; exists {
+					continue
+				}
+				bt := treenode.GetBlockTreeInExactBox(id, boxID)
+				if bt == nil || bt.Type != "d" {
+					return nil, nil, nil, documentAddressingError("indexUnavailable", treenode.ErrDocumentMetadataUnavailable)
+				}
+				tree, readErr := filesys.ReadDocumentMetadataTree(boxID, bt.Path)
+				if readErr != nil {
+					return nil, nil, nil, documentAddressingError("indexUnavailable", readErr)
+				}
+				if tree.ID != id {
+					return nil, nil, nil, documentAddressingError("indexUnavailable", treenode.ErrDocumentMetadataUnavailable)
+				}
+				icons[id] = tree.Root.IALAttr("icon")
+			}
+		}
 	}
 	return
 }

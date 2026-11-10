@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261026090134"
+		"updated": "20261101154840"
 	},
 	"Children": [
 		{
@@ -3605,12 +3605,76 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183314-2tdx7d1",
-				"updated": "20261024163013"
+				"updated": "20261026142807"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Document"
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-7llb7wr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-7llb7wr",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The document tree loads documents as needed. Keep scrolling to browse all accessible documents. Adjust the amount loaded at a time in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Documents"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "File Management"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Document tree batch size"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; this does not limit the total number of documents you can browse. Maximum number to list still limits tag lists and subdocuments included in merged exports."
+				}
+			]
+		},
+		{
+			"ID": "20261026142807-48relka",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261026142807-48relka",
+				"updated": "20261026142807"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the desktop document tree, Home and End select the first or last row in the expanded tree. Hold Shift while pressing Up, Down, Home or End to extend the selection, including rows outside the viewport. Locating a document automatically loads its position."
 				}
 			]
 		},
@@ -17092,7 +17156,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220619002116-wyh4u48",
-				"updated": "20261024163013"
+				"updated": "20261030123846"
 			},
 			"Children": [
 				{
@@ -18391,7 +18455,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002135-5dfw1yo",
-				"updated": "20261016202856"
+				"updated": "20261030123846"
 			},
 			"Children": [
 				{
@@ -18405,7 +18469,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922150640-l6dnc3c",
-				"updated": "20261016202856"
+				"updated": "20261030123846"
 			},
 			"Children": [
 				{
@@ -18428,7 +18492,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " set, the document tree and pinned documents decide the click action: the expand-only choice expands or collapses immediately, while the double-click choice opens the parent on a double-click or double-tap without changing its expansion state and makes a single click or tap wait about 300 ms; the parent can still be opened from its document menu. A title without child documents still opens directly; clicking a document icon opens an openable document or otherwise changes the icon; a notebook icon always only changes the icon."
+					"Data": " set, the document tree and pinned documents decide the click action: the expand-only choice does not wait for double-click detection, while the double-click choice opens the parent on a double-click or double-tap without changing its expansion state and makes a single click or tap wait about 300 ms; the parent can still be opened from its document menu. Child documents are loaded before the tree expands. A loading ring appears in place of the arrow during a longer wait, and clicking it again cancels the pending expansion. A title without child documents still opens directly; clicking a document icon opens an openable document or otherwise changes the icon; a notebook icon always only changes the icon."
 				}
 			]
 		},
@@ -19892,6 +19956,364 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-d3b5f19",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261101145217-d3b5f19",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Standalone Markdown editor"
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-4c835c3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-4c835c3",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "These bindings apply only inside the standalone Markdown editor. Windows/Linux and macOS bindings are listed separately; they do not change workspace shortcuts."
+				}
+			]
+		},
+		{
+			"ID": "20261101153939-e623b7d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101153939-e623b7d",
+				"updated": "20261101153939"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, use the More menu and mode selector. With a hardware keyboard, New, Open, Save, and Save As use Cmd on iOS and Ctrl on Android and HarmonyOS. These shortcuts apply only while the standalone editor has focus."
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-02e1d31",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20261101145217-02e1d31",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Action"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Windows / Linux"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "macOS"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "New window"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+N"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+N"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Open file"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+O"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+O"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Save"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+S"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+S"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Save As"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Shift+S"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+Shift+S"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "WYSIWYG"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Alt+7"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+Option+7"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Instant rendering"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Alt+8"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+Option+8"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Split view"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Alt+9"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cmd+Option+9"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261101145217-b37c58a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261101145217-b37c58a",
+				"updated": "20261101145217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For saving, recovery, and preview limitations, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261101145217-38d4623",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Standalone Markdown editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		}

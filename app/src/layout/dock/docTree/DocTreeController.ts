@@ -1,0 +1,1661 @@
+import {setDocTreeRowItem, setDocTreeAttribute} from "./rowData";
+import {DocTreeModel, getDocTreeWindow, type IDocTreeDirectory} from "./DocTreeModel";
+import {docTreeDataSource} from "./dataSource";
+import {getTransactionOperations} from "../../../util/transactionOperations";
+import {renderDocumentTitlePreview} from "../../../protyle/header/documentTitlePreview";
+import {docTreeDirectoryKey, docTreeParentID, type IDocTreeDataSource, type IDocTreeExpansion, type IDocTreeItem, type IDocTreeRoot,
+    type IDocTreeSelectOptions, type IDocTreeRange} from "./types";
+
+interface IDocTreeControllerOptions {
+    element: HTMLElement;
+    roots?: IDocTreeRoot[];
+    renderRow: (item: IDocTreeItem) => HTMLElement;
+    source?: IDocTreeDataSource;
+    batchSize?: () => number;
+    onSelectionChange?: () => void;
+    onExpansionChange?: () => void;
+    onRowsRendered?: () => void;
+    onSelectionProgress?: (loaded: number, total: number, cancel: () => void) => void;
+}
+
+export interface IDocTreeScrollAnchor {
+    notebookId?: string;
+    id?: string;
+    occurrenceKey?: string;
+    parentKey?: string;
+    index: number;
+    offset: number;
+}
+
+const controllers = new WeakMap<Element, DocTreeController>();
+let activeController: WeakRef<DocTreeController>;
+
+export const getActiveDocTreeController = (root?: Element) => {
+    const active = activeController?.deref();
+    return active && (!root || root.contains(active.options.element)) ? active : undefined;
+};
+
+export const getDocTreeController = (element: Element): DocTreeController | undefined => {
+    while (element) {
+        const controller = controllers.get(element);
+        if (controller) {
+            return controller;
+        }
+        element = element.parentElement;
+    }
+};
+
+// 一个滚动容器共享行投影和窗口，选择与展开不依赖已挂载的 DOM。
+export class DocTreeController {
+    public readonly model = new DocTreeModel();
+    private source: IDocTreeDataSource;
+    private list: HTMLElement;
+    private selected = new Map<string, IDocTreeItem>();
+    private focused: string;
+    private anchor: string;
+    private focusedItem: IDocTreeItem;
+    private anchorItem: IDocTreeItem;
+    private version = 0;
+    private operation = 0;
+    private interaction = 0;
+    private generation = 0;
+    private refresh: {interaction: number};
+    private reloadTail: Promise<void>;
+    private refreshItems = new Map<string, IDocTreeItem>();
+    private disposed = false;
+    private frame = 0;
+    private rowHeight = 28;
+    private rowSpacing = 0;
+    private finishRowAnimation: () => void;
+    private deferRowAnimationResize: (entries: ResizeObserverEntry[]) => boolean;
+    private mounted = new Map<string, {element: HTMLElement, signature: string, titleVersion?: string}>();
+    private expanding = new Map<string, {item: IDocTreeItem}>();
+    private inFlight = new Map<string, {request: Promise<void>, directory: IDocTreeDirectory, isCurrent: () => boolean,
+        indicatorTimer: number, showIndicator: boolean}>();
+    private navigation: {interaction: number, generation: number, publishing: boolean, select: boolean};
+    private navigationID = 0;
+    private pages = new Map<string, {directory: IDocTreeDirectory, start: number, count: number}>();
+    private refreshingDirectories = new Map<IDocTreeDirectory, {generation: number, offsets: Set<number>, request?: Promise<void>}>();
+    private errors = new Set<string>();
+    private observer: ResizeObserver;
+    private events = new AbortController();
+    private dragging: string;
+    private selectionPending = 0;
+    private activeRequests = 0;
+    private requestQueue: (() => void)[] = [];
+
+    constructor(public readonly options: IDocTreeControllerOptions) {
+        this.source = options.source || docTreeDataSource;
+        this.list = document.createElement("ul");
+        this.list.className = "b3-list b3-list--background";
+        this.list.setAttribute("role", "tree");
+        this.list.setAttribute("aria-multiselectable", "true");
+        this.list.tabIndex = 0;
+        this.list.style.margin = "0";
+        this.list.style.padding = "0";
+        this.list.style.minHeight = "0";
+        this.list.style.display = "flex";
+        this.list.style.flexDirection = "column";
+        // 滚动位置由控制器维护，浏览器锚定会在占位区间替换时额外补偿。
+        this.list.style.overflowAnchor = "none";
+        options.element.replaceChildren(this.list);
+        controllers.set(options.element, this);
+        const signal = this.events.signal;
+        options.element.addEventListener("scroll", () => {
+            this.finishRowAnimation?.();
+            this.scheduleRender();
+        }, {passive: true, signal});
+        // 真实输入取消迟到的状态恢复；程序设置 scrollTop 不应中断自己的定位。
+        for (const event of ["pointerdown", "wheel"] as const) {
+            options.element.addEventListener(event, () => {
+                this.finishRowAnimation?.();
+                this.interaction++;
+            }, {passive: true, signal});
+        }
+        options.element.addEventListener("keydown", event => {
+            if (event.key === "Escape" && this.selectionPending) {
+                this.operation++;
+                this.finishSelection(this.selectionPending);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }, {capture: true, signal});
+        options.element.addEventListener("dragstart", event => {
+            this.dragging = this.getItemFromElement(event.target as Element)?.occurrenceKey;
+        }, {capture: true, signal});
+        options.element.addEventListener("dragend", () => {
+            this.dragging = undefined;
+            this.scheduleRender();
+        }, {signal});
+        options.element.addEventListener("click", event => {
+            const placeholder = (event.target as Element).closest<HTMLElement>("[data-tree-loading]");
+            const row = (event.target as Element).closest<HTMLElement>("[data-tree-key]");
+            const item = row && this.getItem(row.dataset.treeKey);
+            const retry = item && (event.target as Element).closest(".b3-list-item__arrow") &&
+                this.errors.has(this.model.directory(item).key);
+            if (!placeholder && !retry) { return; }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            const parent = retry ? item : this.getItem(placeholder.dataset.parentKey);
+            if (parent) {
+                this.errors.delete(this.model.directory(parent).key);
+                void this.load(parent, placeholder ? Number(placeholder.dataset.index) : 0).catch((): void => undefined);
+            }
+        }, {capture: true, signal});
+        this.observer = new ResizeObserver(entries => {
+            if (!this.deferRowAnimationResize?.(entries)) { this.scheduleRender(); }
+        });
+        this.observer.observe(options.element);
+        this.setRoots(options.roots || []);
+    }
+
+    public get selectionVersion() { return this.version; }
+    public get interactionVersion() { return this.interaction; }
+
+    public setRoots(roots: IDocTreeRoot[]) {
+        if (this.disposed) { return; }
+        const anchor = this.getScrollAnchor();
+        const notebooks = new Set(roots.filter(root => !root.unavailable).map(root => root.notebookId));
+        new Set(this.model.roots.map(root => root.notebookId)).forEach(notebookId => {
+            if (!notebooks.has(notebookId)) {
+                this.removeNotebook(notebookId);
+            }
+        });
+        this.model.setRoots(roots);
+        const rootKeys = new Set(this.model.roots.filter(root => !root.unavailable).map(root => root.occurrenceKey));
+        const available = (item?: IDocTreeItem) => item && notebooks.has(item.notebookId) &&
+            rootKeys.has(item.occurrenceKey.split("/")[0]);
+        this.expanding.forEach((expansion, key) => {
+            if (!available(expansion.item)) { this.expanding.delete(key); }
+        });
+        let changed = false;
+        for (const [key, item] of this.selected) {
+            if (!available(item)) {
+                this.selected.delete(key);
+                changed = true;
+            }
+        }
+        if (!available(this.getItem(this.focused))) {
+            this.focused = undefined;
+            this.focusedItem = undefined;
+        }
+        if (!available(this.getItem(this.anchor))) {
+            this.anchor = undefined;
+            this.anchorItem = undefined;
+        }
+        if (changed) {
+            this.selectionChanged();
+        }
+        this.restoreScrollAnchor(anchor);
+        this.render();
+    }
+
+    public getItem(key: string) {
+        return this.model.getItem(key) || this.selected.get(key) ||
+            (key === this.focused ? this.focusedItem : undefined) ||
+            (key === this.anchor ? this.anchorItem : undefined) ||
+            (this.mounted.has(key) ? this.refreshItems.get(key) : undefined);
+    }
+
+    private positionOf(key: string) {
+        return this.model.indexOf(key, this.getItem(key));
+    }
+
+    public getItemFromElement(element: Element): IDocTreeItem | undefined {
+        const row = element?.closest<HTMLElement>("[data-tree-key]");
+        return row && getDocTreeController(row) === this ? this.getItem(row.dataset.treeKey) : undefined;
+    }
+
+    public getFocusedItem() { return this.getItem(this.focused); }
+    public getMountedElement(key: string) { return this.mounted.get(key)?.element; }
+    public isExpanded(key: string) { return this.model.expanded.has(key); }
+    public retain(key: string) { this.dragging = key; }
+    public release(key?: string) {
+        if (!key || this.dragging === key) {
+            this.dragging = undefined;
+            this.scheduleRender();
+        }
+    }
+
+    public findItem(notebookId: string, id: string, rootKey?: string): IDocTreeItem | undefined {
+        const roots = this.model.roots.filter(root => root.notebookId === notebookId &&
+            (!rootKey || root.occurrenceKey === rootKey));
+        const root = roots.find(item => item.id === id);
+        if (root) {
+            return root;
+        }
+        for (const parent of [...roots, ...this.model.expanded.values()]) {
+            if (parent.notebookId !== notebookId || (rootKey && !parent.occurrenceKey.startsWith(rootKey + "/") &&
+                parent.occurrenceKey !== rootKey)) {
+                continue;
+            }
+            for (const [index, file] of this.model.directory(parent).files) {
+                if (file.id === id) {
+                    return this.model.child(parent, index);
+                }
+            }
+        }
+    }
+
+    public setFocused(key: string | undefined) {
+        this.interaction++;
+        if (key === this.focused) {
+            return;
+        }
+        this.focusedItem = this.getItem(key);
+        this.anchorItem = this.focusedItem;
+        this.focused = key;
+        this.anchor = key;
+        this.version++;
+        this.scheduleRender();
+    }
+
+    public getSelectedItems(): IDocTreeItem[] {
+        return Array.from(this.selected.values(), item => this.model.getItem(item.occurrenceKey) || item);
+    }
+
+    public validateSelection(version: number, items: readonly IDocTreeItem[]) {
+        return version === this.version && items.length === this.selected.size && items.every(item => {
+            const current = this.selected.get(item.occurrenceKey);
+            return current?.id === item.id && current.path === item.path && current.notebookId === item.notebookId;
+        });
+    }
+
+    public getSelectionElements(): NodeListOf<HTMLElement> {
+        const container = document.createElement("div");
+        this.getSelectedItems().forEach(item => {
+            const row = this.options.renderRow(item);
+            this.decorate(row, item);
+            container.append(row);
+        });
+        return container.querySelectorAll<HTMLElement>("[data-tree-key]");
+    }
+
+    private selectionChanged() {
+        if (this.selected.size) {
+            activeController = new WeakRef(this);
+        } else if (activeController?.deref() === this) {
+            activeController = undefined;
+        }
+        this.version++;
+        this.scheduleRender();
+        this.options.onSelectionChange?.();
+    }
+
+    private finishSelection(operation: number) {
+        if (!operation || this.selectionPending !== operation) { return; }
+        this.selectionPending = 0;
+        this.list.removeAttribute("aria-busy");
+        this.options.onSelectionProgress?.(0, 0, () => {});
+    }
+
+    public clearSelection() {
+        this.interaction++;
+        this.operation++;
+        this.finishSelection(this.selectionPending);
+        this.anchor = undefined;
+        this.anchorItem = undefined;
+        if (!this.selected.size) {
+            return;
+        }
+        this.selected.clear();
+        this.selectionChanged();
+    }
+
+    public async select(key: string, options: IDocTreeSelectOptions = {}, userAction = true) {
+        const item = this.getItem(key);
+        if (!item || item.unavailable) {
+            return;
+        }
+        if (userAction) { this.interaction++; }
+        this.finishSelection(this.selectionPending);
+        const operation = ++this.operation;
+        if (options.range && this.anchor) {
+            const start = this.positionOf(this.anchor);
+            const end = this.positionOf(key);
+            if (start >= 0 && end >= 0) {
+                const selection = new Map<string, IDocTreeItem>();
+                const generation = this.generation;
+                const total = Math.abs(end - start) + 1;
+                const cancel = () => {
+                    if (this.selectionPending === operation) {
+                        this.operation++;
+                        this.finishSelection(operation);
+                    }
+                };
+                this.selectionPending = operation;
+                this.list.setAttribute("aria-busy", "true");
+                this.options.onSelectionProgress?.(0, total, cancel);
+                try {
+                    for (let position = Math.min(start, end); position <= Math.max(start, end); position++) {
+                        const next = await this.itemAt(position);
+                        if (this.disposed || operation !== this.operation || generation !== this.generation) {
+                            return;
+                        }
+                        if (!next) { return; }
+                        if (next && !next.unavailable) {
+                            selection.set(next.occurrenceKey, next);
+                        }
+                        const loaded = position - Math.min(start, end) + 1;
+                        if (loaded % 64 === 0 || loaded === total) {
+                            this.options.onSelectionProgress?.(loaded, total, cancel);
+                        }
+                    }
+                    this.selected = selection;
+                } finally {
+                    this.finishSelection(operation);
+                }
+            }
+        } else if (options.toggle) {
+            if (this.selected.has(key)) {
+                this.selected.delete(key);
+            } else {
+                this.selected.set(key, item);
+            }
+            this.anchor = key;
+            this.anchorItem = item;
+        } else {
+            this.selected = new Map([[key, item]]);
+            this.anchor = key;
+            this.anchorItem = item;
+        }
+        this.focused = key;
+        this.focusedItem = item;
+        this.selectionChanged();
+        if (options.scroll !== false) {
+            await this.ensureRendered(key);
+        }
+    }
+
+    public async toggle(key: string, expanded = !(this.isExpanded(key) || this.expanding.has(key)), userAction = true) {
+        this.finishRowAnimation?.();
+        const item = this.getItem(key);
+        if (!item || item.unavailable) {
+            return;
+        }
+        if (userAction) {
+            this.interaction++;
+            this.operation++;
+            this.finishSelection(this.selectionPending);
+        }
+        const interaction = this.interaction;
+        let generation = this.generation;
+        let anchor = this.getScrollAnchor();
+        let previousCount = this.model.rowCount;
+        const parentPosition = this.positionOf(key);
+        const parentRow = this.mounted.get(key)?.element;
+        const bounds = parentRow?.getBoundingClientRect();
+        const viewport = this.options.element.getBoundingClientRect();
+        const animate = userAction && bounds && bounds.top >= viewport.top && bounds.bottom <= viewport.bottom &&
+            typeof parentRow.animate === "function" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const snapshot = animate && !expanded ? Array.from(this.mounted, ([childKey, mounted]) => ({
+            position: this.positionOf(childKey), element: mounted.element,
+        })).filter(child => child.position > parentPosition &&
+            child.element.dataset.treeKey.startsWith(key + "/")).map(child => ({
+            position: child.position, element: child.element.cloneNode(true) as HTMLElement,
+        })) : [];
+        if (expanded) {
+            const expansion = {item};
+            this.expanding.set(key, expansion);
+            this.scheduleRender();
+            this.errors.delete(this.model.directory(item).key);
+            try {
+                let ready = false;
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    generation = this.generation;
+                    await this.load(expansion.item, 0);
+                    if (this.disposed || this.expanding.get(key) !== expansion ||
+                        (!userAction && interaction !== this.interaction)) { return; }
+                    if (generation !== this.generation) {
+                        const current = this.getItem(key);
+                        if (!current || current.unavailable) { return; }
+                        expansion.item = current;
+                        continue;
+                    }
+                    const directory = this.model.directory(expansion.item);
+                    ready = Boolean(directory.revision && (directory.total === 0 || directory.files.has(0)));
+                    break;
+                }
+                if (!ready) { return; }
+                // 首批数据就绪后发布子树，等待期间保持折叠布局。
+                if (interaction !== this.interaction) { anchor = this.getScrollAnchor(); }
+                previousCount = this.model.rowCount;
+                this.model.expanded.set(key, this.getItem(key) || expansion.item);
+                this.model.project();
+            } finally {
+                if (this.expanding.get(key) === expansion) {
+                    this.expanding.delete(key);
+                    this.scheduleRender();
+                }
+            }
+        } else {
+            for (const expandingKey of this.expanding.keys()) {
+                if (expandingKey === key || expandingKey.startsWith(key + "/")) { this.expanding.delete(expandingKey); }
+            }
+            for (const expandedKey of this.model.expanded.keys()) {
+                if (expandedKey === key || expandedKey.startsWith(key + "/")) {
+                    this.model.expanded.delete(expandedKey);
+                }
+            }
+            let changed = false;
+            for (const selectedKey of this.selected.keys()) {
+                if (selectedKey.startsWith(key + "/")) {
+                    this.selected.delete(selectedKey);
+                    changed = true;
+                }
+            }
+            if (this.focused?.startsWith(key + "/")) {
+                this.focused = key;
+                this.focusedItem = item;
+                this.selected.set(key, item);
+                changed = true;
+            }
+            if (this.anchor?.startsWith(key + "/")) {
+                this.anchor = key;
+                this.anchorItem = item;
+            }
+            if (changed) { this.selectionChanged(); }
+            this.model.project();
+        }
+        if (this.disposed || generation !== this.generation) { return; }
+        this.restoreScrollAnchor(anchor);
+        this.render();
+        if (animate && interaction === this.interaction && this.positionOf(key) === parentPosition) {
+            this.animateRows(parentPosition + 1, Math.abs(this.model.rowCount - previousCount), expanded, snapshot);
+        }
+        this.options.onExpansionChange?.();
+    }
+
+    private animateRows(start: number, count: number, expanded: boolean,
+                        snapshot: {position: number, element: HTMLElement}[]) {
+        if (!count) { return; }
+        const group = document.createElement("li");
+        group.dataset.treeAnimation = "true";
+        group.setAttribute("role", "presentation");
+        group.style.cssText = "display:flex;flex-direction:column;flex-shrink:0;overflow:clip;min-height:0";
+        const height = count * this.rowHeight;
+        if (expanded) {
+            let position = 0;
+            for (const child of Array.from(this.list.children) as HTMLElement[]) {
+                const size = child.dataset.treeSpacer ? Math.round(parseFloat(child.style.height) / this.rowHeight) : 1;
+                const overlap = Math.max(0, Math.min(position + size, start + count) - Math.max(position, start));
+                if (overlap) {
+                    if (position < start) {
+                        const before = child.cloneNode() as HTMLElement;
+                        before.style.height = `${(start - position) * this.rowHeight}px`;
+                        child.before(before);
+                    }
+                    if (position + size > start + count) {
+                        const after = child.cloneNode() as HTMLElement;
+                        after.style.height = `${(position + size - start - count) * this.rowHeight}px`;
+                        child.after(after);
+                    }
+                    if (!group.isConnected) { child.before(group); }
+                    if (child.dataset.treeSpacer) { child.style.height = `${overlap * this.rowHeight}px`; }
+                    group.append(child);
+                }
+                position += size;
+            }
+        } else {
+            group.inert = true;
+            group.setAttribute("aria-hidden", "true");
+            group.style.pointerEvents = "none";
+            group.style.position = "relative";
+            for (const child of snapshot) {
+                child.element.style.position = "absolute";
+                child.element.style.top = `${(child.position - start) * this.rowHeight}px`;
+                child.element.style.left = "0";
+                child.element.style.right = "0";
+                group.append(child.element);
+            }
+            const parent = this.model.rowAt(start - 1)?.item;
+            const row = parent && this.mounted.get(parent.occurrenceKey)?.element;
+            if (!row) { return; }
+            row.after(group);
+        }
+        if (!group.isConnected) { return; }
+        cancelAnimationFrame(this.frame);
+        this.frame = 0;
+        const element = this.options.element;
+        const width = element.getBoundingClientRect().width;
+        // 自适应列表的视口随动画区域增高，固定视口的两次测量值相同。
+        group.style.height = "0px";
+        const collapsedHeight = element.clientHeight;
+        group.style.height = `${height}px`;
+        const expandedHeight = element.clientHeight;
+        group.style.height = `${expanded ? height : 0}px`;
+        const animation = group.animate([{height: `${expanded ? 0 : height}px`},
+            {height: `${expanded ? height : 0}px`}], {duration: 200, easing: "cubic-bezier(0, 0, .2, 1)"});
+        const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let resizeDeferred = false;
+        this.deferRowAnimationResize = entries => {
+            const expectedHeight = Math.min(expandedHeight, collapsedHeight + group.getBoundingClientRect().height);
+            if (Math.abs(element.getBoundingClientRect().width - width) > 1 ||
+                Math.abs(element.clientHeight - expectedHeight) > 1 || entries.some(entry => {
+                    if (entry.target === element) { return false; }
+                    const row = entry.target as HTMLElement;
+                    const style = getComputedStyle(row);
+                    const spacing = (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
+                    return Math.abs(row.getBoundingClientRect().height + spacing - this.rowHeight) > 0.1;
+                })) { return false; }
+            resizeDeferred = true;
+            return true;
+        };
+        const finish = () => {
+            if (this.finishRowAnimation !== finish) { return; }
+            this.finishRowAnimation = undefined;
+            this.deferRowAnimationResize = undefined;
+            motion.removeEventListener("change", finish);
+            animation.cancel();
+            if (expanded) { group.replaceWith(...Array.from(group.children)); }
+            else { group.remove(); }
+            if (resizeDeferred) { this.scheduleRender(); }
+        };
+        this.finishRowAnimation = finish;
+        motion.addEventListener("change", finish);
+        animation.onfinish = finish;
+        animation.oncancel = finish;
+    }
+
+    public collapseAll() {
+        this.operation++;
+        this.expanding.clear();
+        this.model.expanded.clear();
+        this.model.project();
+        this.clearSelection();
+        this.render();
+        this.options.onExpansionChange?.();
+    }
+
+    public getExpandedItems(): IDocTreeExpansion[] {
+        return Array.from(this.model.expanded.values(), item => ({
+            occurrenceKey: item.occurrenceKey, notebookId: item.notebookId, id: item.id,
+            path: item.path, kind: item.kind,
+        }));
+    }
+
+    public async restoreExpanded(items: readonly (Pick<IDocTreeExpansion, "notebookId" | "id" | "kind"> & Partial<IDocTreeExpansion>)[],
+                                 isCurrent: () => boolean = () => true) {
+        const generation = this.generation;
+        const interaction = this.interaction;
+        const current = () => !this.disposed && generation === this.generation &&
+            interaction === this.interaction && isCurrent();
+        const pending = new Set(new Map(items.map(item => [
+            JSON.stringify([item.notebookId, item.kind, item.occurrenceKey || item.id]), item,
+        ])).values());
+        const resolve = (item: typeof items[number]) => this.model.getItem(item.occurrenceKey) ||
+            this.findItem(item.notebookId, item.id, item.occurrenceKey?.split("/")[0]);
+        while (pending.size && current()) {
+            const known = Array.from(pending, item => ({saved: item, item: resolve(item)})).filter(entry => entry.item);
+            if (!known.length) {
+                // 旧状态只有 ID；首批外或已移动的目标按需定位，避免遍历宽目录的全部批次。
+                const saved = pending.values().next().value;
+                try {
+                    await this.locate(saved.notebookId, saved.id, {select: false, scroll: false,
+                        rootKey: saved.occurrenceKey?.split("/")[0]});
+                } catch (error) {
+                    console.error(error);
+                }
+                if (!current()) { return; }
+                if (!resolve(saved)) { pending.delete(saved); }
+                continue;
+            }
+            const depth = known.reduce((minimum, entry) => Math.min(minimum, entry.item.depth), Infinity);
+            const level = known.filter(entry => entry.item.depth === depth);
+            level.forEach(entry => pending.delete(entry.saved));
+            await Promise.all(level.map(async ({saved, item}) => {
+                if (!current() || item.unavailable) { return; }
+                try {
+                    const directory = this.model.directory(item);
+                    if (item.kind === "notebook" || this.refreshingDirectories.has(directory)) {
+                        await this.toggle(item.occurrenceKey, true, false);
+                    } else {
+                        // 父批次携带经过相同过滤的子文档数，足以投影未加载的子目录。
+                        directory.total ??= item.subFileCount;
+                        this.model.expanded.set(item.occurrenceKey, item);
+                    }
+                    if (!current()) { return; }
+                    if (saved.occurrenceKey && saved.occurrenceKey !== item.occurrenceKey) {
+                        this.model.expanded.delete(saved.occurrenceKey);
+                    }
+                    const needsChildren = Array.from(pending).some(target => target.notebookId === item.notebookId &&
+                        (!target.occurrenceKey || target.occurrenceKey.startsWith(item.occurrenceKey + "/")) && !resolve(target));
+                    if (needsChildren && directory.total !== 0) { await this.load(item, 0); }
+                } catch (error) {
+                    // 已保存的分支可能已删除或失去访问权限，其他同层目录仍可继续恢复。
+                    console.error(error);
+                }
+            }));
+            if (!current()) { return; }
+            this.model.project();
+            this.scheduleRender();
+        }
+    }
+
+    public async locate(notebook: string, id: string, options: {select?: boolean, scroll?: boolean, rootKey?: string, ignoreUnavailable?: boolean} = {}, attempt = 0): Promise<HTMLElement> {
+        if (this.disposed) { return; }
+        // 后台恢复不能替换主动定位；刷新改变源版本时，主动定位会重试整个路径。
+        if (options.select === false && this.navigation?.select) { return; }
+        if (!attempt && options.select !== false) {
+            this.interaction++;
+            this.operation++;
+            this.finishSelection(this.selectionPending);
+        }
+        const interaction = this.interaction;
+        const generation = this.generation;
+        let parent = options.rootKey ? this.model.roots.find(root => root.occurrenceKey === options.rootKey) :
+            this.model.roots.find(root => root.notebookId === notebook && root.kind === "notebook") ||
+            this.model.roots.find(root => root.notebookId === notebook && root.id === id);
+        if (!parent || parent.unavailable) {
+            return;
+        }
+        const root = parent;
+        const navigation = {interaction, generation, publishing: false, select: options.select !== false};
+        const expansion = {item: root};
+        this.navigation = navigation;
+        this.expanding.set(root.occurrenceKey, expansion);
+        const rootDirectory = this.model.directory(root);
+        const interrupted = () => this.disposed || this.navigation !== navigation || interaction !== this.interaction;
+        const isCurrent = () => !interrupted() && generation === this.generation;
+        const retry = () => !interrupted() && attempt < 2 ? this.locate(notebook, id, options, attempt + 1) : undefined;
+        const requestKey = `locate:${++this.navigationID}`;
+        let finish: () => void;
+        const tracked = this.trackRequest(requestKey, rootDirectory,
+            new Promise<void>(resolve => { finish = resolve; }), isCurrent);
+        const stages: {directory: IDocTreeDirectory, generation: number, revision: string,
+            index: number, id: string, range?: IDocTreeRange}[] = [];
+        const ancestors: IDocTreeItem[] = [];
+        try {
+            if (parent.id !== id) {
+                let located: Awaited<ReturnType<IDocTreeDataSource["locate"]>>;
+                try {
+                    located = await this.source.locate({notebook, id}, {
+                        ignoreUnavailable: options.ignoreUnavailable || (options.select === false && options.scroll === false),
+                    });
+                } catch {
+                    return;
+                }
+                if (!isCurrent()) { return retry(); }
+                let started = parent.kind === "notebook";
+                for (const step of located.steps) {
+                    if (!started) {
+                        if (step.id === parent.id) { started = true; }
+                        continue;
+                    }
+                    if (docTreeParentID(parent) !== step.parentID) { return; }
+                    const directory = this.model.directory(parent);
+                    const directoryGeneration = directory.generation;
+                    let range: IDocTreeRange;
+                    let snapshot = directory;
+                    if (directory.revision !== step.revision || directory.files.get(step.index)?.id !== step.id) {
+                        const limit = this.batchSize();
+                        range = await this.limited(() => this.source.range({notebook, parentID: step.parentID,
+                            offset: Math.floor(step.index / limit) * limit, limit, revision: step.revision}));
+                        if (!isCurrent()) { return retry(); }
+                        if (range.stale || range.revision !== step.revision) { return retry(); }
+                        snapshot = {...directory, total: range.total, revision: range.revision,
+                            effectiveSortMode: range.effectiveSortMode,
+                            files: new Map(range.files.map((file, index) => [range.offset + index, file])),
+                            indices: new Map(range.files.map((file, index) => [file.id, range.offset + index]))};
+                    }
+                    const child = this.model.child(parent, step.index, snapshot);
+                    if (!child || child.id !== step.id) { return retry(); }
+                    stages.push({directory, generation: directoryGeneration, revision: step.revision,
+                        index: step.index, id: step.id, range});
+                    ancestors.push(parent);
+                    parent = child;
+                }
+                if (parent.id !== id) { return; }
+            }
+            if (!isCurrent()) { return retry(); }
+            if (!this.model.roots.some(item => item.occurrenceKey === root.occurrenceKey && !item.unavailable)) { return; }
+            if (stages.some(stage => stage.directory.generation !== stage.generation ||
+                (!stage.range && (stage.directory.revision !== stage.revision ||
+                    stage.directory.files.get(stage.index)?.id !== stage.id)))) { return retry(); }
+            // 路径和目录批次一次提交，等待期间不清空已有缓存或展开祖先。
+            navigation.publishing = true;
+            for (const {directory, range} of stages) {
+                if (!range) { continue; }
+                if (directory.revision !== range.revision) {
+                    for (const [key, page] of this.pages) {
+                        if (page.directory === directory) { this.pages.delete(key); }
+                    }
+                }
+                this.model.applyRange(directory, range);
+                this.pages.set(`${requestKey}:${directory.key}:${range.offset}`,
+                    {directory, start: range.offset, count: range.files.length});
+                this.errors.delete(directory.key);
+            }
+            ancestors.forEach(item => this.model.expanded.set(item.occurrenceKey, item));
+            this.model.project();
+            this.evictPages();
+            if (options.select !== false) {
+                await this.select(parent.occurrenceKey, {scroll: options.scroll}, false);
+            }
+            this.options.onExpansionChange?.();
+            if (options.scroll === false) {
+                this.render();
+                return this.getMountedElement(parent.occurrenceKey);
+            }
+            return await this.ensureRendered(parent.occurrenceKey);
+        } catch (error) {
+            if (isCurrent()) {
+                this.errors.add(rootDirectory.key);
+                console.warn("Failed to load document tree range", error);
+            }
+        } finally {
+            finish();
+            await tracked;
+            if (this.expanding.get(root.occurrenceKey) === expansion) { this.expanding.delete(root.occurrenceKey); }
+            if (this.navigation === navigation) {
+                if (navigation.publishing) { this.render(); }
+                this.navigation = undefined;
+                this.scheduleRender();
+            }
+        }
+    }
+
+    public async itemAtDirectoryIndex(parentKey: string, index: number) {
+        const parent = this.getItem(parentKey);
+        if (!parent || index < 0) {
+            return;
+        }
+        const directory = this.model.directory(parent);
+        if (directory.revision && directory.total !== undefined && index >= directory.total) {
+            return;
+        }
+        await this.load(parent, index);
+        return this.model.child(parent, index);
+    }
+
+    public sibling(item: IDocTreeItem, delta: number) {
+        if (!item.parentKey) {
+            return Promise.resolve(this.model.roots[item.index + delta]);
+        }
+        return this.itemAtDirectoryIndex(item.parentKey, item.index + delta);
+    }
+
+    private async itemAt(position: number) {
+        const row = this.model.rowAt(position);
+        if (row?.item) {
+            return row.item;
+        }
+        if (row?.parent) {
+            return this.itemAtDirectoryIndex(row.parent.occurrenceKey, row.index);
+        }
+    }
+
+    public async focusRelative(delta: number, extend = false) {
+        const interaction = ++this.interaction;
+        let index = this.positionOf(this.focused);
+        index = index < 0 ? (delta < 0 ? this.model.rowCount - 1 : 0) :
+            Math.max(0, Math.min(this.model.rowCount - 1, index + delta));
+        const item = await this.itemAt(index);
+        if (item && interaction === this.interaction) {
+            await this.select(item.occurrenceKey, {range: extend});
+        }
+    }
+
+    public async focusBoundary(boundary: "first" | "last", extend = false) {
+        const interaction = ++this.interaction;
+        const item = await this.itemAt(boundary === "first" ? 0 : this.model.rowCount - 1);
+        if (item && interaction === this.interaction) {
+            await this.select(item.occurrenceKey, {range: extend});
+        }
+    }
+
+    public async focusParent() {
+        const parent = this.getFocusedItem()?.parentKey;
+        if (parent) {
+            await this.select(parent);
+        }
+    }
+
+    public async expandFocused() {
+        if (this.focused) {
+            if (this.isExpanded(this.focused)) {
+                await this.focusRelative(1);
+            } else {
+                await this.toggle(this.focused, true);
+            }
+        }
+    }
+
+    public async collapseFocused() {
+        if (this.focused) {
+            if (this.isExpanded(this.focused) || this.expanding.has(this.focused)) {
+                await this.toggle(this.focused, false);
+            } else {
+                await this.focusParent();
+            }
+        }
+    }
+
+    public async ensureRendered(key: string): Promise<HTMLElement> {
+        let position = this.positionOf(key);
+        if (position < 0) {
+            return;
+        }
+        const generation = this.generation;
+        const interaction = this.interaction;
+        const item = await this.itemAt(position);
+        if (this.disposed || generation !== this.generation || interaction !== this.interaction || item?.occurrenceKey !== key) {
+            return;
+        }
+        // 定位前先读取当前主题的实际行距；已淘汰的目标批次也必须重新加载。
+        this.render();
+        position = this.positionOf(key);
+        if (position < 0) { return; }
+        const element = this.options.element;
+        const top = position * this.rowHeight;
+        if (top < element.scrollTop) {
+            element.scrollTop = top;
+        } else if (top + this.rowHeight > element.scrollTop + element.clientHeight) {
+            element.scrollTop = Math.max(0, top + this.rowHeight - element.clientHeight);
+        }
+        this.render();
+        const row = this.getMountedElement(key);
+        if (row && element.clientHeight > 0) {
+            // 实际行边界包含主题间距和像素取整，校正估算行距留下的裁切。
+            const bounds = row.getBoundingClientRect();
+            const viewportTop = element.getBoundingClientRect().top + element.clientTop;
+            const viewportBottom = viewportTop + element.clientHeight;
+            const adjustment = bounds.top < viewportTop ? -Math.ceil(viewportTop - bounds.top) :
+                bounds.bottom > viewportBottom ? Math.ceil(bounds.bottom - viewportBottom) : 0;
+            if (adjustment) {
+                element.scrollTop += adjustment;
+                this.render();
+            }
+        }
+        return this.getMountedElement(key);
+    }
+
+    public getScrollAnchor(): IDocTreeScrollAnchor {
+        const position = Math.floor(this.options.element.scrollTop / this.rowHeight);
+        const row = this.model.rowAt(position);
+        return {notebookId: row?.item?.notebookId, id: row?.item?.id,
+            occurrenceKey: row?.item?.occurrenceKey, parentKey: row?.parent?.occurrenceKey,
+            index: row?.index ?? 0, offset: this.options.element.scrollTop - position * this.rowHeight};
+    }
+
+    public restoreScrollAnchor(anchor?: IDocTreeScrollAnchor) {
+        if (!anchor) {
+            return;
+        }
+        let position = anchor.occurrenceKey ? this.positionOf(anchor.occurrenceKey) : -1;
+        if (position < 0 && anchor.parentKey) {
+            const parent = this.getItem(anchor.parentKey);
+            const child = parent && this.model.child(parent, anchor.index);
+            position = child ? this.positionOf(child.occurrenceKey) : this.positionOf(anchor.parentKey) + 1 + anchor.index;
+        }
+        if (position >= 0) {
+            this.options.element.scrollTop = position * this.rowHeight + anchor.offset;
+        }
+    }
+
+    public async reload(filter: {notebook?: string, parentID?: string} = {}) {
+        const previous = this.reloadTail;
+        const pending = (async () => {
+            if (previous) { await previous; }
+            await this.performReload(filter);
+        })();
+        this.reloadTail = pending.catch((): void => undefined);
+        return pending;
+    }
+
+    private async performReload(filter: {notebook?: string, parentID?: string}) {
+        if (this.disposed) { return; }
+        this.mounted.forEach((_, key) => {
+            const item = this.getItem(key);
+            if (item) { this.refreshItems.set(key, item); }
+        });
+        const refresh = {interaction: this.interaction};
+        this.refresh = refresh;
+        try {
+            await this.reloadContent(filter);
+        } finally {
+            // 只发布最新刷新结果；加载过程保留已有行，真实输入仍可立即更新视区。
+            if (this.refresh === refresh) {
+                this.refresh = undefined;
+                this.refreshItems.clear();
+                this.render();
+            }
+        }
+    }
+
+    private async reloadContent(filter: {notebook?: string, parentID?: string}) {
+        if (this.disposed) { return; }
+        const interaction = this.interaction;
+        const anchor = this.getScrollAnchor();
+        const affected = (item: IDocTreeItem) => (!filter.notebook || item.notebookId === filter.notebook) &&
+            (filter.parentID === undefined || item.parentID === filter.parentID || !this.model.getItem(item.occurrenceKey));
+        const parents = new Map<string, IDocTreeItem>();
+        const affectedBranches = Array.from(this.model.expanded.values()).filter(item =>
+            (!filter.notebook || item.notebookId === filter.notebook) &&
+            (filter.parentID === undefined || docTreeParentID(item) === filter.parentID));
+        const expanded = this.getExpandedItems().filter(item => affectedBranches.some(branch =>
+            item.occurrenceKey === branch.occurrenceKey || item.occurrenceKey.startsWith(branch.occurrenceKey + "/")));
+        const selected = this.getSelectedItems();
+        selected.forEach(item => {
+            const parent = this.model.getItem(item.parentKey);
+            if (parent) { parents.set(parent.occurrenceKey, parent); }
+        });
+        const generation = ++this.generation;
+        const operation = ++this.operation;
+        this.finishSelection(this.selectionPending);
+        // 保留已挂载目录的完整旧批次，新视区及展开路径的批次就绪后再替换。
+        const required = new Map<IDocTreeDirectory, Set<number>>();
+        const retain = (parent: IDocTreeItem, index: number) => {
+            const directory = this.model.directory(parent);
+            const offsets = required.get(directory) || new Set<number>([0]);
+            offsets.add(Math.floor(index / this.batchSize()) * this.batchSize());
+            required.set(directory, offsets);
+        };
+        const viewport = getDocTreeWindow(this.model.rowCount, this.options.element.scrollTop,
+            this.options.element.clientHeight, this.rowHeight);
+        for (let position = viewport.start; position < viewport.end; position++) {
+            const row = this.model.rowAt(position);
+            if (row?.parent) { retain(row.parent, row.index); }
+        }
+        this.model.expanded.forEach(item => {
+            const parent = this.model.getItem(item.parentKey);
+            if (parent) { retain(parent, item.index); }
+        });
+        this.model.invalidate(filter.notebook, filter.parentID, true);
+        for (const directory of this.model.directories.values()) {
+            if ((!filter.notebook || directory.notebookId === filter.notebook) &&
+                (filter.parentID === undefined || directory.parentID === filter.parentID)) {
+                this.refreshingDirectories.set(directory, {generation: directory.generation,
+                    offsets: required.get(directory) || new Set([0])});
+            }
+        }
+        this.errors.clear();
+        this.version++;
+        await this.restoreExpanded(expanded);
+        if (this.disposed || generation !== this.generation) {
+            return;
+        }
+        const nextSelection = new Map(selected.filter(item => !affected(item) || !item.parentKey)
+            .map(item => [item.occurrenceKey, item]));
+        const groups = new Map<string, IDocTreeItem[]>();
+        for (const item of selected) {
+            if (affected(item) && item.parentKey) {
+                const group = groups.get(item.parentKey) || [];
+                group.push(item);
+                groups.set(item.parentKey, group);
+            }
+        }
+        for (const [parentKey, group] of groups) {
+            if (this.disposed || generation !== this.generation || operation !== this.operation) {
+                return;
+            }
+            if (group.length <= 2) {
+                for (const item of group) {
+                    await this.locate(item.notebookId, item.id, {select: false, scroll: false,
+                        rootKey: item.occurrenceKey.split("/")[0]});
+                    const current = this.findItem(item.notebookId, item.id, item.occurrenceKey.split("/")[0]);
+                    if (current) { nextSelection.set(current.occurrenceKey, current); }
+                }
+            } else {
+                const parent = this.model.getItem(parentKey) || parents.get(parentKey);
+                if (!parent) { continue; }
+                const ids = new Set(group.map(item => item.id));
+                const directory = this.model.directory(parent);
+                const limit = this.batchSize();
+                for (let offset = 0; offset < (directory.total ?? 1) && ids.size; offset += limit) {
+                    await this.load(parent, offset);
+                    if (this.disposed || generation !== this.generation || operation !== this.operation) { return; }
+                    for (let index = offset; index < Math.min(offset + limit, directory.total); index++) {
+                        const current = this.model.child(parent, index);
+                        if (current && ids.delete(current.id)) {
+                            nextSelection.set(current.occurrenceKey, current);
+                        }
+                    }
+                }
+            }
+        }
+        if (this.disposed || generation !== this.generation || operation !== this.operation) {
+            return;
+        }
+        this.selected = nextSelection;
+        this.focusedItem = this.getItem(this.focused);
+        this.anchorItem = this.getItem(this.anchor);
+        if (interaction === this.interaction) {
+            this.restoreScrollAnchor(anchor);
+        }
+        // 首批数据可能远离当前视区，恢复展开和选择后补齐可见范围再替换已有行。
+        const nextViewport = getDocTreeWindow(this.model.rowCount, this.options.element.scrollTop,
+            this.options.element.clientHeight, this.rowHeight);
+        const loaded = new Set<string>();
+        for (let position = nextViewport.start; position < nextViewport.end; position++) {
+            const row = this.model.rowAt(position);
+            if (row?.item || !row?.parent) { continue; }
+            const directory = this.model.directory(row.parent);
+            const key = `${directory.key}:${Math.floor(row.index / this.batchSize())}`;
+            if (!loaded.has(key) && !this.errors.has(directory.key)) {
+                loaded.add(key);
+                await this.load(row.parent, row.index);
+                if (this.disposed || generation !== this.generation || operation !== this.operation) { return; }
+            }
+        }
+        this.render();
+        this.options.onSelectionChange?.();
+    }
+
+    public handleMessage(data: IWebSocketData) {
+        if (["closeBox", "removeBox"].includes(data.cmd)) {
+            const notebook = typeof data.data === "string" ? data.data : data.data.box?.id || data.data.box || data.data.id;
+            if (typeof notebook === "string") {
+                this.removeNotebook(notebook);
+            }
+        } else if (data.cmd === "transactions") {
+            getTransactionOperations(data.data).forEach(operation => {
+                if (operation.action !== "updateAttrs" || operation.id !== operation.rootID) { return; }
+                const attrs = operation.data;
+                if (!attrs || typeof attrs !== "object" || Array.isArray(attrs)) { return; }
+                const previous = attrs.old || {};
+                const next = attrs.new || {};
+                const metadata: Partial<IFile> = {};
+                for (const key of ["icon", "alias", "memo", "bookmark"] as const) {
+                    if (previous[key] !== next[key]) { metadata[key] = next[key] || ""; }
+                }
+                if (previous.name !== next.name) { metadata.name1 = next.name || ""; }
+                if (previous.title !== next.title && next.title !== undefined) {
+                    metadata.name = next.title;
+                }
+                if (previous.title !== next.title || previous["custom-sy-title-empty"] !== next["custom-sy-title-empty"]) {
+                    metadata.titleEmpty = next["custom-sy-title-empty"] === "true";
+                }
+                this.applyMetadata(operation.id, metadata, false);
+            });
+        } else if (data.cmd === "reloadDocInfo") {
+            const metadata: Partial<IFile> = {};
+            for (const key of ["name", "name1", "alias", "memo", "bookmark", "icon", "hMtime", "hCtime", "hSize", "subFileCount", "count", "titleEmpty", "titleFormat", "titleRevision"] as const) {
+                if (data.data[key] !== undefined) { Object.assign(metadata, {[key]: data.data[key]}); }
+            }
+            this.applyMetadata(data.data.rootID, metadata, true, data.data.box);
+        } else if (["create", "heading2doc", "li2doc", "createdailynote", "rename"].includes(data.cmd)) {
+            const notebook = data.data.box?.id || data.data.box;
+            const path = data.data.path;
+            if (typeof notebook === "string" && typeof path === "string") {
+                const parentID = path.split("/").filter(Boolean).slice(-2, -1)[0] || "";
+                void this.reload({notebook, parentID});
+            }
+        } else if (data.cmd === "removeDoc") {
+            if (Array.isArray(data.data?.ids)) {
+                this.removeDocuments(new Set(data.data.ids.filter((id: unknown) => typeof id === "string")));
+            }
+            void this.reload();
+        } else if (data.cmd === "moveDocs") {
+            const directories = new Map<string, {notebook: string, parentID: string}>();
+            const moves = data.data?.moves;
+            if (!Array.isArray(moves) || !moves.length || moves.some(move =>
+                !move || typeof move.fromNotebook !== "string" || typeof move.fromPath !== "string" ||
+                typeof move.toNotebook !== "string" || typeof move.newPath !== "string")) {
+                void this.reload();
+                return;
+            }
+            // 移动通知已包含成功落盘的源、目标路径，只恢复这些目录的展开和选择。
+            for (const move of moves) {
+                for (const [notebook, path] of [[move.fromNotebook, move.fromPath], [move.toNotebook, move.newPath]]) {
+                    const parentID = path.split("/").filter(Boolean).slice(-2, -1)[0] || "";
+                    directories.set(`${notebook}:${parentID}`, {notebook, parentID});
+                }
+            }
+            directories.forEach(filter => { void this.reload(filter); });
+        } else if (["reloadFiletree", "mount"].includes(data.cmd)) {
+            void this.reload();
+        }
+    }
+
+    private removeDocuments(ids: ReadonlySet<string>) {
+        if (!ids.size) { return; }
+        const removedRoots = new Set(this.model.roots.filter(item => item.kind === "document" && ids.has(item.id))
+            .map(item => item.occurrenceKey));
+        const removed = (key?: string) => key && (removedRoots.has(key.split("/")[0]) ||
+            key.split("/").slice(1).some(id => ids.has(id)));
+        for (const key of this.expanding.keys()) {
+            if (removed(key)) { this.expanding.delete(key); }
+        }
+        // 删除通知代表源已成功移除，立即清理可见行和恢复目标，不等待目录请求。
+        for (const [key, mounted] of this.mounted) {
+            if (!removed(key)) { continue; }
+            this.observer.unobserve(mounted.element);
+            mounted.element.remove();
+            this.mounted.delete(key);
+        }
+        for (const key of this.selected.keys()) {
+            if (removed(key)) { this.selected.delete(key); }
+        }
+        for (const key of this.model.expanded.keys()) {
+            if (removed(key)) { this.model.expanded.delete(key); }
+        }
+        this.model.roots = this.model.roots.filter(item => !removedRoots.has(item.occurrenceKey));
+        for (const directory of this.model.removeDocuments(ids)) {
+            for (const [key, page] of this.pages) {
+                if (page.directory === directory) { this.pages.delete(key); }
+            }
+            const limit = this.batchSize();
+            const offsets = new Set([...directory.files.keys()].map(index => Math.floor(index / limit) * limit));
+            offsets.forEach(start => this.pages.set(`retained:${directory.key}:${directory.generation}:${start}`,
+                {directory, start, count: Math.min(limit, directory.total - start)}));
+        }
+        if (removed(this.focused)) {
+            this.focused = undefined;
+            this.focusedItem = undefined;
+        }
+        if (removed(this.anchor)) {
+            this.anchor = undefined;
+            this.anchorItem = undefined;
+        }
+        if (removed(this.dragging)) { this.dragging = undefined; }
+        this.selectionChanged();
+        this.render();
+        this.options.onExpansionChange?.();
+    }
+
+    private applyMetadata(id: string, metadata: Partial<IFile>, refreshSort: boolean, notebook?: string) {
+        const changed = new Map<string, {notebook: string, parentID: string}>();
+        const updateItem = (item: IDocTreeItem) => {
+            if (item.id !== id) { return item; }
+            return {...item, name: metadata.name ?? item.name, subFileCount: metadata.subFileCount ?? item.subFileCount,
+                file: item.file ? {...item.file, ...metadata} : undefined};
+        };
+        this.selected.forEach((item, key) => this.selected.set(key, updateItem(item)));
+        if (this.focusedItem) { this.focusedItem = updateItem(this.focusedItem); }
+        if (this.anchorItem) { this.anchorItem = updateItem(this.anchorItem); }
+        this.model.expanded.forEach((item, key) => this.model.expanded.set(key, updateItem(item)));
+        this.model.roots = this.model.roots.map(updateItem);
+        this.model.directories.forEach(directory => {
+            const index = directory.indices.get(id);
+            const file = index === undefined ? undefined : directory.files.get(index);
+            if (file) { directory.files.set(index, {...file, ...metadata}); }
+            if (refreshSort && (file || notebook === directory.notebookId) &&
+                [2, 3, 7, 8, 11, 12, 13, 14].includes(directory.effectiveSortMode)) {
+                changed.set(directory.key, {notebook: directory.notebookId, parentID: directory.parentID});
+            }
+        });
+        this.model.project();
+        this.scheduleRender();
+        void (async () => {
+            for (const filter of changed.values()) { await this.reload(filter); }
+        })();
+    }
+
+    public removeNotebook(notebook: string) {
+        this.generation++;
+        this.interaction++;
+        this.operation++;
+        this.finishSelection(this.selectionPending);
+        this.expanding.forEach((expansion, key) => {
+            if (expansion.item.notebookId === notebook) { this.expanding.delete(key); }
+        });
+        if (this.getItem(this.focused)?.notebookId === notebook) {
+            this.focused = undefined;
+            this.focusedItem = undefined;
+        }
+        if (this.getItem(this.anchor)?.notebookId === notebook) {
+            this.anchor = undefined;
+            this.anchorItem = undefined;
+        }
+        this.model.removeNotebook(notebook);
+        this.model.setRoots(this.model.roots.filter(root => root.notebookId !== notebook));
+        for (const [key, item] of this.selected) {
+            if (item.notebookId === notebook) {
+                this.selected.delete(key);
+            }
+        }
+        for (const [key, page] of this.pages) {
+            if (page.directory.notebookId === notebook) {
+                this.pages.delete(key);
+            }
+        }
+        for (const directory of this.refreshingDirectories.keys()) {
+            if (directory.notebookId === notebook) { this.refreshingDirectories.delete(directory); }
+        }
+        this.selectionChanged();
+        this.render();
+    }
+
+    private async limited<T>(request: () => Promise<T>): Promise<T> {
+        if (this.activeRequests >= 4) {
+            await new Promise<void>(resolve => this.requestQueue.push(resolve));
+        }
+        this.activeRequests++;
+        try {
+            return await request();
+        } finally {
+            this.activeRequests--;
+            this.requestQueue.shift()?.();
+        }
+    }
+
+    private batchSize() {
+        return Math.max(1, Math.min(10240, Math.floor(this.options.batchSize?.() ??
+            window.siyuan?.config?.fileTree?.docTreeBatchSize ?? 512)));
+    }
+
+    private trackRequest(key: string, directory: IDocTreeDirectory, request: Promise<void>, isCurrent: () => boolean) {
+        const tracked = request.finally(() => {
+            window.clearTimeout(this.inFlight.get(key)?.indicatorTimer);
+            this.inFlight.delete(key);
+            this.scheduleRender();
+        });
+        // 快请求直接显示结果，持续等待时才在箭头位置显示动画。
+        const indicatorTimer = window.setTimeout(() => {
+            const pending = this.inFlight.get(key);
+            if (pending?.isCurrent()) {
+                pending.showIndicator = true;
+                this.scheduleRender();
+            }
+        }, 200);
+        this.inFlight.set(key, {request: tracked, directory, isCurrent, indicatorTimer, showIndicator: false});
+        this.scheduleRender();
+        return tracked;
+    }
+
+    private async load(parent: IDocTreeItem, index: number) {
+        const directory = this.model.directory(parent);
+        const refresh = this.refreshingDirectories.get(directory);
+        if (refresh && refresh.generation === directory.generation) {
+            refresh.offsets.add(Math.floor(index / this.batchSize()) * this.batchSize());
+            if (!refresh.request) {
+                const generation = this.generation;
+                const current = () => !this.disposed && generation === this.generation && refresh.generation === directory.generation;
+                const key = `refresh:${directory.key}:${directory.generation}:${generation}`;
+                let applied = false;
+                const request = (async () => {
+                    for (let attempt = 0; attempt < 3 && current(); attempt++) {
+                        const ranges: IDocTreeRange[] = [];
+                        for (const offset of refresh.offsets) {
+                            const range = await this.limited(() => this.source.range({notebook: directory.notebookId,
+                                parentID: directory.parentID, offset, limit: this.batchSize(), revision: ranges[0]?.revision}));
+                            if (!current()) { return; }
+                            if (range.stale) { break; }
+                            ranges.push(range);
+                        }
+                        if (ranges.length !== refresh.offsets.size) { continue; }
+                        for (const [pageKey, page] of this.pages) {
+                            if (page.directory === directory) { this.pages.delete(pageKey); }
+                        }
+                        directory.files.clear();
+                        directory.indices.clear();
+                        directory.revision = undefined;
+                        for (const range of ranges) {
+                            this.model.applyRange(directory, range);
+                            this.pages.set(`${key}:${range.offset}`, {directory, start: range.offset, count: range.files.length});
+                        }
+                        this.errors.delete(directory.key);
+                        applied = true;
+                        this.evictPages();
+                        return;
+                    }
+                    if (current()) { throw Error("Document tree refresh did not reach a stable revision"); }
+                })().catch(error => {
+                    if (current()) {
+                        this.errors.add(directory.key);
+                        console.warn("Failed to load document tree range", error);
+                    }
+                }).finally(() => {
+                    if (this.refreshingDirectories.get(directory) === refresh) {
+                        if (applied || !current()) { this.refreshingDirectories.delete(directory); }
+                        else { refresh.request = undefined; }
+                    }
+                });
+                refresh.request = this.trackRequest(key, directory, request, current);
+            }
+            await refresh.request;
+            if (directory.files.has(index) || this.errors.has(directory.key)) { return; }
+        }
+        if (directory.files.has(index) || (directory.revision && directory.total !== undefined && index >= directory.total)) {
+            return;
+        }
+        const limit = this.batchSize();
+        const offset = Math.floor(index / limit) * limit;
+        const generation = this.generation;
+        let directoryGeneration = directory.generation;
+        let stale = false;
+        const key = `${directory.key}:${offset}:${directoryGeneration}:${generation}`;
+        if (this.inFlight.has(key)) {
+            return this.inFlight.get(key).request;
+        }
+        const request = this.limited(async () => {
+            if (this.disposed || generation !== this.generation || directoryGeneration !== directory.generation) {
+                return;
+            }
+            let range = await this.source.range({notebook: directory.notebookId, parentID: directory.parentID,
+                offset, limit, revision: directory.revision});
+            if (this.disposed || generation !== this.generation || directoryGeneration !== directory.generation) {
+                return;
+            }
+            if (range.stale) {
+                stale = true;
+                directoryGeneration = ++directory.generation;
+                directory.files.clear();
+                directory.indices.clear();
+                for (const [pageKey, page] of this.pages) {
+                    if (page.directory === directory) {
+                        this.pages.delete(pageKey);
+                    }
+                }
+                directory.revision = undefined;
+                directory.total = range.total;
+                this.operation++;
+                this.version++;
+                range = await this.source.range({notebook: directory.notebookId, parentID: directory.parentID, offset, limit});
+            }
+            if (this.disposed || generation !== this.generation || directoryGeneration !== directory.generation || range.stale) {
+                return;
+            }
+            this.model.applyRange(directory, range);
+            this.pages.delete(key);
+            this.pages.set(key, {directory, start: range.offset, count: range.files.length});
+            this.errors.delete(directory.key);
+            this.evictPages();
+            this.scheduleRender();
+        }).catch(error => {
+            if (this.disposed || generation !== this.generation || directoryGeneration !== directory.generation) { return; }
+            this.errors.add(directory.key);
+            this.scheduleRender();
+            console.warn("Failed to load document tree range", error);
+        }).then(async () => {
+            if (stale && !this.disposed && generation === this.generation) {
+                const refreshing = Boolean(this.refresh);
+                const reload = this.reload({notebook: directory.notebookId, parentID: directory.parentID});
+                // 当前刷新可能正等待本次 load，不能反过来等待队列中的刷新。
+                if (!refreshing) { await reload; }
+            }
+        });
+        return this.trackRequest(key, directory, request, () =>
+            generation === this.generation && directoryGeneration === directory.generation);
+    }
+
+    private evictPages() {
+        let count = Array.from(this.pages.values()).reduce((total, page) => total + page.count, 0);
+        const viewport = getDocTreeWindow(this.model.rowCount, this.options.element.scrollTop,
+            this.options.element.clientHeight, this.rowHeight);
+        for (const [key, page] of this.pages) {
+            if (count <= 32768 && this.pages.size <= 64) {
+                break;
+            }
+            let visible = false;
+            for (let position = viewport.start; position < viewport.end; position++) {
+                const row = this.model.rowAt(position);
+                if (row?.parent && this.model.directory(row.parent) === page.directory &&
+                    row.index >= page.start && row.index < page.start + page.count) {
+                    visible = true;
+                    break;
+                }
+            }
+            if (visible) {
+                continue;
+            }
+            this.pages.delete(key);
+            count -= page.count;
+            for (let index = page.start; index < page.start + page.count; index++) {
+                const file = page.directory.files.get(index);
+                const retained = file && (Array.from(this.model.expanded.values()).some(item =>
+                    item.notebookId === page.directory.notebookId && item.id === file.id) ||
+                    Array.from(this.expanding.values()).some(expansion =>
+                        expansion.item.notebookId === page.directory.notebookId && expansion.item.id === file.id));
+                if (!retained) {
+                    page.directory.files.delete(index);
+                    if (file) {
+                        page.directory.indices.delete(file.id);
+                    }
+                }
+            }
+        }
+    }
+
+    private scheduleRender() {
+        if (!this.frame && !this.disposed) {
+            this.frame = requestAnimationFrame(() => {
+                this.frame = 0;
+                this.render();
+            });
+        }
+    }
+
+    private decorate(row: HTMLElement, item: IDocTreeItem) {
+        if (row.style.flexShrink !== "0") { row.style.flexShrink = "0"; }
+        controllers.set(row, this);
+        setDocTreeRowItem(row, item);
+        setDocTreeAttribute(row, "data-tree-key", item.occurrenceKey);
+        setDocTreeAttribute(row, "role", "treeitem");
+        setDocTreeAttribute(row, "aria-level", String(item.depth + 1));
+        setDocTreeAttribute(row, "aria-posinset", String(item.index + 1));
+        setDocTreeAttribute(row, "aria-setsize", String(item.setSize > 0 ? item.setSize : -1));
+        setDocTreeAttribute(row, "aria-selected", String(this.selected.has(item.occurrenceKey)));
+        row.classList.toggle("b3-list-item--focus", this.selected.has(item.occurrenceKey));
+        setDocTreeAttribute(row, "tabindex", item.occurrenceKey === this.focused ? "0" : "-1");
+        if (item.subFileCount > 0 || item.kind === "notebook") {
+            setDocTreeAttribute(row, "aria-expanded", String(this.isExpanded(item.occurrenceKey)));
+        } else {
+            setDocTreeAttribute(row, "aria-expanded");
+        }
+        const expanded = this.isExpanded(item.occurrenceKey);
+        const directory = this.model.directories.get(docTreeDirectoryKey(item.notebookId, docTreeParentID(item)));
+        const pending = expanded || this.expanding.has(item.occurrenceKey) ? Array.from(this.inFlight.values()).filter(request =>
+            request.directory === directory && request.isCurrent()) : [];
+        const showIndicator = pending.some(request => request.showIndicator);
+        const retry = !this.expanding.has(item.occurrenceKey) &&
+            Boolean(directory && this.errors.has(directory.key));
+        setDocTreeAttribute(row, "aria-busy", pending.length > 0 ? "true" : undefined);
+        const arrow = row.querySelector(".b3-list-item__arrow");
+        arrow?.classList.toggle("b3-list-item__arrow--open", expanded);
+        arrow?.classList.toggle("fn__none", showIndicator);
+        const indicator = arrow?.parentElement.querySelector("[data-tree-indicator]");
+        if (showIndicator && arrow && !indicator) {
+            const loading = document.createElement("span");
+            loading.className = "b3-loading b3-loading--small";
+            loading.dataset.treeIndicator = "true";
+            loading.setAttribute("aria-hidden", "true");
+            loading.style.setProperty("--b3-loading-size", "14px");
+            arrow.after(loading);
+        } else if (!showIndicator) {
+            indicator?.remove();
+        }
+        if (retry) { arrow?.setAttribute("aria-label", window.siyuan?.languages?.retry || ""); }
+        else { arrow?.removeAttribute("aria-label"); }
+        const use = arrow?.querySelector("use");
+        const icon = retry ? "#iconRefresh" : "#iconRight";
+        if (use && use.getAttribute("xlink:href") !== icon) { use.setAttribute("xlink:href", icon); }
+    }
+
+    private render() {
+        this.finishRowAnimation?.();
+        if (this.disposed) { return; }
+        const navigation = this.navigation?.generation === this.generation &&
+            this.navigation.interaction === this.interaction ? this.navigation : undefined;
+        if (navigation && !navigation.publishing) {
+            // 定位只更新加载提示；整条路径就绪后再发布投影，保持已有行可见。
+            this.mounted.forEach((mounted, key) => {
+                const item = this.getItem(key);
+                if (item) { this.decorate(mounted.element, item); }
+            });
+            return;
+        }
+        if (this.refresh && this.refresh.interaction === this.interaction && !navigation?.publishing) { return; }
+        const element = this.options.element;
+        const sample = this.mounted.values().next().value?.element as HTMLElement | undefined;
+        const measured = sample?.getBoundingClientRect().height;
+        const style = sample && getComputedStyle(sample);
+        this.rowSpacing = style ? (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0) : this.rowSpacing;
+        const configured = parseFloat(getComputedStyle(element).getPropertyValue("--b3-ui-list-height"));
+        const rowHeight = measured > 0 ? measured + this.rowSpacing : configured > 0 ? configured + this.rowSpacing : this.rowHeight;
+        if (Math.abs(rowHeight - this.rowHeight) > 0.1) {
+            const anchor = this.getScrollAnchor();
+            this.rowHeight = rowHeight;
+            this.restoreScrollAnchor(anchor);
+        }
+        const viewport = getDocTreeWindow(this.model.rowCount, element.scrollTop, element.clientHeight, this.rowHeight);
+        const positions = new Set<number>();
+        for (let index = viewport.start; index < viewport.end; index++) {
+            positions.add(index);
+        }
+        [this.dragging, this.getItemFromElement(document.activeElement)?.occurrenceKey].forEach(key => {
+            const index = this.positionOf(key);
+            if (index >= 0) {
+                positions.add(index);
+            }
+        });
+        const children: HTMLElement[] = [];
+        const retained = new Set<string>();
+        let previous = 0;
+        const spacer = (count: number) => {
+            if (count <= 0) {
+                return;
+            }
+            const node = document.createElement("li");
+            node.dataset.treeSpacer = "true";
+            node.setAttribute("role", "presentation");
+            node.setAttribute("aria-hidden", "true");
+            node.style.height = `${count * this.rowHeight}px`;
+            node.style.flexShrink = "0";
+            node.style.pointerEvents = "none";
+            children.push(node);
+        };
+        Array.from(positions).sort((a, b) => a - b).forEach(position => {
+            spacer(position - previous);
+            previous = position + 1;
+            const projected = this.model.rowAt(position);
+            const item = projected?.item;
+            if (item) {
+                const signature = JSON.stringify([item.file, item.notebook, item.name, item.path, item.index, item.setSize, item.unavailable]);
+                const titleVersion = JSON.stringify([item.file?.titleFormat, item.file?.titleRevision, item.name, item.file?.titleEmpty]);
+                let mounted = this.mounted.get(item.occurrenceKey);
+                if (!mounted || (mounted.signature !== signature && !mounted.element.contains(document.activeElement) &&
+                    item.occurrenceKey !== this.dragging)) {
+                    if (mounted) { this.observer.unobserve(mounted.element); }
+                    const element = this.options.renderRow(item);
+                    const previousTitle = mounted?.element.querySelector<HTMLElement>(".b3-list-item__text");
+                    const nextTitle = element.querySelector(".b3-list-item__text");
+                    let retainedTitleVersion: string;
+                    if (item.file?.titleFormat === "inline-ast" && mounted?.titleVersion === titleVersion && previousTitle && nextTitle) {
+                        // 正文元数据刷新时保留标题节点和在途请求，提示属性使用当前行的值。
+                        const rich = previousTitle.classList.contains("document-title-preview");
+                        Array.from(previousTitle.attributes).forEach(attribute => {
+                            if (!["data-document-title-id", "data-notebook-id", "data-protyle-lite-render"].includes(attribute.name)) {
+                                previousTitle.removeAttribute(attribute.name);
+                            }
+                        });
+                        Array.from(nextTitle.attributes).forEach(attribute => previousTitle.setAttribute(attribute.name, attribute.value));
+                        if (rich) { previousTitle.classList.add("b3-typography", "document-title-preview"); }
+                        nextTitle.replaceWith(previousTitle);
+                        retainedTitleVersion = titleVersion;
+                    }
+                    mounted = {element, signature, titleVersion: retainedTitleVersion};
+                    this.mounted.set(item.occurrenceKey, mounted);
+                }
+                if (mounted.titleVersion !== titleVersion) {
+                    mounted.titleVersion = titleVersion;
+                    const row = mounted.element;
+                    const title = row.querySelector<HTMLElement>(".b3-list-item__text");
+                    queueMicrotask(() => {
+                        const isCurrent = () => !this.disposed &&
+                            this.mounted.get(item.occurrenceKey)?.element.querySelector(".b3-list-item__text") === title &&
+                            this.mounted.get(item.occurrenceKey)?.titleVersion === titleVersion;
+                        if (!title?.isConnected || !isCurrent()) return;
+                        if (item.kind === "document" && item.file?.titleFormat === "inline-ast") {
+                            renderDocumentTitlePreview(title, item.id, item.notebookId, isCurrent);
+                        } else if (row.querySelector(".document-title-preview")) {
+                            renderDocumentTitlePreview(title, item.id, item.notebookId,
+                                isCurrent, {id: item.id, notebook: item.notebookId, format: "plain",
+                                    text: item.name, empty: !!item.file?.titleEmpty, blockDOM: ""});
+                        }
+                    });
+                }
+                retained.add(item.occurrenceKey);
+                this.decorate(mounted.element, item);
+                children.push(mounted.element);
+            } else if (projected?.parent) {
+                const placeholder = document.createElement("li");
+                placeholder.dataset.treeLoading = "true";
+                placeholder.dataset.parentKey = projected.parent.occurrenceKey;
+                placeholder.dataset.index = String(projected.index);
+                placeholder.setAttribute("role", "presentation");
+                placeholder.style.height = `${Math.max(1, this.rowHeight - this.rowSpacing)}px`;
+                placeholder.style.flexShrink = "0";
+                placeholder.className = "b3-list-item";
+                placeholder.style.opacity = "0.4";
+                const directory = this.model.directory(projected.parent);
+                const failed = this.errors.has(directory.key);
+                placeholder.textContent = failed ? window.siyuan?.languages?.retry || "" : "";
+                if (!failed) { placeholder.setAttribute("aria-hidden", "true"); }
+                children.push(placeholder);
+                if (!this.errors.has(directory.key)) {
+                    void this.load(projected.parent, projected.index).catch((): void => undefined);
+                }
+            }
+        });
+        spacer(this.model.rowCount - previous);
+        for (const [key, mounted] of this.mounted) {
+            if (!retained.has(key)) {
+                this.observer.unobserve(mounted.element);
+                this.mounted.delete(key);
+            }
+        }
+        // 新节点先补入，再跳过过期占位，保持顺序未变的行及其焦点、悬停状态。
+        const nextChildren = new Set(children);
+        let current = this.list.firstElementChild;
+        children.forEach(child => {
+            if (child.parentElement === this.list) {
+                while (current && !nextChildren.has(current as HTMLElement)) {
+                    const next = current.nextElementSibling;
+                    current.remove();
+                    current = next;
+                }
+            }
+            if (current === child) {
+                current = current.nextElementSibling;
+            } else {
+                this.list.insertBefore(child, current);
+            }
+        });
+        while (current) {
+            const next = current.nextElementSibling;
+            current.remove();
+            current = next;
+        }
+        const first = this.mounted.values().next().value?.element as HTMLElement | undefined;
+        if (first) {
+            this.observer.observe(first);
+        }
+        this.options.onRowsRendered?.();
+    }
+
+    public destroy() {
+        this.finishRowAnimation?.();
+        this.disposed = true;
+        this.interaction++;
+        this.generation++;
+        this.operation++;
+        cancelAnimationFrame(this.frame);
+        this.events.abort();
+        this.observer.disconnect();
+        this.model.directories.clear();
+        this.model.expanded.clear();
+        this.expanding.clear();
+        this.navigation = undefined;
+        this.model.setRoots([]);
+        this.selected.clear();
+        this.focused = undefined;
+        this.focusedItem = undefined;
+        this.anchor = undefined;
+        this.anchorItem = undefined;
+        this.mounted.clear();
+        this.refreshItems.clear();
+        this.pages.clear();
+        this.refreshingDirectories.clear();
+        this.errors.clear();
+        this.inFlight.forEach(pending => window.clearTimeout(pending.indicatorTimer));
+        this.inFlight.clear();
+        this.options.onSelectionProgress?.(0, 0, () => { this.operation++; });
+        controllers.delete(this.options.element);
+        if (activeController?.deref() === this) {
+            activeController = undefined;
+        }
+        this.options.element.replaceChildren();
+    }
+}

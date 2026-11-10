@@ -110,7 +110,7 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 		return apicontract.Failure[apicontract.Null](code, Conf.Language(83))
 	}
 
-	workspaceSession.AccessAuthCode = authCode
+	SetAccessCodeSession(workspaceSession, authCode)
 	workspaceSession.OIDCSessionVersion = ""
 	BindDesktopSession(c, workspaceSession, request.RememberMe)
 	util.WrongAuthCount = 0
@@ -214,9 +214,13 @@ func CheckReadonly(c *gin.Context) {
 			c.Abort()
 			return
 		}
-		// 同步控制接口会在实际应用阶段取得写租约，不跨整轮网络请求持有读租约。
+		// 同步控制和来源配置在准备落盘时取得独占写准入，MCP 在实际工具调用期间取得读租约。
 		switch c.Request.URL.Path {
-		case "/api/sync/performSync", "/api/sync/performBootSync", "/api/notebook/enableEncryptedNotebooks":
+		case "/api/sync/performSync", "/api/sync/performBootSync", "/api/sync/getSyncSourceState",
+			"/api/sync/setCloudSyncDir", "/api/sync/removeCloudSyncDir", "/api/sync/setSyncProvider",
+			"/api/sync/setSyncProviderS3", "/api/sync/setSyncProviderWebDAV", "/api/sync/setSyncProviderLocal",
+			"/api/sync/importSyncProviderS3", "/api/sync/importSyncProviderWebDAV", "/api/sync/clearSyncProviderConfig",
+			"/api/notebook/enableEncryptedNotebooks", "/mcp":
 			dataImportAccess.RUnlock()
 			released = true
 		}
@@ -285,7 +289,7 @@ func CheckAuth(c *gin.Context) {
 
 		// Authenticate requests with the Origin header other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9180
 		if !localhost || !isLocalHostRequestAllowed(c) {
-			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: for security reasons, please set [Lock screen password] when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请设置 [锁屏密码]"})
+			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": Conf.Language(469)})
 			c.Abort()
 			return
 		}
@@ -467,10 +471,23 @@ func authByAPIToken(c *gin.Context, source, token string) (handled bool) {
 	return true
 }
 
-// IsLocalRequest 判断请求是否由本机客户端直接发起或经可信本机代理转发。
+// IsLocalRequest 判断请求是否由本机客户端直接发起或经内置 fixed-port 代理转发。
 func IsLocalRequest(c *gin.Context) bool {
-	// 仅当直接连接和可信代理解析出的原始客户端均为环回地址时，才视为本机请求。
-	return util.IsLocalHost(c.Request.RemoteAddr) && util.IsLocalHostname(c.ClientIP())
+	if !util.IsLocalHost(c.Request.RemoteAddr) {
+		return false
+	}
+
+	// 内置 fixed-port 代理会覆盖标记并追加真实客户端地址，仍需校验解析出的客户端为环回地址。
+	if util.IsLocalProxyRequest(c.Request) {
+		return util.IsLocalHostname(c.ClientIP())
+	}
+
+	// 第三方反向代理可能原样转发调用方伪造的转发头，带这类头的请求不能按本机请求放行。
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-gmcm-mggw-8759
+	if util.HasForwardedHeaders(c.Request) {
+		return false
+	}
+	return true
 }
 
 // isLocalHostRequestAllowed 判断本机放行请求是否可信任：
@@ -593,8 +610,8 @@ func ControlConcurrency(c *gin.Context) {
 
 	reqPath := c.Request.URL.Path
 
-	// 插件 RPC 独立处理各次调用，避免单个调用阻塞其他插件或信息查询。
-	if reqPath == "/api/plugin/rpc" {
+	// 插件 RPC 独立调用；日记创建使用内部身份锁，联网确认期间不能持有接口写入锁。
+	if reqPath == "/api/plugin/rpc" || reqPath == "/api/filetree/createDailyNote" {
 		c.Next()
 		return
 	}

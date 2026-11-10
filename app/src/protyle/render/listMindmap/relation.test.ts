@@ -51,7 +51,7 @@ test("manual route save and reset use one transaction and reject stale relation 
     };
     runInNewContext(compiled, context);
     const target = new context.Controller();
-    Object.assign(target, {list, owner: {}, view: {getSelectedId: () => "a"}, refresh: () => {}});
+    Object.assign(target, {list, owner: {}, view: {captureHistoryViewport: () => "{}", getSelectedId: () => "a"}, refresh: () => {}});
     const route = {version: 1, points: [{x: -40, y: 20, t: .5}]};
     const snapshot = JSON.stringify(data.relations[0]);
     target.onRelationChange("r", {route}, snapshot);

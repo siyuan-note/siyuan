@@ -31,7 +31,12 @@ test("mobile back saves floating image titles before navigating or closing their
         };
         const api = {} as typeof import("./MobileBackFoward");
         runInNewContext(source, {
-            exports: api, require: (name: string) => modules[name] || {}, CustomEvent: class {},
+            exports: api, require: (name: string) => name === "../../dialog/mobileDialog" ? {
+                requestMobileDialogClose: (dialog: {destroy: () => void}, reason: string) => {
+                    assert.equal(reason, "back");
+                    dialog.destroy();
+                },
+            } : modules[name] || {}, CustomEvent: class {},
             document: {getElementById: () => ({style: {}}), querySelector: (): undefined => undefined},
             window: {siyuan: {dialogs, menus: {menu: {element: menu}}, mobile: {
                 tabs: {goBack: () => {navigated++; return Promise.resolve(true);}},
@@ -74,7 +79,12 @@ test("mobile back saves the database text editor before leaving its owner", () =
         };
         const api = {} as typeof import("./MobileBackFoward");
         runInNewContext(source, {
-            exports: api, require: (name: string) => modules[name] || {}, CustomEvent: class {},
+            exports: api, require: (name: string) => name === "../../dialog/mobileDialog" ? {
+                requestMobileDialogClose: (dialog: {destroy: () => void}, reason: string) => {
+                    assert.equal(reason, "back");
+                    dialog.destroy();
+                },
+            } : modules[name] || {}, CustomEvent: class {},
             document: {getElementById: () => ({style: {}}),
                 querySelector: (selector: string) => selector === ".av__richtext-mask" ? richText : undefined},
             window: {siyuan: {dialogs, menus: {menu: {element: menu}}, mobile: {
@@ -106,7 +116,12 @@ test("mobile back closes a select menu before its containing menu or dialog", ()
         "../../dialog/anchoredInput": {getAnchoredInputMask: (): undefined => undefined},
     };
     runInNewContext(source, {
-        exports: api, require: (name: string) => modules[name] || {}, CustomEvent: class {},
+        exports: api, require: (name: string) => name === "../../dialog/mobileDialog" ? {
+                requestMobileDialogClose: (dialog: {destroy: () => void}, reason: string) => {
+                    assert.equal(reason, "back");
+                    dialog.destroy();
+                },
+            } : modules[name] || {}, CustomEvent: class {},
         document: {getElementById: () => ({style: {}}), querySelector: (): undefined => undefined},
         window: {siyuan: {menus: {menu: {element: ownerMenu}}, dialogs: [{
             element: {querySelector: () => ({style: {zIndex: "2"}})}, destroy: () => closedOwner++,
@@ -115,6 +130,29 @@ test("mobile back closes a select menu before its containing menu or dialog", ()
     api.goBack();
     assert.equal(closedSelect, 1);
     assert.equal(closedOwner, 0);
+});
+
+test("mobile back closes a child dialog before an underlying fullscreen menu", () => {
+    const source = transpileModule(readFileSync(join(__dirname, "MobileBackFoward.ts"), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+    }).outputText;
+    const calls: string[] = [];
+    const menu = {style: {zIndex: "1"}, classList: {contains: (name: string) => name !== "fn__none"},
+        dispatchEvent: () => calls.push("menu")};
+    const dialog = {element: {querySelector: () => ({style: {zIndex: "2"}})}};
+    const api = {} as typeof import("./MobileBackFoward");
+    runInNewContext(source, {
+        exports: api,
+        document: {getElementById: (): undefined => undefined, querySelector: (): undefined => undefined},
+        window: {siyuan: {menus: {menu: {element: menu}}, dialogs: [dialog]}},
+        require: () => ({getCurrentEditor: (): undefined => undefined,
+            getAnchoredInputMask: (): undefined => undefined, getMobileSelectMenuElement: (): undefined => undefined,
+            isAbove, requestMobileDialogClose: (target: unknown, reason: string) => {
+                assert.equal(target, dialog); assert.equal(reason, "back"); calls.push("dialog");
+            }}),
+    });
+    api.goBack();
+    assert.deepEqual(calls, ["dialog"]);
 });
 
 test("mobile back handles the top database editor before its retained parent and document history", () => {
@@ -145,7 +183,12 @@ test("mobile back handles the top database editor before its retained parent and
         };
         const api = {} as typeof import("./MobileBackFoward");
         runInNewContext(source, {
-            exports: api, require: (name: string) => modules[name] || {},
+            exports: api, require: (name: string) => name === "../../dialog/mobileDialog" ? {
+                requestMobileDialogClose: (dialog: {destroy: () => void}, reason: string) => {
+                    assert.equal(reason, "back");
+                    dialog.destroy();
+                },
+            } : modules[name] || {},
             CustomEvent: class {
                 detail: unknown;
                 constructor(_name: string, options: {detail: unknown}) { this.detail = options.detail; }
@@ -167,4 +210,34 @@ test("mobile back handles the top database editor before its retained parent and
         api.goBack();
         assert.deepEqual(calls, [top === "panel" || top === "menu" || top === "select" ? `${top}:back` : top], top);
     }
+});
+
+
+test("mobile back consumes repeated progress returns and resumes after the last task", () => {
+    const source = transpileModule(readFileSync(join(__dirname, "MobileBackFoward.ts"), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+    }).outputText;
+    let remainingTasks = 2;
+    let backgroundCalls = 0;
+    const api = {} as typeof import("./MobileBackFoward");
+    runInNewContext(source, {
+        exports: api,
+        document: {querySelector: (selector: string) => {
+            assert.equal(selector, ".b3-dialog__scrim--progress");
+            return remainingTasks ? {} : null;
+        }},
+        require: () => ({getCurrentEditor: () => {
+            backgroundCalls++;
+            throw new Error("background resumed");
+        }}),
+    });
+    api.goBack();
+    api.goBack();
+    remainingTasks--;
+    api.goBack();
+    assert.equal(backgroundCalls, 0);
+    assert.equal(remainingTasks, 1);
+    remainingTasks--;
+    assert.throws(() => api.goBack(), /background resumed/);
+    assert.equal(backgroundCalls, 1);
 });

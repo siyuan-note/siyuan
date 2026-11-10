@@ -24,7 +24,6 @@ const browserCases = async (sources: Record<string, string>, css: string,
         "protyle/util/compatibility": {getEventName: () => "click", isInMobileApp: () => mobileApp, isPhablet: () => false,
             updateHotkeyTip: (value: string) => value},
         "util/functions": {isMobile: () => mobile},
-        "util/zIndex": {isScrollAboveMenu: () => false},
         "layout/getTopBarHeight": {getTopBarHeight: () => 32},
         constants: {Constants: {TIMEOUT_DBLCLICK: 10, ATTRIBUTE_MENU_KEYMAP: "data-keymap",
             CUSTOM_SY_EMBED_BREADCRUMB_PARENT_PATH: "custom-sy-embed-breadcrumb-parent-path"}},
@@ -56,6 +55,7 @@ const browserCases = async (sources: Record<string, string>, css: string,
         }},
         "protyle/render/av/automationPosition": {},
         "protyle/render/av/select": {},
+        "protyle/render/av/cell": {},
         "protyle/render/av/filter": {},
         "protyle/ui/hideElements": {},
         "protyle/render/av/mobilePanel": {},
@@ -65,6 +65,7 @@ const browserCases = async (sources: Record<string, string>, css: string,
         "protyle/render/av/groups": {getPageSize: () => ({})},
         "protyle/render/av/color": {applyAVColorPalette() {}, getAVCustomColors: (): string[] => []},
         "protyle/render/av/panelTarget": {},
+        "protyle/render/av/host": {getAVRelationHost: (): undefined => undefined, getAVHostIdentity: (): undefined => undefined},
         "protyle/render/av/selectPosition": {},
         "protyle/render/av/calendar/date": {},
         "protyle/render/av/calendar/hitTest": {},
@@ -172,8 +173,8 @@ const browserCases = async (sources: Record<string, string>, css: string,
                 instance.addItem(embedBreadcrumbMenu({} as IProtyle, embed)[index]);
                 instance.popup({x: 40, y: 40});
                 const parent = instance.element.querySelector<HTMLElement>(".b3-menu__item");
-                check.equal(parent.querySelector(":scope > svg:not(.b3-menu__icon--small)"), null,
-                    "breadcrumb menus have no empty leading icon");
+                check.ok(parent.querySelector(":scope > svg:not(.b3-menu__icon--small)"),
+                    "breadcrumb menus reserve the leading icon space to align with adjacent entries");
                 check.equal(parent.querySelector(":scope > .b3-menu__icon--small use")?.getAttribute("xlink:href"), "#iconRight",
                     "breadcrumb submenu retains the standard arrow");
                 parent.dispatchEvent(new MouseEvent(touch ? "click" : "mouseover", {bubbles: true}));
@@ -556,6 +557,11 @@ const browserCases = async (sources: Record<string, string>, css: string,
     check.ok(lazyScroll > 0, "Asynchronous submenu loading preserves the parent's scroll position");
     const loadedMenu = lazyItems.querySelector(".b3-menu__item--show > .b3-menu__submenu");
     check.match(loadedMenu.textContent, /Loaded \d+/, "The item under a scrolled pointer loads its asynchronous submenu");
+    const loadedRect = loadedMenu.getBoundingClientRect();
+    const loadedParentRect = loadedMenu.parentElement.getBoundingClientRect();
+    check.ok(Math.abs(loadedRect.top - Math.max(32,
+        Math.min(loadedParentRect.top - 9, innerHeight - loadedRect.height - 1))) < 2,
+    "The first loaded submenu aligns with its parent after restoring the parent's scroll position");
     pointer(lazyItems, .75);
     check.ok(lazyItems.scrollTop > lazyScroll, "Loading a child does not interrupt scrolling of its unchanged parent");
     dispose(lazyMouse);
@@ -648,6 +654,18 @@ const browserCases = async (sources: Record<string, string>, css: string,
     check.ok(innerScroll.element.querySelector(".b3-menu__filter").getBoundingClientRect().height > innerHeight * .5 + 20,
         "the model picker must enable inner scrolling before popup measures its height");
     fitsViewport(innerScroll.element);
+    modelInput.style.top = "580px";
+    innerScroll.resetPosition();
+    const modelSearch = innerScroll.element.querySelector<HTMLInputElement>(".b3-menu__filter input");
+    for (const keyword of ["Model 59", "not-found", ""]) {
+        modelSearch.value = keyword;
+        modelSearch.dispatchEvent(new InputEvent("input", {bubbles: true}));
+        await settle();
+        const menuRect = innerScroll.element.getBoundingClientRect();
+        const inputRect = modelInput.getBoundingClientRect();
+        check.ok(Math.abs(menuRect.bottom - inputRect.top) < 1 || Math.abs(menuRect.top - inputRect.bottom) < 1,
+            "filtered model menus stay attached to their input, including empty results and restoring the full list");
+    }
     const innerScrollItems = markMenuInnerScroll(innerScroll.element);
     innerScroll.popup({x: 40, y: 40});
     await settle();
@@ -813,11 +831,16 @@ const browserCases = async (sources: Record<string, string>, css: string,
     pointer(mobilePDF.items, .7);
     check.equal(mobilePDF.items.scrollTop, 0, "Mobile PDF menus preserve their touch interaction");
     mobilePDF.host.remove();
+    const keyboardToolbar = document.createElement("div");
+    keyboardToolbar.id = "keyboardToolbar";
+    keyboardToolbar.style.cssText = "position:fixed;bottom:0;height:40px;width:100%";
+    document.body.append(keyboardToolbar);
     const sheet = createMenu();
     sheet.element.classList.add("b3-menu--fit");
     addItems(sheet, 2);
     sheet.fullscreen("bottom", undefined, {preserveKeyboard: true});
     await settle();
+    check.equal(keyboardToolbar.classList.contains("keyboard--sheet-open"), true);
     const sheetHeight = sheet.element.getBoundingClientRect().height;
     const resetSheet = sheet.resetPosition.bind(sheet);
     let sheetResets = 0;
@@ -839,6 +862,50 @@ const browserCases = async (sources: Record<string, string>, css: string,
     await settle();
     check.equal(sheetResets, 1, "Closing cancels the pending layout update");
     sheet.element.remove();
+    check.equal(keyboardToolbar.classList.contains("keyboard--sheet-open"), false);
+    keyboardToolbar.remove();
+
+    const scrim = document.createElement("div");
+    scrim.id = "commonMenuScrim";
+    scrim.className = "b3-menu__scrim fn__none";
+    const background = document.createElement("div");
+    const overlay = document.createElement("div");
+    document.body.append(scrim, background, overlay);
+    const touchMove = (target: Element) => {
+        const event = new Event("touchmove", {bubbles: true, cancelable: true});
+        target.dispatchEvent(event);
+        return event.defaultPrevented;
+    };
+    const localSheet = createMenu();
+    localSheet.addItem({label: "Parent", submenu: [{label: "Child"}]});
+    localSheet.fullscreen("bottom", undefined, {preserveKeyboard: true});
+    await settle();
+    check.equal(touchMove(background), false, "Sheet scroll guards do not cover the underlying document tree");
+    check.equal(touchMove(scrim), true, "The scrim blocks background scrolling");
+    check.equal(touchMove(localSheet.element.lastElementChild), false, "Sheet items remain scrollable");
+    check.equal(touchMove(localSheet.element.querySelector(".b3-menu__submenu")), false,
+        "Nested menu items retain their scrolling");
+    overlay.style.zIndex = String(window.siyuan.zIndex + 1);
+    check.equal(touchMove(overlay), false, "Overlays above the sheet retain their scrolling");
+    localSheet.remove();
+    check.equal(touchMove(scrim), false, "Removing a sheet releases its scrim scroll guard");
+    addItems(localSheet, 2);
+    localSheet.fullscreen("bottom", () => {}, {preserveKeyboard: true});
+    localSheet.closeSheet();
+    check.equal(touchMove(scrim), false, "Keyboard restoration releases scroll guards immediately");
+    localSheet.element.remove();
+    scrim.remove();
+
+    const unmaskedSheet = createMenu();
+    unmaskedSheet.element.id = "independentSheet";
+    addItems(unmaskedSheet, 2);
+    unmaskedSheet.fullscreen("bottom", undefined, {preserveKeyboard: true});
+    check.equal(touchMove(background), true, "Sheets without a scrim still block background scrolling");
+    check.equal(touchMove(unmaskedSheet.element.lastElementChild), false);
+    dispose(unmaskedSheet);
+    check.equal(touchMove(background), false, "Unmasked sheets release the window scroll guard when removed");
+    background.remove();
+    overlay.remove();
 
     const mobileCommon = createMenu();
     const mobileCalendar = createCalendarMenu();
@@ -872,8 +939,8 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
-        "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel",
+    const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
+        "util/setPosition", "util/zIndex", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel", "protyle/render/av/renderData",
         "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated", "protyle/gutter/embedBreadcrumbMenu",
         "layout/dock/agent/AgentSessionPanel", "protyle/render/listMindmap/appearance"].map(name => [name,
         transpileModule(readFileSync(path.join(__dirname, "..", name.endsWith(".js") ? name : name + ".ts"), "utf8"), {

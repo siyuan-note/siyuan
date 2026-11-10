@@ -1,3 +1,4 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
@@ -19,6 +20,7 @@ import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getLastExportPath, setLastExportPath} from "./path";
 import {normalizeHeadingPageBreakLevels} from "./headingPageBreaks";
 import {headingPageBreakControls} from "./headingPageBreaksUI";
+import {toScriptLiteral} from "./scriptLiteral";
 import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 
 const getExportLanguages = () => {
@@ -30,9 +32,7 @@ const getExportLanguages = () => {
     ]);
     const languages = Object.fromEntries(Object.entries(window.siyuan.languages)
         .filter(([key]) => keys.has(key) || key.startsWith("listMindmap")));
-    // 转义脚本边界和行分隔符，保留各语言文案中的引号与换行。
-    return JSON.stringify(languages).replace(/</g, "\\u003c")
-        .replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+    return toScriptLiteral(languages);
 };
 
 const getPluginStyle = async () => {
@@ -77,7 +77,7 @@ export const saveExport = (option: IExportOptions) => {
         };
         fetchPost("/api/block/getBlockInfo", {id: option.id}, (response) => {
             if (response.code === 0 && isEncryptedBox(response.data.box)) {
-                confirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, startExport);
+                mobileConfirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, startExport);
                 return;
             }
             startExport();
@@ -209,6 +209,12 @@ const getAvailableExportPath = async () => {
 
 const renderPDF = async (id: string) => {
     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
+    // 自定义纸张沿用最近一次导出的纸张记录，宽高单位与打印接口一致，均为英寸。
+    const customPageSize = localData.pageSize && typeof localData.pageSize === "object";
+    const pageWidth = customPageSize && Number.isFinite(localData.pageSize.width) && localData.pageSize.width > 0 ?
+        localData.pageSize.width : 8.27;
+    const pageHeight = customPageSize && Number.isFinite(localData.pageSize.height) && localData.pageSize.height > 0 ?
+        localData.pageSize.height : 11.7;
     if (typeof localData.paged === "undefined") {
         localData.paged = true;
     }
@@ -386,7 +392,26 @@ const renderPDF = async (id: string) => {
                 <option ${localData.pageSize === "Legal" ? "selected" : ""} value="Legal">Legal</option>
                 <option ${localData.pageSize === "Letter" ? "selected" : ""} value="Letter">Letter</option>
                 <option ${localData.pageSize === "Tabloid" ? "selected" : ""} value="Tabloid">Tabloid</option>
+                <option ${customPageSize ? "selected" : ""} value="custom">${window.siyuan.languages.custom}</option>
             </select>
+            <div id="customPageSize" class="${customPageSize ? "" : "fn__none"}">
+                <div class="fn__hr"></div>
+                <label for="pageWidth"><small>${window.siyuan.languages.width}</small></label>
+                <div class="fn__hr--small"></div>
+                <div class="fn__flex">
+                    <input id="pageWidth" class="b3-text-field fn__block" value="${pageWidth}" type="number" required min="0.01" step="0.01">
+                    <span class="fn__space"></span>
+                    <small class="fn__flex-center">${window.siyuan.languages.unitInches}</small>
+                </div>
+                <div class="fn__hr"></div>
+                <label for="pageHeight"><small>${window.siyuan.languages.height}</small></label>
+                <div class="fn__hr--small"></div>
+                <div class="fn__flex">
+                    <input id="pageHeight" class="b3-text-field fn__block" value="${pageHeight}" type="number" required min="0.01" step="0.01">
+                    <span class="fn__space"></span>
+                    <small class="fn__flex-center">${window.siyuan.languages.unitInches}</small>
+                </div>
+            </div>
         </div>
         <div class="b3-label">
             <div>
@@ -564,36 +589,31 @@ ${getIconScript(servePath)}
     document.getElementById("headingPageBreaks").addEventListener("change", updateHeadingPageBreaks);
     document.getElementById("paged").addEventListener("change", updateHeadingPageBreaks);
     updateHeadingPageBreaks();
+    const getPageSizeDimensions = () => {
+        const pageSizes = {
+            A3: {width: 11.7, height: 16.54},
+            A4: {width: 8.27, height: 11.7},
+            A5: {width: 5.83, height: 8.27},
+            Legal: {width: 8.5, height: 14},
+            Letter: {width: 8.5, height: 11},
+            Tabloid: {width: 11, height: 17},
+        };
+        const pageSize = document.querySelector("#action #pageSize").value;
+        if (pageSize === "custom") {
+            const width = Number(document.getElementById("pageWidth").value);
+            const height = Number(document.getElementById("pageHeight").value);
+            return {
+                width: Number.isFinite(width) && width > 0 ? width : pageSizes.A4.width,
+                height: Number.isFinite(height) && height > 0 ? height : pageSizes.A4.height,
+            };
+        }
+        return pageSizes[pageSize] || pageSizes.A4;
+    };
     const fixBlockWidth = async (printableWidth = false) => {
         const isLandscape = document.querySelector("#landscape").checked;
-        let width = 800
-        let height = 1131
-        switch (document.querySelector("#action #pageSize").value) {
-            case "A3":
-              width = isLandscape ? 1587.84 : 1122.24
-              height = isLandscape ? 1122.24 : 1587.84
-              break;
-            case "A4":
-              width = isLandscape ? 1122.24 : 793.92
-              height = isLandscape ? 793.92 : 1122.24
-              break;
-            case "A5":
-              width = isLandscape ? 793.92 : 559.68
-              height = isLandscape ? 559.68 : 793.92
-              break;
-            case "Legal":
-              width = isLandscape ? 1344: 816
-              height = isLandscape ? 816 : 1344
-              break;
-            case "Letter":
-              width = isLandscape ? 1056 : 816
-              height = isLandscape ? 816 : 1056
-              break;
-            case "Tabloid":
-              width = isLandscape ? 1632 : 1056
-              height = isLandscape ? 1056 : 1632
-              break;
-        }
+        const dimensions = getPageSizeDimensions();
+        let width = (isLandscape ? dimensions.height : dimensions.width) * 96;
+        let height = (isLandscape ? dimensions.width : dimensions.height) * 96;
         const scale = parseFloat(document.querySelector("#scale").value);
         if (printableWidth) {
             width -= ((parseFloat(document.querySelector("#marginsLeft").value) || 0) +
@@ -747,7 +767,7 @@ ${getIconScript(servePath)}
         Protyle.setAutoDirection(previewElement, ${!!window.siyuan.config.editor.autoDirection});
         await Protyle.renderExportJSEmbeds(wysElement, {
             disabled: ${window.siyuan.config.system.safeMode || getHostCapabilities().remoteKernel},
-            disabledTip: decodeURIComponent(${JSON.stringify(encodeURIComponent(window.siyuan.languages.safeModeJSTip))}),
+            disabledTip: ${toScriptLiteral(window.siyuan.languages.safeModeJSTip)},
             rootID: "${id}",
             headingMode: ${window.siyuan.config.editor.headingEmbedMode},
         }, async (url, data) => {
@@ -792,7 +812,7 @@ ${getIconScript(servePath)}
             alert(response.msg)
             return;
         }
-        document.title = response.data.name
+        document.title = response.data.name || ${toScriptLiteral(window.siyuan.languages._kernel[16])};
         window.siyuan = {
           config: {
             appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
@@ -924,7 +944,12 @@ ${getIconScript(servePath)}
             fixBlockWidth();
         })
         actionElement.querySelector("#pageSize").addEventListener('change', () => {
+            actionElement.querySelector("#customPageSize").classList.toggle("fn__none",
+                actionElement.querySelector("#pageSize").value !== "custom");
             fixBlockWidth();
+        });
+        ["pageWidth", "pageHeight"].forEach(id => {
+            actionElement.querySelector("#" + id).addEventListener("input", () => fixBlockWidth());
         });
         actionElement.querySelector("#marginsType").addEventListener('change', (event) => {
             setPadding();
@@ -957,11 +982,12 @@ ${getIconScript(servePath)}
             ipcRenderer.send("${Constants.SIYUAN_CMD}", "destroy")
         });
         const buildExportConfig = (unPagedPageSize) => {
-            const pageSize = actionElement.querySelector("#pageSize").value;
+            const selectedPageSize = actionElement.querySelector("#pageSize").value;
+            const pageSize = selectedPageSize === "custom" ? getPageSizeDimensions() : selectedPageSize;
             // https://www.electronjs.org/docs/latest/api/web-contents#contentsprinttopdfoptions
             // https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-printToPDF
             return {
-                title: "${window.siyuan.languages.export} PDF",
+                title: ${toScriptLiteral(`${window.siyuan.languages.export} PDF`)},
                 pdfOptions: {
                     printBackground: true,
                     landscape: actionElement.querySelector("#landscape").checked,
@@ -988,7 +1014,6 @@ ${getIconScript(servePath)}
                 paged: !unPagedPageSize,
                 headingPageBreakLevels: getHeadingPageBreakLevels(),
                 rootId: "${id}",
-                rootTitle: response.data.name,
                 parentWindowId: ${currentWindowId},
             };
         };
@@ -1011,19 +1036,26 @@ ${getIconScript(servePath)}
         });
         actionElement.querySelector('.b3-button--text').addEventListener('click', async () => {
             await previewReady;
-            const {ipcRenderer}  = require("electron");
-            const defaultPath = decodeURIComponent(${JSON.stringify(encodeURIComponent(defaultExportPath))});
-            const dialogOptions = {
-                cmd: "showOpenDialog",
-                title: "${window.siyuan.languages.export} PDF",
-                buttonLabel: ${JSON.stringify(window.siyuan.languages.save)},
-                properties: ["createDirectory", "openDirectory"],
-            };
-            if (defaultPath) {
-                dialogOptions.defaultPath = defaultPath;
+            if (actionElement.querySelector("#pageSize").value === "custom") {
+                for (const id of ["pageWidth", "pageHeight"]) {
+                    if (!actionElement.querySelector("#" + id).reportValidity()) {
+                        return;
+                    }
+                }
             }
+            const {ipcRenderer}  = require("electron");
+            const defaultPath = ${toScriptLiteral(defaultExportPath)};
+            const fileName = ((${replaceLocalPath.toString()})(response.data.name || "") || ${toScriptLiteral(window.siyuan.languages._kernel[16])}) + ".pdf";
+            const dialogOptions = {
+                cmd: "showSaveDialog",
+                title: ${toScriptLiteral(`${window.siyuan.languages.export} PDF`)},
+                buttonLabel: ${toScriptLiteral(window.siyuan.languages.save)},
+                defaultPath: require("path").join(defaultPath, fileName),
+                filters: [{name: "PDF", extensions: ["pdf"]}],
+                properties: ["createDirectory", "showOverwriteConfirmation"],
+            };
             const result = await ipcRenderer.invoke("${Constants.SIYUAN_GET}", dialogOptions);
-            if (result.canceled || result.filePaths.length === 0) {
+            if (result.canceled || !result.filePath) {
                 return;
             }
             reserveEmbeddedAssetSpace(removeAssetsElement.checked);
@@ -1043,18 +1075,6 @@ ${getIconScript(servePath)}
             await waitForImages();
             let exportConfig;
             if (!isPaged) {
-                const getPageSizeDimensions = () => {
-                    // https://github.com/electron/electron/blob/3df3a6a736b93e0d69fa3b0c403b33f201287780/lib/browser/api/web-contents.ts#L89-L101
-                    const pageSizes = {
-                        "A3": { width: 11.7, height: 16.54 },
-                        "A4": { width: 8.27, height: 11.7 },
-                        "A5": { width: 5.83, height: 8.27 },
-                        "Legal": { width: 8.5, height: 14 },
-                        "Letter": { width: 8.5, height: 11 },
-                        "Tabloid": { width: 11, height: 17 },
-                    };
-                    return pageSizes[actionElement.querySelector("#pageSize").value];
-                };
                 const dimensions = getPageSizeDimensions();
                 const landscape = actionElement.querySelector("#landscape").checked;
                 const scale = parseFloat(actionElement.querySelector("#scale").value);
@@ -1073,7 +1093,7 @@ ${getIconScript(servePath)}
             } else {
                 exportConfig = buildExportConfig();
             }
-            exportConfig.filePaths = result.filePaths;
+            exportConfig.filePath = result.filePath;
             actionElement.remove();
             ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", exportConfig);
         });

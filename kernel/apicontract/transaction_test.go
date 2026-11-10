@@ -53,6 +53,11 @@ func TestTransactionFiniteActionSchemas(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fixture := range []struct{ action, data string }{
+		{"setAttrViewSubItems", `{"enabled":true,"parentName":"Parent","childrenName":"Children"}`},
+		{"setAttrViewSubItemsDisplay", `"nested"`},
+		{"reparentAttrViewItems", `null`},
+		{"promoteAttrViewItems", `null`},
+		{"duplicateAttrViewSubtree", `null`},
 		{"setAttrViewColAttributePanelVisibility", `"hide-empty"`},
 		{"update", `"<div>content</div>"`},
 		{"append", `"<div>content</div>"`},

@@ -1,6 +1,6 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {hasClosestByClassName} from "../util/hasClosest";
@@ -48,7 +48,7 @@ const notifyUndoState = (rootID?: string) => {
     }
 };
 
-// 文档操作栏订阅共享历史状态，销毁编辑器时解除订阅。
+// 文档菜单订阅共享历史状态，销毁编辑器时解除订阅。
 export const subscribeUndoState = (rootID: string, listener: (state: ReturnType<typeof getUndoStateSnapshot>) => void) => {
     let listeners = undoStateListeners.get(rootID);
     if (!listeners) {
@@ -156,7 +156,7 @@ const applyUndoButtons = (protyle: IProtyle, rootID: string) => {
     };
     if (protyle.breadcrumb) {
         applyState(protyle.breadcrumb.element.parentElement);
-        protyle.breadcrumb.refreshHistory?.(rootID);
+        protyle.breadcrumb.refreshHistory?.();
     }
     /// #if MOBILE
     const toolbarEditor = getMobileToolbarProtyle();
@@ -297,6 +297,7 @@ export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
     isUndoing = true;
     notifyUndoState();
     try {
+        await protyle.title?.flushPendingInput();
         await waitForPendingTransactions(protyle);
 
         // 等待输入事务提交后读取权威状态，避免本地镜像尚未更新时吞掉立即撤销。
@@ -322,7 +323,7 @@ export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
             let confirmed = false;
             try {
                 confirmed = await new Promise<boolean>((resolve) => {
-                    confirmDialog(`⚠️ ${window.siyuan.languages.undo}`,
+                    mobileConfirmDialog(`⚠️ ${window.siyuan.languages.undo}`,
                         `<div data-undo-confirmation="true">${window.siyuan.languages.undoCrossDocConfirm}<div style="margin-top: 8px;">${names.map(n => `• ${n}`).join("<br>")}</div></div>`,
                         () => resolve(true),
                         () => resolve(false));
@@ -391,6 +392,7 @@ export const requestRedo = async (protyle: IProtyle, rootID?: string) => {
     isUndoing = true;
     notifyUndoState();
     try {
+        await protyle.title?.flushPendingInput();
         await waitForPendingTransactions(protyle);
         const state = await fetchUndoState(rootID);
         if (!state) {

@@ -20,15 +20,25 @@ func RecordRelationWrites(box string, record SourceWriteRecorder) func() {
 }
 
 type sourceWriteRecord struct {
-	active func() bool
-	record SourceWriteRecorder
+	active   func() bool
+	record   SourceWriteRecorder
+	recovery bool
 }
 
 // RecordSourceWrites covers all parsed copies used by one serialized editing
 // transaction, including two-way relation helpers that reload the same database.
 func RecordSourceWrites(view *AttributeView, active func() bool, record SourceWriteRecorder) func() {
-	_, box := FindAttributeViewPath(view.ID)
+	return recordSourceWrites(view, active, record, false)
+}
+
+// RecordHistorySourceWrites 将历史恢复纳入原始字节事务，恢复前数据容许布局缺失。
+func RecordHistorySourceWrites(view *AttributeView, record SourceWriteRecorder) func() {
+	return recordSourceWrites(view, func() bool { return true }, record, true)
+}
+
+func recordSourceWrites(view *AttributeView, active func() bool, record SourceWriteRecorder, recovery bool) func() {
+	_, box := view.StoragePath()
 	key := box + "/" + view.ID
-	sourceWriteRecorders.Store(key, &sourceWriteRecord{active, record})
+	sourceWriteRecorders.Store(key, &sourceWriteRecord{active: active, record: record, recovery: recovery})
 	return func() { sourceWriteRecorders.Delete(key) }
 }

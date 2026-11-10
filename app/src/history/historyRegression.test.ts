@@ -26,12 +26,14 @@ test("file history displays zero histories for an empty search", () => {
     const next = {...node(), nextElementSibling: {nextElementSibling: count}};
     const list = {...node(), innerHTML: "old results"};
     const element = {
+        isConnected: true,
         setAttribute() {},
         querySelector: (selector: string) => selector === '[data-type="docnext"]' ? next : selector === ".b3-list" ? list : node(),
     };
     const dependencies = {
         window: {siyuan: {storage: {history: {}}, languages: {pageCountAndHistoryCount: "${x} pages, ${y} histories", emptyContent: "empty"}}},
         Constants: {LOCAL_HISTORY: "history"},
+        historyGroups: new WeakMap(), historyRequests: new WeakMap(),
         setStorageVal() {},
         fetchPost: (_url: string, _request: unknown, callback: (response: unknown) => void) =>
             callback({data: {pageCount: 0, totalCount: 0, histories: []}}),
@@ -39,6 +41,31 @@ test("file history displays zero histories for an empty search", () => {
     const render = new Function(...Object.keys(dependencies), extract("renderDoc") + "\nreturn renderDoc;")(...Object.values(dependencies));
     render(element, 1);
     assert.equal(count.textContent, "0 pages, 0 histories");
+    assert.match(list.innerHTML, /empty/);
+});
+
+test("file history ignores older search results after filters change", () => {
+    const node = (): any => ({value: "0", classList: {add() {}, remove() {}}, setAttribute() {}, removeAttribute() {}, querySelector: node});
+    const count = {textContent: "", classList: {remove() {}}};
+    const next = {...node(), nextElementSibling: {nextElementSibling: count}};
+    const list = {...node(), innerHTML: ""};
+    const element = {
+        isConnected: true, setAttribute() {},
+        querySelector: (selector: string) => selector === '[data-type="docnext"]' ? next : selector === ".b3-list" ? list : node(),
+    };
+    const responses: ((response: unknown) => void)[] = [];
+    const dependencies = {
+        window: {siyuan: {storage: {history: {}}, languages: {pageCountAndHistoryCount: "${x}/${y}", emptyContent: "empty"}}},
+        Constants: {LOCAL_HISTORY: "history"}, historyGroups: new WeakMap(), historyRequests: new WeakMap(),
+        setStorageVal() {},
+        fetchPost: (_url: string, _request: unknown, callback: (response: unknown) => void) => responses.push(callback),
+    };
+    const render = new Function(...Object.keys(dependencies), extract("renderDoc") + "\nreturn renderDoc;")(...Object.values(dependencies));
+    render(element, 1);
+    render(element, 1);
+    responses[1]({data: {pageCount: 0, totalCount: 0, histories: []}});
+    responses[0]({data: {pageCount: 1, totalCount: 100, histories: ["123"]}});
+    assert.equal(count.textContent, "0/0");
     assert.match(list.innerHTML, /empty/);
 });
 
@@ -72,7 +99,8 @@ test("snapshot creation sends full checks, closes completed checks and retains u
             const dependencies = {
                 window: {siyuan: {languages: {snapshotMemo: "Memo", fullCheckSnapshotTip: "Read all local files"}}},
                 Constants: {DIALOG_SNAPSHOTMEMO: "snapshot-memo"},
-                openInputDialog: (value: typeof options) => { options = value; return dialog; },
+                isMobile: () => false,
+                mobileInputDialog: (value: typeof options) => { options = value; return dialog; },
                 renderRepo: (_element: unknown, page: number) => refreshed.push(page),
                 fetchPost: async (path: string, body: unknown, callback: (response: unknown) => void) => {
                     requests.push({path, body});
@@ -104,7 +132,8 @@ test("a failed full snapshot check retains the memo and releases the busy contro
     };
     const dependencies = {
         window: {siyuan: {languages: {}}}, Constants: {},
-        openInputDialog: (value: typeof options) => { options = value; return dialog; },
+        isMobile: () => false,
+                mobileInputDialog: (value: typeof options) => { options = value; return dialog; },
         fetchPost: async () => { throw new Error("read failed"); },
     };
     const open = new Function(...Object.keys(dependencies), extract("openSnapshotMemo") + "\nreturn openSnapshotMemo;")(...Object.values(dependencies));
@@ -112,4 +141,27 @@ test("a failed full snapshot check retains the memo and releases the busy contro
     await assert.rejects(options.onConfirm("memo", dialog), /read failed/);
     assert.equal(button.disabled, false);
     assert.equal(textarea.readOnly, false);
+});
+
+test("mobile snapshot memo only reports success after the API accepts the save", async () => {
+    let options: {awaitConfirm: boolean, onConfirm: (value: string, dialog: unknown) => Promise<boolean>};
+    const dialog = {element: {setAttribute() {}}, destroy: () => assert.fail("the wrapper owns closing")};
+    let code = 1;
+    let created = false;
+    let refreshed = 0;
+    const dependencies = {
+        window: {siyuan: {languages: {}}}, Constants: {}, isMobile: () => true,
+        mobileInputDialog: (value: typeof options) => { options = value; return dialog; },
+        fetchSyncPost: async () => ({code, data: {created}}),
+        renderRepo: () => refreshed++,
+    };
+    const open = new Function(...Object.keys(dependencies), extract("openSnapshotMemo") + "\nreturn openSnapshotMemo;")(...Object.values(dependencies));
+    open({}, undefined, "memo", false);
+    assert.equal(options.awaitConfirm, true);
+    assert.equal(await options.onConfirm("memo", dialog), false);
+    code = 0;
+    assert.equal(await options.onConfirm("memo", dialog), false);
+    created = true;
+    assert.equal(await options.onConfirm("memo", dialog), true);
+    assert.equal(refreshed, 1);
 });

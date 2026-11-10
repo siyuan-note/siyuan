@@ -29,6 +29,7 @@ const rendererModules = () => {
         extract("util/selection", ["setFirstNodeRange", "focusBlock", "getEditorRange"]))
             .replace(/\/\/\/ #else[\s\S]*?\/\/\/ #endif/g, "");
     modules["util/hasClosest"] = readFileSync(path.join(root, "util/hasClosest.ts"), "utf8");
+    modules["util/tableCellRichContext"] = readFileSync(path.join(root, "util/tableCellRichContext.ts"), "utf8");
     modules["render/tabsVisibility"] = readFileSync(path.join(root, "render/tabsVisibility.ts"), "utf8");
     modules["util/selectionOffsets"] = "const revealTabsForTarget = () => {};\n" +
         extract("util/selectionOffsets", ["focusByRange", "setLastNodeRange"]);
@@ -53,6 +54,7 @@ const rendererModules = () => {
     modules["undo/viewport"] = readFileSync(path.join(root, "undo/viewport.ts"), "utf8");
     modules["render/av/focus"] = 'import {focusEditableAtGoalX} from "../../wysiwyg/verticalCaret";\n' +
         'import {isTableLikeView} from "./viewType";\n' +
+        'import {prepareAVColumnWindow} from "./columnWindow";\n' +
         'import {ensureAVTableBoundaryRow, getAVData} from "./virtualScroll";\n' +
         "const clearSelect = () => {};\n" +
         extract("render/av/focus", ["getVisibleAVTitle", "focusAVTitleByVerticalArrow", "focusAVVerticalRegion",
@@ -115,17 +117,21 @@ const rendererModules = () => {
         const restoreListMindmapFocus = () => false;
         const focusByOffset = element => { window.restoredFocusElement = element; return true; };\n` +
         extract("util/selection", ["restoreFocusContext"]);
-    for (const name of ["virtualScroll", "selectionState", "rangeSelect", "groupTableVirtual", "backlinkScroll", "viewType", "capabilities", "capabilities.generated"]) {
+    for (const name of ["tableRowHeights", "columnWindow", "columnVirtualScroll", "virtualScroll", "selectionState", "rangeSelect", "groupTableVirtual", "backlinkScroll", "viewType", "capabilities", "capabilities.generated"]) {
         modules[`render/av/${name}`] = readFileSync(path.join(root, "render/av", `${name}.ts`), "utf8");
     }
     modules["../constants"] = "const SIYUAN_VERSION = 'test', NODE_ENV = 'test';\n" +
         readFileSync(path.join(root, "../constants.ts"), "utf8");
+    for (const name of ["dockKeymap", "keymapBindings"]) {
+        modules[`../util/${name}`] = readFileSync(path.join(root, "../util", `${name}.ts`), "utf8");
+    }
     modules["render/av/richText"] = "export const renderAVRichTextElements = () => {};";
     modules["render/av/row"] = `export const updateAVSelectionStatus = () => {};
         export const getRowHTML = ({row, rowIndex}) =>
             '<div class="av__row" data-id="' + row.id + '" data-index="' + rowIndex +
             '" style="height:30px"><div class="av__cell" data-col-id="c0" data-dtype="text">' + row.id + '</div></div>';`;
-    modules["render/av/focus"] = 'import {setAVCellAnchor} from "./rangeSelect";\n' +
+    modules["render/av/focus"] = 'import {ensureAVColumnWindow} from "./columnWindow";\n' +
+        'import {setAVCellAnchor} from "./rangeSelect";\n' +
         'import {focusBlock} from "../../util/selection";\n' +
         'import {hasClosestByClassName} from "../../util/hasClosest";\n' +
         "const addDragFill = () => {};\n" +
@@ -504,6 +510,30 @@ const runEntryCases = async () => {
         }
     }
     window.siyuan.config.editor.cursorSurroundingLines = 3;
+    for (const direction of ["up", "down"]) {
+        const {protyle, editor} = setup(`<div style="height:600px"></div>
+<div data-type="NodeTable" data-node-id="table"><table style="font:inherit"><tr><td><div class="table__cell-editor">
+<div class="protyle-content"><div class="protyle-wysiwyg">${paragraph}</div></div>
+</div></td></tr></table></div><div style="height:600px"></div>`);
+        const cell = editor.querySelector("td");
+        const element = cell.querySelector(".table__cell-editor");
+        const nested = {element, contentElement: element.querySelector(".protyle-content"),
+            wysiwyg: {element: element.querySelector(".protyle-wysiwyg")}, disabled: false};
+        window.navigationModules("util/tableCellRichContext").setTableCellRichContext(nested,
+            {owner: protyle, cell, finish: () => {}});
+        const body = cell.querySelector("[contenteditable]");
+        select(body);
+        protyle.contentElement.scrollTop = direction === "down" ? 450 : 640;
+        scheduleCaretScroll(nested, direction);
+        await frame();
+        const caret = getVerticalCaretRect(body, getSelection().getRangeAt(0));
+        const viewport = protyle.contentElement.getBoundingClientRect();
+        assert.ok(direction === "down" ? caret.bottom <= viewport.bottom - 90 + 1 :
+            caret.top >= viewport.top + 90 - 1,
+        `${direction}: table caret ${caret.top}..${caret.bottom}, viewport ${viewport.top}..${viewport.bottom}, scroll ${protyle.contentElement.scrollTop}`);
+        assert.equal(nested.contentElement.scrollTop, 0, "cell viewport stays in place");
+        cases++;
+    }
     for (const guard of ["disabled", "detached", "nested", "atomic"]) {
         const {protyle, editor} = setup(paragraph);
         const body = document.getElementById("body");

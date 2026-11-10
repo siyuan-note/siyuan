@@ -222,9 +222,9 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			order := []string{}
 			footnotes := map[string]*refAsFootnotes{}
 			depth := 0
-			collectFootnotesDefs0(tree, tree.Root, &order, footnotes, &depth, nil)
+			collectFootnotesDefs0(tree, tree.Root, &order, footnotes, &depth, nil, nil)
 			defs, defsErr := resolveFootnotesDefs(&order, footnotes, tree, map[string]bool{},
-				confExportSnapshot.BlockRefTextLeft, confExportSnapshot.BlockRefTextRight, false)
+				confExportSnapshot.BlockRefTextLeft, confExportSnapshot.BlockRefTextRight, false, nil)
 			if defsErr != nil {
 				return defsErr
 			}

@@ -54,6 +54,8 @@ const loadEditor = (id = "custom", initialEnabled = true, mobile = false) => {
         getSettingsWindowHost: (): undefined => undefined,
         isSettingsWindow: () => false,
         getEditorToolbarCatalogSnapshot: (): [] => [],
+        getBreadcrumbButtonCatalogSnapshot: (): [] => [],
+        refreshBreadcrumbCatalog() {},
         refreshToolbarCatalogEntries() {}, refreshTopBarCatalog() {}, refreshDockCatalog() {}, refreshSlashMenuCatalog() {},
         getDockEntryOrderSnapshot: () => emptyDock,
         createEntryProfileSnapshot: (template: string) => ({[frequentPath]: template === "full", [rootPath]: !mobile}),
@@ -67,6 +69,7 @@ const loadEditor = (id = "custom", initialEnabled = true, mobile = false) => {
             : !mobile,
         isMobile: () => mobile,
         isInMobileApp: () => false,
+        isIPad: () => false, isInAndroid: () => false, isInHarmony: () => false,
         getHostCapabilities: () => ({importExport: false}),
         getEntryCatalogChildren: () => entries,
         getEntryCatalogPathChain: (_section: string, path: string) => [path],
@@ -80,7 +83,7 @@ const loadEditor = (id = "custom", initialEnabled = true, mobile = false) => {
         escapeAttr: (value: string) => value,
         escapeHtml: (value: string) => value,
         saveEntryVisibility: (value: typeof config) => { siyuan.config.appearance.entryVisibility = value; writes.push(value); },
-        confirmDialog: (_title: string, _text: string, callback: () => void) => {
+        mobileConfirmDialog: (_title: string, _text: string, callback: () => void) => {
             discardPrompts++;
             if (allowDiscard) callback();
         },

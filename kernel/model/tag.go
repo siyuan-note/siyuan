@@ -104,7 +104,7 @@ func removeTag(label string, beforeCommit func()) (err error) {
 		if beforeCommit != nil {
 			beforeCommit()
 		}
-		if err = writeReplacementTree(tree, original, "", false); err != nil {
+		if err = writeReplacementTree(tree, original, "", false, nil); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}
@@ -225,7 +225,7 @@ func renameTag(oldLabel, newLabel string, beforeCommit func()) (err error) {
 		if beforeCommit != nil {
 			beforeCommit()
 		}
-		if err = writeReplacementTree(tree, original, "", false); err != nil {
+		if err = writeReplacementTree(tree, original, "", false, nil); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}

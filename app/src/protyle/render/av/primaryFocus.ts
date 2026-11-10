@@ -19,6 +19,26 @@ export const focusDatabasePrimary = (root: Element, protyle: IProtyle,
         return;
     }
     if (focusTitle && !bindPrimary && request.boundBlockID && request.boundBlockID === protyle.block?.rootID) {
+        const title = protyle.title;
+        let isTitleVisible: () => boolean;
+        /// #if MOBILE
+        if (window.siyuan.mobile.editor?.protyle !== protyle) {
+            return;
+        }
+        isTitleVisible = () => {
+            const input = document.getElementById("toolbarNameReadonly") as HTMLInputElement;
+            return Boolean(input && !input.disabled && input.getClientRects().length &&
+                window.siyuan.mobile.editor?.protyle === protyle);
+        };
+        /// #else
+        isTitleVisible = () => Boolean(title?.editElement?.getClientRects().length);
+        /// #endif
+        if (title && isTitleVisible()) {
+            // 标题完整源加载后再聚焦，重绘与迟到响应不能重复抢占光标。
+            return title.openEditor(() => root.isConnected && protyle.title === title &&
+                protyle.block.rootID === request.boundBlockID && isTitleVisible())
+                .catch(error => console.error(error));
+        }
         /// #if MOBILE
         const titleInput = document.getElementById("toolbarName") as HTMLInputElement;
         if (titleInput && !titleInput.disabled && !titleInput.readOnly && titleInput.getClientRects().length) {
@@ -27,10 +47,10 @@ export const focusDatabasePrimary = (root: Element, protyle: IProtyle,
             return;
         }
         /// #else
-        const title = protyle.title?.editElement;
-        if (title?.isContentEditable && title.getClientRects().length) {
-            title.focus({preventScroll: true});
-            focusByOffset(title, title.textContent.length, title.textContent.length);
+        const titleElement = title?.editElement;
+        if (titleElement?.isContentEditable && titleElement.getClientRects().length) {
+            titleElement.focus({preventScroll: true});
+            focusByOffset(titleElement, titleElement.textContent.length, titleElement.textContent.length);
             return;
         }
         /// #endif

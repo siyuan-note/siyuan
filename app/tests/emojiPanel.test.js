@@ -51,7 +51,10 @@ const cases = (source, helpers, languages) => {
         Constants: {LOCAL_EMOJIS: "emojis", DIALOG_EMOJIS: "emoji-panel"},
         genEmojiCategoryButtons: () => "", getEmojiTitle: () => "Custom",
         setPosition() {}, updateHotkeyTip: value => value, setStorageVal() {}, activeBlur() {},
-        bindBottomSheetDialog: () => {sheets++; return () => disposed++;},
+        bindBottomSheetDialog: () => {
+            sheets++;
+            return Object.assign(() => disposed++, {freeze() {}});
+        },
         reloadEmoji() {}, addEmoji: value => recent.push(value), showMessage: message => messages.push(message),
         getRandomEmoji: () => "1f600",
         updateFileTreeEmoji: (...args) => treeUpdates.push(args), updateOutlineEmoji() {},

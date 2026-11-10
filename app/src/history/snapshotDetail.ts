@@ -1,6 +1,6 @@
+import {MobileDialog} from "../dialog/mobileDialog";
 import type {App} from "../index";
 import type {DocHistorySnapshot} from "../types/api";
-import {Dialog} from "../dialog";
 import {Protyle} from "../protyle";
 import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
@@ -13,7 +13,8 @@ export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot
     const lang = window.siyuan.languages;
     let editor: Protyle;
     const abort = new AbortController();
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
+        mobileSheet: {mode: "expanded"},
         title: escapeHtml(reference.tags.join(" / ")),
         content: `<div class="history__snapshot-detail"><div class="history__snapshot-detail-status" data-detail-status role="status">${lang.loading}</div><div class="history__snapshot-detail-content fn__none"><div class="history__snapshot-detail-meta"></div><div class="history__snapshot-detail-panels"><ul class="b3-list b3-list--background history__snapshot-detail-files"></ul><div class="history__snapshot-detail-preview"></div></div></div></div>`,
         width: isMobile() ? "100vw" : "85vw",

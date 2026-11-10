@@ -8,7 +8,7 @@ import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 import {compileString} from "sass";
 
-const browserCases = async (source: string, css: string, columnSource: string, blockSource: string, menuSource: string, calendarSource: string) => {
+const browserCases = async (source: string, css: string, columnSource: string, blockSource: string, menuSource: string, calendarSource: string, escapeSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const config = {editor: {databaseAttrShow: true, databaseAttrHideEmpty: false, databaseAttrViewMode: 0, databaseAttrUseTabs: false}};
     const dialogs: {element: HTMLElement, destroy: () => void}[] = [];
@@ -18,8 +18,12 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         alwaysShow: "Always show", hideWhenEmpty: "Hide when empty", alwaysHide: "Always hide",
         _attrView: {dateCalendar: "Calendar", solarCalendar: "Gregorian", lunarCalendar: "Chinese lunar"},
     }}});
-    const Panel = new Function("cancelHeightAnimation", "escapeHtmlTextAndAttr", source + "\nreturn AVAttributePanel;")(
-        () => {}, (value: string) => value);
+    const {escapeHtmlTextAndAttr} = new Function(escapeSource + "\nreturn {escapeHtmlTextAndAttr};")() as {
+        escapeHtmlTextAndAttr: (value: unknown) => string
+    };
+    const Panel = new Function("cancelHeightAnimation", "escapeHtmlTextAndAttr", "syncRelatedAVViews", "disposeRelatedAVViews",
+        "preserveRelatedAVViews", source + "\nreturn AVAttributePanel;")(
+        () => {}, escapeHtmlTextAndAttr, () => {}, () => {}, () => {});
     const style = document.createElement("style");
     style.textContent = css + ".fn__none {display:none} .av__row {display:flex}";
     document.head.append(style);
@@ -66,14 +70,15 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         panel.element.remove();
     }
     const pending: Array<() => void> = [];
-    const preparedAPI = new Function("cancelHeightAnimation", "renderAVAttribute", source +
+    const preparedAPI = new Function("cancelHeightAnimation", "renderAVAttribute", "syncRelatedAVViews", "disposeRelatedAVViews",
+        "preserveRelatedAVViews", source +
         "\nreturn {AVAttributePanel, prepareDatabaseAttributePanel};")(() => {},
     (element: HTMLElement, id: string, _protyle: unknown, callback: (element: HTMLElement) => void) => {
         pending.push(() => {
             element.innerHTML = `<div data-av-id="database">${id}<button data-type="av-bind-document"></button></div>`;
             callback(element);
         });
-    });
+    }, () => {}, () => {}, () => {});
     const bound = {disabled: false, options: {}, block: {showAll: true, id: "first"}};
     const boundPanel = new preparedAPI.AVAttributePanel(bound);
     document.body.append(boundPanel.element);
@@ -150,11 +155,12 @@ const browserCases = async (source: string, css: string, columnSource: string, b
             transactions.push([[{action: "setAttrViewColDateFormat", avID, id, type, format}],
                 [{action: "setAttrViewColDateFormat", avID, id, type, format: oldFormat}]]);
         });
-    const columns = new Function("getFieldsByData", "escapeAttr", "escapeHtml", "escapeAriaLabel", "bindRollupData", "transaction", "MenuItem", "Menu", "isMobile", "bindDateCalendarMenu", "getLabelByDateFormat",
+    const columns = new Function("getFieldsByData", "escapeAttr", "escapeHtml", "escapeAriaLabel", "bindRollupData", "transaction", "MenuItem", "Menu", "isMobile", "bindDateCalendarMenu", "getLabelByDateFormat", "fetchSyncPost",
         columnSource + "\nreturn {getEditHTML, bindEditEvent};")(
         (data: IAV) => (data.view as IAVTable).columns, escape, escape, escape, () => {},
         (_protyle: IProtyle, operations: IOperation[], undo: IOperation[]) => transactions.push([operations, undo]),
-        Item, MobileMenu, () => mobile, bindCalendar, (format: string) => format);
+        Item, MobileMenu, () => mobile, bindCalendar, (format: string) => format,
+        async () => ({code: 0, data: {allowed: false}}));
     for (const visibility of [undefined, "always", "hide-empty", "hide"]) {
         const field = {id: "key", name: "Notes", type: "text", attributePanelVisibility: visibility};
         const data = {id: "database", viewType: "table", view: {columns: [field]}};
@@ -277,9 +283,11 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     const renderAttributes = new Function("fetchPost", "createEmptyAVValue", "getColIconByType", "cellValueIsEmpty",
         "genAVAttributeRowHTML", "preserveAVBindingRange", "renderAVRichTextElements", "getAVTemplateInteractiveElement",
         "hasClosestByClassName", "hasClosestByAttribute", "hasClosestBlock", "openLink", "checkFold", "openFileById", "Constants",
+        "escapeHtmlTextAndAttr", "preserveRelatedAVViews", "mountRelatedAVViews", "syncRelatedAVViews", "guardTemplateHTTPRequest",
         blockSource + "\nreturn renderAVAttribute;")(
         (url: string, _data: unknown, callback: (response: {data: unknown}) => void) => {
             callback({data: url === "/api/av/getAttributeViewKeys" ? tables : {total: 0}});
+            return Promise.resolve();
         }, () => ({}), () => "iconText", (value: IAVCellValue) => !value.text.content,
         (options: {keyID: string, attributePanelVisibility: string, empty: boolean}) =>
             `<div class="av__row" data-col-id="${options.keyID}" data-panel-visibility="${options.attributePanelVisibility}" data-empty="${options.empty}"></div>`,
@@ -291,12 +299,24 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         (_app: unknown, link: string) => openedLinks.push(link),
         (_id: string, callback: (zoomIn: boolean, action: string[], isRoot: boolean) => void) =>
             callback(foldedTarget, foldedTarget ? ["all"] : ["context", "scroll"], false),
-        (options: IOpenFileOptions) => splitOpens.push(options), {CB_GET_HL: "highlight"});
+        (options: IOpenFileOptions) => splitOpens.push(options), {CB_GET_HL: "highlight"}, escapeHtmlTextAndAttr,
+        () => {}, () => {}, () => {}, () => ({signal: new AbortController().signal, dispose() {}}));
+    const xssPayload = "<img src=x onerror=\"globalThis.__siyuanAVPanelXss=1\">";
+    tables[0].avName = xssPayload;
+    const xssBody = document.createElement("div");
+    xssBody.className = "custom-attr protyle-db-attr__body";
+    document.body.append(xssBody);
+    renderAttributes(xssBody, "document", {disabled: false, options: {}});
+    const xssHeader = xssBody.querySelector<HTMLElement>('[data-av-id="database-a"] .custom-attr__avheader .fn__ellipsis');
+    check.equal(xssBody.querySelector("img"), null, "database names must not become elements in the attribute panel header");
+    check.equal(xssHeader.textContent, xssPayload, "database names are shown as text in the attribute panel header");
+    xssBody.remove();
+    tables[0].avName = "database-a";
     for (const className of ["custom-attr protyle-db-row__body", "custom-attr"]) {
         const body = document.createElement("div");
         body.className = className;
         document.body.append(body);
-        const protyle = {disabled: false};
+        const protyle = {disabled: false, options: {}};
         renderAttributes(body, "document", protyle);
         const visible = (id: string, avID = "database-a") => getComputedStyle(body.querySelector(
             `[data-av-id="${avID}"] .av__row[data-col-id="${id}"]`)).display !== "none";
@@ -329,7 +349,7 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     }
     const topBody = document.createElement("div");
     topBody.className = "custom-attr protyle-db-attr__body";
-    renderAttributes(topBody, "document", {disabled: false});
+    renderAttributes(topBody, "document", {disabled: false, options: {}});
     check.equal(topBody.querySelector('[data-type="toggle-panel-visibility"]'), null, "top panels reuse their existing edit button");
     const dialog = document.createElement("div");
     dialog.className = "b3-dialog--open";
@@ -391,7 +411,7 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     return "Attribute panel visibility cases passed";
 };
 
-test("attribute panel field rules preserve global defaults and reveal hidden fields for editing", {
+test("attribute panel field rules preserve global defaults, reveal hidden fields, and escape database names", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -403,7 +423,10 @@ test("attribute panel field rules preserve global defaults and reveal hidden fie
         readFileSync(path.resolve(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")).join("\n"),
     {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
-    const columnSource = capabilitySource + transpileModule(readFileSync(path.resolve(__dirname, "col.ts"), "utf8")
+    const permissionSource = transpileModule(readFileSync("src/template/httpPermission.ts", "utf8")
+        .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const columnSource = capabilitySource + permissionSource + transpileModule(readFileSync(path.resolve(__dirname, "col.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const layoutSource = transpileModule(readFileSync(path.resolve(__dirname, "attributePanelLayout.ts"), "utf8")
@@ -417,9 +440,12 @@ test("attribute panel field rules preserve global defaults and reveal hidden fie
     const calendarSource = transpileModule(readFileSync(path.resolve(__dirname, "dateCalendarMenu.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const escapeSource = transpileModule(readFileSync("src/util/escape.ts", "utf8")
+        .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-panel-visibility-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + "," + JSON.stringify(menuSource) + "," + JSON.stringify(calendarSource) + ")";
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + "," + JSON.stringify(menuSource) + "," + JSON.stringify(calendarSource) + "," + JSON.stringify(escapeSource) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {

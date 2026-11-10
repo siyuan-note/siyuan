@@ -1,3 +1,4 @@
+import * as dockKeymap from "../../util/dockKeymap";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
@@ -10,7 +11,7 @@ import {createDefaultMobileBottomBarConfig, normalizeMobileBottomBarConfig} from
 const constantsExports: {Constants?: typeof AppConstants} = {};
 runInNewContext(transpileModule(readFileSync(resolve("src/constants.ts"), "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS},
-}).outputText, {exports: constantsExports, SIYUAN_VERSION: "test", NODE_ENV: "test"});
+}).outputText, {exports: constantsExports, SIYUAN_VERSION: "test", NODE_ENV: "test", require: () => dockKeymap});
 const Constants = constantsExports.Constants;
 
 // 单独执行真实的存储加载函数，隔离编辑器和原生窗口依赖。

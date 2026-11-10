@@ -1,0 +1,43 @@
+.data-import {
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+
+  &__section + &__section {
+    margin-top: 16px;
+  }
+
+  &__list {
+    margin-top: 8px;
+    max-height: 96px;
+    overflow: auto;
+    font-size: 13px;
+    line-height: 18px;
+  }
+
+  &__mode {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    cursor: pointer;
+    line-height: 20px;
+
+    input {
+      margin: 3px 0 0;
+      flex-shrink: 0;
+    }
+  }
+
+  &__password {
+    display: block;
+
+    input {
+      display: block;
+      margin-top: 8px;
+    }
+
+    span {
+      display: block;
+    }
+  }
+}

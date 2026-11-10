@@ -295,6 +295,7 @@ Port 6806’yı gizlemek için NGINX ters proxy (reverse proxy) kullan. Dikkat e
 
 - WebSocket ters proxy’sini `/ws` yoluna göre yapılandır.
 - Hem normal isteklerde hem de `/ws` için port dahil özgün `Host` başlığını koruyun. NGINX yapılandırmasında her iki proxy konumuna da `proxy_set_header Host $http_host;` ekleyin. `$host` kullanımı standart dışı portları (örneğin `8443`) kaldırır; bu da Origin doğrulamasının başarısız olmasına, girişten sonra logoda takılıp sayfanın sürekli yenilenmesine, API isteklerinin `401` yanıtı vermesine veya WebSocket bağlantılarının başarısız olmasına neden olabilir
+- Çekirdeğin gerçek istemci adresini alabilmesi için her iki proxy konumuna da `proxy_set_header X-Forwarded-For $remote_addr;` ekleyin. Çağıran tarafından gönderilen `X-Forwarded-For` başlığını değiştirmeden iletmeyin; aksi halde uzak bir istemci yerel yönetici olarak değerlendirilebilir
 
 #### Notlar
 

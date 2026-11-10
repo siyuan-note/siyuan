@@ -24,36 +24,85 @@ const browserCases = async (sources: Record<string, string>) => {
             const key = id.split("/").pop();
             if (key === "path") { return require("node:path"); }
             return modules[key] || {isInIOS: () => false, isMobile: () => mobile,
-                emitToPlugins: () => {}, forEachPluginSubscriber: () => {}, getFileTreeIconHTML: () => ""};
+                emitToPlugins: () => {}, forEachPluginSubscriber: () => {}, getFileTreeIconHTML: () => "", getFileTreeDefaultIconAttr: () => "",
+                getPublishAccessOptionByLevel: () => ({iconHTML: ""}), getTreeItemTailHTML: (count: string, actions: string) => count + actions};
         });
         modules[name] = exports;
         return exports;
     };
     load("escape");
-    const names = load("pathName") as typeof import("../../util/pathName");
+    load("pathName");
     const helper = load("fileTreeTooltip");
     const input = load("hoverInput") as typeof import("../../util/hoverInput");
     const tooltip = load("tooltip") as typeof import("../../dialog/tooltip");
+    const iconHelper = load("fileTreeIcon");
+    iconHelper.getFileTreeIconHTML = () => "";
+    load("rowData");
+    const rowRenderer = load("row") as typeof import("./docTree/row");
     const Pinned = load("PinnedDocs") as unknown as {PinnedDocs: {prototype: object}};
     const panel = Object.create(Pinned.PinnedDocs.prototype);
-    panel.expanded = new Set();
     const regular: {render?: (item: unknown) => string, renderExpanded?: (item: unknown) => string} = {};
-    const dependencies = {...modules.escape, ...helper, getDocDisplayName: names.getDocDisplayName,
-        FILE_TREE_CHILDREN_SORT_MODE: "data-children-sort-mode", getFileTreeDefaultIconAttr: () => "",
-        getFileTreeIconHTML: () => "", getPublishAccessOptionByLevel: () => ({iconHTML: ""})};
-    new Function("exports", ...Object.keys(dependencies), sources.regular)(regular, ...Object.values(dependencies));
+    const render = (doc: IFile, options = {}) => rowRenderer.renderDocTreeRowHTML({
+        id: doc.id, notebookId: "box", path: doc.path, name: doc.name, kind: "document", file: doc,
+        subFileCount: doc.subFileCount, depth: 0, index: 0, setSize: 1, occurrenceKey: "doc",
+        parentID: "", childrenSortMode: null, effectiveSortMode: 0,
+    }, options);
+    regular.render = doc => render(doc as IFile);
+    regular.renderExpanded = doc => render(doc as IFile, {mobile: true});
     const pinned = document.getElementById("pinned");
     const ordinary = document.getElementById("ordinary");
     const expanded = document.createElement("ul");
     document.body.append(expanded);
     const tip = document.getElementById("tooltip");
     tooltip.initTooltips();
-    const doc = {id: "doc", notebook: "box", name: 'A//%2F/%3Ctag%3E/Title "quotes" <tag> & text &amp; &copy; &lt;tag&gt;.sy', path: "/doc.sy", subFileCount: 2,
+    const doc = {id: "doc", notebook: "box", name: 'A//%2F/%3Ctag%3E/Title "quotes" <tag> & text &amp; &copy; &lt;tag&gt;.sy', path: "/doc.sy", subFileCount: 2, icon: "", count: 0,
         hSize: "2 KB", hMtime: "2026-10-17 11:00:00", hCtime: "2026-09-01 10:00:00",
         bookmark: 'Mark "quoted"', name1: "Named <tag>", alias: "Alias & text", memo: "Memo <img src=x>"};
+    const rowData = modules.rowData as typeof import("./docTree/rowData");
+    ordinary.innerHTML = render({...doc, count: 3} as IFile);
+    check.ok(ordinary.querySelector(".counter.popover__block.b3-tooltips"), "desktop reference counts retain backlink previews and tooltips");
+    check.ok(ordinary.querySelector('[data-type="more-file"].b3-tooltips'), "document actions retain their tooltips");
+    const notebook = {id: "box", name: "Notebook", closed: true, encrypted: true, sortMode: 0} as INotebook;
+    window.siyuan.notebooks.push(notebook);
+    const notebookItem = rowData.notebookTreeItem(notebook);
+    ordinary.innerHTML = rowRenderer.renderDocTreeRowHTML(notebookItem);
+    check.equal(rowData.getDocTreeItem(ordinary.firstElementChild)?.notebookId, "box", "closed notebook identity comes from its tree key");
+    check.equal(rowData.isEncryptedDocTreeItem(ordinary.firstElementChild), true);
+    check.equal(ordinary.firstElementChild.getAttribute("data-default-icon"), "lock");
+    check.equal(ordinary.querySelector(".b3-list-item__switch").classList.contains("fn__none"), true, "encrypted notebooks cannot expose publish controls");
+    notebook.closed = false;
+    window.siyuan.config.readonly = true;
+    ordinary.innerHTML = rowRenderer.renderDocTreeRowHTML(notebookItem);
+    check.equal(ordinary.querySelector('[data-type="more-root"]').classList.contains("fn__none"), true);
+    check.equal((ordinary.firstElementChild as HTMLElement).draggable, false);
+    window.siyuan.config.readonly = false;
+    for (const options of [{}, {mobile: true}, {pinned: true}, {mobile: true, pinned: true}]) {
+        ordinary.innerHTML = render(doc as IFile, options);
+        const row = ordinary.firstElementChild as HTMLElement;
+        const dataNames = Array.from(row.attributes).filter(attribute => attribute.name.startsWith("data-"))
+            .map(attribute => attribute.name).sort();
+        check.deepEqual(dataNames, ["data-default-icon", "data-node-id", "data-tree-key", "data-type"]);
+        check.equal(row.draggable, !options.mobile);
+    }
+    const detachedItem = {id: doc.id, notebookId: "box", path: doc.path, name: doc.name, kind: "document",
+        file: doc, occurrenceKey: "detached", depth: 0, subFileCount: 2, parentID: "", childrenSortMode: null,
+        effectiveSortMode: 0, index: 0, setSize: 1} as import("./docTree/types").IDocTreeItem;
+    const detached = rowRenderer.renderDocTreeRow(detachedItem);
+    check.equal(rowData.getDocTreeItem(detached), detachedItem, "detached menu rows retain their model without serialized fields");
+    const mutations: string[] = [];
+    const observer = new MutationObserver(entries => mutations.push(...entries.map(entry => entry.attributeName)));
+    observer.observe(detached, {attributes: true});
+    rowData.setDocTreeAttribute(detached, "aria-selected", "true");
+    await Promise.resolve();
+    check.deepEqual(mutations.splice(0), ["aria-selected"]);
+    rowData.setDocTreeAttribute(detached, "aria-selected", "true");
+    rowData.setDocTreeAttribute(detached, "aria-busy");
+    await Promise.resolve();
+    check.deepEqual(mutations, [], "unchanged attributes and absent loading state cause no DOM mutations");
+    observer.disconnect();
     for (const depth of [0, 1]) {
         pinned.replaceChildren();
-        await panel.appendDoc(pinned, doc, "doc", depth, 0);
+        pinned.append(panel.renderRow({id: doc.id, kind: "document", path: doc.path, name: doc.name, subFileCount: doc.subFileCount, file: doc, notebookId: doc.notebook, occurrenceKey: "pin:doc", depth}));
         ordinary.innerHTML = regular.render.call({element: ordinary}, doc);
         expanded.innerHTML = regular.renderExpanded(doc);
         const title = pinned.querySelector(".b3-list-item__text");
@@ -77,7 +126,7 @@ const browserCases = async (sources: Record<string, string>) => {
         tooltip.hideTooltip();
     }
     pinned.replaceChildren();
-    await panel.appendDoc(pinned, {...doc, unavailable: true}, "doc", 0, 0);
+    pinned.append(panel.renderRow({id: doc.id, kind: "document", path: doc.path, name: doc.name, subFileCount: doc.subFileCount, file: doc, notebookId: doc.notebook, occurrenceKey: "pin:doc", depth: 0, unavailable: true}));
     const closed = pinned.querySelector(".b3-list-item__text");
     closed.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.equal(tip.textContent, doc.name + " (Closed notebook)");
@@ -104,14 +153,9 @@ test("pinned roots and children show the same complete escaped tooltip as ordina
     for (const file of ["util/escape", "util/pathName", "util/fileTreeTooltip", "util/hoverInput", "dialog/tooltip", "layout/dock/PinnedDocs"]) {
         sources[file.split("/").pop()] = compile(readFileSync(`src/${file}.ts`, "utf8"));
     }
-    const source = ts.createSourceFile("Files.ts", readFileSync("src/layout/dock/Files.ts", "utf8"), ts.ScriptTarget.Latest, true);
-    const declaration = source.statements.find(ts.isClassDeclaration);
-    const method = declaration.members.find(member => member.name?.getText(source) === "genFileHTML") as ts.MethodDeclaration;
-    const pathNameSource = readFileSync("src/util/pathName.ts", "utf8");
-    const start = pathNameSource.indexOf('<span class="b3-list-item__text ariaLabel" data-position="parentE" data-tooltip-encoding');
-    const end = pathNameSource.indexOf("</span>", start) + "</span>".length;
-    sources.regular = compile(`exports.render = function(item) ${method.body.getText(source)};` +
-        "exports.renderExpanded = item => `" + pathNameSource.slice(start, end) + "`;");
+    for (const file of ["layout/dock/docTree/row", "layout/dock/docTree/rowData", "emoji/fileTreeIcon"]) {
+        sources[file.split("/").pop()] = compile(readFileSync(`src/${file}.ts`, "utf8"));
+    }
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-pinned-tooltip-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app,BrowserWindow}=require("electron");

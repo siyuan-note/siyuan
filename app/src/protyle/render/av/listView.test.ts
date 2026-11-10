@@ -12,6 +12,7 @@ import {resolveAVSelectedCell} from "./selectionState";
 // 使用实际行渲染与字段定位函数，检查列表沿用行列交互时的字段映射。
 const loadModule = (name: string) => {
     const mocks: Record<string, unknown> = {
+        "./subItemsState": name === "row" ? loadModule("subItemsState") : {},
         "./viewType": viewType,
         "./conditionalColor": conditionalColor,
         "./cell": {renderCell: (value: IAVCellValue) => value?.text?.content || value?.block?.content || ""},
@@ -68,6 +69,45 @@ describe("database list view", () => {
         assert.match(html, /width: 360px/);
         assert.match(html, /av__colsticky--freeze/);
         assert.match(html, /av__freeze-drag/);
+    });
+
+    it("renders tree controls and context metadata in the first table field and the list primary field", () => {
+        for (const type of ["table", "list"] as TAVView[]) {
+            const data = createView();
+            data.rows[0].hierarchy = {parentID: "parent", depth: 2, childCount: 3, context: true, expanded: false};
+            const html = getRowHTML({data, row: data.rows[0], rowIndex: 4, pinIndex: 0, type});
+            assert.match(html, /data-index="4" data-id="row" data-parent-id="parent" data-depth="2"/);
+            assert.match(html, /av__row--context/);
+            assert.match(html, /padding-left:40px/);
+            assert.match(html, /data-type="av-sub-items-toggle" aria-expanded="false"/);
+            assert.equal((html.match(/data-type="av-sub-items-toggle"/g) || []).length, 1);
+            assert.doesNotMatch(html, /data-col-id="tag"/);
+        }
+    });
+
+    it("moves table tree controls with the first visible field across reordering, hiding and freezing", () => {
+        const data = createView();
+        data.columns[1].hidden = false;
+        data.rows[0].hierarchy = {depth: 2, childCount: 1, context: false, expanded: true};
+        const treeField = (type: TAVView, pinIndex = -1) => {
+            const html = getRowHTML({data, row: data.rows[0], rowIndex: 400, pinIndex, type});
+            const cells = html.split('<div class="av__cell').slice(1);
+            assert.equal(cells.filter(cell => cell.includes('data-sub-items-cell="true"')).length, 1);
+            assert.equal((html.match(/class="av__sub-items"/g) || []).length, 1);
+            return cells.find(cell => cell.includes('data-sub-items-cell="true"'));
+        };
+        assert.match(treeField("table"), /data-col-id="title"/);
+        data.columns.reverse();
+        data.rows[0].cells.reverse();
+        assert.match(treeField("table", 0), /data-col-id="tag"/);
+        assert.match(treeField("list"), /data-col-id="title"/);
+        data.columns[0].hidden = true;
+        assert.match(treeField("table", 1), /data-col-id="title"/);
+        data.columns[0].hidden = false;
+        data.columns[1].hidden = true;
+        assert.match(treeField("table"), /data-col-id="tag"/);
+        delete data.rows[0].hierarchy;
+        assert.doesNotMatch(getRowHTML({data, row: data.rows[0], rowIndex: 400, type: "table"}), /data-sub-items-cell|av__sub-items/);
     });
 
     it("resolves list edit targets from row IDs and column IDs", () => {

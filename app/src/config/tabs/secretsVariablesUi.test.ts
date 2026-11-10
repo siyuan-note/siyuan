@@ -17,6 +17,14 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
     window.cancelAnimationFrame = id => window.clearTimeout(id);
     let mobile = false;
     let native = true;
+    const fullHeight = window.innerHeight;
+    const resizeViewport = async (height: number) => {
+        await require("electron").ipcRenderer.invoke("resize-viewport", window.innerWidth, height);
+        const deadline = Date.now() + 2000;
+        while (window.innerHeight !== height && Date.now() < deadline) await settle();
+        await settle();
+        check.equal(window.innerHeight, height, "native keyboard resizing changes the actual layout viewport");
+    };
     let clipboardReads = 0;
     let clipboard: () => string | undefined | Promise<string> = () => "pasted-secret";
     const messages: string[] = [];
@@ -34,9 +42,12 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
         destroyDialogBlockPanels: () => {},
         getDialogBlockPanel: (): undefined => undefined,
         getAnchoredInputMask: (): undefined => undefined,
+        isIOSPlatform: () => false,
+        isNotCtrl: () => true,
     };
     Object.defineProperty(window, "siyuan", {configurable: true, writable: true, value: {
         config: {secrets: {items: []}, variables: {items: []}},
+        mobile: {size: {isLandscape: false, portrait: {height1: fullHeight}, landscape: {height1: fullHeight}}},
         dialogs: [], storage: {}, zIndex: 0, languages,
         menus: {menu: {element: document.createElement("div")}},
     }});
@@ -63,13 +74,18 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
     const open = async (kind = "Secret") => {
         root.querySelector<HTMLElement>(`[data-type="add${kind}"]`).click();
         await settle();
-        return window.siyuan.dialogs.at(-1);
+        const dialog = window.siyuan.dialogs.at(-1);
+        const sheet = dialog.element.querySelector<HTMLElement>(".mobile-bottom-sheet");
+        const started = performance.now();
+        while (sheet?.style.visibility === "hidden" && performance.now() - started < 1500) await settle();
+        check.notEqual(sheet?.style.visibility, "hidden", "the sheet must finish opening before editing");
+        return dialog;
     };
     const input = (element: HTMLElement, id: string) => element.querySelector<HTMLInputElement>(`#${id}`);
     const visible = (element: Element) => {
         const rect = element.getBoundingClientRect();
-        const top = viewport.offsetTop;
-        const bottom = Math.min(window.innerHeight, top + viewport.height);
+        const top = native ? 0 : viewport.offsetTop;
+        const bottom = native ? window.innerHeight : Math.min(window.innerHeight, top + viewport.height);
         check.ok(rect.height > 0 && rect.top >= top - 1 && rect.bottom <= bottom + 1,
             `${element.id || element.className} must fit in ${top}..${bottom}, got ${rect.top}..${rect.bottom}`);
         check.ok(rect.width > 0 && rect.left >= 0 && rect.right <= window.innerWidth + 1,
@@ -105,14 +121,18 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
         value.addEventListener("focusout", () => focusouts++);
         const overlay = dialog.element.querySelector<HTMLElement>(".b3-dialog");
         for (const height of [300, 220, 0, 340]) {
+            if (native && height > 0) await resizeViewport(height);
+            const layoutHeight = Object.getOwnPropertyDescriptor(window, "innerHeight");
+            if (native && height === 0) Object.defineProperty(window, "innerHeight", {configurable: true, value: 0});
             viewport.height = height;
             viewport.dispatchEvent(new Event("resize"));
             await settle();
-            check.equal(document.activeElement, value);
+            check.equal(document.activeElement, value, `native=${native}, height=${height}`);
             check.equal(value.value, "draft-secret");
             check.equal(value.selectionStart, 2);
             check.equal(value.selectionEnd, 5);
             check.equal(focusouts, 0);
+            if (native && height === 0) Object.defineProperty(window, "innerHeight", layoutHeight);
             if (height > 0) {
                 visible(value);
                 visible(dialog.element.querySelector(".b3-dialog__action"));
@@ -120,6 +140,7 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
         }
         viewport.offsetTop = 35;
         viewport.height = 240;
+        if (native) await resizeViewport(240);
         viewport.dispatchEvent(new Event("scroll"));
         await settle();
         visible(value);
@@ -157,11 +178,14 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
             name: native ? "native-key" : "browser-key", value: "pasted-secret",
             allowedHosts: ["api.example.com", "api.other.test"],
         });
-        viewport.height = window.innerHeight;
+        const closingStyle = overlay.style.cssText;
+        await resizeViewport(fullHeight);
+        viewport.height = fullHeight;
         viewport.offsetTop = 0;
         viewport.dispatchEvent(new Event("resize"));
         await settle();
-        check.equal(overlay.style.height, "240px", "closing releases viewport listeners");
+        check.equal(overlay.style.cssText, closingStyle, "closing releases viewport listeners");
+        check.equal(overlay.isConnected, false, "closing releases the dialog and viewport listeners");
         clipboard = () => "pasted-secret";
     }
 
@@ -194,20 +218,18 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
     variable.focus();
     input(dialog.element, "itemName").value = "variable-name";
     const initialHeight = window.innerHeight;
-    const initialHeightDescriptor = Object.getOwnPropertyDescriptor(window, "innerHeight");
-    Object.defineProperty(window, "innerHeight", {configurable: true, value: 220});
+    await resizeViewport(220);
     window.dispatchEvent(new Event("resize"));
     await settle();
-    check.equal(dialog.element.querySelector<HTMLElement>(".b3-dialog").style.height, "220px");
+    check.equal(dialog.element.querySelector<HTMLElement>(".b3-dialog").getBoundingClientRect().height, 220);
     check.ok(variable.getBoundingClientRect().bottom <= 220);
-    Object.defineProperty(window, "innerHeight", {configurable: true, value: initialHeight});
+    await resizeViewport(initialHeight);
     window.dispatchEvent(new Event("resize"));
     await settle();
     dialog.element.querySelector<HTMLButtonElement>(".b3-button--text").click();
     await settle();
     check.deepEqual(writes.at(-1), {namespace: "variables", items: [{name: "variable-name", value: "variable-draft"}]});
     root.remove();
-    Object.defineProperty(window, "innerHeight", initialHeightDescriptor);
     check.equal(window.siyuan.dialogs.length, 0);
     return "Secrets and variables input cases passed";
 };
@@ -216,7 +238,9 @@ test("secrets and variables dialogs preserve input through keyboard resizing and
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const sources = ["util/escape", "config/render/fragments", "mobile/util/visibleViewport", "dialog/index", "config/tabs/secretsVariablesUi"]
+    const sources = ["util/escape", "config/render/fragments", "mobile/util/visibleViewport", "mobile/util/orientation",
+        "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "mobile/util/mobileSheetLayout", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog",
+        "dialog/index", "dialog/mobileDialog", "config/tabs/secretsVariablesUi"]
         .map(id => transpileModule(readFileSync(path.resolve("src", id + ".ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
         }).outputText);
@@ -224,19 +248,20 @@ test("secrets and variables dialogs preserve input through keyboard resizing and
     const css = compile("src/assets/scss/mobile.scss", {logger: {warn() {}}}).css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-secrets-input-test-"));
     const script = path.join(temporary, "run.cjs");
-    writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+    writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, width: 390, height: 844,
         webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
+    ipcMain.handle("resize-viewport", (_event, width, height) => win.setContentSize(width, height));
     try {
         await win.loadURL("about:blank");
         await win.webContents.insertCSS(${JSON.stringify(css)});
         for (const [theme, width, height, fontSize] of [["daylight", 390, 844, 16], ["midnight", 320, 640, 20], ["daylight", 640, 390, 16]]) {
             win.setSize(width, height);
             await win.webContents.insertCSS(require("node:fs").readFileSync(${JSON.stringify(path.resolve("appearance/themes"))} + "/" + theme + "/theme.css", "utf8"));
-            await win.webContents.insertCSS("body {font-size:" + fontSize + "px} .b3-dialog__container {transition:none}");
+            await win.webContents.insertCSS("body {font-size:" + fontSize + "px} .b3-dialog__container, .mobile-bottom-sheet-dialog .mobile-bottom-sheet {transition:none}");
             console.log(await win.webContents.executeJavaScript(${JSON.stringify(
         `var __name = value => value; (${browserCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(languages)})`)}));
         }

@@ -5,6 +5,8 @@ import {loadModule} from "../../../testSupport/loadModule";
 
 const exports = loadModule<typeof import("./attributePanel")>("src/protyle/render/av/attributePanel.ts", {
     require: () => ({}),
+    setTimeout,
+    clearTimeout,
 }, ScriptTarget.ES2021);
 
 const setup = (database = "", item = "") => {
@@ -14,7 +16,7 @@ const setup = (database = "", item = "") => {
         targetID: "document",
         hasDatabase: (id: string) => id === database,
         hasItem: (id: string) => !!id && id === item,
-        refresh: () => { refreshed++; },
+        refresh: (automaticRefresh: boolean) => { assert.equal(automaticRefresh, true); refreshed++; },
     });
     return {panel, refreshed: () => refreshed};
 };
@@ -42,4 +44,37 @@ test("binding transactions do not refresh unrelated panels or operations without
     panel.refreshForOperation({action: "replaceAttrViewBlock", avID: "database", previousID: "item", nextID: "other"});
     panel.refreshForOperation({action: "replaceAttrViewBlock", previousID: "other-item", nextID: "document"});
     assert.equal(refreshed(), 0);
+});
+
+test("sub-item structure changes refresh only attribute panels bound to the database", () => {
+    const relevant = setup("database");
+    const unrelated = setup("other");
+    const operations: IOperation[] = [
+        {action: "setAttrViewSubItems", avID: "database", data: {enabled: true}},
+        {action: "reparentAttrViewItems", avID: "database", srcIDs: ["child"], parentID: "parent"},
+        {action: "promoteAttrViewItems", avID: "database", srcIDs: ["child"]},
+        {action: "duplicateAttrViewSubtree", avID: "database", srcIDs: ["parent"]},
+    ];
+    operations.forEach(operation => {
+        relevant.panel.refreshForOperation(operation);
+        unrelated.panel.refreshForOperation(operation);
+    });
+    assert.equal(relevant.refreshed(), operations.length);
+    assert.equal(unrelated.refreshed(), 0);
+});
+
+test("relation and source field changes coalesce a refresh of computed panel values", async () => {
+    const {panel, refreshed} = setup("database", "item");
+    for (const type of ["relation", "text", "date", "select", "checkbox"] as TAVCol[]) {
+        panel.refreshForOperation({action: "updateAttrViewCell", avID: "database", rowID: "item", data: {type}});
+        panel.refreshForOperation({action: "updateAttrViewCells", avID: "database", cellUpdates: [
+            {rowID: "item", data: {type}},
+        ]} as IOperation);
+        panel.refreshForOperation({action: "updateAttrViewCell", avID: "database", rowID: "other", data: {type}});
+    }
+    await new Promise(resolve => setTimeout(resolve, 150));
+    assert.equal(refreshed(), 1);
+    panel.refreshForOperation({action: "updateAttrViewCell", avID: "database", rowID: "other", data: {type: "relation"}});
+    await new Promise(resolve => setTimeout(resolve, 150));
+    assert.equal(refreshed(), 1, "unrelated rows do not schedule another refresh");
 });

@@ -1,6 +1,7 @@
 import {Constants} from "./constants";
 import {refreshSettingConfig} from "./config/setting/sync";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
+import {closeDocumentTitleDialogs} from "./protyle/header/documentTitleDialogs";
 import {clearDocumentCreationPlans} from "./util/configuredDocument";
 import {closeNotebookLivePhotos} from "./protyle/preview/livePhoto";
 import {systemConfig} from "./config/systemConfig";
@@ -15,7 +16,8 @@ import {loadDesktopHostConnection, onGetConfig} from "./boot/onGetConfig";
 import {exitAfterSettingsReset} from "./config/setting/reset";
 import {initBlockPopover} from "./block/popover";
 import {applyCloudUserState, onSetaccount} from "./config/tabs/accountUi";
-import {addScript, addScriptSync} from "./protyle/util/addScript";
+import {addScript} from "./protyle/util/addScript";
+import {ensureLute} from "./protyle/util/lute";
 import {genUUID} from "./util/genID";
 import {fetchPost} from "./util/fetch";
 import {
@@ -73,6 +75,9 @@ import {initializeEnglishCommandTranslations} from "./command/english";
 import {loadLanguages} from "./boot/loadLanguages";
 import {installPluginStorageFetchAppId} from "./util/fetchAppId";
 import {initWindowWithLoading} from "./boot/loading";
+import {completeStartup, guardStartup, reportStartupError, setStartupLanguage, setStartupStage} from "./boot/startupError";
+
+const startupRequestFailed = (response: IWebSocketData) => reportStartupError(new Error(response.msg || String(response.code)));
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -80,6 +85,7 @@ export class App {
 
     constructor() {
         if (checkPublishServiceClosed()) {
+            completeStartup();
             return;
         }
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
@@ -216,6 +222,7 @@ export class App {
                             break;
                         case "closeBox":
                         case "removeBox":
+                            closeDocumentTitleDialogs({notebookId: data.data.box});
                             closeNotebookHistoryDialogs(data.data.box);
                             clearDocumentCreationPlans(data.data.box);
                             closeNotebookLivePhotos(data.data.box);
@@ -226,13 +233,14 @@ export class App {
                                     if (initTab) {
                                         const initTabData = JSON.parse(initTab);
                                         if (initTabData.instance === "Editor" && data.data.box === initTabData.notebookId) {
-                                            tab.parent.removeTab(tab.id);
+                                            tab.parent.removeTab(tab.id, false, false, true, true);
                                         }
                                     }
                                 }
                             });
                             break;
                         case "removeDoc":
+                            closeDocumentTitleDialogs({rootIDs: data.data.ids});
                             removeBlockPanelEditors({rootIDs: data.data.ids});
                             getAllTabs().forEach((tab) => {
                                 if (tab.headElement) {
@@ -240,7 +248,7 @@ export class App {
                                     if (initTab) {
                                         const initTabData = JSON.parse(initTab);
                                         if (initTabData.instance === "Editor" && data.data.ids.includes(initTabData.rootId)) {
-                                            tab.parent.removeTab(tab.id);
+                                            tab.parent.removeTab(tab.id, false, false, true, true);
                                         }
                                     }
                                 }
@@ -335,8 +343,11 @@ export class App {
             ws: mainWs,
         };
         const notebookPromise = setNoteBook();
-        fetchPost("/api/system/getConf", {}, async (response) => {
-            await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
+        setStartupStage("configuration");
+        fetchPost("/api/system/getConf", {}, guardStartup<IWebSocketData>(async (response) => {
+            setStartupLanguage(response.data.conf.appearance.lang);
+            setStartupStage("engine");
+            await ensureLute({reloadOnFailure: false});
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = systemConfig(response.data.conf, () => structuredClone(Constants.SIYUAN_EMPTY_LAYOUT));
             await loadDesktopHostConnection();
@@ -344,9 +355,13 @@ export class App {
             window.siyuan.isPublish = response.data.isPublish;
             setBodyHighlight();
             await notebookPromise;
+            setStartupStage("plugins");
             await loadPlugins(this);
-            getLocalStorage(() => {
-                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, (languages: IObject) => {
+            setStartupStage("storage");
+            getLocalStorage(guardStartup<void>(() => {
+                setStartupStage("language");
+                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, guardStartup<IObject>((languages) => {
+                    setStartupStage("interface");
                     window.siyuan.languages = languages;
                     void initializeEnglishCommandTranslations(
                         window.siyuan.config.appearance.lang,
@@ -354,7 +369,7 @@ export class App {
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);
-                    fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {cached: true}, guardStartup<IWebSocketData>(async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
                         await setNoteBook();
@@ -377,11 +392,12 @@ export class App {
                         mainWs.flushMainMessages();
                         bootSync();
                         exitAfterSettingsReset();
+                        completeStartup();
                         fetchPost("/api/setting/getCloudUser", {});
-                    });
-                });
-            });
-        });
+                    }), undefined, startupRequestFailed);
+                }), reportStartupError);
+            }), reportStartupError);
+        }), undefined, startupRequestFailed);
         initBlockPopover(this);
     }
 }

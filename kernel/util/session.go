@@ -5,6 +5,8 @@
 package util
 
 import (
+	"crypto/hkdf"
+	"crypto/sha256"
 	"crypto/subtle"
 	"strings"
 	"sync"
@@ -138,17 +140,34 @@ func AuthThrottleReset(key string) {
 	delete(authThrottles, key)
 }
 
+// SessionCookieName 是会话 Cookie 的名称。Cookie 不按端口隔离，同一主机上的各工作空间共用该 Cookie。
+const SessionCookieName = "siyuan"
+
+// SessionCookieKeys 由 Cookie 密钥派生会话 Cookie 的签名密钥和 AES-256 加密密钥。
+// 旧格式 Cookie 直接以 Cookie 密钥签名且不加密，无法通过校验，按未登录处理。
+// Cookie 密钥为空时不派生，会话 Cookie 的编解码随之失败，避免以公开的固定密钥签发会话。
+func SessionCookieKeys(cookieKey string) (hashKey, blockKey []byte, err error) {
+	if "" == cookieKey {
+		return
+	}
+	if hashKey, err = hkdf.Key(sha256.New, []byte(cookieKey), nil, "siyuan-session-cookie-hash-v1", 32); err != nil {
+		return
+	}
+	blockKey, err = hkdf.Key(sha256.New, []byte(cookieKey), nil, "siyuan-session-cookie-block-v1", 32)
+	return
+}
+
 // SessionData represents the session.
 type SessionData struct {
 	Workspaces map[string]*WorkspaceSession // <WorkspacePath, WorkspaceSession>
 }
 
 type WorkspaceSession struct {
-	AccessAuthCode     string
-	OIDCSessionVersion string
-	DesktopSessionID   string `json:",omitempty"` // 未记住的本机桌面登录所属内核启动批次
-	OIDCBinding        string
-	CaptchaID          string // 服务端验证码挑战 ID，验证码答案不写入会话
+	AccessAuthCodeVersion string // 锁屏密码的 HMAC 摘要，会话不保存密码原文；修改密码后既有会话随之失效
+	OIDCSessionVersion    string
+	DesktopSessionID      string `json:",omitempty"` // 未记住的本机桌面登录所属内核启动批次
+	OIDCBinding           string
+	CaptchaID             string // 服务端验证码挑战 ID，验证码答案不写入会话
 }
 
 func (sd *SessionData) Clear(c *gin.Context) {
@@ -208,8 +227,8 @@ func RemoveWorkspaceSession(session *SessionData) {
 
 // IsBrowserRequest 判断请求是否来自浏览器（非 SiYuan 原生客户端）。
 // 原生客户端（桌面 Electron、Android/iOS/Harmony）的 User-Agent 均以 "SiYuan/" 开头，
-// 其余视为浏览器。该口径与前端 getFrontend()、electron/main.js 设置的 UA 前缀、
-// 以及 session 鉴权中既有的 HasPrefix(ua, "SiYuan/") 判断保持一致。
+// 其余视为浏览器。该口径与前端 getFrontend()、Electron 主进程为各窗口设置的 UA 前缀
+// （app/electron/window/mainWindow.ts 等）以及 session 鉴权中既有的 HasPrefix(ua, "SiYuan/") 判断保持一致。
 func IsBrowserRequest(c *gin.Context) bool {
 	return !strings.HasPrefix(c.GetHeader("User-Agent"), "SiYuan/")
 }

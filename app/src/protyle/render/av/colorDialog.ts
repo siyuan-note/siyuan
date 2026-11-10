@@ -1,5 +1,5 @@
-import {Dialog} from "../../../dialog";
-import {confirmDialog} from "../../../dialog/confirmDialog";
+import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {MobileDialog} from "../../../dialog/mobileDialog";
 import {showMessage} from "../../../dialog/message";
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../../dialog/themeColorEditor";
 import {isMobile} from "../../../util/functions";
@@ -53,7 +53,7 @@ export const openAVCustomColorDialog = (options: {
     let editingColorIndex: number | undefined;
     let editingBuiltinKey: string | undefined;
     let saving = false;
-    const dialog = new Dialog({
+    const dialog = new MobileDialog({
         title: window.siyuan.languages.manageColors,
         width: isMobile() ? "92vw" : "600px",
         content: `<div class="b3-dialog__content" style="max-height:70vh">
@@ -285,7 +285,7 @@ export const openAVCustomColorDialog = (options: {
                 showMessage(window.siyuan.languages.invalid, 6000, "error");
                 return;
             }
-            confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
+            mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
                 draft.splice(draft.indexOf(color), 1);
                 orderDraft = orderDraft.filter(item => item !== key);
                 renderList();

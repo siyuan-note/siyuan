@@ -16,6 +16,7 @@ const fixture = (pending: Promise<void>[] = [], host?: {suspendLayoutSaving: () 
     const events: string[] = [];
     const api = {} as Pick<typeof import("./util"), "suspendLayoutSaving" | "exportLayout">;
     runInNewContext(code, {
+        clearReloadSnapshot: () => {},
         exports: api, layoutSaveRequests: new Set(pending),
         window: {clearTimeout, siyuan: {config: {readonly: false}, layout: {layout: {}, bottomDock: {}, leftDock: {}, rightDock: {}}}},
         document: {querySelector: () => ({getAttribute: () => "#iconDock"})},

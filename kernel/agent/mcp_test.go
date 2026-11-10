@@ -15,8 +15,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -144,6 +146,93 @@ func TestMCPDiscoveryRespectsAvailabilityAndPolicy(t *testing.T) {
 	}
 	if set.registration("mcp") != nil || set.registration("test_mcp_cloud_read") == nil || availableMCPSegment(set) != "" {
 		t.Fatal("disabling discovery must preserve direct access to enabled MCP tools")
+	}
+}
+
+func TestMCPDiscoveryFailureDiagnostics(t *testing.T) {
+	for _, action := range []string{"list", "load"} {
+		t.Run(action, func(t *testing.T) {
+			state := setupMCPDiscoveryTest(t)
+			ai := kernelModel.Conf.AI.Load()
+			ai.MCP.Servers[0].Name = "Browser service"
+			ai.MCP.Servers = append(ai.MCP.Servers, conf.MCPServer{ID: "offline", Name: "Offline service", Enabled: true})
+			call := func(server, expected string) {
+				t.Helper()
+				result, err := state.discover(context.Background(), map[string]any{"action": action, "server": server})
+				text := resultToString(result)
+				if err != nil || !result.IsError || !strings.Contains(text, expected) || strings.Contains(text, "secretSchema") || state.loaded[server] {
+					t.Fatalf("%s(%q): %s, %v; expected %q without loading tools", action, server, text, err, expected)
+				}
+			}
+			call("Browser service", `"id":"browser"`)
+			call("missing", "unknown MCP service ID")
+			if action == "load" {
+				call("", "exact MCP service ID is required")
+			}
+			call("offline", "no registered tools")
+			ai.MCP.Servers[0].Enabled = false
+			call("browser", "service is disabled")
+			ai.MCP.Servers[0].Enabled = true
+			for _, action := range []string{"read", "write"} {
+				ai.Agent.CapabilityPolicy.Overrides[tools.BuildCapabilityID("mcp", "backend", "browser", action)] = "deny"
+			}
+			call("browser", "not allowed by the agent capability policy")
+			for _, tool := range tools.GetAllTools() {
+				if tool.OwnerID == "browser" {
+					tool.Available = func() bool { return false }
+				}
+			}
+			call("browser", "tools are currently unavailable")
+		})
+	}
+}
+
+func TestMCPDiscoveryNameCollisionKeepsExactIDMatching(t *testing.T) {
+	state := setupMCPDiscoveryTest(t)
+	ai := kernelModel.Conf.AI.Load()
+	ai.MCP.Servers[0].Name = "Shared service"
+	ai.MCP.Servers[1].Name = "Shared service"
+	result, err := state.discover(context.Background(), map[string]any{"action": "load", "server": "Shared service"})
+	text := resultToString(result)
+	if err != nil || !result.IsError || !strings.Contains(text, `"id":"browser"`) || !strings.Contains(text, `"id":"cloud"`) || len(state.loaded) != 0 {
+		t.Fatalf("ambiguous name: %s, %v", text, err)
+	}
+	ai.MCP.Servers[1].Name = "browser"
+	ai.MCP.Servers[0].Enabled = false
+	result, err = state.discover(context.Background(), map[string]any{"action": "load", "server": "browser"})
+	if err != nil || !result.IsError || !strings.Contains(resultToString(result), "service is disabled") || len(state.loaded) != 0 {
+		t.Fatalf("an exact ID must take precedence over a name: %#v, %v", result, err)
+	}
+}
+
+func TestMCPDiscoveryConnectionDiagnostics(t *testing.T) {
+	state := setupMCPDiscoveryTest(t)
+	empty := mcp.NewServer(&mcp.Implementation{Name: "empty", Version: "1"}, nil)
+	server := httptest.NewServer(mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return empty }, nil))
+	t.Cleanup(server.Close)
+	failed := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "private connection details", http.StatusServiceUnavailable)
+	}))
+	t.Cleanup(failed.Close)
+	ai := kernelModel.Conf.AI.Load()
+	ai.MCP.Servers = append(ai.MCP.Servers,
+		conf.MCPServer{ID: "empty", Name: "Empty", Type: "http", URL: server.URL, Enabled: true},
+		conf.MCPServer{ID: "failed", Name: "Failed", Type: "http", URL: failed.URL, Enabled: true})
+	t.Cleanup(func() { <-mcpclient.ReconnectMCPAsync(nil, nil, nil) })
+	select {
+	case <-mcpclient.ReconnectMCPAsync(ai.MCP.Servers[2:], nil, nil):
+	case <-time.After(5 * time.Second):
+		t.Fatal("MCP test connections did not finish")
+	}
+	for _, tc := range []struct{ server, expected string }{
+		{"empty", "connected but has no registered tools"},
+		{"failed", "not connected (status: failed)"},
+	} {
+		result, err := state.discover(context.Background(), map[string]any{"action": "load", "server": tc.server})
+		text := resultToString(result)
+		if err != nil || !result.IsError || !strings.Contains(text, tc.expected) || strings.Contains(text, "private connection details") || state.loaded[tc.server] {
+			t.Fatalf("load(%q): %s, %v", tc.server, text, err)
+		}
 	}
 }
 

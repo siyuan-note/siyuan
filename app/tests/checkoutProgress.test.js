@@ -35,7 +35,7 @@ const run = async () => {
             const themeOverride = await win.webContents.insertCSS(".b3-button {background-color:rgb(90,100,110);}");
             const result = await win.webContents.executeJavaScript(`(async () => {
                 const assert = require("node:assert/strict");
-                window.siyuan = {zIndex:100,languages:{sync:"Sync",expand:"Expand",collapseSyncDetails:"Hide details",cancel:"Cancel",_kernel:{436:"Applying synchronized changes"}}};
+                window.siyuan = {zIndex:100,languages:{sync:"Sync",expand:"Expand",collapseSyncDetails:"Hide details",cancel:"Cancel",_kernel:{81:"Syncing...",436:"Applying synchronized changes"}}};
                 const escapeExports = {};
                 new Function("exports", ${JSON.stringify(escape)})(escapeExports);
                 const progressExports = {};
@@ -69,6 +69,14 @@ const run = async () => {
                 assert.equal(document.querySelector('#other-progress [data-type="message"]').textContent,"<img src=y>");
                 assert.equal(document.querySelector("#other-progress button"),skipButton,"progress update replaced the exit action");
                 const skipBounds = skipButton.getBoundingClientRect();
+                const footer = skipButton.parentElement;
+                const statusBounds = document.querySelector('#other-progress [role="status"]').getBoundingClientRect();
+                const progressPanel = document.querySelector('#other-progress .b3-dialog__loading');
+                const panelBounds = progressPanel.getBoundingClientRect();
+                assert.equal(getComputedStyle(footer).borderTopWidth,"0px","progress actions have no dialog divider");
+                assert.ok(skipBounds.top - statusBounds.bottom >= 16,"exit action crowds the status message");
+                assert.ok(Math.abs(skipBounds.right - (panelBounds.right - parseFloat(getComputedStyle(progressPanel).paddingRight) -
+                    parseFloat(getComputedStyle(progressPanel).borderRightWidth))) <= 1,"exit action has an extra right inset");
                 assert.ok(skipBounds.left >= 0 && skipBounds.right <= innerWidth && skipBounds.bottom <= innerHeight,
                     "exit action overflowed the progress panel");
                 assert.equal(document.querySelector("#other-progress img"),null);
@@ -106,7 +114,16 @@ const run = async () => {
                     }
                 }));
                 const runtime = {};
+                let activeSheetLayouts = 0;
                 new Function("exports","require","window",${JSON.stringify(source)})(runtime, name => {
+                    if (name === "../util/functions") return {isMobile:() => ${width <= 640}};
+                    if (name === "../mobile/util/mobileSheetLayout") return {bindMobileSheetLayout: (root, panel, options) => {
+                        assert.equal(options.standalone,true);
+                        assert.equal(panel.getAttribute("role"),"dialog");
+                        activeSheetLayouts++;
+                        let disposed = false;
+                        return {dispose:() => { assert.equal(disposed,false); disposed=true; activeSheetLayouts--; }};
+                    }};
                     if (name.includes("escape")) return escapeExports;
                     if (name === "../dialog/progress") return progressExports;
                     if (name.includes("constants")) return {Constants:{SIYUAN_APPID:"app"}};
@@ -129,10 +146,12 @@ const run = async () => {
                     message:"<img src=x onerror='window.compromised=true'>",...extra}});
                 progress("first",0,1,"background");
                 assert.equal(document.getElementById("sync-checkout-progress"),null);
+                assert.equal(activeSheetLayouts,0);
                 assert.equal(document.activeElement,editor);
                 assert.equal(editor.dispatchEvent(new Event("beforeinput",{bubbles:true,cancelable:true})),true);
                 assert.equal(runtime.openSyncCheckoutProgress(),true);
                 let root = document.getElementById("sync-checkout-progress");
+                assert.equal(activeSheetLayouts,${width <= 640 ? 1 : 0});
                 assert.equal(root.querySelector('[role="dialog"]').getAttribute("aria-modal"),"false");
                 assert.equal(document.activeElement,editor);
                 assert.equal(getComputedStyle(root.querySelector(".sync-checkout__scrim")).display,"none");
@@ -141,7 +160,10 @@ const run = async () => {
                 progress("first",0,2,"preparing",{token:"window-token"});
                 root = document.getElementById("sync-checkout-progress");
                 assert.ok(root && root.contains(document.activeElement));
-                assert.equal(root.classList.contains("sync-checkout--compact"),false,"local checkout should open the existing full progress view");
+                assert.equal(root.classList.contains("sync-checkout--compact"),true,"local checkout opens with concise sync progress");
+                assert.equal(root.querySelector('[data-type="message"]').textContent,window.siyuan.languages._kernel[81]);
+                assert.ok(root.querySelector(".sync-checkout__notice").classList.contains("fn__none"));
+                root.querySelector('[data-action="toggle"]').click();
                 assert.equal(root.querySelector(".sync-checkout__panel").hasAttribute("tabindex"),false,"the progress panel must not acquire a focus outline");
                 assert.equal(document.activeElement,root.querySelector('[data-action="toggle"]'));
                 assert.equal(getComputedStyle(root.querySelector(".sync-checkout__panel")).color,sharedColor);
@@ -160,6 +182,13 @@ const run = async () => {
                 assert.equal(calls.length,1);
                 assert.deepEqual(calls.shift().data,{taskID:"first",token:"window-token",saved:true});
                 progress("first",0,3);
+                progress("first",0,3,"applying",{current:0,total:0,message:"Indexing document"});
+                assert.equal(root.querySelector('[data-type="message"]').textContent,"Indexing document");
+                root.querySelector('[data-action="toggle"]').click();
+                assert.equal(root.querySelector('[data-type="message"]').textContent,"Indexing document");
+                assert.equal(root.querySelector('[role="progressbar"]').hasAttribute("aria-valuenow"),false);
+                root.querySelector('[data-action="toggle"]').click();
+                progress("first",0,3);
                 root.querySelector('[data-action="toggle"]').focus();
                 document.activeElement.dispatchEvent(new KeyboardEvent("keydown",{key:"Tab",bubbles:true,cancelable:true}));
                 assert.equal(document.activeElement,root.querySelector('[data-action="cancel"]'));
@@ -175,10 +204,11 @@ const run = async () => {
                 assert.ok(document.elementFromPoint(12,12).classList.contains("sync-checkout__scrim"));
                 root.querySelector('[data-action="toggle"]').click();
                 assert.ok(root.classList.contains("sync-checkout--compact"));
-                assert.ok(root.querySelector(".sync-checkout__details").classList.contains("fn__none"));
+                assert.ok(!root.querySelector(".sync-checkout__details").classList.contains("fn__none"));
+                assert.equal(root.querySelector('[data-type="message"]').textContent,window.siyuan.languages._kernel[81]);
                 assert.equal(getComputedStyle(root.querySelector(".sync-checkout__notice")).color,sharedColor,"collapsed sync notice should use the normal progress text color");
                 const compactPanel = root.querySelector(".sync-checkout__panel").getBoundingClientRect();
-                const noticeRect = root.querySelector(".sync-checkout__notice").getBoundingClientRect();
+                const noticeRect = root.querySelector(".sync-checkout__details").getBoundingClientRect();
                 const actionsRect = root.querySelector(".sync-checkout__actions").getBoundingClientRect();
                 assert.ok(actionsRect.top >= noticeRect.bottom,"compact actions must be below the notice");
                 assert.ok(Math.abs(actionsRect.width-noticeRect.width) <= 1,"compact rows must fill the same available width");

@@ -4,6 +4,32 @@
 
 package apicontract
 
+import (
+	"encoding/json"
+	"errors"
+)
+
+type DailyNoteCreateResult struct {
+	value   *FileTreeCreateData
+	failure *DocumentSelectionFailure
+}
+
+func NewDailyNoteCreateResult(id string) DailyNoteCreateResult {
+	return DailyNoteCreateResult{value: &FileTreeCreateData{ID: id}}
+}
+func NewDailyNoteSelectionFailure(value DocumentSelectionFailure) DailyNoteCreateResult {
+	return DailyNoteCreateResult{failure: &value}
+}
+func (value DailyNoteCreateResult) MarshalJSON() ([]byte, error) {
+	if value.value != nil {
+		return json.Marshal(value.value)
+	}
+	if value.failure != nil {
+		return json.Marshal(value.failure)
+	}
+	return nil, errors.New("daily note response is not set")
+}
+
 // DailyNoteInfoRequest 查询指定笔记本的日记候选，不创建文档或修改已有日记属性。
 // Date 为本地公历日期 YYYY-MM-DD，省略、空串或 null 时使用当天；日期无效返回 -1。
 // 已有文档按日期属性及模板路径定位，返回实际标题和不含笔记本名的绝对人类路径。

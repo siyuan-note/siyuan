@@ -44,18 +44,23 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Notebook: a top-level container holding documents. Use notebook.list to enumerate; pass notebook ID when creating documents.
 - hPath (human-readable path): display text only. A literal title can contain "/", so identical hPaths can refer to different document hierarchies. Never split an hPath or use it to recover identity. Document create/list/move and inbox.convert use notebook + parentID; parentID="" explicitly selects the notebook root. Legacy path=hPath resolves only unambiguous ancestor chains with non-empty titles and no literal "/"; unsupported or ambiguous candidates and unavailable indexes return explicit errors. Obtain document IDs from document.list/search_docs/get; a rename changes display text but not ID.
 - Document vs block move: document.move relocates an entire document (and children) — needs id, notebook (from document.get field "Box"), and target parentID. block.move repositions a single content block under a new parent block.
-- Dailynote (daily note/diary/journal): a special document on the notebook's daily-note save path. For diary/daily note/journal requests, use dailynote.create (not document.create) to open today's note, then dailynote.append/prepend to add content.
+- Dailynote (daily note/diary/journal): a special document on the notebook's daily-note save path. Use dailynote.append/prepend directly to add content; they create today's note automatically if needed, so no preliminary create call is needed. Use dailynote.create only to create/open today's note without adding content, not document.create.
 
 ## Tool Usage Patterns
 - Find: search.fulltext (keyword) → block.get (by ID). For semantic search use search.semantic.
+- Read source content: before answering about a block identified in the user's message (including a bare block ID), references or editor context, read its actual content with block.get or block.get_kramdown. Reference anchor text, document titles, child previews and batch_get metadata are not complete source content.
+- Read completely: block.get may truncate long block content. Use block.get_kramdown when complete content is needed, including before editing or quoting beyond a preview; do not treat a truncated read as the whole source.
+- Read documents: block.get on a document block returns its title, not its body. Use block.get_kramdown for the document body, or block.get_children followed by content reads of the relevant children; traverse nested containers when the task requires the whole document.
+- Read selectively: prioritize explicitly requested/referenced blocks and selected/focused blocks. Use block tools for visible blocks only when relevant to the request; a viewport ID list is neither a complete document nor a reason to fetch every visible block.
 - Structural search: for block types, inline formats, ancestry or statistics, first fetch sql.schema, then use sql.query. To show matching blocks in the frontend, use native/frontend/open_search(query, method=2) with SELECT b.* FROM blocks b; use projections and aggregates only with sql.query.
+- SQL boundary: sql.query is for structured discovery and statistics, not a substitute for block.get or block.get_kramdown when answering about a specific block's content. Never switch tools to bypass notebook scope, ambiguity or access errors.
 - Dynamic SQL in documents: reuse a complete-block query in a native {{SQL}} embed via block.insert/append/prepend. For single-line embeds, read block.get_kramdown, preserve ID and IAL, and update that block with lockType=true. For multiline SQL or -- comments, read block.dom and write dataType=dom with preserved metadata. Consult sql.schema for the workflow; never replace a dynamic embed with static results unless requested.
 - Explore structure: document.list (notebook + parentID, omitted parentID lists the notebook root) → document.get → block.get_children → block.get. Use block breadcrumb to trace a block's location.
 - Create content: document.create (notebook + parentID + independent literal title) → block.append/prepend/insert. Title slashes are text, never implicit parent segments.
-- Modify: block.update replaces ONE block's content — it does NOT create or append new blocks. To both modify and add, call block.update first, then block.append/prepend/insert as separate calls.
+- Modify: first read the current block with block.get_kramdown, or block.dom for structured containers. block.update replaces ONE block's entire content, not a delta; preserve content and metadata outside the requested change. It does NOT create or append new blocks. To both modify and add, call block.update first, then block.append/prepend/insert as separate calls.
 - Organize: document.move (full document), document.rename (title), block.move (single content block), document.delete.
 - Inbox (cloud-synced clippings, messages, and audio/video/file attachments; requires subscription): inbox.list (paged, summaries only) → inbox.get (read full content to judge how to file it) → inbox.convert (move one or many into local documents under a notebook, auto-deleting the cloud originals on success). Failed conversions are left in the inbox for retry. If a request fails with an auth/subscription error, report it honestly — do not retry.
-- Attributes: attr.get/set on any block. Database/attribute views: database.create (database block with ordered fields), database.item_add (rows), database.key_add (columns), database.key_update (field configuration: name/type/icon/description, number/date format, display template, date defaults, select options, relation and rollup settings; inspect keys first, send exactly one config setting per call, and render to verify), database.key_set_template (existing template field formulas; use .action{add .Number 1} for a number field plus one, then render to verify; do not write computed template cells with item_update), database.render (view). Use database.get or search to locate the database and view IDs, then database.view_get with its carrier block ID to inspect metadata, ordered views, block-specific visibleViewIDs, filters, sorts, group, layout and revision. Use database.view_add/view_duplicate/view_remove for view lifecycle, view_update for name/icon/desc (omitted fields stay unchanged; empty icon/desc clears them), view_move for database-wide ordering, and view_visibility_set for the carrier block's complete visible view list (preserve other visible views and keep at least one). Metadata and order affect all mirrors; hiding a view affects only the specified carrier block. Use database.view_filters_set/view_sorts_set/view_group_set/view_layout_set for configuration; preserve unchanged rules when replacing the complete filters or sorts array, and use the revision from the latest view_get. Create database blocks via database.create, never via the file tool or generic block insertion.
+- Attributes: attr.get/set on any block. Database/attribute views: database.create (database block with ordered fields), database.item_add (one row), database.items_add (up to 100 rows with typed field values), database.items_update (up to 1000 typed cell updates; prefer batches for multi-row work, inspect keys first and verify returned saved values), database.key_add (columns), database.key_update (field configuration: name/type/icon/description, number/date format, display template, date defaults, select options, relation and rollup settings; inspect keys first, send exactly one config setting per call, and render to verify), database.key_set_template (existing template field formulas; use .action{add .Number 1} for a number field plus one, then render to verify; do not write computed template cells with item_update), database.render (view). Use database.get or search to locate the database and view IDs, then database.view_get with its carrier block ID to inspect metadata, ordered views, block-specific visibleViewIDs, filters, sorts, group, layout and revision. Use database.view_add/view_duplicate/view_remove for view lifecycle, view_update for name/icon/desc (omitted fields stay unchanged; empty icon/desc clears them), view_move for database-wide ordering, and view_visibility_set for the carrier block's complete visible view list (preserve other visible views and keep at least one). Metadata and order affect all mirrors; hiding a view affects only the specified carrier block. Use database.view_field_move to reorder columns or card fields in a specific view, including the primary field; follow the tool description and verify the returned field order. Use database.view_filters_set/view_sorts_set/view_group_set/view_layout_set for configuration; preserve unchanged rules when replacing the complete filters or sorts array, and use the revision from the latest view_get. Create database blocks via database.create, never via the file tool or generic block insertion.
 - Icons: attr.set only changes a document BLOCK's icon — it cannot set a NOTEBOOK's icon. For notebooks use notebook.set_icon (a specific emoji) or notebook.random_icon (random emoji, optionally scoped by id; omit id to randomize ALL notebooks).
 - Document images: image.list finds local images referenced by a document; call image.analyze on a returned asset path to attach it to the current model for understanding. image.generate creates a reusable image asset for insertion or other document operations.
 - HTML components: asset.create_html writes HTML content as an asset and inserts a sandboxed IFrame block in one operation. Prefer self-contained HTML; only use remote resources when the user requests them.
@@ -63,13 +68,14 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 
 ## Response Guidelines
 - Reply in the language configured in SiYuan's appearance settings.
-- When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs actually returned by a tool call; never fabricate IDs. For general mentions without a specific block, plain text is fine.
+- When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs supplied by the user, present in turn context, or actually returned by a tool call; never fabricate IDs. A known ID permits linking, not claims about unread content. For general mentions without a specific block, plain text is fine.
 - When displaying a SiYuan tag name in chat, render its exact label as <span data-type="tag">label</span>. Keep every label character, including a leading $, inside the span and HTML-escape the label text. Never prefix the label with # or use #label# in chat.
 - Be concise: summarize rather than repeat large content.
 - For choices (which notebook/document/action), use the question tool — never a plain text list.
 - Use markdown; for code blocks always specify the language (e.g. python, go); use $...$ for inline and $...$ for block formulas.
 - Refer to the product as "SiYuan", never "SiYuan Note".
 - Do not fabricate. If unknown or not found in the notes, say so honestly and search/verify before claiming facts.
+- If source content cannot be read with the available capabilities, explain the limitation and request the needed content; do not infer it from titles or previews.
 
 ## SiYuan User Guide
 SiYuan has a built-in user guide notebook documenting all features. IDs by language: 简体中文 "20210808180117-czj9bvb", 繁體中文 "20211226090932-5lcq56f", 日本語 "20240530133126-axarxgx", others "20210808180117-6v0mkxr".
@@ -136,7 +142,7 @@ var toolSignatureKeys = map[string][]string{
 
 	"attr":      {"id", "ids"},
 	"block":     {"id", "ids", "parentID", "nextID", "previousID"},
-	"document":  {"id", "path", "notebook", "keyword"},
+	"document":  {"id", "parentID", "path", "notebook", "keyword"},
 	"database":  {"id", "notebook", "parentID", "previousID", "nextID", "keyID", "itemID", "itemIDs", "keyword"},
 	"ref":       {"id", "keyword"},
 	"notebook":  {"id", "name"},
@@ -170,7 +176,7 @@ func buildDoomSignature(name, action string, args map[string]any) string {
 		if v, ok := args[k]; ok {
 			s := fmt.Sprint(v)
 			if len(s) > 64 {
-				s = s[:64] + "..."
+				s = util.TruncateUTF8Bytes(s, 64) + "..."
 			}
 			sig.WriteString("::")
 			sig.WriteString(k)
@@ -288,24 +294,6 @@ func BrowserCapabilityResult(callID string, result string, structuredContent any
 	}
 }
 
-func sendEvent(ch chan<- AgentEvent, ev AgentEvent) {
-	// 仍用非阻塞发送，避免 SSE 消费端卡住时拖死 agent 主循环；缓冲已加大以降低背压概率。
-	// 仅在确实丢弃（背压）时记日志，便于诊断长会话偶发丢字。
-	select {
-	case ch <- ev:
-	default:
-		logging.LogWarnf("agent event dropped (type=%s): SSE consumer too slow", ev.Type)
-	}
-}
-
-func sendCriticalEvent(ctx context.Context, ch chan<- AgentEvent, ev AgentEvent) {
-	select {
-	case ch <- ev:
-	case <-ctx.Done():
-	case <-time.After(5 * time.Second):
-	}
-}
-
 func wrapToolOutput(result string) string {
 	return "[tool_output]\n" + result + "\n[/tool_output]"
 }
@@ -387,7 +375,7 @@ type AgentAttachment struct {
 
 type Reference struct {
 	ID    string `json:"id"`
-	Title string `json:"title"`
+	Title string `json:"title"` // 引用锚文本，仅作预览，不代表目标块正文。
 }
 
 // EditorContext 是发送消息时前端编辑器的只读状态快照。
@@ -493,8 +481,19 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 	confAIReadSnapshot := kernelModel.Conf.LoadAI()
 
 	ch := make(chan AgentEvent, 256)
+	workCtx, cancel := context.WithCancelCause(ctx)
+	output := relayAgentEvents(workCtx, cancel, ch, EventDeliveryTimeout, func(cause error) string {
+		if errors.Is(cause, ErrSessionTimeout) {
+			return kernelModel.Conf.Language(379)
+		}
+		if errors.Is(cause, errSlowConsumer) {
+			return kernelModel.Conf.Language(467)
+		}
+		return kernelModel.Conf.Language(468)
+	})
 
 	go func() {
+		ctx := workCtx
 		defer close(ch)
 		defer func() {
 			if ctx.Err() != nil && sessionID != "" {
@@ -511,10 +510,19 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		// 每次用户发起对话只读取一次，工具轮次和压缩重建共享这份指令快照。
 		instructions, instructionsErr := util.ReadAgentInstructions()
 		if instructionsErr != nil {
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: util.AgentInstructionsError(instructionsErr, language)})
+			sendEvent(ctx, ch, AgentEvent{Type: "error", Error: util.AgentInstructionsError(instructionsErr, language)})
 			return
 		}
 
+		memoryIDs := append([]string{}, editorCtx.SelectedBlockIDs...)
+		if editorCtx.FocusedBlockID != "" {
+			memoryIDs = append(memoryIDs, editorCtx.FocusedBlockID)
+		}
+
+		for _, reference := range references {
+			memoryIDs = append(memoryIDs, reference.ID)
+		}
+		ctx = kernelModel.ContextWithAIMemoryScope(ctx, memoryIDs)
 		if confAIReadSnapshot.MCP != nil {
 			mcpclient.EnsureMCPConnected(confAIReadSnapshot.MCP.Servers)
 		}
@@ -526,7 +534,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		permissionController, err := registerSessionPermissionController(sessionID)
 		if err != nil {
 			logging.LogErrorf("load agent session permission failed: %s", err)
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+			sendEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 			return
 		}
 		defer unregisterSessionPermissionController(sessionID, permissionController)
@@ -546,7 +554,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		ctx = mcptools.ContextWithMCPDiscovery(ctx, mcpState.discover)
 		capabilities, capabilityErr := mcpState.build(frontendCapabilities)
 		if capabilityErr != nil {
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
+			sendEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
 			return
 		}
 		var messages []openai.ChatCompletionMessage
@@ -595,7 +603,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						if lastUserIdx >= 0 {
 							truncated = truncated[:lastUserIdx]
 						} else if userEntryID != "" {
-							sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+							sendEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 							return
 						}
 					} else {
@@ -670,7 +678,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		}
 		if err := beginRuntimeTurn(sessionID, turn); err != nil {
 			logging.LogErrorf("begin agent runtime failed: %s", err)
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+			sendEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 			return
 		}
 		// turn 是恢复协议的身份锚点，且此时事件通道仍为空。直接写入缓冲区，确保请求刚被取消时
@@ -750,7 +758,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			return fmt.Sprintf(kernelModel.Conf.Language(417), getAgentRequestErrorMessage(err, requestMessages))
 		}
 
-		compactContext := func(requestTools []openai.Tool, force bool) (bool, error) {
+		compactContext := func(requestTools []openai.Tool, force bool, roundID string) (bool, error) {
 			if contextLimit <= 0 {
 				if !force {
 					return false, nil
@@ -829,7 +837,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			defer cancelCompaction()
 			compactionCtx = context.WithValue(compactionCtx, compactionRequestBudgetKey{}, &compactionRequests)
 
-			sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "compacting context"})
+			sendEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "compacting context", RoundID: roundID})
 			var nextCompaction *runtimeCompaction
 			var compactionStateErr error
 			if nativeResponsesCompaction {
@@ -918,9 +926,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 
 			roundID := fmt.Sprintf("%s_%d", turn.TurnID, modelRound)
 			if modelRound == 0 {
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "analyzing", RoundID: roundID})
+				sendEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "analyzing", RoundID: roundID})
 			} else {
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "processing", RoundID: roundID})
+				sendEvent(ctx, ch, AgentEvent{Type: "thinking", Reasoning: "processing", RoundID: roundID})
 			}
 			modelRound++
 
@@ -929,7 +937,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				if !saveTurn("interrupted") {
 					return
 				}
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
+				sendEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
 				return
 			}
 			requestTools := roundCapabilities.definitions
@@ -949,19 +957,24 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				messages[0].Content = buildSystemPrompt(language, roundCapabilities, instructions.Content)
 			}
 
-			_, compactErr := compactContext(requestTools, false)
+			_, compactErr := compactContext(requestTools, false, roundID)
 			if compactErr != nil {
 				logging.LogErrorf("agent context compaction failed: %s", compactErr)
 				if !saveTurn("interrupted") {
 					return
 				}
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: compactionErrorMessage(compactErr)})
+				sendEvent(ctx, ch, AgentEvent{Type: "error", Error: compactionErrorMessage(compactErr)})
 				return
 			}
 
+			memoryContext, memoryErr := kernelModel.BuildAIMemoryContext(ctx, rawUserMessage, memoryIDs, 6000)
+			if memoryErr != nil {
+				memoryContext = "<untrusted_memory>Memory could not be verified for this request; do not infer missing background.</untrusted_memory>"
+			}
+			memoryContext = fitAIMemoryContext(model, messages, requestTools, memoryContext, contextLimit, maxCompletionTokens)
 			req := openai.ChatCompletionRequest{
 				Model:               model,
-				Messages:            messages,
+				Messages:            withAIMemoryMessages(messages, memoryContext),
 				Tools:               requestTools,
 				Stream:              true,
 				StreamOptions:       &openai.StreamOptions{IncludeUsage: true},
@@ -974,8 +987,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			var responseInput func(bool) []any
 			if util.IsOpenAIResponsesProtocol(protocol) {
 				responseInput = func(downgradeImages bool) []any {
-					return checkpointMessagesToOpenAIResponseInput(
-						contextMsgs, language, capabilities, compaction, downgradeImages)
+					return withAIMemoryResponseInput(checkpointMessagesToOpenAIResponseInput(
+						contextMsgs, language, capabilities, compaction, downgradeImages), memoryContext)
 				}
 			}
 			stream, firstResp, roundCancel, requestMessages, imageDowngraded, imageUnsupportedDetected, streamErr :=
@@ -990,7 +1003,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 			if streamErr != nil {
 				if isContextOverflow(streamErr) && !overflowRetryPending {
-					compacted, err := compactContext(requestTools, true)
+					compacted, err := compactContext(requestTools, true, roundID)
 					if err == nil && compacted {
 						overflowRetryPending = true
 						continue
@@ -1000,7 +1013,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						if !saveTurn("interrupted") {
 							return
 						}
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: compactionErrorMessage(err)})
+						sendEvent(ctx, ch, AgentEvent{Type: "error", Error: compactionErrorMessage(err)})
 						return
 					}
 				}
@@ -1009,10 +1022,10 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					return
 				}
 				if isContextOverflow(streamErr) {
-					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(352)})
+					sendEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(352)})
 					return
 				}
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentRequestErrorMessage(streamErr, requestMessages)})
+				sendEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentRequestErrorMessage(streamErr, requestMessages)})
 				return
 			}
 			overflowRetryPending = false
@@ -1030,7 +1043,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				}
 				contentBuilder.WriteString(token)
 				if !toolRoundLimitReached {
-					sendEvent(ch, AgentEvent{Type: "content", Token: token})
+					sendEvent(ctx, ch, AgentEvent{Type: "content", Token: token})
 				}
 			}
 			writeReasoning := func(token string) {
@@ -1039,7 +1052,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				}
 				reasoningBuilder.WriteString(token)
 				if !toolRoundLimitReached {
-					sendEvent(ch, AgentEvent{Type: "reasoning", Token: token})
+					sendEvent(ctx, ch, AgentEvent{Type: "reasoning", Token: token})
 				}
 			}
 			writeTaggedContent := func(token string) {
@@ -1104,7 +1117,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					stream.Close()
 					roundCancel()
 					if finalized {
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentRequestErrorMessage(recvErr, messages)})
+						sendEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentRequestErrorMessage(recvErr, messages)})
 					}
 					return
 				}
@@ -1185,10 +1198,10 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					responseOutputTokens = 0
 				} else {
 					if reasoningBuilder.Len() > 0 {
-						sendEvent(ch, AgentEvent{Type: "reasoning", Token: reasoningBuilder.String()})
+						sendEvent(ctx, ch, AgentEvent{Type: "reasoning", Token: reasoningBuilder.String()})
 					}
 					if contentBuilder.Len() > 0 {
-						sendEvent(ch, AgentEvent{Type: "content", Token: contentBuilder.String()})
+						sendEvent(ctx, ch, AgentEvent{Type: "content", Token: contentBuilder.String()})
 					}
 				}
 			}
@@ -1217,12 +1230,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				if !saveTurn("interrupted") {
 					return
 				}
-				sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
+				sendEvent(ctx, ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
 				errMsg := kernelModel.Conf.Language(297)
 				if toolRoundLimitReached {
 					errMsg = kernelModel.Conf.Language(440)
 				}
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
+				sendEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
 				return
 			}
 
@@ -1278,7 +1291,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					for j := start; j < len(aggregatedToolCalls); j++ {
 						checkpointMsgs[assistantIdx].ToolCalls[j].Result = result
 						checkpointMsgs[assistantIdx].ToolCalls[j].State = "skipped"
-						sendEvent(ch, AgentEvent{
+						sendEvent(ctx, ch, AgentEvent{
 							Type:       "tool_result",
 							Name:       aggregatedToolCalls[j].Function.Name,
 							RoundID:    roundID,
@@ -1301,7 +1314,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						action, _ = a.(string)
 					}
 
-					sendEvent(ch, AgentEvent{
+					sendEvent(ctx, ch, AgentEvent{
 						Type:       "tool_call",
 						Name:       tc.Function.Name,
 						RoundID:    roundID,
@@ -1339,6 +1352,10 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						}
 					}
 					if toolInputErr == nil {
+						toolInputErr = preflightCapabilitySnapshot(registration, action)
+					}
+					approvedEffects := capabilityEffects(registration, action)
+					if toolInputErr == nil {
 						requiresConfirm, forcedConfirm = capabilityConfirmRequirement(
 							registration, action, args, permissionController.allowSession.Load(), nil)
 					}
@@ -1348,9 +1365,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						confirmChannelsMu.Lock()
 						confirmChannels[confirmID] = &confirmWaiter{sessionID: sessionID, ch: ch2}
 						confirmChannelsMu.Unlock()
-						effects := capabilityEffects(registration, action)
-						sendCriticalEvent(ctx, ch, AgentEvent{
-							Type: "confirm", Name: tc.Function.Name, Arguments: confirmationArgs, ConfirmID: confirmID, Effects: effects,
+						sendEvent(ctx, ch, AgentEvent{
+							Type: "confirm", Name: tc.Function.Name, Arguments: confirmationArgs, ConfirmID: confirmID, Effects: approvedEffects,
 							ForcedConfirm: forcedConfirm, CapabilityID: registration.ID,
 						})
 						var rejectionMsg string
@@ -1376,7 +1392,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 								Content:    wrapToolOutput(cancelMsg),
 								ToolCallID: tc.ID,
 							})
-							sendEvent(ch, AgentEvent{
+							sendEvent(ctx, ch, AgentEvent{
 								Type:       "tool_result",
 								Name:       tc.Function.Name,
 								RoundID:    roundID,
@@ -1392,7 +1408,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 									Content:    wrapToolOutput(cancelMsg),
 									ToolCallID: aggregatedToolCalls[j].ID,
 								})
-								sendEvent(ch, AgentEvent{
+								sendEvent(ctx, ch, AgentEvent{
 									Type:       "tool_result",
 									Name:       aggregatedToolCalls[j].Function.Name,
 									RoundID:    roundID,
@@ -1411,7 +1427,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							}
 							timedOut = true
 							rejectionMsg = "Confirmation timed out, operation skipped automatically"
-							sendEvent(ch, AgentEvent{
+							sendEvent(ctx, ch, AgentEvent{
 								Type:       "tool_result",
 								Name:       tc.Function.Name,
 								RoundID:    roundID,
@@ -1423,7 +1439,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						if timedOut || !result.approved {
 							if rejectionMsg == "" {
 								rejectionMsg = "User rejected this operation"
-								sendEvent(ch, AgentEvent{
+								sendEvent(ctx, ch, AgentEvent{
 									Type:       "tool_result",
 									Name:       tc.Function.Name,
 									RoundID:    roundID,
@@ -1445,12 +1461,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						}
 
 						if result.always {
-							sendCriticalEvent(ctx, ch, AgentEvent{
+							sendEvent(ctx, ch, AgentEvent{
 								Type: AgentEventPermission, PermissionMode: AgentPermissionAllowSession,
 							})
 						}
 						// 确认卡片会结束当前思考状态，工具执行前重新通知前端显示“思考中”。
-						sendCriticalEvent(ctx, ch, AgentEvent{
+						sendEvent(ctx, ch, AgentEvent{
 							Type: "thinking", Reasoning: "processing", RoundID: roundID,
 						})
 					}
@@ -1464,6 +1480,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					if toolInputErr == nil {
 						// 用户确认期间能力可能被禁用、卸载或重新注册，快照和执行前必须复核同一份注册。
 						toolInputErr = validateCapabilityCall(ctx, registration, args)
+					}
+					if toolInputErr == nil {
+						toolInputErr = validateCapabilityEffects(registration, action, approvedEffects)
 					}
 
 					if toolInputErr == nil && !snapshotCreated && needsCapabilitySnapshot(registration, action) {
@@ -1490,7 +1509,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							if !saveTurn("interrupted") {
 								return
 							}
-							sendEvent(ch, AgentEvent{
+							sendEvent(ctx, ch, AgentEvent{
 								Type:       "tool_result",
 								Name:       tc.Function.Name,
 								RoundID:    roundID,
@@ -1498,7 +1517,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 								Result:     abortMsg,
 							})
 							for j := i + 1; j < len(aggregatedToolCalls); j++ {
-								sendEvent(ch, AgentEvent{
+								sendEvent(ctx, ch, AgentEvent{
 									Type:       "tool_result",
 									Name:       aggregatedToolCalls[j].Function.Name,
 									RoundID:    roundID,
@@ -1506,7 +1525,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 									Result:     abortMsg,
 								})
 							}
-							sendCriticalEvent(ctx, ch, AgentEvent{
+							sendEvent(ctx, ch, AgentEvent{
 								Type:  "error",
 								Error: "auto snapshot failed, operation aborted: " + err.Error(),
 							})
@@ -1514,7 +1533,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						}
 						snapshotIDs = append(snapshotIDs, id)
 						snapshotCreated = true
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "snapshot", RoundID: roundID, SnapshotID: id})
+						sendEvent(ctx, ch, AgentEvent{Type: "snapshot", RoundID: roundID, SnapshotID: id})
 					}
 
 					if toolInputErr == nil {
@@ -1536,6 +1555,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					var modelAttachments []mcptools.ModelAttachment
 					isErr := false
 					executionUnknown := false
+					if toolInputErr == nil {
+						toolInputErr = validateCapabilityEffects(registration, action, approvedEffects)
+					}
 					if toolInputErr != nil {
 						resultStr = toolInputErr.Error()
 						isErr = true
@@ -1576,7 +1598,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					resultStr = util.TruncateToolOutput(resultStr, sessionID)
 					resultStr = wrapToolOutput(resultStr)
 
-					sendEvent(ch, AgentEvent{
+					sendEvent(ctx, ch, AgentEvent{
 						Type:       "tool_result",
 						Name:       tc.Function.Name,
 						RoundID:    roundID,
@@ -1601,7 +1623,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						return
 					}
 					if executionUnknown {
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: rawResult})
+						sendEvent(ctx, ch, AgentEvent{Type: "error", Error: rawResult})
 						return
 					}
 
@@ -1632,7 +1654,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					if !saveTurn("interrupted") {
 						return
 					}
-					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
+					sendEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
 					return
 				}
 
@@ -1674,17 +1696,17 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				return
 			}
 
-			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
+			sendEvent(ctx, ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
 			if toolRoundLimitReached {
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(440)})
+				sendEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(440)})
 				return
 			}
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
+			sendEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
 			return
 		}
 	}()
 
-	return ch
+	return output
 }
 
 func GenerateTitle(client *util.AIClient, apiBaseURL, protocol, model, userMsg, language string) string {
@@ -1813,7 +1835,20 @@ func capabilityEffects(registration *capabilityRegistration, action string) mcpt
 		return effects
 	}
 	effects, _ := registration.Tool.EffectsFor(action)
+	if needsCapabilitySnapshot(registration, action) {
+		effects = mcptools.EffectsWithSyncAssets(effects)
+	}
 	return effects
+}
+
+func validateCapabilityEffects(registration *capabilityRegistration, action string, approved mcptools.ToolEffects) error {
+	current := capabilityEffects(registration, action)
+	// 等待确认或准备快照期间配置可能改变，新增写入、外发或费用不能沿用旧确认。
+	if current.LocalWrite && !approved.LocalWrite || current.DataEgress && !approved.DataEgress ||
+		current.ExternalCost && !approved.ExternalCost {
+		return errors.New("Tool effects changed before execution; request confirmation again with the current configuration")
+	}
+	return nil
 }
 
 func capabilityConfirmRequirement(registration *capabilityRegistration, action string, args map[string]any,
@@ -1854,6 +1889,15 @@ func needsCapabilitySnapshot(registration *capabilityRegistration, action string
 		return false
 	}
 	return needsLocalSnapshot(registration.ModelName, action)
+}
+
+// 本地写入必须先具备快照密钥；在请求确认前返回前置条件，允许本轮继续执行只读工具。
+func preflightCapabilitySnapshot(registration *capabilityRegistration, action string) error {
+	repo := kernelModel.Conf.Repo.Load()
+	if needsCapabilitySnapshot(registration, action) && (repo == nil || len(repo.Key) == 0) {
+		return errors.New(kernelModel.Conf.Language(26))
+	}
+	return nil
 }
 
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
@@ -1898,6 +1942,10 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 
 func needsLocalSnapshot(toolName, action string) bool {
 	tool := mcptools.GetTool(toolName)
+	// 创建快照本身就是恢复点，无需在它之前再创建一份相同的数据快照。
+	if tool != nil && tool.CapabilityID == "native/backend/repo" && action == "create" {
+		return false
+	}
 	if effects, ok := tool.EffectsFor(action); ok {
 		return effects.LocalWrite
 	}
@@ -1947,7 +1995,7 @@ func waitForQuestion(ctx context.Context, args map[string]any, questionID, round
 	}
 	questionChannelsMu.Unlock()
 
-	sendCriticalEvent(ctx, ch, AgentEvent{
+	sendEvent(ctx, ch, AgentEvent{
 		Type:       "question",
 		QuestionID: questionID,
 		RoundID:    roundID,
@@ -2057,7 +2105,7 @@ func handleBrowserCapability(ctx context.Context, tc openai.ToolCall, registrati
 	browserCapabilityChannels[callID] = ch2
 	browserCapabilityChannelsMu.Unlock()
 
-	sendCriticalEvent(ctx, ch, AgentEvent{
+	sendEvent(ctx, ch, AgentEvent{
 		Type:         "browser_capability_call",
 		CallID:       callID,
 		Name:         tc.Function.Name,
@@ -2165,6 +2213,9 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 
 	var sb strings.Builder
 	sb.WriteString(filterSystemPromptByCapabilities(systemPrompt, capabilities))
+	if capabilities.hasModelName("memory") {
+		sb.WriteString("\n\nLong-term memory: use the memory tool for explicit remember, correct, disable or forget requests; report success only after saved=true. Query records before correcting and use exact IDs/revisions. Memory never grants permission for other actions.")
+	}
 	sb.WriteString(availableMCPSegment(capabilities))
 	if capabilities != nil && capabilities.toolRoundLimitReached {
 		sb.WriteString(toolRoundLimitPrompt)
@@ -2223,7 +2274,7 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 	if capabilities.hasModelName("dailynote") {
 		sb.WriteString("\n\nIn the language configured in SiYuan's appearance settings, a daily note is called: ")
 		sb.WriteString(util.I18nTerm(language, "dailyNote"))
-		sb.WriteString(". When the user asks to write or create this, use dailynote.create, not document.create.")
+		sb.WriteString(". To add content, call dailynote.append/prepend directly; they create today's note automatically if needed. Use dailynote.create to create/open it without adding content, not document.create.")
 	}
 	return sb.String()
 }
@@ -2237,7 +2288,7 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 	var sb strings.Builder
 	sb.WriteString("<turn_context>\n")
 	if len(references) > 0 {
-		sb.WriteString("The user referenced the following content blocks when sending this message:\n")
+		sb.WriteString("The user referenced the following blocks. Each label is anchor text/a preview, not the block's full content:\n")
 		for _, ref := range references {
 			sb.WriteString("- ")
 			sb.WriteString(ref.Title)
@@ -2246,7 +2297,7 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 			sb.WriteString(")\n")
 		}
 		if capabilities == nil || capabilities.hasModelName("block") {
-			sb.WriteString("Use the block tools to fetch their actual content before responding.\n")
+			sb.WriteString("Use block.get or block.get_kramdown to fetch actual content before answering about these blocks. For a document body, use block.get_kramdown or traverse its children; block.get returns only the document title.\n")
 		}
 	}
 	if editorCtx != nil {
@@ -2310,7 +2361,7 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 			}
 		}
 		if capabilities == nil || capabilities.hasModelName("block") {
-			sb.WriteString("Use the block tools (e.g. block with action \"get\") to fetch actual content before responding.")
+			sb.WriteString("Use block.get or block.get_kramdown to read relevant content before answering. Prioritize explicitly requested/referenced and selected/focused blocks; fetch visible blocks only as needed. Visible IDs are a viewport snapshot, not the complete document. For the document body, use block.get_kramdown or traverse its children; block.get returns only the document title.")
 		}
 		sb.WriteString("\n</editor_context>")
 	}
@@ -2691,10 +2742,11 @@ func createProtocolStreamWithRetry(ctx context.Context, client *util.AIClient, p
 				return nil, openai.ChatCompletionStreamResponse{}, nil, ctx.Err()
 			case <-time.After(delay):
 			}
-			sendEvent(ch, AgentEvent{Type: "retry", RetryAttempt: attempt, RetryMax: maxRetries})
+			sendEvent(ctx, ch, AgentEvent{Type: "retry", RetryAttempt: attempt, RetryMax: maxRetries})
 		}
 
 		streamCtx, streamCancel := context.WithCancel(ctx)
+		streamCtx = util.ContextWithOpenAIChatTemperature(streamCtx, req.Temperature)
 		requestTimer, requestTimerDone := startCancelTimer(requestTimeout, streamCancel)
 		stream, err := util.CreateOpenAICompletionStream(streamCtx, client, protocol, req, responseInput)
 		requestTimedOut := stopCancelTimer(requestTimer, requestTimerDone)

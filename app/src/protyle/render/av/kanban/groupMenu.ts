@@ -1,7 +1,7 @@
+import {mobileConfirmDialog} from "../../../../dialog/mobileConfirmDialog";
 import {Menu} from "../../../../plugin/Menu";
 import {Constants} from "../../../../constants";
 import {transaction} from "../../../wysiwyg/transaction";
-import {confirmDialog} from "../../../../dialog/confirmDialog";
 import dayjs from "dayjs";
 import {getAVData} from "../virtualScroll";
 import {
@@ -45,7 +45,7 @@ export const openKanbanGroupMenu = (options: {
         label: window.siyuan.languages.delete,
         warning: true,
         click() {
-            confirmDialog(
+            mobileConfirmDialog(
                 window.siyuan.languages.deleteKanbanGroupConfirm,
                 window.siyuan.languages.deleteKanbanGroupTip,
                 () => {

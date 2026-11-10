@@ -620,6 +620,26 @@ describe("sortBazaarPackages", () => {
         sortBazaarPackages(packages, "0");
         assert.deepEqual(packages.map((item) => item.name), ["first", "second", "third"]);
     });
+
+    it("sorts bazaar creation timestamps in both directions without substituting update times", () => {
+        const releases = [
+            {name: "missing", updated: "20990101", downloads: 0},
+            {name: "new", created: "2026-11-07T00:00:00Z", updated: "20260101", downloads: 0},
+            {name: "invalid", created: "not-a-date", updated: "20990101", downloads: 0},
+            {name: "old", created: "2020-01-01T00:00:00Z", updated: "20990101", downloads: 0},
+            {name: "same", created: "2026-11-07T08:00:00+08:00", updated: "20260102", downloads: 0},
+            {name: "empty", created: "", updated: "20990101", downloads: 0},
+            {name: "epoch", created: "1970-01-01T00:00:00Z", updated: "20990101", downloads: 0},
+        ];
+        const original = releases.map((item) => item.name);
+        assert.deepEqual(sortBazaarPackages(releases, "6").map((item) => item.name),
+            ["new", "same", "old", "epoch", "missing", "invalid", "empty"]);
+        assert.deepEqual(sortBazaarPackages(releases, "7").map((item) => item.name),
+            ["epoch", "old", "new", "same", "missing", "invalid", "empty"]);
+        assert.deepEqual(releases.map((item) => item.name), original);
+        assert.deepEqual(sortBazaarPackages(packages, "6"), packages);
+        assert.deepEqual(sortBazaarPackages([], "7"), []);
+    });
 });
 
 describe("isBazaarPackageRatingLoaded", () => {

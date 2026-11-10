@@ -6,7 +6,7 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261029135500"
 	},
 	"Children": [
 		{
@@ -441,6 +441,46 @@
 					"TextMarkType": "block-ref",
 					"TextMarkTextContent": "MCP Service",
 					"TextMarkBlockRefID": "20260804223002-mcpsv03",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-k3s9gxa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261029051700-k3s9gxa",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Long-term memory"
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-80jfq5t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-80jfq5t",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Long-term memory retains facts and preferences across conversations. For setup, management and privacy, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Long-term memory",
+					"TextMarkBlockRefID": "20261029135500-sc9beol",
 					"TextMarkBlockRefSubtype": "s"
 				},
 				{

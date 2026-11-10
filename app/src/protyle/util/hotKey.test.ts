@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import {test} from "node:test";
 import {ScriptTarget} from "typescript";
 import {compileModule, evaluateModule} from "../../testSupport/loadModule";
+import * as shortcut from "../../util/shortcut";
 import * as keymapBindings from "../../util/keymapBindings";
 
 const compiled = compileModule("src/protyle/util/hotKey.ts", ScriptTarget.ES2021);
@@ -9,6 +10,7 @@ const compiled = compileModule("src/protyle/util/hotKey.ts", ScriptTarget.ES2021
 const fixture = (ios = true, mac = true) => {
     const dependencies: Record<string, object> = {
         "../../util/keymapBindings": keymapBindings,
+        "../../util/shortcut": shortcut,
         "../../constants": {Constants: {KEYCODELIST: {67: "C", 70: "F", 76: "L", 80: "P", 82: "R"}}},
         "./compatibility": {
             isInIOS: () => ios,

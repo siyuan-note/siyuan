@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {getMobileSheetBounds, moveSheetGesture} from "../../../mobile/util/mobileSheetGesture";
 import {getVisibleSheetViewport} from "../../../menus/sheetOpen";
 
 const compiled = transpileModule(readFileSync("src/protyle/render/av/mobilePanel.ts", "utf8"), {
@@ -15,6 +16,7 @@ const createPanel = () => {
     const observers: Array<() => void> = [];
     const classes = new Set<string>();
     const resizeListeners = new Set<() => void>();
+    const viewport = {height: 800, offsetTop: 0, addEventListener() {}};
     let backTarget: HTMLElement;
     const backButtonClasses = new Set<string>();
     const backButton = {classList: {toggle: (name: string, force: boolean) => {
@@ -29,13 +31,15 @@ const createPanel = () => {
         classList: {add: (...names: string[]) => names.forEach(name => classes.add(name)),
             contains: (name: string) => classes.has(name)},
         setAttribute() {},
+        scrollHeight: 1000,
+        getBoundingClientRect: () => ({height: parseFloat(menu.style.height)}),
         clientHeight: 400,
         offsetHeight: 400,
-        firstElementChild: undefined as undefined | {classList: {contains: (name: string) => boolean}},
+        firstElementChild: undefined as undefined | {getBoundingClientRect: () => {height: number}, classList: {contains: (name: string) => boolean}},
         insertedHTML: [] as string[],
         insertAdjacentHTML(position: string, html: string) {
             this.insertedHTML.push(`${position}:${html}`);
-            this.firstElementChild = {classList: {contains: (name: string) => html.includes(name)}};
+            this.firstElementChild = {getBoundingClientRect: () => ({height: 40}), classList: {contains: (name: string) => html.includes(name)}};
         },
         querySelectorAll: (selector: string): Element[] => selector.includes("block__icon--menu-back") && backTarget ? [backTarget] : [],
         querySelector: (selector: string) => selector.includes("sheet-back") ? backButton : null,
@@ -50,8 +54,8 @@ const createPanel = () => {
     const exports: {bindMobileAVPanel?: (panel: unknown, menu: unknown) => void} = {};
     runInNewContext(compiled, {
         exports,
-        require: () => ({waitForSheetViewport: () => () => {}, getVisibleSheetViewport,
-            escapeAttr: (value: string) => value || "", getSheetActionsHTML: () => "actions",
+        require: () => ({getMobileSheetBounds, moveSheetGesture, waitForSheetViewport: () => () => {}, getVisibleSheetViewport,
+            escapeAttr: (value: string) => value || "",
             setSheetExpanded: (_menu: unknown, expanded: boolean) => {
                 if (expanded) {
                     classes.add("b3-menu--expanded");
@@ -61,6 +65,7 @@ const createPanel = () => {
             }, updateMenuItemGroupClasses() {}}),
         window: {
             innerHeight: 800,
+            visualViewport: viewport,
             siyuan: {languages: {back: "Back"}, mobile: {size: {portrait: {height1: 800}}}},
             addEventListener: (_name: string, callback: () => void) => resizeListeners.add(callback),
         },
@@ -92,7 +97,7 @@ const createPanel = () => {
     const click = (type: string) => listeners.get("click")({
         target: {closest: () => ({dataset: {type}})}, detail: 1, preventDefault() {}, stopImmediatePropagation() {},
     });
-    return {menu, scrim, drag, end, rerender, click, actions, classes, backButtonClasses,
+    return {menu, scrim, drag, end, rerender, click, actions, classes, backButtonClasses, viewport,
         cancel: () => listeners.get("touchcancel")({}), resize: () => resizeListeners.forEach(callback => callback()),
         setBackTarget: () => {
             backTarget = {closest: (): null => null} as unknown as HTMLElement;
@@ -110,47 +115,71 @@ test("database panel handle is hosted by a root menu title", () => {
     assert.equal(panel.menu.insertedHTML.length, 2);
 });
 
-test("pulling the database panel title upward expands it and downward restores half height", () => {
+test("database panel title dragging retains continuously selected heights", () => {
     const panel = createPanel();
     panel.drag(false, -120, true);
     panel.end(-120);
-    assert.equal(panel.classes.has("b3-menu--expanded"), true);
-    assert.equal(panel.menu.style.height, "800px");
+    assert.equal(panel.classes.has("b3-menu--expanded"), false);
+    assert.equal(panel.menu.style.height, "568px");
     panel.resize();
-    assert.equal(panel.menu.style.height, "800px");
+    assert.equal(panel.menu.style.height, "568px");
     panel.drag(false, 200, true);
     panel.end();
+    assert.equal(panel.classes.has("b3-menu--expanded"), false);
+    assert.ok(Math.abs(parseFloat(panel.menu.style.height) - 368) < .01);
+    assert.equal(panel.closes(), 0);
+});
+
+test("database panel gestures refresh bounds when the viewport shrinks during a drag", () => {
+    const panel = createPanel();
+    panel.drag(false, -100, true);
+    panel.viewport.height = 100;
+    panel.resize();
+    panel.end(-100);
+    assert.equal(panel.menu.style.height, "100px");
+    assert.equal(panel.closes(), 0);
+});
+
+test("background swipes collapse a manually expanded database panel", () => {
+    const panel = createPanel();
+    panel.drag(false, -500, true);
+    panel.end(-500);
+    assert.equal(panel.menu.style.height, "800px");
+    assert.equal(panel.classes.has("b3-menu--expanded"), true);
+    panel.drag(false, 200);
+    panel.end(200);
     assert.equal(panel.classes.has("b3-menu--expanded"), false);
     assert.ok(Math.abs(parseFloat(panel.menu.style.height) - 448) < .01);
     assert.equal(panel.closes(), 0);
 });
 
-test("canceling an upward gesture restores the half-height database panel", () => {
+test("canceling a database panel gesture keeps its selected height", () => {
     const panel = createPanel();
     panel.drag(false, -120, true);
     panel.cancel();
     assert.equal(panel.classes.has("b3-menu--expanded"), false);
-    assert.ok(Math.abs(parseFloat(panel.menu.style.height) - 448) < .01);
+    assert.ok(Math.abs(parseFloat(panel.menu.style.height) - 568) < .01);
 });
 
-test("the expand button toggles full height without closing the panel", () => {
+test("database panel redraws keep the back control and never inject expansion controls", () => {
     const panel = createPanel();
-    panel.click("sheet-expand");
-    assert.equal(panel.classes.has("b3-menu--expanded"), true);
+    panel.drag(false, -120, true);
+    panel.end(-120);
     panel.rerender();
-    assert.equal(panel.classes.has("b3-menu--expanded"), true);
-    panel.click("sheet-expand");
-    assert.equal(panel.classes.has("b3-menu--expanded"), false);
+    assert.equal(panel.menu.style.height, "568px");
+    for (const html of panel.menu.insertedHTML) {
+        assert.match(html, /data-type="sheet-back"/);
+        assert.doesNotMatch(html, /sheet-expand|b3-menu__actions/);
+    }
     assert.equal(panel.closes(), 0);
 });
 
-test("the close and back controls use the database panel action entry", () => {
+test("the back control uses the database panel action entry", () => {
     const panel = createPanel();
-    panel.click("sheet-close");
     panel.setBackTarget();
     assert.equal(panel.backButtonClasses.has("fn__none"), false);
     panel.click("sheet-back");
-    assert.deepEqual(panel.actions, ["close", "back"]);
+    assert.deepEqual(panel.actions, ["back"]);
 });
 
 test("sorting the first view downward does not move or dismiss the database panel", () => {

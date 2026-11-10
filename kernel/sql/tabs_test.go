@@ -22,7 +22,7 @@ func TestTabsIndexIncludesEveryTitleAndBody(t *testing.T) {
 		tabs.AppendChild(item)
 	}
 	tabs.SetIALAttr("tabs-active-id", tabs.FirstChild.ID)
-	content := nodeStaticContent(tabs, nil, false, false, false, false)
+	content := nodeStaticContent(tabs, nil, false, false, false, false, true)
 	for _, text := range []string{"First title", "First body", "Second title", "Second body"} {
 		if !strings.Contains(content, text) {
 			t.Fatalf("missing %q in %q", text, content)

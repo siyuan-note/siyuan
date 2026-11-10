@@ -1768,7 +1768,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "编辑方式：在单元格中输入文本，使用 "
+									"Data": "编辑方式：文本单元格无论是否有内容，单击即可打开编辑框。新输入遵循全局 Markdown 行内语法设置，关闭语法不改变已有富文本格式。在单元格中输入文本，使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1787,6 +1787,38 @@
 								{
 									"Type": "NodeText",
 									"Data": " 换行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261108121039-3359525",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261108121039-3359525",
+						"updated": "20261108121039"
+					},
+					"Children": [
+						{
+							"ID": "20261108121039-c94b26f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108121039-c94b26f",
+								"updated": "20261108121039"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Markdown 导出：文本字段中的列表、下划线等格式以 HTML 保留在表格单元格内，预览软件需要支持 Markdown 表格中的 HTML"
 								}
 							]
 						}

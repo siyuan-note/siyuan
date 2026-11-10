@@ -10,7 +10,7 @@ import {isInIOS, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {Model} from "../Model";
 import {needSubscribe} from "../../util/needSubscribe";
 import {MenuItem} from "../../menus/Menu";
-import {confirmDialog} from "../../dialog/confirmDialog";
+import {mobileConfirmDialog as confirmDialog} from "../../dialog/mobileConfirmDialog";
 import {normalizeDocumentTitle} from "../../editor/rename";
 import {movePathTo} from "../../util/pathName";
 import {documentCreateRequest} from "../../util/documentCreate";
@@ -220,7 +220,7 @@ export class Inbox extends Model {
     <span data-type="back" class="toolbar__text fn__flex-1">${data.shorthandTitle}</span>
     ${linkHTML}
 </div>
-<div class="b3-typography b3-typography--default" style="padding: 0 8px 8px">
+<div class="b3-typography b3-typography--default" style="padding: 0 8px calc(8px + var(--android-navigation-bar-height, 0px))">
 ${data.shorthandContent}
 </div>`);
         /// #else

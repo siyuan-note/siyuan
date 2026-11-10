@@ -8,7 +8,7 @@ import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {disabledForeverProtyle, disabledProtyle} from "../util/onGet";
 import {avRender} from "../render/av/render";
-import {hasClosestByAttribute} from "../util/hasClosest";
+import {improveBreadcrumbAppearance} from "../breadcrumb/appearance";
 import {isEncryptedBox} from "../../util/pathName";
 import {decodeHTML, escapeAttr, escapeHtml, escapeSearchHighlight} from "../../util/escape";
 import {
@@ -20,6 +20,7 @@ import {
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {IBacklinkAVTarget, prepareBacklinkAV} from "../render/av/backlink";
 import {captureBacklinkAVSources, reuseBacklinkAVSources} from "../render/av/backlinkReuse";
+import {captureBacklinkImageSources, reuseBacklinkImageSources} from "../render/backlinkImageReuse";
 import {markBacklinkReference, updateBacklinkReferenceVisibility} from "./backlinkReference";
 import {setBacklinkTypeFoldExpandHandler, updateBacklinkTypeFolds} from "./backlinkTypeFold";
 
@@ -40,6 +41,7 @@ interface IBacklinkDOMRecord {
     anchor: HTMLElement,
     targets: IBacklinkAVTarget[],
     databases: ReturnType<typeof captureBacklinkAVSources>,
+    images: ReturnType<typeof captureBacklinkImageSources>,
 }
 
 const backlinkDOMRecords = new WeakMap<IProtyle, Map<string, IBacklinkDOMRecord>>();
@@ -76,6 +78,7 @@ const createBacklinkDOMRecord = (item: IBacklinkData, index: number, id: string,
             anchor: nodes[0] as HTMLElement,
             targets: item.attributeViewTargets || [],
             databases: captureBacklinkAVSources(nodes, item.attributeViewTargets || []),
+            images: captureBacklinkImageSources(nodes),
         },
         nodes,
     };
@@ -136,6 +139,7 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
             const created = createBacklinkDOMRecord(item, index, id, protyle.element.hasAttribute("data-backlink-show-document"));
             if (record) {
                 const restoreAVScroll = reuseBacklinkAVSources(created.nodes, created.record.databases, record.databases);
+                reuseBacklinkImageSources(created.record.images, record.images);
                 created.nodes.forEach(node => element.insertBefore(node, record.anchor));
                 removeBacklinkDOMRecord(record);
                 restoreAVScroll();
@@ -296,38 +300,4 @@ export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst: boolean, p
         }
     });
     return `<div${backlinkAttr} contenteditable="false" class="protyle-breadcrumb__bar protyle-breadcrumb__bar--nowrap">${html}</div>`;
-};
-
-export const improveBreadcrumbAppearance = (element: HTMLElement) => {
-    const elements: HTMLElement[] = [];
-    if (element.classList.contains("protyle-breadcrumb__bar")) {
-        elements.push(element);
-    }
-    elements.push(...Array.from(element.querySelectorAll(".protyle-breadcrumb__bar")) as HTMLElement[]);
-    elements.forEach((item: HTMLElement) => {
-        item.classList.remove("protyle-breadcrumb__bar--nowrap");
-        const itemElements = Array.from(item.querySelectorAll(".protyle-breadcrumb__text"));
-        if (itemElements.length === 0) {
-            return;
-        }
-        let jump = false;
-        const isEmbed = hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed");
-        while (item.scrollHeight > 30 && !jump && itemElements.length > 1) {
-            itemElements.find((item, index) => {
-                if (index > (isEmbed ? 0 : -1)) {
-                    if (!item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
-                        item.classList.add("protyle-breadcrumb__text--ellipsis");
-                        return true;
-                    }
-                    if (index === itemElements.length - 1 && item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
-                        jump = true;
-                    }
-                }
-            });
-        }
-        item.classList.add("protyle-breadcrumb__bar--nowrap");
-        if (item.lastElementChild) {
-            item.scrollLeft = (item.lastElementChild as HTMLElement).offsetLeft - item.clientWidth + 14;
-        }
-    });
 };

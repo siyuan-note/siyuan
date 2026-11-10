@@ -125,6 +125,28 @@ func FixInvalidListChildren(root *ast.Node) (fixed bool) {
 	return
 }
 
+// 正文内的历史文档节点以纵向超级块承载，原块 ID、属性及子块保持不变。
+func FixNestedDocumentNodes(root *ast.Node) (fixed bool) {
+	if root == nil {
+		return
+	}
+	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || n == root || n.Type != ast.NodeDocument {
+			return ast.WalkContinue
+		}
+		n.Type = ast.NodeSuperBlock
+		if n.FirstChild == nil {
+			n.AppendChild(NewParagraph(""))
+		}
+		n.PrependChild(&ast.Node{Type: ast.NodeSuperBlockLayoutMarker, Tokens: []byte("row")})
+		n.PrependChild(&ast.Node{Type: ast.NodeSuperBlockOpenMarker, Tokens: []byte("{{{")})
+		n.AppendChild(&ast.Node{Type: ast.NodeSuperBlockCloseMarker, Tokens: []byte("}}}")})
+		fixed = true
+		return ast.WalkContinue
+	})
+	return
+}
+
 func newListItemData(list, child *ast.Node) (ret *ast.ListData) {
 	listType := 0
 	if nil != list.ListData {

@@ -12,16 +12,16 @@ import (
 func TestAIWebConfiguration(t *testing.T) {
 	ai := &AI{}
 	ai.Normalize()
-	if ai.Web.SearchProvider != "exa" || ai.Web.FetchProvider != "direct" || ai.Web.Timeout != 30 {
+	if ai.Web.SearchProvider != "exa" || ai.Web.FetchProvider != "direct" || ai.Web.Timeout != 30 || ai.Web.ExaAPIKey != "" {
 		t.Fatal("legacy defaults changed")
 	}
-	ai.Web = &AIWeb{SearchProvider: " deepseek ", FetchProvider: " direct ", APIKey: " test-key ", Timeout: 900}
+	ai.Web = &AIWeb{SearchProvider: " deepseek ", FetchProvider: " direct ", APIKey: " test-key ", ExaAPIKey: " exa-key ", Timeout: 900}
 	ai.Normalize()
-	if ai.Web.SearchProvider != "deepseek" || ai.Web.FetchProvider != "direct" || ai.Web.Timeout != 600 || ai.Web.APIKey != "test-key" {
+	if ai.Web.SearchProvider != "deepseek" || ai.Web.FetchProvider != "direct" || ai.Web.Timeout != 600 || ai.Web.APIKey != "test-key" || ai.Web.ExaAPIKey != "exa-key" {
 		t.Fatal("independent providers or limits lost")
 	}
 	ai.EncryptAPIKeys()
-	if ai.Web.APIKey == "test-key" {
+	if ai.Web.APIKey == "test-key" || ai.Web.ExaAPIKey == "exa-key" {
 		t.Fatal("web credential saved in plaintext")
 	}
 	data, err := json.Marshal(ai)
@@ -34,7 +34,7 @@ func TestAIWebConfiguration(t *testing.T) {
 	}
 	restored.DecryptAPIKeys()
 	restored.Normalize()
-	if restored.Web.APIKey != "test-key" || restored.Web.SearchProvider != "deepseek" || restored.Web.FetchProvider != "direct" {
+	if restored.Web.APIKey != "test-key" || restored.Web.ExaAPIKey != "exa-key" || restored.Web.SearchProvider != "deepseek" || restored.Web.FetchProvider != "direct" {
 		t.Fatal("web credentials or provider selection lost after reload")
 	}
 }

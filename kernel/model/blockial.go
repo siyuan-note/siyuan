@@ -259,6 +259,9 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 			}
 		}
 	}
+	if err == nil {
+		memoryCommittedSourcesChanged([]string{tree.ID})
+	}
 	return
 }
 
@@ -382,6 +385,14 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string, boxID string) (
 }
 
 func setNodeAttrsData(node *ast.Node, nameValues map[string]string, boxID string) (oldAttrs map[string]string, err error) {
+	if node.DocumentTitle != nil {
+		for name, value := range nameValues {
+			if strings.EqualFold(name, "title") && value != treenode.ReadDocumentTitle(node).Text ||
+				strings.EqualFold(name, treenode.DocumentTitleEmptyAttr) && value != node.IALAttr(treenode.DocumentTitleEmptyAttr) {
+				return nil, &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(446), cause: treenode.ErrRichDocumentTitleWrite}
+			}
+		}
+	}
 	if err = treenode.ValidateTabsAttrs(node, nameValues); nil != err {
 		return
 	}

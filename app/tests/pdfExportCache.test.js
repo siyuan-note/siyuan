@@ -13,12 +13,12 @@ const createPreview = mode => {
     let time = 1000;
     const renderPDF = new Function("window", "Constants", "ipcRenderer", "getAvailableExportPath", "getHostCapabilities",
         "getIconScript", "getSnippetCSS", "getSnippetJS", "getExportLanguages", "setInlineStyle", "getCustomFontStyle",
-        "getPluginStyle", "fetchPost", "headingPageBreakControls", "Date", compiled + ";return renderPDF;")(
+        "getPluginStyle", "fetchPost", "headingPageBreakControls", "Date", "replaceLocalPath", ts.transpileModule(readFileSync(path.join(__dirname, "../src/protyle/export/scriptLiteral.ts"), "utf8").replace("export const", "const"), {compilerOptions: {target: ts.ScriptTarget.ES2021}}).outputText + compiled + ";return renderPDF;")(
         {siyuan: {config: {appearance: {themeLight: "daylight"}, editor: {}, export: {}, system: {}},
-            storage: {pdf: {paged: true}}, languages: {}}},
+            storage: {pdf: {paged: true}}, languages: {_kernel: {16: "Untitled"}}}},
         {LOCAL_EXPORTPDF: "pdf", SIYUAN_VERSION: "test", NODE_ENV: mode}, {invoke: async () => 0},
         async () => "", () => ({}), () => "", () => "", () => "", () => "{}", async () => "", async () => "",
-        async () => "", (_url, data) => html = data.content, () => "", {now: () => ++time});
+        async () => "", (_url, data) => html = data.content, () => "", {now: () => ++time}, name => name);
     return async () => {
         await renderPDF("root");
         return {

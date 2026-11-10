@@ -1764,7 +1764,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "編集：セルにテキストを入力し、"
+									"Data": "編集：テキストセルは空でも入力済みでも、1 回クリックするとエディターが開きます。新しい入力はグローバルな Markdown のインライン構文設定に従います。構文を無効にしても既存の書式は保持されます。セルにテキストを入力し、"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1783,6 +1783,38 @@
 								{
 									"Type": "NodeText",
 									"Data": " で改行します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261108121039-4122ec8",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261108121039-4122ec8",
+						"updated": "20261108121039"
+					},
+					"Children": [
+						{
+							"ID": "20261108121039-0339165",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261108121039-0339165",
+								"updated": "20261108121039"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Markdown エクスポート：テキストフィールドのリスト、下線などの書式は表のセル内に HTML として保持されます。プレビューするアプリは Markdown の表内の HTML に対応している必要があります"
 								}
 							]
 						}

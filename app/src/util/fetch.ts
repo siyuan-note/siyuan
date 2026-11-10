@@ -11,6 +11,31 @@ import {trackSettingRequest} from "../config/setting/pending";
 import {trackEditorSaveRequest} from "../protyle/util/editorSave";
 import {showMessage} from "../dialog/message";
 
+const beginTemplateHTTPRequest = (url: string, data: {id?: string; blockID?: string},
+                                  headers?: Record<string, string>, signal?: AbortSignal) => {
+    if (url === "/api/transactions" && window.siyuan.ws?.ws) {
+        const {getTemplateHTTPWindow}: typeof import("../template/http") = require("../template/http");
+        const owner = getTemplateHTTPWindow();
+        if (owner) return {headers: {...headers, "X-Siyuan-Template-App": owner.app, "X-Siyuan-Template-Session": owner.session},
+            signal, isCurrent: () => true, finish: () => {}};
+        return undefined;
+    }
+    if (!["/api/template/render", "/api/av/renderAttributeView", "/api/av/getAttributeViewKeys", "/api/av/runAttributeViewAutomation", "/api/filetree/createDailyNote"].includes(url)) {
+        return undefined;
+    }
+    const {beginTemplateHTTPRequest: begin}: typeof import("../template/http") = require("../template/http");
+    return begin(url, data, headers, signal);
+};
+
+const scheduleAutomaticHTTP = (url: string, response: IWebSocketData) => {
+    if (url !== "/api/transactions" || response.code !== 0 || !Array.isArray(response.data)) return;
+    const jobs = response.data.flatMap((transaction: import("../types/api").Transaction) => transaction.httpAutomationJobs || []);
+    if (jobs.length) {
+        const {scheduleAutomaticHTTP: schedule}: typeof import("../protyle/render/av/automaticHTTP") = require("../protyle/render/av/automaticHTTP");
+        schedule(jobs);
+    }
+};
+
 const reportTransactionFailure = (url: string, error: Error) => {
     if (url !== "/api/transactions" || error?.name === "AbortError") {
         return;
@@ -29,6 +54,9 @@ export const fetchPost = ((
     signal?: AbortSignal,
     timeout = url === "/api/system/exit" || url === "/api/system/setWorkspaceDir" ||
         (url === "/api/system/setUILayout" && data?.errorExit) ? 30000 : 0) => {
+    const templateRequest = beginTemplateHTTPRequest(url, data, headers, signal);
+    headers = templateRequest?.headers || headers;
+    signal = templateRequest?.signal || signal;
     const init: RequestInit = {
         method: "POST",
     };
@@ -92,6 +120,9 @@ export const fetchPost = ((
         reportTransactionFailure(url, error);
         throw error;
     }).then((response: IWebSocketData) => {
+        if (signal?.aborted || (templateRequest && !templateRequest.isCurrent())) {
+            return;
+        }
         if (failCallback && url === "/api/file/getFile" && isGetFile202) {
             failCallback(response);
             return;
@@ -114,8 +145,9 @@ export const fetchPost = ((
         } else if (cb) {
             cb(response);
         }
+        scheduleAutomaticHTTP(url, response);
     }).catch((e) => {
-        if (e?.name === "AbortError") {
+        if (e?.name === "AbortError" || (templateRequest && !templateRequest.isCurrent())) {
             return;
         }
         if (failCallback) {
@@ -134,11 +166,14 @@ export const fetchPost = ((
             ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
         }
         /// #endif
-    });
+    }).finally(() => templateRequest?.finish());
 }) as FetchPost<IWebSocketData>;
 
 export const fetchSyncPost = (async (url: string, data?: any, headers?: Record<string, string>, process = true,
                                     signal?: AbortSignal) => {
+    const templateRequest = beginTemplateHTTPRequest(url, data, headers, signal);
+    headers = templateRequest?.headers || headers;
+    signal = templateRequest?.signal || signal;
     const init: RequestInit = {
         method: "POST",
         signal,
@@ -155,14 +190,24 @@ export const fetchSyncPost = (async (url: string, data?: any, headers?: Record<s
     }
     return trackSettingRequest(url, trackEditorSaveRequest(url, data,
         fetchWithAppId(url, init).then(res => res.json() as Promise<IWebSocketData>)).catch(error => {
+        if (templateRequest && (signal?.aborted || !templateRequest.isCurrent())) {
+            const cancelled: IWebSocketData = {code: -1, msg: "", data: null};
+            return cancelled;
+        }
         reportTransactionFailure(url, error);
         throw error;
     }).then(res2 => {
+        if (signal?.aborted || (templateRequest && !templateRequest.isCurrent())) {
+            const cancelled: IWebSocketData = {code: -1, msg: "", data: null};
+            return cancelled;
+        }
         if (process) {
             processMessage(res2);
         }
+        scheduleAutomaticHTTP(url, res2);
         return res2;
-    }), url === "/api/storage/setLocalStorageVal" && data?.key === Constants.LOCAL_SLASH_USAGE);
+    }), url === "/api/storage/setLocalStorageVal" && data?.key === Constants.LOCAL_SLASH_USAGE)
+        .finally(() => templateRequest?.finish());
 }) as FetchSyncPost<IWebSocketData>;
 
 export const fetchGet = ((url: string, cb: (response: IWebSocketData | IObject | string) => void) => {

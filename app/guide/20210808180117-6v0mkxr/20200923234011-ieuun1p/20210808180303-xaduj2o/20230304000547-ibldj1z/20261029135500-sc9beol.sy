@@ -1,0 +1,439 @@
+{
+	"ID": "20261029135500-sc9beol",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261029135500-sc9beol",
+		"title": "Long-term memory",
+		"type": "doc",
+		"updated": "20261101174653"
+	},
+	"Children": [
+		{
+			"ID": "20261029135500-o6zwzu7",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-o6zwzu7",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-3w6vu14",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-3w6vu14",
+				"updated": "20261029135500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Long-term memory organizes lasting facts, preferences, background and decisions into shared workspace records for future agent conversations. It is neither a backup of chat history nor a copy of every note."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-7kelad9",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-7kelad9",
+				"updated": "20261030063122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable and configure"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-1na7hjs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-1na7hjs",
+				"updated": "20261031133741"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "First configure and enable a provider and model in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API Provider"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Then open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Long-term memory"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " at the bottom of the AI settings, after the Rerank group. The master switch starts off; turn it on to use long-term memory. The Manage button is shown only while long-term memory is enabled; click it to open the memory manager. Turning off the master switch stops memory use, automatic maintenance and new user-message capture without deleting existing records."
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-5k5bwhb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-5k5bwhb",
+				"updated": "20261029155830"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose a dedicated processing model and reasoning effort; changing the conversation model does not change this selection. Reasoning options follow Agent: default, none, low, medium, high, xhigh, and max, without guessing capabilities from model names. The provider determines which values it accepts. Model processing sends permitted content to the selected provider and may incur costs."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-w46deg2",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-w46deg2",
+				"updated": "20261030115757"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manage and organize memory"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-mlne86v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-mlne86v",
+				"updated": "20261031105717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open Manage to view Memory summary, enter the facts or preferences to organize or correct together with their conditions, and click Organize with model, or press Enter in the input. The manager shows the unified overview and a loading spinner while processing; errors appear in the upper-right message area. Successfully submitting a task does not mean its content has been remembered. After the task completes successfully, including when no changes are needed, the submitted text is cleared only if you have not edited the input since submitting; failed or partially failed tasks and new edits leave it intact."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-4mkva7o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-4mkva7o",
+				"updated": "20261030101455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Only active memories that are currently usable can inform conversations; unconfirmed, disabled, expired or source-invalid records are excluded. The manager does not display a memory count, individual records or their internal categories."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-agntqax",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-agntqax",
+				"updated": "20261030113607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, enter “When writing project status reports, start with conclusions, then risks and next steps” and use Organize with model. Preserve project restrictions in the input instead of turning a project-specific agreement into a preference for every task. Review the updated overview after processing."
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-2hw0xe9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-2hw0xe9",
+				"updated": "20261030213309"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To forget a specific memory, submit a separate direct request in Memory summary, for example “Forget my preference for starting project reports with conclusions.” Do not combine forgetting with additions. Quoted, ambiguous or clear-all requests do not authorize deletion. The selected model checks the target again, which may incur additional charges; review the result rather than assuming every request succeeds. The corresponding APIs retain the ability to disable and forget canonical records. Disabling preserves a record but stops using it; forgetting creates a withdrawal marker before removing its content. Old backups may retain the original text, and withdrawal only protects another device after synchronization reaches it, so forgetting does not erase every historical backup. If the intent or target cannot be established, no opposite fact is saved in place of forgetting; an error message appears in the upper-right area so you can clarify and retry. Forgetting a fact preserves other existing, distinct records from the same source. Before syncing withdrawals, update all devices to a version supporting the current memory format. Older withdrawal markers retain their source restrictions; if they excluded an unrelated fact, explicitly submit that fact again instead of deleting the markers."
+				}
+			]
+		},
+		{
+			"ID": "20261031130026-rmaubcg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261031130026-rmaubcg",
+				"updated": "20261031130026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open More in the upper-right corner of Memory summary and select Delete all memories and disable memory. After confirmation, long-term memory is disabled, running writes are stopped, and all current memory records and summaries are deleted. Original notes, conversations, historical backups and withdrawal markers are retained. This action does not call a model. If cleanup is incomplete, memory remains disabled and you can retry."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-eyepamf",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-eyepamf",
+				"updated": "20261030063122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Sources and reliability"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-vpy6gbc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-vpy6gbc",
+				"updated": "20261101151527"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Only active memories that pass source, scope and validity checks are used. Uncertain proposals are not automatically activated. Confirmed source changes or deletion mark affected memories for review. Temporary read failures only suspend the current use and preserve the record state; you do not need to add the memory again after access recovers. Inaccessible sources are not sent to the model, and an old overview cannot restore invalid content."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-oj02bkz",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-oj02bkz",
+				"updated": "20261030113607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Model organization tasks"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-jksxqku",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-jksxqku",
+				"updated": "20261030113607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The manager checks tasks automatically without a manual refresh; task status and completion text are not displayed inline. Temporary query failures retry the same task without automatically resubmitting a paid organization request; an unavailable task permits an explicit retry. Closing the manager does not cancel the background job, which remains subject to its timeout. A missing or unavailable model prompts you to configure one first. Existing overviews remain readable, and model failure must not be reported as a successful save."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-iknqk8t",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-iknqk8t",
+				"updated": "20261030025512"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Collection scope"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029051700-o1lc8ft",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-o1lc8ft",
+				"updated": "20261101120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Only future successfully committed user messages are collected automatically; AI replies, past conversations and notes are excluded. Note organization requires an explicit request and permitted non-encrypted sources. Existing memories remain available subject to source validation; note changes only invalidate affected records and do not extract new facts."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-7s47asc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-7s47asc",
+				"updated": "20261101120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic organization first checks whether the entire message clearly expresses your own lasting preference, background or agreement. External articles, third-party statements, mixed personal/external material and uncertain authorship are skipped. To submit an explicit fact immediately, use Organize with model in the manager and review the result."
+				}
+			]
+		},
+		{
+			"ID": "20261031130026-5dprj0g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261031130026-5dprj0g",
+				"updated": "20261031130026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic candidates are managed in the background while memory is enabled in a writable workspace. Exact duplicates with identical evidence are merged. A later model review can activate an unchanged fact only when its current sources and verbatim evidence pass validation. Automatic candidates without a meaningful update for 30 days are cleaned up; repeating the same proposal does not restart that period. Manual submissions, confirmed records and usable memories are not removed by this cleanup. Cleanup itself does not call a model."
+				}
+			]
+		},
+		{
+			"ID": "20261029135900-gllgfcf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135900-gllgfcf",
+				"updated": "20261101120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Attribution is checked in the existing keyword request, without an additional model call. Only a clear self-attribution proceeds; a missing or invalid verdict stops processing. Your own explicitly endorsed quoted words can qualify, so blockquote formatting alone does not determine authorship. Unlabelled pasted first-person text can still be misclassified; automatic judgment cannot guarantee authorship."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-nyu2063",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-nyu2063",
+				"updated": "20261030101455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Local records, overviews and sync"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-lmw7mfc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-lmw7mfc",
+				"updated": "20261101174653"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Canonical records live in data/storage/ai/memory/records/ within the current workspace, not in ordinary notebook documents. They sync with workspace data; other devices must finish syncing to receive the latest records, corrections and withdrawals. Records with sync conflicts are not silently used as valid memories."
+				}
+			]
+		},
+		{
+			"ID": "20261029051700-qf51204",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029051700-qf51204",
+				"updated": "20261030063122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MEMORY.md is the single active, read-only derived overview combining user background, preferences and common context, not a separate editable record source. Migration preserves the original legacy USER.md and MEMORY.md text before combining only content that still matches current eligible records. Invalid legacy text is retained only as a recovery backup and is not reused in conversations. Overview generation failure does not roll back saved canonical records."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-n44lj73",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-n44lj73",
+				"updated": "20261030101455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The manager displays the unified overview above the input, without its file name or technical record references. It contains a bounded selection of verified records rather than a complete inventory. When memory is enabled, the workspace is writable and a processing model is configured, the overview is displayed in the interface language; model processing shows a loading indicator and keeps the original text if it fails. Display processing sends only the overview to the configured memory model and does not change the stored original. Cached results reduce repeated calls, but an existing overview may need another model request after restart. To organize or correct content, use the input below rather than editing the overview file directly."
+				}
+			]
+		},
+		{
+			"ID": "20261029135500-pxo4q07",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261029135500-pxo4q07",
+				"updated": "20261030094544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Costs and privacy"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261029135500-hqao4c5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261029135500-hqao4c5",
+				"updated": "20261030094544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Local storage does not mean offline processing. Automatic maintenance, manual model organization, overview generation and display processing may send relevant text, source evidence and existing memories to the selected model provider and incur API charges. Using memory in a conversation may also send relevant memories to the conversation model. Review the provider’s data policy before enabling this feature and avoid submitting sensitive content you do not want sent out. Encrypted notebooks are excluded from automatic collection, but text you paste manually is still processed as part of your model organization request."
+				}
+			]
+		}
+	]
+}

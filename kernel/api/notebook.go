@@ -263,7 +263,7 @@ var getNotebookConf = contractHandler(apicontract.GetNotebookConf, func(c *gin.C
 		}
 		indexState := treenode.DocumentMetadataState(notebook)
 		capabilities = &apicontract.DocumentCapabilities{StructuredPaths: true,
-			LiteralSlash: indexState == "ready", TitleFormats: []string{"plain"},
+			LiteralSlash: indexState == "ready", TitleFormats: []string{"plain", "inline-ast"},
 			IndexState: indexState, Revision: snapshot.Revision}
 	}
 
@@ -289,6 +289,7 @@ var setNotebookConf = contractHandler(apicontract.SetNotebookConf, func(c *gin.C
 	}
 
 	boxConf := box.GetConf()
+	oldName := boxConf.Name
 	oldSortMode := boxConf.SortMode
 	if err := applyNotebookDocumentTargetPatch(notebook, boxConf, request.Conf); err != nil {
 		return apicontract.Failure[*apicontract.NotebookConf](-1, err.Error())
@@ -311,6 +312,13 @@ var setNotebookConf = contractHandler(apicontract.SetNotebookConf, func(c *gin.C
 	}
 
 	boxConf.DailyNoteTemplatePath = util.NormalizeTemplatePath(boxConf.DailyNoteTemplatePath)
+	if request.Conf != nil && request.Conf.Name != nil && *request.Conf.Name != oldName &&
+		box.Exist("/"+notebook+".sy") {
+		if err := model.RenameBox(notebook, *request.Conf.Name); err != nil {
+			return apicontract.Failure[*apicontract.NotebookConf](-1, err.Error())
+		}
+		boxConf.Name = box.GetConf().Name
+	}
 
 	if err := box.SaveConfAndSync(boxConf); err != nil {
 		return apicontract.Failure[*apicontract.NotebookConf](-1, err.Error())

@@ -1,0 +1,644 @@
+@use "component/button";
+@use "component/loading";
+@use "component/dialog";
+@use "component/menu";
+@use "component/list";
+@use "component/chip";
+@use "component/select";
+@use "component/text-field";
+@use "component/tooltips";
+@use "business/block";
+@use "util/scroll";
+@use "util/keyframes";
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--b3-theme-background);
+  color: var(--b3-theme-on-background);
+  font-family: var(--b3-font-family);
+  font-size: var(--b3-font-size);
+}
+
+button {
+  font-family: inherit;
+  outline: none;
+}
+
+.b3-select {
+  outline: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+[hidden] {
+  display: none;
+}
+
+.markdown-app {
+  -webkit-tap-highlight-color: var(--b3-list-hover);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  --markdown-font-size: 16px;
+  font-family: var(--markdown-global-font-family, var(--b3-font-family));
+  font-weight: var(--markdown-global-font-weight, 400);
+}
+
+.markdown-header {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--b3-border-color);
+  background: var(--b3-theme-surface);
+  padding: 0 6px;
+  min-width: 0;
+  position: relative;
+  z-index: 3;
+}
+
+.markdown-heading {
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 2px 6px;
+  min-height: 28px;
+  cursor: default;
+  -webkit-app-region: drag;
+}
+
+.markdown-name {
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.markdown-header__drag {
+  flex: 1;
+  min-width: 16px;
+  height: 28px;
+}
+
+.markdown-app[data-window-controls] {
+  position: relative;
+
+  .markdown-header {
+    -webkit-app-region: drag;
+    user-select: none;
+  }
+
+  .markdown-tree-toggle,
+  .markdown-outline-toggle,
+  .markdown-history,
+  .markdown-more,
+  .markdown-caption {
+    -webkit-app-region: no-drag;
+  }
+
+  .markdown-caption-placeholder {
+    width: 138px;
+    flex-shrink: 0;
+  }
+
+  &[data-window-controls="mac"] .markdown-caption-placeholder {
+    width: 68px;
+  }
+
+  &[data-fullscreen="true"] .markdown-caption-placeholder {
+    display: none;
+  }
+}
+
+.markdown-caption {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  display: flex;
+  z-index: 4;
+}
+
+.markdown-caption__button {
+  width: 46px;
+  height: var(--markdown-caption-height, 32px);
+  justify-content: center;
+}
+
+.markdown-history,
+.markdown-tree-toggle,
+.markdown-outline-toggle {
+  min-width: 28px;
+  min-height: 28px;
+  justify-content: center;
+}
+
+.markdown-tree-toggle,
+.markdown-outline-toggle {
+  > svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &[aria-expanded="true"] {
+    color: var(--b3-theme-on-background);
+    background-color: var(--b3-list-icon-hover);
+  }
+}
+
+.markdown-more {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.markdown-more__button {
+  width: 28px;
+  height: 28px;
+  list-style: none;
+}
+
+.markdown-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.markdown-more__button:hover,
+.markdown-more[open] > .markdown-more__button,
+.markdown-menu .b3-menu__item:hover:not(:disabled) {
+  background-color: var(--b3-list-hover);
+}
+
+.markdown-more summary:focus-visible,
+button:focus-visible,
+.b3-chip:focus-visible,
+.markdown-history:focus-visible,
+.markdown-tree-toggle:focus-visible,
+.markdown-outline-toggle:focus-visible,
+.markdown-menu button:focus-visible,
+.markdown-choice:focus-visible {
+  outline: 1px solid var(--b3-theme-primary);
+  outline-offset: -1px;
+}
+
+.markdown-menu {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 6px);
+  width: min(260px, calc(100vw - 24px));
+  max-height: calc(100vh - 80px);
+  max-height: calc(100dvh - 80px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+
+  .b3-menu__item {
+    align-items: center;
+    font-size: inherit;
+    list-style: none;
+  }
+
+  .b3-menu__label {
+    white-space: normal;
+    min-width: 0;
+  }
+
+  button:disabled {
+    opacity: .38;
+    cursor: not-allowed;
+  }
+}
+
+.markdown-menu__info {
+  position: relative;
+}
+
+.markdown-choice[aria-disabled="true"] {
+  opacity: .38;
+  cursor: not-allowed;
+}
+
+.markdown-choice__menu {
+  width: max-content;
+  min-width: min(120px, calc(100vw - 16px));
+  max-width: min(220px, calc(100vw - 16px));
+  box-sizing: border-box;
+  padding-inline: 6px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  z-index: 4;
+
+  &--workspace .b3-menu__label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &--compact {
+    min-width: 0;
+  }
+}
+
+.markdown-policy {
+  color: var(--b3-theme-on-surface);
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 0 8px;
+
+  p {
+    margin: 8px 0;
+  }
+
+  p:empty {
+    display: none;
+  }
+}
+
+.markdown-status,
+.markdown-status__actions,
+.markdown-recovery__heading,
+.markdown-recovery__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.markdown-workspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+}
+
+.markdown-tree {
+  position: relative;
+  box-sizing: border-box;
+  width: var(--markdown-tree-width, 240px);
+  max-width: 60%;
+  min-height: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--b3-theme-surface);
+  border-inline-end: 1px solid var(--b3-border-color);
+
+  &[hidden] {
+    display: none;
+  }
+
+  &[data-drawer="true"] {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: min(320px, calc(100% - 48px));
+    max-width: none;
+    z-index: 2;
+    box-shadow: var(--b3-dialog-shadow);
+    --b3-ui-list-height: 44px;
+  }
+}
+
+.markdown-tree__animation {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: clip;
+  min-height: 0;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+.markdown-workspace--drawer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--b3-mask-background);
+  z-index: 1;
+}
+
+.markdown-tree__notice {
+  padding: 12px;
+  color: var(--b3-theme-on-surface);
+  line-height: 1.6;
+}
+
+.markdown-tree__choose {
+  margin: 8px 12px;
+  flex-shrink: 0;
+}
+
+.markdown-tree__viewport {
+  user-select: none;
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+  outline: none;
+
+  > .b3-list {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+
+    > * {
+      flex-shrink: 0;
+    }
+  }
+}
+
+.markdown-tree__row {
+  box-sizing: border-box;
+  height: var(--b3-ui-list-height, 28px);
+  padding-inline-start: calc(4px + var(--markdown-tree-depth) * 16px);
+}
+
+.markdown-tree__row--focused {
+  outline: 1px solid var(--b3-theme-primary);
+  outline-offset: -1px;
+}
+
+.markdown-tree__resize {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -3px;
+  width: 6px;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 1;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 2px;
+    width: 2px;
+  }
+
+  &:hover,
+  &:focus-visible {
+    outline: none;
+
+    &::after {
+      background: var(--b3-theme-primary);
+    }
+  }
+}
+
+.markdown-editor.vditor {
+  isolation: isolate;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  --border-color: var(--b3-border-color);
+  --panel-background-color: var(--b3-theme-background);
+  --toolbar-background-color: var(--b3-theme-surface);
+  --toolbar-icon-color: var(--b3-theme-on-surface);
+  --toolbar-icon-hover-color: var(--b3-theme-primary);
+  --textarea-background-color: var(--b3-theme-background);
+  --textarea-text-color: var(--b3-theme-on-background);
+  --heading-border-color: var(--b3-border-color);
+  --blockquote-border-color: var(--b3-border-color);
+  --blockquote-text-color: var(--b3-theme-on-surface);
+  --panel-shadow: var(--b3-dialog-shadow);
+}
+
+.markdown-editor > .vditor-toolbar {
+  display: none;
+}
+
+.markdown-editor .vditor-wysiwyg {
+  margin-top: 24px;
+}
+
+.markdown-app[data-tooltips] .vditor-tooltipped::before,
+.markdown-app[data-tooltips] .vditor-tooltipped::after {
+  content: none;
+}
+
+.markdown-editor .vditor-outline {
+  max-width: 40%;
+}
+
+.markdown-editor .vditor-reset,
+.markdown-editor .vditor-sv {
+  font-size: var(--markdown-font-size);
+  font-family: var(--markdown-editor-font-family, var(--b3-font-family-protyle));
+  font-weight: var(--markdown-editor-font-weight, 400);
+}
+
+.markdown-editor .vditor-reset code,
+.markdown-editor .vditor-sv {
+  font-family: var(--markdown-code-font-family, var(--b3-font-family-code));
+  font-weight: var(--markdown-code-font-weight, 400);
+}
+
+.markdown-editor .vditor-reset table code:not(.hljs):not(.highlight-chroma) {
+  white-space: pre;
+}
+
+// 先按标题字号计算实际行高，让小字号的 H1-H6 标识继承同一行高。
+.markdown-editor .vditor-ir .vditor-reset > h1,
+.markdown-editor .vditor-ir .vditor-reset > h2,
+.markdown-editor .vditor-ir .vditor-reset > h3,
+.markdown-editor .vditor-ir .vditor-reset > h4,
+.markdown-editor .vditor-ir .vditor-reset > h5,
+.markdown-editor .vditor-ir .vditor-reset > h6,
+.markdown-editor .vditor-wysiwyg > .vditor-reset > h1,
+.markdown-editor .vditor-wysiwyg > .vditor-reset > h2,
+.markdown-editor .vditor-wysiwyg > .vditor-reset > h3,
+.markdown-editor .vditor-wysiwyg > .vditor-reset > h4,
+.markdown-editor .vditor-wysiwyg > .vditor-reset > h5,
+.markdown-editor .vditor-wysiwyg > .vditor-reset > h6 {
+  line-height: 1.25em;
+}
+
+.markdown-footer {
+  // 通过后置顺序盖住同层抽屉的底部阴影，同时保持标题栏菜单在上方。
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  border-top: 1px solid var(--b3-border-color);
+  padding: 0 8px;
+  background: var(--b3-theme-surface);
+  font-size: 12px;
+  max-height: 25%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.markdown-status {
+  justify-content: space-between;
+  min-height: 23px;
+  line-height: 22px;
+}
+
+.markdown-status__actions .b3-button {
+  padding: 1px 6px;
+}
+
+.markdown-status [data-status="blocked"],
+.markdown-status [data-status="conflict"] {
+  color: var(--b3-theme-error);
+}
+
+.markdown-recovery {
+  width: min(300px, 35vw);
+  flex-shrink: 0;
+  overflow: auto;
+  padding: 16px;
+  border-right: 1px solid var(--b3-border-color);
+  background: var(--b3-theme-surface);
+}
+
+.markdown-recovery__heading {
+  justify-content: space-between;
+}
+
+.markdown-recovery p,
+.markdown-recovery time {
+  color: var(--b3-theme-on-surface);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.markdown-recovery__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-wrap: anywhere;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--b3-border-color);
+}
+
+@media (max-width: 640px) {
+  .markdown-workspace {
+    flex-direction: column;
+  }
+
+  .markdown-recovery {
+    width: auto;
+    max-height: 30vh;
+    border-right: 0;
+    border-bottom: 1px solid var(--b3-border-color);
+  }
+}
+
+@mixin touch-controls {
+  .markdown-menu__info::before {
+    content: "";
+    position: absolute;
+    inset: -14px;
+  }
+
+  .markdown-header {
+    height: 48px;
+  }
+
+  .markdown-app .b3-button,
+  .markdown-tree-toggle,
+  .markdown-outline-toggle,
+  .markdown-heading,
+  .markdown-menu .b3-menu__item {
+    min-height: 44px;
+  }
+
+  .markdown-more__button,
+  .markdown-tree-toggle,
+  .markdown-outline-toggle,
+  .markdown-history {
+    width: 44px;
+    height: 44px;
+    --b3-icon-background-inset: 6px;
+  }
+
+}
+
+@media (pointer: coarse) {
+  @include touch-controls;
+}
+
+.body--android,
+.body--ios,
+.body--harmony {
+  @include touch-controls;
+}
+
+.markdown-appearance-form,
+.markdown-appearance-form__field,
+.markdown-appearance-form__fonts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.markdown-appearance-form__fonts {
+  gap: 8px;
+}
+
+.markdown-font-picker__controls {
+  display: flex;
+  gap: 8px;
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.markdown-font-picker__list {
+  padding: 0;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.markdown-font-picker__chip {
+  max-width: calc(100% - 8px);
+}
+
+.markdown-font-picker__weights {
+  position: fixed;
+  z-index: 10;
+  max-height: min(320px, calc(100vh - 16px));
+  overflow-y: auto;
+}
+
+// 原生模态层提供焦点约束，容器和操作区使用共享对话框样式。
+.markdown-appearance-dialog {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  max-width: none;
+  max-height: none;
+  background: transparent;
+  color: inherit;
+
+  &::backdrop {
+    background: transparent;
+  }
+}
+
+.markdown-appearance-dialog__container {
+  width: 560px;
+  max-height: 88vh;
+}
+
+.markdown-appearance-dialog__actions {
+  gap: 8px;
+}

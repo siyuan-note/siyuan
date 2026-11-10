@@ -1,3 +1,4 @@
+import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {isSameOriginAPIRequest, SIYUAN_APP_ID_HEADER} from "../../util/fetchAppId";
 import {insertHTML} from "../util/insertHTML";
 import {hideMessage, showMessage} from "../../dialog/message";
@@ -9,7 +10,7 @@ import {fetchSyncPost} from "../../util/fetch";
 import {getEditorRange, getUndoFocusContext, restoreFocusContext} from "../util/selection";
 import {pathPosix} from "../../util/pathName";
 import {genAssetHTML} from "../../asset/renderAssets";
-import {hasClosestBlock} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {scrollCenter} from "../../util/highlightById";
 import {confirmDialog} from "../../dialog/confirmDialog";
@@ -172,7 +173,7 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
     // https://github.com/siyuan-note/siyuan/issues/7624
     const nodeElement = hasClosestBlock(range.startContainer);
     if (nodeElement) {
-        if (nodeElement.classList.contains("table")) {
+        if (nodeElement.classList.contains("table") || hasClosestByClassName(range.startContainer, "callout-title")) {
             insertBlock = false;
         } else {
             const editableElement = getContenteditableElement(nodeElement);
@@ -489,7 +490,7 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
     } else {
         formData.append("id", options.document.rootID);
     }
-    confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
+    mobileConfirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
         try {
             if (!callbacks.isTargetAvailable()) {
                 hideMessage(validateResult.msgId);

@@ -9,6 +9,87 @@ const {loadMenuToggle} = require("../../../tests/menu-toggle-fixture.cjs");
 
 const {parse} = require("ifdef-loader/preprocessor");
 
+test("mobile workspace global font picker shows system fonts without custom fonts and persists selection", async () => {
+    const font = {family: "Mobile System Sans", displayName: "Mobile System Sans Regular", weight: 400};
+    const config = {appearance: {globalFontFamilies: [] as typeof font[]}, editor: {fontFamilies: [] as typeof font[], codeFontFamilies: [] as typeof font[]}};
+    const window = {siyuan: {config, languages: new Proxy({}, {get: (_, key) => String(key)})}};
+    const load = (file: string, modules: Record<string, unknown>, suffix = "") => {
+        const exports: Record<string, any> = {};
+        runInNewContext(transpileModule(readFileSync(file, "utf8") + suffix, {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+        }).outputText, {exports, window, console, CSS: {escape: (value: string) => value},
+            document: {createTextNode: (value: string) => value, querySelectorAll: (): unknown[] => []},
+            require: (name: string) => modules[name] || {}});
+        return exports;
+    };
+    let systemLoads = 0;
+    let customLoads = 0;
+    const available = load("src/util/availableFont.ts", {
+        "./systemFont": {loadSystemFonts: async () => {systemLoads++; return [font];}},
+        "./customFont": {supportsCustomFonts: () => true, loadCustomFonts: async (): Promise<unknown[]> => {customLoads++; return [];}, syncCustomFonts() {}},
+    });
+    let open: (event: unknown) => Promise<void>;
+    let click: (event: unknown) => void;
+    let checked = false;
+    let hidden = false;
+    const label = {dataset: {family: font.family, weight: "400", name: font.displayName, search: font.displayName.toLowerCase()},
+        replaceChildren() {}, parentElement: undefined as unknown};
+    const item = {dataset: {}, querySelector: (selector: string) => selector === ".b3-menu__label" ? label :
+        checked ? {remove: () => {checked = false;}} : undefined,
+    insertAdjacentHTML: () => {checked = true;},
+    classList: {add() {}, remove() {}, toggle: (_name: string, value: boolean) => {hidden = value;}}};
+    label.parentElement = item;
+    const list = {querySelectorAll: (selector: string) => selector === ".b3-list-item" ? [item] : [label],
+        querySelector: () => item, addEventListener: (name: string, handler: typeof click) => {if (name === "click") click = handler;}};
+    const search = {value: "", addEventListener() {}, focus: () => assert.fail("mobile picker must not force keyboard focus")};
+    const menuBody = {querySelector: (selector: string) => selector === '[data-type="available-fonts"]' ? list :
+        selector === '[data-type="font-search"]' ? search : undefined};
+    const selected = {innerHTML: "", classList: {toggle() {}}, querySelectorAll: (): unknown[] => [], addEventListener() {}};
+    const input = {value: "", isConnected: true, style: {removeProperty() {}},
+        addEventListener: (_name: string, callback: typeof open) => {open = callback;},
+        getBoundingClientRect: () => ({left: 0, bottom: 100, height: 28})};
+    const fontElement = {querySelector: (selector: string) => selector === '[data-type="selected-fonts"]' ? selected : input};
+    const writes: Array<{key: string; fonts: typeof font[]}> = [];
+    let opened = false;
+    class FontMenu {
+        isOpen = false;
+        element = menuBody;
+        addItem(option: {label: string; bind(element: unknown): void}) {
+            assert.ok(option.label.includes(`data-family="${font.family}"`), "system family is rendered in the menu");
+            assert.ok(!option.label.includes('data-type="delete-font"'), "system fonts are not treated as imported custom fonts");
+            option.bind(menuBody);
+        }
+        open() {opened = true;}
+    }
+    const appearance = load("src/config/tabs/appearanceTab.ts", {
+        "../../util/availableFont": available,
+        "../../menus/menuToggle": {toggleMenu: async (options: {build(menu: unknown, session: unknown): Promise<void>}) =>
+            options.build(undefined, {isCurrent: () => true, show: (callback: () => void) => callback()})},
+        "../../menus/Menu": {markMenuInnerScroll() {}},
+        "../../plugin/Menu": {Menu: FontMenu},
+        "../../util/functions": {isMobile: () => true},
+        "../../util/escape": {escapeAttr: (value: string) => value, escapeHtml: (value: string) => value},
+        "../../util/fontPreview": {observeFontPreview: () => () => {}},
+        "./appearanceRuntime": {appearanceConfigApi: {patch: (key: string, fonts: typeof font[], refresh: () => void) => {
+            writes.push({key, fonts}); config.appearance.globalFontFamilies = fonts; refresh(); return Promise.resolve();
+        }}},
+        "./editorRuntime": {editorConfigApi: {patch: () => assert.fail("global font must use appearance configuration")}},
+    }, "\nexports.mountAppearanceFontFamily = mountAppearanceFontFamily;");
+    appearance.mountAppearanceFontFamily({querySelector: () => fontElement}, "globalFontFamilies");
+    await open({stopPropagation() {}});
+    assert.equal(opened, true);
+    assert.equal(systemLoads, 1);
+    assert.equal(customLoads, 1);
+    assert.equal(hidden, false);
+    click({target: {closest: (selector: string) => selector === ".b3-list-item" ? item : undefined}});
+    assert.equal(writes.length, 1);
+    assert.equal(writes[0].key, "globalFontFamilies");
+    assert.deepEqual(JSON.parse(JSON.stringify(writes[0].fonts)), [font]);
+    assert.equal(checked, true);
+    assert.ok(selected.innerHTML.includes(font.family));
+    assert.equal(input.value, font.displayName);
+});
+
 for (const mobile of [true, false]) {
     test(`appearance settings expose toolbar controls and all color managers (mobile=${mobile})`, () => {
         const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appearanceTab.ts"), "utf8");
@@ -50,6 +131,8 @@ for (const mobile of [true, false]) {
                     slots.push(args[0] as typeof slots[number]);
                 } else if (method === "switch") {
                     switches.push({id: args[0] as string, spec: args[1] as typeof switches[number]["spec"]});
+                } else if (method === "stack" && (args[0] as {key: string}).key === "statusBar") {
+                    (args[1] as (stack: unknown) => void)(group);
                 }
             },
         });
@@ -68,6 +151,12 @@ for (const mobile of [true, false]) {
         assert.equal(slots.some(item => item.key === "mobileSidebarAccess"), mobile);
         assert.equal(switches.some(item => item.id === "pageScrollButtons" || item.id === "editor.pageScrollButtons"), false);
         assert.equal(switches.some(item => item.id === "compactMode"), !mobile);
+        assert.equal(switches.some(item => item.id === "appearance.showFloatingDockBar"), !mobile);
+        assert.equal(switches.some(item => item.id === "appearance.showFloatingStatusBar"), !mobile);
+        if (!mobile) {
+            const toolbarIndex = switches.findIndex(item => item.id === "appearance.hideToolbar");
+            assert.equal(switches[toolbarIndex + 1].id, "appearance.showFloatingDockBar");
+        }
         const colors = slots.find(item => item.key === "manageColors");
         assert.ok(colors);
         assert.equal(colors.keywords.join(","), "manageColors,color,colorFont,colorPrimary");
@@ -94,6 +183,67 @@ for (const mobile of [true, false]) {
         windowContext.siyuan.isPublish = true;
         colors.afterMount(root);
         buttons.forEach(button => assert.equal(button.disabled, true));
+    });
+}
+
+for (const field of ["statusBar", "notifications"] as const) {
+    test(`${field} mobile close waits for persistence and preserves a failed draft`, async () => {
+        const statusKeys = ["msgTaskDatabaseIndexCommitDisabled", "msgTaskAssetDatabaseIndexCommitDisabled",
+            "msgTaskHistoryDatabaseIndexCommitDisabled", "msgTaskHistoryGenerateFileDisabled", "msgDataSyncDisabled"];
+        const notificationKeys = ["docTreeMaxList", "tagMaxList", "workspaceNotSSD", "browserCompatibility",
+            "selectAllTip", "selectAllIncompleteTip", "formatPainterTip"];
+        const keys = field === "statusBar" ? statusKeys : notificationKeys;
+        const config = {statusBar: Object.fromEntries(statusKeys.map(key => [key, false])),
+            notifications: Object.fromEntries(notificationKeys.map(key => [key, true]))};
+        const inputs = new Map(keys.map(key => [key, {checked: true}]));
+        let open: () => void;
+        let options: {mobileSheet: {beforeClose: () => Promise<boolean>}; destroyCallback: () => void};
+        let writes = 0;
+        let release: () => void;
+        let fail = true;
+        const exports: Record<string, (root: unknown) => void> = {};
+        const source = readFileSync("src/config/tabs/appearanceTab.ts", "utf8") +
+            "\nexports.mountStatus = mountAppearanceSetStatusBar; exports.mountNotifications = mountAppearanceSetNotifications;";
+        runInNewContext(transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText, {
+            exports, CSS: {escape: (value: string) => value},
+            window: {siyuan: {config: {appearance: config}, languages: new Proxy({}, {get: () => ({})})}},
+            require: (name: string) => name === "../../dialog/mobileDialog" ? {
+                MobileDialog: class {
+                    element = {querySelector: (selector: string) => inputs.get(selector.slice(1))};
+                    constructor(value: typeof options) { options = value; }
+                },
+            } : name === "../../util/functions" ? {
+                isMobile: () => true,
+                objEquals: (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b),
+            } : name === "./appearanceRuntime" ? {appearanceConfigApi: {
+                patch: async (key: typeof field, value: Record<string, boolean>) => {
+                    writes++;
+                    await new Promise<void>(resolve => { release = resolve; });
+                    if (fail) throw new Error("save failed");
+                    config[key] = value;
+                },
+            }} : name === "../render/fragments" ? {genListSwitchItemHtml: () => ""} : {},
+        });
+        exports[field === "statusBar" ? "mountStatus" : "mountNotifications"]({querySelector: () => ({
+            addEventListener: (_event: string, callback: () => void) => { open = callback; },
+        })});
+        open();
+        assert.equal(await options.mobileSheet.beforeClose(), true);
+        assert.equal(writes, 0, "unchanged close does not write");
+        inputs.get(keys[0]).checked = !inputs.get(keys[0]).checked;
+        const failed = options.mobileSheet.beforeClose();
+        assert.equal(writes, 1);
+        release();
+        await assert.rejects(failed, /save failed/);
+        assert.equal(config[field][keys[0]], field !== "statusBar");
+        assert.equal(inputs.get(keys[0]).checked, false);
+        fail = false;
+        const retry = options.mobileSheet.beforeClose();
+        release();
+        assert.equal(await retry, true);
+        assert.equal(config[field][keys[0]], field === "statusBar");
+        options.destroyCallback();
+        assert.equal(writes, 2, "mobile destroy does not issue another save");
     });
 }
 

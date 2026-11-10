@@ -88,6 +88,11 @@ func collectionTagsMatch(source *av.AutomationBlockSource, root *ast.Node) bool 
 
 // 先匹配标签来源，再选择唯一的合格对象；类型和属性始终约束最终收集对象。
 func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[string]bool {
+	return collectionMatchesWithReferences(source, tree, attributeViewBindingBlockTree, nil)
+}
+
+func collectionMatchesWithReferences(source *av.AutomationBlockSource, tree *parse.Tree,
+	resolve func(string, string) *treenode.BlockTree, changedSources map[string]bool) map[string]bool {
 	ret := map[string]bool{}
 	if !collectionScopeMatches(source, tree) {
 		return ret
@@ -97,7 +102,7 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 		attributes = append(attributes, collectionAttributeMatcher(attr))
 	}
 	if source.ReferenceID != "" {
-		return collectionReferenceMatches(source, tree, attributes)
+		return collectionReferenceMatches(source, tree, attributes, resolve, changedSources)
 	}
 	var containers []*ast.Node
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
@@ -122,6 +127,9 @@ func collectionMatches(source *av.AutomationBlockSource, tree *parse.Tree) map[s
 			containers = append(containers, node)
 		}
 		if !collectionTagsMatch(source, node) {
+			return ast.WalkContinue
+		}
+		if changedSources != nil && !changedSources[node.ID] {
 			return ast.WalkContinue
 		}
 		var target *ast.Node
@@ -613,15 +621,16 @@ func (tx *Transaction) runAttributeViewCollections() error {
 			ReloadAttrView(id)
 		}
 		beforeMatches, afterMatches := map[*av.AutomationRule]map[string]bool{}, map[*av.AutomationRule]map[string]bool{}
+		beforeResolver, afterResolver := collectionReferenceResolver(state.before), collectionReferenceResolver(tx.trees)
 		for _, rule := range rules {
 			beforeMatches[rule], afterMatches[rule] = map[string]bool{}, map[string]bool{}
 			for _, tree := range state.before {
-				for id := range collectionMatches(rule.BlockSource, tree) {
+				for id := range collectionMatchesWithReferences(rule.BlockSource, tree, beforeResolver, nil) {
 					beforeMatches[rule][id] = true
 				}
 			}
 			for _, tree := range tx.trees {
-				for id := range collectionMatches(rule.BlockSource, tree) {
+				for id := range collectionMatchesWithReferences(rule.BlockSource, tree, afterResolver, nil) {
 					afterMatches[rule][id] = true
 				}
 			}

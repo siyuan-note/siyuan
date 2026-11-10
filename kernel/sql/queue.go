@@ -20,6 +20,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -202,6 +203,15 @@ func clearQueue() {
 
 var flushingTx = atomic.Bool{}
 
+// IndexQueueIdle 在索引执行锁内检查队列，避免把已取出但尚未提交的操作误判为空闲。
+func IndexQueueIdle() bool {
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+	return len(operationQueue) == 0 && !flushingTx.Load()
+}
+
 func FlushQueue() {
 	timing := util.BeginPerformance("index.flush")
 	timing.Stage("wait_lock")
@@ -310,6 +320,7 @@ func FlushQueue() {
 		context["total"] = groupOpsTotal[op.action]
 		diagnostic.Stage("execute " + op.action)
 		timing.Stage("execute")
+		context["docTreeRefsChanged"] = true
 		if err = execOp(op, tx, context); err != nil {
 			tx.Rollback()
 			closeTxPreparedStmts(tx)
@@ -320,13 +331,19 @@ func FlushQueue() {
 
 		diagnostic.Stage("commit " + op.action)
 		timing.Stage("commit")
+		finishDocTreeRefs := func() {}
+		if changed, _ := context["docTreeRefsChanged"].(bool); changed {
+			finishDocTreeRefs = cache.BeginDocTreeRefMutation()
+		}
 		if err = commitTx(tx); err != nil {
+			finishDocTreeRefs()
 			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("commit tx failed: %s", err)
 			return
 		}
 		invalidateRefsCacheForOperation(op)
 		backlinkChange.addOperation(op)
+		finishDocTreeRefs()
 
 		switch op.action {
 		case "index":
@@ -392,10 +409,14 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		}
 	}
 	if op.indexTree != nil && op.action != "rename" {
-		op.indexTree = currentDocumentIndexSnapshot(op.indexTree)
+		if op.indexTree, err = currentDocumentIndexSnapshot(op.indexTree); err != nil {
+			return err
+		}
 	}
 	if op.upsertTree != nil && op.action == "upsert" {
-		op.upsertTree = currentDocumentIndexSnapshot(op.upsertTree)
+		if op.upsertTree, err = currentDocumentIndexSnapshot(op.upsertTree); err != nil {
+			return err
+		}
 	}
 	updateEmbeddings := func(stmt string, args ...any) error {
 		// Encrypted notebooks do not participate in vector indexing and their

@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"maps"
+	"math/big"
 	"testing"
 )
 
@@ -188,6 +189,74 @@ func TestAsymmetricJWKRoundTrip(t *testing.T) {
 						c.label, entry.kind, member, jwk[member], again[member])
 				}
 			}
+		}
+	}
+}
+
+func TestLargeRSAJWKRoundTrip(t *testing.T) {
+	alg := Algorithm{Name: AlgRSASSAPKCS1, Hash: AlgSHA256,
+		ModulusLength: new(4608), PublicExponent: []byte{1, 0, 1}}
+	pair, err := GenerateKey(alg, true, []KeyUsage{UsageSign, UsageVerify})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, key := range []*Key{pair.PublicKey, pair.PrivateKey} {
+		t.Run(string(key.Type), func(t *testing.T) {
+			data, err := ExportKey(FormatJWK, key)
+			if err != nil {
+				t.Fatal(err)
+			}
+			imported, err := ImportKey(FormatJWK, *data, alg, true, key.Usages)
+			if err != nil {
+				t.Fatal(err)
+			}
+			again, err := ExportKey(FormatJWK, imported)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(data.JSON, again.JSON) {
+				t.Fatal("RSA JWK round trip changed the key")
+			}
+			if key.Type == KeyTypePrivate {
+				var jwk map[string]any
+				if err = json.Unmarshal(data.JSON, &jwk); err != nil {
+					t.Fatal(err)
+				}
+				// 素因子必须与模数匹配，超长素因子在昂贵的私钥校验前被拒绝。
+				jwk["p"] = base64.RawURLEncoding.EncodeToString(new(big.Int).Lsh(big.NewInt(1), 16384).Bytes())
+				malformed, err := json.Marshal(jwk)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if _, err = ImportKey(FormatJWK, KeyData{JSON: malformed}, alg, true, key.Usages); errorName(t, err) != ErrNameData {
+					t.Fatalf("oversized RSA prime: error = %v, want DataError", err)
+				}
+			}
+		})
+	}
+}
+
+func TestRSAJWKModulusLimit(t *testing.T) {
+	alg := Algorithm{Name: AlgRSASSAPKCS1, Hash: AlgSHA256}
+	for _, bits := range []int{4096, 8192, 16384, 16385} {
+		// 公钥无需生成素数即可验证解析器的模数位长边界。
+		n := new(big.Int).Lsh(big.NewInt(1), uint(bits-1))
+		n.SetBit(n, 0, 1)
+		data, err := json.Marshal(map[string]string{
+			"kty": "RSA", "n": base64.RawURLEncoding.EncodeToString(n.Bytes()), "e": "AQAB",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		key, err := ImportKey(FormatJWK, KeyData{JSON: data}, alg, true, []KeyUsage{UsageVerify})
+		if bits > 16384 {
+			if errorName(t, err) != ErrNameData {
+				t.Fatalf("%d-bit modulus: error = %v, want DataError", bits, err)
+			}
+		} else if err != nil {
+			t.Fatalf("%d-bit modulus: %v", bits, err)
+		} else if *key.Algorithm.ModulusLength != bits {
+			t.Fatalf("modulus length = %d, want %d", *key.Algorithm.ModulusLength, bits)
 		}
 	}
 }

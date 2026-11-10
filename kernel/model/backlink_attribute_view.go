@@ -76,18 +76,18 @@ func backlinkAttributeViewMatches(attrView *av.AttributeView, defIDs map[string]
 	}
 	items := getAttributeViewBacklinkBlockValues(attrView)
 	for _, kv := range attrView.KeyValues {
-		if nil == kv || nil == kv.Key || av.KeyTypeText != kv.Key.Type {
+		if nil == kv || nil == kv.Key || (av.KeyTypeText != kv.Key.Type && av.KeyTypeBlock != kv.Key.Type) {
 			continue
 		}
 		for _, value := range kv.Values {
-			if nil == value || nil == value.Text || !value.Text.IsRich() {
+			if nil == value {
 				continue
 			}
 			item := items[value.BlockID]
 			if nil == item || nil == item.Block {
 				continue
 			}
-			fragment, err := av.ParseValueTextRich(value.Text.Rich)
+			fragment, err := av.RichValueTree(value)
 			if nil != err || nil == fragment || nil == fragment.Root {
 				continue
 			}

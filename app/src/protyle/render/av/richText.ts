@@ -5,6 +5,7 @@ import {highlightRender} from "../highlightRender";
 import {getAgentLute} from "../setLute";
 import {restoreInlineElementBoundaries} from "../../util/inlineElementBoundary";
 import {mathRender} from "../mathRender";
+import {renderImageDisplay} from "../imageDisplay";
 import {
     createAVRichTextStyleBackslashEncoding,
     createAVRichTextStyleEntityReplacer,
@@ -522,5 +523,6 @@ export const renderAVRichTextElements = (root: Element) => {
     elements.forEach((element) => {
         mathRender(element);
         highlightRender(element);
+        if (element.classList.contains("document-title-preview")) { renderImageDisplay(element); }
     });
 };

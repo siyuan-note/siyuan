@@ -417,6 +417,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, blockID, viewID, groupID, previou
 		// 主键都不返回内容，避免闪烁 https://github.com/siyuan-note/siyuan/issues/15561#issuecomment-3184746195
 		if av.KeyTypeBlock == value.Type {
 			value.Block.Content = ""
+			value.Block.Rich, value.Block.RichBlockDOM = nil, ""
 		}
 	}
 	return
@@ -2205,7 +2206,7 @@ func DuplicateAttributeViewRow(tx *Transaction, avID, previousItemID, srcRowID, 
 
 	now := util.CurrentTimeMillis()
 
-	// 创建副本的主键值，强制为纯文本（非绑定块）
+	// 副本使用独立条目身份，完整行级源随文字保留。
 	blockContent := ""
 	if nil != srcBlockVal.Block {
 		blockContent = srcBlockVal.Block.Content
@@ -2219,6 +2220,13 @@ func DuplicateAttributeViewRow(tx *Transaction, avID, previousItemID, srcRowID, 
 		CreatedAt:  now,
 		UpdatedAt:  now,
 		Block:      &av.ValueBlock{Content: blockContent, Created: now, Updated: now},
+	}
+	if srcBlockVal.Block != nil && srcBlockVal.Block.Rich != nil {
+		source := *srcBlockVal.Block.Rich
+		newBlockVal.Block.Rich = &source
+		if err = newBlockVal.Block.NormalizeRichContent(); err != nil {
+			return
+		}
 	}
 	blockKeyValues.Values = append(blockKeyValues.Values, newBlockVal)
 
@@ -6449,6 +6457,7 @@ func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlock
 				blockValue.Block.Icon = blockIcon
 				blockValue.Block.Content = addingBlockContent
 				blockValue.Block.RefSubtype = blockRefSubtype
+				refreshAttributeViewPrimarySource(blockValue, node, avID)
 				blockValue.UpdatedAt = now
 			}
 
@@ -6473,6 +6482,7 @@ func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlock
 		Block:      &av.ValueBlock{Icon: blockIcon, Content: addingBlockContent, RefSubtype: blockRefSubtype, Created: now, Updated: now}}
 	if !isDetached {
 		blockValue.Block.ID = addingBoundBlockID
+		refreshAttributeViewPrimarySource(blockValue, node, avID)
 		if len(collectionRuleIDs) > 0 {
 			blockValue.Block.CollectionRuleID = collectionRuleIDs[0]
 		}
@@ -8186,6 +8196,8 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 			content = util.UnescapeHTML(content)
 			blockVal.Block.Icon, blockVal.Block.Content = icon, content
 			blockVal.Block.RefSubtype = getNodeAvBlockRefSubtype(node, avID)
+			blockVal.Block.Rich = nil
+			refreshAttributeViewPrimarySource(blockVal, node, avID)
 			blockVal.UpdatedAt = now
 			regenAttrViewGroups(attrView)
 			targetItemID = blockVal.BlockID
@@ -8218,6 +8230,8 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 				content = util.UnescapeHTML(content)
 				blockVal.Block.Icon, blockVal.Block.Content = icon, content
 				blockVal.Block.RefSubtype = getNodeAvBlockRefSubtype(node, avID)
+				blockVal.Block.Rich = nil
+				refreshAttributeViewPrimarySource(blockVal, node, avID)
 
 				refreshRelatedSrcAvs(avID, tx)
 			} else {
@@ -8604,6 +8618,15 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		}
 		normalizeAttributeViewLocationProvenance(val.Location, updatedVal.Location, data)
 	}
+	if av.KeyTypeBlock == valueType {
+		boxID := ""
+		if tx != nil {
+			boxID = tx.attributeViewStorageContexts[avID]
+		}
+		if err = prepareAttributeViewPrimaryRich(tx, updatedVal, val, data, boxID); err != nil {
+			return
+		}
+	}
 	if updatedVal != val {
 		*val = *updatedVal
 	}
@@ -8708,6 +8731,8 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 					val.Block.Icon = icon
 					val.Block.Content = util.UnescapeHTML(content)
 					val.Block.RefSubtype = getNodeAvBlockRefSubtype(node, avID)
+					val.Block.Rich = nil
+					refreshAttributeViewPrimarySource(val, node, avID)
 				} else {
 					val.Block.RefSubtype = av.BlockRefSubtypeDynamic
 				}
@@ -8734,6 +8759,8 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 						val.Block.Icon = icon
 						val.Block.Content = util.UnescapeHTML(content)
 						val.Block.RefSubtype = getNodeAvBlockRefSubtype(node, avID)
+						val.Block.Rich = nil
+						refreshAttributeViewPrimarySource(val, node, avID)
 					} else {
 						val.Block.Content = util.UnescapeHTML(val.Block.Content)
 						val.Block.RefSubtype = av.BlockRefSubtypeDynamic
@@ -8742,7 +8769,7 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 					content := strings.TrimSpace(val.Block.Content)
 					node, tree, _ := getNodeByBlockID(tx, val.Block.ID)
 					_, blockText := getNodeAvBlockText(node, "")
-					if "" == content {
+					if "" == content && val.Block.Rich == nil {
 						// 使用动态锚文本
 						val.Block.Content = util.UnescapeHTML(blockText)
 						val.Block.RefSubtype = av.BlockRefSubtypeDynamic
@@ -8755,6 +8782,13 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 				}
 			}
 		}
+	}
+	if isUpdatingBlockKey && !val.IsDetached {
+		node, _, loadErr := getNodeByBlockID(tx, val.Block.ID)
+		if loadErr != nil {
+			return nil, loadErr
+		}
+		refreshAttributeViewPrimarySource(val, node, avID)
 	}
 
 	blockVal.Block.Updated = now

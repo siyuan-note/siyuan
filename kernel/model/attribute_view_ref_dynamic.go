@@ -65,14 +65,14 @@ func updateAttributeViewDynamicRefTexts(attrView *av.AttributeView, updatedDefNo
 		return
 	}
 	for _, keyValues := range attrView.KeyValues {
-		if nil == keyValues || nil == keyValues.Key || av.KeyTypeText != keyValues.Key.Type {
+		if nil == keyValues || nil == keyValues.Key || (av.KeyTypeText != keyValues.Key.Type && av.KeyTypeBlock != keyValues.Key.Type) {
 			continue
 		}
 		for _, value := range keyValues.Values {
-			if nil == value || nil == value.Text || !value.Text.IsRich() {
+			if nil == value {
 				continue
 			}
-			fragmentTree, err := av.ParseValueTextRich(value.Text.Rich)
+			fragmentTree, err := av.RichValueTree(value)
 			if nil != err || nil == fragmentTree {
 				continue
 			}
@@ -80,12 +80,11 @@ func updateAttributeViewDynamicRefTexts(attrView *av.AttributeView, updatedDefNo
 			if !valueChanged {
 				continue
 			}
-			richContent, renderErr := av.RenderValueTextRich(fragmentTree)
+			renderErr := av.SetRichValueTree(value, fragmentTree)
 			if nil != renderErr {
 				logging.LogWarnf("render attribute view [%s] dynamic reference text failed: %s", attrView.ID, renderErr)
 				continue
 			}
-			value.Text.Rich.Content = richContent
 			changed = true
 		}
 	}

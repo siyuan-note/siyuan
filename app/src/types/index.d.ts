@@ -1528,6 +1528,8 @@ interface IAVCellValue {
     mAsset?: IAVCellAssetValue[]
     block?: {
         content: string,
+        rich?: {spec: 1, format: "inline-ast", content: string} | null,
+        richBlockDOM?: string,
         id?: string,
         /** 游离条目可独立设置图标；绑定条目与目标块共享图标，无图标的普通块在绑定时继承条目图标。 */
         icon?: string,

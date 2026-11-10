@@ -227,10 +227,10 @@ func rewriteAttributeViewValueAssetReferences(value *av.Value, options assetRefe
 }
 
 func rewriteAttributeViewRichAssetReferences(value *av.Value, options assetReferenceRewriteOptions) (updated bool) {
-	if nil == value || nil == value.Text || nil == value.Text.Rich {
+	if nil == value {
 		return
 	}
-	tree, err := av.ParseValueTextRich(value.Text.Rich)
+	tree, err := av.RichValueTree(value)
 	if nil != err || nil == tree {
 		return
 	}
@@ -278,17 +278,7 @@ func rewriteAttributeViewRichAssetReferences(value *av.Value, options assetRefer
 		return
 	}
 
-	oldRichContent, oldContent := value.Text.Rich.Content, value.Text.Content
-	richContent, err := av.RenderValueTextRich(tree)
-	if nil != err {
-		return false
-	}
-	value.Text.Rich.Content = richContent
-	if err = value.Text.NormalizeRichContent(); nil != err {
-		value.Text.Rich.Content, value.Text.Content = oldRichContent, oldContent
-		return false
-	}
-	return true
+	return av.SetRichValueTree(value, tree) == nil
 }
 
 func rewriteAttributeViewFileAnnotationReference(reference string, options assetReferenceRewriteOptions) string {

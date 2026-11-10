@@ -209,6 +209,7 @@ func (tx *Transaction) applyAttributeViewBinding(current *av.AttributeView, valu
 		icon, content := getNodeAvBlockText(node, current.ID)
 		value.Block.Icon, value.Block.Content = icon, util.UnescapeHTML(content)
 		value.Block.RefSubtype = getNodeAvBlockRefSubtype(node, current.ID)
+		refreshAttributeViewPrimarySource(value, node, current.ID)
 	}
 	regenAttrViewGroups(current)
 	if err := avSaveView(current, state.blockID); err != nil {

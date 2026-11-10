@@ -84,6 +84,9 @@ const runCases = async (sources, appDirectory) => {
         "../../toolbar/defaults": {getDefaultToolbar: () => []},
         "../highlightRender": {highlightRender: () => {}},
         "../mathRender": {mathRender: () => {}},
+        "../imageDisplay": {renderImageDisplay() {}},
+        "../../header/documentTitleDOM": {},
+        "./primaryRich": {},
         "./richTextEditorPosition": {positionAVRichTextEditor: () => {}},
         "./richTextEditorLute": {createAVRichTextEditorLute: () => ({}), configureAVRichTextEditorLute() {}},
         "./virtualScroll": {getAVData: element => dataByElement.get(element),
@@ -173,7 +176,7 @@ const runCases = async (sources, appDirectory) => {
         dataByElement.set(nodeElement, data);
         const saves = [];
         let closed = 0;
-        const protyle = {element: standalone ? document.createElement("div") : owner, wysiwyg: {element: owner},
+        const protyle = {options: {}, element: standalone ? document.createElement("div") : owner, wysiwyg: {element: owner},
             notebookId, path: "/document.sy", block: {rootID: "document"}};
         editor.openAVRichTextEditor({protyle, nodeElement, anchorElement, value, stableCells,
             onSave: (...args) => saves.push(args), onDestroy: () => closed++, prepareNextInput});

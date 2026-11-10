@@ -13837,6 +13837,12 @@
             "d"
           ]
         },
+        "rich": {
+          "$ref": "#/$defs/DocumentTitleSource"
+        },
+        "richBlockDOM": {
+          "type": "string"
+        },
         "updated": {
           "type": "integer"
         }
@@ -13897,6 +13903,26 @@
             "s",
             "d"
           ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rich": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DocumentTitleSourceInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "richBlockDOM": {
           "anyOf": [
             {
               "type": "string"

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261110124116"
+		"updated": "20261110155812"
 	},
 	"Children": [
 		{
@@ -6186,6 +6186,63 @@
 				"id": "20260613194213-n2rytff",
 				"updated": "20260613194213"
 			}
+		},
+		{
+			"ID": "20261110155812-vnwu8jk",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110155812-vnwu8jk",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rich primary keys"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110155812-jqq7g2f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110155812-jqq7g2f",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Primary keys use a single inline editor with the same supported elements as document titles, including text styles, links, images, formulas and references. Table, list, gallery, kanban, calendar, entry details, relations and rollups display the complete source. Filtering, sorting, search and plain-text copying use the text projection; existing Markdown-looking primary keys remain literal."
+				}
+			]
+		},
+		{
+			"ID": "20261110155812-s0dfq3p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110155812-s0dfq3p",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Editing a bound primary key sets a custom static anchor. Clearing it restores the dynamic source. Dynamic anchors follow supported inline styling in the source document title or paragraph, including changes to styling alone. Static anchors retain their own content. Binding, rebinding and detaching preserve the entry identity. Unsupported block structures are rejected by the inline editor, and failed saves retain the draft."
+				}
+			]
+		},
+		{
+			"ID": "20261110155812-zuuix8w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110155812-zuuix8w",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Databases containing rich primary keys use format 15. Earlier database formats remain readable, but kernels that do not support format 15 cannot open a database once it uses this feature. Images and references follow the database notebook access boundary. Back up the workspace before upgrading or switching clients."
+				}
+			]
 		}
 	]
 }

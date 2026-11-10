@@ -16,14 +16,18 @@ import (
 )
 
 func TestEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T) {
-	testEncryptedAttributeViewSaveReplacesCiphertext(t, false)
+	testEncryptedAttributeViewSaveReplacesCiphertext(t, false, false)
 }
 
 func TestEncryptedDeprecatedLayoutRecovery(t *testing.T) {
-	testEncryptedAttributeViewSaveReplacesCiphertext(t, true)
+	testEncryptedAttributeViewSaveReplacesCiphertext(t, true, false)
 }
 
-func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy bool) {
+func TestEncryptedPrimaryRichPreservesPreviousAuthenticatedSnapshot(t *testing.T) {
+	testEncryptedAttributeViewSaveReplacesCiphertext(t, false, true)
+}
+
+func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy, primary bool) {
 	t.Helper()
 	const boxID, avID = "20261010120000-encbox0", "20261010120001-encav00"
 	oldData := util.DataDir
@@ -85,6 +89,11 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy bool)
 		t.Fatal(err)
 	}
 	view.Name = "second encrypted version with different length"
+	if primary {
+		view.KeyValues = []*KeyValues{{Key: &Key{ID: "20261110000000-primary", Type: KeyTypeBlock}, Values: []*Value{{
+			Type: KeyTypeBlock, IsDetached: true, BlockID: "20261110000000-row0000", Block: &ValueBlock{Rich: primaryRichFixture(t, `<span data-type="strong">encrypted primary</span>`)},
+		}}}}
+	}
 	if err := SaveAttributeView(view); err != nil {
 		t.Fatal(err)
 	}
@@ -96,6 +105,9 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy bool)
 	loaded, err := ParseAttributeViewInBox(avID, boxID)
 	if err != nil || loaded.Name != view.Name {
 		t.Fatalf("updated ciphertext did not authenticate: %+v, %v", loaded, err)
+	}
+	if primary && (loaded.Spec != PrimaryRichSpec || loaded.KeyValues[0].Values[0].Block.Content != "encrypted primary" || loaded.KeyValues[0].Values[0].Block.Rich == nil) {
+		t.Fatal("encrypted primary source did not survive authenticated reopening")
 	}
 	plain, err := decryptAVData(boxID, avID, retained)
 	if err != nil {

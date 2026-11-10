@@ -40,7 +40,7 @@ func TestAttributeViewOrderFingerprintCoversPersistedValueFields(t *testing.T) {
 		{reflect.TypeFor[av.Value](), []string{"ID", "KeyID", "BlockID", "Type", "IsDetached", "CreatedAt", "UpdatedAt",
 			"Block", "Text", "Number", "Date", "MSelect", "URL", "Email", "Phone", "Location", "MAsset", "Template",
 			"Created", "Updated", "Checkbox", "Relation", "Rollup", "RenderedContent", "HasRenderTemplate"}},
-		{reflect.TypeFor[av.ValueBlock](), []string{"CollectionRuleID", "ID", "Icon", "Content", "RefSubtype", "Created", "Updated"}},
+		{reflect.TypeFor[av.ValueBlock](), []string{"CollectionRuleID", "ID", "Icon", "Content", "Rich", "RichBlockDOM", "RefSubtype", "Created", "Updated"}},
 		{reflect.TypeFor[av.ValueText](), []string{"Content", "Rich"}},
 		{reflect.TypeFor[av.ValueTemplate](), []string{"Content"}},
 	} {
@@ -128,6 +128,8 @@ func TestAttributeViewOrderFingerprintRetainsPayloadFieldsAndBoundaries(t *testi
 			changed := reflect.ValueOf(value.Block).Elem().FieldByName(field.Name)
 			if changed.Kind() == reflect.String {
 				changed.SetString("changed")
+			} else if changed.Kind() == reflect.Pointer {
+				changed.Set(reflect.New(changed.Type().Elem()))
 			} else {
 				changed.SetInt(math.MinInt64)
 			}

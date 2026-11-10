@@ -450,6 +450,12 @@ func TestAutomationRelationConditionsUseSourceSnapshot(t *testing.T) {
 	if err := PerformTxSync(automationStatusTransaction(source, fixture.sourceID, statusID, itemID, "Active")); err != nil {
 		t.Fatal(err)
 	}
+	target = readAttributeViewItemsTest(t, target.ID)
+	primary := target.GetBlockKeyValues().Values[0]
+	primary.Block.Rich = attributeViewNodePrimaryRich(util.NewLute().BlockDOM2Tree(primaryRichTestDOM(`<span data-type="strong">Primary</span>`)).Root.FirstChild)
+	if err := av.SaveAttributeView(target); err != nil {
+		t.Fatal(err)
+	}
 	source = readAttributeViewItemsTest(t, source.ID)
 	finish := source.Automations.Rules[1]
 	finish.Conditions = append(finish.Conditions, &av.ViewFilter{Column: logsID, Operator: av.FilterOperatorContains,
@@ -468,7 +474,7 @@ func TestAutomationRelationConditionsUseSourceSnapshot(t *testing.T) {
 	}
 	target = readAttributeViewItemsTest(t, target.ID)
 	row := target.GetBlockKeyValues().Values[0]
-	if row.Block.Content != "Renamed" {
+	if row.Block.Content != "Renamed" || row.Block.Rich != nil || row.Block.RichBlockDOM != "" {
 		t.Fatal("first rule did not rename the related item")
 	}
 	if value := target.GetValue(target.KeyValues[3].Key.ID, row.BlockID); value != nil && value.Date.IsNotEmpty {

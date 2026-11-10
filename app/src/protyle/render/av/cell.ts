@@ -62,6 +62,7 @@ import {
     renderAVRichTextElements,
 } from "./richText";
 import {openAVRichTextEditor} from "./richTextEditor";
+import {getAVPrimaryPreviewHTML} from "./primaryRich";
 import {getAVData, getAVPrimaryCell} from "./virtualScroll";
 import {AV_CELL_EDITOR_CLOSE_EVENT, getAVCellEditorOwner} from "./cellEditor";
 import {getAVBlockIconHTML, renderAVBlockIcon} from "./blockIcon";
@@ -219,9 +220,11 @@ export const getCellText = (cellElement: HTMLElement | false, purpose: "copy" | 
     if (ownValue?.type === "location" && !cellElement.matches(".av__celltext--template")) {
         return formatLocation(ownValue.location);
     }
+    if (ownValue?.type === "block" && !cellElement.matches(".av__celltext--template")) { return ownValue.block?.content || ""; }
     const richTextElement = cellElement.matches(".av__celltext--rich[data-cell-value]") ? cellElement :
         cellElement.querySelector<HTMLElement>(".av__celltext--rich[data-cell-value]");
     const storedCellValue = richTextElement ? getStoredCellValueByElement(richTextElement) : undefined;
+    if (storedCellValue?.type === "block") { return storedCellValue.block?.content || ""; }
     if (storedCellValue?.type === "text" && getAVTextSource(storedCellValue).kind === "rich") {
         return getAVTextCopyContent(storedCellValue);
     }
@@ -620,13 +623,13 @@ export const getTypeByCellElement = (cellElement: Element) => {
     return scrollElement.querySelector(".av__row--header").querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
 };
 
-const getStableTextCells = (cellElements: HTMLElement[], blockElement: HTMLElement) => {
+const getStableTextCells = (cellElements: HTMLElement[], blockElement: HTMLElement, type: "text" | "block") => {
     const viewType = blockElement.dataset.avType as TAVView;
     const stableCells: IAVSelectedCell[] = [];
     cellElements.forEach((cellElement) => {
         const rowID = getFieldIdByCellElement(cellElement, viewType);
         const colID = getColId(cellElement, viewType);
-        const value = getStoredCellValueByElement(cellElement) || genCellValueByElement("text", cellElement);
+        const value = getStoredCellValueByElement(cellElement) || genCellValueByElement(type, cellElement);
         const rowElement = hasClosestByClassName(cellElement,
             isTableLikeView(viewType) ? "av__row" : "av__gallery-item");
         const groupElement = hasClosestByClassName(cellElement, "av__body");
@@ -864,8 +867,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     const hasRenderedTemplate = cellElements[0].matches(".av__celltext--template") ||
         Boolean(cellElements[0].querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template"));
-    if (type === "text" && !hasRenderedTemplate) {
-        const stableCells = getStableTextCells(cellElements, blockElement);
+    if ((type === "text" || type === "block") && !hasRenderedTemplate) {
+        const stableCells = getStableTextCells(cellElements, blockElement, type);
         if (stableCells.length > 0) {
             if (!options?.keepMenuOpen) {
                 window.siyuan.menus.menu.remove();
@@ -1518,6 +1521,9 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         if (type === "block" && typeof cellValue.block.icon === "undefined") {
             cellValue.block.icon = oldValue.block.icon || "";
         }
+        if (type === "block") {
+            if (cellValue.block.rich === undefined && cellValue.block.richBlockDOM === undefined) { cellValue.block.rich = null; }
+        }
         cellValue = rebindAVCellValue(cellValue, {
             id: cellId,
             keyID: colId,
@@ -1738,11 +1744,14 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     } else if ("url" === cellValue.type) {
         text = renderCellURL(cellValue?.url?.content || "");
     } else if (cellValue.type === "block") {
+        const primaryContent = cellValue.block.richBlockDOM ? getAVPrimaryPreviewHTML(cellValue) : escapeHtmlTextAndAttr(cellValue.block.content || "");
+        const primaryAttributes = cellValue.block.richBlockDOM ? ` data-protyle-lite-render="safe" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(cellValue))))}"` : "";
+        const primaryClass = cellValue.block.richBlockDOM ? " av__celltext--rich b3-typography document-title-preview" : "";
         // 不可使用换行 https://github.com/siyuan-note/siyuan/issues/11365
         if (cellValue?.isDetached) {
-            text = `${renderAVBlockIcon(cellValue, showIcon)}<span class="av__celltext">${escapeHtmlTextAndAttr(cellValue.block.content || "")}</span>`;
+            text = `${renderAVBlockIcon(cellValue, showIcon)}<span class="av__celltext${primaryClass}"${primaryAttributes}>${primaryContent}</span>`;
         } else {
-            text = `${renderAVBlockIcon(cellValue, showIcon)}<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref">${escapeHtmlTextAndAttr(cellValue.block.content)}</span>`;
+            text = `${renderAVBlockIcon(cellValue, showIcon)}<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref${primaryClass}"${primaryAttributes}>${primaryContent}</span>`;
         }
         text = `<span class="av__cellprimary">${text}</span>`;
     } else if (cellValue.type === "number") {
@@ -1839,6 +1848,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
 };
 
 export const getCellValueText = (value: IAVCellValue, column?: IAVColumn, rowIndex = 0) => {
+    if (value.type === "block" && !hasAVRenderTemplateResult(value, column?.renderTemplate)) { return value.block?.content || ""; }
     if (value.type === "location" && !hasAVRenderTemplateResult(value, column?.renderTemplate)) {
         return getAVLocationText(value.location);
     }
@@ -1888,6 +1898,7 @@ const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {
             text = renderCellURL(urlContent);
         }
     } else if (cellValue.type === "block") {
+        if (cellValue.block?.richBlockDOM) { return renderCell(cellValue, 0, showIcon, "table", undefined, "", undefined, false); }
         if (cellValue?.isDetached) {
             text = `${renderAVBlockIcon(cellValue, showIcon)}<span class="av__celltext">${escapeHtmlTextAndAttr(cellValue.block?.content || window.siyuan.languages.untitled)}</span>`;
         } else {

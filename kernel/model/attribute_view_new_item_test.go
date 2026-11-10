@@ -261,16 +261,20 @@ func TestNewBoundAttributeViewItemValueUsesDynamicAnchorText(t *testing.T) {
 		IsDetached: true,
 		Block:      &av.ValueBlock{Content: "Detached item"},
 	}
+	original.Block.Rich = attributeViewNodePrimaryRich(util.NewLute().BlockDOM2Tree(primaryRichTestDOM(`<span data-type="strong">Detached item</span>`)).Root.FirstChild)
+	if err := original.Block.NormalizeRichContent(); err != nil {
+		t.Fatal(err)
+	}
 	docID := ast.NewNodeID()
 	bound, err := newBoundAttributeViewItemValue(original, docID, "1f4c4")
 	if nil != err {
 		t.Fatalf("create bound attribute view item value failed: %s", err)
 	}
 	if bound.IsDetached || docID != bound.Block.ID || "" != bound.Block.Content || "1f4c4" != bound.Block.Icon ||
-		av.BlockRefSubtypeDynamic != bound.Block.RefSubtype {
+		av.BlockRefSubtypeDynamic != bound.Block.RefSubtype || bound.Block.Rich != nil || bound.Block.RichBlockDOM != "" {
 		t.Fatalf("the bound item should use dynamic anchor text: %+v", bound)
 	}
-	if !original.IsDetached || "" != original.Block.ID || "Detached item" != original.Block.Content {
+	if !original.IsDetached || "" != original.Block.ID || "Detached item" != original.Block.Content || original.Block.Rich == nil {
 		t.Fatalf("the original detached item should remain unchanged: %+v", original)
 	}
 }

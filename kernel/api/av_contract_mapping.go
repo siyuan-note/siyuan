@@ -5,6 +5,7 @@
 package api
 
 import (
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -192,6 +193,8 @@ func toContractAVValueBlock(value *av.ValueBlock) *apicontract.AVValueBlock {
 		ID:               value.ID,
 		Icon:             value.Icon,
 		Content:          value.Content,
+		Rich:             toContractAVPrimaryRich(value.Rich),
+		RichBlockDOM:     value.RichBlockDOM,
 		RefSubtype:       string(value.RefSubtype),
 		Created:          value.Created,
 		Updated:          value.Updated,
@@ -202,13 +205,27 @@ func fromContractAVValueBlock(value *apicontract.AVValueBlock) *av.ValueBlock {
 		return nil
 	}
 	return &av.ValueBlock{
-		ID:         value.ID,
-		Icon:       value.Icon,
-		Content:    value.Content,
-		RefSubtype: av.BlockRefSubtype(value.RefSubtype),
-		Created:    value.Created,
-		Updated:    value.Updated,
+		ID:           value.ID,
+		Icon:         value.Icon,
+		Content:      value.Content,
+		Rich:         fromContractAVPrimaryRich(value.Rich),
+		RichBlockDOM: value.RichBlockDOM,
+		RefSubtype:   av.BlockRefSubtype(value.RefSubtype),
+		Created:      value.Created,
+		Updated:      value.Updated,
 	}
+}
+func toContractAVPrimaryRich(value *ast.DocumentTitle) *apicontract.DocumentTitleSource {
+	if value == nil {
+		return nil
+	}
+	return &apicontract.DocumentTitleSource{Spec: value.Spec, Format: value.Format, Content: value.Content}
+}
+func fromContractAVPrimaryRich(value *apicontract.DocumentTitleSource) *ast.DocumentTitle {
+	if value == nil {
+		return nil
+	}
+	return &ast.DocumentTitle{Spec: value.Spec, Format: value.Format, Content: value.Content}
 }
 func toContractAVValueText(value *av.ValueText) *apicontract.AVValueText {
 	if value == nil {

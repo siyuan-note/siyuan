@@ -19,6 +19,10 @@ import {updateOutlineCurrentBlock} from "../../util/outlineBlock";
 import {focusBlock} from "../../util/selection";
 import {isAVContinuousInputKey} from "./continuousInput";
 import {configureAVRichTextEditorLute, createAVRichTextEditorLute} from "./richTextEditorLute";
+import {getDocumentTitleDOMFingerprint, getDocumentTitleLute, getDocumentTitleUnsupportedPasteBlocks,
+    prepareDocumentTitleBlockDOM} from "../../header/documentTitleDOM";
+import {createAVPrimaryEditValue, getAVPrimaryInitialDOM} from "./primaryRich";
+import {renderImageDisplay} from "../imageDisplay";
 import {
     createAVRichTextValue,
     getAVRichTextBlockDOM,
@@ -105,6 +109,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     void activeEditor?.finish(false);
 
     const mobile = isMobile();
+    const primary = options.value.type === "block";
     let cleanup = () => {};
     const content = `<div class="av__richtext-editor${mobile ? " av__richtext-editor--sheet" : ""}"${mobile ? "" : ' role="dialog"'}>
     <div class="av__richtext-host"></div>
@@ -112,7 +117,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         <button type="button" class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button>
     </div>` : ""}`;
     const dialog = mobile ? new MobileDialog({
-        title: window.siyuan.languages.text,
+        title: primary ? window.siyuan.languages.key : window.siyuan.languages.text,
         content,
         containerClassName: "mobile-av-richtext-sheet",
         mobileSheet: {beforeClose: () => saveMobile()},
@@ -137,15 +142,21 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     setPanelPosition(panelElement, options.anchorElement);
 
     const source = getAVTextSource(options.value);
-    const toolbar = getDefaultToolbar(mobile);
+    const toolbar = getDefaultToolbar(mobile).filter(item => !primary ||
+        !["block-type", "ai"].includes(typeof item === "string" ? item : item.name));
+    const inlineSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, source: THintSource) => {
+        prepareHint(protyle);
+        const allowed = new Set(["ref", "link", "bold", "italic", "underline", "strike", "mark", "sup", "sub", "inlineCode", "kbd", "tag", "inlineMath", "emoji"]);
+        return hintSlash(key, protyle, source).filter(item => allowed.has(item.id));
+    });
     const hint: IProtyleOptions["hint"] = {
         extend: [{key: "((", hint: hintAVRef}, {key: "【【", hint: hintAVRef},
             {key: "（（", hint: hintAVRef}, {key: "[[", hint: hintAVRef},
-            {key: "/", hint: hintAVSlash}, {key: "、", hint: hintAVSlash}],
+            {key: "/", hint: primary ? inlineSlash : hintAVSlash}, {key: "、", hint: primary ? inlineSlash : hintAVSlash}],
     };
     const fragment = mountProtyleLiteFragment(hostElement, {
-        initialBlockHTML: source.kind === "rich" ? getAVRichTextBlockDOM(source.content) : undefined,
-        initialPlainText: source.kind === "plain" ? source.content : undefined,
+        initialBlockHTML: primary ? getAVPrimaryInitialDOM(options.value) : source.kind === "rich" ? getAVRichTextBlockDOM(source.content) : undefined,
+        initialPlainText: !primary && source.kind === "plain" ? source.content : undefined,
         placeholder: window.siyuan.languages.empty,
         protyleOptions: {
             notebookId: options.protyle.notebookId ||
@@ -154,19 +165,22 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             hint,
         },
         runtimeCapabilities: {
-            upload: false,
+            upload: primary,
             websocket: false,
-            lute: createAVRichTextEditorLute(),
+            lute: primary ? getDocumentTitleLute(createAVRichTextEditorLute()) : createAVRichTextEditorLute(),
             lockedOptions: {toolbar, hint},
             pluginExtensions: false,
             customBlockRender: false,
-            sanitizeBlockDOM: sanitizeAVRichTextBlockDOM,
-            getUnsupportedPasteBlocks: getAVRichTextUnsupportedPasteBlocks,
-            restoreLuteMarkdownSyntax: configureAVRichTextEditorLute,
+            sanitizeBlockDOM: primary ? prepareDocumentTitleBlockDOM : sanitizeAVRichTextBlockDOM,
+            getUnsupportedPasteBlocks: primary ? getDocumentTitleUnsupportedPasteBlocks : getAVRichTextUnsupportedPasteBlocks,
+            getUnsupportedPasteMessage: primary ? () => window.siyuan.languages.documentTitleInlineOnly : undefined,
+            richHTMLPaste: primary,
+            restoreLuteMarkdownSyntax: lute => primary ? getDocumentTitleLute(configureAVRichTextEditorLute(lute)) : configureAVRichTextEditorLute(lute),
         },
         afterSetContent: (protyle, element) => {
             mathRender(element);
             highlightRender(element);
+            if (primary) { renderImageDisplay(element); }
             protyle.undo.clear();
         },
     });
@@ -175,7 +189,9 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     fragment.protyle.block.parentID = getAVHostBlockID(options.nodeElement);
     fragment.protyle.path = options.protyle.path;
     setPanelPosition(panelElement, options.anchorElement);
-    const initialMarkdown = serializeAVRichTextBlockDOM(fragment.getBlockHTML()).markdown;
+    const fingerprint = () => primary ? getDocumentTitleDOMFingerprint(fragment.getBlockHTML()) :
+        serializeAVRichTextBlockDOM(fragment.getBlockHTML()).markdown;
+    const initialMarkdown = fingerprint();
 
     let finished = false;
     let finishing = false;
@@ -186,13 +202,21 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         if (!ownerElement.isConnected || !options.nodeElement.isConnected) {
             return false;
         }
+        if (primary) {
+            const data = getAVData(options.nodeElement);
+            if (data && options.stableCells.some(cell => {
+                const current = resolveAVSelectedCell(data, cell)?.cell.value;
+                return !current || current.type !== "block" || current.isDetached !== options.value.isDetached ||
+                    current.block?.id !== options.value.block?.id;
+            })) { return false; }
+        }
         if (options.anchorElement.isConnected) {
             return true;
         }
         // 行重渲染后按稳定标识确认编辑目标，避免其他单元格的事务丢弃尚未保存的输入。
         const data = getAVData(options.nodeElement);
         return data && options.stableCells.length > 0 && options.stableCells.every(cell =>
-            resolveAVSelectedCell(data, cell)?.column.type === "text");
+            resolveAVSelectedCell(data, cell)?.column.type === (primary ? "block" : "text"));
     };
     const resize = () => {
         if (!options.anchorElement.isConnected) {
@@ -238,9 +262,14 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     const saveContent = async () => {
         await fragment.protyle.wysiwyg.flushPendingInput();
         if (cancelled || !isOwnerConnected()) return;
-        const serialized = serializeAVRichTextBlockDOM(fragment.getBlockHTML());
-        if (serialized.markdown !== initialMarkdown) {
-            await options.onSave(createAVRichTextValue(serialized.markdown, serialized.plainText, options.value),
+        if (fingerprint() !== initialMarkdown) {
+            if (options.protyle.disabled || window.siyuan.config.readonly || window.siyuan.isPublish ||
+                options.protyle.options.history?.created || options.protyle.options.history?.snapshot) {
+                throw new Error(window.siyuan.languages.readonly);
+            }
+            const serialized = primary ? undefined : serializeAVRichTextBlockDOM(fragment.getBlockHTML());
+            await options.onSave(primary ? createAVPrimaryEditValue(fragment.getBlockHTML(), options.value) :
+                createAVRichTextValue(serialized.markdown, serialized.plainText, options.value),
                 options.nodeElement, options.stableCells);
         }
     };

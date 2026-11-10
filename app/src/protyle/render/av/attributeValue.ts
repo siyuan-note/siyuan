@@ -14,6 +14,7 @@ import {getAVColorStyle} from "./color";
 import {getHostCapabilities} from "../../../util/hostCapabilities";
 import {getAVRichTextPreviewHTML, getAVTextSource} from "./richText";
 import {getAVLocationDisplayText} from "./locationValue";
+import {getAVPrimaryPreviewHTML} from "./primaryRich";
 
 export {createEmptyAVValue} from "./cellValue";
 
@@ -31,8 +32,8 @@ export const genAVRelationHTML = (item: IAVCellValue, rowID: string, showIcon = 
     }
     const useTemplate = hasAVRenderTemplateResult(item);
     const content = useTemplate ? getAVTemplateHTML(item.renderedContent || "") :
-        escapeHtmlTextAndAttr(item.block.content || window.siyuan.languages.untitled);
-    const templateClass = useTemplate ? " av__celltext--template" : "";
+        item.block.richBlockDOM ? getAVPrimaryPreviewHTML(item) : escapeHtmlTextAndAttr(item.block.content || window.siyuan.languages.untitled);
+    const templateClass = useTemplate ? " av__celltext--template" : item.block.richBlockDOM ? " av__celltext--rich b3-typography document-title-preview" : "";
     const storedValue = escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(item))));
     const attributes = `data-row-id="${escapeAttr(rowID)}" data-relation-value="${storedValue}" class="av__cell--relation"`;
     if (item.isDetached) {
@@ -84,6 +85,7 @@ const genAVRollupHTML = (value: IAVCellValue) => {
     const dataValue: IAVCellDateValue = value[value.type as "date"];
     switch (value.type) {
         case "block":
+            if (value.block?.richBlockDOM) { return genAVRelationHTML(value, value.blockID, false); }
             if (value?.isDetached) {
                 html = `<span>${escapeHtml(value.block?.content || window.siyuan.languages.untitled)}</span>`;
             } else {
@@ -137,7 +139,7 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
     let html = "";
     switch (value.type) {
         case "block":
-            html = `${renderAVBlockIcon(value)}<input data-id="${value.block.id || ""}" value="${escapeAttr(value.block.content)}" type="text" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
+            html = `${renderAVBlockIcon(value)}<div class="av__celltext fn__flex-1${value.block.richBlockDOM ? " av__celltext--rich b3-typography document-title-preview" : ""}" data-protyle-lite-render="safe" placeholder="${window.siyuan.languages.empty}">${value.block.richBlockDOM ? getAVPrimaryPreviewHTML(value) : escapeHtml(value.block.content || "")}</div>
 ${value.isDetached || !value.block.id ? `<button type="button" data-type="av-bind-document" class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${window.siyuan.languages.bind}"><svg><use xlink:href="#iconRef"></use></svg></button>` : ""}`;
             break;
         case "text": {
@@ -264,7 +266,7 @@ export const genAVAttributeRowHTML = (options: {
 }) => {
     const value = options.value;
     const storedValue = cloneAVCellValueSnapshot(value);
-    const textInputType = isAVLinkType(value.type);
+    const textInputType = isAVLinkType(value.type) && value.type !== "block";
     const hasOwnPlaceholder = hasAVAttributePlaceholder(value.type);
     const checkClass = value.type === "checkbox" ? (value.checkbox.checked ? " av__cell-check" : " av__cell-uncheck") : "";
     return `<div class="block__icons av__row" data-id="${escapeAttr(options.nodeID)}" data-col-id="${escapeAttr(options.keyID)}" data-empty="${options.empty}" data-panel-visibility="${escapeAttr(options.attributePanelVisibility || "")}"${options.type === "block" ? ' data-primary="true"' : ""}>

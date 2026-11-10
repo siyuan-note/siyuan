@@ -249,19 +249,14 @@ func (r *assetRelinker) attributeView(view *av.AttributeView, location apicontra
 				asset.Content = r.reference(asset.Content, "av-asset", loc)
 			}
 		}
-		if value.Text == nil || value.Text.Rich == nil {
-			return
-		}
 		var tree *parse.Tree
-		if tree, err = av.ParseValueTextRich(value.Text.Rich); err != nil || tree == nil {
+		if tree, err = av.RichValueTree(value); err != nil || tree == nil {
 			return
 		}
 		before := r.changes
 		r.tree(tree, loc)
 		if r.changes != before {
-			if value.Text.Rich.Content, err = av.RenderValueTextRich(tree); err == nil {
-				err = value.Text.NormalizeRichContent()
-			}
+			err = av.SetRichValueTree(value, tree)
 		}
 	})
 	return

@@ -2667,6 +2667,8 @@ if (response.code === 0 && response.data) {
 
 `location` 的 `name` 可选。`latitude` 和 `longitude` 必须同时缺省或为 null，或者同时为有限数值，范围分别为 [-90, 90] 和 [-180, 180]；零是有效坐标。所有坐标隐式使用 WGS84，保存时不自动转换。位置值不接受显式坐标系属性，字段不提供默认坐标系设置。`originalInput` 保留来源文本，不参与筛选和排序。更新时省略成员会保留已有值；清空位置可发送 `{"location":null}`，或显式清空名称并将两个坐标都设为 null。坐标变化时，省略的 `originalInput` 会自动清空；显式提供的来源文本会被保留。文本筛选使用 `{"type":"location","text":{"content":"查询词"}}`，匹配名称和坐标。位置字段使用数据库存储版本 13，旧版内核无法打开；未使用位置字段的数据库保留原有存储版本。
 
+主键（`block`）通过 `block.rich` 保存完整的第 1 版 `inline-ast` 源，合法行级元素与文档标题相同。`block.richBlockDOM` 是运行时渲染片段，也可向单元格更新接口提交一个行级段落，由内核校验后转为存储源；两种形式不能分别提交不同内容。`block.content` 是派生的纯文本投影。省略富文本字段且投影未变时保留源；以普通文字替换富文本主键须明确传 `block.rich: null`，并省略 `richBlockDOM`。编辑绑定主键设置静态锚文本，清空普通文字后恢复动态来源。富文本主键要求数据库存储规范 15，普通数据库保留原版本。
+
 * `/api/av/setAttributeViewBlockAttr`
 * 参数
 

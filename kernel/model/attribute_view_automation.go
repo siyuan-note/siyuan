@@ -686,8 +686,12 @@ func (tx *Transaction) runAutomationAction(source *attributeViewAutomationSource
 				if value.Block != nil {
 					content = value.Block.Content
 				}
+				if previous.Block != nil && previous.Block.Content == content {
+					continue
+				}
 				value = previous.Clone()
 				value.Block.Content = content
+				value.Block.Rich, value.Block.RichBlockDOM = nil, ""
 			}
 			if equalAutomationValues(previous, value) {
 				continue
@@ -727,6 +731,13 @@ func automationValuePatch(value *av.Value) map[string]any {
 		ret[field] = map[string]any{"name": location.Name, "latitude": location.Latitude,
 			"longitude":     location.Longitude,
 			"originalInput": location.OriginalInput}
+	}
+	if value.Type == av.KeyTypeBlock && value.Block != nil {
+		block := ret[field].(map[string]any)
+		delete(block, "richBlockDOM")
+		if value.Block.Rich == nil {
+			block["rich"] = nil
+		}
 	}
 	for _, key := range []string{"id", "keyID", "blockID", "createdAt", "updatedAt", "renderedContent", "hasRenderTemplate"} {
 		delete(ret, key)

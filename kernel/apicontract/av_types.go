@@ -87,11 +87,16 @@ type AVValueBlock struct {
 	CollectionRuleID string `json:"collectionRuleID,omitempty" api:"optional"`
 	ID               string `json:"id,omitempty" api:"optional,nullable"`
 	// 游离条目可独立设置图标；绑定条目与目标块共享图标，无图标的普通块在绑定时继承条目图标。
-	Icon       string `json:"icon,omitempty" api:"optional,nullable"`
-	Content    string `json:"content" api:"optional,nullable"`
-	RefSubtype string `json:"refSubtype,omitempty" api:"optional,nullable,enum=s|d"`
-	Created    int64  `json:"created,omitempty" api:"optional,nullable"`
-	Updated    int64  `json:"updated,omitempty" api:"optional,nullable"`
+	Icon    string `json:"icon,omitempty" api:"optional,nullable"`
+	Content string `json:"content" api:"optional,nullable"`
+	// 完整行级源与文档标题采用相同的 inline-ast 格式；content 是只读文字投影，不可代替完整源。
+	Rich *DocumentTitleSource `json:"rich,omitempty" api:"optional,nullable"`
+	// 响应中的安全渲染片段不落盘；写入此字段时按标题规则校验并转换为 rich，普通旧文字不解释为 Markdown。
+	// 富文本主键的纯文本替换须明确传 rich: null；省略 rich 的不同 content 不得静默丢弃源。
+	RichBlockDOM string `json:"richBlockDOM,omitempty" api:"optional,nullable"`
+	RefSubtype   string `json:"refSubtype,omitempty" api:"optional,nullable,enum=s|d"`
+	Created      int64  `json:"created,omitempty" api:"optional,nullable"`
+	Updated      int64  `json:"updated,omitempty" api:"optional,nullable"`
 }
 
 type AVValueText struct {

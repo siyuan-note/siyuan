@@ -4051,6 +4051,12 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 					}
 					if av.KeyTypeBlock == cell.Value.Type {
 						if nil != cell.Value.Block {
+							if cell.Value.Block.Rich != nil {
+								if attrViewRichErr = appendAttributeViewPrimaryRichExport(mdTableCell, cell.Value, exportOpts.RichTableCells); attrViewRichErr != nil {
+									return ast.WalkStop
+								}
+								continue
+							}
 							val = cell.Value.Block.Content
 							if !exportOpts.WYSIWYG {
 								val = string(lex.EscapeProtyleMarkers([]byte(val)))
@@ -4216,6 +4222,15 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 							}
 
 							if av.KeyTypeBlock == v.Type && nil != v.Block {
+								if v.Block.Rich != nil {
+									if attrViewRichErr = appendAttributeViewPrimaryRichExport(mdTableCell, v, exportOpts.RichTableCells); attrViewRichErr != nil {
+										return ast.WalkStop
+									}
+									if i < len(cell.Value.Relation.Contents)-1 {
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
+									}
+									continue
+								}
 								val = v.Block.Content
 								if !exportOpts.WYSIWYG {
 									val = string(lex.EscapeProtyleMarkers([]byte(val)))
@@ -4257,6 +4272,15 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 
 							if av.KeyTypeBlock == v.Type {
 								if nil != v.Block {
+									if v.Block.Rich != nil {
+										if attrViewRichErr = appendAttributeViewPrimaryRichExport(mdTableCell, v, exportOpts.RichTableCells); attrViewRichErr != nil {
+											return ast.WalkStop
+										}
+										if i < len(cell.Value.Rollup.Contents)-1 {
+											mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
+										}
+										continue
+									}
 									val = v.Block.Content
 									if !exportOpts.WYSIWYG {
 										val = string(lex.EscapeProtyleMarkers([]byte(val)))

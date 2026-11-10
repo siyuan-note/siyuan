@@ -21,6 +21,18 @@ func appendAttributeViewRichTextExport(cell *ast.Node, value *av.ValueText, rich
 	if err != nil {
 		return err
 	}
+	return appendAttributeViewRichFragmentExport(cell, fragment, richTableCells)
+}
+
+func appendAttributeViewPrimaryRichExport(cell *ast.Node, value *av.Value, richTableCells bool) error {
+	fragment, err := av.RichValueTree(value)
+	if err != nil {
+		return err
+	}
+	return appendAttributeViewRichFragmentExport(cell, fragment, richTableCells)
+}
+
+func appendAttributeViewRichFragmentExport(cell *ast.Node, fragment *parse.Tree, richTableCells bool) error {
 	var unlinks []*ast.Node
 	ast.Walk(fragment.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if entering {

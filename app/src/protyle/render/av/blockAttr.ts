@@ -788,7 +788,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
             break;
         } else if ((isAVTextType(type) && type !== "template") &&
             (target.querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template") ||
-                (type === "text" && target.querySelector(":scope > .av__celltext")))) {
+                ((type === "text" || type === "block") && target.querySelector(":scope > .av__celltext")))) {
             popTextCell(protyle, [target], type as TAVCol);
             event.stopPropagation();
             event.preventDefault();

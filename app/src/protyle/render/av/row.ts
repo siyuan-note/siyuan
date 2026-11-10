@@ -1,4 +1,5 @@
 import {isAVTimestampType} from "./capabilities";
+import {cloneAVCellValueSnapshot} from "./cellValue";
 import {getSubItemsCellStyle, getSubItemsControlHTML} from "./subItemsState";
 import {getConditionalItemStyle, getConditionalCellStyle} from "./conditionalColor";
 import {isTableLikeView} from "./viewType";
@@ -928,6 +929,12 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle,
             blockID: blockElement.dataset.nodeId,
             groupID: item.groupID
         });
+        if (blockValue.block.rich && (blockValue.isDetached || blockValue.block.refSubtype === "s")) {
+            const value = cloneAVCellValueSnapshot(blockValue);
+            delete value.block.richBlockDOM;
+            undoOperations.push({action: "updateAttrViewCell", avID, blockID: blockElement.dataset.nodeId,
+                keyID: value.keyID, rowID: item.itemID, data: value});
+        }
     });
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
     undoOperations.push({

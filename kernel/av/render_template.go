@@ -19,6 +19,11 @@ func CloneStoredValue(value *Value) (ret *Value) {
 	cloned.RenderedContent = ""
 	cloned.HasRenderTemplate = false
 	ret = &cloned
+	if value.Block != nil {
+		block := *value.Block
+		block.RichBlockDOM = ""
+		ret.Block = &block
+	}
 	if nil != value.Relation {
 		relation := *value.Relation
 		relation.Contents = cloneStoredValues(value.Relation.Contents)

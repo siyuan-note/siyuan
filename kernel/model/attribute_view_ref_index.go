@@ -85,14 +85,14 @@ func attributeViewRichTextRefDefIDs(attrView *av.AttributeView) (ret []string) {
 		return
 	}
 	for _, keyValues := range attrView.KeyValues {
-		if nil == keyValues || nil == keyValues.Key || av.KeyTypeText != keyValues.Key.Type {
+		if nil == keyValues || nil == keyValues.Key || (av.KeyTypeText != keyValues.Key.Type && av.KeyTypeBlock != keyValues.Key.Type) {
 			continue
 		}
 		for _, value := range keyValues.Values {
-			if nil == value || nil == value.Text || !value.Text.IsRich() || "" == value.Text.Rich.Content {
+			if nil == value {
 				continue
 			}
-			fragmentTree, err := av.ParseValueTextRich(value.Text.Rich)
+			fragmentTree, err := av.RichValueTree(value)
 			if nil != err || nil == fragmentTree || nil == fragmentTree.Root {
 				continue
 			}

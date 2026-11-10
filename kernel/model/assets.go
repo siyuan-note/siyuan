@@ -2834,10 +2834,8 @@ func getAttributeViewValueAssetsLinkDests(value *av.Value, includeServePath bool
 			ret = append(ret, strings.TrimSpace(normalizeScannedAsset(asset.Content, normalize)))
 		}
 	}
-	if nil != value.Text && nil != value.Text.Rich {
-		if tree, err := av.ParseValueTextRich(value.Text.Rich); nil == err && nil != tree {
-			ret = append(ret, getAssetsLinkDests(tree.Root, includeServePath, normalize...)...)
-		}
+	if tree, err := av.RichValueTree(value); nil == err && nil != tree {
+		ret = append(ret, getAssetsLinkDests(tree.Root, includeServePath, normalize...)...)
 	}
 	return
 }

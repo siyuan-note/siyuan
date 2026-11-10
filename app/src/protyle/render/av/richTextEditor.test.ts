@@ -5,7 +5,7 @@ import {loadModule} from "../../../testSupport/loadModule";
 
 const continuous = loadModule<typeof import("./continuousInput")>("src/protyle/render/av/continuousInput.ts", {require: () => ({})});
 
-const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: () => Promise<void>; save?: () => Promise<void>;
+const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; changed?: boolean; flush?: () => Promise<void>; save?: () => Promise<void>;
     tableInput?: boolean; hint?: boolean} = {}) => {
     const lifecycle: string[] = [];
     const masks: Array<{
@@ -31,6 +31,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         },
     });
     const protyle = {
+        options: {},
         element: owner,
         block: {rootID: "document"},
         wysiwyg: {element: {contains: (element: unknown) => element === node}},
@@ -50,12 +51,17 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         protyle,
         nodeElement: node,
         anchorElement: anchor,
-        value: {type: "text", text: {content: "initial"}},
+        value: settings.primary ? {type: "block", isDetached: true, block: {content: "initial"}} :
+            {type: "text", text: {content: "initial"}},
         stableCells: [] as import("./selectionState").IAVSelectedCell[],
         onSave: () => { lifecycle.push("save"); return settings.save?.(); },
         onDestroy: () => lifecycle.push("callback"),
         prepareNextInput: () => settings.tableInput ? () => lifecycle.push("next") : undefined,
     };
+    let currentValue = options.value;
+    if (settings.primary) {
+        options.stableCells.push({rowID: "row", colID: "primary"} as import("./selectionState").IAVSelectedCell);
+    }
     const modules: Record<string, unknown> = {
         "./continuousInput": continuous,
         "./host": {getAVHostIdentity: (element: typeof node) => element.dataset.nodeId,
@@ -102,6 +108,12 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
         "../../toolbar/defaults": {getDefaultToolbar: (): unknown[] => []},
         "./richTextEditorPosition": {positionAVRichTextEditor: () => {}},
         "./richTextEditorLute": {createAVRichTextEditorLute: () => ({}), configureAVRichTextEditorLute: () => {}},
+        "../../header/documentTitleDOM": {getDocumentTitleLute: (lute: unknown) => lute,
+            getDocumentTitleDOMFingerprint: (html: string) => html},
+        "./primaryRich": {getAVPrimaryInitialDOM: () => "initial",
+            createAVPrimaryEditValue: (html: string) => ({type: "block", isDetached: true, block: {content: html}})},
+        "./virtualScroll": {getAVData: () => settings.primary ? {} : undefined},
+        "./selectionState": {resolveAVSelectedCell: () => ({cell: {value: currentValue}, column: {type: currentValue.type}})},
         "./editorSession": {beginAVEditorSession: () => () => lifecycle.push("end-session")},
         "../../util/outlineBlock": {updateOutlineCurrentBlock: () => {}},
         "../../util/selection": {focusBlock: (element: unknown) => {
@@ -134,7 +146,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
             },
         },
         window: {
-            siyuan: {zIndex: 0, languages: {}},
+            siyuan: {zIndex: 0, languages: {}, config: {}},
             addEventListener: () => {},
             removeEventListener: () => {},
         },
@@ -150,6 +162,7 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
     }
     return {
         methods, lifecycle, owner, node, open,
+        rebind: () => { currentValue = {type: "block", isDetached: false, block: {content: "other"}}; },
         cancel: () => masks.at(-1).handlers.get("siyuan-av-cell-editor-close")({}),
         get inert() { return masks.at(-1).firstElementChild.inert; },
         enter: (options: Partial<KeyboardEvent> = {}) => masks.at(-1).firstElementChild.handlers.get("keydown")({
@@ -172,7 +185,8 @@ const createEditor = (settings: {mobile?: boolean; changed?: boolean; flush?: ()
     };
 };
 
-describe("database rich text editor lifecycle and continuous input", () => {
+[false, true].forEach(primary => describe(`database ${primary ? "primary" : "text"} rich editor lifecycle and continuous input`, () => {
+    const createEditor = (settings: Parameters<typeof createEditorFixture>[0] = {}) => createEditorFixture({...settings, primary});
     for (const mobile of [false, true]) {
         it(`waits for a successful save before continuing input (${mobile ? "mobile" : "desktop"})`, async () => {
             let complete: () => void;
@@ -349,4 +363,19 @@ describe("database rich text editor lifecycle and continuous input", () => {
         assert.equal(editor.lifecycle.includes("focus"), false);
         editor.methods.destroyAVRichTextEditor();
     });
-});
+    if (primary) {
+        for (const mobile of [false, true]) {
+            it(`drops a late primary save after rebinding (${mobile ? "mobile" : "desktop"})`, async () => {
+                let flush: () => void;
+                const editor = createEditor({mobile, changed: true, flush: () => new Promise<void>(resolve => flush = resolve)});
+                editor.escape();
+                editor.rebind();
+                flush();
+                await editor.settle();
+                assert.equal(editor.lifecycle.includes("save"), false);
+                assert.equal(editor.lifecycle.includes("destroy"), true);
+                assert.equal(editor.lifecycle.includes("focus"), false);
+            });
+        }
+    }
+}));

@@ -15,7 +15,7 @@ import * as host from "./host";
 
 // 位置用例不调用这些依赖；新增依赖或意外调用都应立即使测试失败。
 const unusedDependencies = [
-    "./columnWindow", "./continuousInput",
+    "./columnWindow", "./continuousInput", "./primaryRich",
     "./viewType", "./renderData", "../../wysiwyg/transaction", "../../util/hasClosest", "./openMenuPanel",
     "./action", "../../util/compatibility", "../../../util/fetch", "../../util/selection", "../../util/selectionOffsets",
     "dayjs", "../../../emoji", "./col", "./attributeValue", "../../../constants", "../../hint/extend",

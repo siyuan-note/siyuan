@@ -385,6 +385,7 @@ func (tx *Transaction) prepareListConversionBindings(originals []*parse.Tree, tr
 				value.Block.ID = targetID
 				icon, content := getNodeAvBlockText(target, avID)
 				value.Block.Icon, value.Block.Content, value.Block.RefSubtype = icon, util.UnescapeHTML(content), getNodeAvBlockRefSubtype(target, avID)
+				refreshAttributeViewPrimarySource(value, target, avID)
 				binding.after = value.Clone()
 				state.bindings = append(state.bindings, binding)
 			}

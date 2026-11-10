@@ -26,10 +26,9 @@ export const openPluginSnapshots = (app: App) => {
     <span class="fn__space"></span><button class="b3-button" type="submit">${lang.search}</button>
 </form>
 <div class="fn__hr"></div><div data-plugin-result aria-live="polite"></div>
-<ul class="b3-list b3-list--background" data-plugin-list></ul>
-<div class="fn__flex">
+<ul class="history__plugin-list" data-plugin-list></ul>
+<div class="history__plugin-pagination">
     <button type="button" class="b3-button b3-button--text" data-plugin-page="previous" disabled>${lang.previousLabel}</button>
-    <span class="fn__flex-1"></span>
     <button type="button" class="b3-button b3-button--text" data-plugin-page="next" disabled>${lang.nextLabel}</button>
 </div></div>`,
         width: isMobile() ? "92vw" : "640px",
@@ -94,15 +93,16 @@ export const openPluginSnapshots = (app: App) => {
                 .replace("${y}", String(response.data.totalCount));
             response.data.snapshots.forEach(snapshot => {
                 const row = document.createElement("li");
-                row.className = "b3-label";
+                row.className = "history__association";
                 const title = document.createElement("div");
                 title.textContent = `${dayjs(snapshot.created).format("YYYY-MM-DD HH:mm:ss")} ${snapshot.id.substring(0, 7)}`;
                 const stat = document.createElement("div");
-                stat.className = "b3-label__text";
+                stat.className = "ft__on-surface";
                 stat.textContent = lang.pluginSnapshotStats.replace("${programCount}", String(snapshot.program.count))
                     .replace("${programSize}", String(snapshot.program.size)).replace("${dataCount}", String(snapshot.data.count))
                     .replace("${dataSize}", String(snapshot.data.size));
                 const memo = document.createElement("div");
+                memo.className = "history__association-memo";
                 memo.textContent = snapshot.memo;
                 const button = document.createElement("button");
                 button.className = "b3-button b3-button--outline";
@@ -112,11 +112,14 @@ export const openPluginSnapshots = (app: App) => {
                 const open = document.createElement("button");
                 open.className = "b3-button b3-button--text";
                 open.type = "button";
-                open.textContent = lang.open;
+                open.textContent = lang.openBy;
                 open.addEventListener("click", () => {
                     void openSnapshotDetail(app, {...snapshot, fileID: "", tags: [packageName]}, "", packageName);
                 });
-                row.append(title, stat, memo, open, button);
+                const actions = document.createElement("div");
+                actions.className = "fn__flex history__repo-actions";
+                actions.append(open, button);
+                row.append(title, stat, memo, actions);
                 list.append(row);
             });
             if (!response.data.snapshots.length) { list.textContent = lang.emptyContent; }

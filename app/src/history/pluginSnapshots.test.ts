@@ -54,11 +54,12 @@ const setup = (mobile = false) => {
     let releaseUnload: () => void;
     let delayUnload = false;
     const calls: Array<{url: string, body?: any}> = [];
+    const opened: unknown[][] = [];
     const snapshot = {id: "a".repeat(40), created: 1000, memo: "<img onerror=alert(1)>",
         program: {count: 1, size: 100}, data: {count: 2, size: 200}};
     const app = {appId: "app", plugins: [{name: "example"}]};
     const exports: typeof import("./pluginSnapshots") = {} as any;
-    const languages = {pluginSnapshotRestoreTip: "Restore ${name}", pluginSnapshotRestored: "Backup ${id}",
+    const languages = {openBy: "Open", rollback: "Rollback", pluginSnapshotRestoreTip: "Restore ${name}", pluginSnapshotRestored: "Backup ${id}",
         pageCountAndSnapshotCount: "${x} pages ${y} snapshots", pluginSnapshotStats: "${programCount}/${programSize}/${dataCount}/${dataSize}"};
     runInNewContext(transpileModule(readFileSync(join(__dirname, "pluginSnapshots.ts"), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
@@ -79,16 +80,17 @@ const setup = (mobile = false) => {
             if (module.endsWith("/escape")) return {escapeHtml: (text: string) => text};
             if (module.endsWith("/functions")) return {isMobile: () => mobile};
             if (module === "dayjs") return require("dayjs");
+            if (module === "./snapshotDetail") return {openSnapshotDetail: (...args: unknown[]) => { opened.push(args); }};
             return {};
         }});
     exports.openPluginSnapshots(app as any);
     const flush = () => new Promise<void>(resolve => setImmediate(resolve));
-    return {root, input, list, result, next, calls, app, snapshot, flush,
+    return {root, input, list, result, previous, next, calls, opened, app, snapshot, flush,
         get options() { return options; },
         search: async () => { input.value = " example "; form.listeners.submit({preventDefault() {}}); await flush(); },
         confirm: () => confirm(),
         delayUnload: () => { delayUnload = true; }, release: () => releaseUnload(),
-        restore: () => list.children[0].children.at(-1).listeners.click(),
+        restore: () => list.children[0].children.at(-1).children.at(-1).listeners.click(),
     };
 };
 
@@ -101,10 +103,29 @@ for (const mobile of [false, true]) {
         assert.equal(state.result.textContent, "2 pages 33 snapshots");
         assert.equal(state.list.children[0].children[1].textContent, "1/100/2/200");
         assert.equal(state.list.children[0].children[2].textContent, state.snapshot.memo);
+        assert.equal(state.list.children[0].className, "history__association");
+        assert.match(state.options.content, /class="history__plugin-list" data-plugin-list/);
+        assert.match(state.options.content, /class="history__plugin-pagination"/);
+        const actions = state.list.children[0].children.at(-1);
+        assert.equal(actions.className, "fn__flex history__repo-actions");
+        assert.equal(actions.children[0].textContent, "Open");
+        assert.equal(actions.children[1].textContent, "Rollback");
+        actions.children[0].listeners.click();
+        assert.equal(state.opened.length, 1);
+        assert.equal((state.opened[0][1] as {id: string}).id, state.snapshot.id);
+        assert.equal(state.opened[0][3], "example");
+        assert.equal(state.previous.disabled, true);
         assert.equal(state.next.disabled, false);
         state.next.listeners.click();
         await state.flush();
         assert.equal(state.calls[1].body.page, 2);
+        assert.equal(state.next.disabled, true);
+        assert.equal(state.previous.disabled, false);
+        state.previous.listeners.click();
+        await state.flush();
+        assert.equal(state.calls[2].body.page, 1);
+        assert.equal(state.previous.disabled, true);
+        assert.equal(state.next.disabled, false);
     });
 }
 

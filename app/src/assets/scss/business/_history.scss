@@ -1,4 +1,18 @@
 .history {
+  &__plugin-list {
+    list-style: none;
+    margin: 8px 0;
+    padding: 0;
+    overflow-wrap: anywhere;
+  }
+
+  &__plugin-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
   &__associations {
     padding: 8px 16px;
     flex-shrink: 0;

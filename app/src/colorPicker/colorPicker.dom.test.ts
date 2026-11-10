@@ -13,6 +13,24 @@ const browserCases = async (sources: Record<string, string>, css: string, theme:
     const style = document.createElement("style");
     style.textContent = theme + css;
     document.head.append(style);
+    for (const platform of ["body--windows", "body--linux"]) {
+        document.body.className = platform;
+        const select = document.createElement("select");
+        select.className = "b3-select";
+        select.id = "focus-select";
+        select.innerHTML = "<option>First</option><option>Second</option>";
+        document.body.append(select);
+        await require("electron").ipcRenderer.invoke("focus-option");
+        const focus = getComputedStyle(select.options[1]);
+        check.equal(focus.outlineStyle, "solid");
+        check.equal(focus.outlineWidth, "2px");
+        const probe = document.createElement("span");
+        probe.style.color = "var(--b3-theme-primary)";
+        document.body.append(probe);
+        check.equal(focus.outlineColor, getComputedStyle(probe).color);
+        select.remove(); probe.remove();
+    }
+    document.body.className = "";
     const languages = {color: "Color", originalValue: "Original", new: "Draft", cancel: "Cancel", confirm: "Apply",
         themeLight: "Light", themeDark: "Dark", colorFont: "Text", colorPrimary: "Background",
         invalidColor: "Invalid HEX or RGB", colorPickerComposing: "Finish composing", nativeColorUnavailable: "Use numeric inputs"};
@@ -194,7 +212,7 @@ const browserCases = async (sources: Record<string, string>, css: string, theme:
 };
 
 for (const scheme of ["daylight", "midnight"]) {
-test(`real color fields retain drafts, layout and lifetimes in ${scheme}`, {
+test(`real color fields retain drafts, layout, focus and lifetimes in ${scheme}`, {
     timeout: 45000, skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
 }, async () => {
     const sources = Object.fromEntries(["model", "session", "native", "field", "runtime", "owners", "index", "dialog", "themeColorEditor"].map(name => [name,
@@ -207,10 +225,12 @@ test(`real color fields retain drafts, layout and lifetimes in ${scheme}`, {
     const temporary = mkdtempSync(join(tmpdir(), "siyuan-color-picker-"));
     const script = join(temporary, "run.cjs");
     const expression = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(sources)},${JSON.stringify(css)},${JSON.stringify(theme)})`;
-    writeFileSync(script, `const {app,BrowserWindow}=require("electron");
+    writeFileSync(script, `const {app,BrowserWindow,ipcMain}=require("electron");
 app.setPath("userData",${JSON.stringify(join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async()=>{const win=new BrowserWindow({show:false,width:900,height:900,webPreferences:{nodeIntegration:true,contextIsolation:false}});
+win.webContents.debugger.attach("1.3");
+ipcMain.handle("focus-option",async()=>{const d=win.webContents.debugger;await d.sendCommand("DOM.enable");await d.sendCommand("CSS.enable");const {root}=await d.sendCommand("DOM.getDocument");const {nodeId}=await d.sendCommand("DOM.querySelector",{nodeId:root.nodeId,selector:"#focus-select option:last-child"});await d.sendCommand("CSS.forcePseudoState",{nodeId,forcedPseudoClasses:["focus-visible"]});});
 try{await win.loadURL("data:text/html,<html><body></body></html>");console.log(await win.webContents.executeJavaScript(${JSON.stringify(expression)}));app.exit(0);}
 catch(error){console.error(error);app.exit(1);}});`, "utf8");
     const env = {...process.env}; delete env.ELECTRON_RUN_AS_NODE;

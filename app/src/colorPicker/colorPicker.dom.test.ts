@@ -124,9 +124,34 @@ const browserCases = async (sources: Record<string, string>, css: string, theme:
         const content = unchangedRoot.querySelector<HTMLElement>(".b3-dialog__content");
         check.ok(content.scrollWidth <= content.clientWidth + 1, `no horizontal clipping at ${width}: ${content.scrollWidth}/${content.clientWidth}`);
     }
-    unchangedRoot.querySelector<HTMLButtonElement>(".b3-dialog__action .b3-button:last-child").click();
+    const action = unchangedRoot.querySelector<HTMLButtonElement>(".b3-dialog__action .b3-button:last-child");
+    check.equal(action.offsetHeight, 28, "desktop actions use the shared compact control");
+    check.equal(unchangedRoot.querySelector<HTMLInputElement>('input[type="text"]').offsetHeight, 28);
+    const samples = unchangedRoot.querySelectorAll<HTMLElement>(".color-picker__sample");
+    for (const sample of samples) {
+        const label = sample.firstElementChild.getBoundingClientRect();
+        const swatch = sample.lastElementChild.getBoundingClientRect();
+        check.ok(swatch.top >= label.bottom, "sample labels sit above the swatches");
+        check.equal((sample.lastElementChild as HTMLElement).offsetWidth, 50);
+        check.equal((sample.lastElementChild as HTMLElement).offsetHeight, 27);
+    }
+    const nativeBounds = unchangedRoot.querySelector('input[type="color"]').getBoundingClientRect();
+    check.equal(nativeBounds.bottom, samples[0].lastElementChild.getBoundingClientRect().bottom);
+    action.click();
     const confirmed = await unchanged.result;
     check.equal(confirmed.type, "confirm"); check.equal(confirmed.changed, false); check.equal(confirmed.value.hex, "#aabbcc");
+
+    const sidebar = document.createElement("div"); sidebar.id = "sidebar"; document.body.append(sidebar);
+    document.documentElement.dataset.frontend = "mobile";
+    const mobile = open();
+    const mobileRoot = current();
+    check.ok(mobileRoot.querySelector<HTMLElement>(".b3-dialog__action .b3-button").offsetHeight >= 48);
+    for (const input of mobileRoot.querySelectorAll("input")) {
+        check.ok(input.offsetHeight >= 44, "mobile color inputs preserve touch targets");
+    }
+    check.equal(mobileRoot.querySelector<HTMLElement>(".color-picker__swatch").offsetHeight, 44);
+    mobile.destroy(); await mobile.result;
+    sidebar.remove(); delete document.documentElement.dataset.frontend;
 
     const doomed = {};
     modules.owners.registerColorPickerOwner(doomed);
@@ -168,7 +193,8 @@ const browserCases = async (sources: Record<string, string>, css: string, theme:
     return "Color field and lifecycle passed";
 };
 
-test("real color fields retain drafts, isolate native events and obey dialog and plugin lifetimes", {
+for (const scheme of ["daylight", "midnight"]) {
+test(`real color fields retain drafts, layout and lifetimes in ${scheme}`, {
     timeout: 45000, skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
 }, async () => {
     const sources = Object.fromEntries(["model", "session", "native", "field", "runtime", "owners", "index", "dialog", "themeColorEditor"].map(name => [name,
@@ -177,7 +203,7 @@ test("real color fields retain drafts, isolate native events and obey dialog and
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText]));
     const css = compile(join(__dirname, "../assets/scss/base.scss"), {logger: {warn() {}}}).css;
-    const theme = readFileSync(join(__dirname, "../../appearance/themes/daylight/theme.css"), "utf8");
+    const theme = readFileSync(join(__dirname, `../../appearance/themes/${scheme}/theme.css`), "utf8");
     const temporary = mkdtempSync(join(tmpdir(), "siyuan-color-picker-"));
     const script = join(temporary, "run.cjs");
     const expression = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(sources)},${JSON.stringify(css)},${JSON.stringify(theme)})`;
@@ -196,3 +222,5 @@ catch(error){console.error(error);app.exit(1);}});`, "utf8");
         rmSync(temporary, {recursive: true, force: true});
     }
 });
+
+}

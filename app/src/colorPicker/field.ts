@@ -28,6 +28,7 @@ export const createColorField = (host: HTMLElement, options: {
     preview.className = "color-picker__preview";
     const makeSwatch = (label: string) => {
         const group = doc.createElement("span");
+        group.className = "color-picker__sample";
         const text = doc.createElement("span");
         text.textContent = label;
         const swatch = doc.createElement("span");
@@ -48,7 +49,7 @@ export const createColorField = (host: HTMLElement, options: {
         const input = doc.createElement("input");
         input.type = "text";
         input.spellcheck = false;
-        input.className = "b3-text-field b3-text-field--touch";
+        input.className = "b3-text-field" + (doc.getElementById("sidebar") ? " b3-text-field--touch" : "");
         input.setAttribute("aria-label", `${options.label} ${label}`);
         wrapper.append(text, input);
         controls.append(wrapper);

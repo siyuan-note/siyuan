@@ -6,16 +6,26 @@
   &__preview {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: end;
     gap: 8px;
   }
 
+  &__sample {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
   &__swatch {
-    display: inline-flex;
-    align-items: end;
-    width: 72px;
-    min-height: 44px;
+    width: 50px;
+    height: 27px;
+    box-sizing: border-box;
     border: 1px solid var(--b3-border-color);
+
+    [data-frontend="mobile"] &,
+    [data-frontend="browser-mobile"] & {
+      height: 44px;
+    }
   }
 
   &__fields {

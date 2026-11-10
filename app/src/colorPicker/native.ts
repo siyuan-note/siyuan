@@ -5,7 +5,7 @@ export const createNativeColorInput = (doc: Document, value: IColorValue, label:
                                        needsSync = () => false) => {
     const input = doc.createElement("input");
     input.type = "color";
-    input.className = "b3-text-field b3-text-field--touch";
+    input.className = "b3-text-field" + (doc.getElementById("sidebar") ? " b3-text-field--touch" : "");
     input.setAttribute("aria-label", label);
     input.value = value.hex;
     let active = true;

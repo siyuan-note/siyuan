@@ -116,13 +116,16 @@ func refreshAttributeViewPrimarySource(value *av.Value, node *ast.Node, avID str
 	icon, content := getNodeAvBlockText(node, avID)
 	content = util.UnescapeHTML(content)
 	subtype := getNodeAvBlockRefSubtype(node, avID)
+	staticText := node.IALAttr(av.NodeAttrViewStaticText + "-" + avID)
+	// 静态锚文本写入时会裁剪首尾空白，富文本换行的纯文本投影仍保留这些空白。
+	trimmedContent := strings.TrimSpace(value.Block.Content)
 	if value.Block.RefSubtype == av.BlockRefSubtypeStatic && value.Block.Rich != nil &&
-		node.IALAttr(av.NodeAttrViewStaticText+"-"+avID) == util.EscapeHTML(value.Block.Content) {
+		(staticText == util.EscapeHTML(value.Block.Content) || staticText == util.EscapeHTML(trimmedContent)) {
 		subtype = av.BlockRefSubtypeStatic
 	}
 	value.Block.Icon = icon
 	if subtype == av.BlockRefSubtypeStatic {
-		if value.Block.Rich == nil || value.Block.Content != content && node.IALAttr(av.NodeAttrViewStaticText+"-"+avID) != "" {
+		if value.Block.Rich == nil || value.Block.Content != content && trimmedContent != content && staticText != "" {
 			value.Block.Rich = nil
 			value.Block.Content = content
 		}

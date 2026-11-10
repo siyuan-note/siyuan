@@ -163,6 +163,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
                 options.nodeElement.closest<HTMLElement>(".protyle")?.dataset.notebookId,
             toolbar,
             hint,
+            click: {preventInsetEmptyBlock: primary},
         },
         runtimeCapabilities: {
             upload: primary,
@@ -354,12 +355,28 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         return false;
     };
     panelElement.addEventListener("beforeinput", (event: InputEvent) => {
-        if (mobile && event.cancelable && !event.isComposing && event.inputType === "insertParagraph") {
-            continueInput(event);
+        if (event.cancelable && !event.isComposing && event.inputType === "insertParagraph") {
+            if (mobile && continueInput(event)) return;
+            if (primary && fragment.wysiwyg.contains(event.target as Node) &&
+                fragment.hintElement.classList.contains("fn__none")) {
+                event.preventDefault();
+                event.stopPropagation();
+                void finish(true, true);
+            }
         }
     }, true);
     panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (isAVContinuousInputKey(event, true) && continueInput(event, event.repeat)) return;
+        if (primary && fragment.wysiwyg.contains(event.target as Node) && event.key === "Enter" && !event.isComposing &&
+            fragment.hintElement.classList.contains("fn__none")) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+                if (event.shiftKey) document.execCommand("insertLineBreak");
+                else if (!event.repeat) void finish(true, true);
+            }
+            return;
+        }
         if (event.key === "Escape" && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {

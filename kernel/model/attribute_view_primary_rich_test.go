@@ -148,6 +148,39 @@ func TestPrimaryRichDynamicStylesRefreshAndStaticContentSurvives(t *testing.T) {
 	}
 }
 
+func TestPrimaryRichStaticSoftBreakSurvivesRepeatedRefresh(t *testing.T) {
+	for _, ending := range []string{"<br>next", "<br>next<br>", "\nnext\n"} {
+		t.Run(ending, func(t *testing.T) {
+			html := `<span data-type="strong">bold</span> <span data-type="a" data-href="https://example.com">link</span> <span data-type="code">code</span>` + ending
+			value := &av.Value{Type: av.KeyTypeBlock, Block: &av.ValueBlock{ID: "20261110000000-source0", RefSubtype: av.BlockRefSubtypeStatic}}
+			data, _ := json.Marshal(map[string]any{"block": map[string]any{"rich": nil, "richBlockDOM": primaryRichTestDOM(html)}})
+			if err := prepareAttributeViewPrimaryRich(nil, value, nil, data, ""); err != nil {
+				t.Fatal(err)
+			}
+			if value.Block.Rich == nil {
+				t.Fatal("fixture lost rich source")
+			}
+			source := *value.Block.Rich
+			content := value.Block.Content
+			paragraph := util.NewLute().BlockDOM2Tree(primaryRichTestDOM("original")).Root.FirstChild
+			paragraph.ID = value.Block.ID
+			value.Block.Content = strings.TrimSpace(value.Block.Content)
+			paragraph.SetIALAttr(av.NodeAttrViewStaticText+"-database", util.EscapeHTML(value.Block.Content))
+			for i := 0; i < 2; i++ {
+				refreshAttributeViewPrimarySource(value, paragraph, "database")
+				if !reflect.DeepEqual(value.Block.Rich, &source) || value.Block.Content != content || value.Block.RichBlockDOM == "" {
+					t.Fatalf("refresh %d lost rich source: content=%q, expected=%q, rich=%+v", i+1, value.Block.Content, content, value.Block.Rich)
+				}
+			}
+			paragraph.SetIALAttr(av.NodeAttrViewStaticText+"-database", "external replacement")
+			refreshAttributeViewPrimarySource(value, paragraph, "database")
+			if value.Block.Rich != nil || value.Block.RichBlockDOM != "" || value.Block.Content != "external replacement" {
+				t.Fatal("external static text replacement did not clear stale rich source")
+			}
+		})
+	}
+}
+
 func TestPrimaryRichAssetsReferencesExportAndHistory(t *testing.T) {
 	engine := util.NewLute()
 	tree := engine.BlockDOM2Tree(primaryRichTestDOM(`<span data-type="a" data-href="assets/a.pdf">file</span><span data-type="block-ref" data-id="20261110000000-target0" data-subtype="d">Target</span>`))

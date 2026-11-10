@@ -1835,6 +1835,28 @@
     touch-action: none;
   }
 
+  &__cellprimary {
+    display: inline-flex;
+    min-width: 0;
+    max-width: 100%;
+    vertical-align: top;
+
+    > .b3-menu__avemoji {
+      align-self: flex-start;
+      flex-shrink: 0;
+    }
+
+    > .av__celltext {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      text-overflow: ellipsis;
+    }
+
+    > .av__celltext--rich {
+      width: auto;
+    }
+  }
+
   &__celltext {
     overflow: hidden;
 

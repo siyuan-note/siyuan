@@ -19,6 +19,8 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
     const owner = {isConnected: true};
     const node = {isConnected: true, dataset: {nodeId: "database-block"}, closest: (): null => null};
     const anchor = {isConnected: true};
+    const bodyTarget = {};
+    const toolbarTarget = {};
     let content = "initial";
     const createPanel = () => ({
         inert: false,
@@ -37,6 +39,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         wysiwyg: {element: {contains: (element: unknown) => element === node}},
     };
     const fragment = {
+        wysiwyg: {contains: (target: unknown) => target === bodyTarget},
         protyle: {
             block: {},
             wysiwyg: {flushPendingInput: settings.flush || (async () => {})},
@@ -59,6 +62,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         prepareNextInput: () => settings.tableInput ? () => lifecycle.push("next") : undefined,
     };
     let currentValue = options.value;
+    let fragmentOptions: Parameters<typeof import("../../lite/fragmentEditor").mountProtyleLiteFragment>[1];
     if (settings.primary) {
         options.stableCells.push({rowID: "row", colID: "primary"} as import("./selectionState").IAVSelectedCell);
     }
@@ -104,7 +108,10 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         "../../../util/escape": {escapeHtml: String},
         "../../../mobile/util/mobileAppUtil": {callMobileAppShowKeyboard: () => {}},
         "../../hint/builtinSlash": {registerBuiltinSlashHint: (handler: unknown) => handler},
-        "../../lite/fragmentEditor": {mountProtyleLiteFragment: () => fragment},
+        "../../lite/fragmentEditor": {mountProtyleLiteFragment: (_host: unknown, options: typeof fragmentOptions) => {
+            fragmentOptions = options;
+            return fragment;
+        }},
         "../../toolbar/defaults": {getDefaultToolbar: (): unknown[] => []},
         "./richTextEditorPosition": {positionAVRichTextEditor: () => {}},
         "./richTextEditorLute": {createAVRichTextEditorLute: () => ({}), configureAVRichTextEditorLute: () => {}},
@@ -130,6 +137,10 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         require: (name: string) => modules[name] || {},
         document: {
             body: {appendChild: () => {}},
+            execCommand: (command: string) => {
+                assert.equal(command, "insertLineBreak");
+                lifecycle.push("line-break");
+            },
             createElement: () => {
                 const mask = {
                     dataset: {},
@@ -161,15 +172,16 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         content = "updated";
     }
     return {
-        methods, lifecycle, owner, node, open,
+        methods, lifecycle, owner, node, open, fragmentOptions, toolbarTarget,
         rebind: () => { currentValue = {type: "block", isDetached: false, block: {content: "other"}}; },
         cancel: () => masks.at(-1).handlers.get("siyuan-av-cell-editor-close")({}),
         get inert() { return masks.at(-1).firstElementChild.inert; },
         enter: (options: Partial<KeyboardEvent> = {}) => masks.at(-1).firstElementChild.handlers.get("keydown")({
-            key: "Enter", preventDefault: () => lifecycle.push("prevent"), stopPropagation: () => lifecycle.push("stop"), ...options,
+            key: "Enter", target: bodyTarget,
+            preventDefault: () => lifecycle.push("prevent"), stopPropagation: () => lifecycle.push("stop"), ...options,
         }),
         softKeyboardEnter: (options: Partial<InputEvent> = {}) => masks.at(-1).firstElementChild.handlers.get("beforeinput")({
-            inputType: "insertParagraph", cancelable: true,
+            inputType: "insertParagraph", cancelable: true, target: bodyTarget,
             preventDefault: () => lifecycle.push("prevent"), stopPropagation: () => lifecycle.push("stop"), ...options,
         }),
         escape: () => masks.at(-1).firstElementChild.handlers.get("keydown")({
@@ -187,6 +199,12 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
 
 [false, true].forEach(primary => describe(`database ${primary ? "primary" : "text"} rich editor lifecycle and continuous input`, () => {
     const createEditor = (settings: Parameters<typeof createEditorFixture>[0] = {}) => createEditorFixture({...settings, primary});
+    for (const mobile of [false, true]) {
+        it(`only primary fields prevent blank-click paragraph insertion (${mobile ? "mobile" : "desktop"})`, () => {
+            const editor = createEditor({mobile});
+            assert.equal(editor.fragmentOptions.protyleOptions.click.preventInsetEmptyBlock, primary);
+        });
+    }
     for (const mobile of [false, true]) {
         it(`waits for a successful save before continuing input (${mobile ? "mobile" : "desktop"})`, async () => {
             let complete: () => void;
@@ -219,20 +237,49 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
             assert.equal(editor.lifecycle.includes("next"), false);
         });
     }
-    it("preserves rich text Enter outside table inputs, soft breaks, IME confirmation and reference hints", async () => {
+    it("keeps primary Enter inline while preserving text blocks, IME confirmation and reference hints", async () => {
         for (const settings of [{}, {tableInput: true, hint: true}]) {
             const editor = createEditor(settings);
             editor.enter();
             await editor.settle();
-            assert.deepEqual(editor.lifecycle, []);
+            if (primary && !settings.hint) {
+                assert.ok(editor.lifecycle.includes("destroy"));
+                assert.ok(editor.lifecycle.includes("focus"));
+            } else {
+                assert.deepEqual(editor.lifecycle, []);
+            }
         }
         for (const key of ["shiftKey", "ctrlKey", "metaKey", "altKey", "isComposing"]) {
             const editor = createEditor({tableInput: true});
             editor.enter({[key]: true});
             await editor.settle();
-            assert.deepEqual(editor.lifecycle, [], key);
+            assert.deepEqual(editor.lifecycle, !primary || key === "isComposing" ? [] :
+                key === "shiftKey" ? ["prevent", "stop", "line-break"] : ["prevent", "stop"], key);
         }
     });
+    if (primary) {
+        it("leaves toolbar and inline element input Enter events to their own handlers", async () => {
+            for (const mobile of [false, true]) {
+                const editor = createEditor({mobile, changed: true});
+                const target = editor.toolbarTarget as EventTarget;
+                editor.enter({target});
+                editor.enter({target, shiftKey: true});
+                editor.softKeyboardEnter({target});
+                await editor.settle();
+                assert.deepEqual(editor.lifecycle, []);
+            }
+        });
+        for (const mobile of [false, true]) {
+            it(`saves a primary paragraph without a next-row callback (${mobile ? "mobile" : "desktop"})`, async () => {
+                const editor = createEditor({mobile, changed: true});
+                editor.softKeyboardEnter();
+                await editor.settle();
+                assert.equal(editor.lifecycle.filter(item => item === "save").length, 1);
+                assert.ok(editor.lifecycle.includes("destroy"));
+                assert.equal(editor.lifecycle.includes("next"), false);
+            });
+        }
+    }
     it("consumes held Enter without saving another cell and supports mobile beforeinput confirmation", async () => {
         const held = createEditor({tableInput: true});
         held.enter({repeat: true});

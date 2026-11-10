@@ -24,6 +24,24 @@ const inputCode = transpileModule(`let savingContinuousInput = false; ${inputSav
 const handler = ${inputKeydown.getText(source)}; handler;`, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
 const continuous = loadModule<typeof import("./continuousInput")>("src/protyle/render/av/continuousInput.ts", {require: () => ({})});
 
+test("fallback text input leaves Enter available for multiline editing", async () => {
+    const input = {value: "First\nSecond", disabled: false};
+    const keydown = runInNewContext(inputCode, {
+        type: "text", inputElement: input, electronUndo: () => false, isNotCtrl: () => true,
+        isAVContinuousInputKey: continuous.isAVContinuousInputKey,
+        prepareAVContinuousInput: () => assert.fail("text Enter must keep editing"),
+    }) as (event: KeyboardEvent) => Promise<void>;
+    for (const options of [{}, {repeat: true}, {shiftKey: true}, {isComposing: true}]) {
+        const event: Partial<KeyboardEvent> = {key: "Enter", ...options,
+            preventDefault: () => assert.fail("text Enter must reach the textarea"),
+            stopPropagation: () => assert.fail("text Enter must propagate"),
+        };
+        await keydown(event as KeyboardEvent);
+        assert.equal(input.value, "First\nSecond");
+        assert.equal(input.disabled, false);
+    }
+});
+
 test("ordinary input confirms once, retains failed drafts and respects focus moved during saving", async () => {
     for (const result of ["saved", "failed", "focusMoved"]) {
         let complete: () => void;

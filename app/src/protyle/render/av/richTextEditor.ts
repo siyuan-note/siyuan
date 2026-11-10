@@ -341,7 +341,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         maskElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () => void finish(true));
     }
     const continueInput = (event: Event, repeat = false) => {
-        if (fragment.hintElement.classList.contains("fn__none") &&
+        if (primary && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
             const next = options.prepareNextInput?.(options.anchorElement);

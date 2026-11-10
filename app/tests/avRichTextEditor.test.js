@@ -85,8 +85,10 @@ const runCases = async (sources, appDirectory) => {
         "../highlightRender": {highlightRender: () => {}},
         "../mathRender": {mathRender: () => {}},
         "../imageDisplay": {renderImageDisplay() {}},
-        "../../header/documentTitleDOM": {},
-        "./primaryRich": {},
+        "../../header/documentTitleDOM": {getDocumentTitleLute: lute => lute,
+            getDocumentTitleDOMFingerprint: content => content},
+        "./primaryRich": {getAVPrimaryInitialDOM: value => value.block.content,
+            createAVPrimaryEditValue: (content, value) => ({...value, block: {...value.block, content}})},
         "./richTextEditorPosition": {positionAVRichTextEditor: () => {}},
         "./richTextEditorLute": {createAVRichTextEditorLute: () => ({}), configureAVRichTextEditorLute() {}},
         "./virtualScroll": {getAVData: element => dataByElement.get(element),
@@ -95,7 +97,7 @@ const runCases = async (sources, appDirectory) => {
         "./rangeSelect": {setAVCellAnchor: () => true},
         "../../util/outlineBlock": {updateOutlineCurrentBlock: () => {}},
         "./richText": {
-            getAVTextSource: value => ({kind: "plain", content: value.text.content}),
+            getAVTextSource: value => ({kind: "plain", content: value.text?.content || ""}),
             serializeAVRichTextBlockDOM: content => ({markdown: content, plainText: content}),
             createAVRichTextValue: (content, _plainText, value) => ({...value, text: {...value.text, content}}),
         },
@@ -104,10 +106,11 @@ const runCases = async (sources, appDirectory) => {
             mountProtyleLiteFragment: (host, options) => {
                 const input = document.createElement("div");
                 input.contentEditable = "true";
-                input.textContent = options.initialPlainText;
+                input.textContent = options.initialPlainText ?? options.initialBlockHTML;
                 host.append(input);
                 fragment = {
                     input,
+                    wysiwyg: input,
                     destroyed: false,
                     flushed: false,
                     pendingInput: "",
@@ -153,7 +156,7 @@ const runCases = async (sources, appDirectory) => {
     };
     const editor = load("./richTextEditor");
     const {hasAVEditorSession} = load("./editorSession");
-    const createOwner = (standalone, notebookId = "box", prepareNextInput) => {
+    const createOwner = (standalone, notebookId = "box", prepareNextInput, primary = false) => {
         const owner = document.createElement("div");
         owner.className = standalone ? `protyle-db-row${mobile ? " protyle-db-row--mobile" : ""}` : "protyle";
         owner.innerHTML = '<div class="av" data-type="NodeAttributeView" data-av-type="table" data-av-id="database"><div class="av__body"><div class="av__row" data-id="row"><div class="av__cell" data-col-id="text" data-dtype="text"></div></div></div></div>';
@@ -168,8 +171,11 @@ const runCases = async (sources, appDirectory) => {
         const nodeElement = owner.firstElementChild;
         nodeElement.dataset.nodeId = "carrier-block";
         const anchorElement = nodeElement.querySelector("[data-col-id]");
-        const value = {id: "value", keyID: "text", blockID: "row", type: "text", text: {content: "Initial"}};
-        const column = {id: "text", type: "text"};
+        const value = {id: "value", keyID: "text", blockID: "row", ...(primary ?
+            {type: "block", isDetached: true, block: {content: "Initial"}} : {type: "text", text: {content: "Initial"}})};
+        const column = {id: "text", type: value.type};
+        anchorElement.dataset.dtype = value.type;
+        if (primary) anchorElement.dataset.detached = "true";
         const cell = {id: "value", value};
         const stableCells = [{groupID: "", rowID: "row", colID: "text", rowIndex: 0, colIndex: 0, cell, column}];
         const data = {viewType: "table", view: {columns: [column], rows: [{id: "row", cells: [cell]}]}};
@@ -283,6 +289,35 @@ const runCases = async (sources, appDirectory) => {
     }
     for (const isMobile of [false, true]) {
         mobile = isMobile;
+        for (const html of ["<p>First</p>", "<ul><li>First</li></ul>"]) {
+            const state = createOwner(false, "box", () => () => assert.fail("text Enter must keep editing"));
+            await settle();
+            fragment.input.innerHTML = html;
+            fragment.input.focus();
+            const range = document.createRange();
+            range.selectNodeContents(fragment.input);
+            range.collapse(false);
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+            const enter = isMobile ?
+                new InputEvent("beforeinput", {inputType: "insertParagraph", bubbles: true, cancelable: true}) :
+                new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
+            fragment.input.dispatchEvent(enter);
+            assert.equal(enter.defaultPrevented, false);
+            document.execCommand("insertParagraph");
+            document.execCommand("insertText", false, "Second");
+            await settle();
+            assert.equal(fragment.input.children.length, html.startsWith("<ul>") ? 1 : 2);
+            if (html.startsWith("<ul>")) assert.equal(fragment.input.querySelectorAll("li").length, 2);
+            assert.ok(mask());
+            assert.equal(fragment.destroyed, false);
+            assert.equal(state.saves.length, 0);
+            editor.destroyAVRichTextEditor(true);
+            await settle();
+            assert.equal(state.saves.length, 1);
+            assert.ok(state.saves[0][0].text.content.includes("Second"));
+            assert.equal(mask(), null);
+        }
         const {prepareAVContinuousInput} = load("./continuousInput");
         const {resolveAVSelectedCell} = load("./selectionState");
         const openedRows = [];
@@ -296,13 +331,13 @@ const runCases = async (sources, appDirectory) => {
                 anchorElement: next, value: target.cell.value, stableCells: [target],
                 onSave: (...args) => state.saves.push(args), prepareNextInput});
         });
-        const state = createOwner(false, "box", prepareNextInput);
+        const state = createOwner(false, "box", prepareNextInput, true);
         currentAnchor = state.anchorElement;
         for (const rowID of ["next1", "next2"]) {
             const value = {...state.value, id: rowID + "-value", blockID: rowID};
             state.data.view.rows.push({id: rowID, cells: [{id: value.id, value}]});
             state.nodeElement.querySelector(".av__body").insertAdjacentHTML("beforeend",
-                `<div class="av__row" data-id="${rowID}"><div class="av__cell" data-col-id="text" data-dtype="text"></div></div>`);
+                `<div class="av__row" data-id="${rowID}"><div class="av__cell" data-col-id="text" data-dtype="block" data-detached="true"></div></div>`);
         }
         for (let row = 0; row < 3; row++) {
             currentAnchor.replaceWith(currentAnchor.cloneNode());

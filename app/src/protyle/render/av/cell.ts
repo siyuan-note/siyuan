@@ -1106,7 +1106,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             if (electronUndo(event)) {
                 return;
             }
-            if (isAVContinuousInputKey(event, true) && type !== "template") {
+            if (isAVContinuousInputKey(event, true) && type !== "template" && type !== "text") {
                 const next = prepareAVContinuousInput(protyle, blockElement, cellElements,
                     cell => popTextCell(protyle, [cell]));
                 if (next) {
@@ -1129,7 +1129,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 }
             }
             if (event.key === "Escape" || event.key === "Tab" ||
-                (event.key === "Enter" && !event.shiftKey && isNotCtrl(event))) {
+                (event.key === "Enter" && type !== "text" && !event.shiftKey && isNotCtrl(event))) {
                 updateCellValueByInput(protyle, type, blockElement, cellElements, true, inputTarget);
                 if (event.key === "Tab" && !getAVRelationHost(blockElement)) {
                     protyle.wysiwyg.element.dispatchEvent(new KeyboardEvent("keydown", {

@@ -197,7 +197,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
     };
 };
 
-[false, true].forEach(primary => describe(`database ${primary ? "primary" : "text"} rich editor lifecycle and continuous input`, () => {
+[false, true].forEach(primary => describe(`database ${primary ? "primary" : "text"} rich editor lifecycle and keyboard input`, () => {
     const createEditor = (settings: Parameters<typeof createEditorFixture>[0] = {}) => createEditorFixture({...settings, primary});
     for (const mobile of [false, true]) {
         it(`only primary fields prevent blank-click paragraph insertion (${mobile ? "mobile" : "desktop"})`, () => {
@@ -206,19 +206,24 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         });
     }
     for (const mobile of [false, true]) {
-        it(`waits for a successful save before continuing input (${mobile ? "mobile" : "desktop"})`, async () => {
+        it(`waits for a successful ${primary ? "continuous" : "explicit"} save (${mobile ? "mobile" : "desktop"})`, async () => {
             let complete: () => void;
             const saving = new Promise<void>(resolve => complete = resolve);
             const editor = createEditor({mobile, changed: true, tableInput: true, save: () => saving});
             editor.enter();
             editor.enter();
             await editor.settle();
+            if (!primary) {
+                assert.deepEqual(editor.lifecycle, []);
+                editor.escape();
+                await editor.settle();
+            }
             assert.equal(editor.lifecycle.filter(item => item === "save").length, 1);
             assert.equal(editor.lifecycle.includes("next"), false);
             complete();
             await editor.settle();
-            assert.equal(editor.lifecycle.filter(item => item === "next").length, 1);
-            assert.ok(editor.lifecycle.indexOf("next") > editor.lifecycle.indexOf("destroy"));
+            assert.equal(editor.lifecycle.filter(item => item === "next").length, primary ? 1 : 0);
+            if (primary) assert.ok(editor.lifecycle.indexOf("next") > editor.lifecycle.indexOf("destroy"));
         });
         it(`retains failed drafts and does not navigate after invalidation (${mobile ? "mobile" : "desktop"})`, async () => {
             let fail = true;
@@ -226,6 +231,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
                 if (fail) throw new Error("failed");
             }});
             editor.enter();
+            if (!primary) editor.escape();
             await editor.settle();
             assert.equal(editor.lifecycle.includes("next"), false);
             assert.equal(editor.lifecycle.includes("destroy"), false);
@@ -257,6 +263,27 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
                 key === "shiftKey" ? ["prevent", "stop", "line-break"] : ["prevent", "stop"], key);
         }
     });
+    if (!primary) {
+        for (const mobile of [false, true]) {
+            it(`leaves paragraph and list Enter events to the text editor (${mobile ? "mobile" : "desktop"})`, async () => {
+                const editor = createEditor({mobile, tableInput: true, changed: true});
+                editor.enter();
+                editor.enter({repeat: true});
+                editor.enter({shiftKey: true});
+                editor.enter({isComposing: true});
+                editor.softKeyboardEnter();
+                editor.softKeyboardEnter({isComposing: true});
+                editor.softKeyboardEnter({inputType: "insertLineBreak"});
+                await editor.settle();
+                assert.deepEqual(editor.lifecycle, []);
+                assert.equal(editor.inert, false);
+                editor.escape();
+                await editor.settle();
+                assert.equal(editor.lifecycle.filter(item => item === "save").length, 1);
+                assert.equal(editor.lifecycle.includes("next"), false);
+            });
+        }
+    }
     if (primary) {
         it("leaves toolbar and inline element input Enter events to their own handlers", async () => {
             for (const mobile of [false, true]) {
@@ -280,18 +307,19 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
             });
         }
     }
-    it("consumes held Enter without saving another cell and supports mobile beforeinput confirmation", async () => {
+    it(`handles held Enter and mobile beforeinput as ${primary ? "confirmation" : "text editing"}`, async () => {
         const held = createEditor({tableInput: true});
         held.enter({repeat: true});
         await held.settle();
-        assert.deepEqual(held.lifecycle, ["prevent", "stop"]);
+        assert.deepEqual(held.lifecycle, primary ? ["prevent", "stop"] : []);
         const mobile = createEditor({mobile: true, tableInput: true, changed: true});
         mobile.softKeyboardEnter({isComposing: true});
         mobile.softKeyboardEnter({inputType: "insertLineBreak"});
         assert.deepEqual(mobile.lifecycle, []);
         mobile.softKeyboardEnter();
         await mobile.settle();
-        assert.equal(mobile.lifecycle.includes("next"), true);
+        assert.equal(mobile.lifecycle.includes("next"), primary);
+        if (!primary) assert.deepEqual(mobile.lifecycle, []);
     });
     for (const mobile of [false, true]) {
         it(`cancels owned ${mobile ? "mobile" : "desktop"} rich text immediately without saving its draft`, async () => {

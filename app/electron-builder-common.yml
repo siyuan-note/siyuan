@@ -37,3 +37,27 @@ mac:
   fileAssociations:
     - <<: *markdownAssociation
       icon: "src/assets/markdown.icns"
+
+# GNOME 系统监视器按内核进程名查找图标；由 deb/rpm 管理这些文件的安装、升级和卸载。
+deb:
+  fpm:
+    - "src/assets/icon/16x16.png=/usr/share/icons/hicolor/16x16/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/32x32.png=/usr/share/icons/hicolor/32x32/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/48x48.png=/usr/share/icons/hicolor/48x48/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/64x64.png=/usr/share/icons/hicolor/64x64/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/128x128.png=/usr/share/icons/hicolor/128x128/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/256x256.png=/usr/share/icons/hicolor/256x256/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/512x512.png=/usr/share/icons/hicolor/512x512/apps/SiYuan-Kernel.png"
+
+rpm:
+  fpm:
+    # 避免与包含相同 Electron 二进制文件的 RPM 包产生 build-id 链接冲突。
+    - "--rpm-rpmbuild-define"
+    - "_build_id_links none"
+    - "src/assets/icon/16x16.png=/usr/share/icons/hicolor/16x16/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/32x32.png=/usr/share/icons/hicolor/32x32/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/48x48.png=/usr/share/icons/hicolor/48x48/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/64x64.png=/usr/share/icons/hicolor/64x64/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/128x128.png=/usr/share/icons/hicolor/128x128/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/256x256.png=/usr/share/icons/hicolor/256x256/apps/SiYuan-Kernel.png"
+    - "src/assets/icon/512x512.png=/usr/share/icons/hicolor/512x512/apps/SiYuan-Kernel.png"

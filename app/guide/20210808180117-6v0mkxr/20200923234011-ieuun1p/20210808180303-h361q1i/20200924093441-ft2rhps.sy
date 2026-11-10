@@ -2662,6 +2662,65 @@
 			]
 		},
 		{
+			"ID": "20261110224000-x8g1zmq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110224000-x8g1zmq",
+				"updated": "20261110224000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select one or more nodes. In the selection toolbar, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Connector style"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to override the connector from each selected node’s parent. Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Node shape"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose Underline, Rectangle, or Capsule. Choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Default"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to use the map’s connector style or the theme’s node shape again. These changes are saved with the document and support undo and redo."
+				}
+			]
+		},
+		{
 			"ID": "20261017113512-rxzvh9f",
 			"Type": "NodeParagraph",
 			"Properties": {

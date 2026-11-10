@@ -2545,6 +2545,65 @@
 			]
 		},
 		{
+			"ID": "20261110224000-f6nyw3z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110224000-f6nyw3z",
+				"updated": "20261110224000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取一個或多個節點後，在節點工具列中使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "連線樣式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可單獨修改從父節點接入所選節點的連線，使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "節點形狀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可選擇底線、矩形或膠囊形。選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "預設"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可恢復使用整張心智圖的連線樣式或佈景主題的節點形狀。變更隨文件儲存，支援復原和重做。"
+				}
+			]
+		},
+		{
 			"ID": "20261017113512-z8j1a4z",
 			"Type": "NodeParagraph",
 			"Properties": {

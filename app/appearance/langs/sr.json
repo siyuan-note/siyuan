@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Облик чвора",
+	"listMindmapShapeRectangle": "Правоугаоник",
+	"listMindmapShapeCapsule": "Капсула",
 	"databaseShowIcon": "Prikaži ikonice stavki u primarnom ključu",
 	"databaseShowRelationIcon": "Prikaži ikonice stavki u relacijama i zbirnim poljima",
 	"databaseShowIconTip": "Kada je uključeno, ikonice stavki u primarnom ključu se podrazumevano prikazuju u novim bazama podataka i prikazima",

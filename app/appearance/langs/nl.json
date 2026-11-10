@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Knooppuntvorm",
+	"listMindmapShapeRectangle": "Rechthoek",
+	"listMindmapShapeCapsule": "Capsulevorm",
 	"databaseShowIcon": "Itempictogrammen bij de primaire sleutel tonen",
 	"databaseShowRelationIcon": "Itempictogrammen bij relaties en samenvoegingen tonen",
 	"databaseShowIconTip": "Indien ingeschakeld worden itempictogrammen bij de primaire sleutel standaard getoond in nieuwe databases en weergaven",

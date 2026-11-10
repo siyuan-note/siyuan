@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Tvar uzla",
+	"listMindmapShapeRectangle": "Obdĺžnik",
+	"listMindmapShapeCapsule": "Kapsula",
 	"databaseShowIcon": "Zobraziť ikony položiek v primárnom kľúči",
 	"databaseShowRelationIcon": "Zobraziť ikony položiek vo vzťahoch a súhrnoch",
 	"databaseShowIconTip": "Po zapnutí sa ikony položiek v primárnom kľúči predvolene zobrazujú v nových databázach a zobrazeniach",

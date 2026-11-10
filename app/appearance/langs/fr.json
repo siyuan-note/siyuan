@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Forme du nœud",
+	"listMindmapShapeRectangle": "Rectangle",
+	"listMindmapShapeCapsule": "Capsule",
 	"databaseShowIcon": "Afficher les icônes des entrées de clé primaire",
 	"databaseShowRelationIcon": "Afficher les icônes des entrées de relation et de rollup",
 	"databaseShowIconTip": "Lorsque cette option est activée, les icônes des entrées de clé primaire sont affichées par défaut dans les nouvelles bases de données et vues",

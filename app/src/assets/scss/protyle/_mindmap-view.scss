@@ -425,6 +425,25 @@
       }
     }
 
+    &[data-mindmap-shape="rectangle"],
+    &[data-mindmap-shape="capsule"] {
+      border: 1px solid var(--mindmap-node-line-color, var(--b3-border-color, currentColor));
+    }
+
+    &[data-mindmap-shape="rectangle"] {
+      border-radius: 0;
+    }
+
+    &[data-mindmap-shape="capsule"] {
+      border-radius: 1em;
+      padding-inline: 12px;
+    }
+
+    &[data-mindmap-shape="underline"] {
+      border-bottom: 1px solid var(--mindmap-node-line-color, var(--b3-border-color, currentColor));
+      border-radius: 0;
+    }
+
     &--untitled:not(.mindmap-view__node--editing) {
       width: 32px;
       min-width: 32px;
@@ -457,7 +476,7 @@
       inset: 0;
       z-index: 3;
       pointer-events: none;
-      border-radius: var(--b3-border-radius);
+      border-radius: inherit;
       background-color: var(--b3-theme-primary-lightest);
       box-shadow: inset 0 0 0 1px var(--b3-theme-primary-lighter);
     }

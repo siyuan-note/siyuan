@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "ノードの形状",
+	"listMindmapShapeRectangle": "長方形",
+	"listMindmapShapeCapsule": "カプセル形",
 	"databaseShowIcon": "主キーフィールドのエントリアイコンを表示",
 	"databaseShowRelationIcon": "関連・集計フィールドのエントリアイコンを表示",
 	"databaseShowIconTip": "有効にすると、新しいデータベースとビューで主キーフィールドのエントリアイコンを既定で表示します",

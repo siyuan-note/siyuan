@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Форма узла",
+	"listMindmapShapeRectangle": "Прямоугольник",
+	"listMindmapShapeCapsule": "Капсула",
 	"databaseShowIcon": "Показывать значки записей в первичном ключе",
 	"databaseShowRelationIcon": "Показывать значки записей в связях и сводках",
 	"databaseShowIconTip": "Если включено, значки записей в первичном ключе отображаются по умолчанию в новых базах данных и представлениях",

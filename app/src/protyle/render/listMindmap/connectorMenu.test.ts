@@ -25,7 +25,7 @@ const visit = (node: import("typescript").Node) => {
 visit(controller);
 assert.ok(callback);
 assert.ok(batchCallback);
-const methods = controller.members.filter(item => item.name && ["metadata", "change"].includes(item.name.getText(source)));
+const methods = controller.members.filter(item => item.name && ["metadata", "change", "setNodeStyles"].includes(item.name.getText(source)));
 const compiled = transpileModule(`class Controller {
     ${methods.map(item => item.getText(source)).join("\n")}
     onSettingsMenu = ${callback};
@@ -73,7 +73,7 @@ test("desktop and mobile settings cancel theme previews and persist one undoable
             getListMindmapSiblingIDs: () => new Map(),
             normalizeListMindmapSummaryMetadata: () => {},
             readListMindmap: () => ({root: {id: "root", children: [{id: "child"}]}, metadata: JSON.parse(JSON.stringify(data)),
-                nodes: new Map([["root", {children: []}], ["child", {children: []}]])}),
+                nodes: new Map([["root", {children: []}], ["child", {parentId: "root", children: []}]])}),
             writeListMindmapMetadata: (_list: unknown, value: typeof data) => data = value,
             cleanListMindmapHTML: (html: string) => html,
             updateTransaction: (_owner: unknown, _list: unknown, before: string) =>
@@ -212,6 +212,21 @@ test("desktop and mobile settings cancel theme previews and persist one undoable
         assert.equal(updated.nodes.child.backgroundColor, "#fed7aa");
         assert.equal(updated.nodes.child.lineColor, "red");
         assert.equal(updated.nodes.deleted, undefined, "a stale selection cannot create orphan styles");
+        target.onNodesStyle(["root", "child", "deleted"], {connectorStyle: "rounded"});
+        target.onNodesStyle(["root", "child"], {shape: "capsule"});
+        assert.equal(transactions.length, beforeCount + 4);
+        const styled = JSON.parse(list.outerHTML);
+        assert.equal(styled.nodes.root.connectorStyle, undefined, "the root has no incoming connector");
+        assert.equal(styled.nodes.child.connectorStyle, "rounded");
+        assert.equal(styled.nodes.root.shape, "capsule");
+        assert.equal(styled.nodes.child.shape, "capsule");
+        assert.equal(JSON.parse(transactions.at(-1).before).nodes.child.shape, undefined, "the undo snapshot has the prior shape");
+        target.onNodesStyle(["child"], {shape: undefined, connectorStyle: undefined});
+        assert.equal(transactions.length, beforeCount + 5);
+        assert.deepEqual(JSON.parse(list.outerHTML).nodes.child, updated.nodes.child,
+            "restoring defaults removes only the two style overrides");
+        target.onNodesStyle(["child"], {shape: undefined});
+        assert.equal(transactions.length, beforeCount + 5, "restoring a default twice adds no undo entry");
         const count = transactions.length;
         editable = false;
         choose("spline");

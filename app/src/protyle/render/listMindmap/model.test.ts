@@ -1859,6 +1859,34 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(view.linePaths.filter((line: {relation: boolean}) => !line.relation).length, view.edges.length);
         view.setReadOnly(false);
     }
+    const styled = api.readListMindmap(list);
+    const capsule = alpha;
+    const rectangle = beta;
+    const underline = styled.root.children[0].children[0].id;
+    styled.metadata.connectorStyle = "bezier";
+    styled.metadata.nodes[capsule] = {...styled.metadata.nodes[capsule], shape: "capsule", connectorStyle: "orthogonal"};
+    styled.metadata.nodes[rectangle] = {...styled.metadata.nodes[rectangle], shape: "rectangle", connectorStyle: "spline"};
+    styled.metadata.nodes[underline] = {...styled.metadata.nodes[underline], shape: "underline",
+        backgroundColor: "#123456", textColor: "#ffffff"};
+    api.writeListMindmapMetadata(list, styled.metadata);
+    view.update(api.readListMindmap(list));
+    await settle();
+    const shapeStyle = (id: string) => getComputedStyle(view.getBlockById(id));
+    check.ok(parseFloat(shapeStyle(capsule).borderTopLeftRadius) > 0, "capsule nodes have rounded corners");
+    check.equal(shapeStyle(rectangle).borderTopLeftRadius, "0px");
+    check.equal(shapeStyle(rectangle).borderTopStyle, "solid");
+    check.equal(shapeStyle(underline).borderTopStyle, "none");
+    check.equal(shapeStyle(underline).borderBottomStyle, "solid");
+    check.equal(shapeStyle(underline).backgroundColor, "rgb(18, 52, 86)", "the underline preserves an explicit node fill");
+    const capsuleParent = view.positions.get(styled.root.id);
+    const capsulePosition = view.positions.get(capsule);
+    const branchX = (capsuleParent.x + capsuleParent.width + capsulePosition.x * 3) / 4;
+    const branchY = capsulePosition.y + capsulePosition.height / 2;
+    const bounds = viewport.getBoundingClientRect();
+    check.equal(view.findLine(new MouseEvent("click", {
+        clientX: bounds.left + view.offsetX + branchX * view.scale,
+        clientY: bounds.top + view.offsetY + branchY * view.scale,
+    }))?.id, capsule, "the incoming connector meets the shaped node's side and can be selected");
     if (connectorSource === null) {
         list.removeAttribute("custom-sy-list-mindmap-data");
     } else {
@@ -1867,6 +1895,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     delete model.metadata.connectorStyle;
     view.update(model);
     await settle();
+    check.equal(view.getBlockById(capsule).hasAttribute("data-mindmap-shape"), false, "restoring metadata restores the theme shape");
     check.equal(viewport.getAttribute("data-prevent-swipe"), "true");
     const originalCapture = HTMLElement.prototype.setPointerCapture;
     const originalHasCapture = HTMLElement.prototype.hasPointerCapture;

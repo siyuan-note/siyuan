@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "รูปร่างโหนด",
+	"listMindmapShapeRectangle": "สี่เหลี่ยมผืนผ้า",
+	"listMindmapShapeCapsule": "ทรงแคปซูล",
 	"databaseShowIcon": "แสดงไอคอนรายการในคีย์หลัก",
 	"databaseShowRelationIcon": "แสดงไอคอนรายการในความสัมพันธ์และการสรุป",
 	"databaseShowIconTip": "เมื่อเปิดใช้งาน จะแสดงไอคอนรายการในคีย์หลักเป็นค่าเริ่มต้นในฐานข้อมูลและมุมมองใหม่",

@@ -6,7 +6,7 @@ import type {ListMindmapSummary} from "./summary";
 import {LIST_MINDMAP_CONNECTOR_STYLES} from "./connectors";
 import type {ListMindmapConnectorStyle} from "./connectors";
 import {isListMindmapAppearance} from "./appearance";
-import type {ListMindmapAppearance} from "./appearance";
+import type {ListMindmapAppearance, ListMindmapNodeShape} from "./appearance";
 
 export interface ListMindmapNodeStyle {
     width?: number;
@@ -22,6 +22,8 @@ export interface ListMindmapNodeStyle {
     lineColor?: string;
     lineWidth?: number;
     lineDash?: boolean;
+    connectorStyle?: ListMindmapConnectorStyle;
+    shape?: ListMindmapNodeShape;
 }
 
 export interface ListMindmapRelation {

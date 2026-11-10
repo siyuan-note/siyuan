@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Форма вузла",
+	"listMindmapShapeRectangle": "Прямокутник",
+	"listMindmapShapeCapsule": "Капсула",
 	"databaseShowIcon": "Показувати піктограми записів у первинному ключі",
 	"databaseShowRelationIcon": "Показувати піктограми записів у зв’язках і агрегаціях",
 	"databaseShowIconTip": "Якщо ввімкнено, піктограми записів у первинному ключі відображаються за замовчуванням у нових базах даних і поданнях",

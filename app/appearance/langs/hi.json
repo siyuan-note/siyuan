@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "नोड का आकार",
+	"listMindmapShapeRectangle": "आयत",
+	"listMindmapShapeCapsule": "कैप्सूल आकार",
 	"databaseShowIcon": "प्राथमिक कुंजी प्रविष्टियों के आइकन दिखाएँ",
 	"databaseShowRelationIcon": "संबंध और रोलअप प्रविष्टियों के आइकन दिखाएँ",
 	"databaseShowIconTip": "सक्षम होने पर नए डेटाबेस और दृश्यों में प्राथमिक कुंजी प्रविष्टियों के आइकन डिफ़ॉल्ट रूप से दिखाए जाते हैं",

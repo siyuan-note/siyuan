@@ -2762,6 +2762,65 @@
 			]
 		},
 		{
+			"ID": "20261110224000-t2x4qnb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110224000-t2x4qnb",
+				"updated": "20261110224000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ノードを一つ以上選択し、選択ツールバーの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "接続線のスタイル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、選択したノードと親ノードを結ぶ接続線のスタイルを個別に変更できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "詳細"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ノードの形状"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " では、下線、長方形、カプセル形を選べます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "デフォルト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、マップ全体の接続線スタイルまたはテーマのノード形状に戻ります。変更は文書とともに保存され、元に戻すこともやり直すこともできます。"
+				}
+			]
+		},
+		{
 			"ID": "20261017113512-geqkoea",
 			"Type": "NodeParagraph",
 			"Properties": {

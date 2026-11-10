@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "노드 모양",
+	"listMindmapShapeRectangle": "직사각형",
+	"listMindmapShapeCapsule": "캡슐형",
 	"databaseShowIcon": "기본 키 항목 아이콘 표시",
 	"databaseShowRelationIcon": "관계 및 롤업 항목 아이콘 표시",
 	"databaseShowIconTip": "활성화하면 새 데이터베이스와 뷰에서 기본 키 항목 아이콘이 기본적으로 표시됩니다",

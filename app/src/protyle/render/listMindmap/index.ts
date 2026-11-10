@@ -30,7 +30,7 @@ import {
     convertListMindmapToList, hasListMindmapRootTitle, clearListMindmapHeight, initializeListMindmapConnectorStyle,
 } from "./model";
 import {prepareListMindmapConversion} from "./conversion";
-import type {ListMindmapMetadata, ListMindmapModel} from "./model";
+import type {ListMindmapMetadata, ListMindmapModel, ListMindmapNodeStyle} from "./model";
 import {applyListMindmapListInput, getListMindmapListInputTarget} from "./listInput";
 import type {ListMindmapListInput} from "./listInput";
 import {getListMindmapElements, registerListMindmapRoot, registerListMindmapView} from "./render";
@@ -55,6 +55,7 @@ import {highlightRender} from "../highlightRender";
 import {avRender} from "../av/render";
 import {blockRender} from "../blockRender";
 import {getListMindmapConnectorMenuItem} from "./connectorMenu";
+import {getListMindmapNodeStyleMenuItems} from "./nodeStyleMenu";
 import {getDefaultListMindmapConnectorStyle, setDefaultListMindmapConnectorStyle} from "./preferences";
 import {assignListMindmapBranchColors, getListMindmapAppearanceMenu} from "./appearance";
 import {getEmbedChildOperationContext} from "../../wysiwyg/getBlock";
@@ -426,27 +427,36 @@ class ListMindmapController {
             onCopy: (ids, cut, event) => void this.copyNodes(ids, cut, event),
             onPaste: (id, kind, data) => void this.pasteNodes(id, kind, data),
             onDeleteNodes: ids => void this.removeNodes(ids),
-            onClipboardMenu: (anchor, ids) => {
+            onNodeMenu: (anchor, ids) => {
                 toggleMenu({target: anchor, build: (_menu, session) => {
                     const menu = new Menu();
-                    if (canEdit(owner, list) && canCutMindmapBranches(readListMindmap(list), ids)) {
+                    const model = readListMindmap(list);
+                    const editable = canEdit(owner, list);
+                    if (editable && canCutMindmapBranches(model, ids)) {
                         menu.addItem({label: window.siyuan.languages.cut, icon: "iconCut",
                             click: () => void this.copyNodes(ids, true)});
                     }
                     menu.addItem({label: window.siyuan.languages.copy, icon: "iconCopy",
                         click: () => void this.copyNodes(ids, false)});
-                    if (ids.length === 1 && canEdit(owner, list)) {
+                    if (ids.length === 1 && editable) {
                         menu.addItem({label: window.siyuan.languages.mindmapPasteChild, icon: "iconPaste",
                             click: () => void this.pasteNodes(ids[0], "child")});
-                        if (this.model.nodes.get(ids[0])?.parentId) {
+                        if (model.nodes.get(ids[0])?.parentId) {
                             menu.addItem({label: window.siyuan.languages.mindmapPasteSibling, icon: "iconPaste",
                                 click: () => void this.pasteNodes(ids[0], "sibling")});
                         }
                     }
-                    const marker = ids.length === 1 ? this.model.nodes.get(ids[0])?.taskMarker : undefined;
-                    if (marker !== undefined && canEdit(owner, list)) {
+                    const marker = ids.length === 1 ? model.nodes.get(ids[0])?.taskMarker : undefined;
+                    if (marker !== undefined && editable) {
                         menu.addItem({label: window.siyuan.languages.checkToggle, icon: "iconCheck",
                             submenu: getTaskStatusItems(marker, next => this.setTask(ids[0], () => next))});
+                    }
+                    if (editable) {
+                        const selected = ids.filter(id => model.nodes.has(id));
+                        if (selected.length) {
+                            getListMindmapNodeStyleMenuItems(model, selected, (targets, patch) => void this.setNodeStyles(targets, patch),
+                                window.siyuan.languages).forEach(item => menu.addItem(item));
+                        }
                     }
                     const rect = anchor.getBoundingClientRect();
                     if (isMobile()) {
@@ -526,15 +536,8 @@ class ListMindmapController {
                     }
                 });
             }),
-            onNodeStyle: (id, patch) => this.metadata(metadata => {
-                metadata.nodes[id] = {...metadata.nodes[id], ...patch};
-            }),
-            onNodesStyle: (ids, patch) => this.metadata(metadata => {
-                const nodes = readListMindmap(list).nodes;
-                ids.filter(id => nodes.has(id)).forEach(id => {
-                    metadata.nodes[id] = {...metadata.nodes[id], ...patch};
-                });
-            }),
+            onNodeStyle: (id, patch) => this.setNodeStyles([id], patch),
+            onNodesStyle: (ids, patch) => this.setNodeStyles(ids, patch),
             onNodeWidths: (widths, expected) => this.metadata(metadata => {
                 const nodes = readListMindmap(list).nodes;
                 const current = widths.map(({id}) => ({id, width: metadata.nodes[id]?.width || 0}));
@@ -650,6 +653,24 @@ class ListMindmapController {
                 return false;
             }
             writeListMindmapMetadata(this.list, metadata);
+        });
+    }
+
+    private setNodeStyles(ids: string[], patch: Partial<ListMindmapNodeStyle>) {
+        return this.metadata(metadata => {
+            const nodes = readListMindmap(this.list).nodes;
+            for (const id of ids) {
+                const node = nodes.get(id);
+                if (!node || ("connectorStyle" in patch && !node.parentId)) {
+                    continue;
+                }
+                const style = {...metadata.nodes[id], ...patch};
+                if (Object.values(style).some(value => value !== undefined)) {
+                    metadata.nodes[id] = style;
+                } else {
+                    delete metadata.nodes[id];
+                }
+            }
         });
     }
 

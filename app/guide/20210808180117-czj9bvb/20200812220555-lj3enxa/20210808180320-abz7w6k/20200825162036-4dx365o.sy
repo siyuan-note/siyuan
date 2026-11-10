@@ -2548,6 +2548,65 @@
 			]
 		},
 		{
+			"ID": "20261110224000-a9frk2n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110224000-a9frk2n",
+				"updated": "20261110224000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中一个或多个节点后，在节点工具栏中使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "连线样式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可单独修改从父节点接入所选节点的连线，使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "节点形状"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可选择下划线、矩形或胶囊形。选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "默认"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可恢复使用整张导图的连线样式或主题的节点形状。修改随文档保存，支持撤销和重做。"
+				}
+			]
+		},
+		{
 			"ID": "20261017113512-kojg0bw",
 			"Type": "NodeParagraph",
 			"Properties": {

@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "شكل العقدة",
+	"listMindmapShapeRectangle": "مستطيل",
+	"listMindmapShapeCapsule": "شكل كبسولة",
 	"databaseShowIcon": "إظهار أيقونات إدخالات المفتاح الأساسي",
 	"databaseShowRelationIcon": "إظهار أيقونات إدخالات العلاقات والتجميع",
 	"databaseShowIconTip": "عند التمكين، تظهر أيقونات إدخالات المفتاح الأساسي افتراضيًا في قواعد البيانات وطرق العرض الجديدة",

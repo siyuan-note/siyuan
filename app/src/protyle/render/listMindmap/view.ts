@@ -22,7 +22,7 @@ import {getListMindmapSummarySelection, getListMindmapSummarySnapshot,
     layoutListMindmapSummaries, resolveListMindmapSummaryStyle} from "./summary";
 import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
 import {buildListMindmapConnectors, buildListMindmapSummaryConnector} from "./connectors";
-import {getMindmapLineColor, getMindmapTextColor, isMindmapColor, resolveListMindmapColors} from "./appearance";
+import {getListMindmapNodeShape, getMindmapLineColor, getMindmapTextColor, isMindmapColor, resolveListMindmapColors} from "./appearance";
 import type {ListMindmapViewport} from "./viewport";
 
 export interface ListMindmapViewOptions {
@@ -49,7 +49,7 @@ export interface ListMindmapViewOptions {
     onEdit?: (id: string, contentHost: HTMLElement, replaceFirstParagraph?: string) => void;
     onCopy?: (ids: string[], cut: boolean, event?: ClipboardEvent) => void;
     onPaste?: (id: string, kind: "child" | "sibling", data?: IClipboardData) => void;
-    onClipboardMenu?: (anchor: HTMLElement, ids: string[]) => void;
+    onNodeMenu?: (anchor: HTMLElement, ids: string[]) => void;
     onDeleteNodes?: (ids: string[]) => void;
     isAddSiblingShortcut?: (event: KeyboardEvent) => boolean;
     isAddChildShortcut?: (event: KeyboardEvent) => boolean;
@@ -1129,12 +1129,21 @@ export class ListMindmapView {
         this.nodeElements.forEach((element, id) => {
             const style = this.model.metadata.nodes[id];
             const themed = this.themeColors.get(id);
-            const background = style?.backgroundColor || themed?.backgroundColor || "";
+            const shape = getListMindmapNodeShape(style?.shape);
+            if (shape) {
+                element.dataset.mindmapShape = shape;
+            } else {
+                delete element.dataset.mindmapShape;
+            }
+            element.style.setProperty("--mindmap-node-line-color", shape ? style?.lineColor || themed?.lineColor || "" : "");
+            const useCanvasForeground = shape === "underline" && !style?.backgroundColor;
+            const background = useCanvasForeground ? "transparent" : style?.backgroundColor || themed?.backgroundColor || "";
             const adaptForeground = !!themed || !!canvasForeground;
             element.classList.toggle("mindmap-view__node--colored", adaptForeground);
             element.style.backgroundColor = background;
-            element.style.color = style?.textColor || (adaptForeground && style?.backgroundColor && isMindmapColor(background) ?
-                getMindmapTextColor(background) : themed?.textColor || canvasForeground) || "";
+            element.style.color = style?.textColor || (useCanvasForeground ? canvasForeground || "var(--b3-theme-on-background)" :
+                adaptForeground && style?.backgroundColor && isMindmapColor(background) ?
+                    getMindmapTextColor(background) : themed?.textColor || canvasForeground) || "";
             element.style.fontSize = themed?.fontSize ? `${style?.fontSize ?? themed.fontSize}px` : "";
             element.style.fontWeight = themed?.fontSize ? (style?.bold === undefined ? (themed.bold ? "600" : "400") :
                 style.bold ? "700" : "400") : "";
@@ -2306,7 +2315,7 @@ export class ListMindmapView {
         };
         const connectors = buildListMindmapConnectors(this.model.root.id, this.positions, this.edges,
             this.model.metadata.connectorStyle || "bezier", () => new Path2D(),
-            this.model.metadata.appearance?.nodeStyle === "branch");
+            this.model.metadata.appearance?.nodeStyle === "branch", this.model.metadata.nodes);
         const trunkOpacities = new Map<string, number>();
         if (this.foldOpacities) {
             this.edges.forEach(edge => {
@@ -4567,8 +4576,8 @@ export class ListMindmapView {
         const multiple = ids.length > 1;
         const sameSelection = () => !this.readOnly && JSON.stringify(ids) === JSON.stringify(this.getSelectedIds());
         const appendMore = () => {
-            if (this.options.onClipboardMenu) {
-                const more = squareButton("more", "iconMore", () => this.options.onClipboardMenu(more, ids));
+            if (this.options.onNodeMenu) {
+                const more = squareButton("more", "iconMore", () => this.options.onNodeMenu(more, ids));
                 more.classList.add("mindmap-view__node-more");
                 more.setAttribute("aria-haspopup", "menu");
                 this.inspector.append(more);

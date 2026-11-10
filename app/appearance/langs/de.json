@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Knotenform",
+	"listMindmapShapeRectangle": "Rechteck",
+	"listMindmapShapeCapsule": "Kapselform",
 	"databaseShowIcon": "Eintragssymbole im Primärschlüssel anzeigen",
 	"databaseShowRelationIcon": "Eintragssymbole in Beziehungen und Rollups anzeigen",
 	"databaseShowIconTip": "Wenn aktiviert, werden Eintragssymbole im Primärschlüssel in neuen Datenbanken und Ansichten standardmäßig angezeigt",

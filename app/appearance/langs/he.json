@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "צורת הצומת",
+	"listMindmapShapeRectangle": "מלבן",
+	"listMindmapShapeCapsule": "צורת כמוסה",
 	"databaseShowIcon": "הצגת סמלי רשומות במפתח הראשי",
 	"databaseShowRelationIcon": "הצגת סמלי רשומות בקשרים ובסיכומים",
 	"databaseShowIconTip": "כאשר האפשרות מופעלת, סמלי הרשומות במפתח הראשי מוצגים כברירת מחדל במסדי נתונים ובתצוגות חדשים",

@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Forma do nó",
+	"listMindmapShapeRectangle": "Retângulo",
+	"listMindmapShapeCapsule": "Cápsula",
 	"databaseShowIcon": "Mostrar ícones das entradas na chave primária",
 	"databaseShowRelationIcon": "Mostrar ícones das entradas nas relações e rollups",
 	"databaseShowIconTip": "Quando ativado, mostra por padrão os ícones das entradas na chave primária em novos bancos de dados e visualizações",

@@ -1,5 +1,10 @@
 import type {ListMindmapMetadata, ListMindmapModel, ListMindmapNodeStyle} from "./model";
 
+export const LIST_MINDMAP_NODE_SHAPES = ["underline", "rectangle", "capsule"] as const;
+export type ListMindmapNodeShape = typeof LIST_MINDMAP_NODE_SHAPES[number];
+
+export const getListMindmapNodeShape = (value: unknown) => LIST_MINDMAP_NODE_SHAPES.find(shape => shape === value);
+
 export interface ListMindmapAppearance {
     version: 1;
     palette: string[];

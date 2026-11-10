@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Düğüm şekli",
+	"listMindmapShapeRectangle": "Dikdörtgen",
+	"listMindmapShapeCapsule": "Kapsül",
 	"databaseShowIcon": "Birincil anahtar girdi simgelerini göster",
 	"databaseShowRelationIcon": "İlişki ve toplama girdi simgelerini göster",
 	"databaseShowIconTip": "Etkinleştirildiğinde, yeni veritabanlarında ve görünümlerde birincil anahtar girdi simgelerini varsayılan olarak gösterir",

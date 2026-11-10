@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Node shape",
+	"listMindmapShapeRectangle": "Rectangle",
+	"listMindmapShapeCapsule": "Capsule",
 	"databaseShowIcon": "Show primary key entry icons",
 	"databaseShowRelationIcon": "Show relation and rollup entry icons",
 	"databaseShowIconTip": "When enabled, show primary key entry icons by default in new databases and views",

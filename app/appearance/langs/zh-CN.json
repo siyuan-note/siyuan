@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "节点形状",
+	"listMindmapShapeRectangle": "矩形",
+	"listMindmapShapeCapsule": "胶囊形",
 	"databaseShowIcon": "显示主键条目图标",
 	"databaseShowRelationIcon": "显示关联和汇总条目图标",
 	"databaseShowIconTip": "启用后新建数据库及视图时默认显示主键条目的图标",

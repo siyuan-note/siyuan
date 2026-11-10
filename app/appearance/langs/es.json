@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Forma del nodo",
+	"listMindmapShapeRectangle": "Rectángulo",
+	"listMindmapShapeCapsule": "Cápsula",
 	"databaseShowIcon": "Mostrar iconos de entradas en la clave primaria",
 	"databaseShowRelationIcon": "Mostrar iconos de entradas en relaciones y agregaciones",
 	"databaseShowIconTip": "Al activar esta opción, se muestran por defecto los iconos de entradas en la clave primaria de las nuevas bases de datos y vistas",

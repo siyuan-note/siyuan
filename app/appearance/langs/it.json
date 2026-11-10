@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Forma del nodo",
+	"listMindmapShapeRectangle": "Rettangolo",
+	"listMindmapShapeCapsule": "Capsula",
 	"databaseShowIcon": "Mostra le icone delle voci nella chiave primaria",
 	"databaseShowRelationIcon": "Mostra le icone delle voci nelle relazioni e nei rollup",
 	"databaseShowIconTip": "Se abilitato, mostra per impostazione predefinita le icone delle voci nella chiave primaria nei nuovi database e nelle nuove viste",

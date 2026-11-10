@@ -1,4 +1,7 @@
 {
+	"listMindmapNodeShape": "Kształt węzła",
+	"listMindmapShapeRectangle": "Prostokąt",
+	"listMindmapShapeCapsule": "Kapsuła",
 	"databaseShowIcon": "Pokaż ikony wpisów w kluczu głównym",
 	"databaseShowRelationIcon": "Pokaż ikony wpisów w relacjach i agregacjach",
 	"databaseShowIconTip": "Po włączeniu ikony wpisów w kluczu głównym są domyślnie wyświetlane w nowych bazach danych i widokach",

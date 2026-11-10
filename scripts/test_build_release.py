@@ -422,18 +422,67 @@ class BuildTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which("node") and (build.ROOT / "app/node_modules/electron-builder").exists(),
                          "需要已安装的 Electron Builder，仅加载配置，不执行构建")
-    def test_installed_builder_configuration_excludes_old_kernel(self):
-        destination = self.root / "windows.json"
-        with contextlib.redirect_stdout(io.StringIO()):
-            build.run(["node", build.ROOT / "scripts/release-windows-config.cjs",
-                       build.ROOT / "app/electron-builder.yml", self.root / "new-kernel",
-                       self.root / "build", "A" * 40, destination], build.ROOT / "app", capture=True)
-        config = json.loads(destination.read_text(encoding="utf-8"))
-        self.assertEqual(config["win"]["extraResources"], [{"from": str(self.root / "new-kernel"), "to": "kernel"}])
-        self.assertTrue(config["forceCodeSigning"])
-        self.assertNotIn("extends", config)
-        self.assertEqual(config["win"]["signtoolOptions"]["signingHashAlgorithms"], ["sha256"])
-        self.assertTrue(any(entry.get("to") == "stage" for entry in config["extraResources"]))
+    def test_installed_builder_configurations_preserve_resources_and_replace_kernel(self):
+        inspect_resources = """
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const {createRequire} = require("node:module");
+const [project, base, generated, output, arch] = process.argv.slice(1);
+const projectRequire = createRequire(path.join(project, "package.json"));
+const builderRequire = createRequire(projectRequire.resolve("electron-builder"));
+const library = path.dirname(builderRequire.resolve("app-builder-lib"));
+const {getConfig} = require(path.join(library, "util/config/config.js"));
+const {getFileMatchers, copyFiles} = require(path.join(library, "fileMatcher.js"));
+(async () => {
+    const original = await getConfig(project, base, null);
+    const config = await getConfig(project, generated, null);
+    const otherResources = resources => resources.filter(resource => resource.to !== "kernel");
+    assert.deepEqual(otherResources(config.win.extraResources), otherResources(original.win.extraResources));
+    assert.deepEqual(config.extraResources, original.extraResources);
+    const resources = path.join(output, "resources");
+    const matchers = getFileMatchers(config, "extraResources", resources, {
+        defaultSrc: project,
+        globalOutDir: output,
+        customBuildOptions: config.win,
+        macroExpander: value => value.replaceAll("${arch}", arch),
+    });
+    const icon = matchers.filter(matcher => matcher.to === path.join(resources, "markdown.ico"));
+    const kernel = matchers.filter(matcher => matcher.to === path.join(resources, "kernel"));
+    assert.equal(icon.length, 1);
+    assert.equal(kernel.length, 1);
+    assert.equal(icon[0].from, path.join(project, "src/assets/markdown.ico"));
+    await copyFiles([...icon, ...kernel], null, false);
+    assert.deepEqual(fs.readFileSync(icon[0].to), fs.readFileSync(icon[0].from));
+    assert.equal(fs.readFileSync(path.join(kernel[0].to, "kernel-marker.txt"), "utf8"), arch);
+    assert.deepEqual(fs.readdirSync(kernel[0].to), ["kernel-marker.txt"]);
+    assert.equal(config.win.icon, original.win.icon);
+    assert.equal(config.nsis.include, "nsis/installer.nsh");
+    const installer = fs.readFileSync(path.join(project, config.nsis.include), "utf8");
+    assert.ok(installer.includes(String.raw`\\DefaultIcon" "" '"$INSTDIR\\resources\\markdown.ico",0'`));
+})().catch(error => { console.error(error); process.exitCode = 1; });
+"""
+        for name, arch in (("electron-builder.yml", "x64"), ("electron-builder-arm64.yml", "arm64")):
+            with self.subTest(arch=arch):
+                destination = self.root / f"windows-{arch}.json"
+                kernel_dir = self.root / f"new-kernel-{arch}"
+                self.write(kernel_dir / "kernel-marker.txt", arch.encode("ascii"))
+                output = self.root / arch
+                base = build.ROOT / "app" / name
+                with contextlib.redirect_stdout(io.StringIO()):
+                    build.run(["node", build.ROOT / "scripts/release-windows-config.cjs",
+                               base, kernel_dir, output, "A" * 40, destination], build.ROOT / "app", capture=True)
+                config = json.loads(destination.read_text(encoding="utf-8"))
+                kernels = [entry for entry in config["win"]["extraResources"] if entry.get("to") == "kernel"]
+                self.assertEqual(kernels, [{"from": str(kernel_dir), "to": "kernel"}])
+                self.assertIn({"from": "src/assets/markdown.ico", "to": "markdown.ico"}, config["win"]["extraResources"])
+                self.assertTrue(config["forceCodeSigning"])
+                self.assertNotIn("extends", config)
+                self.assertEqual(config["win"]["signtoolOptions"]["signingHashAlgorithms"], ["sha256"])
+                self.assertTrue(any(entry.get("to") == "stage" for entry in config["extraResources"]))
+                with contextlib.redirect_stdout(io.StringIO()):
+                    build.run(["node", "-e", inspect_resources, build.ROOT / "app", base, destination, output, arch],
+                              build.ROOT / "app", capture=True)
 
     @unittest.skipUnless(shutil.which("node") and (build.ROOT / "app/node_modules/electron-builder").exists(),
                          "需要已安装的 Electron Builder")

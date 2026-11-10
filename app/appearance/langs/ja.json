@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "前回の閲覧位置を復元",
+	"restoreDocPositionTip": "無効の場合、ドキュメントを先頭から開きます。ブロックリンク、検索結果、タブの復元では指定された位置を維持します",
 	"markdownAppearanceSettings": "外観設定",
 	"markdownFontSizeSettings": "文字サイズ設定",
 	"markdownFontSettings": "フォント設定",

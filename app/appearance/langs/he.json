@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "שחזור מיקום הקריאה האחרון",
+	"restoreDocPositionTip": "כשהאפשרות כבויה, מסמכים נפתחים מחדש בתחילתם; קישורי בלוקים, תוצאות חיפוש ושחזור כרטיסיות שומרים על המיקום שלהם",
 	"markdownAppearanceSettings": "הגדרות מראה",
 	"markdownFontSizeSettings": "הגדרות גודל גופן",
 	"markdownFontSettings": "הגדרות גופן",

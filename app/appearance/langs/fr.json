@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Restaurer la dernière position de lecture",
+	"restoreDocPositionTip": "Si désactivé, les documents se rouvrent au début ; les liens de bloc, les résultats de recherche et la restauration des onglets conservent leurs positions",
 	"markdownAppearanceSettings": "Paramètres d’apparence",
 	"markdownFontSizeSettings": "Paramètres de taille de police",
 	"markdownFontSettings": "Paramètres de police",

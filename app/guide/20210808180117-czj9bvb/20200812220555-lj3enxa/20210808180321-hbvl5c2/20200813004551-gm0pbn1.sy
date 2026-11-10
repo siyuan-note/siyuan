@@ -20344,6 +20344,47 @@
 					"Data": "。"
 				}
 			]
+		},
+		{
+			"ID": "20261110180000-673fb24",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110180000-673fb24",
+				"updated": "20261110180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "普通重新打开文档默认恢复上次浏览位置。关闭 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "恢复上次浏览位置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后从文档开头打开。块链接、搜索结果、恢复页签和前进后退仍定位到指定位置。"
+				}
+			]
 		}
 	]
 }

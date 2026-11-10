@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Restore last reading position",
+	"restoreDocPositionTip": "When disabled, reopen documents at the beginning; block links, search targets and tab restoration retain their positions",
 	"markdownAppearanceSettings": "Appearance settings",
 	"markdownFontSizeSettings": "Font size settings",
 	"markdownFontSettings": "Font settings",

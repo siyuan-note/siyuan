@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Son okuma konumunu geri yükle",
+	"restoreDocPositionTip": "Devre dışıyken belgeler baştan açılır; blok bağlantıları, arama sonuçları ve sekme geri yükleme kendi konumlarını korur",
 	"markdownAppearanceSettings": "Görünüm ayarları",
 	"markdownFontSizeSettings": "Yazı tipi boyutu ayarları",
 	"markdownFontSettings": "Yazı tipi ayarları",

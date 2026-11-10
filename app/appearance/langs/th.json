@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "คืนค่าตำแหน่งการอ่านล่าสุด",
+	"restoreDocPositionTip": "เมื่อปิดใช้งาน เอกสารจะเปิดใหม่ที่จุดเริ่มต้น ส่วนลิงก์บล็อก ผลการค้นหา และการคืนค่าแท็บจะคงตำแหน่งเดิม",
 	"markdownAppearanceSettings": "การตั้งค่ารูปลักษณ์",
 	"markdownFontSizeSettings": "การตั้งค่าขนาดแบบอักษร",
 	"markdownFontSettings": "การตั้งค่าแบบอักษร",

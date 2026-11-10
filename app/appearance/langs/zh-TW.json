@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "恢復上次瀏覽位置",
+	"restoreDocPositionTip": "關閉後從文件開頭重新開啟；區塊連結、搜尋結果和頁籤恢復仍定位到指定位置",
 	"markdownAppearanceSettings": "外觀設定",
 	"markdownFontSizeSettings": "字型大小設定",
 	"markdownFontSettings": "字型設定",

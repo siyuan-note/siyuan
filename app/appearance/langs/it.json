@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Ripristina l’ultima posizione di lettura",
+	"restoreDocPositionTip": "Se disattivato, i documenti si riaprono dall’inizio; collegamenti ai blocchi, risultati di ricerca e ripristino delle schede mantengono le loro posizioni",
 	"markdownAppearanceSettings": "Impostazioni dell’aspetto",
 	"markdownFontSizeSettings": "Impostazioni della dimensione del carattere",
 	"markdownFontSettings": "Impostazioni dei caratteri",

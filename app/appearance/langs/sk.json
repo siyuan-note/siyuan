@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Obnoviť poslednú pozíciu čítania",
+	"restoreDocPositionTip": "Po vypnutí sa dokumenty otvárajú od začiatku; odkazy na bloky, výsledky vyhľadávania a obnovenie kariet si zachovajú svoje pozície",
 	"markdownAppearanceSettings": "Nastavenia vzhľadu",
 	"markdownFontSizeSettings": "Nastavenia veľkosti písma",
 	"markdownFontSettings": "Nastavenia písma",

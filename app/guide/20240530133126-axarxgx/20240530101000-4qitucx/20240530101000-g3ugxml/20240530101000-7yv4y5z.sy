@@ -1621,6 +1621,47 @@
 				"id": "20260613204554-fzmwd6k",
 				"updated": "20260613204554"
 			}
+		},
+		{
+			"ID": "20261110180000-d57ccd2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110180000-d57ccd2",
+				"updated": "20261110180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通常、ドキュメントを再度開くと前回の閲覧位置に戻ります。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ドキュメント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "前回の閲覧位置を復元"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を無効にすると先頭から開きます。ブロックリンク、検索結果、タブの復元、戻る・進む操作では指定された位置を維持します。"
+				}
+			]
 		}
 	]
 }

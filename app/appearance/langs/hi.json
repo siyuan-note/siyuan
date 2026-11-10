@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "पिछली पढ़ने की स्थिति बहाल करें",
+	"restoreDocPositionTip": "बंद होने पर दस्तावेज़ शुरुआत से खुलते हैं; ब्लॉक लिंक, खोज परिणाम और टैब बहाली अपनी स्थिति बनाए रखते हैं",
 	"markdownAppearanceSettings": "दिखावट सेटिंग्स",
 	"markdownFontSizeSettings": "फ़ॉन्ट आकार सेटिंग्स",
 	"markdownFontSettings": "फ़ॉन्ट सेटिंग्स",

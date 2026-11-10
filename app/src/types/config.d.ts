@@ -1056,6 +1056,7 @@ declare namespace Config {
          * Defaults to true; does not affect the main window.
          */
         closeWindowOnLastTabClosed: boolean;
+        restoreDocPosition: boolean;
         /**
          * The storage path of the new document created using block references
          */

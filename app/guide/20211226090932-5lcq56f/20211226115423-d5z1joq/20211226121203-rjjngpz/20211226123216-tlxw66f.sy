@@ -1574,6 +1574,47 @@
 				"id": "20260613204621-nsfl544",
 				"updated": "20260613204621"
 			}
+		},
+		{
+			"ID": "20261110180000-39c7a25",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110180000-39c7a25",
+				"updated": "20261110180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "一般重新開啟文件預設會恢復上次瀏覽位置。關閉 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "恢復上次瀏覽位置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後從文件開頭開啟。區塊連結、搜尋結果、恢復頁籤和上一頁、下一頁仍定位到指定位置。"
+				}
+			]
 		}
 	]
 }

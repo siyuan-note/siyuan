@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Врати последњи положај читања",
+	"restoreDocPositionTip": "Када је искључено, документи се поново отварају од почетка; везе ка блоковима, резултати претраге и обнова картица задржавају своје положаје",
 	"markdownAppearanceSettings": "Подешавања изгледа",
 	"markdownFontSizeSettings": "Подешавања величине фонта",
 	"markdownFontSettings": "Подешавања фонта",

@@ -38,8 +38,8 @@ test("desktop tab settings end with startup behavior and last-tab window closing
     }
 });
 
-const loadBehaviorSettings = (config: {docIconClickMode?: number, parentDocTitleClickMode?: number} = {}) => {
-    const fileTree = {docIconClickMode: 0, parentDocTitleClickMode: 0, ...config};
+const loadBehaviorSettings = (config: {docIconClickMode?: number, parentDocTitleClickMode?: number, restoreDocPosition?: boolean} = {}) => {
+    const fileTree = {docIconClickMode: 0, parentDocTitleClickMode: 0, restoreDocPosition: true, ...config};
     const languages = {
         docIconClickAction: "Clicking a document icon",
         docIconClickActionTip: "Action performed by clicking a document icon; without child documents an openable document opens, otherwise the icon is changed",
@@ -115,11 +115,23 @@ const loadBehaviorSettings = (config: {docIconClickMode?: number, parentDocTitle
     const scanExports: {scanSettingTabSearch?: (id: string, title: string, query: string) => SettingTabSearchResult} = {};
     runInNewContext(compile("../search/scan.ts"), {exports: scanExports,
         require: () => ({getTabGroupEntries: entries})});
-    return {icon, title, saved, updates, fileTree,
+    const restore = registered.find(item => item.id === "fileTree.restoreDocPosition");
+    return {icon, title, restore, saved, updates, fileTree,
         iconControl: icon?.rowParts.find(isSettingControl), titleControl: title?.rowParts.find(isSettingControl),
         html: () => renderExports.buildGroupedItemsView("file").html,
         search: (query: string) => scanExports.scanSettingTabSearch("file", "documents", query)};
 };
+
+test("reading position restoration is a shared default-on document setting", () => {
+    for (const value of [true, false]) {
+        const state = loadBehaviorSettings({restoreDocPosition: value});
+        assert.ok(state.restore?.kind === "full");
+        const control = state.restore.rowParts.find(isSettingControl);
+        assert.equal(control.kind, "switch");
+        assert.equal(control.readConfig(), value);
+        assert.match(state.html(), /data-config-item-id="fileTree.restoreDocPosition"/);
+    }
+});
 
 test("both click settings are standard select rows that replace the removed switches", () => {
     const h = loadBehaviorSettings();

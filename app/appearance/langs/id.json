@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Pulihkan posisi baca terakhir",
+	"restoreDocPositionTip": "Jika dinonaktifkan, dokumen dibuka kembali dari awal; tautan blok, hasil pencarian dan pemulihan tab tetap mempertahankan posisinya",
 	"markdownAppearanceSettings": "Pengaturan tampilan",
 	"markdownFontSizeSettings": "Pengaturan ukuran font",
 	"markdownFontSettings": "Pengaturan font",

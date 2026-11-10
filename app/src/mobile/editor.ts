@@ -275,7 +275,8 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             }
             // 保留正文直到新文档返回，跨文档切换时显式更新只读状态
             const updateReadonly = previousRootID !== data.data.rootID ? true : undefined;
-            const targetScrollAttr = scrollAttr || window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID];
+            const targetScrollAttr = scrollAttr || (window.siyuan.config.fileTree.restoreDocPosition !== false ?
+                window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID] : undefined);
             if (actionList.includes(Constants.CB_GET_SCROLL) && targetScrollAttr) {
                 getDocByScroll({
                     protyle: window.siyuan.mobile.editor.protyle,

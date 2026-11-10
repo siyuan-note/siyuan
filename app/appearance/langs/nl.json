@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Laatste leespositie herstellen",
+	"restoreDocPositionTip": "Indien uitgeschakeld openen documenten opnieuw aan het begin; bloklinks, zoekresultaten en tabbladherstel behouden hun posities",
 	"markdownAppearanceSettings": "Weergave-instellingen",
 	"markdownFontSizeSettings": "Instellingen voor lettergrootte",
 	"markdownFontSettings": "Lettertype-instellingen",

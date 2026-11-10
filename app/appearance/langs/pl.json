@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Przywracaj ostatnią pozycję czytania",
+	"restoreDocPositionTip": "Po wyłączeniu dokumenty otwierają się od początku; łącza do bloków, wyniki wyszukiwania i przywracanie kart zachowują swoje pozycje",
 	"markdownAppearanceSettings": "Ustawienia wyglądu",
 	"markdownFontSizeSettings": "Ustawienia rozmiaru czcionki",
 	"markdownFontSettings": "Ustawienia czcionek",

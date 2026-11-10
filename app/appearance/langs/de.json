@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Letzte Leseposition wiederherstellen",
+	"restoreDocPositionTip": "Deaktiviert werden Dokumente am Anfang geöffnet; Blocklinks, Suchtreffer und die Wiederherstellung von Tabs bleiben unverändert",
 	"markdownAppearanceSettings": "Darstellungseinstellungen",
 	"markdownFontSizeSettings": "Schriftgrößeneinstellungen",
 	"markdownFontSettings": "Schrifteinstellungen",

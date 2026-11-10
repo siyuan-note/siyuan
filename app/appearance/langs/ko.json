@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "마지막 읽기 위치 복원",
+	"restoreDocPositionTip": "비활성화하면 문서를 처음부터 다시 엽니다. 블록 링크, 검색 결과 및 탭 복원은 해당 위치를 유지합니다",
 	"markdownAppearanceSettings": "외관 설정",
 	"markdownFontSizeSettings": "글꼴 크기 설정",
 	"markdownFontSettings": "글꼴 설정",

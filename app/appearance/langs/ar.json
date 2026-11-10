@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "استعادة موضع القراءة السابق",
+	"restoreDocPositionTip": "تُفتح المستندات من البداية عند التعطيل؛ لا تتأثر الروابط إلى الكتل ونتائج البحث واستعادة علامات التبويب",
 	"markdownAppearanceSettings": "إعدادات المظهر",
 	"markdownFontSizeSettings": "إعدادات حجم الخط",
 	"markdownFontSettings": "إعدادات الخط",

@@ -158,10 +158,59 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
                 resolve(false);
             }, false, true);
     });
-    return {load, switchRow, requests, rendered, constructed, window, presentation, attributes, bottomBacklink,
+    const loadDesktop = (scrollAttr?: IScrollAttr, blockId = "root", action = [constants.CB_GET_SCROLL]) => {
+        const options = {scrollAttr, rootId: "root", blockId, action};
+        const protyle = makeProtyle(options as IProtyleOptions);
+        constructor.restore.call({protyle, afterOnGet: noop,
+            getDoc: (value: IProtyleOptions) => constructor.getDoc.call({protyle, afterOnGet: noop}, value)}, options, options);
+    };
+    return {load, loadDesktop, switchRow, requests, rendered, constructed, window, presentation, attributes, bottomBacklink,
         get clearedSearchHighlights() { return clearedSearchHighlights; },
         get docRequest() { return requests.filter(item => item.url === "/api/filetree/getDoc").at(-1)?.data; }};
 };
+
+test("disabling document position restoration starts cold and reused mobile editors at the top", async () => {
+    const state = setup(position(8000));
+    state.window.siyuan.config.fileTree.restoreDocPosition = false;
+    const protyle = await state.load();
+    assert.equal(protyle.contentElement.scrollTop, 0);
+    assert.equal(state.rendered[0].scrollAttr, undefined);
+    assert.equal(state.docRequest.startID, undefined);
+    assert.equal(await state.load(), protyle);
+    assert.equal(state.rendered[1].scrollAttr, undefined);
+    assert.equal(state.window.siyuan.storage.positions.root.scrollTop, 8000);
+});
+
+test("explicit mobile tab positions still restore when ordinary restoration is disabled", async () => {
+    const state = setup(position(8000));
+    state.window.siyuan.config.fileTree.restoreDocPosition = false;
+    const scroll = position(240, {zoomInId: "zoomed-block"});
+    const protyle = await state.load(scroll);
+    assert.equal(protyle.contentElement.scrollTop, 240);
+    await state.load(scroll);
+    assert.deepEqual(state.rendered.map(item => item.scrollAttr), [scroll, scroll]);
+    assert.equal(state.docRequest.id, "zoomed-block");
+});
+
+test("desktop ordinary reopening honors the preference and explicit targets retain priority", () => {
+    const state = setup(position(8000));
+    state.loadDesktop();
+    assert.equal(state.rendered.at(-1).scrollAttr.scrollTop, 8000);
+    state.window.siyuan.config.fileTree.restoreDocPosition = false;
+    state.loadDesktop();
+    assert.equal(state.rendered.at(-1).scrollAttr, undefined);
+    assert.equal(state.docRequest.id, "root");
+    assert.equal(state.docRequest.startID, undefined);
+    const scroll = position(240);
+    state.loadDesktop(scroll);
+    assert.deepEqual(state.rendered.at(-1).scrollAttr, scroll);
+    for (const restore of [true, false]) {
+        state.window.siyuan.config.fileTree.restoreDocPosition = restore;
+        state.loadDesktop(undefined, "target-block", [constants.CB_GET_ROOTSCROLL, constants.CB_GET_HL]);
+        assert.equal(state.docRequest.id, "target-block");
+        assert.equal(state.rendered.at(-1).scrollAttr, undefined);
+    }
+});
 
 test("mobile document loading waits for bottom backlink input before reusing the editor", async () => {
     const state = setup();

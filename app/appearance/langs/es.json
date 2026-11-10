@@ -1,4 +1,6 @@
 {
+	"restoreDocPosition": "Restaurar la última posición de lectura",
+	"restoreDocPositionTip": "Al desactivar, los documentos se abren al principio; los enlaces a bloques, los resultados de búsqueda y la restauración de pestañas conservan sus posiciones",
 	"markdownAppearanceSettings": "Ajustes de apariencia",
 	"markdownFontSizeSettings": "Ajustes de tamaño de fuente",
 	"markdownFontSettings": "Ajustes de fuente",

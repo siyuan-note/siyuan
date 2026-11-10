@@ -45881,6 +45881,16 @@
             }
           ]
         },
+        "restoreDocPosition": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "shorthandSaveBox": {
           "anyOf": [
             {
@@ -51346,6 +51356,16 @@
         "removeDocWithoutConfirm": {
           "type": "boolean"
         },
+        "restoreDocPosition": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "shorthandSaveBox": {
           "type": "string"
         },
@@ -51403,6 +51423,7 @@
         "refCreateSaveBox",
         "refCreateSavePath",
         "removeDocWithoutConfirm",
+        "restoreDocPosition",
         "shorthandSaveBox",
         "shorthandSavePath",
         "sort",
@@ -51636,6 +51657,16 @@
           ]
         },
         "removeDocWithoutConfirm": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "restoreDocPosition": {
           "anyOf": [
             {
               "type": "boolean"

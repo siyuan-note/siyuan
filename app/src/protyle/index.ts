@@ -465,7 +465,8 @@ export class Protyle {
             }
 
             const savedScroll = options.scrollAttr?.rootId === options.rootId ? options.scrollAttr :
-                window.siyuan.storage?.[Constants.LOCAL_FILEPOSITION]?.[options.rootId];
+                (window.siyuan.config.fileTree.restoreDocPosition !== false ?
+                    window.siyuan.storage?.[Constants.LOCAL_FILEPOSITION]?.[options.rootId] : undefined);
             if (this.protyle.options.mode !== "preview" &&
                 options.rootId && savedScroll &&
                 (

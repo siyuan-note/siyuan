@@ -214,7 +214,7 @@ if (process.versions.electron && process.type === "browser") {
             const sources = {app: path.resolve(__dirname, ".."), icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"), languages: fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8")};
             sources.snapshotButtons = fs.readFileSync(path.join(__dirname, "../src/history/history.ts"), "utf8").match(/<button class="b3-button b3-button--outline" data-type="genRepo">[\s\S]*?data-type="fullCheckRepo">[^<]*<\/button>/)[0];
             sources.mobileRuntime = require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource();
-            for (const name of ["dialog/index", "util/escape", "history/docSnapshots", "history/snapshotDetail", "history/notebookDialogs", "history/repoFile", "history/repoPanel", "history/repoBatch", "history/repoRange", "history/repoPurge"]) {
+            for (const name of ["dialog/index", "util/escape", "history/docSnapshots", "history/snapshotDetail", "history/pluginSnapshotPaths", "history/notebookDialogs", "history/repoFile", "history/repoPanel", "history/repoBatch", "history/repoRange", "history/repoPurge"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
             }
             sources["dialog/index"] = require("./fixtures/anchoredInputRuntime.cjs").withAnchoredInputRuntime(sources["dialog/index"]);

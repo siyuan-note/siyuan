@@ -9,8 +9,13 @@ const sass = require("sass");
 const calendarItem = mobile => {
     const api = {};
     const source = readFileSync(path.join(__dirname, "../src/protyle/render/av/calendar/render.ts"), "utf8");
+    const entryIcon = {};
+    runInNewContext(transpileModule(readFileSync(path.join(__dirname, "../src/protyle/render/av/entryIcon.ts"), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+    }).outputText, {exports: entryIcon});
     const escape = value => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
     const modules = {
+        "../entryIcon": entryIcon,
         "../../../../util/escape": {escapeAttr: escape, escapeHtml: escape},
         "../../../../util/functions": {isMobile: () => mobile},
         "./date": {getCalendarDate: value => value.date, isCalendarDateEditable: () => true},

@@ -22,7 +22,7 @@ const makeSources = () => {
     };
     const sources = Object.fromEntries(["virtualScroll", "selectionState", "groupTableVirtual", "tableRowHeights",
         "viewType", "capabilities", "capabilities.generated", "columnWindow", "columnVirtualScroll", "rangeSelect",
-        "cellValue", "locationValue", "columnPresentation"].map(name => ["./" + name,
+        "cellValue", "locationValue", "columnPresentation", "entryIcon"].map(name => ["./" + name,
         transpile(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"))]));
     for (const [file, names] of Object.entries({
         row: ["getRowHTML", "getFreezeDragHTML"],
@@ -97,7 +97,7 @@ const browserCases = async sources => {
         .replaceAll(">", "&gt;").replaceAll('"', "&quot;");
     const shared = {Constants: constants, escapeAttr: escape, escapeHtml: escape,
         escapeHtmlTextAndAttr: escape, escapeAriaLabel: escape, ...load("./capabilities"),
-        ...load("./cellValue"), ...load("./viewType"), hasClosestByClassName: closest,
+        ...load("./cellValue"), ...load("./viewType"), ...load("./entryIcon"), hasClosestByClassName: closest,
         hasClosestBlock: element => element.closest(".av"), renderAVRichTextElements() {},
         renderAVBlockIcon: () => "", getColIconByType: () => "iconText", getCalcValue: () => "",
         updateAVSelectionStatus() {}, addDragFill() {}, matchHotKey: () => false, isMobile: () => false,

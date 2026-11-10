@@ -1665,6 +1665,9 @@ func setAttrViewWrapField(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doSetAttrViewShowIcon(operation *Operation) (ret *TxErr) {
+	if err := tx.rememberAttributeViewMutationTree(operation.BlockID); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	err := setAttrViewShowIcon(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -1694,6 +1697,9 @@ func setAttrViewShowIcon(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doSetAttrViewShowRelationIcon(operation *Operation) (ret *TxErr) {
+	if err := tx.rememberAttributeViewMutationTree(operation.BlockID); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	err := setAttrViewShowRelationIcon(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}

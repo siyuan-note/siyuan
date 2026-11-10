@@ -996,11 +996,45 @@ export class AgentChat extends Model {
         this.navPreviewMarker = marker;
         this.navPreviewId = id;
         this.navPreviewShown = true;
-        // 单条消息预览复用提示框，不扩大导航的点击区域。
-        showTooltip(escapeHtmlTextAndAttr(marker.getAttribute("aria-label") || ""), marker, "agent-nav", event);
+        this.navRail.classList.add("agent-chat__nav-rail--expanded");
+        this.updateNavEmphasis(marker);
+        const index = this.entries.findIndex(entry => entry.type === "user" && entry.id === id);
+        let answer = "";
+        // 只取当前轮次最后一段可见回答，避免混入工具结果、思考内容或下一轮对话。
+        for (let i = index + 1; index >= 0 && i < this.entries.length; i++) {
+            const entry = this.entries[i];
+            if (entry.type === "user") {
+                break;
+            }
+            if (entry.type === "assistant" && entry.content?.trim()) {
+                answer = entry.content;
+            }
+        }
+        const title = escapeHtmlTextAndAttr(marker.getAttribute("aria-label") || "");
+        const summary = escapeHtmlTextAndAttr(answer.slice(0, 600));
+        // 提示框不接收鼠标事件，正文中的复制等操作仍可直接点击。
+        showTooltip(`<strong class="agent-chat__nav-title">${title}</strong>` +
+            (summary ? `<span class="agent-chat__nav-summary">${summary}</span>` : ""), marker, "agent-nav", event);
+    }
+
+    private updateNavEmphasis(selected: HTMLElement | null) {
+        const markers = Array.from(this.navRail.children) as HTMLElement[];
+        const index = selected ? markers.indexOf(selected) : -1;
+        markers.forEach((marker, i) => {
+            const distance = Math.abs(i - index);
+            if (index < 0 || distance > 3) {
+                marker.style.removeProperty("--nav-scale");
+                marker.style.removeProperty("--nav-opacity");
+                return;
+            }
+            marker.style.setProperty("--nav-scale", String(1 + (4 - distance) * 0.8));
+            marker.style.setProperty("--nav-opacity", String(1 - distance * 0.2));
+        });
     }
 
     private resetNavPreview() {
+        this.navRail.classList.remove("agent-chat__nav-rail--expanded");
+        this.updateNavEmphasis(null);
         this.navPreviewMarker = null;
         this.navPreviewId = "";
         if (!this.navPreviewShown) {
@@ -1029,7 +1063,7 @@ export class AgentChat extends Model {
             const marker = document.createElement("div");
             marker.className = "agent-chat__nav-rail-marker";
             marker.dataset.messageId = entry.id || "";
-            marker.setAttribute("data-position", "west");
+            marker.setAttribute("data-position", "36west");
             marker.setAttribute("aria-label", entry.content);
             this.navRail.appendChild(marker);
         }

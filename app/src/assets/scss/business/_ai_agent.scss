@@ -1146,7 +1146,7 @@
   right: 12px;
   top: 8px;
   box-sizing: border-box;
-  width: 24px;
+  width: 60px;
   max-height: calc(100% - 56px);
   overflow-y: auto;
   scrollbar-width: none;
@@ -1155,29 +1155,42 @@
   align-items: flex-end;
   z-index: 6;
   padding: 4px 2px;
+  pointer-events: none;
+
+  &--expanded {
+    pointer-events: auto;
+  }
 }
 
 .agent-chat__nav-rail-marker {
+  position: relative;
   box-sizing: content-box;
   width: 10px;
   height: 2px;
   flex-shrink: 0;
   padding: calc(3px + var(--nav-gap, 0px) / 2) 5px;
-  // Rounded corners can make content-box backgrounds paint the padding at fractional zoom.
-  background-clip: content-box;
-  background-color: var(--b3-theme-on-surface);
-  opacity: 0.3;
   cursor: pointer;
-  transition: opacity 150ms ease-out;
+  pointer-events: auto;
 
-  &:hover {
-    opacity: 1;
+  &::before {
+    content: "";
+    position: absolute;
+    right: 5px;
+    top: calc(50% - 1px);
+    width: 10px;
+    height: 2px;
+    background-color: var(--b3-theme-on-surface);
+    opacity: var(--nav-opacity, 0.3);
+    transform: scaleX(var(--nav-scale, 1));
+    transform-origin: right center;
+    transition: transform 100ms ease-out, opacity 100ms ease-out;
+    pointer-events: none;
   }
 }
 
-.agent-chat__nav-rail-marker--active {
+.agent-chat__nav-rail-marker--active::before {
   background-color: var(--b3-theme-primary);
-  opacity: 0.7;
+  opacity: var(--nav-opacity, 0.7);
 }
 
 .tooltip--agent-nav {
@@ -1185,6 +1198,19 @@
   pointer-events: none;
   max-height: min(160px, 90vh);
   overflow: hidden;
+}
+
+.agent-chat__nav-title,
+.agent-chat__nav-summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+}
+
+.agent-chat__nav-summary {
+  margin-top: 4px;
+  -webkit-line-clamp: 3;
 }
 
 .agent-chat__msg--jumped .agent-chat__body {

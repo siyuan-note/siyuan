@@ -8,6 +8,7 @@
 @use "component/text-field";
 @use "component/tooltips";
 @use "business/block";
+@use "business/markdown-content";
 @use "util/scroll";
 @use "util/keyframes";
 
@@ -434,23 +435,6 @@ button:focus-visible,
 
 .markdown-editor .vditor-outline {
   max-width: 40%;
-}
-
-.markdown-editor .vditor-reset,
-.markdown-editor .vditor-sv {
-  font-size: var(--markdown-font-size);
-  font-family: var(--markdown-editor-font-family, var(--b3-font-family-protyle));
-  font-weight: var(--markdown-editor-font-weight, 400);
-}
-
-.markdown-editor .vditor-reset code,
-.markdown-editor .vditor-sv {
-  font-family: var(--markdown-code-font-family, var(--b3-font-family-code));
-  font-weight: var(--markdown-code-font-weight, 400);
-}
-
-.markdown-editor .vditor-reset table code:not(.hljs):not(.highlight-chroma) {
-  white-space: pre;
 }
 
 // 先按标题字号计算实际行高，让小字号的 H1-H6 标识继承同一行高。

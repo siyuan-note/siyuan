@@ -7,6 +7,9 @@ const unzipper = require("unzipper");
 module.exports = async function afterPack(context) {
   const {appOutDir, arch, electronPlatformName, packager} = context;
   await extractPackagedPandoc(appOutDir, packager, electronPlatformName, arch);
+  if (electronPlatformName === "darwin") {
+    await require("./quicklook").compileQuickLook(path.join(appOutDir, `${packager.appInfo.productFilename}.app`), packager.appInfo.version);
+  }
 };
 
 async function extractPackagedPandoc(appOutDir, packager, platform, arch) {

@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "El contenido supera el límite de vista previa (256 KiB o 20000 elementos)",
+	"quickLookEncoding": "La vista previa requiere UTF-8 o UTF-16 con BOM",
+	"quickLookTimeout": "La vista previa agotó el tiempo de renderizado (15 segundos)",
 	"invalidColor": "Introduzca un color HEX o valores RGB enteros de 0 a 255",
 	"colorPickerComposing": "Termine la composición del texto antes de aplicar el color",
 	"nativeColorUnavailable": "La selección gráfica no está disponible; use HEX o RGB",

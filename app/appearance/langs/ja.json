@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "内容がプレビューの上限を超えています（256 KiB または 20000 要素）",
+	"quickLookEncoding": "プレビューには UTF-8 または BOM 付き UTF-16 が必要です",
+	"quickLookTimeout": "プレビューの描画がタイムアウトしました（15 秒）",
 	"invalidColor": "HEX 色または 0～255 の RGB 整数を入力してください",
 	"colorPickerComposing": "変換中の入力を確定してから色を適用してください",
 	"nativeColorUnavailable": "グラフィカルな色選択は利用できません。HEX または RGB を入力してください",

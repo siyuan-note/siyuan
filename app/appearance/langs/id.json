@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "Konten melebihi batas pratinjau (256 KiB atau 20000 elemen)",
+	"quickLookEncoding": "Pratinjau memerlukan UTF-8 atau UTF-16 dengan BOM",
+	"quickLookTimeout": "Waktu perenderan pratinjau habis (15 detik)",
 	"invalidColor": "Masukkan warna HEX atau nilai RGB bilangan bulat dari 0 hingga 255",
 	"colorPickerComposing": "Selesaikan komposisi teks sebelum menerapkan warna",
 	"nativeColorUnavailable": "Pemilihan warna grafis tidak tersedia; gunakan HEX atau RGB",

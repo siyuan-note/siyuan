@@ -6,7 +6,7 @@
 		"id": "20261101145217-402153c",
 		"title": "独立 Markdown 编辑器",
 		"type": "doc",
-		"updated": "20261109092557"
+		"updated": "20261110151447"
 	},
 	"Children": [
 		{
@@ -679,6 +679,49 @@
 				{
 					"Type": "NodeText",
 					"Data": "包含密集表格或代码的复杂文档在渲染、切换模式或保存时仍可能出现停顿；大小限制并不保证所有文档都能流畅操作。"
+				}
+			]
+		},
+		{
+			"ID": "20261110151447-5ruydxt",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110151447-5ruydxt",
+				"updated": "20261110151447"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "macOS 快速预览"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110151447-43tn36b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110151447-43tn36b",
+				"updated": "20261110151447"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 macOS 安装思源后，系统启用并选中思源 Markdown 快速预览扩展时，可在 Finder 选中 .md 或 .markdown 文件并按空格，只读查看内容，无需启动主界面或内核，不修改源文件或默认打开应用。系统可能优先使用其他 Markdown 预览扩展，具体以系统选择为准。"
+				}
+			]
+		},
+		{
+			"ID": "20261110151447-4kftymz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110151447-4kftymz",
+				"updated": "20261110151447"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "预览使用安装包内资源和系统深浅色外观，不打开远程图片或外部链接。相对路径的本地 PNG、JPEG、GIF 和 WebP 图片仅在系统实际授予访问权限时显示；缺失、无权限或不支持的图片显示占位提示。预览支持 UTF-8 和带 BOM 的 UTF-16，正文上限为 256 KiB、20000 个元素，渲染超过 15 秒会停止并提示。复杂代码或公式可能保留为文本。这些限制仅针对快速预览，不影响独立编辑器。"
 				}
 			]
 		}

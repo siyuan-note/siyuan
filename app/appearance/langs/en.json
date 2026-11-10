@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "Content exceeds the preview limit (256 KiB or 20000 elements)",
+	"quickLookEncoding": "Preview requires UTF-8 or UTF-16 with a BOM",
+	"quickLookTimeout": "Preview rendering timed out (15 seconds)",
 	"invalidColor": "Enter a HEX color or integer RGB values from 0 to 255",
 	"colorPickerComposing": "Finish composing before applying the color",
 	"nativeColorUnavailable": "Graphical color selection is unavailable; use HEX or RGB input",

@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "O conteúdo excede o limite da prévia (256 KiB ou 20000 elementos)",
+	"quickLookEncoding": "A prévia exige UTF-8 ou UTF-16 com BOM",
+	"quickLookTimeout": "O tempo de renderização da prévia expirou (15 segundos)",
 	"invalidColor": "Digite uma cor HEX ou valores RGB inteiros de 0 a 255",
 	"colorPickerComposing": "Conclua a composição do texto antes de aplicar a cor",
 	"nativeColorUnavailable": "Seleção gráfica indisponível; use HEX ou RGB",

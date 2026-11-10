@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "콘텐츠가 미리보기 제한을 초과합니다(256 KiB 또는 요소 20000개)",
+	"quickLookEncoding": "미리보기에는 UTF-8 또는 BOM이 있는 UTF-16이 필요합니다",
+	"quickLookTimeout": "미리보기 렌더링 시간이 초과되었습니다(15초)",
 	"invalidColor": "HEX 색상 또는 0~255의 RGB 정수를 입력하세요",
 	"colorPickerComposing": "색상을 적용하기 전에 조합 중인 입력을 완료하세요",
 	"nativeColorUnavailable": "그래픽 색상 선택을 사용할 수 없습니다. HEX 또는 RGB를 입력하세요",

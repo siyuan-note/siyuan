@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "Treść przekracza limit podglądu (256 KiB lub 20000 elementów)",
+	"quickLookEncoding": "Podgląd wymaga UTF-8 lub UTF-16 ze znacznikiem BOM",
+	"quickLookTimeout": "Przekroczono czas renderowania podglądu (15 sekund)",
 	"invalidColor": "Wpisz kolor HEX lub całkowite wartości RGB od 0 do 255",
 	"colorPickerComposing": "Zakończ komponowanie tekstu przed zastosowaniem koloru",
 	"nativeColorUnavailable": "Graficzny wybór koloru jest niedostępny; użyj HEX lub RGB",

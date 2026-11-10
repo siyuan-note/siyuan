@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "Le contenu dépasse la limite de l’aperçu (256 Kio ou 20000 éléments)",
+	"quickLookEncoding": "L’aperçu nécessite UTF-8 ou UTF-16 avec BOM",
+	"quickLookTimeout": "Le rendu de l’aperçu a expiré (15 secondes)",
 	"invalidColor": "Saisissez une couleur HEX ou des entiers RGB de 0 à 255",
 	"colorPickerComposing": "Terminez la saisie en cours avant d’appliquer la couleur",
 	"nativeColorUnavailable": "Sélection graphique indisponible ; utilisez HEX ou RGB",

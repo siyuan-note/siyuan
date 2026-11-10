@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "Obsah prekračuje limit náhľadu (256 KiB alebo 20000 prvkov)",
+	"quickLookEncoding": "Náhľad vyžaduje UTF-8 alebo UTF-16 s BOM",
+	"quickLookTimeout": "Čas vykresľovania náhľadu vypršal (15 sekúnd)",
 	"invalidColor": "Zadajte farbu HEX alebo celé hodnoty RGB od 0 do 255",
 	"colorPickerComposing": "Pred použitím farby dokončite skladanie textu",
 	"nativeColorUnavailable": "Grafický výber farby nie je dostupný; použite HEX alebo RGB",

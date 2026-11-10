@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "Inhoud overschrijdt de voorbeeldlimiet (256 KiB of 20000 elementen)",
+	"quickLookEncoding": "Voorbeeld vereist UTF-8 of UTF-16 met BOM",
+	"quickLookTimeout": "Voorbeeldweergave duurde te lang (15 seconden)",
 	"invalidColor": "Voer een HEX-kleur of gehele RGB-waarden van 0 tot 255 in",
 	"colorPickerComposing": "Rond de tekstcompositie af voordat u de kleur toepast",
 	"nativeColorUnavailable": "Grafische kleurselectie is niet beschikbaar; gebruik HEX of RGB",

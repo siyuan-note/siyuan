@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "內容超出預覽限制（256 KiB 或 20000 個元素）",
+	"quickLookEncoding": "預覽要求 UTF-8 或帶 BOM 的 UTF-16 編碼",
+	"quickLookTimeout": "預覽算繪逾時（15 秒）",
 	"invalidColor": "請輸入 HEX 色值或 0 到 255 的 RGB 整數",
 	"colorPickerComposing": "請先完成輸入法組合輸入，再套用顏色",
 	"nativeColorUnavailable": "圖形選色無法使用，請使用 HEX 或 RGB 輸入",

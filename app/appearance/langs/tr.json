@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "İçerik önizleme sınırını aşıyor (256 KiB veya 20000 öğe)",
+	"quickLookEncoding": "Önizleme UTF-8 veya BOM içeren UTF-16 gerektirir",
+	"quickLookTimeout": "Önizleme işleme zaman aşımına uğradı (15 saniye)",
 	"invalidColor": "HEX rengi veya 0 ile 255 arasında tam sayı RGB değerleri girin",
 	"colorPickerComposing": "Rengi uygulamadan önce metin oluşturmayı tamamlayın",
 	"nativeColorUnavailable": "Grafik renk seçimi kullanılamıyor; HEX veya RGB girin",

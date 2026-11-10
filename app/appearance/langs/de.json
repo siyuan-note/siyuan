@@ -1,4 +1,7 @@
 {
+	"quickLookLimit": "Inhalt überschreitet die Vorschaugrenze (256 KiB oder 20000 Elemente)",
+	"quickLookEncoding": "Vorschau benötigt UTF-8 oder UTF-16 mit BOM",
+	"quickLookTimeout": "Zeitüberschreitung beim Rendern der Vorschau (15 Sekunden)",
 	"invalidColor": "HEX-Farbe oder ganzzahlige RGB-Werte von 0 bis 255 eingeben",
 	"colorPickerComposing": "Schließen Sie die Texteingabe ab, bevor Sie die Farbe anwenden",
 	"nativeColorUnavailable": "Grafische Farbauswahl nicht verfügbar; HEX oder RGB eingeben",

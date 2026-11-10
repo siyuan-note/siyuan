@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261109092557"
+		"updated": "20261110151447"
 	},
 	"Children": [
 		{
@@ -679,6 +679,49 @@
 				{
 					"Type": "NodeText",
 					"Data": "Complex documents with dense tables or code can still pause while rendering, switching modes, or saving; the size limit does not guarantee smooth interaction."
+				}
+			]
+		},
+		{
+			"ID": "20261110151447-ps0vv48",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110151447-ps0vv48",
+				"updated": "20261110151447"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "macOS Quick Look"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110151447-efrjijg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110151447-efrjijg",
+				"updated": "20261110151447"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On macOS, the installed SiYuan Markdown Quick Look extension provides a read-only preview of .md and .markdown files selected in Finder with the Space key. It does not launch the main interface or kernel, edit the source, or change the default application. Availability depends on the system enabling and selecting this extension; other Markdown preview extensions may take precedence."
+				}
+			]
+		},
+		{
+			"ID": "20261110151447-6wjpg8e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110151447-6wjpg8e",
+				"updated": "20261110151447"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The preview uses bundled resources and the system light/dark appearance. Remote images and links do not open. Relative local PNG, JPEG, GIF and WebP images are displayed only when the system grants actual access; missing, unauthorized or unsupported images show a placeholder. Preview supports UTF-8 and BOM-marked UTF-16, limits content to 256 KiB and 20000 elements, and stops rendering after 15 seconds. Complex code or formulas may remain as text. These limits apply to Quick Look rather than the independent editor."
 				}
 			]
 		}

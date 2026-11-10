@@ -1,0 +1,30 @@
+@use "business/markdown-content";
+
+html {
+  color-scheme: light dark;
+  background: var(--b3-theme-background);
+  color: var(--b3-theme-on-background);
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  overflow-wrap: anywhere;
+}
+
+.vditor-reset {
+  background: var(--b3-theme-background);
+  color: var(--b3-theme-on-background);
+
+  pre,
+  table {
+    display: block;
+    max-width: 100%;
+    overflow: auto;
+  }
+}
+
+.quicklook-warning {
+  color: var(--b3-theme-on-surface);
+  font-family: var(--b3-font-family);
+}

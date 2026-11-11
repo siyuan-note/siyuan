@@ -193,7 +193,9 @@ func (j *documentSourceJournal) save() error {
 	}
 	documentSourceJournalLock.Lock()
 	defer documentSourceJournalLock.Unlock()
-	return os.Rename(file.Name(), j.filename())
+	return retryDocumentSourceJournalRename(func() error {
+		return os.Rename(file.Name(), j.filename())
+	})
 }
 
 func (j *documentSourceJournal) remove() error {

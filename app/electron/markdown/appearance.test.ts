@@ -66,10 +66,31 @@ test("custom fonts require selected workspace capability, valid hash and no syml
     await fs.writeFile(file, Buffer.from("\x00\x01\x00\x00tampered"));
     assert.equal(await host.readFont(token), undefined);
     await fs.unlink(file);
-    const outside = path.join(root, "outside.ttf");
-    await fs.writeFile(outside, bytes);
-    await fs.symlink(outside, file);
+    const outside = path.join(root, "outside-fonts");
+    const outsideFont = path.join(outside, path.basename(file));
+    await fs.mkdir(outside);
+    await fs.writeFile(outsideFont, bytes);
+    await t.test("rejects a symbolic link in place of the font file", async t => {
+        try {
+            await fs.symlink(outsideFont, file, "file");
+        } catch (error) {
+            if (process.platform !== "win32" || (error as NodeJS.ErrnoException).code !== "EPERM") throw error;
+            t.skip("Creating file symbolic links requires Windows developer mode or permission");
+            return;
+        }
+        try {
+            assert.equal(await host.readFont(token), undefined);
+        } finally {
+            await fs.unlink(file);
+        }
+    });
+    await fs.rmdir(directory);
+    await fs.symlink(outside, directory, process.platform === "win32" ? "junction" : "dir");
     assert.equal(await host.readFont(token), undefined);
+    await fs.unlink(directory);
+    await fs.mkdir(directory);
+    await fs.writeFile(file, bytes);
+    assert.deepEqual((await host.readFont(token)).bytes, bytes);
     await host.load({fonts: "independent"});
     assert.equal(await host.readFont(token), undefined);
     host.close();

@@ -149,7 +149,8 @@ test("date panels embed a shared calendar without changing range, batch, clear o
         interact: async win => {
             await win.webContents.executeJavaScript("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
             const image = await win.webContents.capturePage();
-            require("node:fs").writeFileSync("/tmp/date-panel-inline-320.png", image.toPNG());
+            // 交互回调在临时目录的 Electron 脚本中执行。
+            require("node:fs").writeFileSync(require("node:path").join(__dirname, "date-panel-inline-320.png"), image.toPNG());
             return "date panel inline cases passed";
         }});
     assert.match(result, /date panel inline cases passed/);

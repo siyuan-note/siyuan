@@ -840,11 +840,14 @@ const run = async () => {
     }});
     let code = 0;
     try {
-        // 测试只使用内存 HTML 和本地 Lute，禁止测试夹具中的图片或链接发起外部请求。
+        // 测试夹具中的图片和链接不发起外部请求。
         win.webContents.session.webRequest.onBeforeRequest((details, callback) => {
             callback({cancel: /^https?:/.test(details.url)});
         });
         await win.loadURL("data:text/html,<html><body></body></html>");
+        const purify = readFileSync(path.join(__dirname, "../stage/protyle/js/protyle-html.js"), "utf8").split("\n").slice(0, 2).join("\n");
+        await win.webContents.executeJavaScript("((exports, module, define) => {" + purify + "\n})()");
+        assert.equal(await win.webContents.executeJavaScript("typeof window.DOMPurify?.sanitize"), "function");
         await win.webContents.executeJavaScript(readFileSync(path.join(__dirname,
             "../stage/protyle/js/lute/lute.min.js"), "utf8"));
         const css = ["component/_typography.scss", "business/_ai_agent.scss"].map(file =>

@@ -58,9 +58,7 @@ export const getEmojiFontStyle = (platform: "apple" | "windows11" | "windows" | 
   local("Segoe UI Symbol");
   size-adjust: 85%;
 }
-/* 图标位使用：图标旁边是文字，因此要对齐的是文字的视觉中心而不是图标框中心。
-   Segoe UI Emoji 的字体框为 1.08/0.25，图标墨迹约为 0.875/0.141，按原度量居中会让字形比中文偏低约 0.75px；
-   把 ascent/descent 改写为 80%/19%（和仍为 99%，行盒高度不变）后，字形与相邻文字对齐，且随字号等比生效。 */
+/* Segoe UI Emoji 的上升和下降度量以相邻文字的可见字形为参照，合计 99% 以维持图标的行盒高度。 */
 @font-face {
   font-family: "Emojis Icon";
   src: local("Segoe UI Emoji"),
@@ -69,6 +67,19 @@ export const getEmojiFontStyle = (platform: "apple" | "windows11" | "windows" | 
   ascent-override: 80%;
   descent-override: 19%;
   line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Emojis File Tree Native";
+  src: local("Segoe UI Emoji"),
+  local("Segoe UI Symbol");
+  size-adjust: 85%;
+  ascent-override: 82%;
+  descent-override: 17%;
+  line-gap-override: 0%;
+}
+:root[data-theme-mode="light"][data-light-theme="daylight"],
+:root[data-theme-mode="dark"][data-dark-theme="midnight"] {
+  --b3-font-family-emoji-file-tree: "Emojis Additional", "Emojis File Tree Native", var(--b3-font-family-emoji);
 }`;
     } else {
         style = `@font-face {

@@ -78,11 +78,6 @@ func TestExportPreviewDropsHandlerIAL(t *testing.T) {
 		t.Fatal("preview round-trip should promote the attribute list text to IAL")
 	}
 
-	unfiltered := luteEngine.ProtylePreview(previewTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
-	if !strings.Contains(strings.ToLower(unfiltered), "onmouseover") {
-		t.Fatalf("test fixture did not reproduce the handler attribute injection: %s", unfiltered)
-	}
-
 	filterHandlerIALInTree(previewTree.Root)
 	if hasHandlerIAL(previewTree.Root) {
 		t.Fatal("handler attributes should be removed from the tree")
@@ -96,13 +91,13 @@ func TestExportPreviewDropsHandlerIAL(t *testing.T) {
 	}
 }
 
-// TestExportPreviewDropsInlineHandlerIAL 覆盖内联 IAL（.sy 中的真实属性列表）被预览渲染为元素属性后的过滤。
+// TestExportPreviewDropsInlineHandlerIAL 覆盖内联 IAL（.sy 中的真实属性列表）中的事件处理器属性。
+// Lute 渲染器已经过滤这类属性，内核在渲染前仍然过滤，覆盖旧版 Lute 与历史数据。
 func TestExportPreviewDropsInlineHandlerIAL(t *testing.T) {
 	luteEngine := util.NewLute()
 	tree := parse.Parse("", []byte("**bold**{: onmouseover=\"window.xssFired=true\"}\n"), luteEngine.ParseOptions)
-	unfiltered := luteEngine.ProtylePreview(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
-	if !strings.Contains(strings.ToLower(unfiltered), "onmouseover") {
-		t.Fatalf("test fixture did not reproduce the inline handler attribute: %s", unfiltered)
+	if !hasHandlerIAL(tree.Root) {
+		t.Fatal("test fixture should keep the handler attribute in the tree")
 	}
 
 	filterHandlerIALInTree(tree.Root)

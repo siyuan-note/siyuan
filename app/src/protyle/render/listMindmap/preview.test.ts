@@ -187,6 +187,7 @@ const cases = async (source: string, css: string, formulas: string[]) => {
     const view = Object.assign(new api.MindmapPreviewView(), {
         options: {host: map}, viewport: document.createElement("div"), persistedLocked: false,
         nodeElements: new Map([[node.id, nodeElement]]), folded: new Map(), selectedIds: new Set(),
+        relationRoutes: new Map(), fallbackRoutes: new Set(), anchorFallbackRoutes: new Set(),
         renderTask: () => {}, destroyContentViews: () => {},
         label: (key: string) => key, updateRelations: () => {}, updateSummaries: () => {},
         updateSelection: () => {}, renderInspector: () => {}, refreshLayout: () => {},

@@ -6,6 +6,7 @@ import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} fro
 import type {ListMindmapRelation} from "./model";
 import {buildListMindmapConnectors} from "./connectors";
 import {getMindmapLineColor, resolveListMindmapColors} from "./appearance";
+import * as relationGeometry from "./relationGeometry";
 
 // 执行实际绘制和命中方法，画布替身仅记录路径与箭头，避免依赖图形显示环境。
 const source = createSourceFile("view.ts", readFileSync("src/protyle/render/listMindmap/view.ts", "utf8"),
@@ -57,6 +58,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
         isPointInStroke: () => context.strokeHit,
     };
     const sandbox: any = {
+        ...relationGeometry,
         buildListMindmapConnectors,
         getMindmapLineColor,
         Path2D: TestPath, window: {devicePixelRatio: 1},
@@ -79,6 +81,7 @@ const setup = (arrowDirection?: ListMindmapRelation["arrowDirection"]) => {
         syncSelectionInput: () => {},
         viewport: {clientWidth: 400, clientHeight: 200, getBoundingClientRect: () => ({left: 0, top: 0})},
         canvas: {getContext: () => context}, options: {host: {}}, colorProbe: {style: {}},
+        relationCanvas: {getContext: () => context, style: {}},
         inspector: {hidden: true},
         model: {root: {id: "a"}, metadata: {nodes: {}, relations: [relation]}}, edges: [],
         positions: new Map([["a", {id: "a", x: 100, y: 0, width: 20, height: 20}],
@@ -256,6 +259,20 @@ test("overlapping opposite relations retain separate identity and selected-arrow
         assert.equal(target.findLine({clientX: 50, clientY: 10}).id, selected);
         context.strokeHit = false;
     }
+});
+
+test("free relationships are selected above automatic paths regardless of metadata order", () => {
+    const {target, element, context} = setup("none");
+    target.model.metadata.relations[0].pathStyle = "straight";
+    target.model.metadata.relations.push({id: "under", from: "a", to: "b", label: "", arrowDirection: "none"});
+    target.relationElements.set("under", element());
+    target.relationRoutes.set("under", [{x: 0, y: 10}, {x: 100, y: 10}]);
+    target.selectedRelation = undefined;
+    target.draw();
+    context.strokeHit = true;
+    assert.equal(target.findLine({clientX: 50, clientY: 10}).id, "r");
+    target.selectedRelation = "under";
+    assert.equal(target.findLine({clientX: 50, clientY: 10}).id, "under", "explicit selection retains priority");
 });
 
 test("short bidirectional arrows stay separated and hierarchy lines have no arrows", () => {

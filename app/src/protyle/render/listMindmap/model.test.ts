@@ -1281,9 +1281,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
 
     // 复制后关系线与节点样式引用新块 ID，遇到任一损坏配置时不进行部分迁移。
     const copiedRoute = {version: 1, points: [{x: -35, y: 20, t: .5}], extension: "keep"};
+    const copiedRelationStyle = {pathStyle: "bezier", strokeStyle: "dotted", freeRoute: copiedRoute,
+        curve: {version: 1, from: {x: 50, y: -40}, to: {x: -20, y: 80}}};
     list.setAttribute("custom-sy-list-mindmap-data", JSON.stringify({version: 1, extension: "keep",
         nodes: {a: {bold: true}, b: {italic: true}, deleted: {bold: true}},
-        relations: [{id: "relation", from: "a", to: "b", label: "keep", route: copiedRoute, arrowDirection: "both"},
+        relations: [{id: "relation", from: "a", to: "b", label: "keep", route: copiedRoute, arrowDirection: "both", ...copiedRelationStyle},
             {id: "orphan", from: "a", to: "deleted", label: "remove"}]}));
     const copiedItems = list.querySelectorAll('[data-type="NodeListItem"]');
     copiedItems[0].setAttribute("data-node-id", "new-a");
@@ -1298,7 +1300,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const remapped = JSON.parse(list.getAttribute("custom-sy-list-mindmap-data"));
     check.deepEqual(remapped.nodes, {"new-a": {bold: true}, "new-b": {italic: true}});
     check.deepEqual(remapped.relations, [{id: "relation", from: "new-a", to: "new-b", label: "keep",
-        route: copiedRoute, arrowDirection: "both"}]);
+        route: copiedRoute, arrowDirection: "both", ...copiedRelationStyle}]);
     check.equal(remapped.extension, "keep");
     check.equal(list.querySelector(".mindmap-view"), null);
     check.equal(list.hasAttribute("data-mindmap-view-rendered"), false);
@@ -2974,8 +2976,11 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const setRelationTheme = (property: string, value: string) =>
         host.style.setProperty(`--b3-mindmap-relation-${property}`, value);
     const checkRelation = (color: string, width: number) => {
-        checkLine(color, width);
-        check.equal(lineContext.fillStyle, color, "relation arrows share the connector color");
+        view.draw();
+        const context = view.relationFrom ? host.querySelector<HTMLCanvasElement>(".mindmap-view__relation-canvas").getContext("2d") : lineContext;
+        check.equal(context.strokeStyle, color);
+        check.equal(context.lineWidth, width);
+        check.equal(context.fillStyle, color, "relation arrows share the connector color");
     };
     view.scale = 0.5;
     setLineTheme("color", "#abcdef");
@@ -6049,7 +6054,7 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
     const source = tabsSource + compile(path.join(__dirname, "../../wysiwyg/tabsList.ts")) +
         compile(path.join(__dirname, "../av/richTextValue.ts")) + compile(path.join(__dirname, "../../wysiwyg/listContext.ts")) +
         compile(path.join(__dirname, "summary.ts")) + compile(path.join(__dirname, "connectors.ts")) +
-        compile(path.join(__dirname, "appearance.ts")) + compile(path.join(__dirname, "model.ts")) +
+        compile(path.join(__dirname, "appearance.ts")) + compile(path.join(__dirname, "relationGeometry.ts")) + compile(path.join(__dirname, "model.ts")) +
         compile(path.join(__dirname, "preferences.ts")) + compile(path.join(__dirname, "fold.ts")) +
         compile(path.join(__dirname, "routing.ts")) + compile(path.join(__dirname, "pan.ts")) +
         compile(path.join(__dirname, "clipboard.ts")) + compile(path.join(__dirname, "view.ts")) +

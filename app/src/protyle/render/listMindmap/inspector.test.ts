@@ -394,7 +394,7 @@ test("mindmap node widths support mouse and touch drags, cancellation and clippe
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const source = ["../av/richTextValue.ts", "summary.ts", "connectors.ts", "appearance.ts", "model.ts", "fold.ts", "routing.ts", "pan.ts", "view.ts"]
+    const source = ["../av/richTextValue.ts", "summary.ts", "connectors.ts", "appearance.ts", "relationGeometry.ts", "model.ts", "fold.ts", "routing.ts", "pan.ts", "view.ts"]
         .map(file => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
             compilerOptions: {target: ScriptTarget.ES2021},

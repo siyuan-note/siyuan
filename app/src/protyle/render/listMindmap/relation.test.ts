@@ -10,9 +10,13 @@ const source = createSourceFile("index.ts", readFileSync("src/protyle/render/lis
 const controller = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapController");
 assert.ok(controller && isClassDeclaration(controller));
 let callback = "";
+let addCallback = "";
 const visit = (node: import("typescript").Node) => {
     if (isPropertyAssignment(node) && node.name.getText(source) === "onRelationChange") {
         callback = node.initializer.getText(source);
+    }
+    if (isPropertyAssignment(node) && node.name.getText(source) === "onRelationAdd") {
+        addCallback = node.initializer.getText(source);
     }
     node.forEachChild(visit);
 };
@@ -22,6 +26,7 @@ const methods = controller.members.filter(item => item.name && ["metadata", "cha
 const compiled = transpileModule(`class Controller {
     ${methods.map(item => item.getText(source)).join("\n")}
     onRelationChange = ${callback};
+    onRelationAdd = ${addCallback};
 }
 globalThis.Controller = Controller;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
@@ -47,6 +52,7 @@ test("manual route save and reset use one transaction and reject stale relation 
             transactions.push({before, after: list.outerHTML});
         },
         showMessage: (message: string) => messages.push(message),
+        Lute: {NewNodeID: () => "new-relation"},
         window: {siyuan: {languages: {listMindmapStale: "stale"}}}, console,
     };
     runInNewContext(compiled, context);
@@ -130,4 +136,20 @@ test("manual route save and reset use one transaction and reject stale relation 
     target.onRelationChange("r", {from: "c", route: undefined, fromAnchor: undefined}, JSON.stringify(data.relations[0]));
     assert.deepEqual(JSON.parse(transactions[transactions.length - 1].after).relations[0],
         {id: "r", from: "c", to: "b", label: "Keep", color: "red"});
+    data = JSON.parse(original);
+    const curve = {version: 1, from: {x: 40, y: -60}, to: {x: -30, y: 80}};
+    target.onRelationChange("r", {pathStyle: "bezier", strokeStyle: "dotted", curve}, JSON.stringify(data.relations[0]));
+    const curved = transactions[transactions.length - 1];
+    assert.equal(curved.before, original);
+    assert.deepEqual(JSON.parse(curved.after).relations[0], {...JSON.parse(original).relations[0], pathStyle: "bezier", strokeStyle: "dotted", curve});
+    data = JSON.parse(curved.before);
+    assert.equal(JSON.stringify(data), original);
+    data = JSON.parse(curved.after);
+    target.onRelationChange("r", {pathStyle: "auto"});
+    assert.deepEqual(JSON.parse(transactions[transactions.length - 1].after).relations[0].curve, curve);
+    target.onRelationChange("r", {curve: undefined});
+    assert.ok(!("curve" in JSON.parse(transactions[transactions.length - 1].after).relations[0]));
+    target.onRelationAdd("b", "c");
+    assert.deepEqual(JSON.parse(JSON.stringify(data.relations[1])),
+        {id: "new-relation", from: "b", to: "c", label: "", pathStyle: "bezier"});
 });

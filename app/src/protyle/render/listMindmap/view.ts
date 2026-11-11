@@ -7,7 +7,7 @@ import {
     ListMindmapRelation,
     readListMindmap,
 } from "./model";
-import {routeMindmapRelation, routeManualMindmapRelation, adjustMindmapRoute,
+import {routeMindmapRelation, routeManualMindmapRelation, adjustMindmapRoute, encodeMindmapRoute, moveMindmapRouteSegment,
     MindmapRoutePoint, MindmapManualRoute, MindmapRelationAnchor,
     projectMindmapRelationAnchor, getMindmapRelationAnchorPoint} from "./routing";
 import {mathRender} from "../mathRender";
@@ -24,6 +24,9 @@ import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryR
 import {buildListMindmapConnectors, buildListMindmapSummaryConnector} from "./connectors";
 import {getListMindmapNodeShape, getMindmapLineColor, getMindmapTextColor, isMindmapColor, resolveListMindmapColors} from "./appearance";
 import type {ListMindmapViewport} from "./viewport";
+import {buildMindmapRelationPath, getMindmapRelationDash, getMindmapRelationPathStyle,
+    getMindmapRelationStrokeStyle, routeFreeMindmapRelation, sampleMindmapRelation} from "./relationGeometry";
+import type {MindmapRelationCurve} from "./relationGeometry";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -76,6 +79,7 @@ export interface ListMindmapViewOptions {
     onRelationAdd?: (from: string, to: string) => void;
     onRelationChange?: (id: string, patch: Partial<ListMindmapRelation>, expected?: string) => void;
     onRelationDelete?: (id: string) => void;
+    onRelationMenu?: (anchor: HTMLElement, id: string) => void;
     onSummaryBatchAdd?: (ranges: ListMindmapSummaryRange[], expected: string) => Promise<string[] | undefined>;
     onSummaryChange?: (id: string, patch: Pick<Partial<ListMindmapSummary>, "label" | "color">, expected?: string) => void;
     onSummaryDelete?: (id: string) => void;
@@ -111,6 +115,8 @@ interface PointerState {
         endpoint?: "from" | "to";
         targetId?: string;
         route?: MindmapManualRoute;
+        curve?: MindmapRelationCurve;
+        delta?: MindmapRoutePoint;
         anchor?: MindmapRelationAnchor;
         routeFallback?: boolean;
     };
@@ -131,6 +137,7 @@ export class ListMindmapView {
     private readonly viewport: HTMLDivElement;
     private readonly world: HTMLDivElement;
     private readonly canvas: HTMLCanvasElement;
+    private readonly relationCanvas: HTMLCanvasElement;
     private readonly toolbar: HTMLDivElement;
     private readonly inspector: HTMLDivElement;
     private readonly inspectorPopover = createElement("div", "mindmap-view__inspector-popover");
@@ -178,7 +185,7 @@ export class ListMindmapView {
     private selectedEdge?: string;
     private hoveredLine?: string;
     private finishRelationEdit?: (save: boolean) => void;
-    private linePaths: {id: string, relation: boolean, summary?: boolean, path: Path2D, arrows?: MindmapRoutePoint[]}[] = [];
+    private linePaths: {id: string, relation: boolean, summary?: boolean, foreground?: boolean, path: Path2D, arrows?: MindmapRoutePoint[]}[] = [];
     private relationRoutes = new Map<string, MindmapRoutePoint[]>();
     private anchorFallbackRoutes = new Set<string>();
     private readonly routeHandles = new Map<string, HTMLButtonElement>();
@@ -244,6 +251,9 @@ export class ListMindmapView {
         this.canvas = createElement("canvas", "mindmap-view__canvas");
         this.canvas.setAttribute("aria-hidden", "true");
         this.world = createElement("div", "mindmap-view__world");
+        this.relationCanvas = createElement("canvas", "mindmap-view__relation-canvas");
+        this.relationCanvas.setAttribute("aria-hidden", "true");
+        this.world.append(this.relationCanvas);
         this.inspector = createElement("div", "mindmap-view__inspector");
         this.inspector.setAttribute("data-prevent-swipe", "true");
         this.inspector.hidden = true;
@@ -871,6 +881,9 @@ export class ListMindmapView {
             return;
         }
         this.model = model;
+        this.relationRoutes.clear();
+        this.fallbackRoutes.clear();
+        this.anchorFallbackRoutes.clear();
         this.selectedIds.forEach(id => {
             if (!model.nodes.has(id)) {
                 this.selectedIds.delete(id);
@@ -1461,7 +1474,7 @@ export class ListMindmapView {
                 this.bounds.width = Math.max(this.bounds.width, position.labelX + position.width + 32);
                 this.bounds.height = Math.max(this.bounds.height, position.bottom + 32, position.labelY + position.height + 32);
             });
-            // 每条连接独立避让节点和按钮，已有关系线不影响路径选择。
+            // 已有关系线不影响其他连接的路径选择。
             this.model.metadata.relations.forEach((relation) => {
                 const from = this.positions.get(relation.from);
                 const to = this.positions.get(relation.to);
@@ -1925,9 +1938,11 @@ export class ListMindmapView {
     }
 
     private relationPath(id: string | undefined, from: ListMindmapPosition, to: ListMindmapPosition, label?: HTMLElement) {
+        const relation = this.model.metadata.relations.find(relation => relation.id === id);
+        const style = id ? getMindmapRelationPathStyle(relation) : "bezier";
         let points = id ? this.relationRoutes.get(id) : undefined;
         if (!points) {
-            points = this.calculateRelationRoute(this.model.metadata.relations.find(relation => relation.id === id), from, to);
+            points = id ? this.calculateRelationRoute(relation, from, to) : routeFreeMindmapRelation(from, to, {pathStyle: "bezier"});
             if (id) {
                 this.relationRoutes.set(id, points);
             }
@@ -1936,35 +1951,21 @@ export class ListMindmapView {
             return;
         }
         const end = points[points.length - 1];
-        const previous = points[points.length - 2];
+        const previous = [...points].reverse().find(point => point.x !== end.x || point.y !== end.y) || end;
         const start = points[0];
-        const next = points[1];
+        const next = points.find(point => point.x !== start.x || point.y !== start.y) || start;
+        const sampled = sampleMindmapRelation(points, style);
         // 按整条路径限制箭头大小，短尾段不会把长关系线的箭头压小。
-        const arrowSizeLimit = points.slice(1).reduce((length, point, i) =>
-            length + Math.hypot(point.x - points[i].x, point.y - points[i].y), 0) / 3;
-        // 重合路径从同一端绘制，避免反向虚线填满正向虚线的间隙。
-        const drawingPoints = (points[0].x - end.x || points[0].y - end.y) > 0 ? [...points].reverse() : points;
-        const path = new Path2D();
-        path.moveTo(drawingPoints[0].x, drawingPoints[0].y);
-        for (let i = 1; i < drawingPoints.length - 1; i++) {
-            const a = drawingPoints[i - 1];
-            const b = drawingPoints[i];
-            const c = drawingPoints[i + 1];
-            const before = Math.hypot(b.x - a.x, b.y - a.y);
-            const after = Math.hypot(c.x - b.x, c.y - b.y);
-            const radius = Math.min(8, before / 2, after / 2);
-            path.lineTo(b.x + (a.x - b.x) * radius / before, b.y + (a.y - b.y) * radius / before);
-            path.quadraticCurveTo(b.x, b.y, b.x + (c.x - b.x) * radius / after, b.y + (c.y - b.y) * radius / after);
-        }
-        const drawingEnd = drawingPoints[drawingPoints.length - 1];
-        path.lineTo(drawingEnd.x, drawingEnd.y);
+        const arrowSizeLimit = sampled.slice(1).reduce((length, point, i) =>
+            length + Math.hypot(point.x - sampled[i].x, point.y - sampled[i].y), 0) / 3;
+        const path = buildMindmapRelationPath(points, style, () => new Path2D());
         if (!label) {
             return {path, start, next, end, previous, arrowSizeLimit, labelPoint: undefined as MindmapRoutePoint | undefined};
         }
         const width = label.offsetWidth;
         const height = label.offsetHeight;
-        const segments = points.slice(1).map((p, i) => ({a: points[i], b: p,
-            length: Math.hypot(p.x - points[i].x, p.y - points[i].y)})).sort((a, b) => b.length - a.length);
+        const segments = sampled.slice(1).map((p, i) => ({a: sampled[i], b: p,
+            length: Math.hypot(p.x - sampled[i].x, p.y - sampled[i].y)})).sort((a, b) => b.length - a.length);
         const nodes = this.routingObstacles();
         const available = (p: MindmapRoutePoint) => !nodes.some(node =>
             p.x + width / 2 > node.x - 4 && p.x - width / 2 < node.x + node.width + 4 &&
@@ -1988,6 +1989,9 @@ export class ListMindmapView {
 
     private resolveRelationRoute(relation: ListMindmapRelation | undefined, from: ListMindmapPosition,
                                  to: ListMindmapPosition, allowAnchorFallback = true) {
+        if (getMindmapRelationPathStyle(relation) !== "auto") {
+            return {points: routeFreeMindmapRelation(from, to, relation), routeFallback: false, anchorFallback: false};
+        }
         const obstacles = this.routingObstacles();
         if (relation?.route) {
             const points = routeManualMindmapRelation(from, to, obstacles, relation.route, relation);
@@ -2023,18 +2027,22 @@ export class ListMindmapView {
         const id = this.selectedRelation;
         const drag = this.pointer?.relation;
         const editable = !this.readOnly && !this.printTransform && !this.options.printLayout && !this.finishRelationEdit;
+        const style = getMindmapRelationPathStyle(this.model.metadata.relations.find(relation => relation.id === id));
         const points = editable && !drag?.endpoint ? drag?.points || this.relationRoutes.get(id) || [] : [];
         const visible = new Set<string>();
-        for (let i = 0; i < points.length - 1; i++) {
+        for (let i = 0; i < (style === "straight" ? 0 : style === "bezier" ? Math.min(2, points.length - 1) : points.length - 1); i++) {
             const a = points[i];
             const b = points[i + 1];
-            if (Math.hypot(b.x - a.x, b.y - a.y) < 12 || (drag && drag.segment !== i)) {
+            if ((style !== "bezier" && Math.hypot(b.x - a.x, b.y - a.y) < 12) || (drag && drag.segment !== i)) {
                 continue;
             }
             const horizontal = a.y === b.y;
             let x = this.offsetX + (a.x + b.x) / 2 * this.scale;
             let y = this.offsetY + (a.y + b.y) / 2 * this.scale;
-            if (drag) {
+            if (style === "bezier") {
+                x = this.offsetX + (points[i + 1].x + (drag?.delta?.x || 0)) * this.scale;
+                y = this.offsetY + (points[i + 1].y + (drag?.delta?.y || 0)) * this.scale;
+            } else if (drag) {
                 x = this.offsetX + (drag.handle.x + (horizontal ? 0 : drag.offset)) * this.scale;
                 y = this.offsetY + (drag.handle.y + (horizontal ? drag.offset : 0)) * this.scale;
             }
@@ -2043,7 +2051,7 @@ export class ListMindmapView {
             const handle = this.getRouteHandle(id, i);
             handle.style.left = `${x}px`;
             handle.style.top = `${y}px`;
-            handle.style.cursor = horizontal ? "ns-resize" : "ew-resize";
+            handle.style.cursor = style === "bezier" ? "move" : horizontal ? "ns-resize" : "ew-resize";
         }
         const route = editable ? this.relationRoutes.get(id) : undefined;
         if (route?.length >= 2) {
@@ -2164,7 +2172,8 @@ export class ListMindmapView {
             const anchorKey = drag.endpoint === "from" ? "fromAnchor" : "toAnchor";
             const sameNode = target?.id === relation[drag.endpoint];
             const preview = {...relation, [drag.endpoint]: target?.id || relation[drag.endpoint],
-                [anchorKey]: sameNode ? drag.anchor : undefined, route: sameNode ? relation.route : undefined};
+                [anchorKey]: sameNode ? drag.anchor : undefined, route: sameNode ? relation.route : undefined,
+                curve: sameNode ? relation.curve : undefined, freeRoute: sameNode ? relation.freeRoute : undefined};
             const {points, routeFallback} = this.resolveRelationRoute(preview, nextFrom, nextTo, false);
             drag.valid = !!target && (!sameNode || !!drag.anchor) &&
                 this.canReconnectRelation(relation, drag.endpoint, target.id) && points.length >= 2;
@@ -2177,10 +2186,26 @@ export class ListMindmapView {
             this.draw();
             return;
         }
-        const route = from && to && adjustMindmapRoute(drag.points, drag.segment, drag.offset, from, to,
+        const style = getMindmapRelationPathStyle(relation);
+        if (style === "bezier") {
+            const points = drag.points.map(point => ({...point}));
+            const control = points[drag.segment + 1];
+            control.x += drag.delta?.x || 0;
+            control.y += drag.delta?.y || 0;
+            drag.curve = {version: 1, from: {x: points[1].x - points[0].x, y: points[1].y - points[0].y},
+                to: {x: points[2].x - points[3].x, y: points[2].y - points[3].y}};
+            drag.valid = true;
+            this.relationRoutes.set(drag.id, points);
+            this.draw();
+            return;
+        }
+        const candidate = style === "rounded" ? moveMindmapRouteSegment(drag.points, drag.segment, drag.offset) : [];
+        const route = style === "rounded" ? candidate.length > 2 && candidate.length <= 66 ? encodeMindmapRoute(candidate, from, to) : undefined :
+            adjustMindmapRoute(drag.points, drag.segment, drag.offset, from, to,
             this.fallbackRoutes.has(drag.id) ? undefined : relation.route);
         if (route) {
-            const points = routeManualMindmapRelation(from, to, this.routingObstacles(), route, relation);
+            const points = style === "rounded" ? routeFreeMindmapRelation(from, to, {...relation, freeRoute: route}) :
+                routeManualMindmapRelation(from, to, this.routingObstacles(), route, relation);
             if (points.length >= 2) {
                 drag.route = route;
                 drag.valid = true;
@@ -2205,8 +2230,10 @@ export class ListMindmapView {
         this.cancelPointer();
         this.finishThen(() => {
             const relation = this.model.metadata.relations.find(item => item.id === id);
-            if (!this.readOnly && relation?.route) {
-                this.options.onRelationChange?.(id, {route: undefined}, JSON.stringify(relation));
+            const style = getMindmapRelationPathStyle(relation);
+            const key = style === "bezier" ? "curve" : style === "rounded" ? "freeRoute" : "route";
+            if (!this.readOnly && relation?.[key]) {
+                this.options.onRelationChange?.(id, {[key]: undefined}, JSON.stringify(relation));
             }
         });
     }
@@ -2255,15 +2282,27 @@ export class ListMindmapView {
             this.canvas.width = Math.round(width * ratio);
             this.canvas.height = Math.round(height * ratio);
         }
+        if (this.relationCanvas.width !== this.canvas.width || this.relationCanvas.height !== this.canvas.height) {
+            this.relationCanvas.width = this.canvas.width;
+            this.relationCanvas.height = this.canvas.height;
+        }
+        // 使用视口大小的缓冲区，同时让节点编辑区和控件参与同一层叠上下文。
+        this.relationCanvas.style.width = `${width}px`;
+        this.relationCanvas.style.height = `${height}px`;
+        this.relationCanvas.style.transform = `translate(${-this.offsetX / this.scale}px, ${-this.offsetY / this.scale}px) scale(${1 / this.scale})`;
+        const relationContext = this.relationCanvas.getContext("2d");
         const context = this.canvas.getContext("2d");
         this.linePaths = [];
-        if (!context) {
+        if (!context || !relationContext) {
             return;
         }
-        context.setTransform(ratio, 0, 0, ratio, 0, 0);
-        context.clearRect(0, 0, width, height);
-        context.translate(this.offsetX, this.offsetY);
-        context.scale(this.scale, this.scale);
+        [context, relationContext].forEach(layer => {
+            layer.lineCap = "butt";
+            layer.setTransform(ratio, 0, 0, ratio, 0, 0);
+            layer.clearRect(0, 0, width, height);
+            layer.translate(this.offsetX, this.offsetY);
+            layer.scale(this.scale, this.scale);
+        });
         const theme = getComputedStyle(this.options.host);
         const defaultLine = theme.getPropertyValue("--b3-border-color").trim() || "#a8adb5";
         const primary = theme.getPropertyValue("--b3-theme-primary").trim() || "#3574f0";
@@ -2359,6 +2398,7 @@ export class ListMindmapView {
             context.stroke(path);
         });
         this.model.metadata.relations.forEach((relation) => {
+            const context = getMindmapRelationPathStyle(relation) === "auto" ? this.canvas.getContext("2d") : relationContext;
             const from = this.positions.get(relation.from);
             const to = this.positions.get(relation.to);
             const element = this.relationElements.get(relation.id);
@@ -2383,7 +2423,8 @@ export class ListMindmapView {
             if (direction === "reverse" || direction === "both") {
                 arrows.push({tip: start, previous: next});
             }
-            this.linePaths.push({id: relation.id, relation: true, path, arrows: arrows.map(arrow => arrow.tip)});
+            this.linePaths.push({id: relation.id, relation: true, foreground: getMindmapRelationPathStyle(relation) !== "auto",
+                path, arrows: arrows.map(arrow => arrow.tip)});
             context.beginPath();
             const selected = relation.id === this.selectedRelation;
             const hovered = this.hoveredLine === `relation:${relation.id}`;
@@ -2394,7 +2435,8 @@ export class ListMindmapView {
             context.globalAlpha = opacity;
             const emphasis = Math.max(0, context.lineWidth - baseWidth);
             element.classList.toggle("mindmap-view__relation--hover", hovered);
-            context.setLineDash(relation.dash === false ? [] : [5, 4]);
+            context.lineCap = getMindmapRelationStrokeStyle(relation) === "dotted" ? "round" : "butt";
+            context.setLineDash(getMindmapRelationDash(relation, lineStyle.width));
             context.stroke(path);
             context.setLineDash([]);
             // 短线上的双向箭头预留间隙，避免合并成菱形。
@@ -2419,7 +2461,10 @@ export class ListMindmapView {
             }
         });
         context.globalAlpha = 1;
-        this.drawRelationPreview(context, resolveColor(relationStyles[0].color, primary), relationStyles[0].width || 1.5);
+        context.lineCap = "butt";
+        relationContext.globalAlpha = 1;
+        relationContext.lineCap = "butt";
+        this.drawRelationPreview(relationContext, resolveColor(relationStyles[0].color, primary), relationStyles[0].width || 1.5);
         this.drawSummaries(context, (color, selected, hovered) =>
             resolveLineStyle(summaryStyles, color, undefined, defaultLine, selected, hovered));
         this.renderRouteControls();
@@ -2839,7 +2884,7 @@ export class ListMindmapView {
         if (event.button === 0 && !this.panning && !id && !this.readOnly && !this.relationFrom) {
             const line = this.findLine(event);
             const points = line?.relation && this.relationRoutes.get(line.id);
-            if (points) {
+            if (points && getMindmapRelationPathStyle(this.model.metadata.relations.find(relation => relation.id === line.id)) === "auto") {
                 const bounds = this.viewport.getBoundingClientRect();
                 const x = (event.clientX - bounds.left - this.offsetX) / this.scale;
                 const y = (event.clientY - bounds.top - this.offsetY) / this.scale;
@@ -3039,6 +3084,8 @@ export class ListMindmapView {
                 } else {
                     drag.anchor = undefined;
                 }
+            } else if (getMindmapRelationPathStyle(this.model.metadata.relations.find(item => item.id === drag.id)) === "bezier") {
+                drag.delta = {x: dx / this.scale, y: dy / this.scale};
             } else {
                 drag.offset = (drag.points[drag.segment].y === drag.points[drag.segment + 1].y ? dy : dx) / this.scale;
             }
@@ -3178,13 +3225,24 @@ export class ListMindmapView {
                     }
                 } else {
                     const patch: Partial<ListMindmapRelation> = {[drag.endpoint]: drag.targetId, route: undefined};
+                    if (relation.curve) {
+                        patch.curve = undefined;
+                    }
+                    if (relation.freeRoute) {
+                        patch.freeRoute = undefined;
+                    }
                     if (relation[anchorKey]) {
                         patch[anchorKey] = undefined;
                     }
                     this.options.onRelationChange?.(drag.id, patch, drag.original);
                 }
-            } else if (moved && !drag.endpoint && Math.abs(drag.offset) > .01 && drag.valid && drag.route && !this.readOnly) {
-                this.options.onRelationChange?.(drag.id, {route: drag.route}, drag.original);
+            } else if (moved && !drag.endpoint && drag.valid && !this.readOnly) {
+                if (drag.curve && Math.hypot(drag.delta?.x || 0, drag.delta?.y || 0) > .01) {
+                    this.options.onRelationChange?.(drag.id, {curve: drag.curve}, drag.original);
+                } else if (drag.route && Math.abs(drag.offset) > .01) {
+                    this.options.onRelationChange?.(drag.id,
+                        {[getMindmapRelationPathStyle(relation) === "rounded" ? "freeRoute" : "route"]: drag.route}, drag.original);
+                }
             }
             return;
         }
@@ -3234,7 +3292,7 @@ export class ListMindmapView {
         context.resetTransform();
         context.setLineDash([]);
         context.lineWidth = 12 / this.scale;
-        const lines = this.linePaths.slice().reverse();
+        const lines = this.linePaths.slice().reverse().sort((a, b) => Number(!!b.foreground) - Number(!!a.foreground));
         // 优先命中最近的箭头，重合的双向连接可从各自的箭头单独选中。
         let arrow: typeof lines[number];
         let distance = 12 / this.scale;
@@ -4539,6 +4597,12 @@ export class ListMindmapView {
             }
             const change = (patch: Partial<ListMindmapRelation>) => this.options.onRelationChange?.(relation.id, patch);
             color(relation.color, value => change({color: value}));
+            if (this.options.onRelationMenu) {
+                const settings = squareButton("listMindmapRelationAppearance", "iconLine", () =>
+                    this.options.onRelationMenu(settings, relation.id));
+                settings.setAttribute("aria-haspopup", "menu");
+                this.inspector.append(settings);
+            }
             const direction = createElement("select", "b3-select");
             direction.setAttribute("aria-label", this.label("listMindmapArrowDirection"));
             for (const [value, key] of [["forward", "listMindmapArrowForward"], ["reverse", "listMindmapArrowReverse"],

@@ -264,6 +264,15 @@
     pointer-events: none;
   }
 
+  &__relation-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    transform-origin: 0 0;
+    pointer-events: none;
+  }
+
   &__document-viewport {
     position: absolute;
     top: 0;

@@ -56,6 +56,7 @@ import {avRender} from "../av/render";
 import {blockRender} from "../blockRender";
 import {getListMindmapConnectorMenuItem} from "./connectorMenu";
 import {getListMindmapNodeStyleMenuItems} from "./nodeStyleMenu";
+import {getMindmapRelationMenuItems} from "./relationMenu";
 import {getDefaultListMindmapConnectorStyle, setDefaultListMindmapConnectorStyle} from "./preferences";
 import {assignListMindmapBranchColors, getListMindmapAppearanceMenu} from "./appearance";
 import {getEmbedChildOperationContext} from "../../wysiwyg/getBlock";
@@ -550,9 +551,33 @@ class ListMindmapController {
             }),
             onRelationAdd: (from, to) => this.metadata(metadata => {
                 if (from !== to && !metadata.relations.some(relation => relation.from === from && relation.to === to)) {
-                    metadata.relations.push({id: Lute.NewNodeID(), from, to, label: ""});
+                    metadata.relations.push({id: Lute.NewNodeID(), from, to, label: "", pathStyle: "bezier"});
                 }
             }),
+            onRelationMenu: (anchor, id) => {
+                toggleMenu({target: anchor, build: (_menu, session) => {
+                    const relation = readListMindmap(list).metadata.relations.find(item => item.id === id);
+                    if (!relation || !canEdit(owner, list)) {
+                        return;
+                    }
+                    const expected = JSON.stringify(relation);
+                    const menu = new Menu();
+                    getMindmapRelationMenuItems(relation, patch => this.metadata(metadata => {
+                        const current = metadata.relations.find(item => item.id === id);
+                        if (!current || JSON.stringify(current) !== expected) {
+                            showMessage(window.siyuan.languages.listMindmapStale);
+                            return false;
+                        }
+                        Object.assign(current, patch);
+                    }), window.siyuan.languages).forEach(item => menu.addItem(item));
+                    const rect = anchor.getBoundingClientRect();
+                    if (isMobile()) {
+                        session.show(() => menu.fullscreen("bottom"));
+                    } else {
+                        session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+                    }
+                }});
+            },
             onRelationChange: (id, patch, expected) => this.metadata(metadata => {
                 const relation = metadata.relations.find(item => item.id === id);
                 if (!relation || (expected !== undefined && JSON.stringify(relation) !== expected)) {
@@ -569,7 +594,7 @@ class ListMindmapController {
                     }
                 }
                 Object.assign(relation, patch);
-                for (const key of ["route", "fromAnchor", "toAnchor"] as const) {
+                for (const key of ["route", "curve", "freeRoute", "fromAnchor", "toAnchor"] as const) {
                     if (key in patch && patch[key] === undefined) {
                         delete relation[key];
                     }

@@ -405,7 +405,7 @@ test("mind map selection and clipboard preserve branches, metadata, identities a
     const methods = controller.members.filter(member =>
         ["copyNodes", "removeNodes", "replaceClipboardSource", "replaceSourceChildren", "pasteNodes", "add"]
             .includes(member.name?.getText(sourceFile)));
-    const source = ["../../wysiwyg/listContext.ts", "summary.ts", "appearance.ts", "model.ts", "../../util/tabsCopy.ts", "clipboard.ts",
+    const source = ["../../wysiwyg/listContext.ts", "summary.ts", "appearance.ts", "relationGeometry.ts", "model.ts", "../../util/tabsCopy.ts", "clipboard.ts",
         "fold.ts", "routing.ts", "pan.ts", "connectors.ts", "../av/richTextValue.ts", "view.ts",
         "../../util/blockDOMClipboard.ts", "../../util/clipboardData.ts"].map(compile).join("\n") +
         ts.transpileModule(`class ClipboardController {${methods.map(method => method.getText(sourceFile)).join("\n")}}`,

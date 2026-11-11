@@ -105,8 +105,39 @@ func validListMindmapMetadata(data map[string]any) bool {
 				return false
 			}
 		}
-		if route, exists := relation["route"]; exists && !validListMindmapRoute(route) {
-			return false
+		for key, choices := range map[string][]string{
+			"pathStyle":   {"auto", "straight", "bezier", "rounded"},
+			"strokeStyle": {"solid", "dashed", "long-dashed", "dotted"},
+		} {
+			if value, exists := relation[key]; exists {
+				style, ok := value.(string)
+				if !ok || !slices.Contains(choices, style) {
+					return false
+				}
+			}
+		}
+		if value, exists := relation["curve"]; exists {
+			curve, ok := value.(map[string]any)
+			if !ok || curve["version"] != float64(1) {
+				return false
+			}
+			for _, key := range []string{"from", "to"} {
+				point, ok := curve[key].(map[string]any)
+				if !ok {
+					return false
+				}
+				for _, axis := range []string{"x", "y"} {
+					value, ok := point[axis].(float64)
+					if !ok || math.IsNaN(value) || math.IsInf(value, 0) || math.Abs(value) > 1e6 {
+						return false
+					}
+				}
+			}
+		}
+		for _, key := range []string{"route", "freeRoute"} {
+			if route, exists := relation[key]; exists && !validListMindmapRoute(route) {
+				return false
+			}
 		}
 		for _, key := range []string{"fromAnchor", "toAnchor"} {
 			if value, exists := relation[key]; exists && !validListMindmapRelationAnchor(value) {

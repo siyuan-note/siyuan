@@ -7,6 +7,8 @@ import {LIST_MINDMAP_CONNECTOR_STYLES} from "./connectors";
 import type {ListMindmapConnectorStyle} from "./connectors";
 import {isListMindmapAppearance} from "./appearance";
 import type {ListMindmapAppearance, ListMindmapNodeShape} from "./appearance";
+import {MINDMAP_RELATION_PATHS, MINDMAP_RELATION_STROKES} from "./relationGeometry";
+import type {MindmapRelationCurve, MindmapRelationPathStyle, MindmapRelationStrokeStyle} from "./relationGeometry";
 
 export interface ListMindmapNodeStyle {
     width?: number;
@@ -34,6 +36,10 @@ export interface ListMindmapRelation {
     color?: string;
     width?: number;
     dash?: boolean;
+    pathStyle?: MindmapRelationPathStyle;
+    strokeStyle?: MindmapRelationStrokeStyle;
+    curve?: MindmapRelationCurve;
+    freeRoute?: MindmapManualRoute;
     arrowDirection?: "forward" | "reverse" | "both" | "none";
     route?: MindmapManualRoute;
     fromAnchor?: MindmapRelationAnchor;
@@ -142,6 +148,8 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
             ("width" in relation && (typeof relation.width !== "number" ||
                 !Number.isFinite(relation.width) || relation.width < 0)) ||
             ("dash" in relation && typeof relation.dash !== "boolean") ||
+            ("pathStyle" in relation && !MINDMAP_RELATION_PATHS.some(style => style === relation.pathStyle)) ||
+            ("strokeStyle" in relation && !MINDMAP_RELATION_STROKES.some(style => style === relation.strokeStyle)) ||
             ("arrowDirection" in relation && (typeof relation.arrowDirection !== "string" ||
                 !["forward", "reverse", "both", "none"].includes(relation.arrowDirection)))) {
             throw invalidMetadata();
@@ -156,8 +164,19 @@ export const parseListMindmapMetadata = (value: string | null): ListMindmapMetad
                 }
             }
         }
-        if ("route" in relation) {
-            const route = relation.route;
+        if ("curve" in relation) {
+            const curve = relation.curve;
+            if (!isRecord(curve) || curve.version !== 1 || [curve.from, curve.to].some(point =>
+                !isRecord(point) || ["x", "y"].some(key => typeof point[key] !== "number" ||
+                    !Number.isFinite(point[key]) || Math.abs(Number(point[key])) > 1000000))) {
+                throw invalidMetadata();
+            }
+        }
+        for (const key of ["route", "freeRoute"]) {
+            if (!(key in relation)) {
+                continue;
+            }
+            const route = relation[key];
             if (!isRecord(route) || route.version !== 1 || !Array.isArray(route.points) ||
                 !route.points.length || route.points.length > 64 || route.points.some(point =>
                     !isRecord(point) || ["x", "y", "t"].some(key => typeof point[key] !== "number" ||

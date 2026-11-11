@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261107150237"
+		"updated": "20261111233241"
 	},
 	"Children": [
 		{
@@ -2067,7 +2067,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261031115926"
+				"updated": "20261111233241"
 			},
 			"Children": [
 				{
@@ -2922,7 +2922,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-b13pkc3",
-				"updated": "20261024164212"
+				"updated": "20261111233241"
 			},
 			"Children": [
 				{
@@ -2943,6 +2943,98 @@
 				{
 					"Type": "NodeText",
 					"Data": "Select a starting node, click the connect button in the bottom node menu, then choose a target node to create a relationship line. Use it for connections outside the parent-child hierarchy."
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-bvhuk7q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-bvhuk7q",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "New relationships use a free Bézier curve that can cross above other nodes. Existing relationships keep automatic obstacle avoidance until you change their path. Node editing and controls remain accessible."
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-xz95pen",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-xz95pen",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select a relationship and open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Relationship appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Path"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the bottom settings to choose automatic obstacle avoidance, a straight line, a Bézier curve, or a rounded orthogonal line. Free paths can cross nodes; automatic paths avoid nodes and controls. Switching paths retains the adjustments for each shape."
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-ncxbpae",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-ncxbpae",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag either of the two curve handles to adjust curvature in any direction, or drag a rounded line’s segment handle perpendicular to the segment. Straight lines only have endpoint handles. Mouse and touch adjustments are saved once on release and support undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-wc8bhox",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-wc8bhox",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Relationship appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Line pattern"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose a solid line, short dashes, long dashes, or dots for each relationship. Dashes and dots reduce visual interference but can still overlap text. The saved appearance also applies to SiYuan-format HTML and PDF previews."
 				}
 			]
 		},
@@ -3024,12 +3116,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-fcd022g",
-				"updated": "20261024161816"
+				"updated": "20261111232017"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Dropping on blank space, an invalid target, the opposite endpoint’s node, or an existing same-direction connection cancels the change. A position that cannot avoid nodes or controls is also rejected. Connection points remain automatic until adjusted; adjusted positions follow the node as its text size or layout changes."
+					"Data": "Dropping on blank space, an invalid target, the opposite endpoint’s node, or an existing same-direction connection cancels the change. In automatic obstacle avoidance mode, a position that cannot avoid nodes or controls is also rejected. Connection points remain automatic until adjusted; adjusted positions follow the node as its text size or layout changes."
 				}
 			]
 		},
@@ -3038,7 +3130,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001051950-ow14bv7",
-				"updated": "20261012014859"
+				"updated": "20261111232017"
 			},
 			"Children": [
 				{
@@ -3052,7 +3144,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to reset both connection points while keeping the manually adjusted intermediate path. Double-clicking a path-segment handle resets only the intermediate path and preserves the connection points. Labels, styles, and arrow direction are unchanged."
+					"Data": " to reset both connection points while keeping the manually adjusted intermediate path. Double-clicking a curve or path-segment handle restores the current shape’s default path and preserves the connection points. Labels, styles, and arrow direction are unchanged."
 				}
 			]
 		},
@@ -3061,12 +3153,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001051950-ue75z7f",
-				"updated": "20261024164212"
+				"updated": "20261111232017"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If a layout change blocks the saved manual path, the line temporarily uses an automatic path while retaining the specified connection points. If those connection points are also unavailable, it temporarily uses automatic connection points."
+					"Data": "With automatic obstacle avoidance, if a layout change blocks the saved manual path, the line temporarily uses an automatic path while retaining the specified connection points. If those connection points are also unavailable, it temporarily uses automatic connection points."
 				}
 			]
 		},

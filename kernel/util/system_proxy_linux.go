@@ -155,7 +155,7 @@ func readGNOMENetworkProxy(ctx context.Context, getenv func(string) string, read
 	}
 	ret := &systemNetworkProxyConfig{HTTPProxy: proxies["http"], HTTPSProxy: proxies["https"]}
 	// HTTPS 未单独配置时复用 HTTP，然后才回退 SOCKS。
-	applyLinuxProxyFallback(ret, proxies["socks"])
+	applyGNOMEProxyFallback(ret, proxies["socks"])
 	if ret.HTTPProxy == "" && ret.HTTPSProxy == "" {
 		return nil, nil
 	}
@@ -200,11 +200,21 @@ func explicitProxyEnvironment(getenv func(string) string) bool {
 	return false
 }
 
-// applyLinuxProxyFallback 补齐未单独配置的协议：HTTPS 先复用 HTTP，HTTP 和 HTTPS 再回退 SOCKS。
-func applyLinuxProxyFallback(config *systemNetworkProxyConfig, socksProxy string) {
+// applyGNOMEProxyFallback 补齐 GNOME 未单独配置的协议：HTTPS 先复用 HTTP，HTTP 和 HTTPS 再回退 SOCKS。
+func applyGNOMEProxyFallback(config *systemNetworkProxyConfig, socksProxy string) {
 	if config.HTTPSProxy == "" {
 		config.HTTPSProxy = config.HTTPProxy
 	}
+	if config.HTTPProxy == "" {
+		config.HTTPProxy = socksProxy
+	}
+	if config.HTTPSProxy == "" {
+		config.HTTPSProxy = socksProxy
+	}
+}
+
+// applyKDEProxyFallback 只在同一协议内回退 SOCKS，不把 HTTP 代理用于 HTTPS。
+func applyKDEProxyFallback(config *systemNetworkProxyConfig, socksProxy string) {
 	if config.HTTPProxy == "" {
 		config.HTTPProxy = socksProxy
 	}

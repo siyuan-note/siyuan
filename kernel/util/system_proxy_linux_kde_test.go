@@ -86,15 +86,15 @@ socksProxy=socks://127.0.0.1:7892
 ProxyType=1
 httpProxy=http://127.0.0.1 7890
 `,
-			want: &systemNetworkProxyConfig{HTTPProxy: "http://127.0.0.1:7890", HTTPSProxy: "http://127.0.0.1:7890"},
+			want: &systemNetworkProxyConfig{HTTPProxy: "http://127.0.0.1:7890"},
 		},
 		{
-			name: "https falls back to http",
+			name: "https stays direct when only http configured",
 			content: `[Proxy Settings]
 ProxyType=1
 httpProxy=http://proxy.example:8080
 `,
-			want: &systemNetworkProxyConfig{HTTPProxy: "http://proxy.example:8080", HTTPSProxy: "http://proxy.example:8080"},
+			want: &systemNetworkProxyConfig{HTTPProxy: "http://proxy.example:8080"},
 		},
 		{
 			name: "https only",
@@ -113,13 +113,13 @@ socksProxy=socks://127.0.0.1:7890
 			want: &systemNetworkProxyConfig{HTTPProxy: "socks5://127.0.0.1:7890", HTTPSProxy: "socks5://127.0.0.1:7890"},
 		},
 		{
-			name: "https falls back to http before socks",
+			name: "https uses socks when https unset",
 			content: `[Proxy Settings]
 ProxyType=1
 httpProxy=http://proxy.example:8080
 socksProxy=socks://127.0.0.1:7890
 `,
-			want: &systemNetworkProxyConfig{HTTPProxy: "http://proxy.example:8080", HTTPSProxy: "http://proxy.example:8080"},
+			want: &systemNetworkProxyConfig{HTTPProxy: "http://proxy.example:8080", HTTPSProxy: "socks5://127.0.0.1:7890"},
 		},
 		{
 			name: "local bypass",
@@ -128,7 +128,7 @@ ProxyType=1
 httpProxy=http://127.0.0.1:7890
 NoProxyFor=localhost,<local>
 `,
-			want: &systemNetworkProxyConfig{HTTPProxy: "http://127.0.0.1:7890", HTTPSProxy: "http://127.0.0.1:7890",
+			want: &systemNetworkProxyConfig{HTTPProxy: "http://127.0.0.1:7890",
 				NoProxy: "localhost,127.0.0.1,::1"},
 		},
 		{
@@ -138,7 +138,7 @@ ProxyType=1
 httpProxy=http://127.0.0.1:7890
 NoProxyFor=http://bugs.kde.org/,10.0.0.0/8
 `,
-			want: &systemNetworkProxyConfig{HTTPProxy: "http://127.0.0.1:7890", HTTPSProxy: "http://127.0.0.1:7890",
+			want: &systemNetworkProxyConfig{HTTPProxy: "http://127.0.0.1:7890",
 				NoProxy: "bugs.kde.org,10.0.0.0/8"},
 		},
 		{
@@ -149,7 +149,7 @@ httpProxy=http://127.0.0.1:7890
 NoProxyFor=localhost
 `,
 			env: map[string]string{"no_proxy": "private.example"},
-			want: &systemNetworkProxyConfig{HTTPProxy: "http://127.0.0.1:7890", HTTPSProxy: "http://127.0.0.1:7890",
+			want: &systemNetworkProxyConfig{HTTPProxy: "http://127.0.0.1:7890",
 				NoProxy: "localhost,private.example"},
 		},
 		{
@@ -262,7 +262,7 @@ httpProxy=http://kde-home:8080
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := &systemNetworkProxyConfig{HTTPProxy: "http://kde-home:8080", HTTPSProxy: "http://kde-home:8080"}
+	want := &systemNetworkProxyConfig{HTTPProxy: "http://kde-home:8080"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %#v, want %#v", got, want)
 	}

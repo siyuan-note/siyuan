@@ -85,7 +85,8 @@ func readKDENetworkProxy(getenv func(string) string) (*systemNetworkProxyConfig,
 		return nil, err
 	}
 	ret := &systemNetworkProxyConfig{HTTPProxy: httpProxy, HTTPSProxy: httpsProxy}
-	applyLinuxProxyFallback(ret, socksProxy)
+	// KDE 按协议配置代理，HTTPS 未配置时只回退 SOCKS，不复用 HTTP。
+	applyKDEProxyFallback(ret, socksProxy)
 	if ret.HTTPProxy == "" && ret.HTTPSProxy == "" {
 		return nil, nil
 	}

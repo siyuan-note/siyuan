@@ -502,6 +502,15 @@ const renderPDF = async (id: string) => {
             <span class="fn__hr"></span>
             <input id="titleImage" class="b3-switch" type="checkbox" ${localData.titleImage !== false ? "checked" : ""}>
         </label>
+        <label class="b3-label">
+            <div>${window.siyuan.languages.exportBlockRefMode}</div>
+            <span class="fn__hr"></span>
+            <select id="blockRefMode" class="b3-select fn__block">
+                <option value="2" ${window.siyuan.config.export.blockRefMode === 2 ? "selected" : ""}>${window.siyuan.languages.export2}</option>
+                <option value="3" ${window.siyuan.config.export.blockRefMode === 3 ? "selected" : ""}>${window.siyuan.languages.export3}</option>
+                <option value="4" ${window.siyuan.config.export.blockRefMode === 4 ? "selected" : ""}>${window.siyuan.languages.export4}</option>
+            </select>
+        </label>
         <label id="customTitlePanel" class="b3-label${window.siyuan.config.export.addTitle ? "" : " fn__none"}">
             <div>
                 ${window.siyuan.languages.title}
@@ -802,6 +811,7 @@ ${getIconScript(servePath)}
         keepJSEmbed: true,
         keepFold: ${localData.keepFold},
         pdf: true,
+        blockRefMode: ${window.siyuan.config.export.blockRefMode},
         excludeTitleImage: ${localData.titleImage === false},
         addTitle: ${window.siyuan.config.export.addTitle},
         customTitle: "",
@@ -858,6 +868,10 @@ ${getIconScript(servePath)}
             refreshPreview();
         });
         const addTitleElement = actionElement.querySelector('#addTitle');
+        const blockRefModeElement = actionElement.querySelector('#blockRefMode');
+        blockRefModeElement.addEventListener('change', () => {
+            refreshPreview();
+        });
         const titleImageElement = actionElement.querySelector('#titleImage');
         titleImageElement.addEventListener('change', () => {
             refreshPreview();
@@ -912,6 +926,7 @@ ${getIconScript(servePath)}
                 keepJSEmbed: true,
                 keepFold: keepFoldElement.checked,
                 pdf: true,
+                blockRefMode: Number(blockRefModeElement.value),
                 excludeTitleImage: !titleImageElement.checked,
                 addTitle: addTitleElement.checked,
                 customTitle: customTitleElement.value,

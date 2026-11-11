@@ -1392,16 +1392,16 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool, mergeHeadingOpti
 
 func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle bool, customTitle string,
 	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
-	return exportHTMLWithTitle(id, savePath, pdf, keepFold, merge, addTitle, customTitle, false, false, mergeHeadingOptions...)
+	return exportHTMLWithTitle(id, savePath, pdf, keepFold, merge, addTitle, customTitle, false, false, nil, mergeHeadingOptions...)
 }
 
 func ExportPreviewHTMLWithTitle(id string, keepFold, merge, addTitle bool, customTitle string, keepJSEmbed, excludeTitleImage bool,
-	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
-	return exportHTMLWithTitle(id, "", true, keepFold, merge, addTitle, customTitle, keepJSEmbed, excludeTitleImage, mergeHeadingOptions...)
+	blockRefMode *int, mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
+	return exportHTMLWithTitle(id, "", true, keepFold, merge, addTitle, customTitle, keepJSEmbed, excludeTitleImage, blockRefMode, mergeHeadingOptions...)
 }
 
 func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle bool, customTitle string, keepJSEmbed, excludeTitleImage bool,
-	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
+	blockRefModeOverride *int, mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
 	if err := prepareExportBlockAssets(id, merge); err != nil {
 		util.PushErrMsg(err.Error(), 7000)
 		return
@@ -1439,6 +1439,9 @@ func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 
 		blockRefMode := confExportSnapshot.BlockRefMode
 		var headings []*ast.Node
+		if blockRefModeOverride != nil {
+			blockRefMode = *blockRefModeOverride
+		}
 		if pdf { // 导出 PDF 需要标记目录书签
 			headings = collectOutlineHeadings(tree)
 			for _, h := range headings {

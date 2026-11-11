@@ -987,12 +987,13 @@ ${databaseOptions}`,
                 label: window.siyuan.languages.print,
                 icon: "iconPDF",
                 ignore: !isInMobileApp() || !getHostCapabilities().importExport,
-                click: () => openHeadingPageBreakDialog(() => {
+                click: () => openHeadingPageBreakDialog((blockRefMode) => {
                     const msgId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
                     fetchPost("/api/export/exportPreviewHTML", {
                         id,
                         pdf: true,
+                        blockRefMode,
                         excludeTitleImage: localData.titleImage === false,
                         keepFold: localData.keepFold,
                         merge: localData.mergeSubdocs,

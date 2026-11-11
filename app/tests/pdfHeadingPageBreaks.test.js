@@ -48,7 +48,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     let confirmed = 0;
     let activeDialog;
     const Constants = {LOCAL_EXPORTPDF: "pdf", SIYUAN_VERSION: "test", SIYUAN_GET: "get"};
-    window.siyuan = {storage: {pdf: {headingPageBreakLevels: [2]}}, languages: {
+    window.siyuan = {config: {export: {blockRefMode: 4}}, storage: {pdf: {headingPageBreakLevels: [2]}}, languages: {
         print: "Print", confirm: "Confirm", cancel: "Cancel", pdfHeadingPageBreaks: "Heading page breaks",
         pdfHeadingPageBreaksTip: "Choose levels", exportTitleImage: "Export title image",
     }};
@@ -70,6 +70,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         throw new Error(name);
     });
     ui.openHeadingPageBreakDialog(() => confirmed++);
+    check.equal(activeDialog.element.querySelector("#blockRefMode").value, "4");
     check.equal(activeDialog.element.querySelector("#titleImage").checked, true);
     for (const width of [280, 360]) {
         activeDialog.element.style.width = `${width}px`;
@@ -93,20 +94,24 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     activeDialog.element.querySelector(".b3-button--cancel").click();
     check.equal(saved, undefined);
     check.equal(confirmed, 0);
-    ui.openHeadingPageBreakDialog(() => confirmed++);
+    ui.openHeadingPageBreakDialog(mode => { check.equal(mode, 3); confirmed++; });
+    activeDialog.element.querySelector("#blockRefMode").value = "3";
     check.equal(activeDialog.element.querySelector("#titleImage").checked, true, "Cancel preserves the default");
     activeDialog.element.querySelector('input[value="6"]').checked = true;
     activeDialog.element.querySelector("#titleImage").checked = false;
     activeDialog.element.querySelector(".b3-button--text").click();
     check.deepEqual(saved, {key: "pdf", levels: [2, 6], titleImage: false});
     check.equal(confirmed, 1);
+    check.equal(window.siyuan.config.export.blockRefMode, 4);
+    check.equal(window.siyuan.storage.pdf.blockRefMode, undefined);
     ui.openHeadingPageBreakDialog(() => confirmed++);
     check.equal(activeDialog.element.querySelector("#titleImage").checked, false, "Mobile printing restores the saved choice");
+    check.equal(activeDialog.element.querySelector("#blockRefMode").value, "4", "Each print starts with the global mode");
     check.equal(activeDialog.element.querySelector('input[value="6"]').checked, true);
     activeDialog.element.querySelector(".b3-button--cancel").click();
 
     let html;
-    const config = {appearance: {themeLight: "daylight"}, editor: {}, export: {addTitle: true}, system: {}};
+    const config = {appearance: {themeLight: "daylight"}, editor: {}, export: {addTitle: true, blockRefMode: 4}, system: {}};
     window.siyuan = {config, storage: {pdf: {paged: true, scale: 1, mergeSubdocs: false,
         mergeDocHeadingMode: "flat", mergeContentHeadingMode: "preserve", headingPageBreakLevels: [2, 6]}},
     languages: new Proxy({}, {get: (_object, key) => key === "_kernel" ? {16: "Untitled"} : String(key)})};
@@ -142,6 +147,15 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     const preview = document.getElementById("preview");
     const waitForPreview = () => new Promise(resolve => setTimeout(resolve, 30));
     check.equal(previewRequests.at(-1).pdf, true);
+    check.equal(previewRequests.at(-1).blockRefMode, 4);
+    const blockRefMode = document.getElementById("blockRefMode");
+    for (const mode of [3, 2, 4]) {
+        blockRefMode.value = String(mode);
+        blockRefMode.dispatchEvent(new Event("change"));
+        await waitForPreview();
+        check.equal(previewRequests.at(-1).blockRefMode, mode);
+        check.equal(config.export.blockRefMode, 4);
+    }
     check.equal(previewRequests.at(-1).excludeTitleImage, false);
     check.ok(preview.querySelector("[data-cover]"));
     const titleImage = document.getElementById("titleImage");
@@ -220,7 +234,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     window.siyuan.storage.pdf.titleImage = false;
     const mobilePrint = new Function("openHeadingPageBreakDialog", "showMessage", "Constants", "id", "fetchPost",
         "onExport", "isInAndroid", "isInHarmony", "isInIOS", "hideMessage", mobileMenuSource + ";return printPDF;")(
-        callback => callback(), () => "message", Constants, "root",
+        callback => callback(3), () => "message", Constants, "root",
         (_url, request, callback) => {
             mobileRequest = request;
             return callback({data: {name: "Mobile", content: (request.excludeTitleImage ? "" : "<div data-cover>Cover</div>") + p("Body")}});
@@ -228,6 +242,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     mobilePrint();
     await waitForPreview();
     check.equal(mobileRequest.pdf, true);
+    check.equal(mobileRequest.blockRefMode, 3);
     check.equal(mobileRequest.excludeTitleImage, true);
     check.ok(printed.content.includes("Body"));
     check.ok(!printed.content.includes("data-cover"));
@@ -315,7 +330,7 @@ const runElectron = async () => {
 if (process.versions.electron && process.type === "browser") {
     runElectron().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
-    require("node:test").it("heading page breaks support multiple levels, continuous headings and desktop/mobile controls", {
+    require("node:test").it("PDF settings support heading page breaks and per-export reference modes on desktop and mobile", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 60000,
     }, async () => {

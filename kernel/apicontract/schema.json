@@ -27702,6 +27702,16 @@
             }
           ]
         },
+        "blockRefMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "customTitle": {
           "anyOf": [
             {

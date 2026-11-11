@@ -1230,7 +1230,7 @@ export type ExportPreviewData = { "fillCSSVar": boolean; "html": string; };
 
 export type ExportPreviewHTMLData = { "attrs": Record<string, string> | null; "content": string; "id": string; "name": string; "type": string; };
 
-export type ExportPreviewHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "excludeTitleImage"?: boolean | null; "id": string; "image"?: boolean | null; "keepFold"?: boolean | null; "keepJSEmbed"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "pdf"?: boolean | null; };
+export type ExportPreviewHTMLRequestInput = { "addTitle"?: boolean | null; "blockRefMode"?: number | null; "customTitle"?: string | null; "excludeTitleImage"?: boolean | null; "id": string; "image"?: boolean | null; "keepFold"?: boolean | null; "keepJSEmbed"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "pdf"?: boolean | null; };
 
 export type ExportRepoFileRequestInput = { "id": string; };
 
@@ -5619,6 +5619,8 @@ export interface APIPOSTRoutes {
      * 内核不执行脚本；调用方须遵守安全模式限制，并等待异步渲染完成后再导出。
      * image=true 或 pdf=true 时可用 excludeTitleImage=true 排除题头图；省略、null 或 false 保留，独立于 addTitle。
      * 未指定图片或 PDF 模式时忽略 excludeTitleImage；原始文档、正文图片及加密笔记本读取授权不受影响。
+     * pdf=true 时 blockRefMode 可设为 2（锚文本和区块链接）、3（仅锚文本）或 4（脚注和锚点哈希），仅本次生效。
+     * blockRefMode 省略或 null 沿用全局设置；非 PDF 请求忽略该选项，PDF 请求的其他整数值返回错误。
      */
     "/api/export/exportPreviewHTML": {
         request: ExportPreviewHTMLRequestInput;

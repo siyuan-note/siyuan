@@ -28,7 +28,7 @@ func TestExportPreviewJSEmbed(t *testing.T) {
 		tree.Root.AppendChild(embed)
 	}
 	writeExportRelatedTestTree(t, tree)
-	_, content, _ := ExportPreviewHTMLWithTitle(docID, false, false, false, "", true, false)
+	_, content, _ := ExportPreviewHTMLWithTitle(docID, false, false, false, "", true, false, nil)
 	if strings.Count(content, `data-type="NodeBlockQueryEmbed"`) != 2 ||
 		strings.Contains(content, "<b>") || !strings.Contains(content, `data-notebook="`+boxID+`"`) ||
 		!strings.Contains(content, `custom-heading-mode="1"`) || strings.Contains(content, "<protyle-html") {

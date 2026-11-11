@@ -959,6 +959,20 @@
 			]
 		},
 		{
+			"ID": "20261111230000-n53cyhw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111230000-n53cyhw",
+				"updated": "20261111230000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For each PDF export, you can choose how block references and block hyperlinks are exported in the desktop preview window or mobile print settings. The initial selection follows the global export settings. Choosing Just anchor text keeps reference labels without including the referenced content. Changes apply only to this export and do not change the global settings; the desktop preview refreshes when you change the selection."
+				}
+			]
+		},
+		{
 			"ID": "20261104002100-drlmzre",
 			"Type": "NodeParagraph",
 			"Properties": {

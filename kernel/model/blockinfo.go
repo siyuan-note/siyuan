@@ -67,7 +67,7 @@ func getDocInfoByTree(blockID string, tree *parse.Tree) (ret *BlockInfo) {
 	boxID := tree.Box
 	title := treenode.ReadDocumentTitle(tree.Root).Text
 	ret = &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
-	ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
+	ret.IAL = filterHandlerIALAttrs(parse.IAL2Map(tree.Root.KramdownIAL))
 	scrollData := ret.IAL["scroll"]
 	if 0 < len(scrollData) {
 		// scroll 属性值在持久化时会被 html.EscapeAttrVal() 进行 HTML 转义（如 " 变为 &quot;），
@@ -185,7 +185,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 		}
 		title := treenode.ReadDocumentTitle(tree.Root).Text
 		ret := &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
-		ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
+		ret.IAL = filterHandlerIALAttrs(parse.IAL2Map(tree.Root.KramdownIAL))
 		scrollData := ret.IAL["scroll"]
 		if 0 < len(scrollData) {
 			// scroll 属性值在持久化时会被 html.EscapeAttrVal() 进行 HTML 转义（如 " 变为 &quot;），

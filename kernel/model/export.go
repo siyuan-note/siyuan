@@ -1100,6 +1100,9 @@ func ExportPreview(id string, fillCSSVar bool, avPublishFilter AVExportPublishFi
 		})
 
 		tree = normalizeExportPreviewTree(tree, luteEngine)
+		// 预览 HTML 会直接写入前端 innerHTML，Markdown 往返还会把属性列表文本提升为元素属性，
+		// 因此这里必须移除事件处理器属性 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-x62v-7955-xx6v
+		filterHandlerIALInTree(tree.Root)
 		// 使用实际主题样式值替换样式变量 Use real theme style value replace var in preview mode https://github.com/siyuan-note/siyuan/issues/11458
 		if fillCSSVar {
 			fillThemeStyleVar(tree)
@@ -1547,6 +1550,9 @@ func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 		// 不进行安全过滤，因为导出时需要保留所有的 HTML 标签
 		// 使用属性 `data-export-html` 导出时 `<style></style>` 标签丢失 https://github.com/siyuan-note/siyuan/issues/6228
 		luteEngine.SetSanitize(false)
+		// 导出的 HTML 会在桌面端本地页面中打开，仍需移除 IAL 中的事件处理器属性
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-x62v-7955-xx6v
+		filterHandlerIALInTree(tree.Root)
 
 		renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		if keepJSEmbed {

@@ -496,6 +496,12 @@ func isValidAttrName(name string) bool {
 		return false
 	}
 
+	// 事件处理器属性名（on*）写入 DOM 后会被浏览器当作脚本执行，不允许持久化为 IAL
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-x62v-7955-xx6v
+	if isHandlerAttrName(name) {
+		return false
+	}
+
 	// 首字符必须是小写字母
 	c := name[0]
 	if c < 'a' || c > 'z' {
@@ -521,6 +527,45 @@ func isValidAttrName(name string) bool {
 
 	// 非自定义属性
 	return validateChars(name, 1, n)
+}
+
+// isHandlerAttrName 判断 IAL 属性名是否为事件处理器属性（on*）。
+func isHandlerAttrName(name string) bool {
+	return strings.HasPrefix(strings.ToLower(name), "on")
+}
+
+// filterHandlerIALAttrs 返回移除事件处理器属性后的 IAL 副本。
+// 历史数据、.sy.zip 导入和外部 Markdown 可能已经带有这类属性名，输出边界需要再次过滤。
+func filterHandlerIALAttrs(ial map[string]string) map[string]string {
+	if 0 == len(ial) {
+		return ial
+	}
+	ret := make(map[string]string, len(ial))
+	for name, value := range ial {
+		if isHandlerAttrName(name) {
+			continue
+		}
+		ret[name] = value
+	}
+	return ret
+}
+
+// filterHandlerIALInTree 移除树中所有节点 IAL 的事件处理器属性。
+func filterHandlerIALInTree(root *ast.Node) {
+	ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || 0 == len(node.KramdownIAL) {
+			return ast.WalkContinue
+		}
+		filtered := node.KramdownIAL[:0]
+		for _, kv := range node.KramdownIAL {
+			if 2 > len(kv) || isHandlerAttrName(kv[0]) {
+				continue
+			}
+			filtered = append(filtered, kv)
+		}
+		node.KramdownIAL = filtered
+		return ast.WalkContinue
+	})
 }
 
 // validateChars 验证从指定索引开始的字符是否合法（小写字母、数字、连字符）

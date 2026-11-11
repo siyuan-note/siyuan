@@ -249,6 +249,7 @@ import {LargeTableVirtualizer} from "./tableVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {syncRootAttributes} from "../util/syncRootAttributes";
+import {isHandlerIALAttribute} from "../util/ialAttributes";
 import {bindImageTitleEditor} from "../render/imageTitleEditor";
 import {bindImageResize, getImageResizeWidth} from "../render/imageResize";
 import {isDirectCalloutStructureClick} from "./calloutClick";
@@ -673,7 +674,8 @@ export class WYSIWYG {
             }
         }
         ialKeys.forEach((key: string) => {
-            if (!["title-img", "title", "updated", "icon", "id", "type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth", "data-readonly", "av-names"].includes(key)) {
+            if (!isHandlerIALAttribute(key) &&
+                !["title-img", "title", "updated", "icon", "id", "type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth", "data-readonly", "av-names"].includes(key)) {
                 this.element.setAttribute(key, ial[key]);
             }
         });

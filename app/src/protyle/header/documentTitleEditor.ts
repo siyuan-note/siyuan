@@ -101,7 +101,7 @@ export class DocumentTitleEditor {
             protyleOptions: {notebookId: owner.notebookId, toolbar, hint,
                 click: {preventInsetEmptyBlock: true}},
             runtimeCapabilities: {
-                upload: true, websocket: false, pluginExtensions: false, customBlockRender: false,
+                upload: true, websocket: false, pluginExtensions: false, customBlockRender: false, blockConversion: false,
                 lute, lockedOptions: {toolbar, hint}, richHTMLPaste: true,
                 sanitizeBlockDOM: prepareDocumentTitleBlockDOM,
                 getUnsupportedPasteBlocks: getDocumentTitleUnsupportedPasteBlocks,

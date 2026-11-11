@@ -89,6 +89,37 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
         check.equal(template.content.firstElementChild.getAttribute("data-type"), "NodeParagraph", text);
         check.equal(template.content.querySelector("[contenteditable]").textContent, text, text);
     }
+    let blockTransactions = 0;
+    const conversions = new Function("decodeHTML", "transaction", "focusByWbr", "Constants", "dayjs", "escapeAttr",
+        sources.slice(7).join("\n") + "\nreturn {turnIntoTaskList, headingTurnIntoList, registerProtyleRuntimeCapabilities};")(
+        (html: string) => { const field = document.createElement("textarea"); field.innerHTML = html; return field.value; },
+        () => blockTransactions++, () => {}, {ATTRIBUTE_EDITING: "data-editing"}, () => ({format: () => "20260101000000"}),
+        (value: string) => value);
+    Object.assign(window.siyuan, {config: {editor: {markdown: {blockFullWidthTaskList: true}}}});
+    for (const restricted of [true, false]) {
+        for (const marker of ["[]", "[ ]", "[x]", "[/]", "【 】"]) {
+            const host = document.createElement("div");
+            host.innerHTML = paragraph(marker + " Task<wbr>");
+            const owner = {wysiwyg: {element: host}};
+            conversions.registerProtyleRuntimeCapabilities(owner, {blockConversion: !restricted});
+            const block = host.firstElementChild;
+            const editable = block.querySelector("[contenteditable]");
+            const original = host.innerHTML;
+            const before = blockTransactions;
+            check.equal(conversions.turnIntoTaskList(owner, "NodeParagraph", block, editable, document.createRange()), !restricted);
+            if (restricted) {
+                check.equal(host.innerHTML, original, "title task markers remain literal without DOM changes");
+                check.equal(blockTransactions, before, "title input cannot issue list transactions");
+                check.equal(conversions.headingTurnIntoList(owner, "NodeHeading", block, editable, document.createRange()), false);
+                template.innerHTML = lute.SpinBlockDOM(host.innerHTML);
+                check.equal(prepare(template.innerHTML).includes("NodeList"), false);
+                check.equal(template.content.querySelector("[contenteditable]").textContent, marker + " Task");
+            } else {
+                check.ok(host.querySelector('[data-type="NodeList"]'), "ordinary body input still creates tasks");
+                check.equal(blockTransactions, before + 1);
+            }
+        }
+    }
     template.innerHTML = lute.SpinBlockDOM(paragraph("**Bold** and `code`"));
     check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "Bold");
     check.equal(template.content.querySelector('[data-type~="code"]').textContent.replaceAll("\u2060", ""), "code");
@@ -283,7 +314,11 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
                 getDocumentTitleLute: () => lute, getAgentLute: () => lute,
                 prepareDocumentTitleInitialDOM: (html: string) => html,
                 prepareDocumentTitleBlockDOM: prepare, getDocumentTitleUnsupportedPasteBlocks: unsupported,
-                getDocumentTitleDOMFingerprint: fingerprint, mountProtyleLiteFragment: () => fragment,
+                getDocumentTitleDOMFingerprint: fingerprint, mountProtyleLiteFragment: (_host: HTMLElement,
+                    options: {runtimeCapabilities: {blockConversion: boolean}}) => {
+                    check.equal(options.runtimeCapabilities.blockConversion, false, "desktop/mobile titles and rename drafts forbid block conversion");
+                    return fragment;
+                },
                 setMobileToolbarUndo: () => {}, hideElements, hideAllElements,
             };
             const MountedEditor = new Function(...Object.keys(dependencies), sources[3] + "\nreturn DocumentTitleEditor;")(
@@ -326,7 +361,8 @@ test("native document title DOM preserves content, layout, readonly handoff and 
     timeout: 30000,
 }, async () => {
     const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts", "documentTitleEditor.ts",
-        "Title.ts", "../util/disabledWYSIWYG.ts", "../ui/hideElements.ts"].map(file =>
+        "Title.ts", "../util/disabledWYSIWYG.ts", "../ui/hideElements.ts", "../runtimeCapabilities.ts",
+        "../wysiwyg/taskListMarker.ts", "../wysiwyg/turnIntoList.ts"].map(file =>
         transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);

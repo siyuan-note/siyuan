@@ -7,6 +7,7 @@ export interface ProtyleRuntimeCapabilities {
     lockedOptions?: Partial<Pick<IProtyleOptions, "hint" | "toolbar">>;
     pluginExtensions?: boolean;
     customBlockRender?: boolean;
+    blockConversion?: boolean;
     // 片段内容作为列表项正文编辑，首段沿用列表输入规则。
     listItemFragment?: boolean;
     getTransactionOwner?: (operations: IOperation[]) => IProtyle | undefined;
@@ -40,6 +41,9 @@ export const areProtylePluginExtensionsEnabled = (protyle: IProtyle) =>
 
 export const isProtyleCustomBlockRenderEnabled = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.customBlockRender !== false;
+
+export const isProtyleBlockConversionEnabled = (protyle: IProtyle) =>
+    protyleRuntimeCapabilities.get(protyle)?.blockConversion !== false;
 
 export const isProtyleListItemFragment = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.listItemFragment === true;

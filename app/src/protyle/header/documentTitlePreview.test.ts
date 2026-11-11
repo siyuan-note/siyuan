@@ -54,6 +54,15 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
     check.equal(target.dataset.protyleLiteRender, "safe");
     check.equal(target.dataset.documentTitleId, "document");
     check.equal(renders, 1);
+    const sizedContent = '<span data-type="strong" style="font-size:72px;color:red">Large' +
+        '<span style="font-size:9px;font-family:serif">Small</span></span>';
+    const sizedSource = result(sizedContent);
+    request().reply(sizedSource);
+    check.equal(target.querySelector<HTMLElement>("span").style.fontSize, "");
+    check.equal(target.querySelector<HTMLElement>(":scope > span > span").style.fontSize, "");
+    check.equal(target.querySelector<HTMLElement>("span").style.color, "red");
+    check.equal(target.querySelector<HTMLElement>(":scope > span > span").style.fontFamily, "serif");
+    check.ok(sizedSource.data.blockDOM.includes("font-size:72px"), "preview normalization preserves the title source");
     const menuLabel = document.createElement("span");
     menuLabel.className = "b3-menu__label";
     document.body.append(menuLabel);
@@ -228,6 +237,13 @@ const browserCases = async (source: string, tabSource: string, styles: Record<st
                     }
                 }
             }
+            render(preview, "document", "encrypted-box", () => true, result(sizedContent).data);
+            const expectedSize = getComputedStyle(preview).fontSize;
+            preview.querySelectorAll("span").forEach(span => {
+                check.equal(getComputedStyle(span).fontSize, expectedSize,
+                    `${entry} ${labelClass} ignores nested title source font sizes`);
+            });
+            render(preview, "document", "encrypted-box", () => true, result(sample).data);
             preview.classList.remove("outline-document-title");
             themeStyle.remove();
             snippet.remove();

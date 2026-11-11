@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import {decodeHTML, escapeAttr} from "../../util/escape";
 import {Constants} from "../../constants";
 import {getTaskListMarker} from "./taskListMarker";
-import {isProtyleListItemFirstParagraph} from "../runtimeCapabilities";
+import {isProtyleBlockConversionEnabled, isProtyleListItemFirstParagraph} from "../runtimeCapabilities";
 
 interface IAdditionalOperations {
     doOperations: IOperation[];
@@ -22,6 +22,9 @@ const transactionWithAdditionalOperations = (protyle: IProtyle, doOperations: IO
 export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: HTMLElement,
                                  editElement: HTMLElement, range: Range,
                                  additionalOperations?: IAdditionalOperations) => {
+    if (!isProtyleBlockConversionEnabled(protyle)) {
+        return false;
+    }
     const html = decodeHTML(editElement.innerHTML);
     const taskListMarker = getTaskListMarker(html,
         window.siyuan.config.editor.markdown.blockFullWidthTaskList !== false);
@@ -111,6 +114,9 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
 export const headingTurnIntoList = (protyle: IProtyle, type: string, blockElement: HTMLElement,
                                     editElement: HTMLElement, range: Range,
                                     additionalOperations?: IAdditionalOperations) => {
+    if (!isProtyleBlockConversionEnabled(protyle)) {
+        return false;
+    }
     if (type === "NodeHeading" && ["* ", "- "].includes(editElement.innerHTML.substring(0, 2)) &&
         blockElement.parentElement.getAttribute("data-type") !== "NodeListItem") {
         const id = blockElement.getAttribute("data-node-id");

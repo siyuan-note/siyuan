@@ -18,6 +18,10 @@ if (process.versions.electron && process.type === "browser") {
                 requests.push(request.url);
                 const url = new URL(request.url);
                 let file = url.pathname.slice(1);
+                if (url.hostname === "bundle" && file === "font/00000000-0000-0000-0000-000000000001/ac") {
+                    return new Response(fs.readFileSync(require.resolve("vditor/dist/js/katex/fonts/KaTeX_Main-Regular.ttf")),
+                        {headers: {"Content-Type": "font/ttf"}});
+                }
                 if (file === "vditor/dist/js/lute/lute.min.js") file = "lute.min.js";
                 if (url.hostname !== "bundle" || !manifest.has(file)) return new Response("", {status: 403});
                 const mime = {html: "text/html", js: "text/javascript", css: "text/css", woff: "font/woff", woff2: "font/woff2", ttf: "font/ttf"};
@@ -40,7 +44,13 @@ if (process.versions.electron && process.type === "browser") {
             const text = "# 中文 title\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\n```js\nconst x = 1;\n```\n\n$E=mc^2$\n\n- [ ] task\n\n![local](image.png)\n![remote](https://example.com/private.png)\n\n<a href=\"javascript:alert(1)\" onclick=\"window.bad=1\">Link</a>\n<script>window.bad=1</script>\n<iframe src=\"https://example.com\"></iframe>\n<img src=x onerror=\"window.bad=1\">\n<div contenteditable=true autofocus tabindex=0>readonly</div>";
             const id = "00000000-0000-0000-0000-000000000001";
             const options = {limit: "Preview limit", resource: "Resource unavailable"};
-            const rendered = win.webContents.executeJavaScript(`window.preview.render(${JSON.stringify(id)}, ${JSON.stringify(text)}, ${JSON.stringify(options)})`);
+            const appearance = {fonts: {global: [{family: "Arial", weight: 500}],
+                editor: [{family: "MissingQuickLook", weight: 600}, {family: "LoadedQuickLook", weight: 600}, {family: "Georgia", weight: 600}],
+                code: [{family: "Courier New", weight: 400}]}, customFonts: [
+                {family: "MissingQuickLook", weight: 600, url: `siyuan-preview://bundle/font/${id}/ab`},
+                {family: "LoadedQuickLook", weight: 600, url: `siyuan-preview://bundle/font/${id}/ac`},
+                {family: "Georgia", weight: 600, url: "https://example.com/private.ttf"}]};
+            const rendered = win.webContents.executeJavaScript(`window.preview.render(${JSON.stringify(id)}, ${JSON.stringify(text)}, ${JSON.stringify(options)}, ${JSON.stringify(appearance)})`);
             for (let attempt = 0; !messages.some(message => message.type === "images" && message.id === id); attempt++) {
                 assert.ok(attempt < 100, "image discovery must finish");
                 await new Promise(resolve => setTimeout(resolve, 20));
@@ -56,6 +66,11 @@ if (process.versions.electron && process.type === "browser") {
                 math: !!document.querySelector(".katex"), code: !!document.querySelector(".hljs"), bad: window.bad,
                 unsafe: !!document.querySelector("#content script, #content iframe, #content [onclick], #content [onerror], #content [contenteditable], #content a[href], #content img[src^='http']"),
                 checked: document.querySelector("input[type=checkbox]")?.disabled,
+                editorFamily: getComputedStyle(document.getElementById("content")).fontFamily,
+                editorWeight: getComputedStyle(document.getElementById("content")).fontWeight,
+                codeFamily: getComputedStyle(document.querySelector("pre code")).fontFamily,
+                globalWeight: getComputedStyle(document.body).fontWeight,
+                loadedFonts: Array.from(document.fonts).filter(face => face.family.includes("LoadedQuickLook") && face.status === "loaded").length,
                 warning: document.getElementById("warning").textContent, width: document.body.scrollWidth, viewport: innerWidth})`);
             assert.equal(result.title, "中文 title");
             assert.equal(result.table, true);
@@ -64,6 +79,12 @@ if (process.versions.electron && process.type === "browser") {
             assert.equal(result.unsafe, false);
             assert.equal(result.bad, undefined);
             assert.equal(result.checked, true);
+            assert.match(result.editorFamily, /Georgia/);
+            assert.equal(result.editorWeight, "600");
+            assert.match(result.codeFamily, /Courier New/);
+            assert.equal(result.globalWeight, "500");
+            assert.ok(requests.includes(`siyuan-preview://bundle/font/${id}/ab`));
+            assert.equal(result.loadedFonts, 1);
             assert.equal(result.warning, options.resource);
             assert.ok(result.width <= result.viewport + 1);
             assert.ok(!requests.some(url => /^(?:https?:|file:)/.test(url)), requests.join("\n"));
@@ -76,6 +97,7 @@ if (process.versions.electron && process.type === "browser") {
             await win.webContents.executeJavaScript('window.preview.images("old", [])');
             assert.ok(!messages.some(message => message.id === "old" && message.type === "rendered"));
             assert.equal(await win.webContents.executeJavaScript('document.getElementById("content").textContent'), "");
+            assert.equal(await win.webContents.executeJavaScript('document.body.style.getPropertyValue("--markdown-editor-font-family")'), "");
             await win.webContents.executeJavaScript(`window.preview.render("large", "x".repeat(262145), ${JSON.stringify(options)})`);
             assert.ok(messages.some(message => message.type === "failed" && message.id === "large"));
         } catch (error) { console.error(error); code = 1; }

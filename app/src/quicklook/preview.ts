@@ -1,5 +1,6 @@
 import {createMarkdownResourcePolicy, isRelativeMarkdownResource} from "../markdown/resourcePolicy";
 import {MARKDOWN_RENDER_BYTES, markdownByteLength} from "../markdown/limits";
+import {createQuickLookFonts} from "./fonts";
 
 interface IPreviewMessages {
     limit: string;
@@ -17,7 +18,8 @@ export const createReadOnlyMarkdownPreview = (content: HTMLElement, warning: HTM
     const doc = content.ownerDocument;
     let generation = 0;
     let policy: ReturnType<typeof createMarkdownResourcePolicy>;
-    const cancel = () => { generation++; policy?.destroy(); content.replaceChildren(); warning.textContent = ""; };
+    const fonts = createQuickLookFonts(doc.body);
+    const cancel = () => { generation++; policy?.destroy(); fonts.clear(); content.replaceChildren(); warning.textContent = ""; };
     const block = (event: Event) => {
         if ((event.target as Element)?.closest("a, input, button, form")) { event.preventDefault(); }
     };
@@ -25,10 +27,11 @@ export const createReadOnlyMarkdownPreview = (content: HTMLElement, warning: HTM
     content.addEventListener("submit", block, true);
     return {
         cancel,
-        async render(id: string, markdown: string, messages: IPreviewMessages): Promise<boolean> {
+        async render(id: string, markdown: string, messages: IPreviewMessages, appearance?: unknown): Promise<boolean> {
             cancel();
             const ticket = generation;
             if (markdownByteLength(markdown) > MARKDOWN_RENDER_BYTES) { throw new Error(messages.limit); }
+            const fontsReady = fonts.apply(id, appearance);
             policy = createMarkdownResourcePolicy(doc);
             const currentPolicy = policy;
             const html = await dependencies.html(markdown);
@@ -77,6 +80,8 @@ export const createReadOnlyMarkdownPreview = (content: HTMLElement, warning: HTM
                     warning.textContent = messages.resource;
                 }
             });
+            await fontsReady;
+            if (ticket !== generation) { return false; }
             await doc.fonts.ready;
             await Promise.all(Array.from(content.querySelectorAll<HTMLImageElement>("img")).map(image =>
                 image.decode().catch(() => { if (ticket === generation) warning.textContent = messages.resource; })));

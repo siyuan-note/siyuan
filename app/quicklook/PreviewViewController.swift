@@ -14,6 +14,7 @@ private final class PreviewResourceHandler: NSObject, WKURLSchemeHandler {
     let files: Set<String>
     var id = ""
     var images: [String: (Data, String)] = [:]
+    var fonts: [String: (Data, String)] = [:]
     private var jobs: [ObjectIdentifier: UUID] = [:]
 
     init(root: URL) throws {
@@ -31,6 +32,7 @@ private final class PreviewResourceHandler: NSObject, WKURLSchemeHandler {
         jobs[key] = token
         let requestID = id
         let cachedImages = images
+        let cachedFonts = fonts
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
             let result = Result { () throws -> (Data, String) in
@@ -39,6 +41,9 @@ private final class PreviewResourceHandler: NSObject, WKURLSchemeHandler {
                 if url.host == "image", url.pathComponents.count == 3, url.pathComponents[1] == requestID,
                    let image = cachedImages[url.pathComponents[2]] {
                     (data, mime) = image
+                } else if url.host == "bundle", url.pathComponents.count == 4, url.pathComponents[1] == "font",
+                          url.pathComponents[2] == requestID, let font = cachedFonts[url.pathComponents[3]] {
+                    (data, mime) = font
                 } else if url.host == "bundle" {
                     let name = String(url.path.dropFirst())
                     let alias = name == "vditor/dist/js/lute/lute.min.js" ? "lute.min.js" : name
@@ -66,7 +71,7 @@ private final class PreviewResourceHandler: NSObject, WKURLSchemeHandler {
     }
 
     func webView(_ webView: WKWebView, stop task: WKURLSchemeTask) { jobs.removeValue(forKey: ObjectIdentifier(task)) }
-    func cancel() { jobs.removeAll(); images.removeAll() }
+    func cancel() { jobs.removeAll(); images.removeAll(); fonts.removeAll() }
 }
 
 @objc(PreviewViewController)
@@ -84,6 +89,7 @@ final class PreviewViewController: NSViewController, QLPreviewingController, WKN
     private var work: DispatchWorkItem?
     private var cancellation = PreviewCancellation()
     private var strings: [String: String] = [:]
+    private var fontPayload = PreviewFontSnapshot().payload
 
     override func loadView() {
         view = NSView(frame: NSRect(x: 0, y: 0, width: 800, height: 600))
@@ -130,10 +136,15 @@ final class PreviewViewController: NSViewController, QLPreviewingController, WKN
             let cancellation = self.cancellation
             let read = DispatchWorkItem { [weak self] in
                 let result = Result { try PreviewFiles.document(url, cancellation: cancellation) }
+                let fonts = PreviewFonts.load(id: id, cancellation: cancellation)
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self, self.request == id else { return }
                     switch result {
-                    case .success(let text): self.markdown = text; self.sendDocument()
+                    case .success(let text):
+                        self.fontPayload = fonts.payload
+                        self.resources?.fonts = fonts.resources
+                        self.markdown = text
+                        self.sendDocument()
                     case .failure(let error):
                         switch error {
                         case PreviewFileError.limit: self.fail("limit")
@@ -192,8 +203,9 @@ final class PreviewViewController: NSViewController, QLPreviewingController, WKN
         guard ready, !sent, let text = markdown else { return }
         sent = true
         markdown = nil
-        evaluate("window.preview.render(id, markdown, messages)",
-                 ["id": request, "markdown": text, "messages": ["limit": strings["limit"] ?? "", "resource": strings["resource"] ?? ""]])
+        evaluate("window.preview.render(id, markdown, messages, appearance)",
+                 ["id": request, "markdown": text, "appearance": fontPayload,
+                  "messages": ["limit": strings["limit"] ?? "", "resource": strings["resource"] ?? ""]])
     }
 
     private func evaluate(_ script: String, _ arguments: [String: Any]) {
@@ -237,6 +249,7 @@ final class PreviewViewController: NSViewController, QLPreviewingController, WKN
         resources?.cancel()
         resources = nil
         markdown = nil
+        fontPayload = PreviewFontSnapshot().payload
     }
 
     private func cancel() {

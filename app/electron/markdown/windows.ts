@@ -34,6 +34,7 @@ export type MarkdownWindowsOptions = {
     dialog: Dialog; shell: Pick<Shell, "openExternal" | "showItemInFolder">; protocol?: Protocol; nativeTheme?: NativeTheme;
     rootDirectory: string; configDirectory: string; lang?: string | (() => string); platform?: NodeJS.Platform;
     systemFonts?: (language: string) => Promise<MarkdownSystemFont[]>;
+    onAppearance?: () => void;
     onEmpty?: () => void; host?: MarkdownDesktopHost; windowControls: MarkdownWindowControls; devTools: MarkdownDevTools;
 };
 export type MarkdownWindows = {
@@ -87,7 +88,7 @@ const trustedEvent = (event: Pick<IpcMainInvokeEvent, "sender" | "senderFrame">,
 };
 
 const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, rootDirectory, configDirectory,
-    lang, platform = process.platform, nativeTheme, systemFonts, onEmpty, host: injectedHost, windowControls, devTools}: MarkdownWindowsOptions): MarkdownWindows => {
+    lang, platform = process.platform, nativeTheme, systemFonts, onAppearance, onEmpty, host: injectedHost, windowControls, devTools}: MarkdownWindowsOptions): MarkdownWindows => {
     const directory = path.join(rootDirectory, "stage", "build", "markdown");
     const host = injectedHost || new MarkdownDesktopHost({directory: path.join(configDirectory, "recovery")});
     const preferences = createMarkdownPreferences(configDirectory);
@@ -189,6 +190,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             if (values.sources?.[group] && values.sources[group] !== appearance.sources[group]) changed[group] = appearance.sources[group];
         }
         if (Object.keys(changed).length) await preferences.update({sources: changed}, values.sources);
+        onAppearance?.();
         return appearance;
     };
     const bootstrap = async (initial: MarkdownInitial, source?: string, appearance?: MarkdownAppearance): Promise<MarkdownBootstrap> => {

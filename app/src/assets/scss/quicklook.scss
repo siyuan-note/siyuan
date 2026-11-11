@@ -7,6 +7,8 @@ html {
 }
 
 body {
+  font-family: var(--markdown-global-font-family, var(--b3-font-family));
+  font-weight: var(--markdown-global-font-weight, 400);
   margin: 0;
   padding: 24px;
   overflow-wrap: anywhere;
@@ -26,5 +28,5 @@ body {
 
 .quicklook-warning {
   color: var(--b3-theme-on-surface);
-  font-family: var(--b3-font-family);
+  font-family: var(--markdown-global-font-family, var(--b3-font-family));
 }

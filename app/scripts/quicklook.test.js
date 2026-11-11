@@ -43,6 +43,11 @@ test("both Darwin packages embed the universal extension before signing, preserv
     });
     for (const arch of ["x86_64", "arm64"]) assert.ok(calls.some(([, args]) => args.includes(`${arch}-apple-macosx12.0`)));
     assert.ok(calls.some(([, args]) => args.includes("-verify_arch") && args.includes("x86_64") && args.includes("arm64")));
+    assert.equal(calls.filter(([, args]) => args.some(arg => arg.endsWith("PreviewFonts.swift"))).length, 4);
+    for (const source of ["FontPublisher.swift", "FontContainer.swift"]) {
+        assert.equal(calls.filter(([, args]) => args.some(arg => arg.endsWith(source))).length, 2);
+    }
+    assert.ok(calls.some(([, args]) => args.includes("-verify_arch") && args.at(-1).endsWith("SiYuanQuickLookFonts")));
     const plist = fs.readFileSync(path.join(app, "Contents/PlugIns", extensionName, "Contents/Info.plist"), "utf8");
     assert.match(plist, /com\.apple\.quicklook\.preview/);
     assert.match(plist, /net\.daringfireball\.markdown/);
@@ -57,29 +62,48 @@ test("both Darwin packages embed the universal extension before signing, preserv
     assert.ok(afterPack.indexOf("await extractPackagedPandoc") < afterPack.indexOf(".compileQuickLook"));
 });
 
-test("the native extension is signed with read-only sandbox entitlements before the enclosing app", async () => {
+test("native consumers use the signing team's shared group without Electron JIT entitlements", async t => {
     const sign = require("./sign-darwin");
     const operations = [];
-    const app = path.resolve("SiYuan.app");
+    const root = temporary(t);
+    const app = path.join(root, "SiYuan.app");
+    const helper = path.join(app, "Contents/MacOS/SiYuanQuickLookFonts");
+    fs.mkdirSync(path.dirname(helper), {recursive: true});
+    fs.writeFileSync(helper, "test native binary");
+    const electron = path.join(root, "electron.plist");
+    fs.writeFileSync(electron, '<plist version="1.0"><dict><key>com.apple.security.cs.allow-jit</key><true/></dict></plist>');
     const extension = path.join(app, "Contents/PlugIns", extensionName);
-    await sign({app, identity: "identity", optionsForFile: () => ({entitlements: "electron.plist"}), ignore: () => false}, null, {
+    await sign({app, identity: "identity", optionsForFile: () => ({entitlements: electron}),
+        ignore: ["custom-string", /custom-regex/, file => file.includes("custom-function")]}, null, {
         run: (command, args) => operations.push([command, args]),
+        display: () => ({status: 0, stderr: "TeamIdentifier=ABCDEFGHIJ\n"}),
         sign: async options => {
             operations.push(["parent"]);
             assert.equal(options.ignore(extension), true);
             assert.equal(options.ignore(path.join(extension, "Contents/MacOS/SiYuanQuickLook")), true);
             assert.equal(options.ignore(app), false);
-            assert.equal(options.optionsForFile(extension).entitlements, extensionEntitlements);
-            assert.equal(options.optionsForFile(app).entitlements, "electron.plist");
+            for (const file of ["custom-string", "custom-regex", "custom-function"]) assert.equal(options.ignore(file), true);
+            assert.equal(options.ignore(helper), true);
+            for (const target of [helper, extension, app]) {
+                const entitlements = fs.readFileSync(options.optionsForFile(target).entitlements, "utf8");
+                assert.match(entitlements, /ABCDEFGHIJ\.org\.b3log\.siyuan\.quicklook/);
+                assert.equal(entitlements.includes("allow-jit"), target === app);
+                assert.equal(entitlements.includes("app-sandbox"), target === extension);
+            }
+            assert.equal(options.optionsForFile(path.join(app, "Contents/Frameworks/Helper.app")).entitlements, electron);
         },
     });
     assert.equal(operations[0][0], "codesign");
-    assert.equal(operations[0][1].at(-1), extension);
-    assert.equal(operations[2][0], "parent");
+    assert.equal(operations.filter(([command, args]) => command === "codesign" && args.includes("--sign")).length, 3);
+    assert.ok(operations.findIndex(([command]) => command === "parent") > operations.findIndex(([, args]) => args?.at(-1) === extension));
+    assert.equal(operations.filter(([command, args]) => command === "plutil" && args.includes("SiYuanQuickLookAppGroup")).length, 2);
     assert.ok(operations.at(-1)[1].includes("--deep"));
     const entitlements = fs.readFileSync(extensionEntitlements, "utf8");
     assert.equal((entitlements.match(/<key>/g) || []).length, 2);
     assert.match(entitlements, /com.apple.security.app-sandbox/);
     assert.match(entitlements, /com.apple.security.files.user-selected.read-only/);
     await assert.rejects(() => sign({app}, null, {run() {}}), /identity/);
+    await assert.rejects(() => sign({app, identity: "identity"}, null, {
+        run() {}, display: () => ({status: 0, stderr: "TeamIdentifier=not set\n"}),
+    }), /TeamIdentifier/);
 });

@@ -5,7 +5,7 @@ interface IQuickLookWindow {
     Vditor: {md2html(markdown: string, options: Record<string, unknown>): Promise<string>};
     katex: {renderToString(expression: string, options: Record<string, unknown>): string};
     hljs: {getLanguage(language: string): unknown; highlight(code: string, options: {language: string}): {value: string}};
-    preview: {render(id: string, markdown: string, messages: {limit: string; resource: string}): Promise<void>;
+    preview: {render(id: string, markdown: string, messages: {limit: string; resource: string}, appearance?: unknown): Promise<void>;
         images(id: string, urls: Array<string | null>): void; cancel(): void};
 }
 const host = window as unknown as IQuickLookWindow;
@@ -21,8 +21,8 @@ const view = createReadOnlyMarkdownPreview(document.getElementById("content"), d
     }),
 });
 host.preview = {
-    async render(id, markdown, messages) {
-        try { if (await view.render(id, markdown, messages)) { send({type: "rendered", id}); } }
+    async render(id, markdown, messages, appearance) {
+        try { if (await view.render(id, markdown, messages, appearance)) { send({type: "rendered", id}); } }
         catch { send({type: "failed", id}); }
     },
     images(id, urls) { if (images?.id === id) {images.resolve(urls); images = undefined;} },

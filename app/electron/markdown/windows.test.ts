@@ -9,7 +9,7 @@ const {MarkdownDesktopHost} = require("./host");
 const {windowControls} = require("../fixtures/windowControlsStub.cjs");
 const {isDevToolsShortcut, toggleDevTools} = require("../window/devToolsDock");
 
-const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boolean; theme?: string; dark?: boolean} = {}) => {
+const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boolean; theme?: string; dark?: boolean; onAppearance?: () => void} = {}) => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-windows-"));
     const appDirectory = path.join(directory, "app");
     const build = path.join(appDirectory, "stage", "build", "markdown");
@@ -80,7 +80,7 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
         nativeTheme: Object.assign(new EventEmitter(), {shouldUseDarkColors: options.dark ?? false}),
         ipcMain: {handle: (_channel, callback) => { receive = callback; }}, dialog,
         shell: {openExternal: async url => opens.push(url), showItemInFolder: file => reveals.push(file)}, rootDirectory: appDirectory,
-        configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++,
+        configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++, onAppearance: options.onAppearance,
         // 标题栏按钮区由主进程注入，Markdown 模块不直接依赖 window 目录。
         windowControls,
         devTools: {isShortcut: isDevToolsShortcut, toggle: toggleDevTools},
@@ -975,6 +975,21 @@ test("independent appearance can be configured with no registered workspace", as
     assert.equal(restored.appearance.fontSize, 27);
     await assert.rejects(call(window, "appearance", {independent: {fontSize: 1000}}));
     assert.equal((await call(window, "bootstrap")).appearance.fontSize, 27);
+});
+
+test("font synchronization is notified only after appearance is resolved and saved", async t => {
+    let changes = 0;
+    const {manager, call, directory} = await fixture(t, {onAppearance: () => changes++});
+    const window = await manager.open();
+    assert.equal(changes, 1);
+    await call(window, "appearance", {independent: {fonts: {global: [{family: "Arial", weight: 500}], editor: [], code: []}}});
+    assert.equal(changes, 2);
+    const saved = JSON.parse(await fs.readFile(path.join(directory, "config", "preferences.json"), "utf8"));
+    assert.equal(saved.independent.fonts.global[0].family, "Arial");
+    await call(window, "appearance");
+    assert.equal(changes, 3);
+    await assert.rejects(call(window, "appearance", {sources: {fonts: "not-a-workspace"}}));
+    assert.equal(changes, 3);
 });
 
 test("missing workspace sources switch to independent persistently without altering other settings", async t => {

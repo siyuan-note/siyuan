@@ -59,13 +59,26 @@ const compileQuickLook = async (appPath, version, run = execFileSync) => {
                 "-sdk", sdk, "-target", `${arch}-apple-macosx${minimumVersion}`, "-O",
                 "-Xlinker", "-e", "-Xlinker", "_NSExtensionMain", "-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks",
                 "-framework", "Cocoa", "-framework", "QuickLookUI", "-framework", "WebKit", "-framework", "ImageIO",
-                path.join(appRoot, "quicklook/PreviewFiles.swift"), path.join(appRoot, "quicklook/PreviewViewController.swift"),
+                path.join(appRoot, "quicklook/PreviewFiles.swift"), path.join(appRoot, "quicklook/PreviewFonts.swift"),
+                path.join(appRoot, "quicklook/PreviewViewController.swift"),
                 "-o", binary], {stdio: "inherit"});
             return binary;
         });
         const executable = path.join(contents, "MacOS/SiYuanQuickLook");
         run("xcrun", ["lipo", "-create", ...binaries, "-output", executable], {stdio: "inherit"});
         run("xcrun", ["lipo", "-verify_arch", "x86_64", "arm64", executable], {stdio: "inherit"});
+        const helpers = ["x86_64", "arm64"].map(arch => {
+            const binary = path.join(temporary, `fonts-${arch}`);
+            run("xcrun", ["swiftc", "-parse-as-library", "-sdk", sdk, "-target", `${arch}-apple-macosx${minimumVersion}`, "-O",
+                "-framework", "ImageIO", path.join(appRoot, "quicklook/PreviewFiles.swift"),
+                path.join(appRoot, "quicklook/PreviewFonts.swift"), path.join(appRoot, "quicklook/FontPublisher.swift"),
+                path.join(appRoot, "quicklook/FontContainer.swift"), "-o", binary], {stdio: "inherit"});
+            return binary;
+        });
+        const helper = path.join(appPath, "Contents/MacOS/SiYuanQuickLookFonts");
+        fs.mkdirSync(path.dirname(helper), {recursive: true});
+        run("xcrun", ["lipo", "-create", ...helpers, "-output", helper], {stdio: "inherit"});
+        run("xcrun", ["lipo", "-verify_arch", "x86_64", "arm64", helper], {stdio: "inherit"});
         run("plutil", ["-lint", path.join(contents, "Info.plist"), extensionEntitlements], {stdio: "inherit"});
     } finally {
         fs.rmSync(temporary, {recursive: true, force: true});

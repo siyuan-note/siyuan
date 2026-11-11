@@ -35,9 +35,9 @@ export const getDateHTML = (cellElements: HTMLElement[], format?: TAVDateFormat)
     return `<div class="b3-menu__items">
 <div>
     <label class="date-picker__endpoint"><span class="ft__smaller">${window.siyuan.languages.startDate}</span>
-    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value}" data-value="${dayjs(cellValue.content || currentDate).format("YYYY-MM-DD HH:mm")}" class="b3-text-field"></label>
+    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value}" data-original-timestamp="${cellValue.isNotEmpty ? cellValue.content : ""}" data-value="${dayjs(cellValue.content || currentDate).format("YYYY-MM-DD HH:mm")}" class="b3-text-field"></label>
     <label class="date-picker__endpoint${cellValue.hasEndDate ? "" : " fn__none"}"><span class="ft__smaller">${window.siyuan.languages.endDate}</span>
-    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value2}" data-value="${cellValue.isNotEmpty2 ? dayjs(cellValue.content2).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field${cellValue.hasEndDate ? "" : " fn__none"}"></label>
+    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value2}" data-original-timestamp="${cellValue.isNotEmpty2 ? cellValue.content2 : ""}" data-value="${cellValue.isNotEmpty2 ? dayjs(cellValue.content2).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field${cellValue.hasEndDate ? "" : " fn__none"}"></label>
     <button class="b3-menu__separator"></button>
     <label class="b3-menu__item">
         <span class="fn__flex-center">${window.siyuan.languages.endDate}</span>
@@ -74,10 +74,12 @@ export const bindDateEvent = (options: {
     const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
     let dirty = false;
     let submitted = false;
+    const timeEdited = [false, false];
 
     [inputElements[0], inputElements[1]].forEach(input => input.addEventListener("input", () => { dirty = true; }));
     const picker = bindInlineDatePicker(options.menuElement.querySelector("[data-date-inline]"),
         [inputElements[0], inputElements[1]], {onChange: (_input, state) => {
+            if (state.part === "time") { timeEdited[_input === inputElements[0] ? 0 : 1] = true; }
             if (!state.valid || state.kind === "input") { return; }
             dirty = true;
         }});
@@ -99,8 +101,17 @@ export const bindDateEvent = (options: {
         }
         const dateStr1 = buildDateStr(0);
         const dateStr2 = buildDateStr(1);
-        const content1 = getFullYearTime(dateStr1) || 0;
-        const content2 = getFullYearTime(dateStr2) || 0;
+        const timestamp = (value: string, index: number) => {
+            const parsed = getFullYearTime(value) || 0;
+            const original = Number(inputElements[index].dataset.originalTimestamp);
+            if (!parsed || !original || timeEdited[index] || !inputElements[3].checked ||
+                value.substring(11) !== dayjs(original).format("HH:mm")) { return parsed; }
+            // 分钟界面未编辑时间时，保留存量值中不可见的秒和毫秒。
+            if (value.substring(0, 10) === dayjs(original).format("YYYY-MM-DD")) { return original; }
+            return parsed + ((original % 60000) + 60000) % 60000;
+        };
+        const content1 = timestamp(dateStr1, 0);
+        const content2 = timestamp(dateStr2, 1);
         submitted = true;
         updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
             content: content1,
@@ -130,11 +141,11 @@ export const bindDateEvent = (options: {
     });
     inputElements[0].addEventListener("change", () => {
         dirty = true;
-        inputElements[0].dataset.value = inputElements[0].value.length > 10 ? inputElements[0].value : inputElements[0].value + " 00:00";
+        inputElements[0].dataset.value = buildDateStr(0);
     });
     inputElements[1].addEventListener("change", () => {
         dirty = true;
-        inputElements[1].dataset.value = inputElements[1].value.length > 10 ? inputElements[1].value : inputElements[1].value + " 00:00";
+        inputElements[1].dataset.value = buildDateStr(1);
     });
     inputElements[2].addEventListener("change", () => {
         dirty = true;
@@ -142,7 +153,7 @@ export const bindDateEvent = (options: {
             if (!inputElements[1].dataset.value) {
                 const currentDate = Date.now();
                 inputElements[1].dataset.value = dayjs(currentDate).format("YYYY-MM-DD HH:mm");
-                inputElements[1].value = dayjs(currentDate).format(inputElements[3].checked ? "YYYY-MM-DD HH:mm" : "YYYY-MM-DD");
+                setInlineDateValue(inputElements[1], dayjs(currentDate).format(inputElements[3].checked ? "YYYY-MM-DD HH:mm" : "YYYY-MM-DD"));
             }
             inputElements[1].classList.remove("fn__none");
         } else {
@@ -158,8 +169,9 @@ export const bindDateEvent = (options: {
         }
         dirty = true;
         [inputElements[0], inputElements[1]].forEach(input => {
-            if (getInlineDateType(input) === "datetime-local" || input.value !== input.dataset.value.substring(0, 10)) {
-                input.dataset.value = input.value ? input.value.length > 10 ? input.value : input.value + " 00:00" : "";
+            const value = getInlineDateValue(input);
+            if (getInlineDateType(input) === "datetime-local" || value !== input.dataset.value.substring(0, 10)) {
+                input.dataset.value = value ? value.length > 10 ? value : value + " 00:00" : "";
             }
         });
         if (inputElements[3].checked) {

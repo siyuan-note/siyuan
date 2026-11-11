@@ -36,6 +36,7 @@ const setup = (mobile: boolean) => {
     }
     const dialogs: ReminderDialog[] = [];
     const bound: Control[] = [];
+    const activated: Control[] = [];
     const writes: {id: string; timed: string}[] = [];
     const messages: string[] = [];
     let release: (result: {code: number}) => void;
@@ -44,14 +45,23 @@ const setup = (mobile: boolean) => {
         setAttribute: (name: string, value: string) => attrs.set(name, value),
         removeAttribute: (name: string) => attrs.delete(name)};
     const methods = loadModule<typeof import("./commonMenuItem")>("src/menus/commonMenuItem.ts", {
-        window: {siyuan: {languages: {reminderTip: "Future time required", notEmpty: "Required"}}},
+        window: {siyuan: {languages: {
+            reminderTip: "Future time required", notEmpty: "Required", wechatTip: "Reminder delivery notice",
+        }}},
+        document: {createElement: () => ({
+            textContent: "",
+            get innerHTML() {
+                return this.textContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            },
+        })},
         require: (name: string) => ({
             "dayjs": dayjs,
             "../dialog/mobileDialog": {MobileDialog: ReminderDialog},
             "../datePicker/inline": {getInlineDateValue: (input: Control) => input.value.replace(" ", "T"), bindInlineDatePicker: (_host: unknown, input: Control) => {
                 bound.push(input);
                 const dialog = dialogs.at(-1);
-                return {validate: () => dialog.dateValid, destroy: () => { dialog.dateDestroyed = true; }};
+                return {activate: (target: Control) => activated.push(target),
+                    validate: () => dialog.dateValid, destroy: () => { dialog.dateDestroyed = true; }};
             }},
             "../constants": {Constants: {CUSTOM_REMINDER_WECHAT: "reminder"}},
             "../util/functions": {isMobile: () => mobile},
@@ -71,7 +81,7 @@ const setup = (mobile: boolean) => {
             },
         })[name] || {},
     });
-    return {methods, dialogs, writes, bound, messages, attrs,
+    return {methods, dialogs, writes, bound, activated, messages, attrs,
         node: node as unknown as Element, release: (code: number) => release({code})};
 };
 
@@ -82,6 +92,8 @@ test("existing WeChat reminders keep picker changes local until explicit future-
         else f.methods.openWechatNotify(f.node);
         const dialog = f.dialogs[0];
         assert.deepEqual(f.bound, [dialog.input]);
+        assert.deepEqual(f.activated, [dialog.input]);
+        assert.equal(f.writes.length, 0, "initial calendar activation sends no reminder");
         dialog.dateValid = false;
         dialog.input.value = "2099-12-31T23:59";
         dialog.buttons[2].click();

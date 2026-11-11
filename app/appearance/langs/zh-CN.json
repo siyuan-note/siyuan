@@ -2543,7 +2543,7 @@
 	"removeAssetsFolder": "移除 assets 目录",
 	"upload": "上传",
 	"reminderTip": "提醒时间不能小于当前时间",
-	"wechatTip": "该内容块将以明文形式发送到云端，到期时通过微信公众号模板消息进行推送",
+	"wechatTip": "该内容块将以明文形式发送到云端\n到期时通过微信公众号模板消息进行推送",
 	"notEmpty": "提醒时间不能为空",
 	"experimentalFeature": "（⚗️ 该特性正处于试验阶段）",
 	"wechatReminder": "微信提醒",

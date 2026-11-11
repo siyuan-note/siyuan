@@ -1,3 +1,17 @@
+.date-picker-reminder-dialog {
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+
+  > .b3-dialog__header {
+    flex-shrink: 0;
+  }
+
+  > .b3-dialog__body,
+  .b3-dialog__content {
+    min-height: 0;
+  }
+}
+
 .date-picker {
   display: flex;
   flex-direction: column;
@@ -38,6 +52,39 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+  }
+
+  &__split {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 auto;
+
+    > span,
+    > label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    [data-frontend="mobile"] & input,
+    [data-frontend="browser-mobile"] & input {
+      min-height: 44px;
+    }
+  }
+
+  &__split-date,
+  &__split-time {
+    flex: 1 1 calc(10ch + 16px);
   }
 
   &__endpoint {
@@ -189,6 +236,25 @@
 
 .date-picker-input::-webkit-calendar-picker-indicator {
   display: none;
+}
+
+.date-picker__reminder {
+  width: 244px;
+  max-width: 100%;
+  margin-inline: auto;
+
+  > label {
+    display: block;
+  }
+
+  .date-picker__split {
+    margin-top: 4px;
+  }
+
+  [data-frontend="mobile"] &,
+  [data-frontend="browser-mobile"] & {
+    width: 320px;
+  }
 }
 
 .date-picker-input[data-date-picker-active="true"] {

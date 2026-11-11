@@ -640,11 +640,12 @@ const runCases = async (sources, css, mobile) => {
     await tick();
     assertFieldSpacing();
     await change("[data-template-item]", "sample");
-    assert.equal(get("[data-template-time]").parentElement.nextElementSibling.querySelector(".date-picker__calendar"), null, "preview trigger calendars start collapsed");
+    const triggerCalendar = get("[data-template-time]").closest("label").nextElementSibling;
+    assert.equal(triggerCalendar.querySelector(".date-picker__calendar"), null, "preview trigger calendars start collapsed");
     get("[data-template-time]").focus();
-    assert.ok(get("[data-template-time]").parentElement.nextElementSibling.querySelector(".date-picker__calendar"), "preview trigger time binds the shared picker");
+    assert.ok(triggerCalendar.querySelector(".date-picker__calendar"), "preview trigger time binds the shared picker");
     const beforeTriggerEdit = transactions.length;
-    get("[data-template-time]").parentElement.nextElementSibling.querySelector("[data-date]:not([disabled])").click();
+    triggerCalendar.querySelector("[data-date]:not([disabled])").click();
     assert.equal(templatePreviews.length, 0, "trigger-time calendar changes do not issue preview requests");
     assert.equal(transactions.length, beforeTriggerEdit, "trigger-time calendar changes do not save real data");
     await change("[data-template-time]", "2026-10-16T15:30");

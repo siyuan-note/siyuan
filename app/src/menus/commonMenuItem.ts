@@ -68,6 +68,12 @@ const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     });
 };
 
+const getWechatTipHTML = () => {
+    const text = document.createElement("span");
+    text.textContent = window.siyuan.languages.wechatTip;
+    return text.innerHTML.replace(/\n/g, "<br>");
+};
+
 export const openWechatNotify = (nodeElement: Element) => {
     const id = nodeElement.getAttribute("data-node-id");
     const range = getEditorRange(nodeElement);
@@ -77,16 +83,17 @@ export const openWechatNotify = (nodeElement: Element) => {
         reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
     }
     const dialog = new MobileDialog({
-        width: isMobile() ? "92vw" : "50vw",
+        width: isMobile() ? "92vw" : "min(420px, 92vw)",
+        containerClassName: isMobile() ? undefined : "date-picker-reminder-dialog",
         title: window.siyuan.languages.wechatReminder,
         content: `<div class="b3-dialog__content custom-attr">
-    <div class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;flex: 0 0 100px;overflow-wrap: anywhere">${window.siyuan.languages.notifyTime}</span>
-        <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
+    <div class="date-picker__reminder">
+        <label class="ft__on-surface">${window.siyuan.languages.notifyTime}
+            <input class="b3-text-field" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
+        </label>
+        <div data-role="reminder-date-calendar"></div>
     </div>
-    <div data-role="reminder-date-calendar"></div>
-    <div class="b3-label__text" style="text-align: center">${window.siyuan.languages.wechatTip}</div>
+    <div class="b3-label__text" style="text-align: center">${getWechatTipHTML()}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -101,6 +108,7 @@ export const openWechatNotify = (nodeElement: Element) => {
     dialog.element.setAttribute("data-key", Constants.DIALOG_WECHATREMINDER);
     const dateInput = dialog.element.querySelector<HTMLInputElement>('input[type="datetime-local"]');
     const datePicker = bindInlineDatePicker(dialog.element.querySelector<HTMLElement>('[data-role="reminder-date-calendar"]'), dateInput);
+    datePicker.activate(dateInput);
     const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
@@ -171,16 +179,17 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
             reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
         }
         const dialog = new MobileDialog({
-            width: isMobile() ? "92vw" : "50vw",
+            width: isMobile() ? "92vw" : "min(420px, 92vw)",
+            containerClassName: isMobile() ? undefined : "date-picker-reminder-dialog",
             title: window.siyuan.languages.wechatReminder,
             content: `<div class="b3-dialog__content custom-attr">
-    <div class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;flex: 0 0 100px;overflow-wrap: anywhere">${window.siyuan.languages.notifyTime}</span>
-        <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
+    <div class="date-picker__reminder">
+        <label class="ft__on-surface">${window.siyuan.languages.notifyTime}
+            <input class="b3-text-field" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
+        </label>
+        <div data-role="reminder-date-calendar"></div>
     </div>
-    <div data-role="reminder-date-calendar"></div>
-    <div class="b3-label__text" style="text-align: center">${window.siyuan.languages.wechatTip}</div>
+    <div class="b3-label__text" style="text-align: center">${getWechatTipHTML()}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -192,6 +201,7 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
         dialog.element.setAttribute("data-key", Constants.DIALOG_WECHATREMINDER);
         const dateInput = dialog.element.querySelector<HTMLInputElement>('input[type="datetime-local"]');
         const datePicker = bindInlineDatePicker(dialog.element.querySelector<HTMLElement>('[data-role="reminder-date-calendar"]'), dateInput);
+        datePicker.activate(dateInput);
         const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();

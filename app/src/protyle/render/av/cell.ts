@@ -533,7 +533,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
         ensureAVColumnWindow(blockElement, columnID);
     }
     const cellRect = cellElement.getBoundingClientRect();
-    if (!onlyHeight) {
+    if (!onlyHeight && !cellElement.classList.contains("custom-attr__avvalue")) {
         const avScrollElement = cellElement.closest(".av__scroll") || blockElement.querySelector(".av__scroll");
         const rowElement = hasClosestByClassName(cellElement, "av__row");
         if (avScrollElement && rowElement) {

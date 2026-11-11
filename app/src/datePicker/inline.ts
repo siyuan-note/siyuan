@@ -6,6 +6,7 @@ interface IInlineDateState {
     draft: string;
     valid: boolean;
     kind: "input" | "change" | "select" | "clear";
+    part?: "date" | "time";
 }
 
 export const getInlineDateType = (input: HTMLInputElement) =>
@@ -13,16 +14,42 @@ export const getInlineDateType = (input: HTMLInputElement) =>
 
 const validationErrors = new WeakMap<HTMLInputElement, string>();
 const composingInputs = new WeakSet<HTMLInputElement>();
+const splitInputs = new WeakMap<HTMLInputElement, {time: HTMLInputElement; element: HTMLElement}>();
+const normalizeTimeDraft = (value: string) => {
+    if (!/^\d{3,4}$/.test(value)) { return value; }
+    const hours = value.slice(0, -2).padStart(2, "0");
+    const minutes = value.slice(-2);
+    return Number(hours) < 24 && Number(minutes) < 60 ? `${hours}:${minutes}` : value;
+};
 const getConstraints = (input: HTMLInputElement): IDateConstraints => {
     const type = getInlineDateType(input);
     if (!isDatePickerType(type)) { throw new TypeError("Invalid inline date input type"); }
     return {type, min: input.min, max: input.max, step: input.step, required: input.required,
         stepBase: input.getAttribute("value") || ""};
 };
-export const getInlineDateValue = (input: HTMLInputElement) => getInlineDateType(input) === "datetime-local" ? input.value.replace(" ", "T") : input.value;
+export const getInlineDateValue = (input: HTMLInputElement) => {
+    if (getInlineDateType(input) !== "datetime-local") { return input.value; }
+    const split = splitInputs.get(input);
+    if (!split || /[T ]/.test(input.value)) { return input.value.replace(" ", "T"); }
+    return input.value || split.time.value ? `${input.value}T${normalizeTimeDraft(split.time.value)}` : "";
+};
 export const setInlineDateValue = (input: HTMLInputElement, value: string) => {
     const type = getInlineDateType(input);
     const normalized = type === "datetime-local" ? value.replace(" ", "T") : value;
+    const split = splitInputs.get(input);
+    if (split && type === "datetime-local") {
+        const separator = normalized.indexOf("T");
+        const date = separator < 0 ? normalized : normalized.substring(0, separator);
+        const time = separator < 0 ? "" : normalized.substring(separator + 1);
+        for (const [target, draft] of [[input, date], [split.time, time]] as const) {
+            if (target.value === draft) { continue; }
+            const selection = target.ownerDocument.activeElement === target ?
+                [target.selectionStart, target.selectionEnd, target.selectionDirection] as const : undefined;
+            target.value = draft;
+            if (selection) { target.setSelectionRange(...selection); }
+        }
+        return;
+    }
     const display = type === "datetime-local" && validateDateValue(normalized, {type, step: "any"}) === "valid" ?
         normalized.replace("T", " ") : value;
     if (input.value === display) { return; }
@@ -47,6 +74,11 @@ export const validateInlineDateInput = (input: HTMLInputElement, message = input
     validationErrors.set(input, error);
     input.setCustomValidity(error);
     input.setAttribute("aria-invalid", String(!valid));
+    const time = splitInputs.get(input)?.time;
+    if (time) {
+        time.setCustomValidity(error);
+        time.setAttribute("aria-invalid", String(!valid));
+    }
     return valid;
 };
 
@@ -60,7 +92,9 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
     const languages = options.languages || view.siyuan.languages;
     const releases: (() => void)[] = [];
     const composing = new Set<HTMLInputElement>();
+    const editingParts = new WeakMap<HTMLInputElement, "date" | "time">();
     const restoreTypes = new Map<HTMLInputElement, string>();
+    const splitReleases = new Map<HTMLInputElement, () => void>();
     let active: HTMLInputElement;
     let field: ReturnType<typeof createDateField>;
     let renderedValue: string;
@@ -81,14 +115,16 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
         if (disposed || !field || !available(active) || composing.size) { return; }
         const input = active;
         const draft = field.draft();
-        const valid = field.validate();
+        let valid = field.validate();
         if (valid) {
-            const value = field.commit();
+            let value = field.commit();
             if (value !== undefined) {
+                const split = splitInputs.get(input);
+                if (split && kind === "select") { value = `${value.split("T")[0]}T${split.time.value}`; }
                 writing = true;
                 const changed = getInlineDateValue(input) !== value;
                 setInlineDateValue(input, value);
-                validateInput(input);
+                valid = validateInput(input);
                 if (changed) { input.dispatchEvent(new view.Event("input", {bubbles: true})); }
                 if (!disposed && (changed || kind === "select" || kind === "clear") && kind !== "input") {
                     input.dispatchEvent(new view.Event("change", {bubbles: true}));
@@ -143,12 +179,129 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
         }
         input.placeholder = getInlineDateType(input) === "date" ? "YYYY-MM-DD" :
             getInlineDateType(input) === "time" ? "HH:mm[:ss[.SSS]]" : "YYYY-MM-DD HH:mm";
+        if (getInlineDateType(input) !== "datetime-local") {
+            splitReleases.get(input)?.();
+            return;
+        }
+        if (!splitInputs.has(input)) {
+            const value = input.value;
+            const inputLabel = input.getAttribute("aria-label") || Array.from(input.labels || [])
+                .map(label => label.textContent.trim()).filter(Boolean).join(" ");
+            const element = doc.createElement("span");
+            element.className = "date-picker__split";
+            const dateField = doc.createElement("span");
+            dateField.className = "date-picker__split-date";
+            const dateLabel = doc.createElement("span");
+            dateLabel.className = "ft__smaller";
+            dateLabel.textContent = languages.date || languages.startDate;
+            if (!input.getAttribute("aria-label") && !input.labels?.length) { input.setAttribute("aria-label", dateLabel.textContent); }
+            const timeField = doc.createElement("span");
+            timeField.className = "date-picker__split-time";
+            const timeLabel = doc.createElement("span");
+            timeLabel.className = "ft__smaller";
+            timeLabel.textContent = languages.datePickerTime || languages.includeTime;
+            const time = doc.createElement("input");
+            time.type = "text";
+            time.className = "b3-text-field date-picker-input";
+            time.dataset.datePickerPart = "time";
+            time.placeholder = "HH:mm";
+            time.autocomplete = "off";
+            time.spellcheck = false;
+            time.setAttribute("aria-label", inputLabel.endsWith(timeLabel.textContent) ? inputLabel :
+                `${inputLabel} ${timeLabel.textContent}`.trim());
+            input.before(element);
+            dateField.append(input);
+            timeField.append(time);
+            element.append(dateField, timeField);
+            splitInputs.set(input, {time, element});
+            setInlineDateValue(input, value);
+            const reportDescriptor = Object.getOwnPropertyDescriptor(input, "reportValidity");
+            const reportValidity = input.reportValidity.bind(input);
+            Object.defineProperty(input, "reportValidity", {configurable: true, value: () =>
+                validateDateValue(input.value, {type: "date"}) === "valid" && input.value && !time.validity.valid ?
+                    time.reportValidity() : reportValidity()});
+            let forwarding = false;
+            let changed = false;
+            const forward = (name: string) => {
+                forwarding = true;
+                try { input.dispatchEvent(new view.Event(name, {bubbles: true})); }
+                finally { forwarding = false; }
+            };
+            const onInput = (event: Event) => {
+                if (forwarding || writing) { return; }
+                changed = true;
+                const target = event.target as HTMLInputElement;
+                editingParts.set(input, target === time || /[T ]/.test(target.value) ? "time" : "date");
+                if (!composing.has(input) && /[T ]/.test(target.value)) {
+                    const full = target.value.replace(" ", "T");
+                    if (validateDateValue(full, {type: "datetime-local", step: "any"}) === "valid") {
+                        setInlineDateValue(input, full);
+                    }
+                }
+                if (target === time) {
+                    event.stopImmediatePropagation();
+                    forward("input");
+                }
+            };
+            const onChange = (event: Event) => {
+                if (forwarding || writing) { return; }
+                if (event.isTrusted) { event.stopImmediatePropagation(); }
+                else { onInput(event); }
+            };
+            const onBlur = (event: FocusEvent) => {
+                event.stopImmediatePropagation();
+            };
+            const onLeave = (event: FocusEvent) => {
+                if (element.contains(event.relatedTarget as Node) || !changed) { return; }
+                if (!composing.has(input)) { time.value = normalizeTimeDraft(time.value); }
+                changed = false;
+                forward("change");
+            };
+            const onFocus = () => activate(input);
+            const onKey = (event: KeyboardEvent) => {
+                event.stopPropagation();
+                if (event.key === "Tab") { return; }
+                const forwarded = new view.KeyboardEvent("keydown", {key: event.key, code: event.code,
+                    altKey: event.altKey, ctrlKey: event.ctrlKey, shiftKey: event.shiftKey,
+                    metaKey: event.metaKey, isComposing: event.isComposing, bubbles: true, cancelable: true});
+                if (!input.dispatchEvent(forwarded)) { event.preventDefault(); }
+            };
+            const onComposition = (event: CompositionEvent) => {
+                event.stopPropagation();
+                input.dispatchEvent(new view.CompositionEvent(event.type, {data: event.data, bubbles: true}));
+            };
+            element.addEventListener("input", onInput, true);
+            element.addEventListener("change", onChange, true);
+            element.addEventListener("blur", onBlur, true);
+            element.addEventListener("focusout", onLeave);
+            time.addEventListener("focus", onFocus);
+            time.addEventListener("keydown", onKey);
+            time.addEventListener("compositionstart", onComposition);
+            time.addEventListener("compositionend", onComposition);
+            splitReleases.set(input, () => {
+                const value = getInlineDateValue(input);
+                if (input.parentElement === dateField) { element.replaceWith(input); }
+                else { element.remove(); }
+                splitInputs.delete(input);
+                splitReleases.delete(input);
+                input.value = value;
+                if (reportDescriptor) { Object.defineProperty(input, "reportValidity", reportDescriptor); }
+                else { delete input.reportValidity; }
+            });
+        }
+        input.placeholder = "YYYY-MM-DD";
+        const split = splitInputs.get(input);
+        split.time.disabled = input.disabled;
+        split.time.readOnly = input.readOnly;
+        split.element.classList.toggle("fn__none", input.classList.contains("fn__none") || !!input.hidden);
     };
     const update = () => {
         if (disposed) { return; }
         inputs.forEach(input => {
             syncType(input);
-            if (!composing.has(input)) { setInlineDateValue(input, input.value); }
+            if (!composing.has(input) && (!splitInputs.has(input) || /[T ]/.test(input.value))) {
+                setInlineDateValue(input, getInlineDateValue(input));
+            }
             validateInput(input);
         });
         if (active && !available(active)) { active = inputs.find(available); }
@@ -184,6 +337,11 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
                 if (event.key === "Enter" || event.key === "Escape") { event.stopPropagation(); }
                 return;
             }
+            if (event.key === "Enter") {
+                const time = splitInputs.get(input)?.time;
+                if (time) { time.value = normalizeTimeDraft(time.value); }
+                validateInput(input);
+            }
             if (event.key === " " && getInlineDateType(input) !== "datetime-local" || event.altKey && event.key === "ArrowDown") {
                 event.preventDefault(); event.stopPropagation(); open();
             }
@@ -193,7 +351,10 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
             const valid = validateInput(input);
             if (active === input && !composing.has(input) &&
                 (!field || event.type !== "change" || getInlineDateValue(input) !== renderedValue)) { render(); }
-            options.onChange?.(input, {value: getInlineDateValue(input), draft: input.value, valid, kind: event.type === "change" ? "change" : "input"});
+            const part = editingParts.get(input);
+            editingParts.delete(input);
+            options.onChange?.(input, {value: getInlineDateValue(input), draft: input.value, valid,
+                kind: event.type === "change" ? "change" : "input", part});
         };
         const startComposition = () => { composing.add(input); composingInputs.add(input); validateInput(input); };
         const endComposition = () => { composing.delete(input); composingInputs.delete(input); change(new view.Event("input")); };
@@ -214,6 +375,7 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
             input.removeEventListener("change", change, true);
             input.removeEventListener("compositionstart", startComposition);
             input.removeEventListener("compositionend", endComposition);
+            splitReleases.get(input)?.();
             if (!hadClass) { input.classList.remove("date-picker-input"); }
             const type = getInlineDateType(input);
             const draft = input.value;
@@ -248,7 +410,8 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
     if (inputs.includes(doc.activeElement as HTMLInputElement)) { activate(doc.activeElement as HTMLInputElement); }
     return {activate, update, destroy,
         isActive: (input?: HTMLInputElement) => !disposed && (!input || active === input) &&
-            (doc.activeElement === active || !!field?.element.contains(doc.activeElement)),
+            (doc.activeElement === active || !!splitInputs.get(active)?.element.contains(doc.activeElement) ||
+                !!field?.element.contains(doc.activeElement)),
         validate: () => !disposed && !inputs.some(input => available(input) && !validateInput(input)) &&
             (!field || !field.isComposing()),
     };

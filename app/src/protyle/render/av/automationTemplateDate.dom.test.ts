@@ -49,8 +49,8 @@ test("template preview normalizes datetime inputs without changing other overrid
         const input = (id: string) => host.querySelector<HTMLInputElement>(`[data-template-input="${id}"]`);
         const trigger = host.querySelector<HTMLInputElement>("[data-template-time]");
         const button = host.querySelector<HTMLButtonElement>("[data-template-run]");
-        ok(!trigger.value.includes("T") && trigger.value.includes(" "), "Trigger datetime initially uses natural display");
-        ok(input("datetime").value === "2026-11-11 09:35", "Source timezone controls visible datetime");
+        ok(!trigger.value.includes("T") && trigger.closest(".date-picker__split").querySelector<HTMLInputElement>('[data-date-picker-part="time"]').value.length >= 5, "Trigger datetime has separate visible time");
+        ok(input("datetime").value === "2026-11-11" && modules.inline.getInlineDateValue(input("datetime")) === "2026-11-11T09:35", "Source timezone controls separate datetime");
         ok(input("date").value === "2026-11-11" && input("range").value === JSON.stringify(range) &&
             !input("range").dataset.datePickerType, "Date-only and range text stay distinct");
         const edit = (field: HTMLInputElement, value: string) => {

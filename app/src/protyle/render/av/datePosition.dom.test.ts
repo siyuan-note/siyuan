@@ -67,7 +67,7 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
                 modules.datePanel.datePanel.bind(context);
             };
             mount(); await tick();
-            const inputs = menu.querySelectorAll<HTMLInputElement>("input");
+            const inputs = menu.querySelectorAll<HTMLInputElement>("input:not([data-date-picker-part])");
             let items = menu.querySelector<HTMLElement>(".b3-menu__items");
             const check = (step: string) => {
                 const rect = menu.getBoundingClientRect();
@@ -94,6 +94,24 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
             for (let cycle = 0; cycle < 2; cycle++) {
                 inputs[2].click(); await tick(); check("range");
                 inputs[3].click(); await tick(); check("time");
+                for (const split of menu.querySelectorAll<HTMLElement>(".date-picker__split")) {
+                    const pair = Array.from(split.querySelectorAll<HTMLInputElement>("input"));
+                    const [dateRect, timeRect] = pair.map(input => input.getBoundingClientRect());
+                    ok(Math.abs(dateRect.width - timeRect.width) <= 1, "date and time inputs have equal widths");
+                    ok(Math.abs(parseFloat(getComputedStyle(split).gap) - 8) <= 1, "split inputs retain an eight pixel gap");
+                    const inputStyle = getComputedStyle(pair[0]);
+                    const canvas = document.createElement("canvas");
+                    const context = canvas.getContext("2d");
+                    context.font = inputStyle.font;
+                    const textWidth = context.measureText("2026-12-31").width;
+                    ok(pair[0].clientWidth - parseFloat(inputStyle.paddingLeft) - parseFloat(inputStyle.paddingRight) >= textWidth,
+                        "date text fits without horizontal clipping");
+                    if (Math.abs(dateRect.top - timeRect.top) <= 1) {
+                        ok(Math.abs(timeRect.left - dateRect.right - 8) <= 1, "side by side inputs have the requested gap");
+                    } else {
+                        ok(Math.abs(dateRect.left - timeRect.left) <= 1, "wrapped inputs remain aligned");
+                    }
+                }
                 inputs[1].focus(); await tick(); check("end focus");
                 const endpoint = menu.querySelector(".date-picker__endpoint > span").getBoundingClientRect();
                 const toggle = inputs[2].parentElement.firstElementChild.getBoundingClientRect();
@@ -134,7 +152,7 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
             const tick = () => new Promise(resolve => setTimeout(resolve, 100));
             const before = await run("datePanelQA.inspect()");
             for (const index of [2, 3]) {
-                const p = await run(`(() => {const input = datePanelQA.menu.querySelectorAll('input')[${index}];
+                const p = await run(`(() => {const input = datePanelQA.menu.querySelectorAll('input:not([data-date-picker-part])')[${index}];
                     input.scrollIntoView({block:'nearest'}); const r = input.getBoundingClientRect();
                     return {x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()`);
                 const top = (await run("datePanelQA.inspect()")).top;
@@ -147,7 +165,7 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
                 const after = await run("datePanelQA.inspect()");
                 assert.equal(after.writes, 0, "Toggle release does not click clear or submit");
                 assert.equal(after.date.substring(0, 10), before.date.substring(0, 10), "Toggle release does not select a shifted calendar day");
-                assert.equal(await run(`datePanelQA.menu.querySelectorAll('input')[${index}].checked`), true);
+                assert.equal(await run(`datePanelQA.menu.querySelectorAll('input:not([data-date-picker-part])')[${index}].checked`), true);
                 await run("datePanelQA.check('pointer expansion')");
             }
             win.setContentSize(320, 400); await tick();

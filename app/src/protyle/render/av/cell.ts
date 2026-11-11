@@ -657,10 +657,10 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
     const avID = blockElement.dataset.avId;
     const hostID = getAVHostIdentity(blockElement);
     const rootID = protyle.block.rootID;
-    const attributeSelect = (type === "select" || type === "mSelect") && cellElements.every(element =>
+    const attributeCell = (type === "select" || type === "mSelect" || type === "date") && cellElements.every(element =>
         element.classList.contains("custom-attr__avvalue") && !element.dataset.avBatchOriginalValue);
     const cellOwner = getAVCellEditorOwner(blockElement);
-    const ownerElement = attributeSelect ?
+    const ownerElement = attributeCell ?
         cellOwner.closest<HTMLElement>(".protyle-db-attr, .protyle-db-row, .b3-dialog__container") || cellOwner : cellOwner;
     const attributeID = blockElement.dataset.attributeId;
     const viewType = blockElement.dataset.avType as TAVView;
@@ -699,7 +699,7 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
         }
     };
     return () => {
-        if (attributeSelect && !blockElement.isConnected) {
+        if (attributeCell && !blockElement.isConnected) {
             // 属性栏刷新会替换数据库容器，只在原面板内恢复同一属性目标。
             const currentBlock = ownerElement.querySelector<HTMLElement>(
                 `[data-av-id="${escapeAttr(avID)}"][data-attribute-id="${escapeAttr(attributeID || "")}"]` +
@@ -709,7 +709,7 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
         }
         const currentRelationHost = getAVRelationHost(blockElement);
         if (!blockElement.isConnected || !ownerElement.contains(blockElement) ||
-            (attributeSelect && blockElement.dataset.attributeId !== attributeID) ||
+            (attributeCell && blockElement.dataset.attributeId !== attributeID) ||
             blockElement.dataset.avId !== avID || getAVHostIdentity(blockElement) !== hostID ||
             blockElement.dataset.avType !== viewType || protyle.block.rootID !== rootID ||
             blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) !== viewAttribute ||
@@ -728,7 +728,7 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
         const attributeElements: HTMLElement[] = [];
         for (const target of targets) {
             if (!target.rowID || !target.colID) return;
-            if (attributeSelect) {
+            if (attributeCell) {
                 const element = blockElement.querySelector<HTMLElement>(
                     `.custom-attr__avvalue[data-row-id="${escapeAttr(target.rowID)}"]` +
                     `[data-col-id="${escapeAttr(target.colID)}"][data-type="${type}"]`);
@@ -747,7 +747,7 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
                 return;
             }
         }
-        if (attributeSelect) {
+        if (attributeCell) {
             attributeElements.forEach((element, index) => cellElements[index] = element);
             return {cells, values, elements: attributeElements, blockElement};
         }
@@ -1281,6 +1281,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         return getOperations ? {doOperations, undoOperations} : {text: "", json: [] as IAVCellValue[][]};
     }
     if (inputTarget) {
+        nodeElement = inputTarget.blockElement;
         stableCells = inputTarget.cells;
         cElements = inputTarget.elements;
     }

@@ -5,7 +5,7 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-import type {IAVPanelContext, IAVPanelDescriptor, TAVPanelType} from "./types";
+import type {IAVPanelContext, IAVPanelDescriptor, IOpenAVPanelOptions, TAVPanelType} from "./types";
 
 const createPanels = (overrides: Record<string, unknown> = {}) => {
     const calls: Array<[string, unknown[]]> = [];
@@ -159,3 +159,39 @@ test("asynchronous group navigation consumes the current close callback and uses
     assert.equal(context.closeCB, undefined);
     assert.ok(h.calls.some(([name, args]) => name === "getGroupsHTML" && args[0] === context.fields));
 });
+
+for (const type of ["relation", "rollup"] as const) {
+    for (const targetID of ["target", "av"]) {
+        test(`${type} field filters retain their owner while loading ${targetID === "av" ? "self" : "another database"} fields`, () => {
+            const status = {id: "status", type: "select", name: "Status"} as IAVColumn;
+            const filters: IAVFilter[] = [{column: status.id, operator: "Is not empty", value: {type: "select"}}];
+            const relation = {id: "relation", type: "relation", relation: {avID: targetID, candidateFilters: filters}} as IAVColumn;
+            const rollup = {id: "rollup", type: "rollup", rollup: {relationKeyID: relation.id, filters}} as IAVColumn;
+            const requests: Array<{id: string}> = [];
+            const h = createPanels({fetchPost: (_url: string, data: {id: string}, callback: (response: unknown) => void) => {
+                requests.push(data);
+                callback({code: 0, data: {av: {id: targetID, name: "Target", keyValues: [{key: status}]}}});
+            }});
+            let opened: IOpenAVPanelOptions;
+            const context = contextFor("edit", {fields: [relation, rollup],
+                avPanelElement: {isConnected: true, remove() {}} as unknown as Element,
+                menuElement: {querySelector: (): null => null} as unknown as HTMLElement,
+                openPanel: options => { opened = options; }});
+            context.options.colId = type;
+            h.registry.dispatchAVPanelAction(context, {type: "goAttrViewColFilters",
+                target: {dataset: {filterType: type}, classList: {contains: () => false}} as unknown as HTMLElement,
+                event: {preventDefault() {}, stopPropagation() {}} as MouseEvent});
+            assert.equal(requests[0].id, targetID);
+            assert.equal(opened.data.id, targetID);
+            assert.ok("columns" in opened.data.view);
+            assert.equal(opened.data.view.columns[0], status);
+            assert.deepEqual(JSON.parse(JSON.stringify(opened.data.view.filters)), filters);
+            assert.notEqual(opened.data.view.filters, filters);
+            assert.equal(opened.filterOperation.avID, "av");
+            assert.equal(opened.filterOperation.keyID, type);
+            assert.equal(opened.filterOperation.action, type === "relation" ?
+                "setAttrViewColRelationFilters" : "setAttrViewColRollupFilters");
+            assert.equal(opened.blockElement, context.options.blockElement);
+        });
+    }
+}

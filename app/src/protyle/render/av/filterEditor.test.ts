@@ -3,6 +3,56 @@ import * as assert from "node:assert/strict";
 import {test} from "node:test";
 import {ScriptTarget} from "typescript";
 import {loadModule} from "../../../testSupport/loadModule";
+import * as filterTree from "./filterTree";
+
+for (const action of [undefined, "setAttrViewColRelationFilters", "setAttrViewColRollupFilters"] as const) {
+    test(`${action || "view filters"} add and edit conditions with matching undo destinations`, () => {
+        const submissions: Array<{doOperations: IOperation[], undoOperations: IOperation[]}> = [];
+        const items: Array<{click: () => void}> = [];
+        const methods = loadModule<typeof import("./filter")>("src/protyle/render/av/filter.ts", {
+            window: {siyuan: {languages: new Proxy({}, {get: (_target, key) => String(key)})}},
+            document: {createElement: () => ({style: {}, offsetWidth: 10}), body: {appendChild() {}, removeChild() {}}},
+            require: (name: string) => name === "./capabilities" ? capabilities : ({
+                "./filterTree": filterTree,
+                "./view": {getFieldsByData: (data: IAV) => "columns" in data.view ? data.view.columns : data.view.fields},
+                "./col": {getColIconByType: () => "iconText"},
+                "../../../util/escape": {escapeAttr: String, escapeHtml: String},
+                "../../../util/setPosition": {setPosition() {}},
+                "../../../constants": {Constants: {}},
+                "../../../plugin/Menu": {Menu: class {
+                    addItem(item: {click: () => void}) { items.push(item); }
+                    open() {}
+                }},
+                "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, doOperations: IOperation[], undoOperations: IOperation[]) => {
+                    submissions.push({doOperations, undoOperations});
+                }},
+            })[name] || {},
+        }, ScriptTarget.ES2022);
+        const data = {id: "target", view: {columns: [{id: "text", type: "text", name: "Text"}],
+            filters: [{combination: "and", filters: []}]}} as unknown as IAV;
+        const filterOperation = action ? {action, avID: "source", keyID: "source-field"} : undefined;
+        methods.addFilter({data, avId: data.id, protyle: {} as IProtyle,
+            blockElement: {getAttribute: () => "source-block"} as unknown as Element,
+            rect: {} as DOMRect, tabRect: {} as DOMRect, menuElement: {} as HTMLElement, filterOperation});
+        items[0].click();
+        const changed = {column: "text", operator: "Contains", value: {type: "text", text: {content: "changed"}}} as IAVFilter;
+        methods.commitFilter(data, "0", changed, {} as IProtyle, "source-block", data.id, null, false, filterOperation);
+        assert.equal(submissions.length, 2);
+        for (const submission of submissions) {
+            for (const operation of [...submission.doOperations, ...submission.undoOperations]) {
+                assert.equal(operation.action, action || "setAttrViewFilters");
+                assert.equal(operation.avID, action ? "source" : "target");
+                assert.equal(operation.keyID, action ? "source-field" : undefined);
+                assert.equal(operation.blockID, "source-block");
+            }
+        }
+        const filters = (operation: IOperation) => JSON.parse(JSON.stringify(operation.data)) as IAVFilter[];
+        assert.deepEqual(filters(submissions[0].undoOperations[0]), [{combination: "and", filters: []}]);
+        assert.deepEqual(filters(submissions[1].undoOperations[0]), filters(submissions[0].doOperations[0]));
+        assert.deepEqual(filters(submissions[1].doOperations[0]), [{combination: "and", filters: [changed]}]);
+        assert.equal(data.id, "target");
+    });
+}
 
 test("selection conditions with the same path read only their own editor options", () => {
     const methods = loadModule<typeof import("./filter")>("src/protyle/render/av/filter.ts", {

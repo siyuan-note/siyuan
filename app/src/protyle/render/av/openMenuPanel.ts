@@ -96,7 +96,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
             }
             const operation = (filters: IAVFilter[]): IOperation => ({
                 action: options.filterOperation?.action || "setAttrViewFilters",
-                avID,
+                avID: options.filterOperation?.avID || avID,
                 keyID: options.filterOperation?.keyID,
                 data: filters,
                 blockID,

@@ -19,6 +19,8 @@ import {bindDatePicker, isDatePickerOpen} from "../../../datePicker";
 
 export interface FilterEditorOptions {
     action?: IAVFilterOperation["action"];
+    // 字段筛选保存到字段所属数据库，条件元数据来自关联目标数据库。
+    avID?: string;
     keyID?: string;
     save?: (filters: IAVFilter[]) => void;
     render?: () => string;
@@ -32,7 +34,7 @@ const getSetFiltersOperation = (avID: string, blockID: string, data: IAVFilter[]
                                 filterOperation?: FilterEditorOptions): IOperation => {
     return {
         action: filterOperation?.action || "setAttrViewFilters",
-        avID,
+        avID: filterOperation?.avID || avID,
         keyID: filterOperation?.keyID,
         data,
         blockID,

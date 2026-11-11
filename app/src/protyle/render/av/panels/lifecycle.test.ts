@@ -12,6 +12,7 @@ const createPanel = (mobile = false) => {
     const observers: Array<() => void> = [];
     const positions: Array<{left: number, top: number}> = [];
     const requests: Array<{url: string, data: {ignoreRows: boolean}}> = [];
+    const transactions: Array<{doOperations: IOperation[], undoOperations: IOperation[]}> = [];
     let onMenuRemove = () => {};
     let context: IAVPanelContext;
     let existing = false;
@@ -33,6 +34,10 @@ const createPanel = (mobile = false) => {
         getAVHostIdentity: (element: HTMLElement) => element.getAttribute("data-node-id"),
         isAVRenderData: (data: {view?: unknown}) => !!data?.view,
         getPageSize: () => ({}), getFieldsByData: (data: IAV & {fields: IAVColumn[]}) => data.fields,
+        transaction: (_protyle: IProtyle, doOperations: IOperation[], undoOperations: IOperation[]) => {
+            calls.push("transaction");
+            transactions.push({doOperations, undoOperations});
+        },
         fetchPost: (url: string, data: {ignoreRows: boolean}, callback: (response: unknown) => void) => {
             requests.push({url, data});
             callback({code: 0, data: {id: "av", viewType: "table", fields: [], view: {rows: []}}});
@@ -63,7 +68,7 @@ const createPanel = (mobile = false) => {
     });
     const open = exports.openMenuPanel as typeof import("../openMenuPanel").openMenuPanel;
     const click = (detail: unknown) => events.get("click")({detail, target: {dataset: {}, closest: (): null => null}, preventDefault: () => {}, stopPropagation: () => {}});
-    return {open, options, calls, click, observers, menuClasses, positions, requests, resize: () => events.get("resize")({}),
+    return {open, options, calls, click, observers, menuClasses, positions, requests, transactions, resize: () => events.get("resize")({}),
         onMenuRemove: (callback: () => void) => { onMenuRemove = callback; },
         setBackTarget: () => {
             backTarget = {dataset: {type: "go-properties"}, closest: (): null => null} as unknown as HTMLElement;
@@ -111,6 +116,7 @@ for (const mobile of [false, true]) {
         const saved: IAVFilter[][] = [];
         h.options.type = "filters";
         h.options.protyle = undefined;
+        h.options.data.id = "query-database";
         h.options.anchorElement = {getBoundingClientRect: () => ({right: 400, bottom: 50, width: 24, height: 20})} as HTMLElement;
         h.options.filterOperation = {save: filters => saved.push(filters)};
         h.open(h.options);
@@ -118,13 +124,44 @@ for (const mobile of [false, true]) {
         const filters: IAVFilter[] = [{combination: "and", filters: []}];
         h.context.saveFilters(filters, []);
         assert.equal(saved[0], filters);
-        assert.equal(h.context.avID, "av");
+        assert.equal(h.context.avID, "query-database");
         assert.ok(!h.calls.includes("transaction"));
         h.calls.length = 0;
         await h.click("close");
         assert.ok(h.calls.includes("remove"));
         assert.ok(!h.calls.includes("focusBlock"));
     });
+}
+
+for (const mobile of [false, true]) {
+    for (const action of ["setAttrViewColRelationFilters", "setAttrViewColRollupFilters"] as const) {
+        test(`${action} saves and clears the source field with undo (${mobile ? "mobile" : "desktop"})`, async () => {
+            const h = createPanel(mobile);
+            h.options.type = "filters";
+            h.options.data.id = "target";
+            h.options.filterOperation = {action, avID: "av", keyID: "source-field"};
+            h.open(h.options);
+            await Promise.resolve();
+            assert.equal(h.context.data.id, "target");
+            assert.equal(h.context.avID, "target");
+            const filters: IAVFilter[] = [{column: "target-field", operator: "Is not empty", value: {type: "text"}}];
+            h.context.saveFilters(filters, []);
+            h.context.saveFilters([], filters);
+            assert.equal(h.transactions.length, 2);
+            for (const transaction of h.transactions) {
+                for (const operation of [...transaction.doOperations, ...transaction.undoOperations]) {
+                    assert.equal(operation.action, action);
+                    assert.equal(operation.avID, "av");
+                    assert.equal(operation.keyID, "source-field");
+                    assert.equal(operation.blockID, "block");
+                }
+            }
+            assert.equal(h.transactions[0].doOperations[0].data, filters);
+            assert.equal(h.transactions[1].undoOperations[0].data, filters);
+            assert.equal((h.transactions[0].undoOperations[0].data as IAVFilter[]).length, 0);
+            assert.equal((h.transactions[1].doOperations[0].data as IAVFilter[]).length, 0);
+        });
+    }
 }
 
 test("query panels retain their anchor while loading and use a visible anchor again on resize", async () => {

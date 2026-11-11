@@ -235,6 +235,7 @@ export const filtersPanel: IAVPanelDescriptor = {
                         filterOperation: {
                             action: isRelationFilter ? "setAttrViewColRelationFilters" :
                                 "setAttrViewColRollupFilters",
+                            avID: context.avID,
                             keyID: colId,
                         },
                     });

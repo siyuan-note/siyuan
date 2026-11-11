@@ -520,7 +520,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Automatic sync normally runs in the background without opening a panel. Click the sync icon to view the current file, written bytes, speed, and estimated remaining time. While restoring indexes after files are written, both expanded and collapsed views show the current indexing status with an animated progress bar until index restoration completes. "
+					"Data": "Automatic sync normally runs in the background without opening a panel. Click the sync icon to view the current file, written bytes, speed, and estimated remaining time. While restoring indexes after files are written, the panel shows the current indexing status with an animated progress bar. The collapsed panel shows an expand button when more information is available. "
 				},
 				{
 					"Type": "NodeTextMark",

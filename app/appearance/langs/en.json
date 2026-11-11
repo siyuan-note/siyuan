@@ -3746,6 +3746,8 @@
 		"466": "Automatic AI OCR paused for %s; retrying in 10 minutes. Check the provider account and model settings: %s",
 		"467": "The streaming response was interrupted because the client could not keep up; reopen the session to recover available output",
 		"468": "The response was interrupted; reopen the session to recover available output",
-		"469": "Authentication failed: this request did not pass the local access checks. VPNs, proxies or network filtering apps may affect local access; try temporarily disabling them and retrying. When accessing through a non-local address, set a lock screen password first"
+		"469": "Authentication failed: this request did not pass the local access checks. VPNs, proxies or network filtering apps may affect local access; try temporarily disabling them and retrying. When accessing through a non-local address, set a lock screen password first",
+		"470": "Tool call round limit reached. I have stopped using tools; this task may still be incomplete",
+		"471": "Repeated tool calls returned the same result. I have stopped using tools; this task may still be incomplete"
 	}
 }

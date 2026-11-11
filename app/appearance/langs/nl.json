@@ -3746,6 +3746,8 @@
 		"466": "Automatische AI-OCR gepauzeerd voor %s; nieuwe poging over 10 minuten. Controleer het provideraccount en de modelinstellingen: %s",
 		"467": "Het streamingantwoord is onderbroken omdat de client het tempo niet kon bijhouden; open de sessie opnieuw om beschikbare uitvoer te herstellen",
 		"468": "Het antwoord is onderbroken; open de sessie opnieuw om beschikbare uitvoer te herstellen",
-		"469": "Authenticatie mislukt: dit verzoek heeft de controles voor lokale toegang niet doorstaan. VPN’s, proxy’s of netwerkfilterapps kunnen lokale toegang beïnvloeden; schakel ze tijdelijk uit en probeer het opnieuw. Stel bij toegang via een niet-lokaal adres eerst een wachtwoord voor schermvergrendeling in"
+		"469": "Authenticatie mislukt: dit verzoek heeft de controles voor lokale toegang niet doorstaan. VPN’s, proxy’s of netwerkfilterapps kunnen lokale toegang beïnvloeden; schakel ze tijdelijk uit en probeer het opnieuw. Stel bij toegang via een niet-lokaal adres eerst een wachtwoord voor schermvergrendeling in",
+		"470": "Het maximumaantal rondes met hulpmiddelaanroepen is bereikt. Ik ben gestopt met het gebruik van hulpmiddelen; deze taak is mogelijk nog niet voltooid",
+		"471": "Herhaalde hulpmiddelaanroepen leverden hetzelfde resultaat op. Ik ben gestopt met het gebruik van hulpmiddelen; deze taak is mogelijk nog niet voltooid"
 	}
 }

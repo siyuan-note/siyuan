@@ -3746,6 +3746,8 @@
 		"466": "OCR automatique par IA suspendue pour %s ; nouvel essai dans 10 minutes. Vérifiez le compte du fournisseur et les paramètres du modèle : %s",
 		"467": "La réponse en streaming a été interrompue car le client ne pouvait pas suivre le rythme ; rouvrez la session pour récupérer le contenu disponible",
 		"468": "La réponse a été interrompue ; rouvrez la session pour récupérer le contenu disponible",
-		"469": "Échec de l’authentification : cette requête n’a pas passé les vérifications d’accès local. Les VPN, proxys ou applications de filtrage réseau peuvent affecter l’accès local ; essayez de les désactiver temporairement, puis réessayez. Pour accéder via une adresse non locale, définissez d’abord un mot de passe de verrouillage"
+		"469": "Échec de l’authentification : cette requête n’a pas passé les vérifications d’accès local. Les VPN, proxys ou applications de filtrage réseau peuvent affecter l’accès local ; essayez de les désactiver temporairement, puis réessayez. Pour accéder via une adresse non locale, définissez d’abord un mot de passe de verrouillage",
+		"470": "La limite de cycles d’appels aux outils a été atteinte. J’ai cessé d’utiliser les outils ; cette tâche est peut-être encore inachevée",
+		"471": "Les appels répétés aux outils ont renvoyé le même résultat. J’ai cessé d’utiliser les outils ; cette tâche est peut-être encore inachevée"
 	}
 }

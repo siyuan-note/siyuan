@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261106140529"
+		"updated": "20261111084137"
 	},
 	"Children": [
 		{
@@ -317,7 +317,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-iffmsq0",
-				"updated": "20261105133947"
+				"updated": "20261111084137"
 			},
 			"Children": [
 				{
@@ -538,7 +538,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-x813t3f",
-				"updated": "20261105133947"
+				"updated": "20261111084137"
 			},
 			"Children": [
 				{
@@ -589,6 +589,34 @@
 				{
 					"Type": "NodeText",
 					"Data": "While the agent is running, select the stop button to interrupt the current task. Automatic retries keep and continue the same thinking card. Stopping keeps already-visible output while the server finishes saving and recovery, but does not undo completed actions. A slow connection may interrupt generation; reopen the session to recover saved content. Results are generally more reliable when the goal, scope, and destination are explicit."
+				}
+			]
+		},
+		{
+			"ID": "20261111083018-c643006",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111083018-c643006",
+				"updated": "20261111084137"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Within the current conversation turn, the agent checks repeated calls involving eligible built-in reads, as well as calls that fail or return empty results, using a window of the 10 most recent eligible calls. When the same tool with the same arguments returns the same result 3 times, the model is prompted to change strategy; at 5 occurrences, tool use stops. A changed result for the same target resets that target’s count; successful writes or user interaction reset the observation window. This protection covers a limited range of repeated calls and cannot detect every lack of progress."
+				}
+			]
+		},
+		{
+			"ID": "20261111083018-6202b92",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111083018-6202b92",
+				"updated": "20261111083018"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After the tool call round limit is reached or repeated calls cause a stop, if the model provides no valid text reply, the system displays and saves an explicit interruption notice stating that the task may still be incomplete. Stopping tool use does not mean the task is complete and does not undo completed actions."
 				}
 			]
 		},

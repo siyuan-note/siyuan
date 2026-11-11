@@ -3746,6 +3746,8 @@
 		"466": "Automatische KI-OCR für %s pausiert; erneuter Versuch in 10 Minuten. Anbieterkonto und Modelleinstellungen prüfen: %s",
 		"467": "Die Streaming-Antwort wurde unterbrochen, weil der Client nicht mithalten konnte; öffnen Sie die Sitzung erneut, um verfügbare Ausgaben wiederherzustellen",
 		"468": "Die Antwort wurde unterbrochen; öffnen Sie die Sitzung erneut, um verfügbare Ausgaben wiederherzustellen",
-		"469": "Authentifizierung fehlgeschlagen: Diese Anfrage hat die Prüfungen für den lokalen Zugriff nicht bestanden. VPNs, Proxys oder Netzwerkfilter-Apps können den lokalen Zugriff beeinträchtigen; deaktivieren Sie diese vorübergehend und versuchen Sie es erneut. Richten Sie beim Zugriff über eine nicht lokale Adresse zuerst ein Sperrbildschirm-Passwort ein"
+		"469": "Authentifizierung fehlgeschlagen: Diese Anfrage hat die Prüfungen für den lokalen Zugriff nicht bestanden. VPNs, Proxys oder Netzwerkfilter-Apps können den lokalen Zugriff beeinträchtigen; deaktivieren Sie diese vorübergehend und versuchen Sie es erneut. Richten Sie beim Zugriff über eine nicht lokale Adresse zuerst ein Sperrbildschirm-Passwort ein",
+		"470": "Die maximale Anzahl an Werkzeugaufrufrunden wurde erreicht. Ich habe die Verwendung von Werkzeugen beendet; diese Aufgabe ist möglicherweise noch nicht abgeschlossen",
+		"471": "Wiederholte Werkzeugaufrufe lieferten dasselbe Ergebnis. Ich habe die Verwendung von Werkzeugen beendet; diese Aufgabe ist möglicherweise noch nicht abgeschlossen"
 	}
 }

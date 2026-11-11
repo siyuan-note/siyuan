@@ -3746,6 +3746,8 @@
 		"466": "OCR automático con IA pausado para %s; se reintentará en 10 minutos. Revisa la cuenta del proveedor y la configuración del modelo: %s",
 		"467": "La respuesta en streaming se interrumpió porque el cliente no pudo seguir el ritmo; vuelva a abrir la sesión para recuperar el contenido disponible",
 		"468": "La respuesta se interrumpió; vuelva a abrir la sesión para recuperar el contenido disponible",
-		"469": "Error de autenticación: esta solicitud no superó las comprobaciones de acceso local. Las VPN, los proxies o las aplicaciones de filtrado de red pueden afectar al acceso local; prueba a desactivarlos temporalmente y vuelve a intentarlo. Para acceder mediante una dirección no local, configura primero una contraseña de bloqueo de pantalla"
+		"469": "Error de autenticación: esta solicitud no superó las comprobaciones de acceso local. Las VPN, los proxies o las aplicaciones de filtrado de red pueden afectar al acceso local; prueba a desactivarlos temporalmente y vuelve a intentarlo. Para acceder mediante una dirección no local, configura primero una contraseña de bloqueo de pantalla",
+		"470": "Se ha alcanzado el límite de rondas de llamadas a herramientas. He dejado de usar herramientas; esta tarea puede seguir incompleta",
+		"471": "Las llamadas repetidas a herramientas devolvieron el mismo resultado. He dejado de usar herramientas; esta tarea puede seguir incompleta"
 	}
 }

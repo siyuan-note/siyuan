@@ -3746,6 +3746,8 @@
 		"466": "OCR AI otomatis dijeda untuk %s; mencoba lagi dalam 10 menit. Periksa akun penyedia dan pengaturan model: %s",
 		"467": "Respons streaming terputus karena klien tidak dapat mengimbangi laju penerimaan; buka kembali sesi untuk memulihkan keluaran yang tersedia",
 		"468": "Respons terputus; buka kembali sesi untuk memulihkan keluaran yang tersedia",
-		"469": "Autentikasi gagal: permintaan ini tidak lolos pemeriksaan akses lokal. VPN, proksi, atau aplikasi penyaring jaringan dapat memengaruhi akses lokal; coba nonaktifkan sementara lalu coba lagi. Saat mengakses melalui alamat nonlokal, atur kata sandi layar kunci terlebih dahulu"
+		"469": "Autentikasi gagal: permintaan ini tidak lolos pemeriksaan akses lokal. VPN, proksi, atau aplikasi penyaring jaringan dapat memengaruhi akses lokal; coba nonaktifkan sementara lalu coba lagi. Saat mengakses melalui alamat nonlokal, atur kata sandi layar kunci terlebih dahulu",
+		"470": "Batas putaran pemanggilan alat telah tercapai. Saya telah berhenti menggunakan alat; tugas ini mungkin masih belum selesai",
+		"471": "Pemanggilan alat berulang mengembalikan hasil yang sama. Saya telah berhenti menggunakan alat; tugas ini mungkin masih belum selesai"
 	}
 }

@@ -22,6 +22,8 @@ import (
 
 const (
 	testToolRoundLimitMessage  = "Tool call round limit reached. Remaining tool calls were not executed; send another message to continue"
+	testToolRoundLimitFallback = "Tool call round limit reached. I have stopped using tools; this task may still be incomplete"
+	testDoomLoopMessage        = "Repeated tool calls returned the same result. I have stopped using tools; this task may still be incomplete"
 	testToolRoundLimitToolName = "test_round_limit"
 )
 
@@ -34,7 +36,16 @@ func TestAgentChatToolRoundLimit(t *testing.T) {
 			rejected   bool
 			budget     int
 			reasoning  string
+			length     bool
 		}{
+			{name: "empty", budget: 1},
+			{name: "whitespace", chunks: []string{" ", "\n\t"}, budget: 1},
+			{name: "reasoning only", reasoning: "Considering the completed read.", budget: 1},
+			{name: "length empty", length: true, budget: 1},
+			{name: "length whitespace", chunks: []string{" ", "\n\t"}, length: true, budget: 1},
+			{name: "length tool markup", chunks: []string{"<|tool_", "calls|>file edit"}, rejected: true, length: true, budget: 1},
+			{name: "length reasoning only", reasoning: "Considering the completed read.", length: true, budget: 1},
+			{name: "length summary", chunks: []string{"  Completed the read.\n"}, length: true, budget: 1},
 			{name: "summary", chunks: []string{"Completed the read. ", "The edit remains unfinished."}, budget: 1},
 			{name: "DSML", chunks: []string{"Preparing an edit <", "｜｜DS", "ML｜｜ calls><invoke name=\"file\">edit</invoke>"}, rejected: true, budget: 1},
 			{name: "tool calls token", chunks: []string{"<|tool_", "calls|>file edit"}, rejected: true, budget: 1},
@@ -44,9 +55,6 @@ func TestAgentChatToolRoundLimit(t *testing.T) {
 			{name: "below limit", chunks: []string{"Task completed."}, budget: 2},
 			{name: "reasoning markup", chunks: []string{"An edit was requested."}, reasoning: "<|tool_calls|>file edit", rejected: true, budget: 1},
 		} {
-			if tc.reasoning != "" && protocol != "openai" {
-				continue
-			}
 			t.Run(protocol+"/"+tc.name, func(t *testing.T) {
 				executed := setupToolRoundLimitAgentTest(t, tc.budget)
 				limited := tc.budget == 1
@@ -65,15 +73,17 @@ func TestAgentChatToolRoundLimit(t *testing.T) {
 						return
 					}
 					encoded, _ := json.Marshal(payload)
+					encodedLimitPrompt, _ := json.Marshal(toolRoundLimitPrompt)
+					hasLimitPrompt := strings.Contains(string(encoded), string(encodedLimitPrompt[1:len(encodedLimitPrompt)-1]))
 					if attempt == 1 || attempt == 3 || !limited {
-						if len(payload["tools"]) == 0 || strings.Contains(string(encoded), "Tool call round limit reached") {
+						if len(payload["tools"]) == 0 || hasLimitPrompt {
 							t.Error("tools were limited before the budget was spent")
 						}
 					} else {
 						if raw := string(payload["tools"]); raw != "" && raw != "[]" && raw != "null" {
 							t.Errorf("tools remained available at the limit: %s", raw)
 						}
-						if !strings.Contains(string(encoded), "Tool call round limit reached") || !strings.Contains(string(encoded), "completed read") {
+						if !hasLimitPrompt || !strings.Contains(string(encoded), "completed read") {
 							t.Errorf("summary request lost the limit instruction or completed tool result: %s", encoded)
 						}
 					}
@@ -85,33 +95,26 @@ func TestAgentChatToolRoundLimit(t *testing.T) {
 					if attempt == 3 {
 						chunks = []string{"Continued normally."}
 					}
-					content := strings.Join(chunks, "")
+					if tool == "" {
+						reasoning, length := "", false
+						if attempt == 2 {
+							reasoning, length = tc.reasoning, tc.length
+						}
+						writeToolRoundLimitSummary(t, w, protocol, chunks, reasoning, length)
+						return
+					}
 					switch protocol {
 					case util.AnthropicProtocolMessages:
-						writeAnthropicAgentResponse(t, w, "signature", content, tool, true)
+						writeAnthropicAgentResponse(t, w, "signature", "", tool, true)
 					case util.OpenAIProtocolResponses:
 						flusher := prepareTestStream(t, w)
-						var output []any
-						if tool != "" {
-							output = []any{map[string]any{"type": "function_call", "id": "fc-1", "call_id": "call-1", "name": tool, "arguments": `{"action":"list"}`, "status": "completed"}}
-						} else {
-							output = []any{map[string]any{"type": "message", "id": "msg-1", "role": "assistant", "status": "completed", "content": []any{map[string]any{"type": "output_text", "text": content}}}}
-						}
+						output := []any{map[string]any{"type": "function_call", "id": "fc-1", "call_id": "call-1", "name": tool, "arguments": `{"action":"list"}`, "status": "completed"}}
 						writeResponsesTestCompleted(t, w, flusher, "resp-1", output, 10, 5)
 					default:
 						flusher := prepareTestStream(t, w)
-						if tool != "" {
-							_, _ = fmt.Fprintf(w, "data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"call-1\",\"type\":\"function\",\"function\":{\"name\":%q,\"arguments\":\"{\\\"action\\\":\\\"list\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}]}\n\n", tool)
-							flusher.Flush()
-						} else {
-							if attempt == 2 && tc.reasoning != "" {
-								_, _ = fmt.Fprintf(w, "data: {\"choices\":[{\"index\":0,\"delta\":{\"reasoning_content\":%q}}]}\n\n", tc.reasoning)
-								flusher.Flush()
-							}
-							for _, chunk := range chunks {
-								writeTestStreamChunk(t, w, flusher, chunk)
-							}
-						}
+						_, _ = fmt.Fprintf(w, "data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"call-1\",\"type\":\"function\",\"function\":{\"name\":%q,\"arguments\":\"{\\\"action\\\":\\\"list\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}]}\n\n", tool)
+						_, _ = fmt.Fprint(w, "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":5,\"total_tokens\":15}}\n\n")
+						flusher.Flush()
 						writeTestStreamDone(t, w, flusher)
 					}
 				}))
@@ -125,7 +128,7 @@ func TestAgentChatToolRoundLimit(t *testing.T) {
 					case "content":
 						content.WriteString(event.Token)
 					case "reasoning":
-						if tc.reasoning != "" && event.Token == tc.reasoning {
+						if tc.rejected && tc.reasoning != "" && event.Token == tc.reasoning {
 							t.Error("raw tool markup was exposed as reasoning")
 						}
 					case "done":
@@ -144,8 +147,8 @@ func TestAgentChatToolRoundLimit(t *testing.T) {
 					}
 				}
 				wantContent, wantDelta := strings.Join(tc.chunks, ""), 2
-				if tc.rejected {
-					wantContent, wantDelta = "", 1
+				if limited && (tc.rejected || strings.TrimSpace(wantContent) == "") {
+					wantContent = testToolRoundLimitFallback
 				}
 				if content.String() != wantContent || errorSeen != limited || doneSeen == limited || !usageSeen || requests.Load() != 2 || executed.Load() != 1 {
 					t.Fatalf("unexpected final response: content=%q error=%v done=%v usage=%v requests=%d executed=%d", content.String(), errorSeen, doneSeen, usageSeen, requests.Load(), executed.Load())
@@ -164,6 +167,12 @@ func TestAgentChatToolRoundLimit(t *testing.T) {
 				}
 				if len(turn.Delta[0].ToolCalls) != 1 || turn.Delta[0].ToolCalls[0].State != "finished" || !strings.Contains(turn.Delta[0].ToolCalls[0].Result, "completed read") {
 					t.Fatalf("completed tool result was lost: %#v", turn.Delta[0])
+				}
+				if turn.Delta[1].Content != wantContent || len(turn.Delta[1].ToolCalls) != 0 {
+					t.Fatalf("final response was not checkpointed: %#v", turn.Delta[1])
+				}
+				if turn.CompletionTokens != 10 || turn.PromptTokens != 20 {
+					t.Fatalf("summary usage was lost: %#v", turn)
 				}
 				if kernelModel.Conf.AI.Load().Agent.MaxToolCallRounds != tc.budget {
 					t.Error("turn changed the global tool budget")
@@ -199,7 +208,7 @@ func TestAgentChatToolRoundLimit(t *testing.T) {
 						doneSeen = true
 					}
 				}
-				if !doneSeen || requests.Load() != 3 {
+				if !doneSeen || requests.Load() != 3 || executed.Load() != 1 {
 					t.Fatalf("follow-up did not complete normally: done=%v requests=%d", doneSeen, requests.Load())
 				}
 			})
@@ -298,6 +307,84 @@ func setupToolRoundLimitAgentTest(t *testing.T, budget int) *atomic.Int32 {
 func useTestToolRoundLimitLanguage(t *testing.T) {
 	t.Helper()
 	originalLangs := util.Langs
-	util.Langs = map[string]map[int]string{"en": {440: testToolRoundLimitMessage}}
+	util.Langs = map[string]map[int]string{"en": {
+		440: testToolRoundLimitMessage,
+		470: testToolRoundLimitFallback,
+		471: testDoomLoopMessage,
+	}}
 	t.Cleanup(func() { util.Langs = originalLangs })
+}
+
+func writeToolRoundLimitSummary(t *testing.T, w http.ResponseWriter, protocol string, chunks []string, reasoning string, length bool) {
+	t.Helper()
+	flusher := prepareTestStream(t, w)
+	switch protocol {
+	case util.AnthropicProtocolMessages:
+		write := func(event any) {
+			data, err := json.Marshal(event)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, _ = fmt.Fprintf(w, "data: %s\n\n", data)
+			flusher.Flush()
+		}
+		write(map[string]any{"type": "message_start", "message": map[string]any{
+			"id": "summary", "content": []any{}, "usage": map[string]int{"input_tokens": 10, "output_tokens": 1},
+		}})
+		blockIndex := 0
+		if reasoning != "" {
+			write(map[string]any{"type": "content_block_start", "index": blockIndex, "content_block": map[string]any{"type": "thinking", "thinking": reasoning, "signature": "signature"}})
+			write(map[string]any{"type": "content_block_stop", "index": blockIndex})
+			blockIndex++
+		}
+		if len(chunks) > 0 {
+			write(map[string]any{"type": "content_block_start", "index": blockIndex, "content_block": map[string]any{"type": "text", "text": ""}})
+			for _, chunk := range chunks {
+				write(map[string]any{"type": "content_block_delta", "index": blockIndex, "delta": map[string]any{"type": "text_delta", "text": chunk}})
+			}
+			write(map[string]any{"type": "content_block_stop", "index": blockIndex})
+		}
+		finish := "end_turn"
+		if length {
+			finish = "max_tokens"
+		}
+		write(map[string]any{"type": "message_delta", "delta": map[string]string{"stop_reason": finish}, "usage": map[string]int{"output_tokens": 5}})
+		write(map[string]any{"type": "message_stop"})
+	case util.OpenAIProtocolResponses:
+		output := []any{}
+		if reasoning != "" {
+			output = append(output, map[string]any{"type": "reasoning", "id": "reason-1", "summary": []any{map[string]any{"type": "summary_text", "text": reasoning}}})
+			writeResponsesTestEvent(t, w, flusher, "response.reasoning_summary_text.delta", map[string]any{"type": "response.reasoning_summary_text.delta", "output_index": 0, "delta": reasoning})
+		}
+		if len(chunks) > 0 {
+			output = append(output, map[string]any{"type": "message", "id": "msg-1", "role": "assistant", "status": "completed", "content": []any{map[string]any{"type": "output_text", "text": strings.Join(chunks, "")}}})
+			for _, chunk := range chunks {
+				writeResponsesTestEvent(t, w, flusher, "response.output_text.delta", map[string]any{"type": "response.output_text.delta", "output_index": len(output) - 1, "content_index": 0, "delta": chunk})
+			}
+		}
+		if length {
+			writeResponsesTestEvent(t, w, flusher, "response.incomplete", map[string]any{"type": "response.incomplete", "response": map[string]any{
+				"id": "resp-summary", "status": "incomplete", "incomplete_details": map[string]any{"reason": "max_output_tokens"}, "output": output,
+				"usage": map[string]int{"input_tokens": 10, "output_tokens": 5, "total_tokens": 15},
+			}})
+		} else {
+			writeResponsesTestCompleted(t, w, flusher, "resp-summary", output, 10, 5)
+		}
+	default:
+		if reasoning != "" {
+			_, _ = fmt.Fprintf(w, "data: {\"choices\":[{\"index\":0,\"delta\":{\"reasoning_content\":%q}}]}\n\n", reasoning)
+			flusher.Flush()
+		}
+		for _, chunk := range chunks {
+			writeTestStreamChunk(t, w, flusher, chunk)
+		}
+		finish := "stop"
+		if length {
+			finish = "length"
+		}
+		_, _ = fmt.Fprintf(w, "data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":%q}]}\n\n", finish)
+		_, _ = fmt.Fprint(w, "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":5,\"total_tokens\":15}}\n\n")
+		flusher.Flush()
+		writeTestStreamDone(t, w, flusher)
+	}
 }

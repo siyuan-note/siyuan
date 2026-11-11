@@ -15,7 +15,9 @@ import {getAVColorStyle} from "./color";
 import {setFilterSelectPosition} from "./selectPosition";
 import {closeInlineFilterDropdowns} from "./filterDropdown";
 import type {IAVRelationContext} from "./host";
-import {bindDatePicker, isDatePickerOpen} from "../../../datePicker";
+import {bindInlineDatePicker, validateInlineDateInput} from "../../../datePicker/inline";
+
+const destroyFilterDateEditors = new WeakMap<HTMLElement, () => void>();
 
 export interface FilterEditorOptions {
     action?: IAVFilterOperation["action"];
@@ -25,6 +27,7 @@ export interface FilterEditorOptions {
     save?: (filters: IAVFilter[]) => void;
     render?: () => string;
     root?: HTMLElement;
+    onResize?: () => void;
 }
 
 const isExactRelationOperator = (operator: string) =>
@@ -719,7 +722,7 @@ const genInlineDateHTML = (filter: IAVFilter, valueType: TAVCol, path: string): 
         const hasAbsoluteValue = suffix === "2"
             ? dateVal?.isNotEmpty2
             : dateVal && (dateVal.isNotEmpty || valueType !== "date");
-        const absDate = `<input value="${hasAbsoluteValue ? formatAbsDate(suffix === "2" ? dateVal.content2 : dateVal.content) : ""}" type="date" max="9999-12-31" class="b3-text-field b3-text-field--text" data-type="absDate${suffix}" data-path="${path}" style="${isRelative ? "display:none;" : ""}">`;
+        const absDate = `<input value="${hasAbsoluteValue ? formatAbsDate(suffix === "2" ? dateVal.content2 : dateVal.content) : ""}" type="text" data-date-picker-type="date" max="9999-12-31" class="b3-text-field b3-text-field--text" data-type="absDate${suffix}" data-path="${path}" style="${isRelative ? "display:none;" : ""}">`;
         const relDir = `<select class="b3-select" data-type="dataDirection${suffix}" data-path="${path}" style="${!isRelative ? "display:none;" : ""}">
 <option value="-1"${relativeDate?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.pastDate}</option>
 <option value="1"${relativeDate?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
@@ -961,6 +964,7 @@ export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, prot
     }
 
     if (reRender && menuElement) {
+        destroyFilterDateEditors.get(menuElement)?.();
         menuElement.innerHTML = filterOperation?.render?.() || getFiltersHTML(data);
     }
 };
@@ -1002,6 +1006,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
 
     // 保存当前行的值（从 DOM 读取后提交）
     const saveRow = (rowElement: HTMLElement, path: string, reRender: boolean) => {
+        if (!current()) { return; }
         const filter = getFilterByPath(getEditableFilters(data), path);
         const colData = findColData(path);
         if (!filter || !colData) return;
@@ -1010,8 +1015,8 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         const operator = (operatorSel?.value || filter.operator) as TAVFilterOperator;
         const usesAbsoluteDate = isAVDateType(valueType) && operator !== "Is empty" && operator !== "Is not empty" &&
             rowElement.querySelector<HTMLSelectElement>('[data-type="dateType"]')?.value !== "custom";
-        if (usesAbsoluteDate && (rowElement.querySelector('input[data-type="absDate"]:invalid') ||
-            operator === "Is between" && rowElement.querySelector('input[data-type="absDate2"]:invalid'))) {
+        if (usesAbsoluteDate && (!validateInlineDateInput(rowElement.querySelector('[data-type="absDate"]')) ||
+            operator === "Is between" && !validateInlineDateInput(rowElement.querySelector('[data-type="absDate2"]')))) {
             return;
         }
         const {newValue, relativeDate, relativeDate2} = readInlineValue(rowElement, valueType, operator, filter, menuElement);
@@ -1036,19 +1041,100 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, reRender, filterOperation);
     };
 
-    // 条件行会整体重绘，在当前编辑器内绑定新生成的日期框。
+    // 两个条件值共用月历，字段起止端点仍由 dateEndpoint 独立选择。
+    const dateEditors = new Map<HTMLElement, ReturnType<typeof bindInlineDatePicker>>();
+    destroyFilterDateEditors.set(menuElement, () => {
+        dateEditors.forEach(editor => editor.destroy());
+        dateEditors.clear();
+    });
     const bindAbsoluteDate = (event: Event) => {
         const input = event.target as HTMLInputElement;
         if (!input.dataset.type?.startsWith("absDate") ||
             input.closest('[data-filter-events-bound="true"]') !== panelElement) {
             return;
         }
-        bindDatePicker(input, {onCommit: () => {
-            const row = getRow(input);
-            if (input.isConnected && row) {
-                saveRow(row, input.dataset.path, false);
+        const row = getRow(input);
+        const container = input.closest<HTMLElement>('[data-type="valueContainer"]');
+        if (!row || !container) { return; }
+        const focusInput = event.type === "pointerdown" && input.type !== "text";
+        if (focusInput) { event.preventDefault(); }
+        dateEditors.forEach((item, element) => {
+            if (!element.isConnected) {
+                item.destroy();
+                dateEditors.delete(element);
             }
-        }});
+        });
+        let editor = dateEditors.get(container);
+        if (!editor) {
+            row.classList.add("av__filter-row--date-open");
+            const host = input.ownerDocument.createElement("span");
+            host.className = "fn__block";
+            container.querySelector(".av__filter-date-col").append(host);
+            const inputs = [row.querySelector<HTMLInputElement>('[data-type="absDate"]')];
+            if (getFilterByPath(getEditableFilters(data), input.dataset.path)?.operator === "Is between") {
+                inputs.push(row.querySelector<HTMLInputElement>('[data-type="absDate2"]'));
+            }
+            const picker = bindInlineDatePicker(host, inputs);
+            let releaseResize = () => {};
+            if (filterOperation?.onResize) {
+                const doc = input.ownerDocument;
+                const view = doc.defaultView;
+                const pointers = new Set<number>(event.type === "pointerdown" ? [(event as PointerEvent).pointerId] : []);
+                let pending = false;
+                let frame = 0;
+                let disposed = false;
+                const alive = () => current() && host.isConnected && panelElement.isConnected && getRow(input) === row &&
+                    !menuElement.closest('[data-dialog-closing="true"]');
+                const schedule = () => {
+                    pending = true;
+                    if (disposed || pointers.size || frame) { return; }
+                    frame = view.requestAnimationFrame(() => {
+                        frame = 0;
+                        if (!alive()) { releaseResize(); return; }
+                        if (disposed || pointers.size) { return; }
+                        pending = false;
+                        filterOperation.onResize();
+                    });
+                };
+                // 点击序列结束后再移动宿主，避免按下输入框时把后续鼠标事件移到日期按钮上。
+                const pointerDown = (pointer: PointerEvent) => { pointers.add(pointer.pointerId); };
+                const pointerEnd = (pointer: PointerEvent) => {
+                    pointers.delete(pointer.pointerId);
+                    if (pending) { schedule(); }
+                };
+                const windowBlur = () => {
+                    pointers.clear();
+                    if (pending) { schedule(); }
+                };
+                const observer = new view.ResizeObserver(() => {
+                    if (!alive()) { releaseResize(); return; }
+                    schedule();
+                });
+                releaseResize = () => {
+                    if (disposed) { return; }
+                    disposed = true;
+                    observer.disconnect();
+                    if (frame) { view.cancelAnimationFrame(frame); }
+                    host.removeEventListener("pointerdown", pointerDown, true);
+                    inputs.forEach(element => element.removeEventListener("pointerdown", pointerDown, true));
+                    doc.removeEventListener("pointerup", pointerEnd, true);
+                    doc.removeEventListener("pointercancel", pointerEnd, true);
+                    view.removeEventListener("blur", windowBlur);
+                    view.removeEventListener("pagehide", releaseResize);
+                };
+                observer.observe(host);
+                host.addEventListener("pointerdown", pointerDown, true);
+                inputs.forEach(element => element.addEventListener("pointerdown", pointerDown, true));
+                doc.addEventListener("pointerup", pointerEnd, true);
+                doc.addEventListener("pointercancel", pointerEnd, true);
+                view.addEventListener("blur", windowBlur);
+                view.addEventListener("pagehide", releaseResize, {once: true});
+            }
+            editor = {...picker, destroy: () => { releaseResize(); picker.destroy(); }};
+            dateEditors.set(container, editor);
+        }
+        editor.activate(input);
+        if (focusInput) { input.focus(); }
     };
     panelElement.addEventListener("pointerdown", bindAbsoluteDate, true);
     panelElement.addEventListener("focusin", bindAbsoluteDate);
@@ -1217,7 +1303,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             }
         } else if (type === "relUnit" || type === "relUnit2") {
             saveRow(row, path, false);
-        } else if (type === "filterValue") {
+        } else if (type === "filterValue" || type === "absDate" || type === "absDate2") {
             // select/change 触发（非键盘输入的 change，如浏览器自动填充）
             saveRow(row, path, false);
         }
@@ -1229,7 +1315,8 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
             return;
         }
-        if (target.dataset.type?.startsWith("absDate") && isDatePickerOpen(target as HTMLInputElement)) {
+        if (target.dataset.type?.startsWith("absDate") &&
+            dateEditors.has(target.closest<HTMLElement>('[data-type="valueContainer"]'))) {
             return;
         }
         if (target.dataset.type === "filterValue" || target.dataset.type?.startsWith("absDate") || target.dataset.type?.startsWith("relCount")) {

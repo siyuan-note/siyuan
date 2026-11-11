@@ -64,7 +64,16 @@ const relation = id => ({blockIDs: [id], contents: [{type: "block", block: {cont
 
 const fixture = (type, {count = 1, batch = "", groups = false, cached = true, related = false} = {}) => {
     const transactions = [];
-    const datePickers = new WeakMap();
+    const dateBindings = [];
+    const getInlineDateType = input => input.dataset.datePickerType || input.type;
+    const validateInlineDateInput = input => {
+        const type = getInlineDateType(input);
+        const value = type === "datetime-local" ? input.value.replace(" ", "T") : input.value;
+        return load("../../../datePicker/model").validateDateValue(value, {
+            type, min: input.min, max: input.max, step: input.step, required: input.required,
+            stepBase: input.defaultValue || "",
+        }) === "valid";
+    };
     const owner = {contains: () => true};
     const values = Array.from({length: count}, (_, index) => ({
         id: `value-${index}`, keyID: "column", blockID: `row-${index}`, type,
@@ -165,8 +174,23 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
             fullscreen() {}
         },
         getSelectHTML: () => "", setSelectMenuPosition() {},
-        bindDatePicker: (input, options) => {datePickers.set(input, options);},
-        isDatePickerOpen: () => false,
+        getInlineDateType, validateInlineDateInput,
+        bindInlineDatePicker: (host, inputs, options) => {
+            assert.ok(host);
+            assert.equal(inputs.length, 2);
+            const binding = {host, inputs, options, active: undefined, destroyed: false};
+            dateBindings.push(binding);
+            inputs.forEach(input => {
+                input.dataset.datePickerType = input.type;
+                input.type = "text";
+            });
+            return {
+                activate: input => {assert.ok(inputs.includes(input)); binding.active = input;},
+                validate: () => !binding.destroyed && inputs.every(validateInlineDateInput),
+                update() {},
+                destroy: () => {binding.destroyed = true;},
+            };
+        },
         bindAssetEvent: options => {state.boundMenu = options;},
         removeCompressURL: value => value, openMenu: () => [], isBrowserRenderableImagePath: () => false,
         base64ToURL: async () => state.base64Response,
@@ -203,18 +227,36 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         target.querySelector = selector => selector === ".b3-menu__label" ? label : primary;
         await api.setRelationCell(protyle, block, target, cells);
     };
-    const saveDate = (dirty = true) => {
+    const saveDate = (dirty = true, {value = "2026-11-06", change = "input", constraints = {}} = {}) => {
         const inputs = Array.from({length: 4}, () => element());
-        inputs[0].value = "2026-11-06";
+        inputs[0].defaultValue = "2026-11-06";
+        inputs[1].defaultValue = "";
+        inputs[0].value = value;
         inputs[1].value = "";
+        inputs.slice(0, 2).forEach(input => {input.type = "date"; input.dataset.value = input.value;});
+        Object.assign(inputs[0], constraints);
         inputs[2].checked = false;
         inputs[3].checked = false;
+        const host = element();
         const close = api.bindDateEvent({protyle, data: state.data, blockElement: block, cellElements: cells,
-            menuElement: {querySelectorAll: () => inputs}, requireExplicitChange: true});
-        assert.equal(typeof datePickers.get(inputs[0])?.onCommit, "function");
-        assert.equal(typeof datePickers.get(inputs[1])?.onCommit, "function");
-        if (dirty) inputs[0].dispatchEvent(new Event("input"));
+            menuElement: {querySelectorAll: () => inputs,
+                querySelector: selector => selector === "[data-date-inline]" ? host : null}, requireExplicitChange: true});
+        const binding = dateBindings.at(-1);
+        assert.equal(binding.host, host);
+        assert.deepEqual(Array.from(binding.inputs), inputs.slice(0, 2));
+        assert.equal(binding.active, inputs[0]);
+        assert.equal(inputs[0].type, "text");
+        assert.equal(inputs[1].type, "text");
+        assert.equal(transactions.length, 0, "mount and activation cannot write the date prefill");
+        if (dirty) {
+            if (change === "select") {
+                binding.options.onChange(inputs[0], {value, draft: value, valid: validateInlineDateInput(inputs[0]), kind: "select"});
+            } else {
+                inputs[0].dispatchEvent(new Event(change));
+            }
+        }
         close();
+        assert.equal(binding.destroyed, true, "closing releases the shared inline binding");
     };
     const save = type === "date" ? saveDate : type === "relation" ? selectRelation : type === "mAsset" ?
         () => api.updateAssetCell({protyle, blockElement: block, cellElements: cells, addValue: [asset("new")]}) : select;
@@ -296,6 +338,31 @@ test("explicit-change date panel cancellation does not save a prefilled date", (
     f.saveDate(false);
     assert.equal(f.transactions.length, 0);
 });
+
+test("explicitly selecting an unchanged inline date commits against the captured target", () => {
+    const f = fixture("date");
+    f.unmount();
+    f.saveDate(true, {change: "select"});
+    assert.equal(f.transactions.length, 1);
+    assert.equal(f.transactions[0].operations[0].rowID, "row-0");
+    assert.equal(f.transactions[0].operations[0].data.date.content, new Date("2026-11-06 00:00").getTime());
+});
+
+for (const [name, value, constraints] of [
+    ["impossible day", "2026-02-30", {}],
+    ["unfinished draft", "2026-11-", {}],
+    ["required empty", "", {required: true}],
+    ["minimum", "2026-11-06", {min: "2026-11-07"}],
+    ["maximum", "2026-11-06", {max: "2026-11-05"}],
+    ["step", "2026-11-06", {min: "2026-11-05", step: "2"}],
+]) {
+    test(`date stable-target saves reject ${name} through the real date model`, () => {
+        const f = fixture("date");
+        f.unmount();
+        f.saveDate(true, {value, constraints});
+        assert.equal(f.transactions.length, 0);
+    });
+}
 
 test("date clear action keeps its stable target after unmount", () => {
     const f = fixture("date");

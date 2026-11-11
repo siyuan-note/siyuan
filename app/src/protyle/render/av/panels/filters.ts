@@ -1,25 +1,38 @@
 import { getFiltersHTML, bindInlineFilterEvents, addFilter, addFilterGroup, getEditableFilters, getFilterByPath, getDefaultOperatorByType, duplicateFilterByPath, convertFilterToGroup, convertGroupToFilter, removeFilterByPath } from "../filter";
 import { setPosition } from "../../../../util/setPosition";
+import { isMobile } from "../../../../util/functions";
 import { Menu } from "../../../../plugin/Menu";
 import { getFieldsByData } from "../view";
 import { hasAVCapability } from "../capabilities";
 import { genCellValue } from "../cell";
 import { fetchPost } from "../../../../util/fetch";
 import { updateRelation } from "../relation";
-import type { IAVPanelDescriptor } from "./types";
+import type { IAVPanelContext, IAVPanelDescriptor } from "./types";
+export const bindFilterPanelEvents = (context: IAVPanelContext) => {
+    bindInlineFilterEvents(context.avPanelElement as HTMLElement, context.data, context.options.protyle,
+        context.blockID, context.avID, {...context.options.filterOperation, onResize: () => {
+            if (!context.menuElement.isConnected) { return; }
+            if (context.options.filterOperation?.onResize) {
+                context.options.filterOperation.onResize();
+            } else if (!isMobile()) {
+                setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth,
+                    context.tabRect.bottom, context.tabRect.height, 0, true);
+            }
+        }});
+};
 export const filtersPanel: IAVPanelDescriptor = {
     render: context => {
         context.html = getFiltersHTML(context.data);
         return true;
     },
     bind: context => {
-        bindInlineFilterEvents(context.avPanelElement as HTMLElement, context.data, context.options.protyle, context.blockID, context.avID, context.options.filterOperation);
+        bindFilterPanelEvents(context);
     },
     actions: {
         "goFilters": (context, action) => {
             context.menuElement.innerHTML = getFiltersHTML(context.data);
             context.menuElement.classList.add("av__filter-panel");
-            bindInlineFilterEvents(context.avPanelElement as HTMLElement, context.data, context.options.protyle, context.blockID, context.avID, context.options.filterOperation);
+            bindFilterPanelEvents(context);
             setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth, context.tabRect.bottom, context.tabRect.height, 0, true);
             window.siyuan.menus.menu.remove();
             action.event.preventDefault();

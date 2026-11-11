@@ -13,7 +13,7 @@ import {formatDateValue} from "./dateFormat";
 import {bindLunarDateEditor, getLunarDateHTML} from "./lunarDate";
 import {createAVLocationReplacement, getAVLocationDisplayText} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
-import {bindDatePicker} from "../../../datePicker";
+import {bindInlineDatePicker} from "../../../datePicker/inline";
 
 export const getSelectedOptionNames = (element: HTMLElement) => {
     try {
@@ -134,7 +134,7 @@ export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFiel
     const value = fieldValue?.value;
     if (column.type === "date" && column.dateFormat === "lunar") {
         const date = value?.date || {isNotEmpty: false, isNotTime: !column.date?.fillSpecificTime};
-        return `<button type="button" class="b3-button b3-button--cancel${fieldValue?.mode === "currentTime" ? " fn__none" : ""}" data-role="field-value" data-value-type="lunarDate" data-lunar-value="${escapeAttr(JSON.stringify(date))}">${escapeHtml(formatDateValue(date, "lunar") || window.siyuan.languages.select)}</button>`;
+        return `<div class="fn__flex-1 fn__flex fn__flex-column${fieldValue?.mode === "currentTime" ? " fn__none" : ""}" data-field-date-host><button type="button" class="b3-button b3-button--cancel" data-role="field-value" data-value-type="lunarDate" data-lunar-value="${escapeAttr(JSON.stringify(date))}">${escapeHtml(formatDateValue(date, "lunar") || window.siyuan.languages.select)}</button><div data-field-date-picker></div></div>`;
     }
     if (column.type === "location") {
         const location = value?.location || {};
@@ -159,38 +159,95 @@ export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFiel
     }
     const hiddenClass = column.type === "date" && fieldValue?.mode === "currentTime" ? " fn__none" : "";
     const max = column.type === "date" ? ` max="${column.date?.fillSpecificTime ? "9999-12-31 23:59" : "9999-12-31"}"` : "";
-    return `<input class="b3-text-field b3-text-field--text fn__flex-1${hiddenClass}" data-role="field-value" type="${inputType}"${column.type === "number" ? ' step="any"' : ""}${max} value="${escapeAttr(getFieldText(value))}">`;
+    const inputHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1${hiddenClass}" data-role="field-value" type="${inputType}"${column.type === "number" ? ' step="any"' : ""}${max} value="${escapeAttr(getFieldText(value))}">`;
+    return column.type === "date" ? `<div class="fn__flex-1 fn__flex fn__flex-column${hiddenClass}" data-field-date-host>${inputHTML}<div data-field-date-picker></div></div>` : inputHTML;
 };
 
-export const bindFieldDates = (host: HTMLElement) => {
+export const bindFieldDates = (host: HTMLElement, options: {commitOnLeave?: boolean} = {}) => {
+    const bindings: ReturnType<typeof bindInlineDatePicker>[] = [];
+    const lunarEditors = new Map<HTMLElement, ReturnType<typeof bindLunarDateEditor>>();
+    let disposed = false;
     host.querySelectorAll<HTMLInputElement>('input[type="date"], input[type="datetime-local"]').forEach(input => {
-        bindDatePicker(input);
+        const container = input.closest<HTMLElement>("[data-field-date-host]");
+        bindings.push(bindInlineDatePicker(container.querySelector("[data-field-date-picker]"), input));
     });
     host.querySelectorAll<HTMLElement>('[data-value-type="lunarDate"]').forEach(target => target.addEventListener("click", event => {
         event.preventDefault();
         event.stopPropagation();
+        if (disposed || !target.isConnected) { return; }
+        const container = target.closest<HTMLElement>("[data-field-date-host]").querySelector<HTMLElement>("[data-field-date-picker]");
+        if (container.childElementCount) {
+            return;
+        }
         const value: IAVCellDateValue = JSON.parse(target.dataset.lunarValue);
-        let submit: () => void;
-        const menu = new Menu("av-field-lunar-date", () => submit?.(), true);
-        menu.addItem({
-            type: "empty",
-            label: getLunarDateHTML(value),
-            bind: element => {
-                element.classList.add("b3-menu__custom");
-                submit = bindLunarDateEditor({
-                    value, menuElement: element, requireExplicitChange: true,
-                    update: date => {
-                        target.dataset.lunarValue = JSON.stringify(date);
-                        target.textContent = formatDateValue(date, "lunar") || window.siyuan.languages.select;
-                        target.dispatchEvent(new Event("change", {bubbles: true}));
-                    },
-                    close: () => menu.close(),
-                });
+        container.innerHTML = getLunarDateHTML(value, true);
+        if (!container.dataset.eventsBound) {
+            ["input", "change", "click"].forEach(name => container.addEventListener(name, event => event.stopPropagation()));
+            container.dataset.eventsBound = "true";
+        }
+        lunarEditors.set(target, bindLunarDateEditor({
+            value, menuElement: container, requireExplicitChange: true,
+            update: date => {
+                if (!target.isConnected) { return; }
+                target.dataset.lunarValue = JSON.stringify(date);
+                target.textContent = formatDateValue(date, "lunar") || window.siyuan.languages.select;
+                target.dispatchEvent(new target.ownerDocument.defaultView.Event("change", {bubbles: true}));
             },
-        });
-        const rect = target.getBoundingClientRect();
-        menu.open({x: rect.left, y: rect.bottom, h: rect.height, target});
+            close: () => {
+                lunarEditors.get(target)?.destroy();
+                lunarEditors.delete(target);
+                container.replaceChildren();
+                target.focus();
+            },
+        }));
     }));
+    const submit = () => bindings.every(binding => binding.validate()) &&
+        Array.from(lunarEditors).every(([target, binding]) => target.closest(".fn__none") || binding.submit());
+    const doc = host.ownerDocument;
+    let submitting = false;
+    const commitOnLeave = (event: Event) => {
+        if (disposed || submitting || !host.isConnected || !lunarEditors.size) { return; }
+        const target = event.target as Element;
+        if (event instanceof doc.defaultView.KeyboardEvent) {
+            if (event.key !== "Escape" || event.isComposing || event.keyCode === 229) { return; }
+        } else {
+            if (host.contains(target)) { return; }
+            // 移动端原生下拉的选项位于子菜单，选择过程中仍属于当前农历草稿。
+            const menu = target.closest(".b3-menu");
+            if (menu && !menu.contains(host)) { return; }
+        }
+        submitting = true;
+        try {
+            lunarEditors.forEach(binding => { if (binding.validate()) { binding.submit(); } });
+        } finally {
+            submitting = false;
+        }
+    };
+    const events = ["pointerdown", "focusin", "click", "change", "keydown"];
+    const watchLeave = options.commitOnLeave && !!host.querySelector('[data-value-type="lunarDate"]');
+    const destroy = () => {
+        if (disposed) { return; }
+        disposed = true;
+        observer?.disconnect();
+        events.forEach(name => doc.removeEventListener(name, commitOnLeave, true));
+        bindings.forEach(binding => binding.destroy());
+        lunarEditors.forEach(binding => binding.destroy());
+        lunarEditors.clear();
+    };
+    const observer = watchLeave ? new doc.defaultView.MutationObserver(() => {
+        if (!host.isConnected) { destroy(); }
+    }) : undefined;
+    if (watchLeave) {
+        events.forEach(name => doc.addEventListener(name, commitOnLeave, true));
+        observer.observe(doc.documentElement, {childList: true, subtree: true});
+    }
+    return {
+        update: () => bindings.forEach(binding => binding.update()),
+        validate: () => bindings.every(binding => binding.validate()),
+        submit,
+        isActive: () => bindings.some(binding => binding.isActive()),
+        destroy,
+    };
 };
 
 export const openFieldLocationEditor = (target: HTMLElement) => {

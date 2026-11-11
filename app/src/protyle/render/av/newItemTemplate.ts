@@ -1,6 +1,5 @@
 import {isAVNewItemTemplateType, isAVSelectType} from "./capabilities";
 import {bindFieldDates, genFieldValue, getValueInputHTML, openFieldSelectMenu, getRelationOptions, renderRelationFieldValue, openFieldRelationMenu, openFieldLocationEditor} from "./fieldValueEditor";
-import {bindDatePicker} from "../../../datePicker";
 import {isAVLocationEmpty} from "./locationValue";
 import {getCalendarCreationDate} from "./calendar/state";
 import {Constants} from "../../../constants";
@@ -360,17 +359,21 @@ export const openNewItemTemplateDialog = (options: {
     const hostElement = root.querySelector('[data-role="editor-host"]') as HTMLElement;
     const warnedUnavailableNotebooks = new Set<string>();
 
+    let fieldDates: ReturnType<typeof bindFieldDates>;
     const collectCurrent = () => {
         const editor = root.querySelector('[data-role="template-editor"]') as HTMLElement;
         if (!editor || selectedIndex < 0) {
             return;
         }
+        if (!fieldDates?.submit()) { return false; }
         collectTemplate(editor, templates[selectedIndex], fields);
+        return true;
     };
 
     const render = () => {
         listElement.innerHTML = `<li class="b3-list-item" data-role="add-template"><svg class="b3-list-item__graphic"><use xlink:href="#iconAdd"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newTemplate}</span></li><li class="b3-menu__separator"></li>` +
             templates.map((item, index) => `<li class="b3-list-item b3-list-item--hide-action${index === selectedIndex ? " b3-list-item--focus" : ""}" data-index="${index}" draggable="true"><svg class="b3-list-item__graphic fn__grab"><use xlink:href="#iconDrag"></use></svg><span class="b3-list-item__text">${escapeHtml(item.name)}</span>${item.id === defaultTemplateID ? `<span class="b3-list-item__meta">${window.siyuan.languages.default}</span>` : ""}<span class="b3-list-item__action ariaLabel" data-menu="true" data-position="4west" data-role="template-action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span></li>`).join("");
+        fieldDates?.destroy();
         hostElement.innerHTML = selectedIndex < 0 ? "" : getEditorHTML(templates[selectedIndex], primaryKey, fields, options.protyle.notebookId, options.blockElement.dataset.avType === "calendar");
         hostElement.querySelector<HTMLSelectElement>('[data-role="open-after-create"]')?.addEventListener("change", event => {
             (event.currentTarget as HTMLElement).dataset.changed = "true";
@@ -430,15 +433,14 @@ export const openNewItemTemplateDialog = (options: {
                 const valueElement = modeElement.parentElement.querySelector<HTMLInputElement>('[data-role="field-value"]');
                 const useCurrentTime = modeElement.value === "currentTime";
                 valueElement.classList.toggle("fn__none", useCurrentTime);
+                valueElement.closest("[data-field-date-host]").classList.toggle("fn__none", useCurrentTime);
+                fieldDates.update();
                 if (!useCurrentTime) {
                     valueElement.focus();
-                    if (valueElement instanceof HTMLInputElement) {
-                        bindDatePicker(valueElement).open();
-                    }
                 }
             });
         });
-        bindFieldDates(hostElement);
+        fieldDates = bindFieldDates(hostElement);
         hostElement.querySelectorAll<HTMLElement>('[data-role="field-value"][data-value-type]:not([data-value-type="lunarDate"])').forEach(item => item.addEventListener("click", (event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -473,7 +475,7 @@ export const openNewItemTemplateDialog = (options: {
             icon: "iconEdit",
             label: window.siyuan.languages.edit,
             click: () => {
-                collectCurrent();
+                if (collectCurrent() === false) { return; }
                 selectedIndex = templates.findIndex(item => item.id === itemTemplate.id);
                 render();
             },
@@ -483,7 +485,7 @@ export const openNewItemTemplateDialog = (options: {
             label: window.siyuan.languages.setAsDefault,
             disabled: itemTemplate.id === defaultTemplateID,
             click: () => {
-                collectCurrent();
+                if (collectCurrent() === false) { return; }
                 defaultTemplateID = itemTemplate.id;
                 render();
             },
@@ -494,7 +496,7 @@ export const openNewItemTemplateDialog = (options: {
             label: window.siyuan.languages.delete,
             warning: true,
             click: () => {
-                collectCurrent();
+                if (collectCurrent() === false) { return; }
                 const deletedIndex = templates.findIndex(item => item.id === itemTemplate.id);
                 if (deletedIndex < 0) {
                     return;
@@ -561,7 +563,7 @@ export const openNewItemTemplateDialog = (options: {
             insertIndex--;
         }
         if (oldIndex !== insertIndex) {
-            collectCurrent();
+            if (collectCurrent() === false) { return; }
             const [movedTemplate] = templates.splice(oldIndex, 1);
             templates.splice(insertIndex, 0, movedTemplate);
             if (selectedIndex === oldIndex) {
@@ -588,7 +590,7 @@ export const openNewItemTemplateDialog = (options: {
             return;
         }
         if (roleElement?.dataset.role === "add-template") {
-            collectCurrent();
+            if (collectCurrent() === false) { return; }
             templates.push({id: Lute.NewNodeID(), name: window.siyuan.languages.template, targetType: "detached", openAfterCreate: false});
             selectedIndex = templates.length - 1;
             render();
@@ -598,7 +600,7 @@ export const openNewItemTemplateDialog = (options: {
                 openTemplateActionMenu(roleElement, itemTemplate);
             }
         } else if (itemElement) {
-            collectCurrent();
+            if (collectCurrent() === false) { return; }
             selectedIndex = parseInt(itemElement.dataset.index);
             render();
         }
@@ -611,7 +613,7 @@ export const openNewItemTemplateDialog = (options: {
             showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
             return;
         }
-        collectCurrent();
+        if (collectCurrent() === false) { return; }
         if (templates.some(item => !item.name)) {
             showMessage(window.siyuan.languages.nameEmpty, 6000, "error");
             return;

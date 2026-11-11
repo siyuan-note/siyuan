@@ -18,13 +18,16 @@ const setup = (mobile: boolean) => {
         buttons = [new Control(), new Control(), new Control()];
         closed = false;
         pending = false;
+        dateValid = true;
+        dateDestroyed = false;
+        options: {destroyCallback?: () => void};
         element = {
             setAttribute() {},
             querySelector: () => this.input,
             querySelectorAll: () => this.buttons,
         };
-        constructor() { dialogs.push(this); }
-        destroy() { this.closed = true; }
+        constructor(options: {destroyCallback?: () => void}) { this.options = options; dialogs.push(this); }
+        destroy() { this.closed = true; this.options.destroyCallback?.(); }
         async runPending(action: () => Promise<boolean>) {
             if (this.pending) return;
             this.pending = true;
@@ -45,11 +48,16 @@ const setup = (mobile: boolean) => {
         require: (name: string) => ({
             "dayjs": dayjs,
             "../dialog/mobileDialog": {MobileDialog: ReminderDialog},
-            "../datePicker": {bindDatePicker: (input: Control) => bound.push(input)},
+            "../datePicker/inline": {bindInlineDatePicker: (_host: unknown, input: Control) => {
+                bound.push(input);
+                const dialog = dialogs.at(-1);
+                return {validate: () => dialog.dateValid, destroy: () => { dialog.dateDestroyed = true; }};
+            }},
             "../constants": {Constants: {CUSTOM_REMINDER_WECHAT: "reminder"}},
             "../util/functions": {isMobile: () => mobile},
             "../util/pathName": {isEncryptedBox: () => false},
             "../protyle/util/selection": {getEditorRange: () => ({})},
+            "../protyle/util/selectionOffsets": {focusByRange() {}},
             "../dialog/message": {showMessage: (message: string) => messages.push(message)},
             "../util/fetch": {
                 fetchPost: (path: string, data: {id: string; timed: string}, callback: (value?: unknown) => void) => {
@@ -74,6 +82,11 @@ test("existing WeChat reminders keep picker changes local until explicit future-
         else f.methods.openWechatNotify(f.node);
         const dialog = f.dialogs[0];
         assert.deepEqual(f.bound, [dialog.input]);
+        dialog.dateValid = false;
+        dialog.input.value = "2099-12-31T23:59";
+        dialog.buttons[2].click();
+        assert.equal(f.writes.length, 0, "invalid calendar drafts block host confirmation");
+        dialog.dateValid = true;
         dialog.input.value = "2000-01-01T00:00";
         dialog.buttons[2].click();
         assert.equal(f.writes.length, 0);
@@ -87,6 +100,7 @@ test("existing WeChat reminders keep picker changes local until explicit future-
         dialog.buttons[2].click();
         assert.deepEqual(JSON.parse(JSON.stringify(f.writes)), [{id: file ? "document" : "block", timed: "20991231235900"}]);
         assert.equal(dialog.closed, true);
+        assert.equal(dialog.dateDestroyed, true);
     }
 });
 
@@ -104,6 +118,20 @@ test("mobile WeChat reminder confirmation and explicit removal retain pending pr
         f.release(0);
         await new Promise(resolve => setImmediate(resolve));
         assert.equal(dialog.closed, true);
+        assert.equal(dialog.dateDestroyed, true);
         assert.equal(f.attrs.get("reminder"), remove ? undefined : "20991231235900");
+    }
+});
+
+test("reminder cancel destroys the embedded editor without sending", () => {
+    for (const file of [false, true]) {
+        const f = setup(false);
+        if (file) f.methods.openFileWechatNotify("document", "notebook");
+        else f.methods.openWechatNotify(f.node);
+        const dialog = f.dialogs[0];
+        dialog.input.value = "2099-12-31T23:59";
+        dialog.buttons[0].click();
+        assert.equal(f.writes.length, 0);
+        assert.equal(dialog.dateDestroyed, true);
     }
 });

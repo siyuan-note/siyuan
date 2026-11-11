@@ -126,24 +126,30 @@ test("nested color conditions do not change the parent view filter, including ca
     assert.equal(inner.panel.innerHTML, "updated condition");
 });
 
-test("absolute filter date pickers defer blur saves, preserve invalid values, and bind replacement rows", () => {
-    let open = false;
-    const pickers = new Map<unknown, {onCommit: () => void}>();
+test("absolute filter calendars save valid edits, preserve invalid values, and bind replacement rows", () => {
+
+    const pickers = new Set<unknown>();
     const methods = loadModule<typeof import("./filter")>("src/protyle/render/av/filter.ts", {
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : ({
             "./view": {getFieldsByData: () => [{id: "date", type: "date"}]},
-            "../../../datePicker": {
-                bindDatePicker: (input: unknown, options: {onCommit: () => void}) => pickers.set(input, options),
-                isDatePickerOpen: () => open,
+            "../../../datePicker/inline": {
+                validateInlineDateInput: () => !invalid,
+                bindInlineDatePicker: (_host: unknown, inputs: unknown[]) => {
+                    inputs.forEach(input => pickers.add(input));
+                    return {activate() {}, destroy() {}};
+                },
             },
         })[name] || {},
     }, ScriptTarget.ES2022);
     const listeners = new Map<string, Array<(event: unknown) => void>>();
     let invalid = false;
-    const createInput = () => ({value: "2026-11-11", isConnected: true,
-        dataset: {type: "absDate", path: "0"}, closest: () => panel});
+    let container = {isConnected: true, querySelector: () => ({append() {}})};
+    const createInput = () => ({value: "2026-11-11", isConnected: true, focus() {},
+        ownerDocument: {createElement: () => ({})},
+        dataset: {type: "absDate", path: "0"},
+        closest: (selector: string): unknown => selector.includes("valueContainer") ? container : panel});
     let input = createInput();
-    const row = {dataset: {path: "0"}, querySelector: (selector: string) => {
+    const row = {classList: {add() {}}, dataset: {path: "0"}, querySelector: (selector: string) => {
         if (selector.includes(":invalid")) return invalid ? input : null;
         if (selector === '[data-type="operation"]') return {value: "Is"};
         if (selector === '[data-type="dateType"]') return {value: "specific"};
@@ -155,7 +161,7 @@ test("absolute filter date pickers defer blur saves, preserve invalid values, an
             listeners.set(type, [...listeners.get(type) || [], listener]);
         },
     };
-    const fire = (type: string) => listeners.get(type)?.forEach(listener => listener({target: input}));
+    const fire = (type: string) => listeners.get(type)?.forEach(listener => listener({target: input, preventDefault() {}}));
     const data = {view: {filters: [{column: "date", operator: "Is", value: {type: "date"}}]}} as unknown as IAV;
     let saves = 0;
     methods.bindInlineFilterEvents(panel as unknown as HTMLElement, data, {} as IProtyle, "block", "database", {
@@ -164,12 +170,10 @@ test("absolute filter date pickers defer blur saves, preserve invalid values, an
     fire("pointerdown");
     assert.equal(pickers.has(input), true);
     assert.equal(saves, 0);
-    open = true;
     fire("blur");
-    assert.equal(saves, 0, "opening a child picker does not save the old value");
-    open = false;
+    assert.equal(saves, 0, "opening the embedded calendar does not save the old value");
     input.value = "2026-12-31";
-    pickers.get(input).onCommit();
+    fire("change");
     assert.equal(saves, 1);
     assert.equal(data.view.filters[0].value.date.content, new Date("2026-12-31T00:00:00").getTime());
     invalid = true;
@@ -177,25 +181,25 @@ test("absolute filter date pickers defer blur saves, preserve invalid values, an
     fire("blur");
     assert.equal(saves, 1, "incomplete input is not a deliberate clear");
     invalid = false;
-    fire("blur");
+    fire("change");
     assert.equal(saves, 2);
     assert.equal(data.view.filters[0].value.date.isNotEmpty, false);
+    container = {isConnected: true, querySelector: () => ({append() {}})};
     input = createInput();
     fire("focusin");
     assert.equal(pickers.has(input), true, "rows replaced during operator or relative-mode changes remain bound");
     input.value = "2027-01-01";
-    open = true;
     fire("blur");
-    open = false;
-    assert.equal(saves, 2, "cancelling has no commit callback and no write");
-    pickers.get(input).onCommit();
+    assert.equal(saves, 2, "focusing the calendar has no write");
+    fire("change");
     assert.equal(saves, 3);
 });
 
 test("date filter structure changes validate only the absolute endpoints they retain", () => {
     const methods = loadModule<typeof import("./filter")>("src/protyle/render/av/filter.ts", {
         require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities :
-            name === "./view" ? {getFieldsByData: () => [{id: "date", type: "date"}]} : {},
+            name === "./view" ? {getFieldsByData: () => [{id: "date", type: "date"}]} :
+                name === "../../../datePicker/inline" ? {validateInlineDateInput: (input: {value: string}) => !!input.value} : {},
     }, ScriptTarget.ES2022);
     const cases = [
         {operator: "Is empty", mode: "specific", invalidStart: true, invalidEnd: true, saved: true},

@@ -44,9 +44,7 @@ const runCases = async (sources, css, mobile, dark) => {
     let signal;
     const files = [{id: "doc-file", path: "/notebook/project/document.sy"}, ...Array.from({length: 20}, (_, i) => ({id: "file-" + i, path: "/notebook/project/note-" + i + ".sy"}))];
     let nextID = 0;
-    const datePickers = new Set();
     const stubs = {
-        "datePicker": {bindDatePicker: input => {datePickers.add(input);}},
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "util/genID": {genUUID: () => String(++nextID)},
         "util/zIndex": {isAbove: () => false},
@@ -106,9 +104,50 @@ const runCases = async (sources, css, mobile, dark) => {
     panel.className = "history__repo fn__block";
     panel.innerHTML = `<div class="history__action"><div class="history__repo-pagination"></div><input class="b3-text-field"><button data-type="compare">Compare</button>${new Function("return `" + sources.snapshotButtons + "`;")()}</div><ul data-type="repoList"></ul>`;
     document.body.append(panel);
-    const disposePanel = initRepoPanel(panel, () => {});
-    assert.deepEqual(Array.from(datePickers), Array.from(panel.querySelectorAll("input[data-range]")));
+    let refreshes = 0;
+    const disposePanel = initRepoPanel(panel, () => { refreshes++; });
+    const start = panel.querySelector('[data-range="start"]');
+    const end = panel.querySelector('[data-range="end"]');
+    const calendar = panel.querySelector('[data-role="date-calendar"]');
+    assert.equal(calendar.children.length, 0, "snapshot dates do not allocate a calendar before focus");
+    assert.equal(start.placeholder, "YYYY-MM-DD");
+    assert.equal(end.placeholder, "YYYY-MM-DD");
+    if (mobile) panel.querySelector('[data-action="filters"]').click();
+    start.focus();
+    assert.equal(calendar.querySelectorAll(".date-picker").length, 1, "range endpoints share one embedded calendar");
+    start.value = "2026-11-01";
+    start.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.equal(end.min, "2026-11-01");
+    assert.equal(start.dataset.datePickerActive, "true");
+    end.focus();
+    assert.equal(start.dataset.datePickerActive, "false");
+    assert.equal(end.dataset.datePickerActive, "true");
+    assert.equal(calendar.querySelectorAll(".date-picker").length, 1);
+    end.value = "2026-11-30";
+    end.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.equal(start.max, "2026-11-30");
+    calendar.querySelector('[data-date="2026-11-25"]').click();
+    assert.equal(end.value, "2026-11-25", "calendar selection edits the active range endpoint");
+    assert.equal(start.max, "2026-11-25");
+    end.value = "2026-02-30";
+    end.dispatchEvent(new Event("input", {bubbles: true}));
+    panel.querySelector('[data-role="date-range"]').dispatchEvent(new Event("submit", {bubbles: true, cancelable: true}));
+    assert.equal(refreshes, 0, "invalid range drafts cannot query snapshots");
+    end.value = "2026-11-30";
+    end.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.equal(refreshes, 0, "date editing keeps the existing explicit filter boundary");
+    panel.querySelector('[data-role="date-range"]').dispatchEvent(new Event("submit", {bubbles: true, cancelable: true}));
+    assert.equal(refreshes, 2, "filter refreshes local and cloud snapshots");
+    panel.querySelector('[data-action="range-clear"]').click();
+    assert.equal(start.value, "");
+    assert.equal(end.value, "");
+    assert.equal(start.max, "9999-12-31");
+    assert.equal(end.min, "1970-01-01");
+    assert.equal(refreshes, 4);
+    assert.equal(document.querySelectorAll(".b3-dialog").length, 0, "range editor opens no separate dialog");
     await tick();
+    assert.ok(calendar.getBoundingClientRect().width > 0, "the expanded calendar is visible");
+    assert.ok(calendar.getBoundingClientRect().right <= innerWidth + 1, "the calendar fits the narrow viewport");
     const local = panel.querySelector('[data-repo-source="local"]');
     const cloud = panel.querySelector('[data-repo-source="cloud"]');
     assert.ok(local.querySelector('.history__snapshot-heading [data-type="fullCheckRepo"]'), "full check belongs to local snapshots");
@@ -122,6 +161,7 @@ const runCases = async (sources, css, mobile, dark) => {
         assert.ok(button.getBoundingClientRect().width > 0 && button.getBoundingClientRect().right <= innerWidth + 1, "full check must remain visible");
     }
     disposePanel();
+    assert.equal(calendar.children.length, 0, "panel disposal removes the inline calendar");
     panel.remove();
     const {DocHistorySnapshots} = load("history/docSnapshots");
     const {closeNotebookHistoryDialogs} = load("history/notebookDialogs");
@@ -217,7 +257,7 @@ if (process.versions.electron && process.type === "browser") {
             const sources = {app: path.resolve(__dirname, ".."), icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"), languages: fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8")};
             sources.snapshotButtons = fs.readFileSync(path.join(__dirname, "../src/history/history.ts"), "utf8").match(/<button class="b3-button b3-button--outline" data-type="genRepo">[\s\S]*?data-type="fullCheckRepo">[^<]*<\/button>/)[0];
             sources.mobileRuntime = require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource();
-            for (const name of ["dialog/index", "util/escape", "history/docSnapshots", "history/snapshotDetail", "history/pluginSnapshotPaths", "history/notebookDialogs", "history/repoFile", "history/repoPanel", "history/repoBatch", "history/repoRange", "history/repoPurge"]) {
+            for (const name of ["datePicker/inline", "datePicker/field", "datePicker/model", "datePicker/yearInput", "dialog/index", "util/escape", "history/docSnapshots", "history/snapshotDetail", "history/pluginSnapshotPaths", "history/notebookDialogs", "history/repoFile", "history/repoPanel", "history/repoBatch", "history/repoRange", "history/repoPurge"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
             }
             sources["dialog/index"] = require("./fixtures/anchoredInputRuntime.cjs").withAnchoredInputRuntime(sources["dialog/index"]);
@@ -233,6 +273,7 @@ if (process.versions.electron && process.type === "browser") {
                     await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(theme + styles)}, ${mobile}, ${dark})`);
                 }
             }
+            console.log("History snapshots passed: desktop/mobile, light/dark, embedded calendar.");
         } catch (error) {
             console.error(error);
             code = 1;
@@ -249,8 +290,10 @@ if (process.versions.electron && process.type === "browser") {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-history-snapshots-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
+        const headlessArgs = process.platform === "linux" && !env.DISPLAY && !env.WAYLAND_DISPLAY ?
+            ["--no-sandbox", "--disable-gpu", "--ozone-platform=headless"] : [];
         try {
-            await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 90000});
+            await promisify(execFile)(require("electron"), [__filename, profile, ...headlessArgs], {env, windowsHide: true, timeout: 90000});
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});

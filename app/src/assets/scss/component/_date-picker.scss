@@ -4,10 +4,22 @@
   gap: 8px;
   min-width: 0;
 
+  &--inline {
+    width: 100%;
+    max-width: 320px;
+    margin-block: 8px;
+  }
+
   &__fields {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+  }
+
+  &__endpoint {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   &__field {
@@ -142,4 +154,8 @@
 
 .date-picker-input::-webkit-calendar-picker-indicator {
   display: none;
+}
+
+.date-picker-input[data-date-picker-active="true"] {
+  outline-color: var(--b3-theme-primary);
 }

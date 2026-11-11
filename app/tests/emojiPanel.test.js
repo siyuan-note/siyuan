@@ -22,7 +22,10 @@ const cases = (source, helpers, languages) => {
     const selected = [];
     const recent = [];
     const messages = [];
-    const datePickers = new Set();
+    const model = load("dateModel");
+    const yearInput = load("dateYearInput");
+    const field = load("dateField", {"./model": model, "./yearInput": yearInput});
+    const {bindInlineDatePicker} = load("dateInline", {"./model": model, "./field": field});
     let sheets = 0;
     let disposed = 0;
     const treeUpdates = [];
@@ -46,10 +49,10 @@ const cases = (source, helpers, languages) => {
         renderCategory() {}
     }
     const dependencies = {
-        ...escape, ...values, ContractFormData, Dialog, EmojiPanelController,
-        bindDatePicker: input => datePickers.add(input),
+        ...escape, ...values, ...load("dynamicIcon"), ContractFormData, Dialog, EmojiPanelController,
+        bindInlineDatePicker,
         isMobile: () => mobile,
-        dayjs: () => ({format: () => "2026-10-26"}),
+        dayjs: value => ({format: () => typeof value === "string" && value ? value : "2026-10-26"}),
         Constants: {LOCAL_EMOJIS: "emojis", DIALOG_EMOJIS: "emoji-panel"},
         genEmojiCategoryButtons: () => "", getEmojiTitle: () => "Custom",
         setPosition() {}, updateHotkeyTip: value => value, setStorageVal() {}, activeBlur() {},
@@ -136,8 +139,54 @@ const cases = (source, helpers, languages) => {
     }
     check.equal(sheets, 5, "mobile document and database openings use the shared sheet");
     check.equal(disposed, sheets, "mobile sheet handlers are disposed with each closed panel");
-    check.ok(dialogs.every(item => datePickers.has(item.element.querySelector('[data-type="tab-dynamic"] [type="date"]'))),
-        "every desktop and mobile icon panel binds its dynamic date input");
+    for (mobile of [false, true]) {
+        window.siyuan.storage.emojis.currentTab = "dynamic";
+        openEmojiPanel("document", "doc", {x: 100, y: 100, h: 28, w: 100});
+        dialog = dialogs.at(-1);
+        const calendar = dialog.element.querySelector('[data-role="dynamic-date-calendar"]');
+        const date = dialog.element.querySelector('[data-type="tab-dynamic"] .date-picker-input');
+        check.equal(calendar.children.length, 0, "the icon calendar stays collapsed until date focus");
+        check.equal(date.value, "2026-10-26", "lazy calendar setup preserves the initial icon date");
+        date.focus();
+        check.equal(calendar.querySelectorAll(".date-picker").length, 1);
+        date.value = "2026-11-01";
+        date.dispatchEvent(new Event("change", {bubbles: true}));
+        calendar.querySelector('[data-date="2026-11-15"]').click();
+        check.equal(date.value, "2026-11-15");
+        dialog.element.querySelector('.emojis__tabheader [data-type="tab-link"]').click();
+        dialog.element.querySelector('.emojis__tabheader [data-type="tab-dynamic"]').click();
+        date.focus();
+        check.equal(date.value, "2026-11-15", "tab switches preserve the edited icon date");
+        check.equal(calendar.querySelectorAll(".date-picker").length, 1, "tab switches do not duplicate the calendar");
+        const preview = dialog.element.querySelector(".emoji__dynamic-item");
+        check.equal(new URL(preview.getAttribute("src"), "http://localhost").searchParams.get("date"), "2026-11-15");
+        check.equal(requests.length, 0, "calendar selection only updates icon previews");
+        check.equal(document.querySelectorAll(".b3-dialog").length, 1, "dynamic dates remain inside the icon dialog");
+        const text = dialog.element.querySelector('[data-role="dynamic-text"]');
+        text.value = "test icon";
+        text.dispatchEvent(new Event("input", {bubbles: true}));
+        check.equal(date.value, "2026-11-15", "text icon content does not overwrite the date");
+        dialog.element.querySelector('[data-action="clearDate"]').click();
+        check.equal(date.value, "");
+        check.equal(new URL(preview.getAttribute("src"), "http://localhost").searchParams.get("date"), "");
+        check.equal(requests.length, 0);
+        dialog.destroy();
+        check.equal(calendar.children.length, 0, "closing the icon panel disposes its calendar");
+        check.equal(requests.length, 0, "canceling a dynamic preview never writes the document icon");
+        openEmojiPanel("document", "doc", {x: 100, y: 100, h: 28, w: 100});
+        dialog = dialogs.at(-1);
+        const finalDate = dialog.element.querySelector('[data-type="tab-dynamic"] .date-picker-input');
+        finalDate.value = "2026-02-30";
+        finalDate.dispatchEvent(new Event("input", {bubbles: true}));
+        dialog.element.querySelector(".emoji__dynamic-item").click();
+        check.equal(requests.length, 0, "invalid date drafts block icon confirmation");
+        dialog.element.querySelector('[data-action="clearDate"]').click();
+        dialog.element.querySelector(".emoji__dynamic-item").click();
+        check.equal(requests.length, 1, "explicit dynamic icon selection writes once");
+        check.equal(requests[0].url, "/api/attr/setBlockAttrs");
+        check.equal(requests[0].data.id, "document");
+        requests.length = 0;
+    }
     return "Emoji panel uploads passed";
 };
 
@@ -147,6 +196,7 @@ if (process.versions.electron && process.type === "browser") {
         app.setPath("userData", process.argv[2]);
         await app.whenReady();
         const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+        win.webContents.on("console-message", (_event, _level, message) => console.log(message));
         win.setContentSize(1000, 900);
         await win.loadURL("data:text/html,<html><body></body></html>");
         win.show();
@@ -161,25 +211,28 @@ if (process.versions.electron && process.type === "browser") {
             node.declarationList.declarations.some(item => ["openEmojiPanel", "genWeekdayOptions"].includes(item.name.getText(parsed))))
             .map(node => node.getText(parsed).replace(/^export /, "")).join("\n"));
         const helpers = {};
-        for (const [name, file] of [["escape", "util/escape"], ["iconValue", "emoji/iconValue"], ["contractFormData", "util/contractFormData"]]) {
+        for (const [name, file] of [["dynamicIcon", "emoji/dynamicIcon"], ["dateModel", "datePicker/model"], ["dateYearInput", "datePicker/yearInput"], ["dateField", "datePicker/field"], ["dateInline", "datePicker/inline"], ["escape", "util/escape"], ["iconValue", "emoji/iconValue"], ["contractFormData", "util/contractFormData"]]) {
             helpers[name] = compile(readFileSync(path.join(__dirname, "../src", `${file}.ts`), "utf8"));
         }
         const languages = JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs/en.json"), "utf8"));
-        console.log(await win.webContents.executeJavaScript(`(${cases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(helpers)}, ${JSON.stringify(languages)})`));
+        const result = await win.webContents.executeJavaScript(`(() => { try { return (${cases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(helpers)}, ${JSON.stringify(languages)}); } catch (error) { return {error: error.stack}; } })()`);
+        assert.equal(typeof result, "string", JSON.stringify(result));
+        console.log(result);
         win.destroy();
         app.exit(0);
     })().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
     require("node:test").test("icon selection defers document writes and supports database uploads on desktop and mobile", {
-        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 30000,
     }, async () => {
         const temporary = mkdtempSync(path.join(os.tmpdir(), "siyuan-emoji-panel-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
+        const headlessArgs = process.platform === "linux" && !env.DISPLAY && !env.WAYLAND_DISPLAY ?
+            ["--no-sandbox", "--disable-gpu", "--ozone-platform=headless"] : [];
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, temporary], {env, windowsHide: true, timeout: 25000});
+                require("electron"), [__filename, temporary, ...headlessArgs], {env, windowsHide: true, timeout: 25000});
             assert.match(stdout, /Emoji panel uploads passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(temporary)), path.resolve(os.tmpdir()));

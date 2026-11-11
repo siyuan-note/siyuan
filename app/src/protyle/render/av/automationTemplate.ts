@@ -7,7 +7,7 @@ import {getAVLocationDisplayText} from "./locationValue";
 import {automationTemplateFunctions} from "./automationTemplateFunctions";
 import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
-import {bindDatePicker} from "../../../datePicker";
+import {bindInlineDatePicker} from "../../../datePicker/inline";
 
 export const automationTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
@@ -66,7 +66,7 @@ export const mountAutomationTemplate = (options: {
     host.innerHTML = `<textarea class="b3-text-field fn__block av__automation-template-editor" data-template rows="3" maxlength="8192" aria-label="${escapeAttr(lang.template)}">${escapeHtml(value.template || "")}</textarea>
 <div class="av__automation-row"><label class="av__automation-control fn__flex-1"><span class="av__automation-control-label">${lang.automationSourceField}</span><select class="b3-select" data-template-field>${fields.map(entry => `<option value="${escapeAttr(entry.key.id)}">${escapeHtml(entry.key.name || entry.key.id)}${names.get(entry.key.name) > 1 ? ` (${escapeHtml(entry.key.id)})` : ""}</option>`).join("")}</select></label><button type="button" class="b3-button b3-button--outline b3-button--wrap" data-template-insert${fields.length ? "" : " disabled"}>${lang.automationInsertField}</button><button type="button" class="b3-button b3-button--outline b3-button--wrap" data-template-copy${fields.length ? "" : " disabled"}>${lang.copyID}</button></div>
 <div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationTemplateTip}</div>
-<details data-template-preview><summary class="av__automation-template-toggle b3-button b3-button--cancel fn__block"><svg aria-hidden="true"><use xlink:href="#iconRight"></use></svg><span class="av__automation-control-label">${lang.automationPreviewData}</span></summary><div class="av__automation-template-data">
+<details class="fn__flex-1" data-template-preview><summary class="av__automation-template-toggle b3-button b3-button--cancel fn__block"><svg aria-hidden="true"><use xlink:href="#iconRight"></use></svg><span class="av__automation-control-label">${lang.automationPreviewData}</span></summary><div class="av__automation-template-data">
 <div class="ft__on-surface ft__smaller av__automation-tip">${lang.automationPreviewOnly}</div>
 <label class="av__automation-control"><span class="av__automation-control-label">${lang.automationPreviewItem}</span><select class="b3-select av__automation-template-item" data-template-item><option value="">${lang.selectRelationItems}</option>${rows.map(row => `<option value="${escapeAttr(row.blockID)}">${escapeHtml(row.block?.content || row.blockID)}</option>`).join("")}</select></label>
 <label class="av__automation-control"><span class="av__automation-control-label">${lang.automationPreviewTime}</span><input class="b3-text-field av__automation-template-time" type="datetime-local" data-template-time value="${automationDateInput(Date.now(), timeZone)}"></label>
@@ -76,14 +76,20 @@ export const mountAutomationTemplate = (options: {
     const editor = host.querySelector<HTMLTextAreaElement>("[data-template]");
     const item = host.querySelector<HTMLSelectElement>("[data-template-item]");
     const triggerTime = host.querySelector<HTMLInputElement>("[data-template-time]");
-    bindDatePicker(triggerTime);
+    const triggerHost = host.ownerDocument.createElement("div");
+    triggerHost.className = "fn__flex-1";
+    triggerTime.parentElement.after(triggerHost);
+    let dateBindings: ReturnType<typeof bindInlineDatePicker>[] = [];
     const inputs = host.querySelector<HTMLElement>("[data-template-inputs]");
     const result = host.querySelector<HTMLOutputElement>("[data-template-result]");
     const invalidate = () => {
         version++;
         result.textContent = "";
     };
+    const triggerBinding = bindInlineDatePicker(triggerHost, triggerTime, {onChange: invalidate});
     const renderInputs = () => {
+        dateBindings.forEach(binding => binding.destroy());
+        dateBindings = [];
         const references = new Set(Array.from(editor.value.matchAll(/\b(?:field|value)\s+"([^"]+)"/g), match => match[1]));
         inputs.innerHTML = fields.filter(entry => references.has(entry.key.id)).map(entry => {
             const stored = entry.values?.find(value => value.blockID === item.value);
@@ -93,7 +99,10 @@ export const mountAutomationTemplate = (options: {
             return `<label class="av__automation-control"><span class="av__automation-control-label">${escapeHtml(entry.key.name)}</span><input class="b3-text-field av__automation-template-input" data-template-input="${escapeAttr(entry.key.id)}" type="${type}"${type === "number" ? ' step="any"' : ""} value="${escapeAttr(text)}" maxlength="65536"></label>`;
         }).join("");
         inputs.querySelectorAll<HTMLInputElement>('input[type="date"], input[type="datetime-local"]').forEach(input => {
-            bindDatePicker(input);
+            const pickerHost = host.ownerDocument.createElement("div");
+            pickerHost.className = "fn__flex-1";
+            input.parentElement.after(pickerHost);
+            dateBindings.push(bindInlineDatePicker(pickerHost, input, {onChange: invalidate}));
         });
         invalidate();
         onResize();
@@ -141,15 +150,15 @@ export const mountAutomationTemplate = (options: {
     });
     host.querySelector<HTMLButtonElement>("[data-template-run]").addEventListener("click", async event => {
         const button = event.currentTarget as HTMLButtonElement;
-        if (!item.value || !triggerTime.checkValidity() || !triggerTime.value) {
+        if (!item.value || !triggerTime.checkValidity() || !triggerBinding.validate() || !triggerTime.value) {
             result.textContent = lang.automationPreviewItem;
             return;
         }
         const requestVersion = ++version;
         const overrides: Record<string, string> = {};
         const invalid = inputs.querySelector<HTMLInputElement>("input:invalid");
-        if (invalid) {
-            invalid.reportValidity();
+        if (invalid || dateBindings.some(binding => !binding.validate())) {
+            invalid?.reportValidity();
             return;
         }
         inputs.querySelectorAll<HTMLInputElement>('[data-template-input][data-modified="true"]').forEach(input => {
@@ -187,8 +196,10 @@ export const mountAutomationTemplate = (options: {
                 result.textContent = String(error);
             }
         } finally {
-            button.disabled = false;
-            onResize();
+            if (host.isConnected) {
+                button.disabled = false;
+                onResize();
+            }
         }
     });
     renderInputs();

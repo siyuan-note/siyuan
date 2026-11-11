@@ -179,6 +179,11 @@
   }
 
   &__snapshot {
+    &-calendar {
+      flex-basis: 100%;
+      min-width: 0;
+    }
+
     &-date-controls {
       display: flex;
       align-items: center;

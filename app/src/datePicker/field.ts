@@ -9,6 +9,9 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     languages: Record<string, string>;
     onStateChange?: () => void;
     onSelect?: () => void;
+    onChange?: (kind: "input" | "change" | "select" | "clear") => void;
+    hideFields?: boolean;
+    hideClear?: boolean;
 }) => {
     const doc = host.ownerDocument;
     const lang = options.languages;
@@ -183,6 +186,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
         month = {...date, day: 1};
         render(true);
         notify();
+        options.onChange?.("select");
         options.onSelect?.();
     };
     const render = (focus = false, preserveYearDraft = false) => {
@@ -337,8 +341,9 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
         }
     });
     inputs.forEach(input => {
+        input.addEventListener("change", () => options.onChange?.("change"));
         input.addEventListener("compositionstart", () => { composing.add(input); notify(); });
-        input.addEventListener("compositionend", () => { composing.delete(input); badInput = false; notify(true); render(); });
+        input.addEventListener("compositionend", () => { composing.delete(input); badInput = false; notify(true); render(); options.onChange?.("input"); });
         input.addEventListener("input", () => {
             if (composing.has(input)) { return; }
             badInput = false;
@@ -346,6 +351,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
             if (date) { focusDate = date; month = {...date, day: 1}; }
             render();
             notify(true);
+            options.onChange?.("input");
         });
     });
     const shortcuts = doc.createElement("div");
@@ -359,19 +365,22 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
         if (composing.size || disposed || yearInput.isComposing()) { return; }
         badInput = false;
         setValue(""); render(); notify(); inputs[0].focus();
+        options.onChange?.("clear");
         options.onSelect?.();
     });
     if (dateInput) { toolbar.insertBefore(today, previous); }
     shortcuts.append(clear);
-    root.append(fields);
+    if (!options.hideFields) { root.append(fields); }
     if (dateInput) { root.append(toolbar, monthEditor, calendar); }
-    root.append(shortcuts, error);
+    if (!options.hideClear) { root.append(shortcuts); }
+    root.append(error);
     host.append(root);
     render();
     notify();
     const focusTarget = () => calendar.querySelector<HTMLButtonElement>('button[tabindex="0"]') || inputs[0];
     return {
         element: root,
+        draft: readValue,
         cancelMonthEdit,
         isComposing: () => composing.size > 0 || yearInput.isComposing(),
         validate,

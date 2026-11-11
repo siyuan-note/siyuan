@@ -947,6 +947,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 data: options?.data,
                 destroyCallback: options?.destroyCallback,
                 keepMenuOpen: options?.keepMenuOpen,
+                requireExplicitChange: options?.requireExplicitChange,
             });
         } else if (type === "checkbox") {
             updateCellValueByInput(protyle, type, blockElement, cellElements);

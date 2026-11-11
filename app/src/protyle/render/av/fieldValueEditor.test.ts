@@ -19,16 +19,21 @@ test("numeric field editors accept decimal steps and preserve decimal and empty 
     }
 });
 
-test("template and fixed automation date fields bind without changing their stored value", () => {
+test("template and fixed automation date fields bind inline without changing their stored value", () => {
     const bound: unknown[] = [];
     const methods = loadModule<typeof import("./fieldValueEditor")>("src/protyle/render/av/fieldValueEditor.ts", {
         require: (name: string) => name === "./capabilities" ? capabilities : ({
             "dayjs": require("dayjs"),
             "../../../util/escape": {escapeAttr: String},
-            "../../../datePicker": {bindDatePicker: (input: unknown) => bound.push(input)},
+            "../../../datePicker/inline": {bindInlineDatePicker: (_host: unknown, input: unknown) => {
+                bound.push(input);
+                return {validate: () => true, update() {}, destroy() {}};
+            }},
         })[name] || {},
     });
-    const values = [{value: "2026-11-11"}, {value: "2026-11-11T14:25"}];
+    const values = ["2026-11-11", "2026-11-11T14:25"].map(value => ({
+        value, closest: () => ({querySelector: () => ({})}),
+    }));
     methods.bindFieldDates({querySelectorAll: (selector: string) => selector.startsWith("input") ? values : []} as unknown as HTMLElement);
     assert.deepEqual(bound, values);
     for (const [index, fillSpecificTime] of [false, true].entries()) {

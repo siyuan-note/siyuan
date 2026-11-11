@@ -3,7 +3,7 @@ import {genCellValueByElement, updateCellsValue} from "./cell";
 import {getFieldsByData} from "./view";
 import {shouldSubmitDateEdit} from "./dateSubmit";
 import {bindLunarDateEvent, getLunarDateHTML} from "./lunarDate";
-import {bindDatePicker, isDatePickerOpen} from "../../../datePicker";
+import {bindInlineDatePicker, getInlineDateType, validateInlineDateInput} from "../../../datePicker/inline";
 
 export const getDateHTML = (cellElements: HTMLElement[], format?: TAVDateFormat) => {
     const cellValue = genCellValueByElement("date", cellElements[0]).date;
@@ -34,8 +34,10 @@ export const getDateHTML = (cellElements: HTMLElement[], format?: TAVDateFormat)
     }
     return `<div class="b3-menu__items">
 <div>
-    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value}" data-value="${dayjs(cellValue.content || currentDate).format("YYYY-MM-DD HH:mm")}" class="b3-text-field fn__size200" style="margin-top: 4px;"><br>
-    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value2}" data-value="${cellValue.isNotEmpty2 ? dayjs(cellValue.content2).format("YYYY-MM-DD HH:mm") : ""}" style="margin-top: 8px;margin-bottom: 4px" class="b3-text-field fn__size200${cellValue.hasEndDate ? "" : " fn__none"}">
+    <label class="date-picker__endpoint"><span class="ft__smaller">${window.siyuan.languages.startDate}</span>
+    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value}" data-value="${dayjs(cellValue.content || currentDate).format("YYYY-MM-DD HH:mm")}" class="b3-text-field fn__size200" style="margin-top: 4px;"></label>
+    <label class="date-picker__endpoint${cellValue.hasEndDate ? "" : " fn__none"}"><span class="ft__smaller">${window.siyuan.languages.endDate}</span>
+    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value2}" data-value="${cellValue.isNotEmpty2 ? dayjs(cellValue.content2).format("YYYY-MM-DD HH:mm") : ""}" style="margin-top: 8px;margin-bottom: 4px" class="b3-text-field fn__size200${cellValue.hasEndDate ? "" : " fn__none"}"></label>
     <button class="b3-menu__separator"></button>
     <label class="b3-menu__item">
         <span class="fn__flex-center">${window.siyuan.languages.endDate}</span>
@@ -48,6 +50,7 @@ export const getDateHTML = (cellElements: HTMLElement[], format?: TAVDateFormat)
         <input type="checkbox" class="b3-switch b3-switch--menu"${isNotTime ? "" : " checked"}>
     </label>
     <button class="b3-menu__separator"></button>
+    <div data-date-inline></div>
     <button class="b3-menu__item" data-type="clearDate">
         <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.clear}</span>
@@ -72,82 +75,26 @@ export const bindDateEvent = (options: {
     let dirty = false;
     let submitted = false;
 
-    // <input type="date"> 对非法日期会清空 input.value。原生 date input 不触发 beforeinput，用 keydown 区分删空与非法日输入。
-    const lastNonEmptyValue: string[] = [inputElements[0].value, inputElements[1].value];
-    // 输入非法日导致浏览器清空 value 时为 true，提交时按当月最后一天截断重建。
-    const invalidEmpty: boolean[] = [false, false];
-    const bindTracking = (index: number) => {
-        const input = inputElements[index];
-        input.addEventListener("focus", () => {
-            if (isDatePickerOpen(input) || invalidEmpty[index]) {
-                return;
-            }
-            lastNonEmptyValue[index] = input.value;
-            invalidEmpty[index] = false;
-        });
-        input.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey) {
-                return;
-            }
-            const isDelete = event.key === "Backspace" || event.key === "Delete";
-            const isDigit = /^\d$/.test(event.key);
-            if (!isDelete && !isDigit) {
-                return;
-            }
-            // date input 的 value 更新晚于 keydown，需推迟到下一个宏任务再读取
-            setTimeout(() => {
-                if (!input.value) {
-                    invalidEmpty[index] = !isDelete;
-                }
-            });
-        });
-        input.addEventListener("input", () => {
+    [inputElements[0], inputElements[1]].forEach(input => input.addEventListener("input", () => { dirty = true; }));
+    const picker = bindInlineDatePicker(options.menuElement.querySelector("[data-date-inline]"),
+        [inputElements[0], inputElements[1]], {onChange: (_input, state) => {
+            if (!state.valid || state.kind === "input") { return; }
             dirty = true;
-            if (input.value) {
-                invalidEmpty[index] = false;
-                // 仅当 input.value 是合法完整日期时才更新
-                if (input.value.replace(/\D/g, "").length >= 8) {
-                    lastNonEmptyValue[index] = input.value;
-                }
-            }
-        });
-    };
-    bindTracking(0);
-    bindTracking(1);
-    [0, 1].forEach(index => bindDatePicker(inputElements[index], {onCommit: () => {
-        dirty = true;
-        invalidEmpty[index] = false;
-    }}));
+        }});
+    picker.activate(inputElements[0]);
+    const validate = () => picker.validate() &&
+        [inputElements[0], inputElements[1]].every(input => validateInlineDateInput(input));
 
     const buildDateStr = (index: number): string => {
         const inputVal = inputElements[index].value;
         if (inputVal) {
             return inputVal.length > 10 ? inputVal : inputVal + " 00:00";
         }
-        if (!invalidEmpty[index]) {
-            return "";
-        }
-        // 如果输入超出日期范围的非法日导致 value 清空，则获取最后一次合法日期，并返回该月最后一天的日期
-        const lastVal = lastNonEmptyValue[index];
-        if (!lastVal) {
-            return "";
-        }
-        const valDigits = lastVal.replace(/\D/g, "");
-        if (valDigits.length < 6) {
-            return "";
-        }
-        const year = parseInt(valDigits.substring(0, 4), 10);
-        const month = parseInt(valDigits.substring(4, 6), 10);
-        if (month < 1 || month > 12) {
-            return "";
-        }
-        const monthStr = String(month).padStart(2, "0");
-        const maxDay = new Date(year, month, 0).getDate();
-        return `${year}-${monthStr}-${String(maxDay).padStart(2, "0")} 00:00`;
+        return "";
     };
 
     const submit = () => {
-        if (submitted || !shouldSubmitDateEdit(dirty, options.requireExplicitChange === true)) {
+        if (submitted || !validate() || !shouldSubmitDateEdit(dirty, options.requireExplicitChange === true)) {
             return;
         }
         const dateStr1 = buildDateStr(0);
@@ -170,11 +117,12 @@ export const bindDateEvent = (options: {
             if (event.key !== "Escape") {
                 event.stopPropagation();
             }
-            if (event.isComposing) {
+            if (event.isComposing || event.keyCode === 229) {
                 return;
             }
             if (event.key === "Enter") {
                 dirty = true;
+                if (!validate()) { return; }
                 submit();
                 document.querySelector(".av__panel")?.dispatchEvent(new CustomEvent("click", {detail: "close"}));
             }
@@ -200,29 +148,40 @@ export const bindDateEvent = (options: {
         } else {
             inputElements[1].classList.add("fn__none");
         }
+        inputElements[1].closest(".date-picker__endpoint")?.classList.toggle("fn__none", !inputElements[2].checked);
+        picker.update();
     });
     inputElements[3].addEventListener("change", () => {
+        if (!validate()) {
+            inputElements[3].checked = !inputElements[3].checked;
+            return;
+        }
         dirty = true;
-        inputElements[0].value = "";
-        inputElements[1].value = "";
+        [inputElements[0], inputElements[1]].forEach(input => {
+            if (getInlineDateType(input) === "datetime-local" || input.value !== input.dataset.value.substring(0, 10)) {
+                input.dataset.value = input.value ? input.value.length > 10 ? input.value : input.value + " 00:00" : "";
+            }
+        });
         if (inputElements[3].checked) {
-            inputElements[0].setAttribute("type", "datetime-local");
-            inputElements[1].setAttribute("type", "datetime-local");
+            inputElements[0].dataset.datePickerType = "datetime-local";
+            inputElements[1].dataset.datePickerType = "datetime-local";
             inputElements[0].setAttribute("max", "9999-12-31 23:59");
             inputElements[1].setAttribute("max", "9999-12-31 23:59");
-            inputElements[0].value = inputElements[0].dataset.value;
-            inputElements[1].value = inputElements[1].dataset.value;
+            inputElements[0].value = inputElements[0].dataset.value.replace(" ", "T");
+            inputElements[1].value = inputElements[1].dataset.value.replace(" ", "T");
         } else {
-            inputElements[0].setAttribute("type", "date");
-            inputElements[1].setAttribute("type", "date");
+            inputElements[0].dataset.datePickerType = "date";
+            inputElements[1].dataset.datePickerType = "date";
             inputElements[0].setAttribute("max", "9999-12-31");
             inputElements[1].setAttribute("max", "9999-12-31");
             inputElements[0].value = inputElements[0].dataset.value.substring(0, 10);
             inputElements[1].value = inputElements[1].dataset.value.substring(0, 10);
         }
+        picker.update();
     });
     return () => {
         submit();
+        picker.destroy();
     };
 };
 

@@ -144,6 +144,38 @@
     display: inline-flex;
     flex-direction: column;
     gap: 6px;
+    width: 100%;
+    max-width: 320px;
+    min-width: 0;
+  }
+
+  .av__filter-date-col > span,
+  .av__filter-date-row {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .av__filter-date-row input {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .av__filter-row--date-open {
+    flex-wrap: wrap;
+
+    .av__filter-rowinner {
+      order: 1;
+      flex-basis: 100%;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .av__filter-date-controls,
+    .av__filter-value {
+      flex-basis: 100%;
+      min-width: 0;
+    }
   }
 
   .av__select-trigger {
@@ -857,7 +889,9 @@
 
     [data-role="field-mode"],
     input[type="date"],
-    input[type="datetime-local"] {
+    input[type="datetime-local"],
+    input[data-date-picker-type="date"],
+    input[data-date-picker-type="datetime-local"] {
       height: 30px;
       min-width: 0;
     }
@@ -2330,7 +2364,10 @@
 
       // “添加筛选条件”按钮：label 按内容宽度，使下拉箭头紧跟文案而非被推到最右
       .av__filter-add-label {
-        flex: none;
+        flex: 0 1 auto;
+        min-width: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
       }
 
       &__item[data-type="nobg"] {
@@ -3391,6 +3428,10 @@ img.av__cellassetimg {
     display: flex;
     flex-wrap: wrap;
     align-self: flex-end;
+
+    &.av__automation-template {
+      flex-wrap: nowrap;
+    }
   }
 
   .b3-select,

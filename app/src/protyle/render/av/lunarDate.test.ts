@@ -57,7 +57,6 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
             escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
         },
         "../../../dialog/message": {showMessage: () => {}},
-        "../../../datePicker": {bindDatePicker: () => {}},
         "../menus/Menu": {Menu: MenuSurface},
     };
     modules["../../util/escape"] = modules["../../../util/escape"];
@@ -66,6 +65,7 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
         const exports = {};
         new Function("require", "exports", source)((name: string) => modules[name], exports);
         modules["./" + name] = exports;
+        if (name === "inline") { modules["../../../datePicker/inline"] = exports; }
         if (name === "overlayOwnership") {
             modules["../menus/overlayOwnership"] = exports;
             modules["../../menus/overlayOwnership"] = exports;
@@ -149,7 +149,7 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
         if (getComputedStyle(control).display === "none") {
             continue;
         }
-        check.ok(control.getBoundingClientRect().right <= window.innerWidth, "controls fit a narrow viewport");
+        check.ok(control.getBoundingClientRect().right <= window.innerWidth, "controls fit a narrow viewport: " + control.tagName + " " + control.getBoundingClientRect().right + "/" + innerWidth);
         const key = new KeyboardEvent("keydown", {key: "ArrowDown", bubbles: true, cancelable: true});
         control.dispatchEvent(key);
         check.equal(key.defaultPrevented, false, "native control navigation remains available");
@@ -173,6 +173,21 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
     check.equal(updates.length, 0, "invalid confirmation preserves the stored value");
     check.equal(closeCount, beforeInvalid, "invalid confirmation keeps the editor open");
 
+    for (const index of [0, 1]) {
+        mount();
+        const time = menu.querySelectorAll<HTMLInputElement>("[data-lunar-time]")[index];
+        time.value = "14:07:99";
+        time.dispatchEvent(new Event("input", {bubbles: true}));
+        time.dispatchEvent(new Event("change", {bubbles: true}));
+        if (index === 1) { menu.querySelector<HTMLInputElement>("[data-lunar-end]").click(); }
+        const toggle = menu.querySelector<HTMLInputElement>("[data-lunar-include-time]");
+        toggle.click();
+        check.equal(toggle.checked, true, "invalid time cannot be hidden by changing to an all-day lunar date");
+        check.equal(time.value, "14:07:99", "rejected lunar time toggle preserves invalid draft");
+        submit();
+        check.equal(updates.length, 0, "invalid visible or hidden lunar endpoint time is never normalized on submit");
+    }
+
     const commonMenu = document.createElement("div");
     commonMenu.className = "b3-menu fn__none";
     commonMenu.innerHTML = '<div class="b3-menu__title"><span class="b3-menu__label"></span></div><div class="b3-menu__items"></div>';
@@ -186,10 +201,11 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
     host.innerHTML = fieldEditor.getValueInputHTML({id: "birthday", name: "Birthday", type: "date", dateFormat: "lunar"},
         {mode: "static", value: {type: "date", date: {...original, isNotTime: true, hasEndDate: false}}});
     document.body.append(host);
-    fieldEditor.bindFieldDates(host);
+    const fieldBinding = fieldEditor.bindFieldDates(host);
     const trigger = host.querySelector<HTMLButtonElement>("button");
     trigger.click();
-    const parent = document.querySelector<HTMLElement>('[data-menu="true"]');
+    const parent = host.querySelector<HTMLElement>("[data-field-date-picker]");
+    check.equal(document.querySelector('[data-menu="av-field-lunar-date"]'), null);
     const choose = (part: string, label: string) => {
         const select = parent.querySelector<HTMLSelectElement>(`[data-lunar-part="${part}"]`);
         select.click();
@@ -199,36 +215,35 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
         choice.click();
         check.equal(select.isConnected, true, "selecting a child menu preserves the parent form");
         check.equal(parent.isConnected, true);
-        check.equal(picker.isConnected, false, "the option menu closes after selection");
+        check.equal(!picker.isConnected || picker.classList.contains("fn__none"), true, "the option menu closes after selection");
     };
     choose("year", "2026");
     choose("month", calendar.getLunarMonthLabel(8));
     choose("day", calendar.getLunarDayLabel(15));
     parent.querySelector<HTMLButtonElement>("[data-lunar-confirm]").click();
-    check.equal(parent.isConnected, false);
+    check.equal(parent.isConnected, true, "confirmation stays in the original field host");
+    check.equal(parent.childElementCount, 0);
     check.equal(JSON.parse(trigger.dataset.lunarValue).content, new Date(2026, 8, 25).valueOf());
 
     trigger.click();
-    const reopened = document.querySelector<HTMLElement>('[data-menu="true"]');
-    reopened.querySelector<HTMLSelectElement>('[data-lunar-part="year"]').click();
-    const picker = mobileSelect.getMobileSelectMenuElement();
-    reopened.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
-    check.equal(reopened.isConnected, false);
-    check.equal(picker.isConnected, false, "closing the parent also removes its child menu");
-    check.equal(mobileSelect.getMobileSelectMenuElement(), undefined);
-    trigger.click();
-    const outsideClosed = document.querySelector<HTMLElement>('[data-menu="true"]');
+    const reopened = host.querySelector<HTMLElement>("[data-field-date-picker]");
     document.body.click();
-    check.equal(outsideClosed.isConnected, false, "outside clicks still dismiss independent menus");
+    check.equal(reopened.childElementCount > 0, true, "outside clicks do not dismiss an embedded date draft");
+    const year = reopened.querySelector<HTMLSelectElement>('[data-lunar-part="year"]');
+    year.value = "2027";
+    year.dispatchEvent(new Event("change", {bubbles: true}));
+    check.equal(fieldBinding.submit(), true, "the business host can flush its pending lunar draft");
+    check.equal(calendar.solarToLunar(JSON.parse(trigger.dataset.lunarValue).content).year, 2027);
+    fieldBinding.destroy();
+    host.remove();
     return "Lunar date editor cases passed";
 };
 
 test("lunar date controls preserve dates, validate selections, and fit narrow layouts", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const sources = Object.fromEntries(["lunarCalendar", "dateFormat", "dateSubmit", "lunarDate"].map(name => [name,
-        transpileModule(readFileSync(path.join(__dirname, name + ".ts"), "utf8"), {
+    const sources = Object.fromEntries(["model", "yearInput", "field", "inline", "lunarCalendar", "dateFormat", "dateSubmit", "lunarDate"].map(name => [name,
+        transpileModule(readFileSync(path.join(__dirname, ["model", "yearInput", "field", "inline"].includes(name) ? "../../../datePicker/" + name + ".ts" : name + ".ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText]));
     for (const [name, file] of Object.entries({overlayOwnership: "src/menus/overlayOwnership.ts", pluginMenu: "src/plugin/Menu.ts",
@@ -239,25 +254,26 @@ test("lunar date controls preserve dates, validate selections, and fit narrow la
     }
     const language = JSON.parse(readFileSync("appearance/langs/zh-CN.json", "utf8"));
     const data = JSON.parse(readFileSync("../kernel/av/lunar_calendar_data.json", "utf8"));
-    const css = compile("src/assets/scss/business/_av.scss").css;
+    const css = compile("src/assets/scss/business/_av.scss").css + compile("src/assets/scss/component/_date-picker.scss").css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-lunar-date-test-"));
     const script = path.join(temporary, "run.cjs");
     const args = [sources, language, data, css].map(value => JSON.stringify(value)).join(",");
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + args + ")";
+    const code = "const __name = value => value; (() => { try { return (" + browserCases.toString() + ")(" + args + "); } catch (error) { return error.stack; } })()";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show:false, width:320, height:700, webPreferences:{nodeIntegration:true, contextIsolation:false}});
+    const win = new BrowserWindow({show:false, useContentSize:true, width:320, height:700, webPreferences:{nodeIntegration:true, contextIsolation:false}});
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
+        win.show();
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
         app.exit(0);
     } catch (error) {console.error(error); app.exit(1);}
 });`, "utf8");
-    const env = {...process.env};
+    const env: NodeJS.ProcessEnv = {...process.env, XDG_CONFIG_HOME: path.join(temporary, "config"), XDG_CACHE_HOME: path.join(temporary, "cache"), XDG_DATA_HOME: path.join(temporary, "data")};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
-        const result = await promisify(execFile)(require("electron") as unknown as string, [script], {
+        const result = await promisify(execFile)(require("electron") as unknown as string, [...(process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY ? ["--no-sandbox", "--disable-gpu", "--ozone-platform=headless", "--ozone-override-screen-size=1200,1200"] : []), script], {
             env, windowsHide: true, timeout: 40000,
         });
         assert.match(result.stdout, /Lunar date editor cases passed/);

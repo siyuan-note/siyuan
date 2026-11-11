@@ -5,7 +5,7 @@ import {getFieldsByData} from "./view";
 import {shouldSubmitDateEdit} from "./dateSubmit";
 import {getLunarDayLabel, getLunarMonthLabel, getLunarMonths, lunarFirstYear, lunarLastYear, lunarToSolar, solarToLunar} from "./lunarCalendar";
 import {formatDateDisplay} from "./dateFormat";
-import {bindDatePicker} from "../../../datePicker";
+import {bindInlineDatePicker, validateInlineDateInput} from "../../../datePicker/inline";
 
 const option = (value: number, label: string, selected?: number) =>
     `<option value="${value}"${value === selected ? " selected" : ""}>${escapeHtml(label)}</option>`;
@@ -27,20 +27,20 @@ const getEndpointHTML = (content: number, isNotTime: boolean, hidden: boolean) =
 </div>`;
 };
 
-export const getLunarDateHTML = (value: IAVCellDateValue) => {
+export const getLunarDateHTML = (value: IAVCellDateValue, inline = false) => {
     const now = Date.now();
     const lang = window.siyuan.languages;
-    return `<div class="b3-menu__items">
+    return `<div class="${inline ? "" : "b3-menu__items"}">
 <div class="av__lunar-editor">
 <div class="ft__smaller ft__on-surface">${lang._attrView.lunarCalendar}</div>
 ${getEndpointHTML(value.isNotEmpty ? value.content : now, value.isNotTime, false)}
 ${getEndpointHTML(value.isNotEmpty2 ? value.content2 : now, value.isNotTime, !value.hasEndDate)}
-<button class="b3-menu__separator"></button>
-<label class="b3-menu__item"><span class="fn__flex-center">${lang.endDate}</span><span class="fn__space fn__flex-1"></span><input data-lunar-end type="checkbox" class="b3-switch b3-switch--menu"${value.hasEndDate ? " checked" : ""}></label>
-<label class="b3-menu__item"><span class="fn__flex-center">${lang.includeTime}</span><span class="fn__space fn__flex-1"></span><input data-lunar-include-time type="checkbox" class="b3-switch b3-switch--menu"${value.isNotTime ? "" : " checked"}></label>
+${inline ? '<div class="fn__hr"></div>' : '<button class="b3-menu__separator"></button>'}
+<label class="${inline ? "fn__flex" : "b3-menu__item"}"><span class="fn__flex-center">${lang.endDate}</span><span class="fn__space fn__flex-1"></span><input data-lunar-end type="checkbox" class="b3-switch${inline ? "" : " b3-switch--menu"}"${value.hasEndDate ? " checked" : ""}></label>
+<label class="${inline ? "fn__flex" : "b3-menu__item"}"><span class="fn__flex-center">${lang.includeTime}</span><span class="fn__space fn__flex-1"></span><input data-lunar-include-time type="checkbox" class="b3-switch${inline ? "" : " b3-switch--menu"}"${value.isNotTime ? "" : " checked"}></label>
 <div class="fn__flex"><span class="fn__flex-1"></span><button type="button" class="b3-button b3-button--text" data-lunar-confirm>${escapeHtml(lang.confirm)}</button></div>
-<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="clearDate"><svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg><span class="b3-menu__label">${lang.clear}</span></button>
+${inline ? '<div class="fn__hr"></div>' : '<button class="b3-menu__separator"></button>'}
+<button type="button" class="${inline ? "b3-button b3-button--cancel" : "b3-menu__item"}" data-type="clearDate">${inline ? "" : '<svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>'}<span>${lang.clear}</span></button>
 </div></div>`;
 };
 
@@ -71,9 +71,9 @@ export const bindLunarDateEditor = (options: {
         return content;
     };
     endpoints.forEach((element, index) => {
-        bindDatePicker(element.querySelector<HTMLInputElement>("[data-lunar-time]"));
         element.addEventListener("change", event => {
             dirty = true;
+            submitted = false;
             edited[index] = true;
             const target = event.target as HTMLElement;
             const parts = element.querySelectorAll<HTMLSelectElement>("select");
@@ -90,24 +90,37 @@ export const bindLunarDateEditor = (options: {
             }
             refresh(element);
         });
+        element.addEventListener("input", () => { dirty = true; submitted = false; edited[index] = true; });
     });
     hasEnd.addEventListener("change", () => {
         dirty = true;
+        submitted = false;
         endpoints[1].classList.toggle("fn__none", !hasEnd.checked);
+        timePicker.update();
     });
     includeTime.addEventListener("change", () => {
+        if (!validTimes()) { includeTime.checked = !includeTime.checked; return; }
         dirty = true;
+        submitted = false;
         endpoints.forEach(element => {
             element.querySelector("[data-lunar-time]").classList.toggle("fn__none", !includeTime.checked);
             refresh(element);
         });
+        timePicker.update();
     });
+    const timeHost = options.menuElement.ownerDocument.createElement("div");
+    options.menuElement.querySelector(".av__lunar-editor").append(timeHost);
+    const timePicker = bindInlineDatePicker(timeHost,
+        endpoints.map(element => element.querySelector<HTMLInputElement>("[data-lunar-time]")));
+    const validTimes = () => timePicker.validate() && endpoints.every(element =>
+        validateInlineDateInput(element.querySelector<HTMLInputElement>("[data-lunar-time]")));
     let submitted = false;
     const submit = () => {
         if (submitted || !shouldSubmitDateEdit(dirty, options.requireExplicitChange === true)) {
             return true;
         }
         // 未修改的端点保留原始时间戳，包括秒和毫秒以及对照表范围外的旧日期。
+        if (!validTimes()) { return false; }
         const content = !edited[0] && original.isNotEmpty ? original.content : refresh(endpoints[0]);
         const content2 = !edited[1] && original.isNotEmpty2 ? original.content2 :
             hasEnd.checked || edited[1] ? refresh(endpoints[1]) : undefined;
@@ -125,11 +138,11 @@ export const bindLunarDateEditor = (options: {
         });
         return true;
     };
-    options.menuElement.querySelectorAll("input, select").forEach(control => control.addEventListener("keydown", (event: KeyboardEvent) => {
+    options.menuElement.querySelectorAll("[data-lunar-time], [data-lunar-part], [data-lunar-end], [data-lunar-include-time]").forEach(control => control.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key !== "Escape") {
             event.stopPropagation();
         }
-        if (event.key === "Enter" && !event.isComposing && !(control instanceof HTMLSelectElement)) {
+        if (event.key === "Enter" && !event.isComposing && event.keyCode !== 229 && control.tagName !== "SELECT") {
             dirty = true;
             if (submit()) {
                 options.close();
@@ -151,7 +164,11 @@ export const bindLunarDateEditor = (options: {
         options.update({content: 0, content2: 0, isNotEmpty: false, isNotEmpty2: false, hasEndDate: false, isNotTime: original.isNotTime});
         options.close();
     });
-    return () => { submit(); };
+    const validate = () => validTimes() &&
+        ((!edited[0] && original.isNotEmpty) || read(endpoints[0]) !== undefined) &&
+        (!hasEnd.checked || (!edited[1] && original.isNotEmpty2) || read(endpoints[1]) !== undefined);
+    const destroy = () => { timePicker.destroy(); timeHost.remove(); };
+    return Object.assign(submit, {submit, validate, destroy});
 };
 
 export const bindLunarDateEvent = (options: {

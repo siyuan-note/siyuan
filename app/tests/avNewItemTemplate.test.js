@@ -10,9 +10,22 @@ const runCases = async (sources, mobile) => {
         new Function("require", "exports", source)(name => imports[name] || {}, exports);
         return exports;
     };
-    window.siyuan = {languages: new Proxy({untitled: "Untitled"}, {get: (target, key) => target[key] || key}),
+    window.siyuan = {languages: new Proxy({...sources.languages, untitled: "Untitled"}, {get: (target, key) => target[key] || key}),
         notebooks: [], config: {editor: {databaseAttrShow: true}}};
     window.Lute = {NewNodeID: () => "new-template"};
+    const dateModules = {};
+    const loadDate = name => {
+        if (dateModules[name]) return dateModules[name];
+        const exports = dateModules[name] = {};
+        if (!sources.dates[name]) return exports;
+        new Function("require", "exports", sources.dates[name])(request => {
+            if (request === "dayjs") return require("dayjs");
+            if (request.endsWith("lunar_calendar_data.json")) return sources.lunarData;
+            return loadDate(require("node:path").posix.normalize(require("node:path").posix.join(require("node:path").posix.dirname(name), request)));
+        }, exports);
+        return exports;
+    };
+    const fieldEditor = loadDate("protyle/render/av/fieldValueEditor");
     const calls = [];
     const pending = [];
     let dialog;
@@ -42,8 +55,10 @@ const runCases = async (sources, mobile) => {
         "../../../util/functions": {isMobile: () => mobile},
         "../../../util/escape": {escapeHtml: String, escapeAttr: String},
         "./blockIcon": {getAVBlockIconHTML: () => ""},
-        "./view": {getFieldsByData: () => []},
-        "./fieldValueEditor": {bindFieldDates() {}},
+        "./view": {getFieldsByData: data => data.fields || []},
+        "./capabilities": loadDate("protyle/render/av/capabilities"),
+        "./col": {getColIconByType: () => "iconCalendar"},
+        "./fieldValueEditor": fieldEditor,
         "../../../constants": {Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view"}},
         "../../../util/fetch": {fetchSyncPost: (url, data) => {
             assert.equal(url, "/api/av/createAttributeViewItem");
@@ -70,6 +85,77 @@ const runCases = async (sources, mobile) => {
     document.body.append(block);
     const protyle = {id: "session", notebookId: "notebook", block: {rootID: "carrier"}, app: {appId: "app"}, options: {}};
 
+    const dateField = {id: "date", name: "Date", type: "date", date: {fillSpecificTime: true}};
+    const dateTemplate = {id: "date-template", name: "Date", targetType: "detached", fieldValues: {
+        date: {mode: "static", value: {type: "date", date: {content: new Date("2024-02-28T13:45").getTime(), isNotEmpty: true, isNotTime: false}}},
+    }};
+    const dateData = {id: "database", fields: [dateField], newItemTemplates: [dateTemplate]};
+    api.openNewItemTemplateDialog({protyle, blockElement: block, data: dateData});
+    const dateHost = dialog.element.querySelector("[data-field-date-host]");
+    const dateInput = dateHost.querySelector('[data-role="field-value"]');
+    const mode = dialog.element.querySelector('[data-role="field-mode"]');
+    assert.equal(dateHost.querySelector(".date-picker__calendar"), null, "template dates stay collapsed until focused");
+    dateInput.focus();
+    assert.ok(dateHost.querySelector(".date-picker__calendar"), "focusing a template date expands its calendar in the existing editor");
+    assert.equal(dateInput.value, "2024-02-28T13:45");
+    for (let index = 0; index < 2; index++) {
+        mode.focus();
+        mode.value = "currentTime"; mode.dispatchEvent(new Event("change"));
+        assert.equal(dateHost.classList.contains("fn__none"), true);
+        mode.focus();
+        mode.value = "static"; mode.dispatchEvent(new Event("change"));
+        assert.equal(dateHost.classList.contains("fn__none"), false);
+        assert.equal(dateHost.querySelectorAll(".date-picker__calendar").length, 1);
+    }
+    dateInput.value = "2024-03-01T15:30";
+    dateInput.dispatchEvent(new Event("input", {bubbles: true}));
+    dateInput.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.equal(saved, undefined, "editing dates only changes the template draft");
+    dialog.element.querySelector('[data-role="cancel"]').click();
+    assert.equal(saved, undefined, "cancel does not write a template transaction");
+    assert.equal(dateTemplate.fieldValues.date.value.date.content, new Date("2024-02-28T13:45").getTime());
+    api.openNewItemTemplateDialog({protyle, blockElement: block, data: dateData});
+    const savedInput = dialog.element.querySelector('[data-role="field-value"]');
+    savedInput.value = "not-a-date";
+    savedInput.dispatchEvent(new Event("input", {bubbles: true}));
+    const beforeInvalid = saved;
+    dialog.element.querySelector('[data-role="confirm"]').click();
+    assert.equal(saved, beforeInvalid, "invalid dates cannot be persisted by the template host");
+    assert.equal(dialog.element.isConnected, true);
+    savedInput.value = "2024-03-01T15:30";
+    savedInput.dispatchEvent(new Event("input", {bubbles: true}));
+    dialog.element.querySelector('[data-role="confirm"]').click();
+    assert.equal(saved.operations[0].data.templates[0].fieldValues.date.value.date.content, new Date("2024-03-01T15:30").getTime());
+    await new Promise(resolve => setTimeout(resolve, 0));
+    api.openNewItemTemplateDialog({protyle, blockElement: block, data: dateData});
+    const dynamicMode = dialog.element.querySelector('[data-role="field-mode"]');
+    dynamicMode.value = "currentTime"; dynamicMode.dispatchEvent(new Event("change"));
+    dialog.element.querySelector('[data-role="confirm"]').click();
+    assert.equal(saved.operations[0].data.templates[0].fieldValues.date.mode, "currentTime");
+    assert.equal(saved.operations[0].data.templates[0].fieldValues.date.value, undefined, "dynamic dates remain dynamic");
+    await new Promise(resolve => setTimeout(resolve, 0));
+    dateField.dateFormat = "lunar";
+    api.openNewItemTemplateDialog({protyle, blockElement: block, data: dateData});
+    const lunarTrigger = dialog.element.querySelector('[data-value-type="lunarDate"]');
+    lunarTrigger.click();
+    assert.ok(dialog.element.querySelector("[data-lunar-endpoint]"), "template lunar controls expand inside its field");
+    assert.equal(document.querySelector('[data-menu="av-field-lunar-date"]'), null);
+    const lunarDay = dialog.element.querySelector('[data-lunar-part="day"]');
+    lunarDay.value = lunarDay.value === "1" ? "2" : "1";
+    lunarDay.dispatchEvent(new Event("change", {bubbles: true}));
+    const beforeLunarCancel = saved;
+    dialog.element.querySelector('[data-role="cancel"]').click();
+    assert.equal(saved, beforeLunarCancel, "cancelling a lunar template draft does not persist");
+    api.openNewItemTemplateDialog({protyle, blockElement: block, data: dateData});
+    dialog.element.querySelector('[data-value-type="lunarDate"]').click();
+    const pendingDay = dialog.element.querySelector('[data-lunar-part="day"]');
+    pendingDay.value = pendingDay.value === "1" ? "2" : "1";
+    pendingDay.dispatchEvent(new Event("change", {bubbles: true}));
+    dialog.element.querySelector('[data-role="confirm"]').click();
+    assert.notEqual(saved.operations[0].data.templates[0].fieldValues.date.value.date.content,
+        dateTemplate.fieldValues.date.value.date.content, "host confirmation flushes the inline lunar draft");
+    await new Promise(resolve => setTimeout(resolve, 0));
+    delete dateField.dateFormat;
     for (const targetType of ["detached", "document"]) {
         for (const view of ["table", "list", "gallery", "kanban", "calendar"]) {
             for (const preference of [undefined, false, true]) {
@@ -329,7 +415,7 @@ const runCases = async (sources, mobile) => {
 
 const runElectron = async () => {
     const {app, BrowserWindow} = require("electron");
-    app.setPath("userData", process.argv[2]);
+    app.setPath("userData", process.argv.at(-1));
     app.commandLine.appendSwitch("disable-gpu");
     await app.whenReady();
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
@@ -350,7 +436,18 @@ const runElectron = async () => {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
                 }).outputText];
             }));
+            sources.lunarData = JSON.parse(readFileSync(path.join(__dirname, "../../kernel/av/lunar_calendar_data.json"), "utf8"));
+            sources.languages = JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"));
+            sources.dates = Object.fromEntries(["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline",
+                "protyle/render/av/fieldValueEditor", "protyle/render/av/lunarDate", "protyle/render/av/lunarCalendar", "protyle/render/av/dateFormat", "protyle/render/av/dateSubmit", "protyle/render/av/capabilities", "protyle/render/av/capabilities.generated", "util/escape"].map(name =>
+                [name, ts.transpileModule(readFileSync(path.join(__dirname, `../src/${name}.ts`), "utf8"), {
+                    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
+                }).outputText]));
             await win.loadURL("data:text/html,<html><body></body></html>");
+            win.show();
+            win.focus();
+            if (!win.webContents.debugger.isAttached()) win.webContents.debugger.attach("1.3");
+            await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled", {enabled: true});
             const result = await win.webContents.executeJavaScript(`(async () => {
                 try { return {message: await (${runCases.toString()})(${JSON.stringify(sources)}, ${mobile})}; }
                 catch (error) { return {error: error.stack}; }
@@ -371,15 +468,14 @@ if (process.versions.electron && process.type === "browser") {
     runElectron().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
     require("node:test").test("template creation preserves legacy behavior and opens and focuses bound and detached items on desktop and mobile", {
-        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 60000,
     }, async () => {
-        const env = {...process.env};
+        const env = {...process.env, XDG_CACHE_HOME: path.join(os.tmpdir(), "siyuan-template-cache")};
         delete env.ELECTRON_RUN_AS_NODE;
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-new-item-template-"));
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 55000});
+                require("electron"), [...(process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY ? ["--no-sandbox", "--disable-gpu", "--ozone-platform=headless"] : []), __filename, profile], {env, windowsHide: true, timeout: 55000});
             assert.equal(stdout.match(/Template opening cases passed/g)?.length, 2);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));

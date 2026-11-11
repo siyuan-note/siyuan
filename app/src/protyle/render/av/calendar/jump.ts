@@ -2,7 +2,7 @@ import {mobileInputDialog} from "../../../../dialog/mobileInputDialog";
 import dayjs from "dayjs";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getCalendarRange, getISOWeekForCalendarRow, getISOWeeksInYear, getISOWeekThursday} from "./date";
-import {bindDatePicker} from "../../../../datePicker";
+import {bindInlineDatePicker} from "../../../../datePicker/inline";
 
 export const openCalendarJump = (anchor: number, weekStart: number, onJump: (date: number) => void) => {
     const rowStart = getCalendarRange(anchor, "week", weekStart).start;
@@ -11,6 +11,7 @@ export const openCalendarJump = (anchor: number, weekStart: number, onJump: (dat
         {year: 9999, week: getISOWeeksInYear(9999)} : rowWeek;
     const languages = window.siyuan.languages;
     const dialog = mobileInputDialog({
+        destroyCallback: () => picker?.destroy(),
         title: languages.calendarJump,
         type: "date",
         value: dayjs(anchor).format("YYYY-MM-DD"),
@@ -20,7 +21,7 @@ export const openCalendarJump = (anchor: number, weekStart: number, onJump: (dat
             <option value="date">${escapeHtml(languages.calendarJumpDate)}</option>
             <option value="week">${escapeHtml(languages.calendarISOWeek)}</option>
         </select>`,
-        extraContent: `<div class="av__calendar-jump-week fn__none" data-calendar-jump-week>
+        extraContent: `<div data-calendar-jump-picker></div><div class="av__calendar-jump-week fn__none" data-calendar-jump-week>
             <label>${escapeHtml(languages.calendarISOWeekYear)}<input class="b3-text-field fn__block" data-calendar-jump-year type="number" min="1" max="9999" step="1" required value="${currentWeek.year}"></label>
             <label>${escapeHtml(languages.calendarISOWeek)}<input class="b3-text-field fn__block" data-calendar-jump-number type="number" min="1" max="${getISOWeeksInYear(currentWeek.year)}" step="1" required value="${currentWeek.week}"></label>
         </div>`,
@@ -39,7 +40,7 @@ export const openCalendarJump = (anchor: number, weekStart: number, onJump: (dat
                 }
             } else {
                 const input = currentDialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
-                if (!value || !input.reportValidity()) {
+                if (!value || !picker.validate() || !input.reportValidity()) {
                     return;
                 }
                 target = new Date(`${value}T00:00:00`).getTime();
@@ -50,15 +51,25 @@ export const openCalendarJump = (anchor: number, weekStart: number, onJump: (dat
     });
     const mode = dialog.element.querySelector<HTMLSelectElement>("[data-calendar-jump-mode]");
     const dateInput = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
-    bindDatePicker(dateInput);
+    const pickerHost = dialog.element.querySelector<HTMLElement>("[data-calendar-jump-picker]");
     dateInput.setAttribute("aria-label", languages.calendarJumpDate);
     const weekFields = dialog.element.querySelector<HTMLElement>("[data-calendar-jump-week]");
     const yearInput = dialog.element.querySelector<HTMLInputElement>("[data-calendar-jump-year]");
     const weekInput = dialog.element.querySelector<HTMLInputElement>("[data-calendar-jump-number]");
     const confirm = dialog.element.querySelector<HTMLButtonElement>("[data-input-confirm]");
+    const updateConfirm = () => {
+        confirm.disabled = mode.value !== "week" && (!dateInput.value || !picker.validate());
+    };
+    const picker = bindInlineDatePicker(pickerHost, dateInput, {onChange: updateConfirm});
+    dateInput.addEventListener("input", updateConfirm);
+    dateInput.addEventListener("change", updateConfirm);
+    updateConfirm();
     mode.addEventListener("change", () => {
         const isWeek = mode.value === "week";
         dateInput.classList.toggle("fn__none", isWeek);
+        pickerHost.classList.toggle("fn__none", isWeek);
+        picker.update();
+        updateConfirm();
         weekFields.classList.toggle("fn__none", !isWeek);
         (isWeek ? yearInput : dateInput).focus();
     });

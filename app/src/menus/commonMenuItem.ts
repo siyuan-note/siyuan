@@ -1,5 +1,5 @@
 import {toggleMenu} from "./menuToggle";
-import {bindDatePicker} from "../datePicker";
+import {bindInlineDatePicker} from "../datePicker/inline";
 import type {BlockQueryRequestInput} from "../types/api";
 import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {isMobile, isValidCustomAttrName} from "../util/functions";
@@ -85,6 +85,7 @@ export const openWechatNotify = (nodeElement: Element) => {
         <div class="fn__space"></div>
         <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
     </div>
+    <div data-role="reminder-date-calendar"></div>
     <div class="b3-label__text" style="text-align: center">${window.siyuan.languages.wechatTip}</div>
 </div>
 <div class="b3-dialog__action">
@@ -93,12 +94,14 @@ export const openWechatNotify = (nodeElement: Element) => {
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         destroyCallback() {
+            datePicker?.destroy();
             focusByRange(range);
         }
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_WECHATREMINDER);
-    bindDatePicker(dialog.element.querySelector<HTMLInputElement>("input"));
-    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    const dateInput = dialog.element.querySelector<HTMLInputElement>('input[type="datetime-local"]');
+    const datePicker = bindInlineDatePicker(dialog.element.querySelector<HTMLElement>('[data-role="reminder-date-calendar"]'), dateInput);
+    const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
     });
@@ -122,7 +125,8 @@ export const openWechatNotify = (nodeElement: Element) => {
         });
     });
     btnsElement[2].addEventListener("click", () => {
-        const date = dialog.element.querySelector("input").value;
+        if (!datePicker.validate()) { return; }
+        const date = dateInput.value;
         if (date) {
             if (new Date(date) <= new Date()) {
                 showMessage(window.siyuan.languages.reminderTip);
@@ -175,17 +179,20 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
         <div class="fn__space"></div>
         <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
     </div>
+    <div data-role="reminder-date-calendar"></div>
     <div class="b3-label__text" style="text-align: center">${window.siyuan.languages.wechatTip}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.remove}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`
+</div>`,
+            destroyCallback() { datePicker?.destroy(); }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_WECHATREMINDER);
-        bindDatePicker(dialog.element.querySelector<HTMLInputElement>("input"));
-        const btnsElement = dialog.element.querySelectorAll(".b3-button");
+        const dateInput = dialog.element.querySelector<HTMLInputElement>('input[type="datetime-local"]');
+        const datePicker = bindInlineDatePicker(dialog.element.querySelector<HTMLElement>('[data-role="reminder-date-calendar"]'), dateInput);
+        const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();
         });
@@ -202,7 +209,8 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
             });
         });
         btnsElement[2].addEventListener("click", () => {
-            const date = dialog.element.querySelector("input").value;
+            if (!datePicker.validate()) { return; }
+            const date = dateInput.value;
             if (date) {
                 if (new Date(date) <= new Date()) {
                     showMessage(window.siyuan.languages.reminderTip);

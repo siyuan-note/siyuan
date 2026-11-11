@@ -195,3 +195,42 @@ for (const type of ["relation", "rollup"] as const) {
         });
     }
 }
+
+for (const mobile of [false, true]) {
+    test(`filter expansion keeps source ownership and respects ${mobile ? "mobile" : "desktop"} positioning`, () => {
+        const h = createPanels({isMobile: () => mobile});
+        const panel = h.load("filters").filtersPanel as IAVPanelDescriptor;
+        const context = contextFor("filters", {menuElement: {isConnected: true, clientWidth: 340} as HTMLElement});
+        const save = () => {};
+        const render = () => "filters";
+        context.options.filterOperation = {action: "setAttrViewColRelationFilters", avID: "source", keyID: "relation",
+            root: context.menuElement, save, render};
+        panel.bind(context);
+        const options = h.calls.find(([name]) => name === "bindInlineFilterEvents")[1][5] as
+            NonNullable<IOpenAVPanelOptions["filterOperation"]>;
+        assert.equal(options.avID, "source");
+        assert.equal(options.action, "setAttrViewColRelationFilters");
+        assert.equal(options.keyID, "relation");
+        assert.equal(options.root, context.menuElement);
+        assert.equal(options.save, save);
+        assert.equal(options.render, render);
+        options.onResize();
+        assert.equal(h.calls.filter(([name]) => name === "setPosition").length, mobile ? 0 : 1);
+        Object.defineProperty(context.menuElement, "isConnected", {value: false});
+        options.onResize();
+        assert.equal(h.calls.filter(([name]) => name === "setPosition").length, mobile ? 0 : 1);
+    });
+}
+
+test("filter expansion retains an existing host resize callback", () => {
+    const h = createPanels();
+    let resized = 0;
+    const context = contextFor("filters", {menuElement: {isConnected: true} as HTMLElement});
+    context.options.filterOperation = {onResize: () => { resized++; }};
+    (h.load("filters").filtersPanel as IAVPanelDescriptor).bind(context);
+    const options = h.calls.find(([name]) => name === "bindInlineFilterEvents")[1][5] as
+        NonNullable<IOpenAVPanelOptions["filterOperation"]>;
+    options.onResize();
+    assert.equal(resized, 1);
+    assert.equal(h.calls.filter(([name]) => name === "setPosition").length, 0);
+});

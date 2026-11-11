@@ -57,7 +57,6 @@ const runCases = async (sources, css, mobile) => {
     const scopePreviews = [];
     const scopeRequests = [];
     const copied = [];
-    const datePickers = new WeakMap();
     let fieldMenu;
     let collectionTypeInput;
     let nextID = 0;
@@ -68,8 +67,6 @@ const runCases = async (sources, css, mobile) => {
             document.querySelectorAll("body > .b3-menu").forEach(popup => popup.remove());
         }}}};
     const mocks = {
-        "datePicker": {bindDatePicker: (input, options = {}) => datePickers.set(input, options),
-            isDatePickerOpen: () => false},
         "menus/menuToggle": {toggleMenu: options => {options.build(); options.show();}},
         "plugin/Menu": {Menu: class {
             items = [];
@@ -145,13 +142,14 @@ const runCases = async (sources, css, mobile) => {
     };
     const cache = {};
     const load = name => {
+        if (name.endsWith("lunar_calendar_data.json")) return sources.lunarData;
         if (name === "dialog") name = "dialog/index";
         if (mocks[name]) return mocks[name];
         if (cache[name]) return cache[name];
         if (!sources[name]) return {};
         const exports = {};
         cache[name] = exports;
-        new Function("exports", "require", sources[name])(exports, request => request === "dayjs" ? {default: require("dayjs")} :
+        new Function("exports", "require", sources[name])(exports, request => request === "dayjs" ? require("dayjs") :
             load(path.normalize(path.join(path.dirname(name), request))));
         return exports;
     };
@@ -459,11 +457,99 @@ const runCases = async (sources, css, mobile) => {
     await click('[data-action="add-field"]');
     fieldMenu.items.find(item => item.label === "Completion time").click();
     await tick();
-    assert.ok(datePickers.has(get('[data-role="field-value"][type="date"]')), "fixed date assignments bind the shared picker");
+    const staticDate = get('[data-role="field-value"]');
+    assert.equal(get("[data-field-date-picker]").querySelector(".date-picker__calendar"), null, "static assignment calendars start collapsed");
+    staticDate.focus();
+    assert.ok(get("[data-field-date-picker] .date-picker__calendar"), "focusing a static assignment expands its inline picker");
+    const beforeDate = transactions.length;
+    get("[data-field-date-picker] [data-date]:not([disabled])").click();
+    assert.ok(transactions.length > beforeDate, "choosing a static date immediately saves the rule configuration");
+    assert.equal(latest().actions[0].fields.finished.value.date.isNotEmpty, true);
+    staticDate.value = "not-a-date";
+    staticDate.dispatchEvent(new Event("input", {bubbles: true}));
+    const beforeInvalidDate = transactions.length;
+    staticDate.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.equal(transactions.length, beforeInvalidDate, "invalid date drafts do not save automation rules");
     await change("[data-mode]", "currentTime");
     assert.deepEqual(latest().conditions, originalConditions);
-    assert.deepEqual(latest().actions[0].fields, {finished: {mode: "currentTime", value: {type: "date"}}});
+    assert.equal(latest().actions[0].fields.finished.mode, "currentTime");
+    assert.equal(latest().actions[0].fields.finished.value.date.isNotEmpty, true, "mode switching retains the saved static draft");
     assert.equal(get("[data-status]").textContent, lang.automationReady);
+    const finishedField = database.keyValues.find(entry => entry.key.id === "finished").key;
+    finishedField.dateFormat = "lunar";
+    await change("[data-mode]", "static");
+    await click('[data-value-type="lunarDate"]');
+    assert.ok(get("[data-lunar-endpoint]"), "automation lunar controls expand in the static value host");
+    assert.equal(document.querySelector('[data-menu="av-field-lunar-date"]'), null);
+    const lunarDay = get('[data-lunar-part="day"]');
+    lunarDay.value = lunarDay.value === "1" ? "2" : "1";
+    lunarDay.dispatchEvent(new Event("change", {bubbles: true}));
+    const beforeLunarCommit = transactions.length;
+    await click("[data-lunar-confirm]");
+    assert.ok(transactions.length > beforeLunarCommit, "confirming an inline lunar date immediately saves the rule");
+    assert.equal(latest().actions[0].fields.finished.value.date.isNotEmpty, true);
+    await click('[data-value-type="lunarDate"]');
+    const pendingLunarDay = get('[data-lunar-part="day"]');
+    pendingLunarDay.value = pendingLunarDay.value === "1" ? "2" : "1";
+    pendingLunarDay.dispatchEvent(new Event("change", {bubbles: true}));
+    const beforeLeave = transactions.length;
+    get("[data-mode]").focus();
+    assert.ok(transactions.length > beforeLeave, "tabbing out saves a valid lunar draft without inner confirmation");
+    const beforeMode = latest().actions[0].fields.finished.value.date.content;
+    await change("[data-mode]", "currentTime");
+    assert.equal(latest().actions[0].fields.finished.value.date.content, beforeMode);
+    const afterDetach = transactions.length;
+    document.body.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    assert.equal(transactions.length, afterDetach, "detached field listeners cannot save an old rule");
+    await change("[data-mode]", "static");
+    await click('[data-value-type="lunarDate"]');
+    const invalidLunarDay = get('[data-lunar-part="day"]');
+    invalidLunarDay.value = "";
+    invalidLunarDay.dispatchEvent(new Event("change", {bubbles: true}));
+    const beforeInvalidLunar = transactions.length;
+    get("[data-mode]").focus();
+    assert.equal(transactions.length, beforeInvalidLunar, "leaving an invalid lunar draft does not write its previous valid value");
+    await change("[data-mode]", "currentTime");
+    assert.equal(latest().actions[0].fields.finished.value.date.content, beforeMode);
+    await change("[data-mode]", "static");
+    await click('[data-value-type="lunarDate"]');
+    const escapeDay = get('[data-lunar-part="day"]');
+    escapeDay.value = escapeDay.value === "1" ? "2" : "1";
+    escapeDay.dispatchEvent(new Event("change", {bubbles: true}));
+    const includeLunarTime = get("[data-lunar-include-time]");
+    includeLunarTime.checked = true;
+    includeLunarTime.dispatchEvent(new Event("change", {bubbles: true}));
+    const composingTime = get("[data-lunar-time]");
+    composingTime.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+    const beforeCompositionLeave = transactions.length;
+    get("[data-mode]").focus();
+    assert.equal(transactions.length, beforeCompositionLeave, "leaving while the lunar time is composing does not save");
+    composingTime.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
+    const beforeEscape = transactions.length;
+    escapeDay.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, isComposing: true}));
+    assert.equal(transactions.length, beforeEscape, "IME Escape does not commit a lunar draft");
+    escapeDay.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    assert.ok(transactions.length > beforeEscape, "normal Escape commits a valid lunar draft before its host closes");
+    escapeDay.value = escapeDay.value === "1" ? "2" : "1";
+    escapeDay.dispatchEvent(new Event("change", {bubbles: true}));
+    const beforeSwitchRule = transactions.length;
+    const addRuleTarget = get('[data-action="add-rule"]');
+    addRuleTarget.scrollIntoView({block: "center"});
+    const addRuleRect = addRuleTarget.getBoundingClientRect();
+    await require("electron").ipcRenderer.invoke("automation-click", addRuleRect.left + addRuleRect.width / 2,
+        addRuleRect.top + addRuleRect.height / 2);
+    await tick();
+    assert.ok(transactions.length > beforeSwitchRule, "switching to another rule preserves the old rule's lunar draft");
+    const retainedLunar = latest().actions[0].fields.finished.value.date.content;
+    await click('[data-action="rules"]');
+    fieldMenu.element.querySelector('[data-id="rule"]').click();
+    await tick();
+    assert.equal(JSON.parse(get('[data-value-type="lunarDate"]').dataset.lunarValue).content, retainedLunar);
+    await click('[data-action="rules"]');
+    fieldMenu.element.querySelector('[data-id]:not([data-id="rule"]) [data-delete]').click();
+    await tick();
+    delete finishedField.dateFormat;
+    await change("[data-mode]", "currentTime");
     await click("[data-target-filters] [data-add-condition]");
     fieldMenu.items.find(item => item.label === "Completion time").click();
     await tick();
@@ -554,12 +640,19 @@ const runCases = async (sources, css, mobile) => {
     await tick();
     assertFieldSpacing();
     await change("[data-template-item]", "sample");
-    assert.ok(datePickers.has(get("[data-template-time]")), "preview trigger time binds the shared picker");
+    assert.equal(get("[data-template-time]").parentElement.nextElementSibling.querySelector(".date-picker__calendar"), null, "preview trigger calendars start collapsed");
+    get("[data-template-time]").focus();
+    assert.ok(get("[data-template-time]").parentElement.nextElementSibling.querySelector(".date-picker__calendar"), "preview trigger time binds the shared picker");
+    const beforeTriggerEdit = transactions.length;
+    get("[data-template-time]").parentElement.nextElementSibling.querySelector("[data-date]:not([disabled])").click();
+    assert.equal(templatePreviews.length, 0, "trigger-time calendar changes do not issue preview requests");
+    assert.equal(transactions.length, beforeTriggerEdit, "trigger-time calendar changes do not save real data");
     await change("[data-template-time]", "2026-10-16T15:30");
     const writesBeforePreview = transactions.length;
     await click("[data-template-run]");
     assert.equal(templatePreviews.length, 1);
     assert.equal(templatePreviews[0].triggerTime, "2026-10-16T15:30");
+    assert.equal(templatePreviews[0].timeZone, latest().timeZone, "preview uses the configured rule timezone");
     assert.equal(transactions.length, writesBeforePreview, "preview never saves or changes entries");
     assert.ok(get("[data-template-result]").textContent);
     assert.ok(get("[data-template-time]").getBoundingClientRect().bottom < get("[data-template-result]").getBoundingClientRect().top,
@@ -570,13 +663,35 @@ const runCases = async (sources, css, mobile) => {
     assert.ok(get('[data-template-input="finished"]'));
     assert.equal(get("[data-template-result]").textContent, "", "editing inputs invalidates old previews");
     const previewDate = get('[data-template-input="finished"]');
-    assert.ok(datePickers.has(previewDate), "rendered sample dates bind the shared picker");
+    assert.equal(previewDate.parentElement.nextElementSibling.querySelector(".date-picker__calendar"), null, "preview override calendars start collapsed");
+    previewDate.focus();
+    assert.ok(previewDate.parentElement.nextElementSibling.querySelector(".date-picker__calendar"), "rendered sample dates bind the shared picker");
+    const requestsBeforeDate = templatePreviews.length;
+    const writesBeforeDate = transactions.length;
+    previewDate.parentElement.nextElementSibling.querySelector("[data-date]:not([disabled])").click();
+    assert.equal(templatePreviews.length, requestsBeforeDate, "calendar edits only invalidate previews");
+    assert.equal(transactions.length, writesBeforeDate, "preview calendar edits never change configuration or real rows");
     previewDate.value = "2026-10-14";
     previewDate.dispatchEvent(new Event("input", {bubbles: true}));
     const writesBeforeInputPreview = transactions.length;
     await click("[data-template-run]");
     assert.equal(templatePreviews.at(-1).inputs.finished, "2026-10-14");
     assert.equal(transactions.length, writesBeforeInputPreview, "editing sample dates never saves a rule or entry");
+    const sampleDateField = database.keyValues.find(entry => entry.key.id === "finished");
+    sampleDateField.values = [{blockID: "sample", type: "date", date: {content: 1791936000000, content2: 1792022400000,
+        isNotEmpty: true, isNotEmpty2: true, hasEndDate: true, isNotTime: true}}];
+    await change("[data-template-item]", "sample");
+    const rangeOverride = get('[data-template-input="finished"]');
+    assert.equal(rangeOverride.type, "text");
+    assert.equal(rangeOverride.dataset.datePickerType, undefined, "range overrides retain their serialized text editor");
+    assert.equal(JSON.parse(rangeOverride.value).hasEndDate, true);
+    assert.equal(get("[data-template-inputs]").querySelectorAll(".date-picker__calendar").length, 0,
+        "range overrides do not gain an unrequested single-date picker");
+    delete sampleDateField.values;
+    await change("[data-template-item]", "sample");
+    get('[data-template-input="finished"]').focus();
+    assert.equal(get("[data-template-inputs]").querySelectorAll(".date-picker__calendar").length, 1,
+        "responsive layout checks include the expanded override calendar");
     document.head.append(theme);
     const longRuleName = await beginRename();
     longRuleName.value = "Long automation name ".repeat(12).trim();
@@ -594,7 +709,7 @@ const runCases = async (sources, css, mobile) => {
             await tick();
             assert.ok(get('[data-action="rules"]').getBoundingClientRect().width > 0);
             for (const element of [menu, get(".av__automation-body"), ...menu.querySelectorAll("section, [data-index]")]) {
-                assert.ok(element.scrollWidth <= element.clientWidth + 1, `${mobile}/${width}/${fontSize}: content overflows`);
+                assert.ok(element.scrollWidth <= element.clientWidth + 1, `${mobile}/${width}/${fontSize}: ${element.className} ${element.scrollWidth}/${element.clientWidth}: content overflows`);
             }
             const nameInput = await beginRename();
             const inputRect = nameInput.getBoundingClientRect();
@@ -1006,7 +1121,7 @@ const runCases = async (sources, css, mobile) => {
 
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow, ipcMain} = require("electron");
-    app.setPath("userData", process.argv[2]);
+    app.setPath("userData", process.argv.at(-1));
     app.commandLine.appendSwitch("disable-gpu");
     app.whenReady().then(async () => {
         const win = new BrowserWindow({show: false, width: 1000, height: 900,
@@ -1021,6 +1136,10 @@ if (process.versions.electron && process.type === "browser") {
                 win.webContents.sendInputEvent({type: "char", keyCode: "\r"});
                 win.webContents.sendInputEvent({type: "keyUp", keyCode: "ENTER"});
             });
+            ipcMain.handle("automation-click", async (_event, x, y) => {
+                await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mousePressed", x, y, button: "left", clickCount: 1});
+                await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseReleased", x, y, button: "left", clickCount: 1});
+            });
             ipcMain.handle("automation-pointer", (_event, x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}));
             ipcMain.handle("automation-capture", async (_event, name) => {
                 if (!process.env.SIYUAN_AUTOMATION_CAPTURE_DIR) return;
@@ -1031,9 +1150,9 @@ if (process.versions.electron && process.type === "browser") {
             });
             const ts = require("typescript");
             const sass = require("sass");
-            const sources = {icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
+            const sources = {lunarData: JSON.parse(fs.readFileSync(path.join(__dirname, "../../kernel/av/lunar_calendar_data.json"), "utf8")), icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                 languages: JSON.parse(fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"))};
-            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "automationTemplateFunctions", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "blockCollection", "collectionConditions", "collectionReference", "collectionReview", "selectPosition", "filterDropdown"]) {
+            for (const name of ["automation", "automationRules", "automationPosition", "automationTemplate", "automationTemplateFunctions", "capabilities", "capabilities.generated", "filter", "filterTree", "fieldValueEditor", "lunarDate", "lunarCalendar", "dateFormat", "dateSubmit", "blockCollection", "collectionConditions", "collectionReference", "collectionReview", "selectPosition", "filterDropdown"]) {
                 sources[`protyle/render/av/${name}`] = ts.transpileModule(fs.readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
                 }).outputText;
@@ -1041,7 +1160,7 @@ if (process.versions.electron && process.type === "browser") {
             sources["menus/aliasInput"] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/menus/aliasInput.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
             }).outputText;
-            for (const name of ["menus/overlayOwnership", "dialog/index", "dialog/confirmDialog", "dialog/mobileConfirmDialog", "dialog/mobileDialog",
+            for (const name of ["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline", "menus/overlayOwnership", "dialog/index", "dialog/confirmDialog", "dialog/mobileConfirmDialog", "dialog/mobileDialog",
                 "mobile/util/keyboardSheetState", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/mobileSheetLayout",
                 "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetOpen", "menus/sheetActions"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname,
@@ -1082,10 +1201,10 @@ if (process.versions.electron && process.type === "browser") {
     const {promisify} = require("node:util");
     test("automation guidance preserves inline naming, source and target filters, explicit activation, collection and responsive layout", async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-automation-panel-"));
-        const env = {...process.env};
+        const env = {...process.env, XDG_CACHE_HOME: path.join(profile, "cache"), XDG_CONFIG_HOME: path.join(profile, "config")};
         delete env.ELECTRON_RUN_AS_NODE;
         try {
-            await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 60000});
+            await promisify(execFile)(require("electron"), [...(process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY ? ["--no-sandbox", "--disable-gpu", "--ozone-platform=headless"] : []), __filename, profile], {env, windowsHide: true, timeout: 60000});
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});

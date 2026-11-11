@@ -53,9 +53,10 @@ const loadJump = () => {
             calendarISOWeek: "ISO week", calendarISOWeekYear: "ISO week year",
         }}},
         require: (name: string) => {
-            if (name === "../../../../datePicker") {
-                return {bindDatePicker: (input: Control) => {
+            if (name === "../../../../datePicker/inline") {
+                return {bindInlineDatePicker: (_host: Control, input: Control) => {
                     input.attributes["data-picker-bound"] = "true";
+                    return {validate: () => input.valid, update() {}, destroy() {}};
                 }};
             }
             if (name === "./date") {
@@ -88,7 +89,7 @@ const loadJump = () => {
                     const controls: Record<string, Control> = {
                         "[data-calendar-jump-mode]": mode, "[data-dialog-input]": date,
                         "[data-calendar-jump-week]": weekFields, "[data-calendar-jump-year]": year,
-                        "[data-calendar-jump-number]": week,
+                        "[data-calendar-jump-number]": week, "[data-calendar-jump-picker]": new Control(),
                     };
                     current = {date, mode, year, week, weekFields, closed: false, options,
                         confirm: {click: () => options.onConfirm(date.value, dialog)}};

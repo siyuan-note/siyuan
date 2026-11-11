@@ -7,7 +7,6 @@ import {transaction} from "../../wysiwyg/transaction";
 import {bindInlineFilterEvents, genEmptyFilterValue, getFiltersHTML} from "./filter";
 import {closeInlineFilterDropdowns} from "./filterDropdown";
 import {bindFieldDates, genFieldValue, getRelationOptions, getSelectedOptionsHTML, getValueInputHTML, openFieldRelationMenu, openFieldSelectMenu, renderRelationFieldValue, openFieldLocationEditor} from "./fieldValueEditor";
-import {isDatePickerOpen} from "../../../datePicker";
 import {createAVLocationReplacement} from "./locationValue";
 import {openSearchAV} from "./relation";
 import {collectionSourceIncomplete, mountBlockCollectionSource} from "./blockCollection";
@@ -255,7 +254,7 @@ export const openAutomationMenu = async (options: {
                 const renderFilter = () => getFiltersHTML(data, true);
                 filterRoot.innerHTML = renderFilter();
                 bindInlineFilterEvents(filterRoot, data, protyle, blockElement.dataset.nodeId, source.id, {
-                    root: filterRoot, render: renderFilter, save: next => {
+                    root: filterRoot, render: renderFilter, onResize, save: next => {
                         filters[i] = clone(next[0]);
                         save(filters);
                         onResize();
@@ -287,21 +286,21 @@ export const openAutomationMenu = async (options: {
             `<button type="button" class="b3-button b3-button--cancel" data-role="field-value" data-value-type="${field.type}" data-selected="${escapeAttr(JSON.stringify(selected))}">${getSelectedOptionsHTML(field, selected) || lang.select}</button>` :
             getValueInputHTML(field, {mode: "static", value: value.value});
         const input = host.querySelector<HTMLElement>('[data-role="field-value"]');
-        bindFieldDates(host);
+        const fieldDates = bindFieldDates(host, {commitOnLeave: true});
         const update = () => {
-            if (input instanceof HTMLInputElement && !input.checkValidity()) {
-                input.reportValidity();
-                return;
+            if (!fieldDates.validate() || input instanceof HTMLInputElement && !input.checkValidity()) {
+                (input as HTMLInputElement).reportValidity?.();
+                return false;
             }
             value.value = genFieldValue(field, input, value.value);
+            return true;
         };
         const commit = () => {
-            update();
-            save();
+            if (update()) { save(); }
         };
         input.addEventListener("change", commit);
         input.addEventListener("blur", () => {
-            if (!(input instanceof HTMLInputElement) || !isDatePickerOpen(input)) {
+            if (!fieldDates.isActive()) {
                 commit();
             }
         });

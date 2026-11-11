@@ -42,9 +42,9 @@ private final class PreviewResourceHandler: NSObject, WKURLSchemeHandler {
                 } else if url.host == "bundle" {
                     let name = String(url.path.dropFirst())
                     let alias = name == "vditor/dist/js/lute/lute.min.js" ? "lute.min.js" : name
-                    guard files.contains(alias) else { throw PreviewFileError.unavailable }
-                    let file = root.appendingPathComponent(alias).resolvingSymlinksInPath()
-                    guard file.path.hasPrefix(root.resolvingSymlinksInPath().path + "/") else { throw PreviewFileError.unavailable }
+                    guard self.files.contains(alias) else { throw PreviewFileError.unavailable }
+                    let file = self.root.appendingPathComponent(alias).resolvingSymlinksInPath()
+                    guard file.path.hasPrefix(self.root.resolvingSymlinksInPath().path + "/") else { throw PreviewFileError.unavailable }
                     data = try Data(contentsOf: file)
                     mime = ["html": "text/html", "js": "text/javascript", "css": "text/css", "woff": "font/woff",
                             "woff2": "font/woff2", "ttf": "font/ttf"][file.pathExtension] ?? "application/octet-stream"
@@ -102,7 +102,7 @@ final class PreviewViewController: NSViewController, QLPreviewingController, WKN
             let root = Bundle(for: PreviewViewController.self).resourceURL!.appendingPathComponent("Preview")
             let translations = try JSONDecoder().decode([String: [String: String]].self,
                 from: Data(contentsOf: root.appendingPathComponent("languages.json")))
-            let languages = Bundle.preferredLocalizations(from: Array(translations.keys()), forPreferences: Locale.preferredLanguages)
+            let languages = Bundle.preferredLocalizations(from: Array(translations.keys), forPreferences: Locale.preferredLanguages)
             strings = translations[languages.first ?? "en"] ?? translations["en"] ?? [:]
             let resourceHandler = try PreviewResourceHandler(root: root)
             resourceHandler.id = id

@@ -20,6 +20,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -2247,7 +2248,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 	BootSyncSucc.Store(0)
 
 	postProcessStart := time.Now()
-	processSyncMergeResult(false, true, &dejavu.MergeResult{}, trafficStat, "u", elapsed)
+	processSyncMergeResult(false, true, &dejavu.MergeResult{}, trafficStat, "u", elapsed, false, nil)
 	notifyLANSyncCommit(repo)
 	logging.LogInfof("upload data repo phases [index=%.2fs, cloud=%.2fs, post-process=%.2fs, total=%.2fs]",
 		indexElapsed.Seconds(), cloudElapsed.Seconds(), time.Since(postProcessStart).Seconds(), time.Since(start).Seconds())
@@ -2563,7 +2564,8 @@ func calcPetalDiff(beforeSyncPetals []*Petal, mergeResult *dejavu.MergeResult) {
 	mergeResult.RemovePetals = gulu.Str.RemoveDuplicatedElem(removePetals)
 }
 
-func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration, immediateIndex ...bool) {
+func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string,
+	elapsed time.Duration, immediateIndex bool, previousNotebookConfs map[string][]byte) {
 	memorySyncSourcesChanged(mergeResult)
 	reloadSyncedDAV(mergeResult, &calendars, &contacts)
 	confSyncSnapshot := Conf.LoadSync()
@@ -2669,6 +2671,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	reloadPluginSet := hashset.New()     // 插件代码变更 data/plugins/
 	dataChangePluginSet := hashset.New() // 插件存储数据变更 data/storage/petal/
 	needUnindexBoxes, needIndexBoxes := map[string]bool{}, map[string]bool{}
+	closedSyncedBoxes := map[string]bool{}
+	refreshBoxSettings := map[string]syncedNotebookConfChange{}
 	removedBoxConfs, removedBoxCryptoBackups := map[string]bool{}, map[string]bool{}
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
@@ -2683,13 +2687,22 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadOcrTexts = true
 		}
 
-		if strings.HasSuffix(file.Path, "/.siyuan/conf.json") {
+		if strings.HasSuffix(file.Path, notebookConfSyncSuffix) {
 			needReloadFiletree = true
-			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/conf.json")
-			if ast.IsNodeIDPattern(boxID) {
+			if boxID := syncNotebookConfBoxID(file.Path); boxID != "" {
 				forgetRuntimeNormalBox(boxID)
-				needUnindexBoxes[boxID] = true
-				needIndexBoxes[boxID] = true
+				change := classifySyncedNotebookConf(boxID, previousNotebookConfs[boxID])
+				if change.unindex {
+					needUnindexBoxes[boxID] = true
+				} else if change.name || change.icon || change.sort || IsBoxDocEnabled() {
+					refreshBoxSettings[boxID] = change
+				}
+				if change.index {
+					needIndexBoxes[boxID] = true
+				}
+				if change.closed {
+					closedSyncedBoxes[boxID] = true
+				}
 			}
 		}
 		if strings.HasSuffix(file.Path, "/.siyuan/boxDoc.json") {
@@ -2761,10 +2774,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadOcrTexts = true
 		}
 
-		if strings.HasSuffix(file.Path, "/.siyuan/conf.json") {
+		if strings.HasSuffix(file.Path, notebookConfSyncSuffix) {
 			needReloadFiletree = true
-			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/conf.json")
-			if ast.IsNodeIDPattern(boxID) {
+			if boxID := syncNotebookConfBoxID(file.Path); boxID != "" {
 				needUnindexBoxes[boxID] = true
 				removedBoxConfs[boxID] = true
 			}
@@ -2901,7 +2913,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	// 需要确认恢复记录时，索引更新必须在当前调用内完成
-	if needFullReindex(upsertTrees) && (len(immediateIndex) == 0 || !immediateIndex[0]) {
+	if needFullReindex(upsertTrees) && !immediateIndex {
 		FullReindex(false)
 		return
 	}
@@ -2911,7 +2923,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	for boxID := range needUnindexBoxes {
-		if len(immediateIndex) != 0 && immediateIndex[0] {
+		if immediateIndex {
 			unindex(boxID)
 		} else {
 			(&Box{ID: boxID}).Unindex()
@@ -2925,7 +2937,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			if _, err := EnsureBoxDoc(boxID); nil != err {
 				logging.LogErrorf("ensure box document [%s] after sync failed: %s", boxID, err)
 			}
-			if len(immediateIndex) != 0 && immediateIndex[0] {
+			if immediateIndex {
 				removeBoxRefs(boxID)
 				indexBox(boxID)
 			} else {
@@ -2933,9 +2945,39 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			}
 		}
 	}
+	var notebookSortChanged bool
+	for boxID, change := range refreshBoxSettings {
+		if needUnindexBoxes[boxID] {
+			continue
+		}
+		box := Conf.GetBox(boxID)
+		if box == nil {
+			continue
+		}
+		if IsBoxDocEnabled() && !box.Closed {
+			if _, err := EnsureBoxDoc(boxID); err != nil {
+				logging.LogErrorf("ensure box document [%s] after sync failed: %s", boxID, err)
+			}
+		}
+		if change.name || change.icon {
+			settings := box.GetConf()
+			if change.name {
+				event := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
+				event.Data = map[string]any{"box": boxID, "name": settings.Name}
+				util.PushEvent(event)
+			}
+			if change.icon {
+				pushNotebookIconChanged(boxID, settings.Icon)
+			}
+		}
+		notebookSortChanged = notebookSortChanged || change.sort
+	}
+	if notebookSortChanged {
+		pushNotebookSortChanged()
+	}
 
 	needReloadUI := 0 < len(needUnindexBoxes) || 0 < len(needIndexBoxes)
-	if needReloadUI && len(immediateIndex) != 0 && immediateIndex[0] {
+	if needReloadUI && immediateIndex {
 		// 应用保护内完成笔记本和引用索引，不将这些任务留到恢复编辑之后。
 		sql.FlushQueue()
 		IndexRefs()
@@ -2946,8 +2988,14 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		util.ReloadUI()
 	}
 
+	if len(closedSyncedBoxes) > 0 {
+		upserts = slices.DeleteFunc(upserts, func(name string) bool {
+			boxID, _, _ := strings.Cut(strings.TrimPrefix(name, "/"), "/")
+			return closedSyncedBoxes[boxID] && strings.HasSuffix(name, ".sy")
+		})
+	}
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
-	if len(immediateIndex) != 0 && immediateIndex[0] {
+	if immediateIndex {
 		sql.FlushQueue()
 	}
 	for changedPath := range changedAttributeViewPaths {

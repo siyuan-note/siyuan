@@ -46,8 +46,15 @@ func exitSyncHooks(repo *dejavu.Repo, ctx context.Context) (dejavu.CheckoutHooks
 	beforePetals := getPetals()
 	var mu sync.Mutex
 	upserts, removes := map[string]*entity.File{}, map[string]*entity.File{}
+	previousNotebookConfs := map[string][]byte{}
 	hooks := dejavu.CheckoutHooks{Preflight: syncDocumentPreflight(repo)}
 	hooks.Context = ctx
+	hooks.Before = func(files []*entity.File) error {
+		mu.Lock()
+		defer mu.Unlock()
+		snapshotSyncNotebookConfs(files, previousNotebookConfs)
+		return nil
+	}
 	hooks.Committed = func(file *entity.File) {
 		mu.Lock()
 		defer mu.Unlock()
@@ -73,7 +80,7 @@ func exitSyncHooks(repo *dejavu.Repo, ctx context.Context) (dejavu.CheckoutHooks
 		}
 		if len(changes.Upserts)+len(changes.Removes) > 0 {
 			calcPetalDiff(beforePetals, changes)
-			processSyncMergeResult(false, true, changes, &dejavu.TrafficStat{}, "c", 0, true)
+			processSyncMergeResult(false, true, changes, &dejavu.TrafficStat{}, "c", 0, true, previousNotebookConfs)
 		}
 		finishAssetDownloadRecovery(repo, syncErr)
 	}

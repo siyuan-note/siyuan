@@ -2844,6 +2844,8 @@ func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths [
 		boxConf.DocCreateSaveBox = ""
 		boxConf.Encrypted = false
 		boxConf.BoxCrypt = nil
+		// 分享用的明文导出仅包含可识别的笔记本设置。
+		boxConf.Extra = nil
 		confData, marshalErr := gulu.JSON.MarshalIndentJSON(boxConf, "", "  ")
 		if marshalErr != nil {
 			logging.LogErrorf("marshal export notebook conf failed: %s", marshalErr)

@@ -77,7 +77,7 @@ func TestBootSyncAttributeViewIndex(t *testing.T) {
 	processSyncMergeResult(false, false, &dejavu.MergeResult{Upserts: []*entity.File{
 		{Path: "/" + tree.Box + tree.Path},
 		{Path: "/storage/av/" + avID + ".json"},
-	}}, &dejavu.TrafficStat{}, "a", 0, true)
+	}}, &dejavu.TrafficStat{}, "a", 0, true, nil)
 	// 数据库定义变更追加的引用索引也必须在启动同步期间完成。
 	sql.FlushQueue()
 	stopWatchdog()

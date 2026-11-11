@@ -386,13 +386,19 @@
       border-top-right-radius: var(--b3-table-border-radius-top-right);
     }
 
-    tbody:last-of-type > tr:last-child > :first-child,
-    thead:last-child > tr:last-child > :first-child {
+    &:not([data-table-corners]) > tbody:last-of-type > tr:last-child > :first-child,
+    &:not([data-table-corners]) > thead:last-child > tr:last-child > :first-child,
+    > thead > tr > [data-table-cell-corner~="bottom-left"],
+    > tbody > tr > [data-table-cell-corner~="bottom-left"],
+    > tfoot > tr > [data-table-cell-corner~="bottom-left"] {
       border-bottom-left-radius: var(--b3-table-border-radius-bottom-left);
     }
 
-    tbody:last-of-type > tr:last-child > :nth-last-child(1 of :not(.fn__none)),
-    thead:last-child > tr:last-child > :nth-last-child(1 of :not(.fn__none)) {
+    &:not([data-table-corners]) > tbody:last-of-type > tr:last-child > :nth-last-child(1 of :not(.fn__none)),
+    &:not([data-table-corners]) > thead:last-child > tr:last-child > :nth-last-child(1 of :not(.fn__none)),
+    > thead > tr > [data-table-cell-corner~="bottom-right"],
+    > tbody > tr > [data-table-cell-corner~="bottom-right"],
+    > tfoot > tr > [data-table-cell-corner~="bottom-right"] {
       border-bottom-right-radius: var(--b3-table-border-radius-bottom-right);
     }
 

@@ -17,6 +17,7 @@ import {WYSIWYG} from "./wysiwyg";
 import {Toolbar} from "./toolbar";
 import {Gutter} from "./gutter";
 import {setAutoDirection} from "./render/autoDirection";
+import {observeTableCorners} from "./render/tableCorners";
 import {Breadcrumb} from "./breadcrumb";
 import {updateNotebookBreadcrumbIcon} from "./breadcrumb/iconRefresh";
 import {
@@ -219,6 +220,7 @@ export class Protyle {
         this.protyle.undo = this.protyle.lite ? new LocalUndo() : new Undo();
         this.protyle.wysiwyg = new WYSIWYG(this.protyle);
         setAutoDirection(this.protyle.wysiwyg.element, window.siyuan.config.editor.autoDirection);
+        observeTableCorners(this.protyle.wysiwyg.element);
         initFoldedRender(this.protyle);
         initEditorTabs(this.protyle);
         initListMindmaps(this.protyle);

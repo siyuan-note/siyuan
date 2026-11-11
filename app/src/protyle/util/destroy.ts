@@ -14,6 +14,7 @@ import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {invalidateFocusFoldRequests} from "./focusFold";
 import {unregisterViewFoldContext} from "./viewFold";
 import {destroyAutoDirection} from "../render/autoDirection";
+import {destroyTableCorners} from "../render/tableCorners";
 import {disposeSyncEditorSave} from "./editorSave";
 import {destroyRelatedAVViews} from "../render/av/relatedView";
 
@@ -50,6 +51,7 @@ export const destroy = (protyle: IProtyle) => {
     protyle.element.removeAttribute("style");
     if (protyle.wysiwyg) {
         destroyAutoDirection(protyle.wysiwyg.element);
+        destroyTableCorners(protyle.wysiwyg.element);
         unregisterCustomBlockRoot(protyle.wysiwyg.element);
         destroyTabsRender(protyle.wysiwyg.element);
         protyle.wysiwyg.destroy();

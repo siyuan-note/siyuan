@@ -765,6 +765,7 @@ ${getIconScript(servePath)}
             wysElement.setAttribute(key, data.attrs[key]);
         })
         Protyle.setAutoDirection(previewElement, ${!!window.siyuan.config.editor.autoDirection});
+        Protyle.observeTableCorners(previewElement);
         await Protyle.renderExportJSEmbeds(wysElement, {
             disabled: ${window.siyuan.config.system.safeMode || getHostCapabilities().remoteKernel},
             disabledTip: ${toScriptLiteral(window.siyuan.languages.safeModeJSTip)},
@@ -1275,6 +1276,7 @@ ${getIconScript(servePath)}
     const previewElement = document.getElementById('preview');
     Protyle.highlightRender(previewElement, "stage/protyle");
     Protyle.setAutoDirection(previewElement, ${!!window.siyuan.config.editor.autoDirection});
+    Protyle.observeTableCorners(previewElement);
     Protyle.mathRender(previewElement, "stage/protyle", ${exportOption.type === "pdf"});
     Protyle.mermaidRender(previewElement, "stage/protyle");
     Protyle.flowchartRender(previewElement, "stage/protyle");

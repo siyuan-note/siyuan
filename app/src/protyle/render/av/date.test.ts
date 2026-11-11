@@ -165,6 +165,7 @@ test("date panels pass the batch explicit-change option to Gregorian and lunar e
         require: (name: string) => ({
             "../date": {bindDateEvent: (options: Parameters<typeof import("./date").bindDateEvent>[0]) => received.push(options)},
             "../col": {getColId: () => "date"},
+            "../datePosition": {bindDatePanelPosition: () => () => {}},
         })[name] || {},
     });
     for (const format of ["", "lunar"]) {

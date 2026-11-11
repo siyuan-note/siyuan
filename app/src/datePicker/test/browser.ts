@@ -35,7 +35,7 @@ catch(error){console.error(error);app.exit(1);}});`, "utf8");
         const env: NodeJS.ProcessEnv = {...process.env, XDG_CACHE_HOME: join(temporary, "cache"), XDG_CONFIG_HOME: join(temporary, "config"),
             XDG_DATA_HOME: join(temporary, "data")}; delete env.ELECTRON_RUN_AS_NODE;
         const flags = process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY ?
-            ["--no-sandbox", "--disable-gpu", "--ozone-platform=headless", "--ozone-override-screen-size=1200,1200"] : [];
+            ["--no-sandbox", "--disable-gpu", "--ozone-platform=headless", `--ozone-override-screen-size=${Math.max(1200, width)},${Math.max(1200, height)}`] : [];
         try {
             const {stdout} = await promisify(execFile)(require("electron"), [...flags, script], {env, timeout: 30000, windowsHide: true});
             return stdout;

@@ -66,6 +66,7 @@ const relation = id => ({blockIDs: [id], contents: [{type: "block", block: {cont
 const fixture = (type, {count = 1, batch = "", groups = false, cached = true, related = false} = {}) => {
     const transactions = [];
     const dateBindings = [];
+    const datePositionBindings = [];
     const getInlineDateType = input => input.dataset.datePickerType || input.type;
     const validateInlineDateInput = input => {
         const type = getInlineDateType(input);
@@ -176,6 +177,14 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         },
         getSelectHTML: () => "", setSelectMenuPosition() {},
         getInlineDateType, validateInlineDateInput,
+        // 几何/ResizeObserver 在 datePosition.dom.test.ts 验证；这里保留宿主绑定与释放契约。
+        bindDatePanelPosition: (menuElement, getAnchor) => {
+            assert.ok(menuElement);
+            assert.equal(typeof getAnchor, "function");
+            const binding = {menuElement, getAnchor, destroyed: false};
+            datePositionBindings.push(binding);
+            return () => {binding.destroyed = true;};
+        },
         bindInlineDatePicker: (host, inputs, options) => {
             assert.ok(host);
             assert.equal(inputs.length, 2);
@@ -241,9 +250,15 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         inputs[2].checked = false;
         inputs[3].checked = false;
         const host = element();
-        const close = api.bindDateEvent({protyle, data: state.data, blockElement: block, cellElements: cells,
-            menuElement: {querySelectorAll: () => inputs,
-                querySelector: selector => selector === "[data-date-inline]" ? host : null}, requireExplicitChange: true});
+        const menuElement = {querySelectorAll: () => inputs,
+            querySelector: selector => selector === "[data-date-inline]" ? host : null};
+        const panelContext = {options: {protyle, blockElement: block, cellElements: cells, requireExplicitChange: true},
+            data: state.data, fields: columns, menuElement, cellRect: cells.at(-1).getBoundingClientRect()};
+        api.datePanel.bind(panelContext);
+        const close = panelContext.closeCB;
+        const position = datePositionBindings.at(-1);
+        assert.equal(position.menuElement, menuElement);
+        assert.deepEqual(plain(position.getAnchor()), plain(panelContext.cellRect));
         const binding = dateBindings.at(-1);
         assert.equal(binding.host, host);
         assert.deepEqual(Array.from(binding.inputs), inputs.slice(0, 2));
@@ -261,6 +276,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         return {inputs, close: () => {
             close();
             assert.equal(binding.destroyed, true, "closing releases the shared inline binding");
+            assert.equal(position.destroyed, true, "closing releases the date panel positioning binding");
         }};
     };
     const saveDate = (dirty = true, options = {}) => editDate(dirty, options).close();

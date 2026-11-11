@@ -35,9 +35,9 @@ export const getDateHTML = (cellElements: HTMLElement[], format?: TAVDateFormat)
     return `<div class="b3-menu__items">
 <div>
     <label class="date-picker__endpoint"><span class="ft__smaller">${window.siyuan.languages.startDate}</span>
-    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value}" data-value="${dayjs(cellValue.content || currentDate).format("YYYY-MM-DD HH:mm")}" class="b3-text-field fn__size200" style="margin-top: 4px;"></label>
+    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value}" data-value="${dayjs(cellValue.content || currentDate).format("YYYY-MM-DD HH:mm")}" class="b3-text-field"></label>
     <label class="date-picker__endpoint${cellValue.hasEndDate ? "" : " fn__none"}"><span class="ft__smaller">${window.siyuan.languages.endDate}</span>
-    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value2}" data-value="${cellValue.isNotEmpty2 ? dayjs(cellValue.content2).format("YYYY-MM-DD HH:mm") : ""}" style="margin-top: 8px;margin-bottom: 4px" class="b3-text-field fn__size200${cellValue.hasEndDate ? "" : " fn__none"}"></label>
+    <input type="${isNotTime ? "date" : "datetime-local"}" max="${isNotTime ? "9999-12-31" : "9999-12-31 23:59"}" value="${value2}" data-value="${cellValue.isNotEmpty2 ? dayjs(cellValue.content2).format("YYYY-MM-DD HH:mm") : ""}" class="b3-text-field${cellValue.hasEndDate ? "" : " fn__none"}"></label>
     <button class="b3-menu__separator"></button>
     <label class="b3-menu__item">
         <span class="fn__flex-center">${window.siyuan.languages.endDate}</span>

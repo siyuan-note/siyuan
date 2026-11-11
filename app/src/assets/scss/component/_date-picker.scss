@@ -17,9 +17,20 @@
   }
 
   &__endpoint {
+    margin-bottom: 8px;
+    padding-inline: 8px;
     display: flex;
     flex-direction: column;
     gap: 4px;
+
+    input {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  &--inline > [role="status"] {
+    padding-inline: 8px;
   }
 
   &__field {

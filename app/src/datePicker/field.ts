@@ -165,7 +165,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
         cell.title = fullWeekdayFormatter.format(day);
         const short = doc.createElement("span");
         short.className = "date-picker__weekday-short";
-        short.textContent = weekdayFormatter.format(day);
+        short.textContent = localeInfo.language === "zh" ? narrowWeekdayFormatter.format(day) : weekdayFormatter.format(day);
         short.setAttribute("aria-hidden", "true");
         const narrow = doc.createElement("span");
         narrow.className = "date-picker__weekday-narrow";

@@ -7,10 +7,13 @@
 package util
 
 import (
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/siyuan-note/httpclient"
 )
 
 func TestLinuxDesktopProxyKind(t *testing.T) {
@@ -298,6 +301,61 @@ func TestNormalizeKDEProxyValue(t *testing.T) {
 		if got != test.want {
 			t.Errorf("%q = %q, want %q", test.value, got, test.want)
 		}
+	}
+}
+
+func TestKDEProxyRouting(t *testing.T) {
+	const proxies = "httpProxy=http://http-proxy:8080\nhttpsProxy=http://https-proxy:8443\n"
+	originalEnvironment := systemNetworkProxyEnvironment
+	systemNetworkProxyEnvironment = map[string]networkProxyEnvironmentValue{}
+	t.Cleanup(func() {
+		systemNetworkProxyEnvironment = originalEnvironment
+	})
+	for _, test := range []struct {
+		name, settings, target, want string
+	}{
+		{"HTTPS stays direct", "httpProxy=http://http-proxy:8080\n", "https://example.com/", ""},
+		{"HTTPS uses SOCKS fallback", "httpProxy=http://http-proxy:8080\nsocksProxy=socks://socks-proxy:1080\n", "https://example.com/", "socks5://socks-proxy:1080"},
+		{"local single label", proxies + "NoProxyFor=<local>\n", "http://intranet/", ""},
+		{"local HTTPS with port", proxies + "NoProxyFor=<local>\n", "https://nas:8443/", ""},
+		{"local case insensitive", proxies + "NoProxyFor=<LOCAL>\n", "http://Intranet/", ""},
+		{"local excludes qualified names", proxies + "NoProxyFor=<local>\n", "http://example.com/", "http://http-proxy:8080"},
+		{"local excludes trailing dot", proxies + "NoProxyFor=<local>\n", "http://intranet./", "http://http-proxy:8080"},
+		{"local excludes IPv4", proxies + "NoProxyFor=<local>\n", "http://192.168.1.12/", "http://http-proxy:8080"},
+		{"local excludes IPv6", proxies + "NoProxyFor=<local>\n", "http://[2001:db8::1]/", "http://http-proxy:8080"},
+		{"IPv4 loopback stays direct", proxies + "NoProxyFor=<local>\n", "http://127.0.0.1/", ""},
+		{"IPv6 loopback stays direct", proxies + "NoProxyFor=<local>\n", "http://[::1]/", ""},
+		{"localhost stays direct", proxies + "NoProxyFor=<local>\n", "http://localhost/", ""},
+		{"single label without local", proxies, "http://intranet/", "http://http-proxy:8080"},
+		{"local with domain exception", proxies + "NoProxyFor=<local>,example.com\n", "http://example.com/", ""},
+		{"local with CIDR exception", proxies + "NoProxyFor=<local>,192.168.0.0/16\n", "http://192.168.1.12/", ""},
+		{"HTTPS explicit proxy", proxies, "https://example.com/", "http://https-proxy:8443"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			for _, name := range networkProxyEnvironmentNames {
+				t.Setenv(name, "")
+			}
+			getenv := kdeTestEnvironment(t, "[Proxy Settings]\nProxyType=1\n"+test.settings, nil)
+			t.Setenv("XDG_CURRENT_DESKTOP", "KDE")
+			t.Setenv("XDG_CONFIG_HOME", getenv("XDG_CONFIG_HOME"))
+			t.Setenv("KDEHOME", "")
+			SetNetworkProxy("", true)
+			request, err := http.NewRequest(http.MethodGet, test.target, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			proxy, err := httpclient.ProxyFromEnvironment(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := ""
+			if proxy != nil {
+				got = proxy.String()
+			}
+			if got != test.want {
+				t.Fatalf("proxy for %s = %q, want %q", test.target, got, test.want)
+			}
+		})
 	}
 }
 

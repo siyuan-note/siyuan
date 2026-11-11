@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261106023628"
+		"updated": "20261111142646"
 	},
 	"Children": [
 		{
@@ -2116,7 +2116,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261030095654-cl5w6xj",
-				"updated": "20261030095654"
+				"updated": "20261111142646"
 			},
 			"Children": [
 				{
@@ -2131,7 +2131,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261030095654-awrf6rs",
-				"updated": "20261030095654"
+				"updated": "20261111142646"
 			},
 			"Children": [
 				{
@@ -2145,7 +2145,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to choose Upload, Link, Assets, or Built-in. The cover is saved only after you select an image or confirm a link. Closing the menu or canceling a picker leaves the document unchanged and does not import an image. To reuse an existing image without uploading it again, choose Assets."
+					"Data": " to choose Upload, Link, Assets, Built-in, or Random. The cover is saved only after you select an image, confirm a link, or choose Random. Closing the menu or canceling a picker leaves the document unchanged and does not import an image. To reuse an existing image without uploading it again, choose Assets. Random imports a randomly selected built-in image; you can also use Random in the cover toolbar to replace an existing cover. Images may repeat. If the built-in image list is unavailable, Random uses a CSS pattern."
 				}
 			]
 		}

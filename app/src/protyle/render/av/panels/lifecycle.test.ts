@@ -18,7 +18,7 @@ const createPanel = (mobile = false) => {
     let existing = false;
     let backTarget: HTMLElement;
     const menuClasses = new Set<string>();
-    const menu = {isConnected: true, clientWidth: 100, dataset: {}, querySelector: (): null => null,
+    const menu = {isConnected: true, clientWidth: 100, dataset: {}, querySelector: (): null => null, contains: () => false,
         classList: {contains: (name: string) => menuClasses.has(name)}};
     const panel = {isConnected: true, lastElementChild: menu, parentElement: {},
         remove: () => { existing = false; panel.isConnected = false; calls.push("remove"); },
@@ -26,7 +26,8 @@ const createPanel = (mobile = false) => {
     const classes = {contains: () => true};
     const options: IOpenAVPanelOptions = {type: "config", data: {fields: []} as unknown as IAV,
         protyle: {toolbar: {subElement: {classList: classes}}} as unknown as IProtyle,
-        blockElement: {getAttribute: (name: string) => name === "data-av-id" ? "av" : "block", classList: classes,
+        blockElement: {isConnected: true, getClientRects: () => [{}],
+            getAttribute: (name: string) => name === "data-av-id" ? "av" : "block", classList: classes,
             querySelector: () => ({textContent: "", getBoundingClientRect: () => ({right: 300, bottom: 40, height: 20})})} as unknown as Element,
         destroyCallback: () => calls.push("destroy")};
     const dependencies = new Proxy({
@@ -54,10 +55,11 @@ const createPanel = (mobile = false) => {
         },
     }, {get: (target, key) => key in target ? Reflect.get(target, key) : () => calls.push(String(key))});
     const exports: Record<string, unknown> = {};
+    const body = {insertAdjacentHTML: () => { existing = true; calls.push("insert"); }};
     const source = readFileSync(path.join(__dirname, "../openMenuPanel.ts"), "utf8");
     runInNewContext(transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText, {
         exports, require: () => dependencies,
-        document: {querySelector: () => existing ? panel : null, body: {insertAdjacentHTML: () => { existing = true; calls.push("insert"); }}},
+        document: {querySelector: () => existing ? panel : null, body, activeElement: body},
         window: {siyuan: {zIndex: 0, menus: {menu: {remove: () => { calls.push("menu.remove"); onMenuRemove(); }, element: {classList: classes}}}},
             addEventListener: (name: string, callback: (event: unknown) => unknown) => {
                 calls.push("resize.bind");

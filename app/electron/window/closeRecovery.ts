@@ -17,7 +17,16 @@ type CloseRecoveryOptions = {
     exit?: typeof exitWorkspace;
 };
 
-const requests = new WeakMap<BrowserWindow, (quit: boolean) => void>();
+type PendingClose = {
+    quit: boolean;
+    timer?: unknown;
+    controller: AbortController;
+};
+
+const requests = new WeakMap<BrowserWindow, {
+    request: (quit: boolean) => void;
+    finishHide: () => void;
+}>();
 
 const installWindowCloseRecovery = (window: BrowserWindow, {
     scheduleTimer = setTimeout,
@@ -28,83 +37,96 @@ const installWindowCloseRecovery = (window: BrowserWindow, {
     findWorkspace = () => state.workspaces.find(item => item.webContentsId === window.webContents.id),
     exit = exitWorkspace,
 }: CloseRecoveryOptions = {}): void => {
-    let pending = false;
-    let timer: unknown;
-    let disposed = false;
-    let activeRequest: AbortController | undefined;
-    const recover = async () => {
+    let pending: PendingClose | undefined;
+    const finish = (request: PendingClose) => {
+        if (pending !== request) return;
+        pending = undefined;
+        cancelTimer(request.timer);
+        request.controller.abort();
+    };
+    const recover = async (request: PendingClose) => {
+        const {signal} = request.controller;
         try {
-            if (disposed || window.isDestroyed()) return;
+            if (signal.aborted || window.isDestroyed()) return;
             // 页面仍能执行脚本时继续由界面处理隐藏、保存确认和同步，避免干扰正常的长任务。
             const responsive = await Promise.race([
                 window.webContents.executeJavaScript("void 0").then(() => true, () => false),
-                new Promise<boolean>(resolve => { timer = scheduleTimer(() => resolve(false), 1000); }),
+                new Promise<boolean>(resolve => { request.timer = scheduleTimer(() => resolve(false), 1000); }),
             ]);
-            cancelTimer(timer);
-            if (responsive || disposed || window.isDestroyed()) return;
+            cancelTimer(request.timer);
+            if (responsive || signal.aborted || window.isDestroyed()) return;
             const decision = await showMessage({type: "warning", title: "SiYuan",
                 message: languages.windowCloseTimeout ?? "", buttons: [languages.cancel ?? "", languages.confirm ?? ""],
-                defaultId: 0, cancelId: 0, noLink: true});
-            if (decision.response !== 1 || disposed || window.isDestroyed()) return;
+                defaultId: 0, cancelId: 0, noLink: true, signal});
+            if (decision.response !== 1 || signal.aborted || window.isDestroyed()) return;
             const workspace = findWorkspace();
             if (!workspace) return;
+            request.quit = true;
             if (!workspace.ownsKernel) {
                 exit(workspace);
                 return;
             }
-            const controller = new AbortController();
-            activeRequest = controller;
-            timer = scheduleTimer(() => controller.abort(), 30000);
+            const timeout = new AbortController();
+            request.timer = scheduleTimer(() => timeout.abort(), 30000);
             try {
                 const response = await requestExit(workspace.port, {
                     force: false, setCurrentWorkspace: true, execInstallPkg: 1,
-                }, controller.signal);
+                }, AbortSignal.any([signal, timeout.signal]));
                 const result = await response?.json();
-                if (disposed || window.isDestroyed()) return;
+                if (signal.aborted || window.isDestroyed()) return;
                 if (result?.code === 0 || state.kernel.exitedPorts.has(workspace.port.toString())) {
                     exit(workspace);
                 } else {
                     await showMessage({type: "error", title: "SiYuan", message: languages.exitWaitFailed ?? "",
-                        buttons: [languages.confirm ?? ""]});
+                        buttons: [languages.confirm ?? ""], signal});
                 }
             } finally {
-                cancelTimer(timer);
-                activeRequest = undefined;
+                cancelTimer(request.timer);
             }
         } catch (error) {
+            if (signal.aborted || window.isDestroyed()) return;
             writeLog("window close recovery failed: " + error);
-            if (!disposed && !window.isDestroyed()) {
-                await showMessage({type: "error", title: "SiYuan", message: languages.exitWaitFailed ?? "",
-                    buttons: [languages.confirm ?? ""]}).catch(error => writeLog("close recovery dialog failed: " + error));
-            }
+            await showMessage({type: "error", title: "SiYuan", message: languages.exitWaitFailed ?? "",
+                buttons: [languages.confirm ?? ""], signal}).catch(error => writeLog("close recovery dialog failed: " + error));
         } finally {
-            pending = false;
+            finish(request);
         }
     };
-    requests.set(window, quit => {
-        if (disposed || window.isDestroyed()) return;
-        if (pending) {
-            if (quit) window.webContents.send(Channel.SIYUAN_SAVE_CLOSE, true);
-            return;
-        }
-        pending = true;
-        // 界面保存、确认和同步可能等待较久，超时仅提供原生确认入口，不自动丢弃编辑。
-        timer = scheduleTimer(() => { void recover(); }, 15000);
-        window.webContents.send(Channel.SIYUAN_SAVE_CLOSE, quit);
+    requests.set(window, {
+        request: quit => {
+            if (pending) {
+                if (quit) {
+                    pending.quit = true;
+                    window.webContents.send(Channel.SIYUAN_SAVE_CLOSE, true);
+                }
+                return;
+            }
+            const request: PendingClose = {quit, controller: new AbortController()};
+            pending = request;
+            // 界面保存、确认和同步可能等待较久，超时仅提供原生确认入口，不自动丢弃编辑。
+            request.timer = scheduleTimer(() => { void recover(request); }, 15000);
+            window.webContents.send(Channel.SIYUAN_SAVE_CLOSE, quit);
+        },
+        finishHide: () => {
+            // 隐藏仅完成窗口关闭请求，退出应用仍需等待界面或内核。
+            if (pending && !pending.quit) finish(pending);
+        },
     });
     window.once("closed", () => {
-        disposed = true;
-        activeRequest?.abort();
-        cancelTimer(timer);
         requests.delete(window);
+        if (pending) finish(pending);
     });
 };
 
 const requestWindowClose = (window: BrowserWindow, quit: boolean): void => {
     if (window.isDestroyed()) return;
     const request = requests.get(window);
-    if (request) request(quit);
+    if (request) request.request(quit);
     else window.webContents.send(Channel.SIYUAN_SAVE_CLOSE, quit);
 };
 
-export {installWindowCloseRecovery, requestWindowClose};
+const finishWindowCloseOnHide = (window: BrowserWindow): void => {
+    requests.get(window)?.finishHide();
+};
+
+export {finishWindowCloseOnHide, installWindowCloseRecovery, requestWindowClose};

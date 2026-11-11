@@ -5,6 +5,7 @@ import {state, writeLog} from "../shared/runtime";
 import {WINDOW_PAGE} from "../shared/pagePaths";
 import {getWindowByContentId} from "../window/windowLookup";
 import {showWindow} from "../window/windowVisibility";
+import {finishWindowCloseOnHide} from "../window/closeRecovery";
 import {updateTitleBarOverlay} from "../window/windowControlsOverlay";
 import {openDevTools, toggleDevTools} from "../window/devToolsDock";
 import {hotKey2Electron} from "../window/appMenu";
@@ -83,13 +84,15 @@ const commands: Record<string, CommandHandler> = {
         if (!window) {
             return;
         }
+        const hide = () => {
+            window.hide();
+            finishWindowCloseOnHide(window);
+        };
         if (window.isFullScreen()) {
-            window.once("leave-full-screen", () => {
-                window.hide();
-            });
+            window.once("leave-full-screen", hide);
             window.setFullScreen(false);
         } else {
-            window.hide();
+            hide();
         }
     },
 

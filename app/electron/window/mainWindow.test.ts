@@ -5,7 +5,6 @@ import {EventEmitter} from "node:events";
 import {mockElectron, resetElectronStub} from "../fixtures/electronStub";
 import {getTitleBarOverlayOptions} from "./windowControlsOverlay";
 import {createResponseHeaderFilter} from "../remote/sessionHeaders";
-import {beginGracefulSystemShutdown, getSystemShutdownPorts} from "../startup/systemShutdown";
 import {state as runtimeState, resetRuntimeState, SYSTEM_SHUTDOWN_NONE, configureRuntime, paths as runtimePaths} from "../shared/runtime";
 import type * as electron from "electron";
 import type {App, BrowserWindow as ElectronBrowserWindow, Display, IpcMain, Screen, Session} from "electron";
@@ -196,6 +195,68 @@ test("main close, tray quit and application quit share the recovery timer", (t: 
     assert.equal(timers.size, 0);
 });
 
+test("closing to the tray or hiding allows another close immediately after relaunch", (t: any) => {
+    for (const action of ["tray", "hide", "fullscreen"] as const) {
+        const {context, ipcMain, timers, Window} = mainWindowSetup(t);
+        context.initMainWindow(6806);
+        const workspace = context.workspaces[0];
+        const window = workspace.browserWindow;
+        let minimized = false;
+        let fullscreen = action === "fullscreen";
+        Object.assign(Window, {getAllWindows: () => [window]});
+        Object.assign(window, {
+            hide: () => { window.shown = false; },
+            minimize: () => { minimized = true; window.shown = false; },
+            isMinimized: () => minimized,
+            restore: () => { minimized = false; },
+            isVisible: () => window.shown,
+            isAlwaysOnTop: () => false,
+            isFullScreen: () => fullscreen,
+            setFullScreen: (value: boolean) => { fullscreen = value; },
+        });
+        workspace.tray = {setContextMenu() {}};
+        mockElectron(t, {Menu: {buildFromTemplate: () => ({})}});
+        const {registerCommandIpc} = require("../ipc/commandChannel");
+        const {registerShellIntegrationIpc} = require("../ipc/shellIntegration");
+        const {queueSecondInstance, startSecondInstance} = require("../startup/secondInstance");
+        registerCommandIpc();
+        registerShellIntegrationIpc();
+        startSecondInstance({
+            initKernel: () => assert.fail("relaunch must reuse the existing kernel"),
+            initMainWindow: () => assert.fail("relaunch must reuse the existing window"),
+        });
+
+        const event = {sender: window.webContents};
+        ipcMain.emit("siyuan-ready-to-show", event);
+        assert.equal(window.shown, true);
+        const close = () => window.emit("close", {preventDefault() {}});
+        close();
+        assert.equal(timers.size, 1);
+        if (action === "tray") {
+            ipcMain.emit("siyuan-config-tray", event, {languages: {}});
+        } else {
+            ipcMain.emit("siyuan-cmd", event, "closeButtonBehavior");
+            if (action === "fullscreen") {
+                assert.equal(fullscreen, false);
+                assert.equal(window.shown, true);
+                assert.equal(timers.size, 1);
+                window.emit("leave-full-screen");
+            }
+        }
+        assert.equal(window.shown, false);
+        assert.equal(timers.size, 0, action);
+
+        queueSecondInstance({}, ["SiYuan.exe"]);
+        assert.equal(window.shown, true);
+        close();
+        assert.deepEqual(window.messages.filter(([channel]) => channel === "siyuan-save-close"),
+            [["siyuan-save-close", false], ["siyuan-save-close", false]]);
+        assert.equal(timers.size, 1);
+        window.destroy();
+        assert.equal(timers.size, 0);
+    }
+});
+
 test("main window timeout and closure clean up their own boot windows and readiness listeners", (t) => {
     const {context, ipcMain, timers, Window} = mainWindowSetup(t);
     const boots = [new Window(), new Window()];
@@ -266,6 +327,8 @@ test("system shutdown includes every booting workspace and closes only successfu
         runtimeState.workspaces = [];
         runtimeState.windows.bootWindows = new Set(boots) as unknown as Set<BootWindow>;
         runtimeState.startup = Object.freeze({...runtimeState.startup, remoteKernelTarget: undefined});
+        const {beginGracefulSystemShutdown, getSystemShutdownPorts} =
+            require("../startup/systemShutdown") as typeof import("../startup/systemShutdown");
         assert.deepEqual(getSystemShutdownPorts(), [6806, 6807]);
         beginGracefulSystemShutdown({
             exitApp: () => { appExits++; },

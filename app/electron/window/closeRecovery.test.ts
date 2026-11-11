@@ -10,7 +10,8 @@ const setup = (t: any) => {
     resetRuntimeState();
     resetElectronStub();
     mockElectron(t);
-    const {installWindowCloseRecovery, requestWindowClose} = require("./closeRecovery") as typeof import("./closeRecovery");
+    const {finishWindowCloseOnHide, installWindowCloseRecovery, requestWindowClose} =
+        require("./closeRecovery") as typeof import("./closeRecovery");
     let destroyed = false;
     let responsive = false;
     let decision = 0;
@@ -61,6 +62,7 @@ const setup = (t: any) => {
     };
     return {window, workspace, sent, dialogs, exits, kernel, timers, fire, settle,
         close: (quit = false) => requestWindowClose(window as unknown as BrowserWindow, quit),
+        hide: () => finishWindowCloseOnHide(window as unknown as BrowserWindow),
         responsive: () => { responsive = true; },
         chooseExit: () => { decision = 1; },
         fail: (reject = false) => { code = 1; rejectRequest = reject; },
@@ -80,6 +82,38 @@ test("responsive renderers keep their own hide, save and sync flow", async t => 
     assert.equal(f.dialogs.length, 0);
     assert.equal(f.timers.size, 0);
     assert.equal(f.kernel.length, 0);
+});
+
+test("a completed hide cancels a stale recovery prompt without affecting the next request", async t => {
+    const f = setup(t);
+    f.defer();
+    f.close();
+    await f.fire(15000);
+    await f.fire(1000);
+    assert.equal(f.dialogs[0].signal?.aborted, false);
+
+    f.hide();
+    assert.equal(f.dialogs[0].signal?.aborted, true);
+    f.close();
+    assert.deepEqual(f.sent, [false, false]);
+    f.finishDecision();
+    await f.settle();
+    assert.equal(f.kernel.length, 0);
+    assert.equal(f.timers.size, 1);
+    f.close();
+    assert.deepEqual(f.sent, [false, false]);
+    f.destroy();
+});
+
+test("a hide does not cancel a close request upgraded to quit", async t => {
+    const f = setup(t);
+    f.close();
+    f.close(true);
+    f.hide();
+    assert.deepEqual(f.sent, [false, true]);
+    await f.fire(15000);
+    await f.fire(1000);
+    assert.equal(f.dialogs.length, 1);
 });
 
 test("unresponsive close offers waiting by default and permits another attempt", async t => {

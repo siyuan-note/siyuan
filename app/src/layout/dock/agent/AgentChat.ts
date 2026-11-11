@@ -69,6 +69,12 @@ import {AgentWelcomeGreeting} from "./AgentWelcomeGreeting";
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
 const maxVisibleBlockIDs = 50;
 
+// 助手回复中的块引用链接使用 siyuan: 协议，消毒时显式允许；内嵌框架一律禁止。
+const agentSanitizeOptions = {
+    FORBID_TAGS: ["iframe", "frame", "frameset"],
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|matrix|siyuan|web\+siyuan):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+};
+
 export type AgentChatStatus = "idle" | "running";
 export type AgentChatNotification = "confirm" | "done";
 
@@ -318,7 +324,8 @@ export class AgentChat extends Model {
         this.panelElement = host.element;
         this.lute = getAgentLute({
             emojiSite: "/emojis",
-            emojis: {}
+            emojis: {},
+            sanitize: true
         });
         this.defaultTitle = window.siyuan.languages.agentChat || "Agent";
         this.sessionTitle = this.defaultTitle;
@@ -2078,7 +2085,7 @@ export class AgentChat extends Model {
         if (entryId) {
             el.setAttribute("data-message-id", entryId);
         }
-        el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.ProtylePreviewStr("", content) || escapeHtml(content)) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body b3-typography">' + this.renderAssistantBody(content) + "</div>";
         this.messagesContainer.appendChild(el);
         postRender(el, this.app, this.host.onNavigate);
         if (showActions) {
@@ -3667,6 +3674,13 @@ export class AgentChat extends Model {
         }
     }
 
+    // 助手回复来自模型或外部材料，其中的 HTML 和内联事件属性都不可信，写入 DOM 前统一经 DOMPurify 消毒
+    // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3rvg-qxwg-f3c6
+    private renderAssistantBody(markdown: string) {
+        const html = this.lute.ProtylePreviewStr("", markdown) || escapeHtml(markdown);
+        return window.DOMPurify ? window.DOMPurify.sanitize(html, agentSanitizeOptions) : escapeHtml(markdown);
+    }
+
     // 结束、停止和错误路径统一使用完整原文渲染，并只在收尾时执行高亮、公式和图表等增强。
     private finalizeStreamingBody(content: string, ts: number, showActions = true) {
         this.cancelTokenUpdate();
@@ -3680,7 +3694,7 @@ export class AgentChat extends Model {
         bodyEl.classList.remove("agent-chat__body--streaming", "agent-chat__body--streaming-markdown");
         if (content) {
             // 富渲染只在此处执行一次，避免流式期间每帧 O(n²) 重建带来的卡顿。
-            bodyEl.innerHTML = this.lute.ProtylePreviewStr("", content) || escapeHtml(content);
+            bodyEl.innerHTML = this.renderAssistantBody(content);
             postRender(bodyEl, this.app, this.host.onNavigate);
             if (showActions) {
                 this.addCopyButton(this.currentAIElement, undefined, ts);
@@ -3712,7 +3726,7 @@ export class AgentChat extends Model {
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
             el.setAttribute("data-message-id", this.currentAssistantEntryId);
-            el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.ProtylePreviewStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body b3-typography">' + this.renderAssistantBody(savedContent) + "</div>";
             this.messagesContainer.appendChild(el);
             postRender(el, this.app, this.host.onNavigate);
             this.currentAIElement = el;
@@ -4003,7 +4017,7 @@ export class AgentChat extends Model {
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
             el.setAttribute("data-message-id", this.currentAssistantEntryId);
-            el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.ProtylePreviewStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body b3-typography">' + this.renderAssistantBody(savedContent) + "</div>";
             this.messagesContainer.appendChild(el);
             postRender(el, this.app, this.host.onNavigate);
             this.currentAIElement = el;
@@ -4435,7 +4449,7 @@ export class AgentChat extends Model {
         for (let i = 0; i < visibleSteps.length; i++) {
             const step = visibleSteps[i];
             if (step.content) {
-                detail += '<div class="agent-chat__thinking-chat b3-typography">' + (this.lute.ProtylePreviewStr("", step.content) || escapeHtml(step.content)) + "</div>";
+                detail += '<div class="agent-chat__thinking-chat b3-typography">' + this.renderAssistantBody(step.content) + "</div>";
             }
             if (step.reasoningContent) {
                 detail += '<div class="agent-chat__thinking-reasoning-text">' + escapeHtml(step.reasoningContent) + "</div>";

@@ -245,7 +245,7 @@ func TestFilterBlockAndRefIDsByPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedID,
-		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+		Value: model.PublishAuthCookieValue(protectedID, protectedPassword),
 	})
 	if filtered := filterBlockIDsByPublishAccess(c, ids, ""); !slices.Equal(filtered, []string{publicID, hiddenID, protectedID}) {
 		t.Fatalf("unexpected authenticated reader block IDs: %v", filtered)
@@ -340,7 +340,7 @@ func TestGetBlockInfoPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + privateID,
-		Value: util.SHA256Hash([]byte(privateID + privatePassword)),
+		Value: model.PublishAuthCookieValue(privateID, privatePassword),
 	})
 	_, passwordRequired, metadataVisible, accessible = getBlockInfoPublishAccess(c, privateChildID, "")
 	if passwordRequired || !metadataVisible || !accessible {

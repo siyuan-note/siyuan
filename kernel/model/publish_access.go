@@ -5,6 +5,10 @@
 package model
 
 import (
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -14,6 +18,7 @@ import (
 	"path"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -457,12 +462,66 @@ func checkBlockTreeAccessableByPublishAccess(c *gin.Context, publishAccess Publi
 	return GetBlockTreePublishAccessStatus(c, publishAccess, bt) == PublishAccessAllowed
 }
 
+// publishAuthCookieTTL 发布密码认证 Cookie 的服务端有效期，与下发的 MaxAge 保持一致。
+const publishAuthCookieTTL = 24 * time.Hour
+
+// publishAuthCookieKey 是签发发布密码认证 Cookie 的进程级随机密钥。
+// Cookie 值不能由客户端根据 ID 和密码计算，否则内容接口会成为绕过密码接口限流的密码预言机
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-6fw6-h6p3-c6gf
+var (
+	publishAuthCookieKey     []byte
+	publishAuthCookieKeyOnce sync.Once
+)
+
+func initPublishAuthCookieKey() {
+	publishAuthCookieKeyOnce.Do(func() {
+		publishAuthCookieKey = make([]byte, 32)
+		if _, err := rand.Read(publishAuthCookieKey); err != nil {
+			logging.LogFatalf(logging.ExitCodeFatal, "initialize publish auth cookie key failed: %s", err)
+		}
+	})
+}
+
+// PublishAuthCookieValue 返回发布密码认证 Cookie 的值：过期时间加 HMAC 签名。
+// 值依赖进程级密钥，客户端无法离线计算；内核内部和测试都应通过它构造 Cookie。
+func PublishAuthCookieValue(ID, password string) string {
+	return publishAuthCookieValue(ID, password, time.Now().Add(publishAuthCookieTTL).Unix())
+}
+
+func publishAuthCookieValue(ID, password string, expiry int64) string {
+	expiryStr := strconv.FormatInt(expiry, 10)
+	return expiryStr + ":" + publishAuthCookieSignature(ID, password, expiryStr)
+}
+
+func publishAuthCookieSignature(ID, password, expiry string) string {
+	initPublishAuthCookieKey()
+	mac := hmac.New(sha256.New, publishAuthCookieKey)
+	mac.Write([]byte(ID))
+	mac.Write([]byte{0})
+	mac.Write([]byte(password))
+	mac.Write([]byte{0})
+	mac.Write([]byte(expiry))
+	return hex.EncodeToString(mac.Sum(nil))
+}
+
+// checkPublishAuthCookieValue 校验 Cookie 值的签名与服务端过期时间。
+func checkPublishAuthCookieValue(value, ID, password string) bool {
+	expiryStr, signature, ok := strings.Cut(value, ":")
+	if !ok {
+		return false
+	}
+	expiry, err := strconv.ParseInt(expiryStr, 10, 64)
+	if nil != err || time.Now().Unix() > expiry {
+		return false
+	}
+	return util.AuthCodeEquals(signature, publishAuthCookieSignature(ID, password, expiryStr))
+}
+
 func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
-	authCookie := util.SHA256Hash([]byte(ID + password))
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:   "publish-auth-" + ID,
-		Value:  authCookie,
-		MaxAge: 24 * 60 * 60,
+		Value:  PublishAuthCookieValue(ID, password),
+		MaxAge: int(publishAuthCookieTTL.Seconds()),
 		Path:   "/",
 		// 只有客户端连接确实使用 TLS 时才标记 Secure，与发布会话 Cookie 保持一致
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
@@ -472,8 +531,14 @@ func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
 }
 
 func CheckPublishAuthCookie(c *gin.Context, ID string, password string) bool {
+	if nil == c {
+		return false
+	}
 	authCookie, err := c.Request.Cookie("publish-auth-" + ID)
-	return err == nil && authCookie.Value == util.SHA256Hash([]byte(ID+password))
+	if nil != err {
+		return false
+	}
+	return checkPublishAuthCookieValue(authCookie.Value, ID, password)
 }
 
 // AssetPathFromDataRelativePath 从 data 相对路径提取文档中使用的资源路径和笔记本 ID。

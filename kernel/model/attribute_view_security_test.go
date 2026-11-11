@@ -127,7 +127,7 @@ func TestGetCurrentAttributeViewImagesPublishAccess(t *testing.T) {
 		c := newReaderContext()
 		c.Request.AddCookie(&http.Cookie{
 			Name:  "publish-auth-" + carrierDocID,
-			Value: util.SHA256Hash([]byte(carrierDocID + readerPass)),
+			Value: PublishAuthCookieValue(carrierDocID, readerPass),
 		})
 		images, err := GetCurrentAttributeViewImages(c, avID, "", "", "", "")
 		if nil != err {

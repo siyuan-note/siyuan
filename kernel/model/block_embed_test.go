@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestFilterEmbedBlocksByAccess(t *testing.T) {
@@ -60,7 +59,7 @@ func TestFilterEmbedBlocksByAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedDocID, protectedPassword),
 	})
 	filtered = filterEmbedBlocksByAccess(blocks, accessChecker)
 	if 3 != len(filtered) || protectedDocID != filtered[2].ID {

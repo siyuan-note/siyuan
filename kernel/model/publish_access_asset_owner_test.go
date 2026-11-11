@@ -116,7 +116,7 @@ func TestCheckAbsPathAccessableByPublishAccessBindsAssetOwner(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + documentPassword)),
+		Value: PublishAuthCookieValue(protectedDocID, documentPassword),
 	})
 	if !CheckAbsPathAccessableByPublishAccess(c, resolved, publishAccess) {
 		t.Error("protected document asset should be accessible after password authorization")

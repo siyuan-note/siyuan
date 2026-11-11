@@ -168,7 +168,7 @@ func TestGetDynamicIconEnforcesPublishAccess(t *testing.T) {
 	// 通过发布密码认证的读者必须仍能渲染
 	authCookie := &http.Cookie{
 		Name:  "publish-auth-" + passwordID,
-		Value: util.SHA256Hash([]byte(passwordID + password)),
+		Value: model.PublishAuthCookieValue(passwordID, password),
 	}
 	if svg := requestIcon(model.RoleReader, passwordID, titleContent, authCookie); !strings.Contains(svg, "Password Doc") {
 		t.Fatalf("authenticated publish reader cannot render the template icon: %s", svg)

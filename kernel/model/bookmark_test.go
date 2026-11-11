@@ -12,7 +12,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestFilterBookmarkLabelsByPublishAccess(t *testing.T) {
@@ -48,7 +47,7 @@ func TestFilterBookmarkLabelsByPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedDocID, protectedPassword),
 	})
 	filtered = filterBookmarkLabelsByPublishAccess(c, publishAccess, blocks)
 	if !slices.Equal(filtered, []string{"protected", "shared"}) {

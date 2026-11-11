@@ -741,7 +741,7 @@ func TestFilterFileTreePublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + privateID,
-		Value: util.SHA256Hash([]byte(privateID + privatePassword)),
+		Value: model.PublishAuthCookieValue(privateID, privatePassword),
 	})
 	expectedPaths = paths[:4]
 	if filtered := filterFileTreePathsByPublishMetadataAccess(c, paths); !slices.Equal(filtered, expectedPaths) {

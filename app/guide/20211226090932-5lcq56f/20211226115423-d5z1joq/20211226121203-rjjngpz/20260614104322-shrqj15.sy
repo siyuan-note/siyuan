@@ -162,7 +162,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "系統模式使用支援的系統設定，或核心啟動時繼承的代理環境變數。核心支援讀取 Windows、Linux GNOME 和 macOS 的手動代理，Linux 和 macOS 上明確設定的代理環境變數優先。這些讀取器不支援自動 PAC 設定，Windows 和 macOS 自動偵測也不受支援；其他平台的核心保留啟動時的代理環境，不讀取作業系統代理設定"
+									"Data": "系統模式使用支援的系統設定，或核心啟動時繼承的代理環境變數。核心支援讀取 Windows、Linux GNOME、Linux KDE 和 macOS 的手動代理，Linux 和 macOS 上明確設定的代理環境變數優先。這些讀取器不支援自動 PAC 設定，Windows 和 macOS 自動偵測也不受支援；其他平台的核心保留啟動時的代理環境，不讀取作業系統代理設定"
 								}
 							]
 						}

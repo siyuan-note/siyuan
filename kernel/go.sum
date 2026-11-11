@@ -434,6 +434,8 @@ github.com/siyuan-note/filelock v0.0.0-20261025032826-1ff24a81dda9 h1:FBWsxvFXk/
 github.com/siyuan-note/filelock v0.0.0-20261025032826-1ff24a81dda9/go.mod h1:YdVmeGbHkUfDrtS7eIdagWLtzFabT/7/Xbp6Z6n3hmU=
 github.com/siyuan-note/httpclient v0.0.0-20260813083704-4643a83d05de h1:2liBebKn9tCH3goDTLdSoq4JHGLarqfeUbKsIrXHqzs=
 github.com/siyuan-note/httpclient v0.0.0-20260813083704-4643a83d05de/go.mod h1:khLwgEGUZiW+haLJsLamZxQAJy54PgIut1rQzf2RRAg=
+github.com/siyuan-note/httpclient v0.0.0-20261111062713-8b98d6bd0703 h1:zACadG6jrNqnST3vDHLq52MIaaw6pqFoPA8uwSBtzCs=
+github.com/siyuan-note/httpclient v0.0.0-20261111062713-8b98d6bd0703/go.mod h1:khLwgEGUZiW+haLJsLamZxQAJy54PgIut1rQzf2RRAg=
 github.com/siyuan-note/logging v0.0.0-20260513050044-06b8e04d5490 h1:z8m0SaVN/9rQqQE+EHbqBoqEz7gSk8qtrNFhKyXHz9I=
 github.com/siyuan-note/logging v0.0.0-20260513050044-06b8e04d5490/go.mod h1:t3Tmt3DgQx0zqJmrckszJ+JBZ7iJrD1Ktp8FDBQ249E=
 github.com/siyuan-note/riff v0.0.0-20261027020519-fcf37f980d3f h1:XR9uI0hsYkunhrT9OxRB7X88iiWFUQlMzlxzGDQ08pU=

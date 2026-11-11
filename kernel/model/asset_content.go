@@ -758,6 +758,13 @@ type XlsxAssetParser struct {
 }
 
 func (parser *XlsxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			ret = nil
+			logging.LogErrorf("parse XLSX asset [%s] failed: %v", absPath, recovered)
+		}
+	}()
+
 	if !strings.HasSuffix(strings.ToLower(absPath), ".xlsx") {
 		return
 	}
@@ -772,12 +779,14 @@ func (parser *XlsxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	}
 	defer os.RemoveAll(tmp)
 
-	x, err := excelize.OpenFile(tmp)
+	x, err := openXlsxAssetFile(tmp)
+	if x != nil {
+		defer x.Close()
+	}
 	if err != nil {
 		logging.LogErrorf("open [%s] failed: [%s]", tmp, err)
 		return
 	}
-	defer x.Close()
 
 	buf := bytes.Buffer{}
 	sheetMap := x.GetSheetMap()
@@ -800,6 +809,23 @@ func (parser *XlsxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		Content: content,
 	}
 	return
+}
+
+func openXlsxAssetFile(path string) (*excelize.File, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	var header [8]byte
+	if _, err = file.ReadAt(header[:], 0); err != nil {
+		return nil, err
+	}
+	// CFB 解密器可能因畸形输入 panic，文件句柄由调用方关闭；普通 ZIP 工作簿保留按需读取。
+	if bytes.Equal(header[:], []byte{0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1}) {
+		return excelize.OpenReader(file)
+	}
+	return excelize.OpenFile(path)
 }
 
 // PdfAssetParser parser factory product

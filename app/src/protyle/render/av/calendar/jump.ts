@@ -2,6 +2,7 @@ import {mobileInputDialog} from "../../../../dialog/mobileInputDialog";
 import dayjs from "dayjs";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getCalendarRange, getISOWeekForCalendarRow, getISOWeeksInYear, getISOWeekThursday} from "./date";
+import {bindDatePicker} from "../../../../datePicker";
 
 export const openCalendarJump = (anchor: number, weekStart: number, onJump: (date: number) => void) => {
     const rowStart = getCalendarRange(anchor, "week", weekStart).start;
@@ -49,6 +50,7 @@ export const openCalendarJump = (anchor: number, weekStart: number, onJump: (dat
     });
     const mode = dialog.element.querySelector<HTMLSelectElement>("[data-calendar-jump-mode]");
     const dateInput = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
+    bindDatePicker(dateInput);
     dateInput.setAttribute("aria-label", languages.calendarJumpDate);
     const weekFields = dialog.element.querySelector<HTMLElement>("[data-calendar-jump-week]");
     const yearInput = dialog.element.querySelector<HTMLInputElement>("[data-calendar-jump-year]");

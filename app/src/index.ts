@@ -1,5 +1,6 @@
 import {Constants} from "./constants";
 import {registerColorPickerWindow} from "./colorPicker/panel";
+import {registerDatePickerWindow} from "./datePicker/panel";
 import {refreshSettingConfig} from "./config/setting/sync";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
 import {closeDocumentTitleDialogs} from "./protyle/header/documentTitleDialogs";
@@ -90,6 +91,7 @@ export class App {
             return;
         }
         registerColorPickerWindow();
+        registerDatePickerWindow();
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
 

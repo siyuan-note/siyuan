@@ -44,7 +44,9 @@ const runCases = async (sources, css, mobile, dark) => {
     let signal;
     const files = [{id: "doc-file", path: "/notebook/project/document.sy"}, ...Array.from({length: 20}, (_, i) => ({id: "file-" + i, path: "/notebook/project/note-" + i + ".sy"}))];
     let nextID = 0;
+    const datePickers = new Set();
     const stubs = {
+        "datePicker": {bindDatePicker: input => {datePickers.add(input);}},
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "util/genID": {genUUID: () => String(++nextID)},
         "util/zIndex": {isAbove: () => false},
@@ -105,6 +107,7 @@ const runCases = async (sources, css, mobile, dark) => {
     panel.innerHTML = `<div class="history__action"><div class="history__repo-pagination"></div><input class="b3-text-field"><button data-type="compare">Compare</button>${new Function("return `" + sources.snapshotButtons + "`;")()}</div><ul data-type="repoList"></ul>`;
     document.body.append(panel);
     const disposePanel = initRepoPanel(panel, () => {});
+    assert.deepEqual(Array.from(datePickers), Array.from(panel.querySelectorAll("input[data-range]")));
     await tick();
     const local = panel.querySelector('[data-repo-source="local"]');
     const cloud = panel.querySelector('[data-repo-source="cloud"]');
@@ -223,6 +226,9 @@ if (process.versions.electron && process.type === "browser") {
                 for (const dark of [false, true]) {
                     win.setContentSize(mobile ? 390 : 1280, 800);
                     await win.loadURL("data:text/html,<html><body></body></html>");
+                    win.show();
+                    win.focus();
+                    assert.deepEqual(await win.webContents.executeJavaScript("[innerWidth, innerHeight]"), [mobile ? 390 : 1280, 800]);
                     const theme = fs.readFileSync(path.join(__dirname, `../appearance/themes/${dark ? "midnight" : "daylight"}/theme.css`), "utf8");
                     await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(theme + styles)}, ${mobile}, ${dark})`);
                 }

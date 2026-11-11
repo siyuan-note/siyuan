@@ -7,6 +7,7 @@ import {Protyle} from "../protyle";
 import {Constants} from "../constants";
 import {destroyDialogBlockPanels, getDialogBlockPanel} from "../block/panelOwnership";
 import {getAnchoredInputMask} from "./anchoredInput";
+import {isMenuOverlayTarget} from "../menus/overlayOwnership";
 
 export class Dialog {
     private destroyCallback: (options?: IObject) => void;
@@ -39,8 +40,10 @@ export class Dialog {
             document.activeElement.closest(".protyle-wysiwyg")) {
             return;
         }
-        const container = menu.contains(document.activeElement) && isAbove(menu, this.element.querySelector(".b3-dialog")) ?
-            menu : activePopover || this.element.querySelector(".b3-dialog__container") as HTMLElement;
+        const ownedMenu = document.activeElement?.closest<HTMLElement>(".b3-menu");
+        const activeOwnedMenu = ownedMenu && isMenuOverlayTarget(this.element, ownedMenu) ? ownedMenu : undefined;
+        const container = activeOwnedMenu || (menu.contains(document.activeElement) && isAbove(menu, this.element.querySelector(".b3-dialog")) ?
+            menu : activePopover || this.element.querySelector(".b3-dialog__container") as HTMLElement);
         const elements = Array.from(container.querySelectorAll<HTMLElement>(
             "a[href], button, input, select, textarea, [tabindex], [contenteditable]"
         )).filter(element => (element.tabIndex >= 0 || (element.isContentEditable && !element.hasAttribute("tabindex"))) &&

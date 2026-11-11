@@ -157,9 +157,10 @@ const fixture = () => {
     const window = {siyuan: {blockPanels: [] as any[], dialogs: [] as any[], menus: {menu}}};
     const globals = {window, document};
     const ownership = loadSource(readFileSync("src/block/panelOwnership.ts", "utf8"), globals);
+    const menuOwnership = loadSource(readFileSync("src/menus/overlayOwnership.ts", "utf8"), globals);
     const zIndex = loadSource(readFileSync("src/util/zIndex.ts", "utf8"), globals);
     const Dialog = loadDialogMethods({
-        ...globals, ...ownership, ...zIndex,
+        ...globals, ...ownership, ...menuOwnership, ...zIndex,
         getAnchoredInputMask: () => document.querySelector?.(".b3-text-field__mask"),
         Constants: {TIMEOUT_DBLCLICK: 200},
         setTimeout: (callback: () => void) => timers.push(callback),

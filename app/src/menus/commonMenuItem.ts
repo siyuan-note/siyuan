@@ -1,4 +1,5 @@
 import {toggleMenu} from "./menuToggle";
+import {bindDatePicker} from "../datePicker";
 import type {BlockQueryRequestInput} from "../types/api";
 import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {isMobile, isValidCustomAttrName} from "../util/functions";
@@ -96,6 +97,7 @@ export const openWechatNotify = (nodeElement: Element) => {
         }
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_WECHATREMINDER);
+    bindDatePicker(dialog.element.querySelector<HTMLInputElement>("input"));
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
@@ -182,6 +184,7 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
 </div>`
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_WECHATREMINDER);
+        bindDatePicker(dialog.element.querySelector<HTMLInputElement>("input"));
         const btnsElement = dialog.element.querySelectorAll(".b3-button");
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();

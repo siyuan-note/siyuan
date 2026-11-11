@@ -39,6 +39,7 @@ const checkDialog = async (css, languages, sources, mobile, rtl) => {
         return exports;
     };
     const {Dialog} = load(sources.dialog, {
+        "../menus/overlayOwnership": load(sources.overlayOwnership, {}),
         "../util/genID": {genUUID: () => `import-dialog-${++sequence}`},
         "../util/zIndex": {getZIndex: () => 0, isAbove: () => false},
         "./moveResize": {moveResize() {}}, "../util/functions": {isMobile: () => mobile},
@@ -137,7 +138,7 @@ if (process.versions.electron && process.type === "browser") {
             nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false,
         }});
         try {
-            const sources = {dialog: compile("../src/dialog/index.ts"), escape: compile("../src/util/escape.ts"),
+            const sources = {overlayOwnership: compile("../src/menus/overlayOwnership.ts"), dialog: compile("../src/dialog/index.ts"), escape: compile("../src/util/escape.ts"),
                 mobileRuntime: require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource(),
                 importData: compile("../src/menus/importData.ts")};
             for (const name of ["base", "mobile"]) {

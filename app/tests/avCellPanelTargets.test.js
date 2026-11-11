@@ -64,6 +64,7 @@ const relation = id => ({blockIDs: [id], contents: [{type: "block", block: {cont
 
 const fixture = (type, {count = 1, batch = "", groups = false, cached = true, related = false} = {}) => {
     const transactions = [];
+    const datePickers = new WeakMap();
     const owner = {contains: () => true};
     const values = Array.from({length: count}, (_, index) => ({
         id: `value-${index}`, keyID: "column", blockID: `row-${index}`, type,
@@ -162,6 +163,8 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
             fullscreen() {}
         },
         getSelectHTML: () => "", bindSelectEvent() {}, setSelectMenuPosition() {},
+        bindDatePicker: (input, options) => {datePickers.set(input, options);},
+        isDatePickerOpen: () => false,
         bindAssetEvent: options => {state.boundMenu = options;},
         removeCompressURL: value => value, openMenu: () => [], isBrowserRenderableImagePath: () => false,
         base64ToURL: async () => state.base64Response,
@@ -206,6 +209,8 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         inputs[3].checked = false;
         const close = api.bindDateEvent({protyle, data: state.data, blockElement: block, cellElements: cells,
             menuElement: {querySelectorAll: () => inputs}, requireExplicitChange: true});
+        assert.equal(typeof datePickers.get(inputs[0])?.onCommit, "function");
+        assert.equal(typeof datePickers.get(inputs[1])?.onCommit, "function");
         if (dirty) inputs[0].dispatchEvent(new Event("input"));
         close();
     };

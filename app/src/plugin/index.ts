@@ -1,5 +1,6 @@
 import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
 import {cancelPluginColorPickers, registerColorPickerOwner} from "../colorPicker/owners";
+import {cancelPluginDatePickers, registerDatePickerOwner} from "../datePicker/owners";
 import type {App} from "../index";
 import {EventBus} from "./EventBus";
 import type {subMenu} from "../menus/Menu";
@@ -60,6 +61,7 @@ const getInvalidStorageNameError = (): IWebSocketData => ({code: 400, msg: "Inva
 
 export const markPluginDisposed = (plugin: Plugin) => {
     cancelPluginColorPickers(plugin);
+    cancelPluginDatePickers(plugin);
     disposedPlugins.add(plugin);
     clearPluginToolbarItems(plugin);
 };
@@ -126,6 +128,7 @@ export class Plugin {
         i18n: Record<string, import("../types/api").JSONValue>
     }) {
         registerColorPickerOwner(this);
+        registerDatePickerOwner(this);
         this.app = options.app;
         this.i18n = options.i18n;
         this.displayName = options.displayName;

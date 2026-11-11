@@ -5,6 +5,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as customTabOwner from "./customTabOwner";
 import {cancelPluginColorPickers, getColorPickerOwner, registerColorPickerOwner} from "../colorPicker/owners";
+import {cancelPluginDatePickers, getDatePickerOwner, registerDatePickerOwner} from "../datePicker/owners";
 
 const compiled = (file: string, mobile: boolean) => transpileModule(require("ifdef-loader/preprocessor").parse(
     readFileSync(file, "utf8"), {MOBILE: mobile, BROWSER: mobile}, false, true), {
@@ -22,10 +23,13 @@ for (const mode of ["settings", "main", "document", "mobile"]) {
         const app = {plugins: [plugin]};
         registerColorPickerOwner(plugin);
         getColorPickerOwner(plugin).sessions.add(() => cleaned.push("color picker"));
+        registerDatePickerOwner(plugin);
+        getDatePickerOwner(plugin).sessions.add(() => cleaned.push("date picker"));
         const window = {siyuan: {layout: mode === "settings" ? {} : {layout: {children: []}},
             config: {appearance: {hideToolbar: false}}, languages: {}, storage: {}}};
         const dependencies = {
             cancelPluginColorPickers,
+            cancelPluginDatePickers,
             Constants: {}, isSettingsWindow: () => mode === "settings", isWindow: () => ["settings", "document"].includes(mode),
             getAllModels: () => ({custom: [] as unknown[]}), getAllEditor: (): unknown[] => [],
             unregisterPluginCommands() {}, cancelAssetUploadsByPlugin() {}, releaseTrackedRangesByPlugin() {},
@@ -53,7 +57,8 @@ for (const mode of ["settings", "main", "document", "mobile"]) {
         }});
         teardown.destroyPlugin(app, plugin, false);
         assert.deepEqual(errors, []);
-        assert.deepEqual(cleaned, ["color picker", "kernel", "event bus", "icons", "style"]);
+        assert.deepEqual(cleaned, ["color picker", "date picker", "kernel", "event bus", "icons", "style"]);
+        assert.throws(() => getDatePickerOwner(plugin), /live Plugin/);
         assert.equal(app.plugins.length, 0);
         assert.deepEqual(updates, mode === "settings" ? [] : mode === "mobile" ? ["dock catalog"] :
             ["dock catalog", "top bar catalog", "top bar layout", "tab layout"]);

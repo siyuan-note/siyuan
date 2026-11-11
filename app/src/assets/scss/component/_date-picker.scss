@@ -1,0 +1,103 @@
+.date-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+
+  &__fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 140px;
+    min-width: 0;
+
+    input {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  &__navigation {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    select {
+      flex: 1;
+      min-width: 0;
+    }
+
+    input {
+      width: 88px;
+      min-width: 0;
+    }
+  }
+
+  &__calendar {
+    width: 100%;
+    table-layout: fixed;
+
+    th {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    button {
+      width: 100%;
+      min-height: 36px;
+
+      &:focus-visible {
+        outline: 2px solid var(--b3-theme-primary);
+        outline-offset: -2px;
+      }
+
+      [data-frontend="mobile"] &,
+      [data-frontend="browser-mobile"] & {
+        min-height: 44px;
+      }
+    }
+  }
+
+  &__heading {
+    padding-block: 4px;
+  }
+
+  &__weekday-narrow {
+    display: none;
+  }
+
+  &--narrow-weekdays &__weekday-short {
+    display: none;
+  }
+
+  &--narrow-weekdays &__weekday-narrow {
+    display: inline;
+  }
+
+  @media (max-width: 380px) {
+    &__weekday-short {
+      display: none;
+    }
+
+    &__weekday-narrow {
+      display: inline;
+    }
+  }
+
+  &__shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+  }
+}
+
+.date-picker-input::-webkit-calendar-picker-indicator {
+  display: none;
+}

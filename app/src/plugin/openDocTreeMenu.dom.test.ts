@@ -306,7 +306,7 @@ for (const mobile of [false, true]) {
     test(`plugin document tree menus use detached rows and real ${mobile ? "mobile sheet" : "desktop popup"} interactions`,
         {timeout: 45000}, async () => {
         const sources = Object.fromEntries(["plugin/openDocTreeMenu", "plugin/EventBus", "plugin/Menu", "menus/navigation",
-            "menus/navigationSelection", "menus/Menu", "menus/menuToggle", "menus/menuPosition", "menus/menuMouseScroll",
+            "menus/navigationSelection", "menus/Menu", "menus/menuToggle", "menus/menuPosition", "menus/menuMouseScroll", "menus/overlayOwnership",
             "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
             "util/setPosition", "protyle/util/hasClosest", "layout/dock/docTree/row", "layout/dock/docTree/rowData",
             "protyle/render/av/addToDatabase", "protyle/render/av/relation"]

@@ -15,6 +15,7 @@ import {getAVColorStyle} from "./color";
 import {setFilterSelectPosition} from "./selectPosition";
 import {closeInlineFilterDropdowns} from "./filterDropdown";
 import type {IAVRelationContext} from "./host";
+import {bindDatePicker, isDatePickerOpen} from "../../../datePicker";
 
 export interface FilterEditorOptions {
     action?: IAVFilterOperation["action"];
@@ -1005,6 +1006,12 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         const {type: valueType} = resolveFilterValueType(filter, colData);
         const operatorSel = rowElement.querySelector('[data-type="operation"]') as HTMLSelectElement;
         const operator = (operatorSel?.value || filter.operator) as TAVFilterOperator;
+        const usesAbsoluteDate = isAVDateType(valueType) && operator !== "Is empty" && operator !== "Is not empty" &&
+            rowElement.querySelector<HTMLSelectElement>('[data-type="dateType"]')?.value !== "custom";
+        if (usesAbsoluteDate && (rowElement.querySelector('input[data-type="absDate"]:invalid') ||
+            operator === "Is between" && rowElement.querySelector('input[data-type="absDate2"]:invalid'))) {
+            return;
+        }
         const {newValue, relativeDate, relativeDate2} = readInlineValue(rowElement, valueType, operator, filter, menuElement);
         const quantifierSel = rowElement.querySelector('[data-type="quantifier"]') as HTMLSelectElement;
         const newFilter: IAVFilter = {
@@ -1026,6 +1033,23 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         }
         commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, reRender, filterOperation);
     };
+
+    // 条件行会整体重绘，在当前编辑器内绑定新生成的日期框。
+    const bindAbsoluteDate = (event: Event) => {
+        const input = event.target as HTMLInputElement;
+        if (!input.dataset.type?.startsWith("absDate") ||
+            input.closest('[data-filter-events-bound="true"]') !== panelElement) {
+            return;
+        }
+        bindDatePicker(input, {onCommit: () => {
+            const row = getRow(input);
+            if (input.isConnected && row) {
+                saveRow(row, input.dataset.path, false);
+            }
+        }});
+    };
+    panelElement.addEventListener("pointerdown", bindAbsoluteDate, true);
+    panelElement.addEventListener("focusin", bindAbsoluteDate);
 
     const getRelationFilterSelection = (dropdown: HTMLElement): string[] => {
         return parseRelationFilterBlockIDs(dropdown.dataset.selected || []);
@@ -1201,6 +1225,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
     panelElement.addEventListener("blur", (event: Event) => {
         const target = event.target as HTMLElement;
         if (target.closest('[data-filter-events-bound="true"]') !== panelElement) {
+            return;
+        }
+        if (target.dataset.type?.startsWith("absDate") && isDatePickerOpen(target as HTMLInputElement)) {
             return;
         }
         if (target.dataset.type === "filterValue" || target.dataset.type?.startsWith("absDate") || target.dataset.type?.startsWith("relCount")) {

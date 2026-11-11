@@ -43,6 +43,7 @@ const runCases = async (sources, mobile) => {
         new Function("require", "exports", sources[name])(() => deps, exports);
         return exports;
     };
+    Object.assign(deps, load("menus/overlayOwnership"));
     Object.assign(deps, load("dialog/index"));
     Object.assign(deps, load("dialog/mobileDialog"));
     const {movePathTo} = load("util/pathName");
@@ -97,7 +98,7 @@ if (process.versions.electron && process.type === "browser") {
             for (const mobile of [false, true]) {
                 await win.loadURL("data:text/html,<html><body></body></html>");
                 const sources = {};
-                for (const name of ["util/pathName", "dialog/index", "dialog/mobileDialog"]) {
+                for (const name of ["util/pathName", "menus/overlayOwnership", "dialog/index", "dialog/mobileDialog"]) {
                     sources[name] = ts.transpileModule(preprocess(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
                         {MOBILE: mobile, BROWSER: true}, false, true), {
                         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},

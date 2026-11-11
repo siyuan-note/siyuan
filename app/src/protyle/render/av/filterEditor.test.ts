@@ -75,3 +75,132 @@ test("nested color conditions do not change the parent view filter, including ca
     assert.equal(inner.data.view.filters[0].operator, "Contains");
     assert.equal(inner.panel.innerHTML, "updated condition");
 });
+
+test("absolute filter date pickers defer blur saves, preserve invalid values, and bind replacement rows", () => {
+    let open = false;
+    const pickers = new Map<unknown, {onCommit: () => void}>();
+    const methods = loadModule<typeof import("./filter")>("src/protyle/render/av/filter.ts", {
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : ({
+            "./view": {getFieldsByData: () => [{id: "date", type: "date"}]},
+            "../../../datePicker": {
+                bindDatePicker: (input: unknown, options: {onCommit: () => void}) => pickers.set(input, options),
+                isDatePickerOpen: () => open,
+            },
+        })[name] || {},
+    }, ScriptTarget.ES2022);
+    const listeners = new Map<string, Array<(event: unknown) => void>>();
+    let invalid = false;
+    const createInput = () => ({value: "2026-11-11", isConnected: true,
+        dataset: {type: "absDate", path: "0"}, closest: () => panel});
+    let input = createInput();
+    const row = {dataset: {path: "0"}, querySelector: (selector: string) => {
+        if (selector.includes(":invalid")) return invalid ? input : null;
+        if (selector === '[data-type="operation"]') return {value: "Is"};
+        if (selector === '[data-type="dateType"]') return {value: "specific"};
+        if (selector === '[data-type="absDate"]') return input;
+        return null;
+    }};
+    const panel = {dataset: {}, querySelector: () => row,
+        addEventListener: (type: string, listener: (event: unknown) => void) => {
+            listeners.set(type, [...listeners.get(type) || [], listener]);
+        },
+    };
+    const fire = (type: string) => listeners.get(type)?.forEach(listener => listener({target: input}));
+    const data = {view: {filters: [{column: "date", operator: "Is", value: {type: "date"}}]}} as unknown as IAV;
+    let saves = 0;
+    methods.bindInlineFilterEvents(panel as unknown as HTMLElement, data, {} as IProtyle, "block", "database", {
+        root: panel as unknown as HTMLElement, save: () => saves++,
+    });
+    fire("pointerdown");
+    assert.equal(pickers.has(input), true);
+    assert.equal(saves, 0);
+    open = true;
+    fire("blur");
+    assert.equal(saves, 0, "opening a child picker does not save the old value");
+    open = false;
+    input.value = "2026-12-31";
+    pickers.get(input).onCommit();
+    assert.equal(saves, 1);
+    assert.equal(data.view.filters[0].value.date.content, new Date("2026-12-31T00:00:00").getTime());
+    invalid = true;
+    input.value = "";
+    fire("blur");
+    assert.equal(saves, 1, "incomplete input is not a deliberate clear");
+    invalid = false;
+    fire("blur");
+    assert.equal(saves, 2);
+    assert.equal(data.view.filters[0].value.date.isNotEmpty, false);
+    input = createInput();
+    fire("focusin");
+    assert.equal(pickers.has(input), true, "rows replaced during operator or relative-mode changes remain bound");
+    input.value = "2027-01-01";
+    open = true;
+    fire("blur");
+    open = false;
+    assert.equal(saves, 2, "cancelling has no commit callback and no write");
+    pickers.get(input).onCommit();
+    assert.equal(saves, 3);
+});
+
+test("date filter structure changes validate only the absolute endpoints they retain", () => {
+    const methods = loadModule<typeof import("./filter")>("src/protyle/render/av/filter.ts", {
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities :
+            name === "./view" ? {getFieldsByData: () => [{id: "date", type: "date"}]} : {},
+    }, ScriptTarget.ES2022);
+    const cases = [
+        {operator: "Is empty", mode: "specific", invalidStart: true, invalidEnd: true, saved: true},
+        {operator: "Is not empty", mode: "specific", invalidStart: true, invalidEnd: true, saved: true},
+        {operator: "Is", mode: "specific", invalidStart: false, invalidEnd: true, saved: true},
+        {operator: ">", mode: "specific", invalidStart: false, invalidEnd: true, saved: true},
+        {operator: "Is", mode: "specific", invalidStart: true, invalidEnd: false, saved: false},
+        {operator: "Is between", mode: "specific", invalidStart: false, invalidEnd: true, saved: false},
+        {operator: "Is between", mode: "custom", invalidStart: true, invalidEnd: true, saved: true},
+    ];
+    for (const item of cases) {
+        const description = JSON.stringify(item);
+        const listeners = new Map<string, (event: unknown) => void>();
+        const control = (type: string, value: string) => ({value, dataset: {type, path: "0"}, closest: (): unknown => panel});
+        const controls: Record<string, ReturnType<typeof control>> = {
+            operation: control("operation", item.operator), dateType: control("dateType", item.mode),
+            absDate: control("absDate", item.invalidStart ? "" : "2026-11-11"),
+            absDate2: control("absDate2", item.invalidEnd ? "" : "2026-11-12"),
+            dataDirection: control("dataDirection", "-1"), relCount: control("relCount", "2"), relUnit: control("relUnit", "0"),
+            dataDirection2: control("dataDirection2", "1"), relCount2: control("relCount2", "3"), relUnit2: control("relUnit2", "1"),
+        };
+        const row = {dataset: {path: "0"}, querySelector: (selector: string): ReturnType<typeof control> | null => {
+            if (selector.includes('data-type^="absDate"') && selector.endsWith(":invalid")) {
+                return item.invalidStart ? controls.absDate : item.invalidEnd ? controls.absDate2 : null;
+            }
+            const type = /data-type="([^"]+)"/.exec(selector)?.[1];
+            if (selector.endsWith(":invalid")) {
+                return type === "absDate" && item.invalidStart ? controls.absDate :
+                    type === "absDate2" && item.invalidEnd ? controls.absDate2 : null;
+            }
+            return controls[type] || null;
+        }};
+        const panel = {dataset: {}, innerHTML: "original", querySelector: () => row,
+            addEventListener: (type: string, listener: (event: unknown) => void) => listeners.set(type, listener)};
+        const data = {view: {filters: [{column: "date", operator: "Is between", value: {type: "date", date: {
+            content: 1, isNotEmpty: true, content2: 2, isNotEmpty2: true, hasEndDate: true, isNotTime: true,
+        }}}]}} as unknown as IAV;
+        let saves = 0;
+        methods.bindInlineFilterEvents(panel as unknown as HTMLElement, data, {} as IProtyle, "block", "database", {
+            root: panel as unknown as HTMLElement, save: () => saves++, render: () => "updated",
+        });
+        listeners.get("change")({target: item.mode === "custom" ? controls.dateType : controls.operation});
+        assert.equal(saves, Number(item.saved), description);
+        assert.equal(panel.innerHTML, item.saved ? "updated" : "original", description);
+        if (!item.saved) {
+            assert.equal(data.view.filters[0].value.date.content, 1, description);
+        } else if (item.mode === "custom") {
+            assert.deepEqual(JSON.parse(JSON.stringify(data.view.filters[0].relativeDate)), {count: 2, unit: 0, direction: -1});
+            assert.deepEqual(JSON.parse(JSON.stringify(data.view.filters[0].relativeDate2)), {count: 3, unit: 1, direction: 1});
+        } else if (item.operator === "Is empty" || item.operator === "Is not empty") {
+            assert.equal(data.view.filters[0].operator, item.operator);
+            assert.equal(data.view.filters[0].value.date, undefined);
+        } else {
+            assert.equal(data.view.filters[0].value.date.content, new Date("2026-11-11T00:00:00").getTime());
+            assert.equal(data.view.filters[0].value.date.isNotEmpty2, false);
+        }
+    }
+});

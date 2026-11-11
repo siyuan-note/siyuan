@@ -7,6 +7,7 @@ import {getAVLocationDisplayText} from "./locationValue";
 import {automationTemplateFunctions} from "./automationTemplateFunctions";
 import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
+import {bindDatePicker} from "../../../datePicker";
 
 export const automationTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
@@ -75,6 +76,7 @@ export const mountAutomationTemplate = (options: {
     const editor = host.querySelector<HTMLTextAreaElement>("[data-template]");
     const item = host.querySelector<HTMLSelectElement>("[data-template-item]");
     const triggerTime = host.querySelector<HTMLInputElement>("[data-template-time]");
+    bindDatePicker(triggerTime);
     const inputs = host.querySelector<HTMLElement>("[data-template-inputs]");
     const result = host.querySelector<HTMLOutputElement>("[data-template-result]");
     const invalidate = () => {
@@ -90,6 +92,9 @@ export const mountAutomationTemplate = (options: {
             const type = date ? (stored?.date?.isNotTime === false ? "datetime-local" : "date") : entry.key.type === "number" ? "number" : "text";
             return `<label class="av__automation-control"><span class="av__automation-control-label">${escapeHtml(entry.key.name)}</span><input class="b3-text-field av__automation-template-input" data-template-input="${escapeAttr(entry.key.id)}" type="${type}"${type === "number" ? ' step="any"' : ""} value="${escapeAttr(text)}" maxlength="65536"></label>`;
         }).join("");
+        inputs.querySelectorAll<HTMLInputElement>('input[type="date"], input[type="datetime-local"]').forEach(input => {
+            bindDatePicker(input);
+        });
         invalidate();
         onResize();
     };

@@ -248,17 +248,19 @@ for (const field of ["statusBar", "notifications"] as const) {
 }
 
 const createPendingFontMenu = (key: string) => {
+    const document: {defaultView?: unknown} = {};
     const listeners = new Map<string, () => Promise<void>>();
     const attributes = new Map<string, string>();
     const state = {opened: 0, focused: 0, items: 0};
     let visible = false;
     let innerScroll = false;
     let resolveFonts: (fonts: unknown[]) => void;
-    const input = {style: {removeProperty() {}}, isConnected: true, closest: (): null => null, setAttribute() {},
+    const input = {ownerDocument: document, style: {removeProperty() {}}, isConnected: true, closest: (): null => null, setAttribute() {},
         addEventListener: (name: string, callback: () => Promise<void>) => listeners.set(name, callback),
         getBoundingClientRect: () => ({left: 700, bottom: 200, height: 28})};
     const selected = {innerHTML: "", classList: {toggle() {}}, querySelectorAll: (): unknown[] => [], addEventListener() {}};
     const element = {
+        ownerDocument: document,
         classList: {contains: () => !visible},
         contains: (target: unknown) => target === element,
         getAttribute: (name: string) => attributes.get(name),
@@ -281,18 +283,21 @@ const createPendingFontMenu = (key: string) => {
             state.opened++;
         },
     };
-    const window = {siyuan: {menus: {menu}, languages: {default: "Default"},
+    const window = {document, siyuan: {menus: {menu}, languages: {default: "Default"},
         config: {appearance: {globalFontFamilies: [] as unknown[]},
             editor: {fontFamilies: [] as unknown[], codeFontFamilies: [] as unknown[]}}}};
+    document.defaultView = window;
     const load = (file: string, modules: Record<string, unknown> = {}, suffix = "") => {
         const exports: Record<string, any> = {};
         runInNewContext(transpileModule(readFileSync(file, "utf8") + suffix, {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
         }).outputText, {exports, window, CSS: {escape: (text: string) => text},
-            getSelection: () => ({rangeCount: 0}), document: {}, require: (name: string) => modules[name] || {}});
+            getSelection: () => ({rangeCount: 0}), document, require: (name: string) => modules[name] || {}});
         return exports;
     };
-    const pluginMenu = load("src/plugin/Menu.ts");
+    const pluginMenu = load("src/plugin/Menu.ts", {
+        "../menus/overlayOwnership": load("src/menus/overlayOwnership.ts"),
+    });
     const click = load("src/menus/menuClick.ts", {
         "../protyle/util/hasClosest": {hasClosestByAttribute: (target: unknown) => target === input},
     });
@@ -313,7 +318,7 @@ const createPendingFontMenu = (key: string) => {
         selector === '[data-type="selected-fonts"]' ? selected : input})};
     appearance.mountAppearanceFontFamily(root, key);
     return {state, element, input, finish: () => resolveFonts([]),
-        outside: () => click.globalClickHideMenu({}),
+        outside: () => click.globalClickHideMenu({ownerDocument: document}),
         inside: () => click.globalClickHideMenu(element),
         trigger: () => click.globalClickHideMenu(input),
         open: () => (listeners.get("click") as (event: unknown) => Promise<void>)({stopPropagation() {}})};

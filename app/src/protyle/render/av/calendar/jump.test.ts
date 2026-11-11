@@ -53,6 +53,11 @@ const loadJump = () => {
             calendarISOWeek: "ISO week", calendarISOWeekYear: "ISO week year",
         }}},
         require: (name: string) => {
+            if (name === "../../../../datePicker") {
+                return {bindDatePicker: (input: Control) => {
+                    input.attributes["data-picker-bound"] = "true";
+                }};
+            }
             if (name === "./date") {
                 return dateExports;
             }
@@ -110,6 +115,8 @@ test("calendar jump keeps date entry and validates ISO week years", () => {
     let dialog = jump.current();
     assert.ok(dialog.options.prefixContent.includes("data-calendar-jump-mode"));
     assert.equal(dialog.date.value, "2027-01-01");
+    assert.equal(dialog.date.attributes["data-picker-bound"], "true");
+    assert.equal(targets.length, 0, "binding the picker does not jump or write a date");
     assert.equal(dialog.date.attributes["aria-label"], "Go to date");
     assert.equal(dialog.year.value, "2026");
     assert.equal(dialog.week.value, "53");

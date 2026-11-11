@@ -6,7 +6,7 @@
 		"id": "20260613155453-pxxzmhc",
 		"title": "字段類型",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261111023017"
 	},
 	"Children": [
 		{
@@ -2136,7 +2136,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-veckkdg",
-				"updated": "20261009120841"
+				"updated": "20261111023017"
 			},
 			"Children": [
 				{
@@ -2160,6 +2160,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "用於儲存日期或日期時間，支援西曆和農曆。"
+				}
+			]
+		},
+		{
+			"ID": "20261111015242-sd8ib91",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111015242-sd8ib91",
+				"updated": "20261111015242"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊西曆日期輸入框可開啟內建日期選擇器，切換年月、選擇今天或清空日期。日曆中可用方向鍵移動焦點，PageUp 和 PageDown 切換月份，配合 Shift 切換年份，Enter 選擇目前日期，Escape 關閉選擇器。日期、時間及範圍仍按所在介面的編輯方式或確認按鈕儲存；農曆年月日繼續使用農曆選項。"
 				}
 			]
 		},

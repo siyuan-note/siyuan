@@ -1,5 +1,6 @@
 import {isAVNewItemTemplateType, isAVSelectType} from "./capabilities";
-import {bindFieldLunarDates, genFieldValue, getValueInputHTML, openFieldSelectMenu, getRelationOptions, renderRelationFieldValue, openFieldRelationMenu, openFieldLocationEditor} from "./fieldValueEditor";
+import {bindFieldDates, genFieldValue, getValueInputHTML, openFieldSelectMenu, getRelationOptions, renderRelationFieldValue, openFieldRelationMenu, openFieldLocationEditor} from "./fieldValueEditor";
+import {bindDatePicker} from "../../../datePicker";
 import {isAVLocationEmpty} from "./locationValue";
 import {getCalendarCreationDate} from "./calendar/state";
 import {Constants} from "../../../constants";
@@ -431,15 +432,13 @@ export const openNewItemTemplateDialog = (options: {
                 valueElement.classList.toggle("fn__none", useCurrentTime);
                 if (!useCurrentTime) {
                     valueElement.focus();
-                    try {
-                        (valueElement as HTMLInputElement & {showPicker?: () => void}).showPicker?.();
-                    } catch {
-                        // 浏览器会在当前事件不具备用户激活状态时拒绝打开选择器，输入框仍可正常点击选择。
+                    if (valueElement instanceof HTMLInputElement) {
+                        bindDatePicker(valueElement).open();
                     }
                 }
             });
         });
-        bindFieldLunarDates(hostElement);
+        bindFieldDates(hostElement);
         hostElement.querySelectorAll<HTMLElement>('[data-role="field-value"][data-value-type]:not([data-value-type="lunarDate"])').forEach(item => item.addEventListener("click", (event) => {
             event.preventDefault();
             event.stopPropagation();

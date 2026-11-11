@@ -22,6 +22,7 @@ const cases = (source, helpers, languages) => {
     const selected = [];
     const recent = [];
     const messages = [];
+    const datePickers = new Set();
     let sheets = 0;
     let disposed = 0;
     const treeUpdates = [];
@@ -46,6 +47,7 @@ const cases = (source, helpers, languages) => {
     }
     const dependencies = {
         ...escape, ...values, ContractFormData, Dialog, EmojiPanelController,
+        bindDatePicker: input => datePickers.add(input),
         isMobile: () => mobile,
         dayjs: () => ({format: () => "2026-10-26"}),
         Constants: {LOCAL_EMOJIS: "emojis", DIALOG_EMOJIS: "emoji-panel"},
@@ -134,6 +136,8 @@ const cases = (source, helpers, languages) => {
     }
     check.equal(sheets, 5, "mobile document and database openings use the shared sheet");
     check.equal(disposed, sheets, "mobile sheet handlers are disposed with each closed panel");
+    check.ok(dialogs.every(item => datePickers.has(item.element.querySelector('[data-type="tab-dynamic"] [type="date"]'))),
+        "every desktop and mobile icon panel binds its dynamic date input");
     return "Emoji panel uploads passed";
 };
 
@@ -143,7 +147,11 @@ if (process.versions.electron && process.type === "browser") {
         app.setPath("userData", process.argv[2]);
         await app.whenReady();
         const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+        win.setContentSize(1000, 900);
         await win.loadURL("data:text/html,<html><body></body></html>");
+        win.show();
+        win.focus();
+        assert.deepEqual(await win.webContents.executeJavaScript("[innerWidth, innerHeight]"), [1000, 900]);
         const ts = require("typescript");
         const compile = value => ts.transpileModule(value, {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},

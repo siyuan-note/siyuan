@@ -3,6 +3,7 @@ import {genCellValueByElement, updateCellsValue} from "./cell";
 import {getFieldsByData} from "./view";
 import {shouldSubmitDateEdit} from "./dateSubmit";
 import {bindLunarDateEvent, getLunarDateHTML} from "./lunarDate";
+import {bindDatePicker, isDatePickerOpen} from "../../../datePicker";
 
 export const getDateHTML = (cellElements: HTMLElement[], format?: TAVDateFormat) => {
     const cellValue = genCellValueByElement("date", cellElements[0]).date;
@@ -69,6 +70,7 @@ export const bindDateEvent = (options: {
     }
     const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
     let dirty = false;
+    let submitted = false;
 
     // <input type="date"> 对非法日期会清空 input.value。原生 date input 不触发 beforeinput，用 keydown 区分删空与非法日输入。
     const lastNonEmptyValue: string[] = [inputElements[0].value, inputElements[1].value];
@@ -76,11 +78,10 @@ export const bindDateEvent = (options: {
     const invalidEmpty: boolean[] = [false, false];
     const bindTracking = (index: number) => {
         const input = inputElements[index];
-        input.addEventListener("pointerdown", () => {
-            // 日期输入框会预填当前日期，用户主动点击表示接受该候选值。
-            dirty = true;
-        });
         input.addEventListener("focus", () => {
+            if (isDatePickerOpen(input) || invalidEmpty[index]) {
+                return;
+            }
             lastNonEmptyValue[index] = input.value;
             invalidEmpty[index] = false;
         });
@@ -113,6 +114,10 @@ export const bindDateEvent = (options: {
     };
     bindTracking(0);
     bindTracking(1);
+    [0, 1].forEach(index => bindDatePicker(inputElements[index], {onCommit: () => {
+        dirty = true;
+        invalidEmpty[index] = false;
+    }}));
 
     const buildDateStr = (index: number): string => {
         const inputVal = inputElements[index].value;
@@ -142,13 +147,14 @@ export const bindDateEvent = (options: {
     };
 
     const submit = () => {
-        if (!shouldSubmitDateEdit(dirty, options.requireExplicitChange === true)) {
+        if (submitted || !shouldSubmitDateEdit(dirty, options.requireExplicitChange === true)) {
             return;
         }
         const dateStr1 = buildDateStr(0);
         const dateStr2 = buildDateStr(1);
         const content1 = getFullYearTime(dateStr1) || 0;
         const content2 = getFullYearTime(dateStr2) || 0;
+        submitted = true;
         updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
             content: content1,
             isNotEmpty: content1 !== 0,

@@ -57,6 +57,7 @@ const runCases = async (sources, css, mobile) => {
     const scopePreviews = [];
     const scopeRequests = [];
     const copied = [];
+    const datePickers = new WeakMap();
     let fieldMenu;
     let collectionTypeInput;
     let nextID = 0;
@@ -67,6 +68,8 @@ const runCases = async (sources, css, mobile) => {
             document.querySelectorAll("body > .b3-menu").forEach(popup => popup.remove());
         }}}};
     const mocks = {
+        "datePicker": {bindDatePicker: (input, options = {}) => datePickers.set(input, options),
+            isDatePickerOpen: () => false},
         "menus/menuToggle": {toggleMenu: options => {options.build(); options.show();}},
         "plugin/Menu": {Menu: class {
             items = [];
@@ -456,6 +459,7 @@ const runCases = async (sources, css, mobile) => {
     await click('[data-action="add-field"]');
     fieldMenu.items.find(item => item.label === "Completion time").click();
     await tick();
+    assert.ok(datePickers.has(get('[data-role="field-value"][type="date"]')), "fixed date assignments bind the shared picker");
     await change("[data-mode]", "currentTime");
     assert.deepEqual(latest().conditions, originalConditions);
     assert.deepEqual(latest().actions[0].fields, {finished: {mode: "currentTime", value: {type: "date"}}});
@@ -550,6 +554,7 @@ const runCases = async (sources, css, mobile) => {
     await tick();
     assertFieldSpacing();
     await change("[data-template-item]", "sample");
+    assert.ok(datePickers.has(get("[data-template-time]")), "preview trigger time binds the shared picker");
     await change("[data-template-time]", "2026-10-16T15:30");
     const writesBeforePreview = transactions.length;
     await click("[data-template-run]");
@@ -565,6 +570,7 @@ const runCases = async (sources, css, mobile) => {
     assert.ok(get('[data-template-input="finished"]'));
     assert.equal(get("[data-template-result]").textContent, "", "editing inputs invalidates old previews");
     const previewDate = get('[data-template-input="finished"]');
+    assert.ok(datePickers.has(previewDate), "rendered sample dates bind the shared picker");
     previewDate.value = "2026-10-14";
     previewDate.dispatchEvent(new Event("input", {bubbles: true}));
     const writesBeforeInputPreview = transactions.length;
@@ -1035,7 +1041,7 @@ if (process.versions.electron && process.type === "browser") {
             sources["menus/aliasInput"] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/menus/aliasInput.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
             }).outputText;
-            for (const name of ["dialog/index", "dialog/confirmDialog", "dialog/mobileConfirmDialog", "dialog/mobileDialog",
+            for (const name of ["menus/overlayOwnership", "dialog/index", "dialog/confirmDialog", "dialog/mobileConfirmDialog", "dialog/mobileDialog",
                 "mobile/util/keyboardSheetState", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/mobileSheetLayout",
                 "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetOpen", "menus/sheetActions"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname,
@@ -1050,7 +1056,11 @@ if (process.versions.electron && process.type === "browser") {
             }
             for (const name of ["daylight", "midnight"]) sources[name] = fs.readFileSync(path.join(__dirname, `../appearance/themes/${name}/theme.css`), "utf8");
             for (const mobile of [false, true]) {
+                win.setContentSize(1000, 900);
                 await win.loadURL("data:text/html,<html><body></body></html>");
+                win.show();
+                win.focus();
+                assert.deepEqual(await win.webContents.executeJavaScript("[innerWidth, innerHeight]"), [1000, 900]);
                 if (!win.webContents.debugger.isAttached()) win.webContents.debugger.attach("1.3");
                 if (mobile) {
                     await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: true});

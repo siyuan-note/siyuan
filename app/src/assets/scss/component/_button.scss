@@ -214,7 +214,8 @@
     }
   }
 
-  &:disabled {
+  &:disabled,
+  &[aria-disabled="true"] {
     opacity: .38;
     cursor: not-allowed;
 

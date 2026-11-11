@@ -1,5 +1,6 @@
 import {Menu} from "../../plugin/Menu";
 import {escapeHtml} from "../../util/escape";
+import {getMenuOwnerElement} from "../../menus/overlayOwnership";
 
 let activeMenu: Menu | undefined;
 
@@ -17,7 +18,7 @@ const openSelect = (select: HTMLSelectElement) => {
         if (activeMenu === menu) {
             activeMenu = undefined;
         }
-    }, Boolean(select.closest(".b3-menu")));
+    }, Boolean(getMenuOwnerElement(select)));
     const addOption = (option: HTMLOptionElement, groupDisabled = false) => {
         if (option.hidden) {
             return;

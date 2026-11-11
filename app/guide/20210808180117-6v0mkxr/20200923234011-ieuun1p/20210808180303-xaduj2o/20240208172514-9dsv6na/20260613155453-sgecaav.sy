@@ -6,7 +6,7 @@
 		"id": "20260613155453-sgecaav",
 		"title": "Field Types",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261111023017"
 	},
 	"Children": [
 		{
@@ -2136,7 +2136,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-tvixbm7",
-				"updated": "20261024163429"
+				"updated": "20261111023017"
 			},
 			"Children": [
 				{
@@ -2160,6 +2160,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Used for storing dates or date-times, with Gregorian and Chinese lunar calendar support."
+				}
+			]
+		},
+		{
+			"ID": "20261111015242-l23mmjt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111015242-l23mmjt",
+				"updated": "20261111015242"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click a Gregorian date input to open the built-in picker, change the month or year, choose today, or clear the date. In the calendar, use arrow keys to move focus, PageUp and PageDown to change months, Shift with these keys to change years, Enter to select the focused date, and Escape to close the picker. Dates, times, and ranges are saved through the editing behavior or confirmation button of the surrounding interface. Lunar dates continue to use lunar year, month, and day options."
 				}
 			]
 		},

@@ -5,6 +5,7 @@ import {getFieldsByData} from "./view";
 import {shouldSubmitDateEdit} from "./dateSubmit";
 import {getLunarDayLabel, getLunarMonthLabel, getLunarMonths, lunarFirstYear, lunarLastYear, lunarToSolar, solarToLunar} from "./lunarCalendar";
 import {formatDateDisplay} from "./dateFormat";
+import {bindDatePicker} from "../../../datePicker";
 
 const option = (value: number, label: string, selected?: number) =>
     `<option value="${value}"${value === selected ? " selected" : ""}>${escapeHtml(label)}</option>`;
@@ -70,6 +71,7 @@ export const bindLunarDateEditor = (options: {
         return content;
     };
     endpoints.forEach((element, index) => {
+        bindDatePicker(element.querySelector<HTMLInputElement>("[data-lunar-time]"));
         element.addEventListener("change", event => {
             dirty = true;
             edited[index] = true;

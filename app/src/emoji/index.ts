@@ -1,4 +1,5 @@
 import {getDocTreeItem} from "../layout/dock/docTree/rowData";
+import {bindDatePicker} from "../datePicker";
 import {IColorPickerHandle, openInternalColorPicker} from "../colorPicker";
 import {parseColor} from "../colorPicker/model";
 import {updateNotebookBreadcrumbIcon} from "../protyle/breadcrumb/iconRefresh";
@@ -1560,6 +1561,7 @@ export const openEmojiPanel = (
         });
     });
     const dynamicDateElement = dialog.element.querySelector('[data-type="tab-dynamic"] [type="date"]') as HTMLInputElement;
+    bindDatePicker(dynamicDateElement);
     dynamicDateElement.addEventListener("change", () => {
         dialog.element.querySelectorAll(".fn__flex-wrap .emoji__dynamic-item").forEach(item => {
             const url = new URLSearchParams(item.getAttribute("src").replace(dynamicURL, ""));

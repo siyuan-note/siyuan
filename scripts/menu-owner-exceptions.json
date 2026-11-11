@@ -239,7 +239,7 @@
     "count": 1,
     "reason": "AV 菜单保持既有构造和交互"
   },
-  "app/src/protyle/render/av/fieldValueEditor.ts | bindFieldLunarDates/event:\"click\" | menu | open": {
+  "app/src/protyle/render/av/fieldValueEditor.ts | bindFieldDates/event:\"click\" | menu | open": {
     "count": 1,
     "reason": "AV 菜单保持既有构造和交互"
   },

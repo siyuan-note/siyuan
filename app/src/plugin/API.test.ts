@@ -14,6 +14,7 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     const adaptHotkey = (value: string) => value;
     const openInputDialog = (): void => undefined;
     const openAssetPicker = async (): Promise<null> => null;
+    const openDatePicker = (): void => undefined;
     const dependency = new Proxy({}, {
         get(_target, key) {
             if (key === "__esModule") return true;
@@ -24,6 +25,9 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
             if (key === "openAssetPicker") {
                 return openAssetPicker;
             }
+            if (key === "openDatePicker") {
+                return openDatePicker;
+            }
             return key === "updateHotkeyTip" ? adaptHotkey : (): void => undefined;
         },
     });
@@ -31,6 +35,7 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
         adaptHotkey: typeof adaptHotkey,
         openInputDialog: typeof openInputDialog,
         openAssetPicker: typeof openAssetPicker,
+        openDatePicker: typeof openDatePicker,
         insertContent: (options: import("./insertContent").IInsertContentOptions) =>
             import("./insertContent").IInsertContentResult
     }} = {};
@@ -40,6 +45,7 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     assert.equal(api.adaptHotkey, adaptHotkey);
     assert.equal(api.openInputDialog, openInputDialog);
     assert.equal(api.openAssetPicker, openAssetPicker);
+    assert.equal(api.openDatePicker, openDatePicker);
     assert.equal(typeof api.insertContent, "function");
     assert.equal(exports.getAPI(), api);
 });

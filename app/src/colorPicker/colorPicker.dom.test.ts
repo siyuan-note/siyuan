@@ -52,6 +52,7 @@ const browserCases = async (sources: Record<string, string>, css: string, theme:
     const dialogDeps = {genUUID: () => String(++uuid), getZIndex: () => 0, isAbove: () => false,
         isMobile: () => false, isNotCtrl: () => true, moveResize() {}, Constants: {TIMEOUT_OPENDIALOG: 0},
         destroyDialogBlockPanels() {}, getDialogBlockPanel() {}, getAnchoredInputMask() {}};
+    load("overlayOwnership");
     const {Dialog} = load("dialog", dialogDeps);
     ["model", "session", "native", "field", "runtime", "owners"].forEach(name => load(name));
     modules.panel = {registerColorPickerWindow() {}};
@@ -187,7 +188,7 @@ const browserCases = async (sources: Record<string, string>, css: string, theme:
     (targetView as any).siyuan = {dialogs: [], zIndex: 10, config: {}, languages,
         menus: {menu: {element: targetMenu, remove() {}}}};
     const targetExports: any = {};
-    new targetView.Function("exports", "require", sources.dialog)(targetExports, () => dialogDeps);
+    new targetView.Function("exports", "require", sources.dialog)(targetExports, (path: string) => path.includes("overlayOwnership") ? modules.overlayOwnership : dialogDeps);
     registerColorPickerRuntime(targetDoc, (options: unknown) => new targetExports.Dialog(options), () => languages);
     const mainSession = open(); const mainRoot = current();
     const targetSession = open({ownerElement: foreignOwner});
@@ -215,8 +216,9 @@ for (const scheme of ["daylight", "midnight"]) {
 test(`real color fields retain drafts, layout, focus and lifetimes in ${scheme}`, {
     timeout: 45000, skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
 }, async () => {
-    const sources = Object.fromEntries(["model", "session", "native", "field", "runtime", "owners", "index", "dialog", "themeColorEditor"].map(name => [name,
-        transpileModule(readFileSync(name === "dialog" ? join(__dirname, "../dialog/index.ts") : name === "themeColorEditor" ?
+    const sources = Object.fromEntries(["model", "session", "native", "field", "runtime", "owners", "index", "overlayOwnership", "dialog", "themeColorEditor"].map(name => [name,
+        transpileModule(readFileSync(name === "dialog" ? join(__dirname, "../dialog/index.ts") : name === "overlayOwnership" ?
+            join(__dirname, "../menus/overlayOwnership.ts") : name === "themeColorEditor" ?
             join(__dirname, "../dialog/themeColorEditor.ts") : join(__dirname, name + ".ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText]));

@@ -7,6 +7,7 @@ import {removeSelectedRepoTags, repoSelectionKey, RepoSource, RepoTagSelection} 
 import {canPurgeRepo} from "./repoPurge";
 import {repoDateRange, RepoTimeRange} from "./repoRange";
 import {MenuItem} from "../menus/Menu";
+import {bindDatePicker} from "../datePicker";
 
 interface RepoPanelState {
     selected: Map<string, RepoTagSelection>;
@@ -167,6 +168,8 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     const refresh = () => panes().forEach(pane => render(pane, 1));
     const startDate = root.querySelector<HTMLInputElement>('[data-range="start"]');
     const endDate = root.querySelector<HTMLInputElement>('[data-range="end"]');
+    bindDatePicker(startDate);
+    bindDatePicker(endDate);
     const dateForm = root.querySelector<HTMLFormElement>('[data-role="date-range"]');
     const updateDateLimits = () => {
         startDate.max = endDate.value || "9999-12-31";

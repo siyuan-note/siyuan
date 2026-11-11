@@ -27,6 +27,7 @@ const createExitDialog = (sources, languages, mobile) => {
     document.body.insertAdjacentHTML("beforeend", '<div id="message"><div></div></div>');
     window.showExitMessage = message.showMessage;
     const {Dialog} = load(sources.dialog, {
+        "../menus/overlayOwnership": load(sources.overlayOwnership, {}),
         "../util/genID": {genUUID: () => "exit-test"},
         "../util/zIndex": {isAbove: () => false},
         "./moveResize": {moveResize() {}},
@@ -70,7 +71,7 @@ if (process.versions.electron && process.type === "browser") {
         const watchdog = setTimeout(() => app.exit(1), 45000);
         const root = path.join(__dirname, "..");
         const ts = require("typescript");
-        const sources = Object.fromEntries(Object.entries({dialog: "dialog/index.ts", exit: "dialog/exitRequest.ts", progress: "dialog/progress.ts", message: "dialog/message.ts"})
+        const sources = Object.fromEntries(Object.entries({overlayOwnership: "menus/overlayOwnership.ts", dialog: "dialog/index.ts", exit: "dialog/exitRequest.ts", progress: "dialog/progress.ts", message: "dialog/message.ts"})
             .map(([key, file]) => [key, ts.transpileModule(fs.readFileSync(path.join(root, "src", file), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText]));

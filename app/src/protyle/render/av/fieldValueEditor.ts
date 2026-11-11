@@ -13,6 +13,7 @@ import {formatDateValue} from "./dateFormat";
 import {bindLunarDateEditor, getLunarDateHTML} from "./lunarDate";
 import {createAVLocationReplacement, getAVLocationDisplayText} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
+import {bindDatePicker} from "../../../datePicker";
 
 export const getSelectedOptionNames = (element: HTMLElement) => {
     try {
@@ -161,7 +162,10 @@ export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFiel
     return `<input class="b3-text-field b3-text-field--text fn__flex-1${hiddenClass}" data-role="field-value" type="${inputType}"${column.type === "number" ? ' step="any"' : ""}${max} value="${escapeAttr(getFieldText(value))}">`;
 };
 
-export const bindFieldLunarDates = (host: HTMLElement) => {
+export const bindFieldDates = (host: HTMLElement) => {
+    host.querySelectorAll<HTMLInputElement>('input[type="date"], input[type="datetime-local"]').forEach(input => {
+        bindDatePicker(input);
+    });
     host.querySelectorAll<HTMLElement>('[data-value-type="lunarDate"]').forEach(target => target.addEventListener("click", event => {
         event.preventDefault();
         event.stopPropagation();

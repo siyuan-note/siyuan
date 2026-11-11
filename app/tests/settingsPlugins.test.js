@@ -25,6 +25,7 @@ const runCases = async sources => {
     const events = load(sources.events, {});
     const customTabOwner = load(sources.customTabOwner, {});
     const colorPickerOwners = load(sources.colorPickerOwners, {});
+    const datePickerOwners = load(sources.datePickerOwners, {});
     const owner = {appId: "owner", plugins: [{name: "dynamic", data: {color: "owner"}}]};
     const app = settingsApps.createSettingsPluginApp("settings");
     const host = {app: owner, applyPluginReload: data => { notifications.push(data); return Promise.resolve(); },
@@ -38,6 +39,7 @@ const runCases = async sources => {
         ...events,
         ...customTabOwner,
         ...colorPickerOwners,
+        ...datePickerOwners,
         Kernel: class {init() {} destroy() {}},
         isSettingsWindow: windowContext.isSettingsWindow, getSettingsWindowHost: windowContext.getSettingsWindowHost,
         isWindow: () => true, isMobile: () => false,
@@ -222,6 +224,10 @@ if (process.versions.electron && process.type === "browser") {
                 }).outputText]));
             sources.colorPickerOwners = ts.transpileModule(fs.readFileSync(path.join(__dirname,
                 "../src/colorPicker/owners.ts"), "utf8"), {
+                compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
+            }).outputText;
+            sources.datePickerOwners = ts.transpileModule(fs.readFileSync(path.join(__dirname,
+                "../src/datePicker/owners.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText;
             sources.windowContext = ts.transpileModule(fs.readFileSync(path.join(__dirname,

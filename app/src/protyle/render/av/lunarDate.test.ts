@@ -57,6 +57,7 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
             escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
         },
         "../../../dialog/message": {showMessage: () => {}},
+        "../../../datePicker": {bindDatePicker: () => {}},
         "../menus/Menu": {Menu: MenuSurface},
     };
     modules["../../util/escape"] = modules["../../../util/escape"];
@@ -65,6 +66,10 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
         const exports = {};
         new Function("require", "exports", source)((name: string) => modules[name], exports);
         modules["./" + name] = exports;
+        if (name === "overlayOwnership") {
+            modules["../menus/overlayOwnership"] = exports;
+            modules["../../menus/overlayOwnership"] = exports;
+        }
         if (name === "pluginMenu") {
             modules["../../../plugin/Menu"] = exports;
             modules["../../plugin/Menu"] = exports;
@@ -181,7 +186,7 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
     host.innerHTML = fieldEditor.getValueInputHTML({id: "birthday", name: "Birthday", type: "date", dateFormat: "lunar"},
         {mode: "static", value: {type: "date", date: {...original, isNotTime: true, hasEndDate: false}}});
     document.body.append(host);
-    fieldEditor.bindFieldLunarDates(host);
+    fieldEditor.bindFieldDates(host);
     const trigger = host.querySelector<HTMLButtonElement>("button");
     trigger.click();
     const parent = document.querySelector<HTMLElement>('[data-menu="true"]');
@@ -226,7 +231,7 @@ test("lunar date controls preserve dates, validate selections, and fit narrow la
         transpileModule(readFileSync(path.join(__dirname, name + ".ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText]));
-    for (const [name, file] of Object.entries({pluginMenu: "src/plugin/Menu.ts",
+    for (const [name, file] of Object.entries({overlayOwnership: "src/menus/overlayOwnership.ts", pluginMenu: "src/plugin/Menu.ts",
         nativeSelect: "src/mobile/util/nativeSelect.ts", fieldValueEditor: "src/protyle/render/av/fieldValueEditor.ts"})) {
         sources[name] = transpileModule(readFileSync(file, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},

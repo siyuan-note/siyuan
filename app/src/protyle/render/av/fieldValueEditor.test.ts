@@ -18,3 +18,26 @@ test("numeric field editors accept decimal steps and preserve decimal and empty 
         assert.match(html, new RegExp(`value="${content === "" ? "" : Number(content)}"`));
     }
 });
+
+test("template and fixed automation date fields bind without changing their stored value", () => {
+    const bound: unknown[] = [];
+    const methods = loadModule<typeof import("./fieldValueEditor")>("src/protyle/render/av/fieldValueEditor.ts", {
+        require: (name: string) => name === "./capabilities" ? capabilities : ({
+            "dayjs": require("dayjs"),
+            "../../../util/escape": {escapeAttr: String},
+            "../../../datePicker": {bindDatePicker: (input: unknown) => bound.push(input)},
+        })[name] || {},
+    });
+    const values = [{value: "2026-11-11"}, {value: "2026-11-11T14:25"}];
+    methods.bindFieldDates({querySelectorAll: (selector: string) => selector.startsWith("input") ? values : []} as unknown as HTMLElement);
+    assert.deepEqual(bound, values);
+    for (const [index, fillSpecificTime] of [false, true].entries()) {
+        const column = {type: "date", date: {fillSpecificTime}} as IAVColumn;
+        const stored = methods.genFieldValue(column, values[index] as unknown as HTMLElement);
+        assert.equal(stored.date.isNotTime, !fillSpecificTime);
+        assert.equal(stored.date.content, new Date(fillSpecificTime ? "2026-11-11T14:25:00" : "2026-11-11T00:00:00").getTime());
+        const html = methods.getValueInputHTML(column, {mode: "currentTime", value: stored});
+        assert.match(html, /fn__none/);
+        assert.ok(html.includes(`type="${fillSpecificTime ? "datetime-local" : "date"}"`));
+    }
+});

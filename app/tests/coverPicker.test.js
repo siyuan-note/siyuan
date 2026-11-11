@@ -242,7 +242,7 @@ const runElectron = async () => {
         for (const mobile of [false, true]) {
             const sources = {};
             for (const name of ["protyle/header/Background", "protyle/header/coverData", "protyle/header/coverPicker",
-                "dialog/index", "config/tabs/lockScreenWallpaper", "util/contractFormData", "util/escape"]) {
+                "menus/overlayOwnership", "dialog/index", "config/tabs/lockScreenWallpaper", "util/contractFormData", "util/escape"]) {
                 const source = preprocess(fs.readFileSync(path.join(root, "src", name + ".ts"), "utf8"),
                     {MOBILE: mobile, BROWSER: false}, false, true);
                 sources[name] = ts.transpileModule(source, {

@@ -43,7 +43,7 @@ const runCases = async (sources, mobile) => {
         "../../../util/escape": {escapeHtml: String, escapeAttr: String},
         "./blockIcon": {getAVBlockIconHTML: () => ""},
         "./view": {getFieldsByData: () => []},
-        "./fieldValueEditor": {bindFieldLunarDates() {}},
+        "./fieldValueEditor": {bindFieldDates() {}},
         "../../../constants": {Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view"}},
         "../../../util/fetch": {fetchSyncPost: (url, data) => {
             assert.equal(url, "/api/av/createAttributeViewItem");

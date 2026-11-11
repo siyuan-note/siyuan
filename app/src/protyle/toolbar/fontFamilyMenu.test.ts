@@ -283,7 +283,7 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
 
 test("font menus show loading for list requests and previews while retaining mobile and desktop interactions", {timeout: 45000}, async () => {
     const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
-        "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "menus/menuToggle", "plugin/Menu", "util/setPosition", "protyle/util/hasClosest", "protyle/toolbar/fontFamilyMenu",
+        "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "menus/menuToggle", "plugin/Menu", "menus/overlayOwnership", "util/setPosition", "protyle/util/hasClosest", "protyle/toolbar/fontFamilyMenu",
         "protyle/toolbar/fontFamilyCore", "util/systemFontCore", "util/fontPreview", "util/escape", "util/upDownHint"];
     const sources = Object.fromEntries(names.map(name => [name, transpileModule(readFileSync(path.join(__dirname, "../..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},

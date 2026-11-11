@@ -11,6 +11,9 @@ test("dialog fixtures load the real anchored input dependency graph", () => {
     assert.equal(api.getAnchoredInputMask(), undefined);
     assert.equal(api.closeAnchoredInput(false), undefined);
     assert.equal(typeof api.openAnchoredInput, "function");
+    const overlays = new Function("return " + compileAnchoredInputRuntime("../menus/overlayOwnership"))();
+    assert.equal(typeof overlays.isMenuOverlayTarget, "function");
+    assert.equal(typeof overlays.registerMenuOverlay, "function");
     assert.throws(() => new Function("return " + source.replace('"./anchoredInputPosition":', '"./missingPosition":'))(),
         /Unexpected anchored input fixture module/);
 });
@@ -30,6 +33,7 @@ test("dialog fixture wrapper preserves strict external dependency resolution", (
     }, exports);
     assert.equal(typeof exports.Dialog, "function");
     assert.equal(imports.includes("./anchoredInput"), false);
+    assert.equal(imports.includes("../menus/overlayOwnership"), false);
     assert.equal(imports.length, allowed.size);
     assert.throws(() => new Function("require", "exports", withAnchoredInputRuntime('require("./unexpected")'))(
         name => { throw new Error("Unmocked dependency: " + name); }, {}), /Unmocked dependency: \.\/unexpected/);

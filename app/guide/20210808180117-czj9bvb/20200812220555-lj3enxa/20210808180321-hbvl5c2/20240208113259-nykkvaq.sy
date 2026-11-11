@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261110134234"
+		"updated": "20261111211629"
 	},
 	"Children": [
 		{
@@ -373,7 +373,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-8jwf2oj",
-				"updated": "20261110134234"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1201,7 +1201,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613162748-v93usth",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1230,7 +1230,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613162748-zeeswbq",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1303,7 +1303,7 @@
 					},
 					"Properties": {
 						"id": "20260613162748-cfi3bs0",
-						"updated": "20261025011511"
+						"updated": "20261111211629"
 					},
 					"Children": [
 						{
@@ -1311,7 +1311,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613162748-7cpchiq",
-								"updated": "20261025011511"
+								"updated": "20261111211629"
 							},
 							"Children": [
 								{
@@ -1344,6 +1344,28 @@
 								{
 									"Type": "NodeText",
 									"Data": "，可在字段值旁显示字段名称；该选项按视图保存，关闭后隐藏字段名称"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。在视图设置的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "字段"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中隐藏主键，可以保留封面预览并避免重复显示文字。使用卡片上的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "打开"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 按钮可打开条目"
 								}
 							]
 						}

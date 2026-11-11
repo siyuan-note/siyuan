@@ -5,7 +5,7 @@ import {insertAVTableColumn} from "./columnPresentation";
 import {getTablePinIndex} from "./groupTableVirtual";
 import {bindTemplateHTTPPermission, templateHTTPPermissionHTML} from "../../../template/httpPermission";
 import {hasAVCapability, isAVReadonlyType, isAVSelectType, isAVTimestampType} from "./capabilities";
-import {isTableLikeView} from "./viewType";
+import {isAVCardView, isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
 import {MenuItem} from "../../../menus/Menu";
@@ -253,7 +253,7 @@ export const getEditHTML = (options: {
     <span class="fn__space fn__flex-1"></span>
     <input type="checkbox" data-type="wrap" class="b3-switch b3-switch--menu"${colData.wrap ? " checked" : ""}>
 </label>`;
-    if (colData.type !== "block" || options.data.viewType === "gallery") {
+    if (colData.type !== "block" || isAVCardView(options.data.viewType)) {
         html += options.isCustomAttr ? "" : `<button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
     <svg class="b3-menu__icon"><use xlink:href="#${colData.hidden ? "iconEye" : "iconEyeoff"}"></use></svg>
     <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hide}</span>

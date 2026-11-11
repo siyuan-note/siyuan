@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261110134234"
+		"updated": "20261111211629"
 	},
 	"Children": [
 		{
@@ -373,7 +373,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-ua2g4rk",
-				"updated": "20261110134234"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1201,7 +1201,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613164228-rrw0f53",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1230,7 +1230,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613164228-hqf3wj5",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1303,7 +1303,7 @@
 					},
 					"Properties": {
 						"id": "20260613164228-yv431bq",
-						"updated": "20261025011511"
+						"updated": "20261111211629"
 					},
 					"Children": [
 						{
@@ -1311,7 +1311,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613164228-cosafjo",
-								"updated": "20261025011511"
+								"updated": "20261111211629"
 							},
 							"Children": [
 								{
@@ -1344,6 +1344,28 @@
 								{
 									"Type": "NodeText",
 									"Data": "，可在欄位值旁顯示欄位名稱；此選項依視圖儲存，關閉後隱藏欄位名稱"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。在視圖設定的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "欄位"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中隱藏主鍵，可以保留封面預覽並避免重複顯示文字。使用卡片上的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "打開"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 按鈕可打開條目"
 								}
 							]
 						}

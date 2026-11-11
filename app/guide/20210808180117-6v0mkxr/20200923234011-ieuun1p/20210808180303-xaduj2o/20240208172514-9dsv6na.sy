@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261110134234"
+		"updated": "20261111211629"
 	},
 	"Children": [
 		{
@@ -373,7 +373,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-v4cp9kf",
-				"updated": "20261110134234"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1201,7 +1201,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613162855-cdeorum",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1230,7 +1230,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613162855-y67hk0x",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1303,7 +1303,7 @@
 					},
 					"Properties": {
 						"id": "20260613162855-i1ifv63",
-						"updated": "20261025011511"
+						"updated": "20261111211629"
 					},
 					"Children": [
 						{
@@ -1311,7 +1311,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613162855-q8b0pyo",
-								"updated": "20261025011511"
+								"updated": "20261111211629"
 							},
 							"Children": [
 								{
@@ -1344,6 +1344,28 @@
 								{
 									"Type": "NodeText",
 									"Data": " to show field names beside their values. This option is saved per view; turn it off to hide the names"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". In the view settings, open "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Fields"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and hide the primary key to keep the preview without repeating its text. Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Open"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " on the card to open the entry"
 								}
 							]
 						}

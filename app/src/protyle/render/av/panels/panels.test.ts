@@ -5,6 +5,7 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {isAVCardView} from "../viewType";
 import type {IAVPanelContext, IAVPanelDescriptor, IOpenAVPanelOptions, TAVPanelType} from "./types";
 
 const createPanels = (overrides: Record<string, unknown> = {}) => {
@@ -18,6 +19,7 @@ const createPanels = (overrides: Record<string, unknown> = {}) => {
         unicode2Emoji: (icon: string) => `emoji-${icon}`,
         escapeHtml: escape,
         getFieldsByData: (data: {fields: IAVColumn[]}) => data.fields,
+        isAVCardView,
         Constants: {TIMEOUT_TRANSITION: 0},
         ...overrides,
     }, {get: (target, key) => key in target ? Reflect.get(target, key) : (...args: unknown[]) => {

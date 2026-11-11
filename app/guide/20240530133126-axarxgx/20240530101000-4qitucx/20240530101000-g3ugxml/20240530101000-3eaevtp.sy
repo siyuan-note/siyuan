@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20261110134234"
+		"updated": "20261111211629"
 	},
 	"Children": [
 		{
@@ -374,7 +374,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-y2nsz1y",
-				"updated": "20261110134234"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1198,7 +1198,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613164213-x497lrs",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1227,7 +1227,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613164213-kvig09h",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1300,7 +1300,7 @@
 					},
 					"Properties": {
 						"id": "20260613164213-9h3zw60",
-						"updated": "20261025011511"
+						"updated": "20261111211629"
 					},
 					"Children": [
 						{
@@ -1308,7 +1308,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613164213-nkkuyiq",
-								"updated": "20261025011511"
+								"updated": "20261111211629"
 							},
 							"Children": [
 								{
@@ -1341,6 +1341,28 @@
 								{
 									"Type": "NodeText",
 									"Data": " を有効にすると、値の横にフィールド名を表示します。この設定はビューごとに保存され、無効にするとフィールド名を非表示にできます"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。ビュー設定の "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "属性"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で主キーを非表示にすると、同じテキストを繰り返さずにプレビューを表示できます。カードの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "開く"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " ボタンでエントリを開けます"
 								}
 							]
 						}

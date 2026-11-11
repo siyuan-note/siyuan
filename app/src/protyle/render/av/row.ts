@@ -44,7 +44,8 @@ import {getAVFilteredTipContext} from "./filteredTip";
 import {clearAVItemSelectionState} from "./selectionState";
 import {renderAVRichTextElements} from "./richText";
 
-const getGalleryActionsHTML = (data: IAVGallery | IAVKanban, row: IAVGalleryItem, primaryHidden = false) => {
+const getGalleryActionsHTML = (data: IAVGallery | IAVKanban, row: IAVGalleryItem) => {
+    const primaryHidden = data.fields.find(field => field.type === "block")?.hidden === true;
     const canPosition = Boolean(row.coverURL && !row.coverURL.startsWith("background") && getCardCoverSource(data));
     const positionHTML = canPosition ? `<span class="protyle-icon protyle-icon--first ariaLabel${data.fitImage ? " fn__none" : ""}" data-position="4north" aria-label="${window.siyuan.languages.dragPosition}" data-type="av-cover-position"><svg><use xlink:href="#iconMove"></use></svg></span>` : "";
     const editFirst = !canPosition || data.fitImage;
@@ -70,7 +71,6 @@ export const getRowHTML = (options: {
     if (options.type === "gallery") {
         const galleryRow = options.row as IAVGalleryItem;
         const galleryData = options.data as IAVGallery;
-        const primaryHidden = galleryData.fields.find(field => field.type === "block")?.hidden === true;
         const hasVisibleFields = galleryData.fields.some(field => !field.hidden);
         const emptyClass = !hasVisibleFields && galleryData.coverFrom === 0 ? " av__gallery-item--empty" : "";
         html += `<div data-id="${escapeAttr(galleryRow.id)}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${emptyClass}" style="${getConditionalItemStyle(galleryRow)}">`;
@@ -137,24 +137,27 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
             }
         });
         html += `</div>
-    ${getGalleryActionsHTML(galleryData, galleryRow, primaryHidden)}
+    ${getGalleryActionsHTML(galleryData, galleryRow)}
 </div>`;
         return html;
     }
     if (options.type === "kanban") {
         const kanbanRow = options.row as IAVGalleryItem;
         const kanbanData = options.data as IAVKanban;
-        html += `<div data-id="${escapeAttr(kanbanRow.id)}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item" style="${getConditionalItemStyle(kanbanRow)}">`;
-        if (kanbanData.coverFrom !== 0) {
+        const hasVisibleFields = kanbanData.fields.some(field => !field.hidden);
+        const hasCover = kanbanData.coverFrom !== 0 && Boolean(kanbanRow.coverURL || kanbanRow.coverContent.trim());
+        const emptyClass = !hasVisibleFields && !hasCover ? " av__gallery-item--empty" : "";
+        html += `<div data-id="${escapeAttr(kanbanRow.id)}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item${emptyClass}" style="${getConditionalItemStyle(kanbanRow)}">`;
+        if (hasCover) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
             if (kanbanRow.coverURL) {
                 html += getCardCoverHTML(coverClass, kanbanRow.coverURL, getCompressURL(kanbanRow.coverURL),
                     kanbanData.fitImage, getCardCoverSource(kanbanData), kanbanRow.coverPosition);
-            } else if (kanbanRow.coverContent.trim()) {
+            } else {
                 html += `<div class="${coverClass}"><div class="av__gallery-content" inert>${kanbanRow.coverContent}</div><div></div></div>`;
             }
         }
-        html += `<div class="${getCardFieldsClass(kanbanData.cardLayout)}">`;
+        html += `<div class="${getCardFieldsClass(kanbanData.cardLayout, hasVisibleFields)}">`;
         kanbanRow.values.forEach((cell, fieldsIndex) => {
             if (kanbanData.fields[fieldsIndex].hidden) {
                 return;

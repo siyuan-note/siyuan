@@ -6,6 +6,7 @@ import {compile} from "sass";
 import {browserSources, canRunBrowser, runBrowserCase} from "./test/browser";
 
 const browserCases = async (sources: Record<string, string>, css: string) => {
+    document.documentElement.lang = "en";
     const equal = (actual: unknown, expected: unknown, message = "") => {
         if (actual !== expected) { throw new Error(`${message}: ${String(actual)} !== ${String(expected)}`); }
     };

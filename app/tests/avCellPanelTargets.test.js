@@ -68,6 +68,13 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
     const dateBindings = [];
     const datePositionBindings = [];
     const getInlineDateType = input => input.dataset.datePickerType || input.type;
+    const getInlineDateValue = input => getInlineDateType(input) === "datetime-local" ? input.value.replace(" ", "T") : input.value;
+    const setInlineDateValue = (input, value) => {
+        const type = getInlineDateType(input);
+        const normalized = type === "datetime-local" ? value.replace(" ", "T") : value;
+        input.value = type === "datetime-local" && load("../../../datePicker/model").validateDateValue(normalized, {type, step: "any"}) === "valid" ?
+            normalized.replace("T", " ") : value;
+    };
     const validateInlineDateInput = input => {
         const type = getInlineDateType(input);
         const value = type === "datetime-local" ? input.value.replace(" ", "T") : input.value;
@@ -176,7 +183,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
             fullscreen() {}
         },
         getSelectHTML: () => "", setSelectMenuPosition() {},
-        getInlineDateType, validateInlineDateInput,
+        getInlineDateType, getInlineDateValue, setInlineDateValue, validateInlineDateInput,
         // 几何/ResizeObserver 在 datePosition.dom.test.ts 验证；这里保留宿主绑定与释放契约。
         bindDatePanelPosition: (menuElement, getAnchor) => {
             assert.ok(menuElement);

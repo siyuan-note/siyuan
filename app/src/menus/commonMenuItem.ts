@@ -1,5 +1,5 @@
 import {toggleMenu} from "./menuToggle";
-import {bindInlineDatePicker} from "../datePicker/inline";
+import {bindInlineDatePicker, getInlineDateValue} from "../datePicker/inline";
 import type {BlockQueryRequestInput} from "../types/api";
 import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {isMobile, isValidCustomAttrName} from "../util/functions";
@@ -126,7 +126,7 @@ export const openWechatNotify = (nodeElement: Element) => {
     });
     btnsElement[2].addEventListener("click", () => {
         if (!datePicker.validate()) { return; }
-        const date = dateInput.value;
+        const date = getInlineDateValue(dateInput);
         if (date) {
             if (new Date(date) <= new Date()) {
                 showMessage(window.siyuan.languages.reminderTip);
@@ -210,7 +210,7 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
         });
         btnsElement[2].addEventListener("click", () => {
             if (!datePicker.validate()) { return; }
-            const date = dateInput.value;
+            const date = getInlineDateValue(dateInput);
             if (date) {
                 if (new Date(date) <= new Date()) {
                     showMessage(window.siyuan.languages.reminderTip);

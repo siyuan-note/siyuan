@@ -2162,7 +2162,8 @@
       max-width: 290px;
 
       &.av__date-panel:not(.b3-menu--fullscreen) {
-        min-width: min(290px, 100vw);
+        width: 260px;
+        min-width: 0;
         max-width: 100vw;
         display: flex;
         flex-direction: column;

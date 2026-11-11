@@ -137,7 +137,7 @@ test("inline dates share a calendar, validate drafts, isolate keys and preserve 
         const timeHandle = modules.inline.bindInlineDatePicker(timeHost, time, {languages});
         equal(timeHandle.validate(), true, "Allowed fractional seconds are valid");
         timeHandle.destroy();
-        equal(time.value, "2026-03-01T12:34:56.123", "Destroy preserves seconds and milliseconds");
+        equal(time.value, "2026-03-01 12:34:56.123", "Destroy preserves visible seconds and milliseconds");
         time.type = "time";
         time.value = "12:34:56.123";
         const clock = modules.inline.bindInlineDatePicker(timeHost, time, {languages});

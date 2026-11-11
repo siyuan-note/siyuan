@@ -14,7 +14,7 @@ const cases = async (sources, appPath, languages) => {
         new Function("require", "exports", sources[name])(id => load(id.replace("./", "")), exports);
         return exports;
     };
-    const {bindInlineDatePicker} = load("inline");
+    const {bindInlineDatePicker, getInlineDateValue} = load("inline");
     const dialogs = [];
     const writes = [];
     let mobile = false;
@@ -32,7 +32,7 @@ const cases = async (sources, appPath, languages) => {
         async runPending(action) { if (await action()) this.destroy(); }
     }
     const dependencies = {
-        bindInlineDatePicker, dayjs, MobileDialog,
+        bindInlineDatePicker, getInlineDateValue, dayjs, MobileDialog,
         Constants: {CUSTOM_REMINDER_WECHAT: "reminder", DIALOG_WECHATREMINDER: "wechat"},
         isMobile: () => mobile, getEditorRange: () => ({}), focusByRange() {},
         isEncryptedBox: () => false, showMessage() {},
@@ -58,14 +58,14 @@ const cases = async (sources, appPath, languages) => {
             let buttons = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
             check.equal(input.type, "text", "the reminder does not invoke a native mobile picker");
             check.equal(calendar.children.length, 0, "the reminder calendar stays collapsed until date focus");
-            check.equal(input.placeholder, "YYYY-MM-DDTHH:mm[:ss[.SSS]]");
+            check.equal(input.placeholder, "YYYY-MM-DD HH:mm");
             input.focus();
             check.equal(calendar.querySelectorAll(".date-picker").length, 1);
             check.equal(buttons.length, 3, "calendar buttons are not host save/cancel controls");
             input.value = "2099-12-01T12:34";
             input.dispatchEvent(new Event("change", {bubbles: true}));
             calendar.querySelector('[data-date="2099-12-15"]').click();
-            check.equal(input.value, "2099-12-15T12:34");
+            check.equal(input.value, "2099-12-15 12:34");
             check.equal(writes.length, 0, "choosing a day sends no reminder");
             check.equal(document.querySelectorAll(".b3-dialog").length, 1);
             input.value = "2099-02-30T12:34";

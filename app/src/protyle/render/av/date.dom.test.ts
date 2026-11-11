@@ -73,7 +73,7 @@ test("date panels embed a shared calendar without changing range, batch, clear o
         inputs[3].click();
         equal(inputs[0].dataset.datePickerType, "datetime-local", "Include-time updates semantic type");
         equal(inputs[0].type, "text", "Include-time never restores a system picker");
-        equal(inputs[0].value, "2026-02-10T12:30", "Time toggle restores cached time");
+        equal(inputs[0].value, "2026-02-10 12:30", "Time toggle restores cached time");
         inputs[3].click();
         equal(inputs[0].value, "2026-02-10", "All-day toggle restores date only");
         inputs[2].click();
@@ -129,7 +129,7 @@ test("date panels embed a shared calendar without changing range, batch, clear o
         inputs[0].value = "2026-02-14";
         inputs[0].dispatchEvent(new Event("input", {bubbles: true}));
         inputs[3].click();
-        equal(inputs[0].value, "2026-02-14T00:00", "Time toggle retains a valid draft before its change or blur event");
+        equal(inputs[0].value, "2026-02-14 00:00", "Time toggle retains a valid draft before its change or blur event");
         inputs[3].click();
         equal(inputs[0].value, "2026-02-14", "A valid input-only draft survives a time round trip");
         close();

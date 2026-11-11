@@ -48,7 +48,7 @@ const setup = (mobile: boolean) => {
         require: (name: string) => ({
             "dayjs": dayjs,
             "../dialog/mobileDialog": {MobileDialog: ReminderDialog},
-            "../datePicker/inline": {bindInlineDatePicker: (_host: unknown, input: Control) => {
+            "../datePicker/inline": {getInlineDateValue: (input: Control) => input.value.replace(" ", "T"), bindInlineDatePicker: (_host: unknown, input: Control) => {
                 bound.push(input);
                 const dialog = dialogs.at(-1);
                 return {validate: () => dialog.dateValid, destroy: () => { dialog.dateDestroyed = true; }};

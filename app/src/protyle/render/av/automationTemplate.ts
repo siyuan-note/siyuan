@@ -7,7 +7,7 @@ import {getAVLocationDisplayText} from "./locationValue";
 import {automationTemplateFunctions} from "./automationTemplateFunctions";
 import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
-import {bindInlineDatePicker} from "../../../datePicker/inline";
+import {bindInlineDatePicker, getInlineDateType, getInlineDateValue} from "../../../datePicker/inline";
 
 export const automationTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
@@ -162,13 +162,13 @@ export const mountAutomationTemplate = (options: {
             return;
         }
         inputs.querySelectorAll<HTMLInputElement>('[data-template-input][data-modified="true"]').forEach(input => {
-            overrides[input.dataset.templateInput] = input.value;
+            overrides[input.dataset.templateInput] = getInlineDateType(input) === "datetime-local" ? getInlineDateValue(input) : input.value;
         });
         button.disabled = true;
         try {
             const response = await fetchSyncPost("/api/av/previewAttributeViewTemplate", {
                 avID: source.id, targetAvID: targetID, itemID: item.value, keyID: field.id,
-                template: editor.value, timeZone, triggerTime: triggerTime.value, inputs: overrides,
+                template: editor.value, timeZone, triggerTime: getInlineDateValue(triggerTime), inputs: overrides,
             });
             if (!host.isConnected || version !== requestVersion) {
                 return;

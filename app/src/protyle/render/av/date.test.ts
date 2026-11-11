@@ -38,6 +38,8 @@ const mountDate = (requireExplicitChange = false) => {
             "./cell": {updateCellsValue: (_protyle: unknown, _block: unknown, value: IAVCellDateValue) => updates.push(value)},
             "./view": {getFieldsByData: (): IAVColumn[] => []},
             "../../../datePicker/inline": {validateInlineDateInput: () => valid,
+                getInlineDateValue: (input: typeof inputs[number]) => input.value.replace(" ", "T"),
+                setInlineDateValue: (input: typeof inputs[number], value: string) => { input.value = value.replace("T", " "); },
                 getInlineDateType: (input: typeof inputs[number]) => (input.dataset as Record<string, string>).datePickerType || input.type, bindInlineDatePicker: (_host: unknown, bound: typeof inputs,
                 options: {onChange: (input: typeof inputs[number], state: {valid: boolean; kind: string}) => void}) => {
                 bound.forEach(input => {
@@ -139,14 +141,14 @@ test("time and end switches preserve their cached values through repeated toggle
     editor.inputs[3].checked = true;
     editor.inputs[3].fire("change");
     assert.equal((editor.inputs[0].dataset as Record<string, string>).datePickerType, "datetime-local");
-    assert.equal(editor.inputs[0].value, "2026-02-28T14:25");
+    assert.equal(editor.inputs[0].value, "2026-02-28 14:25");
     editor.inputs[3].checked = false;
     editor.inputs[3].fire("change");
     assert.equal((editor.inputs[0].dataset as Record<string, string>).datePickerType, "date");
     assert.equal(editor.inputs[0].value, "2026-02-28");
     editor.inputs[3].checked = true;
     editor.inputs[3].fire("change");
-    assert.equal(editor.inputs[0].value, "2026-02-28T14:25");
+    assert.equal(editor.inputs[0].value, "2026-02-28 14:25");
     editor.inputs[1].value = "2026-03-01 15:45";
     editor.inputs[1].fire("change");
     editor.inputs[2].checked = false;

@@ -5,8 +5,9 @@ import test from "node:test";
 import {compile} from "sass";
 import {browserSources, canRunBrowser, runBrowserCase} from "../../../datePicker/test/browser";
 
+for (const theme of ["daylight", "midnight"]) {
 for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [320, 400, false], [320, 400, true]] as const) {
-    test(`date panel expansion and cleanup at ${width}x${height}, mobile=${mobile}`, {
+    test(`date panel expansion and cleanup at ${width}x${height}, mobile=${mobile}, theme=${theme}`, {
         timeout: 45000, skip: !canRunBrowser,
     }, async () => {
         const sources = browserSources(Object.fromEntries([
@@ -19,8 +20,9 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
         sources.dayjs = readFileSync(require.resolve("dayjs"), "utf8");
         sources.languages = readFileSync("appearance/langs/zh-CN.json", "utf8");
         sources.mobile = String(mobile);
+        sources.icons = readFileSync("appearance/icons/litheness/icon.js", "utf8");
         sources.lunarData = readFileSync("../kernel/av/lunar_calendar_data.json", "utf8");
-        const css = readFileSync("appearance/themes/daylight/theme.css", "utf8") +
+        const css = readFileSync(`appearance/themes/${theme}/theme.css`, "utf8") +
             compile("src/assets/scss/base.scss", {logger: {warn() {}}}).css;
         const result = await runBrowserCase(async (source, stylesheet) => {
             const ok = (value: boolean, message: string) => { if (!value) { throw Error(message); } };
@@ -31,6 +33,7 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
             if (innerWidth === 400) { document.documentElement.style.setProperty("--b3-font-size", "24px"); }
             document.documentElement.dataset.frontend = mobile ? "browser-mobile" : "desktop-window";
             Object.assign(window, {siyuan: {languages: JSON.parse(source.languages)}});
+            new Function(source.icons)();
             const observers = new Set<ResizeObserver>();
             const NativeObserver = ResizeObserver;
             window.ResizeObserver = class extends NativeObserver {
@@ -76,6 +79,18 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
                 items.scrollTop = 0;
             };
             check("initial");
+            if (!mobile) { ok(Math.abs(menu.getBoundingClientRect().width - 260) <= 1, "compact desktop width is explicit"); }
+            const calendar = menu.querySelector(".date-picker__calendar").getBoundingClientRect();
+            ok(calendar.width <= (mobile ? 320 : 244), "inline calendar width is bounded");
+            for (const button of menu.querySelectorAll<HTMLElement>(".date-picker__calendar button")) {
+                ok(button.getBoundingClientRect().height >= (mobile ? 44 : 28), "day touch target");
+            }
+            for (const button of menu.querySelectorAll<HTMLElement>(".date-picker__navigation .block__icon")) {
+                const rect = button.getBoundingClientRect();
+                ok(rect.width >= (mobile ? 44 : 24) && rect.height >= (mobile ? 44 : 24), "navigation target");
+                const svg = button.querySelector("svg").getBoundingClientRect();
+                ok(svg.width > 0 && svg.height > 0, "real navigation icon remains visible");
+            }
             for (let cycle = 0; cycle < 2; cycle++) {
                 inputs[2].click(); await tick(); check("range");
                 inputs[3].click(); await tick(); check("time");
@@ -145,4 +160,5 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
         }});
         assert.match(result, /date positioning passed/);
     });
+}
 }

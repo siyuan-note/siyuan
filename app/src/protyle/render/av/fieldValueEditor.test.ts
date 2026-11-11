@@ -25,13 +25,13 @@ test("template and fixed automation date fields bind inline without changing the
         require: (name: string) => name === "./capabilities" ? capabilities : ({
             "dayjs": require("dayjs"),
             "../../../util/escape": {escapeAttr: String},
-            "../../../datePicker/inline": {bindInlineDatePicker: (_host: unknown, input: unknown) => {
+            "../../../datePicker/inline": {getInlineDateValue: (input: {value: string}) => input.value.replace(" ", "T"), bindInlineDatePicker: (_host: unknown, input: unknown) => {
                 bound.push(input);
                 return {validate: () => true, update() {}, destroy() {}};
             }},
         })[name] || {},
     });
-    const values = ["2026-11-11", "2026-11-11T14:25"].map(value => ({
+    const values = ["2026-11-11", "2026-11-11 14:25"].map(value => ({
         value, closest: () => ({querySelector: () => ({})}),
     }));
     methods.bindFieldDates({querySelectorAll: (selector: string) => selector.startsWith("input") ? values : []} as unknown as HTMLElement);

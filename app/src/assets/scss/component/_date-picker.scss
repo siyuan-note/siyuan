@@ -6,8 +6,32 @@
 
   &--inline {
     width: 100%;
-    max-width: 320px;
-    margin-block: 8px;
+    max-width: 244px;
+    margin-block: 4px;
+    gap: 4px;
+
+    .date-picker__navigation .block__icon {
+      min-width: 24px;
+      min-height: 24px;
+    }
+
+    .date-picker__calendar {
+      font-size: inherit;
+
+      button {
+        min-height: 28px;
+      }
+    }
+
+    [data-frontend="mobile"] &,
+    [data-frontend="browser-mobile"] & {
+      max-width: 320px;
+
+      .date-picker__navigation .block__icon {
+        min-width: 44px;
+        min-height: 44px;
+      }
+    }
   }
 
   &__fields {

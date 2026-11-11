@@ -23,6 +23,7 @@ test("date picker shares overlay ownership with independently loaded target-wind
         const iframe = document.createElement("iframe"); document.body.append(iframe);
         const view = iframe.contentWindow as Window & typeof globalThis;
         const doc = view.document;
+        doc.documentElement.lang = "en";
         let closed = 0; let uuid = 0;
         const languages = {date: "Date", datePickerTime: "Time", month: "Month", year: "Year", previous: "Previous", next: "Next",
             calendarToday: "Today", clear: "Clear", confirm: "Confirm", cancel: "Cancel", invalid: "Invalid"};

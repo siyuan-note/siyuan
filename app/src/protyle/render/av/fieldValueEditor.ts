@@ -13,7 +13,7 @@ import {formatDateValue} from "./dateFormat";
 import {bindLunarDateEditor, getLunarDateHTML} from "./lunarDate";
 import {createAVLocationReplacement, getAVLocationDisplayText} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
-import {bindInlineDatePicker} from "../../../datePicker/inline";
+import {bindInlineDatePicker, getInlineDateValue} from "../../../datePicker/inline";
 
 export const getSelectedOptionNames = (element: HTMLElement) => {
     try {
@@ -73,7 +73,8 @@ const getFieldText = (value: IAVCellValue) => {
 };
 
 export const genFieldValue = (column: IAVColumn, input: HTMLElement, previousValue?: IAVCellValue): IAVCellValue => {
-    const inputContent = (input as HTMLInputElement).value || "";
+    const inputContent = (column.type === "date" && column.dateFormat !== "lunar" ?
+        getInlineDateValue(input as HTMLInputElement) : (input as HTMLInputElement).value) || "";
     const content = inputContent.trim();
     switch (column.type) {
         case "block":

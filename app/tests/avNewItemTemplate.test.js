@@ -97,7 +97,7 @@ const runCases = async (sources, mobile) => {
     assert.equal(dateHost.querySelector(".date-picker__calendar"), null, "template dates stay collapsed until focused");
     dateInput.focus();
     assert.ok(dateHost.querySelector(".date-picker__calendar"), "focusing a template date expands its calendar in the existing editor");
-    assert.equal(dateInput.value, "2024-02-28T13:45");
+    assert.equal(dateInput.value, "2024-02-28 13:45");
     for (let index = 0; index < 2; index++) {
         mode.focus();
         mode.value = "currentTime"; mode.dispatchEvent(new Event("change"));

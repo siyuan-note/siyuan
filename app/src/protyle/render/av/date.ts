@@ -3,7 +3,7 @@ import {genCellValueByElement, updateCellsValue} from "./cell";
 import {getFieldsByData} from "./view";
 import {shouldSubmitDateEdit} from "./dateSubmit";
 import {bindLunarDateEvent, getLunarDateHTML} from "./lunarDate";
-import {bindInlineDatePicker, getInlineDateType, validateInlineDateInput} from "../../../datePicker/inline";
+import {bindInlineDatePicker, getInlineDateType, getInlineDateValue, setInlineDateValue, validateInlineDateInput} from "../../../datePicker/inline";
 
 export const getDateHTML = (cellElements: HTMLElement[], format?: TAVDateFormat) => {
     const cellValue = genCellValueByElement("date", cellElements[0]).date;
@@ -86,7 +86,7 @@ export const bindDateEvent = (options: {
         [inputElements[0], inputElements[1]].every(input => validateInlineDateInput(input));
 
     const buildDateStr = (index: number): string => {
-        const inputVal = inputElements[index].value;
+        const inputVal = getInlineDateValue(inputElements[index]);
         if (inputVal) {
             return inputVal.length > 10 ? inputVal : inputVal + " 00:00";
         }
@@ -167,8 +167,8 @@ export const bindDateEvent = (options: {
             inputElements[1].dataset.datePickerType = "datetime-local";
             inputElements[0].setAttribute("max", "9999-12-31 23:59");
             inputElements[1].setAttribute("max", "9999-12-31 23:59");
-            inputElements[0].value = inputElements[0].dataset.value.replace(" ", "T");
-            inputElements[1].value = inputElements[1].dataset.value.replace(" ", "T");
+            setInlineDateValue(inputElements[0], inputElements[0].dataset.value);
+            setInlineDateValue(inputElements[1], inputElements[1].dataset.value);
         } else {
             inputElements[0].dataset.datePickerType = "date";
             inputElements[1].dataset.datePickerType = "date";

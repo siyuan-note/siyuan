@@ -2,7 +2,7 @@
 @use "../util/function";
 
 .file-tree__row {
-  --file-tree-indent: 24px;
+  --file-tree-indent: 16px;
   --file-tree-toggle-size: 22px;
   --file-tree-toggle-padding: 4px;
   --file-tree-toggle-left: calc(var(--file-tree-depth) * var(--file-tree-indent) + var(--file-tree-toggle-padding));

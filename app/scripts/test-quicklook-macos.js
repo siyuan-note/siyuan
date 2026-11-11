@@ -23,6 +23,12 @@ const run = async () => {
             path.join(__dirname, "../quicklook/FontPublisher.swift"),
             path.join(__dirname, "../quicklook/PreviewFontsTests.swift"), "-o", fontsExecutable], {stdio: "inherit"});
         execFileSync(fontsExecutable, [], {stdio: "inherit"});
+        const rendererExecutable = path.join(temporary, "PreviewRendererTests");
+        const source = path.join(__dirname, "../quicklook");
+        execFileSync("xcrun", ["swiftc", "-parse-as-library", "-framework", "ImageIO", "-framework", "JavaScriptCore",
+            ...["PreviewFiles.swift", "PreviewFonts.swift", "PreviewRenderer.swift", "PreviewRendererTests.swift"].map(file => path.join(source, file)),
+            "-o", rendererExecutable], {stdio: "inherit"});
+        execFileSync(rendererExecutable, [path.join(temporary, "SiYuan.app/Contents/PlugIns/SiYuanQuickLook.appex/Contents/Resources/Preview")], {stdio: "inherit"});
     } finally {
         fs.rmSync(temporary, {recursive: true, force: true});
     }

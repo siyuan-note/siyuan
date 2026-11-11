@@ -18,13 +18,16 @@ test("Quick Look builds a self-contained resource manifest with the installed Lu
     const root = temporary(t);
     const manifest = await prepareQuickLookResources(root);
     for (const file of manifest) assert.ok(fs.statSync(path.join(root, file)).isFile(), file);
-    const {markdownAssetFiles, SHARED_LUTE_ASSET} = require("./markdown-assets");
-    for (const file of markdownAssetFiles()) assert.ok(manifest.includes(file.name), file.name);
+    const {SHARED_LUTE_ASSET} = require("./markdown-assets");
     assert.deepEqual(fs.readFileSync(path.join(root, "lute.min.js")), fs.readFileSync(path.join(__dirname, "..", SHARED_LUTE_ASSET)));
     assert.ok(!manifest.some(file => file === "vditor/dist/js/lute/lute.min.js"));
-    const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-    for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) assert.ok(manifest.includes(match[1]), match[1]);
-    assert.match(html, /connect-src 'none'/);
+    const resources = JSON.parse(fs.readFileSync(path.join(root, "resources.json"), "utf8"));
+    for (const file of [...resources.scripts, ...Object.values(resources.fonts)]) assert.ok(manifest.includes(file), file);
+    assert.ok(manifest.includes("parse5-LICENSE") && manifest.includes("entities-LICENSE"));
+    const styles = fs.readFileSync(path.join(root, "preview.css"), "utf8");
+    assert.match(styles, /prefers-color-scheme: dark/);
+    assert.ok(Object.keys(resources.fonts).length > 0);
+    for (const name of Object.keys(resources.fonts)) assert.ok(styles.includes("cid:" + name));
     const bundle = fs.readFileSync(path.join(root, "preview.js"), "utf8");
     assert.ok(!bundle.includes("/api/"));
     assert.ok(!bundle.includes("ipcRenderer"));
@@ -57,6 +60,7 @@ test("both Darwin packages embed the universal extension before signing, preserv
     const plist = fs.readFileSync(path.join(app, "Contents/PlugIns", extensionName, "Contents/Info.plist"), "utf8");
     assert.match(plist, /com\.apple\.quicklook\.preview/);
     assert.match(plist, /net\.daringfireball\.markdown/);
+    assert.match(plist, /<key>QLIsDataBasedPreview<\/key><true\/>/);
     assert.ok(!plist.includes("__VERSION__"));
     for (const name of ["electron-builder-darwin.yml", "electron-builder-darwin-arm64.yml"]) {
         const config = fs.readFileSync(path.join(__dirname, "..", name), "utf8");

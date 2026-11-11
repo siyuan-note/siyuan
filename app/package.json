@@ -96,6 +96,7 @@
     "iconv-lite": "^0.7.3",
     "ifdef-loader": "^2.3.2",
     "mini-css-extract-plugin": "2.10.2",
+    "parse5": "7.3.0",
     "path-browserify": "^1.0.1",
     "postcss": "^8.5.29",
     "postcss-scss": "^4.0.9",

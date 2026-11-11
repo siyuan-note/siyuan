@@ -10,22 +10,47 @@ const extensionName = "SiYuanQuickLook.appex";
 const extensionEntitlements = path.join(appRoot, "quicklook/entitlements.plist");
 const minimumVersion = "12.0";
 const architectures = ["x86_64", "arm64"];
+const katexPath = "vditor/dist/js/katex/";
+const highlightPath = "vditor/dist/js/highlight.js/";
+const scripts = ["lute.min.js", "vditor/dist/js/highlight.js/highlight.min.js",
+    katexPath + "katex.min.js", katexPath + "mhchem.min.js", "preview.js"];
 
 const prepareQuickLookResources = async output => {
     fs.mkdirSync(output, {recursive: true});
-    const files = markdownAssetFiles();
-    files.push({name: "vditor/dist/method.min.js", source: path.join(path.dirname(require.resolve("vditor/package.json")), "dist/method.min.js")});
-    files.push({name: "lute.min.js", source: path.join(appRoot, SHARED_LUTE_ASSET)});
-    files.push({name: "index.html", source: path.join(appRoot, "src/quicklook/index.html")});
-    for (const file of files) {
-        const destination = path.join(output, file.name);
+    const assets = new Map(markdownAssetFiles().map(({name, source}) => [name, source]));
+    assets.set("lute.min.js", path.join(appRoot, SHARED_LUTE_ASSET));
+    const fonts = [...assets.keys()].filter(name => name.startsWith(katexPath + "fonts/") && name.endsWith(".woff2"));
+    const files = [...scripts.slice(0, -1), ...fonts, ...[...assets.keys()].filter(name => name.includes("LICENSE") || name.endsWith("-NOTICE"))];
+    const parserEntry = require.resolve("parse5");
+    const parserRequire = createRequire(parserEntry);
+    for (const [dependency, entry] of [["parse5", parserEntry], ["entities", parserRequire.resolve("entities")]]) {
+        const license = dependency + "-LICENSE";
+        assets.set(license, path.resolve(path.dirname(entry), "../../LICENSE"));
+        files.push(license);
+    }
+    for (const name of files) {
+        const destination = path.join(output, name);
         fs.mkdirSync(path.dirname(destination), {recursive: true});
-        fs.copyFileSync(file.source, destination);
+        fs.copyFileSync(assets.get(name), destination);
     }
     const esbuild = createRequire(require.resolve("esbuild-loader"))("esbuild");
-    await esbuild.build({entryPoints: [path.join(appRoot, "src/quicklook/index.ts")], outfile: path.join(output, "preview.js"),
+    await esbuild.build({entryPoints: [path.join(appRoot, "src/quicklook/preview.ts")], outfile: path.join(output, "preview.js"),
         bundle: true, platform: "browser", format: "iife", target: "safari15", minify: true, legalComments: "none"});
-    fs.writeFileSync(path.join(output, "preview.css"), require("sass").compile(path.join(appRoot, "src/assets/scss/quicklook.scss")).css);
+    const css = name => fs.readFileSync(assets.get(name), "utf8");
+    const katex = require("postcss").parse(css(katexPath + "katex.min.css"));
+    const attachments = new Set();
+    katex.walkAtRules("font-face", rule => rule.walkDecls("src", declaration => {
+        const font = /url\(fonts\/([\w.-]+\.woff2)\)/.exec(declaration.value)?.[1];
+        if (!font) { declaration.remove(); return; }
+        if (!fonts.includes(katexPath + "fonts/" + font)) throw new Error(`Missing Quick Look font: ${font}`);
+        attachments.add(font);
+        declaration.value = `url("cid:${font}") format("woff2")`;
+    }));
+    const styles = [css("vditor/dist/index.css"), katex.toString(),
+        css("appearance/themes/daylight/theme.css"), css(highlightPath + "styles/github.min.css"),
+        `@media (prefers-color-scheme: dark) { ${css("appearance/themes/midnight/theme.css")} ${css(highlightPath + "styles/github-dark.min.css")} }`,
+        require("sass").compile(path.join(appRoot, "src/assets/scss/quicklook.scss")).css];
+    fs.writeFileSync(path.join(output, "preview.css"), styles.join("\n"));
     const names = ["limit", "encoding", "timeout", "failed", "file", "resource"];
     const keys = ["quickLookLimit", "quickLookEncoding", "quickLookTimeout", "markdownLoadError", "markdownFileUnavailable", "markdownResourceUnavailable"];
     const languages = {};
@@ -38,9 +63,9 @@ const prepareQuickLookResources = async output => {
         }));
     }
     fs.writeFileSync(path.join(output, "languages.json"), JSON.stringify(languages));
-    const manifest = [...files.map(file => file.name), "preview.js", "preview.css", "languages.json"];
-    fs.writeFileSync(path.join(output, "resources.json"), JSON.stringify(manifest));
-    return manifest;
+    const fontFiles = Object.fromEntries([...attachments].map(name => [name, katexPath + "fonts/" + name]));
+    fs.writeFileSync(path.join(output, "resources.json"), JSON.stringify({scripts, fonts: fontFiles}));
+    return [...files, "preview.js", "preview.css", "languages.json", "resources.json"];
 };
 
 const compileQuickLook = async (appPath, version, run = execFileSync) => {
@@ -59,9 +84,9 @@ const compileQuickLook = async (appPath, version, run = execFileSync) => {
             run("xcrun", ["swiftc", "-parse-as-library", "-application-extension", "-module-name", "SiYuanQuickLook",
                 "-sdk", sdk, "-target", `${arch}-apple-macosx${minimumVersion}`, "-O",
                 "-Xlinker", "-e", "-Xlinker", "_NSExtensionMain", "-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks",
-                "-framework", "Cocoa", "-framework", "QuickLookUI", "-framework", "WebKit", "-framework", "ImageIO",
+                "-framework", "Cocoa", "-framework", "QuickLookUI", "-framework", "JavaScriptCore", "-framework", "ImageIO",
                 path.join(appRoot, "quicklook/PreviewFiles.swift"), path.join(appRoot, "quicklook/PreviewFonts.swift"),
-                path.join(appRoot, "quicklook/PreviewViewController.swift"),
+                path.join(appRoot, "quicklook/PreviewProvider.swift"), path.join(appRoot, "quicklook/PreviewRenderer.swift"),
                 "-o", binary], {stdio: "inherit"});
             return binary;
         });

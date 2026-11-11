@@ -251,6 +251,9 @@ importers:
       mini-css-extract-plugin:
         specifier: 2.10.2
         version: 2.10.2(webpack@5.106.2)
+      parse5:
+        specifier: 7.3.0
+        version: 7.3.0
       path-browserify:
         specifier: ^1.0.1
         version: 1.0.1

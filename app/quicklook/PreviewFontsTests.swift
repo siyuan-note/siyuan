@@ -28,25 +28,29 @@ struct PreviewFontsTests {
             do { try action(); fatalError("Expected rejection") } catch {}
         }
         try write(manifest)
-        let first = try PreviewFonts.read(root: root, id: "first")
-        let second = try PreviewFonts.read(root: root, id: "second")
+        let first = try PreviewFonts.read(root: root)
         precondition(first.resources.count == 1 && first.resources.values.first!.0 == bytes)
-        precondition(Set(first.resources.keys).isDisjoint(with: Set(second.resources.keys)))
-        let payload = first.payload["customFonts"] as! [[String: Any]]
-        precondition((payload[0]["url"] as! String).hasPrefix("siyuan-preview://bundle/font/first/"))
+        precondition(first.css.contains("cid:workspace-font-" + hash + ".ttf"))
+        precondition(first.css.contains("\"Helvetica\""))
+        var escaped = manifest
+        escaped["fonts"] = ["global": [["family": "</style><script>", "weight": 500]], "editor": [], "code": []]
+        escaped["customFonts"] = []
+        try write(escaped)
+        let escapedSnapshot = try PreviewFonts.read(root: root)
+        precondition(!escapedSnapshot.css.contains("<") && escapedSnapshot.css.contains("--markdown-editor-font-weight:500"))
         var bold = font; bold["weight"] = 700
         var multiple = manifest
         multiple["fonts"] = ["global": [["family": "SiYuanCustomFont-" + hash, "weight": 400]],
                              "editor": [["family": "SiYuanCustomFont-" + hash, "weight": 700]], "code": []]
         multiple["customFonts"] = [font, bold]
         try write(multiple)
-        let multipleSnapshot = try PreviewFonts.read(root: root, id: "weights")
+        let multipleSnapshot = try PreviewFonts.read(root: root)
         precondition(multipleSnapshot.resources.count == 1)
-        precondition((multipleSnapshot.payload["customFonts"] as! [[String: Any]]).count == 2)
+        precondition(multipleSnapshot.css.components(separatedBy: "@font-face").count == 3)
         var unselected = manifest
         unselected["fonts"] = ["global": [], "editor": [], "code": []]
         try write(unselected)
-        rejected { _ = try PreviewFonts.read(root: root, id: "bad") }
+        rejected { _ = try PreviewFonts.read(root: root) }
         let trueBytes = Data([0x74, 0x72, 0x75, 0x65])
         let trueHash = SHA256.hash(data: trueBytes).map { String(format: "%02x", $0) }.joined()
         try trueBytes.write(to: fonts.appendingPathComponent(trueHash + ".ttf"))
@@ -56,7 +60,7 @@ struct PreviewFontsTests {
             "fonts": ["global": [], "editor": [["family": "SiYuanCustomFont-" + trueHash, "weight": 400]], "code": []],
             "customFonts": [trueFont]]
         try write(trueManifest)
-        let trueSnapshot = try PreviewFonts.read(root: root, id: "true")
+        let trueSnapshot = try PreviewFonts.read(root: root)
         precondition(trueSnapshot.resources.values.first!.0 == trueBytes)
         for (key, value) in [("file", "../outside.ttf" as Any), ("file", "/outside.ttf" as Any),
                              ("sha256", String(repeating: "a", count: 64) as Any), ("size", bytes.count + 1 as Any),
@@ -65,38 +69,38 @@ struct PreviewFontsTests {
             var changed = font; changed[key] = value
             var invalid = manifest; invalid["customFonts"] = [changed]
             try write(invalid)
-            rejected { _ = try PreviewFonts.read(root: root, id: "bad") }
+            rejected { _ = try PreviewFonts.read(root: root) }
         }
         var invalid = manifest; invalid["version"] = 2
         try write(invalid)
-        rejected { _ = try PreviewFonts.read(root: root, id: "bad") }
+        rejected { _ = try PreviewFonts.read(root: root) }
         try Data(repeating: 32, count: 128 * 1024 + 1).write(to: current)
-        rejected { _ = try PreviewFonts.read(root: root, id: "bad") }
+        rejected { _ = try PreviewFonts.read(root: root) }
         try write(manifest)
         try manager.removeItem(at: fontURL)
         let outside = root.appendingPathComponent("outside.ttf")
         try bytes.write(to: outside)
         try manager.createSymbolicLink(at: fontURL, withDestinationURL: outside)
-        rejected { _ = try PreviewFonts.read(root: root, id: "bad") }
+        rejected { _ = try PreviewFonts.read(root: root) }
         try manager.removeItem(at: fontURL)
         try Data(repeating: 0, count: bytes.count).write(to: fontURL)
-        rejected { _ = try PreviewFonts.read(root: root, id: "bad") }
+        rejected { _ = try PreviewFonts.read(root: root) }
         try bytes.write(to: fontURL)
         let saved = directory.appendingPathComponent("saved.json")
         try manager.moveItem(at: current, to: saved)
         try manager.createSymbolicLink(at: current, withDestinationURL: saved)
-        rejected { _ = try PreviewFonts.read(root: root, id: "bad") }
+        rejected { _ = try PreviewFonts.read(root: root) }
         try manager.removeItem(at: current)
         try write(manifest)
         let savedFonts = directory.appendingPathComponent("saved-fonts")
         try manager.moveItem(at: fonts, to: savedFonts)
         try manager.createSymbolicLink(at: fonts, withDestinationURL: savedFonts)
-        rejected { _ = try PreviewFonts.read(root: root, id: "bad") }
+        rejected { _ = try PreviewFonts.read(root: root) }
         let token = PreviewCancellation(); token.cancel()
-        rejected { _ = try PreviewFonts.read(root: root, id: "bad", cancellation: token) }
+        rejected { _ = try PreviewFonts.read(root: root, cancellation: token) }
         precondition(first.resources.values.first!.0 == bytes)
         try publisherTests(root: root.appendingPathComponent("publisher"))
-        print("Quick Look font snapshot, bounds, hash, token, symlink and cancellation cases passed")
+        print("Quick Look font snapshots, CSS, attachment reuse, bounds, hashes, symlinks and cancellation passed")
     }
 
     static func publisherTests(root: URL) throws {
@@ -118,7 +122,7 @@ struct PreviewFontsTests {
         }
         let a = try payload(1), b = try payload(2), c = try payload(3)
         try FontPublisher.publish(root: root, data: a.0)
-        let first = try PreviewFonts.read(root: root, id: "published")
+        let first = try PreviewFonts.read(root: root)
         precondition(first.resources.count == 1)
         let directory = root.appendingPathComponent("QuickLookFonts")
         let fonts = directory.appendingPathComponent("fonts")
@@ -127,7 +131,7 @@ struct PreviewFontsTests {
         let locked = open(directory.path, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         precondition(locked >= 0 && flock(locked, LOCK_EX | LOCK_NB) == 0)
         let start = Date.timeIntervalSinceReferenceDate
-        rejected { _ = try PreviewFonts.read(root: root, id: "locked") }
+        rejected { _ = try PreviewFonts.read(root: root) }
         precondition(Date.timeIntervalSinceReferenceDate - start < 1)
         _ = flock(locked, LOCK_UN)
         close(locked)

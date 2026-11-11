@@ -6,7 +6,7 @@ enum PreviewFileError: Error {
     case unavailable, limit, encoding
 }
 
-final class PreviewCancellation {
+final class PreviewCancellation: @unchecked Sendable {
     private let lock = NSLock()
     private var cancelled = false
     func cancel() { lock.lock(); cancelled = true; lock.unlock() }

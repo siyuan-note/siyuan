@@ -28,7 +28,7 @@ struct PreviewFontManifest: Codable {
 }
 
 struct PreviewFontSnapshot {
-    var payload: [String: Any] = ["fonts": ["global": [], "editor": [], "code": []], "customFonts": []]
+    var css = ""
     var resources: [String: (Data, String)] = [:]
 }
 
@@ -89,12 +89,35 @@ enum PreviewFonts {
         return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group)
     }
 
-    static func load(id: String, cancellation: PreviewCancellation) -> PreviewFontSnapshot {
+    static func load(cancellation: PreviewCancellation) -> PreviewFontSnapshot {
         guard let root = container() else { return PreviewFontSnapshot() }
-        return (try? read(root: root, id: id, cancellation: cancellation)) ?? PreviewFontSnapshot()
+        return (try? read(root: root, cancellation: cancellation)) ?? PreviewFontSnapshot()
     }
 
-    static func read(root: URL, id: String, cancellation: PreviewCancellation = PreviewCancellation()) throws -> PreviewFontSnapshot {
+    private static func cssString(_ value: String) -> String {
+        "\"" + value.unicodeScalars.map { scalar in
+            switch scalar {
+            case "\"", "\\", "<", ">": return "\\\(String(scalar.value, radix: 16)) "
+            default: return String(scalar)
+            }
+        }.joined() + "\""
+    }
+
+    private static func fontCSS(_ fonts: PreviewFontGroups) -> String {
+        let groups = [
+            ("global", fonts.global, "--b3-font-family", 400),
+            ("editor", fonts.editor, fonts.global.isEmpty ? "--b3-font-family-protyle" : "--markdown-global-font-family",
+             fonts.global.first?.weight ?? 400),
+            ("code", fonts.code, "--b3-font-family-code", 400),
+        ]
+        let declarations = groups.map { name, selected, fallback, weight in
+            let families = selected.isEmpty ? "" : "var(--b3-font-family-emoji-reset), " + selected.map { cssString($0.family) }.joined(separator: ", ") + ", "
+            return "--markdown-\(name)-font-family:\(families)var(\(fallback));--markdown-\(name)-font-weight:\(selected.first?.weight ?? weight);"
+        }
+        return "body {\(declarations.joined())}"
+    }
+
+    static func read(root: URL, cancellation: PreviewCancellation = PreviewCancellation()) throws -> PreviewFontSnapshot {
         let container = open(root.path, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         guard container >= 0 else { throw PreviewFileError.unavailable }
         defer { close(container) }
@@ -109,35 +132,24 @@ enum PreviewFonts {
         let data = try PreviewFiles.read(manifestFD, limit: 128 * 1024, cancellation: cancellation)
         let manifest = try JSONDecoder().decode(PreviewFontManifest.self, from: data)
         try validate(manifest)
-        var snapshot = PreviewFontSnapshot()
-        snapshot.payload["fonts"] = try JSONSerialization.jsonObject(with: JSONEncoder().encode(manifest.fonts))
+        var snapshot = PreviewFontSnapshot(css: fontCSS(manifest.fonts))
         if manifest.customFonts.isEmpty { return snapshot }
         let fonts = openat(directory, "fonts", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         guard fonts >= 0 else { throw PreviewFileError.unavailable }
         defer { close(fonts) }
-        var custom: [[String: Any]] = []
-        var loaded: [String: (Data, String)] = [:]
         for font in manifest.customFonts {
             try cancellation.check()
-            if let cached = loaded[font.file] {
-                guard cached.0.count == font.size else { throw PreviewFileError.unavailable }
-                custom.append(["family": font.family, "weight": font.weight, "url": cached.1])
-                continue
+            let id = "workspace-font-" + font.file
+            if snapshot.resources[id] == nil {
+                let fd = openat(fonts, font.file, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC)
+                guard fd >= 0 else { throw PreviewFileError.unavailable }
+                defer { close(fd) }
+                let bytes = try PreviewFiles.read(fd, limit: fileLimit, cancellation: cancellation)
+                try validate(bytes, font: font)
+                snapshot.resources[id] = (bytes, font.file.hasSuffix(".ttf") ? "font/ttf" : "font/otf")
             }
-            let fd = openat(fonts, font.file, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC)
-            guard fd >= 0 else { throw PreviewFileError.unavailable }
-            let bytes: Data
-            do { bytes = try PreviewFiles.read(fd, limit: fileLimit, cancellation: cancellation) }
-            catch { close(fd); throw error }
-            close(fd)
-            try validate(bytes, font: font)
-            let token = UUID().uuidString.lowercased()
-            snapshot.resources[token] = (bytes, font.file.hasSuffix(".ttf") ? "font/ttf" : "font/otf")
-            let url = "siyuan-preview://bundle/font/\(id)/\(token)"
-            loaded[font.file] = (bytes, url)
-            custom.append(["family": font.family, "weight": font.weight, "url": url])
+            snapshot.css += "@font-face{font-family:\(cssString(font.family));font-weight:\(font.weight);src:url(\"cid:\(id)\");}"
         }
-        snapshot.payload["customFonts"] = custom
         return snapshot
     }
 }

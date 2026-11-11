@@ -1,92 +1,115 @@
-import {createMarkdownResourcePolicy, isRelativeMarkdownResource} from "../markdown/resourcePolicy";
-import {MARKDOWN_RENDER_BYTES, markdownByteLength} from "../markdown/limits";
-import {createQuickLookFonts} from "./fonts";
+import {parseFragment, type DefaultTreeAdapterMap} from "parse5";
 
-interface IPreviewMessages {
-    limit: string;
-    resource: string;
-}
-interface IPreviewDependencies {
-    html(markdown: string): Promise<string>;
-    math(expression: string, display: boolean): string;
-    highlight(code: string, language: string): string | undefined;
-    images(id: string, references: string[]): Promise<Array<string | null>>;
-}
-
-export const createReadOnlyMarkdownPreview = (content: HTMLElement, warning: HTMLElement,
-                                              dependencies: IPreviewDependencies) => {
-    const doc = content.ownerDocument;
-    let generation = 0;
-    let policy: ReturnType<typeof createMarkdownResourcePolicy>;
-    const fonts = createQuickLookFonts(doc.body);
-    const cancel = () => { generation++; policy?.destroy(); fonts.clear(); content.replaceChildren(); warning.textContent = ""; };
-    const block = (event: Event) => {
-        if ((event.target as Element)?.closest("a, input, button, form")) { event.preventDefault(); }
-    };
-    content.addEventListener("click", block, true);
-    content.addEventListener("submit", block, true);
-    return {
-        cancel,
-        async render(id: string, markdown: string, messages: IPreviewMessages, appearance?: unknown): Promise<boolean> {
-            cancel();
-            const ticket = generation;
-            if (markdownByteLength(markdown) > MARKDOWN_RENDER_BYTES) { throw new Error(messages.limit); }
-            const fontsReady = fonts.apply(id, appearance);
-            policy = createMarkdownResourcePolicy(doc);
-            const currentPolicy = policy;
-            const html = await dependencies.html(markdown);
-            if (ticket !== generation) { return false; }
-            const template = doc.createElement("template");
-            template.innerHTML = currentPolicy.sanitize(html);
-            if (template.content.querySelectorAll("*").length > 20000) { throw new Error(messages.limit); }
-            template.content.querySelectorAll<HTMLInputElement>("input, button, select, textarea").forEach(input => {input.disabled = true;});
-            template.content.querySelectorAll("[contenteditable], [autofocus], [tabindex]").forEach(element => {
-                element.removeAttribute("contenteditable"); element.removeAttribute("autofocus"); element.removeAttribute("tabindex");
-            });
-            template.content.querySelectorAll("a").forEach(link => {
-                link.removeAttribute("href"); link.removeAttribute("target"); link.removeAttribute("download");
-            });
-            content.replaceChildren(template.content);
-            const codes = Array.from(content.querySelectorAll<HTMLElement>("pre > code"));
-            const maths = Array.from(content.querySelectorAll<HTMLElement>(".language-math"));
-            if (codes.length > 512 || maths.length > 256) { throw new Error(messages.limit); }
-            for (const element of codes) {
-                if (element.classList.contains("language-math") || element.textContent.length > 32768) { continue; }
-                const language = element.className.match(/(?:^|\s)language-([\w+-]+)/)?.[1];
-                const highlighted = language && dependencies.highlight(element.textContent, language);
-                if (highlighted) { element.innerHTML = highlighted; element.classList.add("hljs"); }
-            }
-            for (const element of maths) {
-                const expression = element.textContent;
-                if (expression.length > 8192) { warning.textContent = messages.limit; continue; }
-                const replacement = doc.createElement(element.parentElement?.tagName === "PRE" ? "div" : "span");
-                replacement.innerHTML = dependencies.math(expression, replacement.tagName === "DIV");
-                (replacement.tagName === "DIV" ? element.parentElement : element).replaceWith(replacement);
-            }
-            const images = Array.from(content.querySelectorAll<HTMLImageElement>("img"));
-            const references = images.slice(0, 256).map(image => currentPolicy.originalAttribute(image, "src"));
-            const relative = references.map(reference => isRelativeMarkdownResource(reference || "") ? reference : "");
-            const urls = await dependencies.images(id, relative);
-            if (ticket !== generation) { return false; }
-            images.forEach((image, index) => {
-                const url = urls[index];
-                if (url && new RegExp(`^siyuan-preview://image/${id}/[a-f0-9-]+$`).test(url)) {
-                    image.src = url;
-                    image.addEventListener("error", () => { if (ticket === generation) warning.textContent = messages.resource; }, {once: true});
-                } else {
-                    const placeholder = doc.createElement("span");
-                    placeholder.textContent = image.alt ? `[${image.alt}]` : messages.resource;
-                    image.replaceWith(placeholder);
-                    warning.textContent = messages.resource;
-                }
-            });
-            await fontsReady;
-            if (ticket !== generation) { return false; }
-            await doc.fonts.ready;
-            await Promise.all(Array.from(content.querySelectorAll<HTMLImageElement>("img")).map(image =>
-                image.decode().catch(() => { if (ticket === generation) warning.textContent = messages.resource; })));
-            return ticket === generation;
-        },
-        destroy() { cancel(); content.removeEventListener("click", block, true); content.removeEventListener("submit", block, true); },
-    };
+type Child = DefaultTreeAdapterMap["childNode"];
+type Element = DefaultTreeAdapterMap["element"];
+type Renderer = {
+    Lute: {New(): {SetSanitize(value: boolean): void; Md2HTML(markdown: string): string}};
+    katex: {renderToString(expression: string, options: Record<string, unknown>): string};
+    hljs: {getLanguage(language: string): unknown; highlight(code: string, options: {language: string}): {value: string}};
 };
+const host = globalThis as unknown as Renderer;
+
+const allowed = new Set("a abbr b blockquote br caption code dd del div dl dt em h1 h2 h3 h4 h5 h6 hr i kbd li mark ol p pre s samp small span strong sub sup table tbody td th thead tfoot tr u ul var".split(" "));
+const discarded = new Set("audio base button embed form iframe link meta noscript object script select source style template textarea track video".split(" "));
+const htmlNamespace = "http://www.w3.org/1999/xhtml";
+const escape = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+const isElement = (node: Child): node is Element => "tagName" in node;
+const attr = (node: Element, name: string) => node.attrs.find(item => item.name === name && !item.namespace)?.value || "";
+const children = (node: Element) => node.childNodes;
+const textContent = (node: Element): string => children(node).map(child =>
+    "value" in child ? child.value : isElement(child) ? textContent(child) : "").join("");
+
+const renderPreview = (markdown: string, messages: {resource: string; limit: string},
+                       image: (reference: string) => string | null, active: () => boolean) => {
+    const lute = host.Lute.New();
+    lute.SetSanitize(true);
+    const root = parseFragment(lute.Md2HTML(markdown));
+    let nodes = 0;
+    let images = 0;
+    let codes = 0;
+    let maths = 0;
+    let length = 0;
+    let limit = false;
+    let unavailable = false;
+    const output: string[] = [];
+    const append = (value: string) => {
+        length += value.length;
+        if (length > 8 * 1024 * 1024) throw new RangeError("preview limit");
+        output.push(value);
+    };
+    const render = (node: Child, depth: number) => {
+        if ("value" in node) { append(escape(node.value)); return; }
+        if (!isElement(node)) return;
+        if (++nodes > 20000 || depth > 128) throw new RangeError("preview limit");
+        if (nodes % 64 === 0 && !active()) throw new Error("preview cancelled");
+        const tag = node.tagName;
+        if (node.namespaceURI !== htmlNamespace || discarded.has(tag)) return;
+        const classes = attr(node, "class").split(/\s+/);
+        if ((tag === "code" || tag === "div" || tag === "span") && classes.includes("language-math")) {
+            if (++maths > 256) throw new RangeError("preview limit");
+            const expression = textContent(node);
+            const display = tag === "div" || node.parentNode?.nodeName === "pre";
+            if (expression.length > 8192) {
+                limit = true;
+                append(`<${tag}>${escape(expression)}</${tag}>`);
+            } else {
+                append(host.katex.renderToString(expression, {displayMode: display, throwOnError: false,
+                    trust: false, strict: "error", maxExpand: 1000, maxSize: 20}));
+            }
+            return;
+        }
+        if (tag === "img") {
+            const source = attr(node, "src");
+            const alt = escape(attr(node, "alt"));
+            const id = ++images <= 256 && source && source.length <= 2048 && !/^[\\/#]|^[a-z][a-z\d+.-]*:/i.test(source) ?
+                image(source) : "";
+            if (id && /^image-\d+$/.test(id)) append(`<img src="cid:${id}" alt="${alt}">`);
+            else {
+                append(`<span>${alt ? `[${alt}]` : escape(messages.resource)}</span>`);
+                unavailable = true;
+            }
+            return;
+        }
+        if (tag === "input" && attr(node, "type") === "checkbox") {
+            append(node.attrs.some(item => item.name === "checked") ?
+                '<input type="checkbox" disabled checked>' : '<input type="checkbox" disabled>');
+            return;
+        }
+        if (tag === "br" || tag === "hr") { append(`<${tag}>`); return; }
+        if (tag === "code" && node.parentNode?.nodeName === "pre") {
+            if (++codes > 512) throw new RangeError("preview limit");
+            const code = textContent(node);
+            const language = classes.find(name => /^language-[\w+-]+$/.test(name))?.slice(9);
+            if (code.length <= 32768 && language && host.hljs.getLanguage(language)) {
+                append(`<code class="hljs">${host.hljs.highlight(code, {language}).value}</code>`);
+            } else append(`<code>${escape(code)}</code>`);
+            return;
+        }
+        let attributes = "";
+        if (tag === "li" && classes.includes("vditor-task")) attributes = ' class="vditor-task"';
+        if (tag === "td" || tag === "th") {
+            const align = attr(node, "align") || /^text-align:\s*(left|center|right);?$/i.exec(attr(node, "style"))?.[1];
+            if (align && /^(left|center|right)$/.test(align)) attributes += ` align="${align}"`;
+            for (const name of ["rowspan", "colspan"]) {
+                const count = attr(node, name);
+                if (/^[1-9]\d{0,2}$/.test(count)) attributes += ` ${name}="${count}"`;
+            }
+        }
+        if (tag === "ol" && /^-?\d{1,9}$/.test(attr(node, "start"))) attributes = ` start="${attr(node, "start")}"`;
+        const safe = allowed.has(tag);
+        if (safe) append(`<${tag}${attributes}>`);
+        for (const child of children(node)) render(child, depth + 1);
+        if (safe) append(`</${tag}>`);
+    };
+    try {
+        for (const node of root.childNodes) render(node, 0);
+    } catch (error) {
+        if (error instanceof RangeError) return {error: "limit"};
+        throw error;
+    }
+    const warnings = [limit ? messages.limit : "", unavailable ? messages.resource : ""].filter(Boolean);
+    return {html: output.join(""), warning: warnings.map(escape).join(" ")};
+};
+
+Object.assign(globalThis, {quickLookRender: renderPreview});

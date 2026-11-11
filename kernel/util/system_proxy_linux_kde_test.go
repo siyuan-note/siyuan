@@ -129,7 +129,7 @@ httpProxy=http://127.0.0.1:7890
 NoProxyFor=localhost,<local>
 `,
 			want: &systemNetworkProxyConfig{HTTPProxy: "http://127.0.0.1:7890",
-				NoProxy: "localhost,127.0.0.1,::1"},
+				NoProxy: "localhost,<local>"},
 		},
 		{
 			name: "url bypass",
@@ -337,7 +337,7 @@ NoProxyFor=localhost,<local>
 	if got := os.Getenv("HTTPS_PROXY"); got != "http://127.0.0.1:7891" {
 		t.Fatalf("system HTTPS = %q", got)
 	}
-	if got := os.Getenv("NO_PROXY"); got != "localhost,127.0.0.1,::1,private.example" {
+	if got := os.Getenv("NO_PROXY"); got != "localhost,<local>,private.example" {
 		t.Fatalf("system bypass = %q", got)
 	}
 	SetNetworkProxy("", false)

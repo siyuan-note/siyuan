@@ -201,8 +201,7 @@ func parseKDEProxyBypass(value string) []string {
 	for _, field := range strings.FieldsFunc(value, func(r rune) bool { return r == ',' || r == ' ' }) {
 		field = normalizeKDEProxyBypassEntry(field)
 		if strings.EqualFold(field, "<local>") {
-			entries = append(entries, "localhost", "127.0.0.1", "::1")
-			continue
+			field = "<local>"
 		}
 		entries = append(entries, field)
 	}

@@ -9,6 +9,7 @@ const appRoot = path.resolve(__dirname, "..");
 const extensionName = "SiYuanQuickLook.appex";
 const extensionEntitlements = path.join(appRoot, "quicklook/entitlements.plist");
 const minimumVersion = "12.0";
+const architectures = ["x86_64", "arm64"];
 
 const prepareQuickLookResources = async output => {
     fs.mkdirSync(output, {recursive: true});
@@ -53,7 +54,7 @@ const compileQuickLook = async (appPath, version, run = execFileSync) => {
     if (path.dirname(path.resolve(temporary)) !== path.resolve(os.tmpdir())) { throw new Error("Invalid Quick Look temporary path"); }
     try {
         const sdk = String(run("xcrun", ["--sdk", "macosx", "--show-sdk-path"], {encoding: "utf8"})).trim();
-        const binaries = ["x86_64", "arm64"].map(arch => {
+        const binaries = architectures.map(arch => {
             const binary = path.join(temporary, arch);
             run("xcrun", ["swiftc", "-parse-as-library", "-application-extension", "-module-name", "SiYuanQuickLook",
                 "-sdk", sdk, "-target", `${arch}-apple-macosx${minimumVersion}`, "-O",
@@ -66,8 +67,7 @@ const compileQuickLook = async (appPath, version, run = execFileSync) => {
         });
         const executable = path.join(contents, "MacOS/SiYuanQuickLook");
         run("xcrun", ["lipo", "-create", ...binaries, "-output", executable], {stdio: "inherit"});
-        run("xcrun", ["lipo", "-verify_arch", "x86_64", "arm64", executable], {stdio: "inherit"});
-        const helpers = ["x86_64", "arm64"].map(arch => {
+        const helpers = architectures.map(arch => {
             const binary = path.join(temporary, `fonts-${arch}`);
             run("xcrun", ["swiftc", "-parse-as-library", "-sdk", sdk, "-target", `${arch}-apple-macosx${minimumVersion}`, "-O",
                 "-framework", "ImageIO", path.join(appRoot, "quicklook/PreviewFiles.swift"),
@@ -78,7 +78,11 @@ const compileQuickLook = async (appPath, version, run = execFileSync) => {
         const helper = path.join(appPath, "Contents/MacOS/SiYuanQuickLookFonts");
         fs.mkdirSync(path.dirname(helper), {recursive: true});
         run("xcrun", ["lipo", "-create", ...helpers, "-output", helper], {stdio: "inherit"});
-        run("xcrun", ["lipo", "-verify_arch", "x86_64", "arm64", helper], {stdio: "inherit"});
+        for (const binary of [executable, helper]) {
+            for (const arch of architectures) {
+                run("xcrun", ["lipo", binary, "-verify_arch", arch], {stdio: "inherit"});
+            }
+        }
         run("plutil", ["-lint", path.join(contents, "Info.plist"), extensionEntitlements], {stdio: "inherit"});
     } finally {
         fs.rmSync(temporary, {recursive: true, force: true});

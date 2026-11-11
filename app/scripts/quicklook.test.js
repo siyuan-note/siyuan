@@ -42,12 +42,18 @@ test("both Darwin packages embed the universal extension before signing, preserv
         return command === "xcrun" && args[0] === "--sdk" ? "/SDK" : "";
     });
     for (const arch of ["x86_64", "arm64"]) assert.ok(calls.some(([, args]) => args.includes(`${arch}-apple-macosx12.0`)));
-    assert.ok(calls.some(([, args]) => args.includes("-verify_arch") && args.includes("x86_64") && args.includes("arm64")));
+    const extension = path.join(app, "Contents/PlugIns", extensionName, "Contents/MacOS/SiYuanQuickLook");
+    const helper = path.join(app, "Contents/MacOS/SiYuanQuickLookFonts");
+    assert.deepEqual(calls.filter(([, args]) => args.includes("-verify_arch")), [
+        ["xcrun", ["lipo", extension, "-verify_arch", "x86_64"]],
+        ["xcrun", ["lipo", extension, "-verify_arch", "arm64"]],
+        ["xcrun", ["lipo", helper, "-verify_arch", "x86_64"]],
+        ["xcrun", ["lipo", helper, "-verify_arch", "arm64"]],
+    ]);
     assert.equal(calls.filter(([, args]) => args.some(arg => arg.endsWith("PreviewFonts.swift"))).length, 4);
     for (const source of ["FontPublisher.swift", "FontContainer.swift"]) {
         assert.equal(calls.filter(([, args]) => args.some(arg => arg.endsWith(source))).length, 2);
     }
-    assert.ok(calls.some(([, args]) => args.includes("-verify_arch") && args.at(-1).endsWith("SiYuanQuickLookFonts")));
     const plist = fs.readFileSync(path.join(app, "Contents/PlugIns", extensionName, "Contents/Info.plist"), "utf8");
     assert.match(plist, /com\.apple\.quicklook\.preview/);
     assert.match(plist, /net\.daringfireball\.markdown/);

@@ -885,8 +885,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                         false, false, false, selectedCells, true, true);
                 },
                 onDestroy: options?.destroyCallback,
-                prepareNextInput: anchorElement => cellElements.length === 1 ?
-                    prepareAVContinuousInput(protyle, blockElement, [anchorElement], cell => popTextCell(protyle, [cell])) : undefined,
+                prepareNextInput: (anchorElement, rangeOnly) => cellElements.length === 1 ?
+                    prepareAVContinuousInput(protyle, blockElement, [anchorElement], cell => popTextCell(protyle, [cell]), rangeOnly) : undefined,
             });
             return;
         }
@@ -1108,9 +1108,11 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             if (electronUndo(event)) {
                 return;
             }
-            if (isAVContinuousInputKey(event, true) && type !== "template" && type !== "text") {
+            const textConfirm = type === "text" && event.key === "Enter" && (event.ctrlKey || event.metaKey) &&
+                event.keyCode !== 229 && !event.shiftKey && !event.altKey;
+            if (type !== "template" && (type !== "text" && isAVContinuousInputKey(event, true) || textConfirm)) {
                 const next = prepareAVContinuousInput(protyle, blockElement, cellElements,
-                    cell => popTextCell(protyle, [cell]));
+                    cell => popTextCell(protyle, [cell]), type === "text");
                 if (next) {
                     event.preventDefault();
                     event.stopPropagation();

@@ -10,7 +10,7 @@ import {bindEditEvent, getColId, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
 import {isCustomAttr} from "./blockAttr";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
-import {cellScrollIntoView, genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements, type IAVCellInputElements} from "./cell";
+import {cellScrollIntoView, genCellValueByElement, getTypeByCellElement, popTextCell, updateAttrViewCellInOtherElements, type IAVCellInputElements} from "./cell";
 import dayjs from "dayjs";
 import {getFieldsByData} from "./view";
 import {getFieldIdByCellElement} from "./row";
@@ -576,7 +576,10 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
                 const cells = target?.elements || cellElements;
                 if ((!resolveInput || target) && cells[0]?.isConnected) {
                     const selection = getAVCellSelection(block);
-                    const next = prepareAVContinuousInput(protyle, block, cells, cell => cellScrollIntoView(block, cell));
+                    const next = prepareAVContinuousInput(protyle, block, cells, cell => {
+                        cellScrollIntoView(block, cell);
+                        if (selection?.input) popTextCell(protyle, [cell]);
+                    });
                     if (next) {
                         onSave = () => {
                             if (getAVCellSelection(block) === selection && !document.querySelector(".av__panel")) next();

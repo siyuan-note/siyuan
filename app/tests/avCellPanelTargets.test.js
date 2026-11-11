@@ -470,6 +470,23 @@ test("single-select Enter ignores held keys and leaves later cell or panel focus
     assert.deepEqual(state.scrolled, []);
 });
 
+test("single-select range confirmation opens the next field only after a successful save", () => {
+    for (const create of [false, true]) {
+        const {f, state, enter, next} = selectKeyboardFixture("select", {create});
+        f.context.setAVCellSelection(f.block, {input: {groupID: "", rowID: "row-0", colID: "column"}});
+        const opened = [];
+        f.context.popTextCell = (protyle, cells) => {
+            assert.equal(protyle, f.protyle);
+            opened.push(cells[0]);
+        };
+        enter();
+        assert.deepEqual(opened, []);
+        f.transactions[0].options.callback();
+        assert.deepEqual(opened, [next]);
+        assert.deepEqual(state.scrolled, [next]);
+    }
+});
+
 test("multi-select Enter updates the current cell and keeps the option panel open", () => {
     const {f, state, enter} = selectKeyboardFixture("mSelect");
     assert.equal(enter(), false);

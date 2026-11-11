@@ -69,7 +69,7 @@ interface AVRichTextEditorOptions {
     onSave: (value: IAVCellValue, nodeElement: HTMLElement,
              stableCells: import("./selectionState").IAVSelectedCell[]) => void | Promise<void>;
     onDestroy?: () => void;
-    prepareNextInput?: (anchorElement: HTMLElement) => (() => void) | undefined;
+    prepareNextInput?: (anchorElement: HTMLElement, rangeOnly?: boolean) => (() => void) | undefined;
 }
 
 interface ActiveEditor {
@@ -338,13 +338,14 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         }
     });
     if (mobile) {
-        maskElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () => void finish(true));
+        maskElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () =>
+            void finish(true, true, options.prepareNextInput?.(options.anchorElement, true)));
     }
-    const continueInput = (event: Event, repeat = false) => {
-        if (primary && fragment.hintElement.classList.contains("fn__none") &&
+    const continueInput = (event: Event, repeat = false, rangeOnly = false) => {
+        if (fragment.wysiwyg.contains(event.target as Node) && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
-            const next = options.prepareNextInput?.(options.anchorElement);
+            const next = options.prepareNextInput?.(options.anchorElement, rangeOnly);
             if (next) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -356,7 +357,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     };
     panelElement.addEventListener("beforeinput", (event: InputEvent) => {
         if (event.cancelable && !event.isComposing && event.inputType === "insertParagraph") {
-            if (mobile && continueInput(event)) return;
+            if (primary && mobile && continueInput(event)) return;
             if (primary && fragment.wysiwyg.contains(event.target as Node) &&
                 fragment.hintElement.classList.contains("fn__none")) {
                 event.preventDefault();
@@ -366,7 +367,9 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         }
     }, true);
     panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (isAVContinuousInputKey(event, true) && continueInput(event, event.repeat)) return;
+        if (primary && isAVContinuousInputKey(event, true) && continueInput(event, event.repeat)) return;
+        if (!primary && event.key === "Enter" && (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey &&
+            !event.isComposing && event.keyCode !== 229 && continueInput(event, event.repeat, true)) return;
         if (primary && fragment.wysiwyg.contains(event.target as Node) && event.key === "Enter" && !event.isComposing &&
             fragment.hintElement.classList.contains("fn__none")) {
             event.preventDefault();

@@ -19,13 +19,14 @@ import {getAVCellSelection, getAVItemSelection} from "./selectionState";
 import {isMobile} from "../../../util/functions";
 import {getAVVerticalNavigationAction} from "./verticalNavigation";
 import {prepareAVColumnWindow} from "./columnWindow";
+import {openAVRangeInput} from "./continuousInput";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle,
                           leaveVerticalRegion: (direction: "up" | "down") => boolean) => {
     if (!nodeElement.classList.contains("av") || !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         return false;
     }
-    if (event.isComposing) {
+    if (event.isComposing || event.keyCode === 229) {
         return true;
     }
     prepareAVColumnWindow(nodeElement);
@@ -75,10 +76,20 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         return true;
     }
     const cellSelection = getAVCellSelection(nodeElement);
+    if (event.key === "Enter" && cellSelection?.cells.length > 1 &&
+        !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+        openAVRangeInput(protyle, nodeElement, cell => {
+            if (!event.repeat) popTextCell(protyle, [cell]);
+        })) {
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+    const cellFocus = cellSelection?.input || cellSelection?.focus;
     const selectCellElement = (cellSelection ?
         nodeElement.querySelector(
-            `.av__body[data-group-id="${cellSelection.focus.groupID}"] ` +
-            `.av__row[data-id="${cellSelection.focus.rowID}"] .av__cell[data-col-id="${cellSelection.focus.colID}"]`) :
+            `.av__body[data-group-id="${cellFocus.groupID}"] ` +
+            `.av__row[data-id="${cellFocus.rowID}"] .av__cell[data-col-id="${cellFocus.colID}"]`) :
         nodeElement.querySelector(".av__cell--select")) as HTMLElement;
     if (!selectCellElement && cellSelection && event.key === "Escape") {
         clearSelect(["cell"], nodeElement);

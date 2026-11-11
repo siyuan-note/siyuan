@@ -11,6 +11,7 @@ const runCases = async (sources, appDirectory) => {
     let fragment;
     let request;
     let candidates;
+    let openRangeCell;
     window.siyuan = {dialogs: [], storage: {}, config: {readonly: false}, menus: {menu: {element: document.createElement("div"), remove() {}}},
         mobile: {size: {portrait: {height1: innerHeight}, landscape: {height1: innerHeight}}},
         zIndex: 0, languages: {empty: "Empty", confirm: "Confirm",
@@ -70,6 +71,12 @@ const runCases = async (sources, appDirectory) => {
     const hintRef = new Function(...Object.keys(hintDependencies), "exports", sources.hintRef + "\nreturn exports.hintRef;")(
         ...Object.values(hintDependencies), {});
     const dependencies = {
+        "../../util/hotKey": {matchHotKey: () => false},
+        "./row": {updateAVSelectionStatus() {}}, "./action": {}, "../../util/clear": {},
+        "../../../util/upDownHint": {}, "./newItemTemplate": {}, "./verticalNavigation": {},
+        "../../util/hasClosest": {hasClosestByClassName: (element, className) => element.closest("." + className)},
+        "../../../constants": {Constants: {}},
+        "./cell": {popTextCell: (_protyle, cells) => openRangeCell(cells[0])},
         "./host": {getAVHostIdentity: element => element.dataset.avHost || element.dataset.nodeId || "",
             getAVHostBlockID: element => element.dataset.nodeId || ""},
         "./cellEditor": {AV_CELL_EDITOR_CLOSE_EVENT: "siyuan-av-cell-editor-close"},
@@ -92,8 +99,8 @@ const runCases = async (sources, appDirectory) => {
         "./richTextEditorPosition": {positionAVRichTextEditor: () => {}},
         "./richTextEditorLute": {createAVRichTextEditorLute: () => ({}), configureAVRichTextEditorLute() {}},
         "./virtualScroll": {getAVData: element => dataByElement.get(element),
-            ensureAVTableAdjacentRow: row => row.nextElementSibling, ensureAVTableRow() {}},
-        "./columnWindow": {ensureAVColumnWindow() {}},
+            ensureAVTableAdjacentRow: row => row.nextElementSibling, ensureAVTableRow() {}, resetAVRowSelect() {}},
+        "./columnWindow": {ensureAVColumnWindow() {}, prepareAVColumnWindow() {}},
         "./rangeSelect": {setAVCellAnchor: () => true},
         "../../util/outlineBlock": {updateOutlineCurrentBlock: () => {}},
         "./richText": {
@@ -352,6 +359,74 @@ const runCases = async (sources, appDirectory) => {
             assert.equal(Boolean(mask()), row < 2);
         }
     }
+    for (const isMobile of [false, true]) {
+        mobile = isMobile;
+        window.siyuan.menus.menu.element.className = "fn__none";
+        window.siyuan.config.keymap = {editor: {general: {}}};
+        const state = createOwner(false);
+        editor.destroyAVRichTextEditor(false);
+        await settle();
+        const selection = load("./selectionState");
+        const {avKeydown} = load("./keydown");
+        const {prepareAVContinuousInput} = load("./continuousInput");
+        const textColumn = state.data.view.columns[0];
+        const primaryColumn = {id: "primary", type: "block"};
+        state.data.view.columns.push(primaryColumn);
+        state.data.view.rows.push({id: "next", cells: [{value: {...state.value, id: "next-text", blockID: "next"}}]});
+        for (const row of state.data.view.rows) {
+            row.cells.push({value: {id: row.id + "-primary", keyID: "primary", blockID: row.id,
+                type: "block", isDetached: true, block: {content: "Initial"}}});
+        }
+        const points = state.data.view.rows.flatMap(row => [textColumn, primaryColumn].map(column =>
+            ({groupID: "", rowID: row.id, colID: column.id})));
+        const redraw = () => {
+            state.nodeElement.querySelector(".av__body").innerHTML = state.data.view.rows.map(row =>
+                `<div class="av__row" data-id="${row.id}">${state.data.view.columns.map(column =>
+                    `<div class="av__cell" data-col-id="${column.id}" data-dtype="${column.type}" data-detached="true"></div>`).join("")}</div>`).join("");
+            selection.restoreAVCellSelection(state.nodeElement);
+        };
+        redraw();
+        delete dependencies["./rangeSelect"];
+        const ranges = load("./rangeSelect");
+        const cells = state.nodeElement.querySelectorAll(".av__cell");
+        assert.equal(ranges.setAVCellAnchor(state.nodeElement, cells[cells.length - 1]), true);
+        assert.equal(ranges.selectAVCellRange(state.nodeElement, cells[0]), true);
+        const prepareNextInput = (anchor, rangeOnly) => prepareAVContinuousInput(state.protyle, state.nodeElement,
+            [anchor], openRangeCell, rangeOnly);
+        openRangeCell = anchor => {
+            const point = selection.getAVCellSelection(state.nodeElement).input;
+            const target = selection.resolveAVSelectedCell(state.data, point);
+            assert.equal(anchor.dataset.colId, point.colID);
+            editor.openAVRichTextEditor({protyle: state.protyle, nodeElement: state.nodeElement,
+                anchorElement: anchor, value: target.cell.value, stableCells: [target],
+                onSave: (...args) => state.saves.push(args), prepareNextInput});
+        };
+        const enter = new KeyboardEvent("keydown", {key: "Enter", cancelable: true});
+        assert.equal(avKeydown(enter, state.nodeElement, state.protyle, () => false), true);
+        assert.equal(enter.defaultPrevented, true);
+        for (let index = 0; index < points.length; index++) {
+            await settle();
+            assert.deepEqual(selection.getAVCellSelection(state.nodeElement).input, points[index]);
+            redraw();
+            await settle();
+            fragment.input.textContent = "Value " + index;
+            if (mobile) document.querySelector('[data-type="confirm"]').click();
+            else fragment.input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true,
+                cancelable: true, ctrlKey: points[index].colID === "text"}));
+            await settle();
+            assert.equal(state.saves.length, index + 1);
+            assert.equal(state.saves[index][2].length, 1);
+            assert.equal(state.saves[index][2][0].rowID, points[index].rowID);
+            assert.equal(state.saves[index][2][0].colID, points[index].colID);
+        }
+        assert.equal(mask(), null);
+        assert.equal(selection.getAVCellSelection(state.nodeElement).cells.length, 4);
+        assert.equal(state.nodeElement.querySelectorAll(".av__cell--active").length, 4);
+        const active = state.nodeElement.querySelectorAll(".av__cell--select");
+        assert.equal(active.length, 1);
+        assert.equal(active[0].dataset.colId, "primary");
+        assert.equal(active[0].closest(".av__row").dataset.id, "next");
+    }
     // 普通数据库行刷新后仍按稳定标识编辑；目标字段删除后取消编辑。
     mobile = false;
     const rerendered = createOwner(false);
@@ -414,7 +489,7 @@ const runElectron = async () => {
     let exitCode = 0;
     try {
         const ts = require("typescript");
-        const sources = Object.fromEntries(["richTextEditor", "continuousInput", "viewType", "editorSession", "selectionState", "capabilities", "capabilities.generated"].map(name => ["./" + name,
+        const sources = Object.fromEntries(["richTextEditor", "continuousInput", "keydown", "rangeSelect", "viewType", "editorSession", "selectionState", "capabilities", "capabilities.generated"].map(name => ["./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
         const hintSource = ts.createSourceFile("extend.ts", readFileSync(path.join(__dirname,
@@ -465,14 +540,14 @@ if (process.versions.electron && process.type === "browser") {
 } else {
     require("node:test").it("preserves database text editor lifecycle, continuous input and mobile safe-area coverage", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-        timeout: 45000,
+        timeout: 65000,
     }, async () => {
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-av-rich-editor-"));
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
+                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 60000});
             assert.match(stdout, /AV rich text editor lifecycle, continuous input and safe-area cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));

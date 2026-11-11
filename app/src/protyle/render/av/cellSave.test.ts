@@ -42,8 +42,9 @@ test("fallback text input leaves Enter available for multiline editing", async (
     }
 });
 
-test("ordinary input confirms once, retains failed drafts and respects focus moved during saving", async () => {
-    for (const result of ["saved", "failed", "focusMoved"]) {
+test("ordinary and range text inputs confirm once, retain failed drafts and respect moved focus", async () => {
+    for (const {type, result} of ["number", "text"].flatMap(type =>
+        ["saved", "failed", "focusMoved"].map(result => ({type, result})))) {
         let complete: () => void;
         let fail: () => void;
         const saving = new Promise<void>((resolve, reject) => {complete = resolve; fail = () => reject(new Error("failed"));});
@@ -51,16 +52,19 @@ test("ordinary input confirms once, retains failed drafts and respects focus mov
         let next = 0;
         let errors = 0;
         const input = {value: "42", dataset: {changed: "true"}, disabled: false};
-        const cell = {dataset: {dtype: "number"}, classList: {add() {}}};
+        const cell = {dataset: {dtype: type}, classList: {add() {}}};
         const block = {isConnected: true, getAttribute: (key: string) => key === "data-av-type" ? "table" : "database"};
         const mask = {isConnected: true, querySelector: () => input, contains: () => false, remove() {this.isConnected = false;}};
         const body = {};
         const document = {body, activeElement: body, querySelector: (key: string) => key === ".av__mask" ? mask : null};
         const keydown = runInNewContext(inputCode, {
-            protyle: {}, type: "number", blockElement: block, cellElements: [cell], inputElement: input, avMaskElement: mask,
+            protyle: {}, type, blockElement: block, cellElements: [cell], inputElement: input, avMaskElement: mask,
             inputTarget: () => ({elements: [cell], cells: [] as import("./selectionState").IAVSelectedCell[]}), electronUndo: () => false,
             isAVContinuousInputKey: continuous.isAVContinuousInputKey,
-            prepareAVContinuousInput: () => () => {next++;},
+            prepareAVContinuousInput: (_protyle: unknown, _block: unknown, _cells: unknown, _open: unknown, rangeOnly: boolean) => {
+                assert.equal(rangeOnly, type === "text");
+                return () => {next++;};
+            },
             updateCellsValue: (...args: unknown[]) => {
                 assert.equal(args.at(-1), true);
                 saves++;
@@ -71,7 +75,7 @@ test("ordinary input confirms once, retains failed drafts and respects focus mov
             window: {siyuan: {languages: {settingsPendingSaveError: "failed"}}},
             showMessage: () => {errors++;}, console: {error() {}},
         }) as (event: KeyboardEvent) => Promise<void>;
-        const event = {key: "Enter", preventDefault() {}, stopPropagation() {}} as KeyboardEvent;
+        const event = {key: "Enter", ctrlKey: type === "text", preventDefault() {}, stopPropagation() {}} as KeyboardEvent;
         const pending = keydown(event);
         assert.equal(saves, 1);
         assert.equal(next, 0);

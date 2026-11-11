@@ -6,7 +6,7 @@ import {loadModule} from "../../../testSupport/loadModule";
 const continuous = loadModule<typeof import("./continuousInput")>("src/protyle/render/av/continuousInput.ts", {require: () => ({})});
 
 const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; changed?: boolean; flush?: () => Promise<void>; save?: () => Promise<void>;
-    tableInput?: boolean; hint?: boolean} = {}) => {
+    tableInput?: boolean; rangeInput?: boolean; hint?: boolean} = {}) => {
     const lifecycle: string[] = [];
     const masks: Array<{
         firstElementChild: ReturnType<typeof createPanel>;
@@ -59,7 +59,8 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         stableCells: [] as import("./selectionState").IAVSelectedCell[],
         onSave: () => { lifecycle.push("save"); return settings.save?.(); },
         onDestroy: () => lifecycle.push("callback"),
-        prepareNextInput: () => settings.tableInput ? () => lifecycle.push("next") : undefined,
+        prepareNextInput: (_anchor: unknown, rangeOnly = false) =>
+            (rangeOnly ? settings.rangeInput : settings.tableInput) ? () => lifecycle.push("next") : undefined,
     };
     let currentValue = options.value;
     let fragmentOptions: Parameters<typeof import("../../lite/fragmentEditor").mountProtyleLiteFragment>[1];
@@ -176,6 +177,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         rebind: () => { currentValue = {type: "block", isDetached: false, block: {content: "other"}}; },
         cancel: () => masks.at(-1).handlers.get("siyuan-av-cell-editor-close")({}),
         get inert() { return masks.at(-1).firstElementChild.inert; },
+        confirm: () => masks.at(-1).firstElementChild.handlers.get("click")?.({}),
         enter: (options: Partial<KeyboardEvent> = {}) => masks.at(-1).firstElementChild.handlers.get("keydown")({
             key: "Enter", target: bodyTarget,
             preventDefault: () => lifecycle.push("prevent"), stopPropagation: () => lifecycle.push("stop"), ...options,
@@ -264,6 +266,37 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         }
     });
     if (!primary) {
+        for (const mobile of [false, true]) {
+            it(`advances a text range only after an explicit successful confirmation (${mobile ? "mobile" : "desktop"})`, async () => {
+                let complete: () => void;
+                const editor = createEditor({mobile, changed: true, rangeInput: true,
+                    save: () => new Promise<void>(resolve => complete = resolve)});
+                editor.enter();
+                editor.softKeyboardEnter();
+                assert.deepEqual(editor.lifecycle, []);
+                if (mobile) editor.confirm();
+                else editor.enter({ctrlKey: true});
+                await editor.settle();
+                assert.equal(editor.lifecycle.filter(item => item === "save").length, 1);
+                assert.equal(editor.lifecycle.includes("next"), false);
+                complete();
+                await editor.settle();
+                assert.equal(editor.lifecycle.filter(item => item === "next").length, 1);
+                assert.ok(editor.lifecycle.indexOf("next") > editor.lifecycle.indexOf("destroy"));
+            });
+        }
+        it("keeps failed range drafts open and ignores IME and unrelated toolbar confirmations", async () => {
+            const editor = createEditor({changed: true, rangeInput: true, save: async () => {throw new Error("failed");}});
+            editor.enter({ctrlKey: true, isComposing: true});
+            editor.enter({ctrlKey: true, keyCode: 229});
+            editor.enter({metaKey: true, target: editor.toolbarTarget as EventTarget});
+            assert.deepEqual(editor.lifecycle, []);
+            editor.enter({metaKey: true});
+            await editor.settle();
+            assert.equal(editor.lifecycle.includes("next"), false);
+            assert.equal(editor.lifecycle.includes("destroy"), false);
+            assert.equal(editor.inert, false);
+        });
         for (const mobile of [false, true]) {
             it(`leaves paragraph and list Enter events to the text editor (${mobile ? "mobile" : "desktop"})`, async () => {
                 const editor = createEditor({mobile, tableInput: true, changed: true});

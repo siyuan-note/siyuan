@@ -8,7 +8,7 @@
 		"id": "20240530101000-jp793ic",
 		"title": "よくある質問",
 		"type": "doc",
-		"updated": "20261109130054"
+		"updated": "20261111211629"
 	},
 	"Children": [
 		{
@@ -111,6 +111,80 @@
 				{
 					"Type": "NodeText",
 					"Data": "リセット前に、このワークスペースに接続中のすべてのクライアントで保存を完了する必要があります。保存に失敗するとリセットは中止されます。その後、クライアントは再読み込みされます。ローカルのデスクトップアプリから実行した場合、再読み込み後にアプリが終了するので再起動してください。モバイルとブラウザーでは再読み込みのみ行われます。"
+				}
+			]
+		},
+		{
+			"ID": "20261111211629-f338618",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261111211629-f338618",
+				"updated": "20261111211629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "システムログをエクスポートするには？"
+				}
+			]
+		},
+		{
+			"ID": "20261111211629-56a3e9e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111211629-56a3e9e",
+				"updated": "20261111211629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "異常な状態を示すダイアログの左下にある "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "システムログをエクスポート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をクリックすると、ZIP ファイルを保存できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アプリ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "メンテナンス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "システムログ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " からもログをエクスポートできます。"
 				}
 			]
 		},

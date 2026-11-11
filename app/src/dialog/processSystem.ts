@@ -3,6 +3,7 @@ import {clearReloadSnapshot} from "../layout/reloadSnapshot";
 import {renderBazaarInstall, updateBazaarInstallProgress} from "../config/bazaar/installTask";
 import {getSettingsWindowHost} from "../config/setting/windowContext";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {withFetchTimeout} from "../util/fetchTimeout";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
@@ -20,7 +21,7 @@ import {escapeHtml} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {saveMobileLayout} from "../mobile/util/saveLayout";
-import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, saveExportFile, setStorageVal} from "../protyle/util/compatibility";
 import {emitToPlugins} from "../plugin/EventBusCore";
 import {createHostQuitGuard} from "./hostQuit";
 import {requestSystemExit, updateExitProgressStatus} from "./exitRequest";
@@ -286,6 +287,7 @@ export const transactionError = (msg?: string) => {
     if (document.getElementById("transactionError")) {
         return;
     }
+    const canExportLog = getHostCapabilities().importExport;
     const dialog = new Dialog({
         disableClose: true,
         title: `${window.siyuan.languages.stateExcepted} v${Constants.SIYUAN_VERSION}`,
@@ -294,15 +296,39 @@ export const transactionError = (msg?: string) => {
     ${msg ? `<div class="fn__hr"></div>${escapeHtml(msg.trim())}` : ""}
 </div>
 <div class="b3-dialog__action">
-    <button class="b3-button b3-button--text">${window.siyuan.languages._kernel[97]}</button>
+    ${canExportLog ? `<button class="b3-button b3-button--text" data-action="export-log">${window.siyuan.languages.exportSystemLog}</button>
+    <div class="fn__space fn__flex-1"></div>` : ""}
+    <button class="b3-button b3-button--text" data-action="exit">${window.siyuan.languages._kernel[97]}</button>
     <div class="fn__space"></div>
-    <button class="b3-button">${window.siyuan.languages.rebuildDataIndex}</button>
+    <button class="b3-button" data-action="rebuild">${window.siyuan.languages.rebuildDataIndex}</button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_STATEEXCEPTED);
-    const btnsElement = dialog.element.querySelectorAll(".b3-button");
-    btnsElement[0].addEventListener("click", () => {
+    const exportButton = dialog.element.querySelector<HTMLButtonElement>('[data-action="export-log"]');
+    exportButton?.addEventListener("click", async () => {
+        exportButton.disabled = true;
+        try {
+            const response = await withFetchTimeout(
+                signal => fetchSyncPost("/api/system/exportLog", {}, undefined, true, signal), undefined, 30000);
+            if (!dialog.element.isConnected || response.code !== 0) {
+                return;
+            }
+            if (response.data?.zip) {
+                await saveExportFile(response.data.zip);
+            } else {
+                showMessage(window.siyuan.languages._kernel[290], 6000, "error");
+            }
+        } catch (error) {
+            console.warn(error);
+            if (dialog.element.isConnected) {
+                showMessage(window.siyuan.languages._kernel[290], 6000, "error");
+            }
+        } finally {
+            exportButton.disabled = false;
+        }
+    });
+    dialog.element.querySelector('[data-action="exit"]').addEventListener("click", () => {
         /// #if MOBILE
         exitSiYuan();
         /// #else
@@ -312,7 +338,7 @@ export const transactionError = (msg?: string) => {
         });
         /// #endif
     });
-    btnsElement[1].addEventListener("click", () => {
+    dialog.element.querySelector('[data-action="rebuild"]').addEventListener("click", () => {
         refreshFileTree();
         dialog.destroy();
     });

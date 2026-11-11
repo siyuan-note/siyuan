@@ -7,7 +7,7 @@
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
 		"type": "doc",
-		"updated": "20261109130054"
+		"updated": "20261111211629"
 	},
 	"Children": [
 		{
@@ -114,6 +114,80 @@
 				{
 					"Type": "NodeText",
 					"Data": "重設前，連線至此工作空間的所有用戶端必須完成儲存；儲存失敗時會取消重設。隨後用戶端會重新載入。透過本機桌面應用程式發起時，桌面應用程式會在重新載入後結束，請重新啟動；行動端和瀏覽器端僅重新載入。"
+				}
+			]
+		},
+		{
+			"ID": "20261111211629-410771e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261111211629-410771e",
+				"updated": "20261111211629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如何匯出系統日誌？"
+				}
+			]
+		},
+		{
+			"ID": "20261111211629-70a3776",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111211629-70a3776",
+				"updated": "20261111211629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在狀態異常對話框左下角點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "匯出日誌"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可儲存 ZIP 壓縮檔。也可以在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "應用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "維護"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "系統日誌"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中匯出日誌。"
 				}
 			]
 		},

@@ -1,4 +1,5 @@
 {
+	"exportSystemLog": "Экспортировать системный журнал",
 	"datePickerTime": "Время",
 	"listMindmapNodeShape": "Форма узла",
 	"listMindmapShapeRectangle": "Прямоугольник",

@@ -1,5 +1,6 @@
 import {addDays, addMonths, candidateForDay, dateToDays, daysToDate, formatDate, ICivilDate,
     IDateConstraints, localToday, parseDate, validateDateValue, weekday} from "./model";
+import {createYearInputController} from "./yearInput";
 
 export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     value: string;
@@ -45,7 +46,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     error.setAttribute("role", "status");
     const createInput = (label: string, placeholder: string) => {
         const wrapper = doc.createElement("label");
-        wrapper.className = "date-picker__field";
+        wrapper.className = "date-picker__field" + (options.type === "date" ? " date-picker__field--date-only" : "");
         const text = doc.createElement("span");
         text.textContent = label;
         const input = doc.createElement("input");
@@ -80,7 +81,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     const validate = () => {
         const value = readValue();
         probe.value = value;
-        return !disposed && !badInput && !composing.size && validateDateValue(value, options) === "valid" &&
+        return !disposed && !badInput && !composing.size && !yearInput.isComposing() && validateDateValue(value, options) === "valid" &&
             (value === "" || probe.value !== "") && probe.validity.valid;
     };
     const notify = (showError = false) => {
@@ -97,6 +98,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     if (minDate && dateToDays(focusDate) < dateToDays(minDate)) { focusDate = minDate; }
     if (maxDate && dateToDays(focusDate) > dateToDays(maxDate)) { focusDate = maxDate; }
     let month = {...focusDate, day: 1};
+    let settledMonth = {...month};
     const toolbar = doc.createElement("div");
     toolbar.className = "date-picker__navigation";
     const makeButton = (label: string, className = "b3-button b3-button--cancel") => {
@@ -106,12 +108,19 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
         button.textContent = label;
         return button;
     };
-    const previous = makeButton(lang.previous, "block__icon");
+    const previous = makeButton(lang.previous, "block__icon block__icon--show");
     previous.setAttribute("aria-label", lang.previous);
     previous.innerHTML = '<svg><use xlink:href="#iconLeft"></use></svg>';
-    const next = makeButton(lang.next, "block__icon");
+    const next = makeButton(lang.next, "block__icon block__icon--show");
     next.setAttribute("aria-label", lang.next);
     next.innerHTML = '<svg><use xlink:href="#iconRight"></use></svg>';
+    const monthToggle = makeButton("");
+    monthToggle.classList.add("date-picker__month-toggle");
+    monthToggle.setAttribute("aria-expanded", "false");
+    const monthEditor = doc.createElement("div");
+    monthEditor.className = "date-picker__month-editor fn__none";
+    monthEditor.id = "date-picker-month-" + Math.random().toString(36).substring(2);
+    monthToggle.setAttribute("aria-controls", monthEditor.id);
     const months = doc.createElement("select");
     months.className = "b3-select" + (touch ? " b3-select" + touch : "");
     months.setAttribute("aria-label", lang.month);
@@ -122,13 +131,20 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
         months.append(option);
     }
     const year = doc.createElement("input");
-    year.type = "number";
     year.className = "b3-text-field" + (touch ? " b3-text-field" + touch : "");
     year.setAttribute("aria-label", lang.year);
-    year.min = "1";
-    year.max = "275760";
-    year.step = "1";
-    toolbar.append(previous, months, year, next);
+    const yearInput = createYearInputController(year, () => settledMonth.year);
+    const updateMonthOptions = () => {
+        const draft = Number(year.value);
+        const lastYear = !yearInput.isComposing() && /^[0-9]+$/.test(year.value) &&
+            Number.isInteger(draft) && draft >= 1 && draft <= 275760 ? draft === 275760 : month.year === 275760;
+        Array.from(months.options).forEach(option => { option.disabled = lastYear && Number(option.value) > 9; });
+    };
+    year.addEventListener("input", () => { updateMonthOptions(); previewYear(); });
+    year.addEventListener("compositionstart", () => notify());
+    year.addEventListener("compositionend", () => { updateMonthOptions(); previewYear(); notify(); });
+    monthEditor.append(months, year);
+    toolbar.append(monthToggle, previous, next);
     const calendar = doc.createElement("table");
     calendar.className = "date-picker__calendar";
     calendar.setAttribute("role", "grid");
@@ -139,6 +155,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     const heading = calendar.createTHead().insertRow();
     for (let i = 0; i < 7; i++) {
         const cell = doc.createElement("th");
+        cell.className = "ft__on-surface ft__smaller";
         cell.scope = "col";
         const day = Date.UTC(2024, 0, 7 + (weekStart + i) % 7);
         cell.setAttribute("aria-label", fullWeekdayFormatter.format(day));
@@ -157,7 +174,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     const body = calendar.createTBody();
     const candidate = (date: ICivilDate) => candidateForDay(date, options, timeInput?.value || "00:00");
     const selectDay = (date: ICivilDate) => {
-        if (disposed || composing.size) { return; }
+        if (disposed || composing.size || yearInput.isComposing()) { return; }
         const value = candidate(date);
         if (value === undefined) { return; }
         badInput = false;
@@ -168,11 +185,20 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
         notify();
         options.onSelect?.();
     };
-    const render = (focus = false) => {
+    const render = (focus = false, preserveYearDraft = false) => {
         if (!dateInput || disposed) { return; }
         months.value = String(month.month);
-        year.value = String(month.year);
+        if (!preserveYearDraft) {
+            settledMonth = {...month};
+            yearInput.setValue(month.year);
+        }
         caption.textContent = headingFormatter.format(dateToDays(month) * 86400000);
+        monthToggle.textContent = caption.textContent;
+        monthToggle.title = caption.textContent;
+        updateMonthOptions();
+        const rtl = doc.defaultView.getComputedStyle(root).direction === "rtl";
+        previous.querySelector("use").setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", rtl ? "#iconRight" : "#iconLeft");
+        next.querySelector("use").setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", rtl ? "#iconLeft" : "#iconRight");
         calendar.setAttribute("aria-label", caption.textContent);
         previous.disabled = month.year === 1 && month.month === 1;
         next.disabled = month.year === 275760 && month.month >= 9;
@@ -204,6 +230,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
                 if (!fallback || selected) { fallback = button; }
                 button.addEventListener("click", () => selectDay(date));
                 button.addEventListener("keydown", event => {
+                    if (yearInput.isComposing() || composing.size) { return; }
                     const rtl = doc.defaultView.getComputedStyle(root).direction === "rtl";
                     let target: ICivilDate;
                     if (event.key === "ArrowLeft") { target = addDays(date, rtl ? 1 : -1); }
@@ -230,22 +257,83 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
             if (focus) { target.focus({preventScroll: true}); }
         } else if (focus) { months.focus({preventScroll: true}); }
     };
-    previous.addEventListener("click", () => { month = addMonths(month, -1); focusDate = month; render(); });
-    next.addEventListener("click", () => { month = addMonths(month, 1); focusDate = month; render(); });
+    const previewYear = () => {
+        if (yearInput.isComposing()) { return; }
+        const draft = Number(year.value);
+        const valid = /^[0-9]+$/.test(year.value) && Number.isInteger(draft) && draft >= 1 && draft <= 275760;
+        const preview = valid ? {year: draft, month: draft === 275760 ? Math.min(9, settledMonth.month) : settledMonth.month, day: 1} :
+            {...settledMonth};
+        if (month.year === preview.year && month.month === preview.month) { return; }
+        month = preview;
+        focusDate = month;
+        render(false, true);
+    };
+    previous.addEventListener("click", () => {
+        if (yearInput.isComposing()) { return; }
+        navigate();
+        month = addMonths(month, -1); focusDate = month; render();
+    });
+    next.addEventListener("click", () => {
+        if (yearInput.isComposing()) { return; }
+        navigate();
+        month = addMonths(month, 1); focusDate = month; render();
+    });
     const navigate = () => {
-        if (!year.value || !year.validity.valid) { return; }
-        month = {year: Number(year.value), month: Number(months.value), day: 1};
-        if (month.year === 275760 && month.month > 9) { month.month = 9; }
+        if (yearInput.isComposing()) { return; }
+        const nextYear = yearInput.commit();
+        if (nextYear === undefined) {
+            if (month.year !== settledMonth.year || month.month !== settledMonth.month) { month = {...settledMonth}; render(); }
+            months.value = String(month.month);
+            return;
+        }
+        const nextMonth = nextYear === 275760 ? Math.min(9, Number(months.value)) : Number(months.value);
+        months.value = String(nextMonth);
+        settledMonth = {year: nextYear, month: nextMonth, day: 1};
+        if (month.year === nextYear && month.month === nextMonth) { return; }
+        month = {year: nextYear, month: nextMonth, day: 1};
         focusDate = month;
         render();
     };
     months.addEventListener("change", navigate);
+    months.addEventListener("pointerdown", navigate);
     year.addEventListener("change", navigate);
+    year.addEventListener("blur", navigate);
+    const closeMonthEditor = (focus = false) => {
+        if (yearInput.isComposing()) { return; }
+        navigate();
+        monthEditor.classList.add("fn__none");
+        monthToggle.setAttribute("aria-expanded", "false");
+        if (focus) { monthToggle.focus({preventScroll: true}); }
+    };
+    const cancelMonthEdit = () => {
+        if (yearInput.isComposing() || monthToggle.getAttribute("aria-expanded") !== "true") { return false; }
+        month = {...settledMonth};
+        render();
+        monthEditor.classList.add("fn__none");
+        monthToggle.setAttribute("aria-expanded", "false");
+        monthToggle.focus({preventScroll: true});
+        return true;
+    };
+    monthToggle.addEventListener("click", () => {
+        if (monthToggle.getAttribute("aria-expanded") === "true") { closeMonthEditor(true); return; }
+        monthEditor.classList.remove("fn__none");
+        monthToggle.setAttribute("aria-expanded", "true");
+        year.focus({preventScroll: true});
+        year.select();
+    });
+    monthEditor.addEventListener("focusout", event => {
+        const next = event.relatedTarget as Element;
+        if (next && !monthEditor.contains(next) && next !== monthToggle &&
+            !next.closest(".b3-menu")) { closeMonthEditor(); }
+    });
+    root.addEventListener("pointerdown", event => {
+        // 按钮完成点击后再转移焦点，避免失焦收起编辑区使鼠标落到另一行日期。
+        if (monthEditor.contains(doc.activeElement) && (event.target as Element).closest("button")) { event.preventDefault(); }
+    });
     year.addEventListener("keydown", event => {
-        if (event.key === "Enter" && !event.isComposing && event.keyCode !== 229) {
+        if (event.key === "Enter" && !yearInput.isComposing() && !event.isComposing && event.keyCode !== 229) {
             event.preventDefault(); event.stopPropagation();
-            if (!year.reportValidity()) { return; }
-            navigate();
+            closeMonthEditor(true);
         }
     });
     inputs.forEach(input => {
@@ -268,15 +356,15 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     const clear = makeButton(lang.clear);
     clear.disabled = !!options.required;
     clear.addEventListener("click", () => {
-        if (composing.size || disposed) { return; }
+        if (composing.size || disposed || yearInput.isComposing()) { return; }
         badInput = false;
         setValue(""); render(); notify(); inputs[0].focus();
         options.onSelect?.();
     });
-    if (dateInput) { shortcuts.append(today); }
+    if (dateInput) { toolbar.insertBefore(today, previous); }
     shortcuts.append(clear);
     root.append(fields);
-    if (dateInput) { root.append(toolbar, calendar); }
+    if (dateInput) { root.append(toolbar, monthEditor, calendar); }
     root.append(shortcuts, error);
     host.append(root);
     render();
@@ -284,13 +372,16 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     const focusTarget = () => calendar.querySelector<HTMLButtonElement>('button[tabindex="0"]') || inputs[0];
     return {
         element: root,
+        cancelMonthEdit,
+        isComposing: () => composing.size > 0 || yearInput.isComposing(),
         validate,
         commit: (): string | undefined => {
+            if (yearInput.isComposing()) { return; }
             if (!validate()) { notify(true); (Array.from(composing)[0] || inputs.find(input => !input.value) || inputs[0]).focus(); return; }
             return probe.value;
         },
         focusTarget,
         focus: () => focusTarget().focus({preventScroll: true}),
-        destroy: () => { disposed = true; root.remove(); },
+        destroy: () => { disposed = true; yearInput.destroy(); root.remove(); },
     };
 };

@@ -35,7 +35,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     (window as any).siyuan = {dialogs: [], zIndex: 10, languages, config: {}, isReady: true,
         mobile: {size: {isLandscape: false, portrait: {height1: 900}, landscape: {height1: 900}}},
         menus: {}};
-    ["overlayOwnership", "dialog", "model", "field", "runtime", "owners", "sheetOpen", "mobileSheetGesture",
+    ["overlayOwnership", "dialog", "model", "yearInput", "field", "menuPosition", "position", "runtime", "owners", "sheetOpen", "mobileSheetGesture",
         "visibleViewport", "orientation", "keyboardSheetState", "mobileSheetLayout", "bindBottomSheetDrag", "bindBottomSheetDialog"].forEach(name => load(name));
     ["menuGroup", "sheetActions", "hasClosest"].forEach(name => load(name));
     const realMenu = load("realMenu", {"../config/entryVisibility/runtime": fallback});
@@ -60,9 +60,23 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     equal(root.querySelector<HTMLElement>(".b3-dialog__container").style.visibility, "hidden", "real mobile sheet starts hidden");
     await tick();
     equal(root.querySelector<HTMLElement>(".b3-dialog__container").style.visibility, "", "real mobile sheet becomes visible");
+    equal(getComputedStyle(root.querySelector(".b3-dialog__header")).display, "none", "Mobile picker has no default title bar");
+    equal(root.querySelector('[role="dialog"]').getAttribute("aria-label"), "Date", "Untitled mobile sheet keeps an accessible name");
+    ok(root.querySelector(".b3-menu__title--root"), "Mobile sheet keeps its independent drag handle");
     equal((document.activeElement as HTMLElement).dataset.date, "2024-02-28", "mobile focus waits for the sheet");
     const time = root.querySelectorAll<HTMLInputElement>(".date-picker__fields input")[1];
     time.click(); equal(parentClosed, 0, "window capturing menu dismissal respects the picker");
+    root.querySelector<HTMLButtonElement>(".date-picker__month-toggle").click();
+    const year = root.querySelector<HTMLInputElement>(".date-picker__month-editor input");
+    year.dispatchEvent(new CompositionEvent("compositionstart"));
+    ok(root.querySelector<HTMLButtonElement>('[data-action="confirm"]').disabled, "Year composition disables confirmation");
+    const composingEscape = new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true});
+    year.dispatchEvent(composingEscape);
+    equal(composingEscape.defaultPrevented, false, "Unmarked Escape keeps native IME handling");
+    equal(root.dataset.dialogClosing, undefined, "Unmarked IME Escape does not reach mobile sheet dismissal");
+    equal(root.querySelector(".date-picker__month-toggle").getAttribute("aria-expanded"), "true", "IME Escape preserves month editing");
+    year.dispatchEvent(new CompositionEvent("compositionend"));
+    equal(root.querySelector<HTMLButtonElement>('[data-action="confirm"]').disabled, false, "Finishing year composition restores confirmation");
     const month = root.querySelector<HTMLSelectElement>("select"); month.click();
     const menu = nativeSelect.getMobileSelectMenuElement() as HTMLElement;
     ok(menu && menu !== common, "month select creates an independent derived menu");
@@ -121,10 +135,10 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
 };
 
 test("date picker uses the real mobile sheet and preserves nested menu ownership", {timeout: 45000, skip: !canRunBrowser}, async () => {
-    const files = Object.fromEntries(["model", "field", "runtime", "owners", "binding", "index"].map(name => [name, join(__dirname, name + ".ts")]));
+    const files = Object.fromEntries(["model", "yearInput", "field", "runtime", "owners", "binding", "position", "index"].map(name => [name, join(__dirname, name + ".ts")]));
     const mobile = Object.fromEntries(["mobileSheetGesture", "visibleViewport", "orientation", "keyboardSheetState", "mobileSheetLayout",
         "bindBottomSheetDrag", "bindBottomSheetDialog", "nativeSelect"].map(name => [name, join(__dirname, "../mobile/util", name + ".ts")]));
-    const sources = browserSources({...files, ...mobile, realMenu: join(__dirname, "../menus/Menu.ts"),
+    const sources = browserSources({...files, menuPosition: join(__dirname, "../menus/menuPosition.ts"), ...mobile, realMenu: join(__dirname, "../menus/Menu.ts"),
         menuGroup: join(__dirname, "../menus/menuGroup.ts"), sheetActions: join(__dirname, "../menus/sheetActions.ts"),
         hasClosest: join(__dirname, "../protyle/util/hasClosest.ts"), dialog: join(__dirname, "../dialog/index.ts"),
         mobileDialog: join(__dirname, "../dialog/mobileDialog.ts"), pluginMenu: join(__dirname, "../plugin/Menu.ts"),

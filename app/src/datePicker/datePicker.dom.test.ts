@@ -29,7 +29,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         destroyDialogBlockPanels() {}, getDialogBlockPanel() {}, getAnchoredInputMask() {}};
     load("overlayOwnership");
     const {Dialog} = load("dialog", dialogDeps);
-    ["model", "field", "runtime", "owners", "hasClosest", "menuClick"].forEach(name => load(name));
+    ["model", "yearInput", "field", "menuPosition", "position", "runtime", "owners", "hasClosest", "menuClick"].forEach(name => load(name));
     modules.panel = {registerDatePickerWindow() {}};
     modules.index = {};
     load("binding");
@@ -51,6 +51,9 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     const root = current();
     equal(root.querySelector(".b3-dialog__header").textContent, "<img src=x onerror=alert(1)>");
     equal(root.querySelector(".b3-dialog__header img"), null);
+    ok(getComputedStyle(root.querySelector(".b3-dialog__header")).display !== "none", "Custom titles stay visible");
+    ok(root.querySelector(".b3-dialog__header").classList.contains("resize__move"), "Custom titles retain desktop dragging");
+    equal(root.querySelector('[role="dialog"]').getAttribute("aria-labelledby"), root.querySelector(".b3-dialog__header").id);
     equal(root.querySelectorAll('button[tabindex="0"]').length, 1);
     equal((document.activeElement as HTMLElement).dataset.date, "2024-02-28");
     document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
@@ -79,6 +82,14 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         await tick();
     }
     const empty = open({value: ""});
+    equal(getComputedStyle(current().querySelector(".b3-dialog__header")).display, "none", "Default picker has no visible title bar");
+    equal(current().querySelector('[role="dialog"]').getAttribute("aria-label"), "Date");
+    equal(current().querySelector('[role="dialog"]').getAttribute("aria-labelledby"), null);
+    equal(texts(current())[0].labels[0].textContent, "Date", "Date input retains its accessible label");
+    equal(getComputedStyle(texts(current())[0].labels[0].querySelector("span")).clipPath, "inset(50%)", "Single date label is accessible without a duplicate visible label");
+    const defaultContainer = current().querySelector<HTMLElement>(".b3-dialog__container");
+    ok(defaultContainer.getBoundingClientRect().width <= innerWidth, "Untitled picker stays inside the viewport");
+    ok(current().querySelector<HTMLButtonElement>('[data-action="cancel"]').checkVisibility(), "Cancel remains reachable");
     equal(texts(current())[0].value, "");
     confirm(current()); equal(await empty.result, {type: "confirm", value: "", changed: false}); await tick();
     const required = open({value: "", required: true});
@@ -106,19 +117,29 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     equal(texts(steppedRoot)[0].value, "2024-02-03", "unavailable day cannot be selected");
     document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true, cancelable: true}));
     equal((document.activeElement as HTMLElement).dataset.date, "2024-02-05");
-    const year = steppedRoot.querySelector<HTMLInputElement>(".date-picker__navigation input");
+    const year = steppedRoot.querySelector<HTMLInputElement>(".date-picker__month-editor input");
+    steppedRoot.querySelector<HTMLButtonElement>(".date-picker__month-toggle").click();
+    equal(document.activeElement, year, "Month heading opens the year editor");
+    equal(steppedRoot.querySelector(".date-picker__month-toggle").getAttribute("aria-expanded"), "true");
     year.value = "2025";
     year.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
     ok(current() === steppedRoot, "year navigation must not accept the date");
+    equal(steppedRoot.querySelector(".date-picker__month-toggle").getAttribute("aria-expanded"), "false", "Enter closes month editing");
     ok(steppedRoot.querySelector('[data-date="2025-02-03"]'));
     equal(texts(steppedRoot)[0].value, "2024-02-03");
+    steppedRoot.querySelector<HTMLButtonElement>(".date-picker__month-toggle").click();
+    year.value = "2030";
+    year.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    ok(current() === steppedRoot, "First Escape only exits month editing");
+    equal(year.value, "2025", "Escape discards the uncommitted year draft");
     stepped.destroy(); await stepped.result; await tick();
     const future = open({type: "datetime-local", value: "", min: "2099-05-01 10:00"});
-    equal(current().querySelector<HTMLInputElement>(".date-picker__navigation input").value, "2099");
+    equal(current().querySelector<HTMLInputElement>(".date-picker__month-editor input").value, "2099");
     click(current(), '[data-date="2099-05-01"]');
     equal(texts(current())[1].value, "10:00"); future.destroy(); await future.result; await tick();
 
     const time = open({type: "time", value: "23:30", min: "22:00", max: "02:00"});
+    equal(current().querySelector('[role="dialog"]').getAttribute("aria-label"), "Time");
     equal(current().querySelector("table"), null);
     edit(texts(current())[0], "00:30"); confirm(current());
     equal(await time.result, {type: "confirm", value: "00:30", changed: true}); await tick();
@@ -211,13 +232,11 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     equal(await active.result, {type: "cancel", reason: "owner-destroyed"}); await tick();
     let rejected = false; try { open(); } catch { rejected = true; } ok(rejected);
 
-    for (const width of [320, 360, 800]) {
-        document.body.style.width = `${width}px`;
-        document.documentElement.dataset.frontend = width < 400 ? "browser-mobile" : "browser-desktop";
+    for (const width of [innerWidth]) {
+        document.documentElement.dataset.frontend = "browser-desktop";
         const layout = api.openInternalDatePicker({ownerElement: owner, type: "date", value: "2024-02-28", locale: "ar-EG"});
         current().querySelector<HTMLElement>(".date-picker").dir = "rtl";
         const container = current().querySelector<HTMLElement>(".b3-dialog__container");
-        container.style.maxWidth = `${width - 32}px`;
         await tick();
         const picker = current().querySelector<HTMLElement>(".date-picker");
         ok(picker.scrollWidth <= picker.clientWidth + 1, `No picker overflow at ${width}`);
@@ -226,6 +245,9 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         current().querySelector<HTMLButtonElement>('[data-date="2024-02-28"]').focus();
         document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowLeft", bubbles: true, cancelable: true}));
         equal((document.activeElement as HTMLElement).dataset.date, "2024-02-29", "RTL reverses horizontal movement");
+        const bounds = container.getBoundingClientRect();
+        ok(bounds.left >= 0 && bounds.right <= innerWidth + 1 && bounds.top >= 0 && bounds.bottom <= innerHeight + 1,
+            "Anchored picker remains within the actual viewport");
         layout.destroy(); await layout.result; await tick();
     }
     const page = api.openInternalDatePicker({ownerElement: owner, type: "date", value: ""});
@@ -239,13 +261,13 @@ for (const scheme of ["daylight", "midnight"]) {
     test(`date picker real DOM: editing, constraints, events, layout and lifecycle in ${scheme}, ${width}px`, {
         timeout: 45000, skip: !canRunBrowser,
     }, async () => {
-        const files = Object.fromEntries(["model", "field", "runtime", "owners", "binding", "index"].map(name => [name, join(__dirname, name + ".ts")]));
-        const sources = browserSources({...files, dialog: join(__dirname, "../dialog/index.ts"),
+        const files = Object.fromEntries(["model", "yearInput", "field", "runtime", "owners", "binding", "position", "index"].map(name => [name, join(__dirname, name + ".ts")]));
+        const sources = browserSources({...files, menuPosition: join(__dirname, "../menus/menuPosition.ts"), dialog: join(__dirname, "../dialog/index.ts"),
             overlayOwnership: join(__dirname, "../menus/overlayOwnership.ts"),
             hasClosest: join(__dirname, "../protyle/util/hasClosest.ts"), menuClick: join(__dirname, "../menus/menuClick.ts")});
         const css = compile(join(__dirname, "../assets/scss/base.scss"), {logger: {warn() {}}}).css;
         const theme = readFileSync(join(__dirname, `../../appearance/themes/${scheme}/theme.css`), "utf8");
-        assert.match(await runBrowserCase(browserCases, sources, theme + css, {width}), /Date picker browser cases passed/);
+        assert.match(await runBrowserCase(browserCases, sources, theme + css, {width, height: width === 320 ? 600 : 900}), /Date picker browser cases passed/);
     });
   }
 }

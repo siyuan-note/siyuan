@@ -10,20 +10,27 @@ export const browserSources = (files: Record<string, string>) => Object.fromEntr
     [key, transpileModule(readFileSync(path, "utf8"), {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText]));
 
 export const runBrowserCase = async (callback: (sources: Record<string, string>, css: string) => Promise<string>,
-                                     sources: Record<string, string>, css = "", options: {width?: number; height?: number} = {}) => {
+                                     sources: Record<string, string>, css = "", options: {width?: number; height?: number;
+    interact?: (window: import("electron").BrowserWindow) => Promise<string>} = {}) => {
     const width = options.width || 900;
     const height = options.height || 900;
     const temporary = mkdtempSync(join(tmpdir(), "siyuan-date-picker-"));
     const callbackSource = transpileModule(`(${callback.toString()})`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText.trim().replace(/;$/, "");
     const expression = `const __name = value => value; ${callbackSource}(${JSON.stringify(sources)},${JSON.stringify(css)})`;
+    const interaction = options.interact && transpileModule(`(${options.interact.toString()})`,
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText.trim().replace(/^"use strict";\s*/, "").replace(/;$/, "");
     try {
         const script = join(temporary, "run.cjs");
-        writeFileSync(script, `const {app,BrowserWindow}=require("electron");
+        writeFileSync(script, `const {app,BrowserWindow}=require("electron"); const __name=value=>value;
 app.setPath("userData",${JSON.stringify(join(temporary, "profile"))});app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async()=>{const win=new BrowserWindow({show:false,useContentSize:true,width:${width},height:${height},webPreferences:{contextIsolation:false}});
 try{await win.loadURL("data:text/html,<html><body></body></html>");win.show();win.focus();
+win.webContents.debugger.attach("1.3");
+await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled",{enabled:true});
+if(!await win.webContents.executeJavaScript("document.hasFocus()"))throw Error("Browser window must be focused");
 if(await win.webContents.executeJavaScript("innerWidth")!==${width}||await win.webContents.executeJavaScript("innerHeight")!==${height})throw Error("Unexpected browser viewport");
-console.log(await win.webContents.executeJavaScript(${JSON.stringify(expression)}));app.exit(0);}
+const result=await win.webContents.executeJavaScript(${JSON.stringify(expression)});
+console.log(${interaction ? `await (${interaction})(win)` : "result"});app.exit(0);}
 catch(error){console.error(error);app.exit(1);}});`, "utf8");
         const env: NodeJS.ProcessEnv = {...process.env, XDG_CACHE_HOME: join(temporary, "cache"), XDG_CONFIG_HOME: join(temporary, "config"),
             XDG_DATA_HOME: join(temporary, "data")}; delete env.ELECTRON_RUN_AS_NODE;

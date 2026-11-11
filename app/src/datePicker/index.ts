@@ -5,6 +5,7 @@ import {getDatePickerOwner} from "./owners";
 import {registerDatePickerWindow} from "./panel";
 import {getDatePickerRuntime} from "./runtime";
 import {getMenuOwnerElement, registerMenuOverlay} from "../menus/overlayOwnership";
+import {bindDatePickerPosition} from "./position";
 
 export type TDatePickerCancelReason = "cancel" | "escape" | "dismiss" | "destroy" | "replaced" | "owner-destroyed";
 export type TDatePickerResult = {type: "confirm"; value: string; changed: boolean} |
@@ -49,13 +50,14 @@ export const openInternalDatePicker = (options: Omit<IDatePickerOptions, "ownerP
     let active = true;
     let closing = false;
     const resources: {dialog?: ReturnType<typeof runtime.createDialog>; field?: ReturnType<typeof createDateField>;
-        observer?: MutationObserver; releaseMenu?: () => void} = {};
+        observer?: MutationObserver; releaseMenu?: () => void; releasePosition?: () => void} = {};
     const finish = (terminal: TDatePickerResult) => {
         if (!active) { return; }
         active = false;
         if (runtime.current === current) { runtime.current = undefined; }
         owner?.sessions.delete(ownerDestroyed);
         resources.observer?.disconnect();
+        resources.releasePosition?.();
         resources.releaseMenu?.();
         view.removeEventListener("pagehide", ownerDestroyed);
         resources.field?.destroy();
@@ -76,7 +78,9 @@ export const openInternalDatePicker = (options: Omit<IDatePickerOptions, "ownerP
     runtime.current = current;
     owner?.sessions.add(ownerDestroyed);
     try {
-        const dialog = resources.dialog = runtime.createDialog({title: " ", content: "", width: "380px",
+        const anchored = !options.title && !doc.getElementById("sidebar");
+        const dialog = resources.dialog = runtime.createDialog({title: options.title ? " " : "", content: "", width: "380px",
+            transparent: anchored, disableAnimation: anchored,
             beforeClose: () => { closing = true; cancel("dismiss"); return true; },
             destroyCallback: () => cancel("dismiss"),
         });
@@ -86,8 +90,17 @@ export const openInternalDatePicker = (options: Omit<IDatePickerOptions, "ownerP
             dialog.element.dataset.menu = "true";
             resources.releaseMenu = registerMenuOverlay(options.ownerElement, dialog.element, ownerDestroyed);
         } else if (options.ownerElement.closest('[data-menu="true"]')) { dialog.element.dataset.menu = "true"; }
-        dialog.element.querySelector<HTMLElement>(".b3-dialog__header").textContent = options.title ||
-            (options.type === "time" ? lang.datePickerTime : lang.date);
+        if (options.title) {
+            dialog.element.querySelector<HTMLElement>(".b3-dialog__header").textContent = options.title;
+        } else {
+            dialog.element.querySelector<HTMLElement>('[role="dialog"]').setAttribute("aria-label",
+                options.type === "time" ? lang.datePickerTime : lang.date);
+        }
+        if (anchored) {
+            dialog.element.classList.add("date-picker-dialog");
+            dialog.element.querySelectorAll('.b3-dialog__container > [class^="resize__"]:not(.b3-dialog__header)')
+                .forEach(element => element.remove());
+        }
         const content = doc.createElement("div");
         content.className = "b3-dialog__content";
         content.dir = view.getComputedStyle(options.ownerElement).direction;
@@ -126,9 +139,16 @@ export const openInternalDatePicker = (options: Omit<IDatePickerOptions, "ownerP
         };
         apply.addEventListener("click", confirm);
         dismiss.addEventListener("click", () => cancel("cancel"));
+        actions.addEventListener("pointerdown", event => {
+            if (resources.field.element.querySelector(".date-picker__month-editor")?.contains(doc.activeElement)) {
+                event.preventDefault();
+            }
+        });
         dialog.element.addEventListener("keydown", event => {
             if (event.key === "Escape" && !event.isComposing && event.keyCode !== 229) {
-                event.preventDefault(); event.stopPropagation(); cancel("escape");
+                if (resources.field.isComposing()) { event.stopPropagation(); return; }
+                event.preventDefault(); event.stopPropagation();
+                if (!resources.field.cancelMonthEdit()) { cancel("escape"); }
             }
         }, true);
         dialog.element.addEventListener("keydown", event => {
@@ -145,6 +165,7 @@ export const openInternalDatePicker = (options: Omit<IDatePickerOptions, "ownerP
         });
         resources.observer.observe(doc.documentElement, {childList: true, subtree: true,
             attributes: true, attributeFilter: ["data-dialog-closing"]});
+        if (anchored) { resources.releasePosition = bindDatePickerPosition(dialog.element, options.ownerElement); }
         view.addEventListener("pagehide", ownerDestroyed, {once: true});
         if (dialog.focusWhenReady) { dialog.focusWhenReady(field.focusTarget); }
         else { field.focus(); }

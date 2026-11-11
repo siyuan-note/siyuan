@@ -26,6 +26,20 @@
   &__navigation {
     display: flex;
     align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__month-toggle {
+    display: block;
+    min-width: 0;
+    margin-inline-end: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__month-editor {
+    display: flex;
     gap: 8px;
 
     select {
@@ -50,7 +64,7 @@
 
     button {
       width: 100%;
-      min-height: 36px;
+      min-height: 32px;
 
       &:focus-visible {
         outline: 2px solid var(--b3-theme-primary);
@@ -64,8 +78,14 @@
     }
   }
 
-  &__heading {
-    padding-block: 4px;
+  &__heading,
+  &__field--date-only > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   &__weekday-narrow {
@@ -95,6 +115,28 @@
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 8px;
+  }
+}
+
+.date-picker-dialog {
+  .b3-dialog__container {
+    position: absolute;
+    transform: none;
+    max-width: none;
+  }
+
+  .b3-dialog__body {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .b3-dialog__content {
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  .b3-dialog__action {
+    flex-shrink: 0;
   }
 }
 

@@ -6,7 +6,7 @@
 		"id": "20260613155453-sgecaav",
 		"title": "Field Types",
 		"type": "doc",
-		"updated": "20261111023017"
+		"updated": "20261111043337"
 	},
 	"Children": [
 		{
@@ -2136,7 +2136,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-tvixbm7",
-				"updated": "20261111023017"
+				"updated": "20261111043337"
 			},
 			"Children": [
 				{
@@ -2168,12 +2168,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261111015242-l23mmjt",
-				"updated": "20261111015242"
+				"updated": "20261111043337"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click a Gregorian date input to open the built-in picker, change the month or year, choose today, or clear the date. In the calendar, use arrow keys to move focus, PageUp and PageDown to change months, Shift with these keys to change years, Enter to select the focused date, and Escape to close the picker. Dates, times, and ranges are saved through the editing behavior or confirmation button of the surrounding interface. Lunar dates continue to use lunar year, month, and day options."
+					"Data": "Click a Gregorian date input to open the built-in picker, choose today, or clear the date. Click the month and year heading to expand the editing controls; the year accepts digits only. Browsing another month or year does not save the date. In the calendar, use arrow keys to move focus, PageUp and PageDown to change months, Shift with these keys to change years, and Enter to select the focused date. While editing the month and year, Escape cancels unconfirmed changes and collapses the editing controls; otherwise, it closes the picker. Dates, times, and ranges are saved through the editing behavior or confirmation button of the surrounding interface. Lunar dates continue to use lunar year, month, and day options."
 				}
 			]
 		},

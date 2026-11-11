@@ -4,8 +4,8 @@ import {join} from "node:path";
 import {browserSources, canRunBrowser, runBrowserCase} from "./test/browser";
 
 test("date picker shares overlay ownership with independently loaded target-window menus", {timeout: 45000, skip: !canRunBrowser}, async () => {
-    const files = Object.fromEntries(["model", "field", "runtime", "owners", "binding", "index"].map(name => [name, join(__dirname, name + ".ts")]));
-    const sources = browserSources({...files, dialog: join(__dirname, "../dialog/index.ts"),
+    const files = Object.fromEntries(["model", "yearInput", "field", "runtime", "owners", "binding", "position", "index"].map(name => [name, join(__dirname, name + ".ts")]));
+    const sources = browserSources({...files, menuPosition: join(__dirname, "../menus/menuPosition.ts"), dialog: join(__dirname, "../dialog/index.ts"),
         pluginMenu: join(__dirname, "../plugin/Menu.ts"), nativeSelect: join(__dirname, "../mobile/util/nativeSelect.ts"),
         overlayOwnership: join(__dirname, "../menus/overlayOwnership.ts")});
     assert.match(await runBrowserCase(async sources => {
@@ -18,7 +18,7 @@ test("date picker shares overlay ownership with independently loaded target-wind
             new Function("exports", "require", sources[name])(exports, (path: string) => modules[path.split("/").at(-1)] || {});
             return exports;
         };
-        ["model", "field", "runtime", "owners", "overlayOwnership"].forEach(name => load(name));
+        ["model", "yearInput", "field", "menuPosition", "position", "runtime", "owners", "overlayOwnership"].forEach(name => load(name));
         modules.panel = {registerDatePickerWindow() {}}; modules.index = {}; load("binding"); const api = load("index");
         const iframe = document.createElement("iframe"); document.body.append(iframe);
         const view = iframe.contentWindow as Window & typeof globalThis;
@@ -68,6 +68,7 @@ test("date picker shares overlay ownership with independently loaded target-wind
         equal(modules.overlayOwnership.isMenuOverlayTarget(parent.element, input), true, "source sees picker ownership");
         equal(targetOverlay.isMenuOverlayTarget(parent.element, input), true, "target module sees picker ownership");
         input.click(); equal(closed, 0, "field click preserves the target-window parent menu");
+        root.querySelector<HTMLButtonElement>(".date-picker__month-toggle").click();
         const month = root.querySelector<HTMLSelectElement>("select"); month.click();
         const child = targetSelect.getMobileSelectMenuElement() as HTMLElement;
         equal(child !== common && !!child, true, "target native select creates an independent child menu");

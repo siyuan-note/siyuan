@@ -7,6 +7,8 @@ interface IDateDialogOptions {
     title?: string;
     content: string;
     width?: string;
+    transparent?: boolean;
+    disableAnimation?: boolean;
     beforeClose?: () => boolean;
     destroyCallback?: () => void;
 }

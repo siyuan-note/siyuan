@@ -4,12 +4,12 @@ import test from "node:test";
 import {browserSources, canRunBrowser, runBrowserCase} from "./test/browser";
 
 test("date picker step parsing and precision agree with native input constraints", {timeout: 45000, skip: !canRunBrowser}, async () => {
-    const sources = browserSources({model: join(__dirname, "model.ts"), field: join(__dirname, "field.ts")});
+    const sources = browserSources({model: join(__dirname, "model.ts"), yearInput: join(__dirname, "yearInput.ts"), field: join(__dirname, "field.ts")});
     const result = await runBrowserCase(async source => {
         const modules: Record<string, any> = {};
-        for (const name of ["model", "field"]) {
+        for (const name of ["model", "yearInput", "field"]) {
             const exports = {};
-            new Function("exports", "require", source[name])(exports, () => modules.model);
+            new Function("exports", "require", source[name])(exports, (path: string) => modules[path.split("/").at(-1)]);
             modules[name] = exports;
         }
         let comparisons = 0;

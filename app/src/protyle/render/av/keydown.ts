@@ -132,7 +132,9 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "Enter") {
-            popTextCell(protyle, [selectCellElement]);
+            if (!event.repeat || selectCellElement.dataset.dtype !== "select") {
+                popTextCell(protyle, [selectCellElement]);
+            }
             event.preventDefault();
             return true;
         }

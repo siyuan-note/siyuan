@@ -6275,7 +6275,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In table and list views, Enter confirms number, URL, email, phone and unbound primary-key input fields and immediately edits the same field in the next row of the same group. The last row does not create another entry. In text fields, Enter edits paragraphs and list items, and Shift+Enter inserts a line break. Composition and candidate selection keep their existing behavior. A failed save keeps the current draft open."
+					"Data": "In table and list views, Enter confirms number, URL, email, phone and unbound primary-key input fields and immediately edits the same field in the next row of the same group. In a Select field, Enter confirms the edit and selects the same field in the next row of the same group. Press Enter again to edit that field. In a Multi-select field, Enter keeps the option picker open for the current cell. The last row does not create another entry. In text fields, Enter edits paragraphs and list items, and Shift+Enter inserts a line break. Composition and candidate selection keep their existing behavior. A failed save keeps the current input draft open."
 				}
 			]
 		},

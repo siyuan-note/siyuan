@@ -23,7 +23,7 @@ const functions = [
     extract("openMenuPanel.ts", ["openMenuPanel"]),
     extract("date.ts", ["bindDateEvent", "getFullYearTime"]),
     extract("panels/date.ts", ["datePanel"]),
-    extract("select.ts", ["removeCellOption", "addColOptionOrCell", "setColOption"]),
+    extract("select.ts", ["bindSelectEvent", "removeCellOption", "addColOptionOrCell", "setColOption"]),
     extract("relation.ts", ["getRelationCellScope", "getRelationValue", "setRelationCell"]),
     extract("asset.ts", ["getVisibleAssetValues", "isAssetCellMenuCurrent", "getAssetHTML", "resolveAssetCellElement", "updateAssetCell", "editAssetItem",
         "captureAssetCellUpload", "captureAVAssetUploadHandler", "getUploadedAssetValues"]),
@@ -104,6 +104,8 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
     const chips = element();
     const menuItems = element();
     menuItems.scrollTop = 0;
+    menu.lastElementChild = menuItems;
+    menuItems.lastElementChild = element();
     const relatedItems = [];
     const relationRoot = element({keyId: "column"});
     const selectedRows = {append: target => relatedItems.push(target)};
@@ -162,7 +164,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
             open() {}
             fullscreen() {}
         },
-        getSelectHTML: () => "", bindSelectEvent() {}, setSelectMenuPosition() {},
+        getSelectHTML: () => "", setSelectMenuPosition() {},
         bindDatePicker: (input, options) => {datePickers.set(input, options);},
         isDatePickerOpen: () => false,
         bindAssetEvent: options => {state.boundMenu = options;},
@@ -176,13 +178,13 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
                 cell.dataset.cellValue = encodeURIComponent(JSON.stringify(value));
             }
         },
-        transaction: (_protyle, operations, undo) => transactions.push({operations, undo}),
+        transaction: (_protyle, operations, undo, options) => transactions.push({operations, undo, options}),
         captureUploadDocument: (_protyle, options) => options,
         getAssetUploadSuccesses: result => result.successes, pathPosix: () => path.posix,
         showMessage: message => assert.fail(`unexpected message: ${message}`),
     };
     const api = runInNewContext(compiledFunctions + "\n({openMenuPanel, bindDateEvent, datePanel, updateCellsValue," +
-        "addColOptionOrCell, removeCellOption, setColOption, setRelationCell, updateAssetCell, captureAssetCellUpload," +
+        "bindSelectEvent, addColOptionOrCell, removeCellOption, setColOption, setRelationCell, updateAssetCell, captureAssetCellUpload," +
         "getAssetHTML, editAssetItem, captureAVCellInput, captureAVAssetUploadHandler});", context);
     api.openMenuPanel({type: type === "mAsset" ? "asset" : type === "mSelect" ? "select" : type,
         protyle, blockElement: block, cellElements: cells});
@@ -312,6 +314,75 @@ test("multi-select chip removal and repeated saves read current values while off
     f.api.removeCellOption(f.protyle, f.cells, element({content: "old-0"}), f.block);
     assert.deepEqual(plain(f.transactions[1].operations[0].data.mSelect), [option("new")]);
     assert.deepEqual(plain(f.transactions[1].undo[0].data.mSelect), [option("old-0"), option("new")]);
+});
+
+const selectKeyboardFixture = (type, {checked = false, create = false} = {}) => {
+    const f = fixture(type);
+    const input = f.menu.querySelector("input");
+    const chip = element({content: "old-0"});
+    const candidate = element({name: checked ? "old-0" : create ? "created" : "new", color: "1"});
+    const next = element({colId: "column"});
+    candidate.querySelector = selector =>
+        (checked && selector === ".b3-menu__checked") || (create && selector === ".b3-menu__accelerator") ? element() : null;
+    const queryMenu = f.menu.querySelector;
+    f.menu.querySelector = selector => selector.startsWith(".b3-chips .b3-chip") ? chip : queryMenu(selector);
+    const state = {closed: false, prepared: 0, scrolled: []};
+    f.context.document.querySelector = selector => selector === ".av__panel" && !state.closed ? f.panel : null;
+    f.menu.parentElement.addEventListener("click", event => {state.closed = event.detail === "close";});
+    f.context.upDownHint = () => candidate;
+    f.context.isAVContinuousInputKey = event => !event.repeat && !event.shiftKey;
+    f.context.prepareAVContinuousInput = (protyle, block, cells, onNext) => {
+        assert.equal(protyle, f.protyle);
+        assert.equal(block, f.block);
+        assert.equal(cells[0], f.cells[0]);
+        state.prepared++;
+        return () => onNext(next);
+    };
+    f.context.cellScrollIntoView = (block, cell) => {assert.equal(block, f.block); state.scrolled.push(cell);};
+    f.api.bindSelectEvent(f.protyle, f.state.data, f.menu, f.cells, f.block);
+    const enter = (options = {}) => input.dispatchEvent(Object.assign(new Event("keydown", {cancelable: true}), {
+        key: "Enter", ...options,
+    }));
+    return {f, state, enter, next};
+};
+
+for (const options of [{}, {create: true}, {checked: true}]) {
+    test(`single-select Enter advances after ${options.checked ? "clearing" : options.create ? "creating" : "choosing"} an option`, () => {
+        const {f, state, enter, next} = selectKeyboardFixture("select", options);
+        assert.equal(enter(), false);
+        assert.equal(state.closed, true);
+        assert.equal(state.prepared, 1);
+        assert.equal(f.transactions.length, 1);
+        assert.deepEqual(state.scrolled, []);
+        f.transactions[0].options.callback();
+        assert.deepEqual(state.scrolled, [next]);
+    });
+}
+
+test("single-select Enter ignores held keys and leaves later cell or panel focus intact", () => {
+    const {f, state, enter} = selectKeyboardFixture("select");
+    enter({isComposing: true});
+    enter({repeat: true});
+    assert.equal(f.transactions.length, 0);
+    enter();
+    const complete = f.transactions[0].options.callback;
+    state.closed = false;
+    complete();
+    state.closed = true;
+    f.context.setAVCellSelection(f.block, {});
+    complete();
+    assert.deepEqual(state.scrolled, []);
+});
+
+test("multi-select Enter updates the current cell and keeps the option panel open", () => {
+    const {f, state, enter} = selectKeyboardFixture("mSelect");
+    assert.equal(enter(), false);
+    assert.equal(f.transactions.length, 1);
+    const {operations, options} = f.transactions[0];
+    assert.deepEqual(plain(operations[0].data.mSelect), [option("old-0"), option("new")]);
+    assert.equal(options.callback, undefined);
+    assert.equal(state.closed, false);
+    assert.equal(state.prepared, 0);
 });
 
 const attributeSelectFixture = () => {

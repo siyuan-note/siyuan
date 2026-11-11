@@ -127,7 +127,8 @@ const browserCases = async sources => {
     const addColumn = extract("addAttrViewColAnimation", shared);
     const updateMirrors = extract("updateAttrViewCellInOtherElements", shared);
     const removeColumn = extract("removeAttrViewColAnimation", shared);
-    const keydown = extract("avKeydown", shared);
+    const openedCells = [];
+    const keydown = extract("avKeydown", {...shared, popTextCell: (_protyle, cells) => openedCells.push(...cells)});
     const clearSelections = block => {
         range.clearAVCellRange(block);
         range.clearAVItemSelection(block, true);
@@ -274,6 +275,15 @@ const browserCases = async sources => {
     let target = row.querySelector(`[data-col-id="c${boundary + 1}"]`);
     visibleColumn(navigation, target);
     check.equal(selection.getAVCellSelection(navigation.block).focus.colID, `c${boundary + 1}`);
+    target.dataset.dtype = "select";
+    const heldEnter = new KeyboardEvent("keydown", {key: "Enter", repeat: true, cancelable: true});
+    check.equal(keydown(heldEnter, navigation.block, navigation.protyle, () => false), true);
+    check.equal(heldEnter.defaultPrevented, true);
+    check.deepEqual(openedCells, []);
+    const enter = new KeyboardEvent("keydown", {key: "Enter", cancelable: true});
+    keydown(enter, navigation.block, navigation.protyle, () => false);
+    check.deepEqual(openedCells, [target]);
+    target.dataset.dtype = "text";
     const shifted = new KeyboardEvent("keydown", {key: "ArrowRight", shiftKey: true, cancelable: true});
     keydown(shifted, navigation.block, navigation.protyle, () => false);
     await settle();

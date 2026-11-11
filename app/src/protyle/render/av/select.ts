@@ -10,7 +10,7 @@ import {bindEditEvent, getColId, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
 import {isCustomAttr} from "./blockAttr";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
-import {genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements, type IAVCellInputElements} from "./cell";
+import {cellScrollIntoView, genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements, type IAVCellInputElements} from "./cell";
 import dayjs from "dayjs";
 import {getFieldsByData} from "./view";
 import {getFieldIdByCellElement} from "./row";
@@ -29,6 +29,8 @@ import {
 } from "./color";
 import {openAVCustomColorDialog} from "./colorDialog";
 import {isMobile} from "../../../util/functions";
+import {isAVContinuousInputKey, prepareAVContinuousInput} from "./continuousInput";
+import {getAVCellSelection} from "./selectionState";
 
 let cellValues: IAVCellValue[];
 
@@ -86,7 +88,8 @@ const filterSelectHTML = (key: string, options: {
     return html;
 };
 
-export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
+export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element,
+                                 onSave?: () => void) => {
     if (!target) {
         return;
     }
@@ -160,7 +163,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
         id: blockElement.getAttribute("data-node-id"),
         data: dayjs().format("YYYYMMDDHHmmss"),
     });
-    transaction(protyle, doOperations, undoOperations);
+    transaction(protyle, doOperations, undoOperations, {callback: onSave});
     Array.from(document.querySelectorAll(".av__panel .b3-menu__item")).find((item: HTMLElement) => {
         if (item.dataset.name === target.dataset.content) {
             item.querySelector(".b3-menu__checked")?.remove();
@@ -173,6 +176,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     if (menuElement) {
         setSelectMenuPosition(menuElement, cellElements[cellElements.length - 1]);
     }
+    return true;
 };
 
 export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, isCustomAttr: boolean,
@@ -557,13 +561,36 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
         }
         let currentElement = upDownHint(listElement, event, "b3-menu__item--current", listElement.firstElementChild);
         if (event.key === "Enter") {
+            event.preventDefault();
+            event.stopPropagation();
+            if (colData.type === "select" && event.repeat) return;
             if (!currentElement) {
                 currentElement = menuElement.querySelector(".b3-menu__item--current");
             }
+            if (!currentElement) return;
+            let onSave: () => void;
+            if (colData.type === "select" && protyle && isAVContinuousInputKey(event)) {
+                const resolveInput = (cellElements as IAVCellInputElements).resolveAVCellInput;
+                const target = resolveInput?.();
+                const block = (target?.blockElement || blockElement) as HTMLElement;
+                const cells = target?.elements || cellElements;
+                if ((!resolveInput || target) && cells[0]?.isConnected) {
+                    const selection = getAVCellSelection(block);
+                    const next = prepareAVContinuousInput(protyle, block, cells, cell => cellScrollIntoView(block, cell));
+                    if (next) {
+                        onSave = () => {
+                            if (getAVCellSelection(block) === selection && !document.querySelector(".av__panel")) next();
+                        };
+                    }
+                }
+            }
             if (currentElement.querySelector(".b3-menu__checked")) {
-                removeCellOption(protyle, cellElements, menuElement.querySelector(`.b3-chips .b3-chip[data-content="${escapeAttr(currentElement.dataset.name)}"]`), blockElement);
+                const chip = menuElement.querySelector<HTMLElement>(`.b3-chips .b3-chip[data-content="${escapeAttr(currentElement.dataset.name)}"]`);
+                if (removeCellOption(protyle, cellElements, chip, blockElement, onSave) && onSave) {
+                    menuElement.parentElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
+                }
             } else {
-                addColOptionOrCell(protyle, data, cellElements, currentElement, menuElement, blockElement);
+                addColOptionOrCell(protyle, data, cellElements, currentElement, menuElement, blockElement, onSave);
             }
         } else if (event.key === "Backspace" && inputElement.value === "") {
             removeCellOption(protyle, cellElements, inputElement.previousElementSibling as HTMLElement, blockElement);
@@ -571,7 +598,8 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
     });
 };
 
-export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], currentElement: HTMLElement, menuElement: HTMLElement, blockElement: Element) => {
+export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], currentElement: HTMLElement,
+                                   menuElement: HTMLElement, blockElement: Element, onSave?: () => void) => {
     const resolveInput = (cellElements as IAVCellInputElements).resolveAVCellInput;
     const inputTarget = resolveInput?.();
     if (resolveInput && !inputTarget) return;
@@ -723,14 +751,14 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
             id: colId,
             avID: data.id,
             data: currentElement.dataset.name,
-        }]);
+        }], {callback: onSave});
     } else {
         cellDoOperations.push({
             action: "doUpdateUpdated",
             id: blockElement.getAttribute("data-node-id"),
             data: dayjs().format("YYYYMMDDHHmmss"),
         });
-        transaction(protyle, cellDoOperations, cellUndoOperations);
+        transaction(protyle, cellDoOperations, cellUndoOperations, {callback: onSave});
     }
     if (colData.type === "select") {
         if (blockElement.classList.contains("av")) {

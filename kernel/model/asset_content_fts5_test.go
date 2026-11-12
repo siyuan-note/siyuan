@@ -7,6 +7,7 @@
 package model
 
 import (
+	stdsql "database/sql"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -180,6 +181,51 @@ func TestAssetContentInvalidationAfterParseFailure(t *testing.T) {
 type assetContentTestParser func(string) *AssetParseResult
 
 func (parser assetContentTestParser) Parse(path string) *AssetParseResult { return parser(path) }
+
+func TestAssetContentCorruptionRecovery(t *testing.T) {
+	if !assetContentTestChild(t) {
+		return
+	}
+	dir := setupAssetContentRegression(t)
+	util.Langs = map[string]map[int]string{Conf.Lang: {216: "running", 442: "completed", 443: "failed"}}
+	source := filepath.Join(dir, "test.txt")
+	if err := os.WriteFile(source, []byte("source content"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	assetContentSearcher = NewAssetsSearcher()
+	assetContentSearcher.parsers[".txt"] = assetContentTestParser(func(string) *AssetParseResult {
+		return &AssetParseResult{Content: "recovered needle"}
+	})
+	sql.IndexAssetContentsQueue([]*sql.AssetContent{{ID: "before", Path: "assets/test.txt", Content: "needle"}})
+	if err := sql.FlushAssetContentQueue(); err != nil {
+		t.Fatal(err)
+	}
+	target, err := stdsql.Open("sqlite3", util.AssetContentDBPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer target.Close()
+	if _, err := target.Exec("DELETE FROM asset_contents_fts_case_insensitive_data WHERE id = 1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := target.Close(); err != nil {
+		t.Fatal(err)
+	}
+	sql.DeleteAssetContentsByPathQueue("assets/test.txt")
+	if err := sql.FlushAssetContentQueue(); err == nil {
+		t.Fatal("corrupt resource index reported success")
+	}
+	// 执行错误事件已提交的重建任务，验证调度到资源索引并能完成全文检索。
+	time.Sleep(10 * time.Millisecond)
+	task.ExecTaskJob()
+	results, count, _, err := FullTextSearchAssetContent("recovered", nil, 0, 0, 1, 32)
+	if err != nil || count != 1 || len(results) != 1 || results[0].Path != "assets/test.txt" {
+		t.Fatalf("resource index did not recover automatically: results=%v count=%d err=%v", results, count, err)
+	}
+	if data, err := os.ReadFile(source); err != nil || string(data) != "source content" {
+		t.Fatalf("index recovery changed its source: %q, %v", data, err)
+	}
+}
 
 func TestAssetContentRebuildCompletion(t *testing.T) {
 	if !assetContentTestChild(t) {

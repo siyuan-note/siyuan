@@ -64,6 +64,9 @@ func FlushAssetContentQueue() error {
 
 		tx, err := beginAssetContentTx()
 		if err != nil {
+			if isRecoverableDBFileError(err) {
+				eventbus.Publish(util.EvtSQLAssetContentRebuild)
+			}
 			return err
 		}
 
@@ -79,7 +82,10 @@ func FlushAssetContentQueue() error {
 		}
 
 		if err = commitTx(tx); err != nil {
-			logging.LogErrorf("commit tx failed: %s", err)
+			logging.LogErrorf("commit asset content database [%s] tx failed: %s", util.AssetContentDBPath, err)
+			if isRecoverableDBFileError(err) {
+				eventbus.Publish(util.EvtSQLAssetContentRebuild)
+			}
 			return err
 		}
 

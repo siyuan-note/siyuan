@@ -75,7 +75,8 @@ func FlushHistoryQueue() {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)
 
-			if 0 < len(op.histories) {
+			// 索引库写入失败不能据此认定历史快照损坏。
+			if !isRecoverableDBFileError(err) && 0 < len(op.histories) {
 				dir := op.histories[0].Path[:strings.Index(op.histories[0].Path, "/")]
 				dirPath := filepath.Join(util.HistoryDir, dir)
 				if removeErr := os.RemoveAll(dirPath); nil != removeErr {

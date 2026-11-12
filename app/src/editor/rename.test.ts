@@ -78,7 +78,7 @@ for (const kind of ["document", "notebook-document", "notebook"]) {
 test("mobile notebook rename waits for a confirmed response and preserves the draft on failure", async () => {
     const source = transpileModule(readFileSync(path.resolve(__dirname, "rename.ts"), "utf8"),
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText;
-    let options: {awaitConfirm: boolean, compactActions: boolean, onConfirm: (value: string, dialog: object) => Promise<boolean>};
+    let options: {awaitConfirm: boolean, onConfirm: (value: string, dialog: object) => Promise<boolean>};
     let respond: (value: {code: number}) => void;
     let closes = 0;
     const displayed: string[] = [];
@@ -100,7 +100,6 @@ test("mobile notebook rename waits for a confirmed response and preserves the dr
     });
     api.rename({path: "/", notebookId: "box", name: "Before", type: "notebook"});
     assert.equal(options.awaitConfirm, true);
-    assert.equal(options.compactActions, true);
     const failure = options.onConfirm("Draft", dialog);
     assert.equal(closes, 0);
     assert.deepEqual(displayed, []);

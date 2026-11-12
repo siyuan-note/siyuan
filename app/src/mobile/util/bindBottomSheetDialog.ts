@@ -14,6 +14,42 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     sheet.style.transform = "translateY(100%)";
     sheet.style.visibility = "hidden";
     sheet.classList.add("mobile-bottom-sheet");
+    const normalizeActions = () => {
+        sheet.querySelectorAll(":scope > .b3-dialog__body .b3-dialog__action").forEach(footer => {
+            if (!footer.querySelector(".b3-button")) return;
+            footer.classList.add("mobile-sheet-action-bar");
+            footer.querySelectorAll(".b3-button")
+                .forEach(button => button.classList.add("b3-button--touch", "b3-button--wrap"));
+            const directButtons = Array.from(footer.querySelectorAll(":scope > .b3-button"));
+            if (directButtons.length) {
+                const buttons = Array.from(footer.querySelectorAll(":scope > .b3-button, :scope > .mobile-sheet-action-group > .b3-button"));
+                let group = footer.querySelector(":scope > .mobile-sheet-action-group");
+                if (!group) {
+                    group = document.createElement("div");
+                    group.className = "mobile-sheet-action-group";
+                    directButtons[0].before(group);
+                }
+                buttons.forEach(button => group.append(button));
+                footer.querySelectorAll(":scope > .fn__space, :scope > .fn__flex-1")
+                    .forEach(spacer => spacer.remove());
+            }
+            footer.querySelectorAll(".mobile-sheet-action-group").forEach(group => {
+                const buttons = Array.from(group.querySelectorAll(":scope > .b3-button"));
+                group.classList.toggle("mobile-sheet-action-group--stacked", buttons.length > 2);
+                buttons.forEach((button, index) => {
+                    button.classList.add("b3-button--touch", "b3-button--wrap");
+                    if (button.classList.contains("b3-button--cancel")) {
+                        button.classList.add("b3-button--secondary");
+                    } else if (index === buttons.length - 1 && button.classList.contains("b3-button--text")) {
+                        button.classList.add("b3-button--primary");
+                    }
+                });
+            });
+        });
+    };
+    normalizeActions();
+    const actionsObserver = new MutationObserver(normalizeActions);
+    actionsObserver.observe(sheet, {childList: true, subtree: true});
     const disposeKeyboardState = bindKeyboardSheetState(sheet);
     const dragState: {cancel?: () => void} = {};
     const layout = (require("./mobileSheetLayout") as typeof import("./mobileSheetLayout")).bindMobileSheetLayout(dialog.element.querySelector<HTMLElement>(".b3-dialog"),
@@ -89,6 +125,7 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     });
     dragState.cancel = disposeDrag.cancel;
     const dispose = () => {
+        actionsObserver.disconnect();
         disposeKeyboardState();
         cancelOpen?.();
         layout.dispose();

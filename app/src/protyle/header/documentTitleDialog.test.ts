@@ -597,7 +597,7 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
 <div class="protyle-title__rich protyle"><div class="protyle-content"><div class="protyle-wysiwyg">
 <div data-node-id="title-paragraph" data-type="NodeParagraph" class="p"><div class="protyle-title__input" contenteditable="true"></div><div class="protyle-attr">Paragraph badge</div></div>
 </div></div></div></div></div><div class="protyle-wysiwyg">Hidden document body</div></div></div>
-<div class="b3-dialog__action mobile-sheet-action-bar"><div class="mobile-sheet-action-group mobile-sheet-action-group--compact">
+<div class="b3-dialog__action mobile-sheet-action-bar"><div class="mobile-sheet-action-group">
 <button class="b3-button b3-button--touch b3-button--wrap b3-button--cancel b3-button--secondary">Cancel</button>
 <button class="b3-button b3-button--touch b3-button--wrap">Confirm</button></div></div></div></div></div></div>`;
     const container = document.querySelector<HTMLElement>(".b3-dialog");

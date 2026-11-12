@@ -108,6 +108,22 @@
     }
   }
 
+  &--primary {
+    color: var(--b3-theme-on-primary, ButtonText);
+    background-color: var(--b3-theme-primary, ButtonFace);
+
+    &:hover,
+    &:focus {
+      background-color: var(--b3-theme-primary, ButtonFace);
+      box-shadow: var(--b3-button-shadow);
+    }
+
+    &:active {
+      background-color: var(--b3-theme-primary, ButtonFace);
+      box-shadow: var(--b3-button-active-shadow);
+    }
+  }
+
   &--cancel,
   &--secondary {
     color: var(--b3-theme-on-surface);

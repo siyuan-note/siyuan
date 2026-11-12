@@ -55,7 +55,10 @@ const runCases = async appDirectory => {
     const panel = dialog.element.querySelector("[role=dialog]");
     assert.equal(getComputedStyle(actions).display, "flex");
     const before = confirm.getBoundingClientRect();
-    assert.ok(before.bottom <= panel.getBoundingClientRect().bottom);
+    assert.ok(before.height >= 48, "business dialog actions use the shared touch target");
+    assert.equal(getComputedStyle(confirm).fontSize, "16px");
+    assert.ok(before.bottom <= panel.getBoundingClientRect().bottom + 1,
+        JSON.stringify({button: before.toJSON(), panel: panel.getBoundingClientRect().toJSON()}));
     const content = dialog.element.querySelector(".b3-dialog__content");
     content.scrollTop = 500;
     assert.equal(confirm.getBoundingClientRect().top, before.top);
@@ -63,6 +66,65 @@ const runCases = async appDirectory => {
     await wait();
     assert.ok(Math.abs(actions.getBoundingClientRect().bottom - panel.getBoundingClientRect().bottom) < 1);
     dialog.destroy();
+    await wait();
+    const selection = new MobileDialog({title: "Notebook", content:
+        '<div><div class="b3-dialog__content"><select class="b3-select"><option>Notebook</option></select><button class="b3-button" data-inline>Inline</button></div>' +
+        '<div class="b3-dialog__action" data-options><label>Option<input type="checkbox"></label></div>' +
+        '<div class="b3-dialog__action" data-actions><button class="b3-button b3-button--cancel">Cancel</button><div class="fn__space"></div><button class="b3-button b3-button--text">Confirm</button></div></div>'});
+    await wait();
+    const selectionFooter = selection.element.querySelector("[data-actions]");
+    assert.equal(selection.element.querySelector("[data-options]").classList.contains("mobile-sheet-action-bar"), false,
+        "option rows retain their form layout");
+    const selectBox = selection.element.querySelector("select").getBoundingClientRect();
+    assert.ok(selectBox.height > 0 && selectBox.bottom <= selectionFooter.getBoundingClientRect().top,
+        "the input remains visible above the large actions");
+    const actionGroup = selectionFooter.querySelector(".mobile-sheet-action-group");
+    assert.ok(actionGroup, "business actions use the shared full-width group");
+    const groupBox = actionGroup.getBoundingClientRect();
+    const selectionButtons = [...actionGroup.querySelectorAll("button")];
+    const cancelBox = selectionButtons[0].getBoundingClientRect();
+    const confirmBox = selectionButtons[1].getBoundingClientRect();
+    assert.ok(Math.abs(cancelBox.width - confirmBox.width) < 1, "cancel and confirm use equal widths");
+    assert.ok(Math.abs(cancelBox.width * 2 + 12 - groupBox.width) < 1, "buttons fill both columns");
+    assert.equal(selectionButtons[0].classList.contains("b3-button--secondary"), true);
+    assert.equal(selectionButtons[1].classList.contains("b3-button--text"), true, "existing action hooks remain available");
+    assert.equal(selectionButtons[1].classList.contains("b3-button--primary"), true);
+    for (const button of selectionFooter.querySelectorAll("button")) {
+        assert.equal(button.getBoundingClientRect().height, before.height, "selection and business actions have equal height");
+        assert.equal(getComputedStyle(button).fontSize, "16px");
+        assert.equal(getComputedStyle(button).padding, "12px 16px");
+    }
+    assert.equal(selection.element.querySelector("[data-inline]").classList.contains("b3-button--touch"), false,
+        "content controls keep their own sizing");
+    const added = document.createElement("button");
+    added.className = "b3-button b3-button--remove";
+    added.textContent = "Delete";
+    selectionFooter.append(added);
+    await wait();
+    assert.equal(added.getBoundingClientRect().height, before.height, "late actions use the same touch target");
+    assert.equal(added.classList.contains("b3-button--remove"), true, "danger feedback is preserved");
+    assert.equal(actionGroup.children.length, 3, "late actions reuse one group without duplicating buttons");
+    assert.equal(actionGroup.classList.contains("mobile-sheet-action-group--stacked"), true);
+    const selectionPanel = selection.element.querySelector("[role=dialog]");
+    const cancel = selectionFooter.querySelector(".b3-button--cancel");
+    for (const mode of ["light", "dark"]) {
+        document.documentElement.dataset.themeMode = mode;
+        for (const width of [280, 390]) {
+            selectionPanel.style.width = width + "px";
+            added.textContent = "A long translated deletion label with averylongunbrokentoken";
+            for (const button of selectionFooter.querySelectorAll("button")) {
+                assert.ok(button.getBoundingClientRect().height >= 48);
+                assert.ok(button.scrollWidth <= button.clientWidth, "translated actions wrap without overflow");
+            }
+            cancel.focus({preventScroll: true});
+            assert.equal(document.activeElement, cancel);
+            added.disabled = true;
+            assert.ok(Number(getComputedStyle(added).opacity) < 1, "disabled actions keep shared feedback");
+            added.disabled = false;
+        }
+    }
+    delete document.documentElement.dataset.themeMode;
+    selection.destroy();
     await wait();
     const sheet = new MobileDialog({title: "Panel", content: "Content"});
     await wait();

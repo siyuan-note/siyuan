@@ -83,9 +83,6 @@ export const rename = (options: {
     }
     const initialName = options.empty ? "" : options.name;
     const dialog = openInputDialog({
-        /// #if MOBILE
-        compactActions: true,
-        /// #endif
         title: window.siyuan.languages.rename,
         value: initialName,
         awaitConfirm: true,

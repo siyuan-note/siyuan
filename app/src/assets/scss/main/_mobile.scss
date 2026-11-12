@@ -1965,7 +1965,7 @@ body.mobile-topbar--merged {
     justify-content: flex-start;
     flex-wrap: nowrap;
     flex-shrink: 1;
-    min-height: 0;
+    min-height: 63px;
     overflow-y: auto;
     align-items: stretch;
     padding-inline: 16px;
@@ -1985,16 +1985,6 @@ body.mobile-topbar--merged {
 
     &--stacked {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    &--compact {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-
-      > .b3-button {
-        max-width: 100%;
-      }
     }
   }
 
@@ -2059,6 +2049,11 @@ body.mobile-topbar--merged {
 }
 
 .mobile-bottom-sheet-dialog .mobile-sheet-panel--compact {
+  .mobile-sheet-action-bar {
+    min-height: 57px;
+    padding-block: 4px;
+  }
+
   > .b3-dialog__header {
     display: none;
   }

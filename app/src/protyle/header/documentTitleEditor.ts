@@ -144,6 +144,7 @@ export class DocumentTitleEditor {
             "click", "dblclick", "contextmenu", "dragstart", "dragover", "drop", "keyup"];
         events.forEach(type => host.addEventListener(type, event => event.stopPropagation()));
         host.addEventListener("compositionstart", () => {
+            hideAllElements(["toolbar"]);
             clearTimeout(this.timer);
             this.composing = true;
         }, true);
@@ -152,6 +153,9 @@ export class DocumentTitleEditor {
             this.changed();
         }, true);
         host.addEventListener("input", (event: InputEvent) => {
+            if (this.fragment.wysiwyg.contains(event.target as Node)) {
+                hideAllElements(["toolbar"]);
+            }
             if (this.composing && isCommittedTextInput(event)) {
                 this.composing = false;
                 this.changed();

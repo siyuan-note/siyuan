@@ -398,6 +398,21 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
             check.equal(toolbar.classList.contains("fn__none"), false, "format buttons keep the toolbar available");
             check.equal(getSelection().toString(), "Selected", "format buttons retain their selection");
             check.equal(subElement.classList.contains("fn__none"), false, "selection dismissal does not close formatting menus");
+            for (const inputType of ["insertText", "insertReplacementText", "insertFromPaste", "deleteContentBackward"]) {
+                toolbar.classList.remove("fn__none");
+                toolbar.style.display = "block";
+                editable.dispatchEvent(new InputEvent("input", {bubbles: true, inputType, data: "x"}));
+                check.equal(toolbar.classList.contains("fn__none"), true, `${inputType} dismisses the title selection toolbar`);
+                check.equal(toolbar.style.display, "");
+                check.equal(subElement.classList.contains("fn__none"), false, "editing keeps formatting menus available");
+            }
+            const field = document.createElement("input");
+            subElement.append(field);
+            toolbar.classList.remove("fn__none");
+            field.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", data: "x"}));
+            check.equal(toolbar.classList.contains("fn__none"), false, "toolbar input fields retain the toolbar");
+            editable.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+            check.equal(toolbar.classList.contains("fn__none"), true, "IME composition dismisses the title toolbar before committing");
             root.removeEventListener("mousedown", onMouseDown);
             mounted.destroy();
             host.remove();

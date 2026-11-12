@@ -13,6 +13,7 @@ import (
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -150,6 +151,7 @@ func restoreDocumentTitle(root *ast.Node, snapshot documentTitleSnapshot) error 
 // doSetDocTitle 修改独立标题源，内核生成只包含标题的撤销快照，保留同期正文修改。
 func (tx *Transaction) doSetDocTitle(operation *Operation) *TxErr {
 	fail := func(err error) *TxErr {
+		logging.LogErrorf("set document title [%s] failed: %s", operation.ID, err)
 		return &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(447), id: operation.ID, cause: err}
 	}
 	if len(tx.DoOperations) != 1 {

@@ -7,9 +7,12 @@
 package model
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -17,12 +20,63 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestDocumentTitleTransactionLogsFailureCause(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		mixed bool
+		cause string
+	}{
+		{name: "mixed operations", mixed: true, cause: "document title requires a separate transaction"},
+		{name: "invalid title data", cause: "invalid document title operation"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			fixture := setupStructureTransactionTest(t)
+			setupFoldTransactionDatabase(t, fixture)
+			originalLogPath := logging.LogPath
+			logPath := filepath.Join(t.TempDir(), "document-title.log")
+			logging.SetLogPath(logPath)
+			t.Cleanup(func() { logging.SetLogPath(originalLogPath) })
+			path := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)
+			before, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			op := &Operation{Action: "setDocTitle", ID: fixture.sourceID, Data: map[string]any{}}
+			tx := &Transaction{DoOperations: []*Operation{op}}
+			if test.mixed {
+				tx.DoOperations = append(tx.DoOperations, &Operation{Action: "update", ID: fixture.childID})
+			}
+			err = PerformTxSync(tx)
+			var txErr *TxErr
+			if !errors.As(err, &txErr) || txErr.Code() != TxErrCodePushMsg ||
+				txErr.msg != Conf.Language(447) || txErr.id != fixture.sourceID ||
+				errors.Unwrap(txErr) == nil || errors.Unwrap(txErr).Error() != test.cause {
+				t.Fatalf("title failure lost its notification or cause: %#v", err)
+			}
+			data, err := os.ReadFile(logPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, want := range []string{"set document title", fixture.sourceID, test.cause} {
+				if !strings.Contains(string(data), want) {
+					t.Fatalf("missing diagnostic %q: %s", want, data)
+				}
+			}
+			after, err := os.ReadFile(path)
+			if err != nil || !bytes.Equal(before, after) {
+				t.Fatalf("failed title transaction changed the document: %v", err)
+			}
+		})
+	}
+}
 
 func documentTitleTestProcess(t *testing.T) bool {
 	t.Helper()

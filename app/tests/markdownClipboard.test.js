@@ -117,6 +117,7 @@ const runCases = async source => {
             "./pictureImages": load(source.pictureImages),
             "../runtimeCapabilities": {
                 getProtyleBlockDOMSanitizer: () => restricted ? value => value : undefined,
+                getProtylePasteTransform: () => undefined,
                 isProtyleRichHTMLPasteEnabled: () => restricted,
                 isProtyleUploadDisabled: () => !localAssetStatus,
                 areProtylePluginExtensionsEnabled: () => false,

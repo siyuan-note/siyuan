@@ -39,8 +39,23 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
     check.equal(template.content.querySelector("img").style.width, "42px");
     check.equal(template.content.querySelector('[data-type="inline-memo"]').getAttribute("data-inline-memo-content"), "memo & text");
     check.equal(template.content.querySelector('[data-type="file-annotation-ref"]').getAttribute("data-id"), "assets/a.pdf/annotation");
-    for (const invalid of [source + paragraph("Another"), '<div data-type="NodeHeading"><div contenteditable="true">Heading</div></div>',
-        `<div data-type="NodeList">${source}</div>`, '<div data-type="NodeTable"></div>']) {
+    const expectedInlines = template.content.querySelector("[contenteditable]").innerHTML;
+    for (const level of [1, 2, 3, 4, 5, 6]) {
+        const heading = source.replace('data-type="NodeParagraph"', `data-type="NodeHeading" data-subtype="h${level}"`)
+            .replace('class="p"', `class="h${level}" style="font-size: 36px" fold="1"`);
+        check.equal(unsupported(heading).length, 0);
+        template.innerHTML = prepare(heading, "20260101000003-abcdefg");
+        check.equal(template.content.firstElementChild.getAttribute("data-type"), "NodeParagraph");
+        check.equal(template.content.firstElementChild.className, "p");
+        check.equal(template.content.firstElementChild.hasAttribute("data-subtype"), false);
+        check.equal(template.content.firstElementChild.hasAttribute("style"), false);
+        check.equal(template.content.firstElementChild.hasAttribute("fold"), false);
+        check.equal(template.content.querySelector("[contenteditable]").innerHTML, expectedInlines,
+            "heading paste preserves every inline element");
+    }
+    template.innerHTML = rendered;
+    for (const invalid of [source + paragraph("Another"), source.replace('data-type="NodeParagraph"', 'data-type="NodeHeading"') + source,
+        `<div data-type="NodeList">${source}</div>`, '<div data-type="NodeTable"></div>', '<div data-type="NodeHeading">Missing carrier</div>']) {
         check.equal(unsupported(invalid).length, 1);
         check.throws(() => prepare(invalid), /Inline only/);
     }

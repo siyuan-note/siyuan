@@ -7,7 +7,8 @@ export const getDocumentTitleUnsupportedPasteBlocks = (blockDOM: string) => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
     const blocks = Array.from(template.content.querySelectorAll<HTMLElement>('[data-type^="Node"]'));
-    if (blocks.some(block => block.dataset.type !== "NodeParagraph") ||
+    if (blocks.some(block => !["NodeParagraph", "NodeHeading"].includes(block.dataset.type) ||
+        block.dataset.type === "NodeHeading" && !block.querySelector(":scope > [contenteditable]")) ||
         blocks.length > 1 || (blocks.length === 1 && blocks[0].parentNode !== template.content)) {
         return [window.siyuan.languages.block];
     }
@@ -20,6 +21,18 @@ export const prepareDocumentTitleBlockDOM = (blockDOM: string, id?: string) => {
     }
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
+    const heading = template.content.querySelector<HTMLElement>('[data-type="NodeHeading"]');
+    if (heading) {
+        const paragraph = document.createElement("div");
+        paragraph.className = "p";
+        paragraph.dataset.type = "NodeParagraph";
+        paragraph.dataset.nodeId = heading.dataset.nodeId || "";
+        const editable = document.createElement("div");
+        editable.contentEditable = "true";
+        editable.innerHTML = heading.querySelector(":scope > [contenteditable]")?.innerHTML || "";
+        paragraph.append(editable);
+        heading.replaceWith(paragraph);
+    }
     restoreInlineElementBoundaries(template.content);
     const paragraph = template.content.querySelector<HTMLElement>(paragraphSelector);
     if (!paragraph) {

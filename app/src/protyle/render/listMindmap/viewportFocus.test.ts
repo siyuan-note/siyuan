@@ -8,7 +8,7 @@ const source = createSourceFile("view.ts", readFileSync("src/protyle/render/list
     ScriptTarget.ES2021, true);
 const view = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "ListMindmapView");
 assert.ok(view && isClassDeclaration(view));
-const names = ["focusNode", "getToolbarBounds", "revealNode", "isTemporaryPan", "activatePointer", "isPanTarget", "dismissControls", "closeInspectorPanel", "pointerDown", "preparePointer", "beginPointer", "pointerUp"];
+const names = ["focusNode", "getToolbarBounds", "revealNode", "isTemporaryPan", "activatePointer", "isPanTarget", "isOwnedMenuTarget", "dismissControls", "closeInspectorPanel", "pointerDown", "preparePointer", "beginPointer", "pointerUp"];
 const methods = view.members.filter(item => item.name && names.includes(item.name.getText(source)));
 assert.equal(methods.length, names.length);
 const compiled = transpileModule(`class View { ${methods.map(item => item.getText(source)).join("\n")} }
@@ -16,7 +16,7 @@ globalThis.View = View;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outp
 
 const setup = () => {
     const frames: (() => void)[] = [];
-    const context: any = {clearTimeout, requestAnimationFrame: (action: () => void) => frames.push(action),
+    const context: any = {window: {}, Element: class {}, clearTimeout, requestAnimationFrame: (action: () => void) => frames.push(action),
         getComputedStyle: (element: any) => ({display: "block", visibility: "visible", opacity: "1", ...element.style})};
     runInNewContext(compiled, context);
     let focus = "editor";

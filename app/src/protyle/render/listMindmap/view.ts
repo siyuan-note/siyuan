@@ -352,11 +352,13 @@ export class ListMindmapView {
             this.listen(window.visualViewport, "resize", () => this.queueInspectorLayout());
             this.listen(window.visualViewport, "scroll", () => this.queueInspectorLayout());
         }
-        this.listen(options.host, "focusout", (event: FocusEvent) => {
-            if (event.relatedTarget instanceof Node && !options.host.contains(event.relatedTarget)) {
+        this.listen(document, "focusout", (event: FocusEvent) => {
+            if ((options.host.contains(event.target as Node) || this.isOwnedMenuTarget(event.target as Node)) &&
+                event.relatedTarget instanceof Node && !options.host.contains(event.relatedTarget) &&
+                !this.isOwnedMenuTarget(event.relatedTarget)) {
                 this.setInteractionActive(false);
             }
-        });
+        }, {capture: true});
         this.listen(options.host, "pointerover", this.showButtonTooltip);
         this.listen(options.host, "focusin", this.showButtonTooltip);
         ["pointerout", "focusout"].forEach(type => this.listen(options.host, type, this.hideButtonTooltip));
@@ -555,9 +557,18 @@ export class ListMindmapView {
         this.updateSelection();
     }
 
+    private isOwnedMenuTarget(target: Node) {
+        const menu = window.siyuan?.menus?.menu;
+        return menu?.data instanceof Element && menu.data.closest(".mindmap-view") === this.options.host &&
+            !menu.element.classList.contains("fn__none") && menu.element.contains(target);
+    }
+
     private dismissControls = (event: PointerEvent) => {
         const target = event.target as Node;
         this.tooltip.hidden = true;
+        if (this.isOwnedMenuTarget(target)) {
+            return;
+        }
         if (!this.inspectorPopover.contains(target) && !this.inspectorPanel?.anchor.contains(target)) {
             this.closeInspectorPanel();
         }

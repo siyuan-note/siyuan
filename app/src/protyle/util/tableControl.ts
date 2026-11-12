@@ -523,7 +523,7 @@ export class TableControl {
             });
             document.addEventListener("scroll", event => {
                 if (event.target instanceof Node && event.target.contains(protyle.element)) {
-                    this.scheduleRender();
+                    this.onScroll();
                 }
             }, {capture: true, signal: this.abortController.signal});
         }
@@ -970,7 +970,7 @@ export class TableControl {
             range.collapse(true);
             focusByRange(range);
         }, {capture: true, signal});
-        this.protyle.element.addEventListener("scroll", () => this.scheduleRender(), {capture: true, signal});
+        this.protyle.element.addEventListener("scroll", () => this.onScroll(), {capture: true, signal});
         window.addEventListener("resize", () => this.scheduleRender(), {signal});
         this.element.addEventListener("wheel", event => {
             if (event.ctrlKey) {
@@ -1488,6 +1488,17 @@ export class TableControl {
     private setPosition(element: HTMLElement, left: number, top: number) {
         element.style.left = `${Math.round(left)}px`;
         element.style.top = `${Math.round(top)}px`;
+    }
+
+    private onScroll() {
+        if (!this.dimensionDragging) {
+            this.clearDimensionFeedback();
+            this.rowBoundary = undefined;
+            this.wysiwygElement.querySelectorAll<HTMLElement>(".table__resize").forEach(element => {
+                element.style.display = "none";
+            });
+        }
+        this.scheduleRender();
     }
 
     private hoverDimensionBoundary(boundary?: ITableDimensionBoundary) {

@@ -1375,6 +1375,33 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
             "column hover identifies the actual column boundary");
         f.dispose();
     }
+    for (const kind of ["row", "column"]) {
+        for (const mindmap of [false, true]) {
+            mobile = false;
+            const f = fixture(mindmap);
+            const cell = f.cell(1, 1);
+            const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+            const resize = document.createElement("div");
+            resize.className = "table__resize";
+            f.table.parentElement.append(resize);
+            const hover = () => f.invoke("hoverDimensionBoundary", {table: f.table,
+                ...(kind === "row" ? {row: cell.parentElement} : {column: 1})});
+            const scroller = mindmap ? f.scrollContainer : f.root;
+            hover();
+            scroller.dispatchEvent(new Event("scroll"));
+            await new Promise(resolve => setTimeout(resolve, 230));
+            check.ok(guide.classList.contains("fn__none"), "scrolling cancels pending boundary feedback");
+            hover();
+            await new Promise(resolve => setTimeout(resolve, 230));
+            check.equal(guide.classList.contains("fn__none"), false);
+            f.table.parentElement.dispatchEvent(new Event("scroll"));
+            check.ok(guide.classList.contains("fn__none"), "table scrolling hides visible boundary feedback immediately");
+            check.equal(resize.style.display, "none", "scrolling dismisses the column resize hit target");
+            f.render();
+            check.ok(guide.classList.contains("fn__none"), "rendering does not restore a stale hover guide");
+            f.dispose();
+        }
+    }
     for (const touchMode of [false, true]) {
         mobile = touchMode;
         const f = fixture();
@@ -1397,6 +1424,9 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         pointer(document, "pointermove", x, y + 33, 99);
         f.render();
         check.equal(guide.classList.contains("fn__none"), false, "height feedback survives rendering during drag");
+        f.root.dispatchEvent(new Event("scroll"));
+        f.render();
+        check.equal(guide.classList.contains("fn__none"), false, "scrolling during an active resize retains its feedback");
         const guideRect = guide.getBoundingClientRect();
         check.equal(guideRect.top + guideRect.height / 2, row.getBoundingClientRect().bottom,
             "the guide is centered on the actual row boundary");

@@ -6,7 +6,7 @@ import * as path from "node:path";
 import {promisify} from "node:util";
 import test from "node:test";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-import {getExportImageSize, isExportImageSizeSupported, updateExportImageLayout} from "./imageLayout";
+import {getExportImageLayoutScale, getExportImageSize, isExportImageSizeSupported, updateExportImageLayout} from "./imageLayout";
 
 test("image limits account for device pixels, side length and bitmap area", () => {
     assert.equal(isExportImageSizeSupported({width: 8192, height: 2048}, 2), true);
@@ -18,7 +18,17 @@ test("image limits account for device pixels, side length and bitmap area", () =
     assert.equal(isExportImageSizeSupported({width: 100, height: 100}, NaN), false);
 });
 
-const browserCases = async (layoutSource: string, fontSource: string, exportSource: string, mobile: boolean) => {
+test("high-density export layout preserves output limits and falls back for unsupported intermediate sizes", () => {
+    assert.equal(getExportImageLayoutScale({width: 800, height: 600}, 1, true), 2);
+    assert.equal(getExportImageLayoutScale({width: 800, height: 600}, 1.25, true), 2);
+    assert.equal(getExportImageLayoutScale({width: 800, height: 600}, 3, true), 3);
+    assert.equal(getExportImageLayoutScale({width: 800, height: 600}, 2, false), 1);
+    assert.equal(isExportImageSizeSupported({width: 12000, height: 100}, 1), true);
+    assert.equal(getExportImageLayoutScale({width: 12000, height: 100}, 1, true), 1);
+    assert.equal(getExportImageLayoutScale({width: 4097, height: 4096}, 1, true), 1);
+});
+
+const browserCases = async (layoutSource: string, fontSource: string, exportSource: string, mobile: boolean, pixelRatio: number) => {
     const check = require("node:assert/strict");
     const layout: {
         updateExportImageLayout: typeof updateExportImageLayout,
@@ -42,6 +52,7 @@ size-adjust: 85%;
 }`;
     document.head.append(nativeFonts);
     let engine = "html";
+    let applePlatform = true;
     let content = "";
     let titleImageContent = "";
     let previewRequest: {excludeTitleImage: boolean, addTitle: boolean};
@@ -78,7 +89,21 @@ size-adjust: 85%;
             export17: "Add document title", exportTitleImage: "Export title image", title: "Title"},
         storage: {image: {keepFold: false, watermark: false}},
     } as unknown as ISiyuan;
-    Object.defineProperty(window, "devicePixelRatio", {value: 2, configurable: true});
+    check.equal(window.devicePixelRatio, pixelRatio, "the renderer uses the real requested device scale");
+    let captureStyle: Partial<CSSStyleDeclaration>;
+    let captureScale: number;
+    const htmlBlob = window.htmlToImage.toBlob;
+    window.htmlToImage.toBlob = async (element, options) => {
+        captureStyle = options.style as Partial<CSSStyleDeclaration>;
+        captureScale = Number(options.pixelRatio);
+        return htmlBlob(element, options);
+    };
+    const modernBlob = window.modernScreenshot.domToBlob;
+    window.modernScreenshot.domToBlob = async (element, options) => {
+        captureStyle = options.style as Partial<CSSStyleDeclaration>;
+        captureScale = Number(options.scale);
+        return modernBlob(element, options);
+    };
     const htmlCanvas = window.htmlToImage.toCanvas;
     window.htmlToImage.toCanvas = async (element, options) => {
         watermarkWidth = element.clientWidth;
@@ -130,7 +155,7 @@ size-adjust: 85%;
         "../render/highlightRender": {highlightRender: () => {}, lineNumberRender: () => {}},
         "../util/processCode": {processRender: () => {}},
         "../render/chartRender": {renderChartsForImage: async () => {}},
-        "../util/compatibility": {isIPhone: () => mobile && engine === "modern", isIPad: () => false,
+        "../util/compatibility": {isMac: () => applePlatform, isIPhone: () => applePlatform && mobile && engine === "modern", isIPad: () => false,
             isSafari: () => engine === "modern", isInAndroid: () => false,
             setStorageVal: (_key: string, value: {titleImage: boolean}) => {
                 storedImageOptions = JSON.parse(JSON.stringify(value));
@@ -188,14 +213,14 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         try {
             image.src = url;
             await image.decode();
-            check.equal(image.naturalWidth, captured.width * window.devicePixelRatio);
-            check.equal(image.naturalHeight, captured.height * window.devicePixelRatio);
+            check.equal(image.naturalWidth, Math.floor(captured.width * window.devicePixelRatio));
+            check.equal(image.naturalHeight, Math.floor(captured.height * window.devicePixelRatio));
             const canvas = document.createElement("canvas");
             canvas.width = image.naturalWidth;
             canvas.height = image.naturalHeight;
             const context = canvas.getContext("2d");
             context.drawImage(image, 0, 0);
-            const pixel = context.getImageData(Math.floor(captured.x * 2), Math.floor(captured.y * 2), 1, 1).data;
+            const pixel = context.getImageData(Math.floor(captured.x * pixelRatio), Math.floor(captured.y * pixelRatio), 1, 1).data;
             check.deepEqual(Array.from(pixel), [255, 0, 0, 255], `PNG marker moved or was clipped (${engine}, mobile=${mobile})`);
         } finally {
             URL.revokeObjectURL(url);
@@ -346,6 +371,23 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         const oldTop = tall.scrollTop;
         await capture();
         check.equal(tall.scrollTop, oldTop);
+        check.equal(captureStyle.zoom, String(Math.max(2, pixelRatio)));
+        check.equal(captureScale, pixelRatio / Math.max(2, pixelRatio));
+        const fallback = await open(table(2));
+        applePlatform = false;
+        await capture();
+        check.deepEqual(captureStyle, {boxSizing: "border-box", overflow: "hidden"});
+        check.equal(captureScale, pixelRatio, "non-Apple platforms keep the existing rasterization path");
+        applePlatform = true;
+        const ancestor = fallback.parentElement;
+        ancestor.style.zoom = "1.1";
+        (dialog.element.querySelector('[data-type="copy"]') as HTMLButtonElement).click();
+        await waitForActions("existing ancestor zoom", 15000);
+        check.ok(captured?.blob.size > 0);
+        check.deepEqual(captureStyle, {boxSizing: "border-box", overflow: "hidden"});
+        check.equal(captureScale, pixelRatio, "existing ancestor zoom keeps the original capture options");
+        check.equal(ancestor.style.zoom, "1.1", "capture never changes the preview's existing zoom");
+        ancestor.style.zoom = "";
     }
     window.siyuan.storage.image.watermark = true;
     window.siyuan.config.export.imageWatermarkStr = "Watermark";
@@ -355,7 +397,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
     await capture();
     document.body.replaceChildren();
     nativeFonts.remove();
-    return `Image exports passed (mobile=${mobile})`;
+    return `Image exports passed (mobile=${mobile}, pixelRatio=${pixelRatio})`;
 };
 
 test("wide PNG exports preserve text and all columns in both screenshot engines and viewport sizes", {
@@ -386,14 +428,18 @@ app.commandLine.appendSwitch("disable-gpu");
 app.on("window-all-closed", () => {});
 app.whenReady().then(async () => {
     try {
-        const results = await Promise.allSettled([false, true].map(async mobile => {
+        const run = async ({mobile, pixelRatio}) => {
             let win;
             let phase;
             try {
                 phase = "load viewport " + mobile;
                 win = new BrowserWindow({show:false,width:mobile ? 390 : 1000,height:850,
                     webPreferences:{nodeIntegration:true,contextIsolation:false,backgroundThrottling:false}});
-                await win.loadURL("data:text/html,<html><head></head><body></body></html>");
+                await win.loadURL("data:text/html,<!doctype html><html><head></head><body></body></html>");
+                win.webContents.debugger.attach("1.3");
+                await win.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride", {
+                    width: mobile ? 390 : 1000, height: 850, deviceScaleFactor: pixelRatio, mobile: false,
+                });
                 await win.webContents.executeJavaScript(${JSON.stringify(`const style = document.createElement("style");
 style.textContent = ${JSON.stringify(css)}; document.head.append(style);
 ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(source)})(undefined, undefined);`).join("\n")}`)});
@@ -404,14 +450,21 @@ ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(so
                 phase = "export cases " + mobile;
                 console.log(await win.webContents.executeJavaScript(
                     "const __name = value => value; (" + ${JSON.stringify(browserCases.toString())} + ")(" +
-                    ${JSON.stringify(JSON.stringify(layoutSource) + "," + JSON.stringify(fontSource) + "," + JSON.stringify(exportSource))} + "," + mobile + ")"));
+                    ${JSON.stringify(JSON.stringify(layoutSource) + "," + JSON.stringify(fontSource) + "," + JSON.stringify(exportSource))} + "," + mobile + "," + pixelRatio + ")"));
             } catch (error) {
                 console.error(phase, error);
                 throw error;
             } finally {
                 if (win && !win.isDestroyed()) win.destroy();
             }
-        }));
+        };
+        const results = [];
+        for (const pixelRatio of [1, 1.25, 1.5, 2, 3]) {
+            for (const mobile of [false, true]) {
+                results.push(await run({mobile, pixelRatio}).then(value => ({status: "fulfilled", value}),
+                    reason => ({status: "rejected", reason})));
+            }
+        }
         const failure = results.find(result => result.status === "rejected");
         if (failure) throw failure.reason;
         app.exit(0);
@@ -425,8 +478,12 @@ ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(so
         const result = await promisify(execFile)(require("electron") as unknown as string, [script], {
             env, timeout: 180000, windowsHide: true,
         });
-        assert.match(result.stdout, /Image exports passed \(mobile=false\)/, result.stderr);
-        assert.match(result.stdout, /Image exports passed \(mobile=true\)/, result.stderr);
+        for (const pixelRatio of [1, 1.25, 1.5, 2, 3]) {
+            for (const mobile of [false, true]) {
+                assert.ok(result.stdout.includes(`Image exports passed (mobile=${mobile}, pixelRatio=${pixelRatio})`),
+                    result.stderr);
+            }
+        }
     } finally {
         rmSync(temporary, {recursive: true, force: true});
     }

@@ -57,3 +57,10 @@ export const isExportImageSizeSupported = (size: {width: number, height: number}
     return Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0 &&
         width <= MAX_IMAGE_SIZE && height <= MAX_IMAGE_SIZE && width * height <= MAX_IMAGE_PIXELS;
 };
+
+// Apple 彩色位图字体在低密度 SVG 中可能改变字宽；中间布局也必须满足位图上限。
+export const getExportImageLayoutScale = (size: {width: number, height: number}, pixelRatio: number,
+    useHighDensityLayout: boolean) => {
+    const scale = Math.max(2, pixelRatio);
+    return useHighDensityLayout && isExportImageSizeSupported(size, scale) ? scale : 1;
+};

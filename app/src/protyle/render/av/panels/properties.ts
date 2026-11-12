@@ -27,9 +27,8 @@ export const getPropertiesHTML = (fields: IAVColumn[], viewType: TAVView) => {
 </button>`;
         }
     });
-    if (hideHTML) {
-        hideHTML = `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="nobg">
+    hideHTML = `<button class="b3-menu__separator"></button>
+<button class="b3-menu__item" data-type="nobg" data-av-field-section="hidden">
     <span class="b3-menu__label">${window.siyuan.languages.hideCol}</span>
     <span class="block__icon" data-type="showAllCol">
         ${window.siyuan.languages.showAll}
@@ -38,7 +37,6 @@ export const getPropertiesHTML = (fields: IAVColumn[], viewType: TAVView) => {
     </span>
 </button>
 ${hideHTML}`;
-    }
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
     <span class="block__icon block__icon--menu-back" data-type="go-config">
@@ -47,7 +45,7 @@ ${hideHTML}`;
     <span class="b3-menu__label ft__center">${window.siyuan.languages.fields}</span>
 </button>
 <button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="nobg">
+<button class="b3-menu__item" data-type="nobg" data-av-field-section="visible">
     <span class="b3-menu__label">${window.siyuan.languages.showCol}</span>
     <span class="block__icon" data-type="hideAllCol">
         ${window.siyuan.languages.hideAll}

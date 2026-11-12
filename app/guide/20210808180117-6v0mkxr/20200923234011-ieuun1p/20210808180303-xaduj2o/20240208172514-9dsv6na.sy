@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261111211629"
+		"updated": "20261112174810"
 	},
 	"Children": [
 		{
@@ -480,6 +480,29 @@
 				{
 					"Type": "NodeText",
 					"Data": " to control the two kinds of icons independently. Duplicating a view or changing its layout preserves both settings."
+				}
+			]
+		},
+		{
+			"ID": "20261112174810-27e8617",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112174810-27e8617",
+				"updated": "20261112174810"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the current view’s "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Fields"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " menu, drag a field within a section to reorder it, or between Show field and Hide field to change its visibility and position together. You can also drop on a section heading when that section is empty. These changes support undo and redo. The primary key cannot be hidden in table, list, or calendar views."
 				}
 			]
 		},

@@ -8,6 +8,8 @@ import { getLanguageByIndex } from "../groups";
 import { hasClosestByAttribute } from "../../../util/hasClosest";
 import { getPropertiesHTML } from "./properties";
 import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "../viewVisibility";
+import {isAVCardView} from "../viewType";
+import {setPosition} from "../../../../util/setPosition";
 import type { IAVPanelContext } from "./types";
 export const bindAVPanelDrag = (context: IAVPanelContext) => {
     let counter = 0;
@@ -15,7 +17,7 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
         const sourceElement = event.target as HTMLElement;
         counter = 0;
         const conditionalRule = sourceElement.closest("[data-conditional-drag]")?.closest<HTMLElement>("[data-rule-id]");
-        window.siyuan.dragElement = conditionalRule || sourceElement.closest<HTMLElement>('[data-option-row="true"]') || sourceElement;
+        window.siyuan.dragElement = conditionalRule || sourceElement.closest<HTMLElement>('[data-option-row="true"], [data-type="editCol"]') || sourceElement;
         if (conditionalRule) {
             event.dataTransfer.setDragImage(conditionalRule, 16, 14);
         }
@@ -274,43 +276,49 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
             return;
         }
         // 字段列表拖拽排序
-        if (targetElement.getAttribute("data-type") === "editCol") {
-            const previousID = (isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
-            const undoPreviousID = sourceElement.previousElementSibling?.getAttribute("data-id") || "";
-            if (previousID !== undoPreviousID && previousID !== sourceId) {
-                transaction(context.options.protyle, [{
-                        action: "sortAttrViewCol",
-                        avID: context.avID,
-                        previousID,
-                        id: sourceId,
-                        blockID: context.blockID,
-                    }], [{
-                        action: "sortAttrViewCol",
-                        avID: context.avID,
-                        previousID: undoPreviousID,
-                        id: sourceId,
-                        blockID: context.blockID
-                    }]);
-                let column: IAVColumn;
-                context.fields.find((item, index: number) => {
-                    if (item.id === sourceId) {
-                        column = context.fields.splice(index, 1)[0];
-                        return true;
-                    }
-                });
-                context.fields.find((item, index: number) => {
-                    if (item.id === targetId) {
-                        if (isTop) {
-                            context.fields.splice(index, 0, column);
-                        }
-                        else {
-                            context.fields.splice(index + 1, 0, column);
-                        }
-                        return true;
-                    }
-                });
+        if (targetElement.dataset.type === "editCol" || targetElement.dataset.avFieldSection) {
+            event.preventDefault();
+            event.stopPropagation();
+            targetElement.classList.remove("dragover__top", "dragover__bottom");
+            const sourceIndex = context.fields.findIndex(field => field.id === sourceId);
+            const targetField = context.fields.find(field => field.id === targetId);
+            if (!context.menuElement.contains(sourceElement) || sourceElement.dataset.type !== "editCol" ||
+                sourceIndex < 0 || sourceId === targetId || (!targetField && !targetElement.dataset.avFieldSection)) {
+                return;
             }
-            context.menuElement.innerHTML = getPropertiesHTML(context.fields, context.data.viewType);
+            const column = context.fields[sourceIndex];
+            const hidden = targetField ? !!targetField.hidden : targetElement.dataset.avFieldSection === "hidden";
+            if (hidden && column.type === "block" && !isAVCardView(context.data.viewType)) {
+                return;
+            }
+            const fields = context.fields.filter(field => field !== column);
+            let index = targetField ? fields.indexOf(targetField) : fields.findIndex(field => !!field.hidden === hidden);
+            if (index < 0) {
+                index = hidden ? fields.length : 0;
+            } else if (targetField && !isTop) {
+                index++;
+            }
+            fields.splice(index, 0, column);
+            const operations: IOperation[] = [];
+            const undoOperations: IOperation[] = [];
+            const operation = {avID: context.avID, blockID: context.blockID, viewID: context.data.viewID, id: sourceId};
+            if (index !== sourceIndex) {
+                operations.push({...operation, action: "sortAttrViewCol", previousID: fields[index - 1]?.id || ""});
+                undoOperations.push({...operation, action: "sortAttrViewCol", previousID: context.fields[sourceIndex - 1]?.id || ""});
+            }
+            if (!!column.hidden !== hidden) {
+                operations.push({...operation, action: "setAttrViewColHidden", data: hidden});
+                undoOperations.push({...operation, action: "setAttrViewColHidden", data: !!column.hidden});
+            }
+            if (operations.length > 0) {
+                column.hidden = hidden;
+                context.fields.splice(0, context.fields.length, ...fields);
+                transaction(context.options.protyle, operations, undoOperations);
+                const scrollTop = context.menuElement.querySelector(".b3-menu__items").scrollTop;
+                context.menuElement.innerHTML = getPropertiesHTML(context.fields, context.data.viewType);
+                setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth, context.tabRect.bottom, context.tabRect.height, 0, true);
+                context.menuElement.querySelector(".b3-menu__items").scrollTop = scrollTop;
+            }
             return;
         }
         // 分组项拖拽排序
@@ -379,7 +387,9 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
         }
         const target = event.target as HTMLElement;
         const viewSection = context.options.type === "switcher" ? target.closest<HTMLElement>("[data-av-view-section]") : undefined;
-        let targetElement = viewSection || target.closest<HTMLElement>(".av__conditional-rule") || target.closest<HTMLElement>('[data-option-row="true"]') ||
+        const fieldDrag = window.siyuan.dragElement?.dataset.type === "editCol";
+        const fieldSection = fieldDrag ? target.closest<HTMLElement>("[data-av-field-section]") : undefined;
+        let targetElement = viewSection || fieldSection || target.closest<HTMLElement>(".av__conditional-rule") || target.closest<HTMLElement>('[data-option-row="true"]') ||
             hasClosestByAttribute(target, "draggable", "true");
         if (!targetElement) {
             const nearbyElement = document.elementFromPoint(event.clientX, event.clientY - 1);
@@ -387,7 +397,7 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
                 hasClosestByAttribute(nearbyElement, "draggable", "true");
         }
         if (!targetElement || targetElement === window.siyuan.dragElement) {
-            if (context.options.type === "switcher") {
+            if (context.options.type === "switcher" || fieldDrag) {
                 context.avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach(item => {
                     item.classList.remove("dragover__bottom", "dragover__top");
                 });
@@ -396,7 +406,7 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
         }
         event.preventDefault();
         if ((dragoverElement && targetElement === dragoverElement) ||
-            context.options.type === "switcher" && window.siyuan.dragElement?.dataset.avViewVisibility) {
+            context.options.type === "switcher" && window.siyuan.dragElement?.dataset.avViewVisibility || fieldDrag) {
             const nodeRect = targetElement.getBoundingClientRect();
             context.avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
                 item.classList.remove("dragover__bottom", "dragover__top");

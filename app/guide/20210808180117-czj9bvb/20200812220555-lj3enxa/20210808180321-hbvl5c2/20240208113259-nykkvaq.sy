@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261111211629"
+		"updated": "20261112174810"
 	},
 	"Children": [
 		{
@@ -480,6 +480,29 @@
 				{
 					"Type": "NodeText",
 					"Data": " 分别控制两类图标。复制视图或切换布局会保留这两项设置。"
+				}
+			]
+		},
+		{
+			"ID": "20261112174810-5cddef2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112174810-5cddef2",
+				"updated": "20261112174810"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在当前视图的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "字段"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 菜单中，可在同一区域内拖拽字段调整顺序，也可跨「显示字段」和「隐藏字段」区域拖拽，同时调整显隐和位置。区域为空时，可拖到区域标题上。修改支持撤销和重做。表格、列表和日历视图的主键字段不能隐藏。"
 				}
 			]
 		},

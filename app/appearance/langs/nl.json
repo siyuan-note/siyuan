@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "Programma openen",
+	"pluginSnapshotOpenData": "Gegevens openen",
 	"listMindmapRelationAppearance": "Weergave van de relatielijn",
 	"listMindmapRelationPath": "Lijnverloop",
 	"listMindmapRelationAuto": "Obstakels automatisch vermijden",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "Rond de tekstcompositie af voordat u de kleur toepast",
 	"nativeColorUnavailable": "Grafische kleurselectie is niet beschikbaar; gebruik HEX of RGB",
 	"pluginSnapshots": "Pluginmomentopnamen",
-	"pluginSnapshotStats": "Programma: ${programCount} bestanden, ${programSize} bytes; gegevens: ${dataCount} bestanden, ${dataSize} bytes",
+	"pluginSnapshotStats": "Programma: ${programCount} bestanden, ${programSize}; gegevens: ${dataCount} bestanden, ${dataSize}",
 	"pluginSnapshotRestoreTip": "Sluit eerst andere clients. Plugin ${name} wordt automatisch uitgeschakeld. De programma- en standaardgegevensmappen worden vervangen door deze momentopname; ontbrekende bestanden worden verwijderd. Eerst wordt een back-up gemaakt. Andere mappen en gedeelde instellingen zijn uitgesloten. Schakel de plugin daarna handmatig in",
 	"pluginSnapshotRestored": "Hersteld; de plugin blijft uitgeschakeld. Back-up: ${id}",
 	"restoreDocPosition": "Laatste leespositie herstellen",

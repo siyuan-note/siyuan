@@ -58,7 +58,7 @@ const runCases = async (sources, css, mobile, dark) => {
         "util/genID": {genUUID: () => String(++nextID)},
         "util/zIndex": {isAbove: () => false},
         "dialog/moveResize": {moveResize() {}},
-        "util/functions": {isMobile: () => mobile},
+        "util/functions": {isMobile: () => mobile, getFrontend: () => mobile ? "browser-mobile" : "browser-desktop"},
         "protyle/util/compatibility": {isNotCtrl: () => true, saveExportFile() {}},
         "protyle": {Protyle: class {}},
         "constants": {Constants: {TIMEOUT_DBLCLICK: 0, TIMEOUT_OPENDIALOG: 0, SIYUAN_ASSETS_IMAGE: [], SIYUAN_ASSETS_AUDIO: [], SIYUAN_ASSETS_VIDEO: []}},
@@ -70,6 +70,7 @@ const runCases = async (sources, css, mobile, dark) => {
         "util/pathName": {pathPosix: () => require("node:path").posix},
         "util/hostCapabilities": {getHostCapabilities: () => ({importExport: true})},
         "dayjs": require(path.join(sources.app, "node_modules/dayjs")),
+        "filesize": require(path.join(sources.app, "node_modules/filesize")),
         "util/fetch": {
             fetchSyncPost: async (url, body, _headers, _process, abortSignal) => {
                 if (url === "/api/history/getDocHistorySnapshots") {
@@ -250,6 +251,153 @@ const runCases = async (sources, css, mobile, dark) => {
     view.destroy();
     history.destroy();
     await tick();
+
+    let confirmRestore;
+    let releaseUnload;
+    let finishDetail;
+    let detailSignal;
+    let deferDetail = false;
+    const operations = [];
+    const queries = [];
+    let lastPackage = "";
+    stubs["dialog/mobileConfirmDialog"] = {mobileConfirmDialog: (_title, _tip, callback) => { confirmRestore = callback; }};
+    stubs["plugin/loader"] = {unloadPlugin: async () => {
+        operations.push("unload");
+        await new Promise(resolve => { releaseUnload = resolve; });
+    }};
+    stubs["util/fetch"].fetchSyncPost = async (url, body, _headers, _process, abortSignal) => {
+        if (url === "/api/bazaar/getInstalledPlugin") {
+            return {code: 0, data: {packages: [
+                {name: "example", preferredName: "Example <img src=x onerror=alert(1)>", enabled: true},
+                {name: "disabled-package", preferredName: "Disabled", enabled: false},
+            ]}};
+        }
+        if (url === "/api/repo/getPluginSnapshots") {
+            lastPackage = body.name;
+            queries.push(body);
+            return {code: 0, data: {pageCount: 2, totalCount: 40, snapshots: Array.from({length: 20}, (_, index) => ({
+                id: String(index).padStart(40, "a"), created: snapshots[0].created, memo: "<img src=x> Snapshot " + index,
+                program: {count: 1, size: 1024}, data: {count: 1, size: 2000000},
+            }))}};
+        }
+        if (url === "/api/repo/getRepoSnapshots") {
+            detailSignal = abortSignal;
+            const response = {code: 0, data: {snapshots: [{id: body.id, created: snapshots[0].created, memo: "Plugin", files: [
+                {id: "program-file", path: `plugins/${lastPackage}/index.js`},
+                {id: "data-file", path: `storage/petal/${lastPackage}/data.json`},
+                {id: "other-file", path: `storage/petal/${lastPackage}-other/data.json`},
+            ]}]}};
+            if (deferDetail) return new Promise(resolve => { finishDetail = () => resolve(response); });
+            return response;
+        }
+        if (url === "/api/petal/setPetalEnabled") { operations.push("disable"); assert.equal(body.enabled, false); return {code: 0}; }
+        assert.equal(url, "/api/repo/restorePluginSnapshot");
+        operations.push("restore");
+        return {code: 0, data: {backupID: "backup"}};
+    };
+    const {mountPluginSnapshots} = load("history/pluginSnapshots");
+    let disposePlugins;
+    const pluginDialog = new Dialog({title: "Snapshots", width: mobile ? "100vw" : "90vw", height: mobile ? "100dvh" : "80vh",
+        content: '<div class="history__repo fn__block"><div class="history__action"><div class="history__repo-pagination"></div><input class="b3-text-field"><button data-type="compare">Compare</button></div><ul data-type="repoList"></ul></div>',
+        beforeClose: () => disposePlugins?.canClose() !== false,
+        destroyCallback: () => disposePlugins?.(),
+    });
+    const pluginRoot = pluginDialog.element.querySelector(".history__repo");
+    disposePlugins = initRepoPanel(pluginRoot, () => {}, (container, setRestoring) =>
+        mountPluginSnapshots({appId: "app", plugins: [{name: "example"}]}, container, setRestoring));
+    const dialogCount = window.siyuan.dialogs.length;
+    pluginRoot.querySelector('[data-action="plugin-snapshots"]').click();
+    await tick();
+    assert.equal(window.siyuan.dialogs.length, dialogCount, "plugin mode reuses the existing snapshot dialog");
+    assert.equal(getComputedStyle(pluginRoot.querySelector(".history__snapshot-columns")).display, "none");
+    assert.equal(getComputedStyle(pluginRoot.querySelector('[data-action="filters"]')).display, "none");
+    const pluginInput = pluginRoot.querySelector('[role="combobox"]');
+    pluginInput.focus();
+    await tick();
+    assert.equal(pluginRoot.querySelectorAll('[role="option"]').length, 2, "disabled installed plugins remain selectable");
+    assert.equal(pluginRoot.querySelector(".history__plugin-options img"), null, "package labels remain text");
+    const options = pluginRoot.querySelectorAll('[role="option"]');
+    pluginInput.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown", bubbles: true, cancelable: true}));
+    assert.equal(pluginInput.getAttribute("aria-activedescendant"), options[1].id);
+    const optionBounds = options[1].getBoundingClientRect();
+    assert.ok(optionBounds.bottom <= innerHeight);
+    assert.equal(document.elementFromPoint(optionBounds.x + optionBounds.width / 2, optionBounds.y + optionBounds.height / 2)?.closest('[role="option"]'), options[1], "dropdown options remain visible and reachable outside the input row");
+    await require("electron").ipcRenderer.invoke("history-snapshots-capture", `plugin-chooser-${mobile ? "mobile" : "desktop"}-${dark ? "dark" : "light"}`);
+    pluginInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    assert.equal(pluginInput.getAttribute("aria-expanded"), "false");
+    pluginInput.value = "Example";
+    pluginInput.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+    pluginRoot.querySelector("[data-plugin-search]").requestSubmit();
+    assert.equal(queries.length, 0, "IME composition cannot query or select a partial plugin name");
+    pluginInput.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
+    pluginInput.dispatchEvent(new Event("input", {bubbles: true}));
+    assert.equal(pluginRoot.querySelectorAll('[role="option"]').length, 1);
+    pluginRoot.querySelector('[role="option"]').click();
+    await tick();
+    assert.equal(queries.at(-1).name, "example");
+    const rows = pluginRoot.querySelectorAll("[data-plugin-list] > li");
+    assert.equal(rows.length, 20);
+    assert.match(rows[0].textContent, /1.02 kB/);
+    assert.match(rows[0].textContent, /2 MB/);
+    assert.equal(rows[0].querySelector("img"), null);
+    await require("electron").ipcRenderer.invoke("history-snapshots-capture", `plugin-list-${mobile ? "mobile" : "desktop"}-${dark ? "dark" : "light"}`);
+    const actions = rows[0].querySelectorAll("button");
+    actions[0].click();
+    await tick();
+    assert.equal(window.siyuan.dialogs.length, dialogCount, "plugin files and preview stay inside the same dialog");
+    let pluginFiles = pluginRoot.querySelectorAll(".history__snapshot-detail-files [data-id]");
+    assert.equal(pluginFiles.length, 1);
+    assert.equal(pluginFiles[0].dataset.id, "data-file");
+    pluginFiles[0].click();
+    await tick();
+    assert.equal(pluginRoot.querySelector("textarea").value, "文档内容 data-file");
+    assert.ok(pluginRoot.scrollWidth <= pluginRoot.clientWidth + 1);
+    await require("electron").ipcRenderer.invoke("history-snapshots-capture", `plugin-detail-${mobile ? "mobile" : "desktop"}-${dark ? "dark" : "light"}`);
+    pluginRoot.querySelector("[data-plugin-back]").click();
+    actions[1].click();
+    await tick();
+    pluginFiles = pluginRoot.querySelectorAll(".history__snapshot-detail-files [data-id]");
+    assert.equal(pluginFiles.length, 1);
+    assert.equal(pluginFiles[0].dataset.id, "program-file");
+    pluginRoot.querySelector("[data-plugin-back]").click();
+    for (const font of [16, 28]) {
+        pluginRoot.style.fontSize = font + "px";
+        await tick();
+        const list = pluginRoot.querySelector("[data-plugin-list]");
+        assert.ok(list.scrollHeight > list.clientHeight, "plugin rows scroll within their panel");
+        assert.ok(list.getBoundingClientRect().bottom <= innerHeight + 1);
+        assert.ok(pluginRoot.scrollWidth <= pluginRoot.clientWidth + 1, "plugin controls fit narrow and enlarged layouts");
+    }
+    pluginInput.value = "Dis"; pluginInput.dispatchEvent(new Event("input", {bubbles: true}));
+    pluginInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
+    await tick();
+    assert.equal(queries.at(-1).name, "disabled-package");
+    pluginInput.value = "removed-package"; pluginInput.dispatchEvent(new Event("input", {bubbles: true}));
+    pluginRoot.querySelector("[data-plugin-search]").requestSubmit(); await tick();
+    assert.equal(queries.at(-1).name, "removed-package", "uninstalled packages can still be queried by exact name");
+    pluginInput.value = "example";
+    pluginRoot.querySelector("[data-plugin-search]").requestSubmit(); await tick();
+    pluginRoot.querySelector('[data-plugin-page="next"]').click(); await tick();
+    assert.equal(queries.at(-1).page, 2);
+    pluginRoot.querySelector('[data-plugin-restore="true"]').click();
+    const restoring = confirmRestore(); await tick();
+    assert.deepEqual(operations, ["disable", "unload"]);
+    assert.equal(disposePlugins.canClose(), false);
+    pluginDialog.destroy();
+    assert.equal(pluginDialog.element.dataset.dialogClosing, undefined, "restoring keeps the parent available");
+    releaseUnload(); assert.equal(await restoring, true);
+    assert.deepEqual(operations, ["disable", "unload", "restore"]);
+    assert.match(pluginRoot.querySelector("[data-plugin-result]").textContent, /backup/);
+    assert.equal(disposePlugins.canClose(), true);
+    pluginRoot.querySelector('[data-action="normal"]').click();
+    assert.equal(pluginRoot.classList.contains("history__snapshots--plugins"), false);
+    pluginRoot.querySelector('[data-action="plugin-snapshots"]').click();
+    deferDetail = true;
+    pluginRoot.querySelector("[data-plugin-list] button").click(); await tick();
+    pluginDialog.destroy(); await tick();
+    assert.ok(detailSignal.aborted, "closing the parent cancels its inline file request");
+    finishDetail(); await tick();
+    assert.equal(window.siyuan.dialogs.length, 0);
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -261,7 +409,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             ipcMain.handle("history-snapshots-capture", async (_event, name) => {
                 if (process.env.SIYUAN_HISTORY_CAPTURE_DIR) {
-                    assert.match(name, /^(history-)?(mobile|desktop)-(dark|light)$/);
+                    assert.match(name, /^(history-|plugin-list-|plugin-detail-|plugin-chooser-)?(mobile|desktop)-(dark|light)$/);
                     win.webContents.invalidate();
                     await new Promise(resolve => setTimeout(resolve, 350));
                     fs.writeFileSync(path.join(process.env.SIYUAN_HISTORY_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());
@@ -272,7 +420,7 @@ if (process.versions.electron && process.type === "browser") {
             const sources = {app: path.resolve(__dirname, ".."), icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"), languages: fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8")};
             sources.snapshotButtons = fs.readFileSync(path.join(__dirname, "../src/history/history.ts"), "utf8").match(/<button class="b3-button b3-button--outline" data-type="genRepo">[\s\S]*?data-type="fullCheckRepo">[^<]*<\/button>/)[0];
             sources.mobileRuntime = require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource();
-            for (const name of ["datePicker/binding", "datePicker/model", "dialog/index", "util/escape", "history/docSnapshots", "history/snapshotDetail", "history/pluginSnapshotPaths", "history/notebookDialogs", "history/repoFile", "history/repoPanel", "history/repoBatch", "history/repoRange", "history/repoPurge"]) {
+            for (const name of ["datePicker/binding", "datePicker/model", "dialog/index", "util/escape", "util/upDownHint", "history/docSnapshots", "history/snapshotDetail", "history/pluginSnapshotPaths", "history/pluginSnapshotSelect", "history/pluginSnapshots", "history/notebookDialogs", "history/repoFile", "history/repoPanel", "history/repoBatch", "history/repoRange", "history/repoPurge"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
             }
             sources["dialog/index"] = require("./fixtures/anchoredInputRuntime.cjs").withAnchoredInputRuntime(sources["dialog/index"]);

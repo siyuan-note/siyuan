@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "Buka program",
+	"pluginSnapshotOpenData": "Buka data",
 	"listMindmapRelationAppearance": "Tampilan garis hubungan",
 	"listMindmapRelationPath": "Jalur",
 	"listMindmapRelationAuto": "Hindari penghalang secara otomatis",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "Selesaikan komposisi teks sebelum menerapkan warna",
 	"nativeColorUnavailable": "Pemilihan warna grafis tidak tersedia; gunakan HEX atau RGB",
 	"pluginSnapshots": "Snapshot plugin",
-	"pluginSnapshotStats": "Program: ${programCount} berkas, ${programSize} byte; data: ${dataCount} berkas, ${dataSize} byte",
+	"pluginSnapshotStats": "Program: ${programCount} berkas, ${programSize}; data: ${dataCount} berkas, ${dataSize}",
 	"pluginSnapshotRestoreTip": "Tutup klien lain terlebih dahulu. Plugin ${name} akan dinonaktifkan otomatis. Direktori program dan data standarnya diganti dengan snapshot ini; berkas yang tidak ada akan dihapus. Snapshot cadangan dibuat terlebih dahulu. Direktori lain dan pengaturan bersama dikecualikan. Aktifkan plugin secara manual setelahnya",
 	"pluginSnapshotRestored": "Dipulihkan; plugin tetap nonaktif. Snapshot cadangan: ${id}",
 	"restoreDocPosition": "Pulihkan posisi baca terakhir",

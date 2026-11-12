@@ -87,7 +87,8 @@ export const updateRepoSelection = (pane: Element) => {
     });
 };
 
-export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: number) => void, openPlugins?: () => void) => {
+export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: number) => void,
+                             mountPlugins?: (container: HTMLElement, setRestoring: (busy: boolean) => void) => {destroy(): void, canClose(): boolean}) => {
     states.get(root)?.datePickers?.forEach(picker => picker.destroy());
     const lang = window.siyuan.languages;
     const state: RepoPanelState = {selected: new Map(), managing: false, busy: false, tagged: false, range: {}};
@@ -97,10 +98,11 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     root.classList.toggle("history__snapshots--narrow", isMobile());
     root.dataset.source = "local";
     const template = root.innerHTML;
+    let plugins: ReturnType<NonNullable<typeof mountPlugins>>;
     root.innerHTML = `<form class="history__snapshot-toolbar" data-role="date-range">
     <button type="button" class="b3-button b3-button--text" data-action="normal" aria-pressed="true">${lang.dataSnapshot}</button>
     <button type="button" class="b3-button b3-button--text" data-action="tagged" aria-pressed="false">${lang.repoTaggedSnapshots}</button>
-    ${openPlugins ? `<button type="button" class="b3-button b3-button--text" data-action="plugin-snapshots">${lang.pluginSnapshots}</button>` : ""}
+    ${mountPlugins ? `<button type="button" class="b3-button b3-button--text" data-action="plugin-snapshots" aria-pressed="false">${lang.pluginSnapshots}</button>` : ""}
     <span class="fn__flex-1"></span>
     <button type="button" class="b3-button b3-button--text history__snapshot-mobile-control" data-action="filters" aria-expanded="false">${lang.filter}</button>
     <div class="history__snapshot-date-controls">
@@ -115,6 +117,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     <button type="button" class="b3-button b3-button--outline fn__none" data-action="manage">${lang.repoBatchManage}</button>
 </form>
 <div class="history__snapshot-columns"></div>
+<div class="history__plugin-panel fn__none" data-role="plugins"></div>
 <div class="history__snapshot-toolbar fn__none" data-role="batch">
     <span data-role="selection" aria-live="polite"></span><span class="fn__flex-1"></span>
     <button class="b3-button b3-button--outline" data-action="clear">${lang.repoBatchClear}</button>
@@ -122,6 +125,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
 </div>
 <div class="history__snapshot-message fn__none" data-role="result" aria-live="polite"></div>`;
     const columns = root.querySelector(".history__snapshot-columns");
+    const pluginPanel = root.querySelector<HTMLElement>('[data-role="plugins"]');
     for (const source of ["local", "cloud"] as const) {
         const pane = document.createElement("div");
         pane.className = "history__repo history__snapshot-pane";
@@ -236,7 +240,14 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         event.stopPropagation();
         const action = button.dataset.action;
         if (action === "plugin-snapshots") {
-            openPlugins?.();
+            state.managing = false;
+            state.selected.clear();
+            updateRepoSelection(panes()[0]);
+            root.classList.add("history__snapshots--plugins");
+            pluginPanel.classList.remove("fn__none");
+            root.querySelectorAll("[data-action=normal], [data-action=tagged], [data-action=plugin-snapshots]")
+                .forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+            plugins ||= mountPlugins?.(pluginPanel, setBusy);
         } else if (action === "filters") {
             const expanded = root.classList.toggle("history__snapshots--filters");
             button.setAttribute("aria-expanded", String(expanded));
@@ -268,10 +279,12 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
             updateDateLimits();
             applyRange();
         } else if (action === "normal" || action === "tagged") {
+            root.classList.remove("history__snapshots--plugins");
+            pluginPanel.classList.add("fn__none");
             state.tagged = action === "tagged";
             state.managing = false;
             state.selected.clear();
-            root.querySelectorAll("[data-action=normal], [data-action=tagged]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+            root.querySelectorAll("[data-action=normal], [data-action=tagged], [data-action=plugin-snapshots]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
             panes().forEach(pane => {
                 pane.querySelector<HTMLInputElement>(".b3-text-field").value = "";
                 const compare = pane.querySelector('[data-type="compare"]');
@@ -356,8 +369,11 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         }
     });
     observer.observe(root);
-    return () => {
+    const destroy = () => {
         observer.disconnect();
         datePickers.forEach(picker => picker.destroy());
+        plugins?.destroy();
     };
+    destroy.canClose = () => plugins?.canClose() !== false;
+    return destroy;
 };

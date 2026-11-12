@@ -2610,7 +2610,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ": Search local snapshots by the exact plugin package name to view the program and standard data file counts and sizes at each time point. Restoring automatically disables the plugin and creates a backup snapshot, then replaces both data/plugins/<package>/ and data/storage/petal/<package>/ from the same snapshot, removing files absent from it. Close other clients before restoring, and enable the plugin manually afterwards. Other directories and shared settings are excluded."
+					"Data": ": Switch to Plugin snapshots within the existing snapshot panel. Select an installed plugin, filter the dropdown by its display or package name, or enter the exact package name of an uninstalled plugin. The list shows program and standard data file counts with readable size units. Open data and Open program show only their respective directories, with file previews in the same panel. Restoring automatically disables the plugin and creates a backup snapshot, then replaces both data/plugins/<package>/ and data/storage/petal/<package>/ from the same snapshot, removing files absent from it. Close other clients before restoring, and enable the plugin manually afterwards. Other directories and shared settings are excluded."
 				}
 			]
 		}

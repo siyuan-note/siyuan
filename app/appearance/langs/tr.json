@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "Programı aç",
+	"pluginSnapshotOpenData": "Verileri aç",
 	"listMindmapRelationAppearance": "İlişki çizgisi görünümü",
 	"listMindmapRelationPath": "Yol",
 	"listMindmapRelationAuto": "Engellerden otomatik kaçın",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "Rengi uygulamadan önce metin oluşturmayı tamamlayın",
 	"nativeColorUnavailable": "Grafik renk seçimi kullanılamıyor; HEX veya RGB girin",
 	"pluginSnapshots": "Eklenti anlık görüntüleri",
-	"pluginSnapshotStats": "Program: ${programCount} dosya, ${programSize} bayt; veriler: ${dataCount} dosya, ${dataSize} bayt",
+	"pluginSnapshotStats": "Program: ${programCount} dosya, ${programSize}; veriler: ${dataCount} dosya, ${dataSize}",
 	"pluginSnapshotRestoreTip": "Önce diğer istemcileri kapatın. ${name} eklentisi otomatik olarak devre dışı bırakılır. Program ve standart veri dizinleri bu anlık görüntüyle değiştirilir; görüntüde olmayan dosyalar kaldırılır. Önce bir yedek oluşturulur. Diğer dizinler ve paylaşılan ayarlar kapsam dışıdır. Sonra eklentiyi elle etkinleştirin",
 	"pluginSnapshotRestored": "Geri yüklendi; eklenti devre dışı kalır. Yedek: ${id}",
 	"restoreDocPosition": "Son okuma konumunu geri yükle",

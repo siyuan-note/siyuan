@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "Отвори програм",
+	"pluginSnapshotOpenData": "Отвори податке",
 	"listMindmapRelationAppearance": "Изглед линије везе",
 	"listMindmapRelationPath": "Путања",
 	"listMindmapRelationAuto": "Аутоматско избегавање препрека",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "Завршите састављање текста пре примене боје",
 	"nativeColorUnavailable": "Графички избор боје није доступан; користите HEX или RGB",
 	"pluginSnapshots": "Снимци додатака",
-	"pluginSnapshotStats": "Програм: ${programCount} датотека, ${programSize} бајтова; подаци: ${dataCount} датотека, ${dataSize} бајтова",
+	"pluginSnapshotStats": "Програм: ${programCount} датотека, ${programSize}; подаци: ${dataCount} датотека, ${dataSize}",
 	"pluginSnapshotRestoreTip": "Прво затворите друге клијенте. Додатак ${name} биће аутоматски искључен. Његове фасцикле програма и стандардних података биће замењене овим снимком; одсутне датотеке биће уклоњене. Претходно се прави резервни снимак. Остале фасцикле и заједничка подешавања су искључени. Потом ручно укључите додатак",
 	"pluginSnapshotRestored": "Враћено; додатак остаје искључен. Резервни снимак: ${id}",
 	"restoreDocPosition": "Врати последњи положај читања",

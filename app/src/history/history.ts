@@ -28,12 +28,12 @@ import {getRepoSnapshotRange, getRepoSnapshotType, initRepoPanel, updateRepoSele
 import {repoSnapshotInRange} from "./repoRange";
 import {MenuItem} from "../menus/Menu";
 import {renderSnapshotActions} from "./snapshotActions";
-import {openPluginSnapshots} from "./pluginSnapshots";
+import {mountPluginSnapshots} from "./pluginSnapshots";
 
 let historyEditor: Protyle;
 const historyGroups = new WeakMap<Element, HistoryGroups>();
 const historyRequests = new WeakMap<Element, number>();
-const repoPanelCleanup = new WeakMap<Element, () => void>();
+const repoPanelCleanup = new WeakMap<Element, ReturnType<typeof initRepoPanel>>();
 const repoRequests = new WeakMap<Element, number>();
 const repoHistoryEditors = new WeakMap<Element, Protyle>();
 const snapshotMemos = new WeakMap<Element, Map<string, string>>();
@@ -651,6 +651,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc", 
     } else {
         const dialog = new Dialog({
             content: contentHTML,
+            beforeClose: () => repoPanelCleanup.get(dialog.element.querySelector('#historyContainer [data-type="repo"]'))?.canClose() !== false,
             width: "90vw",
             height: "80vh",
             containerClassName: "b3-dialog__container--theme",
@@ -711,7 +712,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
     });
     disabledProtyle(historyEditor.protyle);
     const repoRoot = element.querySelector<HTMLElement>('#historyContainer [data-type="repo"]');
-    repoPanelCleanup.set(repoRoot, initRepoPanel(repoRoot, renderRepo, () => openPluginSnapshots(app)));
+    repoPanelCleanup.set(repoRoot, initRepoPanel(repoRoot, renderRepo, (container, setRestoring) => mountPluginSnapshots(app, container, setRestoring)));
     const repoElement = repoRoot.querySelector('[data-repo-source="local"]');
     const historyElement = element.querySelector('#historyContainer [data-type="doc"]');
     const previewRepoFile = (itemElement: Element) => {

@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "Otwórz program",
+	"pluginSnapshotOpenData": "Otwórz dane",
 	"listMindmapRelationAppearance": "Wygląd linii relacji",
 	"listMindmapRelationPath": "Przebieg",
 	"listMindmapRelationAuto": "Automatyczne omijanie przeszkód",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "Zakończ komponowanie tekstu przed zastosowaniem koloru",
 	"nativeColorUnavailable": "Graficzny wybór koloru jest niedostępny; użyj HEX lub RGB",
 	"pluginSnapshots": "Migawki wtyczek",
-	"pluginSnapshotStats": "Program: ${programCount} plików, ${programSize} bajtów; dane: ${dataCount} plików, ${dataSize} bajtów",
+	"pluginSnapshotStats": "Program: ${programCount} plików, ${programSize}; dane: ${dataCount} plików, ${dataSize}",
 	"pluginSnapshotRestoreTip": "Najpierw zamknij inne klienty. Wtyczka ${name} zostanie wyłączona automatycznie. Jej katalogi programu i standardowych danych zostaną zastąpione migawką; brakujące w niej pliki zostaną usunięte. Wcześniej powstanie kopia zapasowa. Inne katalogi i wspólne ustawienia są wyłączone z tej operacji. Następnie włącz wtyczkę ręcznie",
 	"pluginSnapshotRestored": "Przywrócono; wtyczka pozostaje wyłączona. Kopia zapasowa: ${id}",
 	"restoreDocPosition": "Przywracaj ostatnią pozycję czytania",

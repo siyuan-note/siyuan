@@ -8,36 +8,42 @@ import {isMobile} from "../util/functions";
 import {renderRepoFile} from "./repoFile";
 import dayjs from "dayjs";
 import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "./notebookDialogs";
-import {isPluginSnapshotPath} from "./pluginSnapshotPaths";
+import {isPluginSnapshotPath, TPluginSnapshotPart} from "./pluginSnapshotPaths";
 
-export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot, notebook: string, plugin?: string) => {
-    const lang = window.siyuan.languages;
-    let editor: Protyle;
-    const abort = new AbortController();
+export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot, notebook: string) => {
     const dialog = new MobileDialog({
         mobileSheet: {mode: "expanded"},
         title: escapeHtml(reference.tags.join(" / ")),
-        content: `<div class="history__snapshot-detail"><div class="history__snapshot-detail-status" data-detail-status role="status">${lang.loading}</div><div class="history__snapshot-detail-content fn__none"><div class="history__snapshot-detail-meta"></div><div class="history__snapshot-detail-panels"><ul class="b3-list b3-list--background history__snapshot-detail-files"></ul><div class="history__snapshot-detail-preview"></div></div></div></div>`,
+        content: "",
         width: isMobile() ? "100vw" : "85vw",
         height: isMobile() ? "100dvh" : "80vh",
         containerClassName: "b3-dialog__container--theme",
         destroyCallback: () => {
             forgetNotebookHistoryDialog(dialog);
-            abort.abort();
-            dialog.element.querySelector(".history__snapshot-detail-preview")?.removeAttribute("data-request-id");
-            editor?.destroy();
+            detail?.destroy();
         }
     });
+    const detail = mountSnapshotDetail(app, dialog.element.querySelector(".b3-dialog__body"), reference, notebook, {
+        onNotebooks: notebooks => trackNotebookHistoryDialog(dialog, notebooks),
+    });
+    await detail.loaded;
+};
+
+export const mountSnapshotDetail = (app: App, root: HTMLElement, reference: DocHistorySnapshot, notebook: string,
+                                    options: {plugin?: {name: string, part: TPluginSnapshotPart}, onNotebooks?: (notebooks: string[]) => void} = {}) => {
+    const lang = window.siyuan.languages;
+    let editor: Protyle;
+    const abort = new AbortController();
+    root.innerHTML = `<div class="history__snapshot-detail"><div class="history__snapshot-detail-status" data-detail-status role="status">${lang.loading}</div><div class="history__snapshot-detail-content fn__none"><div class="history__snapshot-detail-meta"></div><div class="history__snapshot-detail-panels"><ul class="b3-list b3-list--background history__snapshot-detail-files"></ul><div class="history__snapshot-detail-preview"></div></div></div></div>`;
     const notebooks = new Set([notebook]);
-    trackNotebookHistoryDialog(dialog, Array.from(notebooks));
-    const root = dialog.element;
+    options.onNotebooks?.(Array.from(notebooks));
     const status = root.querySelector<HTMLElement>("[data-detail-status]");
     const list = root.querySelector<HTMLElement>(".history__snapshot-detail-files");
     const preview = root.querySelector<HTMLElement>(".history__snapshot-detail-preview");
     const select = (row: HTMLElement) => {
         if (row.dataset.notebook) {
             notebooks.add(row.dataset.notebook);
-            trackNotebookHistoryDialog(dialog, Array.from(notebooks));
+            options.onNotebooks?.(Array.from(notebooks));
         }
         editor?.destroy();
         editor = undefined;
@@ -60,8 +66,7 @@ export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot
             }
         }
     });
-    try {
-        const response = await fetchSyncPost("/api/repo/getRepoSnapshots", {id: reference.id, page: 1, includeFiles: true}, undefined, false, abort.signal);
+    const loaded = fetchSyncPost("/api/repo/getRepoSnapshots", {id: reference.id, page: 1, includeFiles: true}, undefined, false, abort.signal).then(response => {
         if (abort.signal.aborted || !root.isConnected) {
             return;
         }
@@ -76,7 +81,7 @@ export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot
         const fragment = document.createDocumentFragment();
         let selected: HTMLElement;
         snapshot.files.forEach(file => {
-            if (plugin && !isPluginSnapshotPath(file.path, plugin)) {
+            if (options.plugin && !isPluginSnapshotPath(file.path, options.plugin.name, options.plugin.part)) {
                 return;
             }
             const row = document.createElement("li");
@@ -97,16 +102,22 @@ export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot
             }
         });
         list.replaceChildren(fragment);
+        if (!list.children.length) { list.textContent = lang.emptyContent; }
         status.classList.add("fn__none");
         root.querySelector(".history__snapshot-detail-content").classList.remove("fn__none");
         if (selected) {
             select(selected);
             selected.scrollIntoView({block: "start"});
         }
-    } catch (error) {
+    }).catch(error => {
         if (!abort.signal.aborted && root.isConnected) {
             status.textContent = error instanceof Error ? error.message : String(error);
             status.classList.add("ft__error");
         }
-    }
+    });
+    return {loaded, destroy: () => {
+        abort.abort();
+        preview.removeAttribute("data-request-id");
+        editor?.destroy();
+    }};
 };

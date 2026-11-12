@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "Открыть программу",
+	"pluginSnapshotOpenData": "Открыть данные",
 	"listMindmapRelationAppearance": "Внешний вид связи",
 	"listMindmapRelationPath": "Траектория",
 	"listMindmapRelationAuto": "Автоматический обход препятствий",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "Завершите составной ввод перед применением цвета",
 	"nativeColorUnavailable": "Графический выбор цвета недоступен; используйте HEX или RGB",
 	"pluginSnapshots": "Снимки плагинов",
-	"pluginSnapshotStats": "Программа: ${programCount} файлов, ${programSize} байт; данные: ${dataCount} файлов, ${dataSize} байт",
+	"pluginSnapshotStats": "Программа: ${programCount} файлов, ${programSize}; данные: ${dataCount} файлов, ${dataSize}",
 	"pluginSnapshotRestoreTip": "Сначала закройте другие клиенты. Плагин ${name} будет автоматически отключён. Его каталоги программы и стандартных данных будут заменены этим снимком; отсутствующие файлы будут удалены. Перед восстановлением создаётся резервный снимок. Другие каталоги и общие настройки исключены. Затем включите плагин вручную",
 	"pluginSnapshotRestored": "Восстановлено; плагин остаётся отключённым. Резервный снимок: ${id}",
 	"restoreDocPosition": "Восстанавливать последнюю позицию чтения",

@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "Otvoriť program",
+	"pluginSnapshotOpenData": "Otvoriť údaje",
 	"listMindmapRelationAppearance": "Vzhľad vzťahovej čiary",
 	"listMindmapRelationPath": "Trasa",
 	"listMindmapRelationAuto": "Automatické obchádzanie prekážok",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "Pred použitím farby dokončite skladanie textu",
 	"nativeColorUnavailable": "Grafický výber farby nie je dostupný; použite HEX alebo RGB",
 	"pluginSnapshots": "Snímky doplnkov",
-	"pluginSnapshotStats": "Program: ${programCount} súborov, ${programSize} bajtov; údaje: ${dataCount} súborov, ${dataSize} bajtov",
+	"pluginSnapshotStats": "Program: ${programCount} súborov, ${programSize}; údaje: ${dataCount} súborov, ${dataSize}",
 	"pluginSnapshotRestoreTip": "Najprv zatvorte ostatných klientov. Doplnok ${name} sa automaticky vypne. Jeho priečinky programu a štandardných údajov sa nahradia touto snímkou; chýbajúce súbory sa odstránia. Najprv sa vytvorí záloha. Ostatné priečinky a spoločné nastavenia sú vylúčené. Potom doplnok zapnite ručne",
 	"pluginSnapshotRestored": "Obnovené; doplnok zostáva vypnutý. Záloha: ${id}",
 	"restoreDocPosition": "Obnoviť poslednú pozíciu čítania",

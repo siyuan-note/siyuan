@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "Відкрити програму",
+	"pluginSnapshotOpenData": "Відкрити дані",
 	"listMindmapRelationAppearance": "Вигляд лінії зв’язку",
 	"listMindmapRelationPath": "Траєкторія",
 	"listMindmapRelationAuto": "Автоматичний обхід перешкод",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "Завершіть складений ввід перед застосуванням кольору",
 	"nativeColorUnavailable": "Графічний вибір кольору недоступний; використовуйте HEX або RGB",
 	"pluginSnapshots": "Знімки плагінів",
-	"pluginSnapshotStats": "Програма: ${programCount} файлів, ${programSize} байтів; дані: ${dataCount} файлів, ${dataSize} байтів",
+	"pluginSnapshotStats": "Програма: ${programCount} файлів, ${programSize}; дані: ${dataCount} файлів, ${dataSize}",
 	"pluginSnapshotRestoreTip": "Спочатку закрийте інші клієнти. Плагін ${name} буде автоматично вимкнено. Його каталоги програми та стандартних даних буде замінено цим знімком; відсутні файли буде видалено. Перед відновленням створюється резервний знімок. Інші каталоги та спільні налаштування виключено. Потім увімкніть плагін вручну",
 	"pluginSnapshotRestored": "Відновлено; плагін залишається вимкненим. Резервний знімок: ${id}",
 	"restoreDocPosition": "Відновлювати останню позицію читання",

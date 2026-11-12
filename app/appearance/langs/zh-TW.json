@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "開啟程式",
+	"pluginSnapshotOpenData": "開啟資料",
 	"listMindmapRelationAppearance": "關聯線外觀",
 	"listMindmapRelationPath": "路徑",
 	"listMindmapRelationAuto": "自動避障",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "請先完成輸入法組合輸入，再套用顏色",
 	"nativeColorUnavailable": "圖形選色無法使用，請使用 HEX 或 RGB 輸入",
 	"pluginSnapshots": "外掛快照",
-	"pluginSnapshotStats": "程式：${programCount} 個檔案，${programSize} 位元組；資料：${dataCount} 個檔案，${dataSize} 位元組",
+	"pluginSnapshotStats": "程式：${programCount} 個檔案，${programSize}；資料：${dataCount} 個檔案，${dataSize}",
 	"pluginSnapshotRestoreTip": "請先關閉其他用戶端。將自動停用外掛 ${name}，並以此快照取代其程式和標準資料目錄，包括移除快照中不存在的檔案。恢復前會建立備份快照。其他目錄和共用設定不在恢復範圍內，恢復後請手動啟用外掛",
 	"pluginSnapshotRestored": "已恢復，外掛保持停用。備份快照：${id}",
 	"restoreDocPosition": "恢復上次瀏覽位置",

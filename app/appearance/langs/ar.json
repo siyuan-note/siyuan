@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "فتح البرنامج",
+	"pluginSnapshotOpenData": "فتح البيانات",
 	"listMindmapRelationAppearance": "مظهر خط العلاقة",
 	"listMindmapRelationPath": "المسار",
 	"listMindmapRelationAuto": "تجنب العوائق تلقائيًا",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "أكمل تركيب النص قبل تطبيق اللون",
 	"nativeColorUnavailable": "اختيار اللون الرسومي غير متاح؛ استخدم HEX أو RGB",
 	"pluginSnapshots": "لقطات الإضافات",
-	"pluginSnapshotStats": "البرنامج: ${programCount} ملف، ${programSize} بايت؛ البيانات: ${dataCount} ملف، ${dataSize} بايت",
+	"pluginSnapshotStats": "البرنامج: ${programCount} ملف، ${programSize}؛ البيانات: ${dataCount} ملف، ${dataSize}",
 	"pluginSnapshotRestoreTip": "أغلق العملاء الآخرين أولاً. ستُعطّل الإضافة ${name} تلقائياً. سيُستبدل مجلدا البرنامج والبيانات القياسية بهذه اللقطة وتُحذف الملفات غير الموجودة فيها. تُنشأ لقطة احتياطية أولاً. لا تشمل العملية المجلدات الأخرى والإعدادات المشتركة. فعّل الإضافة يدوياً بعد الاستعادة",
 	"pluginSnapshotRestored": "تمت الاستعادة؛ تبقى الإضافة معطّلة. اللقطة الاحتياطية: ${id}",
 	"restoreDocPosition": "استعادة موضع القراءة السابق",

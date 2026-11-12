@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "Apri programma",
+	"pluginSnapshotOpenData": "Apri dati",
 	"listMindmapRelationAppearance": "Aspetto della relazione",
 	"listMindmapRelationPath": "Percorso",
 	"listMindmapRelationAuto": "Evita automaticamente gli ostacoli",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "Completa la composizione del testo prima di applicare il colore",
 	"nativeColorUnavailable": "Selezione grafica non disponibile; usa HEX o RGB",
 	"pluginSnapshots": "Istantanee dei plugin",
-	"pluginSnapshotStats": "Programma: ${programCount} file, ${programSize} byte; dati: ${dataCount} file, ${dataSize} byte",
+	"pluginSnapshotStats": "Programma: ${programCount} file, ${programSize}; dati: ${dataCount} file, ${dataSize}",
 	"pluginSnapshotRestoreTip": "Chiudi prima gli altri client. Il plugin ${name} verrà disattivato automaticamente. Le cartelle del programma e dei dati standard verranno sostituite da questa istantanea; i file assenti saranno rimossi. Verrà prima creata una copia di sicurezza. Sono esclusi altre cartelle e impostazioni condivise. Riattiva poi il plugin manualmente",
 	"pluginSnapshotRestored": "Ripristinato; il plugin resta disattivato. Copia di sicurezza: ${id}",
 	"restoreDocPosition": "Ripristina l’ultima posizione di lettura",

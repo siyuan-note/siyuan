@@ -1,4 +1,6 @@
 {
+	"pluginSnapshotOpenProgram": "प्रोग्राम खोलें",
+	"pluginSnapshotOpenData": "डेटा खोलें",
 	"listMindmapRelationAppearance": "संबंध रेखा का रूप",
 	"listMindmapRelationPath": "पथ",
 	"listMindmapRelationAuto": "बाधाओं से स्वतः बचें",
@@ -26,7 +28,7 @@
 	"colorPickerComposing": "रंग लागू करने से पहले संयुक्त इनपुट पूरा करें",
 	"nativeColorUnavailable": "ग्राफ़िकल रंग चयन उपलब्ध नहीं है; HEX या RGB इनपुट का उपयोग करें",
 	"pluginSnapshots": "प्लगइन स्नैपशॉट",
-	"pluginSnapshotStats": "प्रोग्राम: ${programCount} फ़ाइलें, ${programSize} बाइट; डेटा: ${dataCount} फ़ाइलें, ${dataSize} बाइट",
+	"pluginSnapshotStats": "प्रोग्राम: ${programCount} फ़ाइलें, ${programSize}; डेटा: ${dataCount} फ़ाइलें, ${dataSize}",
 	"pluginSnapshotRestoreTip": "पहले अन्य क्लाइंट बंद करें। प्लगइन ${name} अपने आप बंद होगा। इसके प्रोग्राम और मानक डेटा फ़ोल्डर इस स्नैपशॉट से बदलेंगे; इसमें न होने वाली फ़ाइलें हटेंगी। पहले बैकअप स्नैपशॉट बनेगा। अन्य फ़ोल्डर और साझा सेटिंग शामिल नहीं हैं। बाद में प्लगइन को स्वयं चालू करें",
 	"pluginSnapshotRestored": "बहाल हुआ; प्लगइन बंद है। बैकअप स्नैपशॉट: ${id}",
 	"restoreDocPosition": "पिछली पढ़ने की स्थिति बहाल करें",

@@ -7,7 +7,8 @@ import {getAVLocationDisplayText} from "./locationValue";
 import {automationTemplateFunctions} from "./automationTemplateFunctions";
 import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
-import {bindInlineDatePicker, getInlineDateType, getInlineDateValue} from "../../../datePicker/inline";
+import {bindDatePicker} from "../../../datePicker/binding";
+import {getInlineDateValue} from "../../../datePicker/inline";
 
 export const automationTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
@@ -76,17 +77,14 @@ export const mountAutomationTemplate = (options: {
     const editor = host.querySelector<HTMLTextAreaElement>("[data-template]");
     const item = host.querySelector<HTMLSelectElement>("[data-template-item]");
     const triggerTime = host.querySelector<HTMLInputElement>("[data-template-time]");
-    const triggerHost = host.ownerDocument.createElement("div");
-    triggerHost.className = "fn__flex-1";
-    triggerTime.parentElement.after(triggerHost);
-    let dateBindings: ReturnType<typeof bindInlineDatePicker>[] = [];
+    let dateBindings: ReturnType<typeof bindDatePicker>[] = [];
     const inputs = host.querySelector<HTMLElement>("[data-template-inputs]");
     const result = host.querySelector<HTMLOutputElement>("[data-template-result]");
     const invalidate = () => {
         version++;
         result.textContent = "";
     };
-    const triggerBinding = bindInlineDatePicker(triggerHost, triggerTime, {onChange: invalidate});
+    bindDatePicker(triggerTime);
     const renderInputs = () => {
         dateBindings.forEach(binding => binding.destroy());
         dateBindings = [];
@@ -99,10 +97,7 @@ export const mountAutomationTemplate = (options: {
             return `<label class="av__automation-control"><span class="av__automation-control-label">${escapeHtml(entry.key.name)}</span><input class="b3-text-field av__automation-template-input" data-template-input="${escapeAttr(entry.key.id)}" type="${type}"${type === "number" ? ' step="any"' : ""} value="${escapeAttr(text)}" maxlength="65536"></label>`;
         }).join("");
         inputs.querySelectorAll<HTMLInputElement>('input[type="date"], input[type="datetime-local"]').forEach(input => {
-            const pickerHost = host.ownerDocument.createElement("div");
-            pickerHost.className = "fn__flex-1";
-            input.parentElement.after(pickerHost);
-            dateBindings.push(bindInlineDatePicker(pickerHost, input, {onChange: invalidate}));
+            dateBindings.push(bindDatePicker(input));
         });
         invalidate();
         onResize();
@@ -150,19 +145,19 @@ export const mountAutomationTemplate = (options: {
     });
     host.querySelector<HTMLButtonElement>("[data-template-run]").addEventListener("click", async event => {
         const button = event.currentTarget as HTMLButtonElement;
-        if (!item.value || !triggerTime.checkValidity() || !triggerBinding.validate() || !triggerTime.value) {
+        if (!item.value || !triggerTime.checkValidity() || !triggerTime.value) {
             result.textContent = lang.automationPreviewItem;
             return;
         }
         const requestVersion = ++version;
         const overrides: Record<string, string> = {};
         const invalid = inputs.querySelector<HTMLInputElement>("input:invalid");
-        if (invalid || dateBindings.some(binding => !binding.validate())) {
+        if (invalid) {
             invalid?.reportValidity();
             return;
         }
         inputs.querySelectorAll<HTMLInputElement>('[data-template-input][data-modified="true"]').forEach(input => {
-            overrides[input.dataset.templateInput] = getInlineDateType(input) === "datetime-local" ? getInlineDateValue(input) : input.value;
+            overrides[input.dataset.templateInput] = input.type === "datetime-local" ? getInlineDateValue(input) : input.value;
         });
         button.disabled = true;
         try {

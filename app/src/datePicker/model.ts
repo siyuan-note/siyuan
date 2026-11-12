@@ -48,6 +48,12 @@ export const addMonths = (date: ICivilDate, amount: number): ICivilDate => {
     const month = serial % 12 + 1;
     return {year, month, day: Math.min(date.day, daysInMonth(year, month), year === 275760 && month === 9 ? 13 : 31)};
 };
+export const normalizeTimeDraft = (value: string) => {
+    if (!/^\d{3,4}$/.test(value)) { return value; }
+    const hours = value.slice(0, -2).padStart(2, "0");
+    const minutes = value.slice(-2);
+    return Number(hours) < 24 && Number(minutes) < 60 ? `${hours}:${minutes}` : value;
+};
 export const parseTime = (value: string): number | undefined => {
     const match = /^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/.exec(value);
     if (!match) { return; }

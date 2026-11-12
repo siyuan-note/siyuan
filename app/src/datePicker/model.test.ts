@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
 import {addDays, addMonths, candidateForDay, dateToDays, daysToDate, formatDate, formatTime,
-    parseDate, parseTime, validateDateValue, valueToNumber, weekday} from "./model";
+    normalizeTimeDraft, parseDate, parseTime, validateDateValue, valueToNumber, weekday} from "./model";
 
 test("civil date parsing, arithmetic and weekdays do not depend on a timezone", () => {
     for (const value of ["0001-01-01", "0099-12-31", "1900-02-28", "2000-02-29", "2024-03-10", "2024-11-03", "275760-09-13"]) {
@@ -34,6 +34,24 @@ test("time parsing preserves seconds and milliseconds without creating instants"
     }
     assert.equal(valueToNumber("2024-01-01 12:00", "datetime-local"), undefined);
     assert.equal(valueToNumber("2024-01-01T12:00Z", "datetime-local"), undefined);
+});
+
+test("compact time drafts normalize only complete valid hours and minutes", () => {
+    for (const [raw, expected] of [["000", "00:00"], ["0000", "00:00"], ["123", "01:23"], ["945", "09:45"],
+        ["0945", "09:45"], ["1234", "12:34"], ["2359", "23:59"]]) {
+        assert.equal(normalizeTimeDraft(raw), expected);
+        assert.equal(validateDateValue(normalizeTimeDraft(raw), {type: "time"}), "valid");
+        assert.equal(valueToNumber(`2026-11-12T${normalizeTimeDraft(raw)}`, "datetime-local"),
+            valueToNumber(`2026-11-12T${expected}`, "datetime-local"));
+    }
+    for (const unchanged of ["", "1", "12", "2400", "1260", "9999", "12345", " 945", "945 ", "9:45", "09:45",
+        "12:34:56.123", "12:34Z", "12:34+08:00", "-945", "9.45"]) {
+        assert.equal(normalizeTimeDraft(unchanged), unchanged);
+    }
+    assert.equal(validateDateValue(normalizeTimeDraft("945"), {type: "time", min: "10:00"}), "min");
+    assert.equal(validateDateValue(normalizeTimeDraft("1234"), {type: "time", max: "12:00"}), "max");
+    assert.equal(validateDateValue(normalizeTimeDraft("945"), {type: "time", step: "1800"}), "step");
+    assert.equal(validateDateValue(normalizeTimeDraft("945"), {type: "time", step: "any"}), "valid");
 });
 
 test("empty, invalid and constrained drafts remain different states", () => {

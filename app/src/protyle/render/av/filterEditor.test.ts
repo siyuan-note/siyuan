@@ -134,11 +134,11 @@ test("absolute filter calendars save valid edits, preserve invalid values, and b
             "./view": {getFieldsByData: () => [{id: "date", type: "date"}]},
             "../../../datePicker/inline": {
                 validateInlineDateInput: () => !invalid,
-                bindInlineDatePicker: (_host: unknown, inputs: unknown[]) => {
-                    inputs.forEach(input => pickers.add(input));
-                    return {activate() {}, destroy() {}};
-                },
             },
+            "./filterDateDropdown": {createFilterDateDropdown: () => ({
+                open: (input: unknown) => pickers.add(input),
+                isOpen: (input: unknown) => pickers.has(input), destroy() {},
+            })},
         })[name] || {},
     }, ScriptTarget.ES2022);
     const listeners = new Map<string, Array<(event: unknown) => void>>();
@@ -161,7 +161,7 @@ test("absolute filter calendars save valid edits, preserve invalid values, and b
             listeners.set(type, [...listeners.get(type) || [], listener]);
         },
     };
-    const fire = (type: string) => listeners.get(type)?.forEach(listener => listener({target: input, preventDefault() {}}));
+    const fire = (type: string) => listeners.get(type)?.forEach(listener => listener({target: input, button: 0, preventDefault() {}}));
     const data = {view: {filters: [{column: "date", operator: "Is", value: {type: "date"}}]}} as unknown as IAV;
     let saves = 0;
     methods.bindInlineFilterEvents(panel as unknown as HTMLElement, data, {} as IProtyle, "block", "database", {
@@ -171,7 +171,7 @@ test("absolute filter calendars save valid edits, preserve invalid values, and b
     assert.equal(pickers.has(input), true);
     assert.equal(saves, 0);
     fire("blur");
-    assert.equal(saves, 0, "opening the embedded calendar does not save the old value");
+    assert.equal(saves, 0, "opening the dropdown calendar does not save the old value");
     input.value = "2026-12-31";
     fire("change");
     assert.equal(saves, 1);
@@ -186,7 +186,7 @@ test("absolute filter calendars save valid edits, preserve invalid values, and b
     assert.equal(data.view.filters[0].value.date.isNotEmpty, false);
     container = {isConnected: true, querySelector: () => ({append() {}})};
     input = createInput();
-    fire("focusin");
+    fire("pointerdown");
     assert.equal(pickers.has(input), true, "rows replaced during operator or relative-mode changes remain bound");
     input.value = "2027-01-01";
     fire("blur");

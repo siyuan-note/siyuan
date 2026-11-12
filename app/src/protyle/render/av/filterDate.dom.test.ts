@@ -5,18 +5,67 @@ import {compile} from "sass";
 import test from "node:test";
 import {browserSources, canRunBrowser, runBrowserCase} from "../../../datePicker/test/browser";
 
-test("filter dates embed one calendar per condition, preserve endpoint semantics, and isolate editor roots", {
+const pickerSources = () => browserSources(Object.fromEntries([
+    ...["model", "yearInput", "field", "runtime", "owners", "binding", "position", "index"]
+        .map(name => [name, "../../../datePicker/" + name + ".ts"]),
+    ...["mobileSheetGesture", "visibleViewport", "orientation", "keyboardSheetState", "mobileSheetLayout",
+        "bindBottomSheetDrag", "bindBottomSheetDialog"].map(name => [name, "../../../mobile/util/" + name + ".ts"]),
+    ["menuPosition", "../../../menus/menuPosition.ts"], ["overlayOwnership", "../../../menus/overlayOwnership.ts"],
+    ["sheetOpen", "../../../menus/sheetOpen.ts"], ["dialog", "../../../dialog/index.ts"],
+    ["mobileDialog", "../../../dialog/mobileDialog.ts"], ["filterDateDropdown", "filterDateDropdown.ts"],
+].map(([name, path]) => [name, join(__dirname, path)])));
+
+const setupPicker = (source: Record<string, string>, modules: Record<string, any>, stubs: Record<string, any>) => {
+    const mobile = source.frontend === "mobile" || source.frontend === "browser-mobile";
+    let uuid = 0;
+    const fallback = {genUUID: () => String(++uuid), getZIndex: () => 0, isAbove: () => false,
+        isMobile: () => mobile, isInMobileApp: () => false, isIOSPlatform: () => false, isNotCtrl: () => true, moveResize() {},
+        Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}, destroyDialogBlockPanels() {}, getDialogBlockPanel() {},
+        getAnchoredInputMask() {}, callMobileAppShowKeyboard() {}, showMessage() {}, getEventName: () => "click",
+        updateHotkeyTip: (value: string) => value, escapeAttr: (value: string) => value, applyMenuEntryVisibility() {},
+        setPopoverMenuOpen() {}, activeBlur() {}, getTopBarHeight: () => 0, isScrollAboveMenu: () => false,
+        electronUndo() {}, forEachPluginSubscriber() {}};
+    const load = (name: string, deps: Record<string, unknown> = {}) => {
+        const exports = modules[name] ||= {};
+        new Function("exports", "require", source[name])(exports, (path: string) =>
+            deps[path] || stubs[path] || modules[path.split("/").at(-1)] || fallback);
+    };
+    const common = document.createElement("div"); common.className = "b3-menu fn__none"; document.body.append(common);
+    Object.assign(window.siyuan, {dialogs: [], zIndex: 10, isReady: true,
+        mobile: {size: {isLandscape: false, portrait: {height1: innerHeight}, landscape: {height1: innerHeight}}},
+        menus: {menu: {element: common, remove() {}}}});
+    if (mobile) { const sidebar = document.createElement("div"); sidebar.id = "sidebar"; document.body.append(sidebar); }
+    ["overlayOwnership", "dialog", "model", "yearInput", "field", "menuPosition", "position", "runtime", "owners",
+        "sheetOpen", "mobileSheetGesture", "visibleViewport", "orientation", "keyboardSheetState", "mobileSheetLayout",
+        "bindBottomSheetDrag", "bindBottomSheetDialog"].forEach(name => load(name));
+    load("mobileDialog", {"./index": modules.dialog});
+    modules.panel = {registerDatePickerWindow() {}};
+    modules.index = {};
+    load("binding"); load("index");
+    stubs["../../../datePicker"] = modules.index;
+    stubs.__fallback = fallback;
+    modules.runtime.registerDatePickerRuntime(document, (options: unknown) => new modules.mobileDialog.MobileDialog(options),
+        () => window.siyuan.languages);
+    load("filterDateDropdown");
+};
+
+for (const frontend of ["browser-desktop", "mobile"]) {
+test("filter date dropdowns preserve endpoint semantics and isolate editor roots on " + frontend, {
     timeout: 45000, skip: !canRunBrowser,
 }, async () => {
-    const sources = browserSources(Object.fromEntries([
+    const sources = {...pickerSources(), setup: setupPicker.toString(), frontend, ...browserSources(Object.fromEntries([
         ["model", "../../../datePicker/model.ts"], ["yearInput", "../../../datePicker/yearInput.ts"],
         ["field", "../../../datePicker/field.ts"], ["inline", "../../../datePicker/inline.ts"],
         ["capabilities.generated", "capabilities.generated.ts"], ["capabilities", "capabilities.ts"],
         ["filterTree", "filterTree.ts"], ["filter", "filter.ts"],
         ["automationTemplateFunctions", "automationTemplateFunctions.ts"], ["automation", "automation.ts"],
         ["conditionalColorMenu", "conditionalColorMenu.ts"],
-    ].map(([name, path]) => [name, join(__dirname, path)])));
-    const result = await runBrowserCase(async source => {
+    ].map(([name, path]) => [name, join(__dirname, path)])))};
+    const css = readFileSync("appearance/themes/daylight/theme.css", "utf8") +
+        compile("src/assets/scss/" + (frontend === "mobile" ? "mobile" : "base") + ".scss", {logger: {warn() {}}}).css;
+    const result = await runBrowserCase(async (source, stylesheet) => {
+        const style = document.createElement("style"); style.textContent = stylesheet; document.head.append(style);
+        document.documentElement.dataset.frontend = source.frontend;
         const equal = (actual: unknown, expected: unknown, message: string) => {
             if (actual !== expected) { throw new Error(`${message}: ${actual} !== ${expected}`); }
         };
@@ -45,10 +94,11 @@ test("filter dates embed one calendar per condition, preserve endpoint semantics
             dayjs: {default: (value: number) => ({isValid: () => Number.isFinite(value),
                 format: () => new Date(value).toISOString().slice(0, 10)})},
         };
-        for (const name of Object.keys(source)) {
+        new Function("source", "modules", "stubs", "(" + source.setup + ")(source, modules, stubs)")(source, modules, stubs);
+        for (const name of Object.keys(source).filter(name => !["setup", "frontend"].includes(name) && !modules[name])) {
             const exports = modules[name] = {};
             new Function("exports", "require", source[name])(exports, (path: string) =>
-                stubs[path] || modules[path.split("/").at(-1)] || {});
+                stubs[path] || modules[path.split("/").at(-1)] || stubs.__fallback);
         }
         const make = (type: string, save?: (filters: any[]) => void, outer?: HTMLElement,
                       filterOperation: Record<string, string> = {}) => {
@@ -64,6 +114,24 @@ test("filter dates embed one calendar per condition, preserve endpoint semantics
         const fire = (input: HTMLInputElement | HTMLSelectElement, value: string) => {
             input.value = value;
             input.dispatchEvent(new Event("change", {bubbles: true}));
+        };
+        const tick = () => new Promise<void>(resolve => setTimeout(resolve, 80));
+        const popup = () => window.siyuan.dialogs.at(-1)?.element as HTMLElement;
+        const open = async (input: HTMLInputElement) => {
+            input.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, button: 0})); await tick();
+            equal(!!popup()?.querySelector(".date-picker"), true, "pointer opens the shared popup");
+        };
+        const choose = async (input: HTMLInputElement, value: string) => {
+            const before = transactions.length;
+            await open(input);
+            equal(transactions.length, before, "opening never persists the draft");
+            const field = popup().querySelector<HTMLInputElement>(".date-picker__fields input");
+            field.value = value; field.dispatchEvent(new InputEvent("input", {bubbles: true}));
+            const day = value && popup().querySelector<HTMLButtonElement>(`[data-date="${value}"]`);
+            if (day && !day.disabled) { day.click(); }
+            else { popup().querySelector<HTMLButtonElement>('[data-action="confirm"]').click(); }
+            await tick();
+            equal(!!popup(), false, "selecting a date or confirming closes the popup");
         };
         const {root, data} = make("date");
         const start = root.querySelector<HTMLInputElement>('[data-type="absDate"]');
@@ -81,13 +149,28 @@ test("filter dates embed one calendar per condition, preserve endpoint semantics
         equal(start.value, "2026-11-", "binding does not erase an incomplete draft");
         equal(root.querySelectorAll(".date-picker--inline").length, 0, "validation does not force the calendar open");
         start.focus();
-        equal(root.querySelectorAll(".date-picker--inline").length, 1, "the first focus embeds one calendar");
-        equal(root.querySelector(".date-picker--inline").closest('[data-type="valueContainer"]') !== null, true,
-            "the calendar lives in the existing value area");
+        equal(root.querySelectorAll(".date-picker--inline").length, 0, "focus does not expand the condition");
+        await open(start);
+        equal(root.contains(popup()), false, "the popup is outside the condition flow");
+        equal(transactions.length, beforeAutofill, "opening does not save an incomplete draft");
+        popup().querySelector<HTMLButtonElement>('[data-action="cancel"]').click(); await tick();
+        equal(start.value, "2026-11-", "cancel preserves the original draft");
+        equal(transactions.length, beforeAutofill, "cancel never persists the draft");
+        await open(start);
+        if (source.frontend === "mobile") {
+            await (window.siyuan.dialogs.at(-1) as any).requestClose("back");
+        } else {
+            popup().dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+        }
+        await new Promise<void>(resolve => setTimeout(resolve, 400));
+        equal(!!popup(), false, "Back or Escape closes only the date popup");
+        equal(start.value, "2026-11-", "Back or Escape preserves the draft");
+        equal(transactions.length, beforeAutofill, "Back or Escape never saves");
         fire(start, "2026-11-11");
         fire(end, "2026-11-15");
         end.focus();
-        equal(root.querySelectorAll(".date-picker--inline").length, 1, "between endpoints share one calendar");
+        equal(root.querySelectorAll(".date-picker--inline").length, 0, "both endpoints keep the original compact row");
+        await choose(end, "2026-11-15");
         equal(data.view.filters[0].dateEndpoint, "end", "the field endpoint is independent of condition endpoints");
         equal((data.view.filters[0].value as any).date.content2, new Date("2026-11-15T00:00:00").getTime(), "second condition saves");
         equal((data.view.filters[0].value as any).date.isNotTime, true, "absolute filters are date-only");
@@ -108,16 +191,19 @@ test("filter dates embed one calendar per condition, preserve endpoint semantics
         fire(start, "2026-11-13");
         equal(transactions.length, beforeComposition + 1, "the completed date saves after composition ends");
         const beforeYear = transactions.length;
-        root.querySelector<HTMLButtonElement>(".date-picker__month-toggle").click();
-        const year = root.querySelector<HTMLInputElement>(".date-picker__month-editor input");
-        year.value = "2030";
+        await open(start);
+        equal(transactions.length, beforeYear, "opening the focused input does not save");
+        popup().querySelector<HTMLButtonElement>(".date-picker__month-toggle").click();
+        const year = popup().querySelector<HTMLInputElement>(".date-picker__month-editor input");
+        year.value = "2026";
         year.dispatchEvent(new InputEvent("input", {bubbles: true}));
         year.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
         equal(transactions.length, beforeYear, "year navigation never saves a condition");
-        const staleDay = root.querySelector<HTMLButtonElement>("[data-date]:not(:disabled)");
+        const staleDay = popup().querySelector<HTMLButtonElement>("[data-date]:not(:disabled)");
         equal(!!staleDay, true, "the detached-control check has a real calendar day");
         fire(root.querySelector<HTMLSelectElement>('[data-type="dateType"]'), "custom");
-        equal(root.querySelectorAll(".date-picker--inline").length, 0, "relative mode destroys the embedded calendar");
+        await tick();
+        equal(document.querySelectorAll(".date-picker").length, 0, "relative mode destroys the popup");
         const afterRelative = transactions.length;
         staleDay.click();
         equal(transactions.length, afterRelative, "detached controls cannot save late");
@@ -132,12 +218,12 @@ test("filter dates embed one calendar per condition, preserve endpoint semantics
             const nested = make(type, () => nestedSaves++, root);
             const timestamp = nested.root.querySelector<HTMLInputElement>('[data-type="absDate"]');
             timestamp.focus();
-            fire(timestamp, "2025-01-01");
+            await choose(timestamp, "2025-01-01");
             equal(timestamp.readOnly, false, `${type} timestamps remain editable as filter conditions`);
             equal(nestedSaves, 1, "nested condition uses its own save callback");
         }
         equal(transactions.length, beforeNested, "nested condition does not write parent filters");
-        equal(document.querySelectorAll('[role="dialog"], .b3-dialog, .b3-menu').length, 0, "no secondary dialog or menu is created");
+        equal(document.querySelectorAll('[role="dialog"], .b3-dialog').length, 0, "confirmed popups leave no dialog behind");
         root.remove();
         await Promise.resolve();
         for (const action of ["setAttrViewColRelationFilters", "setAttrViewColRollupFilters"]) {
@@ -147,10 +233,10 @@ test("filter dates embed one calendar per condition, preserve endpoint semantics
             const before = transactions.length;
             const initial = JSON.stringify(owned.data.view.filters);
             first.focus();
-            fire(first, "2026-11-11");
+            await choose(first, "2026-11-11");
             second.focus();
-            fire(second, "2026-11-15");
-            fire(first, "");
+            await choose(second, "2026-11-15");
+            await choose(first, "");
             equal(transactions.length, before + 3, `${action} commits each absolute date edit exactly once`);
             for (let index = before; index < transactions.length; index++) {
                 for (const operation of [transactions[index], undoTransactions[index]]) {
@@ -180,7 +266,7 @@ test("filter dates embed one calendar per condition, preserve endpoint semantics
             equal(!!input, true, `automation renders ${selector}`);
             input.focus();
             const before = transactions.length;
-            fire(input, "2026-12-05");
+            await choose(input, "2026-12-05");
             equal(transactions.length, before + 1, "automation date edit saves once");
             equal(transactions.at(-1).action, "setAttrViewAutomations", "automation owns its persistence");
             const rule = transactions.at(-1).data.rules[0];
@@ -195,24 +281,25 @@ test("filter dates embed one calendar per condition, preserve endpoint semantics
         const colorInput = menu.querySelector<HTMLInputElement>('[data-type="absDate"]');
         colorInput.focus();
         const beforeColor = transactions.length;
-        fire(colorInput, "2026-12-08");
+        await choose(colorInput, "2026-12-08");
         equal(transactions.length, beforeColor + 1, "color conditions save once");
         equal(transactions.at(-1).action, "setAttrViewConditionalColors", "color rules own persistence");
         equal(transactions.at(-1).data[0].filter.value.date.isNotTime, true, "color condition preserves date-only values");
         menu.remove();
         await Promise.resolve();
-        return "filter inline DOM passed";
-    }, sources);
-    assert.match(result, /filter inline DOM passed/);
+        return "filter dropdown DOM passed";
+    }, sources, css);
+    assert.match(result, /filter dropdown DOM passed/);
 });
+}
 
 for (const [width, scheme, frontend] of [[400, "daylight", "browser-desktop"], [400, "midnight", "browser-desktop"],
     [800, "daylight", "browser-desktop"], [800, "midnight", "browser-desktop"], [1000, "daylight", "browser-desktop"],
     [400, "daylight", "mobile"], [800, "midnight", "browser-mobile"]] as const) {
-    test(`embedded filter calendars fit production ${frontend} ${scheme} menus at ${width}px with German text and large fonts`, {
+    test(`filter date dropdowns fit production ${frontend} ${scheme} menus at ${width}px with German text and large fonts`, {
         timeout: 45000, skip: !canRunBrowser,
     }, async () => {
-        const sources = {...browserSources(Object.fromEntries([
+        const sources = {...pickerSources(), setup: setupPicker.toString(), ...browserSources(Object.fromEntries([
             ["model", "../../../datePicker/model.ts"], ["yearInput", "../../../datePicker/yearInput.ts"],
             ["field", "../../../datePicker/field.ts"], ["inline", "../../../datePicker/inline.ts"],
             ["capabilities.generated", "capabilities.generated.ts"], ["capabilities", "capabilities.ts"],
@@ -237,10 +324,11 @@ for (const [width, scheme, frontend] of [[400, "daylight", "browser-desktop"], [
                 "./col": {getColIconByType: () => "iconCalendar"},
                 "../../../util/escape": {escapeHtml: String, escapeAttr: String},
             };
-            for (const name of ["model", "yearInput", "field", "inline", "capabilities.generated", "capabilities", "filterTree", "filter"]) {
+            new Function("source", "modules", "stubs", "(" + source.setup + ")(source, modules, stubs)")(source, modules, stubs);
+            for (const name of ["inline", "capabilities.generated", "capabilities", "filterTree", "filter"]) {
                 const exports = modules[name] = {};
                 new Function("exports", "require", source[name])(exports, (path: string) =>
-                    stubs[path] || modules[path.split("/").at(-1)] || {});
+                    stubs[path] || modules[path.split("/").at(-1)] || stubs.__fallback);
             }
             for (const kind of ["view", "color", "automation"]) {
                 const panel = document.createElement("div");
@@ -272,57 +360,43 @@ for (const [width, scheme, frontend] of [[400, "daylight", "browser-desktop"], [
                 modules.filter.bindInlineFilterEvents(root, data, {}, "carrier", "database", {root: kind === "view" ? menu : root, save() {}});
                 const inputs = menu.querySelectorAll<HTMLInputElement>('[data-type="absDate"], [data-type="absDate2"]');
                 inputs[0].focus(); inputs[1].focus();
+                const before = menu.getBoundingClientRect().toJSON();
+                inputs[1].dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, button: 0}));
+                await new Promise<void>(resolve => setTimeout(resolve, 400));
                 const scroll = menu.querySelector<HTMLElement>(".b3-menu__items");
                 ok(getComputedStyle(menu).fontSize === "24px", kind + " uses the large menu font");
-                ok(menu.querySelectorAll(".date-picker--inline").length === 1, kind + " shares a calendar");
+                ok(menu.querySelectorAll(".date-picker--inline").length === 0, kind + " never embeds a calendar");
+                const after = menu.getBoundingClientRect();
+                ok(Math.abs(after.top - before.top) < 1 && Math.abs(after.height - before.height) < 1,
+                    kind + " popup does not expand or move its parent menu");
                 ok(menu.getBoundingClientRect().right <= innerWidth, kind + " menu remains inside the viewport");
                 ok(scroll.scrollWidth <= scroll.clientWidth + 1,
                     `${kind} has no horizontal overflow (${scroll.scrollWidth}/${scroll.clientWidth})`);
-                const calendar = menu.querySelector<HTMLElement>(".date-picker--inline");
-                const bounds = calendar.getBoundingClientRect();
-                const rowBounds = calendar.closest(".av__filter-rowinner").getBoundingClientRect();
-                const conditionBounds = calendar.closest(".av__filter-row").getBoundingClientRect();
-                ok(Math.abs((rowBounds.left + rowBounds.right) - (conditionBounds.left + conditionBounds.right)) < 2,
-                    `${kind} complete editor is centered in the condition`);
-                ok(rowBounds.width <= (source.frontend === "browser-desktop" ? 244 : 320) + 1, `${kind} editor stays compact`);
-                const editor = calendar.closest(".av__filter-rowinner");
-                const fieldBounds = editor.querySelector(".av__field-wrapper").getBoundingClientRect();
-                ok(Math.abs(fieldBounds.left - bounds.left) < 1, `${kind} field aligns with calendar`);
-                for (const control of editor.querySelectorAll<HTMLElement>("select")) {
-                    const controlBounds = control.getBoundingClientRect();
-                    if (!controlBounds.width) { continue; }
-                    ok(controlBounds.left >= bounds.left - 1 && controlBounds.right <= bounds.right + 1,
-                        `${kind} filter controls stay within calendar edges`);
-                }
+                const popup = window.siyuan.dialogs.at(-1)?.element as HTMLElement;
+                ok(popup && !menu.contains(popup), kind + " owns a separate popup");
+                const calendar = popup.querySelector<HTMLElement>(".date-picker");
+                const container = popup.querySelector<HTMLElement>(".b3-dialog__container");
+                const bounds = container.getBoundingClientRect();
+                ok(bounds.left >= -1 && bounds.top >= -1 && bounds.right <= innerWidth + 1 && bounds.bottom <= innerHeight + 1,
+                    kind + " popup fits its viewport: " + JSON.stringify(bounds));
+                ok(calendar.scrollWidth <= calendar.clientWidth + 1, kind + " calendar fits without horizontal clipping");
                 const numberRow = menu.querySelector<HTMLElement>('[data-column="number"]');
                 if (numberRow) {
-                    ok(!numberRow.classList.contains("av__filter-row--date-open") && getComputedStyle(numberRow).display === "flex",
-                        "mixed number condition retains ordinary flex layout");
+                    ok(getComputedStyle(numberRow).display === "flex", "mixed number condition retains ordinary flex layout");
                 }
-                for (const input of inputs) {
-                    const inputBounds = input.getBoundingClientRect();
-                    ok(Math.abs(inputBounds.left - bounds.left) < 1 && Math.abs(inputBounds.right - bounds.right) < 1,
-                        `${kind} date input aligns with calendar`);
-                }
-                ok(Math.abs((bounds.left + bounds.right) - (rowBounds.left + rowBounds.right)) < 2,
-                    `${kind} centered: calendar ${bounds.left}/${bounds.right}, row ${rowBounds.left}/${rowBounds.right}`);
-                ok(calendar.scrollWidth <= calendar.clientWidth + 1, `${kind} calendar fits its value area ${calendar.scrollWidth}/${calendar.clientWidth}`);
-                const buttons = calendar.querySelectorAll<HTMLButtonElement>(".date-picker__navigation button, [data-date]:not(:disabled)");
-                ok(buttons.length >= 30, kind + " has operable navigation and dates");
+                const buttons = popup.querySelectorAll<HTMLButtonElement>(".date-picker__navigation button, [data-date]:not(:disabled), [data-action]");
+                ok(buttons.length >= 30, kind + " has operable navigation, dates and actions");
                 for (const button of buttons) {
                     button.scrollIntoView({block: "nearest", inline: "nearest"});
                     const rect = button.getBoundingClientRect();
-                    const scrollRect = scroll.getBoundingClientRect();
-                    ok(rect.width > 0 && rect.height > 0 && rect.left >= scrollRect.left && rect.right <= scrollRect.right + 1,
-                        kind + " calendar controls are horizontally reachable");
-                    ok(rect.top >= scrollRect.top && rect.bottom <= scrollRect.bottom + 1,
-                        kind + " calendar controls are vertically reachable through menu scrolling");
+                    ok(rect.width > 0 && rect.height > 0 && rect.left >= -1 && rect.right <= innerWidth + 1 &&
+                        rect.top >= -1 && rect.bottom <= innerHeight + 1, kind + " popup controls stay reachable");
                     const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-                    ok(target === button || button.contains(target), `${kind} controls have unobscured hit targets: ${button.outerHTML}, actual ${target?.outerHTML?.slice(0, 300)}, rect ${rect.top}/${rect.bottom}, viewport ${innerHeight}`);
+                    ok(target === button || button.contains(target), kind + " popup control is unobscured: " + button.outerHTML);
                 }
-                ok(scroll.scrollHeight > scroll.clientHeight, kind + " exercises real vertical scrolling");
                 panel.remove();
-                await Promise.resolve();
+                await new Promise<void>(resolve => setTimeout(resolve, 100));
+                ok(!popup.isConnected, kind + " closing the owner releases its popup");
             }
             return "production filter layout passed";
         }, sources, css, {width, height: 400});

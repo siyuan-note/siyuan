@@ -13,7 +13,8 @@ import {formatDateValue} from "./dateFormat";
 import {bindLunarDateEditor, getLunarDateHTML} from "./lunarDate";
 import {createAVLocationReplacement, getAVLocationDisplayText} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
-import {bindInlineDatePicker, getInlineDateValue} from "../../../datePicker/inline";
+import {bindDatePicker} from "../../../datePicker/binding";
+import {getInlineDateValue} from "../../../datePicker/inline";
 
 export const getSelectedOptionNames = (element: HTMLElement) => {
     try {
@@ -161,17 +162,14 @@ export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFiel
     const hiddenClass = column.type === "date" && fieldValue?.mode === "currentTime" ? " fn__none" : "";
     const max = column.type === "date" ? ` max="${column.date?.fillSpecificTime ? "9999-12-31 23:59" : "9999-12-31"}"` : "";
     const inputHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1${hiddenClass}" data-role="field-value" type="${inputType}"${column.type === "number" ? ' step="any"' : ""}${max} value="${escapeAttr(getFieldText(value))}">`;
-    return column.type === "date" ? `<div class="fn__flex-1 fn__flex fn__flex-column${hiddenClass}" data-field-date-host>${inputHTML}<div data-field-date-picker></div></div>` : inputHTML;
+    return column.type === "date" ? `<div class="fn__flex-1 fn__flex${hiddenClass}" data-field-date-host>${inputHTML}</div>` : inputHTML;
 };
 
 export const bindFieldDates = (host: HTMLElement, options: {commitOnLeave?: boolean} = {}) => {
-    const bindings: ReturnType<typeof bindInlineDatePicker>[] = [];
+    const inputs = Array.from(host.querySelectorAll<HTMLInputElement>('input[type="date"], input[type="datetime-local"]'));
+    const bindings = inputs.map(input => bindDatePicker(input));
     const lunarEditors = new Map<HTMLElement, ReturnType<typeof bindLunarDateEditor>>();
     let disposed = false;
-    host.querySelectorAll<HTMLInputElement>('input[type="date"], input[type="datetime-local"]').forEach(input => {
-        const container = input.closest<HTMLElement>("[data-field-date-host]");
-        bindings.push(bindInlineDatePicker(container.querySelector("[data-field-date-picker]"), input));
-    });
     host.querySelectorAll<HTMLElement>('[data-value-type="lunarDate"]').forEach(target => target.addEventListener("click", event => {
         event.preventDefault();
         event.stopPropagation();
@@ -202,7 +200,8 @@ export const bindFieldDates = (host: HTMLElement, options: {commitOnLeave?: bool
             },
         }));
     }));
-    const submit = () => bindings.every(binding => binding.validate()) &&
+    const validate = () => !disposed && inputs.every(input => input.closest(".fn__none, [hidden]") || input.checkValidity());
+    const submit = () => validate() &&
         Array.from(lunarEditors).every(([target, binding]) => target.closest(".fn__none") || binding.submit());
     const doc = host.ownerDocument;
     let submitting = false;
@@ -243,10 +242,9 @@ export const bindFieldDates = (host: HTMLElement, options: {commitOnLeave?: bool
         observer.observe(doc.documentElement, {childList: true, subtree: true});
     }
     return {
-        update: () => bindings.forEach(binding => binding.update()),
-        validate: () => bindings.every(binding => binding.validate()),
+        validate,
         submit,
-        isActive: () => bindings.some(binding => binding.isActive()),
+        isActive: () => !disposed && (bindings.some(binding => binding.isOpen()) || inputs.some(input => doc.activeElement === input)),
         destroy,
     };
 };

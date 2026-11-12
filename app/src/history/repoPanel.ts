@@ -7,7 +7,7 @@ import {removeSelectedRepoTags, repoSelectionKey, RepoSource, RepoTagSelection} 
 import {canPurgeRepo} from "./repoPurge";
 import {repoDateRange, RepoTimeRange} from "./repoRange";
 import {MenuItem} from "../menus/Menu";
-import {bindInlineDatePicker} from "../datePicker/inline";
+import {bindDatePicker} from "../datePicker/binding";
 
 interface RepoPanelState {
     selected: Map<string, RepoTagSelection>;
@@ -15,7 +15,7 @@ interface RepoPanelState {
     busy: boolean;
     tagged: boolean;
     range: RepoTimeRange;
-    datePicker?: ReturnType<typeof bindInlineDatePicker>;
+    datePickers?: ReturnType<typeof bindDatePicker>[];
 }
 
 const states = new WeakMap<Element, RepoPanelState>();
@@ -88,7 +88,7 @@ export const updateRepoSelection = (pane: Element) => {
 };
 
 export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: number) => void, openPlugins?: () => void) => {
-    states.get(root)?.datePicker?.destroy();
+    states.get(root)?.datePickers?.forEach(picker => picker.destroy());
     const lang = window.siyuan.languages;
     const state: RepoPanelState = {selected: new Map(), managing: false, busy: false, tagged: false, range: {}};
     states.set(root, state);
@@ -111,7 +111,6 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     </div>
     <button type="submit" class="b3-button b3-button--outline">${lang.filter}</button>
     <button type="button" class="b3-button b3-button--text" data-action="range-clear">${lang.clear}</button>
-    <div class="history__snapshot-calendar" data-role="date-calendar"></div>
     </div>
     <button type="button" class="b3-button b3-button--outline fn__none" data-action="manage">${lang.repoBatchManage}</button>
 </form>
@@ -171,13 +170,12 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     const refresh = () => panes().forEach(pane => render(pane, 1));
     const startDate = root.querySelector<HTMLInputElement>('[data-range="start"]');
     const endDate = root.querySelector<HTMLInputElement>('[data-range="end"]');
-    const datePicker = bindInlineDatePicker(root.querySelector<HTMLElement>('[data-role="date-calendar"]'), [startDate, endDate]);
-    state.datePicker = datePicker;
+    const datePickers = [startDate, endDate].map(input => bindDatePicker(input));
+    state.datePickers = datePickers;
     const dateForm = root.querySelector<HTMLFormElement>('[data-role="date-range"]');
     const updateDateLimits = () => {
         startDate.max = endDate.value || "9999-12-31";
         endDate.min = startDate.value || "1970-01-01";
-        datePicker.update();
     };
     startDate.addEventListener("change", updateDateLimits);
     endDate.addEventListener("change", updateDateLimits);
@@ -197,7 +195,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     dateForm.addEventListener("submit", event => {
         event.preventDefault();
         event.stopPropagation();
-        if (!state.busy && datePicker.validate() && dateForm.reportValidity()) {
+        if (!state.busy && dateForm.reportValidity()) {
             applyRange();
         }
     });
@@ -360,6 +358,6 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     observer.observe(root);
     return () => {
         observer.disconnect();
-        datePicker.destroy();
+        datePickers.forEach(picker => picker.destroy());
     };
 };

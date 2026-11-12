@@ -3,7 +3,7 @@ const {mkdtempSync, readFileSync, rmSync} = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
-const cases = (source, helpers, languages) => {
+const cases = async (source, helpers, languages) => {
     const check = require("node:assert/strict");
     document.head.innerHTML = "<style>.fn__none {display:none!important}</style>";
     const load = (name, dependencies = {}) => {
@@ -23,9 +23,17 @@ const cases = (source, helpers, languages) => {
     const recent = [];
     const messages = [];
     const model = load("dateModel");
-    const yearInput = load("dateYearInput");
-    const field = load("dateField", {"./model": model, "./yearInput": yearInput});
-    const {bindInlineDatePicker} = load("dateInline", {"./model": model, "./field": field});
+    const dateSessions = [];
+    const {bindDatePicker} = load("dateBinding", {"./model": model, "./index": {
+        openInternalDatePicker: options => {
+            let finish;
+            const session = {options, result: new Promise(resolve => { finish = resolve; }),
+                confirm: value => finish({type: "confirm", value}),
+                destroyed: false, destroy() { this.destroyed = true; finish({type: "cancel", reason: "destroy"}); }};
+            dateSessions.push(session);
+            return session;
+        },
+    }});
     let sheets = 0;
     let disposed = 0;
     const treeUpdates = [];
@@ -50,7 +58,7 @@ const cases = (source, helpers, languages) => {
     }
     const dependencies = {
         ...escape, ...values, ...load("dynamicIcon"), ContractFormData, Dialog, EmojiPanelController,
-        bindInlineDatePicker,
+        bindDatePicker,
         isMobile: () => mobile,
         dayjs: value => ({format: () => typeof value === "string" && value ? value : "2026-10-26"}),
         Constants: {LOCAL_EMOJIS: "emojis", DIALOG_EMOJIS: "emoji-panel"},
@@ -143,25 +151,37 @@ const cases = (source, helpers, languages) => {
         window.siyuan.storage.emojis.currentTab = "dynamic";
         openEmojiPanel("document", "doc", {x: 100, y: 100, h: 28, w: 100});
         dialog = dialogs.at(-1);
-        const calendar = dialog.element.querySelector('[data-role="dynamic-date-calendar"]');
         const date = dialog.element.querySelector('[data-type="tab-dynamic"] .date-picker-input');
-        check.equal(calendar.children.length, 0, "the icon calendar stays collapsed until date focus");
-        check.equal(date.value, "2026-10-26", "lazy calendar setup preserves the initial icon date");
+        check.equal(dialog.element.querySelector('[data-role="dynamic-date-calendar"]'), null, "dynamic dates reserve no inline calendar space");
+        check.equal(date.type, "date");
+        check.equal(date.value, "2026-10-26", "dropdown binding preserves the initial icon date");
+        const sessionCount = dateSessions.length;
         date.focus();
-        check.equal(calendar.querySelectorAll(".date-picker").length, 1);
+        check.equal(dateSessions.length, sessionCount, "focus alone does not open the dropdown");
         date.value = "2026-11-01";
         date.dispatchEvent(new Event("change", {bubbles: true}));
-        calendar.querySelector('[data-date="2026-11-15"]').click();
+        date.click();
+        date.click();
+        check.equal(dateSessions.length, sessionCount + 1, "repeated clicks reuse the open date dropdown");
+        check.equal(dateSessions.at(-1).options.ownerElement, date);
+        check.equal(dateSessions.at(-1).options.value, "2026-11-01");
+        dateSessions.at(-1).confirm("2026-11-15");
+        await Promise.resolve();
         check.equal(date.value, "2026-11-15");
+        check.equal(date.getAttribute("aria-expanded"), "false");
+        date.click();
+        const hiddenSession = dateSessions.at(-1);
         dialog.element.querySelector('.emojis__tabheader [data-type="tab-link"]').click();
+        await Promise.resolve();
+        check.equal(hiddenSession.destroyed, true, "hiding the dynamic tab dismisses its dropdown");
+        await Promise.resolve();
         dialog.element.querySelector('.emojis__tabheader [data-type="tab-dynamic"]').click();
         date.focus();
         check.equal(date.value, "2026-11-15", "tab switches preserve the edited icon date");
-        check.equal(calendar.querySelectorAll(".date-picker").length, 1, "tab switches do not duplicate the calendar");
         const preview = dialog.element.querySelector(".emoji__dynamic-item");
         check.equal(new URL(preview.getAttribute("src"), "http://localhost").searchParams.get("date"), "2026-11-15");
         check.equal(requests.length, 0, "calendar selection only updates icon previews");
-        check.equal(document.querySelectorAll(".b3-dialog").length, 1, "dynamic dates remain inside the icon dialog");
+        check.equal(dateSessions.at(-1).options.autoConfirm, true, "date selection uses the shared auto-confirm dropdown");
         const text = dialog.element.querySelector('[data-role="dynamic-text"]');
         text.value = "test icon";
         text.dispatchEvent(new Event("input", {bubbles: true}));
@@ -170,13 +190,16 @@ const cases = (source, helpers, languages) => {
         check.equal(date.value, "");
         check.equal(new URL(preview.getAttribute("src"), "http://localhost").searchParams.get("date"), "");
         check.equal(requests.length, 0);
+        date.click();
+        const closingSession = dateSessions.at(-1);
         dialog.destroy();
-        check.equal(calendar.children.length, 0, "closing the icon panel disposes its calendar");
+        check.equal(closingSession.destroyed, true, "closing the icon panel disposes its dropdown");
+        check.equal(date.classList.contains("date-picker-input"), false, "closing the icon panel removes its date binding");
         check.equal(requests.length, 0, "canceling a dynamic preview never writes the document icon");
         openEmojiPanel("document", "doc", {x: 100, y: 100, h: 28, w: 100});
         dialog = dialogs.at(-1);
         const finalDate = dialog.element.querySelector('[data-type="tab-dynamic"] .date-picker-input');
-        finalDate.value = "2026-02-30";
+        finalDate.value = "10000-01-01";
         finalDate.dispatchEvent(new Event("input", {bubbles: true}));
         dialog.element.querySelector(".emoji__dynamic-item").click();
         check.equal(requests.length, 0, "invalid date drafts block icon confirmation");
@@ -211,11 +234,11 @@ if (process.versions.electron && process.type === "browser") {
             node.declarationList.declarations.some(item => ["openEmojiPanel", "genWeekdayOptions"].includes(item.name.getText(parsed))))
             .map(node => node.getText(parsed).replace(/^export /, "")).join("\n"));
         const helpers = {};
-        for (const [name, file] of [["dynamicIcon", "emoji/dynamicIcon"], ["dateModel", "datePicker/model"], ["dateYearInput", "datePicker/yearInput"], ["dateField", "datePicker/field"], ["dateInline", "datePicker/inline"], ["escape", "util/escape"], ["iconValue", "emoji/iconValue"], ["contractFormData", "util/contractFormData"]]) {
+        for (const [name, file] of [["dynamicIcon", "emoji/dynamicIcon"], ["dateModel", "datePicker/model"], ["dateBinding", "datePicker/binding"], ["escape", "util/escape"], ["iconValue", "emoji/iconValue"], ["contractFormData", "util/contractFormData"]]) {
             helpers[name] = compile(readFileSync(path.join(__dirname, "../src", `${file}.ts`), "utf8"));
         }
         const languages = JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs/en.json"), "utf8"));
-        const result = await win.webContents.executeJavaScript(`(() => { try { return (${cases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(helpers)}, ${JSON.stringify(languages)}); } catch (error) { return {error: error.stack}; } })()`);
+        const result = await win.webContents.executeJavaScript(`(async () => { try { return await (${cases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(helpers)}, ${JSON.stringify(languages)}); } catch (error) { return {error: error.stack}; } })()`);
         assert.equal(typeof result, "string", JSON.stringify(result));
         console.log(result);
         win.destroy();

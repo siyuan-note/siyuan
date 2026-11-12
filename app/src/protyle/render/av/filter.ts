@@ -15,7 +15,9 @@ import {getAVColorStyle} from "./color";
 import {setFilterSelectPosition} from "./selectPosition";
 import {closeInlineFilterDropdowns} from "./filterDropdown";
 import type {IAVRelationContext} from "./host";
-import {bindInlineDatePicker, validateInlineDateInput} from "../../../datePicker/inline";
+import {validateInlineDateInput} from "../../../datePicker/inline";
+import {createFilterDateDropdown} from "./filterDateDropdown";
+import {showMessage} from "../../../dialog/message";
 
 const destroyFilterDateEditors = new WeakMap<HTMLElement, () => void>();
 
@@ -722,7 +724,7 @@ const genInlineDateHTML = (filter: IAVFilter, valueType: TAVCol, path: string): 
         const hasAbsoluteValue = suffix === "2"
             ? dateVal?.isNotEmpty2
             : dateVal && (dateVal.isNotEmpty || valueType !== "date");
-        const absDate = `<input value="${hasAbsoluteValue ? formatAbsDate(suffix === "2" ? dateVal.content2 : dateVal.content) : ""}" type="text" data-date-picker-type="date" max="9999-12-31" class="b3-text-field b3-text-field--text" data-type="absDate${suffix}" data-path="${path}" style="${isRelative ? "display:none;" : ""}">`;
+        const absDate = `<input value="${hasAbsoluteValue ? formatAbsDate(suffix === "2" ? dateVal.content2 : dateVal.content) : ""}" type="text" data-date-picker-type="date" aria-haspopup="dialog" aria-expanded="false" max="9999-12-31" class="b3-text-field b3-text-field--text" data-type="absDate${suffix}" data-path="${path}" style="${isRelative ? "display:none;" : ""}">`;
         const relDir = `<select class="b3-select" data-type="dataDirection${suffix}" data-path="${path}" style="${!isRelative ? "display:none;" : ""}">
 <option value="-1"${relativeDate?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.pastDate}</option>
 <option value="1"${relativeDate?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
@@ -944,7 +946,7 @@ const readRelativeDate = (rowElement: HTMLElement, suffix: string): IAVRelativeD
 // commitFilter 即时保存单个条件的修改。reRender=true 时重渲染整个面板（结构变化场景）。
 export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, protyle: IProtyle, blockID: string,
                              avID: string, menuElement: HTMLElement, reRender: boolean,
-                             filterOperation?: FilterEditorOptions) => {
+                             filterOperation?: FilterEditorOptions, onFailure?: () => void) => {
     const editable = getEditableFilters(data);
     const {parent, index} = getParentByPath(editable, path);
     if (!parent || index < 0 || index >= parent.length) {
@@ -952,15 +954,22 @@ export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, prot
     }
     const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
     parent[index] = newFilter;
-
-    if (filterOperation?.save) {
-        filterOperation.save(data.view.filters);
-    } else {
-        transaction(protyle, [
+    let pending: void | Promise<void>;
+    try {
+        pending = filterOperation?.save ? filterOperation.save(data.view.filters) : transaction(protyle, [
             getSetFiltersOperation(avID, blockID, JSON.parse(JSON.stringify(data.view.filters)), filterOperation)
         ], [
             getSetFiltersOperation(avID, blockID, oldFilters, filterOperation)
-        ]);
+        ], onFailure ? {awaitResponse: true} : undefined);
+    } catch (error) {
+        onFailure?.();
+        throw error;
+    }
+    if (onFailure && pending && typeof pending.then === "function") {
+        void Promise.resolve(pending).catch(error => {
+            onFailure();
+            showMessage(window.siyuan.languages.transactionSaveUnconfirmed || error?.message);
+        });
     }
 
     if (reRender && menuElement) {
@@ -1005,6 +1014,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
     };
 
     // 保存当前行的值（从 DOM 读取后提交）
+    const composingDates = new WeakSet<HTMLInputElement>();
+    const submittedDateValues = new WeakMap<HTMLInputElement, string>();
+    const pendingDateSaves = new WeakMap<HTMLInputElement, object>();
     const saveRow = (rowElement: HTMLElement, path: string, reRender: boolean) => {
         if (!current()) { return; }
         const filter = getFilterByPath(getEditableFilters(data), path);
@@ -1015,8 +1027,10 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         const operator = (operatorSel?.value || filter.operator) as TAVFilterOperator;
         const usesAbsoluteDate = isAVDateType(valueType) && operator !== "Is empty" && operator !== "Is not empty" &&
             rowElement.querySelector<HTMLSelectElement>('[data-type="dateType"]')?.value !== "custom";
-        if (usesAbsoluteDate && (!validateInlineDateInput(rowElement.querySelector('[data-type="absDate"]')) ||
-            operator === "Is between" && !validateInlineDateInput(rowElement.querySelector('[data-type="absDate2"]')))) {
+        const dateInput = rowElement.querySelector<HTMLInputElement>('[data-type="absDate"]');
+        const dateInput2 = rowElement.querySelector<HTMLInputElement>('[data-type="absDate2"]');
+        if (usesAbsoluteDate && (composingDates.has(dateInput) || !validateInlineDateInput(dateInput) ||
+            operator === "Is between" && (composingDates.has(dateInput2) || !validateInlineDateInput(dateInput2)))) {
             return;
         }
         const {newValue, relativeDate, relativeDate2} = readInlineValue(rowElement, valueType, operator, filter, menuElement);
@@ -1038,106 +1052,59 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         if (quantifierSel) {
             newFilter.quantifier = quantifierSel.value;
         }
-        commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, reRender, filterOperation);
+        const saveAttempt = {};
+        [dateInput, dateInput2].forEach(input => { if (input) { pendingDateSaves.set(input, saveAttempt); } });
+        commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, reRender, filterOperation,
+            usesAbsoluteDate ? () => {
+                [dateInput, dateInput2].forEach(input => {
+                    if (input && pendingDateSaves.get(input) === saveAttempt) {
+                        // 保留失败标记，避免重新聚焦时把未确认的草稿再次视为已提交。
+                        submittedDateValues.set(input, undefined);
+                    }
+                });
+            } : undefined);
+        [dateInput, dateInput2].forEach(input => {
+            if (input) { submittedDateValues.set(input, input.value); }
+        });
     };
 
     // 两个条件值共用月历，字段起止端点仍由 dateEndpoint 独立选择。
-    const dateEditors = new Map<HTMLElement, ReturnType<typeof bindInlineDatePicker>>();
+    let dateDropdown: ReturnType<typeof createFilterDateDropdown>;
     destroyFilterDateEditors.set(menuElement, () => {
-        dateEditors.forEach(editor => editor.destroy());
-        dateEditors.clear();
+        dateDropdown?.destroy();
+        dateDropdown = undefined;
     });
-    const bindAbsoluteDate = (event: Event) => {
+    const isDateInput = (input: HTMLInputElement) => input.dataset.type?.startsWith("absDate") &&
+        input.closest('[data-filter-events-bound="true"]') === panelElement;
+    panelElement.addEventListener("focusin", (event: FocusEvent) => {
         const input = event.target as HTMLInputElement;
-        if (!input.dataset.type?.startsWith("absDate") ||
-            input.closest('[data-filter-events-bound="true"]') !== panelElement) {
-            return;
-        }
-        const row = getRow(input);
-        const container = input.closest<HTMLElement>('[data-type="valueContainer"]');
-        if (!row || !container) { return; }
-        const focusInput = event.type === "pointerdown" && input.type !== "text";
-        if (focusInput) { event.preventDefault(); }
-        dateEditors.forEach((item, element) => {
-            if (!element.isConnected) {
-                item.destroy();
-                dateEditors.delete(element);
-            }
-        });
-        let editor = dateEditors.get(container);
-        if (!editor) {
-            row.classList.add("av__filter-row--date-open");
-            const host = input.ownerDocument.createElement("span");
-            host.className = "fn__block";
-            container.querySelector(".av__filter-date-col").append(host);
-            const inputs = [row.querySelector<HTMLInputElement>('[data-type="absDate"]')];
-            if (getFilterByPath(getEditableFilters(data), input.dataset.path)?.operator === "Is between") {
-                inputs.push(row.querySelector<HTMLInputElement>('[data-type="absDate2"]'));
-            }
-            const picker = bindInlineDatePicker(host, inputs);
-            let releaseResize = () => {};
-            if (filterOperation?.onResize) {
-                const doc = input.ownerDocument;
-                const view = doc.defaultView;
-                const pointers = new Set<number>(event.type === "pointerdown" ? [(event as PointerEvent).pointerId] : []);
-                let pending = false;
-                let frame = 0;
-                let disposed = false;
-                const alive = () => current() && host.isConnected && panelElement.isConnected && getRow(input) === row &&
-                    !menuElement.closest('[data-dialog-closing="true"]');
-                const schedule = () => {
-                    pending = true;
-                    if (disposed || pointers.size || frame) { return; }
-                    frame = view.requestAnimationFrame(() => {
-                        frame = 0;
-                        if (!alive()) { releaseResize(); return; }
-                        if (disposed || pointers.size) { return; }
-                        pending = false;
-                        filterOperation.onResize();
-                    });
-                };
-                // 点击序列结束后再移动宿主，避免按下输入框时把后续鼠标事件移到日期按钮上。
-                const pointerDown = (pointer: PointerEvent) => { pointers.add(pointer.pointerId); };
-                const pointerEnd = (pointer: PointerEvent) => {
-                    pointers.delete(pointer.pointerId);
-                    if (pending) { schedule(); }
-                };
-                const windowBlur = () => {
-                    pointers.clear();
-                    if (pending) { schedule(); }
-                };
-                const observer = new view.ResizeObserver(() => {
-                    if (!alive()) { releaseResize(); return; }
-                    schedule();
-                });
-                releaseResize = () => {
-                    if (disposed) { return; }
-                    disposed = true;
-                    observer.disconnect();
-                    if (frame) { view.cancelAnimationFrame(frame); }
-                    host.removeEventListener("pointerdown", pointerDown, true);
-                    inputs.forEach(element => element.removeEventListener("pointerdown", pointerDown, true));
-                    doc.removeEventListener("pointerup", pointerEnd, true);
-                    doc.removeEventListener("pointercancel", pointerEnd, true);
-                    view.removeEventListener("blur", windowBlur);
-                    view.removeEventListener("pagehide", releaseResize);
-                };
-                observer.observe(host);
-                host.addEventListener("pointerdown", pointerDown, true);
-                inputs.forEach(element => element.addEventListener("pointerdown", pointerDown, true));
-                doc.addEventListener("pointerup", pointerEnd, true);
-                doc.addEventListener("pointercancel", pointerEnd, true);
-                view.addEventListener("blur", windowBlur);
-                view.addEventListener("pagehide", releaseResize, {once: true});
-            }
-            editor = {...picker, destroy: () => { releaseResize(); picker.destroy(); }};
-            dateEditors.set(container, editor);
-        }
-        editor.activate(input);
-        if (focusInput) { input.focus(); }
+        if (isDateInput(input) && !submittedDateValues.has(input)) { submittedDateValues.set(input, input.value); }
+    });
+    panelElement.addEventListener("compositionstart", (event: CompositionEvent) => {
+        const input = event.target as HTMLInputElement;
+        if (isDateInput(input)) { composingDates.add(input); }
+    });
+    panelElement.addEventListener("compositionend", (event: CompositionEvent) => {
+        composingDates.delete(event.target as HTMLInputElement);
+    });
+    const openDateDropdown = (event: MouseEvent) => {
+        const input = event.target as HTMLInputElement;
+        if (event.button !== 0 || !isDateInput(input) || composingDates.has(input)) { return; }
+        event.preventDefault();
+        dateDropdown ||= createFilterDateDropdown(current);
+        dateDropdown.open(input);
     };
-    panelElement.addEventListener("pointerdown", bindAbsoluteDate, true);
-    panelElement.addEventListener("focusin", bindAbsoluteDate);
+    panelElement.addEventListener("pointerdown", openDateDropdown, true);
+    panelElement.addEventListener("click", openDateDropdown);
+    panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        const input = event.target as HTMLInputElement;
+        if (event.altKey && event.key === "ArrowDown" && !event.isComposing && isDateInput(input)) {
+            event.preventDefault();
+            event.stopPropagation();
+            dateDropdown ||= createFilterDateDropdown(current);
+            dateDropdown.open(input);
+        }
+    });
 
     const getRelationFilterSelection = (dropdown: HTMLElement): string[] => {
         return parseRelationFilterBlockIDs(dropdown.dataset.selected || []);
@@ -1316,7 +1283,8 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             return;
         }
         if (target.dataset.type?.startsWith("absDate") &&
-            dateEditors.has(target.closest<HTMLElement>('[data-type="valueContainer"]'))) {
+            (dateDropdown?.isOpen(target as HTMLInputElement) ||
+                submittedDateValues.get(target as HTMLInputElement) === (target as HTMLInputElement).value)) {
             return;
         }
         if (target.dataset.type === "filterValue" || target.dataset.type?.startsWith("absDate") || target.dataset.type?.startsWith("relCount")) {

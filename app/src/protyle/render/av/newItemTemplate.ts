@@ -434,7 +434,6 @@ export const openNewItemTemplateDialog = (options: {
                 const useCurrentTime = modeElement.value === "currentTime";
                 valueElement.classList.toggle("fn__none", useCurrentTime);
                 valueElement.closest("[data-field-date-host]").classList.toggle("fn__none", useCurrentTime);
-                fieldDates.update();
                 if (!useCurrentTime) {
                     valueElement.focus();
                 }

@@ -1,5 +1,5 @@
 import {addDays, addMonths, candidateForDay, dateToDays, daysToDate, formatDate, ICivilDate,
-    IDateConstraints, localToday, parseDate, validateDateValue, weekday} from "./model";
+    IDateConstraints, localToday, normalizeTimeDraft, parseDate, validateDateValue, weekday} from "./model";
 import {createYearInputController} from "./yearInput";
 
 export const createDateField = (host: HTMLElement, options: IDateConstraints & {
@@ -74,8 +74,8 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     probe.step = options.step || "";
     probe.required = !!options.required;
     probe.setAttribute("value", options.stepBase || "");
-    const readValue = () => options.type === "date" ? dateInput.value : options.type === "time" ? timeInput.value :
-        !dateInput.value && !timeInput.value ? "" : `${dateInput.value}T${timeInput.value}`;
+    const readValue = () => options.type === "date" ? dateInput.value : options.type === "time" ? normalizeTimeDraft(timeInput.value) :
+        !dateInput.value && !timeInput.value ? "" : `${dateInput.value}T${normalizeTimeDraft(timeInput.value)}`;
     const setValue = (value: string) => {
         if (dateInput) { dateInput.value = value.split("T")[0]; }
         if (timeInput) { timeInput.value = options.type === "time" ? value : value.split("T")[1] || ""; }
@@ -175,7 +175,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
         heading.append(cell);
     }
     const body = calendar.createTBody();
-    const candidate = (date: ICivilDate) => candidateForDay(date, options, timeInput?.value || "00:00");
+    const candidate = (date: ICivilDate) => candidateForDay(date, options, normalizeTimeDraft(timeInput?.value || "00:00"));
     const selectDay = (date: ICivilDate) => {
         if (disposed || composing.size || yearInput.isComposing()) { return; }
         const value = candidate(date);
@@ -354,6 +354,11 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
             options.onChange?.("input");
         });
     });
+    timeInput?.addEventListener("blur", () => {
+        if (disposed || composing.has(timeInput)) { return; }
+        timeInput.value = normalizeTimeDraft(timeInput.value);
+        notify();
+    });
     const shortcuts = doc.createElement("div");
     shortcuts.className = "date-picker__shortcuts";
     const today = makeButton(lang.calendarToday);
@@ -387,6 +392,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
         commit: (): string | undefined => {
             if (yearInput.isComposing()) { return; }
             if (!validate()) { notify(true); (Array.from(composing)[0] || inputs.find(input => !input.value) || inputs[0]).focus(); return; }
+            if (timeInput) { timeInput.value = normalizeTimeDraft(timeInput.value); }
             return probe.value;
         },
         focusTarget,

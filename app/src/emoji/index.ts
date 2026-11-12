@@ -1,5 +1,5 @@
 import {getDocTreeItem} from "../layout/dock/docTree/rowData";
-import {bindInlineDatePicker} from "../datePicker/inline";
+import {bindDatePicker} from "../datePicker/binding";
 import {IColorPickerHandle, openInternalColorPicker} from "../colorPicker";
 import {parseColor} from "../colorPicker/model";
 import {updateNotebookBreadcrumbIcon} from "../protyle/breadcrumb/iconRefresh";
@@ -965,7 +965,6 @@ export const openEmojiPanel = (
                 <span data-action="clearDate" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.dynamicIconDateEmptyInfo}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
                 <span class="fn__space"></span>
             </div>
-            <div data-role="dynamic-date-calendar"></div>
             <div class="fn__hr"></div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
@@ -1447,7 +1446,7 @@ export const openEmojiPanel = (
                     unicode = target.getAttribute("data-unicode");
                     dialog.destroy();
                 } else if (target.classList.contains("emoji__dynamic-item")) {
-                    if (dynamicColorPending || !dynamicDatePicker.validate()) {
+                    if (dynamicColorPending || !dynamicDateElement.checkValidity()) {
                         event.preventDefault();
                         event.stopPropagation();
                         break;
@@ -1523,9 +1522,6 @@ export const openEmojiPanel = (
                 } else {
                     emojiPanelController.deactivate();
                 }
-                if (target.dataset.type === "tab-dynamic") {
-                    dynamicDatePicker.update();
-                }
                 if (target.dataset.type === "tab-link" && !isMobile()) {
                     linkIconElement.focus();
                 }
@@ -1566,9 +1562,9 @@ export const openEmojiPanel = (
         });
     });
     const dynamicDateElement = dialog.element.querySelector('[data-type="tab-dynamic"] [type="date"]') as HTMLInputElement;
-    const dynamicDatePicker = bindInlineDatePicker(dialog.element.querySelector<HTMLElement>('[data-role="dynamic-date-calendar"]'), dynamicDateElement);
+    const dynamicDatePicker = bindDatePicker(dynamicDateElement);
     dynamicDateElement.addEventListener("change", () => {
-        if (!dynamicDatePicker.validate()) { return; }
+        if (!dynamicDateElement.checkValidity()) { return; }
         dialog.element.querySelectorAll(".fn__flex-wrap .emoji__dynamic-item").forEach(item => {
             const url = new URLSearchParams(item.getAttribute("src").replace(dynamicURL, ""));
             url.set("date", dynamicDateElement.value ? dayjs(dynamicDateElement.value).format("YYYY-MM-DD") : "");

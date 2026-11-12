@@ -5,11 +5,55 @@ import test from "node:test";
 import {compile} from "sass";
 import {browserSources, canRunBrowser, runBrowserCase} from "../../../datePicker/test/browser";
 
+const pickerSources = () => browserSources(Object.fromEntries([
+    ...["model", "yearInput", "field", "runtime", "owners", "binding", "position", "index"]
+        .map(name => [name, "../../../datePicker/" + name + ".ts"]),
+    ...["mobileSheetGesture", "visibleViewport", "orientation", "keyboardSheetState", "mobileSheetLayout",
+        "bindBottomSheetDrag", "bindBottomSheetDialog"].map(name => [name, "../../../mobile/util/" + name + ".ts"]),
+    ["menuPosition", "../../../menus/menuPosition.ts"], ["overlayOwnership", "../../../menus/overlayOwnership.ts"],
+    ["sheetOpen", "../../../menus/sheetOpen.ts"], ["dialog", "../../../dialog/index.ts"],
+    ["mobileDialog", "../../../dialog/mobileDialog.ts"], ["filterDateDropdown", "filterDateDropdown.ts"],
+].map(([name, path]) => [name, join(__dirname, path)])));
+
+const setupPicker = (source: Record<string, string>, modules: Record<string, any>, stubs: Record<string, any>) => {
+    const mobile = source.frontend === "mobile" || source.frontend === "browser-mobile";
+    let uuid = 0;
+    const fallback = {genUUID: () => String(++uuid), getZIndex: () => 0, isAbove: () => false,
+        isMobile: () => mobile, isInMobileApp: () => false, isIOSPlatform: () => false, isNotCtrl: () => true, moveResize() {},
+        Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}, destroyDialogBlockPanels() {}, getDialogBlockPanel() {},
+        getAnchoredInputMask() {}, callMobileAppShowKeyboard() {}, showMessage() {}, getEventName: () => "click",
+        updateHotkeyTip: (value: string) => value, escapeAttr: (value: string) => value, applyMenuEntryVisibility() {},
+        setPopoverMenuOpen() {}, activeBlur() {}, getTopBarHeight: () => 0, isScrollAboveMenu: () => false,
+        electronUndo() {}, forEachPluginSubscriber() {}};
+    const load = (name: string, deps: Record<string, unknown> = {}) => {
+        const exports = modules[name] ||= {};
+        new Function("exports", "require", source[name])(exports, (path: string) =>
+            deps[path] || stubs[path] || modules[path.split("/").at(-1)] || fallback);
+    };
+    const common = document.createElement("div"); common.className = "b3-menu fn__none"; document.body.append(common);
+    Object.assign(window.siyuan, {dialogs: [], zIndex: 10, isReady: true,
+        mobile: {size: {isLandscape: false, portrait: {height1: innerHeight}, landscape: {height1: innerHeight}}},
+        menus: {menu: {element: common, remove() {}}}});
+    if (mobile) { const sidebar = document.createElement("div"); sidebar.id = "sidebar"; document.body.append(sidebar); }
+    ["overlayOwnership", "dialog", "model", "yearInput", "field", "menuPosition", "position", "runtime", "owners",
+        "sheetOpen", "mobileSheetGesture", "visibleViewport", "orientation", "keyboardSheetState", "mobileSheetLayout",
+        "bindBottomSheetDrag", "bindBottomSheetDialog"].forEach(name => load(name));
+    load("mobileDialog", {"./index": modules.dialog});
+    modules.panel = {registerDatePickerWindow() {}};
+    modules.index = {};
+    load("binding"); load("index");
+    stubs["../../../datePicker"] = modules.index;
+    stubs.__fallback = fallback;
+    modules.runtime.registerDatePickerRuntime(document, (options: unknown) => new modules.mobileDialog.MobileDialog(options),
+        () => window.siyuan.languages);
+    load("filterDateDropdown");
+};
+
 for (const width of [400, 800]) {
-    test(`date filters reposition their existing hosts after pointer and keyboard expansion at ${width}px`, {
+    test(`date filter dropdowns preserve their hosts through pointer and keyboard interaction at ${width}px`, {
         timeout: 45000, skip: !canRunBrowser,
     }, async () => {
-        const sources = {...browserSources(Object.fromEntries([
+        const sources = {...pickerSources(), setup: setupPicker.toString(), ...browserSources(Object.fromEntries([
             ["model", "../../../datePicker/model.ts"], ["yearInput", "../../../datePicker/yearInput.ts"],
             ["field", "../../../datePicker/field.ts"], ["inline", "../../../datePicker/inline.ts"],
             ["capabilities.generated", "capabilities.generated.ts"], ["capabilities", "capabilities.ts"],
@@ -43,7 +87,6 @@ for (const width of [400, 800]) {
                 conditions: [dateFilter()], actions: [{type: "edit", target: "filtered", avID: "database",
                     filters: [dateFilter()], fields: {}}]}]}};
             const modules: Record<string, any> = {};
-            const fallback = {getTopBarHeight: () => 0, isMobile: () => false};
             const stubs: Record<string, any> = {
                 "./view": {getFieldsByData: (data: any) => data.view.columns},
                 "./col": {getColIconByType: () => "iconCalendar"},
@@ -53,7 +96,9 @@ for (const width of [400, 800]) {
                 "./conditionalColor": {getConditionalBackground: () => ""},
                 "./filterDropdown": {closeInlineFilterDropdowns() {}},
             };
-            for (const name of Object.keys(source).filter(name => name !== "languages" && name !== "icons")) {
+            new Function("source", "modules", "stubs", "(" + source.setup + ")(source, modules, stubs)")(source, modules, stubs);
+            const fallback = stubs.__fallback;
+            for (const name of Object.keys(source).filter(name => !["languages", "icons", "setup"].includes(name) && !modules[name])) {
                 const exports = modules[name] = {};
                 new Function("exports", "require", source[name])(exports, (path: string) =>
                     stubs[path] || modules[path.split("/").at(-1)] || fallback);
@@ -90,14 +135,26 @@ for (const width of [400, 800]) {
             };
             state.inspect = () => ({top: state.menu.getBoundingClientRect().top, bottom: state.menu.getBoundingClientRect().bottom,
                 positions: state.positions, transactions: state.transactions, observers: observers.size,
-                active: document.activeElement === state.input, calendars: state.menu.querySelectorAll(".date-picker--inline").length});
+                active: document.activeElement === state.input,
+                focusedPopup: !!document.activeElement?.closest(".date-picker"),
+                calendars: state.menu.querySelectorAll(".date-picker--inline").length,
+                popups: document.querySelectorAll(".date-picker").length});
             state.checkReachable = () => {
                 const menu = state.menu as HTMLElement;
                 const rect = menu.getBoundingClientRect();
                 if (rect.top < 0 || rect.bottom > innerHeight + 1 || rect.left < 0 || rect.right > innerWidth + 1) {
                     throw new Error("Menu leaves the viewport: " + JSON.stringify(state.inspect()));
                 }
-                const buttons = menu.querySelectorAll<HTMLElement>("[data-date]:not(:disabled), [data-type=addFilterCondition], [data-type=removeFilters], [data-action=add], [data-add-condition]");
+                const popup = state.siyuan.dialogs.at(-1)?.element as HTMLElement;
+                if (popup) {
+                    const bounds = popup.querySelector(".b3-dialog__container").getBoundingClientRect();
+                    if (bounds.left < -1 || bounds.top < -1 || bounds.right > innerWidth + 1 || bounds.bottom > innerHeight + 1) {
+                        throw new Error("Popup leaves viewport: " + JSON.stringify(bounds));
+                    }
+                }
+                const buttons = (popup || menu).querySelectorAll<HTMLElement>(popup ?
+                    "[data-date]:not(:disabled), .date-picker__navigation button, [data-action]" :
+                    "[data-type=addFilterCondition], [data-type=removeFilters], [data-action=add], [data-add-condition]");
                 for (const button of buttons) {
                     button.scrollIntoView({block: "nearest", inline: "nearest"});
                     const r = button.getBoundingClientRect();
@@ -113,7 +170,7 @@ for (const width of [400, 800]) {
             const equal = (actual: unknown, expected: unknown, message: string) => {
                 if (actual !== expected) { throw new Error(`${message}: ${actual} !== ${expected}`); }
             };
-            const point = (selector: string) => run(`(()=>{const button=menu.querySelector(${JSON.stringify(selector)});button.scrollIntoView({block:"nearest"});const r=button.getBoundingClientRect();return {x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()`);
+            const point = (selector: string) => run(`(()=>{const button=document.querySelector(${JSON.stringify(selector)});button.scrollIntoView({block:"nearest"});const r=button.getBoundingClientRect();return {x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()`);
             const down = (p: {x: number, y: number}) => {
                 win.webContents.sendInputEvent({type: "mouseMove", ...p});
                 win.webContents.sendInputEvent({type: "mouseDown", button: "left", clickCount: 1, ...p});
@@ -130,12 +187,17 @@ for (const width of [400, 800]) {
                 up(p); await tick();
                 const after = await run("inspect()");
                 equal(after.transactions, 0, kind + " first click cannot select a moved calendar day");
-                equal(after.active, true, kind + " first click focuses the original input");
-                equal(after.calendars, 1, kind + " first click expands one calendar");
-                equal(await run("checkReachable()"), true, kind + " expanded host stays reachable");
+                equal(after.focusedPopup, true, kind + " first click focuses the popup");
+                equal(after.calendars, 0, kind + " first click never embeds a calendar");
+                equal(after.popups, 1, kind + " first click opens one popup");
+                equal(after.top, before.top, kind + " opening never moves the parent");
+                equal(after.bottom, before.bottom, kind + " opening never resizes the parent");
+                equal(await run("checkReachable()"), true, kind + " popup stays reachable");
                 const toggle = await point(".date-picker__month-toggle"); down(toggle); up(toggle); await tick();
                 equal(await run("checkReachable()"), true, kind + " year editor growth stays reachable");
                 equal((await run("inspect()")).transactions, 0, kind + " year browsing does not save");
+                equal((await run("inspect()")).top, before.top, kind + " year editor never moves the parent");
+                equal((await run("inspect()")).bottom, before.bottom, kind + " year editor never expands the parent");
                 await run("panel.remove()"); await tick();
                 equal((await run("inspect()")).observers, 0, kind + " detach releases local observers");
 
@@ -144,29 +206,25 @@ for (const width of [400, 800]) {
                 win.webContents.sendInputEvent({type: "keyDown", keyCode: "Tab"});
                 win.webContents.sendInputEvent({type: "keyUp", keyCode: "Tab"}); await tick();
                 equal((await run("inspect()")).active, true, kind + " Tab reaches the date input");
-                equal(await run("checkReachable()"), true, kind + " keyboard expansion needs no pointer release");
+                equal((await run("inspect()")).popups, 0, kind + " Tab focus alone never opens a popup");
+                win.webContents.sendInputEvent({type: "keyDown", keyCode: "Down", modifiers: ["alt"]});
+                win.webContents.sendInputEvent({type: "keyUp", keyCode: "Down", modifiers: ["alt"]}); await tick();
+                equal((await run("inspect()")).popups, 1, kind + " Alt+Down opens the popup");
+                equal(await run("checkReachable()"), true, kind + " keyboard-opened popup stays reachable");
                 equal((await run("inspect()")).transactions, 0, kind + " keyboard focus does not save");
                 await run("panel.remove()"); await tick();
                 equal((await run("inspect()")).observers, 0, kind + " repeated open and close releases observers");
             }
             await run('openCase("view")');
-            await run('input.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true,pointerId:7})); input.focus()'); await tick();
-            const heldPositions = await run("inspect().positions");
-            await run('document.dispatchEvent(new PointerEvent("pointercancel",{bubbles:true,pointerId:8}))'); await tick();
-            equal((await run("inspect()")).positions, heldPositions, "an unrelated pointer cancellation does not move the menu");
-            await run('window.dispatchEvent(new Event("blur"))'); await tick();
-            equal((await run("inspect()")).positions, heldPositions + 1, "leaving the window releases a missing pointerup");
-            equal(await run("checkReachable()"), true, "interrupted pointer expansion still fits its host");
-            await run("panel.remove()"); await tick();
-            equal((await run("inspect()")).observers, 0, "interrupted pointer listeners and observer are released");
-            await run('openCase("view")');
-            await run('input.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true})); input.focus()'); await tick();
-            const pending = await run("inspect().positions");
-            await run('document.dispatchEvent(new PointerEvent("pointercancel",{bubbles:true})); panel.remove(); openCase("view")');
-            const replacement = await run("inspect().positions"); await tick();
-            equal((await run("inspect()")).positions, replacement, "a cancelled old frame cannot reposition a replacement menu");
-            equal((await run("inspect()")).observers, 0, "cancellation and detachment release the observer");
-            equal(replacement, pending + 1, "only the replacement's initial positioning ran");
+            const initial = await run("inspect()");
+            await run('input.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true,pointerId:7}));'); await tick();
+            await run('document.dispatchEvent(new PointerEvent("pointercancel",{bubbles:true,pointerId:8})); window.dispatchEvent(new Event("blur"))'); await tick();
+            equal((await run("inspect()")).positions, initial.positions, "pointer interruption cannot reposition the parent");
+            equal((await run("inspect()")).transactions, 0, "pointer interruption cannot save a draft");
+            await run("panel.remove(); openCase('view')"); await tick();
+            equal((await run("inspect()")).popups, 0, "detached owner releases the old popup");
+            equal((await run("inspect()")).observers, 0, "detached owner releases popup positioning observers");
+            equal((await run("inspect()")).positions, initial.positions + 1, "only the replacement's initial position runs");
             return "Filter host positioning passed";
         }});
         assert.match(result, /Filter host positioning passed/);

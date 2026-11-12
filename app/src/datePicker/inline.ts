@@ -1,5 +1,5 @@
 import {createDateField} from "./field";
-import {IDateConstraints, isDatePickerType, validateDateValue} from "./model";
+import {IDateConstraints, isDatePickerType, normalizeTimeDraft, validateDateValue} from "./model";
 
 interface IInlineDateState {
     value: string;
@@ -15,12 +15,6 @@ export const getInlineDateType = (input: HTMLInputElement) =>
 const validationErrors = new WeakMap<HTMLInputElement, string>();
 const composingInputs = new WeakSet<HTMLInputElement>();
 const splitInputs = new WeakMap<HTMLInputElement, {time: HTMLInputElement; element: HTMLElement}>();
-const normalizeTimeDraft = (value: string) => {
-    if (!/^\d{3,4}$/.test(value)) { return value; }
-    const hours = value.slice(0, -2).padStart(2, "0");
-    const minutes = value.slice(-2);
-    return Number(hours) < 24 && Number(minutes) < 60 ? `${hours}:${minutes}` : value;
-};
 const getConstraints = (input: HTMLInputElement): IDateConstraints => {
     const type = getInlineDateType(input);
     if (!isDatePickerType(type)) { throw new TypeError("Invalid inline date input type"); }

@@ -74,6 +74,9 @@ test("table totals align with headers and fixed rows retain frozen columns acros
                         row.stickyRow(block, outer, "all");
                         check(header.classList.contains("av__row--header--fixed"), context + " header must be fixed");
                         check(footer.classList.contains("av__row--footer--fixed"), context + " footer must be fixed");
+                        const gutter = footer.querySelector<HTMLElement>(".av__firstcol").getBoundingClientRect();
+                        const hit = document.elementFromPoint(gutter.left + gutter.width / 2, gutter.top + gutter.height / 2);
+                        check(!!hit && !hit.closest(".av__firstcol"), context + " total gutter cannot trigger row selection");
                         for (const left of [100, 180, 0]) {
                             scroll.scrollLeft = left;
                             scroll.dispatchEvent(new Event("scroll"));

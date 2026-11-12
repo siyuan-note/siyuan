@@ -1123,6 +1123,10 @@
         opacity: 1;
       }
 
+      .av__firstcol {
+        pointer-events: none;
+      }
+
       .av__calc {
         display: flex;
         align-items: center;

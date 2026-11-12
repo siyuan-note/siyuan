@@ -79,6 +79,22 @@ html[data-frontend="mobile"] body.body--android {
   }
 }
 
+body.body--ios {
+  .mobile-bottom-sheet-dialog .b3-dialog,
+  .mobile-sheet-layout {
+    padding-bottom: 0;
+  }
+
+  .mobile-bottom-sheet,
+  .mobile-sheet-panel {
+    padding-bottom: var(--mobile-bottom-bar-safe-area);
+  }
+
+  .sync-checkout__panel.mobile-sheet-panel {
+    padding-bottom: calc(24px + var(--mobile-bottom-bar-safe-area));
+  }
+}
+
 body.mobile-keyboard--open {
   --mobile-bottom-bar-offset: 0px;
 

@@ -148,6 +148,31 @@ const browserCases = async (sources: string[]) => {
     await settle();
     check.equal(content.scrollTop, 0, "shortened content clamps scrolling to the valid range");
     layout.dispose();
+    document.body.classList.add("body--ios");
+    for (const safeArea of [34, 21, 0]) {
+        document.body.style.setProperty("--mobile-bottom-bar-safe-area", `${safeArea}px`);
+        for (const bottom of [800, 300]) {
+            viewport.bottom = bottom;
+            document.body.innerHTML = markup;
+            const iosOverlay = document.querySelector<HTMLElement>(".b3-dialog");
+            const iosPanel = document.querySelector<HTMLElement>(".mobile-bottom-sheet");
+            const iosFooter = iosPanel.querySelector<HTMLElement>(".b3-dialog__action");
+            const iosLayout = dependencies.bindMobileSheetLayout(iosOverlay, iosPanel);
+            check.equal(getComputedStyle(iosOverlay).paddingBottom, "0px");
+            check.equal(parseFloat(getComputedStyle(iosPanel).paddingBottom), safeArea);
+            check.ok(Math.abs(iosPanel.getBoundingClientRect().bottom - bottom) < 1,
+                "iOS sheet background reaches the viewport or keyboard edge");
+            check.ok(iosFooter.getBoundingClientRect().bottom <= bottom - safeArea + 1,
+                "iOS action buttons remain above the home indicator safe area");
+            iosLayout.setMode("expanded");
+            check.equal(iosPanel.getBoundingClientRect().height, bottom - 20,
+                "iOS safe area is inside the panel and must not be subtracted twice");
+            iosLayout.dispose();
+        }
+    }
+    document.body.classList.remove("body--ios");
+    document.body.style.setProperty("--mobile-bottom-bar-safe-area", "30px");
+    viewport.bottom = 800;
     for (const gate of ["child", "root-inert", "body-inert", "root-busy", "body-busy", "business", "closing"]) {
         document.body.innerHTML = markup;
         const root = document.querySelector<HTMLElement>(".mobile-bottom-sheet-dialog");

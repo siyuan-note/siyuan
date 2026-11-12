@@ -1112,6 +1112,7 @@
 
     &--footer {
       display: flex;
+      font-size: 87.5%;
       border-top: 1px solid var(--b3-theme-surface-lighter);
       color: var(--b3-theme-on-surface);
       position: relative;
@@ -1129,20 +1130,15 @@
         border-right: 1px;
         flex-direction: row-reverse;
         box-sizing: border-box;
+        flex-shrink: 0;
         opacity: 0;
         overflow: hidden;
-        font-size: 87.5%;
         white-space: nowrap;
         line-height: 1.625em;
         cursor: pointer;
 
         &[data-dtype="lineNumber"] {
           cursor: inherit;
-        }
-
-        &:first-child {
-          padding-left: calc(1.625em - 6px);
-          box-sizing: initial;
         }
 
         &.av__calc--ashow {
@@ -1172,6 +1168,10 @@
 
       &--fixed {
         position: fixed;
+
+        > .av__colsticky--freeze {
+          transform: translateX(var(--av-fixed-scroll-left, 0px));
+        }
       }
     }
 
@@ -2076,6 +2076,7 @@
 
   &__body--unfreeze .av__colsticky--freeze {
     position: relative;
+    transform: none;
   }
 
   &__colsticky {

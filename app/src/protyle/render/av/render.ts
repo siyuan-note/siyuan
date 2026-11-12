@@ -227,7 +227,7 @@ const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualDa
         }
     }
     const viewType = e.dataset.avType === "list" ? "list" : "table";
-    let calcHTML = "";
+    let calcHTML = '<div class="av__colsticky"><div class="av__firstcol" aria-hidden="true"><svg></svg></div></div>';
     let contentHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     let freezeIndex = -1;
     data.columns.forEach((item, index) => {
@@ -238,7 +238,7 @@ const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualDa
     const pinIndex = freezeIndex;
     if (pinIndex > -1) {
         contentHTML = '<div class="av__row av__row--header"><div class="av__colsticky av__colsticky--freeze"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
-        calcHTML = '<div class="av__colsticky av__colsticky--freeze">';
+        calcHTML = '<div class="av__colsticky av__colsticky--freeze"><div class="av__firstcol" aria-hidden="true"><svg></svg></div>';
     }
     let hasCalc = false;
     data.columns.forEach((column: IAVColumn, index: number) => {

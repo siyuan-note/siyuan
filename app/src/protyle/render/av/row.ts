@@ -540,15 +540,19 @@ const applyFixedViewportClip = (el: HTMLElement, left = 0, right = 0) => {
 
 const stickyScrollElMap = new WeakMap<HTMLElement, HTMLElement>();
 
+const syncFixedRowScroll = (item: HTMLElement, scrollLeft: number) => {
+    item.style.transform = `translateX(${-scrollLeft}px)`;
+    item.style.setProperty("--av-fixed-scroll-left", `${scrollLeft}px`);
+};
+
 const bindHeaderScrollSync = (blockElement: HTMLElement, scrollEl: HTMLElement) => {
     if (stickyScrollElMap.get(blockElement) === scrollEl) {
         return;
     }
     stickyScrollElMap.set(blockElement, scrollEl);
     const syncHeaders = () => {
-        const x = -scrollEl.scrollLeft;
         blockElement.querySelectorAll(".av__row--header--fixed, .av__row--footer--fixed").forEach((el: HTMLElement) => {
-            el.style.transform = `translateX(${x}px)`;
+            syncFixedRowScroll(el, scrollEl.scrollLeft);
             applyFixedClip(el, scrollEl);
         });
     };
@@ -589,6 +593,7 @@ const removeFixedRow = (item: HTMLElement, fixedClass: string, placeholderClass:
     item.style.width = "";
     item.style.transform = "";
     item.style.clipPath = "";
+    item.style.removeProperty("--av-fixed-scroll-left");
     const next = item.nextElementSibling as HTMLElement;
     if (next?.classList.contains(placeholderClass)) {
         next.remove();
@@ -598,7 +603,7 @@ const removeFixedRow = (item: HTMLElement, fixedClass: string, placeholderClass:
 const syncFixedRowPos = (item: HTMLElement, bodyRect: DOMRect, scrollLeft: number, scrollEl: HTMLElement) => {
     item.style.left = Math.round(bodyRect.left + scrollLeft) + "px";
     item.style.width = Math.round(bodyRect.width) + "px";
-    item.style.transform = `translateX(${-scrollLeft}px)`;
+    syncFixedRowScroll(item, scrollLeft);
     if (scrollEl) {
         applyFixedClip(item, scrollEl);
     }

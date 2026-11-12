@@ -8,6 +8,11 @@ const compiled = transpileModule(readFileSync("src/protyle/render/av/row.ts", "u
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
+const makeStyle = (values: Record<string, string> = {}) => Object.defineProperties(values, {
+    setProperty: {value: (name: string, value: string) => { values[name] = value; }},
+    removeProperty: {value: (name: string) => { delete values[name]; }},
+});
+
 test("sticky views follow breadcrumbs and keep wrapped height in sync when resized", () => {
     const exports: {stickyRow?: (block: unknown, scroll: unknown, status: string) => void} = {};
     runInNewContext(compiled, {
@@ -20,7 +25,7 @@ test("sticky views follow breadcrumbs and keep wrapped height in sync when resiz
     const views = {
         classList: {contains: (name: string) => name === "av__views--fixed"},
         get offsetHeight() { return parseFloat(this.style.width) < 300 ? 80 : 40; },
-        style: {top: "", left: "", width: "", clipPath: ""},
+        style: makeStyle({top: "", left: "", width: "", clipPath: ""}),
         closest: (selector: string) => ({
             getBoundingClientRect: () => ({
                 top: 24, bottom: selector === ".layout-tab-container" ? paneBottom : 800, left: 0, right: 500,
@@ -106,7 +111,8 @@ test("backlink scrolling clears fixed rows and their spacers without calculating
         };
         return {
             classList: {contains: (name: string) => classes.has(name), remove: (name: string) => classes.delete(name)},
-            style: {top: "120px", bottom: "10px", left: "30px", width: "400px", transform: "translateX(-100px)", clipPath: "inset(0 50px 0 0)"},
+            style: makeStyle({top: "120px", bottom: "10px", left: "30px", width: "400px", transform: "translateX(-100px)",
+                clipPath: "inset(0 50px 0 0)", "--av-fixed-scroll-left": "100px"}),
             nextElementSibling: placeholder,
         };
     };
@@ -150,7 +156,7 @@ test("sticky views preserve wrapping at fractional widths across scroll and resi
             add: (name: string) => classes.add(name),
             remove: (name: string) => classes.delete(name),
         },
-        style: {} as Record<string, string>,
+        style: makeStyle(),
         nextElementSibling: undefined as ReturnType<typeof makePlaceholder> | undefined,
         get offsetHeight() {
             const width = classes.has("av__views--fixed") ? parseFloat(this.style.width) :

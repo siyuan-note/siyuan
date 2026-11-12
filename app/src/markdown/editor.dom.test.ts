@@ -43,6 +43,68 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         outlineStyle.onerror = () => reject(new Error("Could not load Vditor outline test styles"));
         document.head.append(outlineStyle);
     });
+    const policy = api.createMarkdownResourcePolicy(document);
+    for (const [destination, visible] of [["https://example.com/path?q=a&b=c#part", true], ["http://example.com/", true],
+        ["mailto:test@example.com", true], ["javascript:alert(1)", false], ["data:text/html,test", false],
+        ["file:///private.md", false], ["https://example.com/a\nb", false]] as const) {
+        const original = document.createElement("a");
+        original.setAttribute("href", destination);
+        original.setAttribute("ping", "https://invalid.example/track");
+        original.setAttribute("onclick", "window.markdownExecuted = true");
+        original.textContent = "Link";
+        const template = document.createElement("template");
+        template.innerHTML = policy.sanitize(original.outerHTML);
+        const anchor = template.content.querySelector("a");
+        check.equal(anchor.getAttribute("href"), visible ? destination : null);
+        check.equal(anchor.getAttribute("ping"), null, "link tracking stays blocked");
+        check.equal(anchor.getAttribute("onclick"), null, "link scripts stay blocked");
+        template.innerHTML = policy.restore(template.innerHTML);
+        check.equal(template.content.querySelector("a").getAttribute("href"), destination, "blocked destinations remain recoverable");
+    }
+    const resource = document.createElement("template");
+    resource.innerHTML = policy.sanitize('<link href="https://invalid.example/style.css" rel="stylesheet">');
+    check.equal(resource.content.querySelector("link"), null, "the href exception applies only to anchors");
+    policy.destroy();
+    for (const mobile of [false, true]) {
+        const element = document.createElement("div");
+        element.style.height = "360px";
+        document.body.append(element);
+        const destination = "https://developer.mozilla.org/zh-CN/docs/Web/API/Document/currentScript?q=a&b=c#value";
+        const source = `[Document.currentScript](${destination} "Title")\n\nOutside\n`;
+        const editor = await api.createMarkdownEditor({element, initialValue: source, mode: "ir", cdn, lutePath, mobile,
+            onEdit: () => {}});
+        editor.setMode("wysiwyg");
+        const surface = element.querySelector<HTMLElement>(".vditor-wysiwyg .vditor-reset");
+        const anchor = surface.querySelector("a");
+        check.equal(anchor.getAttribute("href"), destination, "WYSIWYG retains the link destination after switching from IR");
+        for (const theme of ["light", "dark"] as const) {
+            editor.setTheme(theme);
+            await waitFor(() => getComputedStyle(anchor).color !== getComputedStyle(surface.querySelector("p:last-child")).color,
+                `links retain their theme styling in ${theme}`);
+        }
+        const range = document.createRange();
+        range.selectNodeContents(anchor);
+        range.collapse(false);
+        surface.focus();
+        getSelection().removeAllRanges(); getSelection().addRange(range);
+        surface.dispatchEvent(new KeyboardEvent("keyup", {key: "ArrowLeft", bubbles: true}));
+        await waitFor(() => element.querySelectorAll(".vditor-panel input").length === 3, "link editing fields are available");
+        const fields = element.querySelectorAll<HTMLInputElement>(".vditor-panel input");
+        check.equal(fields[1].value, destination, "link editing displays the original destination");
+        fields[0].value = "Edited link";
+        fields[0].dispatchEvent(new Event("input", {bubbles: true}));
+        check.ok(editor.flush().content.includes(`[Edited link](${destination} "Title")`),
+            "editing link text retains its destination and title");
+        const nextDestination = "https://example.com/updated?q=1&b=2#part";
+        fields[1].value = nextDestination;
+        fields[1].dispatchEvent(new Event("input", {bubbles: true}));
+        check.ok(editor.flush().content.includes(`[Edited link](${nextDestination} "Title")`), "destination edits are serialized");
+        for (const mode of ["sv", "ir", "wysiwyg"] as const) {
+            editor.setMode(mode);
+            check.ok(editor.flush().content.includes(`[Edited link](${nextDestination} "Title")`), `link edits survive ${mode}`);
+        }
+        editor.destroy(); element.remove();
+    }
     for (const mode of ["ir", "wysiwyg", "sv"] as const) {
         const element = document.createElement("div");
         element.style.height = "360px";

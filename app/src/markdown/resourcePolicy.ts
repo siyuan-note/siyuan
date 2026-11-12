@@ -136,6 +136,8 @@ export const createMarkdownResourcePolicy = (document: Document, resolveResource
             const attributes: PreservedMarkup["attributes"] = [];
             for (const attribute of Array.from(element.attributes)) {
                 const name = attribute.name.toLowerCase();
+                // 链接编辑浮层和浏览器链接样式直接读取 href；外部链接的打开仍由宿主处理。
+                if (element.tagName === "A" && name === "href" && isExternalMarkdownLink(attribute.value)) continue;
                 if (resourceAttributes.has(name) || name.startsWith("on") || name === "srcdoc" ||
                     (name === "style" && /url\s*\(|@import|expression|behavior|\\/i.test(attribute.value))) {
                     attributes.push({name, original: attribute.value, displayed: null});

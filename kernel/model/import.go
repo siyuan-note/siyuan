@@ -1998,6 +1998,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 }
 
 func parseStdMd(markdown []byte, footnotes bool) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdated string) {
+	markdown = bytes.TrimPrefix(markdown, []byte("\xef\xbb\xbf"))
 	luteEngine := util.NewStdLute()
 	setImportMathDelimiters(luteEngine)
 	luteEngine.SetFootnotes(footnotes)

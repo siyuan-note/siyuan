@@ -99,6 +99,11 @@
       width: 100%;
       min-width: 0;
     }
+
+    [data-frontend="mobile"] & input,
+    [data-frontend="browser-mobile"] & input {
+      min-height: 44px;
+    }
   }
 
   &--inline > [role="status"] {

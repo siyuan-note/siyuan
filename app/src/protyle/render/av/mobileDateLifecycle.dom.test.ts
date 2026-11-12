@@ -5,9 +5,7 @@ import test from "node:test";
 import {compile} from "sass";
 import {browserSources, canRunBrowser, runBrowserCase} from "../../../datePicker/test/browser";
 
-test("mobile date panels settle after opening, preserve editing and release observers on close", {
-    timeout: 45000, skip: !canRunBrowser,
-}, async () => {
+const getSources = () => {
     const sources = browserSources({
         model: join(__dirname, "../../../datePicker/model.ts"),
         yearInput: join(__dirname, "../../../datePicker/yearInput.ts"),
@@ -28,6 +26,13 @@ test("mobile date panels settle after opening, preserve editing and release obse
     sources.dayjs = readFileSync(require.resolve("dayjs"), "utf8");
     sources.languages = readFileSync("appearance/langs/en.json", "utf8");
     sources.lunarData = readFileSync("../kernel/av/lunar_calendar_data.json", "utf8");
+    return sources;
+};
+
+test("mobile date panels settle after opening, preserve editing and release observers on close", {
+    timeout: 45000, skip: !canRunBrowser,
+}, async () => {
+    const sources = getSources();
     const result = await runBrowserCase(async (source, css) => {
         const equal = (actual: unknown, expected: unknown, message: string) => {
             if (actual !== expected) { throw new Error(`${message}: ${actual} !== ${expected}`); }
@@ -245,3 +250,125 @@ test("mobile date panels settle after opening, preserve editing and release obse
     {width: 393, height: 852});
     assert.match(result, /mobile date lifecycle cases passed/);
 });
+
+for (const viewport of [
+    {frontend: "mobile", width: 320},
+    {frontend: "mobile", width: 393},
+    {frontend: "browser-mobile", width: 320},
+    {frontend: "browser-mobile", width: 393},
+    {frontend: "desktop", width: 900},
+    {frontend: "browser-desktop", width: 900},
+]) {
+    test(`date input heights remain stable across time modes in ${viewport.frontend}, ${viewport.width}px`, {
+        timeout: 45000, skip: !canRunBrowser,
+    }, async () => {
+        const sources = {...getSources(), frontend: viewport.frontend};
+        const result = await runBrowserCase(async (source, css) => {
+            const equal = (actual: unknown, expected: unknown, message: string) => {
+                if (actual !== expected) { throw new Error(`${message}: ${JSON.stringify(actual)} !== ${JSON.stringify(expected)}`); }
+            };
+            const mobile = source.frontend === "mobile" || source.frontend === "browser-mobile";
+            const style = document.createElement("style");
+            style.textContent = css;
+            document.head.append(style);
+            document.documentElement.dataset.frontend = source.frontend;
+            document.body.innerHTML = (mobile ? '<div id="sidebar"></div>' : "") + '<div id="cell"></div>';
+            Object.assign(window, {siyuan: {languages: JSON.parse(source.languages),
+                mobile: {size: {isLandscape: false, portrait: {height1: innerHeight}}}}});
+            const initial = {content: new Date(2026, 10, 12, 9, 30).getTime(),
+                content2: new Date(2026, 10, 13, 10, 45).getTime(), isNotEmpty: true, isNotEmpty2: true,
+                hasEndDate: true, isNotTime: true};
+            const dayjs = {exports: {}};
+            new Function("module", "exports", source.dayjs)(dayjs, dayjs.exports);
+            const modules: Record<string, any> = {dayjs: dayjs.exports,
+                "lunar_calendar_data.json": JSON.parse(source.lunarData),
+                cell: {genCellValueByElement: () => ({date: initial}), updateCellsValue() {}},
+                view: {getFieldsByData: (): unknown[] => []},
+                capabilities: {isAVDateType: () => true}, message: {showMessage() {}}};
+            for (const name of ["model", "yearInput", "field", "inline", "dateSubmit", "escape", "lunarCalendar",
+                "dateFormat", "lunarDate", "date", "menuGroup", "sheetOpen", "sheetActions", "mobileSheetGesture", "mobilePanel"]) {
+                const exports = modules[name] = {};
+                new Function("exports", "require", source[name])(exports, (path: string) => modules[path.split("/").at(-1)]);
+            }
+            const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
+            const settle = async () => { await frame(); await frame(); };
+            const cell = document.getElementById("cell");
+            const panel = document.createElement("div");
+            panel.className = "av__panel";
+            document.body.append(panel);
+            const mount = (format = "") => {
+                panel.innerHTML = '<div class="b3-dialog__scrim"></div><div class="b3-menu">' +
+                    modules.date.getDateHTML([cell], format) + "</div>";
+                const menu = panel.querySelector<HTMLElement>(".b3-menu");
+                if (mobile) { modules.mobilePanel.bindMobileAVPanel(panel, menu); }
+                else { menu.style.cssText = "position:relative;width:380px;max-width:calc(100vw - 16px)"; }
+                const close = modules.date.bindDateEvent({menuElement: menu, cellElements: [cell], data: {},
+                    requireExplicitChange: true, format});
+                return {menu, close};
+            };
+            const height = (input: HTMLInputElement) => input.getBoundingClientRect().height;
+            const measurements: Record<string, unknown> = {frontend: source.frontend, width: innerWidth};
+            const current = mount();
+            const inputs = current.menu.querySelectorAll<HTMLInputElement>("input");
+            await settle();
+            const dateOnly = [height(inputs[0]), height(inputs[1])];
+            measurements.dateOnly = dateOnly;
+            inputs[3].click();
+            await settle();
+            const withTime = [height(inputs[0]), height(inputs[1])];
+            const times = Array.from(current.menu.querySelectorAll<HTMLInputElement>('[data-date-picker-part="time"]')).map(height);
+            measurements.withTime = withTime;
+            measurements.times = times;
+            inputs[3].click();
+            await settle();
+            const restored = [height(inputs[0]), height(inputs[1])];
+            measurements.restored = restored;
+            current.close();
+            panel.remove();
+            await settle();
+
+            initial.isNotTime = false;
+            document.body.append(panel);
+            const lunar = mount("lunar");
+            await settle();
+            const lunarTimes = Array.from(lunar.menu.querySelectorAll<HTMLInputElement>("[data-lunar-time]")).map(height);
+            measurements.lunarTimes = lunarTimes;
+            lunar.close();
+            panel.remove();
+            await settle();
+
+            const popup = document.createElement("div");
+            popup.style.width = "280px";
+            document.body.append(popup);
+            const field = modules.field.createDateField(popup, {type: "datetime-local", value: "2026-11-12T09:30",
+                languages: window.siyuan.languages});
+            const popupInputs = Array.from(popup.querySelectorAll<HTMLInputElement>(".date-picker__fields input")).map(height);
+            measurements.popupInputs = popupInputs;
+            field.destroy();
+            popup.remove();
+            const staticForm = document.createElement("div");
+            staticForm.innerHTML = '<input type="date" class="b3-text-field" value="2026-11-12"><input type="time" class="b3-text-field" value="09:30"><div></div>';
+            document.body.append(staticForm);
+            const staticInputs = Array.from(staticForm.querySelectorAll<HTMLInputElement>("input"));
+            const staticPicker = modules.inline.bindInlineDatePicker(staticForm.querySelector("div"), staticInputs);
+            const staticHeights = staticInputs.map(height);
+            measurements.staticHeights = staticHeights;
+            staticPicker.destroy();
+            staticForm.remove();
+            for (const index of [0, 1]) {
+                equal(withTime[index], dateOnly[index], `Time toggle keeps endpoint ${index} height; ${JSON.stringify(measurements)}`);
+                equal(restored[index], dateOnly[index], "Turning time off restores the same input height");
+                equal(times[index], dateOnly[index], "Date and time inputs have matching heights");
+                equal(lunarTimes[index], 28, "Lunar time keeps its existing input height");
+                equal(staticHeights[index], 28, "Standalone date and time inputs keep their existing heights");
+                equal(popupInputs[index], dateOnly[index], "Popup date and time fields follow the same sizing");
+            }
+            if (mobile) { equal(dateOnly.every(value => value >= 44), true, "Mobile date inputs retain touch-sized controls"); }
+            return "date input height cases passed " + JSON.stringify(measurements);
+        }, sources, readFileSync("appearance/themes/daylight/theme.css", "utf8") +
+            compile(viewport.frontend === "mobile" || viewport.frontend === "browser-mobile" ? "src/assets/scss/mobile.scss" : "src/assets/scss/base.scss",
+                {silenceDeprecations: ["legacy-js-api", "import", "global-builtin"]}).css,
+        {width: viewport.width, height: 852});
+        assert.match(result, /date input height cases passed/);
+    });
+}

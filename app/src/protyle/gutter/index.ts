@@ -140,6 +140,7 @@ import {
     getFixedGutterPosition,
     getGutterFixedContainerRect,
     getGutterMarginHeight,
+    getGutterPaneRect,
     getListGutterAnchorLeft
 } from "./layout";
 import {closeSubElement} from "../toolbar/subElementLifecycle";
@@ -4058,7 +4059,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
             this.element.insertAdjacentHTML("beforeend", `<button class="protyle-gutters__line" data-type="gutterLineBefore" style="display:none"></button><button class="protyle-gutters__line" data-type="gutterLineAfter" style="display:none"></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusBefore" data-position="4west" aria-label="${window.siyuan.languages.insertBefore}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusAfter" data-position="4west" aria-label="${window.siyuan.languages.insertAfter}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button>`);
         }
         const viewportRect = protyle.contentElement.getBoundingClientRect();
-        const paneRect = protyle.element.closest(".layout-tab-container")?.getBoundingClientRect() || viewportRect;
+        const paneRect = getGutterPaneRect(protyle.element, viewportRect);
         const viewportLeft = Math.max(viewportRect.left, paneRect.left);
         const viewportRight = Math.min(viewportRect.right, paneRect.right);
         const viewportBottom = Math.min(viewportRect.bottom, paneRect.bottom);

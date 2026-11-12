@@ -2,6 +2,63 @@ import {restoreInlineElementBoundaries} from "../util/inlineElementBoundary";
 
 const paragraphSelector = '[data-type="NodeParagraph"]';
 
+export const flattenDocumentTitlePaste = (blockDOM: string, text: string, internal: boolean) => {
+    const template = document.createElement("template");
+    template.innerHTML = blockDOM;
+    const paragraph = document.createElement("div");
+    paragraph.className = "p";
+    paragraph.dataset.type = "NodeParagraph";
+    const editable = document.createElement("div");
+    editable.contentEditable = "true";
+    paragraph.append(editable);
+    const content = Array.from(template.content.querySelectorAll(
+        `${paragraphSelector} > [contenteditable], [data-type="NodeHeading"] > [contenteditable], ` +
+        '[data-type="NodeTable"] th, [data-type="NodeTable"] td, [data-type="NodeCodeBlock"] .hljs > [contenteditable], ' +
+        '[data-type="NodeMathBlock"][data-content]'
+    ));
+    if (internal && !template.content.querySelector('[data-type^="Node"]')) {
+        const inline = document.createElement("div");
+        inline.append(template.content);
+        content.push(inline);
+    }
+    content.forEach(part => {
+        const math = part.getAttribute("data-content");
+        if (math !== null) {
+            const inline = document.createElement("span");
+            inline.className = "render-node";
+            inline.dataset.type = "inline-math";
+            inline.dataset.subtype = "math";
+            inline.dataset.content = math;
+            inline.contentEditable = "false";
+            part.replaceChildren(inline);
+        }
+        if (!internal) {
+            // 网页图像的替代文字属于标题文本，独立粘贴的图片文件由附件上传处理。
+            part.querySelectorAll("img").forEach(image => {
+                (image.closest(".img") || image).replaceWith(document.createTextNode(image.alt));
+            });
+        }
+        part.normalize();
+        if (part.firstChild?.nodeType === Node.TEXT_NODE) {
+            part.firstChild.nodeValue = part.firstChild.nodeValue.replace(/^[ \t]+/, "");
+        }
+        if (part.lastChild?.nodeType === Node.TEXT_NODE) {
+            part.lastChild.nodeValue = part.lastChild.nodeValue.replace(/[ \t]+$/, "");
+        }
+        if (!part.textContent.replace(/\u200b/g, "").trim() && !part.querySelector('img, [data-type~="inline-math"]')) {
+            return;
+        }
+        if (editable.hasChildNodes()) {
+            editable.append(" ");
+        }
+        editable.append(...Array.from(part.childNodes));
+    });
+    if (!editable.hasChildNodes() && text.trim()) {
+        editable.textContent = text;
+    }
+    return editable.hasChildNodes() ? paragraph.outerHTML : "";
+};
+
 // 标题只有一个行级载体；先检查结构，避免清洗时悄悄丢掉粘贴的块。
 export const getDocumentTitleUnsupportedPasteBlocks = (blockDOM: string) => {
     const template = document.createElement("template");

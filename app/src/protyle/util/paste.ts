@@ -23,6 +23,7 @@ import {restoreTableVirtualizationDOM} from "./tableVirtualizationDOM";
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {withFetchTimeout} from "../../util/fetchTimeout";
 import {isDynamicRef} from "../../util/functions";
 import {getPdfAnnotationReference} from "../../editor/pdfAssetLink";
 import {insertHTML} from "./insertHTML";
@@ -82,6 +83,7 @@ import {getSelectedInlineCodeElement} from "../toolbar/inlineRangeBoundary";
 import {
     areProtylePluginExtensionsEnabled,
     getProtyleBlockDOMSanitizer,
+    getProtylePasteTransform,
     getProtyleUnsupportedPasteBlocks,
     getProtyleUnsupportedPasteMessage,
     getProtyleRestrictedPlainTextHTML,
@@ -795,6 +797,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         siyuanHTML = siyuanHTML || clipboard.textSiyuan;
         textHTML = clipboard.textHtml;
     }
+    const transformPaste = blockDOMSanitizer ? getProtylePasteTransform(protyle) : undefined;
+    if (transformPaste && !siyuanHTML && !textHTML && textPlain.endsWith(Constants.ZWSP)) {
+        siyuanHTML = textPlain.slice(0, -1);
+        textPlain = "";
+    }
+    const internalPaste = !!siyuanHTML;
+    const transformBlockPaste = transformPaste && (internalPaste || !!textHTML);
+    const transformExternalPaste = transformBlockPaste && !internalPaste;
     if (blockDOMSanitizer && !siyuanHTML && /<picture[\s>]/i.test(textHTML)) {
         const template = document.createElement("template");
         template.innerHTML = textHTML;
@@ -805,7 +815,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // 受限片段中的图片走附件上传，避免被后续纯文本降级丢弃。
         const isImage = (name: string) => Constants.SIYUAN_ASSETS_IMAGE.includes(
             name.substring(name.lastIndexOf(".")).toLowerCase());
-        if (files?.length > 0 && Array.from(files as FileList).every(file => isImage(file.name))) {
+        if (files?.length > 0 && (!transformExternalPaste || !textPlain.trim()) &&
+            Array.from(files as FileList).every(file => isImage(file.name))) {
             uploadFiles(protyle, files, undefined, avAssetUploadSuccess, undefined, directAssetUploadOptions);
             return;
         }
@@ -820,6 +831,36 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         /// #endif
         if (localImages?.length > 0 && localImages.every(file => !file.isDir && isImage(file.path))) {
             await readLocalFile(protyle, localImages, directAssetUploadOptions, avAssetUploadSuccess);
+            return;
+        }
+    }
+    if (transformExternalPaste) {
+        if (!preserveSourceFormat && shouldPasteMarkdownFromHTML(textHTML, textPlain)) {
+            siyuanHTML = markdownMathPaste(protyle.lute, textPlain, mathCompatible);
+        } else {
+            const doc = new DOMParser().parseFromString(textHTML, "text/html");
+            const sourceURL = getHTMLAssetSourceURL(textHTML, doc.querySelector("base[href]")?.getAttribute("href"));
+            resolveHTMLAssetURLs(doc, sourceURL);
+            // 标题与正文共用网页样式归一化；图片文件由独立的上传入口处理。
+            try {
+                const response = await withFetchTimeout(signal => fetchSyncPost("/api/lute/html2BlockDOM", {
+                    dom: Lute.Sanitize(doc.body.innerHTML), text: textPlain, preserveSourceFormat,
+                    skipLocalAssets: true, skipBase64Assets: true, skipInlineSVGAssets: true,
+                }, undefined, false, signal), undefined, PASTE_PLUGIN_TIMEOUT);
+                if (response.code === 0 && typeof response.data === "string") {
+                    siyuanHTML = response.data;
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        if (protyle.disabled || !isPasteInsertPositionAvailable()) {
+            return;
+        }
+    }
+    if (transformBlockPaste) {
+        siyuanHTML = transformPaste(siyuanHTML || "", textPlain, internalPaste);
+        if (!siyuanHTML) {
             return;
         }
     }
@@ -1114,7 +1155,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
         // https://github.com/siyuan-note/siyuan/issues/13552
-        insertAtPasteRange(removeZWJ(textPlain).replace(/```/g, "\u200D```"), range);
+        const codeText = transformBlockPaste ? protyle.lute.BlockDOM2Content(siyuanHTML) : textPlain;
+        insertAtPasteRange(removeZWJ(codeText).replace(/```/g, "\u200D```"), range);
         return;
     } else if (siyuanHTML) {
         if (isEncryptedBox(protyle.notebookId)) {

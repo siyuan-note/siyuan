@@ -8,13 +8,17 @@ import {getAVRichTextSafeURL} from "../render/av/richTextValue";
 import {normalizePictureImages} from "./pictureImages";
 import {htmlMathPaste, markdownMathPaste} from "./mathPaste";
 import {escapeMarkdownPlainText} from "../../util/escape";
+import type {HTMLClipboardRequestInput} from "../../types/api";
 
 // 执行粘贴入口，替换剪贴板和上传接口，检查图片不会在受限片段中被丢弃。
 const source = ts.transpileModule(readFileSync(join(process.cwd(), "src/protyle/util/paste.ts"), "utf8"), {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
 }).outputText;
 
-const createHarness = (disabled = false, richPaste = false, lute?: Lute) => {
+const createHarness = (disabled = false, richPaste = false, lute?: Lute, externalPaste?: {
+    transform: (blockDOM: string, text: string, internal: boolean) => string;
+    convert: (request: HTMLClipboardRequestInput) => Promise<{code: number; data: string}>;
+}) => {
     const uploads: Array<{files: unknown; options: {document: {rootID: string}; insertPosition: unknown}}> = [];
     const position = {range: {startContainer: {}}};
     let available = true;
@@ -27,9 +31,10 @@ const createHarness = (disabled = false, richPaste = false, lute?: Lute) => {
     const mocks: Record<string, unknown> = {
         "./pictureImages": {normalizePictureImages},
         "./tableCellRichContext": {getTableCellRichContext: (): undefined => undefined},
-        "../../constants": {Constants: {SIYUAN_ASSETS_IMAGE: [".png", ".jpg"]}},
+        "../../constants": {Constants: {SIYUAN_ASSETS_IMAGE: [".png", ".jpg"], ZWSP: "\u200b"}},
         "../runtimeCapabilities": {
             getProtyleBlockDOMSanitizer: () => (html: string) => html,
+            getProtylePasteTransform: () => externalPaste?.transform,
             isProtyleRichHTMLPasteEnabled: () => richPaste,
             isProtyleUploadDisabled: () => disabled,
             areProtylePluginExtensionsEnabled: () => false,
@@ -49,6 +54,12 @@ const createHarness = (disabled = false, richPaste = false, lute?: Lute) => {
         "./markdownClipboard": {shouldPasteMarkdownFromHTML: () => false},
         "./mathPaste": {htmlMathPaste, markdownMathPaste},
         "../../util/escape": {escapeMarkdownPlainText},
+        "../../util/fetchTimeout": {withFetchTimeout: (request: () => unknown) => request()},
+        "../../util/fetch": {fetchSyncPost: (url: string, request: HTMLClipboardRequestInput) => {
+            assert.equal(url, "/api/lute/html2BlockDOM");
+            return externalPaste.convert(request);
+        }},
+        "../upload/htmlLocalAssets": {getHTMLAssetSourceURL: (): undefined => undefined, resolveHTMLAssetURLs: () => {}},
         "./compatibility": {getLocalFiles: async () => localFiles, readText: async () => clipboardText, isInHarmony: () => false,
             getTextSiyuanFromTextHTML: (html: string) => ({textSiyuan: "", textHtml: html})},
         "../upload": {
@@ -61,6 +72,12 @@ const createHarness = (disabled = false, richPaste = false, lute?: Lute) => {
     const module = {exports: {}};
     runInNewContext(source, {module, exports: module.exports, require: (id: string) => mocks[id] || {},
         window: {siyuan: {config: {editor: {mathDelimiterCompatibility: true}}}},
+        DOMParser: class {
+            parseFromString(html: string) {
+                return {body: {innerHTML: html}, querySelector: (): null => null};
+            }
+        },
+        Lute: {Sanitize: (html: string) => html},
         document: {createElement: () => ({content: {querySelector: (): null => null}})},
     });
     const api = module.exports as {-readonly [K in keyof typeof import("./paste")]: typeof import("./paste")[K]};
@@ -104,6 +121,73 @@ const createHarness = (disabled = false, richPaste = false, lute?: Lute) => {
         setLocalFiles: (files: unknown[]) => { localFiles = files; },
         invalidate: () => { available = false; }};
 };
+
+describe("block paste into a restricted title", () => {
+    const html = "<h2>First</h2><p style=\"color: red\">Second</p>";
+    const text = "First\nSecond";
+    const converted = '<div data-type="NodeHeading">First</div><div data-type="NodeParagraph">Second</div>';
+    const flattened = '<div data-type="NodeParagraph">First Second</div>';
+
+    it("passes HTML through body conversion and validates the flattened result", async () => {
+        const harness = createHarness(false, true, undefined, {
+            convert: async request => {
+                assert.equal(request.dom, html);
+                assert.equal(request.text, text);
+                assert.equal(request.preserveSourceFormat, false);
+                assert.ok(request.skipLocalAssets && request.skipBase64Assets && request.skipInlineSVGAssets);
+                return {code: 0, data: converted};
+            },
+            transform: (blockDOM, plain, internal) => {
+                assert.equal(blockDOM, converted);
+                assert.equal(plain, text);
+                assert.equal(internal, false);
+                return flattened;
+            },
+        });
+        await assert.rejects(harness.paste([{name: "preview.png"}], "", text, html), harness.restrictedFallback);
+        assert.equal(harness.getCheckedBlockDOM(), flattened);
+        assert.equal(harness.uploads.length, 0);
+    });
+
+    it("flattens native blocks and legacy block clipboard data without external style conversion", async () => {
+        let convertedExternally = false;
+        const harness = createHarness(false, true, undefined, {
+            convert: async () => {
+                convertedExternally = true;
+                return {code: 0, data: ""};
+            },
+            transform: (blockDOM, _plain, internal) => {
+                assert.equal(blockDOM, converted);
+                assert.equal(internal, true);
+                return flattened;
+            },
+        });
+        await assert.rejects(harness.paste([], converted, text, html), harness.restrictedFallback);
+        assert.equal(harness.getCheckedBlockDOM(), flattened);
+        await assert.rejects(harness.paste([], "", converted + "\u200b"), harness.restrictedFallback);
+        assert.equal(harness.getCheckedBlockDOM(), flattened);
+        assert.equal(convertedExternally, false);
+    });
+
+    it("uses clipboard text if conversion fails and cancels if the original target disappears", async () => {
+        let transformed = 0;
+        const harness = createHarness(false, true, undefined, {
+            convert: async () => ({code: -1, data: ""}),
+            transform: (blockDOM, plain) => {
+                assert.equal(blockDOM, "");
+                assert.equal(plain, text);
+                transformed++;
+                return flattened;
+            },
+        });
+        await assert.rejects(harness.paste([], "", text, html), harness.restrictedFallback);
+        assert.equal(transformed, 1);
+        const pending = harness.paste([], "", text, html);
+        harness.invalidate();
+        await pending;
+        assert.equal(transformed, 1);
+    });
+});
 
 describe("escaped text paste", () => {
     if (typeof Lute === "undefined") {
@@ -255,6 +339,7 @@ describe("restricted cell selected text paste", () => {
             "./mathPaste": {htmlMathPaste, markdownMathPaste},
             "../runtimeCapabilities": {
                 getProtyleBlockDOMSanitizer: () => (html: string) => html,
+                getProtylePasteTransform: (): undefined => undefined,
                 isProtyleRichHTMLPasteEnabled: () => false,
                 getProtyleUnsupportedPasteBlocks: () => () => options.unsupported ? ["Table"] : [],
                 getProtyleUnsupportedPasteMessage: (): undefined => undefined,

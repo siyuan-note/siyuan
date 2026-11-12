@@ -28,7 +28,7 @@ import {writeClipboardData} from "../util/compatibility";
 import {prepareExternalClipboardHTML} from "../util/richClipboard";
 import {isCommittedTextInput} from "../wysiwyg/compositionInput";
 import {hideAllElements} from "../ui/hideElements";
-import {getDocumentTitleDOMFingerprint, getDocumentTitleLute, getDocumentTitleUnsupportedPasteBlocks,
+import {flattenDocumentTitlePaste, getDocumentTitleDOMFingerprint, getDocumentTitleLute, getDocumentTitleUnsupportedPasteBlocks,
     prepareDocumentTitleBlockDOM, prepareDocumentTitleInitialDOM} from "./documentTitleDOM";
 
 export interface DocumentTitleEditorValue {
@@ -106,6 +106,7 @@ export class DocumentTitleEditor {
                 sanitizeBlockDOM: prepareDocumentTitleBlockDOM,
                 getUnsupportedPasteBlocks: getDocumentTitleUnsupportedPasteBlocks,
                 getUnsupportedPasteMessage: () => window.siyuan.languages.documentTitleInlineOnly,
+                transformPasteBlockDOM: flattenDocumentTitlePaste,
             },
             afterSetContent: (_protyle, element) => {
                 mathRender(element);

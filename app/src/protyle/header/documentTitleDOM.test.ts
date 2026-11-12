@@ -14,10 +14,11 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
         _kernel: {16: "Untitled document"}}}});
     const unwrap = new Function(sources[0] + "\nreturn unwrapLongTextRuns;")();
     const restore = new Function("unwrapLongTextRuns", sources[1] + "\nreturn restoreInlineElementBoundaries;")(unwrap);
-    const {prepareDocumentTitleBlockDOM: prepare, prepareDocumentTitleInitialDOM: initial, getDocumentTitleUnsupportedPasteBlocks: unsupported,
+    const {flattenDocumentTitlePaste: flatten, prepareDocumentTitleBlockDOM: prepare,
+        prepareDocumentTitleInitialDOM: initial, getDocumentTitleUnsupportedPasteBlocks: unsupported,
         getDocumentTitleDOMFingerprint: fingerprint, getDocumentTitleLute: wrap} =
         new Function("restoreInlineElementBoundaries", sources[2] +
-            "\nreturn {prepareDocumentTitleBlockDOM, prepareDocumentTitleInitialDOM, getDocumentTitleUnsupportedPasteBlocks, getDocumentTitleDOMFingerprint, getDocumentTitleLute};")(restore);
+            "\nreturn {flattenDocumentTitlePaste, prepareDocumentTitleBlockDOM, prepareDocumentTitleInitialDOM, getDocumentTitleUnsupportedPasteBlocks, getDocumentTitleDOMFingerprint, getDocumentTitleLute};")(restore);
     const paragraph = (content: string, id = "20260101000000-abcdefg") =>
         `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true" spellcheck="false">${content}</div></div>`;
     const source = paragraph(`<span data-type="strong em" style="color: red" data-custom="retained">Styled</span>
@@ -81,6 +82,40 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
     lute.SetTag(true);
     lute.SetInlineMath(true);
     lute.SetKramdownIAL(true);
+    const webHTML = "<h2>Heading <strong>bold</strong></h2><blockquote><p>Quote</p></blockquote>" +
+        '<ul><li>One<ul><li><a href="https://example.org">Two</a></li></ul></li></ul>' +
+        "<table><tr><th>Column</th><th>Other</th></tr><tr><td>Cell</td><td>Value</td></tr></table>" +
+        "<pre><code>a &lt; b\nc</code></pre><p>Last<br>line</p>";
+    const external = lute.HTML2BlockDOM(webHTML);
+    check.equal(unsupported(external).length, 1);
+    const flattened = flatten(external, "unused fallback", false);
+    check.equal(unsupported(flattened).length, 0);
+    template.innerHTML = prepare(flattened);
+    check.equal(template.content.querySelectorAll('[data-type^="Node"]').length, 1);
+    check.equal(template.content.querySelector("[contenteditable]").textContent,
+        "Heading bold Quote One Two Column Other Cell Value a < b\nc\n Last\nline");
+    check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "bold");
+    check.equal(template.content.querySelector('[data-type~="a"]').getAttribute("data-href"), "https://example.org");
+    template.innerHTML = flatten(lute.Md2BlockDOM("$$\nx^2\n$$"), "", false);
+    check.equal(template.content.querySelector('[data-type="inline-math"]').getAttribute("data-content"), "x^2");
+    template.innerHTML = flatten("", "Fallback\r\n<title>", false);
+    check.equal(template.content.querySelector("[contenteditable]").textContent, "Fallback\n<title>");
+    check.equal(template.content.querySelector("title"), null);
+    check.equal(flatten("", "", false), "");
+    const internal = paragraph('<span data-type="strong" style="color: red">First</span><br>second') +
+        paragraph('<span data-type="block-ref" data-id="20260101000001-abcdefg" data-subtype="d">Ref</span>') +
+        paragraph('<span class="img"><img src="assets/p.png" alt="Picture"></span>');
+    template.innerHTML = flatten(internal, "", true);
+    check.equal(unsupported(template.innerHTML).length, 0);
+    check.equal(template.content.querySelector("[contenteditable]").textContent, "Firstsecond Ref ");
+    check.ok(template.content.querySelector("[contenteditable] > br"));
+    check.equal(template.content.querySelector<HTMLElement>('[data-type="strong"]').style.color, "red");
+    check.equal(template.content.querySelector<HTMLElement>('[data-type="block-ref"]').dataset.id, "20260101000001-abcdefg");
+    check.equal(template.content.querySelector("img").getAttribute("src"), "assets/p.png");
+    template.innerHTML = lute.SpinBlockDOM(prepare(template.innerHTML, "20260101000000-abcdefg"));
+    check.match(template.content.querySelector("[contenteditable]").textContent, /^First\nsecond Ref/);
+    template.innerHTML = flatten('<span data-type="em">Inline</span>', "", true);
+    check.equal(template.content.querySelector('[data-type="em"]').textContent, "Inline");
     for (const prefix of ["Plain", '<span data-type="em">Styled</span>']) {
         for (const suffix of [" (Duplicated 2026-11-08 00:02:47)", " (Conflicted 2026-11-08 00:02:47)"]) {
             template.innerHTML = initial(paragraph(prefix + suffix), "20260101000000-abcdefg");
@@ -329,9 +364,11 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
                 getDocumentTitleLute: () => lute, getAgentLute: () => lute,
                 prepareDocumentTitleInitialDOM: (html: string) => html,
                 prepareDocumentTitleBlockDOM: prepare, getDocumentTitleUnsupportedPasteBlocks: unsupported,
+                flattenDocumentTitlePaste: flatten,
                 getDocumentTitleDOMFingerprint: fingerprint, mountProtyleLiteFragment: (_host: HTMLElement,
-                    options: {runtimeCapabilities: {blockConversion: boolean}}) => {
+                    options: {runtimeCapabilities: {blockConversion: boolean; transformPasteBlockDOM: typeof flatten}}) => {
                     check.equal(options.runtimeCapabilities.blockConversion, false, "desktop/mobile titles and rename drafts forbid block conversion");
+                    check.equal(options.runtimeCapabilities.transformPasteBlockDOM, flatten);
                     return fragment;
                 },
                 setMobileToolbarUndo: () => {}, hideElements, hideAllElements,

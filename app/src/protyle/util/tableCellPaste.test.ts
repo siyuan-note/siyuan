@@ -47,6 +47,7 @@ const browserCases = async (source: string, pasteSource: string) => {
         "./mathPaste": api,
         "../runtimeCapabilities": {
             getProtyleBlockDOMSanitizer: (protyle: IProtyle) => protyle === cellEditor ? (html: string) => html : undefined,
+            getProtylePasteTransform: (): undefined => undefined,
             getProtyleUnsupportedPasteBlocks: () => (html: string) => {
                 if (html.includes("ordinary")) {
                     throw new Error("ordinary cell paste");

@@ -100,14 +100,14 @@ if (!process.versions.electron) {
                 exitApp: port => workspaceExits.push(port),
             }));
 
-            children[1].forcefullyCrashRenderer();
+            void children[1].executeJavaScript("process.crash()").catch(() => {});
             const deadline = Date.now() + 10000;
             while (crashes.length < 4 && Date.now() < deadline) {
                 await new Promise(resolve => setTimeout(resolve, 20));
             }
             assert.deepEqual(crashes.map(item => item.id).sort((a, b) => a - b),
                 [main, ...children].map(contents => contents.id).sort((a, b) => a - b));
-            assert.ok(crashes.every(item => item.reason === "crashed"));
+            assert.ok(crashes.every(item => item.reason === "crashed"), JSON.stringify(crashes));
             assert.deepEqual(markers, [main.id]);
             assert.deepEqual(kernelExits, [6806]);
             assert.deepEqual(workspaceExits, [6806]);

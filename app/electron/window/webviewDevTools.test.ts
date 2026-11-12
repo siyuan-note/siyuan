@@ -212,7 +212,7 @@ test("main installs the generic hook while retaining the window-open policy", ()
     });
     app.on("web-contents-created", handler);
     app.emit("web-contents-created", {}, guest);
-    assert.equal(press(guest), 1);
+    assert.equal(press(guest, key(process.platform)), 1);
     assert.equal(host.toggled, 1);
     assert.equal(guest.windowOpenHandler({url: "https://example.com"}).action, "deny");
     assert.deepEqual(opened, ["https://example.com"]);

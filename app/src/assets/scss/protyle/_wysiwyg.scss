@@ -28,6 +28,11 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
   }
 }
 
+// macOS 原生拖选需要跨过换行行首的公式，复制和光标归一化由编辑器保持公式整体语义。
+.body--mac .protyle-wysiwyg[data-readonly="false"] span[data-type~="inline-math"] {
+  user-select: text;
+}
+
 .protyle-cross-block-preview {
   pointer-events: none;
 

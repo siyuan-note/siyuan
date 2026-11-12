@@ -28,6 +28,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     const api = (window as unknown as {MarkdownEditorTest: typeof import("./editor") & typeof import("./resourcePolicy")}).MarkdownEditorTest;
     check.equal(matchMedia("(prefers-reduced-motion: reduce)").matches, false,
         "animation cases explicitly use normal motion regardless of the host preference");
+    const primaryModifier = /Mac/i.test(navigator.platform) ? {metaKey: true} : {ctrlKey: true};
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
     const waitFor = async (predicate: () => boolean, message: string) => {
         for (let attempt = 0; attempt < 100 && !predicate(); attempt++) {
@@ -583,7 +584,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
             editor.setValue("- [ ] first\n");
             await new Promise(resolve => setTimeout(resolve, 350));
             placeCaret(richSurface.querySelector("li"));
-            richSurface.dispatchEvent(new KeyboardEvent("keydown", {key: "J", code: "KeyJ", ctrlKey: true,
+            richSurface.dispatchEvent(new KeyboardEvent("keydown", {key: "J", code: "KeyJ", ...primaryModifier,
                 shiftKey: true, bubbles: true, cancelable: true}));
             check.ok(richSurface.querySelector<HTMLInputElement>("input").checked, `task keyboard command in ${mode}`);
             check.match(editor.flush().content, /\[[xX]\]/);

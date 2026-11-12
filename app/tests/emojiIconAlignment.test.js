@@ -144,6 +144,7 @@ const runElectron = async () => {
     app.commandLine.appendSwitch("disable-gpu");
     app.commandLine.appendSwitch("force-device-scale-factor", String(SCALE));
     await app.whenReady();
+    const nativeWindows = process.argv[3] === "windows-native";
     const win = new BrowserWindow({show: false, width: 900, height: 900,
         webPreferences: {nodeIntegration: true, contextIsolation: false}});
     try {
@@ -181,12 +182,14 @@ const runElectron = async () => {
                 document.fonts.load('20px "Emojis Icon"'), document.fonts.load('68px "Emojis Icon"'),
                 document.fonts.load('14px "Emojis File Tree"'), document.fonts.load('16px "Emojis File Tree"')]))
                 .then(() => new Promise(resolve => requestAnimationFrame(() =>
-                    requestAnimationFrame(() => setTimeout(resolve, 80)))))`);
+                    requestAnimationFrame(() => setTimeout(resolve, 80)))))
+                .catch(error => {throw new Error(error.name + ": " + error.message);})`);
         };
 
         // 文档树图标：逐字形核对与文字的对齐，并确认图片/SVG 图标不受影响
-        for (const [platform, bodyClass, tolerance] of [
+        for (const [platform, bodyClass, tolerance] of nativeWindows ? [
             ["windows11", "body--windows", TEXT_TOLERANCE],
+        ] : [
             ["windows", "body--windows", UNCALIBRATED_TOLERANCE],
             ["other", "body--linux", UNCALIBRATED_TOLERANCE],
             ["other", "body--android", UNCALIBRATED_TOLERANCE],
@@ -281,6 +284,10 @@ const runElectron = async () => {
             }
         }
 
+        if (!nativeWindows) {
+            app.exit(0);
+            return;
+        }
         await load(buildPage({css: baseCSS, fontStyle: () => fontModule.getEmojiFontStyle("windows11", servePath),
             lightTheme: "custom", body: SITES[0].markup}));
         assert.ok(!(await measure(win, "#icon")).fontFamily.includes('"Emojis File Tree Native"'));
@@ -315,16 +322,20 @@ const runElectron = async () => {
         }
         app.exit(0);
     } catch (error) {
-        console.error(error);
+        console.error(error?.stack || error?.message || String(error));
         app.exit(1);
     }
 };
 
 if (process.versions.electron && process.type === "browser") {
-    runElectron().catch(error => { console.error(error); require("electron").app.exit(1); });
+    runElectron().catch(error => { console.error(error?.stack || error?.message || String(error)); require("electron").app.exit(1); });
 } else {
-    require("node:test").it("aligns emoji ink with adjacent text in every icon slot", {
-        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    for (const [mode, title] of [
+        ["noto", "aligns bundled Noto emoji ink with adjacent text in document tree icon slots"],
+        ["windows-native", "aligns native Windows emoji ink with adjacent text in every icon slot"],
+    ]) require("node:test").it(title, {
+        skip: mode === "windows-native" && process.platform !== "win32" ? "Native Segoe emoji metrics require Windows" :
+            process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 240000,
     }, async () => {
         const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-emoji-icon-"));
@@ -332,7 +343,7 @@ if (process.versions.electron && process.type === "browser") {
         delete env.ELECTRON_RUN_AS_NODE;
         try {
             await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, temporary], {env, windowsHide: true, timeout: 230000});
+                require("electron"), [__filename, temporary, mode], {env, windowsHide: true, timeout: 230000});
         } finally {
             assert.equal(path.dirname(path.resolve(temporary)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(temporary).startsWith("siyuan-emoji-icon-"));

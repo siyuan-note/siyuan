@@ -389,7 +389,12 @@ const runGeometryCases = async () => {
         const text = direction === "down" ? `x\n${"long".repeat(200)}\n` : `${"long".repeat(200)}\nx\n`;
         const {code, content, scroller} = setup(text);
         scroller.scrollLeft = 1000;
-        assert.equal(focusEditableAtGoalX(code, direction, 40, content), true, `horizontal scroll ${direction}`);
+        const moved = focusEditableAtGoalX(code, direction, 40, content);
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        assert.equal(moved, true, `horizontal scroll ${direction}: ${JSON.stringify({scrollLeft: scroller.scrollLeft,
+            code: code.getBoundingClientRect(), scroller: scroller.getBoundingClientRect(),
+            rects: Array.from(range.getClientRects()).map(rect => rect.toJSON())})}`);
         assert.equal(scroller.scrollLeft, 0);
         cases++;
     }
@@ -399,6 +404,26 @@ const runGeometryCases = async () => {
         assert.equal(focusEditableAtGoalX(code, "down", 100, content), true);
         assert.equal(scroller.scrollLeft, 1000);
         assert.ok(Math.abs(getSelection().getRangeAt(0).getBoundingClientRect().left - 100) < 10);
+        cases++;
+    }
+    {
+        const {code, content, after} = setup("visible");
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        const rect = range.getBoundingClientRect();
+        const cover = document.createElement("div");
+        cover.style.cssText = `position:fixed;z-index:999;left:${rect.left - 1}px;top:${rect.top + rect.height / 2 - 1}px;width:${rect.width + 2}px;height:${rect.height / 2 + 2}px`;
+        document.body.append(cover);
+        assert.equal(document.elementFromPoint(40, rect.top + rect.height / 2), cover);
+        assert.equal(focusEditableAtGoalX(code, "down", 40, content), true,
+            "a partially covered caret can use its visible upper portion");
+        select(after.firstChild, 0);
+        cover.style.top = `${rect.top - 1}px`;
+        cover.style.height = `${rect.height + 2}px`;
+        assert.equal(focusEditableAtGoalX(code, "down", 40, content), false,
+            "an unrelated element covering the entire caret is never accepted as its hit target");
+        assert.equal(getSelection().anchorNode, after.firstChild);
+        cover.remove();
         cases++;
     }
     for (const style of ["display:none", "visibility:hidden", "height:0;overflow:hidden", "height:0;overflow:clip"]) {

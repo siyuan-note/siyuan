@@ -58,6 +58,9 @@ app.whenReady().then(async () => {
     window.webContents.on("console-message", event => {if (event.level === "error") console.error(event.message);});
     try {
         await window.loadFile(${JSON.stringify(html)});
+        window.webContents.debugger.attach("1.3");
+        await window.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride",
+            {width:1000, height:720, deviceScaleFactor:1.5, mobile:false});
         console.log(await window.webContents.executeJavaScript(${JSON.stringify(source + "\n" + checks)}));
         window.destroy(); app.exit(0);
     } catch(error) {console.error(error);window.destroy();app.exit(1);}

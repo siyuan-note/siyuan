@@ -438,6 +438,10 @@ const runCases = async (sources) => {
     assert.equal(confirmed, 1);
     assert.equal(destroyed, 1);
     assert.equal(setting.dialog, undefined);
+    for (let attempt = 0; attempt < 100 && await ipcRenderer.invoke("test-settings-window-count") !== 0; attempt++) {
+        await wait();
+    }
+    assert.equal(await ipcRenderer.invoke("test-settings-window-count"), 0, "closed plugin window is released before reopening");
 
     setting.open("Plugin");
     phase("waiting for native settings window");

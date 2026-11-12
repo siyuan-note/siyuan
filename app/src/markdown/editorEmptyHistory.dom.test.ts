@@ -11,6 +11,7 @@ import {ScriptTarget, transpileModule} from "typescript";
 const browserCases = async (cdn: string, lutePath: string) => {
     const check: typeof assert = require("node:assert/strict");
     const api = (window as unknown as {MarkdownEditorTest: typeof import("./editor")}).MarkdownEditorTest;
+    const primaryModifier = /Mac/i.test(navigator.platform) ? {metaKey: true} : {ctrlKey: true};
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
     for (const mode of ["ir", "wysiwyg", "sv"] as const) {
         const emptyHost = document.createElement("div");
@@ -30,7 +31,7 @@ const browserCases = async (cdn: string, lutePath: string) => {
         emptyEditor.redo();
         await tick();
         check.equal(emptyEditor.flush().content.trim(), "abc", `redo from empty in ${mode}`);
-        emptySurface.dispatchEvent(new KeyboardEvent("keydown", {key: "z", code: "KeyZ", ctrlKey: true,
+        emptySurface.dispatchEvent(new KeyboardEvent("keydown", {key: "z", code: "KeyZ", ...primaryModifier,
             bubbles: true, cancelable: true}));
         await tick();
         check.equal(emptyEditor.flush().content.trim(), "", `keyboard undo to empty in ${mode}`);

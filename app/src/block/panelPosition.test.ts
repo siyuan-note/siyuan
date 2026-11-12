@@ -151,6 +151,9 @@ app.whenReady().then(async () => {
             // 创建窗口时可能受屏幕工作区限制，显式设置内容尺寸以固定测试视口。
             win.setContentSize(width, 900);
             await win.loadURL("data:text/html,<html><body></body></html>");
+            win.webContents.debugger.attach("1.3");
+            await win.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride",
+                {width, height:900, deviceScaleFactor:${scale}, mobile:false});
             const viewport = await win.webContents.executeJavaScript("[innerWidth, innerHeight]");
             // 原生窗口边框换算到分数缩放比例时，内容尺寸可能产生两个 CSS 像素以内的取整误差。
             require("node:assert/strict").ok(Math.abs(viewport[0] - width) <= 2 && Math.abs(viewport[1] - 900) <= 2);

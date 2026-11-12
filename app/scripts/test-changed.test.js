@@ -7,7 +7,7 @@ const {execFileSync} = require("node:child_process");
 const {selectTests, scanReferences, changedFiles, parseArguments} = require("./test-changed.mjs");
 
 const fixture = t => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-test-changed-"));
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-test-changed-")));
     t.after(() => fs.rmSync(root, {recursive: true, force: true}));
     const write = (name, content) => {
         const target = path.join(root, name);

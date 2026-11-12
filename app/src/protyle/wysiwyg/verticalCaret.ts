@@ -15,10 +15,13 @@ const isCaretHitReachable = (element: Element, rects: DOMRect[]) => {
     const onScreenRects = rects.filter(rect => rect.bottom > 0 && rect.top < window.innerHeight &&
         rect.right >= 0 && rect.left < window.innerWidth);
     return onScreenRects.some(rect => {
-        const y = Math.max(0, Math.min(window.innerHeight - 1, (rect.top + rect.bottom) / 2));
-        return [rect.left + 0.25, rect.left - 0.25].some(x => {
-            const hit = document.elementFromPoint(x, y);
-            return hit && (element.contains(hit) || (!element.textContent && hit === element.parentElement));
+        // 覆盖式滚动条可能挡住光标中段，仍需检查同一光标可见部分的实际命中归属。
+        return [(rect.top + rect.bottom) / 2, rect.top + 0.25, rect.bottom - 0.25].some(candidateY => {
+            const y = Math.max(0, Math.min(window.innerHeight - 1, candidateY));
+            return [rect.left + 0.25, rect.left - 0.25].some(x => {
+                const hit = document.elementFromPoint(x, y);
+                return hit && (element.contains(hit) || (!element.textContent && hit === element.parentElement));
+            });
         });
     });
 };

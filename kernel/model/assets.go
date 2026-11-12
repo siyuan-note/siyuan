@@ -1190,6 +1190,13 @@ func ResolveUnusedDataAssetPath(assetPath string) (relativePath, absPath string,
 	}
 
 	if relativePath == "assets/android-notification-texts.txt" {
+		candidate := map[string]string{relativePath: absPath}
+		if err = excludeAssetCleanupIgnoredPaths(candidate); err != nil {
+			return
+		}
+		if len(candidate) == 0 {
+			return "", "", fmt.Errorf("asset is excluded from cleanup: %s", relativePath)
+		}
 		// 保活开关不参与批量清理，但可显式删除普通文件；目录和符号链接不能使用该例外。
 		info, statErr := os.Lstat(absPath)
 		if statErr != nil {
@@ -2191,6 +2198,9 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem, err error) {
 
 	for _, toRemove := range toRemoves {
 		delete(assetsPathMap, toRemove)
+	}
+	if err = excludeAssetCleanupIgnoredPaths(assetsPathMap); err != nil {
+		return nil, fmt.Errorf("read asset cleanup ignore rules failed: %w", err)
 	}
 
 	dataAssetsAbsPath := util.GetDataAssetsAbsPath()

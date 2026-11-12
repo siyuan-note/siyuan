@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20261111142646"
+		"updated": "20261112034624"
 	},
 	"Children": [
 		{
@@ -699,7 +699,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210115222011-bzsftun",
-				"updated": "20261024163013"
+				"updated": "20261112034624"
 			},
 			"Children": [
 				{
@@ -898,6 +898,90 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-f426c36",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-f426c36",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "对于插件或其他工具使用、但没有文档引用的资源，可以在工作空间中创建或编辑 data/.siyuan/assets-cleanup-ignore，使用 UTF-8 纯文本保存。每行一条规则，采用与 syncignore 相同的 go-gitignore 匹配语法。空行和以 # 开头的注释行会被忽略。匹配路径是相对于 data 目录的实际文件路径，而不是文档中的链接或 URL。例如："
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-3b0c9e5",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261112034624-3b0c9e5",
+				"updated": "20261112034624"
+			},
+			"IsFencedCodeBlock": true,
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "# assets\n/assets/example.png\n/assets/plugin/**\n!/assets/plugin/tmp/**\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-ada5e68",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-ada5e68",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上述规则保护 assets/example.png 和 assets/plugin/ 下的文件，但不保护 assets/plugin/tmp/ 下的文件。后面的匹配规则覆盖前面的规则。开头的 ! 仅取消规则提供的保护，不会让仍被文档引用的文件变成未引用资源。"
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-8994f69",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-8994f69",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "受保护文件不会出现在未引用资源列表中，也不会被批量或单个未引用资源清理删除；包含受保护文件的父目录同样会保留。卸载插件不会删除工作空间中的这些规则，不再需要的规则须自行移除。这种保护不阻止手动删除文件。"
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-09d8377",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-09d8377",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "规则文件默认参与数据同步，但仍受 syncignore 排除规则影响。在其他设备清理前，请同步规则并确认该客户端支持此保护：旧内核不识别这些规则。如果规则文件读取失败或规则解析失败，清理会报错停止，请修正规则文件后重试。"
 				}
 			]
 		},

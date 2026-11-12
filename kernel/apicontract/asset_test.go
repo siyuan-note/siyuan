@@ -94,3 +94,29 @@ func TestAssetResponseVariants(t *testing.T) {
 		}
 	}
 }
+
+func TestAssetCleanupIgnoreContractRequests(t *testing.T) {
+	for _, text := range []string{"true", "false", ""} {
+		request, err := UploadAsset.DecodeMultipart(&multipart.Form{Value: map[string][]string{"excludeFromCleanup": {text, "ignored"}}})
+		if err != nil || request.ExcludeFromCleanup == nil || *request.ExcludeFromCleanup != text {
+			t.Fatalf("upload protection binding: %+v %v", request, err)
+		}
+	}
+	request, err := UploadAsset.DecodeMultipart(&multipart.Form{})
+	if err != nil || request.ExcludeFromCleanup != nil {
+		t.Fatalf("upload protection omission: %+v %v", request, err)
+	}
+	for _, body := range []string{`{}`, `{"content":""}`, `{"content":"","expectedRevision":null}`, `{"content":null,"expectedRevision":"x"}`} {
+		if _, err := SetAssetCleanupIgnore.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid save accepted: %s", body)
+		}
+	}
+	if _, err := SetAssetCleanupIgnore.Decode(strings.NewReader(`{"content":"","expectedRevision":"revision"}`)); err != nil {
+		t.Fatal(err)
+	}
+	for _, body := range []string{`{}`, `{"paths":null}`, `{"paths":[null]}`, `{"paths":[1]}`} {
+		if _, err := AddAssetCleanupIgnore.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid paths accepted: %s", body)
+		}
+	}
+}

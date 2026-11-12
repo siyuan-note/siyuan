@@ -1495,7 +1495,23 @@ var AssetUploadCloud = define[AssetCloudUploadRequest, Null]("uploadCloud", "/ap
 var AssetUploadCloudByAssetsPaths = define[AssetPathsCloudUploadRequest, Null]("uploadCloudByAssetsPaths", "/api/asset/uploadCloudByAssetsPaths", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var InsertLocalAssets = define[InsertLocalAssetsRequest, AssetUploadData]("insertLocalAssets", "/api/asset/insertLocalAssets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var InsertCover = define[InsertCoverRequest, AssetInsertCoverData]("insertCover", "/api/asset/insertCover", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// excludeFromCleanup 是可选表单文本，仅接受 "true" 或 "false"，省略时为 false。
+// 为 true 时，将成功上传或复用的普通资源路径加入清理排除规则；规则保存失败的文件不作为成功返回。
+// 不支持借此保护加密笔记本资源；省略该字段时保持原有上传行为。
 var UploadAsset = define[UploadAssetRequest, AssetUploadData]("uploadAsset", "/api/asset/upload", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// 返回 data/.siyuan/assets-cleanup-ignore 的完整 UTF-8 内容及不透明版本号；文件不存在时内容为空。
+// 规则语法与原有清理排除文件一致，内容上限 1 MiB；读取失败返回错误，不能视为空配置。
+var GetAssetCleanupIgnore = define[EmptyRequest, AssetCleanupIgnoreData]("getAssetCleanupIgnore", "/api/asset/getAssetCleanupIgnore", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// 原样保存完整排除规则，expectedRevision 必须来自最近一次读取或写入的 revision。
+// 版本不匹配返回 code 409，不覆盖已有内容；成功后返回新内容和版本号。
+var SetAssetCleanupIgnore = define[SetAssetCleanupIgnoreRequest, AssetCleanupIgnoreData]("setAssetCleanupIgnore", "/api/asset/setAssetCleanupIgnore", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{409}}, "POST")
+
+// 将全局普通资源的 assets/... 路径追加为精确匹配规则，保留已有注释和模式，已受保护的路径不重复添加。
+// 拒绝无效路径和加密笔记本资源；批量校验失败时不写入任何规则。
+var AddAssetCleanupIgnore = define[AddAssetCleanupIgnoreRequest, AssetCleanupIgnoreData]("addAssetCleanupIgnore", "/api/asset/addAssetCleanupIgnore", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet", "/api/setting/setSnippet", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "snippet", Merge: true}}, "POST")
 

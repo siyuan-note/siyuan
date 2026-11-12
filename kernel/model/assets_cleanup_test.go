@@ -25,7 +25,7 @@ import (
 )
 
 func TestOrdinaryAssetCleanupReferenceChanges(t *testing.T) {
-	for _, source := range []string{"document", "new document", "template", "database", "session", "runtime"} {
+	for _, source := range []string{"document", "new document", "template", "database", "session", "runtime", "cleanup ignore"} {
 		for _, stage := range []string{"after backup", "during removal"} {
 			t.Run(source+"/"+stage, func(t *testing.T) {
 				boxID, docPath := setupUnusedAssetWorkspace(t)
@@ -36,6 +36,9 @@ func TestOrdinaryAssetCleanupReferenceChanges(t *testing.T) {
 				}
 				refPath, updated := docPath, []byte(`{"Type":"NodeDocument","Spec":"1","Children":[{"Type":"NodeLinkDest","Data":"assets/unused.png"}]}`)
 				switch source {
+				case "cleanup ignore":
+					refPath = filepath.Join(util.DataDir, filepath.FromSlash(assetCleanupIgnorePath))
+					updated = []byte("/assets/unused.png\n")
 				case "new document":
 					refPath = filepath.Join(util.DataDir, boxID, "20261026000001-abcdefg.sy")
 				case "template":

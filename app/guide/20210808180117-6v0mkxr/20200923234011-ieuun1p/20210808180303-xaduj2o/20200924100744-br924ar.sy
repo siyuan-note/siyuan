@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261111142646"
+		"updated": "20261112034624"
 	},
 	"Children": [
 		{
@@ -713,7 +713,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210115224203-q8bj2gd",
-				"updated": "20260803171606"
+				"updated": "20261112034624"
 			},
 			"Children": [
 				{
@@ -912,6 +912,90 @@
 				{
 					"Type": "NodeText",
 					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-1efeafc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-1efeafc",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To keep assets used by plugins or other tools even when no document references them, create or edit data/.siyuan/assets-cleanup-ignore in your workspace as UTF-8 plain text. Use one rule per line, with the same go-gitignore pattern syntax as syncignore. Blank lines and lines starting with # are ignored. Match actual file paths relative to the data directory, not document links or URLs. For example:"
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-42f7473",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261112034624-42f7473",
+				"updated": "20261112034624"
+			},
+			"IsFencedCodeBlock": true,
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "# assets\n/assets/example.png\n/assets/plugin/**\n!/assets/plugin/tmp/**\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-64c9ade",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-64c9ade",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "These rules protect assets/example.png and files under assets/plugin/, except assets/plugin/tmp/. Later matching rules override earlier ones. A leading ! removes only the protection provided by these rules; files still referenced by documents are not made unused."
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-6513aa2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-6513aa2",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Protected files are excluded from the unused-assets list and from both bulk and individual unused-asset cleanup. Cleanup also preserves parent directories containing protected files. The rules remain in the workspace after a plugin is uninstalled; remove unneeded rules yourself. This protection does not prevent manual file deletion."
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-cc49a40",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-cc49a40",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The rule file participates in data synchronization by default, unless excluded by syncignore. Before cleaning on another device, synchronize the rules and verify that the client supports this protection: older kernels ignore the rules. If the rule file cannot be read or its rules cannot be parsed, cleanup stops with an error; correct the file before retrying."
 				}
 			]
 		},

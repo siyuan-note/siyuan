@@ -1059,6 +1059,7 @@ Legacy lookup checks each candidate ancestor chain. It returns all clean matches
       Under normal circumstances, it is recommended to use the first method, which is stored in the assets folder of the
       workspace, since putting in a subdirectory has some side effects, please refer to the assets chapter of the user guide.
     * `file[]`: Uploaded file list
+    * `excludeFromCleanup`: Optional form text, either `"true"` or `"false"`; omitted means false. When true, successfully uploaded or reused ordinary assets are added to the cleanup exclusion rules. Files whose exclusion rules cannot be saved are not reported as successful. This option does not support encrypted notebook assets
 * Return value
 
   ```json

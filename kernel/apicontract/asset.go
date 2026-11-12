@@ -16,6 +16,20 @@ type AssetPathRequest struct {
 	Path string `json:"path"`
 }
 
+type AssetCleanupIgnoreData struct {
+	Content  string `json:"content"`
+	Revision string `json:"revision"`
+}
+
+type SetAssetCleanupIgnoreRequest struct {
+	Content          string `json:"content"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
+type AddAssetCleanupIgnoreRequest struct {
+	Paths []string `json:"paths"`
+}
+
 type UnusedAssetsRequest struct {
 	Keyword string `json:"keyword" api:"optional,nullable"`
 	All     bool   `json:"all" api:"optional,nullable"`
@@ -91,9 +105,10 @@ type InsertCoverRequest struct {
 }
 
 type UploadAssetRequest struct {
-	ID            *string                 `json:"id" api:"optional,nonnullable"`
-	AssetsDirPath *string                 `json:"assetsDirPath" api:"optional,nonnullable"`
-	Files         []*multipart.FileHeader `json:"file[]" api:"optional"`
+	ExcludeFromCleanup *string                 `json:"excludeFromCleanup" api:"optional,nonnullable"`
+	ID                 *string                 `json:"id" api:"optional,nonnullable"`
+	AssetsDirPath      *string                 `json:"assetsDirPath" api:"optional,nonnullable"`
+	Files              []*multipart.FileHeader `json:"file[]" api:"optional"`
 }
 
 type AssetStatData struct {

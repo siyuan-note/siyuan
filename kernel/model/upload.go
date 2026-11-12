@@ -318,9 +318,10 @@ func Upload(c *gin.Context) {
 
 // AssetUploadRequest 保留目标字段的缺省状态，并按输入顺序接收全部文件。
 type AssetUploadRequest struct {
-	ID            *string
-	AssetsDirPath *string
-	Files         []*multipart.FileHeader
+	ID                 *string
+	AssetsDirPath      *string
+	Files              []*multipart.FileHeader
+	ExcludeFromCleanup bool
 }
 type AssetUploadResult struct {
 	ErrFiles    []string             `json:"errFiles"`
@@ -331,6 +332,20 @@ type AssetUploadResult struct {
 
 // UploadAssets 将附件写入目标资源目录，保留逐文件结果、加密写入和首条失败提示。
 func UploadAssets(request AssetUploadRequest) (result *AssetUploadResult, message string, err error) {
+	if request.ExcludeFromCleanup {
+		if request.ID != nil || (request.AssetsDirPath != nil && *request.AssetsDirPath != "assets" && !strings.HasPrefix(*request.AssetsDirPath, "assets/")) {
+			return nil, "", errors.New("cleanup exclusion uploads require the global assets directory")
+		}
+		syncLock.Lock()
+		defer syncLock.Unlock()
+		rules, readErr := readAssetCleanupIgnore()
+		if readErr != nil {
+			return nil, "", readErr
+		}
+		if _, readErr = compileAssetCleanupIgnore(rules.Content); readErr != nil {
+			return nil, "", readErr
+		}
+	}
 
 	assetsDirPath := filepath.Join(util.DataDir, "assets")
 	var uploadBoxID string // 记录上传目标 boxID，供 writeAssetFile 判断是否需加密
@@ -371,6 +386,28 @@ func UploadAssets(request AssetUploadRequest) (result *AssetUploadResult, messag
 				!strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
 				// 加密资源通过 box 查询参数定位，响应转换为 box 内的标准 assets 相对路径。
 				relAssetsDirPath = path.Join("assets", filepath.ToSlash(rel))
+			}
+		}
+	}
+	if request.ExcludeFromCleanup {
+		if relAssetsDirPath != path.Clean(relAssetsDirPath) || strings.ContainsAny(relAssetsDirPath, "\\:\r\n\x00") {
+			return nil, "", errors.New("invalid global assets upload directory")
+		}
+		resolved, resolveErr := ResolveAssetPathWithMissingLeaf(assetsDirPath)
+		root, rootErr := ResolveAssetPathWithMissingLeaf(util.GetDataAssetsAbsPath())
+		if resolveErr != nil {
+			return nil, "", resolveErr
+		}
+		if rootErr != nil {
+			return nil, "", rootErr
+		}
+		rel, relErr := filepath.Rel(root, resolved)
+		if relErr != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) || filepath.IsAbs(rel) {
+			return nil, "", errors.New("cleanup exclusion upload directory escapes global assets")
+		}
+		for _, file := range request.Files {
+			if gulu.OS.IsDarwin() && strings.HasSuffix(file.Filename, ".rtfd.zip") {
+				return nil, "", errors.New("cleanup exclusion uploads do not support directory assets")
 			}
 		}
 	}
@@ -437,6 +474,9 @@ func UploadAssets(request AssetUploadRequest) (result *AssetUploadResult, messag
 		}
 
 		existAssetPath := GetAssetPathByHash(hash, uploadBoxID)
+		if request.ExcludeFromCleanup && !reusableCleanupUploadAsset(existAssetPath) {
+			existAssetPath = ""
+		}
 		if "" != existAssetPath {
 			originalName := assetNameWithoutID(filepath.Base(existAssetPath))
 			if !strings.EqualFold(assetNameWithoutID(fName), originalName) {
@@ -554,6 +594,16 @@ func UploadAssets(request AssetUploadRequest) (result *AssetUploadResult, messag
 	}
 
 	result = &AssetUploadResult{ErrFiles: errFiles, FailedFiles: failedFiles, SuccFiles: succFiles, SuccMap: succMap}
+	if request.ExcludeFromCleanup && len(succFiles) > 0 {
+		paths := make([]string, 0, len(succFiles))
+		for _, file := range succFiles {
+			paths = append(paths, file.Path)
+		}
+		if _, err = addAssetCleanupIgnore(paths); err != nil {
+			IncSync()
+			return nil, "", fmt.Errorf("uploaded files were retained but cleanup exclusion could not be saved: %w", err)
+		}
+	}
 
 	IncSync()
 

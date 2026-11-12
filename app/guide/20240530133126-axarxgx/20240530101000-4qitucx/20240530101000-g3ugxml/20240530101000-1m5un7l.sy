@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20261111142646"
+		"updated": "20261112034624"
 	},
 	"Children": [
 		{
@@ -713,7 +713,7 @@
 			"Properties": {
 				"ID": "20240530101000-ta4h1wk",
 				"id": "20240530101000-m2u22gy",
-				"updated": "20261024163013"
+				"updated": "20261112034624"
 			},
 			"Children": [
 				{
@@ -921,6 +921,90 @@
 				{
 					"Type": "NodeText",
 					"Data": "機能を利用してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-44c416a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-44c416a",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プラグインや他のツールが使用する、ドキュメントから参照されていないアセットを残すには、ワークスペース内の data/.siyuan/assets-cleanup-ignore を作成または編集し、UTF-8 のプレーンテキストで保存します。1 行に 1 つのルールを記述し、syncignore と同じ go-gitignore のパターン構文を使用します。空行と # で始まるコメント行は無視されます。照合するパスは data ディレクトリからの相対パスで、実際のファイルを指定します。ドキュメント内のリンクや URL ではありません。例："
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-126cb1d",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261112034624-126cb1d",
+				"updated": "20261112034624"
+			},
+			"IsFencedCodeBlock": true,
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "# assets\n/assets/example.png\n/assets/plugin/**\n!/assets/plugin/tmp/**\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-3b47fe6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-3b47fe6",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "この例では assets/example.png と assets/plugin/ 内のファイルを保護し、assets/plugin/tmp/ 内のファイルは保護しません。後に一致したルールが優先されます。先頭の ! はルールによる保護だけを解除します。ドキュメントから参照されているファイルが未参照になることはありません。"
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-90758af",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-90758af",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保護されたファイルは未参照アセットの一覧から除外され、一括・個別の未参照アセットの削除でも削除されません。保護されたファイルを含む親ディレクトリも保持されます。プラグインをアンインストールしてもワークスペース内のルールは残るため、不要になったルールは自分で削除してください。この保護はファイルの手動削除を防ぐものではありません。"
+				}
+			]
+		},
+		{
+			"ID": "20261112034624-b79594d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112034624-b79594d",
+				"updated": "20261112034624"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ルールファイルは通常のデータ同期の対象ですが、syncignore による除外が適用されます。他の端末で削除を実行する前にルールを同期し、そのクライアントがこの保護に対応していることを確認してください。古いカーネルはルールを認識しません。ルールファイルを読み取れない場合やルールを解析できない場合、削除処理はエラーで停止します。ファイルを修正してから再試行してください。"
 				}
 			]
 		},

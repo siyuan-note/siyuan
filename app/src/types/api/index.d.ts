@@ -660,6 +660,8 @@ export type AccountLoginRequestInput = { "captcha": string; "cloudRegion": numbe
 
 export type ActivationCodeRequestInput = { "data": string; };
 
+export type AddAssetCleanupIgnoreRequestInput = { "paths": Array<string>; };
+
 export type AddAttributeViewBlocksRequestInput = { "avID": string; "blockID"?: string | null; "groupID"?: string | null; "ignoreDefaultFill"?: boolean | null; "previousID"?: string | null; "srcs": Array<AVBlockSourceInput>; "viewID"?: string | null; };
 
 export type AddAttributeViewKeyRequestInput = { "avID": string; "blockID"?: string | null; "keyID": string; "keyIcon": string; "keyName": string; "keyType": string; "previousKeyID": string; };
@@ -671,6 +673,8 @@ export type AppendBlockRequestInput = { "data": string; "dataType": string; "par
 export type AppendHeadingChildrenRequestInput = { "childrenDOM": string; "id": string; };
 
 export type AssetAnnotationData = { "data": string; };
+
+export type AssetCleanupIgnoreData = { "content": string; "revision": string; };
 
 export type AssetCloudUploadRequestInput = { "id": string; "ignorePushMsg"?: boolean | null; };
 
@@ -2116,6 +2120,8 @@ export type SetAppearanceRequestInput = { "bodyGradient"?: SettingBodyGradientIn
 
 export type SetAssetAnnotationRequestInput = { "baseData"?: string | null; "data": string; "path": string; };
 
+export type SetAssetCleanupIgnoreRequestInput = { "content": string; "expectedRevision": string; };
+
 export type SetAssetOCRTextRequestInput = { "path": string; "text": string; };
 
 export type SetAttrViewContextFilterRequestInput = { "avID": string; "blockID": string; "keyID"?: string | null; };
@@ -2818,7 +2824,7 @@ export type UpdateEmbedBlockRequestInput = { "content": string; "id": string; };
 
 export type UpdatePinnedDocsRequestInput = { "action": string; "after"?: boolean; "ids": Array<string>; "targetID"?: string; };
 
-export type UploadAssetRequestInput = { "assetsDirPath"?: string; "file[]"?: Array<Blob>; "id"?: string; };
+export type UploadAssetRequestInput = { "assetsDirPath"?: string; "excludeFromCleanup"?: string; "file[]"?: Array<Blob>; "id"?: string; };
 
 export type UploadCloudSnapshotRequestInput = { "id": string; "tag": string; };
 
@@ -3709,6 +3715,17 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
+     * 将全局普通资源的 assets/... 路径追加为精确匹配规则，保留已有注释和模式，已受保护的路径不重复添加。
+     * 拒绝无效路径和加密笔记本资源；批量校验失败时不写入任何规则。
+     */
+    "/api/asset/addAssetCleanupIgnore": {
+        request: AddAssetCleanupIgnoreRequestInput;
+        response: { "code": 0; "data": AssetCleanupIgnoreData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
      * 取消会话并释放在途转换资源，已完成的缓存仍可在下一次播放时复用。
      */
     "/api/asset/cancelLivePhotoPreview": {
@@ -3747,6 +3764,17 @@ export interface APIPOSTRoutes {
         body: "none";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 返回 data/.siyuan/assets-cleanup-ignore 的完整 UTF-8 内容及不透明版本号；文件不存在时内容为空。
+     * 规则语法与原有清理排除文件一致，内容上限 1 MiB；读取失败返回错误，不能视为空配置。
+     */
+    "/api/asset/getAssetCleanupIgnore": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AssetCleanupIgnoreData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/asset/getDocAssets": {
         request: AssetDocumentAssetsRequestInput;
@@ -3962,6 +3990,17 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
+     * 原样保存完整排除规则，expectedRevision 必须来自最近一次读取或写入的 revision。
+     * 版本不匹配返回 code 409，不覆盖已有内容；成功后返回新内容和版本号。
+     */
+    "/api/asset/setAssetCleanupIgnore": {
+        request: SetAssetCleanupIgnoreRequestInput;
+        response: { "code": 0; "data": AssetCleanupIgnoreData; "msg": string; } | { "code": -1 | 409; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
      * 保存 PDF 标注映射。省略 baseData 或传 null 保持旧版整份替换语义。
      * 提供 baseData 时，将 data 相对该读取基线的逐条变化合并到当前映射，保留其他查看器对不同标注的修改。
      * 同一标注已被不同内容修改或删除时返回 -1 / "annotation revision conflict"，不写入文件；重复的相同结果可成功。
@@ -4011,6 +4050,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * excludeFromCleanup 是可选表单文本，仅接受 "true" 或 "false"，省略时为 false。
+     * 为 true 时，将成功上传或复用的普通资源路径加入清理排除规则；规则保存失败的文件不作为成功返回。
+     * 不支持借此保护加密笔记本资源；省略该字段时保持原有上传行为。
+     */
     "/api/asset/upload": {
         request: UploadAssetRequestInput;
         response: { "code": 0; "data": AssetUploadData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getCalendarRange, getISOWeekForCalendarRow, getISOWeeksInYear, getISOWeekThursday} from "./date";
 import {bindInlineDatePicker} from "../../../../datePicker/inline";
+import {isMobile} from "../../../../util/functions";
 
 export const openCalendarJump = (anchor: number, weekStart: number, onJump: (date: number) => void) => {
     const rowStart = getCalendarRange(anchor, "week", weekStart).start;
@@ -13,6 +14,7 @@ export const openCalendarJump = (anchor: number, weekStart: number, onJump: (dat
     const dialog = mobileInputDialog({
         destroyCallback: () => picker?.destroy(),
         title: languages.calendarJump,
+        width: isMobile() ? "92vw" : "min(300px, 92vw)",
         type: "date",
         value: dayjs(anchor).format("YYYY-MM-DD"),
         min: "0001-01-01",

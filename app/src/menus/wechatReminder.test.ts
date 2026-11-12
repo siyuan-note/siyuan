@@ -20,7 +20,7 @@ const setup = (mobile: boolean) => {
         pending = false;
         dateValid = true;
         dateDestroyed = false;
-        options: {destroyCallback?: () => void};
+        options: {destroyCallback?: () => void; width?: string};
         element = {
             setAttribute() {},
             querySelector: () => this.input,
@@ -91,6 +91,7 @@ test("existing WeChat reminders keep picker changes local until explicit future-
         if (file) f.methods.openFileWechatNotify("document", "notebook");
         else f.methods.openWechatNotify(f.node);
         const dialog = f.dialogs[0];
+        assert.equal(dialog.options.width, "min(300px, 92vw)");
         assert.deepEqual(f.bound, [dialog.input]);
         assert.deepEqual(f.activated, [dialog.input]);
         assert.equal(f.writes.length, 0, "initial calendar activation sends no reminder");

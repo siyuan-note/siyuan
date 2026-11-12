@@ -44,7 +44,7 @@ const loadJump = () => {
         week: Control;
         confirm: {click: () => void};
         closed: boolean;
-        options: {prefixContent: string; extraContent: string};
+        options: {prefixContent: string; extraContent: string; width?: string};
     };
     runInNewContext(transpileModule(readFileSync("src/protyle/render/av/calendar/jump.ts", "utf8"),
         {compilerOptions}).outputText, {
@@ -53,6 +53,9 @@ const loadJump = () => {
             calendarISOWeek: "ISO week", calendarISOWeekYear: "ISO week year",
         }}},
         require: (name: string) => {
+            if (name === "../../../../util/functions") {
+                return {isMobile: () => false};
+            }
             if (name === "../../../../datePicker/inline") {
                 return {bindInlineDatePicker: (_host: Control, input: Control) => {
                     input.attributes["data-picker-bound"] = "true";
@@ -114,6 +117,7 @@ test("calendar jump keeps date entry and validates ISO week years", () => {
     const targets: number[] = [];
     jump.open(anchor, 1, value => targets.push(value));
     let dialog = jump.current();
+    assert.equal(dialog.options.width, "min(300px, 92vw)");
     assert.ok(dialog.options.prefixContent.includes("data-calendar-jump-mode"));
     assert.equal(dialog.date.value, "2027-01-01");
     assert.equal(dialog.date.attributes["data-picker-bound"], "true");

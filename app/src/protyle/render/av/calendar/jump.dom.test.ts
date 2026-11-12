@@ -14,6 +14,7 @@ const cases = async (sources: Record<string, string>) => {
     let dialogs = 0;
     let current: any;
     const fallback = {
+        isMobile: () => false,
         escapeAttr: (value: string) => value, escapeHtml: (value: string) => value,
         mobileInputDialog: (options: any) => {
             dialogs++;

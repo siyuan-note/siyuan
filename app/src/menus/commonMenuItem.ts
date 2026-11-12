@@ -83,7 +83,7 @@ export const openWechatNotify = (nodeElement: Element) => {
         reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
     }
     const dialog = new MobileDialog({
-        width: isMobile() ? "92vw" : "min(420px, 92vw)",
+        width: isMobile() ? "92vw" : "min(300px, 92vw)",
         containerClassName: isMobile() ? undefined : "date-picker-reminder-dialog",
         title: window.siyuan.languages.wechatReminder,
         content: `<div class="b3-dialog__content custom-attr">
@@ -179,7 +179,7 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
             reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
         }
         const dialog = new MobileDialog({
-            width: isMobile() ? "92vw" : "min(420px, 92vw)",
+            width: isMobile() ? "92vw" : "min(300px, 92vw)",
             containerClassName: isMobile() ? undefined : "date-picker-reminder-dialog",
             title: window.siyuan.languages.wechatReminder,
             content: `<div class="b3-dialog__content custom-attr">

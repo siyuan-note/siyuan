@@ -65,13 +65,13 @@ const cases = async (sources, appPath, languages) => {
             let input = dialog.element.querySelector(".date-picker-input");
             let calendar = dialog.element.querySelector('[data-role="reminder-date-calendar"]');
             let buttons = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
-            check.equal(dialog.options.width, mobile ? "92vw" : "min(420px, 92vw)");
+            check.equal(dialog.options.width, mobile ? "92vw" : "min(300px, 92vw)");
             check.equal(dialog.options.containerClassName, mobile ? undefined : "date-picker-reminder-dialog");
             if (!mobile) {
                 const container = dialog.element.querySelector(".b3-dialog__container").getBoundingClientRect();
                 const footer = dialog.element.querySelector(".b3-dialog__action").getBoundingClientRect();
                 const content = dialog.element.querySelector(".b3-dialog__content");
-                check.ok(container.top >= 0 && container.bottom <= innerHeight, "short viewport contains the initial dialog");
+                check.ok(container.top >= 0 && container.bottom <= innerHeight, `short viewport contains the initial dialog: ${container.top},${container.bottom}/${innerHeight}`);
                 check.ok(footer.top >= container.top && footer.bottom <= innerHeight, "footer is reachable without scrolling the overlay");
                 check.ok(content.scrollHeight > content.clientHeight, "the expanded calendar scrolls inside the short dialog");
             }
@@ -178,7 +178,7 @@ if (process.versions.electron && process.type === "browser") {
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         const headlessArgs = process.platform === "linux" && !env.DISPLAY && !env.WAYLAND_DISPLAY ?
-            ["--no-sandbox", "--disable-gpu", "--ozone-platform=headless"] : [];
+            ["--no-sandbox", "--disable-gpu", "--ozone-platform=headless", "--ozone-override-screen-size=1200,1200"] : [];
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(require("electron"), [__filename, profile, ...headlessArgs], {env, windowsHide: true, timeout: 25000});
             assert.match(stdout, /Embedded WeChat reminders passed/);

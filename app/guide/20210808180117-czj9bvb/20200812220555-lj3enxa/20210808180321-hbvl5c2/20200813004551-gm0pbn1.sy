@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261101154840"
+		"updated": "20261112025427"
 	},
 	"Children": [
 		{
@@ -4539,7 +4539,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20261024163013"
+				"updated": "20261112025427"
 			},
 			"Children": [
 				{
@@ -6780,7 +6780,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "处于块选择模式时可直接按 "
+									"Data": "光标位于折叠列表项内时，插入同级列表项；处于块选择模式时可直接按 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -6857,7 +6857,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "处于块选择模式时可直接按 "
+									"Data": "光标位于折叠列表项内时，插入同级列表项；处于块选择模式时可直接按 "
 								},
 								{
 									"Type": "NodeTextMark",

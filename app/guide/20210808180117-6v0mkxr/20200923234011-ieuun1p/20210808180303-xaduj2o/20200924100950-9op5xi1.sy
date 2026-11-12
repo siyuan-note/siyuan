@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261101154840"
+		"updated": "20261112025426"
 	},
 	"Children": [
 		{
@@ -4541,7 +4541,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20261024163013"
+				"updated": "20261112025426"
 			},
 			"Children": [
 				{
@@ -6824,7 +6824,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "When block selection mode is active, press "
+									"Data": "With the caret inside a folded list item, inserts a sibling list item. When block selection mode is active, press "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -6905,7 +6905,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "When block selection mode is active, press "
+									"Data": "With the caret inside a folded list item, inserts a sibling list item. When block selection mode is active, press "
 								},
 								{
 									"Type": "NodeTextMark",

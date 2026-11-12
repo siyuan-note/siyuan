@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {getBlockInsertionContext} from "../protyle/wysiwyg/blockInsertion";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {
     BLOCK_SELECTION_CLASS,
     BLOCK_SELECTION_MODE_CLASS,
@@ -111,6 +112,7 @@ for (const position of ["beforebegin", "afterend"]) {
                     clearBlockSelectionMode,
                     getEditorRange: () => range,
                     hasClosestBlock: (element: TestElement) => element,
+                    hasClosestByClassName,
                     getTopAloneElement: (element: TestElement) => element,
                     getUndoFocusContext: () => context,
                     getPreviousBlockSibling: (): Element | undefined => undefined,

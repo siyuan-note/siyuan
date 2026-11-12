@@ -347,12 +347,18 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
             }
         } else {
             blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
-            blockElement = getTopAloneElement(blockElement);
-            // https://github.com/siyuan-note/siyuan/issues/14720#issuecomment-2840665326
-            if (blockElement.classList.contains("list")) {
-                blockElement = hasClosestByClassName(range.startContainer, "li") as HTMLElement;
-            } else if (blockElement.classList.contains("bq") || blockElement.classList.contains("callout")) {
-                blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
+            const listItemElement = hasClosestByClassName(blockElement, "li");
+            // 在折叠列表项内插入同级列表项，避免新块落入隐藏区域。
+            if (listItemElement && listItemElement.getAttribute("fold") === "1") {
+                blockElement = listItemElement;
+            } else {
+                blockElement = getTopAloneElement(blockElement);
+                // https://github.com/siyuan-note/siyuan/issues/14720#issuecomment-2840665326
+                if (blockElement.classList.contains("list")) {
+                    blockElement = hasClosestByClassName(range.startContainer, "li") as HTMLElement;
+                } else if (blockElement.classList.contains("bq") || blockElement.classList.contains("callout")) {
+                    blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
+                }
             }
         }
     }

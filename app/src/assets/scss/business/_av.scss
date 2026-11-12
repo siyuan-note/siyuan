@@ -161,13 +161,28 @@
   }
 
   .av__filter-row--date-open {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
 
     .av__filter-rowinner {
       order: 1;
-      flex-basis: 100%;
+      grid-column: 1 / -1;
+      width: 100%;
+      max-width: 244px;
+      margin-inline: auto;
       flex-wrap: wrap;
       min-width: 0;
+
+      [data-frontend="mobile"] &,
+      [data-frontend="browser-mobile"] & {
+        max-width: 320px;
+      }
+    }
+
+    .av__filter-date-row,
+    .av__filter-date-row input {
+      width: 100%;
     }
 
     .av__filter-date-controls,

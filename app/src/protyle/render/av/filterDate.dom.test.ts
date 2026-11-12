@@ -206,8 +206,10 @@ test("filter dates embed one calendar per condition, preserve endpoint semantics
     assert.match(result, /filter inline DOM passed/);
 });
 
-for (const [width, scheme] of [[400, "daylight"], [400, "midnight"], [800, "daylight"], [800, "midnight"]] as const) {
-    test(`embedded filter calendars fit production ${scheme} menus at ${width}px with German text and large fonts`, {
+for (const [width, scheme, frontend] of [[400, "daylight", "browser-desktop"], [400, "midnight", "browser-desktop"],
+    [800, "daylight", "browser-desktop"], [800, "midnight", "browser-desktop"], [1000, "daylight", "browser-desktop"],
+    [400, "daylight", "mobile"], [800, "midnight", "browser-mobile"]] as const) {
+    test(`embedded filter calendars fit production ${frontend} ${scheme} menus at ${width}px with German text and large fonts`, {
         timeout: 45000, skip: !canRunBrowser,
     }, async () => {
         const sources = {...browserSources(Object.fromEntries([
@@ -216,14 +218,15 @@ for (const [width, scheme] of [[400, "daylight"], [400, "midnight"], [800, "dayl
             ["capabilities.generated", "capabilities.generated.ts"], ["capabilities", "capabilities.ts"],
             ["filterTree", "filterTree.ts"], ["filter", "filter.ts"],
         ].map(([name, path]) => [name, join(__dirname, path)]))),
-        languages: readFileSync("appearance/langs/de.json", "utf8"),
+        frontend, languages: readFileSync("appearance/langs/de.json", "utf8"),
         icons: readFileSync("appearance/icons/litheness/icon.js", "utf8")};
         const css = readFileSync(`appearance/themes/${scheme}/theme.css`, "utf8") +
-            compile("src/assets/scss/base.scss", {logger: {warn() {}}}).css;
+            compile(`src/assets/scss/${frontend === "mobile" ? "mobile" : "base"}.scss`, {logger: {warn() {}}}).css;
         const result = await runBrowserCase(async (source, stylesheet) => {
             const ok = (value: unknown, message: string) => { if (!value) { throw new Error(message); } };
             const style = document.createElement("style");
             style.textContent = stylesheet;
+            document.documentElement.dataset.frontend = source.frontend;
             document.head.append(style);
             new Function(source.icons)();
             document.documentElement.style.setProperty("--b3-font-size", "24px");
@@ -246,8 +249,19 @@ for (const [width, scheme] of [[400, "daylight"], [400, "midnight"], [800, "dayl
                 menu.className = "b3-menu " + ({view: "av__filter-panel", color: "av__conditional-panel", automation: "av__automation-panel"})[kind];
                 menu.style.left = "16px";
                 menu.style.top = "16px";
+                if (source.frontend === "mobile") {
+                    // Match the sheet shell and height installed by bindMobileAVPanel.
+                    menu.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
+                    menu.style.height = `${innerHeight * .56}px`;
+                    menu.style.maxHeight = `${innerHeight}px`;
+                }
+                if (innerWidth === 1000) { menu.style.width = "730px"; }
                 const data = {view: {columns: [{id: "date", name: "Voraussichtliches Fertigstellungsdatum", type: "date"}],
                     filters: [{column: "date", operator: "Is between", value: {type: "date"}}]}};
+                if (kind === "view") {
+                    data.view.columns.push({id: "number", name: "Number", type: "number"});
+                    data.view.filters.push({column: "number", operator: "=", value: {type: "number"}});
+                }
                 const remove = '<svg class="b3-menu__action b3-menu__action--show" data-action="remove"><use xlink:href="#iconTrashcan"></use></svg>';
                 menu.innerHTML = kind === "view" ? modules.filter.getFiltersHTML(data) : kind === "color" ?
                     `<div class="b3-menu__items"><div class="av__conditional-colors"><div data-rules><div class="av__conditional-rule"><span class="block__icon block__icon--show" data-conditional-drag><svg><use xlink:href="#iconDrag"></use></svg></span><div class="av__conditional-condition">${modules.filter.getFiltersHTML(data, true)}</div>${remove}<div class="av__conditional-controls"><button class="b3-button b3-button--cancel">${window.siyuan.languages.default}</button></div></div></div></div></div>` :
@@ -265,6 +279,33 @@ for (const [width, scheme] of [[400, "daylight"], [400, "midnight"], [800, "dayl
                 ok(scroll.scrollWidth <= scroll.clientWidth + 1,
                     `${kind} has no horizontal overflow (${scroll.scrollWidth}/${scroll.clientWidth})`);
                 const calendar = menu.querySelector<HTMLElement>(".date-picker--inline");
+                const bounds = calendar.getBoundingClientRect();
+                const rowBounds = calendar.closest(".av__filter-rowinner").getBoundingClientRect();
+                const conditionBounds = calendar.closest(".av__filter-row").getBoundingClientRect();
+                ok(Math.abs((rowBounds.left + rowBounds.right) - (conditionBounds.left + conditionBounds.right)) < 2,
+                    `${kind} complete editor is centered in the condition`);
+                ok(rowBounds.width <= (source.frontend === "browser-desktop" ? 244 : 320) + 1, `${kind} editor stays compact`);
+                const editor = calendar.closest(".av__filter-rowinner");
+                const fieldBounds = editor.querySelector(".av__field-wrapper").getBoundingClientRect();
+                ok(Math.abs(fieldBounds.left - bounds.left) < 1, `${kind} field aligns with calendar`);
+                for (const control of editor.querySelectorAll<HTMLElement>("select")) {
+                    const controlBounds = control.getBoundingClientRect();
+                    if (!controlBounds.width) { continue; }
+                    ok(controlBounds.left >= bounds.left - 1 && controlBounds.right <= bounds.right + 1,
+                        `${kind} filter controls stay within calendar edges`);
+                }
+                const numberRow = menu.querySelector<HTMLElement>('[data-column="number"]');
+                if (numberRow) {
+                    ok(!numberRow.classList.contains("av__filter-row--date-open") && getComputedStyle(numberRow).display === "flex",
+                        "mixed number condition retains ordinary flex layout");
+                }
+                for (const input of inputs) {
+                    const inputBounds = input.getBoundingClientRect();
+                    ok(Math.abs(inputBounds.left - bounds.left) < 1 && Math.abs(inputBounds.right - bounds.right) < 1,
+                        `${kind} date input aligns with calendar`);
+                }
+                ok(Math.abs((bounds.left + bounds.right) - (rowBounds.left + rowBounds.right)) < 2,
+                    `${kind} centered: calendar ${bounds.left}/${bounds.right}, row ${rowBounds.left}/${rowBounds.right}`);
                 ok(calendar.scrollWidth <= calendar.clientWidth + 1, `${kind} calendar fits its value area ${calendar.scrollWidth}/${calendar.clientWidth}`);
                 const buttons = calendar.querySelectorAll<HTMLButtonElement>(".date-picker__navigation button, [data-date]:not(:disabled)");
                 ok(buttons.length >= 30, kind + " has operable navigation and dates");
@@ -277,7 +318,7 @@ for (const [width, scheme] of [[400, "daylight"], [400, "midnight"], [800, "dayl
                     ok(rect.top >= scrollRect.top && rect.bottom <= scrollRect.bottom + 1,
                         kind + " calendar controls are vertically reachable through menu scrolling");
                     const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-                    ok(target === button || button.contains(target), kind + " controls have unobscured hit targets");
+                    ok(target === button || button.contains(target), `${kind} controls have unobscured hit targets: ${button.outerHTML}, actual ${target?.outerHTML?.slice(0, 300)}, rect ${rect.top}/${rect.bottom}, viewport ${innerHeight}`);
                 }
                 ok(scroll.scrollHeight > scroll.clientHeight, kind + " exercises real vertical scrolling");
                 panel.remove();

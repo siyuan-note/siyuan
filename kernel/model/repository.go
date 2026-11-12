@@ -2129,7 +2129,7 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 		msg := formatSyncRepoErrorMsg(err)
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		pushSyncSourceDecisionError(msg, err)
 		return
 	}
 
@@ -2234,7 +2234,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
 		if !errors.Is(err, context.Canceled) {
-			util.PushErrMsg(msg, 0)
+			pushSyncSourceDecisionError(msg, err)
 		}
 		return
 	}

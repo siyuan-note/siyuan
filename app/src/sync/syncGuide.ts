@@ -259,11 +259,13 @@ export const syncGuide = (app?: App) => {
 
 const syncNow = () => {
     fetchPost("/api/sync/getSyncSourceState", {}, response => {
-		if (response.data.source && !response.data.cloudID) {
-			fetchPost("/api/sync/performSync", {upload: true, source: response.data.source,
-				localID: response.data.localID, cloudID: ""});
-			return;
-		}
+        if (response.data.source && !response.data.cloudID) {
+            fetchPost("/api/sync/performSync", {upload: true, source: response.data.source,
+                localID: response.data.localID, cloudID: ""}, result => {
+                if (result.code === 2) chooseSyncDirection(response.data, true);
+            });
+            return;
+        }
         if (!response.data.pending && window.siyuan.config.sync.mode !== 3) {
             fetchPost("/api/sync/performSync", {});
             return;
@@ -272,17 +274,21 @@ const syncNow = () => {
     });
 };
 
-const chooseSyncDirection = (state: import("../types/api").SyncSourceState) => {
-    const values: Record<string, string | number> = {
-        local: state.localFiles, cloud: state.cloudFiles, time: new Date(state.cloudCreated).toLocaleString(),
-        device: state.cloudDevice, upload: state.uploadFiles, overwrite: state.overwriteFiles, remove: state.removeFiles,
+const chooseSyncDirection = (state: import("../types/api").SyncSourceState, refresh = false) => {
+    const renderPreview = () => {
+        const values: Record<string, string | number> = {
+            local: state.localFiles, cloud: state.cloudFiles, time: new Date(state.cloudCreated).toLocaleString(),
+            device: state.cloudDevice, upload: state.uploadFiles, overwrite: state.overwriteFiles, remove: state.removeFiles,
+        };
+        return state.pending ? window.siyuan.languages.syncSourcePreview.replace(/\$\{(\w+)\}/g,
+            (_match: string, key: string) => escapeHtml(String(values[key]))) : "";
     };
-    const preview = state.pending ? window.siyuan.languages.syncSourcePreview.replace(/\$\{(\w+)\}/g,
-        (_match: string, key: string) => escapeHtml(String(values[key]))) : "";
+    let previewReady = true;
     const manualDialog = new MobileDialog({
         title: window.siyuan.languages.chooseSyncDirection,
         content: `<div class="b3-dialog__content">
-    ${preview ? `<div class="b3-label">${preview}</div>` : ""}
+    <div class="b3-label${state.pending ? "" : " fn__none"}" data-type="sync-source-preview">${renderPreview()}</div>
+    <div class="b3-label ft__error fn__none" data-type="sync-source-notice" role="status" aria-live="polite"></div>
     <label class="fn__flex b3-label">
         <input type="radio" name="upload" value="true">
         <span class="fn__space"></span>
@@ -292,7 +298,7 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState) => {
         </div>
     </label>
     <label class="fn__flex b3-label">
-        <input type="radio" name="upload" value="false">
+        <input type="radio" name="upload" value="false"${state.source && !state.cloudID ? " disabled" : ""}>
         <span class="fn__space"></span>
         <div>
             ${window.siyuan.languages.downloadDataFromCloud}
@@ -308,10 +314,45 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState) => {
     });
     manualDialog.element.setAttribute("data-key", Constants.DIALOG_SYNCCHOOSEDIRECTION);
     const btnsElement = manualDialog.element.querySelectorAll(".b3-button");
+    const refreshPreview = async () => {
+        previewReady = false;
+        manualDialog.element.querySelectorAll<HTMLInputElement>("input[name=upload]").forEach(input => {
+            input.checked = false;
+        });
+        const previewElement = manualDialog.element.querySelector<HTMLElement>('[data-type="sync-source-preview"]');
+        previewElement.textContent = "";
+        previewElement.classList.add("fn__none");
+        const notice = manualDialog.element.querySelector<HTMLElement>('[data-type="sync-source-notice"]');
+        notice.textContent = window.siyuan.languages._kernel[464];
+        notice.classList.remove("fn__none");
+        try {
+            const response = await fetchSyncPost("/api/sync/getSyncSourceState", {});
+            if (response.code !== 0 || !manualDialog.element.isConnected) return;
+            state = response.data;
+            if (!state.source && window.siyuan.config.sync.mode !== 3) {
+                manualDialog.invalidate();
+                return;
+            }
+            manualDialog.element.querySelector<HTMLInputElement>('input[name="upload"][value="false"]').disabled =
+                !!state.source && !state.cloudID;
+            previewElement.innerHTML = renderPreview();
+            previewElement.classList.toggle("fn__none", !state.pending);
+            previewReady = true;
+        } finally {
+            btnsElement[1].textContent = previewReady ? window.siyuan.languages.confirm : window.siyuan.languages.refresh;
+        }
+    };
     btnsElement[0].addEventListener("click", () => {
         manualDialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
+        if (!previewReady) {
+            void manualDialog.runPending(async () => {
+                await refreshPreview();
+                return false;
+            });
+            return;
+        }
         const uploadElement = manualDialog.element.querySelector("input[name=upload]:checked") as HTMLInputElement;
         if (!uploadElement) {
             showMessage(window.siyuan.languages.plsChoose);
@@ -320,11 +361,21 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState) => {
         void manualDialog.runPending(async () => {
             const response = await fetchSyncPost("/api/sync/performSync", {
                 upload: uploadElement.value === "true",
-                ...(state.pending ? {source: state.source, localID: state.localID, cloudID: state.cloudID} : {}),
+                ...(state.source ? {source: state.source, localID: state.localID, cloudID: state.cloudID} : {}),
             });
+            if (response.code === 2) {
+                await refreshPreview();
+                return false;
+            }
             return response.code === 0;
         });
     });
+    if (refresh) {
+        void manualDialog.runPending(async () => {
+            await refreshPreview();
+            return false;
+        });
+    }
 };
 
 const setSync = (key?: string, dialog?: MobileDialog) => {

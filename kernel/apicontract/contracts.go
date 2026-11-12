@@ -1062,9 +1062,10 @@ var GetSyncSourceState = define[EmptyRequest, SyncSourceState]("getSyncSourceSta
 
 // PerformSync retains automatic and fully manual mode behavior when source is omitted.
 // A source decision requires upload, localID and cloudID from getSyncSourceState and performs one-way sync in any mode.
-// The source and both snapshot IDs are revalidated before applying files. A failed decision returns code -1.
+// 来源和两个快照 ID 会在应用文件前重新校验；预览失效返回 code 2、空 msg 和 null data，需重新预览并确认。
+// 其他选择失败返回 code -1；code 2 不推送错误通知，避免通知记录使预览继续失效。
 // Automatic sync rejects a changed nonempty source until an explicit direction succeeds; empty sources use local data.
-var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/performSync", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/performSync", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{2}}, "POST")
 
 // CancelSyncCheckout 请求取消当前文件恢复任务，taskID 必须来自当前 syncProgress 消息。
 // requested 只表示已接受取消请求，旧任务或已完成任务返回 false；可能先完成恢复，再收到请求。

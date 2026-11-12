@@ -183498,7 +183498,8 @@
               "code": {
                 "type": "integer",
                 "enum": [
-                  -1
+                  -1,
+                  2
                 ]
               },
               "data": {

@@ -6,11 +6,13 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/dejavu"
@@ -18,6 +20,34 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestSyncSourcePreviewDoesNotPushNotifications(t *testing.T) {
+	connection := connectSyncCheckoutClient(t, "source-preview-notifications")
+	pushSyncSourceDecisionError("stale preview", dejavu.ErrSyncSourcePreviewChanged)
+	pushSyncSourceDecisionError("wrapped stale preview", fmt.Errorf("wrapped: %w", dejavu.ErrSyncSourcePreviewChanged))
+	pushSyncSourceDecisionError("cloud unavailable", errors.New("cloud unavailable"))
+	util.BroadcastByType("main", "sourcePreviewBarrier", 0, "", nil)
+	_ = connection.SetReadDeadline(time.Now().Add(5 * time.Second))
+	notifications := 0
+	for {
+		var event struct{ Cmd, Msg string }
+		if err := connection.ReadJSON(&event); err != nil {
+			t.Fatal(err)
+		}
+		if event.Cmd == "sourcePreviewBarrier" {
+			break
+		}
+		if event.Cmd == "msg" {
+			notifications++
+			if event.Msg != "cloud unavailable" {
+				t.Fatalf("preview failure emitted a notification: %+v", event)
+			}
+		}
+	}
+	if notifications != 1 {
+		t.Fatalf("real sync error notification count: %d", notifications)
+	}
+}
 
 func TestSyncSourcePreviewThroughWriteAdmission(t *testing.T) {
 	_, repo, _ := prepareAssetDownloadRepoTest(t)
@@ -168,6 +198,30 @@ func TestSyncSourceLegacySwitchBackupAndPreview(t *testing.T) {
 	if err = applySyncSourceDecision(context, []SyncSourceDecision{{Source: state.Source, LocalID: state.LocalID, CloudID: state.CloudID}}); err != nil {
 		t.Fatal(err)
 	}
+	baseline, err := os.ReadFile(filepath.Join(util.RepoDir, "refs", "latest-sync"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(util.DataDir, "notification-history.json"), []byte(`{"message":"sync failed"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	decision := []SyncSourceDecision{{Source: state.Source, LocalID: state.LocalID, CloudID: state.CloudID}}
+	for _, sync := range []func([]SyncSourceDecision) error{syncRepoUploadWithDecision, syncRepoDownloadWithDecision} {
+		if err = sync(decision); !errors.Is(err, dejavu.ErrSyncSourcePreviewChanged) {
+			t.Fatalf("changed local preview accepted: %v", err)
+		}
+		if after, readErr := os.ReadFile(filepath.Join(util.RepoDir, "refs", "latest-sync")); readErr != nil || string(after) != string(baseline) {
+			t.Fatalf("rejected preview advanced baseline: %q %v", after, readErr)
+		}
+		if data, readErr := os.ReadFile(filepath.Join(util.DataDir, "notification-history.json")); readErr != nil || string(data) != `{"message":"sync failed"}` {
+			t.Fatalf("rejected preview changed local data: %q %v", data, readErr)
+		}
+	}
+	fresh, err := GetSyncSourceState()
+	if err != nil || fresh.LocalID == state.LocalID || fresh.CloudID != state.CloudID || fresh.LocalFiles != state.LocalFiles+1 {
+		t.Fatalf("preview did not refresh local changes: %+v %v", fresh, err)
+	}
+	state = fresh
 	if err = syncRepoUploadWithDecision([]SyncSourceDecision{{Source: state.Source, LocalID: state.LocalID, CloudID: state.CloudID}}); err != nil {
 		t.Fatal(err)
 	}

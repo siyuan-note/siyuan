@@ -6,11 +6,14 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 )
 
@@ -40,4 +43,33 @@ func TestAPIContractSyncSourceDecision(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/sync/getSyncSourceState", strings.NewReader("ignored")))
 	requireAPIContract(t, "POST", "/api/sync/getSyncSourceState", recorder)
+}
+
+func TestAPIContractSyncSourcePreviewFailure(t *testing.T) {
+	for _, fixture := range []struct {
+		err  error
+		code int
+		msg  string
+	}{
+		{dejavu.ErrSyncSourcePreviewChanged, 2, ""},
+		{fmt.Errorf("wrapped: %w", dejavu.ErrSyncSourcePreviewChanged), 2, ""},
+		{errors.New("cloud unavailable"), -1, "cloud unavailable"},
+	} {
+		engine := gin.New()
+		engine.POST("/api/sync/performSync", contractHandler(apicontract.PerformSync,
+			func(_ *gin.Context, _ apicontract.PerformSyncRequest) apicontract.Response[apicontract.Null] {
+				return syncSourceDecisionFailure(fixture.err)
+			}))
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(`{}`)))
+		requireAPIContract(t, "POST", "/api/sync/performSync", recorder)
+		var response struct {
+			Code int
+			Msg  string
+			Data json.RawMessage
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != fixture.code || response.Msg != fixture.msg || string(response.Data) != "null" {
+			t.Fatalf("unexpected decision failure: %s %v", recorder.Body.String(), err)
+		}
+	}
 }

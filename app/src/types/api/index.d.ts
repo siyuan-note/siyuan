@@ -8487,12 +8487,13 @@ export interface APIPOSTRoutes {
     /**
      * retains automatic and fully manual mode behavior when source is omitted.
      * A source decision requires upload, localID and cloudID from getSyncSourceState and performs one-way sync in any mode.
-     * The source and both snapshot IDs are revalidated before applying files. A failed decision returns code -1.
+     * 来源和两个快照 ID 会在应用文件前重新校验；预览失效返回 code 2、空 msg 和 null data，需重新预览并确认。
+     * 其他选择失败返回 code -1；code 2 不推送错误通知，避免通知记录使预览继续失效。
      * Automatic sync rejects a changed nonempty source until an explicit direction succeeds; empty sources use local data.
      */
     "/api/sync/performSync": {
         request: PerformSyncRequestInput;
-        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 2; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];

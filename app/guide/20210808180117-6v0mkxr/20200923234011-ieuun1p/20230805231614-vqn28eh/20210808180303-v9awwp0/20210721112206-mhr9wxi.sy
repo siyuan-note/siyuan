@@ -120,7 +120,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to reload it. If enabling synchronization or submitting a sync direction fails, the wizard keeps the current page and selection for retry."
+					"Data": " to reload it. If enabling synchronization or submitting a sync direction fails, the wizard keeps the current page for retry. If the source or data changed after preview, the wizard refreshes the preview and clears the selected direction. Review the new counts and choose a direction again before confirming; synchronization does not retry automatically. If refreshing fails, click Refresh to try again."
 				}
 			]
 		},
@@ -469,7 +469,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before changing the sync provider, endpoint, or directory, SiYuan saves open editors and creates a complete snapshot of the current data. When the new source is nonempty, automatic merging stops. Click Sync to review the local and source file counts, source time and device, and the number of files to upload, overwrite, or delete. Choose either upload from local data or restore from the source; neither direction is selected by default. Uploading publishes the current local snapshot without deleting extra stored objects in the source; restoring replaces local data according to the source. An empty source receives local data directly. If the first sync fails before saving recoverable progress or committing the data, review and confirm the source again. Saved progress resumes in the selected direction; asset downloads that fail after the data is committed can be retried directly. The snapshot created before the change remains available in Data history."
+					"Data": "Before changing the sync provider, endpoint, or directory, SiYuan saves open editors and creates a complete snapshot of the current data. When the new source is nonempty, automatic merging stops. Click Sync to review the local and source file counts, source time and device, and the number of files to upload, overwrite, or delete. Choose either upload from local data or restore from the source; neither direction is selected by default. Uploading publishes the current local snapshot without deleting extra stored objects in the source; restoring replaces local data according to the source. An empty source receives local data directly. If the first sync fails before saving recoverable progress or committing the data, review and confirm the source again. Saved progress resumes in the selected direction; asset downloads that fail after the data is committed can be retried directly. The snapshot created before the change remains available in Data history. The same confirmation is required when the recorded sync source or baseline is inconsistent; this does not necessarily mean you switched storage services."
 				}
 			]
 		},

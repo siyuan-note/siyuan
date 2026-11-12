@@ -94,8 +94,12 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
     let renderedValue: string;
     let disposed = false;
     let writing = false;
+    let observedState: string;
     const available = (input: HTMLInputElement) => input.isConnected && input.ownerDocument === doc && !input.matches(":disabled") &&
         !input.readOnly && isDatePickerType(getInlineDateType(input)) && !input.closest(".fn__none, [hidden]");
+    const inputState = () => JSON.stringify(inputs.map(input => [input.type, getInlineDateType(input), input.min,
+        input.max, input.step, input.getAttribute("value"), input.required, input.disabled, input.readOnly, input.hidden,
+        input.classList.contains("fn__none"), available(input)]));
     const validateInput = (input: HTMLInputElement) => {
         if (composing.has(input)) {
             validationErrors.set(input, languages.invalid);
@@ -299,6 +303,7 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
             validateInput(input);
         });
         if (active && !available(active)) { active = inputs.find(available); }
+        observedState = inputState();
         render();
     };
     const destroy = () => {
@@ -395,7 +400,10 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
         if (!host.isConnected || host.ownerDocument !== doc || host.closest('[data-dialog-closing="true"]') ||
             inputs.every(input => !input.isConnected || input.ownerDocument !== doc)) { destroy(); return; }
         if (active && !available(active) || records.some(record => record.type === "attributes" &&
-            inputs.some(input => record.target === input || (record.target as Element).contains(input)))) { update(); }
+            inputs.some(input => record.target === input || (record.target as Element).contains(input)))) {
+            // 菜单分组、标题等样式变化不改变输入语义，不能因此重建日历。
+            if (inputState() !== observedState) { update(); }
+        }
     });
     observer.observe(doc.documentElement, {childList: true, subtree: true, attributes: true,
         attributeFilter: ["data-dialog-closing", "disabled", "readonly", "type", "min", "max", "step", "required", "class", "hidden"]});

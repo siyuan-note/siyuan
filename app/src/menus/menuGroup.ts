@@ -12,21 +12,24 @@ export const updateMenuGroupsOnMutation = (records: MutationRecord[]) => {
 export const updateMenuItemGroupClasses = (itemsElement: Element) => {
     const itemElements = Array.from(itemsElement.children).filter((element) =>
         element.classList.contains("b3-menu__item")) as HTMLElement[];
-    itemElements.forEach((element) => {
-        element.classList.remove("b3-menu__item--group-first", "b3-menu__item--group-last");
-    });
+    // 仅写入实际变化，避免与内嵌控件的属性观察器互相触发。
+    const setClass = (element: Element, name: string, enabled: boolean) => {
+        if (element.classList.contains(name) === enabled) { return; }
+        if (enabled) { element.classList.add(name); } else { element.classList.remove(name); }
+    };
+    setClass(itemsElement, "b3-menu__items--menu", itemElements.length > 0);
     if (itemElements.length === 0) {
-        itemsElement.classList.remove("b3-menu__items--menu");
         return;
     }
-    itemsElement.classList.add("b3-menu__items--menu");
+    const firstItems = new Set<HTMLElement>();
+    const lastItems = new Set<HTMLElement>();
     let groupElements: HTMLElement[] = [];
     const updateGroup = () => {
         if (groupElements.length === 0) {
             return;
         }
-        groupElements[0].classList.add("b3-menu__item--group-first");
-        groupElements[groupElements.length - 1].classList.add("b3-menu__item--group-last");
+        firstItems.add(groupElements[0]);
+        lastItems.add(groupElements[groupElements.length - 1]);
         groupElements = [];
     };
     Array.from(itemsElement.children).forEach((element: HTMLElement) => {
@@ -40,4 +43,8 @@ export const updateMenuItemGroupClasses = (itemsElement: Element) => {
         }
     });
     updateGroup();
+    itemElements.forEach(element => {
+        setClass(element, "b3-menu__item--group-first", firstItems.has(element));
+        setClass(element, "b3-menu__item--group-last", lastItems.has(element));
+    });
 };

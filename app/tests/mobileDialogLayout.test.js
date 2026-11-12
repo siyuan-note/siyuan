@@ -290,16 +290,19 @@ const runCases = async appDirectory => {
     assert.equal(getComputedStyle(document.body, "::after").pointerEvents, "none");
     document.documentElement.style.removeProperty("--android-navigation-bar-height");
     document.body.style.removeProperty("--b3-theme-surface");
-    for (const [frontend, platform] of [["mobile", "ios"], ["browser-mobile", "android"]]) {
+    for (const [frontend, platform, overlayInset, panelInset] of [
+        ["mobile", "ios", 0, 24],
+        ["browser-mobile", "android", 24, 0],
+    ]) {
         document.documentElement.dataset.frontend = frontend;
         document.body.className = `body--${platform}`;
         document.body.style.setProperty("--mobile-bottom-bar-safe-area", "24px");
         const sheet = new MobileDialog({title: "Other frontend", content: "Content"});
         await wait();
         const panel = sheet.element.querySelector(".mobile-bottom-sheet");
-        assert.equal(getComputedStyle(sheet.element.querySelector(".b3-dialog")).paddingBottom, "24px");
-        assert.equal(getComputedStyle(panel).paddingBottom, "0px");
-        assert.ok(Math.abs(panel.getBoundingClientRect().bottom - (innerHeight - 24)) < 1);
+        assert.equal(getComputedStyle(sheet.element.querySelector(".b3-dialog")).paddingBottom, `${overlayInset}px`);
+        assert.equal(getComputedStyle(panel).paddingBottom, `${panelInset}px`);
+        assert.ok(Math.abs(panel.getBoundingClientRect().bottom - (innerHeight - overlayInset)) < 1);
         sheet.destroy();
         await wait();
     }

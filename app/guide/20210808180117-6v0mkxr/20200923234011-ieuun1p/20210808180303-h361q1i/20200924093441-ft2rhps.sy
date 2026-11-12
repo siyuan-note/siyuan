@@ -7155,7 +7155,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Color fields support three- or six-digit HEX (with or without #) and integer RGB values from 0 to 255. The original color and draft are shown separately. The system or browser provides graphical color selection; HEX/RGB inputs remain available when graphical selection is unavailable. Incomplete, invalid or composing input cannot be applied. Closing the native panel only updates the draft; use the SiYuan editor’s confirmation or cancellation to decide whether to apply it. Inline styles and database colors use their parent panel’s confirmation, and cancelling that panel discards its drafts. Background gradients and dynamic icons use a separate color dialog. Existing quick color palettes still apply directly."
+					"Data": "Color fields support three- or six-digit HEX (with or without #) and integer RGB values from 0 to 255. The original color and draft are shown separately. The system or browser provides graphical color selection; HEX/RGB inputs remain available when graphical selection is unavailable. Incomplete, invalid or composing input cannot be applied. Closing the native panel only updates the draft; use the SiYuan editor’s confirmation or cancellation to decide whether to apply it. Inline styles and database colors use their parent panel’s confirmation, and cancelling that panel discards its drafts. Background gradients and dynamic icons use a separate color editor, which opens as a bottom sheet on mobile. Use Confirm to apply the draft; Cancel or dismissing the sheet discards it. Existing quick color palettes still apply directly."
 				}
 			]
 		}

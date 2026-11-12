@@ -13,7 +13,12 @@ const runCases = async (sources, mobile) => {
     window.siyuan = {languages: new Proxy({...sources.languages, untitled: "Untitled"}, {get: (target, key) => target[key] || key}),
         notebooks: [], config: {editor: {databaseAttrShow: true}}};
     window.Lute = {NewNodeID: () => "new-template"};
-    const dateModules = {};
+    const dateModules = {
+        "datePicker/panel": {registerDatePickerWindow() {}},
+        "datePicker/owners": {},
+        "datePicker/position": {bindDatePickerPosition: () => () => {}},
+        "menus/overlayOwnership": {getMenuOwnerElement: () => null},
+    };
     const loadDate = name => {
         if (dateModules[name]) return dateModules[name];
         const exports = dateModules[name] = {};
@@ -26,6 +31,15 @@ const runCases = async (sources, mobile) => {
         return exports;
     };
     const fieldEditor = loadDate("protyle/render/av/fieldValueEditor");
+    loadDate("datePicker/runtime").registerDatePickerRuntime(document, () => {
+        const element = document.createElement("div");
+        element.dataset.testDatePopup = "true";
+        element.innerHTML = '<div class="b3-dialog__container" role="dialog"><div class="b3-dialog__body"></div></div>';
+        document.body.append(element);
+        return {element, destroy: () => element.remove()};
+    }, () => window.siyuan.languages);
+    const datePopup = () => document.querySelector("[data-test-date-popup]");
+    const tick = () => new Promise(resolve => setTimeout(resolve, 0));
     const calls = [];
     const pending = [];
     let dialog;
@@ -94,19 +108,28 @@ const runCases = async (sources, mobile) => {
     const dateHost = dialog.element.querySelector("[data-field-date-host]");
     const dateInput = dateHost.querySelector('[data-role="field-value"]');
     const mode = dialog.element.querySelector('[data-role="field-mode"]');
-    assert.equal(dateHost.querySelector(".date-picker__calendar"), null, "template dates stay collapsed until focused");
+    assert.equal(datePopup(), null, "template calendars stay closed until clicked");
     dateInput.focus();
-    assert.ok(dateHost.querySelector(".date-picker__calendar"), "focusing a template date expands its calendar in the existing editor");
-    assert.equal(dateInput.value, "2024-02-28");
-    assert.equal(dateInput.closest(".date-picker__split").querySelector('[data-date-picker-part="time"]').value, "13:45");
+    assert.equal(datePopup(), null, "focusing a template date does not open its dropdown");
+    dateInput.click();
+    assert.ok(datePopup()?.querySelector(".date-picker__calendar"), "clicking a template date opens a dropdown");
+    assert.equal(dateInput.value, "2024-02-28T13:45");
+    assert.equal(dateHost.querySelector(".date-picker__calendar"), null, "the calendar is not embedded in the template");
+    datePopup().querySelector('[data-action="cancel"]').click();
+    await tick();
+    assert.equal(datePopup(), null);
     for (let index = 0; index < 2; index++) {
+        dateInput.click();
+        assert.ok(datePopup());
         mode.focus();
         mode.value = "currentTime"; mode.dispatchEvent(new Event("change"));
+        await tick();
         assert.equal(dateHost.classList.contains("fn__none"), true);
+        assert.equal(datePopup(), null, "dynamic dates release their dropdown");
         mode.focus();
         mode.value = "static"; mode.dispatchEvent(new Event("change"));
         assert.equal(dateHost.classList.contains("fn__none"), false);
-        assert.equal(dateHost.querySelectorAll(".date-picker__calendar").length, 1);
+        assert.equal(datePopup(), null, "returning to a static date keeps the dropdown closed");
     }
     dateInput.value = "2024-03-01T15:30";
     dateInput.dispatchEvent(new Event("input", {bubbles: true}));
@@ -117,7 +140,8 @@ const runCases = async (sources, mobile) => {
     assert.equal(dateTemplate.fieldValues.date.value.date.content, new Date("2024-02-28T13:45").getTime());
     api.openNewItemTemplateDialog({protyle, blockElement: block, data: dateData});
     const savedInput = dialog.element.querySelector('[data-role="field-value"]');
-    savedInput.value = "not-a-date";
+    savedInput.min = "2024-03-01T00:00";
+    savedInput.value = "2024-02-28T13:45";
     savedInput.dispatchEvent(new Event("input", {bubbles: true}));
     const beforeInvalid = saved;
     dialog.element.querySelector('[data-role="confirm"]').click();
@@ -439,7 +463,7 @@ const runElectron = async () => {
             }));
             sources.lunarData = JSON.parse(readFileSync(path.join(__dirname, "../../kernel/av/lunar_calendar_data.json"), "utf8"));
             sources.languages = JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"));
-            sources.dates = Object.fromEntries(["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline",
+            sources.dates = Object.fromEntries(["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline", "datePicker/runtime", "datePicker/index", "datePicker/binding",
                 "protyle/render/av/fieldValueEditor", "protyle/render/av/lunarDate", "protyle/render/av/lunarCalendar", "protyle/render/av/dateFormat", "protyle/render/av/dateSubmit", "protyle/render/av/capabilities", "protyle/render/av/capabilities.generated", "util/escape"].map(name =>
                 [name, ts.transpileModule(readFileSync(path.join(__dirname, `../src/${name}.ts`), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},

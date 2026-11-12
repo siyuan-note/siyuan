@@ -378,10 +378,27 @@ type docBlocksOrdersResponse struct {
 }
 
 func TestBlockPublishAccessGuards(t *testing.T) {
-	previousConf := model.Conf
+	const helper = "SIYUAN_TEST_BLOCK_PUBLISH_ACCESS_GUARDS"
+	if os.Getenv(helper) != "1" {
+		ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+		defer cancel()
+		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestBlockPublishAccessGuards$", "-test.v")
+		command.Env = append(os.Environ(), helper+"=1")
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("publish access subprocess failed: %v\n%s", err, output)
+		}
+		return
+	}
+	root := t.TempDir()
+	util.DataDir = filepath.Join(root, "data")
+	util.TempDir, util.ConfDir = root, root
+	util.QueueDir = filepath.Join(root, "queue")
+	util.DBPath = filepath.Join(root, "siyuan.db")
+	util.HistoryDBPath = filepath.Join(root, "history.db")
+	util.AssetContentDBPath = filepath.Join(root, "asset_content.db")
+	util.BlockTreeDBPath = filepath.Join(root, "blocktree.db")
 	model.Conf = model.NewAppConf()
 	model.Conf.Sync.Store(conf.NewSync())
-	t.Cleanup(func() { model.Conf = previousConf })
 	const (
 		boxID             = "20260724000000-boxid03"
 		publicID          = "20260724000020-public3"
@@ -390,35 +407,26 @@ func TestBlockPublishAccessGuards(t *testing.T) {
 		protectedPassword = "password"
 	)
 
-	previousBlockTreeDBPath := util.BlockTreeDBPath
-	previousDataDir := util.DataDir
-	util.DataDir = t.TempDir()
-	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
-	treenode.InitBlockTree(true)
-	previousPublishAccess := model.GetPublishAccess()
+	sql.InitDatabase(true)
+	sql.InitHistoryDatabase(true)
+	sql.InitAssetContentDatabase(true)
+	defer sql.CloseDatabase()
 	if err := model.SetPublishAccess(model.PublishAccess{
 		{ID: disabledID, Visible: true, Disable: true},
 		{ID: protectedID, Visible: true, Password: protectedPassword},
 	}); err != nil {
 		t.Fatalf("set publish access failed: %v", err)
 	}
-	t.Cleanup(func() {
-		_ = model.SetPublishAccess(previousPublishAccess)
-		treenode.CloseDatabase()
-		util.BlockTreeDBPath = previousBlockTreeDBPath
-		util.DataDir = previousDataDir
-	})
 
 	for _, id := range []string{publicID, disabledID, protectedID} {
-		treenode.IndexBlockTree(&parse.Tree{
-			ID:   id,
-			Box:  boxID,
-			Path: "/" + id + ".sy",
-			Root: &ast.Node{ID: id, Type: ast.NodeDocument},
-		})
+		tree := treenode.NewTree(boxID, "/"+id+".sy", "/"+id, id)
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
 	}
 
-	blockGuardRequest := func(role any, body string, handler gin.HandlerFunc) map[string]any {
+	blockGuardRequest := func(t *testing.T, role any, body string, handler gin.HandlerFunc) map[string]any {
 		gin.SetMode(gin.TestMode)
 		engine := gin.New()
 		engine.Use(func(c *gin.Context) {
@@ -440,46 +448,46 @@ func TestBlockPublishAccessGuards(t *testing.T) {
 	}
 
 	t.Run("reader", func(t *testing.T) {
-		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, checkBlockExist); response["data"].(bool) {
+		if response := blockGuardRequest(t, model.RoleReader, `{"id":"`+disabledID+`"}`, checkBlockExist); response["data"].(bool) {
 			t.Fatalf("disabled block should be hidden from the reader, got %v", response["data"])
 		}
-		if response := blockGuardRequest(model.RoleReader, `{"id":"`+publicID+`"}`, checkBlockExist); !response["data"].(bool) {
+		if response := blockGuardRequest(t, model.RoleReader, `{"id":"`+publicID+`"}`, checkBlockExist); !response["data"].(bool) {
 			t.Fatalf("public block should be visible to the reader, got %v", response["data"])
 		}
-		response := blockGuardRequest(model.RoleReader, `{"ids":["`+publicID+`","`+disabledID+`"]}`, checkBlocksExist)
+		response := blockGuardRequest(t, model.RoleReader, `{"ids":["`+publicID+`","`+disabledID+`"]}`, checkBlocksExist)
 		if !response["data"].(map[string]any)[publicID].(bool) {
 			t.Fatalf("unexpected block existence for the reader: %v", response["data"])
 		}
 		if _, exists := response["data"].(map[string]any)[disabledID]; exists {
 			t.Fatalf("disabled block existence should be hidden from the reader: %v", response["data"])
 		}
-		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, checkBlockFold); response["data"].(map[string]any)["isFolded"].(bool) ||
+		if response := blockGuardRequest(t, model.RoleReader, `{"id":"`+disabledID+`"}`, checkBlockFold); response["data"].(map[string]any)["isFolded"].(bool) ||
 			response["data"].(map[string]any)["isRoot"].(bool) || response["data"].(map[string]any)["isHidden"].(bool) {
 			t.Fatalf("fold state of a disabled block should be hidden from the reader: %v", response["data"])
 		}
-		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, getUnfoldedParentID); "" != response["data"].(map[string]any)["parentID"].(string) {
+		if response := blockGuardRequest(t, model.RoleReader, `{"id":"`+disabledID+`"}`, getUnfoldedParentID); "" != response["data"].(map[string]any)["parentID"].(string) {
 			t.Fatalf("unfolded parent of a disabled block should be hidden from the reader: %v", response["data"])
 		}
-		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, getBlockIndex); 0 != int(response["data"].(float64)) {
+		if response := blockGuardRequest(t, model.RoleReader, `{"id":"`+disabledID+`"}`, getBlockIndex); 0 != int(response["data"].(float64)) {
 			t.Fatalf("index of a disabled block should be hidden from the reader: %v", response["data"])
 		}
-		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, getTreeStat); nil != response["data"].(map[string]any)["stat"] {
+		if response := blockGuardRequest(t, model.RoleReader, `{"id":"`+disabledID+`"}`, getTreeStat); nil != response["data"].(map[string]any)["stat"] {
 			t.Fatalf("tree stat of a disabled block should be hidden from the reader: %v", response["data"])
 		}
-		if response := blockGuardRequest(model.RoleReader, `{"ids":["`+publicID+`","`+disabledID+`"]}`, getBlocksWordCount); 0 != int(response["code"].(float64)) {
+		if response := blockGuardRequest(t, model.RoleReader, `{"ids":["`+publicID+`","`+disabledID+`"]}`, getBlocksWordCount); 0 != int(response["code"].(float64)) {
 			t.Fatalf("word count of disabled blocks should not error, got %v", response)
 		}
-		if response := blockGuardRequest(model.RoleReader, `{"ids":["`+publicID+`","`+disabledID+`"]}`, getBlocksIndexes); nil != response["data"].(map[string]any)[disabledID] {
+		if response := blockGuardRequest(t, model.RoleReader, `{"ids":["`+publicID+`","`+disabledID+`"]}`, getBlocksIndexes); nil != response["data"].(map[string]any)[disabledID] {
 			t.Fatalf("indexes of disabled blocks should be hidden from the reader: %v", response["data"])
 		}
-		if response := blockGuardRequest(model.RoleReader, `{"ids":["`+disabledID+`"]}`, checkBlockRef); response["data"].(bool) {
+		if response := blockGuardRequest(t, model.RoleReader, `{"ids":["`+disabledID+`"]}`, checkBlockRef); response["data"].(bool) {
 			t.Fatalf("ref check of a disabled block should be hidden from the reader: %v", response["data"])
 		}
 	})
 
 	t.Run("document title publish access", func(t *testing.T) {
 		for _, id := range []string{disabledID, protectedID} {
-			response := blockGuardRequest(model.RoleReader, `{"id":"`+id+`"}`, getDocTitle)
+			response := blockGuardRequest(t, model.RoleReader, `{"id":"`+id+`"}`, getDocTitle)
 			if response["code"] != float64(-1) || response["data"] != nil || response["msg"] == "" {
 				t.Fatalf("unavailable document title must return a typed failure without title data: %v", response)
 			}
@@ -487,39 +495,39 @@ func TestBlockPublishAccessGuards(t *testing.T) {
 	})
 
 	t.Run("administrator", func(t *testing.T) {
-		if response := blockGuardRequest(model.RoleAdministrator, `{"id":"`+disabledID+`"}`, checkBlockExist); !response["data"].(bool) {
+		if response := blockGuardRequest(t, model.RoleAdministrator, `{"id":"`+disabledID+`"}`, checkBlockExist); !response["data"].(bool) {
 			t.Fatalf("disabled block should be visible to the administrator, got %v", response["data"])
 		}
 		missingID := "20260905120000-missing"
-		response := blockGuardRequest(model.RoleAdministrator, `{"id":"`+missingID+`"}`, checkBlockExist)
+		response := blockGuardRequest(t, model.RoleAdministrator, `{"id":"`+missingID+`"}`, checkBlockExist)
 		if response["code"].(float64) != 0 || response["data"] != false {
 			t.Fatalf("missing block should report false without an API error: %v", response)
 		}
-		response = blockGuardRequest(model.RoleAdministrator, `{"ids":["`+missingID+`"]}`, checkBlocksExist)
+		response = blockGuardRequest(t, model.RoleAdministrator, `{"ids":["`+missingID+`"]}`, checkBlocksExist)
 		if response["code"].(float64) != 0 || response["data"].(map[string]any)[missingID] != false {
 			t.Fatalf("missing blocks should report false without an API error: %v", response)
 		}
-		response = blockGuardRequest(model.RoleAdministrator, `{"ids":["`+missingID+`"]}`, getBlocksWordCount)
+		response = blockGuardRequest(t, model.RoleAdministrator, `{"ids":["`+missingID+`"]}`, getBlocksWordCount)
 		if response["code"].(float64) != 0 || response["data"].(map[string]any)["stat"].(map[string]any)["blockCount"].(float64) != 0 {
 			t.Fatalf("missing blocks should be ignored by word count without an API error: %v", response)
 		}
-		response = blockGuardRequest(model.RoleAdministrator, `{"id":"`+missingID+`"}`, getBlockIndex)
+		response = blockGuardRequest(t, model.RoleAdministrator, `{"id":"`+missingID+`"}`, getBlockIndex)
 		if response["code"].(float64) != 0 || response["data"].(float64) != 0 {
 			t.Fatalf("missing block should report a zero index without an API error: %v", response)
 		}
-		response = blockGuardRequest(model.RoleAdministrator, `{"id":"`+missingID+`"}`, getBlockBreadcrumb)
+		response = blockGuardRequest(t, model.RoleAdministrator, `{"id":"`+missingID+`"}`, getBlockBreadcrumb)
 		if response["code"].(float64) == 0 {
 			t.Fatalf("missing block without a notebook should be rejected: %v", response)
 		}
-		response = blockGuardRequest(model.RoleAdministrator, `{"id":"`+missingID+`","notebook":"`+boxID+`"}`, getBlockBreadcrumb)
+		response = blockGuardRequest(t, model.RoleAdministrator, `{"id":"`+missingID+`","notebook":"`+boxID+`"}`, getBlockBreadcrumb)
 		if response["code"].(float64) != 0 || len(response["data"].([]any)) != 0 {
 			t.Fatalf("missing block in an explicit notebook should report an empty breadcrumb without an API error: %v", response)
 		}
-		response = blockGuardRequest(model.RoleAdministrator, `{"id":"`+missingID+`"}`, getBlockBreadcrumbChildren)
+		response = blockGuardRequest(t, model.RoleAdministrator, `{"id":"`+missingID+`"}`, getBlockBreadcrumbChildren)
 		if response["code"].(float64) == 0 {
 			t.Fatalf("missing breadcrumb parent without a notebook should be rejected: %v", response)
 		}
-		response = blockGuardRequest(model.RoleAdministrator, `{"id":"`+missingID+`","notebook":"`+boxID+`"}`, getBlockBreadcrumbChildren)
+		response = blockGuardRequest(t, model.RoleAdministrator, `{"id":"`+missingID+`","notebook":"`+boxID+`"}`, getBlockBreadcrumbChildren)
 		if response["code"].(float64) != 0 || len(response["data"].(map[string]any)["items"].([]any)) != 0 {
 			t.Fatalf("missing breadcrumb parent in an explicit notebook should report no children: %v", response)
 		}

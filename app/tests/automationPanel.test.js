@@ -61,7 +61,7 @@ const runCases = async (sources, css, mobile) => {
     let collectionTypeInput;
     let nextID = 0;
     window.Lute = {NewNodeID: () => `generated-${++nextID}`};
-    window.siyuan = {languages: lang, config: {}, notebooks: [], zIndex: 0, dialogs: [], storage: {}, blockPanels: [],
+    window.siyuan = {isReady: true, languages: lang, config: {}, notebooks: [], zIndex: 0, dialogs: [], storage: {}, blockPanels: [],
         mobile: {size: {portrait: {height1: innerHeight}, landscape: {height1: innerWidth}}},
         menus: {menu: {element: document.createElement("div"), remove() {
             document.querySelectorAll("body > .b3-menu").forEach(popup => popup.remove());
@@ -458,14 +458,20 @@ const runCases = async (sources, css, mobile) => {
     fieldMenu.items.find(item => item.label === "Completion time").click();
     await tick();
     const staticDate = get('[data-role="field-value"]');
-    assert.equal(get("[data-field-date-picker]").querySelector(".date-picker__calendar"), null, "static assignment calendars start collapsed");
+    assert.equal(document.querySelector(".date-picker__calendar"), null, "static assignment calendars start closed");
     staticDate.focus();
-    assert.ok(get("[data-field-date-picker] .date-picker__calendar"), "focusing a static assignment expands its inline picker");
+    assert.equal(document.querySelector(".date-picker__calendar"), null, "focus does not open a date dropdown");
+    staticDate.click();
+    assert.ok(document.querySelector(".date-picker__calendar"), "clicking a static assignment opens its dropdown");
+    assert.equal(staticDate.closest("[data-field-date-host]").querySelector(".date-picker__calendar"), null);
     const beforeDate = transactions.length;
-    get("[data-field-date-picker] [data-date]:not([disabled])").click();
+    document.querySelector(".date-picker__calendar [data-date]:not([disabled])").click();
+    await tick();
+    assert.equal(document.querySelector(".date-picker__calendar"), null, "selection closes the dropdown");
     assert.ok(transactions.length > beforeDate, "choosing a static date immediately saves the rule configuration");
     assert.equal(latest().actions[0].fields.finished.value.date.isNotEmpty, true);
-    staticDate.value = "not-a-date";
+    staticDate.min = "2026-01-01";
+    staticDate.value = "2025-12-31";
     staticDate.dispatchEvent(new Event("input", {bubbles: true}));
     const beforeInvalidDate = transactions.length;
     staticDate.dispatchEvent(new Event("change", {bubbles: true}));
@@ -640,12 +646,15 @@ const runCases = async (sources, css, mobile) => {
     await tick();
     assertFieldSpacing();
     await change("[data-template-item]", "sample");
-    const triggerCalendar = get("[data-template-time]").closest("label").nextElementSibling;
-    assert.equal(triggerCalendar.querySelector(".date-picker__calendar"), null, "preview trigger calendars start collapsed");
-    get("[data-template-time]").focus();
-    assert.ok(triggerCalendar.querySelector(".date-picker__calendar"), "preview trigger time binds the shared picker");
+    assert.equal(document.querySelector(".date-picker__calendar"), null, "preview trigger calendars start closed");
+    get("[data-template-time]").click();
+    const triggerCalendar = document.querySelector(".date-picker__calendar");
+    assert.ok(triggerCalendar, "preview trigger time opens a shared dropdown");
     const beforeTriggerEdit = transactions.length;
     triggerCalendar.querySelector("[data-date]:not([disabled])").click();
+    document.querySelector('.date-picker-dialog [data-action="confirm"]').click();
+    await tick();
+    assert.equal(document.querySelector(".date-picker__calendar"), null);
     assert.equal(templatePreviews.length, 0, "trigger-time calendar changes do not issue preview requests");
     assert.equal(transactions.length, beforeTriggerEdit, "trigger-time calendar changes do not save real data");
     await change("[data-template-time]", "2026-10-16T15:30");
@@ -664,12 +673,14 @@ const runCases = async (sources, css, mobile) => {
     assert.ok(get('[data-template-input="finished"]'));
     assert.equal(get("[data-template-result]").textContent, "", "editing inputs invalidates old previews");
     const previewDate = get('[data-template-input="finished"]');
-    assert.equal(previewDate.parentElement.nextElementSibling.querySelector(".date-picker__calendar"), null, "preview override calendars start collapsed");
-    previewDate.focus();
-    assert.ok(previewDate.parentElement.nextElementSibling.querySelector(".date-picker__calendar"), "rendered sample dates bind the shared picker");
+    assert.equal(document.querySelector(".date-picker__calendar"), null, "preview override calendars start closed");
+    previewDate.click();
+    assert.ok(document.querySelector(".date-picker__calendar"), "rendered sample dates open a shared dropdown");
     const requestsBeforeDate = templatePreviews.length;
     const writesBeforeDate = transactions.length;
-    previewDate.parentElement.nextElementSibling.querySelector("[data-date]:not([disabled])").click();
+    document.querySelector(".date-picker__calendar [data-date]:not([disabled])").click();
+    await tick();
+    assert.equal(document.querySelector(".date-picker__calendar"), null);
     assert.equal(templatePreviews.length, requestsBeforeDate, "calendar edits only invalidate previews");
     assert.equal(transactions.length, writesBeforeDate, "preview calendar edits never change configuration or real rows");
     previewDate.value = "2026-10-14";
@@ -690,9 +701,12 @@ const runCases = async (sources, css, mobile) => {
         "range overrides do not gain an unrequested single-date picker");
     delete sampleDateField.values;
     await change("[data-template-item]", "sample");
-    get('[data-template-input="finished"]').focus();
-    assert.equal(get("[data-template-inputs]").querySelectorAll(".date-picker__calendar").length, 1,
-        "responsive layout checks include the expanded override calendar");
+    get('[data-template-input="finished"]').click();
+    assert.equal(document.querySelectorAll(".date-picker__calendar").length, 1,
+        "a scalar override can open its dropdown after a range override");
+    document.querySelector('.date-picker-dialog [data-action="cancel"]').click();
+    await tick();
+    assert.equal(document.querySelector(".date-picker__calendar"), null);
     document.head.append(theme);
     const longRuleName = await beginRename();
     longRuleName.value = "Long automation name ".repeat(12).trim();
@@ -1161,7 +1175,7 @@ if (process.versions.electron && process.type === "browser") {
             sources["menus/aliasInput"] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/menus/aliasInput.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
             }).outputText;
-            for (const name of ["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline", "menus/overlayOwnership", "dialog/index", "dialog/confirmDialog", "dialog/mobileConfirmDialog", "dialog/mobileDialog",
+            for (const name of ["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline", "datePicker/runtime", "datePicker/index", "datePicker/binding", "datePicker/panel", "datePicker/owners", "datePicker/position", "menus/menuPosition", "menus/overlayOwnership", "dialog/index", "dialog/confirmDialog", "dialog/mobileConfirmDialog", "dialog/mobileDialog",
                 "mobile/util/keyboardSheetState", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/mobileSheetLayout",
                 "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetOpen", "menus/sheetActions"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname,

@@ -45,7 +45,7 @@ const sources = (full = false) => {
         return source.statements.filter(node => ts.isVariableStatement(node) &&
             node.declarationList.declarations.some(declaration => ["getListItemGutterContainer", "getTopAloneElement",
                 "getSbChildBlockCount", "getParentBlock", "getGutterMarginHeight", "getFixedGutterPosition",
-                "getBacklinkGutterContentTop", "getListGutterAnchorLeft", "getContainerGutterSpace", "isContainerGutterBridge",
+                "getBacklinkGutterContentTop", "getListGutterAnchorLeft", "getContainerGutterSpace", "isContainerGutterBridge", "getGutterPaneRect",
                 "cancelGutterHover", "renderGutterOnHover", "pendingGutterHovers", "gutterHoverPaths",
                 "getVerticalGutterButton", "resetGutterHover", "bindGutterHover",
                 "hasClosestBlock", "isBlockElement", "hasClosestByClassName", "hasTopClosestByClassName", "hasClosestByTag",
@@ -621,9 +621,21 @@ if (process.versions.electron && process.type === "browser") {
         const {app, BrowserWindow} = require("electron");
         app.setPath("userData", process.argv[2]);
         await app.whenReady();
-        const win = new BrowserWindow({show: false, width: 1100, height: 900,
+        const win = new BrowserWindow({show: false, useContentSize: true, width: 1100, height: 900,
             webPreferences: {nodeIntegration: true, contextIsolation: false}});
+        win.setMenu(null);
         await win.loadURL("data:text/html,<html><body></body></html>");
+        win.show();
+        win.setContentSize(1100, 900);
+        let viewport;
+        for (let attempt = 0; attempt < 50; attempt++) {
+            viewport = await win.webContents.executeJavaScript("[innerWidth, innerHeight]");
+            if (viewport[0] === 1100 && viewport[1] === 900) {
+                break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 20));
+        }
+        assert.deepEqual(viewport, [1100, 900], "gutter fixture requires the exact content viewport");
         const css = ["protyle/_wysiwyg.scss", "protyle/_protyle.scss", "util/_function.scss"].map(file =>
             require("sass").compile(path.join(__dirname, "../src/assets/scss", file), {quietDeps: true}).css).join("\n");
         const result = await win.webContents.executeJavaScript(`(async () => {

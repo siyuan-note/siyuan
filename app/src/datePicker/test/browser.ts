@@ -21,14 +21,21 @@ export const runBrowserCase = async (callback: (sources: Record<string, string>,
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText.trim().replace(/^"use strict";\s*/, "").replace(/;$/, "");
     try {
         const script = join(temporary, "run.cjs");
-        writeFileSync(script, `const {app,BrowserWindow}=require("electron"); const __name=value=>value;
+        writeFileSync(script, `const {app,BrowserWindow,screen}=require("electron"); const __name=value=>value;
 app.setPath("userData",${JSON.stringify(join(temporary, "profile"))});app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async()=>{const win=new BrowserWindow({show:false,useContentSize:true,width:${width},height:${height},webPreferences:{contextIsolation:false}});
-try{await win.loadURL("data:text/html,<html><body></body></html>");win.show();win.focus();
+try{win.setMenu(null);await win.loadURL("data:text/html,<html><body></body></html>");win.show();win.focus();
+win.setContentSize(${width},${height});
+let viewport;
+for(let attempt=0;attempt<50;attempt++){
+viewport=await win.webContents.executeJavaScript("[innerWidth,innerHeight]");
+if(viewport[0]===${width}&&viewport[1]===${height})break;
+await new Promise(resolve=>setTimeout(resolve,20));
+}
+if(viewport[0]!==${width}||viewport[1]!==${height})throw Error("Unexpected browser viewport: "+JSON.stringify({expected:[${width},${height}],actual:viewport,content:win.getContentBounds(),display:screen.getDisplayMatching(win.getBounds())}));
 win.webContents.debugger.attach("1.3");
 await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled",{enabled:true});
 if(!await win.webContents.executeJavaScript("document.hasFocus()"))throw Error("Browser window must be focused");
-if(await win.webContents.executeJavaScript("innerWidth")!==${width}||await win.webContents.executeJavaScript("innerHeight")!==${height})throw Error("Unexpected browser viewport");
 const result=await win.webContents.executeJavaScript(${JSON.stringify(expression)});
 console.log(${interaction ? `await (${interaction})(win)` : "result"});app.exit(0);}
 catch(error){console.error(error);app.exit(1);}});`, "utf8");

@@ -104,7 +104,7 @@ func TestAPIContractDuplicateDocTree(t *testing.T) {
 		ret.Header.Set("Authorization", "Token duplicate-tree-test")
 		return ret
 	}
-	post := func(id string, success bool) apicontract.FileTreeDuplicateData {
+	post := func(t *testing.T, id string, success bool) apicontract.FileTreeDuplicateData {
 		t.Helper()
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, request(id))
@@ -156,11 +156,11 @@ func TestAPIContractDuplicateDocTree(t *testing.T) {
 		t.Fatal(err)
 	}
 	source, _ := fixture(box.ID)
-	checkCopy(post(source.ID, true), source)
-	post(source.Root.FirstChild.ID, false)
-	post(ast.NewNodeID(), false)
+	checkCopy(post(t, source.ID, true), source)
+	post(t, source.Root.FirstChild.ID, false)
+	post(t, ast.NewNodeID(), false)
 	util.ReadOnly = true
-	post(source.ID, false)
+	post(t, source.ID, false)
 	util.ReadOnly = false
 	unauthorized := request(source.ID)
 	unauthorized.Header.Del("Authorization")
@@ -185,6 +185,15 @@ func TestAPIContractDuplicateDocTree(t *testing.T) {
 		if err := av.SaveAttributeView(view); err != nil {
 			t.Fatal(err)
 		}
+		host := treenode.NewTree(box.ID, "/"+ast.NewNodeID()+".sy", "/Database", "Database")
+		node := &ast.Node{Type: ast.NodeAttributeView, ID: ast.NewNodeID(), AttributeViewID: view.ID, AttributeViewType: "table"}
+		node.SetIALAttr("id", node.ID)
+		host.Root.AppendChild(node)
+		if _, err := filesys.WriteTree(host); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(host)
+		av.UpsertBlockRel(view.ID, node.ID)
 		source.Root.SetIALAttr("tags", "todo")
 		if _, err := filesys.WriteTree(source); err != nil {
 			t.Fatal(err)
@@ -193,7 +202,7 @@ func TestAPIContractDuplicateDocTree(t *testing.T) {
 		before := len(treenode.GetBlockTreesByTypeInBox("d", box.ID))
 		for _, name := range []string{"duplicateDoc", "duplicateDocTree"} {
 			endpoint = "/api/filetree/" + name
-			post(source.ID, false)
+			post(t, source.ID, false)
 			if got := len(treenode.GetBlockTreesByTypeInBox("d", box.ID)); got != before {
 				t.Fatalf("%s left a failed copy in the index: %d != %d", name, got, before)
 			}
@@ -288,7 +297,7 @@ func TestAPIContractDuplicateDocTree(t *testing.T) {
 		t.Fatal("copy lease ended before response serialization")
 	}
 	requireAPIContract(t, "POST", endpoint, writer.ResponseRecorder)
-	post(source.ID, false)
+	post(t, source.ID, false)
 	if err = model.UnlockBox(boxID, password, (&model.Box{ID: boxID}).GetConf().BoxCrypt); err != nil {
 		t.Fatal(err)
 	}
@@ -308,7 +317,7 @@ func TestAPIContractDuplicateDocTree(t *testing.T) {
 	if err = os.WriteFile(childPath, corrupt, 0644); err != nil {
 		t.Fatal(err)
 	}
-	post(source.ID, false)
+	post(t, source.ID, false)
 	afterEntries, _ := os.ReadDir(filepath.Join(util.DataDir, boxID))
 	preserved, _ := os.ReadFile(childPath)
 	if len(beforeEntries) != len(afterEntries) || !bytes.Equal(corrupt, preserved) {
@@ -326,7 +335,7 @@ func TestAPIContractDuplicateDocTree(t *testing.T) {
 	if err = os.WriteFile(viewPath, corruptView, 0644); err != nil {
 		t.Fatal(err)
 	}
-	post(source.ID, false)
+	post(t, source.ID, false)
 	sortAfter, _ := os.ReadFile(sortPath)
 	mirrorAfter, _ := os.ReadFile(mirrorPath)
 	afterEntries, _ = os.ReadDir(filepath.Join(util.DataDir, boxID))

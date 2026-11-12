@@ -16,6 +16,7 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
     let geometry: string;
     let frozen = false;
     let disposed = false;
+    let bounds: {min: number, max: number};
     const toolbar = document.getElementById("keyboardToolbar");
     overlay.classList.add("mobile-sheet-layout");
     if (options.standalone) overlay.classList.add("mobile-sheet-layout--standalone");
@@ -43,12 +44,13 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
             element.scrollTop = top;
             element.scrollLeft = left;
         });
-        const bounds = getMobileSheetBounds(natural, chrome, available);
+        bounds = getMobileSheetBounds(natural, chrome, available);
         bounds.min = Math.min(bounds.min, Math.max(chrome, standardMax));
         return bounds;
     };
     const resize = () => {
         if (disposed || !overlay.isConnected) return;
+        bounds = undefined;
         const viewport = getVisibleViewportBounds();
         const bottom = toolbar && !toolbar.classList.contains("fn__none") ?
             Math.min(viewport.bottom, toolbar.getBoundingClientRect().top) : viewport.bottom;
@@ -100,9 +102,13 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
         resize,
         getBounds,
         setPreferredHeight: (height: number) => {
+            if (disposed || frozen || !overlay.isConnected) return;
+            const limits = bounds || getBounds();
             preferred = height;
             mode = "standard";
-            resize();
+            sheet.style.maxHeight = `${available}px`;
+            sheet.style.height = `${Math.max(limits.min, Math.min(height, limits.max))}px`;
+            options.onResize?.();
         },
         freeze: () => {
             if (frozen || disposed) return;

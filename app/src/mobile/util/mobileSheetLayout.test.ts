@@ -256,3 +256,18 @@ test("visual viewport constraints activate compact chrome even when layout viewp
     s.emit("visual:resize");
     assert.equal(s.sheet.classList.contains("mobile-sheet-panel--compact"), false);
 });
+
+test("drag height updates reuse measured bounds until geometry changes", () => {
+    const s = setup();
+    let scans = 0;
+    s.sheet.querySelectorAll = () => { scans++; return []; };
+    s.layout.getBounds();
+    assert.equal(scans, 1);
+    for (let height = 300; height < 400; height++) s.layout.setPreferredHeight(height);
+    assert.equal(scans, 1);
+    assert.equal(s.sheet.style.height, "399px");
+    s.layout.resize();
+    assert.equal(scans, 2);
+    s.layout.setPreferredHeight(350);
+    assert.equal(scans, 2);
+});

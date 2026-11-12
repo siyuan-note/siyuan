@@ -118,14 +118,13 @@ test("body keeps downward dismissal without resizing and editable actions stay n
     assert.equal(s.height(), 700);
 });
 
-test("multitouch, wrong identifier, horizontal direction and viewport changes cancel active gestures", () => {
-    for (const cancel of ["multi", "identity", "horizontal", "viewport", "orientation", "touchcancel"]) {
+test("multitouch, wrong identifier and viewport changes cancel active gestures", () => {
+    for (const cancel of ["multi", "identity", "viewport", "orientation", "touchcancel"]) {
         const s = setup();
         s.send("touchstart", 0);
         s.send("touchmove", 100);
         if (cancel === "multi") s.send("touchmove", 150, {multi: true});
         if (cancel === "identity") s.send("touchmove", 150, {id: 8});
-        if (cancel === "horizontal") s.send("touchmove", 150, {x: 900});
         if (cancel === "viewport") s.listeners.get("visual:resize")();
         if (cancel === "orientation") s.listeners.get("orientation:change")();
         if (cancel === "touchcancel") s.send("touchcancel", 100);
@@ -205,3 +204,21 @@ for (const event of ["touchmove", "touchend", "touchcancel"]) {
         assert.equal(s.closes(), 0);
     });
 }
+
+test("grip tolerates initial jitter and locks a recognized vertical drag", () => {
+    const s = setup();
+    s.send("touchstart", 100);
+    s.send("touchmove", 101, {x: 102});
+    assert.equal(s.send("touchmove", 180, {x: 102}), true);
+    assert.equal(s.height(), 620);
+    assert.equal(s.send("touchmove", 110, {x: 150}), true);
+    assert.equal(s.height(), 690);
+});
+
+test("horizontal initiation still cancels before vertical recognition", () => {
+    const s = setup();
+    s.send("touchstart", 100);
+    s.send("touchmove", 101, {x: 110});
+    assert.equal(s.send("touchmove", 180), false);
+    assert.equal(s.height(), 700);
+});

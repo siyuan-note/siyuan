@@ -168,6 +168,7 @@ export class EmojiPanelController {
     private virtualTimer = 0;
     private virtualKey = 0;
     private columnCount = 10;
+    private panelWidth = 0;
     private rowHeight = 34;
     private rowGap = 0;
     private measuredItem?: HTMLElement;
@@ -180,8 +181,20 @@ export class EmojiPanelController {
 
     constructor(private panelElement: HTMLElement, private typeElement: HTMLElement, private options: TEmojiPanelOptions) {
         this.panelElement.addEventListener("scroll", this.handleScroll, {passive: true});
-        this.resizeObserver = new ResizeObserver(() => {
-            if (!this.active || this.pageMode === "search" || this.panelElement.clientWidth === 0) {
+        this.resizeObserver = new ResizeObserver((entries) => {
+            if (!this.active || this.pageMode === "search") {
+                return;
+            }
+            if (this.panelElement.clientWidth === 0) {
+                this.panelWidth = 0;
+                return;
+            }
+            if (this.panelElement.clientWidth === this.panelWidth &&
+                !entries.some(entry => entry.target === this.measuredItem)) {
+                if (this.pageMode === "common") {
+                    this.renderVisibleBuiltInChunks(this.categoryID);
+                    this.ensureCurrentSelection();
+                }
                 return;
             }
             const rowHeight = this.rowHeight;
@@ -457,6 +470,7 @@ export class EmojiPanelController {
             return this.columnCount;
         }
         // 在面板内测量实际样式，使虚拟占位尺寸与主题设置的按钮尺寸保持一致。
+        this.panelWidth = this.panelElement.clientWidth;
         const section = document.createElement("div");
         section.className = "emojis__section";
         section.style.visibility = "hidden";

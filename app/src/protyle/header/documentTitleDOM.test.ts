@@ -411,6 +411,8 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
             toolbar.classList.remove("fn__none");
             field.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", data: "x"}));
             check.equal(toolbar.classList.contains("fn__none"), false, "toolbar input fields retain the toolbar");
+            field.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+            check.equal(toolbar.classList.contains("fn__none"), false, "IME input in toolbar fields retains the toolbar");
             editable.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
             check.equal(toolbar.classList.contains("fn__none"), true, "IME composition dismisses the title toolbar before committing");
             root.removeEventListener("mousedown", onMouseDown);

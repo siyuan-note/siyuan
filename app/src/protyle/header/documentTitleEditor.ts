@@ -143,8 +143,10 @@ export class DocumentTitleEditor {
         const events = ["input", "copy", "cut", "paste", "pointerdown", "pointerup", "mousedown", "mouseup",
             "click", "dblclick", "contextmenu", "dragstart", "dragover", "drop", "keyup"];
         events.forEach(type => host.addEventListener(type, event => event.stopPropagation()));
-        host.addEventListener("compositionstart", () => {
-            hideAllElements(["toolbar"]);
+        host.addEventListener("compositionstart", event => {
+            if (this.fragment.wysiwyg.contains(event.target as Node)) {
+                hideAllElements(["toolbar"]);
+            }
             clearTimeout(this.timer);
             this.composing = true;
         }, true);

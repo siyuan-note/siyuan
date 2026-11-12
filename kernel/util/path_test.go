@@ -168,6 +168,10 @@ func sensitiveTestHome() string {
 		}
 		return filepath.Join(drive+`\`, "Users", "siyuan-sensitive-test")
 	}
+	if runtime.GOOS == "darwin" {
+		// macOS 的 /home 指向 /System，避免合成路径落入系统敏感目录。
+		return filepath.Join(string(filepath.Separator), "Users", "siyuan-sensitive-test")
+	}
 	return filepath.Join(string(filepath.Separator), "home", "siyuan-sensitive-test")
 }
 

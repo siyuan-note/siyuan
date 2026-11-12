@@ -162,12 +162,11 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
         const imageRect = image.getBoundingClientRect();
         const handleRect = corner.getBoundingClientRect();
         const dot = getComputedStyle(corner, "::after");
-        const transform = new DOMMatrix(dot.transform);
         const scale = handleRect.width / corner.offsetWidth;
-        const x = handleRect.left + (parseFloat(dot.left) + parseFloat(dot.width) / 2 + transform.e) * scale;
-        const y = handleRect.top + (parseFloat(dot.top) + parseFloat(dot.height) / 2 + transform.f) * scale;
-        check.ok(Math.abs(x - imageRect.right) <= 1, `compact dot x=${x}, image right=${imageRect.right}`);
-        check.ok(Math.abs(y - imageRect.bottom) <= 1, `compact dot y=${y}, image bottom=${imageRect.bottom}`);
+        const right = handleRect.right - parseFloat(dot.right) * scale;
+        const bottom = handleRect.bottom - parseFloat(dot.bottom) * scale;
+        check.ok(Math.abs(right - imageRect.right) <= 1, `compact dot right=${right}, image right=${imageRect.right}`);
+        check.ok(Math.abs(bottom - imageRect.bottom) <= 1, `compact dot bottom=${bottom}, image bottom=${imageRect.bottom}`);
     };
     for (const legacy of [false, true]) {
         for (const axis of ["width", "height", "both"]) {
@@ -187,8 +186,11 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
             check.equal(frameRect.width, imageRect.width);
             check.equal(frameRect.height, imageRect.height, "captions do not displace image handles");
             const handleRect = handle.getBoundingClientRect();
+            if (axis !== "width") {
+                check.ok(handleRect.bottom <= imageRect.bottom + 1, "bottom handles stay within the image");
+            }
             check.equal(document.elementFromPoint(handleRect.left + handleRect.width / 2,
-                handleRect.top + handleRect.height / 2), handle, "external handles remain reachable");
+                handleRect.top + handleRect.height / 2), handle, "resize handles remain reachable");
             check.equal(handle.dataset.preventSwipe, "true");
             const caption = image.parentElement.querySelector<HTMLElement>(".protyle-action__title");
             const captionRect = caption.getBoundingClientRect();
@@ -498,11 +500,11 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
             const right = Math.min(handleRect.right, badgeRect.right);
             const top = Math.max(handleRect.top, badgeRect.top);
             const bottom = Math.min(handleRect.bottom, badgeRect.bottom);
-            check.ok(left < right && top < bottom, "the narrow editor reproduces overlapping image and reference targets");
-            const x = (left + right) / 2;
-            const y = (top + bottom) / 2;
+            check.ok(left >= right || top >= bottom, "the resize corner leaves room for the next block's badge");
+            const x = badgeRect.left + badgeRect.width / 2;
+            const y = badgeRect.top + badgeRect.height / 2;
             check.equal(document.elementFromPoint(x, y), badge,
-                "the following block's reference badge accepts input over the image resize corner");
+                "the following block's reference badge accepts input");
             let clicked = false;
             badge.addEventListener("click", () => clicked = true);
             (document.elementFromPoint(x, y) as HTMLElement).click();
@@ -513,6 +515,34 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     root.style.width = "";
     root.style.fontSize = "";
     root.style.background = "";
+    for (const sameParagraph of [false, true]) {
+        const adjacent = await create();
+        adjacent.parentElement.querySelector(".protyle-action__title").remove();
+        tap(adjacent);
+        const text = document.createTextNode("Text below the image ".repeat(4));
+        let editor = root.firstElementChild.firstElementChild as HTMLElement;
+        if (sameParagraph) {
+            editor.append(document.createElement("br"), text);
+        } else {
+            root.insertAdjacentHTML("beforeend", lute.Md2BlockDOM(text.data));
+            editor = root.lastElementChild.firstElementChild as HTMLElement;
+            editor.replaceChildren(text);
+        }
+        editor.contentEditable = "true";
+        await settle();
+        const range = document.createRange();
+        range.selectNodeContents(text);
+        const line = range.getClientRects()[0];
+        for (const axis of ["height", "both"]) {
+            const rect = adjacent.parentElement.querySelector(`[data-resize-axis="${axis}"]`).getBoundingClientRect();
+            const x = Math.min(rect.left + rect.width / 2, line.right - 2);
+            const y = Math.floor((line.top + line.bottom) / 2);
+            check.ok(editor.contains(document.elementFromPoint(x, y)), "the line below the image accepts clicks");
+            getSelection().removeAllRanges();
+            await require("electron").ipcRenderer.invoke("image-resize-click", x, y);
+            check.equal(getSelection().anchorNode, text, `the line below the image accepts the caret (same paragraph: ${sameParagraph}, axis: ${axis})`);
+        }
+    }
     const image = await create();
     const frame = image.parentElement.querySelector<HTMLElement>(".protyle-image-resize");
     const move = (x: number, y: number) => require("electron").ipcRenderer.invoke("image-resize-pointer", x, y);
@@ -659,6 +689,10 @@ app.whenReady().then(async () => {
     win.webContents.debugger.attach("1.3");
     require("electron").ipcMain.handle("image-resize-pointer", (_event, x, y) =>
         win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x, y}));
+    require("electron").ipcMain.handle("image-resize-click", async (_event, x, y) => {
+        await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mousePressed", button: "left", clickCount: 1, x, y});
+        await win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {type: "mouseReleased", button: "left", clickCount: 1, x, y});
+    });
     require("electron").ipcMain.handle("image-resize-preview", async (_event, mode) => {
         require("fs").writeFileSync(process.env.SIYUAN_IMAGE_RESIZE_PREVIEW + "-" + mode + ".png", (await win.webContents.capturePage()).toPNG());
     });

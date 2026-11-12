@@ -694,14 +694,10 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         }
 
         .protyle-block-resize[data-resize-axis="both"]::after {
-          width: 5px;
-          height: 5px;
-          // 鼠标与触屏手柄都向图片内部延伸 8px，将圆点中心固定在图片角上。
-          left: 8px;
-          top: 8px;
-          right: auto;
-          bottom: auto;
-          transform: translate(-50%, -50%);
+          width: min(5px, 100%);
+          height: min(5px, 100%);
+          right: 0;
+          bottom: 0;
           border: 0;
           border-radius: 50%;
           background-color: currentColor;
@@ -1013,6 +1009,27 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
   cursor: text;
 }
 
+@media screen {
+  :where(.protyle-wysiwyg [data-type="NodeVideo"]) > .iframe-content > .protyle-block-resize[data-resize-axis="height"] {
+    // 由高度把手撑开视频下方的操作区，避免盖住播放器控件。
+    display: block;
+    position: relative;
+    left: auto;
+    margin-inline: auto;
+    transform: none;
+  }
+
+  .protyle-wysiwyg [data-type="NodeVideo"] > .iframe-content > .protyle-block-resize {
+    &[data-resize-axis="width"] {
+      top: calc((100% - var(--protyle-resize-bottom-height)) / 2);
+    }
+
+    &[data-resize-axis="both"] {
+      height: var(--protyle-resize-bottom-height);
+    }
+  }
+}
+
 .protyle-wysiwyg[data-readonly="true"] .iframe .protyle-block-resize,
 .protyle-wysiwyg[data-readonly="true"] [data-subtype="mermaid"] > .protyle-block-resize,
 .protyle-wysiwyg .sb > [data-subtype="mermaid"] > .protyle-block-resize {
@@ -1095,8 +1112,8 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
   }
 
 
-  .img:hover .protyle-action__drag,
-  .iframe:hover .protyle-action__drag {
+  .img:hover .protyle-action__drag:not(.protyle-block-resize),
+  .iframe:hover .protyle-action__drag:not(.protyle-block-resize) {
     display: inline-block;
   }
 

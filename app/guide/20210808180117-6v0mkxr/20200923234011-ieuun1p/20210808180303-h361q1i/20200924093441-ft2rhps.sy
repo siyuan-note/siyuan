@@ -132,7 +132,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Paste or drag images to upload them. Hover over an image to reveal the small handles outside its border, then drag the right, bottom, or bottom-right handle to resize it proportionally. On touchscreens, tap an image to reveal its handles, then drag a handle"
+									"Data": "Paste or drag images to upload them. Hover over an image to reveal the small handles along its edges, then drag the right, bottom, or bottom-right handle to resize it proportionally. On touchscreens, tap an image to reveal its handles, then drag a handle"
 								}
 							]
 						},
@@ -3201,7 +3201,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Hover over the outer frame to reveal the small handles outside the border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both."
+					"Data": "Hover over the outer frame to reveal the small handles along the edges. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both."
 				}
 			]
 		},
@@ -5727,7 +5727,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Hover over the block to reveal the small handles outside its border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly; changing one dimension preserves the other."
+					"Data": "Hover over the block to reveal the small handles along its edges. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly; changing one dimension preserves the other."
 				}
 			]
 		},

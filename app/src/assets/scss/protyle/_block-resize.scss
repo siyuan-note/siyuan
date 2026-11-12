@@ -1,4 +1,6 @@
 .protyle-block-resize {
+  --protyle-resize-bottom-height: 12px;
+
   position: absolute;
   z-index: 6;
   touch-action: none;
@@ -34,9 +36,9 @@
   }
 
   &[data-resize-axis="height"] {
-    height: 12px;
+    height: var(--protyle-resize-bottom-height);
     width: min(40px, 50%);
-    bottom: -12px;
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
     cursor: ns-resize;
@@ -50,20 +52,26 @@
       border-radius: 2px;
       background-color: currentColor;
     }
+
+    &.protyle-action__drag::after,
+    &.mindmap-view__resize::after {
+      top: auto;
+      bottom: 2px;
+    }
   }
 
   &[data-resize-axis="both"] {
-    width: 24px;
-    height: 24px;
-    right: -16px;
-    bottom: -16px;
+    width: min(20px, 100%);
+    height: min(20px, 100%);
+    right: 0;
+    bottom: 0;
     cursor: nwse-resize;
 
     &::after {
-      width: 16px;
-      height: 16px;
-      right: 9px;
-      bottom: 9px;
+      width: min(16px, calc(100% - 2px));
+      height: min(16px, calc(100% - 2px));
+      right: 2px;
+      bottom: 2px;
       border-right: 3px solid currentColor;
       border-bottom: 3px solid currentColor;
       border-bottom-right-radius: 10px;
@@ -89,8 +97,9 @@
 }
 
 @media (any-pointer: coarse) {
-  // 外侧命中区域为触屏加宽，装饰尺寸保持不变。
   .protyle-block-resize {
+    --protyle-resize-bottom-height: 20px;
+
     &[data-resize-axis="width"] {
       width: 20px;
       right: -20px;
@@ -98,21 +107,12 @@
     }
 
     &[data-resize-axis="height"] {
-      height: 20px;
-      bottom: -20px;
       width: min(48px, 50%);
     }
 
     &[data-resize-axis="both"] {
-      width: 32px;
-      height: 32px;
-      right: -24px;
-      bottom: -24px;
-
-      &::after {
-        right: 17px;
-        bottom: 17px;
-      }
+      width: min(32px, 100%);
+      height: min(32px, 100%);
     }
   }
 }

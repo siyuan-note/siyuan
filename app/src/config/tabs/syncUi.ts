@@ -834,7 +834,7 @@ const CLOUD_SPACE_DISPLAY_KEYS = [
 type CloudSpaceDisplayData = Record<(typeof CLOUD_SPACE_DISPLAY_KEYS)[number], string>;
 
 const buildCloudSpaceHtml = (data: CloudSpaceDisplayData, loading: boolean) =>
-    `<div class="fn__flex config-cloud-space${loading ? " config-cloud-space--loading" : ""}">
+    `<div class="config-cloud-space${loading ? " config-cloud-space--loading" : ""}">
     <div class="config-cloud-space__body">
         <div class="config-cloud-space__title">${window.siyuan.languages.cloudStorage}</div>
         <div class="config-cloud-space__placeholder">

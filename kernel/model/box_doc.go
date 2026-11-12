@@ -283,24 +283,41 @@ func reconcileBoxDoc(box *Box, boxDocID string) error {
 
 // BoxDocSubFileCount 返回笔记本顶层文档的可见下级文档数。
 func BoxDocSubFileCount(boxID string) int {
-	return boxDocSubFileCount(boxID, "/", nil)
+	return boxDocSubFileCount(boxID, "/", "owner", nil)
 }
 
 // BoxDocSubFileCountForPublish 返回发布访问控制下笔记本顶层文档的可见下级文档数。
 func BoxDocSubFileCountForPublish(boxID string, publishAccess PublishAccess) int {
-	return boxDocSubFileCount(boxID, "/", PublishVisibleDocPathFilter(boxID, publishAccess))
+	return boxDocSubFileCount(boxID, "/", DocTreePublishAccessRevision(publishAccess), PublishVisibleDocPathFilter(boxID, publishAccess))
 }
 
 // BoxDocSubFileCountForPublishAt 返回发布访问控制下指定文档的可见直接子文档数，docPath 为该文档的 .sy 路径。
 func BoxDocSubFileCountForPublishAt(boxID, docPath string, publishAccess PublishAccess) int {
-	return boxDocSubFileCount(boxID, strings.TrimSuffix(docPath, ".sy"), PublishVisibleDocPathFilter(boxID, publishAccess))
+	return boxDocSubFileCount(boxID, strings.TrimSuffix(docPath, ".sy"), DocTreePublishAccessRevision(publishAccess),
+		PublishVisibleDocPathFilter(boxID, publishAccess))
 }
 
-func boxDocSubFileCount(boxID, parentPath string, include func(docPath string) bool) int {
-	ret, _ := visibleDocCount(boxID, parentPath, func(p string) map[string]string {
-		ial, _ := filesys.DocIAL(filepath.Join(util.DataDir, boxID, p))
+func boxDocSubFileCount(boxID, parentPath, policy string, include func(docPath string) bool) int {
+	if IsEncryptedBox(boxID) && !isBoxUnlockedForAccess(boxID) {
+		return 0
+	}
+	key := "notebook-document-count\x00" + filepath.Clean(util.DataDir) + "\x00" + boxID + "\x00" + policy
+	version, stable := cache.DocTreeSourceVersion(boxID, true)
+	if count, ok := cache.GetDocTreeChildCount(key, boxID, parentPath); stable && ok {
+		return count
+	}
+	cacheable := stable
+	ret, err := visibleDocCount(boxID, parentPath, func(p string) map[string]string {
+		ial, readErr := filesys.DocIAL(filepath.Join(util.DataDir, boxID, p))
+		if readErr != nil {
+			cacheable = false
+		}
 		return ial
 	}, include)
+	// 读取失败或源版本变化时，不能将临时计数留给后续请求。
+	if err == nil && cacheable {
+		cache.PutDocTreeChildCount(key, boxID, parentPath, version, ret)
+	}
 	return ret
 }
 

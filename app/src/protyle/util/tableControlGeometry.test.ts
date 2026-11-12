@@ -28,10 +28,10 @@ test("mindmap table controls observe their own geometry and ancestor scrolling",
         const observations: Array<{target: TestNode, options: MutationObserverInit}> = [];
         const events: Array<{type: string, callback: (event: {target: unknown}) => void, options: AddEventListenerOptions}> = [];
         const abortController = new AbortController();
-        let renders = 0;
+        let scrolls = 0;
         new Function("protyle", "document", "Node", code).call({
             observer: {observe: (target: TestNode, options: MutationObserverInit) => observations.push({target, options})},
-            abortController, scheduleRender: () => renders++,
+            abortController, onScroll: () => scrolls++,
         }, {element}, {addEventListener: (type: string, callback: typeof events[number]["callback"], options: AddEventListenerOptions) =>
             events.push({type, callback, options})}, TestNode);
         assert.deepEqual(observations.map(item => item.target), mindmap ? [world, node] : []);
@@ -42,10 +42,10 @@ test("mindmap table controls observe their own geometry and ancestor scrolling",
             assert.equal(events[0].options.capture, true);
             assert.equal(events[0].options.signal, abortController.signal, "destroy releases the ancestor scroll listener");
             events[0].callback({target: new TestNode([element])});
-            assert.equal(renders, 1, "ancestor scroll refreshes screen coordinates");
+            assert.equal(scrolls, 1, "ancestor scroll reaches the table scroll handler");
             events[0].callback({target: new TestNode()});
             events[0].callback({target: {}});
-            assert.equal(renders, 1, "unrelated scroll events do not schedule work");
+            assert.equal(scrolls, 1, "unrelated scroll events do not schedule work");
         }
     }
 });

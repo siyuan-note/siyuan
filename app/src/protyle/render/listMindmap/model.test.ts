@@ -2621,7 +2621,12 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         let last = -1;
         while (performance.now() < deadline && stable < 12) {
             await frame();
-            stable = !touchPalette.hasAttribute("data-scrolling") && Math.abs(touchPalette.scrollLeft - last) < .1 ? stable + 1 : 0;
+            const step = parseFloat(getComputedStyle(touchPalette).gridTemplateColumns);
+            const aligned = Math.abs(touchPalette.scrollLeft - Math.round(touchPalette.scrollLeft / step) * step) < 1 ||
+                Math.abs(touchPalette.scrollLeft - (touchPalette.scrollWidth - touchPalette.clientWidth)) < 1;
+            // 原生触屏惯性与吸附之间可能短暂停顿，只有已对齐的稳定位置才表示完成。
+            stable = aligned && !touchPalette.hasAttribute("data-scrolling") &&
+                Math.abs(touchPalette.scrollLeft - last) < .1 ? stable + 1 : 0;
             last = touchPalette.scrollLeft;
         }
         const step = parseFloat(getComputedStyle(touchPalette).gridTemplateColumns);
@@ -6134,7 +6139,10 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.whenReady().then(async () => {
-    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+    // macOS 离屏合成器的原生触屏吸附可能停在中间位置，用真实窗口验证触摸滚动。
+    const nativeWindow = process.platform === "darwin";
+    const win = new BrowserWindow({show: nativeWindow,
+        webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: !nativeWindow}});
     win.webContents.debugger.attach("1.3");
     ipcMain.handle("mindmap-view-ime", async (_event, text) => {
         await win.webContents.debugger.sendCommand("Input.imeSetComposition", {

@@ -7,7 +7,7 @@
 		"id": "20211226120933-vnjgwwh",
 		"title": "搜索進階",
 		"type": "doc",
-		"updated": "20261026182843"
+		"updated": "20261113013235"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-g42svwc",
-				"updated": "20261026182843"
+				"updated": "20261113013235"
 			},
 			"Children": [
 				{
@@ -101,7 +101,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010113646-lqqhbxx",
-				"updated": "20261010113646"
+				"updated": "20261113013235"
 			},
 			"Children": [
 				{
@@ -115,7 +115,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 換行；請保留 -- 行註解後的換行，避免後續語句被視為註解。搜尋視窗需要完整區塊欄位，例如 SELECT b.* FROM blocks b；僅選取部分欄位或統計結果應交給智能體的 sql.query。"
+					"Data": " 換行；請保留 -- 行註解後的換行，避免後續語句被視為註解。其他搜尋方式使用單行輸入，貼上的換行以及從 SQL 切換後留在輸入框中的換行會轉為空格。搜尋視窗需要完整區塊欄位，例如 SELECT b.* FROM blocks b；僅選取部分欄位或統計結果應交給智能體的 sql.query。"
 				}
 			]
 		},

@@ -2,6 +2,7 @@ import {removeSearchCriterion} from "../config/util/resourceConfig";
 import {toggleMenu} from "../menus/menuToggle";
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {updateSearchMethodControls} from "./methodCapabilities";
+import {bindSearchInput} from "./input";
 import {getAttr} from "./attrs";
 import type {APICallbackResponse, APIPOSTRoutes, BlockQueryRequestInput} from "../types/api";
 import {getAllModels} from "../layout/getAll";
@@ -1003,11 +1004,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         }
         saveKeyList("keys", searchInputElement.value, config);
     });
-    searchInputElement.addEventListener("beforeinput", (event: InputEvent) => {
-        if (event.inputType === "insertLineBreak" && config.method !== 2) {
-            event.preventDefault();
-        }
-    });
+    bindSearchInput(searchInputElement, () => config.method);
     searchInputElement.addEventListener("keydown", (event) => {
         electronUndo(event);
     });

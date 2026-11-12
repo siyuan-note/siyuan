@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20261026182843"
+		"updated": "20261113013235"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-t1r641c",
-				"updated": "20261026182843"
+				"updated": "20261113013235"
 			},
 			"Children": [
 				{
@@ -101,7 +101,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010113646-apg2y00",
-				"updated": "20261010113646"
+				"updated": "20261113013235"
 			},
 			"Children": [
 				{
@@ -115,7 +115,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to insert a newline. Keep the newline after a -- line comment so that the following statement is not treated as a comment. The search window requires complete block columns, such as SELECT b.* FROM blocks b; use the agent's sql.query for projections or aggregates."
+					"Data": " to insert a newline. Keep the newline after a -- line comment so that the following statement is not treated as a comment. Other search methods use a single line: pasted line breaks and line breaks remaining after leaving SQL mode become spaces. The search window requires complete block columns, such as SELECT b.* FROM blocks b; use the agent's sql.query for projections or aggregates."
 				}
 			]
 		},

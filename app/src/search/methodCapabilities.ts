@@ -1,3 +1,5 @@
+import {normalizeSearchInput} from "./input";
+
 export const getSearchMethodCapabilities = (method: number, group: number) => ({
     filter: method !== 2,
     path: method !== 2,
@@ -34,7 +36,11 @@ export const updateSearchMethodControls = (element: Element, config: Config.IUIL
                                           mobile = false) => {
     const capabilities = getSearchMethodCapabilities(config.method, config.group);
     const language = window.siyuan.languages;
-    const input = mobile ? document.querySelector("#toolbarSearch") : element.querySelector("#searchInput");
+    const input = mobile ? document.querySelector<HTMLTextAreaElement>("#toolbarSearch") :
+        element.querySelector<HTMLTextAreaElement>("#searchInput");
+    if (input) {
+        normalizeSearchInput(input, config.method);
+    }
     input?.classList.toggle("search__input--sql", config.method === 2);
     if (mobile && input) {
         input.closest(".toolbar__search")?.classList.toggle("toolbar__search--sql", config.method === 2);

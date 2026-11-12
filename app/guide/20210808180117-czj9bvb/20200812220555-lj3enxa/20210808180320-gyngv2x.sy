@@ -7,7 +7,7 @@
 		"id": "20210808180320-gyngv2x",
 		"title": "搜索进阶",
 		"type": "doc",
-		"updated": "20261026182843"
+		"updated": "20261113013235"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-ljls7op",
-				"updated": "20261026182843"
+				"updated": "20261113013235"
 			},
 			"Children": [
 				{
@@ -101,7 +101,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010113646-r0h5r0j",
-				"updated": "20261010113646"
+				"updated": "20261113013235"
 			},
 			"Children": [
 				{
@@ -115,7 +115,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 换行；请保留 -- 行注释后的换行，避免后续语句被视为注释。搜索窗口需要完整块字段，例如 SELECT b.* FROM blocks b；仅选择部分字段或统计结果应交给智能体的 sql.query。"
+					"Data": " 换行；请保留 -- 行注释后的换行，避免后续语句被视为注释。其他搜索方式使用单行输入，粘贴的换行以及从 SQL 切换后留在输入框中的换行会转为空格。搜索窗口需要完整块字段，例如 SELECT b.* FROM blocks b；仅选择部分字段或统计结果应交给智能体的 sql.query。"
 				}
 			]
 		},

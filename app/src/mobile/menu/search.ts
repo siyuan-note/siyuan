@@ -2,6 +2,7 @@ import {removeSearchCriterion} from "../../config/util/resourceConfig";
 import {toggleMenu} from "../../menus/menuToggle";
 import {closePanel} from "../util/closePanel";
 import {updateSearchMethodControls} from "../../search/methodCapabilities";
+import {bindSearchInput} from "../../search/input";
 import {buildSearchRequest, refreshSearchConfigHPath} from "../../search/config";
 import {resolveCurrentSearchHPath} from "../../search/path";
 import {focusSearchInput} from "../../search/focus";
@@ -392,11 +393,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
     let focusTimeout = 0;
     const searchInputElement = document.getElementById("toolbarSearch") as HTMLTextAreaElement;
     searchInputElement.value = config.k || "";
-    searchInputElement.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" && config.method !== 2) {
-            event.preventDefault();
-        }
-    });
+    bindSearchInput(searchInputElement, () => config.method);
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event && event.isComposing) {
             return;

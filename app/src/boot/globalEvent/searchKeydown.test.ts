@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, forEachChild, isCallExpression, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {bindSearchInput} from "../../search/input";
 
 const evaluate = (source: string, globals: Record<string, unknown>) => {
     runInNewContext(transpileModule(source, {
@@ -15,9 +16,10 @@ const inputHandlers = (method: number) => {
     const source = createSourceFile("util.ts", readFileSync(__dirname + "/../../search/util.ts", "utf8"),
         ScriptTarget.ES2021, true);
     const visit = (node: import("typescript").Node) => {
-        if (isCallExpression(node) && node.expression.getText(source) === "searchInputElement.addEventListener" &&
-            ["\"keydown\"", "\"beforeinput\""].includes(node.arguments[0].getText(source))) {
-            evaluate(node.getText(source), {config: {method}, electronUndo: (): void => undefined,
+        if (isCallExpression(node) && (node.expression.getText(source) === "bindSearchInput" ||
+            node.expression.getText(source) === "searchInputElement.addEventListener" &&
+            node.arguments[0].getText(source) === "\"keydown\"")) {
+            evaluate(node.getText(source), {config: {method}, bindSearchInput, electronUndo: (): void => undefined,
                 searchInputElement: {addEventListener: (type: string, handler: (event: any) => void) => handlers[type] = handler}});
         }
         forEachChild(node, visit);
@@ -82,7 +84,7 @@ test("search input Enter retains keyword document creation and ordinary result o
     assert.deepEqual(runEnter("searchInput", 2, "search-result"), {calls: [], handled: false});
 });
 
-test("search input Enter reaches global result opening before newline prevention", () => {
+test("search input Enter reaches global result opening while beforeinput prevents line breaks", () => {
     for (const method of [0, 1, 3]) {
         for (const keyword of ["", "missing"]) {
             assert.deepEqual(runEnter("searchInput", method, "search-result", true, keyword), {calls: ["open"], handled: true});
@@ -93,10 +95,10 @@ test("search input Enter reaches global result opening before newline prevention
 
 test("search input rejects non-SQL line breaks and preserves SQL multiline editing", () => {
     for (const method of [0, 1, 2, 3]) {
-        for (const inputType of ["insertLineBreak", "insertText", "insertCompositionText"]) {
+        for (const inputType of ["insertLineBreak", "insertParagraph", "insertText", "insertCompositionText"]) {
             const event = {inputType, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }};
             inputHandlers(method).beforeinput(event);
-            assert.equal(event.defaultPrevented, inputType === "insertLineBreak" && method !== 2);
+            assert.equal(event.defaultPrevented, ["insertLineBreak", "insertParagraph"].includes(inputType) && method !== 2);
         }
     }
 });

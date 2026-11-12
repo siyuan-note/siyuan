@@ -47,7 +47,8 @@ for (const mobile of [true, false]) {
             searchControlUnavailable: "unavailable", specifyPath: "path", searchType: "types", includeChildDoc: "children",
             filterCurrentDocument: "current document", replace: "replace", remove: "remove",
         }}} as unknown as Window & typeof globalThis;
-        const searchInput = {...control(), closest: (): null => null};
+        const searchInput = {...control(), value: "select\nfrom blocks", selectionStart: 0, selectionEnd: 0,
+            setSelectionRange() {}, closest: (): null => null};
         globalThis.document = {querySelector: (selector: string) => selector === "#toolbarSearch" ? searchInput :
             {classList: {contains: () => true}}} as unknown as Document;
         try {
@@ -71,7 +72,15 @@ for (const mobile of [true, false]) {
             const filter = mobile ? '[data-type="path"]' : "#searchFilter";
             const include = mobile ? '[data-type="include"]' : "#searchInclude";
             const refresh = () => updateSearchMethodControls(element as unknown as Element, config as Config.IUILayoutTabSearchConfig, mobile);
+            const query = mobile ? searchInput : element.querySelector("#searchInput") as unknown as typeof searchInput;
+            query.value = "select\nfrom blocks";
+            query.setSelectionRange = () => {};
+            config.method = 2;
             refresh();
+            assert.equal(query.value, "select\nfrom blocks", "SQL retains its line breaks");
+            config.method = 0;
+            refresh();
+            assert.equal(query.value, "select from blocks", "switching out of SQL normalizes the input before searching");
             assert.equal(row.classes.has("fn__none"), false);
             config.method = 2;
             refresh();

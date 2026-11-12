@@ -1,7 +1,7 @@
 import {Constants} from "../../constants";
 import {openFileById} from "../../editor/util";
 import {pushBackByClick, saveBackScroll} from "../../util/backForward";
-import {checkFold} from "../../util/noRelyPCFunction";
+import {checkReferenceFold} from "../../util/noRelyPCFunction";
 import {parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {hideElements} from "../ui/hideElements";
@@ -26,7 +26,7 @@ export const openTouchReference = (protyle: IProtyle, target: HTMLElement, point
     if (!reference && uri?.avItemID) {
         processSiYuanUri(protyle.app, href);
     } else {
-        checkFold(id, (zoomIn, action, isRoot) => {
+        checkReferenceFold(id, (zoomIn, action, isRoot) => {
             if (!isRoot) {
                 action.push(Constants.CB_GET_HL);
             }

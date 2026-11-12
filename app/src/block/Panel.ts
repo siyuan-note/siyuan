@@ -15,7 +15,7 @@ import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import type {App} from "../index";
 import {resize} from "../protyle/util/resize";
-import {checkFold} from "../util/noRelyPCFunction";
+import {checkReferenceFold} from "../util/noRelyPCFunction";
 import {updateHotkeyAfterTip} from "../protyle/util/compatibility";
 import {getTopBarHeight} from "../layout/getTopBarHeight";
 import {activateAVLocateWithRetry} from "../protyle/render/av/locate";
@@ -156,7 +156,7 @@ export class BlockPanel {
                         openNewWindowById(this.refDefs[0].refID);
                         /// #endif
                     } else if (type === "stickTab") {
-                        checkFold(this.refDefs[0].refID, (zoomIn, action) => {
+                        checkReferenceFold(this.refDefs[0].refID, (zoomIn, action) => {
                             openFileById({
                                 app: options.app,
                                 id: this.refDefs[0].refID,

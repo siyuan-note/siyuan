@@ -107,14 +107,19 @@ export const renameTag = (labelName: string) => {
     });
 };
 
-export const checkFold = (id: string, cb: (zoomIn: boolean, action: TProtyleAction[], isRoot: boolean) => void) => {
+export const checkFold = (id: string, cb: (zoomIn: boolean, action: TProtyleAction[], isRoot: boolean) => void,
+                          onlyHidden = false) => {
     if (!id) {
         return;
     }
     fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
         const action = isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS;
-        cb(foldResponse.data.isFolded,
-            foldResponse.data.isFolded ? [action, Constants.CB_GET_ALL] : [action, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+        const zoomIn = onlyHidden ? (foldResponse.data.isHidden ?? foldResponse.data.isFolded) : foldResponse.data.isFolded;
+        cb(zoomIn,
+            zoomIn ? [action, Constants.CB_GET_ALL] : [action, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
             foldResponse.data.isRoot);
     });
 };
+
+export const checkReferenceFold = (id: string, cb: (zoomIn: boolean, action: TProtyleAction[], isRoot: boolean) => void) =>
+    checkFold(id, cb, true);

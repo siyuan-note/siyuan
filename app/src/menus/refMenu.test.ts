@@ -7,7 +7,7 @@ import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} fr
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-const setup = (mobile: boolean, disabled = false) => {
+const setup = (mobile: boolean, disabled = false, hidden = false) => {
     const source = createSourceFile("protyle.ts", parse(readFileSync(join(__dirname, "protyle.ts"), "utf8"),
         {MOBILE: mobile, BROWSER: true}, false, true, "protyle.ts"), ScriptTarget.Latest, true);
     const declaration = source.statements.filter(isVariableStatement).flatMap(statement =>
@@ -17,6 +17,7 @@ const setup = (mobile: boolean, disabled = false) => {
     const events: string[] = [];
     const items: IMenu[] = [];
     const transactions: string[] = [];
+    const opened: any[] = [];
     const listeners = new Map<string, () => void>();
     const input = {value: "", select: () => events.push("select"),
         addEventListener: (type: string, listener: () => void) => listeners.set(type, listener)};
@@ -38,7 +39,13 @@ const setup = (mobile: boolean, disabled = false) => {
         .map(name => [name, {custom: ""}]));
     runInNewContext(code, {
         protyle, element, isMobile: () => mobile,
-        Constants: {MENU_INLINE_REF: "ref", ATTRIBUTE_MENU_KEYMAP: "data-keymap"},
+        Constants: {MENU_INLINE_REF: "ref", ATTRIBUTE_MENU_KEYMAP: "data-keymap", CB_GET_HL: "hl",
+            CB_GET_ALL: "all", CB_GET_CONTEXT: "context", CB_GET_ROOTSCROLL: "scroll"},
+        checkReferenceFold: (id: string, callback: any) => {
+            assert.equal(id, "target");
+            callback(hidden, [hidden ? "all" : "context"], false);
+        },
+        openFileById: (options: any) => opened.push(options),
         window: {siyuan: {languages: {}, menus: {menu}, config: {keymap: {editor: {general: keymap}}}}},
         hasClosestBlock: () => block, hasTopClosestByClassName: (): undefined => undefined,
         hideElements() {}, emitOpenMenu() {}, updateHotkeyTip: (value: string) => value,
@@ -58,7 +65,7 @@ const setup = (mobile: boolean, disabled = false) => {
             }
         },
     });
-    return {events, items, input, listeners, menu, transactions, element, attributes};
+    return {events, items, input, listeners, menu, transactions, element, attributes, opened};
 };
 
 for (const mobile of [false, true]) {
@@ -86,4 +93,22 @@ test("mobile anchor edits still commit when the reference menu closes", () => {
     fixture.menu.removeCB();
     assert.deepEqual(fixture.transactions, ["<div>Reference</div>"]);
     assert.ok(!fixture.events.includes("select"));
+});
+
+test("reference menu opening actions use visibility while retaining their positions", () => {
+    for (const hidden of [false, true]) {
+        const fixture = setup(false, false, hidden);
+        for (const id of ["openBy", "refTab", "insertRight", "insertBottom"]) {
+            fixture.items.find(item => item.id === id).click(null, null);
+        }
+        assert.equal(fixture.opened.length, 4);
+        fixture.opened.forEach(options => {
+            assert.equal(options.id, "target");
+            assert.equal(options.zoomIn, hidden);
+            assert.equal(options.action.includes("all"), hidden);
+        });
+        assert.equal(fixture.opened[1].keepCursor, true);
+        assert.equal(fixture.opened[2].position, "right");
+        assert.equal(fixture.opened[3].position, "bottom");
+    }
 });

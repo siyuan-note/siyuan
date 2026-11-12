@@ -7,7 +7,7 @@ import {Constants} from "../constants";
 import {openFile, openFileById} from "../editor/util";
 /// #endif
 import {fetchPost} from "./fetch";
-import {checkFold} from "./noRelyPCFunction";
+import {checkReferenceFold} from "./noRelyPCFunction";
 import {openMobileFileById} from "../mobile/editor";
 import {isValidBazaarPackageName} from "./bazaarPackage";
 import {isBazaarAvailable} from "./bazaarAvailability";
@@ -30,7 +30,7 @@ const processSiYuanUriBlocks = (app: App, uriObj: ParsedSiYuanUri, event?: Mouse
         fetchPost("/api/block/checkBlockExist", { id }, existResponse => {
             if (existResponse.data) {
                 if (!openStandaloneDatabaseItemByURI(app, blockInfo)) {
-                    checkFold(id, (zoomIn) => {
+                    checkReferenceFold(id, (zoomIn) => {
                         if (blockInfo.avItemID) {
                             void openDatabaseItem(app, {
                                 databaseBlockID: id,

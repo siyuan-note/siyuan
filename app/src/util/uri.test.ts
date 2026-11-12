@@ -109,7 +109,7 @@ const createDispatcher = (URLClass: typeof URL, mobile: boolean, exists = true) 
             requests.push({url, id: data.id});
             callback({data: exists});
         },
-        checkFold: (_id: string, callback: (zoomIn: boolean) => void) => callback(false),
+        checkReferenceFold: (_id: string, callback: (zoomIn: boolean) => void) => callback(false),
         openStandaloneDatabaseItemByURI: () => false,
         openFileById: (options: {id: string, action: string[]}) => opens.push(options),
         openMobileFileById: (_app: unknown, id: string, action: string[]) => opens.push({id, action}),

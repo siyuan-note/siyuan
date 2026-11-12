@@ -132,7 +132,7 @@ import {newFileBySelectRange} from "../../util/newFile";
 import {removeSearchMark} from "../toolbar/util";
 import {avKeydown} from "../render/av/keydown";
 import {shouldPreserveAVSelectionOnKeyup} from "../render/av/verticalNavigation";
-import {checkFold} from "../../util/noRelyPCFunction";
+import {checkReferenceFold} from "../../util/noRelyPCFunction";
 import {AIActions} from "../../ai/actions";
 import {openLink} from "../../editor/openLink";
 import {onlyProtyleCommand} from "../../boot/globalEvent/command/protyle";
@@ -2693,7 +2693,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             });
             const id = nodeElement.getAttribute("data-node-id");
-            checkFold(id, (zoomIn, action) => {
+            checkReferenceFold(id, (zoomIn, action) => {
                 openFileById({
                     app: protyle.app,
                     id,
@@ -2765,7 +2765,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (refElement) {
             const id = refElement.getAttribute("data-id");
             if (matchHotKey(window.siyuan.config.keymap.editor.general.openBy, event)) {
-                checkFold(id, (zoomIn, action, isRoot) => {
+                checkReferenceFold(id, (zoomIn, action, isRoot) => {
                     if (!isRoot) {
                         action.push(Constants.CB_GET_HL);
                     }
@@ -2782,7 +2782,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return true;
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.refTab, event)) {
                 // 打开块引和编辑器中引用、反链、书签中点击事件需保持一致，都加载上下文
-                checkFold(id, (zoomIn) => {
+                checkReferenceFold(id, (zoomIn) => {
                     openFileById({
                         app: protyle.app,
                         id,
@@ -2796,7 +2796,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.stopPropagation();
                 return true;
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight, event)) {
-                checkFold(id, (zoomIn, action, isRoot) => {
+                checkReferenceFold(id, (zoomIn, action, isRoot) => {
                     if (!isRoot) {
                         action.push(Constants.CB_GET_HL);
                     }
@@ -2813,7 +2813,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.stopPropagation();
                 return true;
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.insertBottom, event)) {
-                checkFold(id, (zoomIn, action, isRoot) => {
+                checkReferenceFold(id, (zoomIn, action, isRoot) => {
                     if (!isRoot) {
                         action.push(Constants.CB_GET_HL);
                     }

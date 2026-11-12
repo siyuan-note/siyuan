@@ -454,7 +454,7 @@ func TestBlockPublishAccessGuards(t *testing.T) {
 			t.Fatalf("disabled block existence should be hidden from the reader: %v", response["data"])
 		}
 		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, checkBlockFold); response["data"].(map[string]any)["isFolded"].(bool) ||
-			response["data"].(map[string]any)["isRoot"].(bool) {
+			response["data"].(map[string]any)["isRoot"].(bool) || response["data"].(map[string]any)["isHidden"].(bool) {
 			t.Fatalf("fold state of a disabled block should be hidden from the reader: %v", response["data"])
 		}
 		if response := blockGuardRequest(model.RoleReader, `{"id":"`+disabledID+`"}`, getUnfoldedParentID); "" != response["data"].(map[string]any)["parentID"].(string) {

@@ -294,8 +294,8 @@ var checkBlockFold = contractHandler(apicontract.CheckBlockFold, func(c *gin.Con
 	if !isBlockPublishAccessible(c, request.ID, boxID) {
 		return apicontract.Success(apicontract.BlockFoldData{})
 	}
-	isFolded, isRoot := model.IsBlockFolded(request.ID)
-	return apicontract.Success(apicontract.BlockFoldData{IsFolded: isFolded, IsRoot: isRoot})
+	isFolded, isRoot, isHidden := model.IsBlockFolded(request.ID)
+	return apicontract.Success(apicontract.BlockFoldData{IsFolded: isFolded, IsRoot: isRoot, IsHidden: isHidden})
 })
 
 var checkBlockExist = contractHandler(apicontract.CheckBlockExist, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[bool] {

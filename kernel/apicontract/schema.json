@@ -19688,12 +19688,16 @@
         "isFolded": {
           "type": "boolean"
         },
+        "isHidden": {
+          "type": "boolean"
+        },
         "isRoot": {
           "type": "boolean"
         }
       },
       "required": [
         "isFolded",
+        "isHidden",
         "isRoot"
       ],
       "additionalProperties": false

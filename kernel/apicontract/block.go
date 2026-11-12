@@ -107,6 +107,7 @@ type UnfoldedParentData struct {
 type BlockFoldData struct {
 	IsFolded bool `json:"isFolded"`
 	IsRoot   bool `json:"isRoot"`
+	IsHidden bool `json:"isHidden"`
 }
 
 type HeadingChildrenRequest struct {

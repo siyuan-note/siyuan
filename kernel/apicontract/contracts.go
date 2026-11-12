@@ -360,9 +360,10 @@ var (
 )
 
 var (
-	GetBlockSiblingID     = define[BlockQueryRequest, BlockSiblingData]("getBlockSiblingID", "/api/block/getBlockSiblingID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-	GetBlockRelevantIDs   = define[BlockQueryRequest, BlockRelevantData]("getBlockRelevantIDs", "/api/block/getBlockRelevantIDs", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-	GetUnfoldedParentID   = define[BlockQueryRequest, UnfoldedParentData]("getUnfoldedParentID", "/api/block/getUnfoldedParentID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	GetBlockSiblingID   = define[BlockQueryRequest, BlockSiblingData]("getBlockSiblingID", "/api/block/getBlockSiblingID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	GetBlockRelevantIDs = define[BlockQueryRequest, BlockRelevantData]("getBlockRelevantIDs", "/api/block/getBlockRelevantIDs", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	GetUnfoldedParentID = define[BlockQueryRequest, UnfoldedParentData]("getUnfoldedParentID", "/api/block/getUnfoldedParentID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	// isFolded 保留自身或上级折叠的判断；isHidden 表示目标被折叠遮挡，裁剪容器内无法确定可见性的目标按隐藏处理
 	CheckBlockFold        = define[BlockQueryRequest, BlockFoldData]("checkBlockFold", "/api/block/checkBlockFold", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 	CheckBlockExist       = define[BlockQueryRequest, bool]("checkBlockExist", "/api/block/checkBlockExist", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 	GetBlockIndex         = define[BlockQueryRequest, int]("getBlockIndex", "/api/block/getBlockIndex", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")

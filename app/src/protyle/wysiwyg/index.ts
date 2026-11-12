@@ -167,7 +167,7 @@ import {selectRow, stickyRow, updateHeader} from "../render/av/row";
 import {getAVSelectedItemIDs, getAVSelectedTableCells, updateAVRowSelect} from "../render/av/virtualScroll";
 import {autoFitAVColumns, setFreezeColumn, showAVColumnWidthMenu, showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
-import {checkFold} from "../../util/noRelyPCFunction";
+import {checkFold, checkReferenceFold} from "../../util/noRelyPCFunction";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {
     addDragFill,
@@ -5062,7 +5062,7 @@ export class WYSIWYG {
                     } else if (aElement) {
                         refBlockId = aLink.substring(16, 38);
                     }
-                    checkFold(refBlockId, (zoomIn, action, isRoot) => {
+                    checkReferenceFold(refBlockId, (zoomIn, action, isRoot) => {
                         // 块引用跳转后需要短暂高亮目标块 https://github.com/siyuan-note/siyuan/issues/11542
                         if (!isRoot) {
                             action.push(Constants.CB_GET_HL);
@@ -5141,7 +5141,7 @@ export class WYSIWYG {
                     virtualRefParam.notebook = protyle.notebookId;
                 }
                 fetchPost("/api/block/getBlockDefIDsByRefText", virtualRefParam, (response) => {
-                    checkFold(response.data.refDefs[0].refID, (zoomIn) => {
+                    checkReferenceFold(response.data.refDefs[0].refID, (zoomIn) => {
                         mobileBlur = true;
                         activeBlur();
                         openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");

@@ -856,7 +856,7 @@ export type BlockDeleteData = { "createEmptyParagraph": boolean; };
 
 export type BlockDeleteDataInput = { "createEmptyParagraph": boolean; };
 
-export type BlockFoldData = { "isFolded": boolean; "isRoot": boolean; };
+export type BlockFoldData = { "isFolded": boolean; "isHidden": boolean; "isRoot": boolean; };
 
 export type BlockIDRequestInput = { "id": string; };
 
@@ -4925,6 +4925,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * isFolded 保留自身或上级折叠的判断；isHidden 表示目标被折叠遮挡，裁剪容器内无法确定可见性的目标按隐藏处理
+     */
     "/api/block/checkBlockFold": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": BlockFoldData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

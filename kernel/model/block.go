@@ -595,7 +595,7 @@ func GetUnfoldedParentID(id string) (parentID string) {
 	return
 }
 
-func IsBlockFolded(id string) (isFolded, isRoot bool) {
+func IsBlockFolded(id string) (isFolded, isRoot, isHidden bool) {
 	tree, _ := LoadTreeByBlockID(id)
 	if nil == tree {
 		return
@@ -609,6 +609,7 @@ func IsBlockFolded(id string) (isFolded, isRoot bool) {
 	if nil == node {
 		return
 	}
+	isHidden = treenode.IsHiddenByFold(node)
 	if treenode.IsSelfFolded(node) || treenode.IsInFoldedHeading(node, nil) {
 		isFolded = true
 		return

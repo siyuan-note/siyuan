@@ -13,7 +13,7 @@ const sources = () => {
         "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/MobileEditorDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "menus/sheetOpen", "protyle/util/transactionQueue",
         "mobile/util/mobileSheetLayout", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetActions", "protyle/util/editorSave", "protyle/util/browserCompatibility",
         "util/escape", "util/zIndex", "menus/overlayOwnership", "dialog/index", "layout/dock/panelSearch", "protyle/wysiwyg/backlinkTypeFold",
-        "layout/dock/backlinkMentionCache", "layout/dock/bottomBacklinkScroll", "protyle/gutter/layout"]) {
+        "layout/dock/backlinkMentionCache", "layout/dock/backlinkSelection", "layout/dock/bottomBacklinkScroll", "protyle/gutter/layout"]) {
         modules[name] = ts.transpileModule(preprocess(
             readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
             {MOBILE: true, BROWSER: true}, false, true), {

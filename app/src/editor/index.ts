@@ -85,6 +85,7 @@ export class Editor extends Model {
                 this.updateBacklinkPanel();
             },
         });
+        this.editor.protyle.element.tabIndex = -1;
         // 需在 after 回调之前，否则不会聚焦 https://github.com/siyuan-note/siyuan/issues/5303
         this.editor.protyle.model = this;
     }

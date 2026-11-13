@@ -1356,15 +1356,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
                 return;
             }
-            const rangeCheckTargets = !range.collapsed && endElement ?
-                getRangeBlockRefCheckTargets(protyle.wysiwyg.element, range, nodeElement, endElement, true) :
-                {elements: [], exactIDs: [], deletedIDs: []};
-            if (endElement && ((isCrossBlock && selectText !== "") || rangeCheckTargets.elements.length > 0)) {
-                event.stopPropagation();
-                event.preventDefault();
-                await removeCrossBlockRange(protyle, range, nodeElement, endElement);
-                return;
-            }
             if (blockSelectionModeElement) {
                 await runBlockSelectionDelete(event, () => removeBlockPreservingSelectionMode(
                     protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete"));
@@ -1373,6 +1364,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (protyle.wysiwyg.element.querySelector(`.${BLOCK_SELECTION_CLASS}`)) {
                 await runBlockSelectionDelete(event, () => removeBlock(
                     protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete"));
+                return;
+            }
+            const rangeCheckTargets = !range.collapsed && endElement ?
+                getRangeBlockRefCheckTargets(protyle.wysiwyg.element, range, nodeElement, endElement, true) :
+                {elements: [], exactIDs: [], deletedIDs: []};
+            if (endElement && ((isCrossBlock && selectText !== "") || rangeCheckTargets.elements.length > 0)) {
+                event.stopPropagation();
+                event.preventDefault();
+                await removeCrossBlockRange(protyle, range, nodeElement, endElement);
                 return;
             }
             if (selectText === "" && range.collapsed) {

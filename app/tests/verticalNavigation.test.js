@@ -206,7 +206,7 @@ const rendererModules = () => {
     visitTrim(onGet);
     assert.ok(trimBranch?.elseStatement && ts.isIfStatement(trimBranch.elseStatement));
     modules["util/renderContent"] = extract("util/renderContent", ["getInsertedRenderRoots"]);
-    modules["util/navigationTrim"] = `import {containsCurrentSelection} from "./documentRange";
+    modules["util/navigationTrim"] = `import {containsCurrentSelection, updateDocumentTopEof} from "./documentRange";
         import {getInsertedRenderRoots} from "./renderContent";
         import {Constants} from "../../constants";
         const invalidateTrackedRangesInElement = () => {}, disposeCustomBlocksInElement = () => {}, hideElements = () => {};
@@ -473,9 +473,9 @@ const runEntryCases = async () => {
                 <div style="height:240px"></div>
             </div></div>`;
         const editor = document.querySelector(".protyle-wysiwyg");
-        const protyle = {element: document.getElementById("protyle"),
-            contentElement: document.querySelector(".protyle-content"), wysiwyg: {element: editor}, disabled: false};
         const title = document.getElementById("title");
+        const protyle = {element: document.getElementById("protyle"), title: {editElement: title},
+            contentElement: document.querySelector(".protyle-content"), wysiwyg: {element: editor}, disabled: false};
         editor.firstElementChild?.setAttribute("data-eof", "1");
         window.titleKeydown.bind(protyle, title);
         bindVerticalNavigationReset(editor);
@@ -490,6 +490,34 @@ const runEntryCases = async () => {
             `caret ${caret?.top}..${caret?.bottom}, viewport ${viewport.top}..${viewport.bottom}`);
     };
     let cases = 0;
+    {
+        const {protyle, editor, title} = setup(paragraph);
+        const {updateDocumentTopEof} = window.navigationModules("util/documentRange");
+        updateDocumentTopEof(editor);
+        editor.firstElementChild.outerHTML = `<div class="bq" data-type="NodeBlockquote" data-node-id="quote">${paragraph}</div>` +
+            '<div data-type="NodeParagraph" data-node-id="next" data-node-index="1"><div id="next" contenteditable="true">next</div></div>';
+        editor.addEventListener("keydown", event => {
+            if (event.key === "ArrowUp") {
+                const body = getSelection().anchorNode.parentElement.closest("[data-node-id]");
+                assert.equal(focusAdjacentVerticalRegion(protyle, body, "up", 40), "moved");
+                event.preventDefault();
+            }
+        });
+        for (const id of ["body", "next"]) {
+            title.focus();
+            select(title);
+            await ipcRenderer.invoke("vertical-navigation-key", "Down");
+            await frame();
+            assert.ok(document.getElementById(id).contains(getSelection().anchorNode), id);
+            await ipcRenderer.invoke("vertical-navigation-key", "Up");
+            await frame();
+            assert.ok(title.contains(getSelection().anchorNode), id);
+            if (id === "body") {
+                editor.firstElementChild.remove();
+            }
+        }
+        cases++;
+    }
     for (const lines of [0, 1, 3]) {
         window.siyuan.config.editor.cursorSurroundingLines = lines;
         for (const whiteSpace of ["pre", "pre-wrap"]) {

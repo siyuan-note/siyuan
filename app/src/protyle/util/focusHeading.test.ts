@@ -118,6 +118,7 @@ const loadView = (responseContent: HeadingElement) => {
         renderHeadingNumbers: (): void => undefined,
         queueHeadingNumberRefresh: (): void => undefined,
         updateDocumentBottomEof: (): void => undefined,
+        updateDocumentTopEof: (): void => undefined,
     };
     const exports = evaluateModule<{applyFocusFold: (protyle: IProtyle) => Promise<void>}>(compiledViewFold, {
         require: (id: string) => id === "./focusFold" ? focusFold :

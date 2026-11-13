@@ -31,7 +31,12 @@ import {
     queueHeadingNumberRefresh,
     renderHeadingNumbers
 } from "./headingNumber";
-import {containsCurrentSelection, updateDocumentBottomEof} from "./documentRange";
+import {
+    containsCurrentSelection,
+    markDocumentBoundaryLoaded,
+    updateDocumentBottomEof,
+    updateDocumentTopEof,
+} from "./documentRange";
 import {disabledWYSIWYG} from "./disabledWYSIWYG";
 import {getEmbeddedDocInfoResponse} from "./docInfo";
 import {updateWidgetCacheVersion} from "./widgetCache";
@@ -115,7 +120,7 @@ export const onGet = (options: {
 
     if (options.data.data.eof && !options.scrollAttr) {
         if (options.action.includes(Constants.CB_GET_BEFORE)) {
-            options.protyle.wysiwyg.element.firstElementChild.setAttribute("data-eof", "1");
+            markDocumentBoundaryLoaded(options.protyle.wysiwyg.element, "before");
         } else {
             options.protyle.wysiwyg.element.lastElementChild.setAttribute("data-eof", "2");
         }
@@ -332,6 +337,7 @@ const setHTML = (options: {
                     removeElement = removeElement.nextElementSibling as HTMLElement;
                 }
                 if (removeElements.length > 0) {
+                    updateDocumentTopEof(protyle.wysiwyg.element, false);
                     const lastRemoveTop = removeElement.getBoundingClientRect().top;
                     removeElements.forEach(item => {
                         invalidateTrackedRangesInElement(protyle, item);
@@ -380,6 +386,7 @@ const setHTML = (options: {
             invalidateTrackedRanges(protyle);
             disposeCustomBlocksInElement(protyle.wysiwyg.element);
             protyle.wysiwyg.element.innerHTML = options.content;
+            updateDocumentTopEof(protyle.wysiwyg.element);
             // 设置 innerHTML 会导致浏览器将 scrollTop 重置为 0，此处立即恢复以避免页面跳转到开头
             // https://github.com/siyuan-note/siyuan/issues/17886
             if (options.scrollAttr && typeof options.scrollAttr.scrollTop === "number") {
@@ -390,9 +397,11 @@ const setHTML = (options: {
 
         void applyPublishFoldStates(protyle);
         if (options.eof) {
-            const eofElement = options.action.includes(Constants.CB_GET_BEFORE) ?
-                protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
-            eofElement?.setAttribute("data-eof", options.action.includes(Constants.CB_GET_BEFORE) ? "1" : "2");
+            if (options.action.includes(Constants.CB_GET_BEFORE)) {
+                markDocumentBoundaryLoaded(protyle.wysiwyg.element, "before");
+            } else {
+                protyle.wysiwyg.element.lastElementChild?.setAttribute("data-eof", "2");
+            }
         }
         updateDocumentBottomEof(protyle.wysiwyg.element);
 

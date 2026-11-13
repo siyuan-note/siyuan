@@ -71,7 +71,8 @@ for (const kind of ["document", "notebook-document", "notebook"]) {
             name: "Derived summary", type: kind === "notebook" ? "notebook" : "file"});
         await new Promise<void>(resolve => setImmediate(resolve));
         assert.equal(opened.length, 1);
-        assert.deepEqual(JSON.parse(JSON.stringify(opened[0])), {id: kind === "document" ? "document" : "box", notebook: "box"});
+        assert.deepEqual(JSON.parse(JSON.stringify(opened[0])),
+            {id: kind === "document" ? "document" : "box", notebook: "box", ignoreEditLock: true});
     });
 }
 

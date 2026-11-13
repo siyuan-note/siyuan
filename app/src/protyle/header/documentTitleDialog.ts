@@ -14,7 +14,7 @@ import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
 /// #endif
 
 // 重命名使用独立草稿，保存失败时保留输入。
-export const openDocumentTitleDialog = (options: {id: string, notebook?: string, app?: App}) => {
+export const openDocumentTitleDialog = (options: {id: string, notebook?: string, app?: App, ignoreEditLock?: boolean}) => {
     let closePending = false;
     let closing = false;
     let canClose = false;
@@ -145,7 +145,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
                     /// #endif
                 }
             },
-        });
+        }, {ignoreEditLock: options.ignoreEditLock});
     const guard = registerEditorSave(editor.protyle);
     dialog.editors = {title: editor};
     const unregister = registerDocumentTitleDialog(editor, options.id, options.notebook, closeInvalidated);

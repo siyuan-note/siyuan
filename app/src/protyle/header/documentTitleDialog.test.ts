@@ -8,6 +8,7 @@ import {promisify} from "node:util";
 import {runInNewContext} from "node:vm";
 import {compile} from "sass";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import type {ProtyleRuntimeCapabilities} from "../runtimeCapabilities";
 
 const deferred = () => {
     let resolve: () => void;
@@ -24,6 +25,8 @@ class ElementMock {
     listeners = new Map<string, () => void>();
     children: ElementMock[] = [];
     className = "";
+    contains() { return false; }
+    getAttribute(): string | null { return null; }
     querySelector() { return this.children[0]; }
     appendChild(element: ElementMock) { this.children.push(element); }
     addEventListener(type: string, callback: () => void) { this.listeners.set(type, callback); }
@@ -35,7 +38,8 @@ const setup = (mobile: boolean, deferDestroy = false) => {
     const window = {innerHeight: 800, screen: {orientation: {type: "portrait-primary"}}, siyuan: {
         dialogs: [] as any[], mobile: {size: {isLandscape: false, portrait: {height1: 800}, landscape: {height1: 390}}},
         layout: {}, blockPanels: [] as any[], ws: {app: {}},
-        config: {readonly: false}, isPublish: false,
+        menus: {menu: {remove() {}}},
+        config: {readonly: false, editor: {readOnly: false}}, isPublish: false,
         languages: {rename: "Rename", confirm: "Confirm", cancel: "Cancel", settingsPendingSaveError: "Save failed"},
     }};
     let canDrag: () => boolean;
@@ -75,7 +79,8 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         destroyed = 0;
         titleFlushes = 0;
         protyle: any;
-        constructor(_app: unknown, element: ElementMock, options: {blockId: string, notebookId?: string, after: (value: ProtyleMock) => void}) {
+        constructor(_app: unknown, element: ElementMock, options: {blockId: string, notebookId?: string, after: (value: ProtyleMock) => void},
+                    capabilities: ProtyleRuntimeCapabilities) {
             const input = {isConnected: true, editable: true, ownerDocument: document, focusCount: 0,
                 getAttribute: () => input.editable ? "true" : "false",
                 focus: () => { input.focusCount++; document.activeElement = input; }};
@@ -83,6 +88,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
                 title: {editElement: input, flushPendingInput: () => { this.titleFlushes++; return flushTitle(this); },
                     openEditor: (isValid?: () => boolean) => openTitle(isValid),
                     mountEditorOnly: (field: ElementMock) => { this.protyle.field = field; }}};
+            runtime.registerProtyleRuntimeCapabilities(this.protyle, capabilities);
             instances.push(this);
             afters.push(() => options.after(this));
         }
@@ -149,13 +155,14 @@ const setup = (mobile: boolean, deferDestroy = false) => {
             return dispose;
         },
     };
-    const load = (file: string) => {
+    const load = (file: string, overrides: Record<string, unknown> = {}) => {
         const source = require("ifdef-loader/preprocessor").parse(
             readFileSync(resolve(__dirname, file), "utf8"), {MOBILE: mobile, BROWSER: false});
         const exports: any = {};
+        const imports = Object.assign(Object.create(dependencies), overrides);
         runInNewContext(transpileModule(source, {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-        }).outputText, {exports, require: () => dependencies, window,
+        }).outputText, {exports, require: () => imports, window,
             document,
             getComputedStyle: () => ({paddingTop: "0px", paddingBottom: "0px"}),
             MutationObserver: MutationObserverMock, console: {error: () => {}}});
@@ -163,6 +170,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
     };
     const secondary = load("../../mobile/util/secondaryEditors.ts");
     Object.assign(dependencies, secondary);
+    const runtime = load("../runtimeCapabilities.ts") as typeof import("../runtimeCapabilities");
     const registry = load("documentTitleDialogs.ts");
     Object.assign(dependencies, registry);
     const allEditors = load("../../layout/getAll.ts");
@@ -172,15 +180,15 @@ const setup = (mobile: boolean, deferDestroy = false) => {
     Object.assign(dependencies, load("../../mobile/util/mobileSheetGesture.ts"));
     Object.assign(dependencies, load("../../mobile/util/mobileSheetLayout.ts"));
     const titleDialog = load("documentTitleDialog.ts");
-    return {window, messages, guards, instances, ready, afters, secondary, registry, allEditors, system,
+    return {window, messages, guards, instances, ready, afters, secondary, registry, allEditors, system, runtime, load,
         viewport, resizeListeners, closeSheet: () => sheetClose(), resizeSheet: () => sheetResize(),
         canDrag: () => canDrag(), openSheet: () => sheetOpen(), keyboardShows: () => keyboardShows,
         setOpenTitle: (callback: typeof openTitle) => { openTitle = callback; },
         sheetDisposals: () => sheetDisposals,
         finishDestroy: () => destroyCallbacks.splice(0).forEach(callback => callback()),
         keyboardToolbar, resizeToolbar: () => toolbarObserver(), toolbarObserved: () => toolbarObserved,
-        open: (id = "doc", notebook: string | undefined = "encrypted") =>
-            titleDialog.openDocumentTitleDialog({id, notebook}) as DialogMock,
+        open: (id = "doc", notebook: string | undefined = "encrypted", ignoreEditLock = false) =>
+            titleDialog.openDocumentTitleDialog({id, notebook, ignoreEditLock}) as DialogMock,
         setFlush: (callback: typeof flush) => { flush = callback; },
         setGuard: (callback: typeof flushGuard) => { flushGuard = callback; },
         setTitle: (callback: typeof flushTitle) => { flushTitle = callback; }};
@@ -479,6 +487,65 @@ test("desktop title editing retains the centered dialog without mobile viewport 
     assert.equal(dialog.classes.size, 0);
     assert.equal(state.resizeListeners.size, 0);
 });
+
+for (const mobile of [false, true]) {
+    test(`${mobile ? "mobile" : "desktop"} document-tree rename ignores edit locks only for its own draft`, () => {
+        const state = setup(mobile);
+        const config = state.window.siyuan.config;
+        const attr = "custom-sy-readonly";
+        const {setReadonlyByConfig} = state.load("../util/onGet.ts", {
+            Constants: {CUSTOM_SY_READONLY: attr},
+            ignoresProtyleEditLock: state.runtime.ignoresProtyleEditLock,
+            hideElements() {}, syncRelatedAVEditor() {}, disabledWYSIWYG() {}, refreshCalendarReadonly() {},
+            hideTooltip() {}, updateMobileTitleReadonly() {}, isIPhone: () => false, isAndroid: () => false,
+            isMobile: () => mobile,
+        }) as typeof import("../util/onGet");
+        state.open("tree-rename", "encrypted", true);
+        state.open("inline-rename");
+        const [draft, ordinary] = state.instances.map(instance => instance.protyle);
+        let docLocked = true;
+        for (const protyle of [draft, ordinary]) {
+            protyle.disabled = false;
+            protyle.wysiwyg.element = {getAttribute: (key: string) => key === attr && docLocked ? "true" : null,
+                querySelectorAll: (): Element[] => [], setAttribute() {}, style: {}};
+        }
+        for (const source of ["document lock", "global edit lock", "workspace read-only"]) {
+            docLocked = source === "document lock";
+            config.editor.readOnly = source === "global edit lock";
+            config.readonly = source === "workspace read-only";
+            setReadonlyByConfig(draft, true);
+            setReadonlyByConfig(ordinary, true);
+            assert.equal(draft.disabled, config.readonly, source);
+            assert.equal(ordinary.disabled, true, source);
+        }
+        config.readonly = false;
+        config.editor.readOnly = true;
+        draft.disabled = false;
+        setReadonlyByConfig(draft, false);
+        assert.equal(draft.disabled, false, "refresh preserves rename under the global edit lock");
+        draft.disabled = true;
+        setReadonlyByConfig(draft, false);
+        assert.equal(draft.disabled, true, "refresh preserves an explicitly disabled draft");
+
+        const {onTransaction} = state.load("../wysiwyg/transaction.ts", {
+            Constants: {CUSTOM_SY_READONLY: attr}, ignoresProtyleEditLock: state.runtime.ignoresProtyleEditLock,
+            disabledProtyle: (protyle: IProtyle) => { protyle.disabled = true; },
+            shouldReloadForEmbedConversion: () => false, handleViewFoldSourceOperation: () => false,
+            invalidateTrackedRangesByOperations() {}, invalidateViewFoldRequests() {}, escapeHtmlTextAndAttr: (value: string) => value,
+            getBlockSelectionStatusIDs: (): string[] => [], isUndoViewportPreserved: () => false, applyViewFoldStates() {},
+            queueHeadingNumberRefresh() {}, refreshHeadingFoldIndicators() {}, shouldReloadForHeadingBatch: () => false,
+        }) as typeof import("../wysiwyg/transaction");
+        for (const protyle of [draft, ordinary]) {
+            protyle.disabled = false;
+            protyle.title.element = {querySelector: () => ({innerHTML: ""}), removeAttribute() {}};
+            protyle.wysiwyg.renderCustom = () => {};
+            onTransaction(protyle, [{action: "updateAttrs", id: protyle.block.rootID,
+                data: {old: {}, new: {[attr]: "true"}}}], false);
+        }
+        assert.equal(draft.disabled, false, "a document lock pushed while renaming keeps the draft editable");
+        assert.equal(ordinary.disabled, true, "the document editor applies the pushed lock");
+    });
+}
 
 test("rename readiness mounts one standalone field on both platforms and rejects late readiness after dismissal", () => {
     const mobile = setup(true);

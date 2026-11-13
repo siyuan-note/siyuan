@@ -42,7 +42,7 @@ import {isAndroid, isIPhone, isPhablet} from "./compatibility";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
 import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
-import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
+import {areProtylePluginExtensionsEnabled, ignoresProtyleEditLock} from "../runtimeCapabilities";
 import {updateBackgroundActions} from "../header/backgroundActions";
 import {recordRestoredSpellcheckFocus} from "./spellcheckFocus";
 import {applyPublishFoldStates} from "./viewFold";
@@ -458,7 +458,7 @@ const setHTML = (options: {
                 protyle.breadcrumb.element.nextElementSibling.textContent = "";
             }
             if (protyle.element.hasAttribute("disabled-forever")) {
-                if (protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY) !== "true") {
+                if (ignoresProtyleEditLock(protyle) || protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY) !== "true") {
                     protyle.disabled = false;
                 }
                 protyle.element.removeAttribute("disabled-forever");
@@ -867,16 +867,14 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
 };
 
 export const setReadonlyByConfig = (protyle: IProtyle, updateReadonly: boolean) => {
-    let readOnly = window.siyuan.config.readonly ? "true" : "false";
-    if (!updateReadonly) {
-        readOnly = protyle.disabled ? "true" : "false";
-    } else if (readOnly === "false") {
-        readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
-        if (readOnly === "false") {
-            readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
-        }
+    const config = window.siyuan.config;
+    let readOnly = updateReadonly ? config.readonly : protyle.disabled;
+    if (ignoresProtyleEditLock(protyle)) {
+        readOnly ||= config.readonly;
+    } else if (updateReadonly) {
+        readOnly ||= config.editor.readOnly || protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY) === "true";
     }
-    if (readOnly === "true") {
+    if (readOnly) {
         disabledProtyle(protyle);
     } else {
         enableProtyle(protyle);

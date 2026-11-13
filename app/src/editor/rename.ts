@@ -77,7 +77,11 @@ export const rename = (options: {
     const notebookDocument = options.type === "notebook" && window.siyuan.config.fileTree?.boxDocEnabled;
     if ((options.type === "file" && rootID) || notebookDocument) {
         void import("../protyle/header/documentTitleDialog").then(({openDocumentTitleDialog}) => {
-            openDocumentTitleDialog({id: notebookDocument ? options.notebookId : rootID, notebook: options.notebookId});
+            openDocumentTitleDialog({
+                id: notebookDocument ? options.notebookId : rootID,
+                notebook: options.notebookId,
+                ignoreEditLock: true,
+            });
         });
         return;
     }

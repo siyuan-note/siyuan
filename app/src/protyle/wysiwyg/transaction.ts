@@ -96,7 +96,7 @@ import {prepareListMindmapConversion} from "../render/listMindmap/conversion";
 import {buildCancelListOperations} from "./cancelList";
 import {markMirror, refreshUndoButtons} from "../undo/globalUndo";
 import type {TransactionListConversionResult} from "../../types/api";
-import {getProtyleTransactionOwner} from "../runtimeCapabilities";
+import {getProtyleTransactionOwner, ignoresProtyleEditLock} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
@@ -1169,7 +1169,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 if (data.new[Constants.CUSTOM_SY_FULLWIDTH] !== data.old[Constants.CUSTOM_SY_FULLWIDTH]) {
                     resize(protyle);
                 }
-                if (data.new[Constants.CUSTOM_SY_READONLY] !== data.old[Constants.CUSTOM_SY_READONLY]) {
+                if (data.new[Constants.CUSTOM_SY_READONLY] !== data.old[Constants.CUSTOM_SY_READONLY] &&
+                    !ignoresProtyleEditLock(protyle)) {
                     let customReadOnly = data.new[Constants.CUSTOM_SY_READONLY];
                     if (!customReadOnly) {
                         customReadOnly = window.siyuan.config.editor.readOnly ? "true" : "false";

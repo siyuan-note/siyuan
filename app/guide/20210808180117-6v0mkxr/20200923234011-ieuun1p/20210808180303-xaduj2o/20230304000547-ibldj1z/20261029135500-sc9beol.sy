@@ -331,7 +331,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Automatic candidates are managed in the background while memory is enabled in a writable workspace. Exact duplicates with identical evidence are merged. A later model review can activate an unchanged fact only when its current sources and verbatim evidence pass validation. Automatic candidates without a meaningful update for 30 days are cleaned up; repeating the same proposal does not restart that period. Manual submissions, confirmed records and usable memories are not removed by this cleanup. Cleanup itself does not call a model."
+					"Data": "Automatic candidates are managed in the background while memory is enabled in a writable workspace. Exact duplicates with identical evidence are merged. A later model review can activate an unchanged fact only when its current sources and verbatim evidence pass validation. Automatic candidates without a meaningful update for 30 days are cleaned up even if their sources are no longer accessible. Repeating the same proposal does not restart that period. The SiYuan log reports how many automatic candidates were retired, without recording their contents or sources. Manual submissions, confirmed records and usable memories are not removed by this cleanup. Cleanup itself does not call a model."
 				}
 			]
 		},

@@ -676,6 +676,17 @@ export class Wnd {
                      focusEditor = !isPhablet()) {
         let currentTab: Tab;
         let isInitActive = false;
+        // 显示相邻页签会改变源页签的高度，并触发浏览器原生滚动锚定。
+        // 在改变任何页签可见性前保存离开页签的阅读位置。
+        if (isPhablet()) {
+            this.children.forEach(item => {
+                if (target !== item.headElement && item.model instanceof Editor &&
+                    !item.panelElement.classList.contains("fn__none")) {
+                    saveTabPosition(item.model.editor.protyle);
+                    saveBackScroll(item.model.editor.protyle);
+                }
+            });
+        }
         this.children.forEach((item) => {
             if (target === item.headElement) {
                 if (item.headElement && item.headElement.classList.contains("fn__none")) {
@@ -703,10 +714,6 @@ export class Wnd {
             } else {
                 item.headElement?.classList.remove("item--focus");
                 if (!item.panelElement.classList.contains("fn__none")) {
-                    if (isPhablet() && item.model instanceof Editor) {
-                        saveTabPosition(item.model.editor.protyle);
-                        saveBackScroll(item.model.editor.protyle);
-                    }
                     // 必须现判断，否则会触发 observer.observe(this.element, {attributeFilter: ["class"]}); 导致 https://ld246.com/article/1641198819303
                     item.panelElement.classList.add("fn__none");
                 }

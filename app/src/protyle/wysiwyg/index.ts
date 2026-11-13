@@ -429,6 +429,7 @@ export class WYSIWYG {
     private disposeHeadingFoldIndicators?: () => void;
     private disposeBoundedBlockDragSelect?: () => void;
     private disposeTouchCaret?: () => void;
+    private disposeTouchBlockDragSelect?: () => void;
     private disposeListMarkerCaret?: () => void;
     private imageTitleEditor: ReturnType<typeof bindImageTitleEditor>;
     private disposeImageResize?: () => void;
@@ -577,7 +578,9 @@ export class WYSIWYG {
         }
         /// #endif
         if (!isMobile()) {
-            bindTouchBlockDragSelect(this.element, () => !protyle.toolbar.isMultiSelectMode());
+            this.disposeTouchBlockDragSelect = bindTouchBlockDragSelect(this.element,
+                () => !protyle.disabled && !window.siyuan.touchDragActive &&
+                    !protyle.toolbar.isMultiSelectMode(), protyle.element);
         }
         if (isAndroid() || isIOSDevice()) {
             this.disposeBoundedBlockDragSelect = bindBoundedBlockDragSelect(protyle, this.element);
@@ -632,6 +635,7 @@ export class WYSIWYG {
         this.disposeSpellcheckFocus?.();
         this.disposeBoundedBlockDragSelect?.();
         this.disposeTouchCaret?.();
+        this.disposeTouchBlockDragSelect?.();
         this.disposeListMarkerCaret?.();
         this.largeListVirtualizer?.destroy();
         this.largeTableVirtualizer?.destroy();

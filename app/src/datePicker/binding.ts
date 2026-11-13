@@ -98,7 +98,8 @@ export const bindDatePicker = (input: HTMLInputElement, options: IDatePickerBind
     const pointer = (event: PointerEvent) => {
         if (event.button !== 0 || input.disabled || input.readOnly || !isDatePickerType(input.type)) { return; }
         event.preventDefault();
-        open();
+        // Touch and pen must open after release so the resulting click cannot dismiss the new overlay.
+        if (event.pointerType !== "touch" && event.pointerType !== "pen") { open(); }
     };
     const click = (event: MouseEvent) => {
         if (!isDatePickerType(input.type) || input.disabled || input.readOnly) { return; }

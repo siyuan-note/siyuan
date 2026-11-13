@@ -105,7 +105,7 @@ export const openInternalDatePicker = (options: Omit<IDatePickerOptions, "ownerP
         content.className = "b3-dialog__content";
         content.dir = view.getComputedStyle(options.ownerElement).direction;
         const actions = doc.createElement("div");
-        actions.className = "b3-dialog__action";
+        actions.className = "b3-dialog__action date-picker-actions";
         const createButton = (label: string, cancel = false) => {
             const button = doc.createElement("button");
             button.type = "button";
@@ -121,11 +121,15 @@ export const openInternalDatePicker = (options: Omit<IDatePickerOptions, "ownerP
         spacer.className = "fn__space";
         actions.append(dismiss, spacer, apply);
         dialog.element.querySelector(".b3-dialog__body").append(content, actions);
-        const field = resources.field = createDateField(content, {...options, value: initial, languages: lang,
+        const field = resources.field = createDateField(content, {...options, value: initial, languages: lang, hideClear: true,
             stepBase: options.stepBase ?? initial,
             onStateChange: () => { if (resources.field) { apply.disabled = !resources.field.validate(); } },
-            onSelect: () => { if (options.autoConfirm && options.type === "date") { confirm(); } },
+            onSelect: () => { if (options.autoConfirm && options.type === "date" && !doc.getElementById("sidebar")) { confirm(); } },
         });
+        const flexibleSpace = doc.createElement("span");
+        flexibleSpace.className = "fn__flex-1";
+        field.clearButton.dataset.action = "clear";
+        actions.prepend(field.clearButton, flexibleSpace);
         apply.disabled = !field.validate();
         const confirm = () => {
             if (!active) { return; }

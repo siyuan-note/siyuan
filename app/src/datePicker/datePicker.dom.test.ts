@@ -188,14 +188,37 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         const inMenu = makeInput(); inMenu.value = "2024-02-28"; menu.append(inMenu);
         const bound = api.bindDatePicker(inMenu);
         inMenu.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, cancelable: true, pointerType, button: 0}));
+        ok(!api.isDatePickerOpen(inMenu), "touch or pen waits for click");
+        inMenu.click();
+        ok(api.isDatePickerOpen(inMenu), "touch or pen click opens the picker");
         const day = current().querySelector<HTMLButtonElement>('[data-date="2024-02-29"]');
         day.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, cancelable: true, pointerType, button: 0}));
         equal(menuRemoved, 0, "capturing touch dismissal must preserve the owning menu");
         day.click(); await tick(); equal(inMenu.value, "2024-02-29"); bound.destroy(); inMenu.remove();
     }
+    // On mobile, selecting or clearing a date is a draft until the user confirms.
+    const sidebar = document.createElement("div"); sidebar.id = "sidebar"; document.body.append(sidebar);
+    const mobileInput = makeInput(); mobileInput.value = "2024-02-28";
+    let mobileChanges = 0; mobileInput.addEventListener("change", () => mobileChanges++);
+    const mobileBinding = api.bindDatePicker(mobileInput);
+    mobileBinding.open(); click(current(), '[data-date="2024-02-29"]');
+    ok(api.isDatePickerOpen(mobileInput), "mobile date selection leaves panel open");
+    equal(mobileInput.value, "2024-02-28"); click(current(), '[data-action="cancel"]'); await tick();
+    equal(mobileInput.value, "2024-02-28"); equal(mobileChanges, 0);
+    mobileBinding.open(); click(current(), '[data-date="2024-02-29"]'); confirm(current()); await tick();
+    equal(mobileInput.value, "2024-02-29"); equal(mobileChanges, 1);
+    mobileBinding.open(); click(current(), '[data-action="clear"]');
+    ok(api.isDatePickerOpen(mobileInput), "mobile clear leaves panel open");
+    equal(mobileInput.value, "2024-02-29"); click(current(), '[data-action="cancel"]'); await tick();
+    equal(mobileInput.value, "2024-02-29"); equal(mobileChanges, 1);
+    mobileBinding.open(); click(current(), '[data-action="clear"]'); confirm(current()); await tick();
+    equal(mobileInput.value, ""); equal(mobileChanges, 2);
+    mobileBinding.destroy(); mobileInput.remove(); sidebar.remove();
     const badInput = api.openInternalDatePicker({ownerElement: owner, type: "date", value: "", initialBadInput: true});
     ok(current().querySelector<HTMLButtonElement>('[data-action="confirm"]').disabled);
-    Array.from(current().querySelectorAll<HTMLButtonElement>("button")).find(button => button.textContent === "Clear").click();
+    const clearButton = current().querySelector<HTMLButtonElement>(`[data-action="clear"]`);
+    clearButton.click();
+    equal(document.activeElement, clearButton, "clearing keeps focus off text fields");
     confirm(current()); equal(await badInput.result, {type: "confirm", value: "", changed: false}); await tick();
 
     const firstSession = open(); const replacement = open();

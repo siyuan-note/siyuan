@@ -369,7 +369,8 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     clear.addEventListener("click", () => {
         if (composing.size || disposed || yearInput.isComposing()) { return; }
         badInput = false;
-        setValue(""); render(); notify(); inputs[0].focus();
+        setValue(""); render(); notify();
+        clear.focus({preventScroll: true});
         options.onChange?.("clear");
         options.onSelect?.();
     });
@@ -385,6 +386,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     const focusTarget = () => calendar.querySelector<HTMLButtonElement>('button[tabindex="0"]') || inputs[0];
     return {
         element: root,
+        clearButton: clear,
         draft: readValue,
         cancelMonthEdit,
         isComposing: () => composing.size > 0 || yearInput.isComposing(),

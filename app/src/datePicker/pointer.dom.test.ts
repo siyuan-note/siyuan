@@ -76,7 +76,7 @@ test("native pointer activation completes before month editing changes the ancho
             for (const action of ["today", "clear", "next", "confirm", "confirm-preview", "cancel"]) {
                 await run(`openCase(${top},"${action === "confirm-preview" ? "2030" : ""}",${action === "today" || action === "clear"})`); await tick();
                 const selector = action === "today" ? ".date-picker__navigation > button:nth-child(2)" :
-                    action === "clear" ? ".date-picker__shortcuts button" : action === "next" ? '[aria-label="Next"]' :
+                    action === "clear" ? '[data-action="clear"]' : action === "next" ? '[aria-label="Next"]' :
                         `[data-action="${action === "confirm-preview" ? "confirm" : action}"]`;
                 await click(selector);
                 const state = await run("inspect()");

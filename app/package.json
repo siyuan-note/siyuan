@@ -109,7 +109,7 @@
     "tsx": "^4.23.15",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "unzipper": "0.12.5",
-    "vditor": "4.0.2-alpha.8",
+    "vditor": "4.0.2-alpha.9",
     "webpack": "^5.104.1",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^7.2.3"

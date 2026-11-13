@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const {createRequire} = require("node:module");
 
-const VDITOR_VERSION = "4.0.2-alpha.8";
+const VDITOR_VERSION = "4.0.2-alpha.9";
 const appRoot = path.resolve(__dirname, "..");
 const LEGACY_LUTE_ASSET = "vditor/dist/js/lute/lute.min.js";
 const SHARED_LUTE_ASSET = "stage/protyle/js/lute/lute.min.js";
@@ -10,7 +10,7 @@ const VDITOR_DIRECTORIES = ["css/content-theme", "js/i18n", "js/highlight.js", "
 const APPEARANCE_FILES = ["themes/daylight/theme.css", "themes/midnight/theme.css", "icons/litheness/icon.js", "icons/litheness/icon.LICENSE"];
 const REQUIRED_ASSETS = ["vditor/LICENSE", "vditor/dist/index.css", "vditor/dist/js/i18n/en_US.js",
     "vditor/licenses/KaTeX-LICENSE", "vditor/licenses/KaTeX-fonts-LICENSE", "vditor/licenses/KaTeX-mhchem-NOTICE",
-    "vditor/licenses/Apache-2.0-LICENSE", "vditor/licenses/diff-match-patch-LICENSE",
+    "vditor/licenses/Apache-2.0-LICENSE", "vditor/licenses/diff-match-patch-LICENSE", "vditor/licenses/Lucide-LICENSE",
     "vditor/dist/js/icons/ant.js", "vditor/dist/js/highlight.js/highlight.min.js",
     "vditor/dist/js/katex/katex.min.js", "vditor/dist/js/katex/katex.min.css", "vditor/dist/js/katex/mhchem.min.js",
     ...APPEARANCE_FILES.map(name => "appearance/" + name)];
@@ -46,6 +46,7 @@ const markdownAssetFiles = ({
         files.push({name: "vditor/dist/" + name, source: path.join(packageRoot, "dist", name)});
     }
     files.push({name: "vditor/LICENSE", source: path.join(packageRoot, "LICENSE")});
+    files.push({name: "vditor/licenses/Lucide-LICENSE", source: path.join(packageRoot, "dist/js/icons/LICENSE-lucide.txt")});
     const dependencyRequire = createRequire(path.join(packageRoot, "package.json"));
     const diffRoot = path.dirname(dependencyRequire.resolve("diff-match-patch/package.json"));
     files.push({name: "vditor/licenses/diff-match-patch-LICENSE", source: path.join(diffRoot, "LICENSE")});

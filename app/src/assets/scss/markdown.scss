@@ -6,6 +6,7 @@
 @use "component/chip";
 @use "component/select";
 @use "component/text-field";
+@use "component/switch";
 @use "component/tooltips";
 @use "business/block";
 @use "business/markdown-content";
@@ -419,6 +420,13 @@ button:focus-visible,
   --blockquote-border-color: var(--b3-border-color);
   --blockquote-text-color: var(--b3-theme-on-surface);
   --panel-shadow: var(--b3-dialog-shadow);
+  --find-background-color: var(--b3-theme-primary);
+  --find-text-color: var(--b3-theme-on-primary);
+}
+
+.markdown-editor .vditor-find__row > .b3-text-field {
+  flex: 1 1 160px;
+  min-width: 100px;
 }
 
 .markdown-editor > .vditor-toolbar {

@@ -206,6 +206,23 @@ const browserCases = async (languages: Record<string, string>) => {
         button.click();
         check.equal(more.open, false, "choosing a menu action closes the menu");
     };
+    menuAction("markdownFind"); await tick();
+    const findPanel = document.querySelector<HTMLElement>(".vditor-find");
+    const findQuery = findPanel.querySelector<HTMLInputElement>('input[type="search"]');
+    check.equal(findPanel.hidden, false, "More opens the shared Vditor find panel");
+    check.ok(findQuery.classList.contains("b3-text-field"));
+    findQuery.value = "Markdown";
+    findQuery.dispatchEvent(new Event("input", {bubbles: true}));
+    await tick();
+    check.ok(/^1\/[1-9]\d*$/.test(findPanel.querySelector("output").textContent));
+    check.equal(application.editor.flush().edited, false, "find keeps the document pristine");
+    check.equal(writes.length, 0, "finding does not save the document");
+    await ipcRenderer.invoke("markdown-screenshot", "find-light");
+    findQuery.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    check.equal(findPanel.hidden, true);
+    document.dispatchEvent(new KeyboardEvent("keydown", {key: "f", ctrlKey: true, metaKey: true, bubbles: true, cancelable: true}));
+    check.equal(findPanel.hidden, false, "the window shortcut opens find");
+    findQuery.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
     await tick();
     check.equal(document.querySelector("#markdownName").textContent, "README.md");
     check.equal(document.title, "README.md");
@@ -1420,7 +1437,7 @@ const browserCases = async (languages: Record<string, string>) => {
 
 test("Markdown file tree and compact menus preserve edits across switching, stale replies and safe exit", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 80000,
+    timeout: 120000,
 }, async () => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-markdown-ui-test-"));
     const artifacts = mkdtempSync(path.join(tmpdir(), "siyuan-markdown-ui-screenshots-"));
@@ -1498,7 +1515,7 @@ app.whenReady().then(async () => {
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
-        const result = await promisify(execFile)(require("electron") as unknown as string, [script], {env, timeout: 75000, windowsHide: true});
+        const result = await promisify(execFile)(require("electron") as unknown as string, [script], {env, timeout: 115000, windowsHide: true});
         assert.match(result.stdout, /Markdown application DOM cases passed/);
         console.log(`Markdown UI screenshots: ${artifacts}`);
     } finally {

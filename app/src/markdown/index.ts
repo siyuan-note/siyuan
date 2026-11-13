@@ -84,6 +84,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             <button type="button" class="b3-menu__item" id="markdownSave"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconSave"></use></svg><span class="b3-menu__label" data-label="save"></span></button>
             <button type="button" class="b3-menu__item" id="markdownSaveAs"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconDownloadAssets"></use></svg><span class="b3-menu__label" data-label="saveAs"></span></button>
             <hr class="b3-menu__separator">
+            <button type="button" class="b3-menu__item" id="markdownFind"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconSearch"></use></svg><span class="b3-menu__label" data-label="search"></span></button>
             <button type="button" class="b3-menu__item" id="markdownInsertImage"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconImage"></use></svg><span class="b3-menu__label" data-label="insertImage"></span></button>
             <button type="button" class="b3-menu__item" id="markdownResources"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconKey"></use></svg><span class="b3-menu__label" data-label="markdownResources"></span></button>
             <button type="button" class="b3-menu__item" id="markdownRecovery" aria-expanded="false" aria-controls="markdownRecoveryPanel"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconHistory"></use></svg><span class="b3-menu__label" data-label="markdownRecovery"></span></button>
@@ -128,6 +129,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     control("markdownEditor").inert = true;
     control("markdownMoreButton").setAttribute("aria-label", text("more"));
     control("markdownMoreButton").dataset.tooltip = text("more");
+    control("markdownFind").dataset.tooltipShortcut = bootstrap.platform === "darwin" || bootstrap.platform === "ios" ? "⌘F" : "Ctrl+F";
     for (const [id, label] of [["markdownUndo", "undo"], ["markdownRedo", "redo"], ["markdownOutlineToggle", "outline"]]) {
         control(id).setAttribute("aria-label", text(label));
         control(id).dataset.tooltip = text(label);
@@ -257,6 +259,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         updateSidebarShortcutHints();
         control<HTMLButtonElement>("markdownSaveAs").disabled = frozen || state.composing || problem?.kind === "indeterminate";
         control<HTMLButtonElement>("markdownInsertImage").disabled = frozen || state.composing || problem?.kind === "indeterminate";
+        control<HTMLButtonElement>("markdownFind").disabled = frozen || state.composing;
         modeChoice?.setDisabled(frozen || state.composing);
         if (targetGeneration !== state.targetGeneration) {
             targetGeneration = state.targetGeneration;
@@ -481,6 +484,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     action("markdownUndo", () => editor.undo());
     action("markdownRedo", () => editor.redo());
     action("markdownOutlineToggle", () => editor.setOutline(!outline.enabled));
+    action("markdownFind", () => editor.openFind());
     action("markdownSaveAs", saveAs);
     action("markdownInsertImage", async () => {
         if (frozen || editor.flush().composing) return;
@@ -856,11 +860,13 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         if (control<HTMLDialogElement>("markdownAppearancePanel").open) return;
         if (sidebarShortcuts.handle(event)) return;
         const modifier = bootstrap.platform === "darwin" || bootstrap.platform === "ios" ? event.metaKey : event.ctrlKey;
-        if (!modifier || event.altKey || event.isComposing || !/^[nos]$/i.test(event.key)) return;
+        if (!modifier || event.altKey || event.isComposing || !/^[nosf]$/i.test(event.key)) return;
+        if (event.key.toLowerCase() === "f" && event.shiftKey) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         if (frozen || editor.flush().composing) return;
         closeMore();
+        if (event.key.toLowerCase() === "f") {editor.openFind(); return;}
         const run = event.key.toLowerCase() === "n" ? () => bridge.newDocument() :
             event.key.toLowerCase() === "o" ? () => bridge.openDocument() : event.shiftKey ? () => saveAs() : save;
         runAction(async () => { await run(); }, event.key.toLowerCase() === "s", event.key.toLowerCase() !== "s");

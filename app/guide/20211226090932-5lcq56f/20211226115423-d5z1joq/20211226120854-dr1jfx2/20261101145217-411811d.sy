@@ -6,7 +6,7 @@
 		"id": "20261101145217-411811d",
 		"title": "獨立 Markdown 編輯器",
 		"type": "doc",
-		"updated": "20261110151447"
+		"updated": "20261113111930"
 	},
 	"Children": [
 		{
@@ -287,6 +287,108 @@
 				{
 					"Type": "NodeText",
 					"Data": " 為外觀模式、字型大小和字型分別選擇工作空間或獨立設定。點擊來源選單頂部的獨立設定可直接開啟設定對話方塊，儲存後才切換為獨立設定，取消則保留原來源；點擊並列的工作空間選項會立即繼承其設定。清單只顯示工作空間資料夾名稱，滑鼠停留時可查看完整路徑；工作空間較多時可捲動清單。預設使用獨立設定，也可依需要選擇繼承工作空間。各項可選擇不同來源，明確選擇獨立設定後，不會因新增工作空間而自動切換。所選工作空間缺失或無法存取時，對應項目會切換並儲存為獨立設定，使用已儲存的獨立值，其他項目不變；工作空間恢復後也不會自動切回。獨立設定可設定外觀模式、字型大小，以及全域預設字型、編輯器字型和等寬字型的有序清單。桌面端可在系統字型清單中搜尋、預覽並勾選字型，透過已選字型標籤移除或調整順序，並選擇可用字重。等寬字型清單預設篩選等寬字型，也可切換為顯示全部。此選擇器無需開啟工作空間，不提供獨立的字型檔案匯入。繼承工作空間時也支援其中的自訂字型；字型缺失或載入失敗時依字型順序回退。不載入工作空間的佈景主題 CSS 或指令碼。支援外觀來源選擇的 Android、iOS 和 HarmonyOS 版本也預設使用獨立設定，可為外觀模式、字型大小和字型分別選擇本機已登錄且可存取的工作空間，繼承規則和缺失時的回退規則與桌面端一致。字型選擇器列出行動系統提供的字型，點擊已選字型的字重按鈕可選擇可用字重，透過上下按鈕調整順序。可用字型及其顯示效果取決於系統和 WebView。"
+				}
+			]
+		},
+		{
+			"ID": "20261113111930-4ea3be3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261113111930-4ea3be3",
+				"updated": "20261113111930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "尋找與取代"
+				}
+			]
+		},
+		{
+			"ID": "20261113111930-865b128",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261113111930-865b128",
+				"updated": "20261113111930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開啟尋找面板，也可以按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+F"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，macOS 使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+F"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "替換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 展開取代輸入框。"
+				}
+			]
+		},
+		{
+			"ID": "20261113111930-1ccb944",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261113111930-1ccb944",
+				"updated": "20261113111930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "即時渲染和所見即所得模式搜尋內文及程式碼區塊，原始碼模式搜尋完整 Markdown 原始碼，包括標記和連結目標。支援一般文字比對、區分大小寫以及上一個和下一個相符項目，內文比對可跨行內格式，範圍限定在同一段落或表格儲存格。"
+				}
+			]
+		},
+		{
+			"ID": "20261113111930-e9df6b9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261113111930-e9df6b9",
+				"updated": "20261113111930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "取代後的內容沿用自動儲存流程。可以取代目前相符項目或全部相符項目，全部取代可一步復原或重做。"
 				}
 			]
 		},

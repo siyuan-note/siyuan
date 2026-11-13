@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261110151447"
+		"updated": "20261113111930"
 	},
 	"Children": [
 		{
@@ -287,6 +287,108 @@
 				{
 					"Type": "NodeText",
 					"Data": " to choose a workspace or independent configuration separately for appearance mode, font size, and fonts. Click independent configuration at the top of a source menu to open its settings dialog. The source switches only when you save; cancelling keeps the original source. Clicking a workspace option in the same menu immediately inherits its settings. The list shows only workspace folder names; hover to see the full path. Scroll the list when there are many workspaces. Independent configuration is the default; you can optionally choose to inherit from a workspace. Each setting can use a different source. Once you explicitly choose independent configuration, adding a workspace does not switch it automatically. If a selected workspace is missing or inaccessible, the affected setting switches to independent configuration and saves that choice, using its saved independent value. Other settings remain unchanged, and it does not switch back automatically when the workspace becomes available again. Independent configuration lets you set appearance mode, font size, and ordered lists for global default, editor, and monospace fonts. On desktop, search and preview the system font list, then select fonts using the checkboxes. Use the selected font chips to remove or reorder fonts and choose available weights. The monospace list is filtered to monospace fonts by default, with an option to show all fonts. This picker works without opening a workspace and does not offer a separate font-file import. Inheriting from a workspace also supports its custom fonts; missing or failed fonts fall back in font order. Workspace theme CSS and scripts are not loaded. Android, iOS, and HarmonyOS versions supporting appearance sources also default to independent configuration. For each of appearance mode, font size, and fonts, you can select a registered, accessible workspace on this device. Inheritance and fallback when a workspace is unavailable follow the same rules as on desktop. The font picker lists fonts provided by the mobile system. Tap the weight button on a selected font to choose an available weight, and use the up/down buttons to reorder fonts. Available fonts and their rendering depend on the system and WebView."
+				}
+			]
+		},
+		{
+			"ID": "20261113111930-09936a4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261113111930-09936a4",
+				"updated": "20261113111930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Find and replace"
+				}
+			]
+		},
+		{
+			"ID": "20261113111930-a57d6b4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261113111930-a57d6b4",
+				"updated": "20261113111930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+F"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+F"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS) to find text. Select "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Replace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to expand the replacement field."
+				}
+			]
+		},
+		{
+			"ID": "20261113111930-8f5258a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261113111930-8f5258a",
+				"updated": "20261113111930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Instant Rendering and WYSIWYG search document text and code blocks. Source mode searches the complete Markdown source, including markers and link destinations. Search supports literal text, case sensitivity, and previous and next matches. Rich-text matches may span inline formatting within one paragraph or table cell."
+				}
+			]
+		},
+		{
+			"ID": "20261113111930-8d8e9c9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261113111930-8d8e9c9",
+				"updated": "20261113111930"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Replacements use the automatic save workflow. You can replace the current match or all matches. Replace all can be undone or redone in one step."
 				}
 			]
 		},

@@ -11,7 +11,7 @@ import {escapeHtml} from "../../util/escape";
 import {setGlobalPluginsDisabled} from "../../plugin/globalState";
 import {openBazaarPath} from "./openPath";
 import {previewImages} from "../../protyle/preview/image";
-import {isBazaarPackageRatingEditable, sortBazaarPackages} from "../../util/bazaarPackage";
+import {isBazaarPackageEnableDisabled, isBazaarPackageRatingEditable, sortBazaarPackages} from "../../util/bazaarPackage";
 import {Constants} from "../../constants";
 import {bindBazaarFilterMenu} from "./filterMenu";
 import {
@@ -422,11 +422,13 @@ const ACTION_HANDLERS = {
         }
         if (!target.hasAttribute("disabled")) {
             target.setAttribute("disabled", "disabled");
-            const enabled = (target as HTMLInputElement).checked;
-            const pluginItem = installedItem || pkgItem;
+            const input = target as HTMLInputElement;
+            const enabled = input.checked;
+            const pluginItem = pkgItem || installedItem;
             controller._setPluginEnabled(app, pluginItem, enabled, () => {
                 if (controller._isMountCurrent(mount)) {
-                    target.removeAttribute("disabled");
+                    input.checked = Boolean(pluginItem.enabled);
+                    input.disabled = isBazaarPackageEnableDisabled("plugins", pluginItem);
                     controller._genMyHTML("plugins", app, true);
                 }
             });

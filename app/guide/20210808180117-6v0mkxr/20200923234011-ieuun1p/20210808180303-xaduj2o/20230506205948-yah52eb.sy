@@ -145,7 +145,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​."
+					"Data": ". If a plugin requires a newer version of SiYuan, the marketplace shows the required version. SiYuan skips loading the plugin on that device and keeps its synced enable setting."
 				}
 			]
 		},

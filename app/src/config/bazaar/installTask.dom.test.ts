@@ -52,11 +52,15 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         if (!mobileFrontend && message) check.equal(tooltipElement.textContent, message);
     };
     Object.assign(window, {siyuan: {languages: {download: "Download", cancel: "Cancel", bazaarInstalling: "Installing...",
-        update: "Update", updateAll: "Update all"},
+        update: "Update", updateAll: "Update all", enable: "Enable", disable: "Disable", uninstall: "Uninstall",
+        bazaarNeedVersion: "Requires SiYuan v${x} or later"},
         config: {bazaar: {petalDisabled: false}}}});
     const style = document.createElement("style");
     style.textContent = css + ":root {--b3-theme-primary:#3573f0;--b3-theme-on-primary:#fff;}";
     document.head.append(style);
+    const packageModule = {exports: {}};
+    new Function("exports", "require", sources.package)(packageModule.exports, () => ({}));
+    const {isBazaarPackageEnableDisabled} = packageModule.exports as typeof import("../../util/bazaarPackage");
     const externals = {
         "./filterMenu": {bindBazaarFilterMenu() {}},
         "./installTask": tasks,
@@ -73,6 +77,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             }
         }},
         "../../dialog/message": {showMessage: () => failures++},
+        "../../util/bazaarPackage": {isBazaarPackageEnableDisabled},
         "../../util/fetch": {fetchPost: (url: string, data: unknown, callback: (response: unknown) => void,
             _headers: unknown, fail: (response: unknown) => void, signal: AbortSignal) => new Promise<void>(resolve => {
             requests.push({callback, fail, signal, resolve, url, data});
@@ -281,7 +286,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     }
     let finishPreferenceSave: () => void;
     const preferenceController = new Function("isBazaarBatchUpdateExcluded", "getBazaarBatchUpdate",
-        "isBazaarPackageType", "bazaarConfigApi", "showMessage", "renderBazaarInstall", sources.preferenceController + "; return result;")(
+        "isBazaarPackageType", "bazaarConfigApi", "showMessage", "renderBazaarInstall", "isBazaarPackageEnableDisabled",
+        "escapeAttr", sources.preferenceController + "; return result;")(
         (excluded: Record<string, Record<string, boolean>>, type: string, name: string) => excluded?.[type]?.[name] === true,
         tasks.getBazaarBatchUpdate, (type: string) => type === "plugins", {
             patch: (_path: string, value: Record<string, boolean>) => new Promise<void>(resolve => {
@@ -290,7 +296,8 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
                     resolve();
                 };
             }),
-        }, () => {}, tasks.renderBazaarInstall) as typeof import("../bazaar").bazaar;
+        }, () => {}, tasks.renderBazaarInstall, isBazaarPackageEnableDisabled,
+        (value: string) => value) as typeof import("../bazaar").bazaar;
     preferenceController.element = root;
     preferenceController._isUpdatePanelActive = () => false;
     window.siyuan.languages.bazaarSkipBatchUpdate = "Skip Update all";
@@ -330,6 +337,43 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
             check.equal(getComputedStyle(update).display === "none", !outdated);
         }
     }
+    for (const mobile of [false, true]) {
+        mobileFrontend = mobile;
+        const installed = {...item, enabled: true, disallowInstall: true, minAppVersion: "99.0.0"} as IBazaarItem;
+        const tip = preferenceController._genInstalledPluginVersionTip(installed, "plugins");
+        check.equal(tip, "Requires SiYuan v99.0.0 or later");
+        preferenceController._data.downloaded = [installed];
+        preferenceController._setPackageDetail("plugins", item.name, {installed});
+        root.innerHTML = `<div><div data-name="sample" data-package-type="plugins" data-package-source="downloaded">
+            ${preferenceController._genInstalledPluginSwitchHTML(installed)}</div>
+            <div id="configBazaarReadme" class="config__view--show">
+                <div class="item__side" data-package-type="plugins" data-name="sample"></div>
+                <div class="item__actions${mobile ? " item__actions--mobile" : ""}">
+                    ${preferenceController._genReadmeActionsHTML("plugins", installed)}</div>
+            </div></div>`;
+        const input = root.querySelector<HTMLInputElement>('[data-type="plugin-enable"]');
+        const action = root.querySelector<HTMLButtonElement>('[data-type="package-disable"]');
+        check.equal(input.checked, true);
+        check.equal(input.disabled, false);
+        check.equal(action.disabled, false);
+        let changes = 0;
+        events.bindBazaarEvents({...preferenceController, _isMountCurrent: () => true, _genMyHTML: () => false,
+            _setPluginEnabled: (_app, plugin, enabled, done) => {
+                check.equal(plugin.name, item.name);
+                check.equal(enabled, false);
+                plugin.enabled = enabled;
+                changes++;
+                preferenceController._updateReadmePluginAction(plugin.name, enabled);
+                done();
+            }}, {} as App, mount);
+        input.click();
+        check.equal(input.checked, false);
+        check.equal(input.disabled, true);
+        check.equal(action.dataset.type, "package-enable");
+        check.equal(action.disabled, true);
+        input.click();
+        check.equal(changes, 1);
+    }
     check.deepEqual(errors, []);
     return "Bazaar install interaction cases passed";
 };
@@ -358,6 +402,9 @@ test("marketplace installation, single update and batch update progress and canc
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
     sources.tooltip = transpileModule(readFileSync(path.join(__dirname, "../../dialog/tooltip.ts"), "utf8"), {
+        compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
+    }).outputText;
+    sources.package = transpileModule(readFileSync(path.join(__dirname, "../../util/bazaarPackage.ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
     const css = ["component/_button.scss", "component/_card.scss", "business/_block.scss", "util/_function.scss"].map(name =>

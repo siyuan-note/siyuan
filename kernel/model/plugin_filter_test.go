@@ -5,6 +5,7 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -252,13 +253,62 @@ func TestLoadPetalsNamesSkipUnselectedManifest(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(util.DataDir, "plugins", "future", "plugin.json"), []byte(manifest), 0644); err != nil {
 		t.Fatal(err)
 	}
+	var stopped []string
+	OnKernelPluginStop = func(petal *Petal) { stopped = append(stopped, petal.Name) }
 	requireFilteredPetals(t, LoadPetals("desktop", false, []string{}))
 	requireFilteredPetals(t, LoadPetals("desktop", false, []string{"alpha"}), "alpha")
-	if petal := GetPetalByName("future"); petal == nil || !petal.Enabled {
-		t.Fatal("loading a selection processed and disabled an unrelated plugin")
+	if len(stopped) != 0 {
+		t.Fatalf("loading a selection stopped unrelated plugins: %v", stopped)
 	}
 	requireFilteredPetals(t, LoadPetals("desktop", false, []string{"future"}))
-	if petal := GetPetalByName("future"); petal == nil || petal.Enabled {
-		t.Fatal("selected plugin bypassed required app version admission")
+	if !slices.Equal(stopped, []string{"future"}) {
+		t.Fatalf("loading the incompatible selection stopped %v, want [future]", stopped)
 	}
+}
+
+func TestLoadPetalsMinimumAppVersionPreservesEnabledSetting(t *testing.T) {
+	install := setupPetalFilterTest(t)
+	install("enabled", true, nil)
+	install("disabled", false, nil)
+	setMinimumVersion := func(version string) {
+		t.Helper()
+		for _, name := range []string{"enabled", "disabled"} {
+			manifest := fmt.Sprintf(`{"name":%q,"version":"1.0.0","minAppVersion":%q,"kernels":["all"]}`, name, version)
+			if err := os.WriteFile(filepath.Join(util.DataDir, "plugins", name, "plugin.json"), []byte(manifest), 0644); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	readSettings := func() []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(util.DataDir, "storage", "petal", "petals.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	before := readSettings()
+	setMinimumVersion("9999.0.0")
+	requireFilteredPetals(t, LoadPetals("desktop", false, nil))
+	requireFilteredPetals(t, LoadPetals("mobile", false, nil))
+	requireFilteredPetals(t, LoadPetals("desktop", true, nil))
+	requireFilteredPetals(t, LoadKernelPetals())
+	if _, err := SetPetalEnabled("disabled", true); err == nil {
+		t.Fatal("explicitly enabling a plugin that needs a newer app version succeeded")
+	}
+	if !bytes.Equal(before, readSettings()) {
+		t.Fatal("incompatible plugin changed the synchronized settings")
+	}
+	setMinimumVersion("0.0.1")
+	requireFilteredPetals(t, LoadPetals("desktop", false, nil), "enabled")
+	requireFilteredPetals(t, LoadPetals("mobile", false, nil), "enabled")
+	requireFilteredPetals(t, LoadKernelPetals(), "enabled")
+
+	setMinimumVersion("9999.0.0")
+	if _, err := SetPetalEnabled("enabled", false); err != nil {
+		t.Fatal(err)
+	}
+	setMinimumVersion("0.0.1")
+	requireFilteredPetals(t, LoadPetals("desktop", false, nil))
+	requireFilteredPetals(t, LoadKernelPetals())
 }

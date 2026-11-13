@@ -424,6 +424,15 @@ export const bazaar = {
         const tooltipClass = bazaarType === "themes" ? "" : " ariaLabel";
         return `<span class="fn__space"></span><span${tooltip} class="fn__flex-center${tooltipClass} b3-chip b3-chip--error b3-chip--small">${window.siyuan.languages.incompatible}</span>`;
     },
+    _genInstalledPluginVersionTip(item: IBazaarItem | undefined, bazaarType: TBazaarType) {
+        return bazaarType === "plugins" && item?.disallowInstall ?
+            window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : "";
+    },
+    _genInstalledPluginSwitchHTML(item: IBazaarItem) {
+        return `<span class="fn__space"></span><span class="fn__space"></span>
+<input class="ariaLabel b3-switch fn__flex-center" type="checkbox" data-type="plugin-enable" data-position="north"
+aria-label="${escapeAttr(window.siyuan.languages[item.enabled ? "disable" : "enable"])}"${item.enabled ? " checked" : ""}${isBazaarPackageEnableDisabled("plugins", item) ? " disabled" : ""}>`;
+    },
     _genDeprecatedChipHTML(item: IBazaarItem, reserveSpace = true) {
         if (!item.deprecated) {
             return "";
@@ -974,12 +983,14 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             ${bazaarItem.disabledInPublish ? "" : `<button type="button" data-type="plugin-publish-data" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.pluginPublishDataTip)}"><svg aria-hidden="true"><use xlink:href="#iconUpload"></use></svg></button>`}</span>` : "";
                     const available = bazaar._getUpdatedItem(bazaarType, bazaarItem.name)?.available;
                     const ratingKey = getRatingKey(bazaarType, bazaarItem.name);
+                    const pluginVersionTip = bazaar._genInstalledPluginVersionTip(bazaarItem, bazaarType);
                     return `<div data-name="${escapeAttr(bazaarItem.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}">
     <div class="b3-card__img">${bazaar._genPackageIconHTML(bazaarItem.iconURL)}</div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             ${escapeHtml(bazaarItem.preferredName)}
             <div class="b3-card__desc" title="${escapeAttr(bazaarItem.preferredDesc)}">${escapeHtml(bazaarItem.preferredDesc)}</div>
+            ${pluginVersionTip ? `<div class="ft__breakword">${escapeHtml(pluginVersionTip)}</div>` : ""}
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
@@ -1005,15 +1016,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         <span data-position="north" class="ariaLabel block__icon block__icon--show${showDisable ? "" : " fn__none"}" data-type="package-disable" aria-label="${window.siyuan.languages.disable}">
             <svg><use xlink:href="#iconClose"></use></svg>
         </span>
-        <span class="fn__space${bazaarType === "plugins" ? "" : " fn__none"}"></span>
-        <span class="fn__space${bazaarType === "plugins" ? "" : " fn__none"}"></span>
-        <input ${((bazaarItem.disallowInstall && !bazaarItem.enabled) || bazaarItem.installedIncompatible) ? "disabled" : ""} 
-aria-label="${(bazaarItem.disallowInstall && !bazaarItem.enabled) ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", bazaarItem.minAppVersion) : window.siyuan.languages[bazaarItem.enabled ? "disable" : "enable"]}"
-data-position="north" class="ariaLabel b3-switch fn__flex-center${bazaarType === "plugins" ? "" : " fn__none"}" 
-${bazaarItem.enabled ? "checked" : ""} 
-data-type="plugin-enable" 
-data-disabletip="${bazaarItem.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", bazaarItem.minAppVersion) : ""}"
-type="checkbox">
+        ${bazaarType === "plugins" ? bazaar._genInstalledPluginSwitchHTML(bazaarItem) : ""}
     </div>
 </div>`;
                 }).join("");
@@ -1164,8 +1167,10 @@ type="checkbox">
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.installDate, installed.hInstallDate)}
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.installSize, `<span data-type="installed-size">${window.siyuan.languages.loading}</span>`, true)}
 </section>` : "";
+        const pluginVersionTip = bazaar._genInstalledPluginVersionTip(installed, bazaarType);
         const compatibilitySection = `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarCompatibility}</div>
+    ${pluginVersionTip ? `<div class="ft__breakword">${escapeHtml(pluginVersionTip)}</div>` : ""}
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarMinAppVersion, compatibilityData.minAppVersion ? `v${compatibilityData.minAppVersion}` : "-")}
     ${compatibilityFieldVisibility.frontends ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarPlatforms, frontendLabels.length ? bazaar._genReadmeChips(frontendLabels, true) : "-", true) : ""}
     ${compatibilityFieldVisibility.systems ? bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarSystems, bazaar._genReadmeChips(systemLabels, true), true) : ""}
@@ -1511,7 +1516,8 @@ type="checkbox">
             actionElement.dataset.type = enabled ? "package-disable" : "package-enable";
             actionElement.textContent = window.siyuan.languages[enabled ? "disable" : "enable"];
         }
-        actionElement.toggleAttribute("disabled", disabled);
+        const installed = bazaar._getPackageDetail("plugins", packageName)?.installed;
+        actionElement.toggleAttribute("disabled", disabled || Boolean(installed && isBazaarPackageEnableDisabled("plugins", installed)));
     },
     _setPluginEnabled(app: App, item: Pick<IBazaarItem, "name" | "enabled">, enabled: boolean, callback: () => void) {
         if (bazaar._pluginEnablePending.has(item.name)) {

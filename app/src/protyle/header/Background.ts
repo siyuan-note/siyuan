@@ -839,6 +839,7 @@ export class Background {
         </div>`,
                     bind: (element) => {
                         const listElement = element.querySelector(".b3-list--background");
+                        const checkedHTML = '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>';
                         const renderTagList = (html: string) => {
                             if (!listElement.isConnected || !menu.element.contains(listElement)) {
                                 return;
@@ -864,12 +865,35 @@ export class Background {
                             response.data.tags.forEach((item: string, index: number) => {
                                 html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">
             <div class="fn__flex-1">${item}</div>
-            ${currentTags.includes(Lute.UnEscapeHTMLStr(item)) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
+            ${currentTags.includes(Lute.UnEscapeHTMLStr(item)) ? checkedHTML : ""}
         </div>`;
                             });
                             renderTagList(html);
                         });
                         const inputElement = element.querySelector("input");
+                        const selectTag = (item?: HTMLElement) => {
+                            if (!item || item.dataset.type === "new") {
+                                const tag = (item?.querySelector("mark").textContent || inputElement.value).trim();
+                                if (tag) {
+                                    this.addTags(tag, protyle, () => {
+                                        inputElement.value = "";
+                                        inputElement.dispatchEvent(new CustomEvent("input"));
+                                    });
+                                }
+                                return;
+                            }
+                            const tag = item.textContent.trim();
+                            this.addTags(tag, protyle, () => {
+                                const check = item.querySelector(".b3-menu__checked");
+                                if (this.getTags().includes(tag)) {
+                                    if (!check) {
+                                        item.insertAdjacentHTML("beforeend", checkedHTML);
+                                    }
+                                } else {
+                                    check?.remove();
+                                }
+                            });
+                        };
                         inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                             event.stopPropagation();
                             if (event.isComposing) {
@@ -877,13 +901,7 @@ export class Background {
                             }
                             upDownHint(listElement, event);
                             if (event.key === "Enter") {
-                                const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
-                                this.addTags(currentElement ?
-                                    (currentElement.dataset.type === "new" ? currentElement.querySelector("mark").textContent.trim() : currentElement.textContent.trim()) :
-                                    inputElement.value.trim(), protyle, () => {
-                                        inputElement.value = "";
-                                        inputElement.dispatchEvent(new CustomEvent("input"));
-                                    });
+                                selectTag(listElement.querySelector<HTMLElement>(".b3-list-item--focus"));
                             } else if (event.key === "Escape") {
                                 window.siyuan.menus.menu.remove();
                             }
@@ -902,7 +920,7 @@ export class Background {
                                 response.data.tags.forEach((item: string, index: number) => {
                                     searchHTML += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">
             <div class="fn__flex-1">${item}</div>
-            ${currentTags.includes(Lute.UnEscapeHTMLStr(item.replace(/<mark>/g, "").replace(/<\/mark>/g, ""))) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
+            ${currentTags.includes(Lute.UnEscapeHTMLStr(item.replace(/<mark>/g, "").replace(/<\/mark>/g, ""))) ? checkedHTML : ""}
         </div>`;
                                     if (item === `<mark>${response.data.k}</mark>`) {
                                         hasKey = true;
@@ -920,12 +938,10 @@ export class Background {
                             if (!listItemElement) {
                                 return;
                             }
-                            this.addTags(listItemElement.dataset.type === "new" ? listItemElement.querySelector("mark").textContent.trim() : listItemElement.textContent.trim(),
-                                protyle, () => {
-                                    inputElement.value = "";
-                                    inputElement.dispatchEvent(new CustomEvent("input"));
-                                    inputElement.focus();
-                                });
+                            listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                            listItemElement.classList.add("b3-list-item--focus");
+                            selectTag(listItemElement);
+                            inputElement.focus({preventScroll: true});
                         });
                     }
                 });
@@ -965,9 +981,7 @@ export class Background {
         fetchPost("/api/attr/setBlockAttrs", {
             id: protyle.block.rootID,
             attrs: {"tags": tags.toString()}
-        }, () => {
-            cb();
-        });
+        }, cb);
         this.ial.tags = tags.toString();
         this.render(this.ial, protyle.block.rootID);
     }

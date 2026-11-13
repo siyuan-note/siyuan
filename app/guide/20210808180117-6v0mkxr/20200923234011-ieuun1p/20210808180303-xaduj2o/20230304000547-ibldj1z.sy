@@ -109,7 +109,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "AI editing processes selected text for tasks such as continuation, summarization, translation, and polishing."
+					"Data": "AI editing processes selected text for tasks such as continuation, summarization, translation, and polishing. Enter a one-time instruction in the top field and select Use to run it without saving it as a custom action. On desktop, Enter runs the instruction and Shift+Enter inserts a new line; on mobile, use the Use button. The separate search field filters common and saved actions. To save an instruction for reuse, choose Custom action... and save it there."
 				}
 			]
 		},

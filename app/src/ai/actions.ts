@@ -11,6 +11,7 @@ import {Menu} from "../plugin/Menu";
 import {upDownHint} from "../util/upDownHint";
 import {clearAIEditorHistory, startAIEditorAction} from "./editor";
 import {isDisabledFeature} from "../protyle/util/compatibility";
+import {bindOneTimeAction} from "./oneTimeAction";
 
 interface IAIEditorAction {
     id: string;
@@ -159,7 +160,11 @@ const openAIActions = (actions: IAIEditorAction[], elements: HTMLElement[], prot
         iconHTML: "",
         type: "empty",
         label: `<div class="fn__flex-column b3-menu__filter">
-    <input class="b3-text-field fn__flex-shrink"/>
+    <textarea class="b3-text-field fn__flex-shrink" rows="2" aria-label="${escapeAriaLabel(window.siyuan.languages.aiOneTimeAction)}" placeholder="${escapeAttr(window.siyuan.languages.aiOneTimeAction)}"></textarea>
+    <div class="fn__hr"></div>
+    <button class="b3-button fn__flex-shrink" data-type="run-once" disabled>${window.siyuan.languages.use}</button>
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__flex-shrink" aria-label="${escapeAriaLabel(window.siyuan.languages.search)}" placeholder="${escapeAttr(window.siyuan.languages.search)}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
        <div class="b3-list-item b3-list-item--narrow b3-list-item--focus" data-action="Continue writing">
@@ -194,6 +199,11 @@ const openAIActions = (actions: IAIEditorAction[], elements: HTMLElement[], prot
             /// #endif
             const listElement = element.querySelector(".b3-list");
             const inputElement = element.querySelector("input");
+            bindOneTimeAction(element.querySelector("textarea"), element.querySelector('[data-type="run-once"]'),
+                isMobile(), (action) => {
+                    menu.close();
+                    startAIEditorAction(protyle, elements, range, action);
+                });
             const runAction = (itemElement: HTMLElement) => {
                 let action = itemElement.dataset.action;
                 if (itemElement.dataset.type === "saved") {
@@ -282,7 +292,7 @@ const openAIActions = (actions: IAIEditorAction[], elements: HTMLElement[], prot
         y: rect.bottom,
         h: rect.height,
     });
-    menu.element.querySelector("input").focus();
+    menu.element.querySelector("textarea").focus();
     /// #endif
 };
 

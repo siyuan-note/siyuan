@@ -990,6 +990,11 @@
     box-shadow: 2px 0 0 0 var(--b3-protyle-inline-mark-background) inset;
   }
 
+  > .protyle-title__rich {
+    // 富文本编辑器不能遮住外层标题的制卡标记和动画。
+    background-color: transparent;
+  }
+
   &__icon {
     position: absolute;
     left: -22px;

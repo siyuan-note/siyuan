@@ -400,8 +400,8 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
     return `Image exports passed (mobile=${mobile}, pixelRatio=${pixelRatio})`;
 };
 
-test("wide PNG exports preserve text and all columns in both screenshot engines and viewport sizes", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+const runBrowserCase = (mobile: boolean, pixelRatio: number) => test(`wide PNG exports preserve text and all columns (mobile=${mobile}, pixelRatio=${pixelRatio})`, {
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
     timeout: 185000,
 }, async () => {
     const sass = require("sass");
@@ -458,15 +458,7 @@ ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(so
                 if (win && !win.isDestroyed()) win.destroy();
             }
         };
-        const results = [];
-        for (const pixelRatio of [1, 1.25, 1.5, 2, 3]) {
-            for (const mobile of [false, true]) {
-                results.push(await run({mobile, pixelRatio}).then(value => ({status: "fulfilled", value}),
-                    reason => ({status: "rejected", reason})));
-            }
-        }
-        const failure = results.find(result => result.status === "rejected");
-        if (failure) throw failure.reason;
+        await run({mobile: ${JSON.stringify(mobile)}, pixelRatio: ${JSON.stringify(pixelRatio)}});
         app.exit(0);
     } catch (error) {
         console.error(error); app.exit(1);
@@ -475,16 +467,20 @@ ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(so
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
-        const result = await promisify(execFile)(require("electron") as unknown as string, [script], {
+        const args = process.env.SIYUAN_ELECTRON_HEADLESS ?
+            ["--ozone-platform=headless", "--ozone-override-screen-size=1920,1080", script] : [script];
+        const result = await promisify(execFile)(require("electron") as unknown as string, args, {
             env, timeout: 180000, windowsHide: true,
         });
-        for (const pixelRatio of [1, 1.25, 1.5, 2, 3]) {
-            for (const mobile of [false, true]) {
-                assert.ok(result.stdout.includes(`Image exports passed (mobile=${mobile}, pixelRatio=${pixelRatio})`),
-                    result.stderr);
-            }
-        }
+        assert.ok(result.stdout.includes(`Image exports passed (mobile=${mobile}, pixelRatio=${pixelRatio})`),
+            `Missing case mobile=${mobile}, pixelRatio=${pixelRatio}\n${result.stdout}\n${result.stderr}`);
     } finally {
         rmSync(temporary, {recursive: true, force: true});
     }
 });
+
+for (const pixelRatio of [1, 1.25, 1.5, 2, 3]) {
+    for (const mobile of [false, true]) {
+        runBrowserCase(mobile, pixelRatio);
+    }
+}

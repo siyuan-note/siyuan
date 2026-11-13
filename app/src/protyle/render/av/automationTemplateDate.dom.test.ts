@@ -118,7 +118,11 @@ test("template preview uses date dropdowns without changing other overrides or s
             ok(input("datetime").value === "2026-11-15T09:45", "Cancel preserves the preview value");
             open(input("date"));
             popup().querySelector<HTMLButtonElement>('[data-date="2026-11-16"]').click(); await tick();
-            ok(!popup() && input("date").value === "2026-11-16", "Date-only selection commits directly");
+            if (mobile) {
+                ok(!!popup() && input("date").value !== "2026-11-16", "Mobile day selection only changes the draft");
+                await confirm();
+            }
+            ok(!popup() && input("date").value === "2026-11-16", "Date selection commits through the platform confirmation boundary");
             const previous = input("datetime"); open(previous);
             item.dispatchEvent(new Event("change")); await tick();
             ok(!popup() && !previous.isConnected && input("datetime").value === "2026-11-11T09:35", "Changing preview rows closes stale dropdowns and restores source data");

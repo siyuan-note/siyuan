@@ -128,8 +128,14 @@ test("filter date dropdowns preserve endpoint semantics and isolate editor roots
             const field = popup().querySelector<HTMLInputElement>(".date-picker__fields input");
             field.value = value; field.dispatchEvent(new InputEvent("input", {bubbles: true}));
             const day = value && popup().querySelector<HTMLButtonElement>(`[data-date="${value}"]`);
-            if (day && !day.disabled) { day.click(); }
-            else { popup().querySelector<HTMLButtonElement>('[data-action="confirm"]').click(); }
+            if (day && !day.disabled) {
+                day.click();
+                if (source.frontend === "mobile") {
+                    equal(!!popup(), true, "mobile day selection keeps the draft open");
+                    equal(transactions.length, before, "mobile day selection does not persist before confirmation");
+                    popup().querySelector<HTMLButtonElement>('[data-action="confirm"]').click();
+                }
+            } else { popup().querySelector<HTMLButtonElement>('[data-action="confirm"]').click(); }
             await tick();
             equal(!!popup(), false, "selecting a date or confirming closes the popup");
         };

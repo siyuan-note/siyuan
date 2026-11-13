@@ -101,6 +101,14 @@ test("dynamic icon date changes validate and update previews without saving an i
 test("snapshot replacement and owner disposal release dropdown bindings", () => {
     const snapshot = sources["history/repoPanel"].text;
     assert.match(snapshot, /states\.get\(root\)\?\.datePickers\?\.forEach\(picker => picker\.destroy\(\)\)/);
-    assert.match(snapshot, /return \(\) => \{\s*observer\.disconnect\(\);\s*datePickers\.forEach\(picker => picker\.destroy\(\)\);/);
+    const disposed = [];
+    const destroy = variable(sources["history/repoPanel"], "destroy", {
+        observer: {disconnect: () => disposed.push("observer")},
+        datePickers: [{destroy: () => disposed.push("start")}, {destroy: () => disposed.push("end")}],
+        plugins: {destroy: () => disposed.push("plugins")},
+    });
+    destroy();
+    assert.deepEqual(disposed, ["observer", "start", "end", "plugins"]);
+    assert.match(snapshot, /return destroy;/);
     assert.match(sources["emoji/index"].text, /destroyCallback: \(\) => \{\s*dynamicDatePicker\?\.destroy\(\)/);
 });

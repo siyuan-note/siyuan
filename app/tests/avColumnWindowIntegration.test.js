@@ -453,19 +453,21 @@ const browserCases = async sources => {
             const fixture = create();
             await settle();
             let finish;
-            let started = false;
+            let signalStarted;
+            const started = new Promise(resolve => { signalStarted = resolve; });
             const cloning = new Promise((resolve, reject) => { finish = failed ? reject : resolve; });
-            const clone = () => { started = true; return cloning; };
+            const clone = () => { signalStarted(); return cloning; };
             window.htmlToImage = {toBlob: clone};
             window.modernScreenshot = {domToBlob: clone};
             const renderImage = extract("renderImageBlob", {...shared, previewElement: fixture.viewport,
                 exportDialog: {element: {querySelector: () => fixture.viewport}},
                 updateExportImageLayout() {}, getExportImageSize: () => ({width: 640, height: 300}),
-                isExportImageSizeSupported: () => true, isIPhone: () => false, isIPad: () => false,
+                getExportImageLayoutScale: () => 1,
+                isExportImageSizeSupported: () => true, isMac: () => false, isIPhone: () => false, isIPad: () => false,
                 isSafari: () => safari, addScript: async () => {}, getExportImageLocalFontCSS: () => "",
                 getExportImageFontCSS: async () => "", IMAGE_PLACEHOLDER: "placeholder"});
             const pending = renderImage();
-            while (!started) await new Promise(resolve => setTimeout(resolve, 0));
+            await Promise.race([started, pending.then(() => check.fail("Export finished before cloning started"))]);
             const fullRows = () => check.ok(rowsOf(fixture.block).every(item =>
                 item.querySelectorAll(".av__cell").length === fixture.view.columns.length));
             fullRows();
@@ -519,7 +521,7 @@ if (process.versions.electron && process.type === "browser") {
     runElectron().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
     require("node:test").test("real table and cell renderers integrate row/column windows, navigation, mirrors and export", {
-        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
         timeout: 90000,
     }, async () => {
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-av-window-integration-"));
@@ -527,7 +529,9 @@ if (process.versions.electron && process.type === "browser") {
         delete env.ELECTRON_RUN_AS_NODE;
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 80000});
+                require("electron"), [...(process.env.SIYUAN_ELECTRON_HEADLESS ?
+                    ["--ozone-platform=headless", "--ozone-override-screen-size=1920,1080"] : []),
+                    __filename, profile], {env, windowsHide: true, timeout: 80000});
             assert.match(stdout, /Combined database windows passed/);
             console.log(stdout.trim());
         } finally {

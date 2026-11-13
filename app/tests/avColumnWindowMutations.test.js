@@ -62,14 +62,27 @@ test("column removal restores all database mirrors before deleting mounted or ca
     assert.ok(cells.every(cell => cell.removed));
 });
 
+const waitForCloning = (started, pending) => Promise.race([
+    started,
+    pending.then(() => assert.fail("Export finished before cloning started")),
+]);
+
+test("export setup rejection fails the clone wait instead of leaving a polling loop active", async () => {
+    const error = new Error("Export setup failed");
+    await assert.rejects(waitForCloning(new Promise(() => {}), Promise.reject(error)), error);
+    await assert.rejects(waitForCloning(new Promise(() => {}), Promise.resolve("image")),
+        /Export finished before cloning started/);
+});
+
 for (const safari of [false, true]) {
     for (const failed of [false, true]) {
         test(`image export keeps columns mounted until ${safari ? "WebKit" : "Chromium"} cloning ${failed ? "fails" : "finishes"}`, async () => {
             let complete;
-            let started = false;
+            let signalStarted;
+            const started = new Promise(resolve => { signalStarted = resolve; });
             let released = 0;
             const cloning = new Promise((resolve, reject) => { complete = failed ? reject : resolve; });
-            const clone = () => { started = true; return cloning; };
+            const clone = () => { signalStarted(); return cloning; };
             const render = load("src/protyle/export/util.ts", "renderImageBlob", {
                 suspendAVColumnWindows: () => () => { released++; },
                 previewElement: {querySelectorAll: () => []},
@@ -78,13 +91,14 @@ for (const safari of [false, true]) {
                 document: {fonts: {ready: Promise.resolve()}},
                 window: {devicePixelRatio: 1, htmlToImage: {toBlob: clone}, modernScreenshot: {domToBlob: clone}},
                 updateExportImageLayout() {}, getExportImageSize: () => ({width: 500, height: 300}),
-                isExportImageSizeSupported: () => true, isIPhone: () => false, isIPad: () => false,
+                getExportImageLayoutScale: () => 1,
+                isExportImageSizeSupported: () => true, isMac: () => false, isIPhone: () => false, isIPad: () => false,
                 isSafari: () => safari, addScript: async () => {},
                 getExportImageLocalFontCSS: () => "", getExportImageFontCSS: async () => "",
                 IMAGE_PLACEHOLDER: "placeholder",
             });
             const pending = render();
-            while (!started) await new Promise(resolve => setImmediate(resolve));
+            await waitForCloning(started, pending);
             assert.equal(released, 0, "pending asynchronous cloning must retain full columns");
             if (failed) {
                 complete(new Error("clone failed"));

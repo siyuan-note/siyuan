@@ -40,6 +40,7 @@ app.whenReady().then(async () => {
                 const point = await win.webContents.executeJavaScript(
                     "(() => {const r = document.querySelector('.protyle-title').getBoundingClientRect(); return {x:r.x,y:r.y};})()");
                 const pixel = async (x, y) => {
+                    await win.webContents.executeJavaScript("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
                     const image = await win.webContents.capturePage({x:Math.floor(x), y:Math.floor(y), width:1, height:1});
                     return Array.from(image.toBitmap().subarray(0, 3));
                 };

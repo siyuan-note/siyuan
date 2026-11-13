@@ -30,8 +30,10 @@ func TestAPIContractExtensionCopy(t *testing.T) {
 	for _, test := range []struct {
 		name, dom                                    string
 		missing, malformed, brokenUpload, blockedDir bool
+		video                                        bool
 	}{
 		{name: "text", dom: "<p>Hello</p>"},
+		{name: "video between text", dom: `<p>Hello</p><video><source src="https://example.invalid/clip.mp4" type="video/mp4"></video><p>After</p>`, video: true},
 		{name: "empty DOM"},
 		{name: "missing DOM", missing: true},
 		{name: "malformed form", malformed: true},
@@ -106,6 +108,12 @@ func TestAPIContractExtensionCopy(t *testing.T) {
 			}
 			if test.dom != "" && (!strings.Contains(response.Data.Markdown, "Hello") || strings.Contains(response.Data.Markdown, "ignored")) {
 				t.Fatalf("DOM selection changed: %s", response.Data.Markdown)
+			}
+			if test.video {
+				const video = `<video src="https://example.invalid/clip.mp4" controls="controls"></video>`
+				if !strings.Contains(response.Data.Markdown, "Hello\n\n"+video+"\n\nAfter") {
+					t.Fatalf("clip should keep the video between paragraphs as a separate block: %q", response.Data.Markdown)
+				}
 			}
 			if _, err := os.Stat(filepath.Dir(assets)); err != nil {
 				t.Fatal(err)

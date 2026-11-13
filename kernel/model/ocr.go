@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -290,6 +291,52 @@ func OCRAssetsJob() {
 
 var ocrRetry automaticOCRRetryCache
 
+func automaticOCRAssets(ctx context.Context, provider string) map[string]*cache.Asset {
+	matchName := util.IsTesseractExtractable
+	if provider == "ai" {
+		matchName = isAIOCRPath
+	}
+	scan := func(root string) map[string]*cache.Asset {
+		assets, err := cache.ScanAssets(ctx, root, matchName)
+		if err != nil && ctx.Err() == nil && !os.IsNotExist(err) {
+			logging.LogWarnf("scan automatic OCR assets [%s] failed: %s", root, err)
+		}
+		return assets
+	}
+
+	var assets map[string]*cache.Asset
+	if util.IsMobileContainer() {
+		assets = scan(util.GetDataAssetsAbsPath())
+	} else {
+		assets = cache.FilterAssets(func(path string, _ *cache.Asset) bool { return matchName(path) })
+	}
+	entries, err := os.ReadDir(util.DataDir)
+	if err != nil {
+		logging.LogWarnf("list notebooks for automatic OCR failed: %s", err)
+		return assets
+	}
+	for _, entry := range entries {
+		if ctx.Err() != nil {
+			break
+		}
+		boxID := entry.Name()
+		if !entry.IsDir() || !ast.IsNodeIDPattern(boxID) {
+			continue
+		}
+		root := filepath.Join(util.DataDir, boxID, "assets")
+		if !filelock.IsExist(root) || !filelock.IsExist(filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")) || IsEncryptedBox(boxID) {
+			continue
+		}
+		// 普通笔记本图片使用不带 box 参数的链接，与手动识别及全文索引使用同一个资源键。
+		for path, asset := range scan(root) {
+			if _, exists := assets[path]; !exists {
+				assets[path] = asset
+			}
+		}
+	}
+	return assets
+}
+
 func autoOCRAssets() {
 	defer logging.Recover()
 	value := Conf.GetOCR()
@@ -298,12 +345,10 @@ func autoOCRAssets() {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), automaticOCRTimeout(value))
 	defer cancel()
-	assets := cache.FilterAssets(func(path string, asset *cache.Asset) bool {
-		if value.Provider == "ai" {
-			return isAIOCRPath(asset.Path)
-		}
-		return util.IsTesseractExtractable(asset.Path)
-	})
+	assets := automaticOCRAssets(ctx, value.Provider)
+	if ctx.Err() != nil {
+		return
+	}
 	generation := ocrRetry.prepare(value, assets)
 	limit := 7
 	if value.Provider == "ai" {
@@ -320,6 +365,15 @@ func autoOCRAssets() {
 		absPath, err := GetAssetAbsPathInBox(asset.Path, "")
 		if err != nil || IsEncryptedAssetPath(absPath) {
 			continue
+		}
+		if util.BoxIDFromDataPath(absPath) != "" {
+			relativePath, err := filepath.Rel(util.DataDir, absPath)
+			if err != nil {
+				continue
+			}
+			if _, _, err = ResolveDataAssetPath(relativePath); err != nil {
+				continue
+			}
 		}
 		info, err := os.Stat(absPath)
 		if err != nil {

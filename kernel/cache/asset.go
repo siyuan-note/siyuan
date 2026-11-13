@@ -5,6 +5,7 @@
 package cache
 
 import (
+	"context"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -154,9 +155,19 @@ func LoadAssets() {
 	assetsLock.Lock()
 	defer assetsLock.Unlock()
 
-	assetsCache = map[string]*Asset{}
-	assets := util.GetDataAssetsAbsPath()
-	filelock.Walk(assets, func(path string, d fs.DirEntry, err error) error {
+	assetsCache, _ = ScanAssets(context.Background(), util.GetDataAssetsAbsPath(), nil)
+	elapsed := time.Since(start)
+	if 2000 < elapsed.Milliseconds() {
+		logging.LogInfof("loaded assets [%.2fs]", elapsed.Seconds())
+	}
+}
+
+func ScanAssets(ctx context.Context, root string, matchName func(string) bool) (assets map[string]*Asset, err error) {
+	assets = map[string]*Asset{}
+	err = filelock.Walk(root, func(path string, d fs.DirEntry, err error) error {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
 		if nil != err || nil == d {
 			return err
 		}
@@ -166,7 +177,8 @@ func LoadAssets() {
 			}
 			return nil
 		}
-		if strings.HasSuffix(d.Name(), ".sya") || strings.HasPrefix(d.Name(), ".") || filelock.IsHidden(path) || util.IsOfficeTempFile(path) {
+		if (matchName != nil && !matchName(d.Name())) || strings.HasSuffix(d.Name(), ".sya") || strings.HasPrefix(d.Name(), ".") ||
+			filelock.IsHidden(path) || util.IsOfficeTempFile(path) {
 			return nil
 		}
 
@@ -177,16 +189,13 @@ func LoadAssets() {
 		}
 
 		hName := util.RemoveID(d.Name())
-		path = "assets" + filepath.ToSlash(strings.TrimPrefix(path, assets))
-		assetsCache[path] = &Asset{
+		path = "assets" + filepath.ToSlash(strings.TrimPrefix(path, root))
+		assets[path] = &Asset{
 			HName:   hName,
 			Path:    path,
 			Updated: info.ModTime().Unix(),
 		}
 		return nil
 	})
-	elapsed := time.Since(start)
-	if 2000 < elapsed.Milliseconds() {
-		logging.LogInfof("loaded assets [%.2fs]", elapsed.Seconds())
-	}
+	return
 }

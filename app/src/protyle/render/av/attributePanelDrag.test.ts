@@ -257,6 +257,8 @@ const browserCases = async (source: string, css: string) => {
         const rightColumn = rect("D").left;
         col.row("A").style.minHeight = "160px";
         check.equal(rect("D").left, rightColumn, "editing content height does not move fields between columns");
+        check.equal(rect("D").top, rect("A").top, "the shorter field stays at the top");
+        check.ok(rect("D").height < rect("A").height, "the shorter field does not stretch to fill the grid row");
         col.panel.style.width = "800px";
         check.equal(rect("A").left, rect("D").left);
         check.ok(rect("D").top > rect("C").top, "narrow column layout follows the complete single-column sequence");

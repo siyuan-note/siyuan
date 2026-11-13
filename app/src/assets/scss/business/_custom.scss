@@ -444,6 +444,7 @@
     grid-template-columns: repeat(var(--b3-database-attr-columns, 2), minmax(0, 1fr));
 
     > .av__row {
+      align-self: start;
       order: calc(var(--av-field-order, 0) * var(--b3-database-attr-column-flow, 0));
     }
 

@@ -374,7 +374,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Canonical records live in data/storage/ai/memory/records/ within the current workspace, not in ordinary notebook documents. They sync with workspace data; other devices must finish syncing to receive the latest records, corrections and withdrawals. Records with sync conflicts are not silently used as valid memories."
+					"Data": "Canonical records live in data/storage/ai/memory/records/ within the current workspace, not in ordinary notebook documents. They sync with workspace data; other devices must finish syncing to receive the latest records, corrections and withdrawals. Conflicting files follow the ordinary sync version-selection rules and retain conflict history. Records with existing conflict markers remain excluded from memory use. Snapshot restoration rolls memories and withdrawal state back together with workspace data, so restoring a snapshot from before forgetting may make forgotten content available again."
 				}
 			]
 		},

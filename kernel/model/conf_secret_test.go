@@ -139,7 +139,7 @@ func TestHideConfSecretHidesAbsolutePaths(t *testing.T) {
 	}
 }
 
-func TestHideBoxConfSecretPreservesNotebookSettings(t *testing.T) {
+func TestHideBoxConfSecretClearsTargetsAndPreservesSettings(t *testing.T) {
 	boxConf := &conf.BoxConf{
 		Name:      "Encrypted notebook",
 		Sort:      7,
@@ -153,12 +153,24 @@ func TestHideBoxConfSecretPreservesNotebookSettings(t *testing.T) {
 			WrapNonce:  []byte("wrap-nonce"),
 			CreatedAt:  123,
 		},
+		DocCreateSaveBox:      "20260101000000-savebox",
+		DocCreateSavePath:     "/private/doc-save",
+		DocCreateTemplatePath: "/private/doc-template.sy",
+		RefCreateSaveBox:      "20260101000001-refbox0",
+		RefCreateSavePath:     "/private/ref-save",
+		DailyNoteSavePath:     "/private/daily/{{now | date \"2006/01\"}}/{{now | date \"20060102\"}}",
+		DailyNoteTemplatePath: "/private/daily-template.sy",
 	}
 
 	HideBoxConfSecret(boxConf)
 
 	if nil != boxConf.BoxCrypt {
 		t.Fatalf("wrapped notebook key was not hidden: %#v", boxConf.BoxCrypt)
+	}
+	if "" != boxConf.DocCreateSaveBox || "" != boxConf.DocCreateSavePath || "" != boxConf.DocCreateTemplatePath ||
+		"" != boxConf.RefCreateSaveBox || "" != boxConf.RefCreateSavePath ||
+		"" != boxConf.DailyNoteSavePath || "" != boxConf.DailyNoteTemplatePath {
+		t.Fatalf("notebook creation targets were not hidden: %#v", boxConf)
 	}
 	if "Encrypted notebook" != boxConf.Name ||
 		7 != boxConf.Sort ||

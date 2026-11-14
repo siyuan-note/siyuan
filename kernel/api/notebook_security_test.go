@@ -527,3 +527,100 @@ func TestGetEncryptedNotebookStatusAuthorization(t *testing.T) {
 		})
 	}
 }
+
+func TestGetNotebookConfHidesCreationTargetsFromReader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldConf, oldDataDir := model.Conf, util.DataDir
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	t.Cleanup(func() {
+		model.Conf, util.DataDir = oldConf, oldDataDir
+	})
+
+	const boxID = "20260724000001-abcdefh"
+	const saveBoxID = "20260724000002-savebx1"
+	boxConf := conf.NewBoxConf()
+	boxConf.Name = "Visible notebook"
+	boxConf.Closed = false
+	boxConf.DocCreateSaveBox = saveBoxID
+	boxConf.DocCreateSavePath = "/private/doc-save"
+	boxConf.DocCreateTemplatePath = "/private/doc-template.sy"
+	boxConf.RefCreateSaveBox = saveBoxID
+	boxConf.RefCreateSavePath = "/private/ref-save"
+	boxConf.DailyNoteSavePath = "/private/daily"
+	boxConf.DailyNoteTemplatePath = "/private/daily-template.sy"
+	boxConfPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
+	if err := os.MkdirAll(filepath.Dir(boxConfPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	data, err := json.Marshal(boxConf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(boxConfPath, data, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name        string
+		role        model.Role
+		keepTargets bool
+	}{
+		{name: "reader", role: model.RoleReader},
+		{name: "administrator", role: model.RoleAdministrator, keepTargets: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(func(c *gin.Context) {
+				c.Set(model.RoleContextKey, test.role)
+				c.Next()
+			})
+			engine.POST("/api/notebook/getNotebookConf", getNotebookConf)
+
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(
+				http.MethodPost,
+				"/api/notebook/getNotebookConf",
+				strings.NewReader(`{"notebook":"`+boxID+`"}`),
+			)
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			response := &struct {
+				Code int `json:"code"`
+				Data struct {
+					Conf *conf.BoxConf `json:"conf"`
+				} `json:"data"`
+			}{}
+			requireAPIContract(t, http.MethodPost, "/api/notebook/getNotebookConf", recorder)
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if 0 != response.Code || nil == response.Data.Conf {
+				t.Fatalf("unexpected notebook configuration response: %s", recorder.Body.String())
+			}
+			got := response.Data.Conf
+			if boxConf.Name != got.Name {
+				t.Fatalf("functional notebook settings were changed: %#v", got)
+			}
+			if test.keepTargets {
+				if saveBoxID != got.DocCreateSaveBox || boxConf.DocCreateSavePath != got.DocCreateSavePath ||
+					boxConf.DocCreateTemplatePath != got.DocCreateTemplatePath ||
+					boxConf.RefCreateSaveBox != got.RefCreateSaveBox || boxConf.RefCreateSavePath != got.RefCreateSavePath ||
+					boxConf.DailyNoteSavePath != got.DailyNoteSavePath ||
+					boxConf.DailyNoteTemplatePath != got.DailyNoteTemplatePath {
+					t.Fatalf("administrator did not receive notebook creation targets: %#v", got)
+				}
+				return
+			}
+			if "" != got.DocCreateSaveBox || "" != got.DocCreateSavePath || "" != got.DocCreateTemplatePath ||
+				"" != got.RefCreateSaveBox || "" != got.RefCreateSavePath ||
+				"" != got.DailyNoteSavePath || "" != got.DailyNoteTemplatePath {
+				t.Fatalf("reader received notebook creation targets: %s", recorder.Body.String())
+			}
+		})
+	}
+}

@@ -171,7 +171,7 @@ func testDocumentTitleMentionSources(t *testing.T, boxID string) string {
 		t.Fatalf("document mention groups/count = %d/%d, want %d", len(mentions), count, len(want))
 	}
 	for _, tree := range []*parse.Tree{plain, named, aliased, literal, rich, strong, linked, codeNamed} {
-		previews, _ := GetBackmentionDocInBox(target.ID, tree.ID, "", false, true, queryBox)
+		previews, _ := GetBackmentionDocInBox(target.ID, tree.ID, "", false, true, queryBox, nil)
 		if len(previews) != 1 || previews[0].ID != tree.ID || previews[0].Type != ast.NodeDocument.String() ||
 			!strings.Contains(previews[0].DOM, `data-document-title="true"`) || strings.Contains(previews[0].DOM, bodyMarker) {
 			t.Fatalf("document mention did not render only its title: %s, %+v", tree.ID, previews)

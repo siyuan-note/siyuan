@@ -77,12 +77,13 @@ var getBackmentionDoc = contractHandler(apicontract.GetBackmentionDoc, func(c *g
 
 	var backlinks []*model.Backlink
 	var keywords []string
+	accessible := backlinkPublishAccessChecker(c)
 	if encryptedNotebookDenied || !isBacklinkDocAccessible(c, refTreeID) {
 		backlinks, keywords = []*model.Backlink{}, []string{}
 	} else if notebook != "" && model.IsEncryptedBox(notebook) {
-		backlinks, keywords = model.GetBackmentionDocInBox(defID, refTreeID, keyword, containChildren, highlight, notebook, notify)
+		backlinks, keywords = model.GetBackmentionDocInBox(defID, refTreeID, keyword, containChildren, highlight, notebook, accessible, notify)
 	} else {
-		backlinks, keywords = model.GetBackmentionDoc(defID, refTreeID, keyword, containChildren, highlight, notify)
+		backlinks, keywords = model.GetBackmentionDoc(defID, refTreeID, keyword, containChildren, highlight, accessible, notify)
 	}
 	keywords = canonicalBacklinkKeywords(keywords)
 	items := newBacklinkContextResponses(backlinks)

@@ -5749,7 +5749,7 @@
 		{
 			"ID": "20220909095340-rr23xv7",
 			"Type": "NodeVideo",
-			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
+			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" style=\"width: 640px; height: 327px;\"></video>",
 			"Properties": {
 				"id": "20220909095340-rr23xv7",
 				"updated": "20220909095340"
@@ -5787,7 +5787,7 @@
 		{
 			"ID": "20210608121458-7rrz8f2",
 			"Type": "NodeAudio",
-			"Data": "<audio controls=\"controls\" src=\"assets/record1623077643753-20210607225403-7cg1jkq.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608121458-mc4mcvz.wav\"></audio>",
+			"Data": "<audio controls=\"controls\" src=\"assets/record1623077643753-20210607225403-7cg1jkq.wav\"></audio>",
 			"Properties": {
 				"id": "20210608121458-7rrz8f2",
 				"updated": "20210608121458"

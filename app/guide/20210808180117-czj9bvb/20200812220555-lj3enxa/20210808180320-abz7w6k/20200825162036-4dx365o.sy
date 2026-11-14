@@ -5486,7 +5486,7 @@
 		{
 			"ID": "20210608113914-zvtw5kj",
 			"Type": "NodeVideo",
-			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
+			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" style=\"width: 640px; height: 327px;\"></video>",
 			"Properties": {
 				"id": "20210608113914-zvtw5kj",
 				"updated": "20210608113914"
@@ -5524,7 +5524,7 @@
 		{
 			"ID": "20210608113713-wm8271x",
 			"Type": "NodeAudio",
-			"Data": "<audio controls=\"controls\" src=\"assets/record1623120470117-20210608104750-2thv5m5.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608113713-4eddn56.wav\"></audio>",
+			"Data": "<audio controls=\"controls\" src=\"assets/record1623120470117-20210608104750-2thv5m5.wav\"></audio>",
 			"Properties": {
 				"id": "20210608113713-wm8271x",
 				"updated": "20210608113713"

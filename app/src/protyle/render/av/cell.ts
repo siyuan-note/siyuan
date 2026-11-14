@@ -868,7 +868,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     const hasRenderedTemplate = cellElements[0].matches(".av__celltext--template") ||
         Boolean(cellElements[0].querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template"));
-    if ((type === "text" || type === "block") && !hasRenderedTemplate) {
+    if (type === "text" || (type === "block" && !hasRenderedTemplate)) {
         const stableCells = getStableTextCells(cellElements, blockElement, type);
         if (stableCells.length > 0) {
             if (!options?.keepMenuOpen) {

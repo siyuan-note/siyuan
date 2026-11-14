@@ -743,6 +743,7 @@ export class Menu {
     }
 
     private setPopupPosition() {
+        this.element.style.right = "auto";
         const options = this.position;
         const itemsElement = this.element.lastElementChild as HTMLElement;
         itemsElement.style.maxHeight = "";

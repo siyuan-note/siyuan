@@ -76,7 +76,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " cannot be set as a shortcut."
+					"Data": " cannot be set as a shortcut. Editing bindings keeps the current search results visible; change the search or filter to update the list."
 				}
 			]
 		},

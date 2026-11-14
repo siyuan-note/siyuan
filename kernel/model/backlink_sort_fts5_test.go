@@ -136,9 +136,9 @@ func TestBacklinkAnchorSortContext(t *testing.T) {
 				for _, explicitBox := range []bool{false, true} {
 					var links []*Backlink
 					if explicitBox {
-						links, _ = GetBacklinkDocInBoxWithSort(fixture.sourceID, fixture.targetID, entry.keyword, entry.children, true, boxID, entry.mode)
+						links, _ = GetBacklinkDocInBoxWithSort(fixture.sourceID, fixture.targetID, entry.keyword, entry.children, true, boxID, entry.mode, nil)
 					} else {
-						links, _ = GetBacklinkDocWithSort(fixture.sourceID, fixture.targetID, entry.keyword, entry.children, true, entry.mode)
+						links, _ = GetBacklinkDocWithSort(fixture.sourceID, fixture.targetID, entry.keyword, entry.children, true, entry.mode, nil)
 					}
 					var got []string
 					for _, link := range links {
@@ -177,9 +177,9 @@ func TestBacklinkAnchorSortContext(t *testing.T) {
 				for _, explicitBox := range []bool{false, true} {
 					var links []*Backlink
 					if explicitBox {
-						links, _ = GetBacklinkDocInBoxWithSort(fixture.sourceID, fixture.targetID, "", true, false, boxID, mode)
+						links, _ = GetBacklinkDocInBoxWithSort(fixture.sourceID, fixture.targetID, "", true, false, boxID, mode, nil)
 					} else {
-						links, _ = GetBacklinkDocWithSort(fixture.sourceID, fixture.targetID, "", true, false, mode)
+						links, _ = GetBacklinkDocWithSort(fixture.sourceID, fixture.targetID, "", true, false, mode, nil)
 					}
 					var got []string
 					for _, link := range links {

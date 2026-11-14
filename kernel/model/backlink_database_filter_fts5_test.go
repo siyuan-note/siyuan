@@ -115,7 +115,7 @@ func TestBacklinkDatabaseFilteringPaginationAndMentions(t *testing.T) {
 	if mentionCount != filteredMentionCount || !reflect.DeepEqual(mentions, filteredMentions) {
 		t.Fatal("database filtering changed mentions")
 	}
-	contexts, _ := GetBacklinkDocInBox(fixture.sourceID, fixture.targetID, "", false, false, "", filter)
+	contexts, _ := GetBacklinkDocInBox(fixture.sourceID, fixture.targetID, "", false, false, "", nil, filter)
 	if len(contexts) != 60 {
 		t.Fatalf("detail count: %d", len(contexts))
 	}
@@ -210,7 +210,7 @@ func TestBacklinkDatabaseListItemBindingAndDirectPrecedence(t *testing.T) {
 		{Column: key.ID, Operator: av.FilterOperatorIsEqual, Value: &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "open"}}},
 	}}}
 	_, _, _, count, _ := GetBacklink2InBoxWithOptions(fixture.sourceID, "", "", 0, 0, false, "", filter, false, true)
-	contexts, _ := GetBacklinkDocInBox(fixture.sourceID, fixture.targetID, "", false, false, "", filter)
+	contexts, _ := GetBacklinkDocInBox(fixture.sourceID, fixture.targetID, "", false, false, "", nil, filter)
 	if count != 1 || len(contexts) != 1 || contexts[0].ID != item.ID {
 		t.Fatalf("list binding not used consistently: %d %+v", count, contexts)
 	}

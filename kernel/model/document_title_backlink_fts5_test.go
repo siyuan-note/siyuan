@@ -121,7 +121,7 @@ func testDocumentTitleBacklinkSources(t *testing.T, boxID string) {
 		}
 	}
 	for _, sortMode := range []int{0, 1, 2} {
-		backlinks, _ := GetBacklinkDocInBoxWithSort(definition.ID, reference.ID, "", false, false, boxID, sortMode)
+		backlinks, _ := GetBacklinkDocInBoxWithSort(definition.ID, reference.ID, "", false, false, boxID, sortMode, nil)
 		assertPreview(backlinks)
 	}
 	_, paths, _, count, _ := GetBacklink2InBoxWithOptions(definition.ID, "", "", 0, 0, false, boxID, nil, false, true)

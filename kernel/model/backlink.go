@@ -259,11 +259,11 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highli
 	return
 }
 
-func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight bool, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
-	return GetBacklinkDocWithSort(defID, refTreeID, keyword, containChildren, highlight, 0, filters...)
+func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight bool, accessible func(string) bool, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
+	return GetBacklinkDocWithSort(defID, refTreeID, keyword, containChildren, highlight, 0, accessible, filters...)
 }
 
-func GetBacklinkDocWithSort(defID, refTreeID, keyword string, containChildren, highlight bool, blockSort int, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
+func GetBacklinkDocWithSort(defID, refTreeID, keyword string, containChildren, highlight bool, blockSort int, accessible func(string) bool, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
 	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
 		keywords = strings.Split(keyword, " ")
@@ -319,7 +319,7 @@ func GetBacklinkDocWithSort(defID, refTreeID, keyword string, containChildren, h
 
 	linkRefs = expandBacklinkDocumentEntries(linkRefs, tmpRefs, rootID, keywords, encBoxIDUsed, originalRefBlockIDs, blockSort, filters...)
 	anchorKeys := backlinkAnchorSortKeys(linkRefs, refTree, tmpRefs, originalRefBlockIDs, blockSort)
-	avTargets := backlinkAttributeViewTargets(refTree, tmpRefs)
+	avTargets := backlinkAttributeViewTargets(refTree, tmpRefs, accessible)
 	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
 		backlink := buildBacklink(linkRef.ID, refTree, originalRefBlockIDs, keywords, highlight, luteEngine, avTargets)
@@ -334,11 +334,11 @@ func GetBacklinkDocWithSort(defID, refTreeID, keyword string, containChildren, h
 	return
 }
 
-func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
-	return GetBacklinkDocInBoxWithSort(defID, refTreeID, keyword, containChildren, highlight, boxID, 0, filters...)
+func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string, accessible func(string) bool, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
+	return GetBacklinkDocInBoxWithSort(defID, refTreeID, keyword, containChildren, highlight, boxID, 0, accessible, filters...)
 }
 
-func GetBacklinkDocInBoxWithSort(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string, blockSort int, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
+func GetBacklinkDocInBoxWithSort(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string, blockSort int, accessible func(string) bool, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
 	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
 		keywords = strings.Split(keyword, " ")
@@ -376,7 +376,7 @@ func GetBacklinkDocInBoxWithSort(defID, refTreeID, keyword string, containChildr
 
 	linkRefs = expandBacklinkDocumentEntries(linkRefs, tmpRefs, rootID, keywords, boxID, originalRefBlockIDs, blockSort, filters...)
 	anchorKeys := backlinkAnchorSortKeys(linkRefs, refTree, tmpRefs, originalRefBlockIDs, blockSort)
-	avTargets := backlinkAttributeViewTargets(refTree, tmpRefs)
+	avTargets := backlinkAttributeViewTargets(refTree, tmpRefs, accessible)
 	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
 		backlink := buildBacklink(linkRef.ID, refTree, originalRefBlockIDs, keywords, highlight, luteEngine, avTargets)

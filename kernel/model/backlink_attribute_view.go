@@ -30,7 +30,7 @@ type BacklinkAttributeViewMatch struct {
 }
 
 // 读取当前来源数据解析引用位置，索引仍按数据库块聚合，不改变引用计数和存储格式。
-func backlinkAttributeViewTargets(tree *parse.Tree, refs []*sql.Ref) map[string]*BacklinkAttributeViewTarget {
+func backlinkAttributeViewTargets(tree *parse.Tree, refs []*sql.Ref, accessible func(string) bool) map[string]*BacklinkAttributeViewTarget {
 	ret := map[string]*BacklinkAttributeViewTarget{}
 	if nil == tree || nil == tree.Root {
 		return ret
@@ -63,14 +63,14 @@ func backlinkAttributeViewTargets(tree *parse.Tree, refs []*sql.Ref) map[string]
 			}
 			views[node.AttributeViewID] = attrView
 		}
-		if matches := backlinkAttributeViewMatches(attrView, defIDs); 0 < len(matches) {
+		if matches := backlinkAttributeViewMatches(attrView, defIDs, accessible); 0 < len(matches) {
 			ret[blockID] = &BacklinkAttributeViewTarget{BlockID: blockID, Matches: matches}
 		}
 	}
 	return ret
 }
 
-func backlinkAttributeViewMatches(attrView *av.AttributeView, defIDs map[string]bool) (ret []*BacklinkAttributeViewMatch) {
+func backlinkAttributeViewMatches(attrView *av.AttributeView, defIDs map[string]bool, accessible func(string) bool) (ret []*BacklinkAttributeViewMatch) {
 	if nil == attrView || 0 == len(defIDs) {
 		return
 	}
@@ -85,6 +85,10 @@ func backlinkAttributeViewMatches(attrView *av.AttributeView, defIDs map[string]
 			}
 			item := items[value.BlockID]
 			if nil == item || nil == item.Block {
+				continue
+			}
+			// 行绑定文档不可发布访问时，行标题与标识不能出现在反链上下文里
+			if nil != accessible && !item.IsDetached && !accessible(item.Block.ID) {
 				continue
 			}
 			fragment, err := av.RichValueTree(value)

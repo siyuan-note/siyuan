@@ -31,6 +31,18 @@ func isBacklinkDocAccessible(c *gin.Context, refTreeID string) bool {
 	return model.CheckBlockIdAccessableByPublishAccess(c, model.GetPublishAccess(), refTreeID)
 }
 
+// backlinkPublishAccessChecker 返回发布读者的块访问判定，其他角色返回 nil 表示不做过滤。
+func backlinkPublishAccessChecker(c *gin.Context) func(string) bool {
+	if !model.IsReadOnlyRoleContext(c) {
+		return nil
+	}
+
+	publishAccess := model.GetPublishAccess()
+	return func(id string) bool {
+		return model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id)
+	}
+}
+
 func backlinkRequestNotifier(c *gin.Context) model.BackmentionNotifier {
 	if model.IsReadOnlyRoleContext(c) {
 		return nil
@@ -148,12 +160,13 @@ var getBacklinkDoc = contractHandler(apicontract.GetBacklinkDoc, func(c *gin.Con
 
 	var backlinks []*model.Backlink
 	var keywords []string
+	accessible := backlinkPublishAccessChecker(c)
 	if encryptedNotebookDenied || !isBacklinkDocAccessible(c, refTreeID) {
 		backlinks, keywords = []*model.Backlink{}, []string{}
 	} else if notebook != "" && model.IsEncryptedBox(notebook) {
-		backlinks, keywords = model.GetBacklinkDocInBoxWithSort(defID, refTreeID, keyword, containChildren, highlight, notebook, request.BlockSort, backlinkSourceFilterModel(request.SourceFilter))
+		backlinks, keywords = model.GetBacklinkDocInBoxWithSort(defID, refTreeID, keyword, containChildren, highlight, notebook, request.BlockSort, accessible, backlinkSourceFilterModel(request.SourceFilter))
 	} else {
-		backlinks, keywords = model.GetBacklinkDocWithSort(defID, refTreeID, keyword, containChildren, highlight, request.BlockSort, backlinkSourceFilterModel(request.SourceFilter))
+		backlinks, keywords = model.GetBacklinkDocWithSort(defID, refTreeID, keyword, containChildren, highlight, request.BlockSort, accessible, backlinkSourceFilterModel(request.SourceFilter))
 	}
 	keywords = canonicalBacklinkKeywords(keywords)
 	items := newBacklinkContextResponses(backlinks)

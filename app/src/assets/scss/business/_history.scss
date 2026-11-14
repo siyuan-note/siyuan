@@ -141,9 +141,21 @@
     display: flex;
     flex-direction: column;
 
-    > div {
+    > [data-type="snapshotFileTitle"] {
+      max-height: 40%;
+      overflow: auto;
+    }
+
+    > [data-type="snapshotFileContent"] {
+      display: flex;
+      flex-direction: column;
       flex: 1;
       min-height: 0;
+
+      > div {
+        flex: 1;
+        min-height: 0;
+      }
     }
   }
 

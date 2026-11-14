@@ -1697,7 +1697,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Local snapshots support searching by file name; searching makes room for the file list and preview. Outside batch management, you can still select two local snapshots to compare them and use individual actions such as tagging, uploading, downloading, and rolling back."
+					"Data": "Local snapshots support searching by file name; searching makes room for the file list and preview. When you select a document file in snapshot details, the preview shows the title saved in that snapshot above the content. Outside batch management, you can still select two local snapshots to compare them and use individual actions such as tagging, uploading, downloading, and rolling back."
 				}
 			]
 		},

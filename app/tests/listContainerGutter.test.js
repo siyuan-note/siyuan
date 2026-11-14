@@ -25,10 +25,12 @@ const sources = (full = false) => {
     const menuType = renderMenu.body.statements.find(node => ts.isVariableStatement(node) &&
         node.declarationList.declarations.some(declaration => declaration.name.getText(source) === "type"));
     const interactions = [];
+    const insertInteractions = [];
     const collectInteractions = node => {
         if (ts.isCallExpression(node) && node.expression.getText(source) === "this.element.addEventListener" &&
-            ['"dragstart"', '"click"'].includes(node.arguments[0].getText(source))) {
-            interactions.push(node.getText(source));
+            ['"dragstart"', '"click"', '"pointermove"'].includes(node.arguments[0].getText(source))) {
+            (node.arguments[0].getText(source) === '"pointermove"' ? insertInteractions : interactions)
+                .push(node.getText(source));
         }
         ts.forEachChild(node, collectInteractions);
     };
@@ -36,10 +38,15 @@ const sources = (full = false) => {
     collectInteractions(constructor);
     const restoreGutter = constructor.body.statements.find(node => ts.isVariableStatement(node) &&
         node.declarationList.declarations.some(declaration => declaration.name.getText(source) === "restoreGutter"));
+    const insertState = constructor.body.statements.filter(node => ts.isVariableStatement(node) &&
+        node.declarationList.declarations.some(declaration =>
+            ["activeBlockButton", "hidePlusTimeout", "hideInsert"].includes(declaration.name.getText(source))))
+        .map(node => node.getText(source)).join("\n");
     const body = full ? render.body.getText(source) :
         render.body.getText(source).split("const shouldRenderInsert")[0] + "return html; }";
     const helpers = ["protyle/gutter/container.ts", "protyle/gutter/hover.ts", "protyle/wysiwyg/getBlock.ts", "protyle/gutter/layout.ts",
-        "protyle/util/hasClosest.ts", "protyle/render/autoDirection.ts", "mobile/util/blockSelection.ts"].map(file => {
+        "protyle/util/hasClosest.ts", "protyle/render/autoDirection.ts", "mobile/util/blockSelection.ts",
+        "protyle/ui/padding.ts"].map(file => {
         const source = ts.createSourceFile(file, readFileSync(path.join(__dirname, "../src", file), "utf8"),
             ts.ScriptTarget.Latest, true);
         return source.statements.filter(node => ts.isVariableStatement(node) &&
@@ -50,11 +57,13 @@ const sources = (full = false) => {
                 "getVerticalGutterButton", "resetGutterHover", "bindGutterHover",
                 "hasClosestBlock", "isBlockElement", "hasClosestByClassName", "hasTopClosestByClassName", "hasClosestByTag",
                 "hasClosestByAttribute", "getAutoListDirection", "listSelector", "directionAttribute",
-                "getMobileBlockSelectionElement"].includes(declaration.name.getText(source))))
+                "getMobileBlockSelectionElement", "getEditorHorizontalPadding"].includes(declaration.name.getText(source))))
             .map(node => node.getText(source)).join("\n");
     }).join("\n").replace(/export const /g, "const ");
     const hoverSource = ts.createSourceFile("initUI.ts", readFileSync(path.join(__dirname,
         "../src/protyle/ui/initUI.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+    const padding = hoverSource.statements.find(node => ts.isVariableStatement(node) &&
+        node.declarationList.declarations.some(declaration => declaration.name.getText(hoverSource) === "getPadding"));
     let hoverBinding;
     let pathBinding;
     const visit = node => {
@@ -84,8 +93,13 @@ function bindInteractions(protyle) {
     let dragCleanupController;
     ${restoreGutter.getText(source)}
     ${interactions.join("\n")};
+}
+function bindInsert(protyle) {
+    ${insertState}
+    ${insertInteractions.join("\n")};
 }`;
-    return ts.transpileModule(helpers + `\nfunction render(protyle, element, target) ${body}\n` +
+    return ts.transpileModule(helpers + "\n" + padding.getText(hoverSource).replace("export const ", "const ") +
+        `\nfunction render(protyle, element, target) ${body}\n` +
         (full ? events + interactionSource : ""), {
         compilerOptions: {target: ts.ScriptTarget.ES2021},
     }).outputText;
@@ -99,7 +113,7 @@ const cases = async (source, fullSource, css) => {
     const folded = [];
     const dependencies = {
         Constants: {CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", ZWSP: "|", SIYUAN_DROP_BLOCK: "block",
-            SIYUAN_DROP_GUTTER: "gutter:"}, hideElements: noop, getCrossBlockTextRange: noop,
+            SIYUAN_DROP_GUTTER: "gutter:", SIZE_EDITOR_WIDTH: 760}, hideElements: noop, getCrossBlockTextRange: noop,
         getGutterSelection: selected => ({isMultiSelect: multiSelect, selectElements: selected}),
         getGutterSelectionTarget: (selected, element) => selected.find(item => item === element || item.contains(element)),
         getHorizontalSuperBlockChild: noop, getEmbedGutterOperationContext: noop, isInEmbedBlock: noop,
@@ -113,15 +127,15 @@ const cases = async (source, fullSource, css) => {
         hideTooltip: noop, clearSelect: noop, isOnlyMeta: noop, isEncryptedBox: noop,
         prepareCrossBlockTextSelection: noop, getContenteditableElement: element => element.querySelector('[contenteditable="true"]'),
         genEmptyElement: () => {const element = document.createElement("div"); element.innerHTML = '<div contenteditable="true"></div>'; return element;},
-        getLangByType: type => type,
+        getLangByType: type => type, canShowGutterInsert: () => true,
         setDragTipGhost: noop, stringifyBlockDragData: JSON.stringify, restoreGutterRange: noop,
         setFold: (_owner, element) => {folded.push(element.dataset.nodeId); return {fold: 1};},
         markGutterForFoldRestore: () => true, isGutterTouchDragging: noop,
         toggleMenu: options => options.build(null, {show: callback => callback()}),
     };
     const render = new Function(...Object.keys(dependencies), source + "\nreturn render;")(...Object.values(dependencies));
-    const {render: renderFull, windowMouseMove, bindHover, getNodeElement, isMatchNode, bindInteractions, mobileMultiSelect} = new Function(...Object.keys(dependencies),
-        fullSource + "\nreturn {render, windowMouseMove, bindHover, getNodeElement, isMatchNode, bindInteractions, mobileMultiSelect};")(...Object.values(dependencies));
+    const {render: renderFull, windowMouseMove, bindHover, getNodeElement, isMatchNode, bindInteractions, bindInsert, mobileMultiSelect, getPadding} = new Function(...Object.keys(dependencies),
+        fullSource + "\nreturn {render, windowMouseMove, bindHover, getNodeElement, isMatchNode, bindInteractions, bindInsert, mobileMultiSelect, getPadding};")(...Object.values(dependencies));
     let mobile = false;
     window.siyuan = {languages: {fold: "Fold", rowTip: "Row", addBelowAbove: "Add"}, layout: {}, blockPanels: [],
         config: {editor: {fontSize: 16, rtl: false}, system: {workspaceDir: "test"}}};
@@ -613,6 +627,76 @@ ${legacyMindmap ? 'custom-sy-list-mindmap="1"' : ""}>${content}${attr}</div>${p(
     check.equal(gutter.element.style.maxHeight, "");
     check.equal(gutter.element.style.overflowY, "");
     check.equal(gutter.element.dataset.scrollable, undefined);
+
+    mobile = false;
+    bindInsert.call(gutter, protyle);
+    root.style.cssText = "padding-top:20px;padding-bottom:20px";
+    pane.style.height = "700px";
+    const popover = document.createElement("div");
+    popover.className = "block__popover block__popover--open";
+    Object.assign(popover.style, {left: "100px", top: "40px", height: "700px", maxWidth: "none"});
+    document.body.append(popover);
+    popover.append(pane);
+    pane.classList.add("protyle-content");
+    pane.dataset.paddingMode = "responsive";
+    const top = document.createElement("div");
+    top.className = "protyle-top";
+    top.innerHTML = '<div class="protyle-title">Document</div>';
+    pane.prepend(top);
+    for (const width of [320, 640, 1000]) {
+        pane.style.width = `${width}px`;
+        popover.style.width = `${width}px`;
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        check.equal(getPadding(protyle).left, Math.ceil(parseFloat(getComputedStyle(root).paddingLeft)),
+            "fallback padding matches responsive popover padding");
+        for (const fontSize of [16, 32]) {
+            document.documentElement.style.setProperty("--b3-font-size-editor", `${fontSize}px`);
+            window.siyuan.config.editor.fontSize = fontSize;
+            for (const full of [false, true]) {
+                window.siyuan.config.editor.blockGutterMode = full;
+                root.innerHTML = `<div class="render-node" data-type="NodeBlockQueryEmbed" data-node-id="embed"><div class="h2" data-type="NodeHeading" data-node-id="heading" data-subtype="h2">Heading</div>${attr}</div>`;
+                gutter.render(protyle, root.querySelector('[data-node-id="heading"]'));
+                const buttons = [...gutter.element.querySelectorAll('button[data-node-id], button[data-type="fold"]')];
+                check.equal(buttons.length, 3);
+                const first = buttons[0].getBoundingClientRect();
+                for (const button of buttons.slice(1)) {
+                    const bounds = button.getBoundingClientRect();
+                    check.ok(bounds.left >= first.right && bounds.top < first.bottom && bounds.bottom > first.top,
+                        `popover controls share one row: width=${width}, font=${fontSize}, full=${full}, ${JSON.stringify({
+                            first: first.toJSON(), bounds: bounds.toJSON(),
+                            padding: getComputedStyle(root).paddingLeft,
+                        })}`);
+                }
+                root.innerHTML = p("paragraph");
+                gutter.render(protyle, root.firstElementChild);
+                const button = gutter.element.querySelector("button[data-node-id]");
+                const bounds = button.getBoundingClientRect();
+                button.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerType: "mouse",
+                    clientX: bounds.left + bounds.width / 2, clientY: bounds.top + bounds.height / 2}));
+                const paragraph = root.firstElementChild.getBoundingClientRect();
+                for (const type of ["Before", "After"]) {
+                    const line = gutter.element.querySelector(`[data-type="gutterLine${type}"]`);
+                    const lineRect = line.getBoundingClientRect();
+                    line.dispatchEvent(new PointerEvent("pointermove", {bubbles: true, pointerType: "mouse",
+                        clientX: lineRect.left + lineRect.width / 2, clientY: lineRect.top + lineRect.height / 2}));
+                    const plus = gutter.element.querySelector(`[data-type="gutterPlus${type}"]`);
+                    check.notEqual(getComputedStyle(plus).display, "none");
+                    check.ok(plus.getBoundingClientRect().right < paragraph.left,
+                        `popover insert controls stay outside content: width=${width}, font=${fontSize}, full=${full}`);
+                }
+                check.equal(top.firstElementChild.getBoundingClientRect().left, paragraph.left,
+                    "document title and body retain the same left edge");
+            }
+        }
+    }
+    mobile = true;
+    check.equal(getPadding(protyle).left, 24, "mobile padding keeps its existing default");
+    mobile = false;
+    popover.classList.remove("block__popover");
+    pane.style.width = "320px";
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    check.equal(getPadding(protyle).left, 24, "ordinary narrow editors keep their existing padding");
+    check.equal(getComputedStyle(root).paddingLeft, "24px");
     return "List container gutters passed";
 };
 
@@ -636,7 +720,7 @@ if (process.versions.electron && process.type === "browser") {
             await new Promise(resolve => setTimeout(resolve, 20));
         }
         assert.deepEqual(viewport, [1100, 900], "gutter fixture requires the exact content viewport");
-        const css = ["protyle/_wysiwyg.scss", "protyle/_protyle.scss", "util/_function.scss"].map(file =>
+        const css = ["protyle/_wysiwyg.scss", "protyle/_protyle.scss", "business/_block.scss", "util/_function.scss"].map(file =>
             require("sass").compile(path.join(__dirname, "../src/assets/scss", file), {quietDeps: true}).css).join("\n");
         const result = await win.webContents.executeJavaScript(`(async () => {
             try { return {message: await (${cases.toString()})(${JSON.stringify(sources())}, ${JSON.stringify(sources(true))}, ${JSON.stringify(css)})}; }

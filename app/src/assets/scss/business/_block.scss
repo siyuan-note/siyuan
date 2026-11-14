@@ -1,5 +1,7 @@
 .block {
   &__popover {
+    // 浮窗左侧为嵌入块、标题和折叠按钮预留横排空间。
+    --b3-protyle-min-padding-left: 64px;
     font-size: 14px;
     background-color: var(--b3-theme-background);
     position: absolute;

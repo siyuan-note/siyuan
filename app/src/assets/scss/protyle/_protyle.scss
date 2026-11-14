@@ -584,7 +584,7 @@
 
   > .protyle-wysiwyg,
   > .sy__backlink--bottom {
-    padding-left: var(--b3-protyle-padding-left);
+    padding-left: max(var(--b3-protyle-padding-left), var(--b3-protyle-min-padding-left, 0px));
     padding-right: max(var(--b3-protyle-padding-right), var(--b3-protyle-page-scroll-gutter, 0px));
   }
 
@@ -592,7 +592,7 @@
     .protyle-title,
     .protyle-background__ia,
     .protyle-db-attr {
-      margin-left: var(--b3-protyle-padding-left);
+      margin-left: max(var(--b3-protyle-padding-left), var(--b3-protyle-min-padding-left, 0px));
       margin-right: max(var(--b3-protyle-padding-right), var(--b3-protyle-page-scroll-gutter, 0px));
     }
   }
@@ -601,7 +601,7 @@
 .protyle-preview[data-padding-mode="responsive"][data-device="desktop"] > .b3-typography {
   --b3-protyle-padding-left: 24px;
   --b3-protyle-padding-right: 16px;
-  padding-left: var(--b3-protyle-padding-left);
+  padding-left: max(var(--b3-protyle-padding-left), var(--b3-protyle-min-padding-left, 0px));
   padding-right: var(--b3-protyle-padding-right);
 }
 

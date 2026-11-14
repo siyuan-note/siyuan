@@ -1,4 +1,5 @@
 import {toggleMenu} from "./menuToggle";
+import {getKeymapBindings} from "../util/keymapBindings";
 import {bindInlineDatePicker, getInlineDateValue} from "../datePicker/inline";
 import type {BlockQueryRequestInput} from "../types/api";
 import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
@@ -1065,8 +1066,18 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             (extension !== ".pdf" ||
                 (extension === ".pdf" && !src.startsWith("file://")));
         const getAccelerator = (action: Config.TAssetOpenAction) => {
-            if (!showAccelerator || !src.startsWith("assets/")) {
+            if (!showAccelerator) {
                 return "";
+            }
+            const shortcuts: string[] = [];
+            /// #if !BROWSER
+            if (action === "folder") {
+                shortcuts.push(...getKeymapBindings(window.siyuan.config.keymap.editor.general.showInFolder)
+                    .map((key) => updateHotkeyTip(key)));
+            }
+            /// #endif
+            if (!src.startsWith("assets/")) {
+                return shortcuts.join(" / ");
             }
             let config = window.siyuan.config.editor.assetOpen;
             /// #if BROWSER
@@ -1078,10 +1089,11 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 altClick: "⌥" + window.siyuan.languages.click,
                 shiftClick: "⇧" + window.siyuan.languages.click,
             };
-            return getAssetOpenGestures(config, action, {
+            shortcuts.push(...getAssetOpenGestures(config, action, {
                 previewable,
                 noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
-            }).map((gesture) => updateHotkeyTip(gestureLabels[gesture])).join(" / ");
+            }).map((gesture) => updateHotkeyTip(gestureLabels[gesture])));
+            return shortcuts.join(" / ");
         };
         // 与链接点击一致：PDF 去掉片段并单独取出页码或标注 ID，其他资源保留原始地址（如视频的 #t=）
         const {linkAddress: assetPath, pdfParams} = resolvePdfAssetLink(src.trim());

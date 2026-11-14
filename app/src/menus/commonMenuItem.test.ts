@@ -9,6 +9,9 @@ import * as escape from "../util/escape";
 import * as mergePathSegments from "../util/mergePathSegments";
 import * as imageURL from "../util/imageURL";
 import * as pdfAssetLink from "../editor/pdfAssetLink";
+import * as assetOpen from "../editor/assetOpen";
+import * as keymapBindings from "../util/keymapBindings";
+import {formatShortcut} from "../util/shortcut";
 
 type Flags = {MOBILE: boolean; BROWSER: boolean};
 
@@ -17,10 +20,13 @@ const compile = (file: string, flags: Flags) => transpileModule(require("ifdef-l
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const loadOpenMenu = (flags: Flags, markdownAvailable = false) => {
+const loadOpenMenu = (flags: Flags, markdownAvailable = false, mac = false) => {
     const calls: Array<{name: string; args: unknown[]}> = [];
     const exportConfig: {headingNumber?: boolean} = {};
-    const window = {siyuan: {config: {editor: {}, fileTree: {}, export: exportConfig}, languages: {}}};
+    const folderKeymap: keymapBindings.IShortcutKeymap = {custom: "⌥A"};
+    const editor = {assetOpen: {...assetOpen.DEFAULT_ASSET_OPEN}};
+    const window = {siyuan: {config: {editor, fileTree: {}, export: exportConfig,
+        keymap: {editor: {general: {showInFolder: folderKeymap}}}}, languages: {click: "click"}}};
     // 未显式提供的依赖统一替换为记录调用的空函数
     const recorder = new Proxy({}, {
         get: (_target, name) => typeof name === "string" && name !== "__esModule" ?
@@ -43,6 +49,12 @@ const loadOpenMenu = (flags: Flags, markdownAvailable = false) => {
         "../constants": constants,
         "../util/imageURL": imageURL,
         "../editor/pdfAssetLink": pdfAssetLink,
+        "../editor/assetOpen": assetOpen,
+        "../util/keymapBindings": keymapBindings,
+        "../protyle/util/compatibility": new Proxy(recorder, {
+            get: (target, name) => name === "updateHotkeyTip" ?
+                (value: string) => formatShortcut(value, mac) : Reflect.get(target, name),
+        }),
         "../util/fetch": {fetchSyncPost: async (...args: unknown[]) => {
             calls.push({name: "fetchSyncPost", args});
             return {code: 0, data: {content: "Markdown"}};
@@ -50,11 +62,49 @@ const loadOpenMenu = (flags: Flags, markdownAvailable = false) => {
         "../editor/markdownAsset": {canOpenMarkdownAsset: () => markdownAvailable,
             openMarkdownAsset: (...args: unknown[]) => calls.push({name: "openMarkdownAsset", args})},
     });
-    return {openMenu: menu.openMenu, copySubMenu: menu.copySubMenu, calls,
+    return {openMenu: menu.openMenu, copySubMenu: menu.copySubMenu, calls, folderKeymap, editor,
         setHeadingNumberChoice: (value: boolean | undefined) => { exportConfig.headingNumber = value; }};
 };
 
 const app = {};
+
+test("asset folder menus show keyboard bindings together with click gestures", () => {
+    const {openMenu, folderKeymap, editor, calls} = loadOpenMenu({MOBILE: false, BROWSER: false});
+    const folder = (src = "assets/document.pdf", show = true) =>
+        openMenu(app, src, true, show).find((item: IMenu) => item.id === "showInFolder");
+    for (const src of ["assets/document.pdf", "assets/archive.zip"]) {
+        assert.equal(folder(src).accelerator, "Alt+A / Ctrl+click");
+        folder(src).click();
+        assert.deepEqual(calls.at(-1), {name: "openBy", args: [src, "folder"]});
+    }
+    keymapBindings.setKeymapBindings(folderKeymap, ["⌘⇧F", "⌥B"]);
+    assert.equal(folder().accelerator, "Ctrl+Shift+F / Alt+B / Ctrl+click");
+    assert.equal(folder("file:///tmp/document.pdf").accelerator, "Ctrl+Shift+F / Alt+B");
+    editor.assetOpen.ctrlClick = "current";
+    assert.equal(folder().accelerator, "Ctrl+Shift+F / Alt+B");
+    keymapBindings.setKeymapBindings(folderKeymap, []);
+    assert.equal(folder().accelerator, "");
+    editor.assetOpen.ctrlClick = "folder";
+    assert.equal(folder().accelerator, "Ctrl+click");
+    assert.equal(folder("assets/document.pdf", false).accelerator, "");
+});
+
+test("browser and mobile asset menus do not advertise desktop folder shortcuts", () => {
+    for (const flags of [{MOBILE: false, BROWSER: true}, {MOBILE: true, BROWSER: true}]) {
+        const {openMenu} = loadOpenMenu(flags);
+        const items = openMenu(app, "assets/document.pdf", true, true);
+        assert.equal(items.some((item: IMenu) => item.id === "showInFolder"), false);
+        assert.equal(items.some((item: IMenu) => item.accelerator?.includes("Alt+A")), false);
+    }
+});
+
+test("macOS folder menus preserve native shortcut symbols", () => {
+    const {openMenu, folderKeymap} = loadOpenMenu({MOBILE: false, BROWSER: false}, false, true);
+    keymapBindings.setKeymapBindings(folderKeymap, ["⌥A", "⌘⇧F"]);
+    const item = openMenu(app, "assets/document.pdf", true, true)
+        .find((entry: IMenu) => entry.id === "showInFolder");
+    assert.equal(item.accelerator, "⌥A / ⌘⇧F / ⌘click");
+});
 
 for (const mobile of [false, true]) {
     test(`copy Markdown uses persisted numbering without an additional prompt (${mobile ? "mobile" : "desktop"})`, async () => {

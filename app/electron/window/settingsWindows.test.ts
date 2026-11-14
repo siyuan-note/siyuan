@@ -176,7 +176,7 @@ test("settings popup authorization requires the registered top-level page and ex
     assert.equal(open({token: "second-token"}).create, false);
 });
 
-test("settings windows reuse their workspace instance and close with the owning renderer", (t) => {
+test("settings windows reuse their workspace instance and close with the owning renderer", async (t) => {
     const {policy, owner, open, ready, shown, initialized} = setup(t);
     const prepared = open();
     assert.equal(open({token: "second-token", command: {tab: "appearance"}}).create, false);
@@ -204,6 +204,7 @@ test("settings windows reuse their workspace instance and close with the owning 
     assert.equal(open({token: "visible-token"}).create, false);
     assert.equal(shown.length, 2);
     owner.emit("destroyed");
+    await new Promise<void>(resolve => setImmediate(resolve));
     assert.equal(destroyed, true);
     assert.deepEqual(owner.sent.at(-1), ["siyuan-settings-closed", "first-token", true]);
     assert.equal(open({token: "fourth-token"}).create, true);
@@ -339,7 +340,7 @@ const createWindow = (owner, prepared) => {
 };
 
 for (const invalidation of ["navigation", "render-process-gone", "destroyed"]) {
-    test(`owner ${invalidation} invalidates windows, reservations and authorized late children`, (t) => {
+    test(`owner ${invalidation} invalidates windows, reservations and authorized late children`, async (t) => {
         const {owner, open, policy, initialized} = setup(t);
         const builtin = open();
         policy(owner, builtin);
@@ -349,13 +350,20 @@ for (const invalidation of ["navigation", "render-process-gone", "destroyed"]) {
         policy(owner, late);
         if (invalidation === "navigation") owner.emit("did-start-navigation", {isSameDocument: false, isMainFrame: true});
         else owner.emit(invalidation);
-        assert.equal(win.isDestroyed(), true);
+        assert.equal(win.isDestroyed(), false, "native destruction waits until the lifecycle callback returns");
         assert.equal(policy(owner, pending), undefined);
         assert.equal(createWindow(owner, late).isDestroyed(), true);
         assert.equal(initialized.length, 1);
         assert.deepEqual(owner.sent.filter(item => item[0] === "siyuan-settings-closed").map(item => item.slice(1)),
             [["first-token", true], ["pending-token", true], ["late-token", true]]);
-        assert.equal(open({token: "manually-reopened"}).create, true);
+        const reopened = open({token: "manually-reopened"});
+        assert.equal(reopened.create, true);
+        policy(owner, reopened);
+        const replacement = createWindow(owner, reopened);
+        await new Promise<void>(resolve => setImmediate(resolve));
+        assert.equal(win.isDestroyed(), true);
+        assert.equal(replacement.isDestroyed(), false);
+        assert.equal(open({token: "reuse-replacement"}).create, false);
     });
 }
 
@@ -370,7 +378,22 @@ test("same-document and subframe navigations preserve the settings owner", (t) =
     assert.equal(open({token: "reuse-token"}).create, false);
 });
 
-test("workspace reuse keeps the original creator as owner until it is invalidated", (t) => {
+test("repeated owner invalidation tolerates a child closed before deferred destruction", async (t) => {
+    const {owner, open, policy} = setup(t);
+    const prepared = open();
+    policy(owner, prepared);
+    const win = createWindow(owner, prepared);
+    let destroyed = 0;
+    win.on("closed", () => destroyed++);
+    owner.emit("did-start-navigation", {isSameDocument: false, isMainFrame: true});
+    owner.emit("render-process-gone");
+    win.destroy();
+    await new Promise<void>(resolve => setImmediate(resolve));
+    assert.equal(destroyed, 1);
+    assert.equal(owner.sent.filter(item => item[0] === "siyuan-settings-closed").length, 1);
+});
+
+test("workspace reuse keeps the original creator as owner until it is invalidated", async (t) => {
     const {owner, open, policy, prepare, target} = setup(t);
     const secondOwner = Object.assign(new EventEmitter(), {id: 2, mainFrame: {}, getURL: () => target.origin + "/stage/build/app/",
         isDestroyed: () => false, send() {}}) as unknown as OwnerStub & WebContents;
@@ -382,14 +405,17 @@ test("workspace reuse keeps the original creator as owner until it is invalidate
     secondOwner.emit("did-start-navigation", {isSameDocument: false, isMainFrame: true});
     assert.equal(win.isDestroyed(), false);
     owner.emit("did-start-navigation", {isSameDocument: false, isMainFrame: true});
-    assert.equal(win.isDestroyed(), true);
+    assert.equal(win.isDestroyed(), false);
     const reopened = prepare(event, {key: "builtin", token: "new-owner"});
     assert.equal(reopened.create, true);
     policy(secondOwner, reopened);
     const replacement = createWindow(secondOwner, reopened);
     owner.emit("render-process-gone");
+    await new Promise<void>(resolve => setImmediate(resolve));
+    assert.equal(win.isDestroyed(), true);
     assert.equal(replacement.isDestroyed(), false);
     secondOwner.emit("render-process-gone");
+    await new Promise<void>(resolve => setImmediate(resolve));
     assert.equal(replacement.isDestroyed(), true);
 });
 

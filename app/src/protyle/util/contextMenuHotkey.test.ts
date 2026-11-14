@@ -72,6 +72,7 @@ for (const mac of [false, true]) {
                     nodeElement: element, selectRowElements: [element], liElements: [element],
                     protyle: {wysiwyg: {element: {querySelectorAll: () => [element]}}, gutter: {renderMenu() {}}},
                     avContextmenu: () => { opened++; }, currentList: element, id: "block",
+                    searchType: "doc", config: {group: 0},
                     initSearchMenu: () => menu, initFileMenu: () => menu,
                     controller: {getSelectedItems: () => [{occurrenceKey: "box/doc"}], selectionVersion: 1,
                         ensureRendered: async () => element, validateSelection: () => true},

@@ -427,6 +427,8 @@ type SettingFileTree struct {
 }
 
 type SettingSearch struct {
+	// 文档分组结果默认折叠，默认关闭；省略保留当前值，null 恢复默认值。
+	GroupFolded bool `json:"groupFolded" api:"optional,nullable"`
 	// 思维导图默认开启，思维导图项默认关闭；null 表示回到默认值。
 	Mindmap                      *bool `json:"mindmap" api:"optional,nullable"`
 	MindmapItem                  *bool `json:"mindmapItem" api:"optional,nullable"`

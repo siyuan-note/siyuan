@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20261113013235"
+		"updated": "20261114162405"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-t1r641c",
-				"updated": "20261113013235"
+				"updated": "20261114162405"
 			},
 			"Children": [
 				{
@@ -65,6 +65,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "Keyword and query syntax searches support block-type, notebook and document-path filters, including child documents, as well as sorting, grouping and replacement. Content-order sorting is available only when grouping by document. An exact block ID follows the same notebook, document-path, block-type, subtype and ignore filters. Multi-keyword searches in keyword mode match %, _ and backslashes literally. Grouping by document organizes only the current page and keeps the pagination unit of the selected search method; with block-based pagination, matches from one document can span several pages."
+				}
+			]
+		},
+		{
+			"ID": "20261114162405-28b48a6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261114162405-28b48a6",
+				"updated": "20261114162405"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the search panel, enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Collapse grouped results by default"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". This preference is off by default and applies only when grouping by document. New searches and refreshed results follow this preference; you can still expand or collapse groups manually. The first result remains available in the desktop preview, and keyboard navigation expands the group containing the selected result."
 				}
 			]
 		},

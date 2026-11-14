@@ -46759,6 +46759,16 @@
             }
           ]
         },
+        "groupFolded": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "hanSensitive": {
           "anyOf": [
             {
@@ -53964,6 +53974,9 @@
         "embedBlock": {
           "type": "boolean"
         },
+        "groupFolded": {
+          "type": "boolean"
+        },
         "hanSensitive": {
           "anyOf": [
             {
@@ -54077,6 +54090,7 @@
         "databaseBlock",
         "document",
         "embedBlock",
+        "groupFolded",
         "hanSensitive",
         "heading",
         "htmlBlock",
@@ -54249,6 +54263,16 @@
           ]
         },
         "embedBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "groupFolded": {
           "anyOf": [
             {
               "type": "boolean"

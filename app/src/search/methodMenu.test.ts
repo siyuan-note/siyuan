@@ -27,12 +27,13 @@ for (const mobile of [true, false]) {
             }).outputText;
             const exports: {moreMenu?: (...args: unknown[]) => Promise<void>} = {};
             runInNewContext(code, {exports, require: (name: string) => dependencies[name] || {},
-                window: {siyuan: {languages, menus: {menu}, config: {ai: {embedding: {enabled: true}}}}}});
+                window: {siyuan: {languages, menus: {menu}, config: {ai: {embedding: {enabled: true}}, search: {groupFolded: false}}}}});
             await exports.moreMenu({method, group, sort: 0}, [], {}, () => {}, () => {});
             const sort = items.find(item => item.label === "sort");
             const grouping = items.find(item => item.label === "group");
             assert.equal(Boolean(sort.disabled), method === 4 || (method === 2 && group === 0));
             assert.equal(Boolean(grouping.disabled), method === 4);
+            assert.equal(Boolean(items.find(item => item.label === "searchGroupFolded").disabled), group !== 1 || method === 4);
             assert.ok(grouping.submenu.every(item => Boolean(item.disabled) === (method === 4)));
             for (const item of sort.submenu) {
                 const rank = item.label === "sortByRankAsc" || item.label === "sortByRankDesc";

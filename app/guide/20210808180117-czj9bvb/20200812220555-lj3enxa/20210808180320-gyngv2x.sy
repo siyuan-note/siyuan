@@ -7,7 +7,7 @@
 		"id": "20210808180320-gyngv2x",
 		"title": "搜索进阶",
 		"type": "doc",
-		"updated": "20261113013235"
+		"updated": "20261114162405"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-ljls7op",
-				"updated": "20261113013235"
+				"updated": "20261114162405"
 			},
 			"Children": [
 				{
@@ -65,6 +65,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "关键字与查询语法搜索支持块类型、笔记本和文档路径筛选、包含子文档，以及排序、分组和替换。按内容顺序排序仅在按文档分组时可用。直接输入块 ID 时，同样遵循笔记本、文档路径、块类型、子类型和忽略条件。关键字模式的多词搜索会按字面量匹配 %、_ 和反斜杠。按文档分组只整理当前页的结果，不改变当前搜索方式的分页单位；按块分页时，同一文档的命中块可能分布在多页。"
+				}
+			]
+		},
+		{
+			"ID": "20261114162405-1c3c4bf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261114162405-1c3c4bf",
+				"updated": "20261114162405"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在搜索面板中启用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "默认折叠分组结果"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。此偏好默认关闭，仅在按文档分组时生效。新搜索与刷新结果时会应用此偏好，仍可手动展开或折叠分组。桌面端仍会预览第一条结果，使用键盘导航时会展开选中结果所在的分组。"
 				}
 			]
 		},

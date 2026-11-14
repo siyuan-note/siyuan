@@ -1684,6 +1684,8 @@ declare namespace Config {
      * SiYuan search related configuration
      */
     export interface ISearch {
+        /** 文档分组结果默认折叠，缺省为 false；仅影响新渲染的分组，手动展开或折叠不修改此偏好 */
+        groupFolded?: boolean;
         /**
          * Whether to search in block aliases
          */

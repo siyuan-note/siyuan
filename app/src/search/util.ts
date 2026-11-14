@@ -1643,6 +1643,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
                       currentId?: string,
                       newId?: string
                   }) => {
+    const groupFolded = config.group === 1 && Boolean(window.siyuan.config.search?.groupFolded);
     let resultHTML = "";
     let currentData;
     let newData;
@@ -1652,11 +1653,11 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
         if (item.children) {
             resultHTML += `<div class="b3-list-item">
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
-    <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
+    <svg class="b3-list-item__arrow${groupFolded ? "" : " b3-list-item__arrow--open"}"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${getFileTreeIconHTML(getNotebookIcon(item.box), "notebook", "b3-list-item__graphic", true)}
 <span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" data-tooltip-encoding="none" aria-label="${escapeHtmlTextAndAttr(title)}">${title}</span>
-</div><div>`;
+</div><div${groupFolded ? ' class="fn__none"' : ""}>`;
             item.children.forEach((childItem) => {
                 if (focusId) {
                     if (childItem.id === focusId.currentId) {

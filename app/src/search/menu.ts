@@ -1,3 +1,4 @@
+import {searchConfigApi} from "../config/tabs/searchRuntime";
 import {MobileDialog} from "../dialog/mobileDialog";
 import {removeSearchCriterion, removeSearchCriterionSync} from "../config/util/resourceConfig";
 import {Dialog} from "../dialog";
@@ -723,6 +724,15 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
             }
         }].map(item => withSearchMethodAvailability(item, capabilities.group)),
     }, capabilities.group)).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: "",
+        label: window.siyuan.languages.searchGroupFolded,
+        current: Boolean(window.siyuan.config.search.groupFolded),
+        disabled: config.group !== 1 || !capabilities.group,
+        click() {
+            void searchConfigApi.patch("groupFolded", !window.siyuan.config.search.groupFolded, () => cb());
+        }
+    }).element);
     if (layoutMenu) {
         layoutMenu();
     }

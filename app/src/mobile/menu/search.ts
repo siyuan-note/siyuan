@@ -212,6 +212,7 @@ const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig,
         newId?: string
     }) => {
     const listElement = document.querySelector("#searchList");
+    const groupFolded = config.group === 1 && Boolean(window.siyuan.config.search?.groupFolded);
     let resultHTML = "";
     let currentData;
     let newData;
@@ -220,11 +221,11 @@ const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig,
         if (item.children) {
             resultHTML += `<div class="b3-list-item">
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
-    <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
+    <svg class="b3-list-item__arrow${groupFolded ? "" : " b3-list-item__arrow--open"}"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${getFileTreeIconHTML(getNotebookIcon(item.box), "notebook", "b3-list-item__graphic", true)}
 <span class="b3-list-item__text" style="color: var(--b3-theme-on-surface)">${escapeHtml(title)}</span>
-</div><div>`;
+</div><div${groupFolded ? ' class="fn__none"' : ""}>`;
             item.children.forEach((childItem) => {
                 if (focusId) {
                     if (childItem.id === focusId.currentId) {
@@ -299,7 +300,8 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
         const currentList = listElement.querySelector(`[data-node-id="${currentData.id}"]`) as HTMLElement;
         if (currentList) {
             currentList.classList.add("b3-list-item--focus");
-            currentList.scrollIntoView();
+            (currentList.parentElement.classList.contains("fn__none") ?
+                currentList.parentElement.previousElementSibling : currentList).scrollIntoView();
         }
     }
 };

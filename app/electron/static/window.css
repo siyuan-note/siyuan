@@ -98,6 +98,23 @@ h2 {
     line-height: 1.65;
 }
 
+.remote-kernel {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+}
+
+.remote-kernel > div {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.remote-kernel .b3-button {
+    margin-left: auto;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 .fn__flex-center {
     align-self: center;
 }

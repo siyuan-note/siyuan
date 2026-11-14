@@ -1,5 +1,8 @@
 {
 	"ar": {
+		"connect": "اتصال",
+		"remoteKernelTitle": "☁️ النواة البعيدة",
+		"remoteKernelDesc": "اتصل بنواة SiYuan تعمل على جهاز آخر أو خادم",
 		"title": "SiYuan",
 		"crashTip": "⚠️ تم اكتشاف خروج غير متوقع سابق لعملية العارض، وقد يكون مرتبطًا بالمكونات الإضافية أو مقتطفات التعليمات البرمجية أو السمات والأيقونات المخصصة. نوصي بالبدء في الوضع الآمن. يعطّل الوضع الآمن جميع المكونات الإضافية ومقتطفات التعليمات البرمجية ويستخدم السمة والأيقونة الافتراضيتين؛ لن يُحذف المحتوى ذو الصلة، ولكن يجب استعادة هذه الإعدادات يدويًا بعد بدء التشغيل.",
 		"safeModeBtn": "🛡️ البدء في الوضع الآمن",
@@ -31,6 +34,9 @@
 		"connectRemoteKernel": "الاتصال بنواة بعيدة..."
 	},
 	"de": {
+		"connect": "Verbinden",
+		"remoteKernelTitle": "☁️ Entfernter Kernel",
+		"remoteKernelDesc": "Mit einem SiYuan-Kernel auf einem anderen Gerät oder Server verbinden",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Ein Renderer-Prozess wurde zuvor unerwartet beendet. Dies kann mit Plugins, Code-Snippets oder benutzerdefinierten Designs und Symbolen zusammenhängen. Es wird empfohlen, im abgesicherten Modus zu starten. Dieser deaktiviert alle Plugins und Code-Snippets und wechselt zum Standarddesign und -symbol. Die zugehörigen Inhalte werden nicht gelöscht, diese Einstellungen müssen nach dem Start jedoch manuell wiederhergestellt werden.",
 		"safeModeBtn": "🛡️ Im abgesicherten Modus starten",
@@ -62,6 +68,9 @@
 		"connectRemoteKernel": "Mit entferntem Kernel verbinden..."
 	},
 	"en": {
+		"connect": "Connect",
+		"remoteKernelTitle": "☁️ Remote kernel",
+		"remoteKernelDesc": "Connect to a SiYuan kernel running on another device or server",
 		"title": "SiYuan",
 		"crashTip": "⚠️ A renderer process previously exited unexpectedly. This may be related to plugins, code snippets, or a custom theme and icon. Starting in safe mode is recommended. Safe mode disables all plugins and code snippets and switches to the default theme and icon. Related content is not deleted, but these settings must be restored manually after startup.",
 		"safeModeBtn": "🛡️ Start in safe mode",
@@ -93,6 +102,9 @@
 		"connectRemoteKernel": "Connect to remote kernel..."
 	},
 	"es": {
+		"connect": "Conectar",
+		"remoteKernelTitle": "☁️ Núcleo remoto",
+		"remoteKernelDesc": "Conéctate a un núcleo de SiYuan que se ejecuta en otro dispositivo o servidor",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Se detectó que un proceso de renderizado se cerró inesperadamente. Esto puede estar relacionado con complementos, fragmentos de código o temas e iconos personalizados. Se recomienda iniciar en modo seguro. El modo seguro desactiva todos los complementos y fragmentos de código y cambia al tema y al icono predeterminados. El contenido relacionado no se eliminará, pero estas opciones deberán restaurarse manualmente después del inicio.",
 		"safeModeBtn": "🛡️ Iniciar en modo seguro",
@@ -124,6 +136,9 @@
 		"connectRemoteKernel": "Conectar a un núcleo remoto..."
 	},
 	"fr": {
+		"connect": "Se connecter",
+		"remoteKernelTitle": "☁️ Noyau distant",
+		"remoteKernelDesc": "Se connecter à un noyau SiYuan exécuté sur un autre appareil ou serveur",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Un processus de rendu s'est précédemment arrêté de manière inattendue. Cela peut être lié aux extensions, aux extraits de code ou aux thèmes et icônes personnalisés. Il est recommandé de démarrer en mode sans échec. Celui-ci désactive toutes les extensions et tous les extraits de code, puis utilise le thème et l'icône par défaut. Le contenu associé ne sera pas supprimé, mais ces réglages devront être restaurés manuellement après le démarrage.",
 		"safeModeBtn": "🛡️ Démarrer en mode sans échec",
@@ -155,6 +170,9 @@
 		"connectRemoteKernel": "Se connecter à un noyau distant..."
 	},
 	"he": {
+		"connect": "התחבר",
+		"remoteKernelTitle": "☁️ ליבה מרוחקת",
+		"remoteKernelDesc": "התחברות לליבת SiYuan שפועלת במכשיר אחר או בשרת",
 		"title": "SiYuan",
 		"crashTip": "⚠️ זוהה שתהליך עיבוד הסתיים בעבר באופן בלתי צפוי. ייתכן שהדבר קשור לתוספים, לקטעי קוד או לערכת נושא וסמלים מותאמים אישית. מומלץ להפעיל במצב בטוח. מצב בטוח משבית את כל התוספים וקטעי הקוד ועובר לערכת הנושא ולסמל שברירת המחדל. התוכן הקשור לא יימחק, אך יש לשחזר הגדרות אלה ידנית לאחר ההפעלה.",
 		"safeModeBtn": "🛡️ הפעלה במצב בטוח",
@@ -186,6 +204,9 @@
 		"connectRemoteKernel": "התחברות לליבה מרוחקת..."
 	},
 	"hi": {
+		"connect": "कनेक्ट करें",
+		"remoteKernelTitle": "☁️ दूरस्थ कर्नेल",
+		"remoteKernelDesc": "किसी दूसरे डिवाइस या सर्वर पर चल रहे SiYuan कर्नेल से कनेक्ट करें",
 		"title": "SiYuan",
 		"crashTip": "⚠️ एक रेंडरर प्रक्रिया के पहले अप्रत्याशित रूप से बंद होने का पता चला। यह प्लगइन, कोड स्निपेट या कस्टम थीम और आइकन से संबंधित हो सकता है। सुरक्षित मोड में प्रारंभ करने की सलाह दी जाती है। सुरक्षित मोड सभी प्लगइन और कोड स्निपेट को अक्षम कर देता है और डिफ़ॉल्ट थीम और आइकन पर स्विच करता है। संबंधित सामग्री हटाई नहीं जाएगी, लेकिन शुरू होने के बाद इन सेटिंग्स को मैन्युअल रूप से पुनर्स्थापित करना होगा।",
 		"safeModeBtn": "🛡️ सुरक्षित मोड में प्रारंभ करें",
@@ -217,6 +238,9 @@
 		"connectRemoteKernel": "दूरस्थ कर्नेल से कनेक्ट करें..."
 	},
 	"id": {
+		"connect": "Hubungkan",
+		"remoteKernelTitle": "☁️ Kernel jarak jauh",
+		"remoteKernelDesc": "Hubungkan ke kernel SiYuan yang berjalan di perangkat lain atau server",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Proses renderer terdeteksi pernah berhenti secara tidak terduga. Hal ini mungkin terkait dengan plugin, cuplikan kode, atau tema dan ikon kustom. Disarankan untuk memulai dalam mode aman. Mode aman menonaktifkan semua plugin dan cuplikan kode serta beralih ke tema dan ikon default. Konten terkait tidak akan dihapus, tetapi pengaturan ini harus dipulihkan secara manual setelah aplikasi dimulai.",
 		"safeModeBtn": "🛡️ Mulai dalam mode aman",
@@ -248,6 +272,9 @@
 		"connectRemoteKernel": "Hubungkan ke kernel jarak jauh..."
 	},
 	"it": {
+		"connect": "Connetti",
+		"remoteKernelTitle": "☁️ Kernel remoto",
+		"remoteKernelDesc": "Connettiti a un kernel SiYuan in esecuzione su un altro dispositivo o server",
 		"title": "SiYuan",
 		"crashTip": "⚠️ È stato rilevato che un processo di rendering si è chiuso inaspettatamente. Ciò potrebbe essere correlato a plugin, snippet di codice o temi e icone personalizzati. Si consiglia di avviare in modalità sicura. La modalità sicura disabilita tutti i plugin e gli snippet di codice e passa al tema e all'icona predefiniti. I contenuti correlati non verranno eliminati, ma queste impostazioni dovranno essere ripristinate manualmente dopo l'avvio.",
 		"safeModeBtn": "🛡️ Avvia in modalità sicura",
@@ -279,6 +306,9 @@
 		"connectRemoteKernel": "Connetti a un kernel remoto..."
 	},
 	"ja": {
+		"connect": "接続",
+		"remoteKernelTitle": "☁️ リモートカーネル",
+		"remoteKernelDesc": "別のデバイスやサーバーで動作している SiYuan カーネルに接続します",
 		"title": "SiYuan",
 		"crashTip": "⚠️ レンダラープロセスが以前予期せず終了したことが検出されました。プラグイン、コードスニペット、またはカスタムテーマとアイコンが関係している可能性があります。セーフモードでの起動をお勧めします。セーフモードでは、すべてのプラグインとコードスニペットが無効になり、デフォルトのテーマとアイコンに切り替わります。関連コンテンツは削除されませんが、起動後にこれらの設定を手動で復元する必要があります。",
 		"safeModeBtn": "🛡️ セーフモードで起動",
@@ -310,6 +340,9 @@
 		"connectRemoteKernel": "リモートカーネルに接続..."
 	},
 	"ko": {
+		"connect": "연결",
+		"remoteKernelTitle": "☁️ 원격 커널",
+		"remoteKernelDesc": "다른 기기나 서버에서 실행 중인 SiYuan 커널에 연결",
 		"title": "SiYuan",
 		"crashTip": "⚠️ 렌더러 프로세스가 이전에 예기치 않게 종료된 것이 감지되었습니다. 플러그인, 코드 스니펫 또는 사용자 지정 테마와 아이콘과 관련이 있을 수 있습니다. 안전 모드로 시작하는 것이 권장됩니다. 안전 모드에서는 모든 플러그인과 코드 스니펫이 비활성화되고 기본 테마와 아이콘으로 전환됩니다. 관련 콘텐츠는 삭제되지 않지만 시작 후 이 설정을 수동으로 복원해야 합니다.",
 		"safeModeBtn": "🛡️ 안전 모드로 시작",
@@ -341,6 +374,9 @@
 		"connectRemoteKernel": "원격 커널에 연결..."
 	},
 	"nl": {
+		"connect": "Verbinden",
+		"remoteKernelTitle": "☁️ Externe kernel",
+		"remoteKernelDesc": "Maak verbinding met een SiYuan-kernel die op een ander apparaat of een server draait",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Er is gedetecteerd dat een renderer-proces eerder onverwacht is afgesloten. Dit kan verband houden met plug-ins, codefragmenten of een aangepast thema en pictogram. Het wordt aanbevolen om in de veilige modus te starten. De veilige modus schakelt alle plug-ins en codefragmenten uit en gebruikt het standaardthema en -pictogram. Gerelateerde inhoud wordt niet verwijderd, maar deze instellingen moeten na het opstarten handmatig worden hersteld.",
 		"safeModeBtn": "🛡️ Start in veilige modus",
@@ -372,6 +408,9 @@
 		"connectRemoteKernel": "Verbinden met externe kernel..."
 	},
 	"pl": {
+		"connect": "Połącz",
+		"remoteKernelTitle": "☁️ Zdalne jądro",
+		"remoteKernelDesc": "Połącz się z jądrem SiYuan działającym na innym urządzeniu lub serwerze",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Wykryto, że proces renderowania zakończył się wcześniej w nieoczekiwany sposób. Może to mieć związek z wtyczkami, fragmentami kodu albo niestandardowym motywem i ikoną. Zaleca się uruchomienie w trybie awaryjnym. Tryb awaryjny wyłącza wszystkie wtyczki i fragmenty kodu oraz przełącza na domyślny motyw i ikonę. Powiązana zawartość nie zostanie usunięta, ale po uruchomieniu te ustawienia trzeba przywrócić ręcznie.",
 		"safeModeBtn": "🛡️ Uruchom w trybie awaryjnym",
@@ -403,6 +442,9 @@
 		"connectRemoteKernel": "Połącz ze zdalnym jądrem..."
 	},
 	"pt-BR": {
+		"connect": "Conectar",
+		"remoteKernelTitle": "☁️ Núcleo remoto",
+		"remoteKernelDesc": "Conecte-se a um núcleo do SiYuan em execução em outro dispositivo ou servidor",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Foi detectado que um processo de renderização foi encerrado inesperadamente anteriormente. Isso pode estar relacionado a plug-ins, trechos de código ou temas e ícones personalizados. Recomenda-se iniciar no modo de segurança. O modo de segurança desativa todos os plug-ins e trechos de código e muda para o tema e o ícone padrão. O conteúdo relacionado não será excluído, mas essas configurações deverão ser restauradas manualmente após a inicialização.",
 		"safeModeBtn": "🛡️ Iniciar no modo de segurança",
@@ -434,6 +476,9 @@
 		"connectRemoteKernel": "Conectar ao kernel remoto..."
 	},
 	"ru": {
+		"connect": "Подключить",
+		"remoteKernelTitle": "☁️ Удалённое ядро",
+		"remoteKernelDesc": "Подключитесь к ядру SiYuan, работающему на другом устройстве или сервере",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Обнаружено, что процесс отрисовки ранее неожиданно завершился. Это может быть связано с плагинами, фрагментами кода или пользовательскими темами и значками. Рекомендуется запуск в безопасном режиме. Безопасный режим отключает все плагины и фрагменты кода, а также переключает на стандартные тему и значок. Связанные материалы не удаляются, но после запуска эти настройки нужно восстановить вручную.",
 		"safeModeBtn": "🛡️ Запустить в безопасном режиме",
@@ -465,6 +510,9 @@
 		"connectRemoteKernel": "Подключиться к удалённому ядру..."
 	},
 	"sk": {
+		"connect": "Pripojiť",
+		"remoteKernelTitle": "☁️ Vzdialené jadro",
+		"remoteKernelDesc": "Pripojte sa k jadru SiYuan spustenému na inom zariadení alebo serveri",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Zistilo sa, že proces vykresľovania sa predtým neočakávane ukončil. Môže to súvisieť s doplnkami, úryvkami kódu alebo vlastnými motívmi a ikonami. Odporúča sa spustiť v núdzovom režime. Núdzový režim zakáže všetky doplnky a úryvky kódu a prepne na predvolený motív a ikonu. Súvisiaci obsah sa neodstráni, ale tieto nastavenia bude potrebné po spustení obnoviť manuálne.",
 		"safeModeBtn": "🛡️ Spustiť v núdzovom režime",
@@ -496,6 +544,9 @@
 		"connectRemoteKernel": "Pripojiť k vzdialenému jadru..."
 	},
 	"sr": {
+		"connect": "Poveži",
+		"remoteKernelTitle": "☁️ Udaljeno jezgro",
+		"remoteKernelDesc": "Povežite se sa jezgrom SiYuan koje radi na drugom uređaju ili serveru",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Proces iscrtavanja se prethodno neočekivano zatvorio. Uzrok mogu biti dodaci, isečci koda ili prilagođena tema i ikonica. Preporučuje se pokretanje u bezbednom režimu. Bezbedni režim isključuje sve dodatke i isečke koda i vraća podrazumevanu temu i ikonicu. Sadržaj se ne briše, ali se ta podešavanja moraju ručno vratiti posle pokretanja.",
 		"safeModeBtn": "🛡️ Pokreni u bezbednom režimu",
@@ -527,6 +578,9 @@
 		"connectRemoteKernel": "Poveži se sa udaljenim jezgrom..."
 	},
 	"th": {
+		"connect": "เชื่อมต่อ",
+		"remoteKernelTitle": "☁️ เคอร์เนลระยะไกล",
+		"remoteKernelDesc": "เชื่อมต่อกับเคอร์เนล SiYuan ที่ทำงานบนอุปกรณ์อื่นหรือเซิร์ฟเวอร์",
 		"title": "SiYuan",
 		"crashTip": "⚠️ ตรวจพบว่ากระบวนการเรนเดอร์เคยปิดตัวลงอย่างไม่คาดคิด ซึ่งอาจเกี่ยวข้องกับปลั๊กอิน สนิปเป็ตโค้ด หรือธีมและไอคอนที่กำหนดเอง ขอแนะนำให้เริ่มในโหมดปลอดภัย โหมดปลอดภัยจะปิดใช้งานปลั๊กอินและสนิปเป็ตโค้ดทั้งหมด พร้อมทั้งเปลี่ยนไปใช้ธีมและไอคอนเริ่มต้น เนื้อหาที่เกี่ยวข้องจะไม่ถูกลบ แต่ต้องคืนค่าการตั้งค่าเหล่านี้ด้วยตนเองหลังจากเริ่มต้นแล้ว",
 		"safeModeBtn": "🛡️ เริ่มในโหมดปลอดภัย",
@@ -558,6 +612,9 @@
 		"connectRemoteKernel": "เชื่อมต่อเคอร์เนลระยะไกล..."
 	},
 	"tr": {
+		"connect": "Bağlan",
+		"remoteKernelTitle": "☁️ Uzak çekirdek",
+		"remoteKernelDesc": "Başka bir cihazda veya sunucuda çalışan SiYuan çekirdeğine bağlanın",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Bir işleyici işleminin daha önce beklenmedik şekilde sonlandığı algılandı. Bu durum eklentiler, kod parçacıkları veya özel tema ve simgelerle ilgili olabilir. Güvenli modda başlatılması önerilir. Güvenli mod tüm eklentileri ve kod parçacıklarını devre dışı bırakır ve varsayılan tema ile simgeye geçer. İlgili içerik silinmez, ancak bu ayarlar başlatmadan sonra elle geri yüklenmelidir.",
 		"safeModeBtn": "🛡️ Güvenli modda başlat",
@@ -589,6 +646,9 @@
 		"connectRemoteKernel": "Uzak çekirdeğe bağlan..."
 	},
 	"uk": {
+		"connect": "Підключити",
+		"remoteKernelTitle": "☁️ Віддалене ядро",
+		"remoteKernelDesc": "Підключіться до ядра SiYuan, що працює на іншому пристрої або сервері",
 		"title": "SiYuan",
 		"crashTip": "⚠️ Виявлено, що процес відображення раніше несподівано завершився. Це може бути пов'язано з плагінами, фрагментами коду або власними темами та піктограмами. Рекомендується запуск у безпечному режимі. Безпечний режим вимикає всі плагіни та фрагменти коду і перемикає на тему та піктограму за замовчуванням. Пов'язані матеріали не видаляються, але після запуску ці налаштування потрібно відновити вручну.",
 		"safeModeBtn": "🛡️ Запустити в безпечному режимі",
@@ -620,6 +680,9 @@
 		"connectRemoteKernel": "Підключитися до віддаленого ядра..."
 	},
 	"zh-CN": {
+		"connect": "连接",
+		"remoteKernelTitle": "☁️ 远程内核",
+		"remoteKernelDesc": "连接到另一台设备或服务器上运行的思源内核",
 		"title": "思源笔记",
 		"crashTip": "⚠️ 检测到渲染进程曾异常退出，可能与插件、代码片段或自定义主题和图标有关，建议以安全模式启动。安全模式会禁用所有插件和代码片段，并切换为默认主题和图标；相关内容不会被删除，但这些设置需要在启动后手动恢复。",
 		"safeModeBtn": "🛡️ 安全模式启动",
@@ -651,6 +714,9 @@
 		"connectRemoteKernel": "连接远程内核..."
 	},
 	"zh-TW": {
+		"connect": "連線",
+		"remoteKernelTitle": "☁️ 遠端核心",
+		"remoteKernelDesc": "連線至在其他裝置或伺服器上執行的思源核心",
 		"title": "思源筆記",
 		"crashTip": "⚠️ 偵測到渲染處理程序曾異常結束，可能與外掛、程式碼片段或自訂主題和圖示有關。建議以安全模式啟動。安全模式會停用所有外掛和程式碼片段，並切換為預設主題和圖示；相關內容不會被刪除，但這些設定需要在啟動後手動還原。",
 		"safeModeBtn": "🛡️ 安全模式啟動",

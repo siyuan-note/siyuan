@@ -1443,10 +1443,44 @@ const browserCases = async (languages: Record<string, string>) => {
     document.querySelector<HTMLButtonElement>('#markdownFonts button[data-value="independent"]').click(); await tick();
     const fontSections = independentPanel.querySelectorAll("section");
     check.equal(fontSections.length, 3);
+    const fontPlatformClasses = document.body.className;
+    const fontTheme = document.getElementById("markdownThemeStyle") as HTMLLinkElement;
+    const fontThemeHref = fontTheme.href;
+    for (const [width, platform, theme] of [[1100, "windows", "daylight"], [360, "windows", "midnight"],
+        [360, "android", "daylight"], [360, "ios", "midnight"], [360, "harmony", "daylight"]] as const) {
+        await ipcRenderer.invoke("markdown-resize", width, 850);
+        document.body.className = `body--${platform}`;
+        const href = new URL(`./appearance/themes/${theme}/theme.css`, location.href).href;
+        if (fontTheme.href !== href) await new Promise<void>(resolve => {fontTheme.onload = () => resolve(); fontTheme.href = href;});
+        for (const section of fontSections) {
+            const list = section.querySelector<HTMLElement>(".markdown-font-picker__list");
+            for (const row of list.querySelectorAll<HTMLButtonElement>(".b3-list-item")) {
+                row.scrollIntoView({block: "center"});
+                const bounds = row.getBoundingClientRect();
+                const parent = list.getBoundingClientRect();
+                const style = getComputedStyle(row);
+                check.ok(Math.abs(bounds.left - parent.left - list.clientLeft - parseFloat(style.marginLeft)) < 1,
+                    `${platform}: font rows retain the shared left inset`);
+                check.ok(Math.abs(bounds.right - parent.left - list.clientLeft - list.clientWidth + parseFloat(style.marginRight)) < 1,
+                    `${platform}: font rows fill the available list width`);
+                check.equal(document.elementFromPoint(bounds.right - 8, bounds.top + bounds.height / 2)?.closest(".b3-list-item"), row,
+                    `${platform}: the blank end of a font row is clickable`);
+            }
+        }
+    }
+    document.body.className = fontPlatformClasses;
+    await ipcRenderer.invoke("markdown-resize", 1100, 850);
+    if (fontTheme.href !== fontThemeHref) await new Promise<void>(resolve => {fontTheme.onload = () => resolve(); fontTheme.href = fontThemeHref;});
     const familySearch = fontSections[0].querySelector<HTMLInputElement>('input[type="search"]');
     familySearch.value = "Sans"; familySearch.dispatchEvent(new Event("input")); await tick();
     check.equal(fontSections[0].querySelectorAll(".b3-list-item").length, 1);
-    fontSections[0].querySelector<HTMLButtonElement>('.b3-list-item[data-family="Arial"]').click();
+    const fontRow = fontSections[0].querySelector<HTMLButtonElement>('.b3-list-item[data-family="Arial"]');
+    fontRow.scrollIntoView({block: "center"});
+    const fontBounds = fontRow.getBoundingClientRect();
+    await ipcRenderer.invoke("markdown-pointer-move", fontBounds.right - 8, fontBounds.top + fontBounds.height / 2);
+    check.notEqual(getComputedStyle(fontRow).backgroundColor, "rgba(0, 0, 0, 0)", "hover feedback covers the blank end of a font row");
+    await ipcRenderer.invoke("markdown-touch", fontBounds.right - 8, fontBounds.top + fontBounds.height / 2);
+    await tick();
     const chip = fontSections[0].querySelector<HTMLElement>(".b3-chip");
     const selectedRow = fontSections[0].querySelector('[aria-checked="true"]');
     const checkmark = selectedRow.querySelector("svg").getBoundingClientRect();

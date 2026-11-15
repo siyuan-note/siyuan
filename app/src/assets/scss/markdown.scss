@@ -597,6 +597,8 @@ button:focus-visible,
 }
 
 .markdown-font-picker__list {
+  display: flex;
+  flex-direction: column;
   padding: 0;
   max-height: 180px;
   overflow-y: auto;

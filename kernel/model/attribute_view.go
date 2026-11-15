@@ -4106,8 +4106,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 	if !view.IsGroupView() {
 		return
 	}
-	viewable := sql.RenderView(attrView, view, "", false)
-	genAttrViewGroupsWithItems(view, attrView, viewable.(av.Collection).GetItems())
+	genAttrViewGroupsWithItems(view, attrView, sql.RenderViewGroupItems(attrView, view))
 }
 
 func genAttrViewGroupsWithItems(view *av.View, attrView *av.AttributeView, sourceItems []av.Item) {

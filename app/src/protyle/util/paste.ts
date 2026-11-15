@@ -803,8 +803,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textPlain = "";
     }
     const internalPaste = !!siyuanHTML;
-    const transformBlockPaste = transformPaste && (internalPaste || !!textHTML);
-    const transformExternalPaste = transformBlockPaste && !internalPaste;
+    const transformBlockPaste = transformPaste && (internalPaste || !!textHTML || !!textPlain);
+    const transformExternalPaste = transformBlockPaste && !internalPaste && !!textHTML;
     if (blockDOMSanitizer && !siyuanHTML && /<picture[\s>]/i.test(textHTML)) {
         const template = document.createElement("template");
         template.innerHTML = textHTML;
@@ -859,6 +859,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
     }
     if (transformBlockPaste) {
+        if (protyle.disabled || !isPasteInsertPositionAvailable()) {
+            return;
+        }
+        if (!internalPaste && !textHTML) {
+            siyuanHTML = markdownMathPaste(protyle.lute, textPlain, mathCompatible);
+        }
         siyuanHTML = transformPaste(siyuanHTML || "", textPlain, internalPaste);
         if (!siyuanHTML) {
             return;

@@ -93,13 +93,13 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
     template.innerHTML = prepare(flattened);
     check.equal(template.content.querySelectorAll('[data-type^="Node"]').length, 1);
     check.equal(template.content.querySelector("[contenteditable]").textContent,
-        "Heading bold Quote One Two Column Other Cell Value a < b\nc\n Last\nline");
+        "Heading bold Quote One Two Column Other Cell Value a < b c  Last line");
     check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "bold");
     check.equal(template.content.querySelector('[data-type~="a"]').getAttribute("data-href"), "https://example.org");
     template.innerHTML = flatten(lute.Md2BlockDOM("$$\nx^2\n$$"), "", false);
     check.equal(template.content.querySelector('[data-type="inline-math"]').getAttribute("data-content"), "x^2");
     template.innerHTML = flatten("", "Fallback\r\n<title>", false);
-    check.equal(template.content.querySelector("[contenteditable]").textContent, "Fallback\n<title>");
+    check.equal(template.content.querySelector("[contenteditable]").textContent, "Fallback <title>");
     check.equal(template.content.querySelector("title"), null);
     check.equal(flatten("", "", false), "");
     const internal = paragraph('<span data-type="strong" style="color: red">First</span><br>second') +
@@ -107,13 +107,13 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
         paragraph('<span class="img"><img src="assets/p.png" alt="Picture"></span>');
     template.innerHTML = flatten(internal, "", true);
     check.equal(unsupported(template.innerHTML).length, 0);
-    check.equal(template.content.querySelector("[contenteditable]").textContent, "Firstsecond Ref ");
-    check.ok(template.content.querySelector("[contenteditable] > br"));
+    check.equal(template.content.querySelector("[contenteditable]").textContent, "First second Ref ");
+    check.equal(template.content.querySelector("br"), null);
     check.equal(template.content.querySelector<HTMLElement>('[data-type="strong"]').style.color, "red");
     check.equal(template.content.querySelector<HTMLElement>('[data-type="block-ref"]').dataset.id, "20260101000001-abcdefg");
     check.equal(template.content.querySelector("img").getAttribute("src"), "assets/p.png");
     template.innerHTML = lute.SpinBlockDOM(prepare(template.innerHTML, "20260101000000-abcdefg"));
-    check.match(template.content.querySelector("[contenteditable]").textContent, /^First\nsecond Ref/);
+    check.match(template.content.querySelector("[contenteditable]").textContent, /^First second Ref/);
     template.innerHTML = flatten('<span data-type="em">Inline</span>', "", true);
     check.equal(template.content.querySelector('[data-type="em"]').textContent, "Inline");
     for (const prefix of ["Plain", '<span data-type="em">Styled</span>']) {
@@ -361,6 +361,7 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
                 instance: {enable() {}, disable() {}}, destroy() {}};
             const dependencies = {
                 isMobile: () => mobile, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
+                copyDocumentTitleTarget: () => false, matchHotKey: () => false, isDocumentTitleBlockHotkey: () => false,
                 hintRef: () => {}, hintTag: () => {},
                 getDocumentTitleLute: () => lute, getAgentLute: () => lute,
                 prepareDocumentTitleInitialDOM: (html: string) => html,
@@ -409,6 +410,23 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
                     "\nreturn applyKeyboardToolbarEntries;")(...Object.values(toolbarDependencies));
                 applyEntries(toolbar, []);
             }
+            const original = titleWysiwyg.innerHTML;
+            for (let repeat = 0; repeat < 3; repeat++) {
+                const key = new KeyboardEvent("keydown", {key: "Enter", shiftKey: true, repeat: repeat > 0,
+                    bubbles: true, cancelable: true});
+                editable.dispatchEvent(key);
+                check.equal(key.defaultPrevented, true, "Shift+Enter cannot insert title line breaks");
+                const before = new InputEvent("beforeinput", {inputType: "insertLineBreak", bubbles: true, cancelable: true});
+                editable.dispatchEvent(before);
+                check.equal(before.defaultPrevented, true, "native/mobile line breaks are blocked without a keydown");
+                check.equal(titleWysiwyg.innerHTML, original, "blocked line breaks retain the draft and selection");
+                check.equal(getSelection().toString(), "Selected");
+            }
+            const formulaField = document.createElement("textarea");
+            subElement.append(formulaField);
+            const formulaBreak = new InputEvent("beforeinput", {inputType: "insertLineBreak", bubbles: true, cancelable: true});
+            formulaField.dispatchEvent(formulaBreak);
+            check.equal(formulaBreak.defaultPrevented, false, "formula source fields retain their own line breaks");
             let escaped = false;
             const onMouseDown = () => { escaped = true; };
             root.addEventListener("mousedown", onMouseDown);

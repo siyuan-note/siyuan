@@ -149,6 +149,28 @@ describe("block paste into a restricted title", () => {
         assert.equal(harness.uploads.length, 0);
     });
 
+    it("normalizes plain Markdown through the title transform before validating or inserting", async () => {
+        const plain = "**First**\r\nSecond\n\nThird";
+        let transformed = 0;
+        const harness = createHarness(false, true, undefined, {
+            convert: async () => { throw new Error("plain text does not use external HTML conversion"); },
+            transform: (blockDOM, text, internal) => {
+                assert.equal(blockDOM, `<div data-type="NodeParagraph">${plain}</div>`);
+                assert.equal(text, plain);
+                assert.equal(internal, false);
+                transformed++;
+                return flattened;
+            },
+        });
+        await assert.rejects(harness.paste([], "", plain), harness.restrictedFallback);
+        assert.equal(harness.getCheckedBlockDOM(), flattened);
+        assert.equal(harness.getConvertedBy(), "markdown");
+        assert.equal(transformed, 1);
+        harness.invalidate();
+        await harness.paste([], "", plain);
+        assert.equal(transformed, 1, "invalidated paste cannot change the title");
+    });
+
     it("flattens native blocks and legacy block clipboard data without external style conversion", async () => {
         let convertedExternally = false;
         const harness = createHarness(false, true, undefined, {

@@ -57,6 +57,23 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
             check.equal(host.querySelector("[contenteditable]"), null);
         }
     }
+    for (const detached of [false, true]) {
+        const value = {...source, isDetached: detached, block: {...source.block, id: detached ? "" : "document",
+            richBlockDOM: dom('<span data-type="strong">First</span><br>Second\nThird')}};
+        templateLineBreaks(value);
+    }
+    function templateLineBreaks(value: IAVCellValue) {
+        const host = document.createElement("div");
+        host.innerHTML = primary.getAVPrimaryInitialDOM(value);
+        check.ok(host.querySelector("br"), "bound and detached primary fields retain soft breaks on open");
+        check.match(host.textContent, /Second\nThird/);
+        const updated = primary.createAVPrimaryEditValue(host.innerHTML, value);
+        host.innerHTML = updated.block.richBlockDOM;
+        check.ok(host.querySelector("br"), "primary edits preserve line breaks in the rich source");
+        check.match(host.textContent, /Second\nThird/);
+        check.equal(updated.isDetached, value.isDetached);
+        check.equal(updated.block.id, value.block.id);
+    }
     const plain: IAVCellValue = {type: "block", isDetached: true, block: {content: "**literal** <tag> &"}};
     const initial = primary.getAVPrimaryInitialDOM(plain);
     const template = document.createElement("template"); template.innerHTML = initial;

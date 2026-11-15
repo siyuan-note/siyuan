@@ -56,6 +56,11 @@ export const flattenDocumentTitlePaste = (blockDOM: string, text: string, intern
     if (!editable.hasChildNodes() && text.trim()) {
         editable.textContent = text;
     }
+    editable.querySelectorAll("br").forEach(element => element.replaceWith(document.createTextNode(" ")));
+    const walker = document.createTreeWalker(editable, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+        walker.currentNode.nodeValue = walker.currentNode.nodeValue.replace(/\r\n?|\n/g, " ");
+    }
     return editable.hasChildNodes() ? paragraph.outerHTML : "";
 };
 

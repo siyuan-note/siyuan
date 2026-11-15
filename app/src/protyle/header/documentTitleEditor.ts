@@ -164,7 +164,10 @@ export class DocumentTitleEditor {
             }
         }, true);
         host.addEventListener("beforeinput", (event: InputEvent) => {
-            if (owner.disabled || event.inputType === "historyUndo" || event.inputType === "historyRedo") {
+            if (event.inputType === "insertLineBreak" && this.fragment.wysiwyg.contains(event.target as Node)) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            } else if (owner.disabled || event.inputType === "historyUndo" || event.inputType === "historyRedo") {
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 if (!owner.disabled) {
@@ -522,16 +525,9 @@ export class DocumentTitleEditor {
             void this.undo(event.shiftKey || event.key.toLowerCase() === "y").catch((): void => {});
             return;
         }
-        if (isDocumentTitleBlockHotkey(event) || event.key === "Enter" && (event.ctrlKey || event.metaKey || event.altKey)) {
+        if (isDocumentTitleBlockHotkey(event) || event.key === "Enter" && (event.shiftKey || event.ctrlKey || event.metaKey || event.altKey)) {
             event.preventDefault();
             event.stopImmediatePropagation();
-            return;
-        }
-        if (event.key === "Enter" && event.shiftKey && this.fragment.hintElement.classList.contains("fn__none")) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            document.execCommand("insertLineBreak");
-            this.changed();
             return;
         }
         if (event.key === "Enter" && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey &&

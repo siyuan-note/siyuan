@@ -23,6 +23,7 @@ const withSearchMethodAvailability = (item: IMenu, enabled: boolean): IMenu => (
     bind: (element) => {
         item.bind?.(element);
         setSearchControlAvailability(element, enabled, item.label, !enabled);
+        element.classList.toggle("ariaLabel", !enabled);
     },
 });
 
@@ -530,6 +531,15 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_SEARCH_MORE);
+    const updateSearch = () => {
+        cb();
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = resolvePersistedSearchConfig(
+            config,
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA],
+            hasSearchConfigTemporaryPath(config),
+        );
+        setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
+    };
     /// #if MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
@@ -617,7 +627,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         current: config.sort === 0,
         click() {
             config.sort = 0;
-            cb();
+            updateSearch();
         }
     }, {
         iconHTML: "",
@@ -625,7 +635,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         current: config.sort === 1,
         click() {
             config.sort = 1;
-            cb();
+            updateSearch();
         }
     }, {
         iconHTML: "",
@@ -633,7 +643,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         current: config.sort === 2,
         click() {
             config.sort = 2;
-            cb();
+            updateSearch();
         }
     }, {
         iconHTML: "",
@@ -641,7 +651,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         current: config.sort === 3,
         click() {
             config.sort = 3;
-            cb();
+            updateSearch();
         }
     }, {
         iconHTML: "",
@@ -649,7 +659,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         current: config.sort === 4,
         click() {
             config.sort = 4;
-            cb();
+            updateSearch();
         }
     }, {
         iconHTML: "",
@@ -657,7 +667,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         current: config.sort === 6,
         click() {
             config.sort = 6;
-            cb();
+            updateSearch();
         }
     }, {
         iconHTML: "",
@@ -665,7 +675,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         current: config.sort === 7,
         click() {
             config.sort = 7;
-            cb();
+            updateSearch();
         }
     }];
     if (config.group === 1) {
@@ -675,7 +685,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
             current: config.sort === 5,
             click() {
                 config.sort = 5;
-                cb();
+                updateSearch();
             }
         });
     }
@@ -706,7 +716,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 if (config.sort === 5) {
                     config.sort = 0;
                 }
-                cb();
+                updateSearch();
             }
         }, {
             iconHTML: "",
@@ -720,7 +730,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                     element.querySelector("#searchCollapse").parentElement.classList.remove("fn__none");
                 }
                 config.group = 1;
-                cb();
+                updateSearch();
             }
         }].map(item => withSearchMethodAvailability(item, capabilities.group)),
     }, capabilities.group)).element);
@@ -741,6 +751,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     if (layoutMenu) {
         layoutMenu();
     }
+    /// #if MOBILE
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.saveCriterion,
@@ -756,6 +767,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
             removeCriterion();
         }
     }).element);
+    /// #endif
 };
 
 const configIsSame = (config: Config.IUILayoutTabSearchConfig, config2: Config.IUILayoutTabSearchConfig) => {

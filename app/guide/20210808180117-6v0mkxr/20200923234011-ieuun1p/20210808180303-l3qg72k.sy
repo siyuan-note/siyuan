@@ -193,7 +193,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Controls that do not apply to the selected method are disabled with an explanatory tooltip. SQL and semantic search hide the replacement row while keeping its text and expanded state, which are restored when returning to a method that supports replacement. Saving and resetting query conditions remain available."
+					"Data": "Controls that do not apply to the selected method are disabled with an explanatory tooltip. SQL and semantic search hide the replacement row while keeping its text and expanded state, which are restored when returning to a method that supports replacement. Saving and resetting query conditions remain available through the buttons in desktop search and the More menu on mobile. Sorting and grouping are remembered when search is reopened and are included in saved query conditions; the desktop result layout is remembered separately. Turning off document grouping switches content-order sorting to type sorting; other sort orders are retained."
 				}
 			]
 		},

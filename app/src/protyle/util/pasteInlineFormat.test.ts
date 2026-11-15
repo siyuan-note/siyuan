@@ -113,6 +113,44 @@ const browserCases = async (sources: Record<string, string>, snippets: Record<st
         check.equal(matches[0].querySelector("span"), null);
         return holder.innerHTML;
     };
+    for (const platform of ["desktop", "mobile"]) {
+        mobile = platform === "mobile";
+        for (const action of ["range", "toolbar"] as const) {
+            for (const type of ["strong", "em", "u", "s", "mark", "sup", "sub", "code", "kbd"]) {
+                for (const label of ["123, sample", "sample"]) {
+                    for (const breaks of [1, 2]) {
+                        const text = label + "\n".repeat(breaks) + "next\nafter";
+                        const fixture = setup(text);
+                        const button = `<button data-type="${type}"></button>`;
+                        fixture.toolbar.element.innerHTML = button;
+                        mobileToolbar.querySelector(".keyboard__dynamic").innerHTML = button;
+                        const range = document.createRange();
+                        range.setStart(fixture.editable.firstChild, 0);
+                        range.setEnd(fixture.editable.firstChild, label.length + breaks);
+                        fixture.toolbar.range = range;
+                        deps.focusByRange(range);
+                        for (let iteration = 0; iteration < 4; iteration++) {
+                            fixture.toolbar.setInlineMark(fixture.protyle, type, action);
+                            const expected = iteration % 2 === 0;
+                            const context = JSON.stringify({platform, action, type, label, breaks, iteration});
+                            check.equal(!!fixture.editable.querySelector(`[data-type~="${type}"]`), expected, context);
+                            check.equal(fixture.toolbar.getCurrentToolbarType(fixture.protyle).includes(type), expected, context);
+                            check.equal(marker.getTextWithoutSemanticMarkers(fixture.editable).split(Constants.ZWSP).join(""), text, context + ": live");
+                            const operation = fixture.protyle.transactions.at(-1);
+                            const serialized = document.createElement("div");
+                            serialized.innerHTML = lute.SpinBlockDOM(operation.doOperations[0].data as string);
+                            check.equal(!!serialized.querySelector(`[data-type~="${type}"]`), expected, context);
+                            const serializedText = Array.from(serialized.children).map(block =>
+                                marker.getTextWithoutSemanticMarkers(block.querySelector('[contenteditable="true"]'))
+                                    .split(Constants.ZWSP).join("")).join("\n\n");
+                            check.equal(serializedText, text, context + ": serialized");
+                        }
+                        fixture.editor.remove();
+                    }
+                }
+            }
+        }
+    }
     // 保持格式操作返回的选区，覆盖全选后连续切换时包含外部边界占位符的情况。
     for (const platform of ["desktop", "mobile"]) {
         mobile = platform === "mobile";

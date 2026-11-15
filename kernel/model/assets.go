@@ -2709,7 +2709,13 @@ func getAssetsLinkDestsWithOptions(
 				}
 				ret = append(ret, assetListLinkDests(dataAssets, includeServePath, options.expandAssetLists, normalize...)...)
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
-				ret = append(ret, htmlAssetLinkDestsWithOptions(n.Tokens, includeServePath, options.expandAssetLists, normalize...)...)
+				nativeMediaTag := ""
+				if ast.NodeAudio == n.Type {
+					nativeMediaTag = "audio"
+				} else if ast.NodeVideo == n.Type {
+					nativeMediaTag = "video"
+				}
+				ret = append(ret, htmlAssetLinkDestsWithOptions(n.Tokens, includeServePath, options.expandAssetLists, nativeMediaTag, normalize...)...)
 			}
 		}
 		return ast.WalkContinue
@@ -2742,10 +2748,10 @@ func assetListLinkDests(raw string, includeServePath, expand bool, normalize ...
 }
 
 func htmlAssetLinkDests(tokens []byte, includeServePath bool, normalize ...func(string) string) (ret []string) {
-	return htmlAssetLinkDestsWithOptions(tokens, includeServePath, false, normalize...)
+	return htmlAssetLinkDestsWithOptions(tokens, includeServePath, false, "", normalize...)
 }
 
-func htmlAssetLinkDestsWithOptions(tokens []byte, includeServePath, expandAssetLists bool, normalize ...func(string) string) (ret []string) {
+func htmlAssetLinkDestsWithOptions(tokens []byte, includeServePath, expandAssetLists bool, nativeMediaTag string, normalize ...func(string) string) (ret []string) {
 	// 逐个读取标签属性，兼容内联标签片段并只解码一层 HTML 实体。
 	tokenizer := html.NewTokenizer(bytes.NewReader(tokens))
 	for {
@@ -2753,7 +2759,23 @@ func htmlAssetLinkDestsWithOptions(tokens []byte, includeServePath, expandAssetL
 		case html.ErrorToken:
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
-			for _, attr := range tokenizer.Token().Attr {
+			token := tokenizer.Token()
+			hasMediaSrc := false
+			if nativeMediaTag != "" && token.Data == nativeMediaTag {
+				// 原生音视频的旧数据可能同时保存 src 和 data-src；非空 src 决定播放地址。
+				for _, attr := range token.Attr {
+					if attr.Key == "src" {
+						hasMediaSrc = strings.TrimSpace(attr.Val) != ""
+						break
+					}
+				}
+			}
+			// 仅处理块的首个媒体标签，嵌套或通用 HTML 的自定义属性仍可能被脚本使用。
+			nativeMediaTag = ""
+			for _, attr := range token.Attr {
+				if hasMediaSrc && attr.Key == "data-src" {
+					continue
+				}
 				if expandAssetLists && (attr.Key == "data-assets" || strings.HasPrefix(attr.Key, "custom-data-assets")) {
 					ret = append(ret, assetListLinkDests(attr.Val, includeServePath, true, normalize...)...)
 					continue

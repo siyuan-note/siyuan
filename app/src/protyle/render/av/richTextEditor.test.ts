@@ -115,9 +115,9 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         }},
         "../../toolbar/defaults": {getDefaultToolbar: (): unknown[] => []},
         "./richTextEditorPosition": {positionAVRichTextEditor: () => {}},
-        "./richTextEditorLute": {createAVRichTextEditorLute: () => ({}), configureAVRichTextEditorLute: () => {}},
-        "../../header/documentTitleDOM": {getDocumentTitleLute: (lute: unknown) => lute,
-            getDocumentTitleDOMFingerprint: (html: string) => html},
+        "./richTextEditorLute": {createAVRichTextEditorLute: (inlineOnly: boolean) => ({inlineOnly}),
+            configureAVRichTextEditorLute: (_lute: unknown, inlineOnly: boolean) => ({inlineOnly})},
+        "../../header/documentTitleDOM": {getDocumentTitleDOMFingerprint: (html: string) => html},
         "./primaryRich": {getAVPrimaryInitialDOM: () => "initial",
             createAVPrimaryEditValue: (html: string) => ({type: "block", isDetached: true, block: {content: html}})},
         "./virtualScroll": {getAVData: () => settings.primary ? {} : undefined},
@@ -202,6 +202,13 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
 [false, true].forEach(primary => describe(`database ${primary ? "primary" : "text"} rich editor lifecycle and keyboard input`, () => {
     const createEditor = (settings: Parameters<typeof createEditorFixture>[0] = {}) => createEditorFixture({...settings, primary});
     for (const mobile of [false, true]) {
+        it(`preserves the field parser mode when restoring input syntax (${mobile ? "mobile" : "desktop"})`, () => {
+            const editor = createEditor({mobile});
+            const capabilities = editor.fragmentOptions.runtimeCapabilities;
+            assert.deepEqual(capabilities.lute, {inlineOnly: primary});
+            assert.deepEqual(capabilities.restoreLuteMarkdownSyntax(capabilities.lute), {inlineOnly: primary});
+            editor.escape();
+        });
         it(`only primary fields prevent blank-click paragraph insertion (${mobile ? "mobile" : "desktop"})`, () => {
             const editor = createEditor({mobile});
             assert.equal(editor.fragmentOptions.protyleOptions.click.preventInsetEmptyBlock, primary);

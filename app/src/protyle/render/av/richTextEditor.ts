@@ -19,7 +19,7 @@ import {updateOutlineCurrentBlock} from "../../util/outlineBlock";
 import {focusBlock} from "../../util/selection";
 import {isAVContinuousInputKey} from "./continuousInput";
 import {configureAVRichTextEditorLute, createAVRichTextEditorLute} from "./richTextEditorLute";
-import {getDocumentTitleDOMFingerprint, getDocumentTitleLute, getDocumentTitleUnsupportedPasteBlocks,
+import {getDocumentTitleDOMFingerprint, getDocumentTitleUnsupportedPasteBlocks,
     prepareDocumentTitleBlockDOM} from "../../header/documentTitleDOM";
 import {createAVPrimaryEditValue, getAVPrimaryInitialDOM} from "./primaryRich";
 import {renderImageDisplay} from "../imageDisplay";
@@ -168,7 +168,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         runtimeCapabilities: {
             upload: primary,
             websocket: false,
-            lute: primary ? getDocumentTitleLute(createAVRichTextEditorLute()) : createAVRichTextEditorLute(),
+            lute: createAVRichTextEditorLute(primary),
             lockedOptions: {toolbar, hint},
             pluginExtensions: false,
             customBlockRender: false,
@@ -176,7 +176,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             getUnsupportedPasteBlocks: primary ? getDocumentTitleUnsupportedPasteBlocks : getAVRichTextUnsupportedPasteBlocks,
             getUnsupportedPasteMessage: primary ? () => window.siyuan.languages.documentTitleInlineOnly : undefined,
             richHTMLPaste: primary,
-            restoreLuteMarkdownSyntax: lute => primary ? getDocumentTitleLute(configureAVRichTextEditorLute(lute)) : configureAVRichTextEditorLute(lute),
+            restoreLuteMarkdownSyntax: lute => configureAVRichTextEditorLute(lute, primary),
         },
         afterSetContent: (protyle, element) => {
             mathRender(element);

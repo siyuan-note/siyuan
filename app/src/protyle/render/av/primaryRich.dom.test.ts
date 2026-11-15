@@ -32,6 +32,9 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
     const attribute = load("attributeValue");
     Object.assign(dependencies, attribute);
     const cell = load("cell");
+    load("richTextValue");
+    load("luteMarkdownSyntax");
+    const parser = load("richTextEditorLute");
     const dom = (html: string) => `<div data-type="NodeParagraph" data-node-id="20000101000000-primary"><div contenteditable="true">${html}</div></div>`;
     const source: IAVCellValue = {type: "block", id: "value", blockID: "row", isDetached: true,
         block: {content: "Summary", rich: {spec: 1, format: "inline-ast", content: "full source"}, richBlockDOM: dom(
@@ -112,6 +115,40 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
     document.head.append(style);
     for (const css of Object.values(styles)) {
         style.textContent = css;
+        (window as any).siyuan.config.editor.markdown = {inlineAsterisk: true, inlineUnderscore: true,
+            inlineSup: true, inlineSub: true, inlineTag: true, inlineMath: true, inlineStrikethrough: true,
+            inlineFullWidthStrikethrough: true, inlineMark: true};
+        const lute = parser.configureAVRichTextEditorLute(Lute.New(), true);
+        lute.SetTextMark(true);
+        lute.SetProtyleWYSIWYG(true);
+        for (const detached of [false, true]) {
+            const host = document.createElement("div");
+            host.className = "av__richtext-host";
+            host.innerHTML = '<div class="protyle-wysiwyg"></div>';
+            document.body.append(host);
+            const wysiwyg = host.firstElementChild as HTMLElement;
+            let value = {...plain, isDetached: detached};
+            for (const fontSize of [16, 24, 32]) {
+                host.style.setProperty("--b3-font-size-editor", `${fontSize}px`);
+                for (let opening = 0; opening < 2; opening++) {
+                    wysiwyg.innerHTML = primary.getAVPrimaryInitialDOM(value);
+                    for (const parseInput of [false, true]) {
+                        if (parseInput) {
+                            wysiwyg.querySelector("[contenteditable]").append(" input");
+                            wysiwyg.innerHTML = lute.SpinBlockDOM(wysiwyg.innerHTML);
+                        }
+                        const editable = wysiwyg.querySelector<HTMLElement>("[contenteditable]");
+                        const actual = getComputedStyle(editable);
+                        check.equal(actual.fontSize, `${fontSize}px`,
+                            `primary font remains ${fontSize}px on opening ${opening}, input=${parseInput}, detached=${detached}`);
+                        check.equal(actual.fontWeight, getComputedStyle(wysiwyg).fontWeight);
+                        check.equal(editable.classList.contains("protyle-title__input"), false);
+                    }
+                    value = primary.createAVPrimaryEditValue(wysiwyg.innerHTML, value);
+                }
+            }
+            host.remove();
+        }
         for (const fontSize of [16, 24]) {
             document.body.style.fontSize = `${fontSize}px`;
             for (const width of [120, 200, 700]) {
@@ -149,6 +186,9 @@ test("primary rich text preserves title inline elements across views, details, r
         const sources = Object.fromEntries([
             ["primaryRich", "src/protyle/render/av/primaryRich.ts"], ["documentTitleDOM", "src/protyle/header/documentTitleDOM.ts"],
             ["cell", "src/protyle/render/av/cell.ts"], ["attributeValue", "src/protyle/render/av/attributeValue.ts"],
+            ["richTextValue", "src/protyle/render/av/richTextValue.ts"],
+            ["luteMarkdownSyntax", "src/protyle/render/luteMarkdownSyntax.ts"],
+            ["richTextEditorLute", "src/protyle/render/av/richTextEditorLute.ts"],
         ].map(([name, path]) => [name, transpileModule(readFileSync(path, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
         }).outputText]));

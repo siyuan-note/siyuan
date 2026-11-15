@@ -17,7 +17,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {getPropertiesHTML} from "./panels/properties";
 import {getLabelByNumberFormat} from "./number";
 import {getDefaultDateFormat, getLabelByDateFormat} from "./dateFormat";
-import {bindDateCalendarMenu} from "./dateCalendarMenu";
+import {bindDateFieldMenus} from "./dateFieldMenu";
 import {bindRelatedViewConfig, getRelatedViewConfigHTML} from "./relatedViewConfig";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
@@ -217,11 +217,13 @@ export const getEditHTML = (options: {
     <span class="b3-menu__accelerator">${getLabelByDateFormat(colData.dateFormat)}</span>
 </button>
 <label class="b3-menu__item">
+    <span class="b3-menu__icon"></span>
     <span class="fn__flex-center">${window.siyuan.languages.fillCreated}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="fillCreated" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.autoFillNow ? "checked" : ""}>
 </label>
 <label class="b3-menu__item">
+    <span class="b3-menu__icon"></span>
     <span class="fn__flex-center">${window.siyuan.languages.fillSpecificTime}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="fillSpecificTime" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.fillSpecificTime ? "checked" : ""}>
@@ -317,7 +319,7 @@ export const bindEditEvent = (options: {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
-    bindDateCalendarMenu(options.protyle, avID, colData, options.menuElement);
+    bindDateFieldMenus(options.protyle, avID, colData, options.menuElement);
     if (colData.type === "relation") {
         void bindRelatedViewConfig(options.protyle, avID, colData, options.menuElement, options.blockID);
     }

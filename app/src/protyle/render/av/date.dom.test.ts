@@ -29,7 +29,7 @@ test("date panels embed a shared calendar without changing range, batch, clear o
         const modules: Record<string, any> = {dayjs: dayjsModule.exports,
             "./cell": {genCellValueByElement: () => ({date: initial}),
                 updateCellsValue: (_protyle: unknown, _block: unknown, value: unknown) => updates.push(value)},
-            "./view": {getFieldsByData: (): unknown[] => []}, "./lunarDate": {}, "../col": {getColId: () => "date"}, "../dateFormatMenu": {}};
+            "./view": {getFieldsByData: (): unknown[] => []}, "./lunarDate": {}, "../col": {getColId: () => "date"}};
         modules["../cell"] = modules["./cell"];
         for (const name of ["model", "yearInput", "field", "inline", "dateSubmit", "date", "datePanel"]) {
             const exports = modules["./" + name] = {};

@@ -74,7 +74,7 @@ const contextFor = (type: TAVPanelType, overrides: Partial<IAVPanelContext> = {}
     };
 };
 
-test("all panel types render and the action registry preserves the existing action set", () => {
+test("all panel types render and the action registry matches supported panel actions", () => {
     const h = createPanels({getRelationHTML: () => "relation"});
     const types: TAVPanelType[] = ["select", "properties", "config", "sorts", "filters", "contextFilter", "edit", "date", "asset", "switcher", "relation", "rollup"];
     for (const type of types) {

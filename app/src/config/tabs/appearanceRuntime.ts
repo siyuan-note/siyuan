@@ -28,6 +28,7 @@ import {syncLockScreenWallpaper} from "./lockScreenWallpaper";
 import {refreshDynamicIcons} from "../../emoji/dynamicIcon";
 import {closeSettingsWindow, isSettingsWindow} from "../setting/windowContext";
 import {syncAppearancePreferences} from "./appearancePreferences";
+import {syncAppearanceFontInputs} from "./appearanceFontSettings";
 
 /** 主题模式下拉框初值：合并 mode / modeOS */
 export const appearanceThemeModeValue = (): number =>
@@ -80,7 +81,7 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
     // 阅读和控件偏好原位应用，避免整页重建期间的布局变化引起滚动抖动。
     // 启动初始化传入当前配置本身，需要完整加载外观资源；重复推送仍使用原位同步。
     const appearanceKeys = Object.keys({...prevAppearance, ...data}) as Array<keyof Config.IAppearance>;
-    const inPlaceKeys = new Set(["bodyGradient", "compactMode", "menuMouseScroll", "pdfTheme",
+    const inPlaceKeys = new Set(["bodyGradient", "compactMode", "globalFontFamilies", "menuMouseScroll", "pdfTheme",
         "outlineKeepCurrentExpand", "mobileBars", "lockScreenWallpaper", "showFloatingDockBar", "showFloatingStatusBar"]);
     const inPlace = !refresh && prevAppearance !== data &&
         appearanceKeys.every(key => inPlaceKeys.has(key) ||
@@ -132,17 +133,24 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
         }, {
             name: "appearance-resources",
             changed: () => !inPlace,
-            apply: async (old, next) => {
-                await loadAssets(next);
-                if (JSON.stringify(next.globalFontFamilies) !== JSON.stringify(old.globalFontFamilies)) {
-                    await setInlineStyle();
-                    refreshHeadingNumberMeasurements();
-                    refreshDynamicIcons();
-                }
-                /// #if !MOBILE
-                void remountOpenSettingTab("appearance");
-                /// #endif
+            apply: (_old, next) => loadAssets(next),
+        }, {
+            name: "global-fonts",
+            changed: (old, next) => JSON.stringify(old.globalFontFamilies) !== JSON.stringify(next.globalFontFamilies),
+            apply: async () => {
+                await setInlineStyle();
+                refreshHeadingNumberMeasurements();
+                refreshDynamicIcons();
+                syncAppearanceFontInputs("globalFontFamilies");
             },
+        /// #if !MOBILE
+        }, {
+            name: "appearance-tab",
+            changed: () => !inPlace,
+            apply: () => {
+                void remountOpenSettingTab("appearance");
+            },
+        /// #endif
         }],
     }).apply(data);
 };

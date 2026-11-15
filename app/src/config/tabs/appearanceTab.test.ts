@@ -33,11 +33,10 @@ test("mobile workspace global font picker shows system fonts without custom font
     let checked = false;
     let hidden = false;
     const label = {dataset: {family: font.family, weight: "400", name: font.displayName, search: font.displayName.toLowerCase()},
-        replaceChildren() {}, parentElement: undefined as unknown};
+        insertAdjacentHTML: () => {checked = true;}, parentElement: undefined as unknown};
     const item = {dataset: {}, querySelector: (selector: string) => selector === ".b3-menu__label" ? label :
         checked ? {remove: () => {checked = false;}} : undefined,
-    insertAdjacentHTML: () => {checked = true;},
-    classList: {add() {}, remove() {}, toggle: (_name: string, value: boolean) => {hidden = value;}}};
+    classList: {add() {}, remove() {}, contains: () => hidden, toggle: (_name: string, value: boolean) => {hidden = value;}}};
     label.parentElement = item;
     const list = {querySelectorAll: (selector: string) => selector === ".b3-list-item" ? [item] : [label],
         querySelector: () => item, addEventListener: (name: string, handler: typeof click) => {if (name === "click") click = handler;}};
@@ -51,6 +50,7 @@ test("mobile workspace global font picker shows system fonts without custom font
     const fontElement = {querySelector: (selector: string) => selector === '[data-type="selected-fonts"]' ? selected : input};
     const writes: Array<{key: string; fonts: typeof font[]}> = [];
     let opened = false;
+    let refreshFontInput: () => void;
     class FontMenu {
         isOpen = false;
         element = menuBody;
@@ -70,8 +70,11 @@ test("mobile workspace global font picker shows system fonts without custom font
         "../../util/functions": {isMobile: () => true},
         "../../util/escape": {escapeAttr: (value: string) => value, escapeHtml: (value: string) => value},
         "../../util/fontPreview": {observeFontPreview: () => () => {}},
-        "./appearanceRuntime": {appearanceConfigApi: {patch: (key: string, fonts: typeof font[], refresh: () => void) => {
-            writes.push({key, fonts}); config.appearance.globalFontFamilies = fonts; refresh(); return Promise.resolve();
+        "./appearanceFontSettings": {bindAppearanceFontInput: (_element: unknown, update: () => void) => {
+            refreshFontInput = update;
+        }},
+        "./appearanceRuntime": {appearanceConfigApi: {patch: (key: string, fonts: typeof font[]) => {
+            writes.push({key, fonts}); config.appearance.globalFontFamilies = fonts; refreshFontInput(); return Promise.resolve();
         }}},
         "./editorRuntime": {editorConfigApi: {patch: () => assert.fail("global font must use appearance configuration")}},
     }, "\nexports.mountAppearanceFontFamily = mountAppearanceFontFamily;");
@@ -313,6 +316,7 @@ const createPendingFontMenu = (key: string) => {
         })},
         "../../util/functions": {isMobile: () => false},
         "../../util/escape": {escapeAttr: (text: string) => text},
+        "./appearanceFontSettings": {bindAppearanceFontInput() {}},
     }, "\nexports.mountAppearanceFontFamily = mountAppearanceFontFamily;");
     const root = {querySelector: () => ({querySelector: (selector: string) =>
         selector === '[data-type="selected-fonts"]' ? selected : input})};

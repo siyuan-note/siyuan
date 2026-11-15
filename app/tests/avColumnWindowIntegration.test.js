@@ -22,7 +22,7 @@ const makeSources = () => {
     };
     const sources = Object.fromEntries(["virtualScroll", "selectionState", "groupTableVirtual", "tableRowHeights",
         "viewType", "capabilities", "capabilities.generated", "columnWindow", "columnVirtualScroll", "rangeSelect",
-        "cellValue", "locationValue", "columnPresentation", "entryIcon"].map(name => ["./" + name,
+        "cellValue", "locationValue", "columnPresentation", "entryIcon", "continuousInput"].map(name => ["./" + name,
         transpile(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"))]));
     for (const [file, names] of Object.entries({
         row: ["getRowHTML", "getFreezeDragHTML"],
@@ -116,7 +116,7 @@ const browserCases = async sources => {
     const columns = load("./columnWindow");
     const selection = load("./selectionState");
     const range = load("./rangeSelect");
-    Object.assign(shared, virtual, columns, selection, range, load("./groupTableVirtual"), load("./columnPresentation"));
+    Object.assign(shared, virtual, columns, selection, range, load("./groupTableVirtual"), load("./columnPresentation"), load("./continuousInput"));
     const renderTable = extract("getTableHTMLs", shared);
     shared.cellScrollIntoView = extract("cellScrollIntoView", shared);
     shared.updateAttrViewCellAnimation = extract("updateAttrViewCellAnimation", shared);
@@ -275,14 +275,17 @@ const browserCases = async sources => {
     let target = row.querySelector(`[data-col-id="c${boundary + 1}"]`);
     visibleColumn(navigation, target);
     check.equal(selection.getAVCellSelection(navigation.block).focus.colID, `c${boundary + 1}`);
-    target.dataset.dtype = "select";
-    const heldEnter = new KeyboardEvent("keydown", {key: "Enter", repeat: true, cancelable: true});
-    check.equal(keydown(heldEnter, navigation.block, navigation.protyle, () => false), true);
-    check.equal(heldEnter.defaultPrevented, true);
-    check.deepEqual(openedCells, []);
-    const enter = new KeyboardEvent("keydown", {key: "Enter", cancelable: true});
-    keydown(enter, navigation.block, navigation.protyle, () => false);
-    check.deepEqual(openedCells, [target]);
+    for (const type of ["select", "number", "url", "email", "phone"]) {
+        target.dataset.dtype = type;
+        const heldEnter = new KeyboardEvent("keydown", {key: "Enter", repeat: true, cancelable: true});
+        check.equal(keydown(heldEnter, navigation.block, navigation.protyle, () => false), true, type);
+        check.equal(heldEnter.defaultPrevented, true, type);
+        check.deepEqual(openedCells, [], type);
+        const enter = new KeyboardEvent("keydown", {key: "Enter", cancelable: true});
+        keydown(enter, navigation.block, navigation.protyle, () => false);
+        check.deepEqual(openedCells, [target], type);
+        openedCells.length = 0;
+    }
     target.dataset.dtype = "text";
     const shifted = new KeyboardEvent("keydown", {key: "ArrowRight", shiftKey: true, cancelable: true});
     keydown(shifted, navigation.block, navigation.protyle, () => false);

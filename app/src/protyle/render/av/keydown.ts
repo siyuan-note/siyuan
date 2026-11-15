@@ -19,7 +19,7 @@ import {getAVCellSelection, getAVItemSelection} from "./selectionState";
 import {isMobile} from "../../../util/functions";
 import {getAVVerticalNavigationAction} from "./verticalNavigation";
 import {prepareAVColumnWindow} from "./columnWindow";
-import {openAVRangeInput} from "./continuousInput";
+import {openAVRangeInput, selectsNextAVCellOnEnter} from "./continuousInput";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle,
                           leaveVerticalRegion: (direction: "up" | "down") => boolean) => {
@@ -143,7 +143,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "Enter") {
-            if (!event.repeat || selectCellElement.dataset.dtype !== "select") {
+            if (!event.repeat || !selectsNextAVCellOnEnter(selectCellElement.dataset.dtype)) {
                 popTextCell(protyle, [selectCellElement]);
             }
             event.preventDefault();

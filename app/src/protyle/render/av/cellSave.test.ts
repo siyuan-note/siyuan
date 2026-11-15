@@ -42,17 +42,22 @@ test("fallback text input leaves Enter available for multiline editing", async (
     }
 });
 
-test("ordinary and range text inputs confirm once, retain failed drafts and respect moved focus", async () => {
-    for (const {type, result} of ["number", "text"].flatMap(type =>
-        ["saved", "failed", "focusMoved"].map(result => ({type, result})))) {
+test("Enter selects the next scalar cell and opens the next editor only during range input", async () => {
+    const types = ["number", "url", "email", "phone", "text"];
+    for (const {type, rangeInput, result} of types.flatMap(type =>
+        (type === "text" ? [true] : [false, true]).flatMap(rangeInput =>
+            ["saved", "failed", "focusMoved"].map(result => ({type, rangeInput, result}))))) {
         let complete: () => void;
         let fail: () => void;
         const saving = new Promise<void>((resolve, reject) => {complete = resolve; fail = () => reject(new Error("failed"));});
         let saves = 0;
         let next = 0;
         let errors = 0;
+        const scrolledCells: unknown[] = [];
+        const openedCells: unknown[] = [];
         const input = {value: "42", dataset: {changed: "true"}, disabled: false};
         const cell = {dataset: {dtype: type}, classList: {add() {}}};
+        const nextCell = {dataset: {dtype: type}};
         const block = {isConnected: true, getAttribute: (key: string) => key === "data-av-type" ? "table" : "database"};
         const mask = {isConnected: true, querySelector: () => input, contains: () => false, remove() {this.isConnected = false;}};
         const body = {};
@@ -61,9 +66,20 @@ test("ordinary and range text inputs confirm once, retain failed drafts and resp
             protyle: {}, type, blockElement: block, cellElements: [cell], inputElement: input, avMaskElement: mask,
             inputTarget: () => ({elements: [cell], cells: [] as import("./selectionState").IAVSelectedCell[]}), electronUndo: () => false,
             isAVContinuousInputKey: continuous.isAVContinuousInputKey,
-            prepareAVContinuousInput: (_protyle: unknown, _block: unknown, _cells: unknown, _open: unknown, rangeOnly: boolean) => {
+            selectsNextAVCellOnEnter: continuous.selectsNextAVCellOnEnter,
+            getAVCellSelection: () => rangeInput ? {input: {}} : undefined,
+            cellScrollIntoView: (host: unknown, target: unknown) => {
+                assert.equal(host, block);
+                scrolledCells.push(target);
+            },
+            popTextCell: (_protyle: unknown, targets: unknown[]) => openedCells.push(...targets),
+            prepareAVContinuousInput: (_protyle: unknown, _block: unknown, _cells: unknown,
+                                       open: (target: typeof nextCell) => void, rangeOnly: boolean) => {
                 assert.equal(rangeOnly, type === "text");
-                return () => {next++;};
+                return () => {
+                    next++;
+                    open(nextCell);
+                };
             },
             updateCellsValue: (...args: unknown[]) => {
                 assert.equal(args.at(-1), true);
@@ -87,6 +103,8 @@ test("ordinary and range text inputs confirm once, retain failed drafts and resp
         else complete();
         await pending;
         assert.equal(next, result === "saved" ? 1 : 0);
+        assert.deepEqual(scrolledCells, result === "saved" && !rangeInput ? [nextCell] : []);
+        assert.deepEqual(openedCells, result === "saved" && rangeInput ? [nextCell] : []);
         assert.equal(mask.isConnected, result === "failed");
         assert.equal(input.disabled, false);
         assert.equal(errors, result === "failed" ? 1 : 0);

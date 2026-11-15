@@ -9,6 +9,9 @@ export const isAVContinuousInputKey = (event: KeyboardEvent, allowRepeat = false
     !event.isComposing && event.keyCode !== 229 && (!event.repeat || allowRepeat) &&
     !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey;
 
+export const selectsNextAVCellOnEnter = (type: string | undefined) =>
+    type === "select" || type === "number" || type === "url" || type === "email" || type === "phone";
+
 const supportsRangeInput = (cell: IAVSelectedCell) => {
     const type = cell.column.type;
     return hasAVCapability(type, "editable") && (isAVTextType(type) || type === "number" || type === "select") &&

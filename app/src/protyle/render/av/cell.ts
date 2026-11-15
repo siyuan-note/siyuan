@@ -46,7 +46,7 @@ import {
     updateAVCachedCellValue,
 } from "./cellValue";
 import {setPosition} from "../../../util/setPosition";
-import {getAVSelectedCells, IAVSelectedCell, resolveAVSelectedCell, updateAVSelectedCellValue} from "./selectionState";
+import {getAVCellSelection, getAVSelectedCells, IAVSelectedCell, resolveAVSelectedCell, updateAVSelectedCellValue} from "./selectionState";
 import {getAVColorStyle} from "./color";
 import {
     getAVBatchDisplayValue,
@@ -71,7 +71,7 @@ import {bindAnchoredInputPosition} from "../../../dialog/anchoredInputPosition";
 import {createAVLocationFromText, createAVLocationReplacement, getAVLocationDisplayText, getAVLocationText, isAVLocationEmpty} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
 import {showMessage} from "../../../dialog/message";
-import {isAVContinuousInputKey, prepareAVContinuousInput} from "./continuousInput";
+import {isAVContinuousInputKey, prepareAVContinuousInput, selectsNextAVCellOnEnter} from "./continuousInput";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -1111,8 +1111,14 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             const textConfirm = type === "text" && event.key === "Enter" && (event.ctrlKey || event.metaKey) &&
                 event.keyCode !== 229 && !event.shiftKey && !event.altKey;
             if (type !== "template" && (type !== "text" && isAVContinuousInputKey(event, true) || textConfirm)) {
-                const next = prepareAVContinuousInput(protyle, blockElement, cellElements,
-                    cell => popTextCell(protyle, [cell]), type === "text");
+                const selectNextCell = selectsNextAVCellOnEnter(type) && !getAVCellSelection(blockElement)?.input;
+                const next = prepareAVContinuousInput(protyle, blockElement, cellElements, cell => {
+                    if (selectNextCell) {
+                        cellScrollIntoView(blockElement, cell);
+                    } else {
+                        popTextCell(protyle, [cell]);
+                    }
+                }, type === "text");
                 if (next) {
                     event.preventDefault();
                     event.stopPropagation();

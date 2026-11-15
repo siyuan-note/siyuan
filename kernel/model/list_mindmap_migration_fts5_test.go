@@ -199,3 +199,44 @@ func TestMigrateLegacyMindmapsHistoryFailureAndQueuedEdits(t *testing.T) {
 	}
 	t.Cleanup(func() { GlobalUndoLog.Clear(fixture.sourceID) })
 }
+
+func TestMigrateLegacyMindmapsSkipsReadonlyDocument(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	originalHistory := util.HistoryDir
+	util.HistoryDir = t.TempDir()
+	t.Cleanup(func() { util.HistoryDir = originalHistory })
+	const codeID = "20260920000000-oldcode"
+	dom := util.NewLute().Md2BlockDOM("```mindmap\n- Original\n```\n{: id=\""+codeID+"\"}", false)
+	if _, err := PerformBlockOperation(&Operation{Action: "appendInsert", ParentID: fixture.sourceID, Data: dom}); err != nil {
+		t.Fatal(err)
+	}
+	if err := SetBlockAttrs(fixture.sourceID, map[string]string{readonlyAttr: "true"}); err != nil {
+		t.Fatal(err)
+	}
+	sourcePath := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourceID+".sy")
+	before, err := os.ReadFile(sourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tx, visible, err := MigrateLegacyMindmaps(fixture.sourceID)
+	if err != nil || tx == nil || len(tx.DoOperations) != 0 || len(tx.UndoOperations) != 0 || len(visible) != 0 {
+		t.Fatalf("read-only migration was not skipped: %+v, %v, %v", tx, visible, err)
+	}
+	after, err := os.ReadFile(sourcePath)
+	if err != nil || !bytes.Equal(before, after) {
+		t.Fatalf("read-only source changed: %v", err)
+	}
+	histories, err := os.ReadDir(util.HistoryDir)
+	if err != nil || len(histories) != 0 {
+		t.Fatalf("read-only migration created history: %v, %v", histories, err)
+	}
+	if err = SetBlockAttrs(fixture.sourceID, map[string]string{readonlyAttr: ""}); err != nil {
+		t.Fatal(err)
+	}
+	tx, visible, err = MigrateLegacyMindmaps(fixture.sourceID)
+	if err != nil || len(tx.DoOperations) != 1 || !strings.Contains(visible[codeID], `data-type="NodeMindmap"`) {
+		t.Fatalf("editable source did not migrate after being unlocked: %+v, %v", tx, err)
+	}
+	t.Cleanup(func() { GlobalUndoLog.Clear(fixture.sourceID) })
+}

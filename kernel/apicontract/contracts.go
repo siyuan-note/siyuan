@@ -510,6 +510,7 @@ var UpdateBlock = define[UpdateBlockRequest, []*BlockTransaction]("updateBlock",
 // 要求管理员身份，保留只读保护及加密笔记本请求租约；请求必须提供文档 id 和 notebook。
 // 保存历史后在一次可撤销事务中转换能够完整解析的旧 mindmap 列表，返回 converted 数量与文档脑图的
 // 权威 blocks（id、dom）。重复请求返回当前块内容而不重复转换，不完整的原文保持不变。
+// 文档为只读时跳过转换，成功返回 converted 为 0、blocks 为空数组；非文档根 ID 返回本地化错误。
 var MigrateLegacyMindmaps = define[MigrateLegacyMindmapsRequest, MigrateLegacyMindmapsData]("migrateLegacyMindmaps", "/api/block/migrateLegacyMindmaps", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var BatchUpdateBlock = define[BatchUpdateBlockRequest, []*BlockTransaction]("batchUpdateBlock", "/api/block/batchUpdateBlock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

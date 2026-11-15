@@ -35,9 +35,10 @@ export const replaceLegacyMindmapHTML = (html: string, blocks: {id: string, dom:
 export const migrateLegacyMindmapsBeforeRender = (protyle: IProtyle, html: string, actions: string[],
                                                  resume: (html: string) => void) => {
     const rootID = protyle.block.rootID;
-    if (!rootID || protyle.lite || protyle.disabled || protyle.options.backlinkData || protyle.options.history ||
-        protyle.options.mode === "preview" || window.siyuan.config.readonly || window.siyuan.config.editor.readOnly ||
-        protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY) === "true" ||
+    const canMigrate = () => !protyle.lite && !protyle.disabled && !protyle.options.backlinkData && !protyle.options.history &&
+        protyle.options.mode !== "preview" && !window.siyuan.config.readonly && !window.siyuan.config.editor.readOnly &&
+        protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY) !== "true";
+    if (!rootID || !canMigrate() ||
         actions.some(action => [Constants.CB_GET_HISTORY, Constants.CB_GET_BACKLINK,
             Constants.CB_GET_APPEND, Constants.CB_GET_BEFORE].includes(action))) {
         return false;
@@ -62,7 +63,7 @@ export const migrateLegacyMindmapsBeforeRender = (protyle: IProtyle, html: strin
         try {
             protyle.wysiwyg.flushPendingInput();
             await waitForPendingTransactions(protyle);
-            if (protyle.block.rootID !== rootID || migrations.get(protyle) !== migration) {
+            if (protyle.block.rootID !== rootID || migrations.get(protyle) !== migration || !canMigrate()) {
                 return;
             }
             const response = await fetchSyncPost("/api/block/migrateLegacyMindmaps", {id: rootID, notebook: protyle.notebookId});

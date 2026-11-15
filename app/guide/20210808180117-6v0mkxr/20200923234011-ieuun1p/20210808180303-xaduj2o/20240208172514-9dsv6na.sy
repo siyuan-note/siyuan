@@ -502,7 +502,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " menu, drag a field within a section to reorder it, or between Show field and Hide field to change its visibility and position together. You can also drop on a section heading when that section is empty. These changes support undo and redo. The primary key cannot be hidden in table, list, or calendar views."
+					"Data": " menu, drag a field within a section to reorder it, or between Show field and Hide field to change its visibility and position together. When a section is empty, drop on the lower half of its heading. Headings of nonempty sections do not accept drops. These changes support undo and redo. The primary key cannot be hidden in table, list, or calendar views."
 				}
 			]
 		},

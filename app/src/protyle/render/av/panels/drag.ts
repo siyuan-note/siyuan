@@ -13,6 +13,36 @@ import {setPosition} from "../../../../util/setPosition";
 import type { IAVPanelContext } from "./types";
 export const bindAVPanelDrag = (context: IAVPanelContext) => {
     let counter = 0;
+    const clearFieldIndicator = () => {
+        context.avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach(element => {
+            element.classList.remove("dragover__bottom", "dragover__top");
+        });
+    };
+    const getFieldDropTarget = (event: DragEvent, sourceElement: HTMLElement) => {
+        if (event.dataTransfer.types.includes("Files") || !context.menuElement.contains(sourceElement) || context.options.protyle?.disabled ||
+            (!context.options.protyle && window.siyuan.config.readonly)) {
+            return;
+        }
+        const column = context.fields.find(field => field.id === sourceElement.dataset.id);
+        const element = (event.target as Element).closest<HTMLElement>('[data-type="editCol"], [data-av-field-section]');
+        if (!column || !element || element === sourceElement || !context.menuElement.contains(element)) {
+            return;
+        }
+        const rect = element.getBoundingClientRect();
+        if (event.clientX < rect.left || event.clientX >= rect.right || event.clientY < rect.top || event.clientY >= rect.bottom) {
+            return;
+        }
+        const before = event.clientY < rect.top + rect.height / 2;
+        const targetField = context.fields.find(field => field.id === element.dataset.id);
+        const hidden = targetField ? !!targetField.hidden : element.dataset.avFieldSection === "hidden";
+        // 分区标题仅在空分区下方提供落点，避免标题两侧指示相同的插入位置
+        if ((!targetField && (!element.dataset.avFieldSection || before ||
+            context.fields.some(field => !!field.hidden === hidden))) ||
+            (hidden && column.type === "block" && !isAVCardView(context.data.viewType))) {
+            return;
+        }
+        return {element, before};
+    };
     context.avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
         const sourceElement = event.target as HTMLElement;
         counter = 0;
@@ -38,7 +68,7 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
         window.siyuan.dragElement.style.opacity = ".38";
         return;
     });
-    context.avPanelElement.addEventListener("drop", (event) => {
+    context.avPanelElement.addEventListener("drop", (event: DragEvent) => {
         counter = 0;
         if (!window.siyuan.dragElement) {
             event.preventDefault();
@@ -48,6 +78,15 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
         window.siyuan.dragElement.style.opacity = "";
         const sourceElement = window.siyuan.dragElement;
         window.siyuan.dragElement = undefined;
+        const fieldTarget = sourceElement.dataset.type === "editCol" ? getFieldDropTarget(event, sourceElement) : undefined;
+        if (sourceElement.dataset.type === "editCol") {
+            clearFieldIndicator();
+            if (!fieldTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+        }
         if (context.options.protyle && context.options.protyle.disabled) {
             event.preventDefault();
             event.stopPropagation();
@@ -58,11 +97,11 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
             event.stopPropagation();
             return;
         }
-        const targetElement = context.avPanelElement.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
+        const targetElement = fieldTarget?.element || context.avPanelElement.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
         if (!targetElement) {
             return;
         }
-        const isTop = targetElement.classList.contains("dragover__top");
+        const isTop = fieldTarget ? fieldTarget.before : targetElement.classList.contains("dragover__top");
         const sourceId = sourceElement.dataset.id;
         const targetId = targetElement.dataset.id;
         // 排序条件拖拽排序
@@ -381,15 +420,23 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
     });
     let dragoverElement: HTMLElement;
     context.avPanelElement.addEventListener("dragover", (event: DragEvent) => {
+        if (window.siyuan.dragElement?.dataset.type === "editCol") {
+            clearFieldIndicator();
+            const target = getFieldDropTarget(event, window.siyuan.dragElement);
+            if (target) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+                target.element.classList.add(target.before ? "dragover__top" : "dragover__bottom");
+            }
+            return;
+        }
         if (event.dataTransfer.types.includes("Files")) {
             event.preventDefault();
             return;
         }
         const target = event.target as HTMLElement;
         const viewSection = context.options.type === "switcher" ? target.closest<HTMLElement>("[data-av-view-section]") : undefined;
-        const fieldDrag = window.siyuan.dragElement?.dataset.type === "editCol";
-        const fieldSection = fieldDrag ? target.closest<HTMLElement>("[data-av-field-section]") : undefined;
-        let targetElement = viewSection || fieldSection || target.closest<HTMLElement>(".av__conditional-rule") || target.closest<HTMLElement>('[data-option-row="true"]') ||
+        let targetElement = viewSection || target.closest<HTMLElement>(".av__conditional-rule") || target.closest<HTMLElement>('[data-option-row="true"]') ||
             hasClosestByAttribute(target, "draggable", "true");
         if (!targetElement) {
             const nearbyElement = document.elementFromPoint(event.clientX, event.clientY - 1);
@@ -397,7 +444,7 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
                 hasClosestByAttribute(nearbyElement, "draggable", "true");
         }
         if (!targetElement || targetElement === window.siyuan.dragElement) {
-            if (context.options.type === "switcher" || fieldDrag) {
+            if (context.options.type === "switcher") {
                 context.avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach(item => {
                     item.classList.remove("dragover__bottom", "dragover__top");
                 });
@@ -406,7 +453,7 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
         }
         event.preventDefault();
         if ((dragoverElement && targetElement === dragoverElement) ||
-            context.options.type === "switcher" && window.siyuan.dragElement?.dataset.avViewVisibility || fieldDrag) {
+            context.options.type === "switcher" && window.siyuan.dragElement?.dataset.avViewVisibility) {
             const nodeRect = targetElement.getBoundingClientRect();
             context.avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
                 item.classList.remove("dragover__bottom", "dragover__top");
@@ -421,7 +468,11 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
         }
         dragoverElement = targetElement;
     });
-    context.avPanelElement.addEventListener("dragleave", () => {
+    context.avPanelElement.addEventListener("dragleave", (event: DragEvent) => {
+        if (window.siyuan.dragElement?.dataset.type === "editCol" &&
+            (!(event.relatedTarget instanceof Node) || !context.avPanelElement.contains(event.relatedTarget))) {
+            clearFieldIndicator();
+        }
         counter--;
         if (counter === 0) {
             context.avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {

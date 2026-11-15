@@ -33,10 +33,12 @@ const browserCases = (source: string) => {
         const row = (id: string) => menu.querySelector<HTMLElement>(`[data-type="editCol"][data-id="${id}"]`);
         const section = (name: string) => menu.querySelector<HTMLElement>(`[data-av-field-section="${name}"]`);
         const transfer = new DataTransfer();
-        const send = (type: string, target: Element, bottom = false) => {
+        const send = (type: string, target: Element, bottom = false, point?: {x: number, y: number}) => {
             const rect = target.getBoundingClientRect();
-            target.dispatchEvent(new DragEvent(type, {bubbles: true, cancelable: true, dataTransfer: transfer,
-                clientX: rect.left + 1, clientY: rect.top + rect.height * (bottom ? .9 : .1)}));
+            const event = new DragEvent(type, {bubbles: true, cancelable: true, dataTransfer: transfer,
+                clientX: point?.x ?? rect.left + 1, clientY: point?.y ?? rect.top + rect.height * (bottom ? .9 : .1)});
+            target.dispatchEvent(event);
+            return event;
         };
         const drag = (id: string, target: HTMLElement, bottom = false) => {
             send("dragstart", row(id));
@@ -56,7 +58,7 @@ const browserCases = (source: string) => {
             });
             render();
         };
-        return {row, section, send, drag, apply, protyle, fields, panel,
+        return {row, section, send, drag, apply, protyle, fields, panel, menu,
             visible: () => fields.filter(field => !field.hidden).map(field => field.id),
             order: () => fields.map(field => field.id)};
     };
@@ -102,12 +104,12 @@ const browserCases = (source: string) => {
     for (const section of ["visible", "hidden"]) {
         const f = fixture(section === "visible" ? ["A", "B"] : [], ["A", "B"], "gallery");
         check.ok(f.section(section), "empty sections remain drop targets");
-        f.drag("B", f.section(section));
+        f.drag("B", f.section(section), true);
         check.deepEqual(f.visible(), section === "visible" ? ["B"] : ["A"]);
     }
     for (const view of ["table", "list", "calendar", "gallery", "kanban"] as TAVView[]) {
         const f = fixture(undefined, undefined, view);
-        f.drag("A", f.section("hidden"));
+        f.drag("A", f.row("C"));
         check.equal(f.fields.find(field => field.id === "A").hidden, view === "gallery" || view === "kanban");
         if (view !== "gallery" && view !== "kanban") check.equal(operations.length, 0);
     }
@@ -135,10 +137,66 @@ const browserCases = (source: string) => {
         check.deepEqual(f.visible(), ["A", "B"]);
         check.equal(window.siyuan.dragElement, undefined);
     }
+    for (const section of ["visible", "hidden"]) {
+        for (const bottom of [false, true]) {
+            const f = fixture();
+            f.send("dragstart", f.row("D"));
+            f.send("dragover", f.row("A"));
+            const target = f.section(section);
+            check.equal(f.send("dragover", target, bottom).defaultPrevented, false, "populated section headings reject drops");
+            check.equal(f.panel.querySelector('[class*="dragover__"]'), null);
+            f.send("drop", target, bottom);
+            check.equal(operations.length, 0);
+            check.deepEqual(f.order(), ["A", "B", "C", "D"]);
+            check.deepEqual(f.visible(), ["A", "B"]);
+        }
+        const empty = fixture(section === "visible" ? ["A", "B"] : [], ["A", "B"], "gallery");
+        empty.drag("B", empty.section(section));
+        check.equal(operations.length, 0, "empty section heading upper half is not an insertion slot");
+    }
+    for (const invalid of ["title", "separator", "new", "outside", "readonly", "primary"]) {
+        const f = fixture();
+        const source = f.row(invalid === "primary" ? "A" : "D");
+        f.send("dragstart", source.querySelector("use"));
+        f.send("dragover", f.row("B"));
+        let target: Element = f.row("A");
+        let point: {x: number, y: number};
+        if (invalid === "title") target = f.menu.querySelector('[data-type="nobg"]');
+        if (invalid === "separator") target = f.menu.querySelector(".b3-menu__separator");
+        if (invalid === "new") target = f.menu.querySelector('[data-type="newCol"]');
+        if (invalid === "outside") point = {x: f.row("A").getBoundingClientRect().right + 20, y: -10};
+        if (invalid === "readonly") f.protyle.disabled = true;
+        if (invalid === "primary") target = f.row("C");
+        check.equal(f.send("dragover", target, false, point).defaultPrevented, false, invalid);
+        check.equal(f.panel.querySelector('[class*="dragover__"]'), null, invalid);
+        f.send("drop", target, false, point);
+        check.equal(operations.length, 0, invalid);
+        check.equal(source.style.opacity, "", invalid);
+        check.equal(window.siyuan.dragElement, undefined, invalid);
+    }
+    {
+        const f = fixture();
+        f.send("dragstart", f.row("D"));
+        f.send("dragover", f.row("A"));
+        f.send("drop", f.section("hidden"));
+        check.equal(operations.length, 0, "release revalidates the actual target without another dragover");
+        check.equal(f.panel.querySelector('[class*="dragover__"]'), null);
+        f.send("dragstart", f.row("D"));
+        f.send("dragover", f.row("B"));
+        f.send("dragover", f.row("B"));
+        f.send("dragleave", f.panel);
+        check.equal(f.panel.querySelector('[class*="dragover__"]'), null, "leaving clears the preview");
+        f.send("dragend", f.row("D"));
+        check.equal(operations.length, 0);
+        check.equal(f.row("D").style.opacity, "");
+        f.drag("D", f.row("B"));
+        check.equal(operations.length, 1, "dragging can restart after cancellation");
+        check.deepEqual(f.visible(), ["A", "D", "B"]);
+    }
     return "Field drag cases passed";
 };
 
-test("field menu drag updates visibility and order with undo, empty sections and primary-field guards", {
+test("field menu drag validates insertion targets, cancellation, visibility and order with undo", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -154,9 +212,10 @@ app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false,
         webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
+    win.webContents.on("console-message", event => console.error(event.message));
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify("try {" + code + "} catch (error) {console.error(error.stack); throw error;} ")}));
         win.destroy(); app.exit(0);
     } catch (error) { console.error(error); win.destroy(); app.exit(1); }
 });`, "utf8");

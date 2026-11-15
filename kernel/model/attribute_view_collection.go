@@ -23,6 +23,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -338,26 +339,44 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 }
 
 func validateBlockCollectionNotebooks(ids []string, boxID string) error {
-	notebooks, err := ListNotebooks()
-	if err != nil {
-		return err
-	}
 	for _, id := range ids {
-		if !ast.IsNodeIDPattern(id) || !IsSameCryptoBoundary(boxID, id) {
+		if !ast.IsNodeIDPattern(id) {
 			return fmt.Errorf("invalid block collection notebook [%s]", id)
 		}
-		if slices.ContainsFunc(notebooks, func(notebook *Box) bool { return notebook.ID == id }) {
-			continue
-		}
-		// 列表也可能略过配置无法读取的笔记本，只有确认目录缺失才停用规则。
-		_, err := os.Lstat(filepath.Join(util.DataDir, id))
+		notebookPath := filepath.Join(util.DataDir, id)
+		info, err := os.Lstat(notebookPath)
 		if os.IsNotExist(err) {
+			// 工作空间本身不可用时，不能将其中的笔记本判定为已删除。
+			workspace, statErr := os.Stat(util.DataDir)
+			if statErr != nil {
+				return statErr
+			}
+			if !workspace.IsDir() {
+				return fmt.Errorf("workspace data path [%s] is not a directory", util.DataDir)
+			}
+			if !IsSameCryptoBoundary(boxID, id) {
+				return fmt.Errorf("invalid block collection notebook [%s]", id)
+			}
 			return unavailableAutomationReference("automationCollectionScope", id, fmt.Sprintf("unavailable block collection notebook [%s]", id))
 		}
 		if err != nil {
 			return err
 		}
-		return fmt.Errorf("invalid block collection notebook [%s]", id)
+		if !info.IsDir() {
+			return fmt.Errorf("invalid block collection notebook [%s]", id)
+		}
+		data, err := os.ReadFile(filepath.Join(notebookPath, ".siyuan", "conf.json"))
+		if err != nil {
+			return fmt.Errorf("read block collection notebook [%s] configuration: %w", id, err)
+		}
+		var notebookConf conf.BoxConf
+		if err = json.Unmarshal(data, &notebookConf); err != nil {
+			return fmt.Errorf("parse block collection notebook [%s] configuration: %w", id, err)
+		}
+		// 同步更新配置后，运行时可能仍缓存普通笔记本身份。
+		if notebookConf.Encrypted && id != boxID || !IsSameCryptoBoundary(boxID, id) {
+			return fmt.Errorf("invalid block collection notebook [%s]", id)
+		}
 	}
 	return nil
 }

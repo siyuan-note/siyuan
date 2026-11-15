@@ -7,6 +7,7 @@
 package model
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -21,6 +22,74 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestBlockCollectionNotebookValidationPreservesUnrelatedConfig(t *testing.T) {
+	fixture, view, _ := setupBlockCollectionTest(t)
+	view.Automations.Rules[0].BlockSource.NotebookIDs = []string{fixture.box.ID}
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	tx := blockCollectionTags(t, fixture.sourceID, "todo")
+	tx.DoOperations = append(tx.DoOperations, &Operation{Action: "update", ID: fixture.childID, Data: fmt.Sprintf(
+		`<div data-node-id="%s" data-type="NodeParagraph"><div contenteditable="true">Saved edit</div></div>`, fixture.childID)})
+
+	badPath := filepath.Join(util.DataDir, ast.NewNodeID(), ".siyuan", "conf.json")
+	if err := os.MkdirAll(filepath.Dir(badPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	badConfig := []byte(`{"name":`)
+	if err := os.WriteFile(badPath, badConfig, 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := PerformTxSync(tx); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := os.ReadFile(badPath); err != nil || !bytes.Equal(got, badConfig) {
+		t.Fatal("edit modified an unrelated notebook configuration", err)
+	}
+	tree, _, err := filesys.LoadTreeSnapshot(fixture.box.ID, fixture.sourcePath, util.NewLute())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if block := treenode.GetNodeInTree(tree, fixture.childID); block == nil || block.Text() != "Saved edit" {
+		t.Fatal("edit did not save")
+	}
+	if readAttributeViewItemsTest(t, view.ID).GetBlockValueByBoundID(fixture.sourceID) == nil {
+		t.Fatal("valid rule did not collect the edited document")
+	}
+}
+
+func TestBlockCollectionNotebookValidationRejectsInvalidSources(t *testing.T) {
+	previousDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = previousDir })
+	for _, scenario := range []struct{ name, config string }{
+		{"missing config", ""},
+		{"malformed config", `{"name":`},
+		{"encrypted config with cached normal identity", `{"encrypted":true}`},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			id := ast.NewNodeID()
+			path := filepath.Join(util.DataDir, id, ".siyuan", "conf.json")
+			if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+				t.Fatal(err)
+			}
+			if scenario.config != "" {
+				if err := os.WriteFile(path, []byte(scenario.config), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			markRuntimeNormalBox(id)
+			t.Cleanup(func() { forgetRuntimeNormalBox(id) })
+			err := validateBlockCollectionNotebooks([]string{id}, "")
+			var unavailable *automationUnavailableReference
+			if err == nil || errors.As(err, &unavailable) {
+				t.Fatalf("existing invalid scope must be rejected without pausing the rule: %v", err)
+			}
+		})
+	}
+}
 
 func TestBlockCollectionNotebookScopeLifecycle(t *testing.T) {
 	for _, deleted := range []bool{true, false} {

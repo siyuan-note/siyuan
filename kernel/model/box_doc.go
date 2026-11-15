@@ -322,8 +322,7 @@ func boxDocSubFileCount(boxID, parentPath, policy string, include func(docPath s
 }
 
 func IsBoxDoc(boxID, id string) bool {
-	box := Conf.Box(boxID)
-	return nil != box && box.ID == id
+	return boxID == id && Conf.Box(boxID) != nil
 }
 
 func IsBoxDocPath(boxID, p string) bool {

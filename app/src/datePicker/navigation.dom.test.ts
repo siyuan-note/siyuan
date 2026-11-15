@@ -72,7 +72,11 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         const boundary = create({value});
         const buttons = navigation();
         ok(buttons[disabledIndex].disabled, "Calendar endpoint disables the outgoing arrow");
-        await new Promise(resolve => setTimeout(resolve, 350));
+        const deadline = performance.now() + 3000;
+        while (buttons.some(button => getComputedStyle(button).opacity !== (button.disabled ? "0.38" : "1"))) {
+            ok(performance.now() < deadline, "Navigation opacity reaches its enabled or disabled state");
+            await new Promise(resolve => requestAnimationFrame(resolve));
+        }
         buttons.forEach(visible);
         const current = month();
         buttons[disabledIndex].click();

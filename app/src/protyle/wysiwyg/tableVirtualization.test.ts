@@ -456,7 +456,8 @@ body {margin:0; --b3-theme-surface-lighter:#ddd; --b3-font-size-editor:16px; --b
 
 test("large tables retain complete source, editing, selection, search and layout with bounded rendered rows", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 60000,
+    // 完整大表序列化和多轮布局需要覆盖全量套件并行运行时的进程预算。
+    timeout: 120000,
 }, async () => {
     const read = (file: string) => readFileSync(path.join(__dirname, file), "utf8");
     const compile = (source: string) => transpileModule(source.replace(/^import [\s\S]*?;\r?\n/gm, "")
@@ -510,7 +511,7 @@ app.whenReady().then(async () => {
     delete env.ELECTRON_RUN_AS_NODE;
     try {
         const result = await promisify(execFile)(require("electron") as unknown as string, [script],
-            {env, timeout: 55000, windowsHide: true});
+            {env, timeout: 115000, windowsHide: true});
         assert.match(result.stdout, /Large table virtualization cases passed/);
     } finally {
         if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) &&

@@ -13,7 +13,7 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
     const modules: Record<string, any> = {};
     const dependencies = {escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;"),
         escapeHtmlTextAndAttr: (value: string) => dependencies.escapeHtml(value), escapeAttr: (value: string) => dependencies.escapeHtml(value),
-        sanitizeKernelHTML: (html: string) => window.DOMPurify.sanitize(html), restoreInlineElementBoundaries() {},
+        sanitizeKernelHTML: (html: string) => html, restoreInlineElementBoundaries() {},
         Constants: {CUSTOM_SY_CODE_TAB_SPACES: "custom-sy-code-tab-spaces"}, CODE_TAB_SPACE_VALUES: [2, 4, 8],
         getAgentLute: () => {
             const lute = Lute.New();

@@ -309,7 +309,7 @@ for (const mobile of [false, true]) {
             "menus/navigationSelection", "menus/Menu", "menus/menuToggle", "menus/menuPosition", "menus/menuMouseScroll", "menus/overlayOwnership",
             "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
             "util/setPosition", "protyle/util/hasClosest", "layout/dock/docTree/row", "layout/dock/docTree/rowData",
-            "protyle/render/av/addToDatabase", "protyle/render/av/relation"]
+            "protyle/render/av/addToDatabase", "protyle/render/av/relation", "protyle/render/av/relationPosition"]
             .map(name => [name, transpileModule(parse(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"),
                 {MOBILE: mobile, BROWSER: true}, false, true, name + ".ts"), {
                 compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},

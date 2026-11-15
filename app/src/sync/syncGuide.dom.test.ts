@@ -233,7 +233,8 @@ const browserCases = async (sources: string[], styles: string[]) => {
 
 test("sync setup and stale preview recovery require confirmed choices on desktop and mobile", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 45000,
+    // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
+    timeout: 65000,
 }, async () => {
     const source = readFileSync(path.join(__dirname, "syncGuide.ts"), "utf8");
     const sources = [false, true].map(mobile => transpileModule(

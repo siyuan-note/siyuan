@@ -118,7 +118,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
                 }
                 for (let i = 0; i < 6; i++) {
                     const item = document.createElement("div");
-                    item.style.height = "20px";
+                    item.className = "b3-menu__item";
                     item.textContent = "Extra item";
                     menu.element.lastElementChild.append(item);
                     await settle();

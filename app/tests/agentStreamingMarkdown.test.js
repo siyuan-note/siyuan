@@ -11,6 +11,7 @@ const sources = () => {
         "layout/dock/agent/AgentMarkdownParser",
         "layout/dock/agent/AgentMarkdownWorker",
         "layout/dock/agent/AgentChat",
+        "layout/dock/agent/AgentMessageQueue",
         "layout/dock/agent/AgentWelcomeGreeting",
         "layout/dock/agent/AgentMessageRenderer",
         "layout/dock/agent/AgentScrollState",
@@ -43,6 +44,7 @@ const runCases = async (sources, css, luteScript) => {
         Model: class { connect() {} },
         genUUID: () => String(++nextID),
         AgentSessionRuns: class {},
+        ipcRenderer: {on() {}, removeListener() {}},
         SessionStore: {newSessionId: () => String(++nextID)},
         isAgentStreamingMarkdownEnabled: () => preference,
         AGENT_STREAMING_MARKDOWN_CHANGED_EVENT: "agent-streaming-setting-test",
@@ -871,14 +873,15 @@ if (process.versions.electron && process.type === "browser") {
 } else {
     require("node:test").test("agent streaming Markdown caches completed groups and preserves the final renderer", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-        timeout: 120000,
+        // 十万字符的解析、布局和 Worker 基准需要覆盖全量套件并行运行时的进程预算。
+        timeout: 240000,
     }, async t => {
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-agent-markdown-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 115000});
+                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 235000});
             assert.match(stdout, /Agent streaming Markdown cases passed/);
             t.diagnostic(stdout.trim());
         } finally {

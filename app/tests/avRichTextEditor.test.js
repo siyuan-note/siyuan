@@ -350,7 +350,11 @@ const runCases = async (sources, appDirectory) => {
             currentAnchor.replaceWith(currentAnchor.cloneNode());
             fragment.input.textContent = String(row);
             await settle();
-            const enter = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
+            const newline = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
+            fragment.input.dispatchEvent(newline);
+            assert.equal(newline.defaultPrevented, false, "plain Enter remains available for block content");
+            assert.equal(state.saves.length, row);
+            const enter = new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true, cancelable: true});
             fragment.input.dispatchEvent(enter);
             assert.equal(enter.defaultPrevented, true, `${isMobile ? "mobile" : "desktop"}: confirm after row redraw`);
             await settle();
@@ -412,7 +416,7 @@ const runCases = async (sources, appDirectory) => {
             fragment.input.textContent = "Value " + index;
             if (mobile) document.querySelector('[data-type="confirm"]').click();
             else fragment.input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true,
-                cancelable: true, ctrlKey: points[index].colID === "text"}));
+                cancelable: true, ctrlKey: true}));
             await settle();
             assert.equal(state.saves.length, index + 1);
             assert.equal(state.saves[index][2].length, 1);

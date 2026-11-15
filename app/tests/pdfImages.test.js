@@ -147,7 +147,9 @@ const runElectron = async () => {
                     for (let y = 0; y < canvas.height; y++) {
                         for (let x = 0; x < canvas.width; x++) {
                             const j = (y * canvas.width + x) * 4;
-                            const [r, g, b] = pixels.subarray(j, j + 3);
+                            const r = pixels[j];
+                            const g = pixels[j + 1];
+                            const b = pixels[j + 2];
                             const color = b > 240 && r < 15 && g < 15 ? "top" :
                                 g > 240 && r < 15 && b < 15 ? "bottom" :
                                     r > 240 && g > 110 && g < 145 && b < 15 ? "image" : null;
@@ -190,6 +192,7 @@ const runElectron = async () => {
                 `${item.name}: small images retain their displayed size (${height})`);
             if (item.expectedHeight) assert.ok(Math.abs(height - item.expectedHeight) < 3,
                 "Manually resized images retain their displayed size");
+            console.log(`PDF image layout case passed: ${item.name}`);
         }
         console.log("PDF image layout cases passed");
     } catch (error) {
@@ -206,14 +209,15 @@ if (process.versions.electron && process.type === "browser") {
 } else {
     require("node:test").it("PDF images fit one page without distortion or overlapping following text", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-        timeout: 60000,
+        // 十三种图片场景需要完成真实分页、光栅化和逐像素检查。
+        timeout: 120000,
     }, async () => {
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-pdf-images-"));
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 55000});
+                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 115000});
             assert.match(stdout, /PDF image layout cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));

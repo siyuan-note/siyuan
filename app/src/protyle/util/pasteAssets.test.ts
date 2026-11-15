@@ -52,6 +52,7 @@ test("encrypted paste rewrites attachment references atomically in the real DOM"
     }).outputText;
     const script = path.join(directory, "main.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+app.setPath("userData", ${JSON.stringify(path.join(directory, "profile"))});
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
     try {

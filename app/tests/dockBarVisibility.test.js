@@ -127,15 +127,31 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
             dock.hideDock();
             await settle();
             const checkAttached = (message, checkOpacity = true) => {
-                const panelRect = panel.getBoundingClientRect();
-                const barRect = element.getBoundingClientRect();
-                const gap = position === "Left" ? panelRect.left - barRect.right : barRect.left - panelRect.right;
-                check.ok(Math.abs(gap) < 2, `${position} ${message}: gap=${gap}`);
-                if (checkOpacity) {
-                    check.ok(Math.abs(Number(getComputedStyle(panel).opacity) - Number(getComputedStyle(element).opacity)) < .02,
-                        `${position} ${message}: opacity follows the panel`);
+                const sampleTime = document.timeline.currentTime;
+                const animations = [...panel.getAnimations(), ...element.getAnimations()]
+                    .filter(animation => animation.playState === "running" && typeof animation.startTime === "number")
+                    .map(animation => ({animation, startTime: animation.startTime}));
+                try {
+                    // 合成器可在两次几何读取之间推进动画，按同一时间点采样并保留各自的起始时间差。
+                    animations.forEach(({animation, startTime}) => {
+                        animation.pause();
+                        animation.currentTime = (sampleTime - startTime) * animation.playbackRate;
+                    });
+                    const panelRect = panel.getBoundingClientRect();
+                    const barRect = element.getBoundingClientRect();
+                    const gap = position === "Left" ? panelRect.left - barRect.right : barRect.left - panelRect.right;
+                    check.ok(Math.abs(gap) < 2, `${position} ${message}: gap=${gap}`);
+                    if (checkOpacity) {
+                        check.ok(Math.abs(Number(getComputedStyle(panel).opacity) - Number(getComputedStyle(element).opacity)) < .02,
+                            `${position} ${message}: opacity follows the panel`);
+                    }
+                    check.deepEqual(rect(center.element), initialEditor, "custom animations do not resize the editor");
+                } finally {
+                    animations.forEach(({animation, startTime}) => {
+                        animation.play();
+                        animation.startTime = startTime;
+                    });
                 }
-                check.deepEqual(rect(center.element), initialEditor, "custom animations do not resize the editor");
             };
             const finish = async () => {
                 await Promise.all([...panel.getAnimations(), ...element.getAnimations()].map(animation => animation.finished));

@@ -298,7 +298,8 @@ const headless = process.env.SIYUAN_TEST_HEADLESS === "1";
 
 test("real sheet geometry keeps short minimums and footer visible across manual and keyboard resizing", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !headless,
-    timeout: 30000,
+    // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
+    timeout: 45000,
 }, async () => {
     const sources = ["keyboardSheetState", "mobileSheetGesture", "mobileSheetLayout", "bindBottomSheetDrag", "bindBottomSheetDialog"].map(id => transpileModule(
         readFileSync(`src/mobile/util/${id}.ts`, "utf8"), {

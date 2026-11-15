@@ -402,7 +402,8 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
 
 const runBrowserCase = (mobile: boolean, pixelRatio: number) => test(`wide PNG exports preserve text and all columns (mobile=${mobile}, pixelRatio=${pixelRatio})`, {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
-    timeout: 185000,
+    // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
+    timeout: 210000,
 }, async () => {
     const sass = require("sass");
     const css = sass.compileString('@use "component/dialog"; @use "protyle/wysiwyg"; ' +

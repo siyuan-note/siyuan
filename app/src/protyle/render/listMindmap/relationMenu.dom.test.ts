@@ -60,11 +60,12 @@ const browserCases = async (source: string, sources: Record<string, string>, css
         for (let i = 0; i < 4; i++) { await new Promise(resolve => requestAnimationFrame(resolve)); }
     };
     const input = async (element: Element, touch = false, hover = false) => {
-        await Promise.all(element.closest(".b3-menu")?.getAnimations({subtree: true}).map(animation =>
+        const menuElement = element.id === "commonMenuScrim" ? window.siyuan.menus.menu.element : element.closest(".b3-menu");
+        await Promise.all(menuElement?.getAnimations({subtree: true}).map(animation =>
             animation.finished.catch(() => {})) || []);
         const rect = element.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
+        const y = element.id === "commonMenuScrim" ? rect.top + 1 : rect.top + rect.height / 2;
         check.ok(rect.width && rect.height && element.contains(document.elementFromPoint(x, y)),
             `Input reaches ${element.getAttribute("data-id") || element.getAttribute("aria-label")}; mobile=${mobile}; ` +
             `${JSON.stringify(rect.toJSON())}; hit=${document.elementFromPoint(x, y)?.outerHTML.slice(0, 250)}`);

@@ -21,8 +21,8 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     let locale: string;
     try { locale = new Intl.Locale(options.locale || doc.documentElement.lang || doc.defaultView.navigator.language).toString(); }
     catch { locale = "en"; }
-    const localeInfo = new Intl.Locale(locale) as Intl.Locale & {getWeekInfo?: () => {firstDay: number}; weekInfo?: {firstDay: number}};
-    const weekStart = (localeInfo.getWeekInfo?.() || localeInfo.weekInfo)?.firstDay % 7 || 0;
+    const localeInfo = new Intl.Locale(locale);
+    const weekStart = 1;
     const monthFormatter = new Intl.DateTimeFormat(locale, {month: "long", calendar: "gregory", timeZone: "UTC"});
     const weekdayFormatter = new Intl.DateTimeFormat(locale, {weekday: "short", timeZone: "UTC"});
     const narrowWeekdayFormatter = new Intl.DateTimeFormat(locale, {weekday: "narrow", timeZone: "UTC"});
@@ -150,6 +150,7 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
     toolbar.append(monthToggle, previous, next);
     const calendar = doc.createElement("table");
     calendar.className = "date-picker__calendar";
+    calendar.dir = "ltr";
     calendar.setAttribute("role", "grid");
     const caption = doc.createElement("caption");
     caption.className = "date-picker__heading";
@@ -235,10 +236,9 @@ export const createDateField = (host: HTMLElement, options: IDateConstraints & {
                 button.addEventListener("click", () => selectDay(date));
                 button.addEventListener("keydown", event => {
                     if (yearInput.isComposing() || composing.size) { return; }
-                    const rtl = doc.defaultView.getComputedStyle(root).direction === "rtl";
                     let target: ICivilDate;
-                    if (event.key === "ArrowLeft") { target = addDays(date, rtl ? 1 : -1); }
-                    else if (event.key === "ArrowRight") { target = addDays(date, rtl ? -1 : 1); }
+                    if (event.key === "ArrowLeft") { target = addDays(date, -1); }
+                    else if (event.key === "ArrowRight") { target = addDays(date, 1); }
                     else if (event.key === "ArrowUp") { target = addDays(date, -7); }
                     else if (event.key === "ArrowDown") { target = addDays(date, 7); }
                     else if (event.key === "Home") { target = addDays(date, -((weekday(date) - weekStart + 7) % 7)); }

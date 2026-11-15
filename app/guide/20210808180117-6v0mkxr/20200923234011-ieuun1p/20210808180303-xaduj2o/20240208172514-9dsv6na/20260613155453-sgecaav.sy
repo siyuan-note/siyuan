@@ -2260,7 +2260,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Click in the cell to open the date picker"
+									"Data": ": Click in the cell to open the date picker. The shared date picker always displays Monday on the left and Sunday on the right, regardless of the interface language or locale; month and weekday names remain localized. In the calendar grid, Home moves to Monday and End to Sunday of the current week, including across month and year boundaries. Database calendar views retain their own week-start setting"
 								}
 							]
 						}

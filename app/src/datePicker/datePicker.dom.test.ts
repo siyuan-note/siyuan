@@ -267,7 +267,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         equal(getComputedStyle(picker.querySelector(".date-picker__weekday-narrow")).display, "inline");
         current().querySelector<HTMLButtonElement>('[data-date="2024-02-28"]').focus();
         document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowLeft", bubbles: true, cancelable: true}));
-        equal((document.activeElement as HTMLElement).dataset.date, "2024-02-29", "RTL reverses horizontal movement");
+        equal((document.activeElement as HTMLElement).dataset.date, "2024-02-27", "Horizontal movement follows the Monday-first grid in RTL layouts");
         const bounds = container.getBoundingClientRect();
         ok(bounds.left >= 0 && bounds.right <= innerWidth + 1 && bounds.top >= 0 && bounds.bottom <= innerHeight + 1,
             "Anchored picker remains within the actual viewport");

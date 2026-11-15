@@ -70,7 +70,7 @@ const isAgentSidebarVisible = () => {
 };
 
 const notify = (type: AgentChatNotification) => {
-    if (isAgentSidebarVisible()) {
+    if (isAgentSidebarVisible() && document.hasFocus() && !document.hidden) {
         return;
     }
     unread = type;

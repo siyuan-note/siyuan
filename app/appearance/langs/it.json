@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "Accoda messaggio",
+	"agentQueuedMessages": "Messaggi in coda (${count})",
+	"agentSendQueuedMessages": "Invia messaggi in coda",
 	"markdownResourceDirectoriesTip": "Autorizza le cartelle selezionate solo per questa sessione di modifica; inizialmente sono tutte selezionate",
 	"markdownResourceDirectoriesEmpty": "Nessun’altra cartella con immagini locali supportate richiede l’autorizzazione",
 	"markdownResourceDirectoriesChanged": "Le cartelle o il documento sono cambiati; chiudi la finestra e riprova",

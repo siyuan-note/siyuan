@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "メッセージを送信待ちにする",
+	"agentQueuedMessages": "送信待ちのメッセージ（${count}）",
+	"agentSendQueuedMessages": "送信待ちのメッセージを送信",
 	"markdownResourceDirectoriesTip": "選択したフォルダーを現在の編集セッションでのみ許可します。既定ではすべて選択されています",
 	"markdownResourceDirectoriesEmpty": "追加の許可が必要な、対応するローカル画像のフォルダーはありません",
 	"markdownResourceDirectoriesChanged": "フォルダーまたは文書が変更されました。ダイアログを閉じて再試行してください",

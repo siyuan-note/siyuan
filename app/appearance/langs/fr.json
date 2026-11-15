@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "Mettre le message en attente",
+	"agentQueuedMessages": "Messages en attente (${count})",
+	"agentSendQueuedMessages": "Envoyer les messages en attente",
 	"markdownResourceDirectoriesTip": "Autoriser les dossiers cochés uniquement pour cette session d’édition ; tous sont cochés par défaut",
 	"markdownResourceDirectoriesEmpty": "Aucun autre dossier contenant des images locales prises en charge ne nécessite d’autorisation",
 	"markdownResourceDirectoriesChanged": "Les dossiers ou le document ont changé ; fermez la boîte de dialogue et réessayez",

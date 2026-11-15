@@ -64,6 +64,7 @@ import {AgentSessionRuns} from "./AgentSessionRuns";
 import {AgentRunController, ManagedAgentRun, PendingAgentInteraction} from "./AgentRunController";
 import {fullscreen} from "../../../protyle/breadcrumb/action";
 import {AgentWelcomeGreeting} from "./AgentWelcomeGreeting";
+import {AgentMessageQueue} from "./AgentMessageQueue";
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
@@ -77,6 +78,13 @@ const agentSanitizeOptions = {
 
 export type AgentChatStatus = "idle" | "running";
 export type AgentChatNotification = "confirm" | "done";
+
+interface QueuedAgentMessage {
+    id: string;
+    sessionID: string;
+    data: AgentComposerData;
+    editorContext?: IEditorContext;
+}
 
 export interface AgentChatHost {
     element: HTMLElement;
@@ -214,6 +222,12 @@ export class AgentChat extends Model {
     private composer: ReturnType<typeof mountComposer> | null = null;
     private sendBtn: HTMLElement;
     private stopBtn: HTMLElement;
+    private queueElement: HTMLElement;
+    private queueRenderState = "";
+    private queuedMessages = new AgentMessageQueue<QueuedAgentMessage>();
+    private startingSessionID = "";
+    private sessionViewChanging = false;
+    private destroyed = false;
     private imageUploadButton: HTMLButtonElement;
     private imageUploadInput: HTMLInputElement;
     private newSessionBtn: HTMLElement;
@@ -362,6 +376,8 @@ export class AgentChat extends Model {
     }
 
     public destroy() {
+        this.destroyed = true;
+        this.queuedMessages = new AgentMessageQueue<QueuedAgentMessage>();
         this.composerResize?.destroy();
         this.welcomeObserver?.disconnect();
         super.destroy();
@@ -450,6 +466,7 @@ export class AgentChat extends Model {
             '<span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span>' +
             "</div>" +
             '<div class="agent-chat__input-area">' +
+            '<div class="agent-chat__queue fn__none" aria-live="polite"></div>' +
             '<div class="agent-chat__input-resize" data-prevent-swipe="true"><span class="protyle-block-resize" data-resize-axis="height" ' +
             'role="separator" aria-orientation="horizontal" tabindex="0" aria-label="' + escapeAriaLabel(L.height) + '"></span></div>' +
             '<div class="agent-chat__composer-host"></div>' +
@@ -493,6 +510,8 @@ export class AgentChat extends Model {
             panel.querySelector(".agent-chat__input-resize .protyle-block-resize"));
         this.sendBtn = panel.querySelector(".agent-chat__send") as HTMLElement;
         this.stopBtn = panel.querySelector(".agent-chat__stop") as HTMLElement;
+        this.queueElement = panel.querySelector(".agent-chat__queue");
+        this.queueRenderState = "";
         this.imageUploadButton = panel.querySelector(".agent-chat__image-upload") as HTMLButtonElement;
         this.imageUploadInput = panel.querySelector(".agent-chat__image-upload-input") as HTMLInputElement;
         this.newSessionBtn = panel.querySelector('.block__icon[data-type="new-session"]') as HTMLElement;
@@ -1322,10 +1341,16 @@ export class AgentChat extends Model {
                 },
                 activate: run => { this.abortController = run.controller; },
                 detached: run => {
+                    this.queuedMessages.pause(run.sessionID);
                     this.pendingRecoverySessionIDs.add(run.sessionID);
                     this.clearRunAbortController(run);
                 },
-                completed: run => this.clearRunAbortController(run),
+                completed: run => {
+                    this.clearRunAbortController(run);
+                    if (run.finishedNormally && !run.detached && this.sessionId === run.sessionID) {
+                        void this.sendQueuedMessage();
+                    }
+                },
                 discarded: (run, current) => {
                     this.clearRunAbortController(run);
                     if (current) {
@@ -1560,6 +1585,7 @@ export class AgentChat extends Model {
 
     private async handleSessionRunError(run: ManagedAgentSessionRun, err: Error, userEntryId?: string,
                                         restoreSession = false) {
+        this.queuedMessages.pause(run.sessionID);
         if (run.detached || this.sessionId !== run.sessionID) {
             return;
         }
@@ -1913,7 +1939,16 @@ export class AgentChat extends Model {
     }
 
     private enqueueSessionViewChange(task: () => Promise<void>): Promise<void> {
-        const change = this.sessionViewChange.then(task);
+        const change = this.sessionViewChange.then(async () => {
+            this.sessionViewChanging = true;
+            this.queuedMessages.pause(this.sessionId);
+            try {
+                await task();
+            } finally {
+                this.sessionViewChanging = false;
+                this.updateSendButtonState();
+            }
+        });
         this.sessionViewChange = change.catch((e) => {
             console.error("change agent session view failed:", e);
         });
@@ -2473,6 +2508,7 @@ export class AgentChat extends Model {
             return;
         }
         this.scrollBottomBySession.delete(id);
+        this.queuedMessages.clear(id);
         const wasCurrent = id === this.sessionId;
         if (wasCurrent) {
             const result = await SessionStore.list({page: 1, pageSize: 2});
@@ -2495,29 +2531,138 @@ export class AgentChat extends Model {
         this.pendingSessionTitles.delete(id);
     }
 
-    private async sendMessage() {
-        if (!this.composer || this.composer.isUploading()) {
+    private renderQueuedMessages() {
+        if (!this.queueElement) {
             return;
         }
-        const sendData = this.composer.getSendData();
+        const messages = this.queuedMessages.get(this.sessionId);
+        const disabled = this.isCurrentSessionRunning() || !!this.startingSessionID ||
+            this.sessionViewChanging || this.modelOptions.length === 0;
+        const state = JSON.stringify([this.sessionId, messages.map(message => message.id), disabled]);
+        if (state === this.queueRenderState) {
+            return;
+        }
+        this.queueRenderState = state;
+        this.queueElement.classList.toggle("fn__none", messages.length === 0);
+        this.queueElement.replaceChildren();
+        if (messages.length === 0) {
+            return;
+        }
+        const L = window.siyuan.languages;
+        const header = document.createElement("div");
+        header.className = "fn__flex";
+        const label = document.createElement("span");
+        label.className = "fn__flex-1";
+        label.textContent = L.agentQueuedMessages.replace("${count}", String(messages.length));
+        const resume = document.createElement("button");
+        resume.className = "b3-button b3-button--icon b3-button--text ariaLabel";
+        resume.setAttribute("aria-label", L.agentSendQueuedMessages);
+        resume.innerHTML = '<svg><use xlink:href="#iconSend"></use></svg>';
+        resume.disabled = disabled;
+        resume.addEventListener("click", () => { void this.sendQueuedMessage(true); });
+        header.append(label, resume);
+        this.queueElement.append(header);
+        messages.forEach(message => {
+            const row = document.createElement("div");
+            row.className = "b3-list-item";
+            const text = document.createElement("span");
+            text.className = "b3-list-item__text";
+            text.textContent = message.data.text;
+            text.title = message.data.text;
+            const cancel = document.createElement("button");
+            cancel.className = "block__icon ariaLabel";
+            cancel.setAttribute("aria-label", L.cancel);
+            cancel.innerHTML = '<svg><use xlink:href="#iconCloseRound"></use></svg>';
+            cancel.addEventListener("click", () => {
+                this.queuedMessages.remove(message.sessionID, message.id);
+                this.updateSendButtonState();
+            });
+            row.append(text, cancel);
+            this.queueElement.append(row);
+        });
+    }
+
+    private async sendQueuedMessage(resume = false) {
+        if (this.destroyed || this.isCurrentSessionRunning() || this.startingSessionID || this.sessionViewChanging) {
+            return;
+        }
+        if (resume) {
+            this.queuedMessages.resume(this.sessionId);
+        }
+        if (this.queuedMessages.isPaused(this.sessionId)) {
+            return;
+        }
+        const message = this.queuedMessages.get(this.sessionId)[0];
+        if (!message) {
+            return;
+        }
+        try {
+            await this.sendMessage(message);
+        } catch (error) {
+            console.error("send queued agent message failed:", error);
+        }
+    }
+
+    private async sendMessage(queued?: QueuedAgentMessage) {
+        if (this.destroyed || (!queued && (!this.composer || this.composer.isUploading())) ||
+            this.startingSessionID || this.sessionViewChanging) {
+            return;
+        }
+        const sessionID = this.sessionId;
+        const viewChange = this.sessionViewChange;
+        const sendData = queued?.data || this.composer.getSendData();
         const text = sendData.text;
         const blockHTML = sendData.blockHTML;
         const refs = sendData.references;
-        const editorContext = this.captureEditorContext();
+        const editorContext = queued ? queued.editorContext : this.captureEditorContext();
         const frontendCapabilities = listCapabilityManifests();
-        if (!text || this.isCurrentSessionRunning() || this.modelOptions.length === 0) {
+        if (!text || this.modelOptions.length === 0 || (queued && queued.sessionID !== sessionID)) {
             return;
         }
-        if (!await this.prepareForNewTurn()) {
+        if (!queued && (this.isCurrentSessionRunning() || this.queuedMessages.get(sessionID).length > 0)) {
+            if (this.isCurrentSessionRunning() && !this.sessionRuns.get(sessionID)) {
+                return;
+            }
+            this.queuedMessages.add(sessionID, {
+                id: SessionStore.newSessionId(), sessionID, data: sendData, editorContext,
+            });
+            this.composer.clear();
+            this.composerResize?.reset();
+            this.updateSendButtonState();
             return;
+        }
+        if (this.isCurrentSessionRunning()) {
+            return;
+        }
+        this.startingSessionID = sessionID;
+        this.updateSendButtonState();
+        let prepared = false;
+        try {
+            prepared = await this.prepareForNewTurn();
+        } finally {
+            this.startingSessionID = "";
+            this.updateSendButtonState();
+        }
+        if (!prepared || this.destroyed || this.sessionId !== sessionID || this.sessionViewChange !== viewChange ||
+            this.sessionViewChanging || this.isCurrentSessionRunning() ||
+            (queued && (this.queuedMessages.isPaused(sessionID) || this.queuedMessages.get(sessionID)[0]?.id !== queued.id))) {
+            return;
+        }
+        if (queued) {
+            this.queuedMessages.remove(sessionID, queued.id);
         }
 
         this.setStreaming(true);
         this.clearThinking();
         this.hasInterveningCard = false;
         this.currentRoundID = "";
-        this.composer.clear();
-        this.composerResize?.reset();
+        if (!queued) {
+            const currentDraft = this.composer.getSendData();
+            if (currentDraft.text === text && currentDraft.blockHTML === blockHTML) {
+                this.composer.clear();
+                this.composerResize?.reset();
+            }
+        }
         const selectedModel = this.getSelectedModel();
         const reasoningEffort = this.selectedReasoningEffort;
 
@@ -2548,6 +2693,10 @@ export class AgentChat extends Model {
         try {
             await this.saveSession();
         } catch (e) {
+            if (queued) {
+                this.queuedMessages.prepend(sessionID, queued);
+            }
+            this.queuedMessages.pause(sessionID);
             this.runController.discard(run);
             if (this.sessionId === run.sessionID) {
                 this.rollbackUserEntry(userEntryId);
@@ -2841,6 +2990,7 @@ export class AgentChat extends Model {
                     this.appendUsage(event.lastPromptTokens, event.tokenBreakdown, event.cachedTokens, event.contextLimit);
                     break;
                 case "error":
+                    this.queuedMessages.pause(this.sessionId);
                     this.flushTokenUpdate();
                     this.requestStartTime = 0;
                     if (this.currentTurnID) {
@@ -2854,6 +3004,7 @@ export class AgentChat extends Model {
                     }
                     break;
                 case "interrupted":
+                    this.queuedMessages.pause(this.sessionId);
                     await this.handleError(new Error(event.message));
                     break;
                 case "retry":
@@ -2861,6 +3012,7 @@ export class AgentChat extends Model {
                     break;
                 case "question":
                     this.appendQuestion(event.questionID, event.arguments, event.roundID);
+                    this.notifyRunInteraction();
                     break;
                 case "reasoning":
                     this.appendReasoning(event.token);
@@ -3980,6 +4132,7 @@ export class AgentChat extends Model {
 
     private async stopGeneration() {
         const sessionID = this.sessionId;
+        this.queuedMessages.pause(sessionID);
         this.pendingRecoverySessionIDs.add(sessionID);
         const sessionRun = this.sessionRuns.get(sessionID);
         if (sessionRun?.detached) {
@@ -4791,32 +4944,38 @@ export class AgentChat extends Model {
         this.isStreaming = streaming;
         this.updateRegenerateButtons();
         this.updateHostRunStatus();
-        this.sendBtn.classList.toggle("fn__none", streaming);
         this.stopBtn.classList.toggle("fn__none", !streaming);
         this.updateSendButtonState();
     }
 
-    // 根据"是否流式中"、"是否有可用模型"、"输入框是否有内容"综合决定发送按钮与输入框可用性。
-    // 无模型时一并禁用发送按钮与输入框（attr disabled + 灰样式 + composer-host 禁用态），从源头阻止无效请求。
+    // 本地运行期间允许编辑并排队；其他实例的运行只开放草稿编辑。
     private updateSendButtonState() {
         const sessionRunning = this.isCurrentSessionRunning();
         const modelUnavailable = this.modelOptions.length === 0;
         const uploading = this.composer?.isUploading() || false;
-        const disabled = sessionRunning || modelUnavailable || uploading || !this.hasComposerInput();
+        const starting = this.startingSessionID === this.sessionId;
+        const disabled = (sessionRunning && !this.sessionRuns.get(this.sessionId)) || starting ||
+            this.sessionViewChanging || modelUnavailable || uploading || !this.hasComposerInput();
         if (disabled) {
             this.sendBtn.setAttribute("disabled", "disabled");
         } else {
             this.sendBtn.removeAttribute("disabled");
         }
         if (this.imageUploadButton) {
-            this.imageUploadButton.disabled = sessionRunning || modelUnavailable || uploading;
+            this.imageUploadButton.disabled = starting || modelUnavailable || uploading;
         }
         if (this.composerHost) {
-            // 复用流式时已有的禁用态样式（灰显 + 阻止交互）。
-            // 注意：仅流式 / 无模型时禁用 composer；输入为空不禁用 composer（用户仍可正常编辑）。
-            const composerDisabled = sessionRunning || modelUnavailable;
+            const composerDisabled = modelUnavailable;
             this.composerHost.classList.toggle("agent-chat__composer-host--disabled", composerDisabled);
         }
+        const L = window.siyuan.languages;
+        const sendLabel = sessionRunning || this.queuedMessages.get(this.sessionId).length > 0 ?
+            L.agentQueueMessage : L.agentSend;
+        if (sendLabel) {
+            this.sendBtn.setAttribute("aria-label", sendLabel +
+                updateHotkeyAfterTip(window.siyuan.config.keymap.general.agentSend.custom));
+        }
+        this.renderQueuedMessages();
     }
 
     // 输入框当前是否有可发送内容（含 @引用也算）。无 composer 时返回 false。

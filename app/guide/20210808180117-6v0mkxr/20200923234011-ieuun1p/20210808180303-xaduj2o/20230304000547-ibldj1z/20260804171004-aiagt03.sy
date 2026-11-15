@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261111084137"
+		"updated": "20261115062149"
 	},
 	"Children": [
 		{
@@ -317,7 +317,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-iffmsq0",
-				"updated": "20261111084137"
+				"updated": "20261115062149"
 			},
 			"Children": [
 				{
@@ -538,7 +538,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-x813t3f",
-				"updated": "20261111084137"
+				"updated": "20261115062149"
 			},
 			"Children": [
 				{
@@ -589,6 +589,34 @@
 				{
 					"Type": "NodeText",
 					"Data": "While the agent is running, select the stop button to interrupt the current task. Automatic retries keep and continue the same thinking card. Stopping keeps already-visible output while the server finishes saving and recovery, but does not undo completed actions. A slow connection may interrupt generation; reopen the session to recover saved content. Results are generally more reliable when the goal, scope, and destination are explicit."
+				}
+			]
+		},
+		{
+			"ID": "20261115062149-v84vob9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261115062149-v84vob9",
+				"updated": "20261115062149"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop and mobile, you can keep composing while a local session runs. Sending at this time queues a snapshot of the message and its references; review the queue above the input and cancel individual messages there. Messages send in order after a normal response ends, using the current model and approval settings. Stopping, an error, or switching sessions pauses the queue; return to that session and use the queue's send button to continue. Queued messages stay only in the current frontend's memory and are lost on refresh or exit. A session running in another instance allows drafting but does not accept queued messages here."
+				}
+			]
+		},
+		{
+			"ID": "20261115062149-nb4deva",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261115062149-nb4deva",
+				"updated": "20261115062149"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When the app loses focus or is hidden, pending approvals, unanswered questions, and normally completed replies can trigger system notifications. Delivery depends on the client and system notification permissions. Locking the screen or losing the connection does not guarantee that a task will continue."
 				}
 			]
 		},

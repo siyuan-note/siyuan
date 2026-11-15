@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "Adicionar mensagem à fila",
+	"agentQueuedMessages": "Mensagens na fila (${count})",
+	"agentSendQueuedMessages": "Enviar mensagens da fila",
 	"markdownResourceDirectoriesTip": "Autorizar as pastas marcadas apenas nesta sessão de edição; todas são marcadas por padrão",
 	"markdownResourceDirectoriesEmpty": "Nenhuma outra pasta com imagens locais compatíveis precisa de autorização",
 	"markdownResourceDirectoriesChanged": "As pastas ou o documento mudaram; feche a caixa de diálogo e tente novamente",

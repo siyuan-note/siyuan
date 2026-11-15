@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "Добавить сообщение в очередь",
+	"agentQueuedMessages": "Сообщения в очереди (${count})",
+	"agentSendQueuedMessages": "Отправить сообщения из очереди",
 	"markdownResourceDirectoriesTip": "Разрешить выбранные папки только на время текущего редактирования; по умолчанию выбраны все",
 	"markdownResourceDirectoriesEmpty": "Нет дополнительных папок с поддерживаемыми локальными изображениями, требующих разрешения",
 	"markdownResourceDirectoriesChanged": "Папки или документ изменились; закройте диалог и повторите попытку",

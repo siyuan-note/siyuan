@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "إضافة رسالة إلى قائمة الانتظار",
+	"agentQueuedMessages": "الرسائل في قائمة الانتظار (${count})",
+	"agentSendQueuedMessages": "إرسال الرسائل في قائمة الانتظار",
 	"markdownResourceDirectoriesTip": "السماح بالمجلدات المحددة لجلسة التحرير الحالية فقط؛ جميع المجلدات محددة افتراضيًا",
 	"markdownResourceDirectoriesEmpty": "لا توجد مجلدات إضافية لصور محلية مدعومة تتطلب إذنًا",
 	"markdownResourceDirectoriesChanged": "تغيرت المجلدات أو المستند؛ أغلق مربع الحوار وأعد المحاولة",

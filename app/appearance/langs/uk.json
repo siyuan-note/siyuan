@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "Додати повідомлення до черги",
+	"agentQueuedMessages": "Повідомлення в черзі (${count})",
+	"agentSendQueuedMessages": "Надіслати повідомлення з черги",
 	"markdownResourceDirectoriesTip": "Дозволити вибрані теки лише на час поточного редагування; типово вибрано всі",
 	"markdownResourceDirectoriesEmpty": "Немає додаткових тек із підтримуваними локальними зображеннями, що потребують дозволу",
 	"markdownResourceDirectoriesChanged": "Теки або документ змінилися; закрийте діалог і спробуйте знову",

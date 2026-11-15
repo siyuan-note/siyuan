@@ -40,6 +40,21 @@ const fixture = () => {
         setSession: (value: string) => { sessionID = value; }, notifications: () => notifications, captures: () => captures};
 };
 
+test("only a normally handled terminal response can continue queued messages", async () => {
+    for (const event of [{type: "done", turnID: "turn"}, {type: "error", message: "failed"},
+        {type: "interrupted", message: "stopped"}] satisfies ISSEResult[]) {
+        const h = fixture();
+        const run = h.controller.begin();
+        await h.controller.handleEvent(run, event);
+        assert.equal(run.finishedNormally === true, event.type === "done");
+    }
+    const h = fixture();
+    const run = h.controller.begin();
+    h.view.handleEvent = async () => { run.controller.abort(); };
+    await h.controller.handleEvent(run, {type: "done", turnID: "turn"});
+    assert.equal(run.finishedNormally, undefined);
+});
+
 test("background runs coalesce text and replay distinct interactions without touching the foreground", async () => {
     const h = fixture();
     const first = h.controller.begin();

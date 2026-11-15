@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "Bericht in wachtrij plaatsen",
+	"agentQueuedMessages": "Berichten in wachtrij (${count})",
+	"agentSendQueuedMessages": "Berichten uit wachtrij verzenden",
 	"markdownResourceDirectoriesTip": "Sta aangevinkte mappen alleen tijdens deze bewerksessie toe; standaard zijn alle mappen aangevinkt",
 	"markdownResourceDirectoriesEmpty": "Er zijn geen extra mappen met ondersteunde lokale afbeeldingen die toestemming vereisen",
 	"markdownResourceDirectoriesChanged": "De mappen of het document zijn gewijzigd; sluit het dialoogvenster en probeer het opnieuw",

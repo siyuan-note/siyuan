@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "Zaradiť správu do frontu",
+	"agentQueuedMessages": "Správy vo fronte (${count})",
+	"agentSendQueuedMessages": "Odoslať správy z frontu",
 	"markdownResourceDirectoriesTip": "Povoliť vybrané priečinky iba počas tejto relácie úprav; predvolene sú vybrané všetky",
 	"markdownResourceDirectoriesEmpty": "Žiadne ďalšie priečinky s podporovanými lokálnymi obrázkami nepotrebujú povolenie",
 	"markdownResourceDirectoriesChanged": "Priečinky alebo dokument sa zmenili; zatvorte dialóg a skúste to znova",

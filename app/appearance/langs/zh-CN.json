@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "消息排队",
+	"agentQueuedMessages": "待发送消息（${count}）",
+	"agentSendQueuedMessages": "发送排队消息",
 	"markdownResourceDirectoriesTip": "仅在当前编辑会话中授权勾选的目录，默认全部勾选",
 	"markdownResourceDirectoriesEmpty": "没有需要额外授权的受支持本地图片目录",
 	"markdownResourceDirectoriesChanged": "目录或文档已变化，请关闭对话框后重试",

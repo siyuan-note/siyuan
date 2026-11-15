@@ -165,6 +165,9 @@ export class AgentRunController<TState> {
                 run.renderedInteractionKeys.add(this.interactionKey(event));
             }
             await this.processView(run, () => this.view.handleEvent(event));
+            if (event.type === "done" && !run.controller.signal.aborted) {
+                run.finishedNormally = true;
+            }
             return;
         }
         if (event.type === "browser_capability_call") {

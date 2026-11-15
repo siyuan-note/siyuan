@@ -5,6 +5,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {AgentSessionRuns} from "./AgentSessionRuns";
+import {AgentMessageQueue} from "./AgentMessageQueue";
 import type {AgentSession} from "./SessionStore";
 
 const compiled = transpileModule(readFileSync("src/layout/dock/agent/AgentChat.ts", "utf8"), {
@@ -30,6 +31,7 @@ const createChat = (load: (id: string) => Promise<AgentSession>) => {
     Object.assign(chat, {
         sessionId: "second",
         sessionRuns: new AgentSessionRuns(),
+        queuedMessages: new AgentMessageQueue(),
         isStreaming: true,
         mirrorLocked: false,
         pendingRecoverySessionIDs: new Set(),
@@ -99,6 +101,25 @@ test("a completed local run restores regenerate controls after the final stream 
 
     assert.equal(chat.isCurrentSessionRunning(), false);
     assert.equal(hidden, false);
+});
+
+test("only normal foreground completion attempts to continue its message queue", async () => {
+    for (const normal of [false, true]) {
+        const {chat} = createChat(async () => session());
+        let sends = 0;
+        chat.sendQueuedMessage = async () => { sends++; };
+        const run = chat.sessionRuns.begin("second");
+        run.finishedNormally = normal;
+        await chat.runController.finish(run);
+        assert.equal(sends, normal ? 1 : 0);
+    }
+    const {chat} = createChat(async () => session());
+    let sends = 0;
+    chat.sendQueuedMessage = async () => { sends++; };
+    const run = chat.sessionRuns.begin("first");
+    run.finishedNormally = true;
+    await chat.runController.finish(run);
+    assert.equal(sends, 0);
 });
 
 test("session pin notifications refresh the list without disturbing conversations or drafts", () => {

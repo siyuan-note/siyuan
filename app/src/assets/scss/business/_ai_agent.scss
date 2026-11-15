@@ -754,6 +754,11 @@
   opacity: 0.5;
 }
 
+.agent-chat__queue {
+  max-height: 25vh;
+  overflow: auto;
+}
+
 .agent-chat__buttons {
   display: flex;
   gap: 8px;

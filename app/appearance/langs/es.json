@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "Poner mensaje en cola",
+	"agentQueuedMessages": "Mensajes en cola (${count})",
+	"agentSendQueuedMessages": "Enviar mensajes en cola",
 	"markdownResourceDirectoriesTip": "Autorizar las carpetas marcadas solo durante esta sesión de edición; todas están marcadas de forma predeterminada",
 	"markdownResourceDirectoriesEmpty": "No hay más carpetas con imágenes locales compatibles que necesiten autorización",
 	"markdownResourceDirectoriesChanged": "Las carpetas o el documento han cambiado; cierre el diálogo e inténtelo de nuevo",

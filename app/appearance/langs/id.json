@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "Antrekan pesan",
+	"agentQueuedMessages": "Pesan dalam antrean (${count})",
+	"agentSendQueuedMessages": "Kirim pesan dalam antrean",
 	"markdownResourceDirectoriesTip": "Izinkan folder yang dicentang hanya selama sesi penyuntingan ini; semua folder dicentang secara bawaan",
 	"markdownResourceDirectoriesEmpty": "Tidak ada folder tambahan berisi gambar lokal yang didukung yang memerlukan izin",
 	"markdownResourceDirectoriesChanged": "Folder atau dokumen telah berubah; tutup dialog dan coba lagi",

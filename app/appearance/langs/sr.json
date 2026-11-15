@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "Додај поруку у ред",
+	"agentQueuedMessages": "Поруке у реду (${count})",
+	"agentSendQueuedMessages": "Пошаљи поруке из реда",
 	"markdownResourceDirectoriesTip": "Дозволи означене фасцикле само током ове сесије уређивања; подразумевано су све означене",
 	"markdownResourceDirectoriesEmpty": "Нема додатних фасцикли са подржаним локалним сликама које захтевају дозволу",
 	"markdownResourceDirectoriesChanged": "Фасцикле или документ су промењени; затворите дијалог и покушајте поново",

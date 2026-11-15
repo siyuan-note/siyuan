@@ -1,4 +1,7 @@
 {
+	"agentQueueMessage": "เพิ่มข้อความในคิว",
+	"agentQueuedMessages": "ข้อความในคิว (${count})",
+	"agentSendQueuedMessages": "ส่งข้อความในคิว",
 	"markdownResourceDirectoriesTip": "อนุญาตโฟลเดอร์ที่เลือกเฉพาะในเซสชันการแก้ไขนี้ โดยเลือกทุกโฟลเดอร์ไว้ตามค่าเริ่มต้น",
 	"markdownResourceDirectoriesEmpty": "ไม่มีโฟลเดอร์รูปภาพในเครื่องที่รองรับซึ่งต้องขอสิทธิ์เพิ่มเติม",
 	"markdownResourceDirectoriesChanged": "โฟลเดอร์หรือเอกสารเปลี่ยนไป โปรดปิดกล่องโต้ตอบแล้วลองอีกครั้ง",

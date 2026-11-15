@@ -716,6 +716,20 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
 
         > .protyle-block-resize {
           pointer-events: auto;
+
+          &[data-resize-axis="width"] {
+            --protyle-image-resize-side-height: min(var(--protyle-resize-side-length), 50%, 100% - var(--protyle-resize-corner-size));
+
+            // 矮图上右侧把手止于右下角把手的上方。
+            height: var(--protyle-image-resize-side-height);
+            right: 0;
+            top: min(50%, 100% - var(--protyle-resize-corner-size) - var(--protyle-image-resize-side-height) / 2);
+          }
+
+          &[data-resize-axis="width"]::after {
+            left: auto;
+            right: 2px;
+          }
         }
       }
 
@@ -1029,8 +1043,21 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
       top: calc((100% - var(--protyle-resize-bottom-height)) / 2);
     }
 
+    &[data-resize-axis="height"]::after {
+      top: 1px;
+      bottom: auto;
+    }
+
     &[data-resize-axis="both"] {
       height: var(--protyle-resize-bottom-height);
+
+      // 圆角沿播放器边缘绘制，命中区域在原生控件下方。
+      &::after {
+        top: -6px;
+        right: 0;
+        bottom: auto;
+        height: 10px;
+      }
     }
   }
 }

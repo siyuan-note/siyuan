@@ -1,5 +1,7 @@
 .protyle-block-resize {
   --protyle-resize-bottom-height: 12px;
+  --protyle-resize-side-length: 40px;
+  --protyle-resize-corner-size: 20px;
 
   position: absolute;
   z-index: 6;
@@ -18,7 +20,7 @@
 
   &[data-resize-axis="width"] {
     width: 12px;
-    height: min(40px, 50%);
+    height: min(var(--protyle-resize-side-length), 50%);
     right: -12px;
     top: 50%;
     transform: translateY(-50%);
@@ -37,7 +39,7 @@
 
   &[data-resize-axis="height"] {
     height: var(--protyle-resize-bottom-height);
-    width: min(40px, 50%);
+    width: min(var(--protyle-resize-side-length), 50%);
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
@@ -61,8 +63,8 @@
   }
 
   &[data-resize-axis="both"] {
-    width: min(20px, 100%);
-    height: min(20px, 100%);
+    width: min(var(--protyle-resize-corner-size), 100%);
+    height: min(var(--protyle-resize-corner-size), 100%);
     right: 0;
     bottom: 0;
     cursor: nwse-resize;
@@ -99,20 +101,12 @@
 @media (any-pointer: coarse) {
   .protyle-block-resize {
     --protyle-resize-bottom-height: 20px;
+    --protyle-resize-side-length: 48px;
+    --protyle-resize-corner-size: 32px;
 
     &[data-resize-axis="width"] {
       width: 20px;
       right: -20px;
-      height: min(48px, 50%);
-    }
-
-    &[data-resize-axis="height"] {
-      width: min(48px, 50%);
-    }
-
-    &[data-resize-axis="both"] {
-      width: min(32px, 100%);
-      height: min(32px, 100%);
     }
   }
 }

@@ -186,6 +186,9 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
             check.equal(frameRect.width, imageRect.width);
             check.equal(frameRect.height, imageRect.height, "captions do not displace image handles");
             const handleRect = handle.getBoundingClientRect();
+            if (axis !== "height") {
+                check.ok(handleRect.right <= imageRect.right + 1, "right handles stay within the image");
+            }
             if (axis !== "width") {
                 check.ok(handleRect.bottom <= imageRect.bottom + 1, "bottom handles stay within the image");
             }
@@ -349,6 +352,17 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
         check.equal(getComputedStyle(handle).visibility, "visible", "cancelling a drag preserves selected handles");
     }
     touchIsolation.abort();
+    const short = await create();
+    short.parentElement.style.width = "96px";
+    tap(short);
+    await settle();
+    const right = short.parentElement.querySelector('[data-resize-axis="width"]');
+    const corner = short.parentElement.querySelector('[data-resize-axis="both"]');
+    const rightRect = right.getBoundingClientRect();
+    check.ok(rightRect.height > 0 && rightRect.bottom <= corner.getBoundingClientRect().top + 1);
+    check.equal(document.elementFromPoint(rightRect.left + rightRect.width / 2, rightRect.top + rightRect.height / 2), right,
+        "short images keep the right handle reachable above the corner");
+
     for (const [width, height] of [[24, 12], [200, 20], [40, 100]]) {
         const compact = await create();
         compact.style.width = width + "px";

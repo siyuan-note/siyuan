@@ -752,11 +752,22 @@ const visibilityCases = async (move: (x: number, y: number) => Promise<void>, ta
             const handles = ["width", "height", "both"].map(axis => block.querySelector('[data-resize-axis="' + axis + '"]'));
             const rects = handles.map(handle => handle.getBoundingClientRect());
             const decorations = handles.map(handle => getComputedStyle(handle, "::after"));
-            const bottom = rects[1].bottom - parseFloat(decorations[1].bottom);
+            const decorationBottom = (index) => decorations[index].bottom === "auto" ?
+                rects[index].top + parseFloat(decorations[index].top) + parseFloat(decorations[index].height) :
+                rects[index].bottom - parseFloat(decorations[index].bottom);
             const check = require("node:assert/strict");
             check.ok(rects[2].right <= rects[0].left + 1, "the corner stays inside the right edge");
-            check.ok(Math.abs(rects[2].bottom - parseFloat(decorations[2].bottom) - bottom) <= 1,
+            check.ok(Math.abs(decorationBottom(2) - decorationBottom(1)) <= 1,
                 "corner aligns with the bottom handle");
+            const video = block.querySelector("video");
+            if (video) {
+                const edge = video.getBoundingClientRect();
+                check.ok(decorationBottom(1) - edge.bottom <= 5, "resize markings hug the video edge");
+                check.ok(rects[2].top + parseFloat(decorations[2].top) < edge.bottom,
+                    "the corner marking continues the video edge");
+                check.equal(parseFloat(decorations[2].right), 0);
+                check.equal(decorations[2].pointerEvents, "none", "the corner marking lets clicks reach the video");
+            }
         })()`);
     }
     if (!touchOnly) {

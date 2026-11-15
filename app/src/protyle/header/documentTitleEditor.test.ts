@@ -120,7 +120,7 @@ test("rename construction retains local undo and toolbar history while inline ti
             addEventListener: (type: string, listener: () => void) => listeners.set(type, listener)};
         const moduleExports: {DocumentTitleEditor?: new (...args: unknown[]) => {destroy: () => void}} = {};
         const dependencies = {
-            isMobile: () => true, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
+            isMobile: () => true, isIPad: () => false, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
             getDocumentTitleLute: () => ({}), getAgentLute: () => ({}), flattenDocumentTitlePaste: () => "",
             prepareDocumentTitleInitialDOM: (html: string) => html,
             getDocumentTitleDOMFingerprint: (html: string) => html,

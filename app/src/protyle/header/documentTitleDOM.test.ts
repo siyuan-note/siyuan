@@ -215,7 +215,7 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
         '<span class="katex">Untrusted cache</span></span>')));
     check.equal(template.content.querySelector(".katex"), null, "input HTML cannot supply trusted render caches");
 
-    const Editor = new Function("getDocumentTitleDOMFingerprint", sources[3] + "\nreturn DocumentTitleEditor;")(fingerprint);
+    const Editor = new Function("getDocumentTitleDOMFingerprint", "isIPad", sources[3] + "\nreturn DocumentTitleEditor;")(fingerprint, () => false);
     const Title = new Function(sources[4] + "\nreturn Title;")();
     const disable = new Function(sources[5] + "\nreturn disabledWYSIWYG;")();
     const root = document.createElement("div");
@@ -372,7 +372,7 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
             const fragment = {protyle, wysiwyg: titleWysiwyg, getBlockHTML: () => titleWysiwyg.innerHTML,
                 instance: {enable() {}, disable() {}}, destroy() {}};
             const dependencies = {
-                isMobile: () => mobile, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
+                isMobile: () => mobile, isIPad: () => false, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
                 copyDocumentTitleTarget: () => false, matchHotKey: () => false, isDocumentTitleBlockHotkey: () => false,
                 hintRef: () => {}, hintTag: () => {},
                 getDocumentTitleLute: () => lute, getAgentLute: () => lute,
@@ -481,7 +481,7 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
 };
 
 test("native document title DOM preserves content, layout, readonly handoff and local toolbar dismissal", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
     timeout: 30000,
 }, async () => {
     const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts", "documentTitleEditor.ts",
@@ -523,7 +523,8 @@ app.whenReady().then(async () => {
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
-        const result = await promisify(execFile)(require("electron") as unknown as string, [script],
+        const args = process.env.SIYUAN_ELECTRON_HEADLESS ? ["--ozone-platform=headless", script] : [script];
+        const result = await promisify(execFile)(require("electron") as unknown as string, args,
             {env, windowsHide: true, timeout: 25000});
         assert.match(result.stdout, /Document title DOM cases passed/);
     } finally {

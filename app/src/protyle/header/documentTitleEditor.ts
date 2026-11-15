@@ -24,7 +24,7 @@ import {enterDocumentFromTitle} from "./titleEnter";
 import {copyDocumentTitleTarget, isDocumentTitleBlockHotkey} from "./documentTitleKeys";
 import {acknowledgeDocumentTitleReload} from "../util/editorSave";
 import {buildBlockDOMClipboardData} from "../util/blockDOMClipboard";
-import {writeClipboardData} from "../util/compatibility";
+import {isIPad, writeClipboardData} from "../util/compatibility";
 import {prepareExternalClipboardHTML} from "../util/richClipboard";
 import {isCommittedTextInput} from "../wysiwyg/compositionInput";
 import {hideAllElements} from "../ui/hideElements";
@@ -475,6 +475,10 @@ export class DocumentTitleEditor {
             this.fragment.instance.disable();
         } else {
             this.fragment.instance.enable();
+            if (isIPad()) {
+                // 标题段落外层不能参与 iPad 原生组合删除，编辑宿主限定为段落内的输入框。
+                this.fragment.wysiwyg.setAttribute("contenteditable", "false");
+            }
         }
     }
 
@@ -484,7 +488,11 @@ export class DocumentTitleEditor {
     }
 
     public focus() {
-        this.fragment.focus();
+        if (isIPad()) {
+            this.editable?.focus();
+        } else {
+            this.fragment.focus();
+        }
     }
 
     private async undo(redo: boolean) {

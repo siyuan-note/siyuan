@@ -123,7 +123,7 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
         isVisible: key => isEntryVisible(`${contextPath}.${key}`),
         isAvailable: name => {
             if (protyle && ["softLine", "moveup", "movedown"].includes(name) &&
-                hasClosestByClassName(protyle.wysiwyg.element, "protyle-title__rich")) {
+                protyle.wysiwyg.element.closest(".protyle-title__rich")) {
                 return false;
             }
             if (hasText && (name === "block-type" || MOBILE_TOOLBAR_ACTION_NAMES.includes(name))) {

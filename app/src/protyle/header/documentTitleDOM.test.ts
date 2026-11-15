@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 import {compile} from "sass";
 
 const browserCases = async (sources: string[], lutePath: string, styles: string[]) => {
@@ -355,7 +355,8 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
             const titleWysiwyg = host.querySelector<HTMLElement>(".protyle-wysiwyg");
             const toolbar = host.querySelector<HTMLElement>(".protyle-toolbar");
             const subElement = host.querySelector<HTMLElement>(".protyle-util");
-            const protyle = {block: {}, undo: {}, toolbar: {element: toolbar, subElement}};
+            const protyle = {block: {}, undo: {}, lite: true, wysiwyg: {element: titleWysiwyg},
+                toolbar: {element: toolbar, subElement}};
             const fragment = {protyle, wysiwyg: titleWysiwyg, getBlockHTML: () => titleWysiwyg.innerHTML,
                 instance: {enable() {}, disable() {}}, destroy() {}};
             const dependencies = {
@@ -384,6 +385,30 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
             range.selectNodeContents(editable.querySelector("strong"));
             getSelection().removeAllRanges();
             getSelection().addRange(range);
+            if (mobile) {
+                const toolbarDependencies = {
+                    getCurrentEditor: () => ({protyle}), getSelection,
+                    hasClosestBlock: () => editable.parentElement,
+                    stripSemanticMarkersFromRangeText: (range: Range) => range.toString(),
+                    getEntryOrder: (): string[] => [], isEntryVisible: () => true,
+                    getMobileToolbarContextPath: () => "editor.toolbar",
+                    Constants: {ZWSP: "\u200b"}, MOBILE_TOOLBAR_NAMES: [] as string[], MOBILE_TOOLBAR_ACTION_NAMES: [] as string[],
+                    MOBILE_TOOLBAR_INSERTS: [] as Array<{name: string}>,
+                    applyMobileToolbarEntries: (_element: unknown, _toolbar: unknown, options: {
+                        isAvailable: (name: string) => boolean,
+                    }) => {
+                        for (const name of ["softLine", "moveup", "movedown"]) {
+                            check.equal(options.isAvailable(name), false, `${draft ? "rename drawer" : "inline title"}: ${name}`);
+                        }
+                        for (const name of ["add", "undo", "redo"]) {
+                            check.equal(options.isAvailable(name), true);
+                        }
+                    },
+                };
+                const applyEntries = new Function(...Object.keys(toolbarDependencies), sources[10] +
+                    "\nreturn applyKeyboardToolbarEntries;")(...Object.values(toolbarDependencies));
+                applyEntries(toolbar, []);
+            }
             let escaped = false;
             const onMouseDown = () => { escaped = true; };
             root.addEventListener("mousedown", onMouseDown);
@@ -435,6 +460,18 @@ test("native document title DOM preserves content, layout, readonly handoff and 
         transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);
+    const toolbarSources = [
+        {file: "../../mobile/util/keyboardToolbar.ts", name: "applyKeyboardToolbarEntries"},
+        {file: "../util/hasClosest.ts", name: "hasClosestByClassName"},
+    ].map(({file, name}) => {
+        const text = readFileSync(path.join(__dirname, file), "utf8");
+        const ast = createSourceFile(file, text, ScriptTarget.ES2021, true);
+        const statement = ast.statements.find(node => isVariableStatement(node) &&
+            node.declarationList.declarations.some(item => item.name.getText(ast) === name));
+        assert.ok(statement, name);
+        return statement.getText(ast).replace(/^export /, "");
+    }).join("\n");
+    sources.push(transpileModule(toolbarSources, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-title-dom-test-"));
     const script = path.join(temporary, "run.cjs");
     const styles = ["base", "mobile"].map(entry => compile(path.resolve(__dirname,

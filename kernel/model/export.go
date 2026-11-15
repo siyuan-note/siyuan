@@ -1958,7 +1958,10 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node, headingNum
 
 			tip := cur.(*pdfcpu.Bookmark)
 			if tip.Level < h.HeadingLevel {
-				bm := bms[h.ID]
+				bm, ok := bms[h.ID]
+				if !ok {
+					break L
+				}
 				bm.Level = h.HeadingLevel
 				bm.Parent = tip
 				tip.Kids = append(tip.Kids, bm)

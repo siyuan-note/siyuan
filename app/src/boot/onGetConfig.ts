@@ -308,7 +308,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             afterExport(pdfFilePath, msgId);
         } catch (e) {
             console.error(e);
-            showMessage(window.siyuan.languages.exportPDFLowMemory, 0, "error", msgId);
+            showMessage(window.siyuan.languages._kernel[290], 0, "error", msgId);
             ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});
         }
         ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "hide", webContentsId: ipcData.webContentsId});

@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "確定要刪除 <b>${x}</b> 欄位嗎？刪除本欄位後，<b>${y}</b> 數據庫中的雙向關聯欄位 <b>${z}</b> 也會同步刪除。",
 	"removeBothRelationField": "同時刪除兩個欄位",
 	"removeButKeepRelationField": "僅刪除本欄位，保留雙向關聯欄位",
-	"exportPDFLowMemory": "系統可用記憶體不足，無法導出該 PDF，請減少內容或者增加可用記憶體後再嘗試導出",
 	"exportConf": "匯出設定",
 	"exportConfTip": "帳號、鎖屏密碼、同步、API token 和資料倉庫金鑰不會被匯出",
 	"importConf": "導入設定",

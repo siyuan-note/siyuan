@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "<b>${x}</b> alanını silmek istediğinden emin misin? Bu alan silindiğinde, <b>${y}</b> veritabanındaki çift yönlü ilişki alanı <b>${z}</b> de eşzamanlı olarak silinir.",
 	"removeBothRelationField": "Her iki alanı da kaldır",
 	"removeButKeepRelationField": "Sadece bu alanı kaldır, çift yönlü alanı koru",
-	"exportPDFLowMemory": "PDF dışa aktarımı için yetersiz bellek. Lütfen içeriği azalt veya belleği artırarak tekrar dene",
 	"exportConf": "Dışa aktarma ayarları",
 	"exportConfTip": "Hesap, erişim yetki kodu, senkronizasyon, API anahtarı ve veri deposu anahtarı dışa aktarılmaz",
 	"importConf": "İçe aktarma ayarları",

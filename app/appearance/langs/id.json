@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "Apakah Anda yakin ingin menghapus bidang <b>${x}</b>? Setelah menghapus bidang ini, bidang relasi dua arah <b>${z}</b> di database <b>${y}</b> juga akan dihapus secara sinkron.",
 	"removeBothRelationField": "Hapus kedua bidang",
 	"removeButKeepRelationField": "Hapus hanya bidang ini, pertahankan bidang relasi dua arah",
-	"exportPDFLowMemory": "Memori yang tersedia tidak cukup untuk mengekspor PDF ini, harap kurangi konten atau tambah memori yang tersedia dan coba ekspor lagi",
 	"exportConf": "Pengaturan ekspor",
 	"exportConfTip": "Akun, kata sandi kunci layar, sinkronisasi, token API, dan kunci repositori data tidak akan diekspor",
 	"importConf": "Pengaturan impor",

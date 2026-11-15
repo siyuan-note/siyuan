@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "<b>${x}</b> フィールドを削除してもよろしいですか？このフィールドを削除すると、<b>${y}</b> データベースの双方向関連フィールド <b>${z}</b> も同時に削除されます。",
 	"removeBothRelationField": "両方のフィールドを削除",
 	"removeButKeepRelationField": "このフィールドのみ削除し、双方向関連フィールドを保持",
-	"exportPDFLowMemory": "システムの利用可能なメモリが不足しているため、この PDF をエクスポートできません。内容を減らすか、利用可能なメモリを増やしてから再試行してください",
 	"exportConf": "設定のエクスポート",
 	"exportConfTip": "アカウント、画面ロックパスワード、同期、API トークン、データウェアハウスキーはエクスポートされません",
 	"importConf": "設定のインポート",

@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "Czy na pewno chcesz usunąć pole <b>${x}</b>? Po usunięciu tego pola, dwukierunkowe pole relacji <b>${z}</b> w bazie danych <b>${y}</b> również zostanie usunięte synchronicznie.",
 	"removeBothRelationField": "Usuń oba pola",
 	"removeButKeepRelationField": "Usuń tylko to pole, zachowaj dwukierunkowe pole relacji",
-	"exportPDFLowMemory": "Za mało dostępnej pamięci, aby wyeksportować ten PDF, proszę zmniejszyć zawartość lub zwiększyć dostępną pamięć i spróbować ponownie",
 	"exportConf": "Ustawienia eksportu",
 	"exportConfTip": "Konto, hasło blokady ekranu, synchronizacja, token API i klucz repozytorium danych nie będą eksportowane",
 	"importConf": "Ustawienia importu",

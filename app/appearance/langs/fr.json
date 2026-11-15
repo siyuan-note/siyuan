@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "Êtes-vous sûr de vouloir supprimer le champ <b>${x}</b> ? Après la suppression de ce champ, le champ de relation bidirectionnelle <b>${z}</b> dans la base de données <b>${y}</b> sera également supprimé de manière synchrone.",
 	"removeBothRelationField": "Supprimer les deux champs",
 	"removeButKeepRelationField": "Supprimer seulement ce champ, conserver le champ de relation bidirectionnelle",
-	"exportPDFLowMemory": "Mémoire disponible insuffisante pour exporter ce PDF, veuillez réduire le contenu ou augmenter la mémoire disponible et réessayer d'exporter",
 	"exportConf": "Exporter les paramètres",
 	"exportConfTip": "Les comptes, mot de passe de verrouillage d'écran, synchronisation, tokens API et clés d'entrepôt de données ne seront pas exportés",
 	"importConf": "Importer les paramètres",

@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "Sind Sie sicher, dass Sie das <b>${x}</b> Feld löschen möchten? Nach dem Löschen dieses Feldes wird das bidirektionale Beziehungsfeld <b>${z}</b> in der <b>${y}</b> Datenbank ebenfalls synchron gelöscht.",
 	"removeBothRelationField": "Beide Felder entfernen",
 	"removeButKeepRelationField": "Nur dieses Feld entfernen, bidirektionales Beziehungsfeld behalten",
-	"exportPDFLowMemory": "Nicht genügend verfügbarer Speicher, um dieses PDF zu exportieren, bitte reduzieren Sie den Inhalt oder erhöhen Sie den verfügbaren Speicher und versuchen Sie es erneut",
 	"exportConf": "Export-Einstellungen",
 	"exportConfTip": "Konto, Bildschirmsperrpasswort, Synchronisation, API-Token und Daten-Repo-Schlüssel werden nicht exportiert",
 	"importConf": "Import-Einstellungen",

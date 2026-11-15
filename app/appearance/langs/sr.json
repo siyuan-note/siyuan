@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "Da li ste sigurni da želite da obrišete polje <b>${x}</b>? Nakon brisanja ovog polja, dvosmerno relaciono polje <b>${z}</b> u bazi <b>${y}</b> će takođe biti obrisano.",
 	"removeBothRelationField": "Ukloni oba polja",
 	"removeButKeepRelationField": "Ukloni samo ovo polje, zadrži dvosmerno relaciono polje",
-	"exportPDFLowMemory": "Nema dovoljno slobodne memorije za izvoz ovog PDF-a; smanjiti sadržaj ili povećati dostupnu memoriju pa ponovo pokušati izvoz",
 	"exportConf": "Izvezi podešavanja",
 	"exportConfTip": "Nalog, lozinka za zaključani ekran, sinhronizacija, API token i ključ riznice podataka neće biti izvezeni",
 	"importConf": "Uvezi podešavanja",

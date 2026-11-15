@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "确定要删除 <b>${x}</b> 字段吗？删除本字段后，<b>${y}</b> 数据库中的双向关联字段 <b>${z}</b> 也会同步删除。",
 	"removeBothRelationField": "同时删除两个字段",
 	"removeButKeepRelationField": "仅删除本字段，保留双向关联字段",
-	"exportPDFLowMemory": "系统可用内存不足，无法导出该 PDF，请减少内容或者增加可用内存后再尝试导出",
 	"exportConf": "导出设置",
 	"exportConfTip": "账号、锁屏密码、同步、API token 和数据仓库密钥不会被导出",
 	"importConf": "导入设置",

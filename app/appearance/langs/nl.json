@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "Weet u zeker dat u veld <b>${x}</b> wilt verwijderen? Het bidirectionele relatieveld <b>${z}</b> in database <b>${y}</b> wordt ook verwijderd",
 	"removeBothRelationField": "Beide velden verwijderen",
 	"removeButKeepRelationField": "Alleen dit veld verwijderen, bidirectioneel veld behouden",
-	"exportPDFLowMemory": "Onvoldoende beschikbaar geheugen om deze PDF te exporteren. Verklein de inhoud of vergroot het beschikbare geheugen en probeer opnieuw te exporteren",
 	"exportConf": "Exportinstellingen",
 	"exportConfTip": "Account, schermvergrendelingswachtwoord, synchronisatie, API-token en data-repo-sleutel worden niet geexporteerd",
 	"importConf": "Instellingen importeren",

@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "<b>${x}</b> 필드를 삭제하시겠습니까? 이 필드를 삭제하면 <b>${y}</b> 데이터베이스의 양방향 관계 필드 <b>${z}</b>도 동시에 삭제됩니다.",
 	"removeBothRelationField": "두 필드 모두 제거",
 	"removeButKeepRelationField": "이 필드만 제거하고 양방향 관계 필드는 유지",
-	"exportPDFLowMemory": "이 PDF를 내보내기에 사용 가능한 메모리가 부족합니다. 내용을 줄이거나 사용 가능한 메모리를 늘린 후 다시 시도하세요",
 	"exportConf": "내보내기 설정",
 	"exportConfTip": "계정, 화면 잠금 비밀번호, 동기화, API 토큰 및 데이터 저장소 키는 내보내지지 않습니다",
 	"importConf": "가져오기 설정",

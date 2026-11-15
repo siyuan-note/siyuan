@@ -1867,7 +1867,6 @@
 	"confirmRemoveRelationField": "Naozaj chcete odstrániť pole <b>${x}</b>? Po odstránení tohto poľa sa synchrónne odstráni aj obojsmerné relačné pole <b>${z}</b> v databáze <b>${y}</b>.",
 	"removeBothRelationField": "Odstrániť obe polia",
 	"removeButKeepRelationField": "Odstrániť iba toto pole, ponechať obojsmerné relačné pole",
-	"exportPDFLowMemory": "Nedostatok pamäte na export tohto PDF. Zredukujte obsah alebo zvýšte pamäť a skúste to znova",
 	"exportConf": "Nastavenia exportu",
 	"exportConfTip": "Účet, heslo zámku obrazovky, synchronizácia, API token a kľúč dátového skladu nebudú exportované",
 	"importConf": "Nastavenia importu",

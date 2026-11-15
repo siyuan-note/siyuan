@@ -33,8 +33,9 @@ const checkClicks = (code: string, mobile: boolean) => {
 <div class="av__scroll"><div class="av__body"><div class="av__row" data-id="row">
 <div class="av__cell" data-id="empty" data-dtype="text"><span class="av__celltext"></span></div>
 <div class="av__cell" data-id="filled" data-dtype="text"><span class="av__celltext">value</span></div>
+<div class="av__cell" data-id="select" data-dtype="select"><span class="av__celltext"></span></div>
 <div class="av__cell" data-id="rich" data-dtype="text"><div class="av__celltext av__celltext--rich"><p><strong>formatted</strong><a href="https://example.com">link</a></p></div></div>
-</div></div></div></div></div>`;
+</div></div></div></div><div class="p"><span>ordinary text</span></div></div>`;
     const element = document.querySelector<HTMLElement>(".protyle-wysiwyg");
     const block = element.querySelector<HTMLElement>(".av");
     const opened: HTMLElement[] = [];
@@ -51,6 +52,7 @@ const checkClicks = (code: string, mobile: boolean) => {
     const dependencies = {
         protyle, isMobile: () => mobile, isOnlyMeta: (event: MouseEvent) => event.ctrlKey || event.metaKey,
         hasClosestByClassName: closest, hasClosestBlock: (target: Element) => closest(target, "av"),
+        hasClosestByTag: (target: Element, tag: string) => target?.closest(tag),
         hasClosestByAttribute: (target: Element, name: string, value: string) => target.closest(`[${name}="${value}"]`),
         getBlockSelectionModeElement: (): HTMLElement => null, getAVTemplateInteractiveElement: (): HTMLElement => null,
         isCardCoverPositioning: () => false,
@@ -77,18 +79,19 @@ const checkClicks = (code: string, mobile: boolean) => {
     const harness = new Function(...Object.keys(dependencies), code)(...Object.values(dependencies));
     harness.element = element;
     let failure: Error;
+    let lastClickResult: unknown;
     const listen = (type: string, callback: (event: MouseEvent) => void) => element.addEventListener(type, event => {
         try { callback(event as MouseEvent); } catch (error) { failure = error; }
     });
     listen("mousedown", event => harness.down(event));
-    listen("click", event => harness.click(event));
-    const send = (type: string, target: Element, clientX = 100) => {
-        target.dispatchEvent(new MouseEvent(type, {bubbles: true, cancelable: true, clientX, clientY: 20, button: 0}));
+    listen("click", event => { lastClickResult = harness.click(event); });
+    const send = (type: string, target: Element, clientX = 100, clientY = 20) => {
+        target.dispatchEvent(new MouseEvent(type, {bubbles: true, cancelable: true, clientX, clientY, button: 0}));
         if (failure) throw failure;
     };
     for (const view of ["table", "list"]) {
         block.dataset.avType = view;
-        for (const id of ["empty", "filled", "rich"]) {
+        for (const id of ["empty", "filled", "rich", "select"]) {
             clear();
             const cell = element.querySelector<HTMLElement>(`[data-id="${id}"]`);
             const target = cell.querySelector("strong, span");
@@ -101,6 +104,13 @@ const checkClicks = (code: string, mobile: boolean) => {
             send("mouseup", target);
             send("click", target);
             check(opened.length === previous + 2, `${view}/${id}: selected cells still open`);
+            for (const [clientX, clientY] of [[110, 20], [100, 30]]) {
+                send("mousedown", target);
+                send("mousemove", target, clientX, clientY);
+                send("mouseup", target, clientX, clientY);
+                send("click", target, clientX, clientY);
+                check(opened.length === previous + 2 && selected.includes(cell), `${view}/${id}: moving within a cell selects without editing`);
+            }
         }
         const start = element.querySelector<HTMLElement>('[data-id="filled"]');
         const end = element.querySelector<HTMLElement>('[data-id="rich"]');
@@ -111,17 +121,45 @@ const checkClicks = (code: string, mobile: boolean) => {
         send("click", block);
         check(opened.length === previous && selected.includes(start) && selected.includes(end), `${view}: dragging selects without editing`);
         check(filled > 0, `${view}: drag selection retains the fill handle`);
+        send("mousedown", start);
+        send("mouseup", start, 110);
+        send("click", start, 110);
+        check(opened.length === previous, `${view}: releasing at a moved position selects without a mousemove event`);
+        send("mousedown", start);
+        send("mousemove", block, 110);
+        send("mouseup", start);
+        send("click", start);
+        check(opened.length === previous && selected.includes(start), `${view}: leaving the body and returning keeps the starting cell selected`);
+        send("mousedown", start);
+        send("mousemove", start, 110);
+        start.addEventListener("mouseup", event => event.stopPropagation(), {once: true});
+        send("mouseup", start, 110);
+        send("click", start, 110);
+        check(opened.length === previous, `${view}: an intercepted release cannot turn a drag into editing`);
+        send("mousedown", start);
+        send("mousemove", start, 110);
+        send("mouseup", document.body, 110);
+        check(document.onmousemove === null && document.onmouseup === null, `${view}: releasing outside cleans up selection handlers`);
+        const ordinaryText = element.querySelector(".p span");
+        send("mousedown", ordinaryText);
+        send("mouseup", ordinaryText);
+        send("click", ordinaryText);
+        check(lastClickResult === false, `${view}: an ordinary editor click continues after an interrupted cell drag`);
+        send("mousedown", start);
+        send("mouseup", start);
+        send("click", start);
+        check(opened.length === previous + 1, `${view}: a new click opens after an interrupted drag with no click event`);
         const link = end.querySelector("a");
         send("mousedown", link);
         send("mouseup", link);
         send("click", link);
-        check(navigated.at(-1) === "https://example.com" && opened.length === previous, `${view}: links navigate without editing`);
+        check(navigated.at(-1) === "https://example.com" && opened.length === previous + 1, `${view}: links navigate without editing`);
     }
     return "av-cell-click-ok";
 };
 
 for (const mobile of [false, true]) {
-    test(`database text fields open on the first click and preserve drag selection and links (${mobile ? "mobile" : "desktop"})`, {
+    test(`database cell clicks open editors while dragging selects and preserves links (${mobile ? "mobile" : "desktop"})`, {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 30000,
     }, async () => {

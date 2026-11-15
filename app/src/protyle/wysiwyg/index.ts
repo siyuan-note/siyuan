@@ -1275,6 +1275,7 @@ export class WYSIWYG {
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
             this.mouseDownWithMeta = event.button === 0 && isOnlyMeta(event);
+            this.preventClick = false;
             if (this.tableControl?.hasTouchSelection() && (event.target as Element).closest("td, th")) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -1971,10 +1972,15 @@ export class WYSIWYG {
                 }
                 let moveSelectCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
+                let hasMoved = false;
                 const nodeRect = nodeElement.getBoundingClientRect();
                 const scrollElement = nodeElement.querySelector(".av__scroll");
                 const bodyElement = hasClosestByClassName(avCellElement, "av__body") as HTMLElement;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                    if (event.clientX !== moveEvent.clientX || event.clientY !== moveEvent.clientY) {
+                        hasMoved = true;
+                        this.preventClick = true;
+                    }
                     const tempCellElement = hasClosestByClassName(moveEvent.target as HTMLElement, "av__cell") as HTMLElement;
                     if (scrollElement.scrollWidth > scrollElement.clientWidth + 2) {
                         if (moveEvent.clientX > nodeRect.right - 10) {
@@ -1999,16 +2005,17 @@ export class WYSIWYG {
                     }
                 };
 
-                documentSelf.onmouseup = () => {
+                documentSelf.onmouseup = (upEvent: MouseEvent) => {
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
-                    if (lastCellElement) {
+                    // 快速移动可能只在释放事件中体现坐标变化，移出单元格时仍保留起点选区。
+                    if (lastCellElement || hasMoved || event.clientX !== upEvent.clientX || event.clientY !== upEvent.clientY) {
                         selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
                         focusBlock(nodeElement);
-                        addDragFill(lastCellElement);
+                        addDragFill(lastCellElement || avCellElement);
                         this.preventClick = true;
                     }
                     return false;

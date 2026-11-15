@@ -4310,6 +4310,7 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            hideElements(["toolbar"], protyle);
             this.persistComposition?.();
             isComposition = true;
             compositionInputText = "";
@@ -4608,6 +4609,7 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            hideElements(["toolbar"], protyle);
             if (this.preventInput) {
                 event.stopPropagation();
                 return;

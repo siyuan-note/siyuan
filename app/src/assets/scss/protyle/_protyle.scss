@@ -1157,6 +1157,8 @@
   // 跟随单元格的可用宽度，保证预览与编辑使用相同的折行边界。
   width: auto;
   max-width: 100%;
+  // 字形的绘制范围可以超出文字排版宽度，允许笔画伸入单元格留白。
+  overflow: visible;
 }
 
 .table__cell-rich .code-block,
@@ -1215,6 +1217,7 @@
   .protyle-wysiwyg {
     padding: 0 !important;
     min-height: 1.6em;
+    overflow: visible;
     // 继承单元格字号，保持预览与编辑时的文字大小一致。
     font-size: inherit;
   }

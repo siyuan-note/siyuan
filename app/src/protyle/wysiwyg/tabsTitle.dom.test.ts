@@ -23,14 +23,21 @@ const browserCases = async (source: string, css: string) => {
     document.head.append(style);
     try {
         for (const extension of ["svg", "png"]) {
-            for (const titleHTML of [
-                `<img class="emoji" src="/emojis/custom.${extension}">`,
-                `<img src="/assets/image.${extension}">`,
-                "<span contenteditable=\"false\" data-type=\"img\" class=\"img\"><span> </span><span>" +
-                `<img src="/assets/large.${extension}" width="600" height="900"></span><span> </span></span>`,
-                `A<img class="emoji" src="/emojis/custom.${extension}">B`,
-                `<img class="emoji" src="/emojis/custom.${extension}"><img class="emoji" src="/emojis/second.${extension}">`,
-                "&#x1f600;", "", "<strong>A</strong><br>B",
+            const imageHTML = "\u200b<span contenteditable=\"false\" data-type=\"img\" class=\"img\">" +
+                `<span> </span><span><img src="/assets/large.${extension}" alt=" Picture " width="600" height="900">` +
+                "</span><span> </span><span class=\"img__title\">Image controls</span></span>";
+            for (const [titleHTML, expectedTooltip] of [
+                [`<img class="emoji" src="/emojis/custom.${extension}">`, "Untitled"],
+                [`<img src="/assets/image.${extension}">`, "Untitled"],
+                ["<span contenteditable=\"false\" data-type=\"img\" class=\"img\"><span> </span><span>" +
+                    `<img src="/assets/large.${extension}" width="600" height="900"></span><span> </span></span>`, "Untitled"],
+                [`A<img class="emoji" src="/emojis/custom.${extension}">B`, "AB"],
+                [`<img class="emoji" src="/emojis/custom.${extension}"><img class="emoji" src="/emojis/second.${extension}">`, "Untitled"],
+                ["&#x1f600;", "😀"], ["", "Untitled"], ["<strong>A</strong><br>B", "A B"],
+                [`${imageHTML}234`, "234"], [`A${imageHTML}B`, "AB"], [`A ${imageHTML} B`, "A  B"],
+                [imageHTML, "Picture"], [imageHTML.replace('alt=" Picture "', 'alt=" \u200b "'), "Untitled"],
+                [`<img alt=" First " src="/assets/first.${extension}"><img alt=" Second " src="/assets/second.${extension}">`, "First Second"],
+                ["  A  B  ", "A  B"],
             ]) {
                 editor.innerHTML = '<div class="tabs" data-type="NodeTabs" data-node-id="tabs">' +
                     '<div class="tab-item" data-type="NodeTabItem" data-node-id="item">' +
@@ -39,7 +46,8 @@ const browserCases = async (source: string, css: string) => {
                 api.tabsRender(editor, {label: "Untitled"});
                 const title = editor.querySelector<HTMLElement>(".tab-item-title");
                 const label = editor.querySelector(".tabs-tab-label");
-                check.ok(editor.querySelector(".tabs-tab").getAttribute("aria-label").trim(), "image-only tabs have a tooltip");
+                check.equal(editor.querySelector(".tabs-tab").getAttribute("aria-label"), expectedTooltip,
+                    "tab tooltips contain title text or normalized image alternatives: " + titleHTML);
                 label.querySelectorAll("img").forEach(image => {
                     check.ok(image.getBoundingClientRect().height <= 22, "tab label images fit the header height");
                 });

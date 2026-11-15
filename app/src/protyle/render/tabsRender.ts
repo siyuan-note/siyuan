@@ -318,7 +318,12 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             button.innerHTML = '<span class="tabs-tab-label"></span>';
                             button.firstElementChild.textContent = label;
                         }
-                        const tooltip = button.textContent.trim() || Array.from(button.querySelectorAll("img"), image => image.alt)
+                        const tooltipElement = button.cloneNode(true) as HTMLElement;
+                        tooltipElement.querySelectorAll(".img").forEach(image => {
+                            image.replaceWith(...image.querySelectorAll("img"));
+                        });
+                        const tooltip = tooltipElement.textContent.replace(/\u200b/g, "").trim() ||
+                            Array.from(tooltipElement.querySelectorAll("img"), image => image.alt.replace(/\u200b/g, "").trim())
                             .filter(Boolean).join(" ") || controller.options.label || "Tab";
                         button.setAttribute("aria-label", escapeHtml(tooltip));
                         button.setAttribute("data-position", "north");

@@ -116,6 +116,18 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
     check.match(template.content.querySelector("[contenteditable]").textContent, /^First second Ref/);
     template.innerHTML = flatten('<span data-type="em">Inline</span>', "", true);
     check.equal(template.content.querySelector('[data-type="em"]').textContent, "Inline");
+    const withRefCount = (block: string, count: number) => block.replace(/<\/div>$/,
+        `<div class="protyle-attr" contenteditable="false"><div class="protyle-attr--refcount popover__block">${count}</div></div></div>`);
+    const copiedParagraph = withRefCount(paragraph('<span data-type="strong">234234234</span>'), 1);
+    const copiedHeading = withRefCount(paragraph('<span data-type="block-ref" data-id="20260101000001-abcdefg" data-subtype="s">234</span>')
+        .replace('data-type="NodeParagraph"', 'data-type="NodeHeading" data-subtype="h2"')
+        .replace('class="p"', 'class="h2"'), 12);
+    template.innerHTML = flatten(copiedParagraph + copiedHeading, "234234234\n234", true);
+    check.equal(template.content.querySelector("[contenteditable]").textContent, "234234234 234",
+        "pasting blocks into a title excludes their reference counts");
+    check.equal(template.content.querySelector(".protyle-attr--refcount"), null);
+    check.equal(template.content.querySelector('[data-type="strong"]').textContent, "234234234");
+    check.equal(template.content.querySelector<HTMLElement>('[data-type="block-ref"]').dataset.id, "20260101000001-abcdefg");
     for (const prefix of ["Plain", '<span data-type="em">Styled</span>']) {
         for (const suffix of [" (Duplicated 2026-11-08 00:02:47)", " (Conflicted 2026-11-08 00:02:47)"]) {
             template.innerHTML = initial(paragraph(prefix + suffix), "20260101000000-abcdefg");

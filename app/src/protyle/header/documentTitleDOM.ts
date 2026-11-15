@@ -5,6 +5,7 @@ const paragraphSelector = '[data-type="NodeParagraph"]';
 export const flattenDocumentTitlePaste = (blockDOM: string, text: string, internal: boolean) => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
+    template.content.querySelectorAll(".protyle-attr").forEach(element => element.remove());
     const paragraph = document.createElement("div");
     paragraph.className = "p";
     paragraph.dataset.type = "NodeParagraph";

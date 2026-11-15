@@ -134,7 +134,7 @@ for (const mobile of [false, true]) {
     });
 }
 
-test("the shared more menu persists only the confirmed preference and disables it when grouping is unavailable", async () => {
+test("the shared more submenu persists explicit preferences after confirmation and disables unavailable grouping", async () => {
     for (const [method, group, disabled] of [[0, 0, true], [0, 1, false], [2, 1, false], [4, 1, true]]) {
         const items = [];
         let refreshes = 0;
@@ -148,26 +148,40 @@ test("the shared more menu persists only the confirmed preference and disables i
                 assert.equal(key, "groupFolded");
                 pending.push(() => { state.window.siyuan.config.search[key] = value; applied(); });
             }}};
-        state.window.siyuan.languages.searchGroupFolded = "fold groups";
+        state.window.siyuan.languages = {searchGroupState: "grouped results",
+            expandByDefault: "expand by default", collapseByDefault: "collapse by default"};
         state.window.siyuan.menus = {menu: {element: new Element(), remove() {}, append: item => items.push(item)}};
         const moreMenu = load("src/search/menu.ts", "moreMenu", context);
-        await moreMenu(state.config, [], {}, () => { refreshes++; }, () => {});
-        const toggle = items.find(item => item.label === "fold groups");
-        assert.ok(toggle);
-        assert.equal(toggle.disabled, disabled);
-        assert.equal(toggle.current, false);
+        const open = async () => {
+            items.length = 0;
+            await moreMenu(state.config, [], {}, () => { refreshes++; }, () => {});
+            const parent = items.find(item => item.label === "grouped results");
+            assert.ok(parent);
+            assert.equal(parent.type, "submenu");
+            assert.equal(parent.disabled, disabled);
+            assert.equal(parent.current, undefined);
+            assert.equal(parent.click, undefined);
+            assert.deepEqual(Array.from(parent.submenu, item => item.label), ["expand by default", "collapse by default"]);
+            assert.deepEqual(Array.from(parent.submenu, item => item.current),
+                [!state.window.siyuan.config.search.groupFolded, state.window.siyuan.config.search.groupFolded]);
+            return parent.submenu;
+        };
+        await open();
         if (disabled) continue;
-        toggle.click();
-        assert.equal(refreshes, 0);
-        assert.equal(state.window.siyuan.config.search.groupFolded, false);
-        pending.shift()();
-        assert.equal(refreshes, 1);
-        state.render();
-        assertFolded(state, [true, true]);
-        toggle.click();
-        pending.shift()();
-        state.render();
-        assertFolded(state, [false, false]);
+        for (const folded of [true, true, false, false]) {
+            const submenu = await open();
+            const previous = state.window.siyuan.config.search.groupFolded;
+            const beforeRefreshes = refreshes;
+            submenu[folded ? 1 : 0].click();
+            assert.equal(refreshes, beforeRefreshes);
+            assert.equal(state.window.siyuan.config.search.groupFolded, previous);
+            assert.equal(pending.length, 1);
+            pending.shift()();
+            assert.equal(refreshes, beforeRefreshes + 1);
+            state.render();
+            assertFolded(state, [folded, folded]);
+        }
+        await open();
     }
 });
 

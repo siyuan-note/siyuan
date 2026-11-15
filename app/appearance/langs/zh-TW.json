@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "分組結果",
+	"expandByDefault": "預設展開",
+	"collapseByDefault": "預設摺疊",
 	"agentNotificationExpired": "此確認已處理、已過期或已無法存取",
 	"agentQueueMessage": "訊息排隊",
 	"agentQueuedMessages": "待傳送訊息（${count}）",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "僅在目前編輯工作階段中授權勾選的目錄，預設全部勾選",
 	"markdownResourceDirectoriesEmpty": "沒有需要額外授權的支援本機圖片目錄",
 	"markdownResourceDirectoriesChanged": "目錄或文件已變更，請關閉對話框後重試",
-	"searchGroupFolded": "預設摺疊分組結果",
 	"aiOneTimeAction": "描述如何編輯（一次性指令）",
 	"pluginSnapshotOpenProgram": "開啟程式",
 	"pluginSnapshotOpenData": "開啟資料",

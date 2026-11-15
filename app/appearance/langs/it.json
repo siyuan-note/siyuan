@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "Risultati raggruppati",
+	"expandByDefault": "Espandi per impostazione predefinita",
+	"collapseByDefault": "Comprimi per impostazione predefinita",
 	"agentNotificationExpired": "Questa conferma è già stata gestita, è scaduta o non è più disponibile",
 	"agentQueueMessage": "Accoda messaggio",
 	"agentQueuedMessages": "Messaggi in coda (${count})",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "Autorizza le cartelle selezionate solo per questa sessione di modifica; inizialmente sono tutte selezionate",
 	"markdownResourceDirectoriesEmpty": "Nessun’altra cartella con immagini locali supportate richiede l’autorizzazione",
 	"markdownResourceDirectoriesChanged": "Le cartelle o il documento sono cambiati; chiudi la finestra e riprova",
-	"searchGroupFolded": "Comprimi i risultati raggruppati per impostazione predefinita",
 	"aiOneTimeAction": "Descrivi come modificare (istruzione singola)",
 	"pluginSnapshotOpenProgram": "Apri programma",
 	"pluginSnapshotOpenData": "Apri dati",

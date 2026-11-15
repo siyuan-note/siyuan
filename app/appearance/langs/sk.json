@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "Zoskupené výsledky",
+	"expandByDefault": "Predvolene rozbaliť",
+	"collapseByDefault": "Predvolene zbaliť",
 	"agentNotificationExpired": "Toto potvrdenie už bolo vybavené, vypršalo alebo už nie je dostupné",
 	"agentQueueMessage": "Zaradiť správu do frontu",
 	"agentQueuedMessages": "Správy vo fronte (${count})",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "Povoliť vybrané priečinky iba počas tejto relácie úprav; predvolene sú vybrané všetky",
 	"markdownResourceDirectoriesEmpty": "Žiadne ďalšie priečinky s podporovanými lokálnymi obrázkami nepotrebujú povolenie",
 	"markdownResourceDirectoriesChanged": "Priečinky alebo dokument sa zmenili; zatvorte dialóg a skúste to znova",
-	"searchGroupFolded": "Predvolene zbaliť zoskupené výsledky",
 	"aiOneTimeAction": "Opíšte úpravu (jednorazový pokyn)",
 	"pluginSnapshotOpenProgram": "Otvoriť program",
 	"pluginSnapshotOpenData": "Otvoriť údaje",

@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "그룹화된 결과",
+	"expandByDefault": "기본적으로 펼치기",
+	"collapseByDefault": "기본적으로 접기",
 	"agentNotificationExpired": "이 확인 요청은 이미 처리되었거나 만료되었거나 더 이상 사용할 수 없습니다",
 	"agentQueueMessage": "메시지 대기열에 추가",
 	"agentQueuedMessages": "대기 중인 메시지 (${count})",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "선택한 폴더를 현재 편집 세션에서만 허용합니다. 기본적으로 모든 폴더가 선택됩니다",
 	"markdownResourceDirectoriesEmpty": "추가 권한이 필요한 지원되는 로컬 이미지 폴더가 없습니다",
 	"markdownResourceDirectoriesChanged": "폴더 또는 문서가 변경되었습니다. 대화 상자를 닫고 다시 시도하세요",
-	"searchGroupFolded": "그룹화된 결과를 기본적으로 접기",
 	"aiOneTimeAction": "편집 방법 입력 (일회성 지시)",
 	"pluginSnapshotOpenProgram": "프로그램 열기",
 	"pluginSnapshotOpenData": "데이터 열기",

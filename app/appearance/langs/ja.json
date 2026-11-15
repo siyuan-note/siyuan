@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "グループ化した結果",
+	"expandByDefault": "既定で展開",
+	"collapseByDefault": "既定で折りたたむ",
 	"agentNotificationExpired": "この確認は処理済み、有効期限切れ、または利用できなくなっています",
 	"agentQueueMessage": "メッセージを送信待ちにする",
 	"agentQueuedMessages": "送信待ちのメッセージ（${count}）",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "選択したフォルダーを現在の編集セッションでのみ許可します。既定ではすべて選択されています",
 	"markdownResourceDirectoriesEmpty": "追加の許可が必要な、対応するローカル画像のフォルダーはありません",
 	"markdownResourceDirectoriesChanged": "フォルダーまたは文書が変更されました。ダイアログを閉じて再試行してください",
-	"searchGroupFolded": "グループ化した結果を既定で折りたたむ",
 	"aiOneTimeAction": "編集内容を入力（一度だけ使う指示）",
 	"pluginSnapshotOpenProgram": "プログラムを開く",
 	"pluginSnapshotOpenData": "データを開く",

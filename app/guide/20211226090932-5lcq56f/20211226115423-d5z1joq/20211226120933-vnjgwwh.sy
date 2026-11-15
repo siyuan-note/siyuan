@@ -7,7 +7,7 @@
 		"id": "20211226120933-vnjgwwh",
 		"title": "搜索進階",
 		"type": "doc",
-		"updated": "20261114162405"
+		"updated": "20261115223610"
 	},
 	"Children": [
 		{
@@ -73,12 +73,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261114162405-31b1f46",
-				"updated": "20261114162405"
+				"updated": "20261115223610"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在搜尋面板中啟用 "
+					"Data": "在搜尋面板中透過 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -92,11 +92,29 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "預設摺疊分組結果"
+					"TextMarkTextContent": "分組結果"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。此偏好預設關閉，僅在依文件分組時生效。新搜尋與重新整理結果時會套用此偏好，仍可手動展開或摺疊分組。桌面端仍會預覽第一筆結果，使用鍵盤導覽時會展開所選結果所在的分組。"
+					"Data": " 選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "預設展開"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "預設摺疊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。預設展開，僅在依文件分組時生效。新搜尋與重新整理結果時會套用此偏好，仍可手動展開或摺疊分組。桌面端仍會預覽第一筆結果，使用鍵盤導覽時會展開所選結果所在的分組。"
 				}
 			]
 		},

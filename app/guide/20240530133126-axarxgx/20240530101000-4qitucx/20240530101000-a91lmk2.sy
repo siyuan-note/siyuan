@@ -8,7 +8,7 @@
 		"id": "20240530101000-a91lmk2",
 		"title": "高度な検索",
 		"type": "doc",
-		"updated": "20261114162405"
+		"updated": "20261115223610"
 	},
 	"Children": [
 		{
@@ -74,12 +74,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261114162405-ef75276",
-				"updated": "20261114162405"
+				"updated": "20261115223610"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "検索パネルで "
+					"Data": "検索パネルの "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -93,11 +93,29 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "グループ化した結果を既定で折りたたむ"
+					"TextMarkTextContent": "グループ化した結果"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を有効にします。この設定は既定で無効で、文書ごとにグループ化した場合のみ適用されます。新しい検索や結果の更新時に適用され、グループは手動でも展開・折りたたみできます。デスクトップでは最初の結果のプレビューを維持し、キーボードで移動すると選択した結果のグループが展開されます。"
+					"Data": " で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "既定で展開"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "既定で折りたたむ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択します。既定では展開され、文書ごとにグループ化した場合のみ適用されます。新しい検索や結果の更新時に適用され、グループは手動でも展開・折りたたみできます。デスクトップでは最初の結果のプレビューを維持し、キーボードで移動すると選択した結果のグループが展開されます。"
 				}
 			]
 		},

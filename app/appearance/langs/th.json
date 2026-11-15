@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "ผลลัพธ์ที่จัดกลุ่ม",
+	"expandByDefault": "ขยายตามค่าเริ่มต้น",
+	"collapseByDefault": "ยุบตามค่าเริ่มต้น",
 	"agentNotificationExpired": "คำขอยืนยันนี้ได้รับการจัดการแล้ว หมดอายุ หรือไม่พร้อมใช้งานอีกต่อไป",
 	"agentQueueMessage": "เพิ่มข้อความในคิว",
 	"agentQueuedMessages": "ข้อความในคิว (${count})",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "อนุญาตโฟลเดอร์ที่เลือกเฉพาะในเซสชันการแก้ไขนี้ โดยเลือกทุกโฟลเดอร์ไว้ตามค่าเริ่มต้น",
 	"markdownResourceDirectoriesEmpty": "ไม่มีโฟลเดอร์รูปภาพในเครื่องที่รองรับซึ่งต้องขอสิทธิ์เพิ่มเติม",
 	"markdownResourceDirectoriesChanged": "โฟลเดอร์หรือเอกสารเปลี่ยนไป โปรดปิดกล่องโต้ตอบแล้วลองอีกครั้ง",
-	"searchGroupFolded": "ยุบผลลัพธ์ที่จัดกลุ่มตามค่าเริ่มต้น",
 	"aiOneTimeAction": "อธิบายวิธีแก้ไข (คำสั่งใช้ครั้งเดียว)",
 	"pluginSnapshotOpenProgram": "เปิดโปรแกรม",
 	"pluginSnapshotOpenData": "เปิดข้อมูล",

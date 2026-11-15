@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "Груписани резултати",
+	"expandByDefault": "Подразумевано прошири",
+	"collapseByDefault": "Подразумевано скупи",
 	"agentNotificationExpired": "Ова потврда је обрађена, истекла је или више није доступна",
 	"agentQueueMessage": "Додај поруку у ред",
 	"agentQueuedMessages": "Поруке у реду (${count})",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "Дозволи означене фасцикле само током ове сесије уређивања; подразумевано су све означене",
 	"markdownResourceDirectoriesEmpty": "Нема додатних фасцикли са подржаним локалним сликама које захтевају дозволу",
 	"markdownResourceDirectoriesChanged": "Фасцикле или документ су промењени; затворите дијалог и покушајте поново",
-	"searchGroupFolded": "Подразумевано скупи груписане резултате",
 	"aiOneTimeAction": "Опишите измену (једнократно упутство)",
 	"pluginSnapshotOpenProgram": "Отвори програм",
 	"pluginSnapshotOpenData": "Отвори податке",

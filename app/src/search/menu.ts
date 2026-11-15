@@ -726,12 +726,17 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }, capabilities.group)).element);
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
-        label: window.siyuan.languages.searchGroupFolded,
-        current: Boolean(window.siyuan.config.search.groupFolded),
+        label: window.siyuan.languages.searchGroupState,
+        type: "submenu",
         disabled: config.group !== 1 || !capabilities.group,
-        click() {
-            void searchConfigApi.patch("groupFolded", !window.siyuan.config.search.groupFolded, () => cb());
-        }
+        submenu: [false, true].map(groupFolded => withSearchMethodAvailability({
+            iconHTML: "",
+            label: window.siyuan.languages[groupFolded ? "collapseByDefault" : "expandByDefault"],
+            current: Boolean(window.siyuan.config.search.groupFolded) === groupFolded,
+            click() {
+                void searchConfigApi.patch("groupFolded", groupFolded, () => cb());
+            }
+        }, config.group === 1 && capabilities.group)),
     }).element);
     if (layoutMenu) {
         layoutMenu();

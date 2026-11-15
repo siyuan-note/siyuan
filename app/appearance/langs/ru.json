@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "Сгруппированные результаты",
+	"expandByDefault": "Разворачивать по умолчанию",
+	"collapseByDefault": "Сворачивать по умолчанию",
 	"agentNotificationExpired": "Этот запрос подтверждения обработан, истёк или больше недоступен",
 	"agentQueueMessage": "Добавить сообщение в очередь",
 	"agentQueuedMessages": "Сообщения в очереди (${count})",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "Разрешить выбранные папки только на время текущего редактирования; по умолчанию выбраны все",
 	"markdownResourceDirectoriesEmpty": "Нет дополнительных папок с поддерживаемыми локальными изображениями, требующих разрешения",
 	"markdownResourceDirectoriesChanged": "Папки или документ изменились; закройте диалог и повторите попытку",
-	"searchGroupFolded": "Сворачивать сгруппированные результаты по умолчанию",
 	"aiOneTimeAction": "Опишите изменения (разовая инструкция)",
 	"pluginSnapshotOpenProgram": "Открыть программу",
 	"pluginSnapshotOpenData": "Открыть данные",

@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "Resultados agrupados",
+	"expandByDefault": "Expandir por padrão",
+	"collapseByDefault": "Recolher por padrão",
 	"agentNotificationExpired": "Esta confirmação já foi tratada, expirou ou não está mais disponível",
 	"agentQueueMessage": "Adicionar mensagem à fila",
 	"agentQueuedMessages": "Mensagens na fila (${count})",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "Autorizar as pastas marcadas apenas nesta sessão de edição; todas são marcadas por padrão",
 	"markdownResourceDirectoriesEmpty": "Nenhuma outra pasta com imagens locais compatíveis precisa de autorização",
 	"markdownResourceDirectoriesChanged": "As pastas ou o documento mudaram; feche a caixa de diálogo e tente novamente",
-	"searchGroupFolded": "Recolher resultados agrupados por padrão",
 	"aiOneTimeAction": "Descreva como editar (instrução de uso único)",
 	"pluginSnapshotOpenProgram": "Abrir programa",
 	"pluginSnapshotOpenData": "Abrir dados",

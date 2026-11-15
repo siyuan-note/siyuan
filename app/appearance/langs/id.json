@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "Hasil yang dikelompokkan",
+	"expandByDefault": "Perluas secara bawaan",
+	"collapseByDefault": "Ciutkan secara bawaan",
 	"agentNotificationExpired": "Konfirmasi ini sudah ditangani, kedaluwarsa, atau tidak lagi tersedia",
 	"agentQueueMessage": "Antrekan pesan",
 	"agentQueuedMessages": "Pesan dalam antrean (${count})",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "Izinkan folder yang dicentang hanya selama sesi penyuntingan ini; semua folder dicentang secara bawaan",
 	"markdownResourceDirectoriesEmpty": "Tidak ada folder tambahan berisi gambar lokal yang didukung yang memerlukan izin",
 	"markdownResourceDirectoriesChanged": "Folder atau dokumen telah berubah; tutup dialog dan coba lagi",
-	"searchGroupFolded": "Ciutkan hasil yang dikelompokkan secara bawaan",
 	"aiOneTimeAction": "Jelaskan cara mengedit (instruksi sekali pakai)",
 	"pluginSnapshotOpenProgram": "Buka program",
 	"pluginSnapshotOpenData": "Buka data",

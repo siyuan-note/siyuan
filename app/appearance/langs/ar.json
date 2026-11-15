@@ -1,4 +1,7 @@
 {
+	"searchGroupState": "النتائج المجمعة",
+	"expandByDefault": "توسيع افتراضيًا",
+	"collapseByDefault": "طي افتراضيًا",
 	"agentNotificationExpired": "تم التعامل مع طلب التأكيد هذا أو انتهت صلاحيته أو لم يعد متاحًا",
 	"agentQueueMessage": "إضافة رسالة إلى قائمة الانتظار",
 	"agentQueuedMessages": "الرسائل في قائمة الانتظار (${count})",
@@ -6,7 +9,6 @@
 	"markdownResourceDirectoriesTip": "السماح بالمجلدات المحددة لجلسة التحرير الحالية فقط؛ جميع المجلدات محددة افتراضيًا",
 	"markdownResourceDirectoriesEmpty": "لا توجد مجلدات إضافية لصور محلية مدعومة تتطلب إذنًا",
 	"markdownResourceDirectoriesChanged": "تغيرت المجلدات أو المستند؛ أغلق مربع الحوار وأعد المحاولة",
-	"searchGroupFolded": "طي نتائج المجموعات افتراضيًا",
 	"aiOneTimeAction": "صِف كيفية التحرير (تعليمات لمرة واحدة)",
 	"pluginSnapshotOpenProgram": "فتح البرنامج",
 	"pluginSnapshotOpenData": "فتح البيانات",

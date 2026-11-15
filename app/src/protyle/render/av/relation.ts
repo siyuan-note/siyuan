@@ -30,6 +30,7 @@ import {getAVBlockIconHTML} from "./blockIcon";
 import {unicode2Emoji} from "../../../emoji";
 import {bindRelationLayout} from "./relationLayout";
 import {getRelationKeyboardTarget} from "./relationKeyboard";
+import {preserveRelationPosition} from "./relationPosition";
 import {getTopBarHeight} from "../../../layout/getTopBarHeight";
 import {canEditAVHost, getAVHostBlockID, getAVRelationHost} from "./host";
 import {getPendingRelatedViewConfig} from "./relatedViewConfig";
@@ -574,6 +575,7 @@ export const bindRelationEvent = (options: {
         keyword: "",
         loading: false,
         loaderVisible: false,
+        refreshPending: false,
         columns: [] as IAVColumn[],
         gridTemplate: "",
         sort: undefined as {column: string, order: "ASC" | "DESC"} | undefined,
@@ -732,7 +734,8 @@ export const bindRelationEvent = (options: {
         columns: IAVColumn[],
         selectedRows: IAVRow[],
         rows: IAVRow[]
-    }, reset: boolean) => {
+    }, reset: boolean, preservePosition = false) => {
+        const restorePosition = preservePosition ? preserveRelationPosition(listElement) : undefined;
         const focusedColumn = listElement.querySelector<HTMLElement>('[role="columnheader"]:focus')?.dataset.relationColumn;
         state.columns = data.columns || state.columns;
         if (reset || !state.gridTemplate) {
@@ -767,22 +770,32 @@ ${genRelationLoaderHTML(false)}`;
                 .find(header => header.dataset.relationColumn === focusedColumn)?.focus();
         }
         renderFooter();
+        restorePosition?.();
         getRelationKeyboardTarget(listElement, state.keyword.trim() !== "");
         updateCopyRelatedItems(options.menuElement);
     };
-    const loadPage = (reset: boolean) => {
-        if (!sourceIsCurrent()) return;
+    const loadPage = (reset: boolean, preservePosition = false) => {
+        if (!sourceIsCurrent() || searchTimer) return;
         if (state.loading && !reset) {
             return;
         }
+        if (!reset && state.refreshPending) {
+            loadPage(true, true);
+            return;
+        }
+        const pageCount = preservePosition ? Math.max(1, state.page) : 1;
         if (reset) {
             state.controller?.abort();
-            state.page = 0;
-            state.total = 0;
+            state.refreshPending = preservePosition;
+            if (!preservePosition) {
+                state.page = 0;
+                state.total = 0;
+            }
         } else if (!hasMore()) {
             return;
         }
         const page = reset ? 1 : state.page + 1;
+        const pageSize = reset ? pageCount * RELATION_PAGE_SIZE : RELATION_PAGE_SIZE;
         const keyword = state.keyword;
         const controller = new AbortController();
         const selectedItems = getSelectedItems();
@@ -799,7 +812,7 @@ ${genRelationLoaderHTML(false)}`;
             keyID: relationElement.getAttribute("data-key-id"),
             keyword,
             page,
-            pageSize: RELATION_PAGE_SIZE,
+            pageSize,
             selectedBlockIDs: selectedItems.map((item) => item.id),
             excludeItemIDs: relationElement.dataset.subItemsParent === "true" ? options.cellElements.map(cell =>
                 getFieldIdByCellElement(cell, options.blockElement.getAttribute("data-av-type") as TAVView)) : undefined,
@@ -810,9 +823,10 @@ ${genRelationLoaderHTML(false)}`;
                 return;
             }
             const rows = response.data.rows as IAVRow[] || [];
-            state.page = page;
+            state.page = reset ? pageCount : page;
+            state.refreshPending = false;
             state.total = typeof response.data.total === "number" ? response.data.total :
-                (page - 1) * RELATION_PAGE_SIZE + rows.length + (rows.length === RELATION_PAGE_SIZE ? 1 : 0);
+                (page - 1) * pageSize + rows.length + (rows.length === pageSize ? 1 : 0);
             const databaseName = inputElement.parentElement.parentElement.querySelector(".popover__block");
             databaseName.textContent = response.data.name;
             databaseName.setAttribute("data-id", response.data.blockIDs?.[0] || "");
@@ -853,7 +867,7 @@ ${genRelationLoaderHTML(false)}`;
                 columns,
                 selectedRows,
                 rows,
-            }, reset);
+            }, reset, preservePosition);
             setLoading(false);
             const listHeightChanged = updateListNaturalMaxHeight(keyword === "" || rows.length === RELATION_PAGE_SIZE);
             if (!positionInitialized || listHeightChanged) {
@@ -903,6 +917,9 @@ ${genRelationLoaderHTML(false)}`;
     });
     const search = () => {
         state.keyword = inputElement.value;
+        state.page = 0;
+        state.total = 0;
+        state.refreshPending = false;
         listElement.querySelectorAll(".b3-menu__item--current").forEach(item => item.classList.remove("b3-menu__item--current"));
         relationItemPreviews.delete(options.menuElement);
         renderFooter();
@@ -972,12 +989,13 @@ ${genRelationLoaderHTML(false)}`;
         });
     });
     listElement.addEventListener("scroll", () => {
-        if (!state.loading && hasMore() && listElement.scrollHeight - listElement.scrollTop - listElement.clientHeight <= 30) {
+        if (!state.loading && (hasMore() || state.refreshPending) && listElement.scrollHeight - listElement.scrollTop - listElement.clientHeight <= 30) {
             loadPage(false);
         }
     });
     const refresh = () => {
-        loadPage(true);
+        // 选择集合变化后重新读取已浏览范围，后续分页沿用同一候选序列的边界。
+        loadPage(true, true);
     };
     options.menuElement.addEventListener("relationrefresh", refresh);
     options.menuElement.addEventListener("relationresize", resizeList);
@@ -1142,14 +1160,17 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
             return;
         }
         if (target.dataset.relationType === "selected") {
+            const restorePosition = preserveRelationPosition(menuElement.querySelector(".b3-menu__items"), target);
             target.dataset.relationType = "candidate";
             target.removeAttribute("draggable");
             target.querySelector(".av__relation-table-check use").setAttribute("xlink:href", "#iconUncheck");
             target.querySelector(".av__relation-table-primary > .fn__grab")?.remove();
             menuElement.querySelector('[data-relation-type="candidateRows"]').prepend(target);
             updateCellsValue(protyle, nodeElement, getRelationValue(menuElement), cellElements);
+            restorePosition();
             menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
         } else if (rowId) {
+            const restorePosition = preserveRelationPosition(menuElement.querySelector(".b3-menu__items"), target);
             target.dataset.relationType = "selected";
             target.setAttribute("draggable", "true");
             target.querySelector(".av__relation-table-check use").setAttribute("xlink:href", "#iconCheck");
@@ -1158,6 +1179,7 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                 '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>');
             menuElement.querySelector('[data-relation-type="selectedRows"]').append(target);
             updateCellsValue(protyle, nodeElement, getRelationValue(menuElement), cellElements);
+            restorePosition();
             menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
         } else {
             const entry = relationItemPreviews.get(menuElement);

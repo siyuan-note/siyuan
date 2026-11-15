@@ -138,7 +138,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
     const context = {
         ...load("capabilities"), ...load("cellValue"), ...load("batchValue"), ...load("dragFillValue"),
         ...load("viewType"), ...load("dateSubmit"), ...load("selectionState"), ...load("panelTarget"),
-        ...load("assetUploadTarget"),
+        ...load("assetUploadTarget"), ...load("relationPosition"),
         document, window, CustomEvent, setTimeout,
         cellValues: plain(values),
         getAVData: () => state.data,

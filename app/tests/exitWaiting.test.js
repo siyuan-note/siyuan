@@ -148,7 +148,7 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(resumed.details, "ready");
                 assert.equal(resumed.progress, "100%");
                 assert.equal(resumed.samePage, true);
-                const html = `<html><head><style>${theme}\n${width === 360 ? mobileCSS : css}</style></head><body><script src="${icons}"></script></body></html>`;
+                const html = `<html data-theme-mode="${mode}"><head><style>${theme}\n${width === 360 ? mobileCSS : css}</style></head><body><script src="${icons}"></script></body></html>`;
                 const file = path.join(process.argv[2], "dialog.html");
                 fs.writeFileSync(file, html);
                 await win.loadFile(file);
@@ -165,12 +165,14 @@ if (process.versions.electron && process.type === "browser") {
                     document.body.dispatchEvent(key);
                     return {visible: bounds.width > 0 && bounds.left >= 0 && bounds.right <= innerWidth,
                         globalMask: maskBounds.left === 0 && maskBounds.top === 0 && maskBounds.width === innerWidth && maskBounds.height === innerHeight,
+                        backdrop: getComputedStyle(mask).backdropFilter,
                         overflow: status.scrollWidth > status.clientWidth, text: status.textContent,
                         endless: segment.animationName === "b3-progress-slide" && segment.animationIterationCount === "infinite",
                         noDialog: !document.querySelector(".b3-dialog__container"), inputBlocked: key.defaultPrevented};
                 })()`);
                 assert.equal(waiting.visible, true);
                 assert.equal(waiting.globalMask, true);
+                assert.match(waiting.backdrop, /blur\(8px\)/);
                 assert.equal(waiting.overflow, false);
                 assert.equal(waiting.endless, true);
                 assert.equal(waiting.noDialog, true);
@@ -258,7 +260,7 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("exit uses endless progress and boot resumes in place after waiting in light, dark and narrow layouts", {timeout: 60000}, async () => {
+    test("exit immediately blurs with endless progress and boot resumes in light, dark and narrow layouts", {timeout: 60000}, async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-exit-wait-test-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

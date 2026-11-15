@@ -277,9 +277,9 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		!slices.Contains([]string{"", "block", "container"}, source.TagTarget) {
 		return fmt.Errorf("invalid block collection match mode")
 	}
-	for _, id := range source.NotebookIDs {
-		if !ast.IsNodeIDPattern(id) || Conf.Box(id) == nil || !IsSameCryptoBoundary(boxID, id) {
-			return fmt.Errorf("invalid block collection notebook [%s]", id)
+	if len(source.NotebookIDs) > 0 {
+		if err := validateBlockCollectionNotebooks(source.NotebookIDs, boxID); err != nil {
+			return err
 		}
 	}
 	for _, id := range source.DocumentIDs {
@@ -333,6 +333,31 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		if value.Mode != "static" || value.Value == nil || value.Value.Type != key.Type {
 			return unavailableAutomationReference("fields", keyID, fmt.Sprintf("invalid collection field value [%s]", keyID))
 		}
+	}
+	return nil
+}
+
+func validateBlockCollectionNotebooks(ids []string, boxID string) error {
+	notebooks, err := ListNotebooks()
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if !ast.IsNodeIDPattern(id) || !IsSameCryptoBoundary(boxID, id) {
+			return fmt.Errorf("invalid block collection notebook [%s]", id)
+		}
+		if slices.ContainsFunc(notebooks, func(notebook *Box) bool { return notebook.ID == id }) {
+			continue
+		}
+		// 列表也可能略过配置无法读取的笔记本，只有确认目录缺失才停用规则。
+		_, err := os.Lstat(filepath.Join(util.DataDir, id))
+		if os.IsNotExist(err) {
+			return unavailableAutomationReference("automationCollectionScope", id, fmt.Sprintf("unavailable block collection notebook [%s]", id))
+		}
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("invalid block collection notebook [%s]", id)
 	}
 	return nil
 }

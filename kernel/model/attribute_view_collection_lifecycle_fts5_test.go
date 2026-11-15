@@ -7,17 +7,114 @@
 package model
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestBlockCollectionNotebookScopeLifecycle(t *testing.T) {
+	for _, deleted := range []bool{true, false} {
+		t.Run(map[bool]string{true: "deleted", false: "closed"}[deleted], func(t *testing.T) {
+			fixture, view, keyID := setupBlockCollectionTest(t)
+			setupAutomationNotificationLanguage(t)
+			notebook := &Box{ID: ast.NewNodeID()}
+			boxConf := notebook.GetConf()
+			boxConf.Closed = false
+			if err := notebook.SaveConf(boxConf); err != nil {
+				t.Fatal(err)
+			}
+			rule := view.Automations.Rules[0]
+			rule.BlockSource.NotebookIDs = []string{notebook.ID}
+			rule.BlockSource.DocumentIDs = append(rule.BlockSource.DocumentIDs, fixture.targetID)
+			if err := PerformAttributeViewOperations([]*Operation{{Action: "setAttrViewAutomations", AvID: view.ID, Data: view.Automations}}); err != nil {
+				t.Fatal(err)
+			}
+			if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, "todo")); err != nil {
+				t.Fatal(err)
+			}
+			stored := readAttributeViewItemsTest(t, view.ID)
+			row := stored.GetBlockValueByBoundID(fixture.sourceID)
+			if row == nil {
+				t.Fatal("initial collection failed")
+			}
+			stored.GetValue(keyID, row.BlockID).Text.Content = "Edited"
+			if err := av.SaveAttributeView(stored); err != nil {
+				t.Fatal(err)
+			}
+			if deleted {
+				if err := os.Rename(filepath.Join(util.DataDir, notebook.ID), filepath.Join(t.TempDir(), notebook.ID)); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				boxConf.Closed = true
+				if err := notebook.SaveConf(boxConf); err != nil {
+					t.Fatal(err)
+				}
+			}
+			target, err := LoadTreeByBlockID(fixture.targetID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			blockID := target.Root.FirstChild.ID
+			edit := func(content string) *Transaction {
+				tx := blockCollectionTags(t, target.ID, "todo")
+				tx.DoOperations = append(tx.DoOperations, &Operation{Action: "update", ID: blockID, Data: fmt.Sprintf(
+					`<div data-node-id="%s" data-type="NodeParagraph" class="p"><div contenteditable="true">%s</div></div>`, blockID, content)})
+				return tx
+			}
+			messages := []string{}
+			if deleted {
+				failed := edit("Rolled back")
+				failure := errors.New("injected tree write failure")
+				failed.writeTransactionTree = func(*parse.Tree) error { return failure }
+				captureAutomationNotifications(t, failed, &messages)
+				if err = PerformTxSync(failed); !errors.Is(err, failure) {
+					t.Fatalf("edit did not reach the tree write: %v", err)
+				}
+				if !readAttributeViewItemsTest(t, view.ID).Automations.Rules[0].Enabled || len(messages) != 0 {
+					t.Fatal("failed edit persisted the rule pause or announced collection", messages)
+				}
+			}
+			tx := edit("Saved text")
+			captureAutomationNotifications(t, tx, &messages)
+			if err = PerformTxSync(tx); err != nil {
+				t.Fatal("ordinary edit did not save", err)
+			}
+			disk, _, err := filesys.LoadTreeSnapshot(target.Box, target.Path, util.NewLute())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if block := treenode.GetNodeInTree(disk, blockID); block == nil || block.Text() != "Saved text" {
+				t.Fatal("edited text was not written to disk")
+			}
+			stored = readAttributeViewItemsTest(t, view.ID)
+			current := stored.Automations.Rules[0]
+			if current.Enabled == deleted || len(current.BlockSource.NotebookIDs) != 1 || current.BlockSource.NotebookIDs[0] != notebook.ID {
+				t.Fatalf("unexpected saved rule: %+v", current)
+			}
+			if stored.GetValue(keyID, row.BlockID).Text.Content != "Edited" || (stored.GetBlockValueByBoundID(target.ID) != nil) == deleted {
+				t.Fatal("existing fields changed or collection did not respect the notebook state")
+			}
+			wantMessages := 1
+			if deleted {
+				wantMessages = 0
+			}
+			if len(messages) != wantMessages {
+				t.Fatal("unexpected collection success notifications", messages)
+			}
+		})
+	}
+}
 
 func TestBlockCollectionDatabaseDeletionAndUndo(t *testing.T) {
 	for _, cold := range []bool{false, true} {

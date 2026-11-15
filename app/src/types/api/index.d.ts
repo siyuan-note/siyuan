@@ -558,9 +558,9 @@ export type AVValueAsset = { "content": string; "name": string; "type": "file" |
 
 export type AVValueAssetInput = { "content"?: string | null; "name"?: string | null; "type"?: "file" | "image"; };
 
-export type AVValueBlock = { "collectionRuleID"?: string; "content": string; "created"?: number; "icon"?: string; "id"?: string; "refSubtype"?: "s" | "d"; "rich"?: DocumentTitleSource; "richBlockDOM"?: string; "updated"?: number; };
+export type AVValueBlock = { "collectionRuleID"?: string; "content": string; "created"?: number; "icon"?: string; "id"?: string; "refSubtype"?: "s" | "d"; "rich"?: AVValuePrimaryRich; "richBlockDOM"?: string; "updated"?: number; };
 
-export type AVValueBlockInput = { "collectionRuleID"?: string; "content"?: string | null; "created"?: number | null; "icon"?: string | null; "id"?: string | null; "refSubtype"?: "s" | "d"; "rich"?: DocumentTitleSourceInput | null; "richBlockDOM"?: string | null; "updated"?: number | null; };
+export type AVValueBlockInput = { "collectionRuleID"?: string; "content"?: string | null; "created"?: number | null; "icon"?: string | null; "id"?: string | null; "refSubtype"?: "s" | "d"; "rich"?: AVValuePrimaryRichInput | null; "richBlockDOM"?: string | null; "updated"?: number | null; };
 
 export type AVValueCheckbox = { "checked": boolean; };
 
@@ -593,6 +593,10 @@ export type AVValueNumberInput = { "content"?: number | null; "format"?: string 
 export type AVValuePhone = { "content": string; };
 
 export type AVValuePhoneInput = { "content"?: string | null; };
+
+export type AVValuePrimaryRich = { "content": string; "format": "inline-ast" | "kramdown"; "spec": 1; };
+
+export type AVValuePrimaryRichInput = { "content": string; "format": "inline-ast" | "kramdown"; "spec": 1; };
 
 export type AVValueRelation = { "blockIDs": Array<string> | null; "contents": Array<AVValue | null> | null; };
 

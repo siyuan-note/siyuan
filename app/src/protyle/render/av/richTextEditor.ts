@@ -17,10 +17,7 @@ import {getAVHostBlockID, getAVHostIdentity} from "./host";
 import {AV_CELL_EDITOR_CLOSE_EVENT} from "./cellEditor";
 import {updateOutlineCurrentBlock} from "../../util/outlineBlock";
 import {focusBlock} from "../../util/selection";
-import {isAVContinuousInputKey} from "./continuousInput";
 import {configureAVRichTextEditorLute, createAVRichTextEditorLute} from "./richTextEditorLute";
-import {getDocumentTitleDOMFingerprint, getDocumentTitleUnsupportedPasteBlocks,
-    prepareDocumentTitleBlockDOM} from "../../header/documentTitleDOM";
 import {createAVPrimaryEditValue, getAVPrimaryInitialDOM} from "./primaryRich";
 import {renderImageDisplay} from "../imageDisplay";
 import {
@@ -142,17 +139,11 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     setPanelPosition(panelElement, options.anchorElement);
 
     const source = getAVTextSource(options.value);
-    const toolbar = getDefaultToolbar(mobile).filter(item => !primary ||
-        !["block-type", "ai"].includes(typeof item === "string" ? item : item.name));
-    const inlineSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, source: THintSource) => {
-        prepareHint(protyle);
-        const allowed = new Set(["ref", "link", "bold", "italic", "underline", "strike", "mark", "sup", "sub", "inlineCode", "kbd", "tag", "inlineMath", "emoji"]);
-        return hintSlash(key, protyle, source).filter(item => allowed.has(item.id));
-    });
+    const toolbar = getDefaultToolbar(mobile);
     const hint: IProtyleOptions["hint"] = {
         extend: [{key: "((", hint: hintAVRef}, {key: "【【", hint: hintAVRef},
             {key: "（（", hint: hintAVRef}, {key: "[[", hint: hintAVRef},
-            {key: "/", hint: primary ? inlineSlash : hintAVSlash}, {key: "、", hint: primary ? inlineSlash : hintAVSlash}],
+            {key: "/", hint: hintAVSlash}, {key: "、", hint: hintAVSlash}],
     };
     const fragment = mountProtyleLiteFragment(hostElement, {
         initialBlockHTML: primary ? getAVPrimaryInitialDOM(options.value) : source.kind === "rich" ? getAVRichTextBlockDOM(source.content) : undefined,
@@ -163,20 +154,18 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
                 options.nodeElement.closest<HTMLElement>(".protyle")?.dataset.notebookId,
             toolbar,
             hint,
-            click: {preventInsetEmptyBlock: primary},
         },
         runtimeCapabilities: {
             upload: primary,
             websocket: false,
-            lute: createAVRichTextEditorLute(primary),
+            lute: createAVRichTextEditorLute(),
             lockedOptions: {toolbar, hint},
             pluginExtensions: false,
             customBlockRender: false,
-            sanitizeBlockDOM: primary ? prepareDocumentTitleBlockDOM : sanitizeAVRichTextBlockDOM,
-            getUnsupportedPasteBlocks: primary ? getDocumentTitleUnsupportedPasteBlocks : getAVRichTextUnsupportedPasteBlocks,
-            getUnsupportedPasteMessage: primary ? () => window.siyuan.languages.documentTitleInlineOnly : undefined,
+            sanitizeBlockDOM: blockDOM => sanitizeAVRichTextBlockDOM(blockDOM, primary),
+            getUnsupportedPasteBlocks: blockDOM => getAVRichTextUnsupportedPasteBlocks(blockDOM, primary),
             richHTMLPaste: primary,
-            restoreLuteMarkdownSyntax: lute => configureAVRichTextEditorLute(lute, primary),
+            restoreLuteMarkdownSyntax: configureAVRichTextEditorLute,
         },
         afterSetContent: (protyle, element) => {
             mathRender(element);
@@ -190,8 +179,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     fragment.protyle.block.parentID = getAVHostBlockID(options.nodeElement);
     fragment.protyle.path = options.protyle.path;
     setPanelPosition(panelElement, options.anchorElement);
-    const fingerprint = () => primary ? getDocumentTitleDOMFingerprint(fragment.getBlockHTML()) :
-        serializeAVRichTextBlockDOM(fragment.getBlockHTML()).markdown;
+    const fingerprint = () => serializeAVRichTextBlockDOM(fragment.getBlockHTML(), undefined, primary).markdown;
     const initialMarkdown = fingerprint();
 
     let finished = false;
@@ -355,31 +343,9 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         }
         return false;
     };
-    panelElement.addEventListener("beforeinput", (event: InputEvent) => {
-        if (event.cancelable && !event.isComposing && event.inputType === "insertParagraph") {
-            if (primary && mobile && continueInput(event)) return;
-            if (primary && fragment.wysiwyg.contains(event.target as Node) &&
-                fragment.hintElement.classList.contains("fn__none")) {
-                event.preventDefault();
-                event.stopPropagation();
-                void finish(true, true);
-            }
-        }
-    }, true);
     panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (primary && isAVContinuousInputKey(event, true) && continueInput(event, event.repeat)) return;
-        if (!primary && event.key === "Enter" && (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey &&
+        if (event.key === "Enter" && (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey &&
             !event.isComposing && event.keyCode !== 229 && continueInput(event, event.repeat, true)) return;
-        if (primary && fragment.wysiwyg.contains(event.target as Node) && event.key === "Enter" && !event.isComposing &&
-            fragment.hintElement.classList.contains("fn__none")) {
-            event.preventDefault();
-            event.stopPropagation();
-            if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-                if (event.shiftKey) document.execCommand("insertLineBreak");
-                else if (!event.repeat) void finish(true, true);
-            }
-            return;
-        }
         if (event.key === "Escape" && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {

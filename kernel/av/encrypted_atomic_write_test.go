@@ -16,18 +16,18 @@ import (
 )
 
 func TestEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T) {
-	testEncryptedAttributeViewSaveReplacesCiphertext(t, false, false)
+	testEncryptedAttributeViewSaveReplacesCiphertext(t, false, 0)
 }
 
 func TestEncryptedDeprecatedLayoutRecovery(t *testing.T) {
-	testEncryptedAttributeViewSaveReplacesCiphertext(t, true, false)
+	testEncryptedAttributeViewSaveReplacesCiphertext(t, true, 0)
 }
 
 func TestEncryptedPrimaryRichPreservesPreviousAuthenticatedSnapshot(t *testing.T) {
-	testEncryptedAttributeViewSaveReplacesCiphertext(t, false, true)
+	testEncryptedAttributeViewSaveReplacesCiphertext(t, false, PrimaryRichSpec)
 }
 
-func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy, primary bool) {
+func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy bool, primary int) {
 	t.Helper()
 	const boxID, avID = "20261010120000-encbox0", "20261010120001-encav00"
 	oldData := util.DataDir
@@ -49,6 +49,11 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy, prim
 	})
 	view := &AttributeView{ID: avID, Spec: PlainTextSpec}
 	view.Name = "first encrypted version"
+	if primary == PrimaryBlockRichSpec {
+		view.KeyValues = []*KeyValues{{Key: &Key{ID: "20261110000000-primary", Type: KeyTypeBlock}, Values: []*Value{{
+			Type: KeyTypeBlock, IsDetached: true, BlockID: "20261110000000-row0000", Block: &ValueBlock{Rich: primaryRichFixture(t, `<span data-type="strong">previous primary</span>`)},
+		}}}}
+	}
 	file := attributeViewDataPathByBox(avID, boxID)
 	if legacy {
 		raw, err := os.ReadFile("testdata/spec1-deprecated-layouts.json")
@@ -89,10 +94,17 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy, prim
 		t.Fatal(err)
 	}
 	view.Name = "second encrypted version with different length"
-	if primary {
+	if primary > 0 {
 		view.KeyValues = []*KeyValues{{Key: &Key{ID: "20261110000000-primary", Type: KeyTypeBlock}, Values: []*Value{{
 			Type: KeyTypeBlock, IsDetached: true, BlockID: "20261110000000-row0000", Block: &ValueBlock{Rich: primaryRichFixture(t, `<span data-type="strong">encrypted primary</span>`)},
 		}}}}
+	}
+	if primary == PrimaryBlockRichSpec {
+		source, sourceErr := NewPrimaryRich(util.NewLute().BlockDOM2Tree(util.NewLute().Md2BlockDOM("encrypted primary\n\nsecond", false)))
+		if sourceErr != nil {
+			t.Fatal(sourceErr)
+		}
+		view.KeyValues[0].Values[0].Block.Rich = source
 	}
 	if err := SaveAttributeView(view); err != nil {
 		t.Fatal(err)
@@ -106,7 +118,7 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy, prim
 	if err != nil || loaded.Name != view.Name {
 		t.Fatalf("updated ciphertext did not authenticate: %+v, %v", loaded, err)
 	}
-	if primary && (loaded.Spec != PrimaryRichSpec || loaded.KeyValues[0].Values[0].Block.Content != "encrypted primary" || loaded.KeyValues[0].Values[0].Block.Rich == nil) {
+	if primary > 0 && (loaded.Spec != primary || loaded.KeyValues[0].Values[0].Block.Content != map[int]string{PrimaryRichSpec: "encrypted primary", PrimaryBlockRichSpec: "encrypted primary\nsecond"}[primary] || loaded.KeyValues[0].Values[0].Block.Rich == nil) {
 		t.Fatal("encrypted primary source did not survive authenticated reopening")
 	}
 	plain, err := decryptAVData(boxID, avID, retained)
@@ -117,8 +129,16 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy, prim
 	if err != nil || previous.Name != "first encrypted version" {
 		t.Fatalf("previous ciphertext is not recoverable: %+v, %v", previous, err)
 	}
+	if primary == PrimaryBlockRichSpec && (previous.Spec != PrimaryRichSpec ||
+		previous.KeyValues[0].Values[0].Block.Rich.Format != "inline-ast" || previous.KeyValues[0].Values[0].Block.Content != "previous primary") {
+		t.Fatal("format 15 rich source is not recoverable after upgrading to format 16")
+	}
 	if legacy && (previous.Spec != 1 || len(previous.Views[0].Table.RowIDs) != 2 ||
 		len(loaded.Views[0].ItemIDs) != 2 || loaded.Views[0].PageSize != 25) {
 		t.Fatal("encrypted save lost legacy layout data or its recovery source")
 	}
+}
+
+func TestEncryptedPrimaryBlockRichPreservesPreviousAuthenticatedSnapshot(t *testing.T) {
+	testEncryptedAttributeViewSaveReplacesCiphertext(t, false, PrimaryBlockRichSpec)
 }

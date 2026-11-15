@@ -7,16 +7,17 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
-	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/net/html"
 )
 
 func prepareAttributeViewPrimaryRich(tx *Transaction, updated, previous *av.Value, data []byte, boxID string) error {
@@ -32,13 +33,12 @@ func prepareAttributeViewPrimaryRich(tx *Transaction, updated, previous *av.Valu
 	dom, hasDOM := payload.Block["richBlockDOM"]
 	hasDOM = hasDOM && strings.TrimSpace(string(dom)) != "null"
 	_, hasRich := payload.Block["rich"]
-	var suppliedSource *ast.DocumentTitle
+	var suppliedSource *av.ValuePrimaryRich
 	if hasRich && strings.TrimSpace(string(payload.Block["rich"])) != "null" {
-		var err error
-		if suppliedSource, err = ast.ParseDocumentTitleJSON(payload.Block["rich"]); err != nil {
+		if err := json.Unmarshal(payload.Block["rich"], &suppliedSource); err != nil {
 			return err
 		}
-		if _, err = parse.ParseDocumentTitle(suppliedSource); err != nil {
+		if _, err := av.ParsePrimaryRich(suppliedSource); err != nil {
 			return err
 		}
 	}
@@ -50,45 +50,46 @@ func prepareAttributeViewPrimaryRich(tx *Transaction, updated, previous *av.Valu
 		if len(html) > 4*1024*1024 {
 			return fmt.Errorf("primary key content is too large")
 		}
+		if err := validatePrimaryRichBlockDOM(html); err != nil {
+			return err
+		}
 		fragment := util.NewLute().BlockDOM2Tree(strings.ReplaceAll(html, editor.FrontEndCaret, ""))
-		var paragraph *ast.Node
-		for node := fragment.Root.FirstChild; node != nil; node = node.Next {
-			if node.Type == ast.NodeKramdownBlockIAL {
-				continue
-			}
-			if node.Type != ast.NodeParagraph || paragraph != nil {
-				return fmt.Errorf("primary keys support inline elements only")
-			}
-			paragraph = node
-		}
-		if paragraph == nil {
-			return fmt.Errorf("primary key paragraph is missing")
-		}
-		if tx != nil && tx.degradeCrossBoundaryBlockRefs(paragraph, boxID) != 0 {
+		if tx != nil && tx.degradeCrossBoundaryBlockRefs(fragment.Root, boxID) != 0 {
 			return fmt.Errorf("primary key reference crosses an encrypted notebook boundary")
 		}
-		source, err := render.NewDocumentTitle(paragraph)
+		source, err := av.NewPrimaryRich(fragment)
 		if err != nil {
 			return err
 		}
 		if suppliedSource != nil {
-			// BlockDOM 会合并嵌套的行级样式，按同一渲染往返比较，接受响应原样提交并保留原始源。
+			// 双源按同一 Kramdown 往返比较，原样提交保留旧源格式。
 			expected := &av.ValueBlock{Rich: suppliedSource}
 			if err = expected.NormalizeRichContent(); err != nil {
 				return err
 			}
 			expectedTree := util.NewLute().BlockDOM2Tree(expected.RichBlockDOM)
-			canonical, canonicalErr := render.NewDocumentTitle(expectedTree.Root.FirstChild)
+			canonical, canonicalErr := av.NewPrimaryRich(expectedTree)
 			if canonicalErr != nil || source.Content != canonical.Content {
 				return fmt.Errorf("primary key sources disagree")
 			}
 			source = suppliedSource
 		}
 		updated.Block.Rich = source
-		updated.Block.Content = treenode.DocumentTitleText(paragraph)
-		if text, plain := treenode.PlainDocumentTitle(paragraph); plain {
+		var blocks []*ast.Node
+		for node := fragment.Root.FirstChild; node != nil; node = node.Next {
+			if node.Type != ast.NodeKramdownBlockIAL {
+				blocks = append(blocks, node)
+			}
+		}
+		if len(blocks) == 0 {
 			updated.Block.Rich = nil
-			updated.Block.Content = text
+			updated.Block.Content = ""
+		}
+		if len(blocks) == 1 && blocks[0].Type == ast.NodeParagraph {
+			if text, plain := treenode.PlainDocumentTitle(blocks[0]); plain && !strings.ContainsAny(text, "\r\n") {
+				updated.Block.Rich = nil
+				updated.Block.Content = text
+			}
 		}
 	} else if !hasRich && previous != nil && previous.Block != nil && previous.Block.Rich != nil &&
 		updated.Block.Content != previous.Block.Content {
@@ -96,15 +97,40 @@ func prepareAttributeViewPrimaryRich(tx *Transaction, updated, previous *av.Valu
 	}
 	updated.Block.RichBlockDOM = ""
 	if updated.Block.Rich != nil && tx != nil {
-		paragraph, err := parse.ParseDocumentTitle(updated.Block.Rich)
+		fragment, err := av.ParsePrimaryRich(updated.Block.Rich)
 		if err != nil {
 			return err
 		}
-		if tx.degradeCrossBoundaryBlockRefs(paragraph, boxID) != 0 {
+		if tx.degradeCrossBoundaryBlockRefs(fragment.Root, boxID) != 0 {
 			return fmt.Errorf("primary key reference crosses an encrypted notebook boundary")
 		}
 	}
 	return updated.Block.NormalizeRichContent()
+}
+
+// 转换器可能丢弃空的未知块，先检查声明的块类型，避免把非法输入当作清空。
+func validatePrimaryRichBlockDOM(blockDOM string) error {
+	tokens := html.NewTokenizer(strings.NewReader(blockDOM))
+	for {
+		switch tokens.Next() {
+		case html.ErrorToken:
+			if tokens.Err() == io.EOF {
+				return nil
+			}
+			return tokens.Err()
+		case html.StartTagToken, html.SelfClosingTagToken:
+			for _, attr := range tokens.Token().Attr {
+				if attr.Key != "data-type" || !strings.HasPrefix(attr.Val, "Node") {
+					continue
+				}
+				switch attr.Val {
+				case "NodeParagraph", "NodeHeading", "NodeList", "NodeListItem", "NodeBlockquote", "NodeCodeBlock", "NodeMathBlock":
+				default:
+					return fmt.Errorf("unsupported primary key block [%s]", attr.Val)
+				}
+			}
+		}
+	}
 }
 
 // 动态主键复制来源的合法行级源，静态锚文本以数据库保存的源为准，不反向改写来源块。
@@ -183,7 +209,7 @@ func refreshAttributeViewPrimarySources(database *av.AttributeView) (changed boo
 	return
 }
 
-func attributeViewNodePrimaryRich(node *ast.Node) *ast.DocumentTitle {
+func attributeViewNodePrimaryRich(node *ast.Node) *av.ValuePrimaryRich {
 	if node == nil || strings.TrimSpace(node.IALAttr("name")) != "" {
 		return nil
 	}
@@ -192,8 +218,7 @@ func attributeViewNodePrimaryRich(node *ast.Node) *ast.DocumentTitle {
 		if node.DocumentTitle == nil {
 			return nil
 		}
-		copy := *node.DocumentTitle
-		return &copy
+		return av.PrimaryRichFromTitle(node.DocumentTitle)
 	}
 	if node.Type != ast.NodeParagraph && node.Type != ast.NodeHeading {
 		return nil
@@ -208,5 +233,5 @@ func attributeViewNodePrimaryRich(node *ast.Node) *ast.DocumentTitle {
 	if err != nil {
 		return nil
 	}
-	return source
+	return av.PrimaryRichFromTitle(source)
 }

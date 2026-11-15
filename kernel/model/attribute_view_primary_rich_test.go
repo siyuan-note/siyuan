@@ -47,9 +47,9 @@ func TestPrimaryRichEditingRejectsLegacyProjectionAndInvalidBlocks(t *testing.T)
 		t.Fatal("source mutated after rejection")
 	}
 	updated = value.Clone()
-	invalid, _ := json.Marshal(map[string]any{"block": map[string]any{"richBlockDOM": primaryRichTestDOM("first") + primaryRichTestDOM("second")}})
+	invalid, _ := json.Marshal(map[string]any{"block": map[string]any{"richBlockDOM": `<div data-type="NodeTable"></div>`}})
 	if err := prepareAttributeViewPrimaryRich(nil, updated, before, invalid, ""); err == nil {
-		t.Fatal("multiple paragraphs accepted")
+		t.Fatal("unsupported table accepted")
 	}
 	updated = value.Clone()
 	updated.Block.Rich = nil
@@ -75,7 +75,7 @@ func TestPrimaryRichCellUpdatePreservesIdentityAndRejectedSource(t *testing.T) {
 	before, _ := json.Marshal(value)
 	for _, block := range []map[string]any{
 		{"content": "lossy replacement"},
-		{"richBlockDOM": primaryRichTestDOM("one") + primaryRichTestDOM("two")},
+		{"richBlockDOM": `<div data-type="NodeTable"></div>`},
 		{"rich": map[string]any{"spec": 99, "format": "inline-ast", "content": "[]"}},
 	} {
 		if _, err = updateAttributeViewValue(nil, database, value.KeyID, value.BlockID, map[string]any{"block": block}, false); err == nil {
@@ -188,7 +188,7 @@ func TestPrimaryRichAssetsReferencesExportAndHistory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	value := &av.Value{Type: av.KeyTypeBlock, BlockID: "row", Block: &av.ValueBlock{Rich: source}}
+	value := &av.Value{Type: av.KeyTypeBlock, BlockID: "row", Block: &av.ValueBlock{Rich: av.PrimaryRichFromTitle(source)}}
 	if err = value.Block.NormalizeRichContent(); err != nil {
 		t.Fatal(err)
 	}
@@ -208,7 +208,7 @@ func TestPrimaryRichAssetsReferencesExportAndHistory(t *testing.T) {
 		t.Fatal("export lost asset link")
 	}
 	before, _ := json.Marshal(database)
-	value.Block.Rich = &ast.DocumentTitle{Spec: source.Spec, Format: source.Format, Content: strings.ReplaceAll(source.Content, "file", "changed")}
+	value.Block.Rich = &av.ValuePrimaryRich{Spec: source.Spec, Format: "inline-ast", Content: strings.ReplaceAll(source.Content, "file", "changed")}
 	after, _ := json.Marshal(database)
 	if docDiffAttributeViewSignature(before) == docDiffAttributeViewSignature(after) {
 		t.Fatal("history omitted primary source")
@@ -234,5 +234,54 @@ func TestPrimaryRichAutomationPatchesRetainCanonicalSourceAndExplicitPlainReplac
 	data, _ = json.Marshal(automationValuePatch(value))
 	if !strings.Contains(string(data), `"rich":null`) {
 		t.Fatal("automation plain replacement omitted explicit source clearing", string(data))
+	}
+}
+
+func TestPrimaryBlockRichEditingStaticBindingAndExport(t *testing.T) {
+	const refID = "20261110000000-target0"
+	dom := primaryRichTestDOM("first") + primaryRichTestDOM("") + primaryRichTestDOM(`<span data-type="a" data-href="assets/a.pdf">file</span><span data-type="block-ref" data-id="`+refID+`" data-subtype="d">Target</span>`)
+	for _, detached := range []bool{false, true} {
+		value := &av.Value{Type: av.KeyTypeBlock, IsDetached: detached, Block: &av.ValueBlock{ID: "20261110000000-source0", RefSubtype: av.BlockRefSubtypeStatic}}
+		data, _ := json.Marshal(map[string]any{"block": map[string]any{"richBlockDOM": dom}})
+		if err := prepareAttributeViewPrimaryRich(nil, value, nil, data, ""); err != nil {
+			t.Fatal(err)
+		}
+		if value.Block.Rich == nil || value.Block.Rich.Format != "kramdown" || !strings.Contains(value.Block.Content, "first\n\nfileTarget") {
+			t.Fatal("multiple paragraphs lost", value.Block)
+		}
+		before, _ := json.Marshal(value.Block.Rich)
+		canonical, _ := json.Marshal(value)
+		if err := prepareAttributeViewPrimaryRich(nil, value.Clone(), value, canonical, ""); err != nil {
+			t.Fatal("canonical multi-block response rejected", err)
+		}
+		origin := util.NewLute().BlockDOM2Tree(primaryRichTestDOM("original document")).Root.FirstChild
+		origin.ID = value.Block.ID
+		origin.SetIALAttr(av.NodeAttrViewStaticText+"-database", util.EscapeHTML(value.Block.Content))
+		refreshAttributeViewPrimarySource(value, origin, "database")
+		after, _ := json.Marshal(value.Block.Rich)
+		if string(before) != string(after) || origin.Content() != "original document" {
+			t.Fatal("static binding changed source or document")
+		}
+		assets := getAttributeViewValueAssetsLinkDests(value, false)
+		if len(assets) != 1 || assets[0] != "assets/a.pdf" {
+			t.Fatal("later block resource missing", assets)
+		}
+		database := &av.AttributeView{KeyValues: []*av.KeyValues{{Key: &av.Key{Type: av.KeyTypeBlock}, Values: []*av.Value{value}}}}
+		if ids := attributeViewRichTextRefDefIDs(database); len(ids) != 1 || ids[0] != refID {
+			t.Fatal("later block reference missing", ids)
+		}
+		for _, richCells := range []bool{false, true} {
+			cell := &ast.Node{Type: ast.NodeTableCell}
+			if err := appendAttributeViewPrimaryRichExport(cell, value, richCells); err != nil {
+				t.Fatal(err)
+			}
+			if richCells {
+				if cell.FirstChild == cell.LastChild {
+					t.Fatal("export dropped later paragraphs")
+				}
+			} else if !strings.Contains(string(cell.FirstChild.Tokens), "assets/a.pdf") || !strings.Contains(string(cell.FirstChild.Tokens), "first") {
+				t.Fatal("markdown export omitted content")
+			}
+		}
 	}
 }

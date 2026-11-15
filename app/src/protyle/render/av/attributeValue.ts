@@ -37,9 +37,9 @@ export const genAVRelationHTML = (item: IAVCellValue, rowID: string, showIcon = 
     const storedValue = escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(item))));
     const attributes = `data-row-id="${escapeAttr(rowID)}" data-relation-value="${storedValue}" class="av__cell--relation"`;
     if (item.isDetached) {
-        return `<span ${attributes}>${renderAVBlockIcon(item, showIcon)}<span class="av__celltext${templateClass}">${content}</span></span>`;
+        return `<div ${attributes}>${renderAVBlockIcon(item, showIcon)}<div class="av__celltext${templateClass}">${content}</div></div>`;
     }
-    return `<span ${attributes} data-block-id="${item.block.id}">${renderAVBlockIcon(item, showIcon)}<span data-type="block-ref" data-id="${item.block.id}" data-subtype="${getAVBlockRefSubtype(item)}" class="av__celltext av__celltext--ref${templateClass}">${content}</span></span>`;
+    return `<div ${attributes} data-block-id="${item.block.id}">${renderAVBlockIcon(item, showIcon)}<div data-type="block-ref" data-id="${item.block.id}" data-subtype="${getAVBlockRefSubtype(item)}" class="av__celltext av__celltext--ref${templateClass}">${content}</div></div>`;
 };
 
 const AV_TEMPLATE_INTERACTIVE_SELECTOR = [

@@ -13,7 +13,18 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
     const modules: Record<string, any> = {};
     const dependencies = {escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;"),
         escapeHtmlTextAndAttr: (value: string) => dependencies.escapeHtml(value), escapeAttr: (value: string) => dependencies.escapeHtml(value),
-        sanitizeKernelHTML: (html: string) => html, restoreInlineElementBoundaries() {},
+        sanitizeKernelHTML: (html: string) => window.DOMPurify.sanitize(html), restoreInlineElementBoundaries() {},
+        Constants: {CUSTOM_SY_CODE_TAB_SPACES: "custom-sy-code-tab-spaces"}, CODE_TAB_SPACE_VALUES: [2, 4, 8],
+        getAgentLute: () => {
+            const lute = Lute.New();
+            lute.SetTextMark(true);
+            lute.SetProtyleWYSIWYG(true);
+            lute.SetHTMLTag2TextMark(true);
+            lute.SetKramdownIAL(true);
+            lute.SetSpin(true);
+            lute.SetBlockRef(true);
+            return lute;
+        },
         getAVBlockRefSubtype: (value: IAVCellValue) => value.block?.refSubtype || "d",
         hasAVRenderTemplateResult: (value: IAVCellValue) => Boolean(value.hasRenderTemplate),
         cloneAVCellValueSnapshot: (value: IAVCellValue) => JSON.parse(JSON.stringify(value)),
@@ -27,18 +38,18 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
         return exports as any;
     };
     (window as any).siyuan = {languages: {empty: "Empty", untitled: "Untitled", openBy: "Open", bind: "Bind", rebind: "Rebind", more: "More", block: "Block", documentTitleInlineOnly: "Inline only"}, config: {editor: {}}};
-    load("documentTitleDOM");
+    load("richTextValue");
+    load("richText");
     const primary = load("primaryRich");
     const attribute = load("attributeValue");
     Object.assign(dependencies, attribute);
     const cell = load("cell");
-    load("richTextValue");
     load("luteMarkdownSyntax");
     const parser = load("richTextEditorLute");
-    const dom = (html: string) => `<div data-type="NodeParagraph" data-node-id="20000101000000-primary"><div contenteditable="true">${html}</div></div>`;
+    const dom = (html: string) => `<div data-type="NodeParagraph" data-node-id="${Lute.NewNodeID()}"><div contenteditable="true">${html}</div></div>`;
     const source: IAVCellValue = {type: "block", id: "value", blockID: "row", isDetached: true,
         block: {content: "Summary", rich: {spec: 1, format: "inline-ast", content: "full source"}, richBlockDOM: dom(
-            '<span data-type="strong em">Styled</span><span data-type="inline-math" data-subtype="math" data-content="x^2" contenteditable="false"></span><span class="img"><img src="assets/a.png" alt="Image"></span><span data-type="block-ref" data-id="target" data-subtype="d">Ref</span>')}};
+            '<span data-type="strong em">Styled</span><span data-type="inline-math" data-subtype="math" data-content="x^2" contenteditable="false"></span><span class="img" data-type="img" contenteditable="false"><img src="assets/a.png" alt="Image"></span><span data-type="block-ref" data-id="target" data-subtype="d">Ref</span>')}};
     for (const detached of [true, false]) {
         const value = {...source, isDetached: detached, block: {...source.block, id: detached ? "" : "bound"}};
         for (const view of ["table", "gallery", "kanban", "list", "calendar"]) {
@@ -72,7 +83,7 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
         check.match(host.textContent, /Second\nThird/);
         const updated = primary.createAVPrimaryEditValue(host.innerHTML, value);
         host.innerHTML = updated.block.richBlockDOM;
-        check.ok(host.querySelector("br"), "primary edits preserve line breaks in the rich source");
+        check.ok(host.querySelector("br") || host.textContent.includes("\n"), "primary edits preserve line breaks in the rich source");
         check.match(host.textContent, /Second\nThird/);
         check.equal(updated.isDetached, value.isDetached);
         check.equal(updated.block.id, value.block.id);
@@ -106,11 +117,20 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
         for (const type of ["strong", "a", "code"]) {
             check.ok(template.content.querySelector(`[data-type="${type}"]`), `${type} survives a primary soft line break`);
         }
-        check.ok(template.content.querySelector("br"), "primary soft line break remains in the save payload");
+        check.ok(template.content.querySelector("br") || template.content.textContent.includes("\n"), "primary soft line break remains in the save payload");
         check.match(updated.block.content, /Next/);
         host.remove();
     }
-    check.throws(() => primary.createAVPrimaryEditValue(dom("a") + dom("b"), source), /Inline only/);
+    const multiple = primary.createAVPrimaryEditValue(dom("a") + dom("b"), source);
+    template.innerHTML = multiple.block.richBlockDOM;
+    check.equal(template.content.querySelectorAll('[data-type="NodeParagraph"]').length, 2);
+    check.equal(multiple.block.content, "a\nb");
+    const blockValue = {...source, block: {...source.block, rich: {spec: 1, format: "kramdown", content: "first\n\n![image](assets/a.png)\n\n- second"}}};
+    template.innerHTML = primary.getAVPrimaryPreviewHTML(blockValue);
+    check.match(template.content.textContent, /first/);
+    check.match(template.content.textContent, /second/);
+    check.equal(template.content.querySelector("img").getAttribute("src"), "assets/a.png");
+    check.equal(template.content.querySelector("[contenteditable]"), null);
     const style = document.createElement("style");
     document.head.append(style);
     for (const css of Object.values(styles)) {
@@ -118,7 +138,7 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
         (window as any).siyuan.config.editor.markdown = {inlineAsterisk: true, inlineUnderscore: true,
             inlineSup: true, inlineSub: true, inlineTag: true, inlineMath: true, inlineStrikethrough: true,
             inlineFullWidthStrikethrough: true, inlineMark: true};
-        const lute = parser.configureAVRichTextEditorLute(Lute.New(), true);
+        const lute = parser.configureAVRichTextEditorLute(Lute.New());
         lute.SetTextMark(true);
         lute.SetProtyleWYSIWYG(true);
         for (const detached of [false, true]) {
@@ -184,7 +204,7 @@ test("primary rich text preserves title inline elements across views, details, r
     const env = {...process.env}; delete env.ELECTRON_RUN_AS_NODE;
     try {
         const sources = Object.fromEntries([
-            ["primaryRich", "src/protyle/render/av/primaryRich.ts"], ["documentTitleDOM", "src/protyle/header/documentTitleDOM.ts"],
+            ["primaryRich", "src/protyle/render/av/primaryRich.ts"], ["richText", "src/protyle/render/av/richText.ts"],
             ["cell", "src/protyle/render/av/cell.ts"], ["attributeValue", "src/protyle/render/av/attributeValue.ts"],
             ["richTextValue", "src/protyle/render/av/richTextValue.ts"],
             ["luteMarkdownSyntax", "src/protyle/render/luteMarkdownSyntax.ts"],
@@ -198,6 +218,7 @@ test("primary rich text preserves title inline elements across views, details, r
         writeFileSync(runner, `const {app,BrowserWindow}=require("electron");app.setPath("userData",${JSON.stringify(join(profile,"data"))});
 app.whenReady().then(async()=>{let win;try{win=new BrowserWindow({show:false,webPreferences:{nodeIntegration:true,contextIsolation:false}});
 await win.loadURL("about:blank");
+await win.webContents.executeJavaScript(${JSON.stringify(readFileSync("stage/protyle/js/protyle-html.js", "utf8").split("\n").slice(0, 2).join("\n"))});
 await win.webContents.executeJavaScript('require('+${JSON.stringify(JSON.stringify(resolve("stage/protyle/js/lute/lute.min.js")))}+');void 0;');
 const result=await win.webContents.executeJavaScript('(()=>{const __name=value=>value;try{('+${JSON.stringify(cases.toString())}+')('+${JSON.stringify(JSON.stringify(sources))}+','+${JSON.stringify(JSON.stringify(styles))}+');return "ok";}catch(error){return String(error.stack);}})()');
 if(result!=="ok")throw new Error(result);

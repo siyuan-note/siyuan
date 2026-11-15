@@ -16,6 +16,52 @@ import (
 )
 
 const PrimaryRichSpec = 15
+const PrimaryBlockRichSpec = 16
+
+// inline-ast 读取格式 15 的主键；新编辑源与文本字段共用 Kramdown 片段结构。
+type ValuePrimaryRich struct {
+	Spec    int    `json:"spec"`
+	Format  string `json:"format"`
+	Content string `json:"content"`
+}
+
+func PrimaryRichFromTitle(title *ast.DocumentTitle) *ValuePrimaryRich {
+	if title == nil {
+		return nil
+	}
+	return &ValuePrimaryRich{Spec: title.Spec, Format: "inline-ast", Content: title.Content}
+}
+
+func ParsePrimaryRich(source *ValuePrimaryRich) (*parse.Tree, error) {
+	if source == nil {
+		return nil, nil
+	}
+	if source.Format == "kramdown" {
+		_, tree, err := parseValueTextRichWithImages(&ValueTextRich{Spec: source.Spec, Format: ValueTextRichFormatKramdown, Content: source.Content}, true)
+		return tree, err
+	}
+	if source.Format != "inline-ast" {
+		return nil, fmt.Errorf("unsupported primary rich text format [%s]", source.Format)
+	}
+	paragraph, err := parse.ParseDocumentTitle(&ast.DocumentTitle{Spec: source.Spec, Format: "inline-ast", Content: source.Content})
+	if err != nil {
+		return nil, err
+	}
+	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: util.NewLute().ParseOptions}}
+	tree.Root.AppendChild(paragraph)
+	return tree, nil
+}
+
+func NewPrimaryRich(tree *parse.Tree) (*ValuePrimaryRich, error) {
+	if err := validateValueTextRichTreeWithImages(tree, true); err != nil {
+		return nil, err
+	}
+	content, _, err := normalizeValueTextRichTreeSourceWithImages(tree, true)
+	if err != nil {
+		return nil, err
+	}
+	return &ValuePrimaryRich{Spec: ValueTextRichSpec, Format: "kramdown", Content: content}, nil
+}
 
 // RichValueTree 只从已标记的完整源构造片段，普通文字中的 Markdown 字符保持字面含义。
 func RichValueTree(value *Value) (*parse.Tree, error) {
@@ -28,13 +74,7 @@ func RichValueTree(value *Value) (*parse.Tree, error) {
 	if value.Block == nil || value.Block.Rich == nil {
 		return nil, nil
 	}
-	paragraph, err := parse.ParseDocumentTitle(value.Block.Rich)
-	if err != nil {
-		return nil, err
-	}
-	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: util.NewLute().ParseOptions}}
-	tree.Root.AppendChild(paragraph)
-	return tree, nil
+	return ParsePrimaryRich(value.Block.Rich)
 }
 
 func SetRichValueTree(value *Value, tree *parse.Tree) error {
@@ -57,10 +97,18 @@ func SetRichValueTree(value *Value, tree *parse.Tree) error {
 	if value.Type != KeyTypeBlock || value.Block == nil {
 		return fmt.Errorf("rich value type is unsupported")
 	}
-	if tree.Root.FirstChild == nil || tree.Root.FirstChild != tree.Root.LastChild {
-		return fmt.Errorf("primary key requires one inline paragraph")
+	var source *ValuePrimaryRich
+	var err error
+	if value.Block.Rich != nil && value.Block.Rich.Format == "inline-ast" {
+		if tree.Root.FirstChild == nil || tree.Root.FirstChild != tree.Root.LastChild {
+			return fmt.Errorf("legacy primary key requires one inline paragraph")
+		}
+		var title *ast.DocumentTitle
+		title, err = render.NewDocumentTitle(tree.Root.FirstChild)
+		source = PrimaryRichFromTitle(title)
+	} else {
+		source, err = NewPrimaryRich(tree)
 	}
-	source, err := render.NewDocumentTitle(tree.Root.FirstChild)
 	if err != nil {
 		return err
 	}
@@ -108,16 +156,20 @@ func (value *ValueBlock) NormalizeRichContent() error {
 		}
 		return nil
 	}
-	paragraph, err := parse.ParseDocumentTitle(value.Rich)
+	tree, err := ParsePrimaryRich(value.Rich)
 	if err != nil {
 		return err
 	}
 	engine := util.NewLute()
+	if value.Rich.Format == "kramdown" {
+		value.Content = valueTextRichPlainContent(tree)
+		value.RichBlockDOM = engine.Tree2BlockDOM(tree, engine.RenderOptions, engine.ParseOptions)
+		return nil
+	}
+	paragraph := tree.Root.FirstChild
 	// 临时载体不参与条目身份，固定标识使同一源的预览序列化稳定；编辑器另行分配自己的载体 ID。
 	paragraph.ID = "20000101000000-primary"
 	paragraph.SetIALAttr("id", paragraph.ID)
-	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
-	tree.Root.AppendChild(paragraph)
 	value.Content = PrimaryRichText(paragraph)
 	value.RichBlockDOM = engine.Tree2BlockDOM(tree, engine.RenderOptions, engine.ParseOptions)
 	return nil
@@ -126,6 +178,14 @@ func (value *ValueBlock) NormalizeRichContent() error {
 func (database *AttributeView) HasPrimaryRich() bool {
 	found := false
 	database.VisitPersistedValues(func(value *Value) { found = found || value.Block != nil && value.Block.Rich != nil })
+	return found
+}
+
+func (database *AttributeView) HasPrimaryBlockRich() bool {
+	found := false
+	database.VisitPersistedValues(func(value *Value) {
+		found = found || value.Block != nil && value.Block.Rich != nil && value.Block.Rich.Format == "kramdown"
+	})
 	return found
 }
 

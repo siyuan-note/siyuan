@@ -40,7 +40,7 @@ test("database input follows global inline syntax without changing stored rich t
     }
 });
 
-test("primary input keeps a single inline carrier without document title presentation", () => {
+test("primary input preserves blocks without document title presentation", () => {
     require("../../../../stage/protyle/js/lute/lute.min.js");
     const originalWindow = globalThis.window;
     const markdown = {inlineAsterisk: true, inlineUnderscore: true, inlineSup: true, inlineSub: true,
@@ -48,23 +48,21 @@ test("primary input keeps a single inline carrier without document title present
         inlineFullWidthStrikethrough: true, inlineMark: true};
     globalThis.window = {siyuan: {config: {editor: {markdown}}}} as unknown as Window & typeof globalThis;
     try {
-        let editor = createAVRichTextEditorLute(true);
+        let editor = createAVRichTextEditorLute();
         const input = (text: string) => `<div data-node-id="20261105120000-abcdefg" data-type="NodeParagraph"><div contenteditable="true">${text}${Lute.Caret}</div></div>`;
-        for (const syntax of ["# Heading", "- List", "1. Ordered", "[ ] Task", "> Quote"]) {
-            const result = editor.SpinBlockDOM(input(syntax));
-            assert.equal((result.match(/data-type="NodeParagraph"/g) || []).length, 1);
-            assert.doesNotMatch(result, /data-type="Node(?:Heading|List|Blockquote)"|protyle-title__input/);
-            assert.match(result, /contenteditable="true"/);
-        }
+        const blocks = editor.SpinBlockDOM(input("first") + input("second"));
+        assert.equal((blocks.match(/data-type="NodeParagraph"/g) || []).length, 2);
+        assert.doesNotMatch(blocks, /protyle-title__input/);
+        assert.match(editor.SpinBlockDOM(input("# Heading")), /data-type="NodeHeading"/);
         // 原生解析器的富文本结果不经过需要浏览器 DOM 的光标边界保护层。
-        editor = configureAVRichTextEditorLute(Lute.New(), true);
+        editor = configureAVRichTextEditorLute(Lute.New());
         editor.SetTextMark(true);
         editor.SetProtyleWYSIWYG(true);
         assert.match(editor.SpinBlockDOM(input("**bold** and `code`")), /data-type="strong"/);
         assert.match(editor.SpinBlockDOM(input("**bold** and `code`")), /data-type="code"/);
         for (const enabled of [false, true, false]) {
             markdown.inlineAsterisk = enabled;
-            editor = configureAVRichTextEditorLute(editor, true);
+            editor = configureAVRichTextEditorLute(editor);
             const result = editor.SpinBlockDOM(input("**bold**"));
             assert.equal(result.includes('data-type="strong"'), enabled);
             assert.doesNotMatch(result, /protyle-title__input/);

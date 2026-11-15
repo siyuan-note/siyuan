@@ -13862,7 +13862,7 @@
           ]
         },
         "rich": {
-          "$ref": "#/$defs/DocumentTitleSource"
+          "$ref": "#/$defs/AVValuePrimaryRich"
         },
         "richBlockDOM": {
           "type": "string"
@@ -13939,7 +13939,7 @@
         "rich": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DocumentTitleSourceInput"
+              "$ref": "#/$defs/AVValuePrimaryRichInput"
             },
             {
               "type": "null"
@@ -14696,6 +14696,60 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "AVValuePrimaryRich": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "inline-ast",
+            "kramdown"
+          ]
+        },
+        "spec": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "content",
+        "format",
+        "spec"
+      ],
+      "additionalProperties": false
+    },
+    "AVValuePrimaryRichInput": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "inline-ast",
+            "kramdown"
+          ]
+        },
+        "spec": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "content",
+        "format",
+        "spec"
+      ],
       "additionalProperties": false
     },
     "AVValueRelation": {

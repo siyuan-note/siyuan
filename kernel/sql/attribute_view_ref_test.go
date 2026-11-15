@@ -198,6 +198,20 @@ func TestAttributeViewRefsIgnoreLegacyPlainTextAndDerivedValues(t *testing.T) {
 	}
 }
 
+func TestAttributeViewRefsIncludeLaterPrimaryBlocks(t *testing.T) {
+	const defID = "20260904010002-def0001"
+	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, ID: "root", Box: "box", Path: "/root.sy"}
+	databaseNode := &ast.Node{Type: ast.NodeAttributeView, ID: "database"}
+	value := &av.Value{Type: av.KeyTypeBlock, Block: &av.ValueBlock{Rich: &av.ValuePrimaryRich{
+		Spec: 1, Format: "kramdown", Content: "first\n\n- ((" + defID + " 'later reference'))",
+	}}}
+	view := &av.AttributeView{KeyValues: []*av.KeyValues{{Key: &av.Key{Type: av.KeyTypeBlock}, Values: []*av.Value{value}}}}
+	refs := attributeViewRefs(tree, databaseNode, view)
+	if len(refs) != 1 || refs[0].DefBlockID != defID || refs[0].BlockID != databaseNode.ID || refs[0].Content != "later reference" {
+		t.Fatalf("later primary block missing from carrier reference index: %+v", refs)
+	}
+}
+
 func TestAttributeViewRefStorageBoxIDKeepsCryptoBoundary(t *testing.T) {
 	original := IsEncryptedBoxFn
 	IsEncryptedBoxFn = func(boxID string) bool {

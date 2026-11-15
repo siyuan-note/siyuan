@@ -1760,11 +1760,11 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         const primaryClass = cellValue.block.richBlockDOM ? " av__celltext--rich b3-typography document-title-preview" : "";
         // 不可使用换行 https://github.com/siyuan-note/siyuan/issues/11365
         if (cellValue?.isDetached) {
-            text = `${renderAVBlockIcon(cellValue, showIcon)}<span class="av__celltext${primaryClass}"${primaryAttributes}>${primaryContent}</span>`;
+            text = `${renderAVBlockIcon(cellValue, showIcon)}<div class="av__celltext${primaryClass}"${primaryAttributes}>${primaryContent}</div>`;
         } else {
-            text = `${renderAVBlockIcon(cellValue, showIcon)}<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref${primaryClass}"${primaryAttributes}>${primaryContent}</span>`;
+            text = `${renderAVBlockIcon(cellValue, showIcon)}<div data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref${primaryClass}"${primaryAttributes}>${primaryContent}</div>`;
         }
-        text = `<span class="av__cellprimary">${text}</span>`;
+        text = `<div class="av__cellprimary">${text}</div>`;
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
     } else if (cellValue.type === "mSelect" || cellValue.type === "select") {

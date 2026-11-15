@@ -1,14 +1,20 @@
 import {escapeHtml} from "../../../util/escape";
 import {sanitizeKernelHTML} from "../../../util/hostCapabilities";
-import {prepareDocumentTitleInitialDOM, prepareDocumentTitleBlockDOM} from "../../header/documentTitleDOM";
+import {getAVRichTextBlockDOM, getAVRichTextPreviewHTML, sanitizeAVRichTextBlockDOM, serializeAVRichTextBlockDOM} from "./richText";
 
 export const getAVPrimaryInitialDOM = (value: IAVCellValue) => {
     const id = Lute.NewNodeID();
-    return prepareDocumentTitleInitialDOM(value.block?.richBlockDOM ? sanitizeKernelHTML(value.block.richBlockDOM) :
-        `<div data-type="NodeParagraph" data-node-id="${id}"><div contenteditable="true">${escapeHtml(value.block?.content || "")}</div></div>`, id);
+    if (value.block?.rich?.format === "kramdown") {
+        return getAVRichTextBlockDOM(value.block.rich.content, true);
+    }
+    return sanitizeAVRichTextBlockDOM(value.block?.richBlockDOM ? sanitizeKernelHTML(value.block.richBlockDOM) :
+        `<div data-type="NodeParagraph" data-node-id="${id}"><div contenteditable="true">${escapeHtml(value.block?.content || "")}</div></div>`, true);
 };
 
 export const getAVPrimaryPreviewHTML = (value: IAVCellValue) => {
+    if (value.block?.rich?.format === "kramdown") {
+        return getAVRichTextPreviewHTML(value.block.rich.content, true);
+    }
     if (!value.block?.richBlockDOM) { return escapeHtml(value.block?.content || ""); }
     const template = document.createElement("template");
     template.innerHTML = sanitizeKernelHTML(value.block.richBlockDOM);
@@ -22,8 +28,8 @@ export const getAVPrimaryPreviewHTML = (value: IAVCellValue) => {
 };
 
 export const createAVPrimaryEditValue = (blockDOM: string, source: IAVCellValue): IAVCellValue => {
-    const dom = prepareDocumentTitleBlockDOM(blockDOM);
+    const serialized = serializeAVRichTextBlockDOM(blockDOM, undefined, true);
     return {type: "block", isDetached: source.isDetached,
-        block: {...source.block, content: Lute.BlockDOM2Content(dom).replace(/\u200b/g, "").replace(/[\r\n]/g, " "),
-            rich: null, richBlockDOM: dom}};
+        block: {...source.block, content: serialized.plainText,
+            rich: null, richBlockDOM: serialized.blockDOM}};
 };

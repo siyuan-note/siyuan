@@ -16,7 +16,7 @@ const createChat = (load: (id: string) => Promise<AgentSession>) => {
     const exports = {} as {AgentChat: {prototype: object}};
     runInNewContext(compiled, {
         exports,
-        require: () => ({AgentRunController, Model: class {}, SessionStore: {load}}),
+        require: () => ({AgentRunController, Model: class {}, SessionStore: {load}, clearAgentInteractionNotifications: () => {}}),
         window: {
             siyuan: {languages: {}},
             setTimeout: (callback: () => void) => { queueMicrotask(callback); return 1; },
@@ -32,6 +32,7 @@ const createChat = (load: (id: string) => Promise<AgentSession>) => {
         sessionId: "second",
         sessionRuns: new AgentSessionRuns(),
         queuedMessages: new AgentMessageQueue(),
+        notifiedSessions: new Set(),
         isStreaming: true,
         mirrorLocked: false,
         pendingRecoverySessionIDs: new Set(),
@@ -120,6 +121,31 @@ test("only normal foreground completion attempts to continue its message queue",
     run.finishedNormally = true;
     await chat.runController.finish(run);
     assert.equal(sends, 0);
+});
+
+test("notification navigation preserves rich drafts and unfinished user-message edits per session", async () => {
+    const {chat} = createChat(async id => session({id}));
+    const original = {text: "First draft", blockHTML: "<p>First draft</p>", references: [{id: "block", title: "Block"}]};
+    const edit = {text: "Edited message", blockHTML: "<p>Edited</p>", references: [] as {id: string; title: string}[]};
+    let data = original;
+    Object.assign(chat, {
+        sessionId: "first", isStreaming: false, currentTurnID: "", preserveNotificationDrafts: true,
+        notificationDrafts: new Map(), editingUserEntryID: "user", editingComposer: {getSendData: () => edit},
+        composer: {getSendData: () => data, setData: (value: typeof original) => { data = value; },
+            clearHistory: () => {}, restoreHistory: () => {}, isUploading: () => false},
+        saveSession: async () => {},
+        destroyEditingComposer: () => { chat.editingComposer = null; chat.editingUserEntryID = ""; },
+        restorePendingEditDraft: () => {},
+    });
+    await chat.performSwitchSession("second");
+    assert.equal(data.text, "");
+    data = {text: "Second draft", blockHTML: "<p>Second</p>", references: []};
+    await chat.performSwitchSession("first");
+    assert.equal(data, original);
+    assert.equal(chat.pendingEditDraft.entryID, "user");
+    assert.equal(chat.pendingEditDraft.data, edit);
+    await chat.performSwitchSession("second");
+    assert.equal(data.text, "Second draft");
 });
 
 test("session pin notifications refresh the list without disturbing conversations or drafts", () => {

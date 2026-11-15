@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "Цей запит підтвердження оброблено, термін його дії минув або він більше недоступний",
 	"agentQueueMessage": "Додати повідомлення до черги",
 	"agentQueuedMessages": "Повідомлення в черзі (${count})",
 	"agentSendQueuedMessages": "Надіслати повідомлення з черги",

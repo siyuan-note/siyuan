@@ -24,11 +24,12 @@ test("current-session questions notify desktop and mobile hosts without answerin
         const context: any = {
             window: {siyuan: {languages: {agentNotifyConfirm: "Pending confirmation"}}},
             document: {hidden: true, hasFocus: () => false},
-            sendNotification: ({title}: {title: string}) => notifications.push(title),
+            notifyAgentInteraction: (title: string) => notifications.push(title),
         };
         runInNewContext(compiled, context);
         const chat = Object.assign(new context.Chat(), {
             host: mobile ? {notify: (type: string) => notifications.push(type)} : {},
+            notifiedSessions: new Set(),
             appendQuestion: () => { rendered++; },
         });
         await chat.handleSSEEvent({type: "question", questionID: "question", arguments: {}});

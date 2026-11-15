@@ -1218,7 +1218,9 @@
   -webkit-line-clamp: 3;
 }
 
-.agent-chat__msg--jumped .agent-chat__body {
+.agent-chat__msg--jumped .agent-chat__body,
+.agent-chat__msg--jumped .agent-chat__confirm-card,
+.agent-chat__msg--jumped .agent-chat__question-card {
   animation: agent-msg-jump 1.5s ease-out;
 }
 

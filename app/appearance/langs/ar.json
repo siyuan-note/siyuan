@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "تم التعامل مع طلب التأكيد هذا أو انتهت صلاحيته أو لم يعد متاحًا",
 	"agentQueueMessage": "إضافة رسالة إلى قائمة الانتظار",
 	"agentQueuedMessages": "الرسائل في قائمة الانتظار (${count})",
 	"agentSendQueuedMessages": "إرسال الرسائل في قائمة الانتظار",

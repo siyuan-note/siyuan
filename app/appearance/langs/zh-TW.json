@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "此確認已處理、已過期或已無法存取",
 	"agentQueueMessage": "訊息排隊",
 	"agentQueuedMessages": "待傳送訊息（${count}）",
 	"agentSendQueuedMessages": "傳送排隊訊息",

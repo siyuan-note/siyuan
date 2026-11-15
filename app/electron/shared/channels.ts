@@ -22,6 +22,7 @@ const Channel = {
     SIYUAN_SYNC_MARKDOWN_KEYMAP: "siyuan-sync-markdown-keymap",
     SIYUAN_OPEN_SETTING: "siyuan-open-setting",
     SIYUAN_OPEN_HELP: "siyuan-open-help",
+    SIYUAN_AGENT_NOTIFICATION: "siyuan-agent-notification",
 
     // 命令、查询与窗口间消息
     SIYUAN_CMD: "siyuan-cmd",

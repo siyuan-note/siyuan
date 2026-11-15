@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "בקשת האישור הזו טופלה, פג תוקפה או שאינה זמינה עוד",
 	"agentQueueMessage": "הוספת הודעה לתור",
 	"agentQueuedMessages": "הודעות בתור (${count})",
 	"agentSendQueuedMessages": "שליחת ההודעות שבתור",

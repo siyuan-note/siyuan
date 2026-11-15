@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "该确认已处理、已过期或已无法访问",
 	"agentQueueMessage": "消息排队",
 	"agentQueuedMessages": "待发送消息（${count}）",
 	"agentSendQueuedMessages": "发送排队消息",

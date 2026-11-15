@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "Deze bevestiging is afgehandeld, verlopen of niet meer beschikbaar",
 	"agentQueueMessage": "Bericht in wachtrij plaatsen",
 	"agentQueuedMessages": "Berichten in wachtrij (${count})",
 	"agentSendQueuedMessages": "Berichten uit wachtrij verzenden",

@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "Этот запрос подтверждения обработан, истёк или больше недоступен",
 	"agentQueueMessage": "Добавить сообщение в очередь",
 	"agentQueuedMessages": "Сообщения в очереди (${count})",
 	"agentSendQueuedMessages": "Отправить сообщения из очереди",

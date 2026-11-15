@@ -41,6 +41,7 @@ export abstract class Constants {
     public static readonly SIYUAN_CMD: string = "siyuan-cmd";
     public static readonly SIYUAN_GET: string = "siyuan-get";
     public static readonly SIYUAN_EVENT: string = "siyuan-event";
+    public static readonly SIYUAN_AGENT_NOTIFICATION = "siyuan-agent-notification";
     public static readonly SIYUAN_WINDOW_WORKSPACE_SAVED = "siyuan-window-workspace-saved";
 
     public static readonly SIYUAN_WINDOW_WORKSPACE_SET = "siyuan-window-workspace-set";

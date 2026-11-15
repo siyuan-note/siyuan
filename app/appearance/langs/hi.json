@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "इस पुष्टि अनुरोध को संभाल लिया गया है, इसकी समय सीमा समाप्त हो गई है या यह अब उपलब्ध नहीं है",
 	"agentQueueMessage": "संदेश कतार में जोड़ें",
 	"agentQueuedMessages": "कतार में संदेश (${count})",
 	"agentSendQueuedMessages": "कतार के संदेश भेजें",

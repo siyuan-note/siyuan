@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "คำขอยืนยันนี้ได้รับการจัดการแล้ว หมดอายุ หรือไม่พร้อมใช้งานอีกต่อไป",
 	"agentQueueMessage": "เพิ่มข้อความในคิว",
 	"agentQueuedMessages": "ข้อความในคิว (${count})",
 	"agentSendQueuedMessages": "ส่งข้อความในคิว",

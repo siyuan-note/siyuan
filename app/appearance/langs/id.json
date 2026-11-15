@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "Konfirmasi ini sudah ditangani, kedaluwarsa, atau tidak lagi tersedia",
 	"agentQueueMessage": "Antrekan pesan",
 	"agentQueuedMessages": "Pesan dalam antrean (${count})",
 	"agentSendQueuedMessages": "Kirim pesan dalam antrean",

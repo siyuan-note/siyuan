@@ -65,6 +65,12 @@ import {AgentRunController, ManagedAgentRun, PendingAgentInteraction} from "./Ag
 import {fullscreen} from "../../../protyle/breadcrumb/action";
 import {AgentWelcomeGreeting} from "./AgentWelcomeGreeting";
 import {AgentMessageQueue} from "./AgentMessageQueue";
+import {clearAgentInteractionNotifications, notifyAgentInteraction} from "./agentNotification";
+import {AgentNotificationTarget, parseAgentNotificationTarget} from "./agentNotificationTarget";
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+import {Constants} from "../../../constants";
+/// #endif
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
@@ -92,6 +98,7 @@ export interface AgentChatHost {
     mobileSidebar?: boolean;
     close: () => void;
     focus?: () => void;
+    reveal?: () => void;
     openAiSetting?: () => void;
     onNavigate?: () => void;
     notify?: (type: AgentChatNotification) => void;
@@ -228,6 +235,21 @@ export class AgentChat extends Model {
     private startingSessionID = "";
     private sessionViewChanging = false;
     private destroyed = false;
+    private notifiedSessions = new Set<string>();
+    private pendingNotificationTarget?: AgentNotificationTarget;
+    private navigatingNotification = false;
+    private preserveNotificationDrafts = false;
+    private notificationDrafts = new Map<string, {
+        data: AgentComposerData;
+        edit?: {entryID: string; data: AgentComposerData};
+    }>();
+    private notificationClickHandler = (_event: unknown, value: unknown) => {
+        const target = parseAgentNotificationTarget(value);
+        if (target) {
+            this.pendingNotificationTarget = target;
+            void this.processNotificationNavigation();
+        }
+    };
     private imageUploadButton: HTMLButtonElement;
     private imageUploadInput: HTMLInputElement;
     private newSessionBtn: HTMLElement;
@@ -373,10 +395,24 @@ export class AgentChat extends Model {
             }, {threshold: 0.01});
             this.welcomeObserver.observe(this.panelElement);
         }
+        /// #if !BROWSER
+        if (process.platform === "win32") {
+            ipcRenderer.on(Constants.SIYUAN_AGENT_NOTIFICATION, this.notificationClickHandler);
+        }
+        /// #endif
     }
 
     public destroy() {
         this.destroyed = true;
+        this.pendingNotificationTarget = undefined;
+        this.notifiedSessions.forEach(sessionID => clearAgentInteractionNotifications(sessionID));
+        this.notifiedSessions.clear();
+        this.notificationDrafts.clear();
+        /// #if !BROWSER
+        if (process.platform === "win32") {
+            ipcRenderer.removeListener(Constants.SIYUAN_AGENT_NOTIFICATION, this.notificationClickHandler);
+        }
+        /// #endif
         this.queuedMessages = new AgentMessageQueue<QueuedAgentMessage>();
         this.composerResize?.destroy();
         this.welcomeObserver?.disconnect();
@@ -1347,6 +1383,8 @@ export class AgentChat extends Model {
                 },
                 completed: run => {
                     this.clearRunAbortController(run);
+                    clearAgentInteractionNotifications(run.sessionID);
+                    this.notifiedSessions.delete(run.sessionID);
                     if (run.finishedNormally && !run.detached && this.sessionId === run.sessionID) {
                         void this.sendQueuedMessage();
                     }
@@ -1368,7 +1406,7 @@ export class AgentChat extends Model {
                 prepareDetach: () => this.prepareRunViewForDetach(),
                 captureView: state => this.captureRunView(state),
                 restore: (state, consumed) => this.restoreRunView(state, consumed),
-                notifyInteraction: () => this.notifyRunInteraction(),
+                notifyInteraction: (run, event) => this.notifyRunInteraction(event, run.sessionID),
                 renderInteraction: event => this.renderRunInteractionView(event),
                 handleEvent: event => this.handleSSEEvent(event),
                 handleBrowserCall: event => this.handleBrowserCapabilityCall(event.callID, event.capabilityID, event.generation, event.arguments),
@@ -1409,13 +1447,126 @@ export class AgentChat extends Model {
         }
     }
 
-    private notifyRunInteraction() {
+    private notifyRunInteraction(event: PendingAgentInteraction, sessionID = this.sessionId) {
         if (this.host.notify) {
             this.host.notify("confirm");
         } else if (!document.hasFocus() || document.hidden) {
             const L = window.siyuan.languages;
-            sendNotification({title: L.agentNotifyConfirm, body: "", timeoutType: "default"});
+            this.notifiedSessions.add(sessionID);
+            notifyAgentInteraction(L.agentNotifyConfirm, {
+                sessionID, kind: event.type,
+                interactionID: event.type === "confirm" ? event.confirmID : event.questionID,
+            });
         }
+    }
+
+    private saveNotificationDraft() {
+        if (!this.preserveNotificationDrafts || !this.composer) {
+            return;
+        }
+        this.notificationDrafts.set(this.sessionId, {
+            data: this.composer.getSendData(),
+            edit: this.editingComposer && this.editingUserEntryID ? {
+                entryID: this.editingUserEntryID, data: this.editingComposer.getSendData(),
+            } : this.pendingEditDraft || undefined,
+        });
+    }
+
+    private restoreNotificationDraft() {
+        if (!this.preserveNotificationDrafts || !this.composer) {
+            return;
+        }
+        const draft = this.notificationDrafts.get(this.sessionId);
+        this.composer.setData(draft?.data || {text: "", blockHTML: "", references: []});
+        this.pendingEditDraft = draft?.edit || null;
+        this.restorePendingEditDraft();
+        this.updateSendButtonState();
+    }
+
+    private async processNotificationNavigation() {
+        if (this.destroyed || this.navigatingNotification || !this.pendingNotificationTarget ||
+            this.startingSessionID || this.sessionViewChanging || this.composer?.isUploading() ||
+            this.editingComposer?.isUploading()) {
+            return;
+        }
+        const target = this.pendingNotificationTarget;
+        this.pendingNotificationTarget = undefined;
+        this.navigatingNotification = true;
+        try {
+            this.preserveNotificationDrafts = true;
+            this.host.reveal?.();
+            if (this.sessionId !== target.sessionID) {
+                await this.switchSession(target.sessionID);
+            }
+            if (this.destroyed) {
+                return;
+            }
+            if (this.sessionId !== target.sessionID) {
+                showMessage(window.siyuan.languages.agentNotificationExpired, 5000);
+                return;
+            }
+            const run = this.sessionRuns.get(target.sessionID);
+            if (run) {
+                await this.runController.waitForView(run);
+            }
+            if (this.destroyed || this.sessionId !== target.sessionID) {
+                return;
+            }
+            const card = Array.from(this.messagesContainer.querySelectorAll<HTMLElement>("[data-agent-interaction-id]"))
+                .find(element => element.dataset.agentInteractionId === target.interactionID &&
+                    element.dataset.agentInteractionType === target.kind);
+            const pending = run && this.sessionRuns.get(target.sessionID) === run && !run.controller.signal.aborted &&
+                !run.finishedNormally && run.pendingInteractions.some(event => event.type === target.kind &&
+                    (event.type === "confirm" ? event.confirmID : event.questionID) === target.interactionID);
+            if (card) {
+                this.highlightNotificationCard(card);
+            }
+            if (!card || !pending || card.classList.contains("agent-chat__msg--confirmed")) {
+                if (card) {
+                    card.classList.add("agent-chat__msg--confirmed");
+                    card.querySelectorAll<HTMLButtonElement | HTMLInputElement>("button,input").forEach(input => {
+                        input.disabled = true;
+                    });
+                }
+                showMessage(window.siyuan.languages.agentNotificationExpired, 5000);
+            }
+        } catch (error) {
+            console.error("open agent notification target failed:", error);
+            this.restoreNotificationDraft();
+            showMessage(window.siyuan.languages.agentNotificationExpired, 5000);
+        } finally {
+            this.navigatingNotification = false;
+            if (this.pendingNotificationTarget) {
+                void this.processNotificationNavigation();
+            }
+        }
+    }
+
+    private highlightNotificationCard(card: HTMLElement) {
+        const startedAt = Date.now();
+        this.userScrolledUp = true;
+        card.classList.add("agent-chat__msg--jumped");
+        card.tabIndex = -1;
+        card.focus({preventScroll: true});
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (this.destroyed || !card.isConnected) {
+                return;
+            }
+            const generation = this.beginProgrammaticScroll();
+            const tick = () => {
+                if (this.destroyed || !card.isConnected || generation !== this.programmaticScrollGeneration) {
+                    return;
+                }
+                card.scrollIntoView({block: "center"});
+                if (Date.now() - startedAt < 320) {
+                    requestAnimationFrame(tick);
+                } else {
+                    this.finishProgrammaticScroll(generation, "restore");
+                }
+            };
+            tick();
+        }));
+        window.setTimeout(() => card.classList.remove("agent-chat__msg--jumped"), 1500);
     }
 
     private async renderRunInteractionView(event: PendingAgentInteraction) {
@@ -1963,6 +2114,7 @@ export class AgentChat extends Model {
         if (id === this.sessionId) {
             return;
         }
+        this.saveNotificationDraft();
         this.destroyEditingComposer();
         this.pendingEditDraft = null;
         const previousSessionID = this.sessionId;
@@ -1995,6 +2147,7 @@ export class AgentChat extends Model {
                 this.runController.attach(previousRun);
                 void this.sessionPanel?.refresh();
             }
+            this.restoreNotificationDraft();
             return;
         }
         this.sessionId = session.id;
@@ -2109,6 +2262,9 @@ export class AgentChat extends Model {
             this.messagesContainer.classList.add("agent-chat__messages--switching");
             fallbackTimer = window.setTimeout(finish, 250);
         });
+        if (this.sessionId === id) {
+            this.restoreNotificationDraft();
+        }
     }
 
     private appendPersistedAssistant(content: string, timestamp?: number, entryId?: string, showActions = true) {
@@ -2180,6 +2336,8 @@ export class AgentChat extends Model {
         const L = window.siyuan.languages;
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--confirm agent-chat__msg--confirmed";
+        el.dataset.agentInteractionId = entry.confirmID;
+        el.dataset.agentInteractionType = "confirm";
         if (entry.id) {
             el.setAttribute("data-message-id", entry.id);
         }
@@ -2246,6 +2404,8 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         // 重载后 question 不可再交互（后端已超时或会话已切换），统一显示为已确认态。
         el.className = "agent-chat__msg agent-chat__msg--question agent-chat__msg--confirmed";
+        el.dataset.agentInteractionId = entry.questionID;
+        el.dataset.agentInteractionType = "question";
         if (entry.id) {
             el.setAttribute("data-message-id", entry.id);
         }
@@ -2419,6 +2579,7 @@ export class AgentChat extends Model {
     }
 
     private async performCreateSession() {
+        this.saveNotificationDraft();
         this.destroyEditingComposer();
         this.pendingEditDraft = null;
         const previousSessionID = this.sessionId;
@@ -2508,6 +2669,7 @@ export class AgentChat extends Model {
             return;
         }
         this.scrollBottomBySession.delete(id);
+        this.notificationDrafts.delete(id);
         this.queuedMessages.clear(id);
         const wasCurrent = id === this.sessionId;
         if (wasCurrent) {
@@ -3012,7 +3174,7 @@ export class AgentChat extends Model {
                     break;
                 case "question":
                     this.appendQuestion(event.questionID, event.arguments, event.roundID);
-                    this.notifyRunInteraction();
+                    this.notifyRunInteraction(event);
                     break;
                 case "reasoning":
                     this.appendReasoning(event.token);
@@ -3273,7 +3435,7 @@ export class AgentChat extends Model {
         });
         editComposer = mountComposer(editorHost, () => {
             void submitEdit();
-        }, undefined, {
+        }, () => { void this.processNotificationNavigation(); }, {
             initialContent: initialData?.text ?? entry.content,
             initialBlockHTML: initialData?.blockHTML ?? entry.blockHTML,
             onCancel: restore,
@@ -4251,6 +4413,8 @@ export class AgentChat extends Model {
         const L = window.siyuan.languages;
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--confirm";
+        el.dataset.agentInteractionId = confirmID;
+        el.dataset.agentInteractionType = "confirm";
         const argsStr = JSON.stringify(args, null, 2);
         const desc = (L.agentConfirmDesc || "Agent: {category} operation").replace("{category}", escapeHtml(this.toolCategory(name)));
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
@@ -4319,11 +4483,7 @@ export class AgentChat extends Model {
         this.scrollToBottom();
         this.hasInterveningCard = true;
         if (notify) {
-            if (this.host.notify) {
-                this.host.notify("confirm");
-            } else if (!document.hasFocus() || document.hidden) {
-                sendNotification({title: L.agentNotifyConfirm, body: "", timeoutType: "default"});
-            }
+            this.notifyRunInteraction({type: "confirm", name, arguments: args, confirmID, effects, forced}, sessionID);
         }
     }
 
@@ -4349,6 +4509,7 @@ export class AgentChat extends Model {
             return false;
         }
         this.runController.removeInteraction(sessionID, "confirm", confirmID);
+        clearAgentInteractionNotifications(sessionID, {sessionID, kind: "confirm", interactionID: confirmID});
         if (this.sessionId !== sessionID) {
             return true;
         }
@@ -4466,6 +4627,8 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--question";
         el.setAttribute("data-question-id", questionID);
+        el.dataset.agentInteractionId = questionID;
+        el.dataset.agentInteractionType = "question";
 
         el.innerHTML = renderQuestionCardHTML(rawQuestions, questionID);
         const sessionID = this.sessionId;
@@ -4565,6 +4728,7 @@ export class AgentChat extends Model {
             return false;
         }
         this.runController.removeInteraction(sessionID, "question", questionID);
+        clearAgentInteractionNotifications(sessionID, {sessionID, kind: "question", interactionID: questionID});
         if (this.sessionId !== sessionID) {
             return true;
         }
@@ -4976,6 +5140,9 @@ export class AgentChat extends Model {
                 updateHotkeyAfterTip(window.siyuan.config.keymap.general.agentSend.custom));
         }
         this.renderQueuedMessages();
+        if (this.pendingNotificationTarget) {
+            void this.processNotificationNavigation();
+        }
     }
 
     // 输入框当前是否有可发送内容（含 @引用也算）。无 composer 时返回 false。

@@ -13,6 +13,7 @@ import {findWorkspaceByWebContents, getWindowKernelTarget} from "../window/windo
 import type {BrowserWindow, WebContents} from "electron";
 import type {Workspace} from "../shared/types";
 import {Channel} from "../shared/channels";
+import {handleAgentNotification} from "./agentNotifications";
 
 /** 一条命令执行时可见的上下文。载荷形状随命令变化，由各命令自行解释。 */
 type CommandContext = {
@@ -122,6 +123,11 @@ const commands: Record<string, CommandHandler> = {
             window?.show();
         });
         notification.show();
+    },
+    agentNotification: ({data, window, sender, isSenderMainFrame}) => {
+        if (process.platform === "win32" && window && isSenderMainFrame) {
+            handleAgentNotification(window, sender, data);
+        }
     },
     setSpellCheckerLanguages: ({data}) => {
         electron.BrowserWindow.getAllWindows().forEach(item => {

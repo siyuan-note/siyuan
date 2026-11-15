@@ -55,6 +55,16 @@ test("only a normally handled terminal response can continue queued messages", a
     assert.equal(run.finishedNormally, undefined);
 });
 
+test("tool results retire timed-out interactions before a notification can reopen them", async () => {
+    const h = fixture(), run = h.controller.begin();
+    h.controller.queueInteraction(run, {type: "question", questionID: "question", arguments: {}, roundID: "round"}, false);
+    h.controller.queueInteraction(run, {type: "confirm", confirmID: "confirm", name: "file", arguments: {}}, false);
+    await h.controller.handleEvent(run, {type: "tool_result", name: "question", result: "timed out", roundID: "round"});
+    assert.deepEqual(run.pendingInteractions.map(event => event.type), ["confirm"]);
+    await h.controller.handleEvent(run, {type: "tool_result", name: "file", result: "timed out"});
+    assert.deepEqual(run.pendingInteractions, []);
+});
+
 test("background runs coalesce text and replay distinct interactions without touching the foreground", async () => {
     const h = fixture();
     const first = h.controller.begin();

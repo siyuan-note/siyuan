@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "This confirmation has been handled, expired, or is no longer available",
 	"agentQueueMessage": "Queue message",
 	"agentQueuedMessages": "Queued messages (${count})",
 	"agentSendQueuedMessages": "Send queued messages",

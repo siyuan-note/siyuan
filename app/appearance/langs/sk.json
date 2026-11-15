@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "Toto potvrdenie už bolo vybavené, vypršalo alebo už nie je dostupné",
 	"agentQueueMessage": "Zaradiť správu do frontu",
 	"agentQueuedMessages": "Správy vo fronte (${count})",
 	"agentSendQueuedMessages": "Odoslať správy z frontu",

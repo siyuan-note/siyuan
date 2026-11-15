@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "Questa conferma è già stata gestita, è scaduta o non è più disponibile",
 	"agentQueueMessage": "Accoda messaggio",
 	"agentQueuedMessages": "Messaggi in coda (${count})",
 	"agentSendQueuedMessages": "Invia messaggi in coda",

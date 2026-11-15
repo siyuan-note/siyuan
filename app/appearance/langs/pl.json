@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "To potwierdzenie zostało obsłużone, wygasło lub nie jest już dostępne",
 	"agentQueueMessage": "Dodaj wiadomość do kolejki",
 	"agentQueuedMessages": "Wiadomości w kolejce (${count})",
 	"agentSendQueuedMessages": "Wyślij wiadomości z kolejki",

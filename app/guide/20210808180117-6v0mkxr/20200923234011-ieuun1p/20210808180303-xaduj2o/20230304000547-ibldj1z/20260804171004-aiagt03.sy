@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261115062149"
+		"updated": "20261115103438"
 	},
 	"Children": [
 		{
@@ -538,7 +538,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-x813t3f",
-				"updated": "20261115062149"
+				"updated": "20261115103438"
 			},
 			"Children": [
 				{
@@ -617,6 +617,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "When the app loses focus or is hidden, pending approvals, unanswered questions, and normally completed replies can trigger system notifications. Delivery depends on the client and system notification permissions. Locking the screen or losing the connection does not guarantee that a task will continue."
+				}
+			]
+		},
+		{
+			"ID": "20261115103438-l8lubnb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261115103438-l8lubnb",
+				"updated": "20261115103438"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On Windows desktop, while SiYuan is running, clicking a pending-confirmation notification restores its original workspace window, opens the corresponding agent session, and highlights the approval or question card. Clicking only navigates; it never sends a draft or approves an operation. Drafts and unfinished message edits are kept when switching away and restored when you return. If an image is still uploading, navigation waits for it to finish. Handled, expired, or missing targets display a notice and do not regain approval controls. This does not support starting an exited app or notification navigation in mobile clients or browsers."
 				}
 			]
 		},

@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "Bu onay isteği işlendi, süresi doldu veya artık kullanılamıyor",
 	"agentQueueMessage": "İletiyi kuyruğa ekle",
 	"agentQueuedMessages": "Kuyruktaki iletiler (${count})",
 	"agentSendQueuedMessages": "Kuyruktaki iletileri gönder",

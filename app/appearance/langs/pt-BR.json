@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "Esta confirmação já foi tratada, expirou ou não está mais disponível",
 	"agentQueueMessage": "Adicionar mensagem à fila",
 	"agentQueuedMessages": "Mensagens na fila (${count})",
 	"agentSendQueuedMessages": "Enviar mensagens da fila",

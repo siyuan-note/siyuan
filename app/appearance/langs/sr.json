@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "Ова потврда је обрађена, истекла је или више није доступна",
 	"agentQueueMessage": "Додај поруку у ред",
 	"agentQueuedMessages": "Поруке у реду (${count})",
 	"agentSendQueuedMessages": "Пошаљи поруке из реда",

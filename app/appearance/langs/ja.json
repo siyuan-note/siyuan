@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "この確認は処理済み、有効期限切れ、または利用できなくなっています",
 	"agentQueueMessage": "メッセージを送信待ちにする",
 	"agentQueuedMessages": "送信待ちのメッセージ（${count}）",
 	"agentSendQueuedMessages": "送信待ちのメッセージを送信",

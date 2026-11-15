@@ -1,4 +1,5 @@
 {
+	"agentNotificationExpired": "Diese Rückfrage wurde bereits bearbeitet, ist abgelaufen oder nicht mehr verfügbar",
 	"agentQueueMessage": "Nachricht einreihen",
 	"agentQueuedMessages": "Nachrichten in der Warteschlange (${count})",
 	"agentSendQueuedMessages": "Nachrichten aus der Warteschlange senden",

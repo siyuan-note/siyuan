@@ -58,6 +58,9 @@ const setup = (withAppearance = false) => {
     // 执行实际生命周期函数，只替换编辑器、宿主和界面边界；无显示服务器时也能验证异步流程。
     const body = transpileModule(`
         let bootstrap, editor, session, autoSave, pendingSwitch, switchTask, pendingFileAction, appearance, appearanceMenu;
+        let resourcePromptTimer, destroyResourceDialog;
+        const promptedResources = new Set(), pendingResourcePrompts = new Set();
+        const scheduleResourcePrompt = () => {};
         let disposed = false, initializationClosing = false, documentGeneration = 0, targetGeneration = 0;
         let actionMessage = "", resourceUnavailable = false, editPending = false, sourceOnly = false, history;
         let outline = {enabled: false, visible: false, available: false};

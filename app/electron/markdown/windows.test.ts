@@ -484,6 +484,31 @@ test("relative images require a separate directory grant and remain scoped to th
     assert.equal((await other.request({url: resource, method: "GET"})).status, 403);
 });
 
+test("batch resource IPC binds listed directories to this document and never grants on cancel or after a generation change", async t => {
+    const {directory, manager, call, host} = await fixture(t);
+    const file = path.join(directory, "note.md");
+    await fs.writeFile(file, "![image](image.png)");
+    await fs.writeFile(path.join(directory, "image.png"), "image");
+    const window = await manager.open(file);
+    const {sessionId} = await call(window, "bootstrap");
+    let proposals = await call(window, "resource-directories", ["image.png", "https://example.com/a.png"]);
+    assert.deepEqual(proposals.map(item => item.path), [await fs.realpath(directory)]);
+    assert.equal(await call(window, "resource", "image.png"), undefined);
+    assert.equal(await call(window, "confirm-resource-directories", []), false);
+    assert.equal(await call(window, "resource", "image.png"), undefined);
+    proposals = await call(window, "resource-directories", ["image.png"]);
+    host.sessions.get(sessionId).generation++;
+    assert.equal(await call(window, "confirm-resource-directories", proposals.map(item => item.id)), false);
+    assert.equal(await call(window, "resource", "image.png"), undefined);
+    proposals = await call(window, "resource-directories", ["image.png"]);
+    assert.equal(await call(window, "confirm-resource-directories", proposals.map(item => item.id)), true);
+    const resource = await call(window, "resource", "image.png");
+    assert.equal((await window.request({url: resource, method: "GET"})).status, 200);
+    assert.deepEqual(await call(window, "resource-directories", ["image.png"]), []);
+    const other = await manager.open();
+    assert.equal((await other.request({url: resource, method: "GET"})).status, 403);
+});
+
 test("image insertion saves to the chosen new location and grants only that resource", async t => {
     const {directory, manager, call, dialog} = await fixture(t);
     const document = path.join(directory, "note.md");

@@ -636,3 +636,29 @@ button:focus-visible,
 .markdown-appearance-dialog__actions {
   gap: 8px;
 }
+
+.markdown-resource-directories {
+  min-height: 0;
+}
+
+.markdown-resource-directories__list {
+  max-height: min(360px, 45vh);
+  overflow-y: auto;
+}
+
+.markdown-resource-directories__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  input {
+    flex-shrink: 0;
+  }
+
+  span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+}

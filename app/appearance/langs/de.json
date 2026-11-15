@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "Ausgewählte Ordner nur für diese Bearbeitungssitzung erlauben; standardmäßig sind alle ausgewählt",
+	"markdownResourceDirectoriesEmpty": "Keine weiteren Ordner mit unterstützten lokalen Bildern benötigen eine Freigabe",
+	"markdownResourceDirectoriesChanged": "Ordner oder Dokument wurden geändert; schließen Sie den Dialog und versuchen Sie es erneut",
 	"searchGroupFolded": "Gruppierte Ergebnisse standardmäßig einklappen",
 	"aiOneTimeAction": "Bearbeitung beschreiben (einmalige Anweisung)",
 	"pluginSnapshotOpenProgram": "Programm öffnen",

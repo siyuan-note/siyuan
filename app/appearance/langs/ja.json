@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "選択したフォルダーを現在の編集セッションでのみ許可します。既定ではすべて選択されています",
+	"markdownResourceDirectoriesEmpty": "追加の許可が必要な、対応するローカル画像のフォルダーはありません",
+	"markdownResourceDirectoriesChanged": "フォルダーまたは文書が変更されました。ダイアログを閉じて再試行してください",
 	"searchGroupFolded": "グループ化した結果を既定で折りたたむ",
 	"aiOneTimeAction": "編集内容を入力（一度だけ使う指示）",
 	"pluginSnapshotOpenProgram": "プログラムを開く",

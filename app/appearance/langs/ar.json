@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "السماح بالمجلدات المحددة لجلسة التحرير الحالية فقط؛ جميع المجلدات محددة افتراضيًا",
+	"markdownResourceDirectoriesEmpty": "لا توجد مجلدات إضافية لصور محلية مدعومة تتطلب إذنًا",
+	"markdownResourceDirectoriesChanged": "تغيرت المجلدات أو المستند؛ أغلق مربع الحوار وأعد المحاولة",
 	"searchGroupFolded": "طي نتائج المجموعات افتراضيًا",
 	"aiOneTimeAction": "صِف كيفية التحرير (تعليمات لمرة واحدة)",
 	"pluginSnapshotOpenProgram": "فتح البرنامج",

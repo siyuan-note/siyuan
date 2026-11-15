@@ -678,6 +678,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         "large source opens without rendering its table-heavy preview");
     recoveryEditor.setValue("# Reloaded\n" + oversizedDraft);
     check.equal(recoveryEditor.flush().content, "# Reloaded\n" + oversizedDraft);
+    check.deepEqual(recoveryEditor.resourceReferences(), [], "source-only recovery does not parse the full document for image authorization");
     recoveryEditor.setValue("# Small preview pending\n");
     recoveryEditor.setValue(oversizedDraft);
     await new Promise(resolve => setTimeout(resolve, 220));

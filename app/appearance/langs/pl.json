@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "Zezwól na wybrane foldery tylko podczas tej sesji edycji; domyślnie zaznaczone są wszystkie",
+	"markdownResourceDirectoriesEmpty": "Żadne dodatkowe foldery z obsługiwanymi lokalnymi obrazami nie wymagają zezwolenia",
+	"markdownResourceDirectoriesChanged": "Foldery lub dokument uległy zmianie; zamknij okno dialogowe i spróbuj ponownie",
 	"searchGroupFolded": "Domyślnie zwijaj pogrupowane wyniki",
 	"aiOneTimeAction": "Opisz sposób edycji (jednorazowa instrukcja)",
 	"pluginSnapshotOpenProgram": "Otwórz program",

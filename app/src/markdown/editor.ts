@@ -80,7 +80,7 @@ export interface MarkdownEditorOptions {
     onOutlineChange?(state: MarkdownOutlineState): void;
     onLink?(url: string): void;
     resolveResource?: MarkdownResourceResolver;
-    onResourceUnavailable?(): void;
+    onResourceUnavailable?(reference?: string): void;
 }
 
 export interface MarkdownOutlineState {
@@ -98,6 +98,7 @@ export interface MarkdownEditor {
     undo(): void;
     redo(): void;
     refreshResources(): void;
+    resourceReferences(): string[];
     insertImage(reference: string): boolean;
     openFind(): void;
     focus(): void;
@@ -687,6 +688,14 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
         undo() {runHistory("undo");},
         redo() {runHistory("redo");},
         refreshResources() { if (!destroyed) policy.refresh(element); },
+        resourceReferences() {
+            // 大文档的源码模式关闭预览，目录授权也不能触发整篇富文本解析。
+            if (destroyed || !ready || isComposing() || recoverySourceOnly) return [];
+            const template = document.createElement("template");
+            template.innerHTML = policy.restore(instance.vditor.lute.Md2HTML(flush().content));
+            return [...new Set(Array.from(template.content.querySelectorAll("img[src]"))
+                .map(image => image.getAttribute("src")).filter(isRelativeMarkdownResource))];
+        },
         insertImage(reference) {
             if (destroyed || isComposing() || !isRelativeMarkdownResource(reference) || /[<>]/.test(reference)) return false;
             markUserInput();

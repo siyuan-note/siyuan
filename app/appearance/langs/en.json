@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "Allow selected folders for this editing session only; all folders are selected by default",
+	"markdownResourceDirectoriesEmpty": "No additional folders containing supported local images need authorization",
+	"markdownResourceDirectoriesChanged": "The folders or document changed; close this dialog and try again",
 	"searchGroupFolded": "Collapse grouped results by default",
 	"aiOneTimeAction": "Describe how to edit (one-time instruction)",
 	"pluginSnapshotOpenProgram": "Open program",

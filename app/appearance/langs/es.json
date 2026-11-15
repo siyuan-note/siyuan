@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "Autorizar las carpetas marcadas solo durante esta sesión de edición; todas están marcadas de forma predeterminada",
+	"markdownResourceDirectoriesEmpty": "No hay más carpetas con imágenes locales compatibles que necesiten autorización",
+	"markdownResourceDirectoriesChanged": "Las carpetas o el documento han cambiado; cierre el diálogo e inténtelo de nuevo",
 	"searchGroupFolded": "Contraer los resultados agrupados por defecto",
 	"aiOneTimeAction": "Describe cómo editar (instrucción de un solo uso)",
 	"pluginSnapshotOpenProgram": "Abrir programa",

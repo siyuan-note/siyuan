@@ -2,6 +2,7 @@ import type {MarkdownFormat, MarkdownHost, MarkdownTarget} from "./contracts";
 import type {MarkdownSessionState} from "./session";
 import type {MarkdownTreeBridge} from "./treeContracts";
 import type {SidebarKeymap} from "../util/dockKeymap";
+import type {MarkdownResourceDirectory} from "./resourceDirectories";
 
 export interface MarkdownPreferences {
     mode: "ir" | "wysiwyg" | "sv";
@@ -75,6 +76,8 @@ export interface MarkdownBridge {
     chooseSaveAs(format: MarkdownFormat): Promise<{kind: "selected"; target: MarkdownTarget} | {kind: "cancelled" | "occupied" | "blocked"}>;
     cancelSaveAs(handle: string): Promise<void>;
     authorizeResources(): Promise<boolean>;
+    resourceDirectories?(references: string[]): Promise<MarkdownResourceDirectory[]>;
+    confirmResourceDirectories?(ids: string[]): Promise<boolean>;
     insertImage(): Promise<{kind: "inserted"; reference: string} | {kind: "cancelled" | "blocked"}>;
     resolveResource(reference: string): Promise<string | undefined>;
     openLink(url: string): Promise<void>;

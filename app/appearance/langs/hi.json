@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "चुने गए फ़ोल्डरों को केवल इस संपादन सत्र के लिए अनुमति दें; डिफ़ॉल्ट रूप से सभी चुने गए हैं",
+	"markdownResourceDirectoriesEmpty": "समर्थित स्थानीय छवियों वाले किसी अतिरिक्त फ़ोल्डर को अनुमति की आवश्यकता नहीं है",
+	"markdownResourceDirectoriesChanged": "फ़ोल्डर या दस्तावेज़ बदल गए हैं; संवाद बंद करके फिर से प्रयास करें",
 	"searchGroupFolded": "समूहीकृत परिणाम डिफ़ॉल्ट रूप से समेटें",
 	"aiOneTimeAction": "बताएँ कैसे संपादित करना है (एक बार का निर्देश)",
 	"pluginSnapshotOpenProgram": "प्रोग्राम खोलें",

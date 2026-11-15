@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "Seçili klasörlere yalnızca bu düzenleme oturumunda izin ver; varsayılan olarak tümü seçilidir",
+	"markdownResourceDirectoriesEmpty": "Desteklenen yerel resimleri içeren başka bir klasör için izin gerekmiyor",
+	"markdownResourceDirectoriesChanged": "Klasörler veya belge değişti; iletişim kutusunu kapatıp yeniden deneyin",
 	"searchGroupFolded": "Gruplanmış sonuçları varsayılan olarak daralt",
 	"aiOneTimeAction": "Nasıl düzenleneceğini açıklayın (tek kullanımlık talimat)",
 	"pluginSnapshotOpenProgram": "Programı aç",

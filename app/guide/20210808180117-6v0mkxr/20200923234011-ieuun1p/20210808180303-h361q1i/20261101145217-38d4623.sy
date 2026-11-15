@@ -677,7 +677,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to select the local folder containing images referenced by relative paths. Only supported images within explicitly authorized folders are displayed. A missing or unauthorized image keeps its original Markdown reference and shows an unavailable-resource notice. Temporary preview addresses are never written into the document. Folder authorization belongs to the current editor session. On Android, select the Markdown document’s direct parent folder. Supported images in that folder and its subfolders can be displayed; parent-directory references containing .. are unavailable."
+					"Data": " to review the real folders containing referenced local images. On desktop, unavailable local images trigger a batch confirmation listing full folder paths. All are selected by default; uncheck any folder you do not want to authorize. Long lists scroll while the confirmation and cancel buttons stay visible. Cancelling grants no access. Authorization lasts only for the current editing session, without permanent trust. New unauthorized image paths prompt again; use this menu to retry skipped folders. Folders are not combined into broader ancestor folders. Missing, unsupported, or oversized images are not included and keep their original references. HTTP and HTTPS images do not require this authorization. Temporary preview addresses are never written into the document. On Android, select the Markdown document’s direct parent folder. Supported images in that folder and its subfolders can be displayed; parent-directory references containing .. are unavailable."
 				}
 			]
 		},

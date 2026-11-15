@@ -86,3 +86,84 @@ test("changing the selected directory junction invalidates its unchanged canonic
     assert.equal(await resources.resolve("first/image.png", target), undefined);
     assert.equal(await resources.read(token(url)), undefined);
 });
+
+test("batch proposals deduplicate real image parents without widening to their ancestor or granting on discovery", async t => {
+    const {directory, resources, target} = await fixture(t);
+    for (const folder of ["first", "second"]) {
+        await fs.mkdir(path.join(directory, folder));
+        await fs.writeFile(path.join(directory, folder, "a.png"), folder);
+    }
+    await fs.symlink(path.join(directory, "first"), path.join(directory, "alias"), process.platform === "win32" ? "junction" : "dir");
+    const proposals = await resources.proposeDirectories(["first/a.png", "./first/a.png?x=1#y", "alias/a.png", "second/a.png"], target);
+    assert.deepEqual(proposals.map(item => item.path).sort(), [await fs.realpath(path.join(directory, "first")), await fs.realpath(path.join(directory, "second"))].sort());
+    assert.equal(await resources.resolve("first/a.png", target), undefined);
+    assert.equal(await resources.confirmDirectories([proposals[0].id]), true);
+    assert.ok(await resources.resolve("first/a.png", target));
+    assert.equal(await resources.resolve("second/a.png", target), undefined);
+    assert.equal(resources.directories.has(directory), false);
+    assert.equal((await resources.proposeDirectories(["first/a.png", "second/a.png"], target)).length, 1);
+});
+
+test("cancel, unknown tokens and stale sessions leave all proposed directories unauthorized", async t => {
+    const {directory, resources, target} = await fixture(t);
+    await fs.writeFile(path.join(directory, "a.png"), "image");
+    let proposals = await resources.proposeDirectories(["a.png"], target);
+    assert.equal(await resources.confirmDirectories([]), false);
+    await assert.rejects(resources.confirmDirectories([proposals[0].id]));
+    proposals = await resources.proposeDirectories(["a.png"], target);
+    assert.equal(await resources.confirmDirectories([proposals[0].id], () => false), false);
+    proposals = await resources.proposeDirectories(["a.png"], target);
+    await assert.rejects(resources.confirmDirectories([proposals[0].id, directory]));
+    assert.equal(await resources.resolve("a.png", target), undefined);
+    assert.equal(resources.directories.size, 0);
+});
+
+test("batch candidates filter external, missing, non-image, control characters, encoded absolute paths and oversized files", async t => {
+    const {directory, resources, target} = await fixture(t);
+    await fs.writeFile(path.join(directory, "a.txt"), "private");
+    const huge = await fs.open(path.join(directory, "huge.png"), "w");
+    await huge.truncate(32 * 1024 * 1024 + 1); await huge.close();
+    const invalid = ["https://example.com/a.png", "//example.com/a.png", "file:///private.png", "C:\\private.png", "missing/a.png", "a.txt", "huge.png", "%00.png", "%2fprivate.png", "%5cprivate.png", "a\n.png", "%43%3a/private.png"];
+    assert.deepEqual(await resources.proposeDirectories(invalid, target), []);
+    assert.deepEqual(await resources.proposeDirectories(["a.png"]), []);
+    await assert.rejects(resources.proposeDirectories([null], target));
+});
+
+test("relative traversal proposes the actual parent and never the document parent", async t => {
+    const {directory, resources} = await fixture(t);
+    const notes = path.join(directory, "notes"); const images = path.join(directory, "images");
+    await fs.mkdir(notes); await fs.mkdir(images);
+    await fs.writeFile(path.join(images, "a.png"), "image");
+    const target = path.join(notes, "note.md");
+    const proposals = await resources.proposeDirectories(["../images/a.png"], target);
+    assert.deepEqual(proposals.map(item => item.path), [await fs.realpath(images)]);
+    assert.equal(await resources.confirmDirectories(proposals.map(item => item.id)), true);
+    assert.ok(await resources.resolve("../images/a.png", target));
+    assert.equal(resources.directories.has(notes), false);
+});
+
+test("a replaced proposed directory aborts the entire batch and a new proposal can authorize the replacement", async t => {
+    const {directory, resources, target} = await fixture(t);
+    const first = path.join(directory, "first"); const second = path.join(directory, "second");
+    for (const folder of [first, second]) {await fs.mkdir(folder); await fs.writeFile(path.join(folder, "a.png"), "image");}
+    const proposals = await resources.proposeDirectories(["first/a.png", "second/a.png"], target);
+    await fs.rename(second, path.join(directory, "old")); await fs.mkdir(second);
+    await fs.writeFile(path.join(second, "a.png"), "replacement");
+    assert.equal(await resources.confirmDirectories(proposals.map(item => item.id)), false);
+    assert.equal(resources.directories.size, 0);
+    const next = await resources.proposeDirectories(["second/a.png"], target);
+    assert.equal(await resources.confirmDirectories(next.map(item => item.id)), true);
+    assert.ok(await resources.resolve("second/a.png", target));
+});
+
+test("retargeting a proposed alias never grants its new destination", async t => {
+    const {directory, resources, target} = await fixture(t);
+    const first = path.join(directory, "first"); const second = path.join(directory, "second"); const alias = path.join(directory, "alias");
+    for (const folder of [first, second]) {await fs.mkdir(folder); await fs.writeFile(path.join(folder, "a.png"), "image");}
+    await fs.symlink(first, alias, process.platform === "win32" ? "junction" : "dir");
+    const proposals = await resources.proposeDirectories(["alias/a.png"], target);
+    await fs.unlink(alias); await fs.symlink(second, alias, process.platform === "win32" ? "junction" : "dir");
+    assert.equal(await resources.confirmDirectories(proposals.map(item => item.id)), true);
+    assert.equal(await resources.resolve("alias/a.png", target), undefined);
+    assert.ok(await resources.resolve("first/a.png", target));
+});

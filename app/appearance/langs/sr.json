@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "Дозволи означене фасцикле само током ове сесије уређивања; подразумевано су све означене",
+	"markdownResourceDirectoriesEmpty": "Нема додатних фасцикли са подржаним локалним сликама које захтевају дозволу",
+	"markdownResourceDirectoriesChanged": "Фасцикле или документ су промењени; затворите дијалог и покушајте поново",
 	"searchGroupFolded": "Подразумевано скупи груписане резултате",
 	"aiOneTimeAction": "Опишите измену (једнократно упутство)",
 	"pluginSnapshotOpenProgram": "Отвори програм",

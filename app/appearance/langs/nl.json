@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "Sta aangevinkte mappen alleen tijdens deze bewerksessie toe; standaard zijn alle mappen aangevinkt",
+	"markdownResourceDirectoriesEmpty": "Er zijn geen extra mappen met ondersteunde lokale afbeeldingen die toestemming vereisen",
+	"markdownResourceDirectoriesChanged": "De mappen of het document zijn gewijzigd; sluit het dialoogvenster en probeer het opnieuw",
 	"searchGroupFolded": "Gegroepeerde resultaten standaard inklappen",
 	"aiOneTimeAction": "Beschrijf de bewerking (eenmalige instructie)",
 	"pluginSnapshotOpenProgram": "Programma openen",

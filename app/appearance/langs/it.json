@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "Autorizza le cartelle selezionate solo per questa sessione di modifica; inizialmente sono tutte selezionate",
+	"markdownResourceDirectoriesEmpty": "Nessun’altra cartella con immagini locali supportate richiede l’autorizzazione",
+	"markdownResourceDirectoriesChanged": "Le cartelle o il documento sono cambiati; chiudi la finestra e riprova",
 	"searchGroupFolded": "Comprimi i risultati raggruppati per impostazione predefinita",
 	"aiOneTimeAction": "Descrivi come modificare (istruzione singola)",
 	"pluginSnapshotOpenProgram": "Apri programma",

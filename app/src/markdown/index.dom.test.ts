@@ -891,6 +891,83 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(application.session.getState().lifecycle, "closed");
     check.equal(closeConfirmations, 1);
     application.destroy();
+    const confirmations: string[][] = [];
+    const scans: string[][] = [];
+    const allowed = new Set<string>();
+    bridge.resourceDirectories = async references => {
+        scans.push(references);
+        return references.filter(reference => !allowed.has(reference)).map(reference => ({id: reference, path: `C:\\Images\\${reference}`}));
+    };
+    bridge.confirmResourceDirectories = async ids => {confirmations.push(ids); ids.forEach(id => allowed.add(id)); return ids.length > 0;};
+    const localReferences = Array.from({length: 45}, (_, i) => `folder${i}/image.png`);
+    const resourceContent = localReferences.map(reference => `![image](${reference})`).join("\n\n") +
+        "\n\n![duplicate](folder0/image.png)\n\n![ref][photo]\n\n[photo]: folder1/image.png\n\n" +
+        "[link](link-only/private.png)\n\n![remote](https://example.com/a.png)\n\n```md\n![code](code-only/private.png)\n```\n";
+    const resourceBootstrap = {...await bridge.bootstrap(), sessionId: "resource-session", content: resourceContent,
+        preferences: {...storedPreferences, theme: "system" as const}, dark: false};
+    const resourceApplication = await api.mountMarkdownApplication(bridge, document.getElementById("markdownApp"), resourceBootstrap);
+    await tick(); await tick();
+    const resourcePanel = document.getElementById("markdownResourcesPanel") as HTMLDialogElement;
+    check.equal(resourcePanel.open, true, "new local image paths automatically open one batch confirmation");
+    check.deepEqual([...scans[0]].sort(), [...localReferences].sort(), "only parsed local images are proposed, including reference images");
+    const resourceCheckboxes = () => Array.from(resourcePanel.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+    check.equal(resourceCheckboxes().length, 45);
+    check.ok(resourceCheckboxes().every(input => input.checked), "all directories default to selected");
+    const resourceList = resourcePanel.querySelector<HTMLElement>(".markdown-resource-directories__list");
+    const resourceActions = resourcePanel.querySelector<HTMLElement>(".b3-dialog__action");
+    check.ok(resourceList.scrollHeight > resourceList.clientHeight, "long directory lists scroll");
+    const actionTop = resourceActions.getBoundingClientRect().top;
+    resourceList.scrollTop = resourceList.scrollHeight;
+    await tick();
+    check.equal(resourceActions.getBoundingClientRect().top, actionTop, "actions stay fixed while the list scrolls");
+    check.ok(resourceActions.getBoundingClientRect().bottom <= innerHeight);
+    await ipcRenderer.invoke("markdown-screenshot", "resources-all-selected-light");
+    resourcePanel.querySelector<HTMLButtonElement>('button[type="button"]').click(); await tick();
+    check.deepEqual(confirmations, [[]], "cancelling discards proposals and grants nothing");
+    check.equal(resourcePanel.open, false);
+    resourceApplication.editor.refreshResources(); await tick(); await tick();
+    check.equal(resourcePanel.open, false, "cancelled paths do not repeatedly interrupt this editing session");
+    document.querySelector<HTMLDetailsElement>("#markdownMore").open = true;
+    document.getElementById("markdownResources").click(); await tick();
+    check.equal(resourcePanel.open, true, "the menu permits retrying skipped directories");
+    resourceCheckboxes()[1].click();
+    const resourceForm = resourcePanel.querySelector("form");
+    resourceForm.requestSubmit(); resourceForm.requestSubmit(); await tick();
+    check.deepEqual(confirmations.at(-1), localReferences.filter(reference => reference !== localReferences[1]));
+    check.equal(confirmations.length, 2, "repeated confirmation does not submit twice");
+    check.equal(resourcePanel.open, false);
+    resourceApplication.editor.setValue(resourceContent + "\n\n![new](new-folder/image.png)\n");
+    await tick(); await tick();
+    check.equal(resourcePanel.open, true, "a later unauthorized image path prompts again");
+    check.equal(resourceCheckboxes().length, 2, "already authorized directories are omitted");
+    for (const input of resourceCheckboxes()) input.click();
+    check.equal(resourcePanel.querySelector<HTMLButtonElement>('button[type="submit"]').disabled, true);
+    resourceCheckboxes()[0].click();
+    check.equal(resourcePanel.querySelector<HTMLButtonElement>('button[type="submit"]').disabled, false);
+    await ipcRenderer.invoke("markdown-resize", 360, 640); await tick();
+    await resourceApplication.dispatch({id: "resource-dark", type: "theme", dark: true});
+    document.getElementById("markdownApp").style.setProperty("--markdown-font-size", "32px");
+    await tick();
+    check.ok(getComputedStyle(resourcePanel.querySelector("form")).backgroundColor.match(/\d+/g).slice(0, 3).every(value => Number(value) < 128),
+        "the directory dialog follows the loaded dark theme");
+    const narrowActions = resourcePanel.querySelector<HTMLElement>(".b3-dialog__action").getBoundingClientRect();
+    check.ok(narrowActions.bottom <= innerHeight && narrowActions.left >= 0 && narrowActions.right <= innerWidth,
+        "confirmation and cancel stay reachable in a narrow window with large editor fonts");
+    await ipcRenderer.invoke("markdown-screenshot", "resources-partial-narrow-dark");
+    resourcePanel.dispatchEvent(new Event("cancel", {cancelable: true})); await tick();
+    check.equal(resourcePanel.open, false, "Escape cancellation grants nothing");
+    check.deepEqual(confirmations.at(-1), []);
+    let completeResourceScan: (directories: import("./resourceDirectories").MarkdownResourceDirectory[]) => void;
+    bridge.resourceDirectories = () => new Promise(resolve => {completeResourceScan = resolve;});
+    document.querySelector<HTMLDetailsElement>("#markdownMore").open = true;
+    document.getElementById("markdownResources").click(); await tick();
+    const closingResources = resourceApplication.dispatch({id: "resource-close", type: "close"});
+    await tick();
+    completeResourceScan([{id: "late", path: "C:\\Late\\images"}]);
+    await closingResources;
+    check.equal(resourcePanel.open, false, "a directory scan completed during closing cannot reopen the dialog");
+    resourceApplication.destroy();
+    delete bridge.resourceDirectories; delete bridge.confirmResourceDirectories;
     const bootstrap = await bridge.bootstrap();
     await ipcRenderer.invoke("markdown-resize", 1100, 850);
     document.body.classList.remove("body--android");
@@ -1444,7 +1521,7 @@ test("Markdown file tree and compact menus preserve edits across switching, stal
     const compileSource = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "../util/systemFontCore.ts", "../util/fontPreview.ts", "fontPicker.ts", "appearance.ts", "index.ts"].map(compileSource).join("\n") +
+    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "resourceDirectories.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "../util/systemFontCore.ts", "../util/fontPreview.ts", "fontPicker.ts", "appearance.ts", "index.ts"].map(compileSource).join("\n") +
         "\nwindow.MarkdownApplicationTest = {mountMarkdownApplication, createMarkdownTree, MARKDOWN_RENDER_BYTES}; void 0;";
     const style = compile(path.resolve(__dirname, "../assets/scss/markdown.scss")).css;
     const template = readFileSync(path.resolve(__dirname, "../assets/template/markdown/index.tpl"), "utf8")

@@ -1,4 +1,7 @@
 {
+	"markdownResourceDirectoriesTip": "אפשר את התיקיות המסומנות רק במהלך העריכה הנוכחית; כולן מסומנות כברירת מחדל",
+	"markdownResourceDirectoriesEmpty": "אין תיקיות נוספות עם תמונות מקומיות נתמכות שדורשות הרשאה",
+	"markdownResourceDirectoriesChanged": "התיקיות או המסמך השתנו; יש לסגור את החלון ולנסות שוב",
 	"searchGroupFolded": "כיווץ תוצאות מקובצות כברירת מחדל",
 	"aiOneTimeAction": "תארו כיצד לערוך (הוראה חד־פעמית)",
 	"pluginSnapshotOpenProgram": "פתיחת התוכנית",

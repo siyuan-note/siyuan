@@ -52,7 +52,7 @@ export const isExternalMarkdownLink = (reference: string): boolean =>
 
 // 显示替换只存在于该编辑器实例；转换回 Markdown 前在惰性副本中还原原属性。
 export const createMarkdownResourcePolicy = (document: Document, resolveResource?: MarkdownResourceResolver,
-    onUnavailable?: () => void, sessionId?: string) => {
+    onUnavailable?: (reference: string) => void, sessionId?: string) => {
     const scope = createMarkdownCapabilityToken();
     let generation = 0;
     let disposed = false;
@@ -177,7 +177,7 @@ export const createMarkdownResourcePolicy = (document: Document, resolveResource
             if (!pending) {
                 pending = Promise.resolve().then(() => resolveResource(source.original)).then(url =>
                     url && isMarkdownDisplayResource(url, document.location.href, sessionId) ? url : undefined).catch((): undefined => undefined);
-                void pending.then(url => { if (!url && !disposed && generation === expectedGeneration) onUnavailable?.(); });
+                void pending.then(url => { if (!url && !disposed && generation === expectedGeneration) onUnavailable?.(source.original); });
                 resources.set(source.original, pending);
             }
             void pending.then(url => {

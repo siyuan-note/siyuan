@@ -1750,6 +1750,35 @@
 			]
 		},
 		{
+			"ID": "20261115153000-9d2f24d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261115153000-9d2f24d",
+				"updated": "20261115153000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Plugin development"
+				}
+			]
+		},
+		{
+			"ID": "20261115153000-7b3d0a9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261115153000-7b3d0a9",
+				"updated": "20261115153000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When repeatedly packaging a managed plugin project, successful packaging keeps up to 8 recent archives with a total size of at most 256 MiB. After the new archive, download copy, and project metadata are saved, older archives and their matching download copies are removed as needed. The current archive is always retained. Source files and code recovery checkpoints are not removed. If publication fails, existing archives are preserved; if cleanup fails, the new archive is retained and an error is reported."
+				}
+			]
+		},
+		{
 			"ID": "20261008115720-pkk1ilo",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

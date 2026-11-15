@@ -1666,6 +1666,35 @@
 			]
 		},
 		{
+			"ID": "20261115153000-ee33d4f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261115153000-ee33d4f",
+				"updated": "20261115153000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "外掛開發"
+				}
+			]
+		},
+		{
+			"ID": "20261115153000-9eaab17",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261115153000-9eaab17",
+				"updated": "20261115153000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "反覆打包受管外掛專案時，成功打包後最多保留最近的 8 個封存檔，總大小不超過 256 MiB。新封存檔、下載副本和專案中繼資料儲存完成後，系統按需清理較早的封存檔及其對應的下載副本，始終保留目前的封存檔。原始碼和程式碼復原檢查點不參與清理。發佈失敗時保留既有封存檔；清理失敗時保留新封存檔並回報錯誤。"
+				}
+			]
+		},
+		{
 			"ID": "20261008115720-aa8twuc",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

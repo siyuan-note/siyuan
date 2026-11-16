@@ -42,8 +42,12 @@ var getTag = contractHandler(apicontract.GetTag, func(c *gin.Context, request ap
 })
 
 var renameTag = contractHandler(apicontract.RenameTag, func(c *gin.Context, request apicontract.RenameTagRequest) apicontract.Response[apicontract.Null] {
-	if err := model.RenameTag(request.OldLabel, request.NewLabel); err != nil {
+	tx, err := model.RenameTagWithTransaction(request.OldLabel, request.NewLabel)
+	if err != nil {
 		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 5000)
+	}
+	if len(tx.DoOperations) > 0 {
+		pushTransactions("", "", []*model.Transaction{tx})
 	}
 	return apicontract.Success(apicontract.Null{})
 })

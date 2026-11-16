@@ -344,7 +344,9 @@ var (
 	RemoveBookmark     = define[RemoveBookmarkRequest, Null]("removeBookmark", "/api/bookmark/removeBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	RenameBookmark     = define[RenameBookmarkRequest, Null]("renameBookmark", "/api/bookmark/renameBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	RemoveTag          = define[RemoveTagRequest, Null]("removeTag", "/api/tag/removeTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	RenameTag          = define[RenameTagRequest, Null]("renameTag", "/api/tag/renameTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	// 精确匹配标签及其子标签前缀，通过单笔可撤销事务改名并广播编辑操作；成功仍返回 null。
+	// 无匹配时不写入；源快照变化时拒绝提交，保留并发编辑。自动收集保留已有条目和字段。
+	RenameTag = define[RenameTagRequest, Null]("renameTag", "/api/tag/renameTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 )
 
 var (

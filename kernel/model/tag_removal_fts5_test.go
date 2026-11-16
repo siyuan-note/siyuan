@@ -177,7 +177,7 @@ func TestTagRemovalBatchRejectsChangedSourceSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 	tx := blockCollectionTags(t, fixture.sourceID, "")
-	tx.tagRemovalSources = sources
+	tx.tagMutationSources = sources
 	if err = PerformTxSync(tx); err == nil {
 		t.Fatal("stale batch source accepted")
 	}
@@ -205,7 +205,7 @@ func TestTagRemovalRejectsChangedSourceSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 	tx := blockCollectionTags(t, fixture.sourceID, "")
-	tx.tagRemovalSources = sources
+	tx.tagMutationSources = sources
 	if err = PerformTxSync(tx); err == nil {
 		t.Fatalf("stale source accepted: %v", err)
 	}

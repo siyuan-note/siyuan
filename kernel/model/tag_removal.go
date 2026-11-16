@@ -5,8 +5,6 @@
 package model
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"slices"
 	"sort"
@@ -17,7 +15,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -92,29 +89,10 @@ func tagRemovalTrees(changes []*apicontract.TagRemovalChange) (before, after map
 		if change == nil || !ast.IsNodeIDPattern(change.ID) || len(change.Tags) == 0 || len(change.Tags) > 1000 {
 			return nil, nil, nil, fmt.Errorf("invalid tag removal change")
 		}
-		bt := treenode.GetBlockTree(change.ID)
-		if bt == nil {
-			continue
+		node, loadErr := tagMutationNode(change.ID, before, after, sources)
+		if loadErr != nil {
+			return nil, nil, nil, loadErr
 		}
-		// 标签属于普通工作区；不扫描或暴露加密笔记本的内容。
-		if IsEncryptedBox(bt.BoxID) {
-			return nil, nil, nil, fmt.Errorf("tags are unavailable in encrypted notebooks")
-		}
-		if before[bt.RootID] == nil {
-			before[bt.RootID], sources[bt.RootID], err = filesys.LoadTreeSnapshot(bt.BoxID, bt.Path, util.NewLute())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			var projectedSource []byte
-			after[bt.RootID], projectedSource, err = filesys.LoadTreeSnapshot(bt.BoxID, bt.Path, util.NewLute())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			if !bytes.Equal(sources[bt.RootID], projectedSource) {
-				return nil, nil, nil, util.ErrFileChanged
-			}
-		}
-		node := treenode.GetNodeInTree(after[bt.RootID], change.ID)
 		if node == nil {
 			continue
 		}
@@ -274,37 +252,12 @@ func RemoveTagWithCollections(request apicontract.RemoveTagWithCollectionsReques
 				allowed[group.AvID][item.ItemID+"/"+item.BlockID] = true
 			}
 		}
-		tx := &Transaction{fromAPI: true, Timestamp: time.Now().UnixMilli(), tagRemovalSources: sources}
-		engine := util.NewLute()
+		tx := &Transaction{fromAPI: true, Timestamp: time.Now().UnixMilli(), tagMutationSources: sources}
 		changed := map[string]bool{}
 		for _, change := range changes {
 			changed[change.ID] = true
 		}
-		for rootID, tree := range after {
-			ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !changed[node.ID] {
-					return ast.WalkContinue
-				}
-				old := treenode.GetNodeInTree(before[rootID], node.ID)
-				if node.Type == ast.NodeDocument {
-					if node.IALAttr("tags") == old.IALAttr("tags") {
-						return ast.WalkContinue
-					}
-					data, _ := json.Marshal(map[string]string{"tags": node.IALAttr("tags")})
-					undo, _ := json.Marshal(map[string]string{"tags": old.IALAttr("tags")})
-					tx.DoOperations = append(tx.DoOperations, &Operation{Action: "setAttrs", ID: node.ID, Data: string(data)})
-					tx.UndoOperations = append(tx.UndoOperations, &Operation{Action: "setAttrs", ID: node.ID, Data: string(undo)})
-					return ast.WalkContinue
-				}
-				data, undo := engine.RenderNodeBlockDOM(node), engine.RenderNodeBlockDOM(old)
-				if data == undo {
-					return ast.WalkContinue
-				}
-				tx.DoOperations = append(tx.DoOperations, &Operation{Action: "update", ID: node.ID, Data: data})
-				tx.UndoOperations = append(tx.UndoOperations, &Operation{Action: "update", ID: node.ID, Data: undo})
-				return ast.WalkSkipChildren
-			})
-		}
+		tx.appendTagMutationOperations(before, after, changed)
 		for _, group := range request.Collections {
 			if group == nil {
 				return result{err: fmt.Errorf("invalid tag removal collection")}

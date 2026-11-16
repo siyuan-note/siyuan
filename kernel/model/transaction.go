@@ -2960,7 +2960,7 @@ type Transaction struct {
 	removeCreatedDoc              func(*Box, string, *lute.Lute) (*parse.Tree, error)
 	writeTransactionTree          func(*parse.Tree) error
 	documentTitleWrite            *documentTitleWriteState
-	tagRemovalSources             map[string][]byte
+	tagMutationSources            map[string][]byte
 	collectionRemovalVersions     map[string]string
 	blockSwapOriginalTrees        []*parse.Tree
 	sourceJournal                 *documentSourceJournal
@@ -3400,7 +3400,7 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.relatedAvIDs = nil
-	tx.tagRemovalSources = nil
+	tx.tagMutationSources = nil
 	tx.collectionRemovalVersions = nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
@@ -3422,7 +3422,7 @@ func (tx *Transaction) releaseCommittedResources() {
 
 func (tx *Transaction) rollback() {
 	tx.indexChanges = nil
-	tx.tagRemovalSources = nil
+	tx.tagMutationSources = nil
 	tx.collectionRemovalVersions = nil
 	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
@@ -3533,7 +3533,7 @@ func loadTreeTxErr(id string, err error) *TxErr {
 	if errors.Is(err, ErrBlockNotFound) {
 		code = TxErrCodeBlockNotFound
 	}
-	return &TxErr{code: code, msg: msg, id: id}
+	return &TxErr{code: code, msg: msg, id: id, cause: err}
 }
 
 func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {

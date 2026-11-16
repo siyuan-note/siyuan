@@ -9234,6 +9234,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 精确匹配标签及其子标签前缀，通过单笔可撤销事务改名并广播编辑操作；成功仍返回 null。
+     * 无匹配时不写入；源快照变化时拒绝提交，保留并发编辑。自动收集保留已有条目和字段。
+     */
     "/api/tag/renameTag": {
         request: RenameTagRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

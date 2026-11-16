@@ -568,7 +568,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     const searchMethodSubmenu = [{
         icon: "iconExact",
         label: window.siyuan.languages.keyword,
-        current: config.method === 0,
+        checked: config.method === 0,
         click() {
             config.method = 0;
             config.page = 1;
@@ -577,7 +577,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }, {
         icon: "iconQuote",
         label: window.siyuan.languages.querySyntax,
-        current: config.method === 1,
+        checked: config.method === 1,
         click() {
             config.method = 1;
             config.page = 1;
@@ -586,7 +586,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }, {
         icon: "iconDatabase",
         label: "SQL",
-        current: config.method === 2,
+        checked: config.method === 2,
         click() {
             config.method = 2;
             config.page = 1;
@@ -595,7 +595,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }, {
         icon: "iconRegex",
         label: window.siyuan.languages.regex,
-        current: config.method === 3,
+        checked: config.method === 3,
         click() {
             config.method = 3;
             config.page = 1;
@@ -606,7 +606,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         searchMethodSubmenu.push({
             icon: "iconSparkles",
             label: window.siyuan.languages.semanticSearch,
-            current: config.method === 4,
+            checked: config.method === 4,
             click() {
                 config.method = 4;
                 config.page = 1;
@@ -624,7 +624,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     const sortMenu: IMenu[] = [{
         iconHTML: "",
         label: window.siyuan.languages.type,
-        current: config.sort === 0,
+        checked: config.sort === 0,
         click() {
             config.sort = 0;
             updateSearch();
@@ -632,7 +632,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }, {
         iconHTML: "",
         label: window.siyuan.languages.createdASC,
-        current: config.sort === 1,
+        checked: config.sort === 1,
         click() {
             config.sort = 1;
             updateSearch();
@@ -640,7 +640,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }, {
         iconHTML: "",
         label: window.siyuan.languages.createdDESC,
-        current: config.sort === 2,
+        checked: config.sort === 2,
         click() {
             config.sort = 2;
             updateSearch();
@@ -648,7 +648,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }, {
         iconHTML: "",
         label: window.siyuan.languages.modifiedASC,
-        current: config.sort === 3,
+        checked: config.sort === 3,
         click() {
             config.sort = 3;
             updateSearch();
@@ -656,7 +656,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }, {
         iconHTML: "",
         label: window.siyuan.languages.modifiedDESC,
-        current: config.sort === 4,
+        checked: config.sort === 4,
         click() {
             config.sort = 4;
             updateSearch();
@@ -664,7 +664,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }, {
         iconHTML: "",
         label: window.siyuan.languages.sortByRankAsc,
-        current: config.sort === 6,
+        checked: config.sort === 6,
         click() {
             config.sort = 6;
             updateSearch();
@@ -672,7 +672,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
     }, {
         iconHTML: "",
         label: window.siyuan.languages.sortByRankDesc,
-        current: config.sort === 7,
+        checked: config.sort === 7,
         click() {
             config.sort = 7;
             updateSearch();
@@ -682,7 +682,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         sortMenu.push({
             iconHTML: "",
             label: window.siyuan.languages.sortByContent,
-            current: config.sort === 5,
+            checked: config.sort === 5,
             click() {
                 config.sort = 5;
                 updateSearch();
@@ -704,7 +704,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         submenu: [{
             iconHTML: "",
             label: window.siyuan.languages.noGroupBy,
-            current: config.group === 0,
+            checked: config.group === 0,
             click() {
                 if (isMobile()) {
                     element.querySelector('[data-type="expand"]').classList.add("fn__none");
@@ -721,7 +721,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         }, {
             iconHTML: "",
             label: window.siyuan.languages.groupByDoc,
-            current: config.group === 1,
+            checked: config.group === 1,
             click() {
                 if (isMobile()) {
                     element.querySelector('[data-type="expand"]').classList.remove("fn__none");
@@ -742,7 +742,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         submenu: [false, true].map(groupFolded => withSearchMethodAvailability({
             iconHTML: "",
             label: window.siyuan.languages[groupFolded ? "collapseByDefault" : "expandByDefault"],
-            current: Boolean(window.siyuan.config.search.groupFolded) === groupFolded,
+            checked: Boolean(window.siyuan.config.search.groupFolded) === groupFolded,
             click() {
                 void searchConfigApi.patch("groupFolded", groupFolded, () => cb());
             }

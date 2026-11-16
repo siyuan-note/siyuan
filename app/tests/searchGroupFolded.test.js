@@ -160,9 +160,10 @@ test("the shared more submenu persists explicit preferences after confirmation a
             assert.equal(parent.type, "submenu");
             assert.equal(parent.disabled, disabled);
             assert.equal(parent.current, undefined);
+            assert.equal(parent.checked, undefined);
             assert.equal(parent.click, undefined);
             assert.deepEqual(Array.from(parent.submenu, item => item.label), ["expand by default", "collapse by default"]);
-            assert.deepEqual(Array.from(parent.submenu, item => item.current),
+            assert.deepEqual(Array.from(parent.submenu, item => item.checked),
                 [!state.window.siyuan.config.search.groupFolded, state.window.siyuan.config.search.groupFolded]);
             return parent.submenu;
         };

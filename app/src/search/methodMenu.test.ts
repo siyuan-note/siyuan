@@ -40,6 +40,9 @@ for (const mobile of [true, false]) {
             await exports.moreMenu({method, group, sort: 0}, [], {}, () => {}, () => {});
             const sort = items.find(item => item.label === "sort");
             const grouping = items.find(item => item.label === "group");
+            assert.deepEqual(Array.from(sort.submenu, item => item.checked),
+                Array.from(sort.submenu, (_item, index) => index === 0));
+            assert.deepEqual(Array.from(grouping.submenu, item => item.checked), [group === 0, group === 1]);
             assert.equal(Boolean(sort.disabled), method === 4 || (method === 2 && group === 0));
             assert.equal(Boolean(grouping.disabled), method === 4);
             const groupState = items.find(item => item.label === "searchGroupState");
@@ -58,14 +61,17 @@ for (const mobile of [true, false]) {
             if (mobile) {
                 assert.equal(Boolean(items.find(item => item.label === "searchType").disabled), method === 2);
                 assert.equal(Boolean(items.find(item => item.label === "replaceType").disabled), method === 2 || method === 4);
+                assert.deepEqual(Array.from(items.find(item => item.label === "searchMethod").submenu,
+                    item => item.checked), [0, 1, 2, 3, 4].map(value => value === method));
             }
             for (const groupFolded of [undefined, false, true]) {
                 search.groupFolded = groupFolded;
                 items.length = 0;
                 await exports.moreMenu({method, group, sort: 0}, [], {}, () => {}, () => {});
                 const submenu = items.find(item => item.label === "searchGroupState").submenu;
-                assert.deepEqual(Array.from(submenu, item => item.current), [!groupFolded, Boolean(groupFolded)]);
+                assert.deepEqual(Array.from(submenu, item => item.checked), [!groupFolded, Boolean(groupFolded)]);
             }
+            assert.ok(items.flatMap(item => item.submenu || []).every(item => item.current === undefined));
         });
     }
 }
@@ -130,8 +136,8 @@ for (const mobile of [true, false]) {
             assert.equal(h.storage.search.sort, 4);
             const reopened = structuredClone(h.writes.at(-1));
             await h.open(reopened);
-            assert.equal(h.items.find(item => item.label === "sort").submenu.find(item => item.label === "modifiedDESC").current, true);
-            assert.equal(h.items.find(item => item.label === "group").submenu.find(item => item.label === "noGroupBy").current, true);
+            assert.equal(h.items.find(item => item.label === "sort").submenu.find(item => item.label === "modifiedDESC").checked, true);
+            assert.equal(h.items.find(item => item.label === "group").submenu.find(item => item.label === "noGroupBy").checked, true);
             config.idPath.push("another-notebook");
             assert.deepEqual(h.storage.search.idPath, ["notebook/document"]);
             assert.equal(savedCriterion.sort, 5);

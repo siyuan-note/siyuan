@@ -712,7 +712,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                 submenu: [{
                                     iconHTML: "",
                                     label: window.siyuan.languages.topBottomLayout,
-                                    current: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
+                                    checked: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
                                     click() {
                                         element.querySelector(".search__layout").classList.remove("search__layout--row");
                                         edit.protyle.element.style.width = "";
@@ -733,7 +733,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                 }, {
                                     iconHTML: "",
                                     label: window.siyuan.languages.leftRightLayout,
-                                    current: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
+                                    checked: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
                                     click() {
                                         element.querySelector(".search__layout").classList.add("search__layout--row");
                                         edit.protyle.element.style.height = "";

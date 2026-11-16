@@ -5,8 +5,9 @@ const os = require("node:os");
 const {test} = require("node:test");
 const {ModuleKind, ScriptTarget, transpileModule} = require("typescript");
 const sass = require("sass");
+const settleDockAnimations = require("./helpers/settleDockAnimations");
 
-const browserCases = async (sources, css, template, animationOnly = false) => {
+const browserCases = async (sources, css, template, animationOnly, settle) => {
     const check = require("node:assert/strict");
     const load = (name, dependencies = {}) => {
         const exports = {};
@@ -68,15 +69,6 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
         docks[position] = window.siyuan.layout[position.toLowerCase() + "Dock"] =
             new Dock({app: {plugins: []}, data: {pin: false, data: []}, position});
     }
-    const settle = async () => {
-        await new Promise(resolve => setTimeout(resolve, 350));
-        // 悬停计时器触发后，等待实际过渡完成，避免繁忙的 CI 在动画收尾前读取显隐状态。
-        const deadline = performance.now() + 5000;
-        while (document.getAnimations().some(animation => animation.pending || animation.playState === "running")) {
-            check.ok(performance.now() < deadline, "dock animations settle within five seconds");
-            await new Promise(resolve => setTimeout(resolve, 20));
-        }
-    };
     await settle();
     for (const position of ["Left", "Right", "Bottom"]) {
         const dock = docks[position];
@@ -612,7 +604,7 @@ if (process.versions.electron && process.type === "browser") {
                         await win.loadURL(`data:text/html,<html><body class='fn__flex-column${hideToolbar ? " body--toolbar-hide" : ""}'></body></html>`);
                         const result = await win.webContents.executeJavaScript(`(${browserCases.toString()})(${[
                             sources, css, html, animationOnly,
-                        ].map(value => JSON.stringify(value)).join(",")})`);
+                        ].map(value => JSON.stringify(value)).join(",")}, ${settleDockAnimations.toString()})`);
                         assert.equal(result, "Floating dock bar cases passed", captureName);
                     }
                 }

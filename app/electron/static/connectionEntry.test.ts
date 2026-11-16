@@ -1,5 +1,5 @@
 import {test} from "node:test";
-import {type DefaultTreeAdapterMap, parse} from "parse5";
+import type {DefaultTreeAdapterMap} from "parse5" with {"resolution-mode": "import"};
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -8,7 +8,8 @@ const vm = require("node:vm");
 const source: string = fs.readFileSync(path.join(__dirname, "connectionEntry.js"), "utf8");
 
 for (const file of ["init.html", "workspace.html"]) {
-    test(`${file} places the remote kernel row between the workspace path and language rows`, () => {
+    test(`${file} places the remote kernel row between the workspace path and language rows`, async () => {
+        const {parse} = await import("parse5");
         const page = parse(fs.readFileSync(path.join(__dirname, file), "utf8"));
         const elements: DefaultTreeAdapterMap["element"][] = [];
         const collect = (node: DefaultTreeAdapterMap["node"]) => {

@@ -24,6 +24,8 @@ test("Quick Look builds a self-contained resource manifest with the installed Lu
     const resources = JSON.parse(fs.readFileSync(path.join(root, "resources.json"), "utf8"));
     for (const file of [...resources.scripts, ...Object.values(resources.fonts)]) assert.ok(manifest.includes(file), file);
     assert.ok(manifest.includes("parse5-LICENSE") && manifest.includes("entities-LICENSE"));
+    assert.match(fs.readFileSync(path.join(root, "parse5-LICENSE"), "utf8"), /Permission is hereby granted/);
+    assert.match(fs.readFileSync(path.join(root, "entities-LICENSE"), "utf8"), /Redistribution and use in source and binary forms/);
     const styles = fs.readFileSync(path.join(root, "preview.css"), "utf8");
     assert.match(styles, /prefers-color-scheme: dark/);
     assert.ok(Object.keys(resources.fonts).length > 0);

@@ -25,7 +25,7 @@ const prepareQuickLookResources = async output => {
     const parserRequire = createRequire(parserEntry);
     for (const [dependency, entry] of [["parse5", parserEntry], ["entities", parserRequire.resolve("entities")]]) {
         const license = dependency + "-LICENSE";
-        assets.set(license, path.resolve(path.dirname(entry), "../../LICENSE"));
+        assets.set(license, path.resolve(path.dirname(entry), "../LICENSE"));
         files.push(license);
     }
     for (const name of files) {

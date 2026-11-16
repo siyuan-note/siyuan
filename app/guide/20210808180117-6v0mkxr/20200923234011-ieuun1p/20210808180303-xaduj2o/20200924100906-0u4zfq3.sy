@@ -1686,7 +1686,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". Select Follow global setting, Restore last reading position, or Open at the beginning. This preference travels with the document; saved reading positions remain local to each client."
+					"Data": ". Select Default (follow the global setting), Restore last reading position, or Open at the beginning. This preference travels with the document; saved reading positions remain local to each client."
 				}
 			]
 		}

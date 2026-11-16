@@ -21,7 +21,7 @@ for (const mobile of [false, true]) {
             const protyle = {disabled: false, block: {rootID: "doc"},
                 wysiwyg: {element: {getAttribute: () => value}}};
             const globals = {protyle, Constants: {CUSTOM_SY_RESTORE_DOC_POSITION: attr},
-                window: {siyuan: {languages: {docOpenPosition: "Position", followGlobal: "Global", restoreDocPosition: "Restore", docOpenAtStart: "Start"},
+                window: {siyuan: {languages: {docOpenPosition: "Position", default: "Default", restoreDocPosition: "Restore", docOpenAtStart: "Start"},
                     menus: {menu: {append: (item: IMenu) => items.push(item)}}}},
                 MenuItem: class {element: IMenu; constructor(options: IMenu) { this.element = options; }},
                 fetchPost: (...args: unknown[]) => writes.push(args)};
@@ -29,6 +29,7 @@ for (const mobile of [false, true]) {
             assert.equal(items.length, 1);
             const menu = items[0];
             assert.equal(menu.type, "submenu");
+            assert.equal(menu.submenu[0].label, "Default");
             assert.deepEqual(Array.from(menu.submenu, item => item.id), ["default", "restore", "start"]);
             const selected = value === "true" ? "restore" : value === "false" ? "start" : "default";
             assert.deepEqual(Array.from(menu.submenu.filter(item => item.current), item => item.id), [selected]);

@@ -1,7 +1,6 @@
 {
 	"docOpenPosition": "文档打开位置",
 	"docOpenAtStart": "从文档开头打开",
-	"followGlobal": "跟随全局设置",
 	"searchGroupState": "分组结果",
 	"expandByDefault": "默认展开",
 	"collapseByDefault": "默认折叠",

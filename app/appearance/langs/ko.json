@@ -1,7 +1,6 @@
 {
 	"docOpenPosition": "문서 열기 위치",
 	"docOpenAtStart": "처음부터 열기",
-	"followGlobal": "전역 설정 따르기",
 	"searchGroupState": "그룹화된 결과",
 	"expandByDefault": "기본적으로 펼치기",
 	"collapseByDefault": "기본적으로 접기",

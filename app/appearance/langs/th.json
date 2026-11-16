@@ -1,7 +1,6 @@
 {
 	"docOpenPosition": "ตำแหน่งเมื่อเปิดเอกสาร",
 	"docOpenAtStart": "เปิดจากจุดเริ่มต้น",
-	"followGlobal": "ใช้การตั้งค่าส่วนกลาง",
 	"searchGroupState": "ผลลัพธ์ที่จัดกลุ่ม",
 	"expandByDefault": "ขยายตามค่าเริ่มต้น",
 	"collapseByDefault": "ยุบตามค่าเริ่มต้น",

@@ -1,7 +1,6 @@
 {
 	"docOpenPosition": "ドキュメントを開く位置",
 	"docOpenAtStart": "先頭から開く",
-	"followGlobal": "全体設定に従う",
 	"searchGroupState": "グループ化した結果",
 	"expandByDefault": "既定で展開",
 	"collapseByDefault": "既定で折りたたむ",

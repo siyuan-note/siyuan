@@ -1200,7 +1200,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                             icon: "iconScrollVert",
                             type: "submenu",
                             submenu: [
-                                {id: "default", label: window.siyuan.languages.followGlobal, value: ""},
+                                {id: "default", label: window.siyuan.languages.default, value: ""},
                                 {id: "restore", label: window.siyuan.languages.restoreDocPosition, value: "true"},
                                 {id: "start", label: window.siyuan.languages.docOpenAtStart, value: "false"},
                             ].map(item => ({

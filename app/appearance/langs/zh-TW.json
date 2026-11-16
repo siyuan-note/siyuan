@@ -1,7 +1,6 @@
 {
 	"docOpenPosition": "文件開啟位置",
 	"docOpenAtStart": "從文件開頭開啟",
-	"followGlobal": "跟隨全域設定",
 	"searchGroupState": "分組結果",
 	"expandByDefault": "預設展開",
 	"collapseByDefault": "預設摺疊",

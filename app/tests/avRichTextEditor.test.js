@@ -14,7 +14,8 @@ const runCases = async (sources, appDirectory) => {
     let openRangeCell;
     window.siyuan = {dialogs: [], storage: {}, config: {readonly: false}, menus: {menu: {element: document.createElement("div"), remove() {}}},
         mobile: {size: {portrait: {height1: innerHeight}, landscape: {height1: innerHeight}}},
-        zIndex: 0, languages: {empty: "Empty", confirm: "Confirm",
+        zIndex: 0, languages: {empty: "Empty", confirm: "Confirm", key: "Key", text: "Text",
+        _attrView: {key: "Primary key"},
         newFile: "New document", newSubDoc: "New subdocument", newFileAtPath: "Choose location"}};
     const fs = require("node:fs");
     const path = require("node:path");
@@ -193,6 +194,9 @@ const runCases = async (sources, appDirectory) => {
             notebookId, path: "/document.sy", block: {rootID: "document"}};
         editor.openAVRichTextEditor({protyle, nodeElement, anchorElement, value, stableCells,
             onSave: (...args) => saves.push(args), onDestroy: () => closed++, prepareNextInput});
+        if (mobile) {
+            assert.equal(mask().querySelector(".b3-dialog__header").textContent, primary ? "Primary key" : "Text");
+        }
         return {owner, protyle, nodeElement, anchorElement, value, stableCells, saves, data, closed: () => closed};
     };
     // 文本字段块引复用真实文档上下文，不把临时段落或数据库条目当作搜索来源。

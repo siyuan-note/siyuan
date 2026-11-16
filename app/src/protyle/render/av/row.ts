@@ -267,10 +267,10 @@ export const getFieldIdByCellElement = (cellElement: Element, viewType: TAVView)
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");
-    if (!rowElement) {
+    const useElement = checkElement?.querySelector("use");
+    if (!rowElement || !useElement) {
         return;
     }
-    const useElement = checkElement.querySelector("use");
     const bodyElement = hasClosestByClassName(rowElement, "av__body") as HTMLElement;
     const blockElement = hasClosestByClassName(rowElement, "av") as HTMLElement;
     if (blockElement && (type === "select" ||
@@ -282,8 +282,8 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
             clearAVItemSelectionState(blockElement);
         }
         if ("#iconCheck" === useElement.getAttribute("xlink:href") || type === "unselectAll") {
-            rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
-                item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
+            rowElement.parentElement.querySelectorAll(".av__firstcol use").forEach(item => {
+                item.setAttribute("xlink:href", "#iconUncheck");
                 const rowItemElement = hasClosestByClassName(item, "av__row");
                 if (rowItemElement) {
                     rowItemElement.classList.remove("av__row--select");
@@ -296,8 +296,8 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
         } else {
             // 全选：范围以当前已加载的分页行（dataStore 的 view.rows）为准，而非仅 DOM 内已渲染的行。
             // 虚拟滚动下被 trim 掉的行 ID 一并存入快照，回填时由 restoreSelect 恢复高亮。
-            rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
-                item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
+            rowElement.parentElement.querySelectorAll(".av__firstcol use").forEach(item => {
+                item.setAttribute("xlink:href", "#iconCheck");
                 const rowItemElement = hasClosestByClassName(item, "av__row");
                 if (rowItemElement) {
                     rowItemElement.classList.add("av__row--select");

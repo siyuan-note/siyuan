@@ -615,7 +615,13 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     for (let parent = owner.element.parentElement; parent; parent = parent.parentElement) {
         observer.observe(parent, {childList: true});
     }
+    const tableScrollElement = cell.closest("table").parentElement;
+    const tableScrollLeft = tableScrollElement.scrollLeft;
     fragment.focus(true);
+    if (point) {
+        // 恢复点击前的横向视口，避免临时末尾定位改变后续的坐标命中。
+        tableScrollElement.scrollLeft = tableScrollLeft;
+    }
     // 进入单元格编辑即按所属表格块同步大纲高亮
     updateOutlineCurrentBlock(owner, cell);
     // 复选框点击交给重建后的任务项，通过内部编辑器保存状态并记录撤销。

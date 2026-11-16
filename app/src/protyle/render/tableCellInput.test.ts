@@ -625,6 +625,37 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
     }
 
+    for (const platform of [false, true]) {
+        mobile = platform;
+        for (const scrollLeft of [0, 350, 550]) {
+            const {owner, element, table} = fixture();
+            element.style.width = "320px";
+            const scroller = table.firstElementChild as HTMLElement;
+            scroller.style.cssText = "width:300px;overflow-x:auto";
+            const grid = table.querySelector("table");
+            grid.style.cssText = "width:1200px;table-layout:fixed";
+            grid.querySelectorAll("col").forEach(column => column.style.width = "400px");
+            const cell = grid.rows[1].cells[scrollLeft === 0 ? 0 : 1];
+            cell.textContent = "Visible caret position ".repeat(10);
+            cell.style.whiteSpace = "nowrap";
+            scroller.scrollLeft = scrollLeft;
+            const viewport = scroller.getBoundingClientRect();
+            const bounds = cell.getBoundingClientRect();
+            const point = {x: (Math.max(viewport.left, bounds.left) + Math.min(viewport.right, bounds.right)) / 2,
+                y: bounds.top + bounds.height / 2};
+            const range = document.caretRangeFromPoint(point.x, point.y);
+            check.ok(range && cell.contains(range.startContainer), "the fixture clicks visible cell text");
+            await open(owner, cell, undefined, point);
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            check.equal(scroller.scrollLeft, scrollLeft, "clicking visible text keeps the table's horizontal viewport");
+            check.ok(cell.querySelector(".table__cell-editor").contains(getSelection().anchorNode),
+                "the cell editor receives the clicked caret");
+            const caret = getSelection().getRangeAt(0).getBoundingClientRect();
+            check.ok(caret.left >= viewport.left && caret.right <= viewport.right, "the restored caret remains visible");
+            await finish(element);
+        }
+    }
+
     for (const mobile of [false, true]) {
         const {owner, element, wysiwyg, table} = fixture();
         const absent = () => false;

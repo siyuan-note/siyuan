@@ -706,7 +706,7 @@ if (process.versions.electron && process.type === "browser") {
         app.setPath("userData", process.argv[2]);
         await app.whenReady();
         const win = new BrowserWindow({show: false, useContentSize: true, width: 1100, height: 900,
-            webPreferences: {nodeIntegration: true, contextIsolation: false}});
+            webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
         win.setMenu(null);
         await win.loadURL("data:text/html,<html><body></body></html>");
         win.show();
@@ -720,6 +720,8 @@ if (process.versions.electron && process.type === "browser") {
             await new Promise(resolve => setTimeout(resolve, 20));
         }
         assert.deepEqual(viewport, [1100, 900], "gutter fixture requires the exact content viewport");
+        // 在后台执行命中测试，避免抢占前台，并验证计时器和动画帧不依赖窗口可见性。
+        win.hide();
         const css = ["protyle/_wysiwyg.scss", "protyle/_protyle.scss", "business/_block.scss", "util/_function.scss"].map(file =>
             require("sass").compile(path.join(__dirname, "../src/assets/scss", file), {quietDeps: true}).css).join("\n");
         const result = await win.webContents.executeJavaScript(`(async () => {

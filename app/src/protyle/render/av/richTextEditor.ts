@@ -114,7 +114,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         <button type="button" class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button>
     </div>` : ""}`;
     const dialog = mobile ? new MobileDialog({
-        title: primary ? window.siyuan.languages.key : window.siyuan.languages.text,
+        title: primary ? window.siyuan.languages._attrView.key : window.siyuan.languages.text,
         content,
         containerClassName: "mobile-av-richtext-sheet",
         mobileSheet: {beforeClose: () => saveMobile()},

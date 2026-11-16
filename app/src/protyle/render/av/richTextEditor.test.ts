@@ -8,6 +8,7 @@ const continuous = loadModule<typeof import("./continuousInput")>("src/protyle/r
 const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; changed?: boolean; flush?: () => Promise<void>; save?: () => Promise<void>;
     tableInput?: boolean; rangeInput?: boolean; hint?: boolean} = {}) => {
     const lifecycle: string[] = [];
+    const dialogTitles: string[] = [];
     const masks: Array<{
         firstElementChild: ReturnType<typeof createPanel>;
         handlers: Map<string, (event: unknown) => void>;
@@ -77,7 +78,8 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
             element: unknown;
             private closed = false;
             private pending = false;
-            constructor(private settings: {mobileSheet: {beforeClose: () => Promise<boolean>}; destroyCallback: () => void}) {
+            constructor(private settings: {title: string; mobileSheet: {beforeClose: () => Promise<boolean>}; destroyCallback: () => void}) {
+                dialogTitles.push(settings.title);
                 const panel = createPanel();
                 const mask = {firstElementChild: panel, handlers: new Map<string, (event: unknown) => void>(),
                     dataset: {}, style: {}, remove: () => lifecycle.push("remove"),
@@ -157,7 +159,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
             },
         },
         window: {
-            siyuan: {zIndex: 0, languages: {}, config: {}},
+            siyuan: {zIndex: 0, languages: {key: "Secret key", text: "Text", _attrView: {key: "Primary key"}}, config: {}},
             addEventListener: () => {},
             removeEventListener: () => {},
         },
@@ -172,7 +174,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         content = "updated";
     }
     return {
-        methods, lifecycle, owner, node, open, fragmentOptions, toolbarTarget,
+        methods, lifecycle, owner, node, open, fragmentOptions, toolbarTarget, dialogTitles,
         rebind: () => { currentValue = {type: "block", isDetached: false, block: {content: "other"}}; },
         cancel: () => masks.at(-1).handlers.get("siyuan-av-cell-editor-close")({}),
         get inert() { return masks.at(-1).firstElementChild.inert; },
@@ -200,6 +202,11 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
 
 [false, true].forEach(primary => describe(`database ${primary ? "primary" : "text"} rich editor lifecycle and keyboard input`, () => {
     const createEditor = (settings: Parameters<typeof createEditorFixture>[0] = {}) => createEditorFixture({...settings, primary});
+    it("uses the field-specific mobile dialog title", () => {
+        const editor = createEditor({mobile: true});
+        assert.deepEqual(editor.dialogTitles, [primary ? "Primary key" : "Text"]);
+        editor.escape();
+    });
     for (const mobile of [false, true]) {
         it(`preserves the field parser mode when restoring input syntax (${mobile ? "mobile" : "desktop"})`, () => {
             const editor = createEditor({mobile});

@@ -8,7 +8,7 @@ export const getMobileSheetMaxHeight = (fullHeight: number, availableHeight: num
     Math.min(Math.max(0, availableHeight), mode === "expanded" ? Math.max(0, availableHeight) : Math.max(0, fullHeight) * .56);
 
 export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
-                                     options: {mode?: MobileSheetMode, onResize?: () => void, onGeometryChange?: () => void, standalone?: boolean} = {}) => {
+                                     options: {mode?: MobileSheetMode, fitContent?: boolean, onResize?: () => void, onGeometryChange?: () => void, standalone?: boolean} = {}) => {
     let mode = options.mode || "standard";
     let preferred: number;
     let available = 0;
@@ -75,7 +75,8 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
             const maxHeight = `${preferred === undefined || mode === "expanded" ?
                 getMobileSheetMaxHeight(fullHeight, available, mode) : available}px`;
             sheet.style.maxHeight = maxHeight;
-            sheet.style.height = mode === "expanded" ? maxHeight : preferred === undefined ? "auto" :
+            sheet.style.height = mode === "expanded" ? maxHeight : preferred === undefined ?
+                (options.fitContent === false ? maxHeight : "auto") :
                 `${Math.max(getBounds().min, Math.min(preferred, available))}px`;
         }
         options.onResize?.();

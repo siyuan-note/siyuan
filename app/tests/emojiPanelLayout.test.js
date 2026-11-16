@@ -112,6 +112,17 @@ const setup = async (directory, mobile, fullHeight) => {
         geometry();
         panel.scrollTop = 200;
         check.ok(panel.scrollTop > 100, "custom icons scroll in the same bounded grid");
+        const sheetHeight = container.getBoundingClientRect().height;
+        const custom = categories.find(category => category.id === "custom");
+        for (const items of [[], custom.items.slice(0, 1)]) {
+            custom.items = items;
+            dialog.element.querySelector('.emojis__tabheader [data-type="tab-emoji"]').click();
+            dialog.element.querySelector('.emojis__tabheader [data-type="tab-custom"]').click();
+            await wait();
+            check.ok(Math.abs(container.getBoundingClientRect().height - sheetHeight) < 1,
+                "empty and short custom lists retain the icon picker height");
+            check.ok(panel.clientHeight > 0, "short custom lists retain a usable grid");
+        }
         dialog.element.querySelector('.emojis__tabheader [data-type="tab-dynamic"]').click();
         await wait();
         const bodyBox = tabbody.getBoundingClientRect();

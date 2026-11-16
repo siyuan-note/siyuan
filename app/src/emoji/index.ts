@@ -1082,7 +1082,9 @@ export const openEmojiPanel = (
             }
             destroyDialog(destroyOptions);
         };
-        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy(), undefined, undefined, {mode: "standard"});
+        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy(), undefined, undefined, {
+            mode: "standard", fitContent: false,
+        });
         if (type === "insert" && options?.insertRange) {
             disposeSelection = bindEmojiSheetSelection(
                 dialog.element.querySelector(".b3-dialog__container"), options.insertRange.cloneRange());

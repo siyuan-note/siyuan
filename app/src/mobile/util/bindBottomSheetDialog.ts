@@ -5,7 +5,7 @@ import type {MobileSheetMode} from "./mobileSheetLayout";
 import {bindKeyboardSheetState} from "./keyboardSheetState";
 
 export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void | boolean>, afterResize?: () => void,
-                                     afterOpen?: () => void, layoutOptions?: {mode?: MobileSheetMode, canStart?: () => boolean}) => {
+                                     afterOpen?: () => void, layoutOptions?: {mode?: MobileSheetMode, fitContent?: boolean, canStart?: () => boolean}) => {
     dialog.element.classList.add("mobile-bottom-sheet-dialog");
     const sheet = dialog.element.querySelector<HTMLElement>(".b3-dialog__container");
     sheet.querySelector(".b3-dialog__close")?.remove();

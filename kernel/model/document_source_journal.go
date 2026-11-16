@@ -166,13 +166,13 @@ func (j *documentSourceJournal) save() error {
 		return err
 	}
 	digest := sha256.Sum256(data)
-	envelope, err := json.Marshal(struct {
-		Data   json.RawMessage `json:"data"`
-		Digest string          `json:"sha256"`
-	}{data, hex.EncodeToString(digest[:])})
-	if err != nil {
-		return err
-	}
+	// 数据已由JSON序列化器转义，直接封装保持原有字节和摘要。
+	envelope := make([]byte, 0, len(data)+len(`{"data":,"sha256":""}`)+hex.EncodedLen(len(digest)))
+	envelope = append(envelope, `{"data":`...)
+	envelope = append(envelope, data...)
+	envelope = append(envelope, `,"sha256":"`...)
+	envelope = hex.AppendEncode(envelope, digest[:])
+	envelope = append(envelope, '"', '}')
 	if err = os.MkdirAll(documentSourceJournalBase(), 0700); err != nil {
 		return err
 	}

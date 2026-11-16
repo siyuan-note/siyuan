@@ -379,7 +379,9 @@ export const setInlineStyle = async (set = true, servePath = "../../../", export
     const codeFontWeight = codeFonts[0]?.weight || 400;
     style += `\n:root { --b3-font-size-editor: ${window.siyuan.config.editor.fontSize}px; --b3-font-family-editor: ${editorFontFamilies || "var(--b3-font-family-protyle)"}; --b3-font-family-editor-code: ${codeFontFamily}; --b3-font-weight-editor-code: ${codeFontWeight}; --b3-database-attr-columns: ${window.siyuan.config.editor.databaseAttrLayout === 0 ? 1 : 2}; --b3-database-attr-column-flow: ${window.siyuan.config.editor.databaseAttrLayout === 2 ? 1 : 0} }
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
-.b3-typography:not(.b3-typography--default) code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-family: var(--b3-font-family-editor-code); font-weight: var(--b3-font-weight-editor-code) }${window.siyuan.config.editor.justify ? "\n.protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
+.b3-typography:not(.b3-typography--default) code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-family: var(--b3-font-family-editor-code) }
+.b3-typography:where(:not(.b3-typography--default)) :where(code:not(.hljs)), .protyle-wysiwyg :where(span[data-type~=code]) { font-weight: var(--b3-font-weight-editor-code) }
+.b3-typography :where(strong code:not(.hljs)) { font-weight: inherit }${window.siyuan.config.editor.justify ? "\n.protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
     if (editorFontFamilies) {
         style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${editorFontWeight ? `font-weight: ${editorFontWeight};` : ""}font-family: var(--b3-font-family-emoji-reset), var(--b3-font-family-editor), var(--b3-font-family)}`;
     }

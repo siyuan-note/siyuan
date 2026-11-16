@@ -1684,6 +1684,8 @@ var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollect
 
 // 删除前只读检查标签移除影响，返回按数据库分组的自动收集条目；不执行删除或移出。
 // 包括逐字改名后实际移除的标签所涉及的条目；手动条目及仍匹配启用规则的条目保留。
+// label、labels、changes 三选一；labels 原始数组为 1 至 100 项，拒绝空标签并精确去重。
+// 批量预览按所有标签删除后的最终状态计算，不隐式删除子标签或相似名称。
 var PreviewTagRemoval = define[TagRemovalPreviewRequest, []*TagRemovalCollection]("previewTagRemoval", "/api/tag/previewTagRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
 // PreviewCollectionRemoval 只读投影整笔编辑，预览删除标签或引用后失配的自动收集条目。
@@ -1693,6 +1695,8 @@ var PreviewTagRemoval = define[TagRemovalPreviewRequest, []*TagRemovalCollection
 var PreviewCollectionRemoval = define[CollectionRemovalPreviewRequest, *CollectionRemovalPreview]("previewCollectionRemoval", "/api/av/previewCollectionRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
 // 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。
+// label 与 labels 二选一；labels 原始数组为 1 至 100 项，拒绝空标签并精确去重。
+// 所有标签在一次事务中删除，同块合并并按最终状态复查自动收集；不隐式删除子标签或相似名称。
 var RemoveTagWithCollections = define[RemoveTagWithCollectionsRequest, Null]("removeTagWithCollections", "/api/tag/removeTagWithCollections", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
 
 // PreviewAttributeViewTemplate 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。

@@ -40350,11 +40350,16 @@
         },
         "label": {
           "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
-        "collections",
-        "label"
+        "collections"
       ],
       "additionalProperties": false
     },
@@ -58918,6 +58923,12 @@
         },
         "label": {
           "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false

@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -84,13 +85,17 @@ func TestAPIContractTagRemovalPreview(t *testing.T) {
 }
 
 func TestAPIContractTagRemovalWrites(t *testing.T) {
-	if os.Getenv("SIYUAN_TEST_TAG_REMOVAL_CONTRACT") != "1" {
-		ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
-		defer cancel()
-		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestAPIContractTagRemovalWrites$", "-test.v")
-		command.Env = append(os.Environ(), "SIYUAN_TEST_TAG_REMOVAL_CONTRACT=1")
-		if output, err := command.CombinedOutput(); err != nil {
-			t.Fatalf("tag removal API subprocess failed: %v\n%s", err, output)
+	if os.Getenv("SIYUAN_TEST_TAG_REMOVAL_CONTRACT") == "" {
+		for _, mode := range []string{"single", "batch"} {
+			t.Run(mode, func(t *testing.T) {
+				ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+				defer cancel()
+				command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestAPIContractTagRemovalWrites$", "-test.v")
+				command.Env = append(os.Environ(), "SIYUAN_TEST_TAG_REMOVAL_CONTRACT="+mode)
+				if output, err := command.CombinedOutput(); err != nil {
+					t.Fatalf("tag removal API subprocess failed: %v\n%s", err, output)
+				}
+			})
 		}
 		return
 	}
@@ -119,7 +124,12 @@ func TestAPIContractTagRemovalWrites(t *testing.T) {
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)
 	defer func() { sql.FlushQueue(); sql.CloseDatabase() }()
-	tree.Root.SetIALAttr("tags", "todo")
+	batch := os.Getenv("SIYUAN_TEST_TAG_REMOVAL_CONTRACT") == "batch"
+	tags, remaining := "todo", ""
+	if batch {
+		tags, remaining = "todo,done,todo/child,xtodo", "todo/child,xtodo"
+	}
+	tree.Root.SetIALAttr("tags", tags)
 	if _, err = filesys.WriteTree(tree); err != nil {
 		t.Fatal(err)
 	}
@@ -132,18 +142,46 @@ func TestAPIContractTagRemovalWrites(t *testing.T) {
 		BlockSource: &av.AutomationBlockSource{DocumentIDs: []string{tree.ID}, Tags: []string{"todo"}, Types: []string{"d"}},
 		Actions:     []*av.AutomationAction{{Type: "collect", Target: "current"}},
 	}}}
+	if batch {
+		view.Automations.Spec = 3
+		view.Automations.Rules[0].BlockSource.Tags = []string{"todo", "done"}
+		view.Automations.Rules[0].BlockSource.TagMatch = "or"
+	}
 	key := view.GetBlockKeyValues()
 	key.Values = append(key.Values, &av.Value{KeyID: key.Key.ID, Type: av.KeyTypeBlock, BlockID: "20261102000000-item001",
 		Block: &av.ValueBlock{ID: tree.ID, CollectionRuleID: ruleID}})
 	if err = av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)
 	}
-	groups, err := model.PreviewTagRemoval(apicontract.TagRemovalPreviewRequest{Label: "todo"})
-	if err != nil || len(groups) != 1 {
-		t.Fatalf("preview: %+v, %v", groups, err)
+	const previewPath = "/api/tag/previewTagRemoval"
+	previewBody := map[string]any{"label": "todo"}
+	var preview struct {
+		Code int
+		Data []*apicontract.TagRemovalCollection
 	}
+	if batch {
+		response := callAttributeViewContextFilterAPI(t, previewPath, map[string]any{"labels": []string{"todo"}}, previewTagRemoval)
+		requireAPIContract(t, http.MethodPost, previewPath, response)
+		decodeAttributeViewContextFilterAPIResponse(t, response, &preview)
+		if preview.Code != 0 || len(preview.Data) != 0 {
+			t.Fatalf("remaining alternative match ignored: %s", response.Body.String())
+		}
+		previewBody = map[string]any{"labels": []string{"todo", "done", "todo"}}
+	}
+	previewResponse := callAttributeViewContextFilterAPI(t, previewPath, previewBody, previewTagRemoval)
+	requireAPIContract(t, http.MethodPost, previewPath, previewResponse)
+	decodeAttributeViewContextFilterAPIResponse(t, previewResponse, &preview)
+	if preview.Code != 0 || len(preview.Data) != 1 || len(preview.Data[0].Cleanup.Items) != 1 {
+		t.Fatalf("final-state HTTP preview: %s", previewResponse.Body.String())
+	}
+	groups := preview.Data
 	const path = "/api/tag/removeTagWithCollections"
-	response := callAttributeViewContextFilterAPI(t, path, map[string]any{"label": "todo", "collections": groups}, removeTagWithCollections)
+	body := map[string]any{"label": "todo", "collections": groups}
+	if batch {
+		delete(body, "label")
+		body["labels"] = []string{"todo", "done", "missing", "todo"}
+	}
+	response := callAttributeViewContextFilterAPI(t, path, body, removeTagWithCollections)
 	requireAPIContract(t, http.MethodPost, path, response)
 	var result struct {
 		Code int
@@ -157,14 +195,26 @@ func TestAPIContractTagRemovalWrites(t *testing.T) {
 	if err != nil || stored.GetBlockValue("20261102000000-item001") != nil {
 		t.Fatal("HTTP write did not remove confirmed entry", err)
 	}
+	if batch {
+		response = callAttributeViewContextFilterAPI(t, path, map[string]any{"labels": slices.Repeat([]string{"missing"}, 100), "collections": []any{}}, removeTagWithCollections)
+		requireAPIContract(t, http.MethodPost, path, response)
+		decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+		if result.Code != 0 || result.Data != nil {
+			t.Fatalf("100 duplicate labels rejected: %s", response.Body.String())
+		}
+	}
 	tree, err = model.LoadTreeByBlockID(tree.ID)
-	if err != nil || tree.Root.IALAttr("tags") != "" {
+	if err != nil || tree.Root.IALAttr("tags") != remaining {
 		t.Fatal("HTTP write did not remove tag", err)
 	}
 }
 
 func TestAPIContractTagRemovalInvalidRequestsAndRoles(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	tooMany, err := json.Marshal(map[string]any{"labels": slices.Repeat([]string{"todo"}, 101), "collections": []any{}})
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, entry := range []struct {
 		path, body string
 		handler    gin.HandlerFunc
@@ -173,6 +223,16 @@ func TestAPIContractTagRemovalInvalidRequestsAndRoles(t *testing.T) {
 		{"/api/tag/previewTagRemoval", `{"changes":[null]}`, previewTagRemoval},
 		{"/api/tag/previewTagRemoval", `{"label":"todo","changes":[{"id":"invalid","tags":["todo"]}]}`, previewTagRemoval},
 		{"/api/tag/removeTagWithCollections", `{"label":"","collections":[]}`, removeTagWithCollections},
+		{"/api/tag/previewTagRemoval", `{"labels":[]}`, previewTagRemoval},
+		{"/api/tag/previewTagRemoval", `{"label":"todo","labels":["done"]}`, previewTagRemoval},
+		{"/api/tag/previewTagRemoval", `{"labels":["todo"],"changes":[{"id":"invalid","tags":["todo"]}]}`, previewTagRemoval},
+		{"/api/tag/removeTagWithCollections", `{"labels":[],"collections":[]}`, removeTagWithCollections},
+		{"/api/tag/removeTagWithCollections", `{"labels":["todo",""],"collections":[]}`, removeTagWithCollections},
+		{"/api/tag/removeTagWithCollections", `{"label":"todo","labels":["done"],"collections":[]}`, removeTagWithCollections},
+		{"/api/tag/previewTagRemoval", string(tooMany), previewTagRemoval},
+		{"/api/tag/removeTagWithCollections", string(tooMany), removeTagWithCollections},
+		{"/api/tag/removeTagWithCollections", `{"labels":[1],"collections":[]}`, removeTagWithCollections},
+		{"/api/tag/removeTagWithCollections", `{"labels":[null],"collections":[]}`, removeTagWithCollections},
 	} {
 		engine := gin.New()
 		engine.POST(entry.path, entry.handler)

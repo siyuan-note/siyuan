@@ -1918,7 +1918,7 @@ export type RemoveShorthandsRequestInput = { "ids": Array<string>; };
 
 export type RemoveTagRequestInput = { "label": string; };
 
-export type RemoveTagWithCollectionsRequestInput = { "collections": Array<TagRemovalCollectionInput | null>; "label": string; };
+export type RemoveTagWithCollectionsRequestInput = { "collections": Array<TagRemovalCollectionInput | null>; "label"?: string; "labels"?: Array<string>; };
 
 export type RemoveUnusedAttributeViewRequestInput = { "id": string; };
 
@@ -2684,7 +2684,7 @@ export type TagRemovalCollection = { "avID": string; "cleanup": AVCollectionClea
 
 export type TagRemovalCollectionInput = { "avID": string; "cleanup": AVCollectionCleanupInput; "name": string; };
 
-export type TagRemovalPreviewRequestInput = { "changes"?: Array<TagRemovalChangeInput | null>; "label"?: string; };
+export type TagRemovalPreviewRequestInput = { "changes"?: Array<TagRemovalChangeInput | null>; "label"?: string; "labels"?: Array<string>; };
 
 export type TagSnapshotRequestInput = { "id": string; "name": string; };
 
@@ -9189,6 +9189,8 @@ export interface APIPOSTRoutes {
     /**
      * 删除前只读检查标签移除影响，返回按数据库分组的自动收集条目；不执行删除或移出。
      * 包括逐字改名后实际移除的标签所涉及的条目；手动条目及仍匹配启用规则的条目保留。
+     * label、labels、changes 三选一；labels 原始数组为 1 至 100 项，拒绝空标签并精确去重。
+     * 批量预览按所有标签删除后的最终状态计算，不隐式删除子标签或相似名称。
      */
     "/api/tag/previewTagRemoval": {
         request: TagRemovalPreviewRequestInput;
@@ -9206,6 +9208,8 @@ export interface APIPOSTRoutes {
     };
     /**
      * 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。
+     * label 与 labels 二选一；labels 原始数组为 1 至 100 项，拒绝空标签并精确去重。
+     * 所有标签在一次事务中删除，同块合并并按最终状态复查自动收集；不隐式删除子标签或相似名称。
      */
     "/api/tag/removeTagWithCollections": {
         request: RemoveTagWithCollectionsRequestInput;

@@ -4862,7 +4862,7 @@ export class WYSIWYG {
                 !target.closest('[data-subtype="plantuml"]')) {
                 previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID,
                     target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO) === "1" ?
-                        target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO_VIDEO) || "" : "");
+                        target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO_VIDEO) || "" : "", target);
                 return;
             }
             // https://github.com/siyuan-note/siyuan/issues/12691

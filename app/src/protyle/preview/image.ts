@@ -223,8 +223,10 @@ export const previewImages = (srcList: Array<string | {src: string, video?: stri
     });
 };
 
-export const previewDocImage = (currentSrc: string, id: string, currentVideo?: string) => {
-    fetchPost("/api/asset/getDocPreviewImages", {id}, (response) => {
+export const previewDocImage = (currentSrc: string, id: string, currentVideo?: string, image?: HTMLElement) => {
+    const embed = image?.closest(".protyle-wysiwyg__embed");
+    const sourceID = embed?.getAttribute("data-root-id") || embed?.getAttribute("data-id") || id;
+    fetchPost("/api/asset/getDocPreviewImages", {id: sourceID}, (response) => {
         previewImages(response.data, currentSrc, undefined, currentVideo);
     });
 };

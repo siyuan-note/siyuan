@@ -163,7 +163,7 @@ export class Preview {
                     }
                     previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID,
                         target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO) === "1" ?
-                            target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO_VIDEO) || "" : "");
+                            target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO_VIDEO) || "" : "", target);
                     event.stopPropagation();
                     event.preventDefault();
                     break;

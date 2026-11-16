@@ -496,7 +496,9 @@ export class TableControl {
                 render = true;
             }
             const pinnedTableSelector = '[data-type="NodeTable"][custom-pinthead="true"]';
-            if (mutations.some(mutation => mutation.type === "attributes" ||
+            if (mutations.some(mutation => mutation.type === "attributes" ?
+                mutation.attributeName === "custom-pinthead" || mutation.attributeName === "style" &&
+                mutation.target instanceof Element && mutation.target.contains(this.protyle.element) :
                 (mutation.target instanceof Element && !!mutation.target.closest(pinnedTableSelector)) ||
                 [...mutation.addedNodes, ...mutation.removedNodes].some(node => node instanceof Element &&
                     (node.matches(pinnedTableSelector) || !!node.querySelector(pinnedTableSelector))))) {
@@ -507,7 +509,7 @@ export class TableControl {
             }
         });
         this.observer.observe(this.wysiwygElement, {
-            attributeFilter: ["custom-pinthead"],
+            attributeFilter: ["custom-pinthead", "style"],
             attributes: true,
             childList: true,
             characterData: true,

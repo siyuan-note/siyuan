@@ -1133,6 +1133,41 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         check.equal(ran, false, "unfinished composition blocks structural menu actions");
     }
     mobile = false;
+    for (const pinned of [false, true]) {
+        const f = fixture();
+        if (pinned) {
+            f.table.closest("[data-type='NodeTable']").setAttribute("custom-pinthead", "true");
+        }
+        Reflect.set(f.core, "hoverCell", f.cell(0, 1));
+        Reflect.set(f.core, "hoverType", "cell");
+        f.render();
+        await frames(3);
+        const row = f.touch("[data-type='row']");
+        const column = f.touch("[data-type='column']");
+        const left = column.style.left;
+        const firstColumn = f.table.querySelector<HTMLTableColElement>("col");
+        firstColumn.style.width = "120px";
+        await frames(3);
+        check.notEqual(column.style.left, left, "column handles follow width changes without pointer movement");
+        const header = f.cell(0, 1).getBoundingClientRect();
+        check.equal(parseFloat(column.style.left), Math.round(header.left + header.width / 2));
+        Reflect.set(f.core, "hoverCell", f.cell(2, 0));
+        f.render();
+        await frames(3);
+        const top = row.style.top;
+        f.table.rows[0].style.height = "80px";
+        await frames(3);
+        check.notEqual(row.style.top, top, "row handles follow height changes without pointer movement");
+        const cell = f.cell(2, 0).getBoundingClientRect();
+        check.equal(parseFloat(row.style.top), Math.round(cell.top + cell.height / 2));
+        let renders = 0;
+        const render = Reflect.get(f.core, "render");
+        Reflect.set(f.core, "render", () => { renders++; render.call(f.core); });
+        f.invoke("scheduleRender");
+        await frames(5);
+        check.equal(renders, 1, "pinned frame style writes do not trigger a rendering loop");
+        f.dispose();
+    }
     {
         const f = fixture();
         await frames(2);

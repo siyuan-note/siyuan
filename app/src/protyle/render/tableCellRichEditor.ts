@@ -196,6 +196,9 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     if (!cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE)) {
         cell.setAttribute(TABLE_CELL_INLINE_ATTRIBUTE, cell.innerHTML);
     }
+    // 自动列宽会在空编辑器初始化时收缩，需要在替换内容前记录视口。
+    const tableScrollElement = cell.closest("table").parentElement;
+    const tableScrollLeft = tableScrollElement.scrollLeft;
     const host = document.createElement("div");
     host.className = "table__cell-editor";
     host.dataset.protyleLiteRender = "safe";
@@ -615,8 +618,6 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     for (let parent = owner.element.parentElement; parent; parent = parent.parentElement) {
         observer.observe(parent, {childList: true});
     }
-    const tableScrollElement = cell.closest("table").parentElement;
-    const tableScrollLeft = tableScrollElement.scrollLeft;
     fragment.focus(true);
     if (point) {
         // 恢复点击前的横向视口，避免临时末尾定位改变后续的坐标命中。

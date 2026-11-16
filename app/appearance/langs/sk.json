@@ -1,4 +1,7 @@
 {
+	"docOpenPosition": "Pozícia otvorenia dokumentu",
+	"docOpenAtStart": "Otvoriť od začiatku",
+	"followGlobal": "Podľa globálneho nastavenia",
 	"searchGroupState": "Zoskupené výsledky",
 	"expandByDefault": "Predvolene rozbaliť",
 	"collapseByDefault": "Predvolene zbaliť",
@@ -43,7 +46,7 @@
 	"pluginSnapshotRestoreTip": "Najprv zatvorte ostatných klientov. Doplnok ${name} sa automaticky vypne. Jeho priečinky programu a štandardných údajov sa nahradia touto snímkou; chýbajúce súbory sa odstránia. Najprv sa vytvorí záloha. Ostatné priečinky a spoločné nastavenia sú vylúčené. Potom doplnok zapnite ručne",
 	"pluginSnapshotRestored": "Obnovené; doplnok zostáva vypnutý. Záloha: ${id}",
 	"restoreDocPosition": "Obnoviť poslednú pozíciu čítania",
-	"restoreDocPositionTip": "Po vypnutí sa dokumenty otvárajú od začiatku; odkazy na bloky, výsledky vyhľadávania a obnovenie kariet si zachovajú svoje pozície",
+	"restoreDocPositionTip": "Po vypnutí sa dokumenty otvárajú od začiatku; odkazy na bloky, výsledky vyhľadávania a obnovenie kariet si zachovajú svoje pozície. Prednosť má pozícia otvorenia nastavená pre konkrétny dokument",
 	"markdownAppearanceSettings": "Nastavenia vzhľadu",
 	"markdownFontSizeSettings": "Nastavenia veľkosti písma",
 	"markdownFontSettings": "Nastavenia písma",

@@ -1,4 +1,7 @@
 {
+	"docOpenPosition": "Position à l’ouverture du document",
+	"docOpenAtStart": "Ouvrir au début",
+	"followGlobal": "Suivre le réglage global",
 	"searchGroupState": "Résultats groupés",
 	"expandByDefault": "Déplier par défaut",
 	"collapseByDefault": "Replier par défaut",
@@ -43,7 +46,7 @@
 	"pluginSnapshotRestoreTip": "Fermez les autres clients. Le plugin ${name} sera désactivé automatiquement. Ses répertoires de programme et de données standard seront remplacés par cet instantané ; les fichiers absents seront supprimés. Une sauvegarde sera créée au préalable. Les autres répertoires et réglages partagés sont exclus. Réactivez ensuite le plugin manuellement",
 	"pluginSnapshotRestored": "Restauration terminée ; le plugin reste désactivé. Sauvegarde : ${id}",
 	"restoreDocPosition": "Restaurer la dernière position de lecture",
-	"restoreDocPositionTip": "Si désactivé, les documents se rouvrent au début ; les liens de bloc, les résultats de recherche et la restauration des onglets conservent leurs positions",
+	"restoreDocPositionTip": "Si désactivé, les documents se rouvrent au début ; les liens de bloc, les résultats de recherche et la restauration des onglets conservent leurs positions. La position d’ouverture propre au document est prioritaire",
 	"markdownAppearanceSettings": "Paramètres d’apparence",
 	"markdownFontSizeSettings": "Paramètres de taille de police",
 	"markdownFontSettings": "Paramètres de police",

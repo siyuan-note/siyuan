@@ -20383,6 +20383,28 @@
 				{
 					"Type": "NodeText",
 					"Data": " 后从文档开头打开。块链接、搜索结果、恢复页签和前进后退仍定位到指定位置。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "如需为当前文档单独设置，请在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文档打开位置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择「跟随全局设置」「恢复上次浏览位置」或「从文档开头打开」。该偏好随文档同步，实际阅读位置仍由各客户端分别记录。"
 				}
 			]
 		}

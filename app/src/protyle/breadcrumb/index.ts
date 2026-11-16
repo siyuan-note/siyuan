@@ -1192,6 +1192,31 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                             }]
                         }).element);
                     }
+                    if (!protyle.disabled) {
+                        const position = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_RESTORE_DOC_POSITION);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "docOpenPosition",
+                            label: window.siyuan.languages.docOpenPosition,
+                            icon: "iconScrollVert",
+                            type: "submenu",
+                            submenu: [
+                                {id: "default", label: window.siyuan.languages.followGlobal, value: ""},
+                                {id: "restore", label: window.siyuan.languages.restoreDocPosition, value: "true"},
+                                {id: "start", label: window.siyuan.languages.docOpenAtStart, value: "false"},
+                            ].map(item => ({
+                                id: item.id,
+                                label: item.label,
+                                iconHTML: "",
+                                current: item.value ? position === item.value : position !== "true" && position !== "false",
+                                click() {
+                                    fetchPost("/api/attr/setBlockAttrs", {
+                                        id: protyle.block.rootID,
+                                        attrs: {[Constants.CUSTOM_SY_RESTORE_DOC_POSITION]: item.value},
+                                    });
+                                },
+                            })),
+                        }).element);
+                    }
                     /// #if !MOBILE
                     if (!protyle.disabled) {
                         const isCustomFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);

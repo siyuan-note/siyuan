@@ -1,4 +1,7 @@
 {
+	"docOpenPosition": "Posición al abrir el documento",
+	"docOpenAtStart": "Abrir desde el principio",
+	"followGlobal": "Seguir la configuración global",
 	"searchGroupState": "Resultados agrupados",
 	"expandByDefault": "Expandir por defecto",
 	"collapseByDefault": "Contraer por defecto",
@@ -43,7 +46,7 @@
 	"pluginSnapshotRestoreTip": "Cierre los otros clientes. El complemento ${name} se desactivará automáticamente. Sus directorios de programa y datos estándar se reemplazarán con esta instantánea y se eliminarán los archivos ausentes. Se creará antes una copia de seguridad. Se excluyen otros directorios y ajustes compartidos. Actívelo manualmente después",
 	"pluginSnapshotRestored": "Restaurado; el complemento sigue desactivado. Copia de seguridad: ${id}",
 	"restoreDocPosition": "Restaurar la última posición de lectura",
-	"restoreDocPositionTip": "Al desactivar, los documentos se abren al principio; los enlaces a bloques, los resultados de búsqueda y la restauración de pestañas conservan sus posiciones",
+	"restoreDocPositionTip": "Al desactivar, los documentos se abren al principio; los enlaces a bloques, los resultados de búsqueda y la restauración de pestañas conservan sus posiciones. La posición de apertura específica del documento tiene prioridad",
 	"markdownAppearanceSettings": "Ajustes de apariencia",
 	"markdownFontSizeSettings": "Ajustes de tamaño de fuente",
 	"markdownFontSettings": "Ajustes de fuente",

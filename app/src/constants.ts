@@ -92,6 +92,7 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_SUBDOC_SORT_MODE: string = "custom-sy-subdoc-sort-mode";
     public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";
     public static readonly CUSTOM_SY_HEADING_NUMBER: string = "custom-sy-heading-number";
+    public static readonly CUSTOM_SY_RESTORE_DOC_POSITION: string = "custom-sy-restore-doc-position";
     public static readonly CUSTOM_SY_AV_VIEW: string = "custom-sy-av-view";
     public static readonly CUSTOM_SY_AV_VISIBLE_VIEWS: string = "custom-sy-av-visible-views";
     public static readonly CUSTOM_SY_LIST_MINDMAP: string = "custom-sy-list-mindmap";

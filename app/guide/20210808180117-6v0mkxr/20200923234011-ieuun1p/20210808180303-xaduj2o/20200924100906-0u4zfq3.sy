@@ -1665,6 +1665,28 @@
 				{
 					"Type": "NodeText",
 					"Data": " to reopen at the beginning. Block links, search results, restored tabs and navigation history keep their target positions."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " To override the global preference for this document, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Document opening position"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Select Follow global setting, Restore last reading position, or Open at the beginning. This preference travels with the document; saved reading positions remain local to each client."
 				}
 			]
 		}

@@ -1,4 +1,7 @@
 {
+	"docOpenPosition": "Posizione di apertura del documento",
+	"docOpenAtStart": "Apri dall’inizio",
+	"followGlobal": "Segui l’impostazione globale",
 	"searchGroupState": "Risultati raggruppati",
 	"expandByDefault": "Espandi per impostazione predefinita",
 	"collapseByDefault": "Comprimi per impostazione predefinita",
@@ -43,7 +46,7 @@
 	"pluginSnapshotRestoreTip": "Chiudi prima gli altri client. Il plugin ${name} verrà disattivato automaticamente. Le cartelle del programma e dei dati standard verranno sostituite da questa istantanea; i file assenti saranno rimossi. Verrà prima creata una copia di sicurezza. Sono esclusi altre cartelle e impostazioni condivise. Riattiva poi il plugin manualmente",
 	"pluginSnapshotRestored": "Ripristinato; il plugin resta disattivato. Copia di sicurezza: ${id}",
 	"restoreDocPosition": "Ripristina l’ultima posizione di lettura",
-	"restoreDocPositionTip": "Se disattivato, i documenti si riaprono dall’inizio; collegamenti ai blocchi, risultati di ricerca e ripristino delle schede mantengono le loro posizioni",
+	"restoreDocPositionTip": "Se disattivato, i documenti si riaprono dall’inizio; collegamenti ai blocchi, risultati di ricerca e ripristino delle schede mantengono le loro posizioni. La posizione di apertura specifica del documento ha la precedenza",
 	"markdownAppearanceSettings": "Impostazioni dell’aspetto",
 	"markdownFontSizeSettings": "Impostazioni della dimensione del carattere",
 	"markdownFontSettings": "Impostazioni dei caratteri",

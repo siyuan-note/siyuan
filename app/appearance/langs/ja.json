@@ -1,4 +1,7 @@
 {
+	"docOpenPosition": "ドキュメントを開く位置",
+	"docOpenAtStart": "先頭から開く",
+	"followGlobal": "全体設定に従う",
 	"searchGroupState": "グループ化した結果",
 	"expandByDefault": "既定で展開",
 	"collapseByDefault": "既定で折りたたむ",
@@ -43,7 +46,7 @@
 	"pluginSnapshotRestoreTip": "先に他のクライアントを閉じてください。プラグイン ${name} を自動的に無効にし、プログラムと標準データのディレクトリをこのスナップショットで置き換えます。含まれないファイルは削除されます。復元前にバックアップを作成します。他のディレクトリと共有設定は対象外です。復元後に手動で有効にしてください",
 	"pluginSnapshotRestored": "復元しました。プラグインは無効のままです。バックアップ：${id}",
 	"restoreDocPosition": "前回の閲覧位置を復元",
-	"restoreDocPositionTip": "無効の場合、ドキュメントを先頭から開きます。ブロックリンク、検索結果、タブの復元では指定された位置を維持します",
+	"restoreDocPositionTip": "無効の場合、ドキュメントを先頭から開きます。ブロックリンク、検索結果、タブの復元では指定された位置を維持します。ドキュメントごとの開始位置設定が優先されます",
 	"markdownAppearanceSettings": "外観設定",
 	"markdownFontSizeSettings": "文字サイズ設定",
 	"markdownFontSettings": "フォント設定",

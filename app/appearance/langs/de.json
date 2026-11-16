@@ -1,4 +1,7 @@
 {
+	"docOpenPosition": "Öffnungsposition des Dokuments",
+	"docOpenAtStart": "Am Anfang öffnen",
+	"followGlobal": "Globaler Einstellung folgen",
 	"searchGroupState": "Gruppierte Ergebnisse",
 	"expandByDefault": "Standardmäßig ausklappen",
 	"collapseByDefault": "Standardmäßig einklappen",
@@ -43,7 +46,7 @@
 	"pluginSnapshotRestoreTip": "Schließen Sie zuerst andere Clients. Das Plugin ${name} wird automatisch deaktiviert. Programm- und Standarddatenverzeichnis werden durch diesen Schnappschuss ersetzt; darin fehlende Dateien werden entfernt. Zuvor wird eine Sicherung erstellt. Andere Verzeichnisse und gemeinsame Einstellungen sind ausgenommen. Aktivieren Sie das Plugin anschließend manuell",
 	"pluginSnapshotRestored": "Wiederhergestellt; das Plugin bleibt deaktiviert. Sicherung: ${id}",
 	"restoreDocPosition": "Letzte Leseposition wiederherstellen",
-	"restoreDocPositionTip": "Deaktiviert werden Dokumente am Anfang geöffnet; Blocklinks, Suchtreffer und die Wiederherstellung von Tabs bleiben unverändert",
+	"restoreDocPositionTip": "Deaktiviert werden Dokumente am Anfang geöffnet; Blocklinks, Suchtreffer und die Wiederherstellung von Tabs bleiben unverändert. Die dokumentbezogene Öffnungsposition hat Vorrang",
 	"markdownAppearanceSettings": "Darstellungseinstellungen",
 	"markdownFontSizeSettings": "Schriftgrößeneinstellungen",
 	"markdownFontSettings": "Schrifteinstellungen",

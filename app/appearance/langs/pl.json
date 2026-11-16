@@ -1,4 +1,7 @@
 {
+	"docOpenPosition": "Pozycja otwierania dokumentu",
+	"docOpenAtStart": "Otwórz od początku",
+	"followGlobal": "Zgodnie z ustawieniem globalnym",
 	"searchGroupState": "Pogrupowane wyniki",
 	"expandByDefault": "Domyślnie rozwijaj",
 	"collapseByDefault": "Domyślnie zwijaj",
@@ -43,7 +46,7 @@
 	"pluginSnapshotRestoreTip": "Najpierw zamknij inne klienty. Wtyczka ${name} zostanie wyłączona automatycznie. Jej katalogi programu i standardowych danych zostaną zastąpione migawką; brakujące w niej pliki zostaną usunięte. Wcześniej powstanie kopia zapasowa. Inne katalogi i wspólne ustawienia są wyłączone z tej operacji. Następnie włącz wtyczkę ręcznie",
 	"pluginSnapshotRestored": "Przywrócono; wtyczka pozostaje wyłączona. Kopia zapasowa: ${id}",
 	"restoreDocPosition": "Przywracaj ostatnią pozycję czytania",
-	"restoreDocPositionTip": "Po wyłączeniu dokumenty otwierają się od początku; łącza do bloków, wyniki wyszukiwania i przywracanie kart zachowują swoje pozycje",
+	"restoreDocPositionTip": "Po wyłączeniu dokumenty otwierają się od początku; łącza do bloków, wyniki wyszukiwania i przywracanie kart zachowują swoje pozycje. Ustawienie pozycji otwierania danego dokumentu ma pierwszeństwo",
 	"markdownAppearanceSettings": "Ustawienia wyglądu",
 	"markdownFontSizeSettings": "Ustawienia rozmiaru czcionki",
 	"markdownFontSettings": "Ustawienia czcionek",

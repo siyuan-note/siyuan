@@ -1,4 +1,7 @@
 {
+	"docOpenPosition": "Posisi pembukaan dokumen",
+	"docOpenAtStart": "Buka dari awal",
+	"followGlobal": "Ikuti pengaturan global",
 	"searchGroupState": "Hasil yang dikelompokkan",
 	"expandByDefault": "Perluas secara bawaan",
 	"collapseByDefault": "Ciutkan secara bawaan",
@@ -43,7 +46,7 @@
 	"pluginSnapshotRestoreTip": "Tutup klien lain terlebih dahulu. Plugin ${name} akan dinonaktifkan otomatis. Direktori program dan data standarnya diganti dengan snapshot ini; berkas yang tidak ada akan dihapus. Snapshot cadangan dibuat terlebih dahulu. Direktori lain dan pengaturan bersama dikecualikan. Aktifkan plugin secara manual setelahnya",
 	"pluginSnapshotRestored": "Dipulihkan; plugin tetap nonaktif. Snapshot cadangan: ${id}",
 	"restoreDocPosition": "Pulihkan posisi baca terakhir",
-	"restoreDocPositionTip": "Jika dinonaktifkan, dokumen dibuka kembali dari awal; tautan blok, hasil pencarian dan pemulihan tab tetap mempertahankan posisinya",
+	"restoreDocPositionTip": "Jika dinonaktifkan, dokumen dibuka kembali dari awal; tautan blok, hasil pencarian dan pemulihan tab tetap mempertahankan posisinya. Posisi pembukaan khusus dokumen diutamakan",
 	"markdownAppearanceSettings": "Pengaturan tampilan",
 	"markdownFontSizeSettings": "Pengaturan ukuran font",
 	"markdownFontSettings": "Pengaturan font",

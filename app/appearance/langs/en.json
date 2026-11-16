@@ -1,4 +1,7 @@
 {
+	"docOpenPosition": "Document opening position",
+	"docOpenAtStart": "Open at the beginning",
+	"followGlobal": "Follow global setting",
 	"searchGroupState": "Grouped results",
 	"expandByDefault": "Expand by default",
 	"collapseByDefault": "Collapse by default",
@@ -43,7 +46,7 @@
 	"pluginSnapshotRestoreTip": "Close other clients before continuing. The plugin ${name} will be disabled automatically. Both its program and standard data directories will be replaced with this snapshot, including removal of files absent from the snapshot. A backup snapshot is created first. Other directories and shared settings are excluded. Enable the plugin manually after restoration",
 	"pluginSnapshotRestored": "Restored; the plugin remains disabled. Backup snapshot: ${id}",
 	"restoreDocPosition": "Restore last reading position",
-	"restoreDocPositionTip": "When disabled, reopen documents at the beginning; block links, search targets and tab restoration retain their positions",
+	"restoreDocPositionTip": "When disabled, reopen documents at the beginning; block links, search targets and tab restoration retain their positions. A document-specific opening position takes precedence",
 	"markdownAppearanceSettings": "Appearance settings",
 	"markdownFontSizeSettings": "Font size settings",
 	"markdownFontSettings": "Font settings",

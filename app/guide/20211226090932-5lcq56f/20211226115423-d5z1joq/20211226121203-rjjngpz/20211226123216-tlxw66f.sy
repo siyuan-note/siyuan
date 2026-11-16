@@ -1613,6 +1613,28 @@
 				{
 					"Type": "NodeText",
 					"Data": " 後從文件開頭開啟。區塊連結、搜尋結果、恢復頁籤和上一頁、下一頁仍定位到指定位置。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "如需為目前文件單獨設定，請在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件開啟位置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇「跟隨全域設定」「恢復上次瀏覽位置」或「從文件開頭開啟」。此偏好隨文件同步，實際閱讀位置仍由各用戶端分別記錄。"
 				}
 			]
 		}

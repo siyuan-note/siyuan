@@ -5,7 +5,6 @@
 package api
 
 import (
-	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -216,17 +215,17 @@ func fromContractAVValueBlock(value *apicontract.AVValueBlock) *av.ValueBlock {
 		Updated:      value.Updated,
 	}
 }
-func toContractAVPrimaryRich(value *ast.DocumentTitle) *apicontract.DocumentTitleSource {
+func toContractAVPrimaryRich(value *av.ValuePrimaryRich) *apicontract.AVValuePrimaryRich {
 	if value == nil {
 		return nil
 	}
-	return &apicontract.DocumentTitleSource{Spec: value.Spec, Format: value.Format, Content: value.Content}
+	return &apicontract.AVValuePrimaryRich{Spec: value.Spec, Format: value.Format, Content: value.Content}
 }
-func fromContractAVPrimaryRich(value *apicontract.DocumentTitleSource) *ast.DocumentTitle {
+func fromContractAVPrimaryRich(value *apicontract.AVValuePrimaryRich) *av.ValuePrimaryRich {
 	if value == nil {
 		return nil
 	}
-	return &ast.DocumentTitle{Spec: value.Spec, Format: value.Format, Content: value.Content}
+	return &av.ValuePrimaryRich{Spec: value.Spec, Format: value.Format, Content: value.Content}
 }
 func toContractAVValueText(value *av.ValueText) *apicontract.AVValueText {
 	if value == nil {

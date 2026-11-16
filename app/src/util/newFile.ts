@@ -251,6 +251,7 @@ export const getDocCreateTemplatePath = (notebookId: string, callback: (template
 };
 
 function openCreatedDoc(app: App, id: string, onCreated?: (id: string, title: string) => void, title?: string) {
+    window.siyuan.menus.menu.remove();
     if (onCreated) {
         onCreated(id, title || "");
     }

@@ -29,6 +29,8 @@ type installPkgTestSource struct {
 	server      *httptest.Server
 	requests    atomic.Int32
 	rangeHeader atomic.Value
+	started     chan struct{}
+	startOnce   sync.Once
 	closed      chan struct{} // 连接被中断时关闭
 	closeOnce   sync.Once
 }
@@ -38,13 +40,22 @@ func (s *installPkgTestSource) markClosed() {
 }
 
 // newInstallPkgTestSource 按 chunk 大小与间隔输出内容，模拟不同带宽的下载源。
-func newInstallPkgTestSource(t *testing.T, content []byte, chunk int, interval time.Duration) *installPkgTestSource {
+func newInstallPkgTestSource(t *testing.T, content []byte, chunk int, interval time.Duration, waitFor ...<-chan struct{}) *installPkgTestSource {
 	t.Helper()
-	source := &installPkgTestSource{closed: make(chan struct{})}
+	source := &installPkgTestSource{started: make(chan struct{}), closed: make(chan struct{})}
 	source.rangeHeader.Store("")
 	source.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		source.requests.Add(1)
 		source.rangeHeader.Store(r.Header.Get("Range"))
+		source.startOnce.Do(func() { close(source.started) })
+		for _, started := range waitFor {
+			select {
+			case <-started:
+			case <-r.Context().Done():
+				source.markClosed()
+				return
+			}
+		}
 		w.Header().Set("Content-Length", strconv.Itoa(len(content)))
 		for offset := 0; offset < len(content); {
 			select {
@@ -142,7 +153,8 @@ func TestProbeAndDownloadReleasesAllSourceConnections(t *testing.T) {
 	metadata := installPkgDownloadMetadata(content)
 	first := newInstallPkgTestSource(t, content, 1024, 20*time.Millisecond)
 	second := newInstallPkgTestSource(t, content, 1024, 20*time.Millisecond)
-	third := newInstallPkgTestSource(t, content, 64*1024, 0)
+	// 慢源必须已收到请求，才能通过服务端上下文检查落选连接是否释放。
+	third := newInstallPkgTestSource(t, content, 64*1024, 0, first.started, second.started)
 
 	urls := []string{first.server.URL, second.server.URL, third.server.URL}
 	if err := probeAndDownloadInstallPkgWithin(dir, urls, metadata, 3*time.Second, 128*1024); err != nil {
@@ -164,8 +176,8 @@ func TestProbeAndDownloadKeepsFastestSourceConnection(t *testing.T) {
 	dir := prepareInstallPackageTest(t)
 	content := installPkgProbeTestContent()
 	metadata := installPkgDownloadMetadata(content)
-	fast := newInstallPkgTestSource(t, content, 64*1024, 0)
 	slow := newInstallPkgTestSource(t, content, 1024, 20*time.Millisecond)
+	fast := newInstallPkgTestSource(t, content, 64*1024, 0, slow.started)
 
 	err := probeAndDownloadInstallPkgWithin(dir, []string{slow.server.URL, fast.server.URL}, metadata, 3*time.Second, 128*1024)
 	if err != nil {

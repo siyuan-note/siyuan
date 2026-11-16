@@ -1682,6 +1682,7 @@ var PreviewAttributeViewCollection = define[AVBlockCollectionPreviewRequest, *AV
 // 使用 cleanupAttrViewBlocks 事务明确移出预览后确认的条目，执行时重新检查并支持撤销。
 var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollectionReview]("reviewAttributeViewCollection", "/api/av/reviewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
+// 内部接口，不属于稳定的插件公开API。
 // 删除前只读检查标签移除影响，返回按数据库分组的自动收集条目；不执行删除或移出。
 // 包括逐字改名后实际移除的标签所涉及的条目；手动条目及仍匹配启用规则的条目保留。
 // label、labels、changes 三选一；labels 原始数组为 1 至 100 项，拒绝空标签并精确去重。
@@ -1694,10 +1695,16 @@ var PreviewTagRemoval = define[TagRemovalPreviewRequest, []*TagRemovalCollection
 // 保留手动、仍符合其他启用规则和未知状态的条目；支持加密笔记本的认证与隔离。
 var PreviewCollectionRemoval = define[CollectionRemovalPreviewRequest, *CollectionRemovalPreview]("previewCollectionRemoval", "/api/av/previewCollectionRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
+// 内部接口，不属于稳定的插件公开API。
 // 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。
 // label 与 labels 二选一；labels 原始数组为 1 至 100 项，拒绝空标签并精确去重。
 // 所有标签在一次事务中删除，同块合并并按最终状态复查自动收集；不隐式删除子标签或相似名称。
 var RemoveTagWithCollections = define[RemoveTagWithCollectionsRequest, Null]("removeTagWithCollections", "/api/tag/removeTagWithCollections", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// 内部接口，不属于稳定的插件公开API。
+// 批量删除精确标签，同一事务中合并修改，按最终状态复查自动收集并保留撤销。
+// labels 原始数组为 1 至 100 项，拒绝空标签并精确去重；仅移出用户确认的自动收集条目。
+var BatchRemoveTag = define[BatchRemoveTagRequest, Null]("batchRemoveTag", "/api/tag/batchRemoveTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // PreviewAttributeViewTemplate 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。
 // 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。

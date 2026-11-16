@@ -35,3 +35,8 @@ type RemoveTagWithCollectionsRequest struct {
 	Labels      []string                `json:"labels,omitempty" api:"optional"`
 	Collections []*TagRemovalCollection `json:"collections"`
 }
+
+type BatchRemoveTagRequest struct {
+	Labels      []string                `json:"labels"`
+	Collections []*TagRemovalCollection `json:"collections"`
+}

@@ -22,6 +22,7 @@ func TestAuthorizationContracts(t *testing.T) {
 		}
 	}
 	expected := map[string]Authorization{
+		"/api/tag/batchRemoveTag":      AuthenticatedAccess | AdminAccess | WritableAccess,
 		"/api/system/version":          PublicAccess,
 		"/oauth/mcp/token":             PublicAccess,
 		"/api/block/getBlockDOM":       AuthenticatedAccess,

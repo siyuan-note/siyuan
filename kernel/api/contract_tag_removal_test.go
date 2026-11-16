@@ -86,7 +86,7 @@ func TestAPIContractTagRemovalPreview(t *testing.T) {
 
 func TestAPIContractTagRemovalWrites(t *testing.T) {
 	if os.Getenv("SIYUAN_TEST_TAG_REMOVAL_CONTRACT") == "" {
-		for _, mode := range []string{"single", "batch"} {
+		for _, mode := range []string{"single", "batch", "batch-route"} {
 			t.Run(mode, func(t *testing.T) {
 				ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 				defer cancel()
@@ -124,7 +124,8 @@ func TestAPIContractTagRemovalWrites(t *testing.T) {
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)
 	defer func() { sql.FlushQueue(); sql.CloseDatabase() }()
-	batch := os.Getenv("SIYUAN_TEST_TAG_REMOVAL_CONTRACT") == "batch"
+	mode := os.Getenv("SIYUAN_TEST_TAG_REMOVAL_CONTRACT")
+	batch := mode != "single"
 	tags, remaining := "todo", ""
 	if batch {
 		tags, remaining = "todo,done,todo/child,xtodo", "todo/child,xtodo"
@@ -175,13 +176,16 @@ func TestAPIContractTagRemovalWrites(t *testing.T) {
 		t.Fatalf("final-state HTTP preview: %s", previewResponse.Body.String())
 	}
 	groups := preview.Data
-	const path = "/api/tag/removeTagWithCollections"
+	path, handler := "/api/tag/removeTagWithCollections", removeTagWithCollections
+	if mode == "batch-route" {
+		path, handler = "/api/tag/batchRemoveTag", batchRemoveTag
+	}
 	body := map[string]any{"label": "todo", "collections": groups}
 	if batch {
 		delete(body, "label")
 		body["labels"] = []string{"todo", "done", "missing", "todo"}
 	}
-	response := callAttributeViewContextFilterAPI(t, path, body, removeTagWithCollections)
+	response := callAttributeViewContextFilterAPI(t, path, body, handler)
 	requireAPIContract(t, http.MethodPost, path, response)
 	var result struct {
 		Code int
@@ -196,7 +200,7 @@ func TestAPIContractTagRemovalWrites(t *testing.T) {
 		t.Fatal("HTTP write did not remove confirmed entry", err)
 	}
 	if batch {
-		response = callAttributeViewContextFilterAPI(t, path, map[string]any{"labels": slices.Repeat([]string{"missing"}, 100), "collections": []any{}}, removeTagWithCollections)
+		response = callAttributeViewContextFilterAPI(t, path, map[string]any{"labels": slices.Repeat([]string{"missing"}, 100), "collections": []any{}}, handler)
 		requireAPIContract(t, http.MethodPost, path, response)
 		decodeAttributeViewContextFilterAPIResponse(t, response, &result)
 		if result.Code != 0 || result.Data != nil {
@@ -233,6 +237,14 @@ func TestAPIContractTagRemovalInvalidRequestsAndRoles(t *testing.T) {
 		{"/api/tag/removeTagWithCollections", string(tooMany), removeTagWithCollections},
 		{"/api/tag/removeTagWithCollections", `{"labels":[1],"collections":[]}`, removeTagWithCollections},
 		{"/api/tag/removeTagWithCollections", `{"labels":[null],"collections":[]}`, removeTagWithCollections},
+		{"/api/tag/batchRemoveTag", `{"label":"todo","collections":[]}`, batchRemoveTag},
+		{"/api/tag/batchRemoveTag", `{"labels":null,"collections":[]}`, batchRemoveTag},
+		{"/api/tag/batchRemoveTag", `{"labels":[],"collections":[]}`, batchRemoveTag},
+		{"/api/tag/batchRemoveTag", `{"labels":["todo",""] ,"collections":[]}`, batchRemoveTag},
+		{"/api/tag/batchRemoveTag", `{"labels":[null],"collections":[]}`, batchRemoveTag},
+		{"/api/tag/batchRemoveTag", `{"labels":[1],"collections":[]}`, batchRemoveTag},
+		{"/api/tag/batchRemoveTag", `{"labels":["todo"]}`, batchRemoveTag},
+		{"/api/tag/batchRemoveTag", string(tooMany), batchRemoveTag},
 	} {
 		engine := gin.New()
 		engine.POST(entry.path, entry.handler)
@@ -241,14 +253,14 @@ func TestAPIContractTagRemovalInvalidRequestsAndRoles(t *testing.T) {
 		requireAPIContract(t, http.MethodPost, entry.path, recorder)
 		var result struct{ Code int }
 		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || result.Code != -1 {
-			t.Fatalf("invalid request accepted: %s (%v)", recorder.Body.String(), err)
+			t.Fatalf("invalid request accepted for %s body %s: %s (%v)", entry.path, entry.body, recorder.Body.String(), err)
 		}
 	}
 	for _, endpoint := range []struct {
 		path    string
 		handler gin.HandlerFunc
 	}{
-		{"/api/tag/previewTagRemoval", previewTagRemoval}, {"/api/tag/removeTagWithCollections", removeTagWithCollections},
+		{"/api/tag/previewTagRemoval", previewTagRemoval}, {"/api/tag/removeTagWithCollections", removeTagWithCollections}, {"/api/tag/batchRemoveTag", batchRemoveTag},
 	} {
 		engine := gin.New()
 		engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleReader) })

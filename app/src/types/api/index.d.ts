@@ -772,6 +772,8 @@ export type BatchInsertBlockRequestInput = { "blocks": Array<BlockInsertInputInp
 
 export type BatchParentBlockRequestInput = { "blocks": Array<PrependBlockRequestInput>; };
 
+export type BatchRemoveTagRequestInput = { "collections": Array<TagRemovalCollectionInput | null>; "labels": Array<string>; };
+
 export type BatchReplaceAttributeViewBlocksRequestInput = { "avID": string; "isDetached": boolean; "oldNew": Array<Record<string, string> | null>; };
 
 export type BatchSetAttributeViewBlockAttrsRequestInput = { "avID": string; "values": Array<AVCellUpdateInput>; };
@@ -9179,6 +9181,18 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["public"];
     };
+    /**
+     * 内部接口，不属于稳定的插件公开API。
+     * 批量删除精确标签，同一事务中合并修改，按最终状态复查自动收集并保留撤销。
+     * labels 原始数组为 1 至 100 项，拒绝空标签并精确去重；仅移出用户确认的自动收集条目。
+     */
+    "/api/tag/batchRemoveTag": {
+        request: BatchRemoveTagRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
     "/api/tag/getTag": {
         request: GetTagRequestInput;
         response: { "code": 0; "data": Array<TagData | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -9187,6 +9201,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated"];
     };
     /**
+     * 内部接口，不属于稳定的插件公开API。
      * 删除前只读检查标签移除影响，返回按数据库分组的自动收集条目；不执行删除或移出。
      * 包括逐字改名后实际移除的标签所涉及的条目；手动条目及仍匹配启用规则的条目保留。
      * label、labels、changes 三选一；labels 原始数组为 1 至 100 项，拒绝空标签并精确去重。
@@ -9207,6 +9222,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
+     * 内部接口，不属于稳定的插件公开API。
      * 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。
      * label 与 labels 二选一；labels 原始数组为 1 至 100 项，拒绝空标签并精确去重。
      * 所有标签在一次事务中删除，同块合并并按最终状态复查自动收集；不隐式删除子标签或相似名称。

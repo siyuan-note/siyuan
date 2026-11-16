@@ -394,6 +394,7 @@ func registerTagRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/tag/removeTag", contractRouteHandlers(apicontract.RemoveTag, removeTag)...)
 	ginServer.Handle("POST", "/api/tag/previewTagRemoval", contractRouteHandlers(apicontract.PreviewTagRemoval, previewTagRemoval)...)
 	ginServer.Handle("POST", "/api/tag/removeTagWithCollections", contractRouteHandlers(apicontract.RemoveTagWithCollections, removeTagWithCollections)...)
+	ginServer.Handle("POST", "/api/tag/batchRemoveTag", contractRouteHandlers(apicontract.BatchRemoveTag, batchRemoveTag)...)
 }
 
 // registerLuteRoutes 注册本域的契约路由。

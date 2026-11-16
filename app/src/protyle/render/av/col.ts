@@ -17,7 +17,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {getPropertiesHTML} from "./panels/properties";
 import {getLabelByNumberFormat} from "./number";
 import {getDefaultDateFormat, getLabelByDateFormat} from "./dateFormat";
-import {bindDateFieldMenus} from "./dateFieldMenu";
+import {bindFieldMenus} from "./fieldMenu";
 import {bindRelatedViewConfig, getRelatedViewConfigHTML} from "./relatedViewConfig";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
@@ -319,7 +319,7 @@ export const bindEditEvent = (options: {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
-    bindDateFieldMenus(options.protyle, avID, colData, options.menuElement);
+    bindFieldMenus(options.protyle, avID, colData, options.menuElement);
     if (colData.type === "relation") {
         void bindRelatedViewConfig(options.protyle, avID, colData, options.menuElement, options.blockID);
     }

@@ -3,8 +3,9 @@ import {MenuItem} from "../../../menus/Menu";
 import {isMobile} from "../../../util/functions";
 import {formatDateDisplay, getLabelByDateFormat} from "./dateFormat";
 import {setDateFieldFormat} from "./dateFormatMenu";
+import {getLabelByNumberFormat, setNumberFieldFormat} from "./number";
 
-const bindDateFieldSubmenu = (placeholder: Element, menuElement: HTMLElement, options: IMenu) => {
+const bindFieldSubmenu = (placeholder: Element, menuElement: HTMLElement, options: IMenu) => {
     const item = new MenuItem(options);
     item.element.dataset.type = placeholder.getAttribute("data-type");
     item.element.classList.toggle("fn__none", placeholder.classList.contains("fn__none"));
@@ -50,8 +51,26 @@ const bindDateFieldSubmenu = (placeholder: Element, menuElement: HTMLElement, op
     });
 };
 
-export const bindDateFieldMenus = (protyle: IProtyle, avID: string, field: IAVColumn, menuElement: HTMLElement) => {
+export const bindFieldMenus = (protyle: IProtyle, avID: string, field: IAVColumn, menuElement: HTMLElement) => {
     const type = field.type;
+    const numberFormat = menuElement.querySelector('[data-type="numberFormat"]');
+    if (type === "number" && numberFormat) {
+        const oldFormat = field.numberFormat || "";
+        bindFieldSubmenu(numberFormat, menuElement, {
+            icon: "iconFormat", label: window.siyuan.languages.format,
+            accelerator: getLabelByNumberFormat(oldFormat),
+            submenu: ["", "commas", "percent", "USD", "CNY", "EUR", "GBP", "JPY", "RUB", "INR", "KRW",
+                "TRY", "CAD", "CHF", "THB", "AUD", "HKD", "TWD", "MOP", "SGD", "NZD", "ILS"].map(format => ({
+                label: getLabelByNumberFormat(format), iconHTML: "", checked: format === oldFormat,
+                click: () => {
+                    if (format !== oldFormat) {
+                        setNumberFieldFormat(protyle, avID, field.id, format, oldFormat);
+                    }
+                    menuElement.closest(".av__panel")?.remove();
+                },
+            })),
+        });
+    }
     if (type !== "date" && type !== "created" && type !== "updated") {
         return;
     }
@@ -65,7 +84,7 @@ export const bindDateFieldMenus = (protyle: IProtyle, avID: string, field: IAVCo
     const lang = window.siyuan.languages._attrView;
     const calendar = menuElement.querySelector('[data-type="dateCalendar"]');
     if (calendar) {
-        bindDateFieldSubmenu(calendar, menuElement, {
+        bindFieldSubmenu(calendar, menuElement, {
             icon: "iconMode", label: lang.dateCalendar,
             accelerator: oldFormat === "lunar" ? lang.lunarCalendar : lang.solarCalendar,
             submenu: [false, true].map(lunar => ({
@@ -78,7 +97,7 @@ export const bindDateFieldMenus = (protyle: IProtyle, avID: string, field: IAVCo
     }
     const format = menuElement.querySelector('[data-type="dateFormat"]');
     if (format) {
-        bindDateFieldSubmenu(format, menuElement, {
+        bindFieldSubmenu(format, menuElement, {
             icon: "iconFormat", label: lang.dateFormat, accelerator: getLabelByDateFormat(oldFormat),
             submenu: (["", "full", "month-day-year", "day-month-year", "year-month-day"] as TAVDateFormat[]).map(value => ({
                 label: getLabelByDateFormat(value), iconHTML: "", checked: value === oldFormat,

@@ -491,6 +491,8 @@ export class TableControl {
                 this.hoverCell?.closest("table"),
                 this.caretCell?.closest("table"),
                 this.selection?.table,
+                this.dimensionBoundary?.table,
+                this.rowBoundary?.cell.closest("table"),
             ].filter((table): table is HTMLTableElement => !!table?.isConnected);
             if (mutations.some(mutation => controlTables.some(table => table.contains(mutation.target)))) {
                 render = true;
@@ -1850,8 +1852,10 @@ export class TableControl {
 
     private render() {
         this.renderPinnedTableFrames();
-        if (this.dimensionDragging) {
+        if (this.dimensionDragging || this.dimensionHoverTimer === undefined) {
             this.renderDimensionGuide();
+        }
+        if (this.dimensionDragging) {
             return;
         }
         this.renderRowBoundary();

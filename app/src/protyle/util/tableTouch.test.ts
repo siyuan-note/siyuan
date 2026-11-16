@@ -1395,6 +1395,8 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         pointer(cell, "pointermove", x, rect.bottom);
         const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
         check.ok(guide.classList.contains("fn__none"), "hover starts with an invisible guide");
+        f.render();
+        check.ok(guide.classList.contains("fn__none"), "rendering preserves the boundary hover delay");
         await delay();
         check.equal(guide.classList.contains("fn__none"), false, "hover reveals the guide after its delay");
         check.equal(getComputedStyle(guide).backgroundColor, "rgb(80, 120, 255)");
@@ -1409,6 +1411,59 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         check.ok(Math.abs(guide.getBoundingClientRect().left + 1 - rect.right) <= 1,
             "column hover identifies the actual column boundary");
         f.dispose();
+    }
+    for (const kind of ["row", "column"]) {
+        for (const fromControl of [false, true]) {
+            const f = fixture();
+            const cell = f.cell(0, 0);
+            const edit = document.createElement("div");
+            edit.contentEditable = "true";
+            edit.style.wordBreak = kind === "row" ? "break-all" : "normal";
+            edit.style.whiteSpace = kind === "row" ? "normal" : "nowrap";
+            const text = document.createTextNode("11111111");
+            edit.append(text);
+            cell.replaceChildren(edit);
+            f.table.style.tableLayout = kind === "row" ? "fixed" : "auto";
+            f.table.style.width = kind === "row" ? "270px" : "";
+            const initial = cell.getBoundingClientRect();
+            const x = kind === "row" ? initial.left + initial.width / 2 : initial.right;
+            const y = kind === "row" ? initial.bottom : initial.top + initial.height / 2;
+            pointer(cell, "pointermove", x, y);
+            if (fromControl) {
+                await frames(1);
+                const control = kind === "row" ? Reflect.get(f.core, "rowResizeHandle") : document.createElement("div");
+                if (kind === "column") {
+                    control.className = "table__resize";
+                    control.setAttribute("data-col-index", "0");
+                    f.table.parentElement.append(control);
+                }
+                check.equal(control.classList.contains("fn__none"), false, "the adjustment control is visible before hovering it");
+                pointer(control, "pointermove", x, y);
+            }
+            await delay();
+            const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+            check.equal(guide.classList.contains("fn__none"), false);
+            for (const value of ["1".repeat(kind === "row" ? 48 : 28), "11111111"]) {
+                text.data = value;
+                edit.dispatchEvent(new InputEvent("input", {bubbles: true,
+                    inputType: value.length > 8 ? "insertText" : "deleteContentBackward"}));
+                await frames(3);
+                const rect = cell.getBoundingClientRect();
+                if (value.length > 8) {
+                    check.ok(kind === "row" ? rect.height > initial.height : rect.width > initial.width,
+                        "typing changes the table's intrinsic row height or column width");
+                }
+                const coordinate = parseFloat(kind === "row" ? guide.style.top : guide.style.left);
+                check.ok(Math.abs(coordinate - (kind === "row" ? rect.bottom : rect.right)) <= 1,
+                    `${kind} boundary feedback follows typing and deletion without pointer movement (control=${fromControl})`);
+                if (kind === "row") {
+                    const handle = Reflect.get(f.core, "rowResizeHandle") as HTMLElement;
+                    check.ok(Math.abs(parseFloat(handle.style.top) - rect.bottom) <= 1,
+                        "the row resize handle follows automatic wrapping");
+                }
+            }
+            f.dispose();
+        }
     }
     for (const kind of ["row", "column"]) {
         for (const mindmap of [false, true]) {

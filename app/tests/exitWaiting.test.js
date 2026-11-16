@@ -165,19 +165,49 @@ if (process.versions.electron && process.type === "browser") {
                     document.body.dispatchEvent(key);
                     return {visible: bounds.width > 0 && bounds.left >= 0 && bounds.right <= innerWidth,
                         globalMask: maskBounds.left === 0 && maskBounds.top === 0 && maskBounds.width === innerWidth && maskBounds.height === innerHeight,
-                        backdrop: getComputedStyle(mask).backdropFilter,
                         overflow: status.scrollWidth > status.clientWidth, text: status.textContent,
                         endless: segment.animationName === "b3-progress-slide" && segment.animationIterationCount === "infinite",
                         noDialog: !document.querySelector(".b3-dialog__container"), inputBlocked: key.defaultPrevented};
                 })()`);
                 assert.equal(waiting.visible, true);
                 assert.equal(waiting.globalMask, true);
-                assert.match(waiting.backdrop, /blur\(8px\)/);
                 assert.equal(waiting.overflow, false);
                 assert.equal(waiting.endless, true);
                 assert.equal(waiting.noDialog, true);
                 assert.equal(waiting.inputBlocked, true);
                 assert.ok(waiting.text.includes(languages.exitWaiting));
+                const blur = await win.webContents.executeJavaScript(`(() => {
+                    const mask = document.querySelector("#exitProgress .b3-dialog__scrim");
+                    const animation = mask.getAnimations().find(item => item.animationName === "exit-progress-blur");
+                    if (!animation) throw new Error("Exit backdrop must gradually blur");
+                    animation.pause();
+                    const samples = [0, 2500, 5000].map(time => {
+                        animation.currentTime = time;
+                        return parseFloat(getComputedStyle(mask).backdropFilter.match(/blur\\(([^)]+)\\)/)[1]);
+                    });
+                    const duration = animation.effect.getTiming().duration;
+                    animation.finish();
+                    return {samples, duration};
+                })()`);
+                assert.equal(blur.duration, 5000);
+                assert.equal(blur.samples[0], 0);
+                assert.ok(blur.samples[1] > 0 && blur.samples[1] < 8);
+                assert.equal(blur.samples[2], 8);
+                for (const feature of ["prefers-reduced-motion", "prefers-reduced-transparency", "forced-colors"]) {
+                    await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                        features: [{name: feature, value: feature === "forced-colors" ? "active" : "reduce"}],
+                    });
+                    const fallback = await win.webContents.executeJavaScript(`(() => {
+                        const mask = document.querySelector("#exitProgress .b3-dialog__scrim");
+                        return {animation: getComputedStyle(mask).animationName, backdrop: getComputedStyle(mask).backdropFilter};
+                    })()`);
+                    assert.equal(fallback.animation, "none");
+                    if (feature === "prefers-reduced-motion") assert.match(fallback.backdrop, /blur\(8px\)/);
+                    else assert.equal(fallback.backdrop, "none");
+                }
+                await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                    features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+                });
                 const merged = await win.webContents.executeJavaScript(`(() => {
                     window.showExitMessage(window.siyuan.languages._kernel[95]);
                     window.showExitMessage(window.siyuan.languages._kernel[81]);
@@ -260,7 +290,7 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("exit immediately blurs with endless progress and boot resumes in light, dark and narrow layouts", {timeout: 60000}, async () => {
+    test("exit gradually blurs with accessible fallbacks and boot resumes in light, dark and narrow layouts", {timeout: 60000}, async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-exit-wait-test-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

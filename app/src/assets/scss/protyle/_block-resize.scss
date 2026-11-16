@@ -19,17 +19,20 @@
   }
 
   &[data-resize-axis="width"] {
+    --protyle-resize-side-height: max(0px, min(var(--protyle-resize-side-length), 50%, 100% - var(--protyle-resize-corner-size)));
+
+    // 矮块上的右侧把手止于右下角把手的上方。
     width: 12px;
-    height: min(var(--protyle-resize-side-length), 50%);
-    right: -12px;
-    top: 50%;
+    height: var(--protyle-resize-side-height);
+    right: 0;
+    top: min(50%, 100% - var(--protyle-resize-corner-size) - var(--protyle-resize-side-height) / 2);
     transform: translateY(-50%);
     cursor: ew-resize;
 
     &::after {
       width: 3px;
       height: min(24px, 100%);
-      left: 4px;
+      right: 2px;
       top: 50%;
       transform: translateY(-50%);
       border-radius: 2px;
@@ -106,7 +109,6 @@
 
     &[data-resize-axis="width"] {
       width: 20px;
-      right: -20px;
     }
   }
 }

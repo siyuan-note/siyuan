@@ -716,20 +716,6 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
 
         > .protyle-block-resize {
           pointer-events: auto;
-
-          &[data-resize-axis="width"] {
-            --protyle-image-resize-side-height: min(var(--protyle-resize-side-length), 50%, 100% - var(--protyle-resize-corner-size));
-
-            // 矮图上右侧把手止于右下角把手的上方。
-            height: var(--protyle-image-resize-side-height);
-            right: 0;
-            top: min(50%, 100% - var(--protyle-resize-corner-size) - var(--protyle-image-resize-side-height) / 2);
-          }
-
-          &[data-resize-axis="width"]::after {
-            left: auto;
-            right: 2px;
-          }
         }
       }
 
@@ -1029,36 +1015,36 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
 }
 
 @media screen {
+  :where(.protyle-wysiwyg[data-readonly="false"] [data-type="NodeVideo"]:not(.mindmap-view__preview-block)) > .protyle-video-resize {
+    --protyle-video-resize-gutter: 12px;
+
+    // 缩放把手放在带衬底的边框内，避开原生控件延伸至视频底边的命中区域。
+    padding-right: var(--protyle-video-resize-gutter);
+    box-sizing: border-box;
+    background-color: var(--b3-theme-surface);
+    border-radius: var(--b3-border-radius);
+    box-shadow: 0 0 0 1px var(--b3-border-color);
+  }
+
   :where(.protyle-wysiwyg [data-type="NodeVideo"]) > .iframe-content > .protyle-block-resize[data-resize-axis="height"] {
     // 由高度把手撑开视频下方的操作区，避免盖住播放器控件。
     display: block;
     position: relative;
-    left: auto;
+    left: calc(var(--protyle-video-resize-gutter, 0px) / 2);
     margin-inline: auto;
     transform: none;
   }
 
   .protyle-wysiwyg [data-type="NodeVideo"] > .iframe-content > .protyle-block-resize {
-    &[data-resize-axis="width"] {
-      top: calc((100% - var(--protyle-resize-bottom-height)) / 2);
-    }
-
-    &[data-resize-axis="height"]::after {
-      top: 1px;
-      bottom: auto;
-    }
-
     &[data-resize-axis="both"] {
       height: var(--protyle-resize-bottom-height);
-
-      // 圆角沿播放器边缘绘制，命中区域在原生控件下方。
-      &::after {
-        top: -6px;
-        right: 0;
-        bottom: auto;
-        height: 10px;
-      }
     }
+  }
+}
+
+@media (any-pointer: coarse) {
+  :where(.protyle-wysiwyg[data-readonly="false"] [data-type="NodeVideo"]:not(.mindmap-view__preview-block)) > .protyle-video-resize {
+    --protyle-video-resize-gutter: 20px;
   }
 }
 
@@ -1070,6 +1056,12 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
 
 .protyle-wysiwyg [data-subtype="mermaid"]:hover > .protyle-block-resize {
   opacity: 1;
+}
+
+.protyle-wysiwyg [data-subtype="mermaid"] > .protyle-block-resize {
+  --protyle-resize-side-height: min(var(--protyle-resize-side-length), 50%);
+
+  top: 50%;
 }
 
 .protyle-wysiwyg[data-readonly="true"] .protyle-image-resize,

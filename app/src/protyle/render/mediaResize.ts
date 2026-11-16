@@ -13,6 +13,9 @@ export const renderMediaResize = (root: Element) => {
         if (!content?.querySelector(block.dataset.type === "NodeVideo" ? ":scope > video" : ":scope > iframe")) {
             return;
         }
+        if (block.dataset.type === "NodeVideo") {
+            content.classList.add("protyle-video-resize");
+        }
         for (const axis of ["both", "width", "height"]) {
             let handle = content.querySelector<HTMLElement>(`.protyle-action__drag[data-resize-axis="${axis}"]`);
             if (!handle && axis === "both") {

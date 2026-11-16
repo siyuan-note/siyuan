@@ -21,7 +21,7 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     style.textContent = css + `
         :root { --b3-theme-on-surface-light: #888; --b3-theme-on-surface: #555;
             --b3-theme-primary: #4285f4; --b3-border-color: #ddd; --b3-border-radius: 6px;
-            --b3-theme-background: #fff; --b3-theme-on-background: #222; }
+            --b3-theme-background: #fff; --b3-theme-on-background: #222; --b3-theme-surface: #f5f5f5; }
         body { margin: 0; padding: 24px; }
         .protyle-wysiwyg { font-size: 24px; }
     `;
@@ -403,7 +403,7 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
             const frame = block.querySelector("iframe").getBoundingClientRect();
             check.equal(handle.getAttribute("data-prevent-swipe"), "true");
             if (axis === "width") {
-                check.ok(rect.right > frame.right, `${axis} hit region extends beyond the right edge`);
+                check.ok(rect.right <= frame.right && rect.left >= frame.left, `${axis} hit region stays inside the right edge`);
             }
             if (axis !== "width") {
                 check.ok(rect.bottom <= frame.bottom, `${axis} hit region ends at the bottom edge`);
@@ -416,6 +416,17 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
             check.ok(parseFloat(decoration.height) <= 24);
         }
         await assertCaretBelow(block, block.querySelector(".iframe-content"));
+        block.style.width = "96px";
+        block.style.height = "48px";
+        const side = block.querySelector('[data-resize-axis="width"]').getBoundingClientRect();
+        const cornerRect = corner.getBoundingClientRect();
+        check.ok(side.height > 0 && side.bottom <= cornerRect.top,
+            `${type} keeps both inboard handles reachable on short blocks`);
+        for (const axis of ["width", "height", "both"]) {
+            const handle = block.querySelector(`[data-resize-axis="${axis}"]`);
+            const rect = handle.getBoundingClientRect();
+            check.equal(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2), handle);
+        }
         for (const legacy of [false, true]) {
             for (const axis of ["width", "height", "both"]) {
                 const current = create(type, legacy);
@@ -513,19 +524,30 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
                 const handle = video.querySelector<HTMLElement>(`[data-resize-axis="${axis}"]`);
                 const rect = handle.getBoundingClientRect();
                 const videoRect = videoContent.getBoundingClientRect();
+                const frameRect = videoContent.parentElement.getBoundingClientRect();
                 if (axis === "width") {
-                    check.ok(rect.left >= videoRect.right, "the right handle sits beside the player");
+                    check.ok(rect.left >= videoRect.right && rect.right <= frameRect.right,
+                        "the right handle stays inside the resize frame and outside native controls");
                 } else {
                     check.ok(rect.top >= videoRect.bottom && rect.height > 0, "the bottom handles sit below the native player");
                     check.equal(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2), handle);
-                    const x = rect.left + rect.width / 2;
+                    const x = Math.min(rect.left + rect.width / 2, videoRect.right - 2);
                     check.equal(document.elementFromPoint(x, videoRect.bottom - 2), videoContent, "the native control bar can receive input");
                 }
                 if (axis === "both" && mode === "mouse") {
                     await assertCaretBelow(video, video.querySelector(".iframe-content"));
                     root.dataset.readonly = "true";
                     check.equal(getComputedStyle(video.querySelector('[data-resize-axis="height"]')).display, "none");
+                    check.equal(getComputedStyle(videoContent.parentElement).paddingRight, "0px",
+                        "read-only playback does not reserve the editing frame");
                     root.dataset.readonly = "false";
+                    const preview = video.cloneNode(true) as HTMLElement;
+                    preview.classList.add("mindmap-view__preview-block");
+                    root.appendChild(preview);
+                    render(preview);
+                    check.equal(getComputedStyle(preview.querySelector(".iframe-content")).paddingRight, "0px",
+                        "a cloned mind map preview does not reserve the video editing frame");
+                    preview.remove();
                 }
                 updates.length = 0;
                 const before = video.outerHTML;
@@ -621,6 +643,7 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     check.equal(getComputedStyle(host.firstElementChild).overflow, "hidden");
     for (const handle of host.querySelectorAll<HTMLElement>(".mindmap-view__resize")) {
         const rect = handle.getBoundingClientRect();
+        check.ok(rect.right <= host.getBoundingClientRect().right, "mind map handles stay inside their frame");
         check.equal(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2), handle,
             JSON.stringify({axis: handle.dataset.resizeAxis, rect: rect.toJSON(), root: root.getBoundingClientRect().toJSON(), viewport: innerWidth}));
         const decoration = getComputedStyle(handle, "::after");
@@ -756,16 +779,18 @@ const visibilityCases = async (move: (x: number, y: number) => Promise<void>, ta
                 rects[index].top + parseFloat(decorations[index].top) + parseFloat(decorations[index].height) :
                 rects[index].bottom - parseFloat(decorations[index].bottom);
             const check = require("node:assert/strict");
-            check.ok(rects[2].right <= rects[0].left + 1, "the corner stays inside the right edge");
+            check.ok(rects[2].right <= rects[0].right + 1, "both handles stay inside the right edge");
+            check.ok(rects[0].bottom <= rects[2].top, "the inboard side handle leaves the corner reachable");
             check.ok(Math.abs(decorationBottom(2) - decorationBottom(1)) <= 1,
                 "corner aligns with the bottom handle");
             const video = block.querySelector("video");
             if (video) {
                 const edge = video.getBoundingClientRect();
-                check.ok(decorationBottom(1) - edge.bottom <= 5, "resize markings hug the video edge");
-                check.ok(rects[2].top + parseFloat(decorations[2].top) < edge.bottom,
-                    "the corner marking continues the video edge");
-                check.equal(parseFloat(decorations[2].right), 0);
+                const frame = video.parentElement.getBoundingClientRect();
+                check.ok(decorationBottom(1) > edge.bottom && decorationBottom(1) < frame.bottom,
+                    "bottom markings sit inside the contrasting frame");
+                check.notEqual(getComputedStyle(video.parentElement).backgroundColor, "rgba(0, 0, 0, 0)");
+                check.equal(parseFloat(decorations[2].right), 2);
                 check.equal(decorations[2].pointerEvents, "none", "the corner marking lets clicks reach the video");
             }
         })()`);
@@ -781,7 +806,7 @@ const visibilityCases = async (move: (x: number, y: number) => Promise<void>, ta
     }
 };
 
-test("external resize handles preserve source, axes, historical dimensions and narrow container bounds", {
+test("media and mind map resize handles preserve source, axes, historical dimensions and narrow container bounds", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 90000,
 }, async () => {

@@ -36,7 +36,7 @@
   height: var(--mindmap-view-height, 460px);
   min-height: min(260px, var(--mindmap-view-height, 260px));
   box-sizing: border-box;
-  // 画布由内部视口裁剪，外侧尺寸把手保持可见。
+  // 画布由内部视口裁剪，边缘尺寸把手保持可见。
   overflow: visible;
   border: 1px solid var(--b3-border-color);
   border-radius: var(--b3-border-radius);

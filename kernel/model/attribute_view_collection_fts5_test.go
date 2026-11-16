@@ -42,7 +42,25 @@ func setupBlockCollectionTest(t *testing.T) (*fileOperationTestFixture, *av.Attr
 	if err := av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)
 	}
+	addCollectionDatabaseBlock(t, view, fixture.sourceID)
 	return fixture, view, keyID
+}
+
+func addCollectionDatabaseBlock(t *testing.T, view *av.AttributeView, documentID string) string {
+	t.Helper()
+	tree, err := LoadTreeByBlockID(documentID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	node := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeAttributeView, AttributeViewID: view.ID, AttributeViewType: "table"}
+	node.SetIALAttr("id", node.ID)
+	tree.Root.AppendChild(node)
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	av.UpsertBlockRel(view.ID, node.ID)
+	return node.ID
 }
 
 func blockCollectionTags(t *testing.T, id, tags string) *Transaction {

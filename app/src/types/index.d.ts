@@ -1273,6 +1273,7 @@ interface IAVView {
     hideAttrViewName?: boolean;
     pageSize?: number;
     showIcon?: boolean;
+    showRelationIcon?: boolean;
     wrapField?: boolean;
     groupHidden?: number,  // 0：显示，1：空白隐藏，2：手动隐藏
     groupFolded?: boolean,
@@ -1532,6 +1533,8 @@ interface IAVCellValue {
     mAsset?: IAVCellAssetValue[]
     block?: {
         content: string,
+        rich?: {spec: 1, format: "inline-ast" | "kramdown", content: string} | null,
+        richBlockDOM?: string,
         id?: string,
         /** 游离条目可独立设置图标；绑定条目与目标块共享图标，无图标的普通块在绑定时继承条目图标。 */
         icon?: string,

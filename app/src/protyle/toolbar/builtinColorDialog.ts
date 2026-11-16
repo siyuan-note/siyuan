@@ -376,12 +376,10 @@ export const bindBuiltinEditor = (panel: HTMLElement, type: TBuiltinColorType,
         properties.forEach(property => {
             const enabled = !!overrideElements.get(property)?.checked;
             anyEnabled = anyEnabled || enabled;
+            themeColorEditor.setEnabled(property, enabled);
             panel.querySelectorAll<HTMLElement>(`[data-type="themeColorEditor"] [data-property="${property}"]`)
                 .forEach(item => {
                     item.classList.toggle("fn__none", !enabled);
-                    item.querySelectorAll<HTMLInputElement>("input[type=\"color\"]").forEach(input => {
-                        input.disabled = !enabled;
-                    });
                 });
         });
         const themeEditorElement = panel.querySelector('[data-type="themeColorEditor"]') as HTMLElement;
@@ -406,8 +404,9 @@ export const bindBuiltinEditor = (panel: HTMLElement, type: TBuiltinColorType,
     };
 
     const commit = (base: IBuiltinColorDialogEntry) => {
+        const value = themeColorEditor.commitDraft(getEditorType(type));
+        if (!value) { return; }
         const entry = readEntry(base);
-        const value = themeColorEditor.getValue(getEditorType(type));
         properties.forEach(property => {
             entry.override[property] = !!overrideElements.get(property)?.checked;
             entry.value.light[property] = value.light[property] || entry.value.light[property];

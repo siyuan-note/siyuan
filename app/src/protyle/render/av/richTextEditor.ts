@@ -17,8 +17,9 @@ import {getAVHostBlockID, getAVHostIdentity} from "./host";
 import {AV_CELL_EDITOR_CLOSE_EVENT} from "./cellEditor";
 import {updateOutlineCurrentBlock} from "../../util/outlineBlock";
 import {focusBlock} from "../../util/selection";
-import {isAVContinuousInputKey} from "./continuousInput";
 import {configureAVRichTextEditorLute, createAVRichTextEditorLute} from "./richTextEditorLute";
+import {createAVPrimaryEditValue, getAVPrimaryInitialDOM} from "./primaryRich";
+import {renderImageDisplay} from "../imageDisplay";
 import {
     createAVRichTextValue,
     getAVRichTextBlockDOM,
@@ -65,7 +66,7 @@ interface AVRichTextEditorOptions {
     onSave: (value: IAVCellValue, nodeElement: HTMLElement,
              stableCells: import("./selectionState").IAVSelectedCell[]) => void | Promise<void>;
     onDestroy?: () => void;
-    prepareNextInput?: (anchorElement: HTMLElement) => (() => void) | undefined;
+    prepareNextInput?: (anchorElement: HTMLElement, rangeOnly?: boolean) => (() => void) | undefined;
 }
 
 interface ActiveEditor {
@@ -105,6 +106,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     void activeEditor?.finish(false);
 
     const mobile = isMobile();
+    const primary = options.value.type === "block";
     let cleanup = () => {};
     const content = `<div class="av__richtext-editor${mobile ? " av__richtext-editor--sheet" : ""}"${mobile ? "" : ' role="dialog"'}>
     <div class="av__richtext-host"></div>
@@ -112,7 +114,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         <button type="button" class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button>
     </div>` : ""}`;
     const dialog = mobile ? new MobileDialog({
-        title: window.siyuan.languages.text,
+        title: primary ? window.siyuan.languages._attrView.key : window.siyuan.languages.text,
         content,
         containerClassName: "mobile-av-richtext-sheet",
         mobileSheet: {beforeClose: () => saveMobile()},
@@ -144,8 +146,8 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             {key: "/", hint: hintAVSlash}, {key: "、", hint: hintAVSlash}],
     };
     const fragment = mountProtyleLiteFragment(hostElement, {
-        initialBlockHTML: source.kind === "rich" ? getAVRichTextBlockDOM(source.content) : undefined,
-        initialPlainText: source.kind === "plain" ? source.content : undefined,
+        initialBlockHTML: primary ? getAVPrimaryInitialDOM(options.value) : source.kind === "rich" ? getAVRichTextBlockDOM(source.content) : undefined,
+        initialPlainText: !primary && source.kind === "plain" ? source.content : undefined,
         placeholder: window.siyuan.languages.empty,
         protyleOptions: {
             notebookId: options.protyle.notebookId ||
@@ -154,19 +156,21 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             hint,
         },
         runtimeCapabilities: {
-            upload: false,
+            upload: primary,
             websocket: false,
             lute: createAVRichTextEditorLute(),
             lockedOptions: {toolbar, hint},
             pluginExtensions: false,
             customBlockRender: false,
-            sanitizeBlockDOM: sanitizeAVRichTextBlockDOM,
-            getUnsupportedPasteBlocks: getAVRichTextUnsupportedPasteBlocks,
+            sanitizeBlockDOM: blockDOM => sanitizeAVRichTextBlockDOM(blockDOM, primary),
+            getUnsupportedPasteBlocks: blockDOM => getAVRichTextUnsupportedPasteBlocks(blockDOM, primary),
+            richHTMLPaste: primary,
             restoreLuteMarkdownSyntax: configureAVRichTextEditorLute,
         },
         afterSetContent: (protyle, element) => {
             mathRender(element);
             highlightRender(element);
+            if (primary) { renderImageDisplay(element); }
             protyle.undo.clear();
         },
     });
@@ -175,7 +179,8 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     fragment.protyle.block.parentID = getAVHostBlockID(options.nodeElement);
     fragment.protyle.path = options.protyle.path;
     setPanelPosition(panelElement, options.anchorElement);
-    const initialMarkdown = serializeAVRichTextBlockDOM(fragment.getBlockHTML()).markdown;
+    const fingerprint = () => serializeAVRichTextBlockDOM(fragment.getBlockHTML(), undefined, primary).markdown;
+    const initialMarkdown = fingerprint();
 
     let finished = false;
     let finishing = false;
@@ -186,13 +191,21 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         if (!ownerElement.isConnected || !options.nodeElement.isConnected) {
             return false;
         }
+        if (primary) {
+            const data = getAVData(options.nodeElement);
+            if (data && options.stableCells.some(cell => {
+                const current = resolveAVSelectedCell(data, cell)?.cell.value;
+                return !current || current.type !== "block" || current.isDetached !== options.value.isDetached ||
+                    current.block?.id !== options.value.block?.id;
+            })) { return false; }
+        }
         if (options.anchorElement.isConnected) {
             return true;
         }
         // 行重渲染后按稳定标识确认编辑目标，避免其他单元格的事务丢弃尚未保存的输入。
         const data = getAVData(options.nodeElement);
         return data && options.stableCells.length > 0 && options.stableCells.every(cell =>
-            resolveAVSelectedCell(data, cell)?.column.type === "text");
+            resolveAVSelectedCell(data, cell)?.column.type === (primary ? "block" : "text"));
     };
     const resize = () => {
         if (!options.anchorElement.isConnected) {
@@ -238,9 +251,14 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     const saveContent = async () => {
         await fragment.protyle.wysiwyg.flushPendingInput();
         if (cancelled || !isOwnerConnected()) return;
-        const serialized = serializeAVRichTextBlockDOM(fragment.getBlockHTML());
-        if (serialized.markdown !== initialMarkdown) {
-            await options.onSave(createAVRichTextValue(serialized.markdown, serialized.plainText, options.value),
+        if (fingerprint() !== initialMarkdown) {
+            if (options.protyle.disabled || window.siyuan.config.readonly || window.siyuan.isPublish ||
+                options.protyle.options.history?.created || options.protyle.options.history?.snapshot) {
+                throw new Error(window.siyuan.languages.readonly);
+            }
+            const serialized = primary ? undefined : serializeAVRichTextBlockDOM(fragment.getBlockHTML());
+            await options.onSave(primary ? createAVPrimaryEditValue(fragment.getBlockHTML(), options.value) :
+                createAVRichTextValue(serialized.markdown, serialized.plainText, options.value),
                 options.nodeElement, options.stableCells);
         }
     };
@@ -308,13 +326,14 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         }
     });
     if (mobile) {
-        maskElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () => void finish(true));
+        maskElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () =>
+            void finish(true, true, options.prepareNextInput?.(options.anchorElement, true)));
     }
-    const continueInput = (event: Event, repeat = false) => {
-        if (fragment.hintElement.classList.contains("fn__none") &&
+    const continueInput = (event: Event, repeat = false, rangeOnly = false) => {
+        if (fragment.wysiwyg.contains(event.target as Node) && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
-            const next = options.prepareNextInput?.(options.anchorElement);
+            const next = options.prepareNextInput?.(options.anchorElement, rangeOnly);
             if (next) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -324,13 +343,9 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         }
         return false;
     };
-    panelElement.addEventListener("beforeinput", (event: InputEvent) => {
-        if (mobile && event.cancelable && !event.isComposing && event.inputType === "insertParagraph") {
-            continueInput(event);
-        }
-    }, true);
     panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (isAVContinuousInputKey(event, true) && continueInput(event, event.repeat)) return;
+        if (event.key === "Enter" && (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey &&
+            !event.isComposing && event.keyCode !== 229 && continueInput(event, event.repeat, true)) return;
         if (event.key === "Escape" && fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.element.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {

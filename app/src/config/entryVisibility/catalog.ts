@@ -912,6 +912,11 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("enable", lang("enable"), false),
                 node("disable", lang("disable"), false),
             ]),
+            node("docOpenPosition", lang("docOpenPosition"), true, [
+                node("default", lang("default")),
+                node("restore", lang("restoreDocPosition")),
+                node("start", lang("docOpenAtStart")),
+            ]),
             node("fullWidth", lang("fullWidth"), false, [
                 node("enable", lang("enable"), false),
                 node("disable", lang("disable"), false),

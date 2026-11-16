@@ -61,7 +61,8 @@ export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement,
             return;
         }
         const offset = touch.clientY - start.y;
-        if (Math.abs(touch.clientX - start.x) > Math.abs(offset)) {
+        if (!dragging && Math.max(Math.abs(touch.clientX - start.x), Math.abs(offset)) < 4) return;
+        if (!dragging && Math.abs(touch.clientX - start.x) > Math.abs(offset)) {
             onCancel();
             return;
         }
@@ -78,7 +79,7 @@ export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement,
         const excess = result ? result.excess : Math.max(0, offset);
         element.style.transform = `translateY(${excess}px)`;
         scrim.style.opacity = Math.max(0, (options.scrimOpacity ?? 1) *
-            (1 - excess / Math.max(element.clientHeight, 1))).toString();
+            (1 - excess / Math.max(result ? result.height : element.clientHeight, 1))).toString();
         if (event.cancelable) event.preventDefault();
     };
     const onEnd = (event: TouchEvent) => {

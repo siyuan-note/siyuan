@@ -58,6 +58,9 @@ func TestTreeWritesValidateCurrentSourceBehindCache(t *testing.T) {
 					t.Fatal(err)
 				}
 				abs := writeStalePathFixture(t, box, p, disk)
+				if _, _, snapshotErr := LoadTreeSnapshot(box, p, util.NewLute()); !errors.Is(snapshotErr, source.err) {
+					t.Fatalf("snapshot accepted unsupported source: %v", snapshotErr)
+				}
 				if _, err = WriteTree(tree); !errors.Is(err, source.err) {
 					t.Fatalf("stale tree overwrote unsupported source: %v", err)
 				}

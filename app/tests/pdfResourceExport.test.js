@@ -59,3 +59,49 @@ for (const removeAssets of [false, true]) {
         }
     });
 }
+
+for (const stage of ["footer", "printing", "processing"]) {
+    test(`PDF ${stage} exceptions report export failure and preserve the destination`, async () => {
+        const directory = mkdtempSync(path.join(os.tmpdir(), "siyuan-pdf-failure-"));
+        const filePath = path.join(directory, "note.pdf");
+        writeFileSync(filePath, "ORIGINAL");
+        const error = new Error(`${stage} failed`);
+        const messages = [];
+        const errors = [];
+        const commands = [];
+        let handler;
+        global.window = {siyuan: {storage: {}, config: {export: {pdfFooter: stage === "footer" ? "invalid" : ""}},
+            languages: {_kernel: {290: "Export failed"}}}};
+        try {
+            const register = new Function("ipcRenderer", "Constants", "getHostCapabilities", "setLastExportPath",
+                "showMessage", "setStorageVal", "fetchSyncPost", "path", "savePDF", "afterExport", "console", compiled);
+            register({on: (_name, callback) => handler = callback,
+                invoke: async () => {
+                    if (stage === "printing") throw error;
+                    return Buffer.from("PDF");
+                }, send: (_channel, command) => commands.push(command)},
+            {SIYUAN_EXPORT_PDF: "pdf", SIYUAN_GET: "get", SIYUAN_CMD: "cmd", LOCAL_EXPORTPDF: "pdf"},
+            () => ({importExport: true}), () => {},
+            (message, duration, type) => { messages.push({message, duration, type}); return "export-msg"; },
+            () => {}, async (url) => {
+                if (stage === "footer") {
+                    assert.equal(url, "/api/template/renderSprig");
+                    return {code: -1, msg: error.message};
+                }
+                assert.equal(url, "/api/export/processPDF");
+                throw error;
+            }, path, savePDF, () => assert.fail("Failed exports must not report success"),
+            {error: e => errors.push(e)});
+            await handler(undefined, {filePath, rootId: "root", pdfOptions: {margins: {}}, webContentsId: 7});
+            assert.deepEqual(messages.at(-1), {message: "Export failed", duration: 0, type: "error"});
+            assert.equal(errors.length, 1);
+            assert.equal(errors[0].message, error.message);
+            assert.ok(commands.some(command => command.cmd === "destroy" && command.webContentsId === 7));
+            assert.equal(readFileSync(filePath, "utf8"), "ORIGINAL");
+            assert.deepEqual(readdirSync(directory), ["note.pdf"]);
+        } finally {
+            delete global.window;
+            rmSync(directory, {recursive: true, force: true});
+        }
+    });
+}

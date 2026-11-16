@@ -9,7 +9,7 @@ const source = transpileModule(readFileSync("src/mobile/util/mobileSheetLayout.t
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const setup = () => {
+const setup = (options: {fitContent?: boolean} = {}) => {
     const listeners = new Map<string, Set<() => void>>();
     const target = (prefix: string) => ({
         addEventListener: (name: string, callback: () => void) => {
@@ -52,13 +52,32 @@ const setup = () => {
             isMobileLandscape: () => window.screen.orientation.type.startsWith("landscape")}),
     });
     let notifications = 0;
-    const layout = exports.bindMobileSheetLayout(overlay, sheet, {onResize: () => notifications++});
+    const layout = exports.bindMobileSheetLayout(overlay, sheet, {...options, onResize: () => notifications++});
     return {window, viewport, toolbar, overlay, sheet, layout, exports,
         emit: (name: string) => listeners.get(name)?.forEach(callback => callback()),
         resizeToolbar: () => observer(), notifications: () => notifications,
         listening: () => Array.from(listeners.values()).reduce((total, callbacks) => total + callbacks.size, 0),
         observed: () => connected};
 };
+
+test("content-independent sheets keep their standard height through content and viewport changes", () => {
+    const s = setup({fitContent: false});
+    const height = s.sheet.getBoundingClientRect().height;
+    assert.ok(height > s.sheet.contentHeight);
+    s.sheet.contentHeight = 80;
+    s.layout.resize();
+    assert.equal(s.sheet.getBoundingClientRect().height, height);
+    s.layout.setPreferredHeight(600);
+    s.layout.resize();
+    assert.equal(s.sheet.getBoundingClientRect().height, 600);
+    s.viewport.bottom = 300;
+    s.layout.resize();
+    assert.ok(s.sheet.getBoundingClientRect().height <= 300);
+    s.viewport.bottom = 800;
+    s.layout.resize();
+    assert.equal(s.sheet.getBoundingClientRect().height, 600);
+    s.layout.dispose();
+});
 
 test("standard sheets use natural content height below a shared full-viewport upper limit", () => {
     const s = setup();
@@ -255,4 +274,19 @@ test("visual viewport constraints activate compact chrome even when layout viewp
     s.viewport.bottom = 800;
     s.emit("visual:resize");
     assert.equal(s.sheet.classList.contains("mobile-sheet-panel--compact"), false);
+});
+
+test("drag height updates reuse measured bounds until geometry changes", () => {
+    const s = setup();
+    let scans = 0;
+    s.sheet.querySelectorAll = () => { scans++; return []; };
+    s.layout.getBounds();
+    assert.equal(scans, 1);
+    for (let height = 300; height < 400; height++) s.layout.setPreferredHeight(height);
+    assert.equal(scans, 1);
+    assert.equal(s.sheet.style.height, "399px");
+    s.layout.resize();
+    assert.equal(scans, 2);
+    s.layout.setPreferredHeight(350);
+    assert.equal(scans, 2);
 });

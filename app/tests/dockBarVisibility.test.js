@@ -5,8 +5,9 @@ const os = require("node:os");
 const {test} = require("node:test");
 const {ModuleKind, ScriptTarget, transpileModule} = require("typescript");
 const sass = require("sass");
+const settleDockAnimations = require("./helpers/settleDockAnimations");
 
-const browserCases = async (sources, css, template, animationOnly = false) => {
+const browserCases = async (sources, css, template, animationOnly, settle) => {
     const check = require("node:assert/strict");
     const load = (name, dependencies = {}) => {
         const exports = {};
@@ -68,15 +69,6 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
         docks[position] = window.siyuan.layout[position.toLowerCase() + "Dock"] =
             new Dock({app: {plugins: []}, data: {pin: false, data: []}, position});
     }
-    const settle = async () => {
-        await new Promise(resolve => setTimeout(resolve, 350));
-        // 悬停计时器触发后，等待实际过渡完成，避免繁忙的 CI 在动画收尾前读取显隐状态。
-        const deadline = performance.now() + 5000;
-        while (document.getAnimations().some(animation => animation.pending || animation.playState === "running")) {
-            check.ok(performance.now() < deadline, "dock animations settle within five seconds");
-            await new Promise(resolve => setTimeout(resolve, 20));
-        }
-    };
     await settle();
     for (const position of ["Left", "Right", "Bottom"]) {
         const dock = docks[position];
@@ -127,15 +119,31 @@ const browserCases = async (sources, css, template, animationOnly = false) => {
             dock.hideDock();
             await settle();
             const checkAttached = (message, checkOpacity = true) => {
-                const panelRect = panel.getBoundingClientRect();
-                const barRect = element.getBoundingClientRect();
-                const gap = position === "Left" ? panelRect.left - barRect.right : barRect.left - panelRect.right;
-                check.ok(Math.abs(gap) < 2, `${position} ${message}: gap=${gap}`);
-                if (checkOpacity) {
-                    check.ok(Math.abs(Number(getComputedStyle(panel).opacity) - Number(getComputedStyle(element).opacity)) < .02,
-                        `${position} ${message}: opacity follows the panel`);
+                const sampleTime = document.timeline.currentTime;
+                const animations = [...panel.getAnimations(), ...element.getAnimations()]
+                    .filter(animation => animation.playState === "running" && typeof animation.startTime === "number")
+                    .map(animation => ({animation, startTime: animation.startTime}));
+                try {
+                    // 合成器可在两次几何读取之间推进动画，按同一时间点采样并保留各自的起始时间差。
+                    animations.forEach(({animation, startTime}) => {
+                        animation.pause();
+                        animation.currentTime = (sampleTime - startTime) * animation.playbackRate;
+                    });
+                    const panelRect = panel.getBoundingClientRect();
+                    const barRect = element.getBoundingClientRect();
+                    const gap = position === "Left" ? panelRect.left - barRect.right : barRect.left - panelRect.right;
+                    check.ok(Math.abs(gap) < 2, `${position} ${message}: gap=${gap}`);
+                    if (checkOpacity) {
+                        check.ok(Math.abs(Number(getComputedStyle(panel).opacity) - Number(getComputedStyle(element).opacity)) < .02,
+                            `${position} ${message}: opacity follows the panel`);
+                    }
+                    check.deepEqual(rect(center.element), initialEditor, "custom animations do not resize the editor");
+                } finally {
+                    animations.forEach(({animation, startTime}) => {
+                        animation.play();
+                        animation.startTime = startTime;
+                    });
                 }
-                check.deepEqual(rect(center.element), initialEditor, "custom animations do not resize the editor");
             };
             const finish = async () => {
                 await Promise.all([...panel.getAnimations(), ...element.getAnimations()].map(animation => animation.finished));
@@ -596,7 +604,7 @@ if (process.versions.electron && process.type === "browser") {
                         await win.loadURL(`data:text/html,<html><body class='fn__flex-column${hideToolbar ? " body--toolbar-hide" : ""}'></body></html>`);
                         const result = await win.webContents.executeJavaScript(`(${browserCases.toString()})(${[
                             sources, css, html, animationOnly,
-                        ].map(value => JSON.stringify(value)).join(",")})`);
+                        ].map(value => JSON.stringify(value)).join(",")}, ${settleDockAnimations.toString()})`);
                         assert.equal(result, "Floating dock bar cases passed", captureName);
                     }
                 }

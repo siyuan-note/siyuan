@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20261109130054"
+		"updated": "20261111211629"
 	},
 	"Children": [
 		{
@@ -114,6 +114,80 @@
 				{
 					"Type": "NodeText",
 					"Data": "All clients connected to this workspace must finish saving before the reset; if saving fails, the reset is cancelled. The clients then reload. When started from the local desktop app, the app exits after reloading; restart it to continue. Mobile and browser clients only reload."
+				}
+			]
+		},
+		{
+			"ID": "20261111211629-575ebd9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261111211629-575ebd9",
+				"updated": "20261111211629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How do I export the system log?"
+				}
+			]
+		},
+		{
+			"ID": "20261111211629-5f194ba",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111211629-5f194ba",
+				"updated": "20261111211629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the abnormal state dialog, click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Export system log"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the lower left to save a ZIP file. You can also export the log from "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "App"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Maintenance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "System log"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

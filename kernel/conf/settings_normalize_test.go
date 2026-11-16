@@ -109,6 +109,26 @@ func TestNormalizeSettingsCloseWindowOnLastTab(t *testing.T) {
 	}
 }
 
+func TestNormalizeSettingsRestoreDocPosition(t *testing.T) {
+	for _, input := range []string{`{}`, `{"restoreDocPosition":null}`, `{"restoreDocPosition":true}`, `{"restoreDocPosition":false}`} {
+		var fileTree FileTree
+		if err := json.Unmarshal([]byte(input), &fileTree); err != nil {
+			t.Fatal(err)
+		}
+		got := NormalizeFileTree(&fileTree)
+		want := !strings.Contains(input, "false")
+		if got.RestoreDocPosition == nil || *got.RestoreDocPosition != want {
+			t.Fatalf("%s: unexpected document position preference: %+v", input, got)
+		}
+		if *NormalizeFileTree(got).RestoreDocPosition != want {
+			t.Fatal("normalization changed the saved preference")
+		}
+	}
+	if !*NewFileTree().RestoreDocPosition || !*NormalizeFileTree(nil).RestoreDocPosition {
+		t.Fatal("new and missing settings must enable document position restoration")
+	}
+}
+
 func TestNormalizeSettingsFlashcard(t *testing.T) {
 	for _, entry := range []struct{ input, want int }{{-1, 0}, {0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 0}} {
 		flashcard := NewFlashcard()

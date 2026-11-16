@@ -81,6 +81,10 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.selectOpen,
         desc: window.siyuan.languages.fileTree2,
     });
+    group.switch("fileTree.restoreDocPosition", {
+        title: window.siyuan.languages.restoreDocPosition,
+        desc: window.siyuan.languages.restoreDocPositionTip,
+    });
 };
 
 const registerTabStartupGroup = (tab: SettingTabBuilder) => {

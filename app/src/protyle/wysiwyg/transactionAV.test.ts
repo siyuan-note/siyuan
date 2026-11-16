@@ -4,9 +4,11 @@ import {ScriptTarget} from "typescript";
 import {loadModule} from "../../testSupport/loadModule";
 import {queueTransaction, queueTransactionBatch, waitForPendingTransactions} from "../util/transactionQueue";
 import {getEditorTransaction} from "../util/transactionContract";
+import type {Transaction} from "../../types/api";
 
 const fixture = () => {
     const rendered: Element[] = [];
+    const refreshed: IOperation[] = [];
     const carriers = [
         {isConnected: true, closest: (): Element => null, getAttribute: (name: string) => name === "data-av-type" ? "table" : "NodeAttributeView"},
         {isConnected: true, closest: (): Element => null, getAttribute: (name: string) => name === "data-av-type" ? "table" : "NodeAttributeView"},
@@ -16,6 +18,10 @@ const fixture = () => {
     const undo: IOperation[][] = [];
     const requests: {transactions: {collectionRemovalSourceVersions?: Record<string, string>}[]}[] = [];
     const dependencies = {
+        shouldReloadForEmbedConversion: () => false,
+        shouldReloadForHeadingBatch: () => false,
+        invalidateTrackedRangesByOperations() {},
+        isUndoViewportPreserved: () => false,
         prepareAVHostTransaction: (_protyle: unknown, operations?: IOperation[]) => operations,
         getTagRemovalChanges: (): [] => [],
         hasReferenceRemoval: () => false,
@@ -36,6 +42,7 @@ const fixture = () => {
         isInEmbedBlock: (): void => undefined,
         syncTrackedRanges: (): void => undefined,
         avRender: (element: Element) => rendered.push(element),
+        refreshAV: (_protyle: IProtyle, operation: IOperation) => refreshed.push(operation),
         invalidateViewFoldRequests: (): void => undefined,
         getBlockSelectionStatusIDs: (): string[] => [],
         countBlockWord: (): void => undefined,
@@ -69,16 +76,30 @@ const fixture = () => {
             carriers.filter(item => item.isConnected) : [],
         querySelector: () => carriers[0],
     };
-    const protyle = {wysiwyg: {element}, options: {}, undo: {add: (operations: IOperation[]) => undo.push(operations)}} as unknown as IProtyle;
+    const protyle = {block: {rootID: "root"}, wysiwyg: {element}, options: {}, undo: {add: (operations: IOperation[]) => undo.push(operations)}} as unknown as IProtyle;
     const insert = () => exports.transaction(protyle, [{
         action: "insert", id: "carrier", previousID: "paragraph", data: '<div data-type="NodeAttributeView"></div>',
     }]);
     const save = (collectionRemovalSourceVersions?: Record<string, string>) => exports.transaction(protyle, [{action: "updateAttrViewCell", id: "value", avID: "av",
         keyID: "key", rowID: "row", data: {type: "text", text: {content: "saved"}}}], [],
     {awaitResponse: true, skipSync: true, collectionRemovalSourceVersions}) as Promise<void>;
-    return {protyle, carriers, rendered, insert, save, undo, requests, finishSave: (response: unknown) => finishSave(response),
+    return {protyle, carriers, rendered, refreshed, api: exports, insert, save, undo, requests, finishSave: (response: unknown) => finishSave(response),
         finish: (success: boolean) => finish(success)};
 };
+
+test("primary and related icon notifications survive contract filtering and refresh the selected view", () => {
+    const f = fixture();
+    for (const action of ["setAttrViewShowIcon", "setAttrViewShowRelationIcon"]) {
+        for (const data of [false, true]) {
+            const response = JSON.parse(JSON.stringify({doOperations: [{action, data, avID: "av", viewID: "view"}]})) as Transaction;
+            const operations = getEditorTransaction(response).doOperations;
+            assert.equal(operations.length, 1);
+            f.api.onTransaction(f.protyle, operations, false);
+            assert.equal(f.refreshed.at(-1), operations[0]);
+            assert.equal(f.refreshed.at(-1).data, data);
+        }
+    }
+});
 
 test("awaited database saves wait for acknowledgement and record undo only after success", async () => {
     const f = fixture();

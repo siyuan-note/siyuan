@@ -5,6 +5,7 @@ import {highlightRender} from "../highlightRender";
 import {getAgentLute} from "../setLute";
 import {restoreInlineElementBoundaries} from "../../util/inlineElementBoundary";
 import {mathRender} from "../mathRender";
+import {renderImageDisplay} from "../imageDisplay";
 import {
     createAVRichTextStyleBackslashEncoding,
     createAVRichTextStyleEntityReplacer,
@@ -414,9 +415,10 @@ const getAVRichTextPreviewBlockDOM = (blockDOM: string) => {
     return (template.innerHTML || "").trim();
 };
 
-const prepareAVRichTextPreviewHTML = (html: string) => {
+const prepareAVRichTextPreviewHTML = (html: string, images = false) => {
     const template = document.createElement("template");
-    template.innerHTML = window.DOMPurify.sanitize(html, AV_RICH_TEXT_PREVIEW_SANITIZE_OPTIONS);
+    template.innerHTML = window.DOMPurify.sanitize(html, images ? {...AV_RICH_TEXT_PREVIEW_SANITIZE_OPTIONS,
+        ADD_TAGS: ["img"], ADD_ATTR: ["src", "alt", "title"]} : AV_RICH_TEXT_PREVIEW_SANITIZE_OPTIONS);
     template.content.querySelectorAll<HTMLElement>(AV_RICH_TEXT_PREVIEW_TEXT_ONLY_TAGS.join(","))
         .forEach((element) => {
         // BlockDOM2HTML 使用 sup 输出备注内容；这里只保留文本，避免备注伪造可交互标记。
@@ -477,22 +479,23 @@ const prepareAVRichTextPreviewHTML = (html: string) => {
     return template.innerHTML;
 };
 
-export const getAVRichTextPreviewHTML = (markdown: string) => {
+export const getAVRichTextPreviewHTML = (markdown: string, images = false) => {
     if (!markdown) {
         return "";
     }
-    const cached = previewCache.get(markdown);
+    const cacheKey = `${images ? "image:" : "text:"}${markdown}`;
+    const cached = previewCache.get(cacheKey);
     if (typeof cached === "string") {
-        previewCache.delete(markdown);
-        previewCache.set(markdown, cached);
+        previewCache.delete(cacheKey);
+        previewCache.set(cacheKey, cached);
         return cached;
     }
     try {
         const lute = getAVRichTextLute();
-        const blockDOM = getAVRichTextBlockDOM(markdown);
+        const blockDOM = getAVRichTextBlockDOM(markdown, images);
         const previewBlockDOM = getAVRichTextPreviewBlockDOM(blockDOM);
-        const html = previewBlockDOM ? prepareAVRichTextPreviewHTML(lute.BlockDOM2HTML(previewBlockDOM)) : "";
-        previewCache.set(markdown, html);
+        const html = previewBlockDOM ? prepareAVRichTextPreviewHTML(lute.BlockDOM2HTML(previewBlockDOM), images) : "";
+        previewCache.set(cacheKey, html);
         if (previewCache.size > PREVIEW_CACHE_LIMIT) {
             const oldestKey = previewCache.keys().next().value;
             if (oldestKey) {
@@ -522,5 +525,6 @@ export const renderAVRichTextElements = (root: Element) => {
     elements.forEach((element) => {
         mathRender(element);
         highlightRender(element);
+        if (element.classList.contains("document-title-preview")) { renderImageDisplay(element); }
     });
 };

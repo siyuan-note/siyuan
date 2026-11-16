@@ -66,6 +66,14 @@ const browserCases = async (sources: Record<string, string>, resizeSource: strin
         check.equal(block.querySelectorAll(":scope > .protyle-block-resize").length, 1);
         return block;
     };
+    const short = await create();
+    short.style.height = "24px";
+    short.style.minHeight = "0";
+    const shortRect = short.getBoundingClientRect();
+    const shortHandle = short.querySelector(".protyle-block-resize").getBoundingClientRect();
+    check.ok(shortHandle.height >= shortRect.height / 2 - 1,
+        "a short width-only diagram keeps its handle without reserving a corner handle");
+    check.ok(shortHandle.right <= shortRect.right, "diagram handles stay inside the right edge");
     const automaticSource = 'flowchart LR\n    A["1"] --> B["2"] --> C["3"] --> D["4"]\n    D -. "哈哈哈" .-> B';
     let automaticWidth = 0;
     const checkAutomaticWidth = (block: Element) => {

@@ -240,7 +240,7 @@ test("secrets and variables dialogs preserve input through keyboard resizing and
 }, async () => {
     const sources = ["util/escape", "config/render/fragments", "mobile/util/visibleViewport", "mobile/util/orientation",
         "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "mobile/util/mobileSheetLayout", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog",
-        "dialog/index", "dialog/mobileDialog", "config/tabs/secretsVariablesUi"]
+        "menus/overlayOwnership", "dialog/index", "dialog/mobileDialog", "config/tabs/secretsVariablesUi"]
         .map(id => transpileModule(readFileSync(path.resolve("src", id + ".ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
         }).outputText);

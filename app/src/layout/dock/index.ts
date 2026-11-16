@@ -946,6 +946,7 @@ export class Dock {
                                     element: tab.panelElement,
                                     close: () => this.toggleModel("agentChat", false, true),
                                     focus: () => setPanelFocus(tab.panelElement),
+                                    reveal: () => this.toggleModel("agentChat", true, false),
                                 }));
                             }
                         });

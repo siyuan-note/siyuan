@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261101154840"
+		"updated": "20261112025427"
 	},
 	"Children": [
 		{
@@ -76,7 +76,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 组合的单个字符设置为快捷键。"
+					"Data": " 组合的单个字符设置为快捷键。编辑快捷键时保留当前查询结果；修改搜索或筛选条件后才更新列表。"
 				}
 			]
 		},
@@ -4539,7 +4539,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20261024163013"
+				"updated": "20261112025427"
 			},
 			"Children": [
 				{
@@ -6780,7 +6780,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "处于块选择模式时可直接按 "
+									"Data": "光标位于折叠列表项内时，插入同级列表项；处于块选择模式时可直接按 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -6857,7 +6857,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "处于块选择模式时可直接按 "
+									"Data": "光标位于折叠列表项内时，插入同级列表项；处于块选择模式时可直接按 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -20342,6 +20342,69 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261110180000-673fb24",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110180000-673fb24",
+				"updated": "20261110180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "普通重新打开文档默认恢复上次浏览位置。关闭 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "恢复上次浏览位置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后从文档开头打开。块链接、搜索结果、恢复页签和前进后退仍定位到指定位置。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "如需为当前文档单独设置，请在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文档打开位置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择「默认」（跟随全局设置）、「恢复上次浏览位置」或「从文档开头打开」。该偏好随文档同步，实际阅读位置仍由各客户端分别记录。"
 				}
 			]
 		}

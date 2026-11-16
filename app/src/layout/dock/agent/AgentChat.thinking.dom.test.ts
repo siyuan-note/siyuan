@@ -56,6 +56,7 @@ const browserCases = async (sources: Record<string, string>) => {
         Object.assign(chat, {
             messagesContainer: container,
             host: {mobile},
+            queuedMessages: {pause: noop},
             sessionId: "first",
             currentThinkingText: "",
             currentThinkingReasoning: "",
@@ -84,6 +85,7 @@ const browserCases = async (sources: Record<string, string>) => {
             formatThinkingHeader: () => "Thought",
             appendToolResult: noop,
             appendConfirm: noop,
+            notifyRunInteraction: noop,
             flushTokenUpdate: noop,
             cancelTokenUpdate: noop,
             applyPermissionMode: noop,

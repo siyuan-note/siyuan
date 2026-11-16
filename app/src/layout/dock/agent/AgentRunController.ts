@@ -17,7 +17,7 @@ export interface AgentRunView<TState> {
     prepareDetach: () => void;
     captureView: (state: TState) => void;
     restore: (state: TState, consumed: () => void) => boolean;
-    notifyInteraction: () => void;
+    notifyInteraction: (run: ManagedAgentRun<TState>, event: PendingAgentInteraction) => void;
     renderInteraction: (event: PendingAgentInteraction) => Promise<void>;
     handleEvent: (event: ISSEResult) => Promise<void>;
     handleBrowserCall: (event: Extract<ISSEResult, {type: "browser_capability_call"}>) => Promise<void>;
@@ -88,7 +88,7 @@ export class AgentRunController<TState> {
         if (!run.pendingInteractions.some(item => this.interactionKey(item) === key)) {
             run.pendingInteractions.push(event);
             if (notify) {
-                this.view.notifyInteraction();
+                this.view.notifyInteraction(run, event);
             }
         }
     }
@@ -159,12 +159,20 @@ export class AgentRunController<TState> {
         if (event.type === "turn") {
             run.turnID = event.turnID;
         }
+        if (event.type === "tool_result") {
+            run.pendingInteractions = run.pendingInteractions.filter(pending => pending.type === "confirm" ?
+                pending.name !== event.name : event.name !== "question" ||
+                Boolean(pending.roundID && event.roundID && pending.roundID !== event.roundID));
+        }
         if (!run.detached && !run.replaying && this.isCurrent(run)) {
             if (event.type === "confirm" || event.type === "question") {
                 this.queueInteraction(run, event, false);
                 run.renderedInteractionKeys.add(this.interactionKey(event));
             }
             await this.processView(run, () => this.view.handleEvent(event));
+            if (event.type === "done" && !run.controller.signal.aborted) {
+                run.finishedNormally = true;
+            }
             return;
         }
         if (event.type === "browser_capability_call") {

@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20261107131528"
+		"updated": "20261116005812"
 	},
 	"Children": [
 		{
@@ -2672,12 +2672,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260921215248-t2cedml",
-				"updated": "20260923221935"
+				"updated": "20261116005812"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A mind map block is a dedicated block type. You can convert an unordered, ordered, or task list into a mind map block and convert it back to a list. Conversion preserves item content, numbering, and task states. Existing mind maps stored as lists are upgraded when their documents are opened for editing."
+					"Data": "A mind map block is a dedicated block type. You can convert an unordered, ordered, or task list into a mind map block and convert it back to a list. Conversion preserves item content, numbering, and task states. Existing mind maps stored as lists are upgraded when their documents are opened for editing. Read-only documents are not upgraded automatically. If conversion fails, reopen the document and try again."
 				}
 			]
 		},
@@ -3369,7 +3369,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Document titles support all native inline elements, including combined text styles, images, links, tags, block references, inline formulas, memos, and file annotation references. Edit the complete title directly above the document or in the mobile top bar; new mobile documents focus the top bar for immediate typing. The Rename action opens a centered dialog on desktop or a bottom drawer on mobile. Both use a standalone single-line rich-text field, without document block icons or corner badges. The field uses the interface font size and the shared input's theme background; long titles scroll horizontally. Opening the drawer automatically focuses the title and opens the keyboard. The drawer follows the visible area above the keyboard. Changes in the rename dialog are saved only after confirmation; dismissing it cancels the draft. File trees, tabs, and the desktop tab dropdown render inline styles and images, while plain titles use ordinary text. Window titles and document breadcrumbs show a plain-text summary. Notebook documents also support rich titles. Their notebook names follow the title’s plain-text summary, including image alternative text. Renaming a notebook edits its complete title when notebook documents are enabled."
+					"Data": "Document titles support all native inline elements, including combined text styles, images, links, tags, block references, inline formulas, memos, and file annotation references. Edit the complete title directly above the document or in the mobile top bar; new mobile documents focus the top bar for immediate typing. The Rename action opens a centered dialog on desktop or a bottom drawer on mobile. Both use a standalone single-line rich-text field, without document block icons or corner badges. The field uses the interface font size and the shared input's theme background; long titles scroll horizontally. Opening the drawer automatically focuses the title and opens the keyboard. The drawer follows the visible area above the keyboard. While editing is locked, you can still rename a document from its document tree menu or by pressing F2 with the document selected. Changes in the rename dialog are saved only after confirmation; dismissing it cancels the draft. File trees, tabs, and the desktop tab dropdown render inline styles and images, while plain titles use ordinary text. Window titles and document breadcrumbs show a plain-text summary. Notebook documents also support rich titles. Their notebook names follow the title’s plain-text summary, including image alternative text. Renaming a notebook edits its complete title when notebook documents are enabled. Titles contain only inline elements; task-list markers remain ordinary text. Navigation previews use the interface font size rather than font sizes set within the title. When you paste blocks copied from SiYuan into the title, their inline content and formatting are kept, and spaces separate the blocks. Heading levels and other block attributes are discarded. When pasting text from a web page into the title, block boundaries become spaces. Basic inline formatting and links are preserved, and text appearance follows the same rules as pasting into a paragraph. Pasted line breaks become spaces. Document titles do not support soft line breaks, including Shift+Enter. You can undo the paste. Rich-text primary fields in databases still support soft line breaks, including fields bound to documents; editing a primary field does not edit the document title."
 				}
 			]
 		},

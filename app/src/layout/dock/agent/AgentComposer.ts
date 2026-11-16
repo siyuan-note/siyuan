@@ -25,6 +25,7 @@ interface ComposerHandle {
     focus: (toEnd?: boolean) => void;
     destroy: () => void;
     getSendData: () => AgentComposerData;
+    setData: (data: AgentComposerData) => void;
     clear: () => void;
     pushHistory: (text: string) => void;
     getHistory: () => string[];
@@ -460,6 +461,14 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         },
         clear: () => {
             fragment.clear();
+            history.resetCursor();
+        },
+        setData: data => {
+            if (data.blockHTML) {
+                fragment.setBlockHTML(data.blockHTML);
+            } else {
+                fragment.setMarkdown(data.text);
+            }
             history.resetCursor();
         },
         pushHistory: (text: string) => history.push(text),

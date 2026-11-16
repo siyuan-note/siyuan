@@ -179,7 +179,7 @@ test("mindmap list input preserves rich blocks, branch identity, transaction foc
     const names = ["listInput", "change", "replaceClipboardSource", "replaceSourceChildren"];
     const methods = controller.members.filter(item => names.includes(item.name?.getText(sourceFile)));
     assert.equal(methods.length, names.length);
-    const source = ["../../wysiwyg/listContext.ts", "summary.ts", "connectors.ts", "appearance.ts", "model.ts", "listInput.ts"]
+    const source = ["../../wysiwyg/listContext.ts", "summary.ts", "connectors.ts", "appearance.ts", "relationGeometry.ts", "model.ts", "listInput.ts"]
         .map(name => compile(readFileSync(path.join(__dirname, name), "utf8"))).join("\n") +
         compile(`class InputController {${methods.map(item => item.getText(sourceFile)).join("\n")}}`);
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-list-input-"));

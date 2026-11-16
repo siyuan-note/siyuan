@@ -5,7 +5,7 @@ import {runInNewContext} from "node:vm";
 import {createSourceFile, forEachChild, isClassDeclaration, isMethodDeclaration, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {CALLOUT_PRESETS} from "../../protyle/wysiwyg/calloutType";
 
-test("binding refresh hides an empty conflict filter and returns to all bindings", () => {
+test("binding refresh keeps the active conflict filter until another search", () => {
     const source = createSourceFile("keymapUi.ts", readFileSync("src/config/tabs/keymapUi.ts", "utf8"), ScriptTarget.ES2021, true);
     const declaration = source.statements.find(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => item.name.getText(source) === "refreshKeymapBindings"));
@@ -34,8 +34,8 @@ test("binding refresh hides an empty conflict filter and returns to all bindings
         list.dataset.keymapFilter = "conflict";
         keys = updated;
         exports.refresh(root);
-        assert.equal(list.dataset.keymapFilter, "all");
-        assert.equal(hidden.get("fn__none"), true);
+        assert.equal(list.dataset.keymapFilter, "conflict");
+        assert.equal(hidden.get("fn__none"), false);
         assert.equal(row.dataset.conflict, "false");
     }
     assert.equal(searches, 0);
@@ -52,7 +52,7 @@ test("binding refresh hides an empty conflict filter and returns to all bindings
     assert.equal(hidden.get("fn__none"), true);
 });
 
-test("editing, deleting and resetting a binding immediately reapplies the current text and shortcut filters", () => {
+test("editing, deleting and resetting a binding preserves the current search results", () => {
     const source = createSourceFile("keymapUi.ts", readFileSync("src/config/tabs/keymapUi.ts", "utf8"), ScriptTarget.ES2021, true);
     let declaration: string;
     const visit = (node: import("typescript").Node) => {
@@ -87,14 +87,53 @@ test("editing, deleting and resetting a binding immediately reapplies the curren
     for (const [keys, reset] of [[["F10"], false], [[], false], [["⌘5"], true]] as [string[], boolean][]) {
         calls.length = 0;
         exports.save(row, keys, reset);
-        assert.deepEqual(calls, [["render", row, keys], ["save", keys], ["refresh"],
-            ["search", list, "Go to tab #5", "⌘5"]]);
+        assert.deepEqual(calls, [["render", row, keys], ["save", keys], ["refresh"]]);
         assert.equal(list.dataset.keymapFilter, "customized");
     }
     assert.equal(item.bindings.priority, undefined);
     delete shortcut.dataset.keymap;
     exports.save(row, ["F11"]);
-    assert.deepEqual(calls.at(-1), ["search", list, "Go to tab #5", ""]);
+    assert.deepEqual(calls.at(-1), ["refresh"]);
+});
+
+test("a shortcut search keeps an edited row visible until the next explicit search", () => {
+    const source = createSourceFile("keymapUi.ts", readFileSync("src/config/tabs/keymapUi.ts", "utf8"), ScriptTarget.ES2021, true);
+    const declarations: string[] = [];
+    const visit = (node: import("typescript").Node) => {
+        if (isVariableStatement(node) && node.declarationList.declarations.some(item =>
+            ["saveRow", "searchKeymapList"].includes(item.name.getText(source)))) {
+            declarations.push(node.getText(source));
+        }
+        forEachChild(node, visit);
+    };
+    visit(source);
+    assert.equal(declarations.length, 2);
+    const code = transpileModule(declarations.join("\n") + "\nexports.save = saveRow; exports.search = searchKeymapList;", {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    const classes = new Set<string>();
+    const row = {keys: ["F9"], dataset: {}, nextElementSibling: {},
+        classList: {add: (name: string) => classes.add(name), remove: (name: string) => classes.delete(name)},
+        parentElement: {classList: {remove() {}}, parentElement: {classList: {remove() {}}}}};
+    const list = {dataset: {keymapFilter: "all"}, querySelectorAll: () => [{parentElement: row, textContent: "Command"}]};
+    const exports = {} as {save: (row: unknown, keys: string[]) => void;
+        search: (list: unknown, text: string, shortcut: string) => void};
+    runInNewContext(code, {exports, root: {}, keymapListElement: list,
+        searchElement: {value: "Command"}, searchKeymapElement: {dataset: {keymap: "F9"}},
+        renderRowBindings: (element: typeof row, keys: string[]) => { element.keys = keys; },
+        getRowBindings: (element: typeof row) => element.keys,
+        normalizeSearchText: (text: string) => text.toLowerCase(),
+        saveKeymapRow() {}, refreshBindings() {}, finishKeymapListSearch() {},
+    });
+    for (const updated of [[], ["F10"]]) {
+        row.keys = ["F9"];
+        exports.search(list, "Command", "F9");
+        assert.equal(classes.has("fn__none"), false);
+        exports.save(row, updated);
+        assert.equal(classes.has("fn__none"), false);
+        exports.search(list, "Command", "F9");
+        assert.equal(classes.has("fn__none"), true);
+    }
 });
 
 test("callout shortcut rows use localized labels without requiring separate translation keys", () => {
@@ -113,7 +152,7 @@ test("callout shortcut rows use localized labels without requiring separate tran
     assert.equal(exports.label("quote"), "引述块");
 });
 
-test("a failed binding save reapplies filters after restoring saved bindings", async () => {
+test("a failed binding save restores saved bindings without changing search results", async () => {
     const source = createSourceFile("keymapUi.ts", readFileSync("src/config/tabs/keymapUi.ts", "utf8"), ScriptTarget.ES2021, true);
     const declaration = source.statements.find(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => item.name.getText(source) === "saveKeymapRow"));
@@ -146,7 +185,7 @@ test("a failed binding save reapplies filters after restoring saved bindings", a
     exports.save(root, row, ["F10"]);
     await context.keymapSaveQueue;
     assert.deepEqual([...row.keys], ["F9"]);
-    assert.deepEqual(calls, [["refresh", ["F9"]], ["search", list, "tab", "F9"], ["message", "failed"]]);
+    assert.deepEqual(calls, [["refresh", ["F9"]], ["message", "failed"]]);
 });
 
 test("settings keymap search keeps undeclared owner plugins visible", () => {
@@ -219,7 +258,6 @@ test("keymap refresh retains local search and untouched controls while synchroni
         },
         refreshKeymapBindings: () => {
             refreshed++;
-            if (list.dataset.keymapFilter === "conflict") list.dataset.keymapFilter = "all";
         },
         searchKeymapList: (...args: unknown[]) => searches.push([list.dataset.keymapFilter, ...args]),
         resetKeymapList: () => { resets++; },
@@ -235,14 +273,11 @@ test("keymap refresh retains local search and untouched controls while synchroni
     }
     assert.equal(refreshed, 2);
     assert.equal(resets, 0);
-    assert.deepEqual(searches, [
-        ["customized", list, "Go to tab #5", "F9"],
-        ["customized", list, "Go to tab #5", "F9"],
-    ]);
+    assert.deepEqual(searches, []);
     list.dataset.keymapFilter = "conflict";
     await exports.mountKeymapTab(root, undefined, undefined, true);
-    assert.equal(list.dataset.keymapFilter, "all");
-    assert.deepEqual(searches.at(-1), ["all", list, "Go to tab #5", "F9"]);
+    assert.equal(list.dataset.keymapFilter, "conflict");
+    assert.deepEqual(searches, []);
     await exports.mountKeymapTab(root, undefined, undefined, false);
     assert.equal(search.value, "");
     assert.equal(hotkey.value, "");

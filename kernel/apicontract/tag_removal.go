@@ -10,12 +10,14 @@ type TagRemovalChange struct {
 	Tags []string `json:"tags"`
 }
 
-// TagRemovalPreviewRequest 的 label 与 changes 二选一。
-// label 查找全工作区同名标签；changes 用于编辑器中即将提交的删除。
+// TagRemovalPreviewRequest 的 label、labels 与 changes 三选一。
+// label 查找全工作区同名标签；labels 最多 100 项，精确去重且不隐式删除子标签。
+// changes 用于编辑器中即将提交的删除。
 // 返回本次移除标签涉及、删除后不再符合任何启用规则的自动收集条目，包括逐字改名后移除的标签。
 // 手动条目、未实际移除的标签和未知状态保留。
 type TagRemovalPreviewRequest struct {
 	Label   string              `json:"label,omitempty" api:"optional"`
+	Labels  []string            `json:"labels,omitempty" api:"optional"`
 	Changes []*TagRemovalChange `json:"changes,omitempty" api:"optional"`
 }
 
@@ -29,6 +31,12 @@ type TagRemovalCollection struct {
 // 移出前复查规则版本、自动收集来源和当前匹配；源内容及字段修改一同提交、回滚和撤销。
 // 未选择的数据库保留条目；重新打标签不会恢复已移出条目的字段，可用撤销恢复。
 type RemoveTagWithCollectionsRequest struct {
-	Label       string                  `json:"label"`
+	Label       string                  `json:"label,omitempty" api:"optional"`
+	Labels      []string                `json:"labels,omitempty" api:"optional"`
+	Collections []*TagRemovalCollection `json:"collections"`
+}
+
+type BatchRemoveTagRequest struct {
+	Labels      []string                `json:"labels"`
 	Collections []*TagRemovalCollection `json:"collections"`
 }

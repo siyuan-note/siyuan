@@ -120,7 +120,10 @@ const browserCases = async (source: string) => {
     inView(highlighted(), code.parentElement);
     const rect = highlighted().getBoundingClientRect();
     const viewport = code.parentElement.getBoundingClientRect();
-    check.ok(rect.left >= viewport.left && rect.right <= viewport.right);
+    // scrollWidth 按整数像素取整，文字范围仍保留小数；滚到末端时允许半个 CSS 像素的舍入差。
+    check.ok(rect.left >= viewport.left - 0.5 && rect.right <= viewport.right + 0.5,
+        JSON.stringify({rect, viewport, scrollLeft: code.parentElement.scrollLeft,
+            scrollWidth: code.parentElement.scrollWidth, clientWidth: code.parentElement.clientWidth}));
 
     // 旧 WebView 使用真实原生选区，正文内容和节点结构不变。
     setup('<div data-node-id="hit">' + longText + "nee<strong>dle</strong></div>");

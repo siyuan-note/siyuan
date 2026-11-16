@@ -61,6 +61,28 @@ func TestMigrateLegacyMindmapsEncrypted(t *testing.T) {
 	if err != nil || !util.IsCiphertext(before) {
 		t.Fatalf("source is not encrypted: %v", err)
 	}
+	if err = SetBlockAttrs(docID, map[string]string{readonlyAttr: "true"}); err != nil {
+		t.Fatal(err)
+	}
+	readonlySource, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	skipped, visible, err := MigrateLegacyMindmaps(docID)
+	if err != nil || skipped == nil || len(skipped.DoOperations) != 0 || len(visible) != 0 {
+		t.Fatalf("encrypted read-only migration was not skipped: %+v, %v", skipped, err)
+	}
+	retainedReadonly, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(readonlySource, retainedReadonly) || !util.IsCiphertext(retainedReadonly) {
+		t.Fatalf("encrypted read-only source changed: %v", err)
+	}
+	if err = SetBlockAttrs(docID, map[string]string{readonlyAttr: ""}); err != nil {
+		t.Fatal(err)
+	}
+	before, err = os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
 	tx, _, err := MigrateLegacyMindmaps(docID)
 	if err != nil || len(tx.DoOperations) != 1 {
 		t.Fatalf("encrypted migration failed: %+v, %v", tx, err)

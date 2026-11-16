@@ -155,6 +155,9 @@ func testBlockCollectionEncryptedSourceAndRecovery(t *testing.T, target string, 
 	if err = av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)
 	}
+	for _, node := range parent.Root.ChildrenByType(ast.NodeAttributeView) {
+		av.UpsertBlockRel(node.AttributeViewID, node.ID)
+	}
 	plainPath := filepath.Join(util.DataDir, "storage", "av", view.ID+".json")
 	if err = os.Remove(plainPath); err != nil {
 		t.Fatal(err)

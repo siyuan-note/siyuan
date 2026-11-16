@@ -38,6 +38,7 @@ const getRowsHTML = () => {
         dependencies["./" + name] = exports;
         return exports;
     };
+    load<typeof import("./entryIcon")>("entryIcon");
     load<typeof import("./subItemsState")>("subItemsState");
     const {getRowHTML} = load<typeof import("./row")>("row");
     const result = ["table", "list"].map(type => {

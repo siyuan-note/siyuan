@@ -230,12 +230,16 @@ const focusStack = async (app: App, stack: IBackStack) => {
         // 即使块存在，折叠的情况需要也需要 zoomOut，否则折叠块内的光标无法定位
         currentZoomId === stack.zoomId
     ) {
+        const activeElement = document.activeElement as HTMLElement;
+        // 平板仅在当前正文仍处于编辑状态时恢复光标，阅读和其他页签不主动唤起键盘。
+        const isEditing = blockElement.getBoundingClientRect().height > 0 &&
+            activeElement?.isContentEditable && stack.protyle.wysiwyg.element.contains(activeElement);
         if (blockElement.getBoundingClientRect().height === 0) {
             // 切换 tab
             stack.protyle.model.parent.parent.switchTab(stack.protyle.model.parent.headElement,
                 false, true, true, true, false);
         }
-        if (!stack.protyle.disabled && !isPhablet()) {
+        if (!stack.protyle.disabled && (!isPhablet() || isEditing)) {
             focusHistoryBlock(blockElement, stack.position);
         }
         scrollCenter(stack.protyle, blockElement, "start");

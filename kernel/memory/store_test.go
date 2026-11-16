@@ -461,3 +461,38 @@ func TestMemoryActiveStateStillChecksValidity(t *testing.T) {
 		t.Fatalf("management cannot inspect inactive records: %+v %v", management, err)
 	}
 }
+
+func TestMemoryConflictEmptyDirectory(t *testing.T) {
+	ctx := context.Background()
+	dir := t.TempDir()
+	s := NewStore(dir)
+	entry, err := s.Save(ctx, sample(), "missing", "remember")
+	if err != nil {
+		t.Fatal(err)
+	}
+	target := filepath.Join(dir, "storage/ai/memory/conflicts", entry.Record.ID)
+	if err = os.MkdirAll(target, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.Get(ctx, entry.Record.ID); err != nil {
+		t.Fatalf("empty conflict directory blocks record: %v", err)
+	}
+	if err = os.WriteFile(filepath.Join(target, "evidence.md"), []byte("evidence"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.Get(ctx, entry.Record.ID); !errors.Is(err, ErrConflict) {
+		t.Fatalf("conflict evidence ignored: %v", err)
+	}
+	if err = os.Remove(filepath.Join(target, "evidence.md")); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Remove(target); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Symlink(t.TempDir(), target); err != nil {
+		t.Skip(err)
+	}
+	if _, err = s.Get(ctx, entry.Record.ID); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("conflict directory symlink accepted: %v", err)
+	}
+}

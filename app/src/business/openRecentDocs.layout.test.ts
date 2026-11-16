@@ -29,6 +29,7 @@ const browserCases = async (sources: string[], css: string, languages: Record<st
     });
     const panels = {destroyDialogBlockPanels() {}, getDialogBlockPanel() {}};
     const dialog = load(sources[1], {
+        "../menus/overlayOwnership": load(sources[4], {}),
         "../util/genID": {genUUID: () => "test-dialog"}, "../util/zIndex": {isAbove: () => false}, "./moveResize": resize,
         "../util/functions": {isMobile: () => false}, "../protyle/util/compatibility": {},
         "../protyle": {}, "../constants": {Constants: constants}, "../block/panelOwnership": panels,
@@ -110,7 +111,7 @@ const browserCases = async (sources: string[], css: string, languages: Record<st
                     for (const count of [2, 40]) {
                         const tabHTML = Array.from({length: count}, (_, index) =>
                             `<li class="b3-list-item"><span class="b3-list-item__text">Document ${index}</span></li>`).join("");
-                        const content = new Function("dockHtml", "tabHtml", "isTabWindow", "return " + sources[4])(
+                        const content = new Function("dockHtml", "tabHtml", "isTabWindow", "return " + sources[5])(
                             isDetached ? "" : `<ul class="b3-list b3-list--background" style="width:200px">${tabHTML}</ul>`,
                             tabHTML, isDetached);
                         const switchDialog = new dialog.Dialog({title: lang.switchTab, content, disableAnimation: true});
@@ -151,7 +152,7 @@ test("recent documents controls fit resized dialogs without changing the shared 
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
-    const sources = ["src/dialog/moveResize.ts", "src/dialog/index.ts", "src/business/clearRecentDocs.ts", "src/business/openRecentDocs.ts"]
+    const sources = ["src/dialog/moveResize.ts", "src/dialog/index.ts", "src/business/clearRecentDocs.ts", "src/business/openRecentDocs.ts", "src/menus/overlayOwnership.ts"]
         .map(file => transpileModule(readFileSync(file, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText);

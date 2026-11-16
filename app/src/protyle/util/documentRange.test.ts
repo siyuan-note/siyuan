@@ -4,7 +4,8 @@ import {
     hasUnloadedDocumentBlocks,
     isDocumentBoundaryLoaded,
     markDocumentBoundaryLoaded,
-    updateDocumentBottomEof
+    updateDocumentBottomEof,
+    updateDocumentTopEof,
 } from "./documentRange";
 
 const createWysiwygElement = (options: {
@@ -105,6 +106,24 @@ describe("hasUnloadedDocumentBlocks", () => {
 });
 
 describe("isDocumentBoundaryLoaded", () => {
+    it("retains the document start across local block edits and resets it when the loaded range changes", () => {
+        const wysiwyg = createWysiwygElement({firstElementIndex: "0"});
+        updateDocumentTopEof(wysiwyg.element);
+        const replacement = createWysiwygElement({firstElementIndex: "1"}).element.firstElementChild;
+        Object.assign(wysiwyg.element, {firstElementChild: replacement});
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "before"), true);
+        updateDocumentTopEof(wysiwyg.element, false);
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "before"), false);
+
+        markDocumentBoundaryLoaded(wysiwyg.element, "before");
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "before"), true);
+        Object.assign(wysiwyg.element, {firstElementChild: null});
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "before"), false);
+        Object.assign(wysiwyg.element, {firstElementChild: createWysiwygElement({firstElementIndex: "10"}).element.firstElementChild});
+        updateDocumentTopEof(wysiwyg.element);
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "before"), false);
+    });
+
     it("checks the beginning independently from the document end", () => {
         const wysiwyg = createWysiwygElement({firstElementIndex: "0"});
 

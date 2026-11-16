@@ -7,6 +7,7 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 const {loadMenuToggle, menuAnchor} = require("../../tests/menu-toggle-fixture.cjs");
 
 const fixture = () => {
+    const document: {defaultView?: unknown} = {};
     let visible = false;
     let sheet = false;
     const attributes = new Map<string, string>();
@@ -15,10 +16,19 @@ const fixture = () => {
     let restoreKeyboard: () => void;
     const menu = {
         data: undefined as Element,
-        element: {classList: {contains: (name: string) => name === "fn__none" ? !visible : name === "b3-menu--sheet" && sheet},
+        removeCB: undefined as (() => void),
+        element: {ownerDocument: document,
+            classList: {contains: (name: string) => name === "fn__none" ? !visible : name === "b3-menu--sheet" && sheet},
             getAttribute: (key: string) => attributes.get(key),
             setAttribute: (key: string, value: string) => attributes.set(key, value)},
-        remove() { visible = false; menu.data = undefined; attributes.clear(); },
+        remove() {
+            const callback = this.removeCB;
+            this.removeCB = undefined;
+            callback?.();
+            visible = false;
+            menu.data = undefined;
+            attributes.clear();
+        },
         popup() { visible = true; sheet = false; shows.push("popup"); },
         closeSheet() { menu.remove(); restoreKeyboard?.(); },
         fullscreen(position = "all", restore?: () => void) {
@@ -26,12 +36,17 @@ const fixture = () => {
         },
         addItem() { builds++; },
     };
-    const globals = {window: {siyuan: {menus: {menu}}}};
+    const globals = {document, window: {document, siyuan: {menus: {menu}}}};
+    document.defaultView = globals.window;
     const helpers = loadMenuToggle(globals) as typeof import("./menuToggle");
+    const overlays = {} as typeof import("./overlayOwnership");
+    runInNewContext(transpileModule(readFileSync("src/menus/overlayOwnership.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+    }).outputText, {exports: overlays});
     const exports = {} as typeof import("../plugin/Menu");
     runInNewContext(transpileModule(readFileSync("src/plugin/Menu.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
-    }).outputText, {...globals, exports, require: () => helpers});
+    }).outputText, {...globals, exports, require: (name: string) => name === "../menus/overlayOwnership" ? overlays : helpers});
     const open = (target: Element, toggle?: boolean) => helpers.toggleMenu({
         target, toggle, build: () => { builds++; }, show: () => menu.popup(),
     });
@@ -145,4 +160,22 @@ test("plugin toggle decides before constructing; legacy AV fixed-id construction
     assert.equal(f.visible(), false);
     const third = new f.Menu("av-column");
     assert.equal(third.isOpen, false);
+});
+
+test("plugin toggle and outside removal run the registered close callback exactly once", () => {
+    const f = fixture();
+    const anchor = menuAnchor();
+    let closed = 0;
+    const open = () => f.Menu.toggle({target: anchor, closeCB: () => closed++, build: () => {},
+        show: menu => menu.open({x: 1, y: 2})});
+    open();
+    open();
+    assert.equal(closed, 1);
+    f.menu.remove();
+    assert.equal(closed, 1);
+    open();
+    f.menu.remove();
+    assert.equal(closed, 2);
+    f.menu.remove();
+    assert.equal(closed, 2);
 });

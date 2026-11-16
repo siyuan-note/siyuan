@@ -1,0 +1,52 @@
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 8px;
+  }
+
+  &__sample {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__swatch {
+    width: 50px;
+    height: 27px;
+    box-sizing: border-box;
+    border: 1px solid var(--b3-border-color);
+
+    [data-frontend="mobile"] &,
+    [data-frontend="browser-mobile"] & {
+      height: 44px;
+    }
+  }
+
+  &__fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 56px;
+    min-width: 0;
+
+    &--hex {
+      flex-basis: 100%;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+}

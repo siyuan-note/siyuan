@@ -20,6 +20,7 @@ import type {MarkdownInitial} from "./host";
 import type {MarkdownSystemFont, MarkdownAppearance, MarkdownBootstrap, MarkdownBridge, MarkdownCommand, MarkdownPreferences} from "../../src/markdown/bridge";
 import type {MarkdownFailure, MarkdownFormat, MarkdownHost, MarkdownSaveAsCommitResult, MarkdownWriteRequest} from "../../src/markdown/contracts";
 import type {MarkdownTreeLocation, MarkdownTreeOpen, MarkdownTreeView} from "../../src/markdown/treeContracts";
+import type {MarkdownEntry} from "./registry";
 
 export type MarkdownWindowControls = {
     getOptions: (platform: NodeJS.Platform, height: number) => TitleBarOverlay | false;
@@ -34,6 +35,7 @@ export type MarkdownWindowsOptions = {
     dialog: Dialog; shell: Pick<Shell, "openExternal" | "showItemInFolder">; protocol?: Protocol; nativeTheme?: NativeTheme;
     rootDirectory: string; configDirectory: string; lang?: string | (() => string); platform?: NodeJS.Platform;
     systemFonts?: (language: string) => Promise<MarkdownSystemFont[]>;
+    onAppearance?: () => void;
     onEmpty?: () => void; host?: MarkdownDesktopHost; windowControls: MarkdownWindowControls; devTools: MarkdownDevTools;
 };
 export type MarkdownWindows = {
@@ -56,6 +58,7 @@ type MarkdownWindowRecord = {
     crashed?: boolean; crashApproved?: boolean; closing?: boolean; followTreePending?: boolean;
     watcher?: FSWatcher; watchTimer?: NodeJS.Timeout; cleanup?: Promise<void>; treeError?: MarkdownFailure;
     imageTask?: ReturnType<MarkdownBridge["insertImage"]>; treeTask?: Promise<unknown>;
+    resourceProposal?: {target: MarkdownEntry | undefined; generation: number};
     state?: Parameters<MarkdownBridge["state"]>[0];
     candidate?: {ticket: string; initial: MarkdownInitial; bootstrap: MarkdownBootstrap; current: CurrentDocument; cancelling?: Promise<void>};
     committedSwitch?: {ticket: string; bootstrap: MarkdownBootstrap};
@@ -87,7 +90,7 @@ const trustedEvent = (event: Pick<IpcMainInvokeEvent, "sender" | "senderFrame">,
 };
 
 const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, rootDirectory, configDirectory,
-    lang, platform = process.platform, nativeTheme, systemFonts, onEmpty, host: injectedHost, windowControls, devTools}: MarkdownWindowsOptions): MarkdownWindows => {
+    lang, platform = process.platform, nativeTheme, systemFonts, onAppearance, onEmpty, host: injectedHost, windowControls, devTools}: MarkdownWindowsOptions): MarkdownWindows => {
     const directory = path.join(rootDirectory, "stage", "build", "markdown");
     const host = injectedHost || new MarkdownDesktopHost({directory: path.join(configDirectory, "recovery")});
     const preferences = createMarkdownPreferences(configDirectory);
@@ -189,6 +192,7 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             if (values.sources?.[group] && values.sources[group] !== appearance.sources[group]) changed[group] = appearance.sources[group];
         }
         if (Object.keys(changed).length) await preferences.update({sources: changed}, values.sources);
+        onAppearance?.();
         return appearance;
     };
     const bootstrap = async (initial: MarkdownInitial, source?: string, appearance?: MarkdownAppearance): Promise<MarkdownBootstrap> => {
@@ -635,6 +639,23 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
                 if (!stillCurrent()) return false;
                 await current.resources.authorizeDirectory(chosen.filePaths[0]);
                 return stillCurrent();
+            }
+            case "resource-directories": {
+                record.resourceProposal = undefined;
+                const target = currentTarget(record);
+                const generation = host.session(current.sessionId).generation;
+                const proposals = await current.resources.proposeDirectories(payload, target?.descriptor.path);
+                if (!stillCurrent() || currentTarget(record) !== target || host.session(current.sessionId).generation !== generation) return [];
+                record.resourceProposal = {target, generation};
+                return proposals;
+            }
+            case "confirm-resource-directories": {
+                const proposal = record.resourceProposal;
+                record.resourceProposal = undefined;
+                if (!proposal) return false;
+                return current.resources.confirmDirectories(payload, () => stillCurrent() && !record.closing && !quitting &&
+                    !host.sessions.get(current.sessionId)?.closing && currentTarget(record) === proposal.target &&
+                    host.sessions.get(current.sessionId)?.generation === proposal.generation);
             }
             case "insert-image": {
                 if (quitting || record.imageTask || !currentTarget(record)) return {kind: "blocked"};

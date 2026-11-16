@@ -188,6 +188,10 @@ module.exports = async () => {
     for (const before of [true, false]) {
         for (const protect of [true, false]) {
             const {protyle, editor} = setup(Array.from({length: 100}, (_, i) => p("p" + i)).join(""));
+            const {isDocumentBoundaryLoaded, markDocumentBoundaryLoaded} = load("util/documentRange");
+            if (!before) {
+                markDocumentBoundaryLoaded(editor, "before");
+            }
             const target = before ? editor.lastElementChild : editor.firstElementChild;
             if (protect) {
                 select(target.firstElementChild);
@@ -199,6 +203,9 @@ module.exports = async () => {
             protyle.contentElement.scrollTop = before ? 0 : 2500;
             load("util/navigationTrim").run(protyle, p("loaded"), before);
             assert.equal(target.isConnected, protect, "trim " + before + "/" + protect);
+            if (!before) {
+                assert.equal(isDocumentBoundaryLoaded(editor, "before"), protect);
+            }
             if (protect) {
                 assert.equal(getSelection().anchorNode, node);
                 assert.equal(getSelection().anchorOffset, offset);

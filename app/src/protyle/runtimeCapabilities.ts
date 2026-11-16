@@ -7,6 +7,9 @@ export interface ProtyleRuntimeCapabilities {
     lockedOptions?: Partial<Pick<IProtyleOptions, "hint" | "toolbar">>;
     pluginExtensions?: boolean;
     customBlockRender?: boolean;
+    blockConversion?: boolean;
+    // 文档树的重命名草稿可独立于文档和全局编辑锁修改标题。
+    ignoreEditLock?: boolean;
     // 片段内容作为列表项正文编辑，首段沿用列表输入规则。
     listItemFragment?: boolean;
     getTransactionOwner?: (operations: IOperation[]) => IProtyle | undefined;
@@ -14,6 +17,7 @@ export interface ProtyleRuntimeCapabilities {
     getUnsupportedPasteBlocks?: (blockDOM: string) => string[];
     getUnsupportedPasteMessage?: (blocks: string[]) => string;
     richHTMLPaste?: boolean;
+    transformPasteBlockDOM?: (blockDOM: string, text: string, internal: boolean) => string;
     restoreLuteMarkdownSyntax?: (lute: Lute) => void;
 }
 
@@ -41,6 +45,12 @@ export const areProtylePluginExtensionsEnabled = (protyle: IProtyle) =>
 export const isProtyleCustomBlockRenderEnabled = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.customBlockRender !== false;
 
+export const isProtyleBlockConversionEnabled = (protyle: IProtyle) =>
+    protyleRuntimeCapabilities.get(protyle)?.blockConversion !== false;
+
+export const ignoresProtyleEditLock = (protyle: IProtyle) =>
+    protyleRuntimeCapabilities.get(protyle)?.ignoreEditLock === true;
+
 export const isProtyleListItemFragment = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.listItemFragment === true;
 
@@ -65,6 +75,9 @@ export const getProtyleUnsupportedPasteMessage = (protyle: IProtyle) =>
 
 export const isProtyleRichHTMLPasteEnabled = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.richHTMLPaste === true;
+
+export const getProtylePasteTransform = (protyle: IProtyle) =>
+    protyleRuntimeCapabilities.get(protyle)?.transformPasteBlockDOM;
 
 export const restoreProtyleLuteMarkdownSyntax = (protyle: IProtyle, restoreDefault: (lute: Lute) => void) => {
     const restore = protyleRuntimeCapabilities.get(protyle)?.restoreLuteMarkdownSyntax || restoreDefault;

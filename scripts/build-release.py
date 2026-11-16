@@ -698,7 +698,7 @@ class Builder:
         started = time.time()
         command = ["bash", "scripts/linux-build.sh", "--target=all"]
         if hasattr(self, "parallel_marker"):
-            command = ["setsid"] + command
+            command = ["setsid", "--wait"] + command
             command.extend(("--process-id-file=" + self.parallel_remote + ".pid",
                             "--harmony-ready-file=" + self.parallel_remote + ".ready"))
         if "harmony" in self.args.platforms:

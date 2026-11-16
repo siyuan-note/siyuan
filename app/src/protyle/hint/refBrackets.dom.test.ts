@@ -16,13 +16,19 @@ const browserCases = (source: string) => {
     window.siyuan = {config: {editor: {autoCloseRefBrackets: true, hashTagSearch: true}}} as any;
     const transactions: {before: string; after: string}[] = [];
     const dependencies = {
-        Constants: {BLOCK_HINT_KEYS: ["[[", "((", "【【"], BLOCK_HINT_CLOSE_KEYS: {"[[": "]]", "((": "))", "【【": "】】"}, SIZE_TITLE: 512},
+        Constants: {BLOCK_HINT_KEYS: ["[[", "((", "（（", "【【"],
+            BLOCK_HINT_CLOSE_KEYS: {"[[": "]]", "((": "))", "（（": "））", "【【": "】】"}, SIZE_TITLE: 512},
         hasClosestByAttribute: (node: Node, attribute: string, value: string) =>
             (node.nodeType === 3 ? node.parentElement : node as Element).closest(`[${attribute}~="${value}"]`),
         hasClosestBlock: (node: Node) => node.parentElement.closest("[data-node-id]"),
         focusByRange: (range: Range) => { getSelection().removeAllRanges(); getSelection().addRange(range); },
         getSelectionOffset: (_node: Node, _root: Element, range: Range) => ({start: range.startOffset}),
-        getWholeTextOffset: (_node: Node, offset: number) => offset,
+        getWholeTextOffset: (node: Node, offset: number) => {
+            for (let sibling = node.previousSibling; sibling?.nodeType === 3; sibling = sibling.previousSibling) {
+                offset += sibling.textContent.length;
+            }
+            return offset;
+        },
         getUndoFocusContext: () => ({id: "block"}),
         hideElements: (): undefined => undefined,
         updateTransaction: (_protyle: unknown, block: Element, before: string) => transactions.push({before, after: block.outerHTML}),
@@ -57,6 +63,7 @@ const browserCases = (source: string) => {
         hint.splitChar = text.startsWith("【【") ? "【【" : "[[";
         hint.lastIndex = 0;
         hint.consumeCloseKey = true;
+        hint.closeKeyTyped = false;
         return range;
     };
     const before = (inputType: string, data: string = null) =>
@@ -208,6 +215,35 @@ const browserCases = (source: string) => {
     range = reset("【【", 2);
     hint.handleRefBracketInput(protyle, range, "【");
     check.equal(editable.textContent, "【【");
+    for (const [trigger, close] of [["((", ""], ["（（", ""], ["[[", "]]"], ["【【", "】】"]]) {
+        for (const tail of ["", " existing123"]) {
+            hint.blockHintQuery = undefined;
+            const before = trigger + "test123";
+            const after = close + tail;
+            range = reset(before + after, before.length);
+            hint.splitChar = trigger;
+            hint.trackBlockHintQuery(range, before, after, "test123");
+            const updated = trigger + "test document";
+            range = reset(updated + "123" + after, updated.length);
+            hint.splitChar = trigger;
+            hint.trackBlockHintQuery(range, updated, "123" + after, "test document");
+            const text = range.startContainer as Text;
+            text.splitText(range.startOffset + 1);
+            range.setStart(text, 0);
+            hint.extendBlockHintQuery(range);
+            check.equal(range.toString(), updated + "123");
+            hint.consumeRefBracketClose(range);
+            range.deleteContents();
+            check.equal(editable.textContent, tail);
+        }
+        hint.blockHintQuery = undefined;
+        range = reset(trigger + "test" + " existing123", trigger.length + 4);
+        hint.splitChar = trigger;
+        hint.trackBlockHintQuery(range, trigger + "test", " existing123", "test");
+        range.setStart(range.startContainer, 0);
+        hint.extendBlockHintQuery(range);
+        check.equal(range.toString(), trigger + "test");
+    }
     return "Reference bracket cases passed";
 };
 
@@ -218,7 +254,8 @@ test("reference brackets preserve native ranges, close once, delete together and
     const file = createSourceFile("index.ts", readFileSync(path.join(__dirname, "index.ts"), "utf8"), ScriptTarget.Latest, true);
     const hint = file.statements.find(isClassDeclaration);
     const names = ["autoCloseRefBrackets", "handleRefBracketInput", "handleRefBracketBeforeInput", "getRefBracketContext", "canResumeBlockHint",
-        "getRefCloseContext", "isRefCloseContextCurrent", "consumeRefBracketClose", "getKey"];
+        "getRefCloseContext", "isRefCloseContextCurrent", "trackBlockHintQuery", "extendBlockHintQuery",
+        "consumeRefBracketClose", "getKey"];
     const methods = names.map(name => hint.members.find(member => member.name?.getText(file) === name).getText(file));
     const helpers = readFileSync(path.join(__dirname, "blockHintRange.ts"), "utf8").replaceAll("export ", "");
     const source = transpileModule(helpers + "\nclass Hint {" + methods.join("\n") + "}", {
@@ -226,7 +263,10 @@ test("reference brackets preserve native ranges, close once, delete together and
     }).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-ref-bracket-test-"));
     const script = path.join(temporary, "run.cjs");
-    const expression = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)})`;
+    const expression = `const __name = value => value; (() => {
+        try { return (${browserCases.toString()})(${JSON.stringify(source)}); }
+        catch (error) { return error.stack; }
+    })()`;
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");

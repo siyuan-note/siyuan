@@ -16,6 +16,7 @@ import {showMessage} from "../dialog/message";
 import type {App} from "../index";
 import {initMirror} from "../protyle/undo/globalUndo";
 import {getDocByScroll, saveScroll} from "../protyle/scroll/saveScroll";
+import {getDocPosition} from "../protyle/scroll/docPosition";
 import {isEncryptedBox} from "../util/pathName";
 import {bindMobileBarsScroll, pauseMobileBarsScroll} from "./util/mobileBars";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
@@ -275,7 +276,9 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             }
             // 保留正文直到新文档返回，跨文档切换时显式更新只读状态
             const updateReadonly = previousRootID !== data.data.rootID ? true : undefined;
-            const targetScrollAttr = scrollAttr || window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID];
+            const targetScrollAttr = actionList.includes(Constants.CB_GET_SCROLL) ?
+                await getDocPosition(data.data.rootID, scrollAttr) : undefined;
+            if (!isValid()) { fail(); return; }
             if (actionList.includes(Constants.CB_GET_SCROLL) && targetScrollAttr) {
                 getDocByScroll({
                     protyle: window.siyuan.mobile.editor.protyle,

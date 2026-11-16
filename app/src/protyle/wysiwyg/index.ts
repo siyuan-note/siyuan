@@ -167,7 +167,7 @@ import {selectRow, stickyRow, updateHeader} from "../render/av/row";
 import {getAVSelectedItemIDs, getAVSelectedTableCells, updateAVRowSelect} from "../render/av/virtualScroll";
 import {autoFitAVColumns, setFreezeColumn, showAVColumnWidthMenu, showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
-import {checkFold} from "../../util/noRelyPCFunction";
+import {checkFold, checkReferenceFold} from "../../util/noRelyPCFunction";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {
     addDragFill,
@@ -249,6 +249,7 @@ import {LargeTableVirtualizer} from "./tableVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {syncRootAttributes} from "../util/syncRootAttributes";
+import {isHandlerIALAttribute} from "../util/ialAttributes";
 import {bindImageTitleEditor} from "../render/imageTitleEditor";
 import {bindImageResize, getImageResizeWidth} from "../render/imageResize";
 import {isDirectCalloutStructureClick} from "./calloutClick";
@@ -428,6 +429,7 @@ export class WYSIWYG {
     private disposeHeadingFoldIndicators?: () => void;
     private disposeBoundedBlockDragSelect?: () => void;
     private disposeTouchCaret?: () => void;
+    private disposeTouchBlockDragSelect?: () => void;
     private disposeListMarkerCaret?: () => void;
     private imageTitleEditor: ReturnType<typeof bindImageTitleEditor>;
     private disposeImageResize?: () => void;
@@ -576,7 +578,9 @@ export class WYSIWYG {
         }
         /// #endif
         if (!isMobile()) {
-            bindTouchBlockDragSelect(this.element, () => !protyle.toolbar.isMultiSelectMode());
+            this.disposeTouchBlockDragSelect = bindTouchBlockDragSelect(this.element,
+                () => !protyle.disabled && !window.siyuan.touchDragActive &&
+                    !protyle.toolbar.isMultiSelectMode(), protyle.element);
         }
         if (isAndroid() || isIOSDevice()) {
             this.disposeBoundedBlockDragSelect = bindBoundedBlockDragSelect(protyle, this.element);
@@ -631,6 +635,7 @@ export class WYSIWYG {
         this.disposeSpellcheckFocus?.();
         this.disposeBoundedBlockDragSelect?.();
         this.disposeTouchCaret?.();
+        this.disposeTouchBlockDragSelect?.();
         this.disposeListMarkerCaret?.();
         this.largeListVirtualizer?.destroy();
         this.largeTableVirtualizer?.destroy();
@@ -673,7 +678,8 @@ export class WYSIWYG {
             }
         }
         ialKeys.forEach((key: string) => {
-            if (!["title-img", "title", "updated", "icon", "id", "type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth", "data-readonly", "av-names"].includes(key)) {
+            if (!isHandlerIALAttribute(key) &&
+                !["title-img", "title", "updated", "icon", "id", "type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth", "data-readonly", "av-names"].includes(key)) {
                 this.element.setAttribute(key, ial[key]);
             }
         });
@@ -1269,6 +1275,7 @@ export class WYSIWYG {
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
             this.mouseDownWithMeta = event.button === 0 && isOnlyMeta(event);
+            this.preventClick = false;
             if (this.tableControl?.hasTouchSelection() && (event.target as Element).closest("td, th")) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -1947,7 +1954,7 @@ export class WYSIWYG {
                         nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) === dragFillViewID &&
                         (stableOriginCells.length > 0 ? selectAVDragFillRange(nodeElement, stableOriginCells, lastCellElement) :
                             selectAVCellRange(nodeElement, lastCellElement))) {
-                        dragFillCellsValue(protyle, nodeElement, originData, originCellIds, lastOriginCellElement);
+                        dragFillCellsValue(protyle, nodeElement, originData, originCellIds);
                         addDragFill(lastCellElement);
                     }
                     return false;
@@ -1965,10 +1972,15 @@ export class WYSIWYG {
                 }
                 let moveSelectCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
+                let hasMoved = false;
                 const nodeRect = nodeElement.getBoundingClientRect();
                 const scrollElement = nodeElement.querySelector(".av__scroll");
                 const bodyElement = hasClosestByClassName(avCellElement, "av__body") as HTMLElement;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                    if (event.clientX !== moveEvent.clientX || event.clientY !== moveEvent.clientY) {
+                        hasMoved = true;
+                        this.preventClick = true;
+                    }
                     const tempCellElement = hasClosestByClassName(moveEvent.target as HTMLElement, "av__cell") as HTMLElement;
                     if (scrollElement.scrollWidth > scrollElement.clientWidth + 2) {
                         if (moveEvent.clientX > nodeRect.right - 10) {
@@ -1993,16 +2005,17 @@ export class WYSIWYG {
                     }
                 };
 
-                documentSelf.onmouseup = () => {
+                documentSelf.onmouseup = (upEvent: MouseEvent) => {
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
-                    if (lastCellElement) {
+                    // 快速移动可能只在释放事件中体现坐标变化，移出单元格时仍保留起点选区。
+                    if (lastCellElement || hasMoved || event.clientX !== upEvent.clientX || event.clientY !== upEvent.clientY) {
                         selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
                         focusBlock(nodeElement);
-                        addDragFill(lastCellElement);
+                        addDragFill(lastCellElement || avCellElement);
                         this.preventClick = true;
                     }
                     return false;
@@ -4297,6 +4310,7 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            hideElements(["toolbar"], protyle);
             this.persistComposition?.();
             isComposition = true;
             compositionInputText = "";
@@ -4595,6 +4609,7 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            hideElements(["toolbar"], protyle);
             if (this.preventInput) {
                 event.stopPropagation();
                 return;
@@ -4847,7 +4862,7 @@ export class WYSIWYG {
                 !target.closest('[data-subtype="plantuml"]')) {
                 previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID,
                     target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO) === "1" ?
-                        target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO_VIDEO) || "" : "");
+                        target.getAttribute(Constants.CUSTOM_SY_LIVE_PHOTO_VIDEO) || "" : "", target);
                 return;
             }
             // https://github.com/siyuan-note/siyuan/issues/12691
@@ -5060,7 +5075,7 @@ export class WYSIWYG {
                     } else if (aElement) {
                         refBlockId = aLink.substring(16, 38);
                     }
-                    checkFold(refBlockId, (zoomIn, action, isRoot) => {
+                    checkReferenceFold(refBlockId, (zoomIn, action, isRoot) => {
                         // 块引用跳转后需要短暂高亮目标块 https://github.com/siyuan-note/siyuan/issues/11542
                         if (!isRoot) {
                             action.push(Constants.CB_GET_HL);
@@ -5139,7 +5154,7 @@ export class WYSIWYG {
                     virtualRefParam.notebook = protyle.notebookId;
                 }
                 fetchPost("/api/block/getBlockDefIDsByRefText", virtualRefParam, (response) => {
-                    checkFold(response.data.refDefs[0].refID, (zoomIn) => {
+                    checkReferenceFold(response.data.refDefs[0].refID, (zoomIn) => {
                         mobileBlur = true;
                         activeBlur();
                         openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");

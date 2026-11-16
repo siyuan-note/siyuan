@@ -9,11 +9,15 @@ test("dialog close guard covers direct close requests and permits cleanup after 
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
     const exported = {} as {Dialog: {prototype: object}};
+    const overlayOwnership = {};
+    runInNewContext(transpileModule(readFileSync("src/menus/overlayOwnership.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText, {exports: overlayOwnership});
     const scheduled: Array<() => void> = [];
     let panelsDestroyed = 0;
     runInNewContext(compiled, {
         exports: exported,
-        require: () => ({
+        require: (name: string) => name === "../menus/overlayOwnership" ? overlayOwnership : ({
             isAbove: () => false,
             Constants: {TIMEOUT_DBLCLICK: 0},
             destroyDialogBlockPanels: () => panelsDestroyed++,

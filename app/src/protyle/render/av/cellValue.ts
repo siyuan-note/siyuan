@@ -187,11 +187,11 @@ export const createAVStableTextCell = (options: {
             color: "",
             bgColor: "",
             value,
-            valueType: "text",
+            valueType: value.type || "text",
         },
         column: {
             id: colID,
-            type: "text",
+            type: value.type || "text",
         } as IAVColumn,
     };
 };

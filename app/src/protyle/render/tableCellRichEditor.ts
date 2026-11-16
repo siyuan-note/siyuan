@@ -196,6 +196,9 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     if (!cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE)) {
         cell.setAttribute(TABLE_CELL_INLINE_ATTRIBUTE, cell.innerHTML);
     }
+    // 自动列宽会在空编辑器初始化时收缩，需要在替换内容前记录视口。
+    const tableScrollElement = cell.closest("table").parentElement;
+    const tableScrollLeft = tableScrollElement.scrollLeft;
     const host = document.createElement("div");
     host.className = "table__cell-editor";
     host.dataset.protyleLiteRender = "safe";
@@ -616,6 +619,10 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
         observer.observe(parent, {childList: true});
     }
     fragment.focus(true);
+    if (point) {
+        // 恢复点击前的横向视口，避免临时末尾定位改变后续的坐标命中。
+        tableScrollElement.scrollLeft = tableScrollLeft;
+    }
     // 进入单元格编辑即按所属表格块同步大纲高亮
     updateOutlineCurrentBlock(owner, cell);
     // 复选框点击交给重建后的任务项，通过内部编辑器保存状态并记录撤销。

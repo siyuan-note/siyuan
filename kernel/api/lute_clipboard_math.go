@@ -162,6 +162,13 @@ func wpsClipboardMathInput(encoded string) (from string, input []byte, ok bool) 
 }
 
 func officeClipboardMathInput(encoded string) (from string, input []byte, ok bool) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			from, input, ok = "", nil, false
+			logging.LogWarnf("parse Office clipboard math failed: %v", recovered)
+		}
+	}()
+
 	if encoded == "" || len(encoded) > base64.StdEncoding.EncodedLen(maxWPSClipboardBytes) {
 		return
 	}

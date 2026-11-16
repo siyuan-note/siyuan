@@ -933,7 +933,7 @@ func readStableObsidianFile(file *obsidianSourceFile) ([]byte, error) {
 	if before.Size() != after.Size() || !before.ModTime().Equal(after.ModTime()) {
 		return nil, fmt.Errorf("%w while reading", errObsidianSourceChanged)
 	}
-	return data, nil
+	return bytes.TrimPrefix(data, []byte("\xef\xbb\xbf")), nil
 }
 
 func newObsidianReadUserError(file *obsidianSourceFile, err error) error {

@@ -52,7 +52,7 @@ export const isExternalMarkdownLink = (reference: string): boolean =>
 
 // 显示替换只存在于该编辑器实例；转换回 Markdown 前在惰性副本中还原原属性。
 export const createMarkdownResourcePolicy = (document: Document, resolveResource?: MarkdownResourceResolver,
-    onUnavailable?: () => void, sessionId?: string) => {
+    onUnavailable?: (reference: string) => void, sessionId?: string) => {
     const scope = createMarkdownCapabilityToken();
     let generation = 0;
     let disposed = false;
@@ -136,6 +136,8 @@ export const createMarkdownResourcePolicy = (document: Document, resolveResource
             const attributes: PreservedMarkup["attributes"] = [];
             for (const attribute of Array.from(element.attributes)) {
                 const name = attribute.name.toLowerCase();
+                // 链接编辑浮层和浏览器链接样式直接读取 href；外部链接的打开仍由宿主处理。
+                if (element.tagName === "A" && name === "href" && isExternalMarkdownLink(attribute.value)) continue;
                 if (resourceAttributes.has(name) || name.startsWith("on") || name === "srcdoc" ||
                     (name === "style" && /url\s*\(|@import|expression|behavior|\\/i.test(attribute.value))) {
                     attributes.push({name, original: attribute.value, displayed: null});
@@ -175,7 +177,7 @@ export const createMarkdownResourcePolicy = (document: Document, resolveResource
             if (!pending) {
                 pending = Promise.resolve().then(() => resolveResource(source.original)).then(url =>
                     url && isMarkdownDisplayResource(url, document.location.href, sessionId) ? url : undefined).catch((): undefined => undefined);
-                void pending.then(url => { if (!url && !disposed && generation === expectedGeneration) onUnavailable?.(); });
+                void pending.then(url => { if (!url && !disposed && generation === expectedGeneration) onUnavailable?.(source.original); });
                 resources.set(source.original, pending);
             }
             void pending.then(url => {

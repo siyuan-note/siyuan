@@ -521,8 +521,15 @@ var exportPreviewHTML = contractHandler(apicontract.ExportPreviewHTML, func(c *g
 	}
 	addTitle, customTitle := exportTitleOptions(request.ExportTitleOptions)
 	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
+	var blockRefMode *int
+	if request.PDF && request.BlockRefMode != nil {
+		if *request.BlockRefMode < 2 || *request.BlockRefMode > 4 {
+			return apicontract.Failure[apicontract.ExportPreviewHTMLData](-1, "Field [blockRefMode] must be 2, 3 or 4")
+		}
+		blockRefMode = request.BlockRefMode
+	}
 	name, content, node := model.ExportPreviewHTMLWithTitle(id, keepFold, merge, addTitle, customTitle, request.KeepJSEmbed,
-		(request.Image || request.PDF) && request.ExcludeTitleImage, mergeHeadingOptions)
+		(request.Image || request.PDF) && request.ExcludeTitleImage, blockRefMode, mergeHeadingOptions)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
 

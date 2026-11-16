@@ -13,6 +13,7 @@ test("inline style persistence delegates pending saves and reports failure or su
     let closes = 0;
     const errors: string[] = [];
     const data = {version: 2, styles: [] as unknown[], order: {style1: [] as string[]}};
+    let editingDraft: typeof data;
     const controls = new Map();
     const control = (selector: string) => {
         if (!controls.has(selector)) controls.set(selector, {
@@ -34,9 +35,9 @@ test("inline style persistence delegates pending saves and reports failure or su
         normalizeInlineStyles: (value: object) => value, getInlineStylesCache: () => data,
         getProperties: (): string[] => [], getThemeColorEditorHTML: () => "", getBuiltinEditorHTML: () => "",
         bindThemeColorEditor: () => ({}), bindBuiltinEditor: () => ({}),
-        getOrderedStyleKeys: (): string[] => [], bindColorListDrag() {},
+        getOrderedStyleKeys: (_type: string, value: typeof data): string[] => { editingDraft = value; return []; }, bindColorListDrag() {},
         saveInlineStyles: (draft: unknown) => {
-            assert.equal(JSON.stringify(draft), JSON.stringify(data));
+            assert.equal(JSON.parse(JSON.stringify(draft)).styles[0].name, "Edited");
             saves++;
             return new Promise(resolve => { complete = resolve; });
         },
@@ -46,6 +47,7 @@ test("inline style persistence delegates pending saves and reports failure or su
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {exports, require: () => dependencies, window: {siyuan: {config: {}, languages: {}}}});
     exports.openInlineStyleDialog("style1", () => { changes++; });
+    editingDraft.styles.push({id: "new", name: "Edited", light: {color: "#ffffff"}, dark: {color: "#000000"}});
     const save = {dataset: {action: "save"}, hasAttribute: () => false,
         classList: {contains: () => false}, closest: (selector: string) => selector === "[data-action]" ? save : null};
     await click({target: save, preventDefault() {}, stopPropagation() {}});

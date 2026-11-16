@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261106140529"
+		"updated": "20261115103438"
 	},
 	"Children": [
 		{
@@ -317,7 +317,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-iffmsq0",
-				"updated": "20261105133947"
+				"updated": "20261115062149"
 			},
 			"Children": [
 				{
@@ -538,7 +538,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-x813t3f",
-				"updated": "20261105133947"
+				"updated": "20261115103438"
 			},
 			"Children": [
 				{
@@ -589,6 +589,76 @@
 				{
 					"Type": "NodeText",
 					"Data": "While the agent is running, select the stop button to interrupt the current task. Automatic retries keep and continue the same thinking card. Stopping keeps already-visible output while the server finishes saving and recovery, but does not undo completed actions. A slow connection may interrupt generation; reopen the session to recover saved content. Results are generally more reliable when the goal, scope, and destination are explicit."
+				}
+			]
+		},
+		{
+			"ID": "20261115062149-v84vob9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261115062149-v84vob9",
+				"updated": "20261115062149"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop and mobile, you can keep composing while a local session runs. Sending at this time queues a snapshot of the message and its references; review the queue above the input and cancel individual messages there. Messages send in order after a normal response ends, using the current model and approval settings. Stopping, an error, or switching sessions pauses the queue; return to that session and use the queue's send button to continue. Queued messages stay only in the current frontend's memory and are lost on refresh or exit. A session running in another instance allows drafting but does not accept queued messages here."
+				}
+			]
+		},
+		{
+			"ID": "20261115062149-nb4deva",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261115062149-nb4deva",
+				"updated": "20261115062149"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When the app loses focus or is hidden, pending approvals, unanswered questions, and normally completed replies can trigger system notifications. Delivery depends on the client and system notification permissions. Locking the screen or losing the connection does not guarantee that a task will continue."
+				}
+			]
+		},
+		{
+			"ID": "20261115103438-l8lubnb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261115103438-l8lubnb",
+				"updated": "20261115103438"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On Windows desktop, while SiYuan is running, clicking a pending-confirmation notification restores its original workspace window, opens the corresponding agent session, and highlights the approval or question card. Clicking only navigates; it never sends a draft or approves an operation. Drafts and unfinished message edits are kept when switching away and restored when you return. If an image is still uploading, navigation waits for it to finish. Handled, expired, or missing targets display a notice and do not regain approval controls. This does not support starting an exited app or notification navigation in mobile clients or browsers."
+				}
+			]
+		},
+		{
+			"ID": "20261111083018-c643006",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111083018-c643006",
+				"updated": "20261111084137"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Within the current conversation turn, the agent checks repeated calls involving eligible built-in reads, as well as calls that fail or return empty results, using a window of the 10 most recent eligible calls. When the same tool with the same arguments returns the same result 3 times, the model is prompted to change strategy; at 5 occurrences, tool use stops. A changed result for the same target resets that target’s count; successful writes or user interaction reset the observation window. This protection covers a limited range of repeated calls and cannot detect every lack of progress."
+				}
+			]
+		},
+		{
+			"ID": "20261111083018-6202b92",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111083018-6202b92",
+				"updated": "20261111083018"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After the tool call round limit is reached or repeated calls cause a stop, if the model provides no valid text reply, the system displays and saves an explicit interruption notice stating that the task may still be incomplete. Stopping tool use does not mean the task is complete and does not undo completed actions."
 				}
 			]
 		},
@@ -1718,6 +1788,35 @@
 				{
 					"Type": "NodeText",
 					"Data": "The snapshot covers workspace data, but not changes made to external systems by external MCP services or plugins. Regenerating an answer, stopping a task, or deleting a session also does not automatically undo completed write operations."
+				}
+			]
+		},
+		{
+			"ID": "20261115153000-9d2f24d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261115153000-9d2f24d",
+				"updated": "20261115153000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Plugin development"
+				}
+			]
+		},
+		{
+			"ID": "20261115153000-7b3d0a9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261115153000-7b3d0a9",
+				"updated": "20261115153000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When repeatedly packaging a managed plugin project, successful packaging keeps up to 8 recent archives with a total size of at most 256 MiB. After the new archive, download copy, and project metadata are saved, older archives and their matching download copies are removed as needed. The current archive is always retained. Source files and code recovery checkpoints are not removed. If publication fails, existing archives are preserved; if cleanup fails, the new archive is retained and an error is reported."
 				}
 			]
 		},

@@ -96,7 +96,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
             }
             const operation = (filters: IAVFilter[]): IOperation => ({
                 action: options.filterOperation?.action || "setAttrViewFilters",
-                avID,
+                avID: options.filterOperation?.avID || avID,
                 keyID: options.filterOperation?.keyID,
                 data: filters,
                 blockID,
@@ -307,7 +307,10 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
                         closeCB?.();
                         avPanelElement.remove();
                         setTimeout(() => {
-                            if (!options.anchorElement) {
+                            // 提交可能已打开下一格，延迟恢复仅在没有新的编辑目标时执行。
+                            if (!options.anchorElement && options.blockElement.isConnected &&
+                                options.blockElement.getClientRects().length > 0 && document.activeElement === document.body &&
+                                !document.querySelector(".av__mask, .av__panel, [data-av-location-editor]")) {
                                 focusBlock(options.blockElement);
                             }
                         }, Constants.TIMEOUT_TRANSITION);  // 单选使用 enter 修改选项后会滚动

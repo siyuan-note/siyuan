@@ -8,8 +8,9 @@ const source = ts.createSourceFile("bazaar.ts", readFileSync("src/config/bazaar.
 const declaration = source.statements.find(statement => ts.isVariableStatement(statement) &&
     statement.declarationList.declarations.some(item => item.name.getText(source) === "bazaar"));
 const object = declaration.declarationList.declarations[0].initializer;
-const render = object.properties.find(property => property.name?.getText(source) === "_genMyHTML");
-const compiled = ts.transpileModule(`export const bazaar = {${render.getText(source)}};`, {
+const render = ["_genMyHTML", "_genInstalledPluginVersionTip", "_genInstalledPluginSwitchHTML"]
+    .map(name => object.properties.find(property => property.name?.getText(source) === name).getText(source));
+const compiled = ts.transpileModule(`export const bazaar = {${render.join(",")}};`, {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
 }).outputText;
 
@@ -107,7 +108,8 @@ for (const mode of ["settings-window", "main-window", "mobile"]) {
                 assert.notEqual(mode, "settings-window");
                 return plugin.name !== "none";
             },
-            isBazaarPluginEnabledInPublish: () => false, getRatingKey: (_type, name) => name,
+            isBazaarPluginEnabledInPublish: () => false, isBazaarPackageEnableDisabled: () => false,
+            getRatingKey: (_type, name) => name,
             escapeHtml: value => value, escapeAttr: value => value,
             genRatePackageActionHTML: () => '<span data-type="rate-package"></span>',
             loadDownloadedRatings() {}, loadDownloadedUserRatings() {}, renderBazaarInstall() {},
@@ -141,7 +143,11 @@ for (const mode of ["settings-window", "main-window", "mobile"]) {
                 const actions = Array.from(card.matchAll(/data-type="([^"]+)"/g), match => match[1]);
                 assert.deepEqual(actions.filter(action => commonActions.includes(action)), commonActions);
                 assert.ok(!actions.includes("skip-batch-update"));
-                assert.ok(actions.indexOf("install-t") < actions.indexOf("plugin-enable"));
+                if (type === "plugins") {
+                    assert.ok(actions.indexOf("install-t") < actions.indexOf("plugin-enable"));
+                } else {
+                    assert.ok(!actions.includes("plugin-enable"));
+                }
             }
             if (type !== "plugins") assert.ok(!content.innerHTML.includes('data-type="setting"'));
         }

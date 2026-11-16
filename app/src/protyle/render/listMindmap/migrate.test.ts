@@ -9,7 +9,7 @@ const code = source.statements.filter(isVariableStatement).filter(statement =>
     !statement.declarationList.declarations.some(item => item.name.getText(source) === "replaceLegacyMindmapHTML"))
     .map(statement => statement.getText(source)).join("\n");
 
-const setup = () => {
+const setup = (waitForTransactions: () => Promise<void> = async () => undefined) => {
     const calls: unknown[] = [];
     const completions: ((response: unknown) => void)[] = [];
     const Constants = {
@@ -25,7 +25,7 @@ const setup = () => {
     runInNewContext(transpileModule(code, {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText, {
         exports, Constants, window, console,
         replaceLegacyMindmapHTML: (html: string) => html,
-        waitForPendingTransactions: async (): Promise<void> => undefined,
+        waitForPendingTransactions: waitForTransactions,
         fetchSyncPost: (...args: unknown[]) => {
             calls.push(args);
             return new Promise(resolve => completions.push(resolve));
@@ -108,13 +108,15 @@ test("a visible mind map waits for an already running full document migration", 
 });
 
 test("read-only, history, backlink, paging and local editors never request migration", async () => {
-    for (const mode of ["readonly", "editorReadonly", "disabled", "lite", "history", "backlink", "append", "before", "preview"]) {
+    for (const mode of ["readonly", "editorReadonly", "documentReadonly", "disabled", "lite", "history", "backlink", "append", "before", "preview"]) {
         const {run, protyle, calls, window} = setup();
         const actions: string[] = [];
         if (mode === "readonly") {
             window.siyuan.config.readonly = true;
         } else if (mode === "editorReadonly") {
             window.siyuan.config.editor.readOnly = true;
+        } else if (mode === "documentReadonly") {
+            protyle.wysiwyg.element.getAttribute = () => "true";
         } else if (["disabled", "lite"].includes(mode)) {
             Object.assign(protyle, {[mode]: true});
         } else if (mode === "preview") {
@@ -125,6 +127,31 @@ test("read-only, history, backlink, paging and local editors never request migra
         assert.equal(run(protyle, "source", actions, () => assert.fail(mode)), false, mode);
         await tick();
         assert.equal(calls.length, 0, mode);
+    }
+});
+
+test("a document that becomes read-only while saving opens without requesting migration", async () => {
+    for (const mode of ["readonly", "editorReadonly", "documentReadonly", "disabled", "preview"]) {
+        let saved: () => void;
+        const {run, protyle, calls, window} = setup(() => new Promise<void>(resolve => saved = resolve));
+        const rendered: string[] = [];
+        const html = mindmap("source");
+        assert.equal(run(protyle, html, [], (content: string) => rendered.push(content)), true);
+        if (mode === "readonly") {
+            window.siyuan.config.readonly = true;
+        } else if (mode === "editorReadonly") {
+            window.siyuan.config.editor.readOnly = true;
+        } else if (mode === "documentReadonly") {
+            protyle.wysiwyg.element.getAttribute = () => "true";
+        } else if (mode === "preview") {
+            Object.assign(protyle.options, {mode: "preview"});
+        } else {
+            protyle.disabled = true;
+        }
+        saved();
+        await tick();
+        assert.equal(calls.length, 0, mode);
+        assert.deepEqual(rendered, [html], mode);
     }
 });
 

@@ -47,6 +47,7 @@ import {genEmbedStatTip, type IBlockStat, type IEmbedStat} from "../../layout/st
 import {mountBreadcrumbButtons} from "../../plugin/breadcrumbButton";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {waitForPendingTransactions} from "../util/transactionQueue";
+import {getLiteFragmentHost} from "../util/liteFragment";
 import {bindMobileMenuKeyboard} from "../../mobile/util/keyboardToolbar";
 /// #if MOBILE
 import {commandPanel} from "../../boot/globalEvent/command/panel";
@@ -881,7 +882,9 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                 const requestID = ++this.menuRequestID;
 
                 let id;
-                const cursorNodeElement = hasClosestBlock(getEditorRange(protyle.element).startContainer);
+                const selectedBlock = hasClosestBlock(getEditorRange(protyle.element).startContainer);
+                // 片段编辑器的段落 ID 只在前端使用，菜单统计使用所属文档。
+                const cursorNodeElement = selectedBlock && !getLiteFragmentHost(selectedBlock) ? selectedBlock : undefined;
                 if (cursorNodeElement) {
                     id = cursorNodeElement.getAttribute("data-node-id");
                 }
@@ -1187,6 +1190,31 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                                     });
                                 }
                             }]
+                        }).element);
+                    }
+                    if (!protyle.disabled) {
+                        const position = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_RESTORE_DOC_POSITION);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "docOpenPosition",
+                            label: window.siyuan.languages.docOpenPosition,
+                            icon: "iconScrollVert",
+                            type: "submenu",
+                            submenu: [
+                                {id: "default", label: window.siyuan.languages.default, value: ""},
+                                {id: "restore", label: window.siyuan.languages.restoreDocPosition, value: "true"},
+                                {id: "start", label: window.siyuan.languages.docOpenAtStart, value: "false"},
+                            ].map(item => ({
+                                id: item.id,
+                                label: item.label,
+                                iconHTML: "",
+                                current: item.value ? position === item.value : position !== "true" && position !== "false",
+                                click() {
+                                    fetchPost("/api/attr/setBlockAttrs", {
+                                        id: protyle.block.rootID,
+                                        attrs: {[Constants.CUSTOM_SY_RESTORE_DOC_POSITION]: item.value},
+                                    });
+                                },
+                            })),
                         }).element);
                     }
                     /// #if !MOBILE

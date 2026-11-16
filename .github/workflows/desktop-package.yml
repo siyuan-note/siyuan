@@ -1,0 +1,75 @@
+name: Package macOS desktop runtime
+
+on:
+  workflow_call:
+    inputs:
+      config:
+        required: true
+        type: string
+      packageManager:
+        required: true
+        type: string
+      testing_ref:
+        required: true
+        type: string
+
+jobs:
+  package:
+    runs-on: ${{ fromJSON(inputs.config).os }}
+    name: ${{ fromJSON(inputs.config).name }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Install Node pnpm
+        run: npm install --global --allow-scripts=pnpm ${{ inputs.packageManager }}
+
+      - name: Download raw macOS runtime
+        uses: actions/download-artifact@v8
+        with:
+          name: desktop-runtime-macos-${{ fromJSON(inputs.config).goarch }}
+          path: ${{ runner.temp }}/desktop-runtime
+
+      - name: Verify and restore macOS runtime
+        shell: bash
+        env:
+          TESTING_REF: ${{ inputs.testing_ref }}
+          TARGET_OS: ${{ fromJSON(inputs.config).goos }}
+          TARGET_ARCH: ${{ fromJSON(inputs.config).goarch }}
+          KERNEL_PATH: ${{ fromJSON(inputs.config).kernel_path }}
+        run: |
+          test "$TARGET_OS" = darwin
+          [[ "$TARGET_ARCH" = amd64 || "$TARGET_ARCH" = arm64 ]]
+          test "$(uname -m)" = arm64
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          (cd "$RUNNER_TEMP/desktop-runtime" && shasum -a 256 --check SHA256SUMS)
+          # 封装只依赖产品版本、目标架构和完整性，不依赖测试仓库状态。
+          node -e 'const r = require(process.argv[1]); if (r.productSHA !== process.env.GITHUB_SHA || r.goos !== process.env.TARGET_OS || r.goarch !== process.env.TARGET_ARCH) throw new Error("Runtime revision or target mismatch");' "$RUNNER_TEMP/desktop-runtime/revisions.json"
+          # 使用本次构建的完整快照，不与 checkout 的 app 文件混合。
+          rm -rf app
+          tar -xzf "$RUNNER_TEMP/desktop-runtime/runtime.tar.gz"
+          test -x "kernel/$KERNEL_PATH"
+          test -s app/stage/build/desktop/index.html
+          test -s app/stage/build/markdown/index.html
+          test -s app/stage/protyle/js/lute/lute.min.js
+          test ! -e app/stage/build/markdown/vditor/dist/js/lute/lute.min.js
+          test -d app/node_modules
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+
+      - name: Building Electron App
+        run: pnpm run ${{ fromJSON(inputs.config).electron_args }}
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: siyuan-${{ fromJSON(inputs.config).suffix }}
+          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-${{ fromJSON(inputs.config).suffix }}
+          if-no-files-found: error

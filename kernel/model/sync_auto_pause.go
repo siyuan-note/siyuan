@@ -17,9 +17,10 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// recordAutoSyncFailure 用户取消和本地编辑竞态不属于云端连续失败。
+// 用户取消、本地编辑竞态和等待确认同步来源不属于云端连续失败。
 func recordAutoSyncFailure(err error) {
-	if errors.Is(err, context.Canceled) || errors.Is(err, dejavu.ErrIndexFileChanged) || errors.Is(err, errSyncCheckoutBusy) {
+	if errors.Is(err, context.Canceled) || errors.Is(err, dejavu.ErrIndexFileChanged) || errors.Is(err, errSyncCheckoutBusy) ||
+		errors.Is(err, dejavu.ErrSyncSourceChanged) || errors.Is(err, dejavu.ErrSyncSourcePreviewChanged) {
 		return
 	}
 	autoSyncErrCount.Add(1)

@@ -10,6 +10,9 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/render"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestParseStdMdInvalidFrontMatterPreservesMarkdown(t *testing.T) {
@@ -57,6 +60,26 @@ func TestParseStdMdValidFrontMatterCompatibility(t *testing.T) {
 	if tree.Root.FirstChild.Type != ast.NodeCodeBlock ||
 		!strings.Contains(tree.Root.FirstChild.ChildByType(ast.NodeCodeBlockCode).TokensStr(), "title: Note") {
 		t.Fatal("valid front matter was not preserved as YAML code")
+	}
+}
+
+func TestImportedFrontMatterExportsAsFencedCode(t *testing.T) {
+	const source = "---\ntitle: Home\ntags: [index, personal]\n---\n\n# Home\n\nSome text.\n"
+	engine := util.NewLute()
+	tree, _, _, _ := parseStdMd([]byte(source), false)
+	stored := render.NewJSONRenderer(tree, engine.RenderOptions, engine.ParseOptions).Render()
+	tree, err := treenode.ParseJSONWithoutFix(stored, engine.ParseOptions)
+	if err != nil {
+		t.Fatal(err)
+	}
+	markdown := string(render.NewProtyleExportMdRenderer(tree, engine.RenderOptions, engine.ParseOptions).Render())
+	if strings.Count(markdown, "```") != 2 || !strings.Contains(markdown, "```yaml\n---\ntitle: Home\ntags: [index, personal]\n---\n```") ||
+		!strings.Contains(markdown, "# Home\n") || !strings.Contains(markdown, "Some text.") {
+		t.Fatalf("front matter or body lost during Markdown export: %q", markdown)
+	}
+	preview := string(render.NewProtyleExportRenderer(tree, engine.RenderOptions, engine.ParseOptions).Render())
+	if !strings.Contains(preview, "title: Home") || !strings.Contains(preview, "tags: [index, personal]") {
+		t.Fatalf("front matter lost during HTML export: %s", preview)
 	}
 }
 

@@ -13,11 +13,11 @@ import {Constants} from "../../constants";
 import {highlightRender, lineNumberRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
 import {renderChartsForImage} from "../render/chartRender";
-import {isInAndroid, isIPad, isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
+import {isInAndroid, isIPad, isIPhone, isMac, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
 import {useShell} from "../../util/pathName";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {copyPNGByLink, writePNGBlob} from "../../menus/util";
-import {getExportImageSize, isExportImageSizeSupported, observeExportImageLayout, updateExportImageLayout} from "./imageLayout";
+import {getExportImageLayoutScale, getExportImageSize, isExportImageSizeSupported, observeExportImageLayout, updateExportImageLayout} from "./imageLayout";
 import {getExportImageFontCSS, getExportImageLocalFontCSS} from "./imageFonts";
 import {suspendAVColumnWindows} from "../render/av/columnWindow";
 
@@ -162,17 +162,28 @@ export const exportImage = (id: string, copyOnly = false) => {
                 throw new Error(window.siyuan.languages.exportImageTooLarge);
             }
             // 截图克隆完整内容区，预览窗口保持原有宽度和滚动位置。
-            const style = {boxSizing: "border-box", overflow: "hidden"};
+            let useHighDensityLayout = (isMac() || isIPhone() || isIPad()) && CSS.supports("zoom", "2");
+            for (let ancestor = contentElement; useHighDensityLayout && ancestor; ancestor = ancestor.parentElement) {
+                const zoom = getComputedStyle(ancestor).zoom;
+                useHighDensityLayout = zoom === "normal" || Number(zoom) === 1;
+            }
+            const layoutScale = getExportImageLayoutScale(size, pixelRatio, useHighDensityLayout);
+            const style: Partial<CSSStyleDeclaration> = {boxSizing: "border-box", overflow: "hidden"};
+            if (layoutScale > 1) {
+                // 在 SVG 内按物理像素布局，避免 Apple emoji 的字宽变大导致表格意外换行。
+                Object.assign(style, {width: `${size.width}px`, height: `${size.height}px`, zoom: String(layoutScale)});
+            }
+            const physicalSize = {width: size.width * layoutScale, height: size.height * layoutScale};
             if (isIPhone() || isIPad() || isSafari()) {
                 // modern-screenshot 通过缓存默认样式提高 WebKit/WKWebView 环境下的导出性能。
                 await addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.7.0`, "protyleModernScreenshot");
                 const localFontCSS = getExportImageLocalFontCSS(contentElement.ownerDocument);
                 return await window.modernScreenshot.domToBlob(
                     contentElement, {
-                        ...size,
+                        ...physicalSize,
                         style,
                         type: "image/png",
-                        scale: pixelRatio,
+                        scale: pixelRatio / layoutScale,
                         onCreateForeignObjectSvg: (svgElement: SVGSVGElement) => {
                             if (localFontCSS) {
                                 const fontStyle = document.createElementNS(svgElement.namespaceURI, "style");
@@ -186,9 +197,9 @@ export const exportImage = (id: string, copyOnly = false) => {
             await addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image");
             return await window.htmlToImage.toBlob(
                 contentElement, {
-                    ...size,
+                    ...physicalSize,
                     style,
-                    pixelRatio,
+                    pixelRatio: pixelRatio / layoutScale,
                     fontEmbedCSS: await getExportImageFontCSS(contentElement),
                     imagePlaceholder: IMAGE_PLACEHOLDER,
                     onImageErrorHandler: (event: Event) => {

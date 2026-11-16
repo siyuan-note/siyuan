@@ -120,7 +120,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Hover over the block to reveal the small handles outside its border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly; changing one dimension preserves the other."
+					"Data": "Hover over the block to reveal the small handles along its edges. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly; changing one dimension preserves the other."
 				}
 			]
 		},

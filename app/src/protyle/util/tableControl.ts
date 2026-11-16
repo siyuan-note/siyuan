@@ -491,12 +491,16 @@ export class TableControl {
                 this.hoverCell?.closest("table"),
                 this.caretCell?.closest("table"),
                 this.selection?.table,
+                this.dimensionBoundary?.table,
+                this.rowBoundary?.cell.closest("table"),
             ].filter((table): table is HTMLTableElement => !!table?.isConnected);
             if (mutations.some(mutation => controlTables.some(table => table.contains(mutation.target)))) {
                 render = true;
             }
             const pinnedTableSelector = '[data-type="NodeTable"][custom-pinthead="true"]';
-            if (mutations.some(mutation => mutation.type === "attributes" ||
+            if (mutations.some(mutation => mutation.type === "attributes" ?
+                mutation.attributeName === "custom-pinthead" || mutation.attributeName === "style" &&
+                mutation.target instanceof Element && mutation.target.contains(this.protyle.element) :
                 (mutation.target instanceof Element && !!mutation.target.closest(pinnedTableSelector)) ||
                 [...mutation.addedNodes, ...mutation.removedNodes].some(node => node instanceof Element &&
                     (node.matches(pinnedTableSelector) || !!node.querySelector(pinnedTableSelector))))) {
@@ -507,7 +511,7 @@ export class TableControl {
             }
         });
         this.observer.observe(this.wysiwygElement, {
-            attributeFilter: ["custom-pinthead"],
+            attributeFilter: ["custom-pinthead", "style"],
             attributes: true,
             childList: true,
             characterData: true,
@@ -523,7 +527,7 @@ export class TableControl {
             });
             document.addEventListener("scroll", event => {
                 if (event.target instanceof Node && event.target.contains(protyle.element)) {
-                    this.scheduleRender();
+                    this.onScroll();
                 }
             }, {capture: true, signal: this.abortController.signal});
         }
@@ -970,7 +974,7 @@ export class TableControl {
             range.collapse(true);
             focusByRange(range);
         }, {capture: true, signal});
-        this.protyle.element.addEventListener("scroll", () => this.scheduleRender(), {capture: true, signal});
+        this.protyle.element.addEventListener("scroll", () => this.onScroll(), {capture: true, signal});
         window.addEventListener("resize", () => this.scheduleRender(), {signal});
         this.element.addEventListener("wheel", event => {
             if (event.ctrlKey) {
@@ -1490,6 +1494,17 @@ export class TableControl {
         element.style.top = `${Math.round(top)}px`;
     }
 
+    private onScroll() {
+        if (!this.dimensionDragging) {
+            this.clearDimensionFeedback();
+            this.rowBoundary = undefined;
+            this.wysiwygElement.querySelectorAll<HTMLElement>(".table__resize").forEach(element => {
+                element.style.display = "none";
+            });
+        }
+        this.scheduleRender();
+    }
+
     private hoverDimensionBoundary(boundary?: ITableDimensionBoundary) {
         if (this.dimensionDragging || boundary?.table === this.dimensionBoundary?.table &&
             boundary?.row === this.dimensionBoundary?.row && boundary?.column === this.dimensionBoundary?.column) {
@@ -1837,8 +1852,10 @@ export class TableControl {
 
     private render() {
         this.renderPinnedTableFrames();
-        if (this.dimensionDragging) {
+        if (this.dimensionDragging || this.dimensionHoverTimer === undefined) {
             this.renderDimensionGuide();
+        }
+        if (this.dimensionDragging) {
             return;
         }
         this.renderRowBoundary();

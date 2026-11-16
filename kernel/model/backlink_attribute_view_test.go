@@ -41,10 +41,10 @@ func TestBacklinkAttributeViewMatches(t *testing.T) {
 		{ItemID: "row2", KeyID: "text1", ValueID: "value2", Title: "Second row", KeyName: "First field", DefIDs: []string{first}},
 		{ItemID: "row1", KeyID: "text2", ValueID: "value3", Title: "First row", KeyName: "Second field", DefIDs: []string{first}},
 	}
-	if got := backlinkAttributeViewMatches(view, map[string]bool{first: true, second: true}); !reflect.DeepEqual(got, want) {
+	if got := backlinkAttributeViewMatches(view, map[string]bool{first: true, second: true}, nil); !reflect.DeepEqual(got, want) {
 		t.Fatalf("unexpected matches: %#v", got)
 	}
-	if got := backlinkAttributeViewMatches(view, map[string]bool{"missing": true}); len(got) != 0 {
+	if got := backlinkAttributeViewMatches(view, map[string]bool{"missing": true}, nil); len(got) != 0 {
 		t.Fatalf("unrelated definition matched: %+v", got)
 	}
 }
@@ -70,12 +70,12 @@ func TestBacklinkAttributeViewTargetsRespectCarrier(t *testing.T) {
 	}
 	tree := newAttributeViewRefCarrierTestTree(boxID, rootID, avID, blockID, mirrorID)
 	ref := &sql.Ref{Type: sql.AttributeViewRefType, BlockID: blockID, DefBlockID: defID, RootID: rootID, Box: boxID, Path: tree.Path}
-	got := backlinkAttributeViewTargets(tree, []*sql.Ref{ref})
+	got := backlinkAttributeViewTargets(tree, []*sql.Ref{ref}, nil)
 	if len(got) != 1 || got[blockID] == nil || len(got[blockID].Matches) != 1 || got[mirrorID] != nil {
 		t.Fatalf("unexpected carrier targets: %+v", got)
 	}
 	ref.Box = "other-box"
-	if got = backlinkAttributeViewTargets(tree, []*sql.Ref{ref}); len(got) != 0 {
+	if got = backlinkAttributeViewTargets(tree, []*sql.Ref{ref}, nil); len(got) != 0 {
 		t.Fatalf("cross-notebook reference matched: %+v", got)
 	}
 	const encryptedBoxID = "20260906160006-boxenc1"
@@ -83,7 +83,41 @@ func TestBacklinkAttributeViewTargetsRespectCarrier(t *testing.T) {
 	t.Cleanup(func() { forgetRuntimeEncryptedBox(encryptedBoxID) })
 	tree.Box = encryptedBoxID
 	ref.Box = encryptedBoxID
-	if got = backlinkAttributeViewTargets(tree, []*sql.Ref{ref}); len(got) != 0 {
+	if got = backlinkAttributeViewTargets(tree, []*sql.Ref{ref}, nil); len(got) != 0 {
 		t.Fatalf("encrypted carrier fell back to the global attribute view: %+v", got)
+	}
+}
+
+func TestBacklinkAttributeViewMatchesRespectPublishAccess(t *testing.T) {
+	const defID = "20260906150000-def0001"
+	const visibleDocID = "20260906150001-visbl01"
+	const hiddenDocID = "20260906150002-hiddn01"
+	cell := func(row, id string) *av.Value {
+		return &av.Value{ID: id, BlockID: row, Type: av.KeyTypeText, Text: &av.ValueText{Rich: &av.ValueTextRich{
+			Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown, Content: "((" + defID + " \"Link\"))",
+		}}}
+	}
+	view := &av.AttributeView{KeyValues: []*av.KeyValues{
+		{Key: &av.Key{ID: "primary", Type: av.KeyTypeBlock}, Values: []*av.Value{
+			{BlockID: "visible", Block: &av.ValueBlock{ID: visibleDocID, Content: "Visible row"}},
+			{BlockID: "hidden", Block: &av.ValueBlock{ID: hiddenDocID, Content: "Hidden row"}},
+			{BlockID: "detached", IsDetached: true, Block: &av.ValueBlock{Content: "Detached row"}},
+		}},
+		{Key: &av.Key{ID: "text", Name: "Field", Type: av.KeyTypeText}, Values: []*av.Value{
+			cell("visible", "value1"), cell("hidden", "value2"), cell("detached", "value3"),
+		}},
+	}}
+	defIDs := map[string]bool{defID: true}
+	if got := backlinkAttributeViewMatches(view, defIDs, nil); 3 != len(got) {
+		t.Fatalf("unfiltered matches changed: %+v", got)
+	}
+	got := backlinkAttributeViewMatches(view, defIDs, func(id string) bool { return hiddenDocID != id })
+	if 2 != len(got) {
+		t.Fatalf("publish access filter did not drop the inaccessible row: %+v", got)
+	}
+	for _, match := range got {
+		if "hidden" == match.ItemID || "Hidden row" == match.Title {
+			t.Fatalf("inaccessible row metadata was returned: %#v", match)
+		}
 	}
 }

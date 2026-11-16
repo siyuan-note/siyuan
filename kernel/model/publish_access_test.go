@@ -151,7 +151,7 @@ func TestCheckBlockTreeAccessableByPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + docID,
-		Value: util.SHA256Hash([]byte(docID + protectedPassword)),
+		Value: PublishAuthCookieValue(docID, protectedPassword),
 	})
 	if status := GetBlockTreePublishAccessStatus(c, protectedAccess, bt); status != PublishAccessAllowed {
 		t.Fatalf("authorized document status = %d, want allowed", status)
@@ -189,7 +189,7 @@ func TestFilterContentByPublishAccessWithStatus(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + docID,
-		Value: util.SHA256Hash([]byte(docID + password)),
+		Value: PublishAuthCookieValue(docID, password),
 	})
 	filtered, status = FilterContentByPublishAccessWithStatus(c, protectedAccess, boxID, "/"+docID+".sy", content, false)
 	if status != PublishAccessAllowed || filtered != content {
@@ -261,15 +261,15 @@ func TestFilterBlockTreesByPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedID,
-		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedID, protectedPassword),
 	})
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedParentID,
-		Value: util.SHA256Hash([]byte(protectedParentID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedParentID, protectedPassword),
 	})
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + privateID,
-		Value: util.SHA256Hash([]byte(privateID + privatePassword)),
+		Value: PublishAuthCookieValue(privateID, privatePassword),
 	})
 
 	filtered = filterBlockTreesByPublishAccess(c, publishAccess, blockTrees)
@@ -940,7 +940,7 @@ func TestCheckBlockTreeMetadataAccessableByPublishAccess(t *testing.T) {
 	privateAccess := PublishAccess{{ID: privateID, Visible: false, Password: privatePass}}
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + privateID,
-		Value: util.SHA256Hash([]byte(privateID + privatePass)),
+		Value: PublishAuthCookieValue(privateID, privatePass),
 	})
 	if !CheckBlockTreeMetadataAccessableByPublishAccess(c, privateAccess, privateTree) {
 		t.Fatal("private document metadata should be accessible after authorization")
@@ -959,7 +959,7 @@ func TestCheckBlockTreeMetadataAccessableByPublishAccess(t *testing.T) {
 	}
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedID,
-		Value: util.SHA256Hash([]byte(protectedID + protectedPass)),
+		Value: PublishAuthCookieValue(protectedID, protectedPass),
 	})
 	if !CheckBlockTreeMetadataAccessableByPublishAccess(c, inheritedAccess, protectedChildTree) {
 		t.Fatal("protected child metadata under a hidden parent should be accessible after authorization")
@@ -1066,7 +1066,7 @@ func TestCheckAttributeViewBlockTreesAccessableByPublishAccess(t *testing.T) {
 	}
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedID,
-		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedID, protectedPassword),
 	})
 	if !checkAttributeViewBlockTreesAccessableByPublishAccess(c, protectedAccess, protectedTrees) {
 		t.Fatal("attribute view with a protected mirror should be accessible after authorization")
@@ -1353,7 +1353,7 @@ func TestFilterSearchDocsByPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedDocID, protectedPassword),
 	})
 	filtered = FilterSearchDocsByPublishAccess(c, publishAccess, docs)
 	if len(filtered) != 2 || filtered[1]["path"] != docs[3]["path"] {
@@ -1412,7 +1412,7 @@ func TestFilterGraphByPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedDocID, protectedPassword),
 	})
 	nodes, links = newGraph()
 	filteredNodes, filteredLinks = FilterGraphByPublishAccess(c, publishAccess, nodes, links)
@@ -1466,7 +1466,7 @@ func TestFilterTagsByPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedDocID, protectedPassword),
 	})
 	filtered = filterTagsByPublishAccess(c, publishAccess, newTags(), spans)
 	if len(*filtered) != 2 ||
@@ -1536,7 +1536,7 @@ func TestFilterEmbedBlocksByPublishAccessDropsInaccessibleResults(t *testing.T) 
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedDocID, protectedPassword),
 	})
 	filtered := FilterEmbedBlocksByPublishAccess(c, publishAccess, embedBlocks)
 	if 1 != len(filtered) || "20260720000005-protect" != filtered[0].Block.ID {
@@ -1598,7 +1598,7 @@ func TestFilterPathsByPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedID,
-		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedID, protectedPassword),
 	})
 	filtered = FilterPathsByPublishAccess(c, publishAccess, newPaths())
 	if len(filtered) != 2 || filtered[0].ID != protectedID || filtered[1].ID != publicID {
@@ -1660,7 +1660,7 @@ func TestFilterRecentDocsByPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedID,
-		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedID, protectedPassword),
 	})
 	filtered = FilterRecentDocsByPublishAccess(c, publishAccess, newRecentDocs())
 	if len(filtered) != 2 || filtered[0].RootID != publicID || filtered[1].RootID != protectedID {
@@ -1722,7 +1722,7 @@ func TestFilterCriteriaByPublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedID,
-		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedID, protectedPassword),
 	})
 	filtered = FilterCriteriaByPublishAccess(c, publishAccess, newCriteria())
 	if len(filtered) != 2 || filtered[0].Name != "public" || filtered[1].Name != "protected" {
@@ -1777,7 +1777,7 @@ func TestCheckAbsPathAccessableByPublishAccessKeepsHiddenNotebookAccessible(t *t
 	}
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + boxID,
-		Value: util.SHA256Hash([]byte(boxID + password)),
+		Value: PublishAuthCookieValue(boxID, password),
 	})
 	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Password: password}}) {
 		t.Fatal("password protected notebook should be accessible after authorization")
@@ -1931,7 +1931,7 @@ func TestFilterBlockInfoByPublishAccessFiltersRefIDs(t *testing.T) {
 	// 授权后密码保护文档的反链可见，禁止发布文档的反链仍不可见
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedDocID, protectedPassword),
 	})
 	filtered = FilterBlockInfoByPublishAccess(c, publishAccess, &BlockInfo{
 		ID:       publicID,

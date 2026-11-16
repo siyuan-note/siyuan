@@ -24,7 +24,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestAutoSyncPauseExcludesCancellationAndPreparationRetry(t *testing.T) {
+func TestAutoSyncPauseExcludesCancellationPreparationRetryAndSourceDecisions(t *testing.T) {
 	previous := autoSyncErrCount.Load()
 	t.Cleanup(func() { autoSyncErrCount.Store(previous) })
 	autoSyncErrCount.Store(7)
@@ -32,6 +32,8 @@ func TestAutoSyncPauseExcludesCancellationAndPreparationRetry(t *testing.T) {
 		recordAutoSyncFailure(errors.Join(errors.New("network request stopped"), context.Canceled))
 		recordAutoSyncFailure(dejavu.ErrIndexFileChanged)
 		recordAutoSyncFailure(fmt.Errorf("wrapped: %w", errSyncCheckoutBusy))
+		recordAutoSyncFailure(fmt.Errorf("wrapped: %w", dejavu.ErrSyncSourceChanged))
+		recordAutoSyncFailure(dejavu.ErrSyncSourcePreviewChanged)
 	}
 	if autoSyncErrCount.Load() != 7 {
 		t.Fatal("user cancellation or active editing triggered automatic backoff")

@@ -206,7 +206,7 @@ const rendererModules = () => {
     visitTrim(onGet);
     assert.ok(trimBranch?.elseStatement && ts.isIfStatement(trimBranch.elseStatement));
     modules["util/renderContent"] = extract("util/renderContent", ["getInsertedRenderRoots"]);
-    modules["util/navigationTrim"] = `import {containsCurrentSelection} from "./documentRange";
+    modules["util/navigationTrim"] = `import {containsCurrentSelection, updateDocumentTopEof} from "./documentRange";
         import {getInsertedRenderRoots} from "./renderContent";
         import {Constants} from "../../constants";
         const invalidateTrackedRangesInElement = () => {}, disposeCustomBlocksInElement = () => {}, hideElements = () => {};
@@ -389,7 +389,12 @@ const runGeometryCases = async () => {
         const text = direction === "down" ? `x\n${"long".repeat(200)}\n` : `${"long".repeat(200)}\nx\n`;
         const {code, content, scroller} = setup(text);
         scroller.scrollLeft = 1000;
-        assert.equal(focusEditableAtGoalX(code, direction, 40, content), true, `horizontal scroll ${direction}`);
+        const moved = focusEditableAtGoalX(code, direction, 40, content);
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        assert.equal(moved, true, `horizontal scroll ${direction}: ${JSON.stringify({scrollLeft: scroller.scrollLeft,
+            code: code.getBoundingClientRect(), scroller: scroller.getBoundingClientRect(),
+            rects: Array.from(range.getClientRects()).map(rect => rect.toJSON())})}`);
         assert.equal(scroller.scrollLeft, 0);
         cases++;
     }
@@ -399,6 +404,26 @@ const runGeometryCases = async () => {
         assert.equal(focusEditableAtGoalX(code, "down", 100, content), true);
         assert.equal(scroller.scrollLeft, 1000);
         assert.ok(Math.abs(getSelection().getRangeAt(0).getBoundingClientRect().left - 100) < 10);
+        cases++;
+    }
+    {
+        const {code, content, after} = setup("visible");
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        const rect = range.getBoundingClientRect();
+        const cover = document.createElement("div");
+        cover.style.cssText = `position:fixed;z-index:999;left:${rect.left - 1}px;top:${rect.top + rect.height / 2 - 1}px;width:${rect.width + 2}px;height:${rect.height / 2 + 2}px`;
+        document.body.append(cover);
+        assert.equal(document.elementFromPoint(40, rect.top + rect.height / 2), cover);
+        assert.equal(focusEditableAtGoalX(code, "down", 40, content), true,
+            "a partially covered caret can use its visible upper portion");
+        select(after.firstChild, 0);
+        cover.style.top = `${rect.top - 1}px`;
+        cover.style.height = `${rect.height + 2}px`;
+        assert.equal(focusEditableAtGoalX(code, "down", 40, content), false,
+            "an unrelated element covering the entire caret is never accepted as its hit target");
+        assert.equal(getSelection().anchorNode, after.firstChild);
+        cover.remove();
         cases++;
     }
     for (const style of ["display:none", "visibility:hidden", "height:0;overflow:hidden", "height:0;overflow:clip"]) {
@@ -448,9 +473,9 @@ const runEntryCases = async () => {
                 <div style="height:240px"></div>
             </div></div>`;
         const editor = document.querySelector(".protyle-wysiwyg");
-        const protyle = {element: document.getElementById("protyle"),
-            contentElement: document.querySelector(".protyle-content"), wysiwyg: {element: editor}, disabled: false};
         const title = document.getElementById("title");
+        const protyle = {element: document.getElementById("protyle"), title: {editElement: title},
+            contentElement: document.querySelector(".protyle-content"), wysiwyg: {element: editor}, disabled: false};
         editor.firstElementChild?.setAttribute("data-eof", "1");
         window.titleKeydown.bind(protyle, title);
         bindVerticalNavigationReset(editor);
@@ -465,6 +490,34 @@ const runEntryCases = async () => {
             `caret ${caret?.top}..${caret?.bottom}, viewport ${viewport.top}..${viewport.bottom}`);
     };
     let cases = 0;
+    {
+        const {protyle, editor, title} = setup(paragraph);
+        const {updateDocumentTopEof} = window.navigationModules("util/documentRange");
+        updateDocumentTopEof(editor);
+        editor.firstElementChild.outerHTML = `<div class="bq" data-type="NodeBlockquote" data-node-id="quote">${paragraph}</div>` +
+            '<div data-type="NodeParagraph" data-node-id="next" data-node-index="1"><div id="next" contenteditable="true">next</div></div>';
+        editor.addEventListener("keydown", event => {
+            if (event.key === "ArrowUp") {
+                const body = getSelection().anchorNode.parentElement.closest("[data-node-id]");
+                assert.equal(focusAdjacentVerticalRegion(protyle, body, "up", 40), "moved");
+                event.preventDefault();
+            }
+        });
+        for (const id of ["body", "next"]) {
+            title.focus();
+            select(title);
+            await ipcRenderer.invoke("vertical-navigation-key", "Down");
+            await frame();
+            assert.ok(document.getElementById(id).contains(getSelection().anchorNode), id);
+            await ipcRenderer.invoke("vertical-navigation-key", "Up");
+            await frame();
+            assert.ok(title.contains(getSelection().anchorNode), id);
+            if (id === "body") {
+                editor.firstElementChild.remove();
+            }
+        }
+        cases++;
+    }
     for (const lines of [0, 1, 3]) {
         window.siyuan.config.editor.cursorSurroundingLines = lines;
         for (const whiteSpace of ["pre", "pre-wrap"]) {

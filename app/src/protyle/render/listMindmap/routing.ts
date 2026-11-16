@@ -320,7 +320,7 @@ export const encodeMindmapRoute = (points: MindmapRoutePoint[], from: MindmapRou
     })};
 };
 
-const decodeMindmapRoute = (route: MindmapManualRoute, from: MindmapRouteBox, to: MindmapRouteBox) =>
+export const decodeMindmapRoute = (route: MindmapManualRoute, from: MindmapRouteBox, to: MindmapRouteBox) =>
     route.points.map(point => {
         const anchor = routeAnchor(from, to, point.t);
         return {x: Math.round((anchor.x + point.x) * 1e6) / 1e6,

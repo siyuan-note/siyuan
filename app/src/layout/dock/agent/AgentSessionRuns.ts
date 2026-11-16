@@ -13,6 +13,7 @@ export interface AgentSessionRun<TInteraction = unknown, TEvent = unknown, TView
     pendingInteractions: TInteraction[];
     renderedInteractionKeys: Set<string>;
     interactionViewReady: boolean;
+    finishedNormally?: boolean;
 }
 
 export class AgentSessionRuns<TInteraction = unknown, TEvent = unknown, TViewState = unknown> {

@@ -4,6 +4,7 @@ import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} from "typescript";
 import * as routing from "./routing";
+import * as relationGeometry from "./relationGeometry";
 import type {ListMindmapRelation} from "./model";
 
 // 执行视图实际的拖动和回退方法，指针及元素替身只提供浏览器事件边界。
@@ -21,7 +22,7 @@ globalThis.View = View;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outp
 const setup = (overrides: Partial<ListMindmapRelation> = {}) => {
     const relation: ListMindmapRelation = {id: "r", from: "a", to: "b", label: "Keep", arrowDirection: "reverse", ...overrides};
     const changes: {id: string, patch: Partial<ListMindmapRelation>, expected: string}[] = [];
-    const sandbox: any = {...routing, clearTimeout, cancelAnimationFrame: () => {}, requestAnimationFrame: () => 1};
+    const sandbox: any = {...routing, ...relationGeometry, clearTimeout, cancelAnimationFrame: () => {}, requestAnimationFrame: () => 1};
     runInNewContext(compiled, sandbox);
     const view = new sandbox.View();
     const positions = new Map([
@@ -56,6 +57,68 @@ const setup = (overrides: Partial<ListMindmapRelation> = {}) => {
         clientX: x * view.scale, clientY: y * view.scale, pointerType, preventDefault: () => {}});
     return {view, relation, positions, changes, begin, event};
 };
+
+test("free curve handles support two-dimensional mouse and touch drags and one undoable save", () => {
+    for (const pointerType of ["mouse", "touch"]) {
+        for (const scale of [.5, 2]) {
+            const {view, relation, positions, changes, event} = setup({pathStyle: "bezier"});
+            view.scale = scale;
+            const points = view.relationRoutes.get("r");
+            const original = JSON.stringify(relation);
+            const handle = points[1];
+            view.pointer = {pointerId: 1, startX: handle.x * scale, startY: handle.y * scale, moved: false,
+                relation: {id: "r", segment: 0, original, points, offset: 0, valid: true, handle}};
+            view.pointerMove(event(handle.x + 40, handle.y - 70, pointerType));
+            view.previewRouteDrag();
+            const preview = view.relationRoutes.get("r");
+            assert.equal(preview[1].x, points[1].x + 40);
+            assert.equal(preview[1].y, points[1].y - 70);
+            assert.equal(JSON.stringify(relation), original);
+            assert.equal(changes.length, 0);
+            view.pointerUp(event(handle.x + 40, handle.y - 70, pointerType));
+            assert.equal(changes.length, 1);
+            assert.equal(changes[0].expected, original);
+            assert.deepEqual(relationGeometry.routeFreeMindmapRelation(positions.get("a"), positions.get("b"),
+                {...relation, ...changes[0].patch}), JSON.parse(JSON.stringify(preview)));
+            assert.equal(changes[0].patch.curve.version, 1);
+        }
+    }
+});
+
+test("free paths accept anchors across obstacles and cancellation restores the saved curve", () => {
+    const {view, relation, changes, begin, event} = setup({pathStyle: "bezier",
+        curve: {version: 1, from: {x: 70, y: -50}, to: {x: -20, y: 90}}});
+    view.routingObstacles = () => [{x: -1000, y: -1000, width: 3000, height: 3000}];
+    const before = JSON.stringify(view.relationRoutes.get("r"));
+    begin();
+    view.pointerMove(event(27, -2, "touch"));
+    view.previewRouteDrag();
+    assert.equal(view.pointer.relation.valid, true);
+    view.cancelPointer();
+    assert.equal(JSON.stringify(view.relationRoutes.get("r")), before);
+    assert.equal(changes.length, 0);
+    begin();
+    view.pointerMove(event(27, -2));
+    view.pointerUp(event(27, -2));
+    assert.equal(changes.length, 1);
+    assert.deepEqual(JSON.parse(JSON.stringify(changes[0].patch)), {fromAnchor: {side: "top", ratio: .27}});
+    assert.ok(relation.curve);
+});
+
+test("reset restores only the active shape while straight paths expose endpoint handles only", () => {
+    for (const pathStyle of ["bezier", "rounded", "auto"] as const) {
+        const {view, changes} = setup({pathStyle, curve: {version: 1, from: {x: 10, y: 30}, to: {x: -20, y: 40}},
+            route: {version: 1, points: [{x: 30, y: -60, t: .5}]},
+            freeRoute: {version: 1, points: [{x: 60, y: 30, t: .5}]}});
+        view.resetRelationRoute("r");
+        assert.deepEqual(Object.keys(changes[0].patch), [pathStyle === "auto" ? "route" : pathStyle === "rounded" ? "freeRoute" : "curve"]);
+    }
+    const {view} = setup({pathStyle: "straight"});
+    const parts: (string | number)[] = [];
+    view.getRouteHandle = (_id: string, part: string | number) => { parts.push(part); return {style: {}}; };
+    view.renderRouteControls();
+    assert.deepEqual(parts, ["from", "to"]);
+});
 
 test("same-node endpoint drag pins a continuous position and preserves route and arrow identity", () => {
     for (const scale of [.5, 1, 2]) {

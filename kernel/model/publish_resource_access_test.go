@@ -66,7 +66,7 @@ func TestCachedPublishResourceRechecksDocumentAndAuthorization(t *testing.T) {
 			t.Fatal("unauthorized reader reused cached access")
 		}
 		authorized := newContext()
-		authorized.Request.AddCookie(&http.Cookie{Name: "publish-auth-" + rootID, Value: util.SHA256Hash([]byte(rootID + "secret"))})
+		authorized.Request.AddCookie(&http.Cookie{Name: "publish-auth-" + rootID, Value: PublishAuthCookieValue(rootID, "secret")})
 		if !checkResourceAccessableByPublishAccess(authorized, resource, protected, widget) {
 			t.Fatal("authorized reader could not use cached references")
 		}

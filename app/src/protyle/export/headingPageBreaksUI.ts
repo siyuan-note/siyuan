@@ -11,7 +11,7 @@ export const headingPageBreakControls = (levels: unknown) => {
 </label>`).join('<div class="fn__hr--small"></div>');
 };
 
-export const openHeadingPageBreakDialog = (onConfirm: () => void) => {
+export const openHeadingPageBreakDialog = (onConfirm: (blockRefMode: number) => void) => {
     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
     const dialog = new MobileDialog({
         title: window.siyuan.languages.print,
@@ -20,6 +20,15 @@ export const openHeadingPageBreakDialog = (onConfirm: () => void) => {
         <div class="fn__flex-1">${window.siyuan.languages.exportTitleImage}</div>
         <span class="fn__space"></span>
         <input id="titleImage" type="checkbox" class="b3-switch fn__flex-center" ${localData.titleImage !== false ? "checked" : ""}>
+    </label>
+    <label class="b3-label b3-label--inner">
+        <div>${window.siyuan.languages.exportBlockRefMode}</div>
+        <div class="fn__hr"></div>
+        <select id="blockRefMode" class="b3-select fn__block">
+            <option value="2" ${window.siyuan.config.export.blockRefMode === 2 ? "selected" : ""}>${window.siyuan.languages.export2}</option>
+            <option value="3" ${window.siyuan.config.export.blockRefMode === 3 ? "selected" : ""}>${window.siyuan.languages.export3}</option>
+            <option value="4" ${window.siyuan.config.export.blockRefMode === 4 ? "selected" : ""}>${window.siyuan.languages.export4}</option>
+        </select>
     </label>
     <div>${window.siyuan.languages.pdfHeadingPageBreaks}</div>
     <div class="ft__smaller ft__on-surface">${window.siyuan.languages.pdfHeadingPageBreaksTip}</div>
@@ -39,7 +48,8 @@ export const openHeadingPageBreakDialog = (onConfirm: () => void) => {
         localData.headingPageBreakLevels = Array.from(dialog.element.querySelectorAll<HTMLInputElement>(
             "[data-heading-page-breaks] input:checked")).map(input => Number(input.value));
         setStorageVal(Constants.LOCAL_EXPORTPDF, localData);
+        const blockRefMode = Number(dialog.element.querySelector<HTMLSelectElement>("#blockRefMode").value);
         dialog.destroy();
-        onConfirm();
+        onConfirm(blockRefMode);
     });
 };

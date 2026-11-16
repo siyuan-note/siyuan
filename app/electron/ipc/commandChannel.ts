@@ -5,6 +5,7 @@ import {state, writeLog} from "../shared/runtime";
 import {WINDOW_PAGE} from "../shared/pagePaths";
 import {getWindowByContentId} from "../window/windowLookup";
 import {showWindow} from "../window/windowVisibility";
+import {finishWindowCloseOnHide} from "../window/closeRecovery";
 import {updateTitleBarOverlay} from "../window/windowControlsOverlay";
 import {openDevTools, toggleDevTools} from "../window/devToolsDock";
 import {hotKey2Electron} from "../window/appMenu";
@@ -12,6 +13,7 @@ import {findWorkspaceByWebContents, getWindowKernelTarget} from "../window/windo
 import type {BrowserWindow, WebContents} from "electron";
 import type {Workspace} from "../shared/types";
 import {Channel} from "../shared/channels";
+import {handleAgentNotification} from "./agentNotifications";
 
 /** 一条命令执行时可见的上下文。载荷形状随命令变化，由各命令自行解释。 */
 type CommandContext = {
@@ -83,13 +85,15 @@ const commands: Record<string, CommandHandler> = {
         if (!window) {
             return;
         }
+        const hide = () => {
+            window.hide();
+            finishWindowCloseOnHide(window);
+        };
         if (window.isFullScreen()) {
-            window.once("leave-full-screen", () => {
-                window.hide();
-            });
+            window.once("leave-full-screen", hide);
             window.setFullScreen(false);
         } else {
-            window.hide();
+            hide();
         }
     },
 
@@ -119,6 +123,11 @@ const commands: Record<string, CommandHandler> = {
             window?.show();
         });
         notification.show();
+    },
+    agentNotification: ({data, window, sender, isSenderMainFrame}) => {
+        if (process.platform === "win32" && window && isSenderMainFrame) {
+            handleAgentNotification(window, sender, data);
+        }
     },
     setSpellCheckerLanguages: ({data}) => {
         electron.BrowserWindow.getAllWindows().forEach(item => {

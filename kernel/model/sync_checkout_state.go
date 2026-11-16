@@ -243,11 +243,12 @@ func (task *syncCheckoutTask) completeApply() {
 	for _, file := range task.removes {
 		changes.Removes = append(changes.Removes, file)
 	}
+	previousNotebookConfs := task.previousNotebookConfs
 	task.Unlock()
 	if changes.DataChanged() {
 		task.beginIndexing()
 		calcPetalDiff(task.beforePetals, changes)
-		processSyncMergeResult(false, false, changes, &dejavu.TrafficStat{}, "c", 0, true)
+		processSyncMergeResult(false, false, changes, &dejavu.TrafficStat{}, "c", 0, true, previousNotebookConfs)
 	}
 	task.Lock()
 	if task.indexedPaths == nil {
@@ -270,6 +271,7 @@ func (task *syncCheckoutTask) completeApply() {
 		}
 	}
 	task.upserts, task.removes = map[string]*entity.File{}, map[string]*entity.File{}
+	clear(task.previousNotebookConfs)
 	if task.releaseWrites != nil {
 		task.releaseWrites()
 		task.releaseWrites = nil
@@ -321,6 +323,9 @@ func reconcileSyncCheckoutChanges(changes *dejavu.MergeResult) (bool, error) {
 	for _, file := range changes.Upserts {
 		task.upserts[file.Path] = file
 		delete(task.removes, file.Path)
+		if boxID := syncNotebookConfBoxID(file.Path); boxID != "" {
+			delete(task.previousNotebookConfs, boxID)
+		}
 	}
 	for _, file := range changes.Removes {
 		task.removes[file.Path] = file

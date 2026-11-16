@@ -1,3 +1,5 @@
+import {createColorField} from "../colorPicker/field";
+
 export type TThemeColorEditorType = "color" | "backgroundColor" | "style1";
 
 export interface IThemeColorValue {
@@ -26,17 +28,17 @@ const getThemeColorGroupHTML = (title: string, colorField: string, backgroundFie
     `<div class="fn__flex-1">
         <div>${title}</div>
         <div class="fn__hr"></div>
-        <label class="fn__flex" data-property="color">
+        <div data-property="color">
             <span class="fn__flex-center">${window.siyuan.languages.colorFont}</span>
             <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center" data-field="${colorField}" type="color">
-        </label>
+            <div data-field="${colorField}"></div>
+        </div>
         <div class="fn__hr"></div>
-        <label class="fn__flex" data-property="backgroundColor">
+        <div data-property="backgroundColor">
             <span class="fn__flex-center">${window.siyuan.languages.colorPrimary}</span>
             <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center" data-field="${backgroundField}" type="color">
-        </label>
+            <div data-field="${backgroundField}"></div>
+        </div>
     </div>`;
 
 export const getThemeColorEditorHTML = () => `<div data-type="themeColorEditor" class="b3-label b3-label--inner fn__flex fn__flex-wrap">
@@ -48,24 +50,33 @@ export const getThemeColorEditorHTML = () => `<div data-type="themeColorEditor" 
 export const bindThemeColorEditor = (element: Element) => {
     const editorElement = element.matches('[data-type="themeColorEditor"]') ? element :
         element.querySelector('[data-type="themeColorEditor"]');
-    const lightColorElement = editorElement.querySelector('[data-field="lightColor"]') as HTMLInputElement;
-    const darkColorElement = editorElement.querySelector('[data-field="darkColor"]') as HTMLInputElement;
-    const lightBackgroundElement = editorElement.querySelector('[data-field="lightBackgroundColor"]') as HTMLInputElement;
-    const darkBackgroundElement = editorElement.querySelector('[data-field="darkBackgroundColor"]') as HTMLInputElement;
+    const fields = (["light", "dark"] as const).flatMap(theme => (["color", "backgroundColor"] as const).map(property => {
+        const name = theme + (property === "color" ? "Color" : "BackgroundColor");
+        const host = editorElement.querySelector<HTMLElement>(`[data-field="${name}"]`);
+        return {theme, property, field: createColorField(host, {
+            value: DEFAULT_THEME_COLOR_VALUE[theme][property], languages: window.siyuan.languages,
+            label: property === "color" ? window.siyuan.languages.colorFont : window.siyuan.languages.colorPrimary,
+            onPreview: () => host.dispatchEvent(new host.ownerDocument.defaultView.Event("input", {bubbles: true})),
+        })};
+    }));
+    let currentType: TThemeColorEditorType = "style1";
+    const enabled = {color: true, backgroundColor: true};
+    const updateEnabled = () => fields.forEach(({property, field}) => {
+        field.setEnabled(enabled[property] && (currentType === "style1" || currentType === property));
+    });
 
     const setType = (type: TThemeColorEditorType) => {
+        currentType = type;
         editorElement.querySelectorAll<HTMLElement>('[data-property="color"]').forEach(item => {
             item.classList.toggle("fn__none", type === "backgroundColor");
         });
         editorElement.querySelectorAll<HTMLElement>('[data-property="backgroundColor"]').forEach(item => {
             item.classList.toggle("fn__none", type === "color");
         });
+        updateEnabled();
     };
     const setValue = (value: IThemeColorValue = DEFAULT_THEME_COLOR_VALUE, type: TThemeColorEditorType = "style1") => {
-        lightColorElement.value = value.light.color || DEFAULT_THEME_COLOR_VALUE.light.color;
-        darkColorElement.value = value.dark.color || DEFAULT_THEME_COLOR_VALUE.dark.color;
-        lightBackgroundElement.value = value.light.backgroundColor || DEFAULT_THEME_COLOR_VALUE.light.backgroundColor;
-        darkBackgroundElement.value = value.dark.backgroundColor || DEFAULT_THEME_COLOR_VALUE.dark.backgroundColor;
+        fields.forEach(({theme, property, field}) => field.setValue(value[theme][property] || DEFAULT_THEME_COLOR_VALUE[theme][property]));
         setType(type);
     };
     const getValue = (type: TThemeColorEditorType = "style1"): IThemeColorValue => {
@@ -74,12 +85,10 @@ export const bindThemeColorEditor = (element: Element) => {
             dark: {},
         };
         if (type !== "backgroundColor") {
-            value.light.color = lightColorElement.value;
-            value.dark.color = darkColorElement.value;
+            fields.filter(item => item.property === "color").forEach(({theme, field}) => value[theme].color = field.getValue().hex);
         }
         if (type !== "color") {
-            value.light.backgroundColor = lightBackgroundElement.value;
-            value.dark.backgroundColor = darkBackgroundElement.value;
+            fields.filter(item => item.property === "backgroundColor").forEach(({theme, field}) => value[theme].backgroundColor = field.getValue().hex);
         }
         return value;
     };
@@ -89,5 +98,20 @@ export const bindThemeColorEditor = (element: Element) => {
         getValue,
         setType,
         setValue,
+        setEnabled: (property: "color" | "backgroundColor", value: boolean) => {
+            if (enabled[property] !== value) {
+                fields.filter(item => item.property === property).forEach(({field}) => field.setValue(field.getValue().hex));
+            }
+            enabled[property] = value;
+            updateEnabled();
+        },
+        commitDraft: (type: TThemeColorEditorType = currentType) => {
+            const participating = fields.filter(item => enabled[item.property] && (type === "style1" || item.property === type));
+            const invalid = participating.find(item => item.field.validate() !== "valid");
+            if (invalid) { invalid.field.focusError(); return undefined; }
+            participating.forEach(item => item.field.commitDraft());
+            return getValue(type);
+        },
+        destroy: () => fields.forEach(item => item.field.destroy()),
     };
 };

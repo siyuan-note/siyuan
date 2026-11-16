@@ -218,21 +218,6 @@ func PackagePluginProject(ctx context.Context, taskID, expectedRevision string) 
 			if !errors.Is(statErr, os.ErrNotExist) {
 				return statErr
 			}
-			entries, readErr := os.ReadDir(artifactsPath)
-			if readErr != nil {
-				return readErr
-			}
-			var stored int64
-			for _, entry := range entries {
-				info, infoErr := entry.Info()
-				if infoErr != nil {
-					return infoErr
-				}
-				stored += info.Size()
-			}
-			if len(entries) >= 8 || stored+int64(len(archive)) > 256*1024*1024 {
-				return util.NewTextFileError(util.TextFileTooLarge, errors.New("retained artifact limit reached; existing recovery artifacts were preserved"))
-			}
 			tmp := ".package-" + artifact.PackageHash + ".tmp"
 			file, writeErr := artifacts.OpenFile(tmp, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
 			if writeErr != nil {
@@ -263,6 +248,9 @@ func PackagePluginProject(ctx context.Context, taskID, expectedRevision string) 
 		}
 		if err = util.RecordPluginProjectArtifact(grant, artifact); err != nil {
 			return util.NewTextFileError(util.TextFileResultUnknown, fmt.Errorf("archive retained; ready metadata was not saved: %w", err))
+		}
+		if err = prunePluginProjectArtifacts(grant, artifacts, name); err != nil {
+			return util.NewTextFileError(util.TextFileResultUnknown, fmt.Errorf("current archive and ready metadata retained; artifact cleanup failed: %w", err))
 		}
 		ret = artifact
 		return nil

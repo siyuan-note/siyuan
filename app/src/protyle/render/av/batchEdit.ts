@@ -1,3 +1,4 @@
+import {getAVCellShowIcon} from "./entryIcon";
 import {isTableLikeView} from "./viewType";
 import {hasAVCapability} from "./capabilities";
 import {createEmptyAVValue} from "./attributeValue";
@@ -121,7 +122,7 @@ const createEditProxy = (options: {
     }
     cellElement.dataset.dateFormat = options.field.dateFormat || "";
     cellElement.style.cssText = "position:absolute;inset:0;";
-    cellElement.innerHTML = renderCell(displayValue, 0, options.data.view.showIcon, "table", options.field.options,
+    cellElement.innerHTML = renderCell(displayValue, 0, getAVCellShowIcon(options.data.view, displayValue.type), "table", options.field.options,
         options.field.dateFormat);
     if (displayValue.type === "checkbox") {
         renderCellAttr(cellElement, displayValue);

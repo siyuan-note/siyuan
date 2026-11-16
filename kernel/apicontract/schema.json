@@ -9416,6 +9416,9 @@
             "showIcon": {
               "type": "boolean"
             },
+            "showRelationIcon": {
+              "type": "boolean"
+            },
             "sorts": {
               "anyOf": [
                 {
@@ -9463,6 +9466,7 @@
             "sorts",
             "group",
             "pageSize",
+            "showRelationIcon",
             "showIcon",
             "wrapField",
             "groupFolded",
@@ -10197,6 +10201,9 @@
             "showIcon": {
               "type": "boolean"
             },
+            "showRelationIcon": {
+              "type": "boolean"
+            },
             "sorts": {
               "anyOf": [
                 {
@@ -10245,6 +10252,7 @@
             "sorts",
             "group",
             "pageSize",
+            "showRelationIcon",
             "showIcon",
             "wrapField",
             "groupFolded",
@@ -10798,6 +10806,9 @@
             "showIcon": {
               "type": "boolean"
             },
+            "showRelationIcon": {
+              "type": "boolean"
+            },
             "spec": {
               "type": "integer"
             },
@@ -10915,6 +10926,9 @@
               "type": "string"
             },
             "showIcon": {
+              "type": "boolean"
+            },
+            "showRelationIcon": {
               "type": "boolean"
             },
             "spec": {
@@ -11076,6 +11090,9 @@
             "showIcon": {
               "type": "boolean"
             },
+            "showRelationIcon": {
+              "type": "boolean"
+            },
             "spec": {
               "type": "integer"
             },
@@ -11205,6 +11222,9 @@
               "type": "string"
             },
             "showIcon": {
+              "type": "boolean"
+            },
+            "showRelationIcon": {
               "type": "boolean"
             },
             "spec": {
@@ -13208,6 +13228,9 @@
             "showIcon": {
               "type": "boolean"
             },
+            "showRelationIcon": {
+              "type": "boolean"
+            },
             "sorts": {
               "anyOf": [
                 {
@@ -13246,6 +13269,7 @@
             "sorts",
             "group",
             "pageSize",
+            "showRelationIcon",
             "showIcon",
             "wrapField",
             "groupFolded",
@@ -13837,6 +13861,12 @@
             "d"
           ]
         },
+        "rich": {
+          "$ref": "#/$defs/AVValuePrimaryRich"
+        },
+        "richBlockDOM": {
+          "type": "string"
+        },
         "updated": {
           "type": "integer"
         }
@@ -13897,6 +13927,26 @@
             "s",
             "d"
           ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rich": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVValuePrimaryRichInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "richBlockDOM": {
           "anyOf": [
             {
               "type": "string"
@@ -14646,6 +14696,60 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "AVValuePrimaryRich": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "inline-ast",
+            "kramdown"
+          ]
+        },
+        "spec": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "content",
+        "format",
+        "spec"
+      ],
+      "additionalProperties": false
+    },
+    "AVValuePrimaryRichInput": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "inline-ast",
+            "kramdown"
+          ]
+        },
+        "spec": {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "content",
+        "format",
+        "spec"
+      ],
       "additionalProperties": false
     },
     "AVValueRelation": {
@@ -16055,6 +16159,21 @@
       ],
       "additionalProperties": false
     },
+    "AddAssetCleanupIgnoreRequestInput": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "paths"
+      ],
+      "additionalProperties": false
+    },
     "AddAttributeViewBlocksRequestInput": {
       "type": "object",
       "properties": {
@@ -16776,6 +16895,22 @@
       },
       "required": [
         "data"
+      ],
+      "additionalProperties": false
+    },
+    "AssetCleanupIgnoreData": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "content",
+        "revision"
       ],
       "additionalProperties": false
     },
@@ -18411,6 +18546,35 @@
       },
       "required": [
         "blocks"
+      ],
+      "additionalProperties": false
+    },
+    "BatchRemoveTagRequestInput": {
+      "type": "object",
+      "properties": {
+        "collections": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TagRemovalCollectionInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "collections",
+        "labels"
       ],
       "additionalProperties": false
     },
@@ -20136,12 +20300,16 @@
         "isFolded": {
           "type": "boolean"
         },
+        "isHidden": {
+          "type": "boolean"
+        },
         "isRoot": {
           "type": "boolean"
         }
       },
       "required": [
         "isFolded",
+        "isHidden",
         "isRoot"
       ],
       "additionalProperties": false
@@ -28218,6 +28386,16 @@
           "anyOf": [
             {
               "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockRefMode": {
+          "anyOf": [
+            {
+              "type": "integer"
             },
             {
               "type": "null"
@@ -37752,6 +37930,22 @@
       ],
       "additionalProperties": false
     },
+    "GetPluginSnapshotsRequestInput": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "page"
+      ],
+      "additionalProperties": false
+    },
     "GetRepoDocHistoryRequestInput": {
       "type": "object",
       "properties": {
@@ -45800,6 +45994,87 @@
       ],
       "additionalProperties": false
     },
+    "PluginSnapshot": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/$defs/PluginSnapshotStat"
+        },
+        "id": {
+          "type": "string"
+        },
+        "memo": {
+          "type": "string"
+        },
+        "program": {
+          "$ref": "#/$defs/PluginSnapshotStat"
+        }
+      },
+      "required": [
+        "created",
+        "data",
+        "id",
+        "memo",
+        "program"
+      ],
+      "additionalProperties": false
+    },
+    "PluginSnapshotStat": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "size": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "count",
+        "size"
+      ],
+      "additionalProperties": false
+    },
+    "PluginSnapshotsData": {
+      "type": "object",
+      "properties": {
+        "pageCount": {
+          "type": "integer"
+        },
+        "snapshots": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/PluginSnapshot"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "totalCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pageCount",
+        "snapshots",
+        "totalCount"
+      ],
+      "additionalProperties": false
+    },
     "PrepareNotebookArchiveRequestInput": {
       "type": "object",
       "properties": {
@@ -46520,11 +46795,16 @@
         },
         "label": {
           "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
-        "collections",
-        "label"
+        "collections"
       ],
       "additionalProperties": false
     },
@@ -48102,6 +48382,34 @@
         "resolved",
         "start",
         "status"
+      ],
+      "additionalProperties": false
+    },
+    "RestorePluginSnapshotData": {
+      "type": "object",
+      "properties": {
+        "backupID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "backupID"
+      ],
+      "additionalProperties": false
+    },
+    "RestorePluginSnapshotRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
       ],
       "additionalProperties": false
     },
@@ -50688,6 +50996,22 @@
       ],
       "additionalProperties": false
     },
+    "SetAssetCleanupIgnoreRequestInput": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "expectedRevision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "content",
+        "expectedRevision"
+      ],
+      "additionalProperties": false
+    },
     "SetAssetOCRTextRequestInput": {
       "type": "object",
       "properties": {
@@ -51347,6 +51671,26 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseShowIcon": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseShowRelationIcon": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -52307,6 +52651,16 @@
             }
           ]
         },
+        "restoreDocPosition": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "shorthandSaveBox": {
           "anyOf": [
             {
@@ -52980,6 +53334,16 @@
           ]
         },
         "embedBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "groupFolded": {
           "anyOf": [
             {
               "type": "boolean"
@@ -55941,6 +56305,26 @@
         "databaseAttrViewMode": {
           "type": "integer"
         },
+        "databaseShowIcon": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseShowRelationIcon": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "displayBookmarkIcon": {
           "type": "boolean"
         },
@@ -56174,6 +56558,8 @@
         "databaseAttrShow",
         "databaseAttrUseTabs",
         "databaseAttrViewMode",
+        "databaseShowIcon",
+        "databaseShowRelationIcon",
         "displayBookmarkIcon",
         "displayImgAlt",
         "displayImgName",
@@ -56583,6 +56969,26 @@
           "anyOf": [
             {
               "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseShowIcon": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseShowRelationIcon": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -57842,6 +58248,16 @@
         "removeDocWithoutConfirm": {
           "type": "boolean"
         },
+        "restoreDocPosition": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "shorthandSaveBox": {
           "type": "string"
         },
@@ -57899,6 +58315,7 @@
         "refCreateSaveBox",
         "refCreateSavePath",
         "removeDocWithoutConfirm",
+        "restoreDocPosition",
         "shorthandSaveBox",
         "shorthandSavePath",
         "sort",
@@ -58132,6 +58549,16 @@
           ]
         },
         "removeDocWithoutConfirm": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "restoreDocPosition": {
           "anyOf": [
             {
               "type": "boolean"
@@ -60187,6 +60614,9 @@
         "embedBlock": {
           "type": "boolean"
         },
+        "groupFolded": {
+          "type": "boolean"
+        },
         "hanSensitive": {
           "anyOf": [
             {
@@ -60300,6 +60730,7 @@
         "databaseBlock",
         "document",
         "embedBlock",
+        "groupFolded",
         "hanSensitive",
         "heading",
         "htmlBlock",
@@ -60472,6 +60903,16 @@
           ]
         },
         "embedBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "groupFolded": {
           "anyOf": [
             {
               "type": "boolean"
@@ -65063,6 +65504,12 @@
         },
         "label": {
           "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false
@@ -87082,6 +87529,220 @@
               "type": "string",
               "enum": [
                 "setAttrViewFillColBackgroundColor"
+              ]
+            },
+            "avID": {
+              "type": "string"
+            },
+            "backRelationKeyID": {
+              "type": "string"
+            },
+            "blockID": {
+              "type": "string"
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TransactionCellUpdate"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "context": {
+              "$ref": "#/$defs/TransactionContext"
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string"
+            },
+            "groupID": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "ignoreDefaultFill": {
+              "type": "boolean"
+            },
+            "isDetached": {
+              "type": "boolean"
+            },
+            "isTwoWay": {
+              "type": "boolean"
+            },
+            "keyID": {
+              "type": "string"
+            },
+            "layout": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nextID": {
+              "type": "string"
+            },
+            "parentID": {
+              "type": "string"
+            },
+            "previousID": {
+              "type": "string"
+            },
+            "relationContext": {
+              "$ref": "#/$defs/AVRelationContext"
+            },
+            "removeDest": {
+              "type": "boolean"
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "type": "string"
+            },
+            "rowID": {
+              "type": "string"
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "location",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ]
+            },
+            "viewID": {
+              "type": "string"
+            },
+            "viewIDs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "action",
+            "id",
+            "rootID",
+            "parentID",
+            "previousID",
+            "nextID",
+            "blockIDs",
+            "blockID",
+            "deckID",
+            "avID",
+            "srcIDs",
+            "srcs",
+            "isDetached",
+            "name",
+            "type",
+            "format",
+            "keyID",
+            "rowID",
+            "isTwoWay",
+            "backRelationKeyID",
+            "removeDest",
+            "layout",
+            "groupID",
+            "targetGroupID",
+            "viewID",
+            "ignoreDefaultFill",
+            "context",
+            "data",
+            "retData"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "setAttrViewShowRelationIcon"
               ]
             },
             "avID": {
@@ -126791,6 +127452,374 @@
             "action": {
               "type": "string",
               "enum": [
+                "setAttrViewShowRelationIcon"
+              ]
+            },
+            "avID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "backRelationKeyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "blockIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cellUpdates": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionCellUpdateInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "context": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TransactionContext"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "data": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "deckID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "format": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "groupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ignoreDefaultFill": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isDetached": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "isTwoWay": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "keyID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "layout": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "nextID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "parentID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "previousID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationContext": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AVRelationContextInput"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "removeDest": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "retData": {
+              "type": "null"
+            },
+            "rootID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rowID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "srcs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/TransactionSourceFieldsInput"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "targetGroupID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": {
+              "enum": [
+                "",
+                "block",
+                "text",
+                "number",
+                "date",
+                "select",
+                "mSelect",
+                "url",
+                "email",
+                "phone",
+                "location",
+                "mAsset",
+                "template",
+                "created",
+                "updated",
+                "checkbox",
+                "relation",
+                "rollup",
+                "lineNumber"
+              ],
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewID": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "viewIDs": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
                 "setAttrViewShowIcon"
               ]
             },
@@ -133272,6 +134301,7 @@
           "setAttrViewDisplayFieldName",
           "setAttrViewDisplayEmptyFields",
           "setAttrViewFillColBackgroundColor",
+          "setAttrViewShowRelationIcon",
           "setAttrViewShowIcon",
           "setAttrViewWrapField",
           "changeAttrViewLayout",
@@ -133465,6 +134495,9 @@
       "type": "object",
       "properties": {
         "assetsDirPath": {
+          "type": "string"
+        },
+        "excludeFromCleanup": {
           "type": "string"
         },
         "file[]": {
@@ -144198,6 +145231,86 @@
     },
     {
       "method": "POST",
+      "path": "/api/asset/addAssetCleanupIgnore",
+      "handler": "addAssetCleanupIgnore",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AddAssetCleanupIgnoreRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AssetCleanupIgnoreData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/asset/cancelLivePhotoPreview",
       "handler": "cancelLivePhotoPreview",
       "authorization": [
@@ -144462,6 +145575,85 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/getAssetCleanupIgnore",
+      "handler": "getAssetCleanupIgnore",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AssetCleanupIgnoreData"
               },
               "msg": {
                 "type": "string"
@@ -146200,6 +147392,87 @@
                 "type": "integer",
                 "enum": [
                   -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/setAssetCleanupIgnore",
+      "handler": "setAssetCleanupIgnore",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetAssetCleanupIgnoreRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AssetCleanupIgnoreData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  409
                 ]
               },
               "data": {
@@ -181348,6 +182621,85 @@
     },
     {
       "method": "POST",
+      "path": "/api/repo/getPluginSnapshots",
+      "handler": "getPluginSnapshots",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetPluginSnapshotsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/PluginSnapshotsData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/repo/getRepoDocHistory",
       "handler": "getRepoDocHistory",
       "authorization": [
@@ -182310,6 +183662,86 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/repo/restorePluginSnapshot",
+      "handler": "restorePluginSnapshot",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/RestorePluginSnapshotRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/RestorePluginSnapshotData"
               },
               "msg": {
                 "type": "string"
@@ -192076,7 +193508,8 @@
               "code": {
                 "type": "integer",
                 "enum": [
-                  -1
+                  -1,
+                  2
                 ]
               },
               "data": {
@@ -198537,6 +199970,86 @@
               },
               "data": {
                 "type": "string"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/tag/batchRemoveTag",
+      "handler": "batchRemoveTag",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BatchRemoveTagRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
               },
               "msg": {
                 "type": "string"

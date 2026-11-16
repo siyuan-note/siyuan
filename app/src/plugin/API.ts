@@ -1,4 +1,6 @@
 import {confirmDialog} from "../dialog/confirmDialog";
+import {openColorPicker} from "../colorPicker";
+import {openDatePicker} from "../datePicker";
 import {Plugin} from "./index";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -411,6 +413,8 @@ const isBottomDockVisible = () => {
 };
 
 const createAPI = () => ({
+    openColorPicker,
+    openDatePicker,
     adaptHotkey: updateHotkeyTip,
     confirm: confirmDialog,
     Constants,

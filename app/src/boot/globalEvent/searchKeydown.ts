@@ -21,6 +21,15 @@ import {getKeysByLiElement} from "../../search/menu";
 import {getSearchAVMatches} from "../../search/avPreview";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 
+const expandSearchResultGroup = (item: HTMLElement) => {
+    const group = item.parentElement;
+    if (group.parentElement?.id !== "searchList") {
+        return;
+    }
+    group.classList.remove("fn__none");
+    group.previousElementSibling.querySelector(".b3-list-item__arrow")?.classList.add("b3-list-item__arrow--open");
+};
+
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (getSelection().rangeCount === 0) {
         return false;
@@ -126,6 +135,9 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         }
         const id = currentList.getAttribute("data-node-id");
         if (matchHotKey(window.siyuan.config.keymap.general.openContextMenu, event)) {
+            if (searchType === "doc" && config.group === 1) {
+                expandSearchResultGroup(currentList);
+            }
             const currentRect = currentList.getBoundingClientRect();
             initSearchMenu(id).popup({
                 x: currentRect.left + 30,
@@ -272,6 +284,9 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
             currentList.nextElementSibling.classList.add("b3-list-item--focus");
         }
         currentList = listElement.querySelector(".b3-list-item--focus");
+        if (searchType === "doc" && config.group === 1) {
+            expandSearchResultGroup(currentList);
+        }
         if (listElement.scrollTop < currentList.offsetTop - listElement.clientHeight + lineHeight ||
             listElement.scrollTop > currentList.offsetTop) {
             listElement.scrollTop = currentList.offsetTop - listElement.clientHeight + lineHeight;
@@ -310,6 +325,9 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
             currentList.previousElementSibling.classList.add("b3-list-item--focus");
         }
         currentList = listElement.querySelector(".b3-list-item--focus");
+        if (searchType === "doc" && config.group === 1) {
+            expandSearchResultGroup(currentList);
+        }
         if (listElement.scrollTop < currentList.offsetTop - listElement.clientHeight + lineHeight ||
             listElement.scrollTop > currentList.offsetTop - lineHeight * 2) {
             listElement.scrollTop = currentList.offsetTop - lineHeight * 2;

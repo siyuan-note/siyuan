@@ -242,12 +242,12 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         filter: [window.siyuan.languages.horizontalSuperBlock, window.siyuan.languages.superBlock, "horizontal super block", "columns", "layout", "横向超级块", "hengxiangchaojikuai", "hx", "超级块", "chaojikuai", "cjk", "分栏", "fenlan", "fl"],
         id: "horizontalSuperBlock",
         value: getSuperBlockCommand("col"),
-        icon: "iconSuper",
+        icon: "iconSplitLR",
     }, {
         filter: [window.siyuan.languages.verticalSuperBlock, window.siyuan.languages.superBlock, "vertical super block", "columns", "layout", "纵向超级块", "zongxiangchaojikuai", "zx", "超级块", "chaojikuai", "cjk", "分栏", "fenlan", "fl"],
         id: "verticalSuperBlock",
         value: getSuperBlockCommand("row"),
-        icon: "iconSuper",
+        icon: "iconSplitTB",
     }, {
         filter: [window.siyuan.languages.tabs, "tabs", "页签", "yeqian", "yq"],
         id: "tabs",

@@ -98,3 +98,39 @@ test("saving a visible document at the top does not restore a stale cached scrol
     await context.restore({}, stack);
     assert.equal(protyle.contentElement.scrollTop, 0);
 });
+
+for (const mode of ["body", "body-child", "other-tab", "title", "readonly", "hidden", "disabled", "desktop"]) {
+    test(`history restores an editing caret without activating tablet reading: ${mode}`, async () => {
+        let focused = 0;
+        let switched = 0;
+        const active = {isContentEditable: mode !== "readonly"};
+        const block = {getBoundingClientRect: () => ({height: mode === "hidden" ? 0 : 20})};
+        const body = {
+            isContentEditable: true,
+            contains: (node: unknown) => node === active && !["other-tab", "title"].includes(mode),
+            querySelectorAll: () => [block],
+        };
+        const protyle = {
+            disabled: mode === "disabled", element: {}, block: {rootID: "doc"},
+            wysiwyg: {element: body}, toolbar: {},
+            model: {parent: {headElement: {}, parent: {switchTab: () => { switched++; }}}},
+        };
+        const position = {start: 8, end: 22};
+        const context: any = {
+            isPhablet: () => mode !== "desktop",
+            document: {contains: () => true, activeElement: mode === "body" ? body : active},
+            hideElements: () => {}, isInEmbedBlock: () => false,
+            focusHistoryBlock: (target: unknown, offset: unknown) => {
+                assert.equal(target, block);
+                assert.equal(offset, position);
+                focused++;
+            },
+            scrollCenter: () => {}, getAllModels: () => ({outline: [] as unknown[]}),
+        };
+        if (mode === "body") body.contains = (node: unknown) => node === body;
+        runInNewContext(compiled, context);
+        assert.equal(await context.restore({}, {id: "paragraph", protyle, position}), true);
+        assert.equal(focused, ["body", "body-child", "desktop"].includes(mode) ? 1 : 0);
+        assert.equal(switched, mode === "hidden" ? 1 : 0);
+    });
+}

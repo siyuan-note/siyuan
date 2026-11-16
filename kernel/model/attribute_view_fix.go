@@ -133,6 +133,15 @@ func normalizeAttributeViewBlockRefSubtypes(attrView *av.AttributeView) (changed
 			changed = true
 		}
 	}
+	changed = refreshAttributeViewPrimarySources(attrView) || changed
+	if attrView.HasPrimaryRich() && attrView.Spec < av.PrimaryRichSpec {
+		attrView.Spec = av.PrimaryRichSpec
+		changed = true
+	}
+	if attrView.HasPrimaryBlockRich() && attrView.Spec < av.PrimaryBlockRichSpec {
+		attrView.Spec = av.PrimaryBlockRichSpec
+		changed = true
+	}
 	return
 }
 

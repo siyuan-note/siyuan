@@ -30,14 +30,16 @@ type AVBaseInstance struct {
 	Sorts             []*AVViewSort             `json:"sorts" api:"optional,nullable"`
 	Group             *AVViewGroup              `json:"group" api:"optional,nullable"`
 	PageSize          int                       `json:"pageSize" api:"optional,nullable"`
-	ShowIcon          bool                      `json:"showIcon" api:"optional,nullable"`
-	WrapField         bool                      `json:"wrapField" api:"optional,nullable"`
-	GroupKey          *AVKey                    `json:"groupKey,omitempty" api:"optional,nullable"`
-	GroupValue        *AVValue                  `json:"groupValue,omitempty" api:"optional,nullable"`
-	Groups            []AVViewInstance          `json:"groups,omitempty" api:"optional,nullable"`
-	GroupCalc         *AVGroupCalc              `json:"groupCalc,omitempty" api:"optional,nullable"`
-	GroupFolded       bool                      `json:"groupFolded" api:"optional,nullable"`
-	GroupHidden       int                       `json:"groupHidden" api:"optional,nullable"`
+	// 关联、汇总条目图标开关；返回已解析的有效值，旧版布局缺少独立设置或为 null 时取 showIcon。
+	ShowRelationIcon bool             `json:"showRelationIcon" api:"optional,nullable"`
+	ShowIcon         bool             `json:"showIcon" api:"optional,nullable"` // 主键条目图标开关
+	WrapField        bool             `json:"wrapField" api:"optional,nullable"`
+	GroupKey         *AVKey           `json:"groupKey,omitempty" api:"optional,nullable"`
+	GroupValue       *AVValue         `json:"groupValue,omitempty" api:"optional,nullable"`
+	Groups           []AVViewInstance `json:"groups,omitempty" api:"optional,nullable"`
+	GroupCalc        *AVGroupCalc     `json:"groupCalc,omitempty" api:"optional,nullable"`
+	GroupFolded      bool             `json:"groupFolded" api:"optional,nullable"`
+	GroupHidden      int              `json:"groupHidden" api:"optional,nullable"`
 }
 
 type AVViewFilter struct {
@@ -87,11 +89,22 @@ type AVValueBlock struct {
 	CollectionRuleID string `json:"collectionRuleID,omitempty" api:"optional"`
 	ID               string `json:"id,omitempty" api:"optional,nullable"`
 	// 游离条目可独立设置图标；绑定条目与目标块共享图标，无图标的普通块在绑定时继承条目图标。
-	Icon       string `json:"icon,omitempty" api:"optional,nullable"`
-	Content    string `json:"content" api:"optional,nullable"`
-	RefSubtype string `json:"refSubtype,omitempty" api:"optional,nullable,enum=s|d"`
-	Created    int64  `json:"created,omitempty" api:"optional,nullable"`
-	Updated    int64  `json:"updated,omitempty" api:"optional,nullable"`
+	Icon    string `json:"icon,omitempty" api:"optional,nullable"`
+	Content string `json:"content" api:"optional,nullable"`
+	// Kramdown 块片段要求数据库格式 16；格式 15 的 inline-ast 源可继续读取，content 仅是文字投影。
+	Rich *AVValuePrimaryRich `json:"rich,omitempty" api:"optional,nullable"`
+	// 响应中的安全渲染片段不落盘；写入时按文本字段块规则校验并保留图片，普通旧文字不解释为 Markdown。
+	// 富文本主键的纯文本替换须明确传 rich: null；省略 rich 的不同 content 不得静默丢弃源。
+	RichBlockDOM string `json:"richBlockDOM,omitempty" api:"optional,nullable"`
+	RefSubtype   string `json:"refSubtype,omitempty" api:"optional,nullable,enum=s|d"`
+	Created      int64  `json:"created,omitempty" api:"optional,nullable"`
+	Updated      int64  `json:"updated,omitempty" api:"optional,nullable"`
+}
+
+type AVValuePrimaryRich struct {
+	Spec    int    `json:"spec" api:"const=1"`
+	Format  string `json:"format" api:"enum=inline-ast|kramdown"`
+	Content string `json:"content"`
 }
 
 type AVValueText struct {
@@ -553,10 +566,12 @@ type AVLayoutTable struct {
 }
 
 type AVBaseLayout struct {
-	Spec      int    `json:"spec" api:"optional,nullable"`
-	ID        string `json:"id" api:"optional,nullable"`
-	ShowIcon  bool   `json:"showIcon" api:"optional,nullable"`
-	WrapField bool   `json:"wrapField" api:"optional,nullable"`
+	Spec int    `json:"spec" api:"optional,nullable"`
+	ID   string `json:"id" api:"optional,nullable"`
+	// 关联、汇总条目图标开关；旧版布局缺少或为 null 时沿用 showIcon。
+	ShowRelationIcon *bool `json:"showRelationIcon,omitempty" api:"optional,nullable"`
+	ShowIcon         bool  `json:"showIcon" api:"optional,nullable"` // 主键条目图标开关
+	WrapField        bool  `json:"wrapField" api:"optional,nullable"`
 }
 
 type AVViewTableColumn struct {

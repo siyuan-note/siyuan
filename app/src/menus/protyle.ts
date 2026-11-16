@@ -62,7 +62,7 @@ import {pushBack} from "../mobile/util/MobileBackFoward";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "./util";
 import {removeInlineType} from "../protyle/toolbar/util";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
-import {checkFold, genTagList, renameTag} from "../util/noRelyPCFunction";
+import {checkReferenceFold, genTagList, renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openMobileFileById} from "../mobile/editor";
@@ -457,7 +457,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         icon: "iconOpen",
         accelerator: window.siyuan.config.keymap.editor.general.openBy.custom + "/" + window.siyuan.languages.click,
         click() {
-            checkFold(refBlockId, (zoomIn, action, isRoot) => {
+            checkReferenceFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
                     action.push(Constants.CB_GET_HL);
                 }
@@ -476,7 +476,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         icon: "iconEyeoff",
         accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/" + updateHotkeyTip("⌘" + window.siyuan.languages.click),
         click() {
-            checkFold(refBlockId, (zoomIn) => {
+            checkReferenceFold(refBlockId, (zoomIn) => {
                 openFileById({
                     app: protyle.app,
                     id: refBlockId,
@@ -495,7 +495,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             (window.siyuan.config.keymap.editor.general.insertRight.custom ? "/" : "") +
             updateHotkeyTip("⌥" + window.siyuan.languages.click),
         click() {
-            checkFold(refBlockId, (zoomIn, action, isRoot) => {
+            checkReferenceFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
                     action.push(Constants.CB_GET_HL);
                 }
@@ -515,7 +515,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         icon: "iconLayoutBottom",
         accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + updateHotkeyTip("⇧" + window.siyuan.languages.click),
         click() {
-            checkFold(refBlockId, (zoomIn, action, isRoot) => {
+            checkReferenceFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
                     action.push(Constants.CB_GET_HL);
                 }

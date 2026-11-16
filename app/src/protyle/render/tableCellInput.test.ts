@@ -168,11 +168,14 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         showMessage: (message: string) => { throw new Error(message); },
         mountProtyleLiteFragment: (host: HTMLElement, options: {initialBlockHTML: string, onChange: () => void}) => {
             // 保留会被 Lute 误读为正文的界面，验证输入任务与实际挂载边界的交接。
-            host.innerHTML = '<div class="protyle-content"><div class="protyle-wysiwyg">' +
-                options.initialBlockHTML + '</div></div><div class="protyle-preview">DesktopTabletMobile</div>' +
+            host.innerHTML = '<div class="protyle-content"><div class="protyle-wysiwyg"></div></div>' +
+                '<div class="protyle-preview">DesktopTabletMobile</div>' +
                 '<div class="protyle-toolbar"><svg><use href="#iconBold"></use></svg>Font family Font Size</div>' +
                 "<style>.protyle-content::highlight(search-mark-regression) {color: red;}</style>";
             const wysiwyg = host.querySelector<HTMLElement>(".protyle-wysiwyg");
+            // 片段初始化先测量空编辑器，再填入正文；自动列宽会在测量时重新分配。
+            host.style.setProperty("--b3-width-protyle", host.clientWidth + "px");
+            wysiwyg.innerHTML = options.initialBlockHTML;
             wysiwyg.addEventListener("keydown", event => {
                 if (event.key === "Enter") {
                     enteredCells.push(host.closest("th, td"));
@@ -196,11 +199,13 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
                 wysiwyg, hintElement: hidden,
                 protyle,
                 getBlockHTML: () => wysiwyg.innerHTML, destroy: noop,
-                focus: () => {
-                    wysiwyg.querySelector<HTMLElement>('[contenteditable="true"]').focus();
+                focus: (toEnd = false) => {
+                    const editables = wysiwyg.querySelectorAll<HTMLElement>('[contenteditable="true"]');
+                    const editable = toEnd ? editables[editables.length - 1] : editables[0];
+                    editable.focus();
                     const range = document.createRange();
-                    range.selectNodeContents(wysiwyg.querySelector('[contenteditable="true"]'));
-                    range.collapse(true);
+                    range.selectNodeContents(editable);
+                    range.collapse(!toEnd);
                     focusByRange(range);
                 },
             };
@@ -623,6 +628,75 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         check.equal(wysiwyg.querySelectorAll('[data-type="NodeTable"] col[style*="180px"]').length, 2,
             "source and embedded column widths synchronize in both directions");
         element.remove();
+    }
+
+    for (const platform of [false, true]) {
+        mobile = platform;
+        for (const scrollLeft of [0, 350, 550]) {
+            const {owner, element, table} = fixture();
+            element.style.width = "320px";
+            const scroller = table.firstElementChild as HTMLElement;
+            scroller.style.cssText = "width:300px;overflow-x:auto";
+            const grid = table.querySelector("table");
+            grid.style.cssText = "width:1200px;table-layout:fixed";
+            grid.querySelectorAll("col").forEach(column => column.style.width = "400px");
+            const cell = grid.rows[1].cells[scrollLeft === 0 ? 0 : 1];
+            cell.textContent = "Visible caret position ".repeat(10);
+            cell.style.whiteSpace = "nowrap";
+            scroller.scrollLeft = scrollLeft;
+            const viewport = scroller.getBoundingClientRect();
+            const bounds = cell.getBoundingClientRect();
+            const point = {x: (Math.max(viewport.left, bounds.left) + Math.min(viewport.right, bounds.right)) / 2,
+                y: bounds.top + bounds.height / 2};
+            const range = document.caretRangeFromPoint(point.x, point.y);
+            check.ok(range && cell.contains(range.startContainer), "the fixture clicks visible cell text");
+            await open(owner, cell, undefined, point);
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            check.equal(scroller.scrollLeft, scrollLeft, "clicking visible text keeps the table's horizontal viewport");
+            check.ok(cell.querySelector(".table__cell-editor").contains(getSelection().anchorNode),
+                "the cell editor receives the clicked caret");
+            const caret = getSelection().getRangeAt(0).getBoundingClientRect();
+            check.ok(caret.left >= viewport.left && caret.right <= viewport.right, "the restored caret remains visible");
+            await finish(element);
+        }
+    }
+
+    for (const platform of [false, true]) {
+        mobile = platform;
+        for (const column of [0, 1, 2]) {
+            const {owner, element, table} = fixture();
+            element.style.width = "840px";
+            const scroller = table.firstElementChild as HTMLElement;
+            scroller.style.cssText = "width:800px;overflow-x:auto";
+            const grid = table.querySelector("table");
+            grid.style.tableLayout = "auto";
+            grid.style.width = "";
+            grid.querySelectorAll("col").forEach(col => col.style.cssText = "min-width:60px");
+            Array.from(grid.rows).forEach((row, index) => Array.from(row.cells).forEach((cell, col) => {
+                cell.textContent = index === col ? "1".repeat(62) : "";
+            }));
+            if (column > 0) {
+                await open(owner, grid.rows[column - 1].cells[column - 1]);
+            }
+            scroller.scrollLeft = column === 2 ? scroller.scrollWidth - scroller.clientWidth : 0;
+            const before = scroller.scrollLeft;
+            const cell = grid.rows[column].cells[column];
+            const viewport = scroller.getBoundingClientRect();
+            const bounds = cell.getBoundingClientRect();
+            const point = {x: (Math.max(viewport.left, bounds.left) + Math.min(viewport.right, bounds.right)) / 2,
+                y: bounds.top + bounds.height / 2};
+            const range = document.caretRangeFromPoint(point.x, point.y);
+            check.ok(range && cell.contains(range.startContainer), "the sample clicks visible text in an automatic-width column");
+            focusByRange(range);
+            await open(owner, cell, undefined, point);
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            check.equal(scroller.scrollLeft, before,
+                `automatic-width table keeps its viewport when opening column ${column} (mobile=${platform})`);
+            check.ok(cell.querySelector(".table__cell-editor").contains(getSelection().anchorNode));
+            const caret = getSelection().getRangeAt(0).getBoundingClientRect();
+            check.ok(caret.left >= viewport.left && caret.right <= viewport.right, "the sample's clicked caret stays visible");
+            await finish(element);
+        }
     }
 
     for (const mobile of [false, true]) {
@@ -1196,7 +1270,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     return "Table cell input handoff cases passed";
 };
 
-test("table cell editors preserve input and alignment, and consume table menu Enter", {
+test("table cell editors preserve input, viewport and alignment, and consume table menu Enter", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

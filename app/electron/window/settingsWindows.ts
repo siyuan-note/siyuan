@@ -154,7 +154,17 @@ const createSettingsWindows = ({initialize = initializeSettingsWindow,
     };
     const cancel = (approved: ApprovedWindow, ownerInvalidated = false): void => {
         finish(approved, ownerInvalidated);
-        if (approved.win && !approved.win.isDestroyed()) approved.win.destroy();
+        const win = approved.win;
+        if (win && !win.isDestroyed()) {
+            if (ownerInvalidated) {
+                // 导航回调内同步销毁子窗口会阻塞 Windows 原生消息循环，授权仍须立即失效。
+                setImmediate(() => {
+                    if (!win.isDestroyed()) win.destroy();
+                });
+            } else {
+                win.destroy();
+            }
+        }
     };
     const watchOwner = (owner: WebContents): OwnerState => {
         let state = owners.get(owner);

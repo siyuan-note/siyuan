@@ -8,6 +8,7 @@ package model
 
 import (
 	"encoding/json"
+	"slices"
 	"testing"
 
 	"github.com/88250/lute/ast"
@@ -18,6 +19,173 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestTagRemovalBatchFinalStateAndUndo(t *testing.T) {
+	fixture, view, keyID := setupBlockCollectionTest(t)
+	view.Automations.Spec = 3
+	view.Automations.Rules[0].BlockSource.Tags = []string{"todo", "done"}
+	view.Automations.Rules[0].BlockSource.TagMatch = "or"
+	if err := av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, "todo,done,todo/child,xtodo")); err != nil {
+		t.Fatal(err)
+	}
+	sql.FlushQueue()
+	groups, err := PreviewTagRemoval(apicontract.TagRemovalPreviewRequest{Labels: []string{"todo"}})
+	if err != nil || len(groups) != 0 {
+		t.Fatalf("other remaining match ignored: %+v %v", groups, err)
+	}
+	labels := []string{"todo", "done", "todo"}
+	changes, err := tagRemovalChanges(apicontract.TagRemovalPreviewRequest{Labels: labels})
+	if err != nil || len(changes) != 1 || !slices.Equal(changes[0].Tags, []string{"todo", "done"}) {
+		t.Fatalf("unmerged changes: %+v %v", changes, err)
+	}
+	groups, err = PreviewTagRemoval(apicontract.TagRemovalPreviewRequest{Labels: labels})
+	if err != nil || len(groups) != 1 || len(groups[0].Cleanup.Items) != 1 {
+		t.Fatalf("final-state preview: %+v %v", groups, err)
+	}
+	view = readAttributeViewItemsTest(t, view.ID)
+	itemID := view.GetBlockValueByBoundID(fixture.sourceID).BlockID
+	view.GetValue(keyID, itemID).Text.Content = "batch undo value"
+	if err = av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	tx, err := RemoveTagWithCollections(apicontract.RemoveTagWithCollectionsRequest{Labels: labels, Collections: groups})
+	if err != nil {
+		t.Fatal(err)
+	}
+	count := 0
+	for _, op := range tx.DoOperations {
+		if op.ID == fixture.sourceID && op.Action == "setAttrs" {
+			count++
+		}
+	}
+	if count != 1 {
+		t.Fatalf("document final attribute operations = %d", count)
+	}
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil || tree.Root.IALAttr("tags") != "todo/child,xtodo" {
+		t.Fatal("exact batch deletion failed", err)
+	}
+	if readAttributeViewItemsTest(t, view.ID).GetBlockValue(itemID) != nil {
+		t.Fatal("confirmed automatic entry retained")
+	}
+	if err = PerformTxSync(&Transaction{isReplay: true, DoOperations: cloneOperations(tx.UndoOperations)}); err != nil {
+		t.Fatal(err)
+	}
+	tree, err = LoadTreeByBlockID(fixture.sourceID)
+	view = readAttributeViewItemsTest(t, view.ID)
+	if err != nil || tree.Root.IALAttr("tags") != "todo,done,todo/child,xtodo" || view.GetValue(keyID, itemID).Text.Content != "batch undo value" {
+		t.Fatal("single batch undo lost tags or fields", err)
+	}
+}
+
+func TestTagRemovalBatchRuleChangePreservesSource(t *testing.T) {
+	for _, disable := range []bool{false, true} {
+		t.Run(map[bool]string{false: "renamed", true: "disabled"}[disable], func(t *testing.T) {
+			fixture, view, _ := setupBlockCollectionTest(t)
+			if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, "todo,done")); err != nil {
+				t.Fatal(err)
+			}
+			sql.FlushQueue()
+			labels := []string{"todo", "done"}
+			groups, err := PreviewTagRemoval(apicontract.TagRemovalPreviewRequest{Labels: labels})
+			if err != nil || len(groups) != 1 {
+				t.Fatalf("preview: %+v %v", groups, err)
+			}
+			view = readAttributeViewItemsTest(t, view.ID)
+			view.Automations.Rules[0].Name = "changed"
+			view.Automations.Rules[0].Enabled = !disable
+			if err = av.SaveAttributeView(view); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = RemoveTagWithCollections(apicontract.RemoveTagWithCollectionsRequest{Labels: labels, Collections: groups}); err == nil {
+				t.Fatal("changed rules accepted")
+			}
+			tree, err := LoadTreeByBlockID(fixture.sourceID)
+			if err != nil || tree.Root.IALAttr("tags") != "todo,done" || readAttributeViewItemsTest(t, view.ID).GetBlockValueByBoundID(fixture.sourceID) == nil {
+				t.Fatal("rejected batch changed source or entry", err)
+			}
+		})
+	}
+}
+
+func TestTagRemovalBatchInlineMergeAndNoop(t *testing.T) {
+	fixture, _, _ := setupBlockCollectionTest(t)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	paragraph := treenode.NewParagraph(ast.NewNodeID())
+	for _, label := range []string{"todo", "done", "todo/child", "xtodo"} {
+		paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "tag", TextMarkTextContent: label})
+	}
+	tree.Root.AppendChild(paragraph)
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	sql.UpsertTreeQueue(tree)
+	sql.FlushQueue()
+	tx, err := RemoveTagWithCollections(apicontract.RemoveTagWithCollectionsRequest{Labels: []string{"todo", "done", "todo"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(tx.DoOperations) != 1 || tx.DoOperations[0].ID != paragraph.ID {
+		t.Fatalf("same-block operations: %+v", tx.DoOperations)
+	}
+	tree, err = LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	node := treenode.GetNodeInTree(tree, paragraph.ID)
+	var tags []string
+	for child := node.FirstChild; child != nil; child = child.Next {
+		if child.IsTextMarkType("tag") {
+			tags = append(tags, child.TextMarkTextContent)
+		}
+	}
+	if !slices.Equal(tags, []string{"todo/child", "xtodo"}) {
+		t.Fatalf("unexpected tags: %v", tags)
+	}
+	tx, err = RemoveTagWithCollections(apicontract.RemoveTagWithCollectionsRequest{Labels: []string{"todo", "done"}})
+	if err != nil || len(tx.DoOperations) != 0 {
+		t.Fatalf("no-op batch: %+v %v", tx, err)
+	}
+}
+
+func TestTagRemovalBatchRejectsChangedSourceSnapshot(t *testing.T) {
+	fixture, _, _ := setupBlockCollectionTest(t)
+	if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, "todo,done")); err != nil {
+		t.Fatal(err)
+	}
+	changes, err := tagRemovalChanges(apicontract.TagRemovalPreviewRequest{Labels: []string{"todo", "done"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _, sources, err := tagRemovalTrees(changes)
+	if err != nil || len(sources) != 1 {
+		t.Fatalf("document snapshots: %v %v", sources, err)
+	}
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree.Root.SetIALAttr("custom-latest", "preserve")
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	tx := blockCollectionTags(t, fixture.sourceID, "")
+	tx.tagMutationSources = sources
+	if err = PerformTxSync(tx); err == nil {
+		t.Fatal("stale batch source accepted")
+	}
+	stored, err := filesys.LoadTree(tree.Box, tree.Path, util.NewLute())
+	if err != nil || stored.Root.IALAttr("custom-latest") != "preserve" || stored.Root.IALAttr("tags") != "todo,done" {
+		t.Fatal("stale batch overwrote newer source", err)
+	}
+}
 
 func TestTagRemovalRejectsChangedSourceSnapshot(t *testing.T) {
 	fixture, _, _ := setupBlockCollectionTest(t)
@@ -37,7 +205,7 @@ func TestTagRemovalRejectsChangedSourceSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 	tx := blockCollectionTags(t, fixture.sourceID, "")
-	tx.tagRemovalSources = sources
+	tx.tagMutationSources = sources
 	if err = PerformTxSync(tx); err == nil {
 		t.Fatalf("stale source accepted: %v", err)
 	}
@@ -301,6 +469,7 @@ func TestGlobalTagRemovalSelectionAndUndo(t *testing.T) {
 	if err := av.SaveAttributeView(&second); err != nil {
 		t.Fatal(err)
 	}
+	addCollectionDatabaseBlock(t, &second, fixture.sourceID)
 	if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, "todo")); err != nil {
 		t.Fatal(err)
 	}

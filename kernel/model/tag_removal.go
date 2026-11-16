@@ -5,8 +5,6 @@
 package model
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"slices"
 	"sort"
@@ -17,24 +15,35 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func tagRemovalChanges(request apicontract.TagRemovalPreviewRequest) ([]*apicontract.TagRemovalChange, error) {
-	if request.Label != "" {
+	if request.Label != "" || request.Labels != nil {
 		if len(request.Changes) != 0 {
-			return nil, fmt.Errorf("label and changes are mutually exclusive")
+			if request.Labels == nil {
+				return nil, fmt.Errorf("label and changes are mutually exclusive")
+			}
+			return nil, fmt.Errorf("label, labels and changes are mutually exclusive")
+		}
+		labels, err := tagRemovalLabels(request.Label, request.Labels)
+		if err != nil {
+			return nil, err
 		}
 		sql.FlushQueue()
 		changes := []*apicontract.TagRemovalChange{}
-		seen := map[string]bool{}
-		for _, span := range sql.QueryTagSpansByLabel(request.Label) {
-			if !seen[span.BlockID] {
-				seen[span.BlockID] = true
-				changes = append(changes, &apicontract.TagRemovalChange{ID: span.BlockID, Tags: []string{request.Label}})
+		seen := map[string]*apicontract.TagRemovalChange{}
+		for _, label := range labels {
+			for _, span := range sql.QueryTagSpansByLabel(label) {
+				change := seen[span.BlockID]
+				if change == nil {
+					change = &apicontract.TagRemovalChange{ID: span.BlockID}
+					seen[span.BlockID] = change
+					changes = append(changes, change)
+				}
+				change.Tags = append(change.Tags, label)
 			}
 		}
 		return changes, nil
@@ -45,6 +54,33 @@ func tagRemovalChanges(request apicontract.TagRemovalPreviewRequest) ([]*apicont
 	return request.Changes, nil
 }
 
+func tagRemovalLabels(label string, labels []string) ([]string, error) {
+	if label != "" {
+		if labels != nil {
+			return nil, fmt.Errorf("label and labels are mutually exclusive")
+		}
+		return []string{label}, nil
+	}
+	if labels == nil {
+		return nil, fmt.Errorf("tag must not be empty")
+	}
+	if len(labels) == 0 || len(labels) > 100 {
+		return nil, fmt.Errorf("labels must contain between 1 and 100 entries")
+	}
+	ret := make([]string, 0, len(labels))
+	seen := map[string]bool{}
+	for _, value := range labels {
+		if value == "" {
+			return nil, fmt.Errorf("tag must not be empty")
+		}
+		if !seen[value] {
+			seen[value] = true
+			ret = append(ret, value)
+		}
+	}
+	return ret, nil
+}
+
 // 使用独立的已认证源快照推演标签删除，不修改缓存或持久化数据。
 func tagRemovalTrees(changes []*apicontract.TagRemovalChange) (before, after map[string]*parse.Tree, sources map[string][]byte, err error) {
 	before, after = map[string]*parse.Tree{}, map[string]*parse.Tree{}
@@ -53,29 +89,10 @@ func tagRemovalTrees(changes []*apicontract.TagRemovalChange) (before, after map
 		if change == nil || !ast.IsNodeIDPattern(change.ID) || len(change.Tags) == 0 || len(change.Tags) > 1000 {
 			return nil, nil, nil, fmt.Errorf("invalid tag removal change")
 		}
-		bt := treenode.GetBlockTree(change.ID)
-		if bt == nil {
-			continue
+		node, loadErr := tagMutationNode(change.ID, before, after, sources)
+		if loadErr != nil {
+			return nil, nil, nil, loadErr
 		}
-		// 标签属于普通工作区；不扫描或暴露加密笔记本的内容。
-		if IsEncryptedBox(bt.BoxID) {
-			return nil, nil, nil, fmt.Errorf("tags are unavailable in encrypted notebooks")
-		}
-		if before[bt.RootID] == nil {
-			before[bt.RootID], sources[bt.RootID], err = filesys.LoadTreeSnapshot(bt.BoxID, bt.Path, util.NewLute())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			var projectedSource []byte
-			after[bt.RootID], projectedSource, err = filesys.LoadTreeSnapshot(bt.BoxID, bt.Path, util.NewLute())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			if !bytes.Equal(sources[bt.RootID], projectedSource) {
-				return nil, nil, nil, util.ErrFileChanged
-			}
-		}
-		node := treenode.GetNodeInTree(after[bt.RootID], change.ID)
 		if node == nil {
 			continue
 		}
@@ -208,15 +225,15 @@ func previewTagRemovalTrees(before, after map[string]*parse.Tree, changes []*api
 
 // 全局标签删除使用普通编辑事务，源标签和用户选择移出的字段共用撤销记录。
 func RemoveTagWithCollections(request apicontract.RemoveTagWithCollectionsRequest) (*Transaction, error) {
-	if request.Label == "" {
-		return nil, fmt.Errorf("tag must not be empty")
+	if _, err := tagRemovalLabels(request.Label, request.Labels); err != nil {
+		return nil, err
 	}
 	type result struct {
 		tx  *Transaction
 		err error
 	}
 	ret := WithTransactionHistory(func(execute func(*Transaction) error) result {
-		changes, err := tagRemovalChanges(apicontract.TagRemovalPreviewRequest{Label: request.Label})
+		changes, err := tagRemovalChanges(apicontract.TagRemovalPreviewRequest{Label: request.Label, Labels: request.Labels})
 		if err != nil {
 			return result{err: err}
 		}
@@ -235,40 +252,26 @@ func RemoveTagWithCollections(request apicontract.RemoveTagWithCollectionsReques
 				allowed[group.AvID][item.ItemID+"/"+item.BlockID] = true
 			}
 		}
-		tx := &Transaction{fromAPI: true, Timestamp: time.Now().UnixMilli(), tagRemovalSources: sources}
-		engine := util.NewLute()
+		tx := &Transaction{fromAPI: true, Timestamp: time.Now().UnixMilli(), tagMutationSources: sources}
 		changed := map[string]bool{}
 		for _, change := range changes {
 			changed[change.ID] = true
 		}
-		for rootID, tree := range after {
-			ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !changed[node.ID] {
-					return ast.WalkContinue
-				}
-				old := treenode.GetNodeInTree(before[rootID], node.ID)
-				if node.Type == ast.NodeDocument {
-					if node.IALAttr("tags") == old.IALAttr("tags") {
-						return ast.WalkContinue
-					}
-					data, _ := json.Marshal(map[string]string{"tags": node.IALAttr("tags")})
-					undo, _ := json.Marshal(map[string]string{"tags": old.IALAttr("tags")})
-					tx.DoOperations = append(tx.DoOperations, &Operation{Action: "setAttrs", ID: node.ID, Data: string(data)})
-					tx.UndoOperations = append(tx.UndoOperations, &Operation{Action: "setAttrs", ID: node.ID, Data: string(undo)})
-					return ast.WalkContinue
-				}
-				data, undo := engine.RenderNodeBlockDOM(node), engine.RenderNodeBlockDOM(old)
-				if data == undo {
-					return ast.WalkContinue
-				}
-				tx.DoOperations = append(tx.DoOperations, &Operation{Action: "update", ID: node.ID, Data: data})
-				tx.UndoOperations = append(tx.UndoOperations, &Operation{Action: "update", ID: node.ID, Data: undo})
-				return ast.WalkSkipChildren
-			})
-		}
+		tx.appendTagMutationOperations(before, after, changed)
 		for _, group := range request.Collections {
 			if group == nil {
 				return result{err: fmt.Errorf("invalid tag removal collection")}
+			}
+			// 批量确认后规则可能使候选消失；过滤条目前仍须校验用户确认的规则版本。
+			if request.Labels != nil {
+				view, readErr := av.ParseAttributeViewForIndexInBox(group.AvID, "")
+				if readErr != nil {
+					return result{err: readErr}
+				}
+				review := tx.newCollectionReview(view, "")
+				if group.Cleanup.RuleVersion == "" || group.Cleanup.RuleVersion != review.version {
+					return result{err: fmt.Errorf("collection rules changed; refresh the review before cleaning up")}
+				}
 			}
 			group.Cleanup.AutomaticOnly = true
 			group.Cleanup.Items = slices.DeleteFunc(slices.Clone(group.Cleanup.Items), func(item *apicontract.AVCollectionCleanupItem) bool {

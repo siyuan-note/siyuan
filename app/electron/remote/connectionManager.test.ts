@@ -15,7 +15,7 @@ if (!process.versions.electron) {
         delete env.ELECTRON_RUN_AS_NODE;
         try {
             const {stdout} = await promisify(execFile)(require("electron"), [__filename, profile], {
-                env, timeout: 60000, windowsHide: true,
+                env, timeout: 60000, killSignal: "SIGKILL", windowsHide: true,
             });
             assert.match(stdout, /Connection manager passed/);
         } finally {
@@ -24,7 +24,26 @@ if (!process.versions.electron) {
         }
     });
 } else {
-    const {app, BrowserWindow, ipcMain, session, net} = require("electron");
+    const {app, BrowserWindow, ipcMain, session, net, safeStorage} = require("electron");
+    const crypto = require("node:crypto");
+    // 会话交接使用进程内临时密钥，避免界面测试依赖系统钥匙串交互授权。
+    const encryptionKey = crypto.randomBytes(32);
+    safeStorage.isEncryptionAvailable = () => true;
+    safeStorage.getSelectedStorageBackend = () => "test-aes-gcm";
+    safeStorage.encryptString = value => {
+        const nonce = crypto.randomBytes(12);
+        const cipher = crypto.createCipheriv("aes-256-gcm", encryptionKey, nonce);
+        const encrypted = Buffer.concat([cipher.update(value, "utf8"), cipher.final()]);
+        return Buffer.concat([nonce, cipher.getAuthTag(), encrypted]);
+    };
+    safeStorage.decryptString = value => {
+        const decipher = crypto.createDecipheriv("aes-256-gcm", encryptionKey, value.subarray(0, 12));
+        decipher.setAuthTag(value.subarray(12, 28));
+        return Buffer.concat([decipher.update(value.subarray(28)), decipher.final()]).toString("utf8");
+    };
+    const tampered = safeStorage.encryptString("test-session");
+    tampered[tampered.length - 1] ^= 1;
+    assert.throws(() => safeStorage.decryptString(tampered));
     const {EventEmitter} = require("node:events");
     const {createConnectionManager, getRemoteSession} = require("./connectionManager");
     const {readConnections} = require("./connectionStore");

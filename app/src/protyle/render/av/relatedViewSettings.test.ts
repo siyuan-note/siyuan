@@ -67,6 +67,33 @@ test("removed settings actions are inert while remaining shared configuration en
     assert.equal(f.shared(), 2);
 });
 
+test("related date filters save only the panel's temporary filters and invalidate its rows", () => {
+    let opened: {data: IAV, filterOperation: {save: (filters: IAVFilter[]) => void}};
+    const original = {view: {filters: [{column: "shared", operator: "Is empty"}]}};
+    const {RelatedAVView} = evaluateModule<{RelatedAVView: {prototype: object}}>(source, {
+        structuredClone,
+        require: () => ({globalClickHideMenu() {}, getAVData: () => original,
+            openMenuPanel: (options: typeof opened) => { opened = options; }}),
+    });
+    let invalidations = 0;
+    const initial = {column: "date", operator: "Is between", dateEndpoint: "end", value: {type: "date"}};
+    const view = Object.assign(Object.create(RelatedAVView.prototype), {
+        host: {active: true, readonly: () => false, temporaryFilters: [initial]},
+        hostElement: {}, editor: {}, invalidate: () => invalidations++,
+    });
+    view.click({stopPropagation() {}, target: {closest: (selector: string) =>
+        selector === "[data-type]" ? {dataset: {type: "av-filter"}} : null}});
+    assert.equal(opened.data.view.filters[0].dateEndpoint, "end");
+    assert.notEqual(opened.data.view.filters, view.host.temporaryFilters);
+    const edited = [{...initial, value: {type: "date", date: {content: 1794355200000,
+        isNotEmpty: true, content2: 1794441600000, isNotEmpty2: true, hasEndDate: true, isNotTime: true}}}] as IAVFilter[];
+    opened.filterOperation.save(edited);
+    assert.deepEqual(view.host.temporaryFilters, edited);
+    assert.notEqual(view.host.temporaryFilters, edited);
+    assert.equal(invalidations, 1);
+    assert.equal(original.view.filters[0].column, "shared");
+});
+
 test("shared configuration warning remains available in every language for retained safety guards", () => {
     const languages = readdirSync("appearance/langs").filter(file => file.endsWith(".json"));
     assert.equal(languages.length, 22);

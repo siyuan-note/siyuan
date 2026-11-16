@@ -657,13 +657,7 @@ func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 			if node == nil {
 				continue
 			}
-			icon, content := getNodeAvBlockText(node, id)
-			content = util.UnescapeHTML(content)
-			subtype := getNodeAvBlockRefSubtype(node, id)
-			if icon != value.Block.Icon || content != value.Block.Content || subtype != value.Block.RefSubtype {
-				value.Block.Icon, value.Block.Content, value.Block.RefSubtype = icon, content, subtype
-				changed = true
-			}
+			changed = refreshAttributeViewPrimarySource(value, node, id) || changed
 		}
 		if changed {
 			if err = av.SaveAttributeView(view); err != nil {

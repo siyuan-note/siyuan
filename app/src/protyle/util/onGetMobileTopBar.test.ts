@@ -88,7 +88,7 @@ const browserCases = (code: typeof sources) => {
         };
         for (const name of ["invalidateTrackedRanges", "hideElements", "invalidateHeadingNumberRefresh",
             "normalizeHTMLAssetIFrameSources", "updateWidgetCacheVersion", "disposeCustomBlocksInElement",
-            "applyPublishFoldStates", "updateDocumentBottomEof", "processRender", "highlightRender", "avRender",
+            "applyPublishFoldStates", "updateDocumentBottomEof", "updateDocumentTopEof", "processRender", "highlightRender", "avRender",
             "blockRender", "renderHeadingNumbers", "setReadonlyByConfig", "setCustomBlockRootReady", "focusElementById"]) {
             dependencies[name] = noop;
         }

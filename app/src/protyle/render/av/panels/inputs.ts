@@ -1,4 +1,5 @@
-import { getFilterByPath, getEditableFilters, getFiltersHTML, bindInlineFilterEvents } from "../filter";
+import { getFilterByPath, getEditableFilters, getFiltersHTML } from "../filter";
+import { bindFilterPanelEvents } from "./filters";
 import { setPosition } from "../../../../util/setPosition";
 import { hasClosestByClassName } from "../../../util/hasClosest";
 import { getColId } from "../col";
@@ -22,7 +23,7 @@ export const bindAVPanelInputs = (context: IAVPanelContext) => {
         context.saveFilters(JSON.parse(JSON.stringify(context.data.view.filters)), oldFilters);
         // 重渲染以同步所有只读且/或标签（index >= 2 的节点显示的是只读 span）
         context.menuElement.innerHTML = getFiltersHTML(context.data);
-        bindInlineFilterEvents(context.avPanelElement as HTMLElement, context.data, context.options.protyle, context.blockID, context.avID, context.options.filterOperation);
+        bindFilterPanelEvents(context);
         setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth, context.tabRect.bottom, context.tabRect.height, 0, true);
         event.stopPropagation();
     });

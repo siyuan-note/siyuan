@@ -110,7 +110,7 @@
     box-shadow: inset -2px 0 0 0 var(--b3-theme-primary-lighter);
   }
 
-  svg:not(.b3-chip__close) {
+  > svg:not(.b3-chip__close) {
     margin-right: 6px;
     margin-left: -5px;
     height: 16px;
@@ -159,7 +159,7 @@
       margin-left: 3px;
     }
 
-    svg:not(.b3-chip__close) {
+    > svg:not(.b3-chip__close) {
       margin-right: 3px;
       margin-left: -2px;
     }

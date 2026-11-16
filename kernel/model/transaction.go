@@ -593,6 +593,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewDisplayEmptyFields(op)
 			case "setAttrViewFillColBackgroundColor":
 				ret = tx.doSetAttrViewFillColBackgroundColor(op)
+			case "setAttrViewShowRelationIcon":
+				ret = tx.doSetAttrViewShowRelationIcon(op)
 			case "setAttrViewShowIcon":
 				ret = tx.doSetAttrViewShowIcon(op)
 			case "setAttrViewWrapField":
@@ -2072,7 +2074,7 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	// 粘贴被引用的块后需刷新目标文档的引用计数，否则目标文档级计数角标不会更新
 	task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, tree.Root.ID)
 
-	upsertAvBlockRel(insertedNode)
+	tx.upsertAvBlockRel(insertedNode, tree)
 
 	// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
 	insertedNode.RemoveIALAttr(av.NodeAttrNameAvs)
@@ -2372,7 +2374,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	tx.nodes[updatedNode.ID] = updatedNode
 	tx.writeTreeWithIndexChanges(tree)
 
-	upsertAvBlockRel(updatedNode)
+	tx.upsertAvBlockRel(updatedNode, tree)
 
 	return
 }
@@ -2483,7 +2485,7 @@ func getRemovedNodes(oldNode, newNode *ast.Node) (ret []*ast.Node) {
 	return
 }
 
-func upsertAvBlockRel(node *ast.Node) {
+func (tx *Transaction) upsertAvBlockRel(node *ast.Node, tree *parse.Tree) {
 	var affectedAvIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -2492,6 +2494,9 @@ func upsertAvBlockRel(node *ast.Node) {
 
 		if ast.NodeAttributeView == n.Type {
 			avID := n.AttributeViewID
+			if tx.isReplay {
+				tx.sourceMirrors = append(tx.sourceMirrors, av.BlockRelRecovery{ID: n.ID, AttributeViewID: avID, BoxID: tree.Box})
+			}
 			if changed := av.UpsertBlockRel(avID, n.ID); changed {
 				affectedAvIDs = append(affectedAvIDs, avID)
 			}
@@ -2955,7 +2960,7 @@ type Transaction struct {
 	removeCreatedDoc              func(*Box, string, *lute.Lute) (*parse.Tree, error)
 	writeTransactionTree          func(*parse.Tree) error
 	documentTitleWrite            *documentTitleWriteState
-	tagRemovalSources             map[string][]byte
+	tagMutationSources            map[string][]byte
 	collectionRemovalVersions     map[string]string
 	blockSwapOriginalTrees        []*parse.Tree
 	sourceJournal                 *documentSourceJournal
@@ -3292,6 +3297,18 @@ func (tx *Transaction) commit() (err error) {
 			}
 		}
 	}
+	if tx.isReplay && len(tx.sourceMirrors) > 0 {
+		// 恢复的加密块在提交后才进入索引，镜像映射按已写入的文档树恢复。
+		present := map[string]string{}
+		for _, tree := range orderedTrees {
+			for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
+				present[node.ID] = node.AttributeViewID
+			}
+		}
+		if err = av.ReconcileBlockRels(tx.sourceMirrors, present); err != nil {
+			return err
+		}
+	}
 	for boxID, icon := range tx.boxIcons {
 		box := &Box{ID: boxID}
 		boxConf := box.GetConf()
@@ -3383,7 +3400,7 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
 	tx.relatedAvIDs = nil
-	tx.tagRemovalSources = nil
+	tx.tagMutationSources = nil
 	tx.collectionRemovalVersions = nil
 	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
 	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
@@ -3405,7 +3422,7 @@ func (tx *Transaction) releaseCommittedResources() {
 
 func (tx *Transaction) rollback() {
 	tx.indexChanges = nil
-	tx.tagRemovalSources = nil
+	tx.tagMutationSources = nil
 	tx.collectionRemovalVersions = nil
 	tx.documentTitleWrite = nil
 	tx.mindmapSummarySiblings = nil
@@ -3516,7 +3533,7 @@ func loadTreeTxErr(id string, err error) *TxErr {
 	if errors.Is(err, ErrBlockNotFound) {
 		code = TxErrCodeBlockNotFound
 	}
-	return &TxErr{code: code, msg: msg, id: id}
+	return &TxErr{code: code, msg: msg, id: id, cause: err}
 }
 
 func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {

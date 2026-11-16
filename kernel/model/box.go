@@ -887,7 +887,7 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 			}
 
 			// Import the YAML at the beginning of the Markdown as a code block https://github.com/siyuan-note/siyuan/issues/16488
-			codeBlock := &ast.Node{Type: ast.NodeCodeBlock, ID: ast.NewNodeID()}
+			codeBlock := &ast.Node{Type: ast.NodeCodeBlock, ID: ast.NewNodeID(), IsFencedCodeBlock: true}
 			codeBlock.SetIALAttr("id", codeBlock.ID)
 			codeBlock.SetIALAttr("updated", codeBlock.ID[:14])
 			openMarker := &ast.Node{Type: ast.NodeCodeBlockFenceOpenMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3}

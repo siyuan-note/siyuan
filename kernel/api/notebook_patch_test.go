@@ -31,6 +31,7 @@ func TestAPIContractNotebookConfPatchPersistence(t *testing.T) {
 	path := filepath.Join(util.DataDir, id, ".siyuan", "conf.json")
 	initial := conf.NewBoxConf()
 	initial.Name = "original"
+	initial.Extra = map[string]json.RawMessage{"futureSetting": json.RawMessage(`999`)}
 	data, _ := json.Marshal(initial)
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		t.Fatal(err)
@@ -41,7 +42,7 @@ func TestAPIContractNotebookConfPatchPersistence(t *testing.T) {
 	engine := gin.New()
 	engine.POST("/api/notebook/setNotebookConf", setNotebookConf)
 	recorder := httptest.NewRecorder()
-	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/notebook/setNotebookConf", strings.NewReader(`{"notebook":"`+id+`","conf":{"dailyNoteSavePath":"daily","name":null,"encrypted":true,"boxCrypt":{"spec":1,"wrappedDEK":"AQID"}}}`)))
+	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/notebook/setNotebookConf", strings.NewReader(`{"notebook":"`+id+`","conf":{"dailyNoteSavePath":"daily","name":null,"encrypted":true,"boxCrypt":{"spec":1,"wrappedDEK":"AQID"},"futureSetting":1,"unknownRequestField":true}}`)))
 	requireAPIContract(t, "POST", "/api/notebook/setNotebookConf", recorder)
 	var response struct {
 		Code int `json:"code"`
@@ -59,6 +60,9 @@ func TestAPIContractNotebookConfPatchPersistence(t *testing.T) {
 	}
 	if stored.Name != "original" || stored.DailyNoteSavePath != "/daily" || stored.Encrypted || stored.BoxCrypt != nil {
 		t.Fatal("patch did not preserve ordinary and encryption configuration")
+	}
+	if string(stored.Extra["futureSetting"]) != `999` || stored.Extra["unknownRequestField"] != nil {
+		t.Fatal("patch changed unknown settings on disk")
 	}
 }
 
@@ -89,6 +93,8 @@ func TestAPIContractNotebookConfPatchCompatibility(t *testing.T) {
 			}
 			savedCrypt := model.DeepCopyBoxEncryption(legacy.BoxCrypt)
 			legacyErr := gulu.JSON.UnmarshalJSON(data, &legacy)
+			// 旧版请求按结构体字段解码，未知请求字段不属于补丁。
+			legacy.Extra = nil
 			legacy.Encrypted = true
 			legacy.BoxCrypt = savedCrypt
 			request, decodeErr := apicontract.SetNotebookConf.Decode(strings.NewReader(`{"notebook":"20260101000000-abcdefg","conf":` + payload + `}`))

@@ -8,6 +8,7 @@ import {existsSync, readFileSync, readdirSync, statSync} from "node:fs";
 import {createRequire} from "node:module";
 import {availableParallelism} from "node:os";
 import path from "node:path";
+import ts from "typescript";
 
 const appRoot = path.resolve(import.meta.dirname, "..");
 // 与 scripts/test.mjs 的 glob 覆盖范围一致。
@@ -31,6 +32,43 @@ export const scanReferences = (text) => {
         references.add(match[1]);
     }
     return [...references];
+};
+
+export const scanReferenceDetails = (text, file = "source.ts") => {
+    const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
+    if (source.parseDiagnostics.length > 0 || !/\.(?:ts|js|mjs)$/.test(file)) {
+        return scanReferences(text).map(reference => ({reference, kind: "unknown"}));
+    }
+    const result = [];
+    const classified = [];
+    const add = (node, kind) => {
+        if (node && ts.isStringLiteralLike(node)) {
+            result.push({reference: node.text, kind});
+            classified.push(node);
+        }
+    };
+    const visit = node => {
+        if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
+            add(node.moduleSpecifier, file.endsWith(".ts") && (node.isTypeOnly || node.importClause?.isTypeOnly) ? "type" : "runtime");
+        } else if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference)) {
+            add(node.moduleReference.expression, file.endsWith(".ts") && node.isTypeOnly ? "type" : "runtime");
+        } else if (ts.isCallExpression(node) &&
+            (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
+                (ts.isIdentifier(node.expression) && node.expression.text === "require"))) {
+            add(node.arguments[0], "runtime");
+        }
+        ts.forEachChild(node, visit);
+    };
+    visit(source);
+    // 只屏蔽已分类的说明符，其余嵌入源码、模板和路径字符串仍按保守规则识别。
+    let remaining = text;
+    for (const node of classified.sort((a, b) => b.pos - a.pos)) {
+        remaining = remaining.slice(0, node.getStart(source)) + " ".repeat(node.end - node.getStart(source)) + remaining.slice(node.end);
+    }
+    for (const reference of scanReferences(remaining)) {
+        result.push({reference, kind: "source"});
+    }
+    return result;
 };
 
 // 把说明符或路径字面量解析成 app 内的绝对路径；外部模块返回 undefined。
@@ -80,8 +118,32 @@ export const buildGraph = (files, root = appRoot, knownFiles = new Set(files)) =
     return edges;
 };
 
+export const buildClassifiedGraph = (files, root = appRoot, knownFiles = new Set(files)) => {
+    const edges = new Map();
+    for (const file of files) {
+        let text;
+        try {
+            text = readFileSync(file, "utf8");
+        } catch {
+            continue;
+        }
+        const targets = [];
+        for (const {reference, kind} of scanReferenceDetails(text, file)) {
+            const target = resolveReference(file, reference, root, knownFiles);
+            if (target && target !== file) {
+                targets.push({target, kind});
+            }
+        }
+        edges.set(file, targets);
+    }
+    return edges;
+};
+
 // 从改动文件出发反向遍历，找出直接或间接引用它们的测试文件。
-export const selectTests = (changedFiles, allFiles, root = appRoot, reasons = new Map()) => {
+export const selectTests = (changedFiles, allFiles, root = appRoot, reasons = new Map(), details = {}) => {
+    details.paths = new Map();
+    details.typeOnlyTests = new Map();
+    details.typecheck = false;
     const changed = new Set(changedFiles.map(file => path.resolve(file)));
     // 依赖与转译配置影响所有测试，不能仅靠源码引用图推导。
     if ([...changed].some(file => path.dirname(file) === root &&
@@ -93,32 +155,43 @@ export const selectTests = (changedFiles, allFiles, root = appRoot, reasons = ne
     }
     const reverse = new Map();
     // 删除的源文件也保留依赖边，避免删除操作被误报为没有受影响的测试。
-    for (const [file, targets] of buildGraph(allFiles, root, new Set([...allFiles, ...changed]))) {
-        for (const target of targets) {
+    for (const [file, targets] of buildClassifiedGraph(allFiles, root, new Set([...allFiles, ...changed]))) {
+        for (const {target, kind} of targets) {
             const list = reverse.get(target) ?? [];
-            list.push(file);
+            list.push({file, kind});
             reverse.set(target, list);
         }
     }
     const selected = new Set([...changed].filter(file => isTestFile(file) && existsSync(file)));
-    const chains = new Map([...changed].map(file => [file, [file]]));
     selected.forEach(file => reasons.set(file, [file]));
-    const visited = new Set(changed);
-    const queue = [...changed];
+    const visited = new Set([...changed].map(file => `${file}:0`));
+    const queue = [...changed].map(file => ({file, flags: 0, chain: [file], kinds: []}));
+    // 源码读取可能检查类型文本或生成声明，因此保留含类型边的完整依赖路径。
     while (queue.length > 0) {
-        const target = queue.pop();
-        for (const referrer of reverse.get(target) ?? []) {
-            if (visited.has(referrer)) {
+        const current = queue.shift();
+        for (const {file: referrer, kind} of reverse.get(current.file) ?? []) {
+            const flags = current.flags | (kind === "type" ? 1 : 0) | (kind === "source" || kind === "unknown" ? 2 : 0);
+            details.typecheck ||= (flags & 1) !== 0;
+            const key = `${referrer}:${flags}`;
+            if (visited.has(key)) {
                 continue;
             }
-            visited.add(referrer);
-            chains.set(referrer, [...chains.get(target), referrer]);
-            queue.push(referrer);
-            if (isTestFile(referrer)) {
+            visited.add(key);
+            const chain = [...current.chain, referrer];
+            const kinds = [...current.kinds, kind];
+            queue.push({file: referrer, flags, chain, kinds});
+            if (isTestFile(referrer) && flags === 1 && !details.typeOnlyTests.has(referrer)) {
+                details.typeOnlyTests.set(referrer, {chain, kinds});
+            }
+            if (isTestFile(referrer) && (!(flags & 1) || (flags & 2)) && !selected.has(referrer)) {
                 selected.add(referrer);
-                reasons.set(referrer, chains.get(referrer));
+                reasons.set(referrer, chain);
+                details.paths.set(referrer, kinds);
             }
         }
+    }
+    for (const file of selected) {
+        details.typeOnlyTests.delete(file);
     }
     return [...selected].sort();
 };
@@ -168,9 +241,13 @@ const main = () => {
         return 0;
     }
     const reasons = new Map();
-    const selected = selectTests(touched, listFiles(), appRoot, reasons);
+    const details = {};
+    const selected = selectTests(touched, listFiles(), appRoot, reasons, details);
     console.error(`基准 ${base}；改动 ${touched.length} 个文件；选中 ${selected.length} 个测试文件`);
-    if (selected.length === 0) {
+    if (details.typecheck) {
+        console.error("类型依赖受影响；test:affected 将先执行完整 typecheck");
+    }
+    if (selected.length === 0 && !details.typecheck) {
         console.error("未找到关联测试；未运行测试，不代表已确认没有影响");
         return 0;
     }
@@ -179,10 +256,27 @@ const main = () => {
     if (explain) {
         for (const file of selected) {
             const reason = reasons.get(file);
-            console.error(`${path.relative(appRoot, file)}: ${Array.isArray(reason) ? reason.map(item => path.relative(appRoot, item)).join(" -> ") : reason}`);
+            const kinds = details.paths.get(file) ?? [];
+            const chain = Array.isArray(reason) ? reason.map((item, index) =>
+                `${index ? ` -[${kinds[index - 1] ?? "changed"}]-> ` : ""}${path.relative(appRoot, item)}`).join("") : reason;
+            console.error(`${path.relative(appRoot, file)}: ${chain}`);
+        }
+        for (const [file, {chain, kinds}] of details.typeOnlyTests) {
+            console.error(`${path.relative(appRoot, file)} [typecheck only]: ${chain.map((item, index) =>
+                `${index ? ` -[${kinds[index - 1]}]-> ` : ""}${path.relative(appRoot, item)}`).join("")}`);
         }
     }
     if (!run) {
+        return 0;
+    }
+    if (details.typecheck) {
+        const result = spawnSync("pnpm", ["--config.verify-deps-before-run=false", "run", "typecheck"],
+            {cwd: appRoot, stdio: "inherit", shell: process.platform === "win32"});
+        if (result.status !== 0) {
+            return result.status ?? 1;
+        }
+    }
+    if (selected.length === 0) {
         return 0;
     }
     // 不能复用 scripts/test.mjs：它把四组 glob 无条件追加在参数之后，传文件等于跑全量。

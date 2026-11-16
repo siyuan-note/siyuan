@@ -2743,13 +2743,13 @@ func buildCreateDocTree(boxID string, validation *createDocValidation, dom strin
 			if nil != link && link.IsTextMarkType("a") {
 				if strings.HasSuffix(link.TextMarkAHref, ".mp3") {
 					unlinks = append(unlinks, n)
-					audio := &ast.Node{ID: n.ID, Type: ast.NodeAudio, Tokens: []byte("<audio controls=\"controls\" src=\"" + link.TextMarkAHref + "\" data-src=\"" + link.TextMarkAHref + "\"></audio>")}
+					audio := &ast.Node{ID: n.ID, Type: ast.NodeAudio, Tokens: []byte("<audio controls=\"controls\" src=\"" + link.TextMarkAHref + "\"></audio>")}
 					audio.SetIALAttr("id", n.ID)
 					audio.SetIALAttr("updated", util.TimeFromID(n.ID))
 					n.InsertBefore(audio)
 				} else if strings.HasSuffix(link.TextMarkAHref, ".mp4") {
 					unlinks = append(unlinks, n)
-					video := &ast.Node{ID: n.ID, Type: ast.NodeVideo, Tokens: []byte("<video controls=\"controls\" src=\"" + link.TextMarkAHref + "\" data-src=\"" + link.TextMarkAHref + "\"></video>")}
+					video := &ast.Node{ID: n.ID, Type: ast.NodeVideo, Tokens: []byte("<video controls=\"controls\" src=\"" + link.TextMarkAHref + "\"></video>")}
 					video.SetIALAttr("id", n.ID)
 					video.SetIALAttr("updated", util.TimeFromID(n.ID))
 					n.InsertBefore(video)

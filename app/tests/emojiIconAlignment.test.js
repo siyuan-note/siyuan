@@ -9,7 +9,8 @@ const os = require("node:os");
 const root = path.resolve(__dirname, "..");
 const GLYPH = "\u{1F4C4}";
 const TEXT = "\u6587\u6863";
-const TREE_ICONS = {file: "1f4c4", notebook: "1f5c3", lock: "1f512", rocket: "1f680", person: "1f9d1"};
+const GEAR_LABEL = "\u4e2a\u4eba\u7ba1\u7406";
+const TREE_ICONS = {file: "1f4c4", notebook: "1f5c3", lock: "1f512", rocket: "1f680", person: "1f9d1", gear: "2699-fe0f"};
 // 以 2 倍设备像素比采样，把 1x 抗锯齿带来的 1px 量化误差降到 0.5px 以内
 const SCALE = 2;
 // 与相邻文字对齐的容差；未标定的平台（内置 Noto 分支）放宽
@@ -24,7 +25,7 @@ const text = (className) => `<span class="${className}" id="text">${TEXT}</span>
 // 每个图标位使用最贴近真实标记的结构；reference 指明该位置的对齐参照物
 const SITES = [
     {name: "document tree icon", reference: "text",
-        markup: `<div class="file-tree sy__file"><ul class="b3-list"><li class="b3-list-item" id="row">
+        markup: `<div class="file-tree sy__file"><ul class="b3-list"><li class="b3-list-item file-tree__row" id="row">
             ${icon()}${text("b3-list-item__text")}</li></ul></div>`},
     {name: "document tree graphic", reference: "text",
         markup: `<ul class="b3-list"><li class="b3-list-item" id="row">
@@ -76,17 +77,19 @@ const getFileTreeIconHTML = (iconValue, defaultIcon, className = "", needSpan = 
 };
 
 // 文字必须使用与产品相同的字体栈，否则测到的文字墨迹中心没有参考价值
-const themeVars = () => fs.readFileSync(path.join(root, "appearance/themes/daylight/theme.css"), "utf8")
+const themeVars = (themeMode) => fs.readFileSync(path.join(root,
+    `appearance/themes/${themeMode === "dark" ? "midnight" : "daylight"}/theme.css`), "utf8")
     .match(/[^{}]+\{[^{}]*\}/g).map(rule => {
         const declarations = rule.match(/--b3-font-family[-a-z]*: [^;]+;/g);
         return declarations ? `${rule.slice(0, rule.indexOf("{"))} { ${declarations.join(" ")} }` : "";
     }).join("\n");
 
-const buildPage = ({css, fontStyle, body, rowClass = "", bodyClass = "body--windows", lang = "ja"}) => {
+const buildPage = ({css, fontStyle, body, rowClass = "", bodyClass = "body--windows", lang = "ja",
+    themeMode = "light", lightTheme = "daylight"}) => {
     const fontCSS = fontStyle();
-    return `<!doctype html><html lang="${lang}"><meta charset="utf-8">
+    return `<!doctype html><html lang="${lang}" data-theme-mode="${themeMode}" data-light-theme="${lightTheme}" data-dark-theme="midnight"><meta charset="utf-8">
 <style>${fontCSS}</style>
-<style>${themeVars()}</style>
+<style>${themeVars(themeMode)}</style>
 <style>${css}</style>
 <style>
 body { margin: 0; padding: 20px; background: #808080; font-size: 14px; }
@@ -141,6 +144,7 @@ const runElectron = async () => {
     app.commandLine.appendSwitch("disable-gpu");
     app.commandLine.appendSwitch("force-device-scale-factor", String(SCALE));
     await app.whenReady();
+    const nativeWindows = process.argv[3] === "windows-native";
     const win = new BrowserWindow({show: false, width: 900, height: 900,
         webPreferences: {nodeIntegration: true, contextIsolation: false}});
     try {
@@ -178,22 +182,28 @@ const runElectron = async () => {
                 document.fonts.load('20px "Emojis Icon"'), document.fonts.load('68px "Emojis Icon"'),
                 document.fonts.load('14px "Emojis File Tree"'), document.fonts.load('16px "Emojis File Tree"')]))
                 .then(() => new Promise(resolve => requestAnimationFrame(() =>
-                    requestAnimationFrame(() => setTimeout(resolve, 80)))))`);
+                    requestAnimationFrame(() => setTimeout(resolve, 80)))))
+                .catch(error => {throw new Error(error.name + ": " + error.message);})`);
         };
 
         // 文档树图标：逐字形核对与文字的对齐，并确认图片/SVG 图标不受影响
-        for (const [platform, bodyClass, tolerance] of [
+        for (const [platform, bodyClass, tolerance] of nativeWindows ? [
             ["windows11", "body--windows", TEXT_TOLERANCE],
+        ] : [
             ["windows", "body--windows", UNCALIBRATED_TOLERANCE],
             ["other", "body--linux", UNCALIBRATED_TOLERANCE],
             ["other", "body--android", UNCALIBRATED_TOLERANCE],
         ]) {
-            for (const [fontSize, lang] of [[14, "ja"], [16, "ja"], [16, "en"], [16, "zh-CN"]]) {
+            const fontCases = [[14, "ja"], [16, "ja"], [16, "en"], [16, "zh-CN"]];
+            if (platform === "windows11") {
+                fontCases.push([14, "zh-CN"], [20, "zh-CN"], [16, "zh-CN", "dark"]);
+            }
+            for (const [fontSize, lang, themeMode] of fontCases) {
                 const rows = Object.entries(TREE_ICONS).map(([name, value]) =>
-                    `<li class="b3-list-item" id="row-${name}">
+                    `<li class="b3-list-item file-tree__row" id="row-${name}">
                         <span class="b3-list-item__icon" id="icon-${name}">${
                             getFileTreeIconHTML(value, name === "notebook" ? "notebook" : "file")}</span>
-                        <span class="b3-list-item__text" id="text-${name}">${TEXT}</span></li>`);
+                        <span class="b3-list-item__text" id="text-${name}">${name === "gear" ? GEAR_LABEL : TEXT}</span></li>`);
                 rows.push(`<li class="b3-list-item" id="row-image">
                     <span class="b3-list-item__icon" id="icon-image">${getFileTreeIconHTML("b3log.png", "file")}</span>
                     <span class="b3-list-item__text" id="text-image">${TEXT}</span></li>`);
@@ -202,9 +212,9 @@ const runElectron = async () => {
                         getFileTreeIconHTML("", "file", "", false, true)}</span>
                     <span class="b3-list-item__text" id="text-svg">${TEXT}</span></li>`);
                 await load(buildPage({css: baseCSS, fontStyle: () => fontModule.getEmojiFontStyle(platform, servePath),
-                    bodyClass, lang, body: `<div class="file-tree sy__file"><ul class="b3-list measure-list">${
+                    bodyClass, lang, themeMode, body: `<div class="file-tree sy__file"><ul class="b3-list measure-list">${
                         rows.join("")}</ul></div>`,
-                    rowClass: `.measure-list .b3-list-item__icon { font-size: ${fontSize}px; }`}));
+                    rowClass: `.file-tree.sy__file .measure-list .b3-list-item__icon { font-size: ${fontSize}px; }`}));
                 const image = await win.webContents.capturePage();
                 const size = image.getSize();
                 const bitmap = image.getBitmap();
@@ -228,6 +238,8 @@ const runElectron = async () => {
                         continue;
                     }
                     assert.equal(iconBox.childTag, null, `${name}: emoji glyph must not be wrapped`);
+                    assert.equal(iconBox.fontSize, `${fontSize}px`);
+                    assert.equal(iconBox.fontFamily.includes('"Emojis File Tree Native"'), platform === "windows11");
                     const target = await win.webContents.executeJavaScript(`(() => {
                         const icon = document.querySelector("#icon-${name}");
                         const rect = icon.getBoundingClientRect();
@@ -242,7 +254,8 @@ const runElectron = async () => {
                     const delta = iconInk.center - textInk.center;
                     console.log(`${platform}/${bodyClass}/${lang}/${fontSize}px ${name}: ink ${iconInk.top.toFixed(1)}..` +
                         `${iconInk.bottom.toFixed(1)} text center ${textInk.center.toFixed(2)} delta ${delta.toFixed(2)}px`);
-                    assert.ok(Math.abs(delta) <= tolerance,
+                    const maxDelta = platform === "windows11" && lang === "zh-CN" && name === "gear" ? 0.5 : tolerance;
+                    assert.ok(Math.abs(delta) <= maxDelta,
                         `${platform}/${fontSize}px ${name}: emoji ink center is ${delta.toFixed(2)}px ` +
                         "off the adjacent text ink center");
                 }
@@ -271,7 +284,15 @@ const runElectron = async () => {
             }
         }
 
-        // 其余图标位：单独成页，避免依赖滚动
+        if (!nativeWindows) {
+            app.exit(0);
+            return;
+        }
+        await load(buildPage({css: baseCSS, fontStyle: () => fontModule.getEmojiFontStyle("windows11", servePath),
+            lightTheme: "custom", body: SITES[0].markup}));
+        assert.ok(!(await measure(win, "#icon")).fontFamily.includes('"Emojis File Tree Native"'));
+
+        // 单独成页测量，避免依赖滚动
         for (const site of SITES) {
             await load(buildPage({css: site.entry === "mobile" ? mobileCSS : baseCSS,
                 fontStyle: () => fontModule.getEmojiFontStyle("windows11", servePath),
@@ -301,16 +322,20 @@ const runElectron = async () => {
         }
         app.exit(0);
     } catch (error) {
-        console.error(error);
+        console.error(error?.stack || error?.message || String(error));
         app.exit(1);
     }
 };
 
 if (process.versions.electron && process.type === "browser") {
-    runElectron().catch(error => { console.error(error); require("electron").app.exit(1); });
+    runElectron().catch(error => { console.error(error?.stack || error?.message || String(error)); require("electron").app.exit(1); });
 } else {
-    require("node:test").it("aligns emoji ink with adjacent text in every icon slot", {
-        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    for (const [mode, title] of [
+        ["noto", "aligns bundled Noto emoji ink with adjacent text in document tree icon slots"],
+        ["windows-native", "aligns native Windows emoji ink with adjacent text in every icon slot"],
+    ]) require("node:test").it(title, {
+        skip: mode === "windows-native" && process.platform !== "win32" ? "Native Segoe emoji metrics require Windows" :
+            process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 240000,
     }, async () => {
         const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-emoji-icon-"));
@@ -318,7 +343,7 @@ if (process.versions.electron && process.type === "browser") {
         delete env.ELECTRON_RUN_AS_NODE;
         try {
             await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, temporary], {env, windowsHide: true, timeout: 230000});
+                require("electron"), [__filename, temporary, mode], {env, windowsHide: true, timeout: 230000});
         } finally {
             assert.equal(path.dirname(path.resolve(temporary)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(temporary).startsWith("siyuan-emoji-icon-"));

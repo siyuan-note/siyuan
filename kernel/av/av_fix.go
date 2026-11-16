@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	CurrentSpec   = 14
+	CurrentSpec   = 16
 	PlainTextSpec = 8
 	RichTextSpec  = 9
 	// 单一 WGS84 位置使用独立版本，防止其他格式的内核重写坐标含义。
@@ -47,6 +47,12 @@ func UpgradeSpec(av *AttributeView) {
 	if av.HasSubItems() && av.Spec < SubItemsSpec {
 		av.Spec = SubItemsSpec
 	}
+	if av.HasPrimaryRich() && av.Spec < PrimaryRichSpec {
+		av.Spec = PrimaryRichSpec
+	}
+	if av.HasPrimaryBlockRich() && av.Spec < PrimaryBlockRichSpec {
+		av.Spec = PrimaryBlockRichSpec
+	}
 }
 
 // upgradeSpec10 仅为包含列表或日历配置的数据库升级，保留其他数据库的旧版兼容性。
@@ -71,6 +77,12 @@ func upgradeSpec10(av *AttributeView) {
 }
 
 func CheckSpec(av *AttributeView) (err error) {
+	if av.HasPrimaryBlockRich() && av.Spec < PrimaryBlockRichSpec {
+		return fmt.Errorf("primary block rich text requires format %d", PrimaryBlockRichSpec)
+	}
+	if av.HasPrimaryRich() && av.Spec < PrimaryRichSpec {
+		return fmt.Errorf("primary rich text requires format %d", PrimaryRichSpec)
+	}
 	if av.HasSubItems() && av.Spec < SubItemsSpec {
 		return fmt.Errorf("database sub-items require format %d", SubItemsSpec)
 	}
@@ -143,6 +155,9 @@ func (av *AttributeView) NormalizeRichText() (err error) {
 		}
 	})
 	if nil != err {
+		return
+	}
+	if err = av.NormalizePrimaryRich(); err != nil {
 		return
 	}
 	for _, text := range normalized {

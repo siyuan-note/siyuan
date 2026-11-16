@@ -6,7 +6,7 @@
 		"id": "20200910201551-h4twhas",
 		"title": "书签和标签",
 		"type": "doc",
-		"updated": "20261024161440"
+		"updated": "20261116220110"
 	},
 	"Children": [
 		{
@@ -98,7 +98,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091316-zxotarc",
-				"updated": "20260810212846"
+				"updated": "20261116220110"
 			},
 			"Children": [
 				{
@@ -220,6 +220,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "​）中列出。如果需要取消标签，在内容块中删掉该标签即可。"
+				}
+			]
+		},
+		{
+			"ID": "20261116215152-8d44f6e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261116215152-8d44f6e",
+				"updated": "20261116220110"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在标签面板菜单中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重命名"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可跨文档统一修改该标签及其子标签。可在任一受影响文档中撤销，并在该文档中重做；数据库中已有的条目及其字段值会保留。"
 				}
 			]
 		},

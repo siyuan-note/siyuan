@@ -9,7 +9,7 @@ const directory = path.join(__dirname, "../src/protyle/render/av");
 const source = ts.createSourceFile("cell.ts", readFileSync(path.join(directory, "cell.ts"), "utf8"),
     ts.ScriptTarget.ES2022, true);
 const functionNames = new Set(["getStoredCellValueByElement", "genCellValueByElement", "genCellValue",
-    "createCellInputTarget", "popTextCell", "updateCellValueByInput", "updateCellsValue"]);
+    "getStableTextCells", "createCellInputTarget", "transformCellValue", "popTextCell", "updateCellValueByInput", "updateCellsValue"]);
 const compile = text => ts.transpileModule(text, {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
 }).outputText;
@@ -109,11 +109,12 @@ const fixture = (type = "number", {groups = false, batch = false, count = 1, vie
             !window.siyuan.isPublish && !editor.options.history?.created && !editor.options.history?.snapshot,
         hasClosestBlock: () => block,
         hasClosestByClassName: (element, name) => name === "custom-attr" ?
-            (element.dataset.avId ? {} : null) : name === "av__row" ? element.row : null,
+            (element.dataset.avId ? {} : null) : name === "av__row" ? element.row : name === "av__body" ? element.group : null,
         getColId: element => element.dataset.colId,
         getFieldIdByCellElement: element => element.dataset.rowId || element.row.dataset.id,
         getComputedStyle: () => ({}), cellScrollIntoView() {},
         bindAnchoredInputPosition: (_input, getter) => {state.anchor = getter;},
+        openAVRichTextEditor: options => {state.richEditor = options; mask.isConnected = true;},
         escapeHtml: value => value, escapeAttr: value => value,
         callMobileAppShowKeyboard() {}, setPosition() {}, addDragFill() {}, focusBlock() {},
         electronUndo: () => false, isNotCtrl: () => true,
@@ -137,7 +138,14 @@ const fixture = (type = "number", {groups = false, batch = false, count = 1, vie
     const api = runInNewContext(compile(functions) + "\n({popTextCell, updateCellsValue});", context);
     api.popTextCell(protyle, cells, type, {scrollIntoView: false});
     const edit = value => {input.value = value; input.dispatchEvent(new Event("input"));};
-    const save = () => mask.dispatchEvent(new Event(context.AV_CELL_EDITOR_CLOSE_EVENT));
+    const save = async () => {
+        if (state.richEditor) {
+            const editor = state.richEditor;
+            await editor.onSave({...editor.value, block: {...editor.value.block, content: input.value, rich: null}},
+                editor.nodeElement, editor.stableCells);
+            mask.isConnected = false;
+        } else { mask.dispatchEvent(new Event(context.AV_CELL_EDITOR_CLOSE_EVENT)); }
+    };
     const unmount = () => originalCells.forEach(cell => {cell.isConnected = false;});
     const close = (saveDraft = false) => {
         const exports = {};
@@ -150,11 +158,11 @@ const fixture = (type = "number", {groups = false, batch = false, count = 1, vie
 };
 
 for (const type of ["number", "url", "email", "phone", "block"]) {
-    test(`${type} input saves through real updateCellsValue after its row is unmounted`, () => {
+    test(`${type} input saves through real updateCellsValue after its row is unmounted`, async () => {
         const f = fixture(type);
         f.edit(type === "number" ? "42" : "updated");
         f.unmount();
-        f.save();
+        await f.save();
         assert.equal(f.transactions.length, 1);
         const operation = f.transactions[0].operations[0];
         assert.equal(operation.action, "updateAttrViewCell");
@@ -308,11 +316,11 @@ test("clearing a number, unchanged close, and cancellation retain their existing
     assert.equal(cancelled.transactions.length, 0);
 });
 
-test("typing a block reference while its anchor is unmounted leaves the draft available to save", () => {
+test("typing a block reference while its anchor is unmounted leaves the draft available to save", async () => {
     const f = fixture("block");
     f.unmount();
     f.edit("((draft");
     assert.equal(f.mask.isConnected, true);
-    f.save();
+    await f.save();
     assert.equal(f.transactions[0].operations[0].data.block.content, "((draft");
 });

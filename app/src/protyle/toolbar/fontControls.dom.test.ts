@@ -118,7 +118,7 @@ const browserCases = async (sources: Record<string, string>, handler: string, cs
 
 test("font size picker retains its selection toolbar while toggling units and restores selection on close", {timeout: 45000}, async () => {
     const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions",
-        "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "menus/menuToggle", "plugin/Menu", "util/setPosition", "protyle/util/hasClosest",
+        "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "menus/menuToggle", "plugin/Menu", "menus/overlayOwnership", "util/setPosition", "protyle/util/hasClosest",
         "protyle/toolbar/fontControls", "protyle/toolbar/ToolbarItem", "protyle/toolbar/subElementLifecycle", "protyle/toolbar/fontSizeCore",
         "protyle/toolbar/fontSizeSelection", "util/escape", "util/upDownHint"];
     const sources = Object.fromEntries(names.map(name => [name, transpileModule(readFileSync(join(__dirname, "../..", `${name}.ts`), "utf8"), {

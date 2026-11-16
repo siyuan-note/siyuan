@@ -1099,6 +1099,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 
 	var data []byte
 	restoreRenderedContents := av.suspendRenderedContents()
+	restorePrimaryRichDOM := av.suspendPrimaryRichDOM()
 	restoreResolvedColors := av.suspendResolvedColors()
 	if util.UseSingleLineSave.Load() {
 		data, err = gulu.JSON.MarshalJSON(av)
@@ -1107,6 +1108,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	}
 	restoreResolvedColors()
 	restoreRenderedContents()
+	restorePrimaryRichDOM()
 	if err != nil {
 		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)
 		return

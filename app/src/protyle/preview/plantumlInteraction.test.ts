@@ -59,12 +59,12 @@ test("reading mode opens PlantUML only on double click and keeps ordinary image 
     assert.equal(diagramPreviews, 1);
     const ordinaryImage = {...event, target: {...event.target, closest: (): null => null}};
     elements[0].listeners.click(ordinaryImage);
-    assert.deepEqual(imagePreviews, [["diagram.svg", "doc", ""]]);
+    assert.deepEqual(imagePreviews, [["diagram.svg", "doc", "", ordinaryImage.target]]);
     elements[0].listeners.dblclick(ordinaryImage);
     assert.equal(diagramPreviews, 1);
     const livePhoto = {...ordinaryImage, target: {...ordinaryImage.target, getAttribute: (name: string) => ({
         src: "photo.heic", "custom-sy-live-photo": "1", "custom-sy-live-photo-video": "photo.mov",
     })[name] || null}};
     elements[0].listeners.click(livePhoto);
-    assert.deepEqual(imagePreviews.at(-1), ["photo.heic", "doc", "photo.mov"]);
+    assert.deepEqual(imagePreviews.at(-1), ["photo.heic", "doc", "photo.mov", livePhoto.target]);
 });

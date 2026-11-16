@@ -49,9 +49,9 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
     list.className = "b3-list b3-list--background markdown-font-picker__list";
     list.setAttribute("aria-label", text("fontFamily"));
     element.append(chips, controls, notice, retry, list);
-    const icon = (id: string) => {
+    const icon = (id: string, className = "") => {
         const span = document.createElement("span");
-        span.innerHTML = `<svg aria-hidden="true"><use href="#${id}"></use></svg>`;
+        span.innerHTML = `<svg class="${className}" aria-hidden="true"><use href="#${id}"></use></svg>`;
         return span.firstChild;
     };
     const renderList = () => {
@@ -68,7 +68,7 @@ export const createMarkdownFontPicker = (element: HTMLElement, initial: Markdown
             label.className = "b3-menu__label"; label.dataset.family = font.family;
             label.textContent = font.displayName || font.family;
             button.append(label);
-            if (checked) button.append(icon("iconSelect"));
+            if (checked) button.append(icon("iconSelect", "b3-list-item__hinticon"));
             button.onclick = () => {
                 selected = checked ? selected.filter(item => item.family !== font.family) : [...selected, {family: font.family, weight: font.weight}];
                 renderChips(); renderList();

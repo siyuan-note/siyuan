@@ -6,6 +6,20 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchSyncPost("/api/tag/previewTagRemoval", {label: "todo"});
+fetchSyncPost("/api/tag/previewTagRemoval", {labels: ["todo", "done"]});
+fetchSyncPost("/api/tag/removeTagWithCollections", {label: "todo", collections: []});
+fetchSyncPost("/api/tag/removeTagWithCollections", {labels: ["todo", "done"], collections: []});
+fetchSyncPost("/api/tag/batchRemoveTag", {labels: ["todo", "done"], collections: []});
+// @ts-expect-error 批量删除必须提供标签数组。
+fetchSyncPost("/api/tag/batchRemoveTag", {label: "todo", collections: []});
+// @ts-expect-error 批量标签不能包含 null。
+fetchSyncPost("/api/tag/batchRemoveTag", {labels: [null], collections: []});
+// @ts-expect-error 批量标签必须是字符串数组。
+fetchSyncPost("/api/tag/previewTagRemoval", {labels: "todo"});
+// @ts-expect-error 批量标签不能包含 null。
+fetchSyncPost("/api/tag/removeTagWithCollections", {labels: [null], collections: []});
+
 fetchSyncPost("/api/filetree/getDocPaths", {notebook: "notebook", ids: ["document"]});
 fetchSyncPost("/api/filetree/getDocPaths", {notebook: "notebook", ids: ["document"], includeIcons: true});
 // @ts-expect-error 图标开关不能为 null。

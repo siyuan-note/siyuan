@@ -1,4 +1,8 @@
 .protyle-block-resize {
+  --protyle-resize-bottom-height: 12px;
+  --protyle-resize-side-length: 40px;
+  --protyle-resize-corner-size: 20px;
+
   position: absolute;
   z-index: 6;
   touch-action: none;
@@ -15,17 +19,20 @@
   }
 
   &[data-resize-axis="width"] {
+    --protyle-resize-side-height: max(0px, min(var(--protyle-resize-side-length), 50%, 100% - var(--protyle-resize-corner-size)));
+
+    // 矮块上的右侧把手止于右下角把手的上方。
     width: 12px;
-    height: min(40px, 50%);
-    right: -12px;
-    top: 50%;
+    height: var(--protyle-resize-side-height);
+    right: 0;
+    top: min(50%, 100% - var(--protyle-resize-corner-size) - var(--protyle-resize-side-height) / 2);
     transform: translateY(-50%);
     cursor: ew-resize;
 
     &::after {
       width: 3px;
       height: min(24px, 100%);
-      left: 4px;
+      right: 2px;
       top: 50%;
       transform: translateY(-50%);
       border-radius: 2px;
@@ -34,9 +41,9 @@
   }
 
   &[data-resize-axis="height"] {
-    height: 12px;
-    width: min(40px, 50%);
-    bottom: -12px;
+    height: var(--protyle-resize-bottom-height);
+    width: min(var(--protyle-resize-side-length), 50%);
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
     cursor: ns-resize;
@@ -50,20 +57,26 @@
       border-radius: 2px;
       background-color: currentColor;
     }
+
+    &.protyle-action__drag::after,
+    &.mindmap-view__resize::after {
+      top: auto;
+      bottom: 2px;
+    }
   }
 
   &[data-resize-axis="both"] {
-    width: 24px;
-    height: 24px;
-    right: -16px;
-    bottom: -16px;
+    width: min(var(--protyle-resize-corner-size), 100%);
+    height: min(var(--protyle-resize-corner-size), 100%);
+    right: 0;
+    bottom: 0;
     cursor: nwse-resize;
 
     &::after {
-      width: 16px;
-      height: 16px;
-      right: 9px;
-      bottom: 9px;
+      width: min(16px, calc(100% - 2px));
+      height: min(16px, calc(100% - 2px));
+      right: 2px;
+      bottom: 2px;
       border-right: 3px solid currentColor;
       border-bottom: 3px solid currentColor;
       border-bottom-right-radius: 10px;
@@ -89,30 +102,13 @@
 }
 
 @media (any-pointer: coarse) {
-  // 外侧命中区域为触屏加宽，装饰尺寸保持不变。
   .protyle-block-resize {
+    --protyle-resize-bottom-height: 20px;
+    --protyle-resize-side-length: 48px;
+    --protyle-resize-corner-size: 32px;
+
     &[data-resize-axis="width"] {
       width: 20px;
-      right: -20px;
-      height: min(48px, 50%);
-    }
-
-    &[data-resize-axis="height"] {
-      height: 20px;
-      bottom: -20px;
-      width: min(48px, 50%);
-    }
-
-    &[data-resize-axis="both"] {
-      width: 32px;
-      height: 32px;
-      right: -24px;
-      bottom: -24px;
-
-      &::after {
-        right: 17px;
-        bottom: 17px;
-      }
     }
   }
 }

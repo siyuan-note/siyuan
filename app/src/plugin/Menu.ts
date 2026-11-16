@@ -1,5 +1,6 @@
 import {Menu as SiyuanMenu} from "../menus/Menu";
 import {toggleMenu} from "../menus/menuToggle";
+import {closeMenuOverlays, getMenuOwnerElement, isMenuOverlayTarget, registerMenuOverlay} from "../menus/overlayOwnership";
 
 const independentMenus = new WeakMap<HTMLElement, Menu>();
 
@@ -28,6 +29,7 @@ export class Menu {
     private menu: SiyuanMenu;
     private parentMenu?: Menu;
     private childMenus = new Set<Menu>();
+    private releaseOverlay?: () => void;
     public isOpen: boolean;
     public element: HTMLElement;
 
@@ -81,6 +83,9 @@ export class Menu {
                 this.menu.removeCB = () => {
                     window.removeEventListener("click", closeEvent, true);
                     this.element.removeEventListener("keydown", keydownEvent);
+                    this.releaseOverlay?.();
+                    this.releaseOverlay = undefined;
+                    closeMenuOverlays(this.element);
                     this.childMenus.forEach(menu => menu.close());
                     this.childMenus.clear();
                     this.parentMenu?.childMenus.delete(this);
@@ -90,7 +95,10 @@ export class Menu {
                     this.element.remove();
                 };
             } else {
-                this.menu.removeCB = closeCB;
+                this.menu.removeCB = () => {
+                    closeMenuOverlays(this.element);
+                    closeCB?.();
+                };
             }
         }
     }
@@ -137,11 +145,16 @@ export class Menu {
         if (independentMenus.has(this.element)) {
             this.parentMenu?.childMenus.delete(this);
             this.parentMenu = undefined;
-            const parentElement = options.target?.closest<HTMLElement>(".b3-menu");
+            const parentElement = getMenuOwnerElement(options.target);
             const parentMenu = parentElement && independentMenus.get(parentElement);
             if (parentMenu && parentMenu !== this && !this.contains(parentMenu.element)) {
                 this.parentMenu = parentMenu;
                 parentMenu.childMenus.add(this);
+            }
+            this.releaseOverlay?.();
+            this.releaseOverlay = undefined;
+            if (parentElement && options.target?.isConnected && !this.element.contains(options.target)) {
+                this.releaseOverlay = registerMenuOverlay(options.target as HTMLElement, this.element, () => this.close());
             }
         }
         this.menu.popup(options);
@@ -159,6 +172,6 @@ export class Menu {
     }
 
     private contains(target: Node): boolean {
-        return this.element.contains(target) || Array.from(this.childMenus).some(menu => menu.contains(target));
+        return isMenuOverlayTarget(this.element, target) || Array.from(this.childMenus).some(menu => menu.contains(target));
     }
 }

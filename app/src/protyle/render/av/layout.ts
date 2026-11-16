@@ -154,10 +154,15 @@ export const getLayoutHTML = (data: IAV) => {
         <input data-type="toggle-view-title" type="checkbox" class="b3-switch b3-switch--menu" ${view.hideAttrViewName ? "" : "checked"}>
     </label>
     ${html}
-    <label class="b3-menu__item">
-        <span class="fn__flex-center">${window.siyuan.languages.showAllEntriesIcons}</span>
-        <span class="fn__space fn__flex-1"></span>
+    <label class="b3-menu__item b3-menu__item--wrap">
+        <span class="b3-menu__label fn__flex-center">${window.siyuan.languages.databaseShowIcon}</span>
+        <span class="fn__space"></span>
         <input data-type="toggle-entries-icons" type="checkbox" class="b3-switch b3-switch--menu" ${view.showIcon ? "checked" : ""}>
+    </label>
+    <label class="b3-menu__item b3-menu__item--wrap">
+        <span class="b3-menu__label fn__flex-center">${window.siyuan.languages.databaseShowRelationIcon}</span>
+        <span class="fn__space"></span>
+        <input data-type="toggle-relation-icons" type="checkbox" class="b3-switch b3-switch--menu" ${(view.showRelationIcon ?? view.showIcon) ? "checked" : ""}>
     </label>
     <label class="b3-menu__item">
         <span class="fn__flex-center">${window.siyuan.languages.wrapAllFields}</span>
@@ -267,7 +272,26 @@ export const bindLayoutEvent = (options: {
             data: !checked,
             viewID
         }]);
+        options.data.view.showRelationIcon ??= options.data.view.showIcon;
         options.data.view.showIcon = checked;
+    });
+    const toggleRelationIconElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-relation-icons"]') as HTMLInputElement;
+    toggleRelationIconElement.addEventListener("change", () => {
+        const checked = toggleRelationIconElement.checked;
+        transaction(options.protyle, [{
+            action: "setAttrViewShowRelationIcon",
+            avID,
+            blockID,
+            data: checked,
+            viewID
+        }], [{
+            action: "setAttrViewShowRelationIcon",
+            avID,
+            blockID,
+            data: options.data.view.showRelationIcon ?? options.data.view.showIcon,
+            viewID
+        }]);
+        options.data.view.showRelationIcon = checked;
     });
     const toggleWrapElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-entries-wrap"]') as HTMLInputElement;
     toggleWrapElement.addEventListener("change", () => {

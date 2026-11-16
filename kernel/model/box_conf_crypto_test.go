@@ -130,6 +130,7 @@ func TestDocumentTargetEncryptedMetadataRecovery(t *testing.T) {
 		Parents: []string{"Private parent"}, Title: "Private title", OnMissingParent: "create"}
 	boxConf := conf.NewBoxConf()
 	boxConf.Encrypted, boxConf.Closed, boxConf.BoxCrypt = true, true, crypt
+	boxConf.Extra = map[string]json.RawMessage{"futureSetting": json.RawMessage(`999`)}
 	boxConf.DocCreateTarget, boxConf.RefCreateTarget, boxConf.DailyNoteTarget = target, target, target
 	if err = encryptBoxMetadata(boxID, boxConf, dek); err != nil {
 		t.Fatal(err)
@@ -157,6 +158,9 @@ func TestDocumentTargetEncryptedMetadataRecovery(t *testing.T) {
 	if err != nil || !bytes.Equal(raw.BoxCrypt.Metadata, metadata) {
 		t.Fatal("locked configuration save changed protected metadata", err)
 	}
+	if string(raw.Extra["futureSetting"]) != `999` {
+		t.Fatal("locked configuration save lost an unknown field")
+	}
 	boxConf.DocCreateTarget = target
 	if err = box.SaveConf(boxConf); err == nil {
 		t.Fatal("locked configuration accepted a protected target update")
@@ -170,6 +174,9 @@ func TestDocumentTargetEncryptedMetadataRecovery(t *testing.T) {
 	}
 	if !bytes.Equal(salt, Conf.NotebookCrypto.MasterSalt) {
 		t.Fatal("password change regenerated the master salt")
+	}
+	if raw, err = readRawBoxConf(boxID); err != nil || string(raw.Extra["futureSetting"]) != `999` {
+		t.Fatal("password change lost an unknown field", err)
 	}
 	newKEK, err := deriveKEK("document-target-new-password")
 	if err != nil {

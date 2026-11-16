@@ -77,6 +77,7 @@ func toContractAVBaseInstance(value *av.BaseInstance) *apicontract.AVBaseInstanc
 		Group:             toContractAVViewGroup(value.Group),
 		PageSize:          value.PageSize,
 		ShowIcon:          value.ShowIcon,
+		ShowRelationIcon:  value.ShowRelationIcon,
 		WrapField:         value.WrapField,
 		GroupKey:          toContractAVKey(value.GroupKey),
 		GroupValue:        toContractAVValue(value.GroupValue),
@@ -192,6 +193,8 @@ func toContractAVValueBlock(value *av.ValueBlock) *apicontract.AVValueBlock {
 		ID:               value.ID,
 		Icon:             value.Icon,
 		Content:          value.Content,
+		Rich:             toContractAVPrimaryRich(value.Rich),
+		RichBlockDOM:     value.RichBlockDOM,
 		RefSubtype:       string(value.RefSubtype),
 		Created:          value.Created,
 		Updated:          value.Updated,
@@ -202,13 +205,27 @@ func fromContractAVValueBlock(value *apicontract.AVValueBlock) *av.ValueBlock {
 		return nil
 	}
 	return &av.ValueBlock{
-		ID:         value.ID,
-		Icon:       value.Icon,
-		Content:    value.Content,
-		RefSubtype: av.BlockRefSubtype(value.RefSubtype),
-		Created:    value.Created,
-		Updated:    value.Updated,
+		ID:           value.ID,
+		Icon:         value.Icon,
+		Content:      value.Content,
+		Rich:         fromContractAVPrimaryRich(value.Rich),
+		RichBlockDOM: value.RichBlockDOM,
+		RefSubtype:   av.BlockRefSubtype(value.RefSubtype),
+		Created:      value.Created,
+		Updated:      value.Updated,
 	}
+}
+func toContractAVPrimaryRich(value *av.ValuePrimaryRich) *apicontract.AVValuePrimaryRich {
+	if value == nil {
+		return nil
+	}
+	return &apicontract.AVValuePrimaryRich{Spec: value.Spec, Format: value.Format, Content: value.Content}
+}
+func fromContractAVPrimaryRich(value *apicontract.AVValuePrimaryRich) *av.ValuePrimaryRich {
+	if value == nil {
+		return nil
+	}
+	return &av.ValuePrimaryRich{Spec: value.Spec, Format: value.Format, Content: value.Content}
 }
 func toContractAVValueText(value *av.ValueText) *apicontract.AVValueText {
 	if value == nil {
@@ -1096,10 +1113,11 @@ func toContractAVBaseLayout(value *av.BaseLayout) *apicontract.AVBaseLayout {
 		return nil
 	}
 	return &apicontract.AVBaseLayout{
-		Spec:      value.Spec,
-		ID:        value.ID,
-		ShowIcon:  value.ShowIcon,
-		WrapField: value.WrapField,
+		Spec:             value.Spec,
+		ID:               value.ID,
+		ShowIcon:         value.ShowIcon,
+		ShowRelationIcon: value.ShowRelationIcon,
+		WrapField:        value.WrapField,
 	}
 }
 func toContractAVViewTableColumn(value *av.ViewTableColumn) *apicontract.AVViewTableColumn {

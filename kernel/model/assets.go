@@ -1190,6 +1190,13 @@ func ResolveUnusedDataAssetPath(assetPath string) (relativePath, absPath string,
 	}
 
 	if relativePath == "assets/android-notification-texts.txt" {
+		candidate := map[string]string{relativePath: absPath}
+		if err = excludeAssetCleanupIgnoredPaths(candidate); err != nil {
+			return
+		}
+		if len(candidate) == 0 {
+			return "", "", fmt.Errorf("asset is excluded from cleanup: %s", relativePath)
+		}
 		// 保活开关不参与批量清理，但可显式删除普通文件；目录和符号链接不能使用该例外。
 		info, statErr := os.Lstat(absPath)
 		if statErr != nil {
@@ -2192,6 +2199,9 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem, err error) {
 	for _, toRemove := range toRemoves {
 		delete(assetsPathMap, toRemove)
 	}
+	if err = excludeAssetCleanupIgnoredPaths(assetsPathMap); err != nil {
+		return nil, fmt.Errorf("read asset cleanup ignore rules failed: %w", err)
+	}
 
 	dataAssetsAbsPath := util.GetDataAssetsAbsPath()
 	for dest, assetAbsPath := range assetsPathMap {
@@ -2699,7 +2709,13 @@ func getAssetsLinkDestsWithOptions(
 				}
 				ret = append(ret, assetListLinkDests(dataAssets, includeServePath, options.expandAssetLists, normalize...)...)
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
-				ret = append(ret, htmlAssetLinkDestsWithOptions(n.Tokens, includeServePath, options.expandAssetLists, normalize...)...)
+				nativeMediaTag := ""
+				if ast.NodeAudio == n.Type {
+					nativeMediaTag = "audio"
+				} else if ast.NodeVideo == n.Type {
+					nativeMediaTag = "video"
+				}
+				ret = append(ret, htmlAssetLinkDestsWithOptions(n.Tokens, includeServePath, options.expandAssetLists, nativeMediaTag, normalize...)...)
 			}
 		}
 		return ast.WalkContinue
@@ -2732,10 +2748,10 @@ func assetListLinkDests(raw string, includeServePath, expand bool, normalize ...
 }
 
 func htmlAssetLinkDests(tokens []byte, includeServePath bool, normalize ...func(string) string) (ret []string) {
-	return htmlAssetLinkDestsWithOptions(tokens, includeServePath, false, normalize...)
+	return htmlAssetLinkDestsWithOptions(tokens, includeServePath, false, "", normalize...)
 }
 
-func htmlAssetLinkDestsWithOptions(tokens []byte, includeServePath, expandAssetLists bool, normalize ...func(string) string) (ret []string) {
+func htmlAssetLinkDestsWithOptions(tokens []byte, includeServePath, expandAssetLists bool, nativeMediaTag string, normalize ...func(string) string) (ret []string) {
 	// 逐个读取标签属性，兼容内联标签片段并只解码一层 HTML 实体。
 	tokenizer := html.NewTokenizer(bytes.NewReader(tokens))
 	for {
@@ -2743,7 +2759,23 @@ func htmlAssetLinkDestsWithOptions(tokens []byte, includeServePath, expandAssetL
 		case html.ErrorToken:
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
-			for _, attr := range tokenizer.Token().Attr {
+			token := tokenizer.Token()
+			hasMediaSrc := false
+			if nativeMediaTag != "" && token.Data == nativeMediaTag {
+				// 原生音视频的旧数据可能同时保存 src 和 data-src；非空 src 决定播放地址。
+				for _, attr := range token.Attr {
+					if attr.Key == "src" {
+						hasMediaSrc = strings.TrimSpace(attr.Val) != ""
+						break
+					}
+				}
+			}
+			// 仅处理块的首个媒体标签，嵌套或通用 HTML 的自定义属性仍可能被脚本使用。
+			nativeMediaTag = ""
+			for _, attr := range token.Attr {
+				if hasMediaSrc && attr.Key == "data-src" {
+					continue
+				}
 				if expandAssetLists && (attr.Key == "data-assets" || strings.HasPrefix(attr.Key, "custom-data-assets")) {
 					ret = append(ret, assetListLinkDests(attr.Val, includeServePath, true, normalize...)...)
 					continue
@@ -2834,10 +2866,8 @@ func getAttributeViewValueAssetsLinkDests(value *av.Value, includeServePath bool
 			ret = append(ret, strings.TrimSpace(normalizeScannedAsset(asset.Content, normalize)))
 		}
 	}
-	if nil != value.Text && nil != value.Text.Rich {
-		if tree, err := av.ParseValueTextRich(value.Text.Rich); nil == err && nil != tree {
-			ret = append(ret, getAssetsLinkDests(tree.Root, includeServePath, normalize...)...)
-		}
+	if tree, err := av.RichValueTree(value); nil == err && nil != tree {
+		ret = append(ret, getAssetsLinkDests(tree.Root, includeServePath, normalize...)...)
 	}
 	return
 }

@@ -59,6 +59,10 @@ export const renderDocumentTitlePreview = (element: HTMLElement, id: string, not
             item.removeAttribute("contenteditable");
             item.removeAttribute("spellcheck");
         });
+        // 导航预览移除源内容中的字号，跟随所在界面的字号。
+        content.querySelectorAll<HTMLElement>("[style]").forEach(item => {
+            item.style.removeProperty("font-size");
+        });
         element.classList.add("b3-typography", "document-title-preview");
         element.dataset.protyleLiteRender = "safe";
         element.replaceChildren(...Array.from(content.childNodes));

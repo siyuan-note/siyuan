@@ -17,6 +17,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -25,8 +26,8 @@ func TestListNotebooksSortsBySubDocCount(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	oldConf, oldDataDir := model.Conf, util.DataDir
-	oldPublishAccess := model.GetPublishAccess()
 	util.DataDir = t.TempDir()
+	oldPublishAccess := model.GetPublishAccess()
 	model.Conf = model.NewAppConf()
 	model.Conf.Sync.Store(conf.NewSync())
 	model.Conf.FileTree.Store(conf.NewFileTree())
@@ -129,8 +130,45 @@ func writeNotebookSortFixture(t *testing.T, boxID string, childCount, boxIndex i
 
 func writeNotebookSortDoc(t *testing.T, boxID, docID string) {
 	t.Helper()
-	if err := os.WriteFile(filepath.Join(util.DataDir, boxID, docID+".sy"), []byte(`{"Properties":{}}`), 0644); err != nil {
+	data, err := json.Marshal(map[string]any{"Properties": map[string]string{"id": docID, "title": "Document"}})
+	if err != nil {
 		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(util.DataDir, boxID, docID+".sy"), data, 0644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestListNotebooksReusesDocumentCounts(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	oldConf, oldDataDir := model.Conf, util.DataDir
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	model.Conf.FileTree.Load().BoxDocEnabled = true
+	t.Cleanup(func() { model.Conf, util.DataDir = oldConf, oldDataDir })
+	const boxID = "20261112000000-count01"
+	writeNotebookSortFixture(t, boxID, 64, 0)
+	originalAcquire := filesys.DEKLockAcquire
+	reads := 0
+	filesys.DEKLockAcquire = func(box string) {
+		reads++
+		if originalAcquire != nil {
+			originalAcquire(box)
+		}
+	}
+	t.Cleanup(func() { filesys.DEKLockAcquire = originalAcquire })
+	for request := 0; request < 2; request++ {
+		reads = 0
+		notebooks := requestNotebookList(t, model.RoleAdministrator)
+		if len(notebooks) != 1 || notebooks[0].SubFileCount != 64 {
+			t.Fatalf("unexpected notebook count: %+v", notebooks)
+		}
+		if request == 0 && reads != 64 || request == 1 && reads != 0 {
+			t.Fatalf("request %d read %d document sources", request, reads)
+		}
 	}
 }
 

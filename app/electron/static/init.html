@@ -15,11 +15,26 @@
     <div class="fn__flex-1"></div>
     <label class="b3-label">
         <div>
+            <span data-i18n="workspace"></span>
+            <div class="b3-label__text" data-i18n="workspaceDesc"></div>
+        </div>
+        <div class="fn__flex-1"></div>
+        <button class="b3-button fn__flex-center choosePath" data-i18n="selectBtn"></button>
+    </label>
+    <div class="b3-label remote-kernel">
+        <div>
+            <span data-i18n="remoteKernelTitle"></span>
+            <div class="b3-label__text" id="remoteKernelDesc" data-i18n="remoteKernelDesc"></div>
+        </div>
+        <button class="b3-button" id="remoteKernelConnect" type="button" aria-describedby="remoteKernelDesc"></button>
+    </div>
+    <label class="b3-label">
+        <div>
             <span data-i18n="lang"></span>
             <div class="b3-label__text" data-i18n-html="langDesc"></div>
         </div>
         <div class="fn__flex-1"></div>
-        <select class="b3-select lang">
+        <select class="b3-select fn__flex-center lang">
             <option value="ar">العربية</option>
             <option value="de">Deutsch</option>
             <option value="en">English</option>
@@ -43,14 +58,6 @@
             <option value="zh-TW">繁體中文</option>
             <option value="zh-CN">简体中文</option>
         </select>
-    </label>
-    <label class="b3-label">
-        <div>
-            <span data-i18n="workspace"></span>
-            <div class="b3-label__text" data-i18n="workspaceDesc"></div>
-        </div>
-        <div class="fn__flex-1"></div>
-        <button class="b3-button fn__flex-center choosePath" data-i18n="selectBtn"></button>
     </label>
     <div class="fn__flex-1"></div>
     <div class="fn__flex-1 notice">

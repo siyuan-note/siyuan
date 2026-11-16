@@ -4,13 +4,13 @@ import {join} from "node:path";
 import test from "node:test";
 import {runInNewContext} from "node:vm";
 import {
-    createSourceFile, forEachChild, isBlock, isMethodDeclaration, isVariableStatement, ModuleKind, ScriptTarget, transpileModule,
+    createSourceFile, forEachChild, isMethodDeclaration, ModuleKind, ScriptTarget, transpileModule,
 } from "typescript";
 import * as scrollRequest from "../protyle/scroll/scrollRequest";
 
 const constants = {
     LOCAL_FILEPOSITION: "positions", CB_GET_SCROLL: "scroll", CB_GET_HL: "highlight", CB_GET_ALL: "all",
-    CB_GET_ROOTSCROLL: "root-scroll", CB_GET_SETID: "set-id", CB_GET_FOCUS: "focus", SIZE_GET_MAX: 100000,
+    CUSTOM_SY_RESTORE_DOC_POSITION: "custom-sy-restore-doc-position", CB_GET_ROOTSCROLL: "root-scroll", CB_GET_SETID: "set-id", CB_GET_FOCUS: "focus", SIZE_GET_MAX: 100000,
 };
 const read = (file: string) => readFileSync(join(__dirname, file), "utf8");
 const compile = (source: string) => transpileModule(source, {
@@ -24,12 +24,8 @@ const protyleSource = createSourceFile("index.ts", read("../protyle/index.ts"), 
 let restoreSource: string;
 let getDocSource: string;
 const findRestore = (node: import("typescript").Node) => {
-    if (isBlock(node)) {
-        const index = node.statements.findIndex(statement => isVariableStatement(statement) &&
-            statement.declarationList.declarations.some(item => item.name.getText(protyleSource) === "savedScroll"));
-        if (index >= 0) {
-            restoreSource = node.statements.slice(index, index + 2).map(item => item.getText(protyleSource)).join("\n");
-        }
+    if (isMethodDeclaration(node) && node.name.getText(protyleSource) === "loadInitialDoc") {
+        restoreSource = node.body.getText(protyleSource).slice(1, -1);
     }
     if (isMethodDeclaration(node) && node.name.getText(protyleSource) === "getDoc") {
         getDocSource = `exports.getDoc = function (${node.parameters.map(item => item.getText(protyleSource)).join(",")}) ` +
@@ -40,7 +36,7 @@ const findRestore = (node: import("typescript").Node) => {
 findRestore(protyleSource);
 assert.ok(restoreSource);
 assert.ok(getDocSource);
-const constructorSource = compile(`exports.restore = function (options, mergedOptions) {${restoreSource}};\n${getDocSource}`);
+const constructorSource = compile(`exports.restore = async function (options, mergedOptions) {${restoreSource}};\n${getDocSource}`);
 const clone = <T>(value: T): T => value === undefined ? value : JSON.parse(JSON.stringify(value));
 const position = (scrollTop: number, extra: Partial<IScrollAttr> = {}): IScrollAttr => ({
     rootId: "root", startId: "first", endId: "last", scrollTop, ...extra,
@@ -53,6 +49,9 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
     const constructed: IProtyleOptions[] = [];
     const presentation: string[] = [];
     const attributes: Array<(ready: boolean) => void> = [];
+    const docAttrs: Record<string, string> = {};
+    let pendingAttrs: Promise<void>;
+    let releaseAttrs: () => void;
     const toolbar = {value: "Document"};
     const bottomBacklink = {close: (): Promise<void> | undefined => undefined, updates: 0};
     let clearedSearchHighlights = 0;
@@ -91,6 +90,10 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
             window, document, console, ...globals});
         return api;
     };
+    const docPosition = execute(compile(read("../protyle/scroll/docPosition.ts")), {
+        "../../constants": {Constants: constants},
+        "../../util/fetch": {fetchSyncPost: async () => { await pendingAttrs; return {code: 0, data: docAttrs}; }},
+    });
     const scroll = execute(scrollSource, {
         "../../constants": {Constants: constants},
         "../../util/fetch": {fetchPost},
@@ -100,7 +103,7 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
         "./scrollRequest": scrollRequest,
     });
     const constructor = execute(constructorSource, {}, {
-        Constants: constants, getDocByScroll: scroll.getDocByScroll,
+        ...docPosition, Constants: constants, getDocByScroll: scroll.getDocByScroll,
         fetchPost, onGet, isEncryptedBox: (id: string) => id === "encrypted-box",
     });
     class Protyle {
@@ -120,6 +123,7 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
     }
     const loader = execute(loaderSource, {
         "../constants": {Constants: constants},
+        "../protyle/scroll/docPosition": docPosition,
         "../protyle": {Protyle},
         "../util/fetch": {fetchPost},
         "../util/pathName": {isEncryptedBox: (id: string) => id === "encrypted-box"},
@@ -146,9 +150,9 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
         "./util/bottomBacklink": {closeMobileBottomBacklinkPanel: () => bottomBacklink.close(),
             updateMobileBottomBacklinkPanel: () => { bottomBacklink.updates++; return Promise.resolve(); }},
     });
-    const load = (scrollAttr?: IScrollAttr) => new Promise<any>((resolve, reject) => {
+    const load = (scrollAttr?: IScrollAttr, isValid = () => true) => new Promise<any>((resolve, reject) => {
         loader.loadMobileFileById({}, "root", [constants.CB_GET_SCROLL], undefined, notebookID, resolve,
-            true, () => true, undefined, scrollAttr, false, () => reject(new Error("Loading failed")));
+            true, isValid, undefined, scrollAttr, false, () => reject(new Error("Loading failed")));
     });
     const switchRow = (id: string, isValid = () => true) => new Promise<boolean>(resolve => {
         loader.loadMobileFileById({}, id, [constants.CB_GET_ALL, constants.CB_GET_FOCUS], undefined, notebookID,
@@ -158,10 +162,99 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
                 resolve(false);
             }, false, true);
     });
-    return {load, switchRow, requests, rendered, constructed, window, presentation, attributes, bottomBacklink,
+    const loadDesktop = async (scrollAttr?: IScrollAttr, blockId = "root", action = [constants.CB_GET_SCROLL], destroyed = false) => {
+        const options = {scrollAttr, rootId: "root", blockId, action};
+        const protyle = makeProtyle(options as IProtyleOptions);
+        await constructor.restore.call({protyle, destroyed, afterOnGet: noop,
+            getDoc: (value: IProtyleOptions) => constructor.getDoc.call({protyle, afterOnGet: noop}, value)}, options, options);
+    };
+    return {docAttrs, load, loadDesktop, switchRow, requests, rendered, constructed, window, presentation, attributes, bottomBacklink,
+        pauseAttrs: () => { pendingAttrs = new Promise<void>(resolve => { releaseAttrs = resolve; }); },
+        releaseAttrs: () => releaseAttrs(),
         get clearedSearchHighlights() { return clearedSearchHighlights; },
         get docRequest() { return requests.filter(item => item.url === "/api/filetree/getDoc").at(-1)?.data; }};
 };
+
+test("disabling document position restoration starts cold and reused mobile editors at the top", async () => {
+    const state = setup(position(8000));
+    state.window.siyuan.config.fileTree.restoreDocPosition = false;
+    const protyle = await state.load();
+    assert.equal(protyle.contentElement.scrollTop, 0);
+    assert.equal(state.rendered[0].scrollAttr, undefined);
+    assert.equal(state.docRequest.startID, undefined);
+    assert.equal(await state.load(), protyle);
+    assert.equal(state.rendered[1].scrollAttr, undefined);
+    assert.equal(state.window.siyuan.storage.positions.root.scrollTop, 8000);
+});
+
+test("explicit mobile tab positions still restore when ordinary restoration is disabled", async () => {
+    const state = setup(position(8000));
+    state.window.siyuan.config.fileTree.restoreDocPosition = false;
+    const scroll = position(240, {zoomInId: "zoomed-block"});
+    const protyle = await state.load(scroll);
+    assert.equal(protyle.contentElement.scrollTop, 240);
+    await state.load(scroll);
+    assert.deepEqual(state.rendered.map(item => item.scrollAttr), [scroll, scroll]);
+    assert.equal(state.docRequest.id, "zoomed-block");
+});
+
+test("desktop ordinary reopening honors the preference and explicit targets retain priority", async () => {
+    const state = setup(position(8000));
+    await state.loadDesktop();
+    assert.equal(state.rendered.at(-1).scrollAttr.scrollTop, 8000);
+    state.window.siyuan.config.fileTree.restoreDocPosition = false;
+    await state.loadDesktop();
+    assert.equal(state.rendered.at(-1).scrollAttr, undefined);
+    assert.equal(state.docRequest.id, "root");
+    assert.equal(state.docRequest.startID, undefined);
+    const scroll = position(240);
+    await state.loadDesktop(scroll);
+    assert.deepEqual(state.rendered.at(-1).scrollAttr, scroll);
+    for (const restore of [true, false]) {
+        state.window.siyuan.config.fileTree.restoreDocPosition = restore;
+        await state.loadDesktop(undefined, "target-block", [constants.CB_GET_ROOTSCROLL, constants.CB_GET_HL]);
+        assert.equal(state.docRequest.id, "target-block");
+        assert.equal(state.rendered.at(-1).scrollAttr, undefined);
+    }
+});
+
+for (const global of [true, false]) {
+    for (const custom of ["true", "false", "", "unknown"]) {
+        test(`document opening position overrides global ${global} with ${custom || "default"} on desktop and mobile`, async () => {
+            const state = setup(position(8000), true);
+            state.window.siyuan.config.fileTree.restoreDocPosition = global;
+            state.docAttrs[constants.CUSTOM_SY_RESTORE_DOC_POSITION] = custom;
+            const expected = custom === "true" || (custom !== "false" && global) ? 8000 : 0;
+            await state.loadDesktop();
+            assert.equal(state.rendered.at(-1).scrollAttr?.scrollTop || 0, expected);
+            const protyle = await state.load();
+            assert.equal(protyle.contentElement.scrollTop, expected);
+            await state.load();
+            assert.equal(state.rendered.at(-1).scrollAttr?.scrollTop || 0, expected);
+            await state.load(position(240));
+            assert.equal(state.rendered.at(-1).scrollAttr.scrollTop, 240);
+            assert.equal(state.window.siyuan.storage.positions.root.scrollTop, 8000);
+        });
+    }
+}
+
+test("a superseded mobile switch and a destroyed desktop editor ignore late document preferences", async () => {
+    const state = setup(position(8000));
+    await state.load();
+    state.requests.length = 0;
+    state.rendered.length = 0;
+    state.pauseAttrs();
+    let valid = true;
+    const pending = state.load(undefined, () => valid);
+    await new Promise<void>(resolve => setImmediate(resolve));
+    valid = false;
+    state.releaseAttrs();
+    await assert.rejects(pending, /Loading failed/);
+    assert.equal(state.rendered.length, 0);
+    assert.equal(state.requests.some(item => item.url === "/api/filetree/getDoc"), false);
+    await state.loadDesktop(undefined, "root", [constants.CB_GET_SCROLL], true);
+    assert.equal(state.rendered.length, 0);
+});
 
 test("mobile document loading waits for bottom backlink input before reusing the editor", async () => {
     const state = setup();

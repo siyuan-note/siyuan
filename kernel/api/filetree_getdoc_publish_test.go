@@ -153,7 +153,7 @@ func TestGetDocKeywordsPublishAccess(t *testing.T) {
 
 	protectedAuthCookie := &http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+		Value: model.PublishAuthCookieValue(protectedDocID, protectedPassword),
 	}
 
 	tests := []struct {

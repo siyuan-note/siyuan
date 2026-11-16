@@ -8,14 +8,46 @@ import { getLanguageByIndex } from "../groups";
 import { hasClosestByAttribute } from "../../../util/hasClosest";
 import { getPropertiesHTML } from "./properties";
 import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "../viewVisibility";
+import {isAVCardView} from "../viewType";
+import {setPosition} from "../../../../util/setPosition";
 import type { IAVPanelContext } from "./types";
 export const bindAVPanelDrag = (context: IAVPanelContext) => {
     let counter = 0;
+    const clearFieldIndicator = () => {
+        context.avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach(element => {
+            element.classList.remove("dragover__bottom", "dragover__top");
+        });
+    };
+    const getFieldDropTarget = (event: DragEvent, sourceElement: HTMLElement) => {
+        if (event.dataTransfer.types.includes("Files") || !context.menuElement.contains(sourceElement) || context.options.protyle?.disabled ||
+            (!context.options.protyle && window.siyuan.config.readonly)) {
+            return;
+        }
+        const column = context.fields.find(field => field.id === sourceElement.dataset.id);
+        const element = (event.target as Element).closest<HTMLElement>('[data-type="editCol"], [data-av-field-section]');
+        if (!column || !element || element === sourceElement || !context.menuElement.contains(element)) {
+            return;
+        }
+        const rect = element.getBoundingClientRect();
+        if (event.clientX < rect.left || event.clientX >= rect.right || event.clientY < rect.top || event.clientY >= rect.bottom) {
+            return;
+        }
+        const before = event.clientY < rect.top + rect.height / 2;
+        const targetField = context.fields.find(field => field.id === element.dataset.id);
+        const hidden = targetField ? !!targetField.hidden : element.dataset.avFieldSection === "hidden";
+        // 分区标题仅在空分区下方提供落点，避免标题两侧指示相同的插入位置
+        if ((!targetField && (!element.dataset.avFieldSection || before ||
+            context.fields.some(field => !!field.hidden === hidden))) ||
+            (hidden && column.type === "block" && !isAVCardView(context.data.viewType))) {
+            return;
+        }
+        return {element, before};
+    };
     context.avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
         const sourceElement = event.target as HTMLElement;
         counter = 0;
         const conditionalRule = sourceElement.closest("[data-conditional-drag]")?.closest<HTMLElement>("[data-rule-id]");
-        window.siyuan.dragElement = conditionalRule || sourceElement.closest<HTMLElement>('[data-option-row="true"]') || sourceElement;
+        window.siyuan.dragElement = conditionalRule || sourceElement.closest<HTMLElement>('[data-option-row="true"], [data-type="editCol"]') || sourceElement;
         if (conditionalRule) {
             event.dataTransfer.setDragImage(conditionalRule, 16, 14);
         }
@@ -36,7 +68,7 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
         window.siyuan.dragElement.style.opacity = ".38";
         return;
     });
-    context.avPanelElement.addEventListener("drop", (event) => {
+    context.avPanelElement.addEventListener("drop", (event: DragEvent) => {
         counter = 0;
         if (!window.siyuan.dragElement) {
             event.preventDefault();
@@ -46,6 +78,15 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
         window.siyuan.dragElement.style.opacity = "";
         const sourceElement = window.siyuan.dragElement;
         window.siyuan.dragElement = undefined;
+        const fieldTarget = sourceElement.dataset.type === "editCol" ? getFieldDropTarget(event, sourceElement) : undefined;
+        if (sourceElement.dataset.type === "editCol") {
+            clearFieldIndicator();
+            if (!fieldTarget) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+        }
         if (context.options.protyle && context.options.protyle.disabled) {
             event.preventDefault();
             event.stopPropagation();
@@ -56,11 +97,11 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
             event.stopPropagation();
             return;
         }
-        const targetElement = context.avPanelElement.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
+        const targetElement = fieldTarget?.element || context.avPanelElement.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
         if (!targetElement) {
             return;
         }
-        const isTop = targetElement.classList.contains("dragover__top");
+        const isTop = fieldTarget ? fieldTarget.before : targetElement.classList.contains("dragover__top");
         const sourceId = sourceElement.dataset.id;
         const targetId = targetElement.dataset.id;
         // 排序条件拖拽排序
@@ -274,43 +315,49 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
             return;
         }
         // 字段列表拖拽排序
-        if (targetElement.getAttribute("data-type") === "editCol") {
-            const previousID = (isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
-            const undoPreviousID = sourceElement.previousElementSibling?.getAttribute("data-id") || "";
-            if (previousID !== undoPreviousID && previousID !== sourceId) {
-                transaction(context.options.protyle, [{
-                        action: "sortAttrViewCol",
-                        avID: context.avID,
-                        previousID,
-                        id: sourceId,
-                        blockID: context.blockID,
-                    }], [{
-                        action: "sortAttrViewCol",
-                        avID: context.avID,
-                        previousID: undoPreviousID,
-                        id: sourceId,
-                        blockID: context.blockID
-                    }]);
-                let column: IAVColumn;
-                context.fields.find((item, index: number) => {
-                    if (item.id === sourceId) {
-                        column = context.fields.splice(index, 1)[0];
-                        return true;
-                    }
-                });
-                context.fields.find((item, index: number) => {
-                    if (item.id === targetId) {
-                        if (isTop) {
-                            context.fields.splice(index, 0, column);
-                        }
-                        else {
-                            context.fields.splice(index + 1, 0, column);
-                        }
-                        return true;
-                    }
-                });
+        if (targetElement.dataset.type === "editCol" || targetElement.dataset.avFieldSection) {
+            event.preventDefault();
+            event.stopPropagation();
+            targetElement.classList.remove("dragover__top", "dragover__bottom");
+            const sourceIndex = context.fields.findIndex(field => field.id === sourceId);
+            const targetField = context.fields.find(field => field.id === targetId);
+            if (!context.menuElement.contains(sourceElement) || sourceElement.dataset.type !== "editCol" ||
+                sourceIndex < 0 || sourceId === targetId || (!targetField && !targetElement.dataset.avFieldSection)) {
+                return;
             }
-            context.menuElement.innerHTML = getPropertiesHTML(context.fields, context.data.viewType);
+            const column = context.fields[sourceIndex];
+            const hidden = targetField ? !!targetField.hidden : targetElement.dataset.avFieldSection === "hidden";
+            if (hidden && column.type === "block" && !isAVCardView(context.data.viewType)) {
+                return;
+            }
+            const fields = context.fields.filter(field => field !== column);
+            let index = targetField ? fields.indexOf(targetField) : fields.findIndex(field => !!field.hidden === hidden);
+            if (index < 0) {
+                index = hidden ? fields.length : 0;
+            } else if (targetField && !isTop) {
+                index++;
+            }
+            fields.splice(index, 0, column);
+            const operations: IOperation[] = [];
+            const undoOperations: IOperation[] = [];
+            const operation = {avID: context.avID, blockID: context.blockID, viewID: context.data.viewID, id: sourceId};
+            if (index !== sourceIndex) {
+                operations.push({...operation, action: "sortAttrViewCol", previousID: fields[index - 1]?.id || ""});
+                undoOperations.push({...operation, action: "sortAttrViewCol", previousID: context.fields[sourceIndex - 1]?.id || ""});
+            }
+            if (!!column.hidden !== hidden) {
+                operations.push({...operation, action: "setAttrViewColHidden", data: hidden});
+                undoOperations.push({...operation, action: "setAttrViewColHidden", data: !!column.hidden});
+            }
+            if (operations.length > 0) {
+                column.hidden = hidden;
+                context.fields.splice(0, context.fields.length, ...fields);
+                transaction(context.options.protyle, operations, undoOperations);
+                const scrollTop = context.menuElement.querySelector(".b3-menu__items").scrollTop;
+                context.menuElement.innerHTML = getPropertiesHTML(context.fields, context.data.viewType);
+                setPosition(context.menuElement, context.tabRect.right - context.menuElement.clientWidth, context.tabRect.bottom, context.tabRect.height, 0, true);
+                context.menuElement.querySelector(".b3-menu__items").scrollTop = scrollTop;
+            }
             return;
         }
         // 分组项拖拽排序
@@ -373,6 +420,16 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
     });
     let dragoverElement: HTMLElement;
     context.avPanelElement.addEventListener("dragover", (event: DragEvent) => {
+        if (window.siyuan.dragElement?.dataset.type === "editCol") {
+            clearFieldIndicator();
+            const target = getFieldDropTarget(event, window.siyuan.dragElement);
+            if (target) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+                target.element.classList.add(target.before ? "dragover__top" : "dragover__bottom");
+            }
+            return;
+        }
         if (event.dataTransfer.types.includes("Files")) {
             event.preventDefault();
             return;
@@ -411,7 +468,11 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
         }
         dragoverElement = targetElement;
     });
-    context.avPanelElement.addEventListener("dragleave", () => {
+    context.avPanelElement.addEventListener("dragleave", (event: DragEvent) => {
+        if (window.siyuan.dragElement?.dataset.type === "editCol" &&
+            (!(event.relatedTarget instanceof Node) || !context.avPanelElement.contains(event.relatedTarget))) {
+            clearFieldIndicator();
+        }
         counter--;
         if (counter === 0) {
             context.avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {

@@ -61,28 +61,23 @@ const runCases = sources => {
         document.body.style.setProperty("--b3-theme-surface-lighter", dark ? "#333333" : "#eeeeee");
         document.body.style.setProperty("--b3-theme-on-surface", dark ? "#eeeeee" : "#222222");
         for (const width of [280, 390, 560]) {
-            const compact = inputDialog({title: "Rename", value: "", compactActions: true, onConfirm() {}});
-            compact.element.style.width = width + "px";
-            const group = compact.element.querySelector(".mobile-sheet-action-group");
-            const actions = [...group.children];
-            const groupRect = group.getBoundingClientRect();
-            const confirmRect = actions[1].getBoundingClientRect();
-            check(Math.abs(confirmRect.right - groupRect.right) < 1, "compact actions align to the right");
+            const rename = inputDialog({title: "Rename", value: "", onConfirm() {}});
+            const actions = geometry(rename, width, width < 300);
             for (const action of actions) {
                 const rect = action.getBoundingClientRect();
-                check(rect.height >= 48, "compact actions preserve touch height");
-                check(rect.width < groupRect.width / 2, "short labels do not stretch across the sheet");
-                check(getComputedStyle(action).fontSize === "16px", "compact actions preserve readable font size");
+                check(rect.height >= 48, "rename actions preserve touch height");
+                check(rect.width >= 140, "rename actions fill the shared responsive columns");
+                check(getComputedStyle(action).fontSize === "16px", "rename actions preserve readable font size");
             }
             actions[1].textContent = "A very long translated confirmation label with several words andaverylongunbrokentoken";
-            check(actions[1].scrollWidth <= actions[1].clientWidth, "long compact labels wrap without overflow");
+            check(actions[1].scrollWidth <= actions[1].clientWidth, "long rename labels wrap without overflow");
             check(actions[0].hasAttribute("data-input-cancel") && actions[1].hasAttribute("data-input-confirm"), "focus order remains cancel then confirm");
             for (const action of actions) {
-                check(action.tabIndex === 0, "compact actions remain in the keyboard focus order");
+                check(action.tabIndex === 0, "rename actions remain in the keyboard focus order");
                 action.focus();
-                check(document.activeElement === action, "long compact labels remain keyboard focusable");
+                check(document.activeElement === action, "long rename labels remain keyboard focusable");
             }
-            compact.element.remove();
+            rename.element.remove();
         }
         for (const make of [() => confirmDialog("Title", "Text"),
             () => inputDialog({title: "Name", value: "", onConfirm() {}})]) {

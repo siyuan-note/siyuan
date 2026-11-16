@@ -4,6 +4,7 @@ import {Constants} from "../../../constants";
 import {unicode2Emoji} from "../../../emoji";
 import {escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
+import {isAVCardView} from "./viewType";
 
 const getViewIcon = (type: TAVView) => {
     switch (type) {
@@ -41,7 +42,7 @@ const getSupportedFieldViews = (views: IAVFieldView[] | undefined, fieldType?: T
     if (!views) {
         return;
     }
-    return fieldType === "block" ? views.filter(view => view.type === "gallery") : views;
+    return fieldType === "block" ? views.filter(view => isAVCardView(view.type)) : views;
 };
 
 const setFieldVisibility = (options: {

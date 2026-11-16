@@ -14,6 +14,7 @@ type FileTree struct {
 	OpenFilesUseCurrentTab     bool   `json:"openFilesUseCurrentTab"`     // 在当前页签打开文件
 	CloseTabOnDoubleClick      bool   `json:"closeTabOnDoubleClick"`      // 是否使用双击关闭页签
 	CloseWindowOnLastTabClosed *bool  `json:"closeWindowOnLastTabClosed"` // 关闭或移走最后一个页签后关闭独立窗口
+	RestoreDocPosition         *bool  `json:"restoreDocPosition"`         // 普通打开文档时恢复上次浏览位置
 	DocIconClickMode           int    `json:"docIconClickMode"`           // 单击文档图标或笔记本图标的行为：0 修改图标，1 展开或折叠子文档
 	ParentDocTitleClickMode    int    `json:"parentDocTitleClickMode"`    // 点击父文档标题的行为：0 打开文档，1 展开或折叠子文档，2 单击展开或折叠子文档、双击打开父文档
 	BoxDocEnabled              bool   `json:"boxDocEnabled"`              // 是否启用顶层笔记本文档
@@ -47,6 +48,7 @@ func NewFileTree() *FileTree {
 		OpenFilesUseCurrentTab:     false,
 		CloseTabOnDoubleClick:      false,
 		CloseWindowOnLastTabClosed: new(true),
+		RestoreDocPosition:         new(true),
 		DocIconClickMode:           0,
 		ParentDocTitleClickMode:    0,
 		BoxDocEnabled:              false,

@@ -70,6 +70,26 @@ test("rounded orthogonal corners stop the shared trunk at each outer tangent", (
         "aligned nodes need no corner and retain a continuous horizontal connection");
 });
 
+test("node overrides mix curved and squared or rounded branches without changing the map default", () => {
+    const extra = new Map(positions).set("d", {id: "d", parentId: "root", x: 160, y: 300, width: 80, height: 40});
+    const result = buildListMindmapConnectors("root", extra, [...edges, {from: "root", to: "d"}],
+        "orthogonal", () => new PathFixture(), false, {
+            a: {connectorStyle: "rounded", shape: "capsule"},
+            b: {connectorStyle: "spline", shape: "rectangle"},
+            d: {shape: "underline"},
+        });
+    const branches = new Map(result.branches.map(branch => [branch.id, branch.path.commands]));
+    assert.deepEqual(branches.get("a"), [["move", 140, 28], ["quadratic", 140, 20, 148, 20], ["line", 160, 20]]);
+    assert.deepEqual(branches.get("b"), [["move", 120, 120], ["bezier", 120, 120, 175, 220, 230, 220]]);
+    assert.deepEqual(branches.get("d"), [["move", 140, 340], ["line", 160, 340]]);
+    assert.deepEqual(branches.get("c"), [["move", 320, 240], ["line", 420, 240]]);
+    assert.deepEqual(result.trunkParents, ["root", "b"]);
+    assert.deepEqual(result.trunks[0].commands, [["move", 120, 120], ["line", 140, 120],
+        ["move", 140, 28], ["line", 140, 340]]);
+    assert.deepEqual(result.trunks[1].commands, [["move", 300, 220], ["line", 320, 220],
+        ["move", 320, 220], ["line", 320, 240]]);
+});
+
 test("reference themes overlay root trunks in branch order and keep their shared geometry out of hit paths", () => {
     for (const style of ["orthogonal", "rounded"] as const) {
         const result = buildListMindmapConnectors("root", positions, edges, style, () => new PathFixture(), true);

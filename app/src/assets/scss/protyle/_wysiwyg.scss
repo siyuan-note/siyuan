@@ -28,6 +28,11 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
   }
 }
 
+// macOS 原生拖选需要跨过换行行首的公式，复制和光标归一化由编辑器保持公式整体语义。
+.body--mac .protyle-wysiwyg[data-readonly="false"] span[data-type~="inline-math"] {
+  user-select: text;
+}
+
 .protyle-cross-block-preview {
   pointer-events: none;
 
@@ -694,14 +699,10 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         }
 
         .protyle-block-resize[data-resize-axis="both"]::after {
-          width: 5px;
-          height: 5px;
-          // 鼠标与触屏手柄都向图片内部延伸 8px，将圆点中心固定在图片角上。
-          left: 8px;
-          top: 8px;
-          right: auto;
-          bottom: auto;
-          transform: translate(-50%, -50%);
+          width: min(5px, 100%);
+          height: min(5px, 100%);
+          right: 0;
+          bottom: 0;
           border: 0;
           border-radius: 50%;
           background-color: currentColor;
@@ -1013,6 +1014,40 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
   cursor: text;
 }
 
+@media screen {
+  :where(.protyle-wysiwyg[data-readonly="false"] [data-type="NodeVideo"]:not(.mindmap-view__preview-block)) > .protyle-video-resize {
+    --protyle-video-resize-gutter: 12px;
+
+    // 缩放把手放在带衬底的边框内，避开原生控件延伸至视频底边的命中区域。
+    padding-right: var(--protyle-video-resize-gutter);
+    box-sizing: border-box;
+    background-color: var(--b3-theme-surface);
+    border-radius: var(--b3-border-radius);
+    box-shadow: 0 0 0 1px var(--b3-border-color);
+  }
+
+  :where(.protyle-wysiwyg [data-type="NodeVideo"]) > .iframe-content > .protyle-block-resize[data-resize-axis="height"] {
+    // 由高度把手撑开视频下方的操作区，避免盖住播放器控件。
+    display: block;
+    position: relative;
+    left: calc(var(--protyle-video-resize-gutter, 0px) / 2);
+    margin-inline: auto;
+    transform: none;
+  }
+
+  .protyle-wysiwyg [data-type="NodeVideo"] > .iframe-content > .protyle-block-resize {
+    &[data-resize-axis="both"] {
+      height: var(--protyle-resize-bottom-height);
+    }
+  }
+}
+
+@media (any-pointer: coarse) {
+  :where(.protyle-wysiwyg[data-readonly="false"] [data-type="NodeVideo"]:not(.mindmap-view__preview-block)) > .protyle-video-resize {
+    --protyle-video-resize-gutter: 20px;
+  }
+}
+
 .protyle-wysiwyg[data-readonly="true"] .iframe .protyle-block-resize,
 .protyle-wysiwyg[data-readonly="true"] [data-subtype="mermaid"] > .protyle-block-resize,
 .protyle-wysiwyg .sb > [data-subtype="mermaid"] > .protyle-block-resize {
@@ -1021,6 +1056,12 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
 
 .protyle-wysiwyg [data-subtype="mermaid"]:hover > .protyle-block-resize {
   opacity: 1;
+}
+
+.protyle-wysiwyg [data-subtype="mermaid"] > .protyle-block-resize {
+  --protyle-resize-side-height: min(var(--protyle-resize-side-length), 50%);
+
+  top: 50%;
 }
 
 .protyle-wysiwyg[data-readonly="true"] .protyle-image-resize,
@@ -1095,8 +1136,8 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
   }
 
 
-  .img:hover .protyle-action__drag,
-  .iframe:hover .protyle-action__drag {
+  .img:hover .protyle-action__drag:not(.protyle-block-resize),
+  .iframe:hover .protyle-action__drag:not(.protyle-block-resize) {
     display: inline-block;
   }
 

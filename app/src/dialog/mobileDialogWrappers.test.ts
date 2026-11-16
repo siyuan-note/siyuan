@@ -65,13 +65,12 @@ const setup = (mobile = true) => {
     return {...load("mobileInputDialog"), ...load("mobileConfirmDialog"), events, pending, delegated: () => delegated};
 };
 
-test("compact input actions retain touch buttons without changing the default action layout", () => {
+test("input actions use the same full-width touch group as confirmations", () => {
     const f = setup();
     const options = {title: "Rename", value: "Draft", onConfirm() {}};
-    const compact = f.mobileInputDialog({...options, compactActions: true});
-    assert.match(compact.options.content, /mobile-sheet-action-group--compact/);
-    assert.equal((compact.options.content.match(/b3-button--touch/g) || []).length, 2);
-    assert.doesNotMatch(f.mobileInputDialog(options).options.content, /mobile-sheet-action-group--compact/);
+    const dialog = f.mobileInputDialog(options);
+    assert.match(dialog.options.content, /class="mobile-sheet-action-group"/);
+    assert.equal((dialog.options.content.match(/b3-button--touch/g) || []).length, 2);
 });
 
 test("mobile input wrapper defers initial focus and only successful awaited confirmation closes", async () => {

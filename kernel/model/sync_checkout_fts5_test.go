@@ -9,6 +9,7 @@ package model
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,6 +17,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/88250/lute/render"
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -163,5 +166,128 @@ func TestSyncCheckoutCompletesIndexesBeforeResuming(t *testing.T) {
 	if os.Getenv(childEnv) == "move" &&
 		(!slices.Contains(snapshot.UpsertRootIDs, movedID) || slices.Contains(snapshot.RemoveRootIDs, movedID)) {
 		t.Fatalf("a moved document was reported as removed: %+v", snapshot)
+	}
+}
+
+func TestSyncCheckoutNotebookSettingsPreserveIndex(t *testing.T) {
+	const childEnv = "SIYUAN_TEST_CHECKOUT_NOTEBOOK_SETTINGS"
+	if os.Getenv(childEnv) == "" {
+		cmd := exec.Command(os.Args[0], "-test.run=^TestSyncCheckoutNotebookSettingsPreserveIndex$", "-test.v")
+		cmd.Env = append(os.Environ(), childEnv+"=1")
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("isolated index test failed: %v\n%s", err, output)
+		}
+		return
+	}
+	fixture, full, repo, fullData := prepareAssetDownloadDocumentTest(t)
+	Conf.Lang = "file-operation-test"
+	util.QueueDir = filepath.Join(util.TempDir, "queue")
+	util.DBPath = filepath.Join(util.TempDir, util.DBName)
+	util.HistoryDBPath = filepath.Join(util.TempDir, "history.db")
+	util.AssetContentDBPath = filepath.Join(util.TempDir, "asset_content.db")
+	if err := os.MkdirAll(util.TempDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	sql.InitDatabase(true)
+	sql.InitHistoryDatabase(true)
+	sql.InitAssetContentDatabase(true)
+	t.Cleanup(sql.CloseDatabase)
+
+	settings := conf.NewBoxConf()
+	settings.Closed = false
+	if err := fixture.box.SaveConf(settings); err != nil {
+		t.Fatal(err)
+	}
+	fileTree := conf.NewFileTree()
+	fileTree.BoxDocEnabled = true
+	Conf.FileTree.Store(fileTree)
+	if _, err := EnsureBoxDoc(fixture.box.ID); err != nil {
+		t.Fatal(err)
+	}
+	const docID = "20261111090300-syncdoc"
+	tree := treenode.NewTree(fixture.box.ID, "/"+docID+".sy", "/Document", "Document")
+	writeAssetDownloadDocumentTest(t, tree)
+	if _, err := repo.Index("notebook baseline", true, nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := repo.Sync(nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := full.Sync(nil); err != nil {
+		t.Fatal(err)
+	}
+	upsertIndexes([]string{"/" + tree.Box + tree.Path})
+	// 仅存在于索引中的区块用于识别整库重建。
+	marker := treenode.NewTree(tree.Box, "/20261111090400-idxmark.sy", "/Index marker", "Index marker")
+	sql.IndexTreeQueue(marker)
+	sql.FlushQueue()
+	if sql.GetBlock(tree.ID) == nil || sql.GetBlock(marker.ID) == nil {
+		t.Fatal("initial indexes are missing")
+	}
+
+	remoteConf := filepath.Join(fullData, fixture.box.ID, ".siyuan", "conf.json")
+	syncSettings := func() {
+		t.Helper()
+		data, err := json.Marshal(settings)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = os.WriteFile(remoteConf, data, 0644); err != nil {
+			t.Fatal(err)
+		}
+		if _, err = full.IndexWithOptions("notebook changes", true, nil, dejavu.IndexOptions{FullCheck: true}); err != nil {
+			t.Fatal(err)
+		}
+		if _, _, err = full.Sync(nil); err != nil {
+			t.Fatal(err)
+		}
+		if _, err = repo.Index("before download", true, nil); err != nil {
+			t.Fatal(err)
+		}
+		checkout := startSyncCheckout(repo)
+		if checkout == nil {
+			t.Fatal("missing checkout task")
+		}
+		_, _, err = repo.SyncDownload(nil)
+		checkout.finish(repo, &err)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	settings.Name, settings.Icon, settings.Sort, settings.DocCreateSavePath = "Renamed", "1f680", 5, "/New"
+	settings.Extra = map[string]json.RawMessage{"future": json.RawMessage(`999`)}
+	syncSettings()
+	box := Conf.Box(fixture.box.ID)
+	if box == nil || box.Name != settings.Name || box.Icon != settings.Icon || box.Sort != settings.Sort {
+		t.Fatalf("notebook list did not reflect downloaded settings: %+v", box)
+	}
+	if local := fixture.box.GetConf(); local.DocCreateSavePath != settings.DocCreateSavePath || string(local.Extra["future"]) != `999` {
+		t.Fatalf("downloaded settings are missing: %+v", local)
+	}
+	if sql.GetBlock(tree.ID) == nil || sql.GetBlock(marker.ID) == nil {
+		t.Fatal("a settings-only download rebuilt the notebook index")
+	}
+	boxDoc, err := filesys.LoadTree(fixture.box.ID, boxDocPath(fixture.box.ID), util.NewLute())
+	if err != nil || boxDoc.Root.IALAttr("title") != settings.Name || boxDoc.Root.IALAttr("icon") != settings.Icon {
+		t.Fatalf("notebook document did not reflect downloaded settings: %v", err)
+	}
+	settings.Closed = true
+	added := treenode.NewTree(tree.Box, "/20261111090500-syncdoc.sy", "/Added", "Added")
+	luteEngine := util.NewLute()
+	data := render.NewJSONRenderer(added, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()
+	if err = os.WriteFile(filepath.Join(fullData, added.Box, added.Path), data, 0644); err != nil {
+		t.Fatal(err)
+	}
+	syncSettings()
+	if _, err = os.Stat(filepath.Join(util.DataDir, added.Box, added.Path)); err != nil {
+		t.Fatalf("document in the same download was not applied: %v", err)
+	}
+	if Conf.Box(fixture.box.ID) != nil || sql.GetBlock(tree.ID) != nil || sql.GetBlock(added.ID) != nil || sql.GetBlock(marker.ID) != nil {
+		t.Fatal("closing the notebook did not remove its indexes")
+	}
+	settings.Closed = false
+	syncSettings()
+	if Conf.Box(fixture.box.ID) == nil || sql.GetBlock(tree.ID) == nil || sql.GetBlock(added.ID) == nil || sql.GetBlock(marker.ID) != nil {
+		t.Fatal("reopening the notebook did not rebuild its indexes from disk")
 	}
 }

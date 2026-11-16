@@ -122,7 +122,7 @@ export const saveRepoFile = (element: Element) => {
 };
 
 export const renderRepoFile = (app: App, element: Element, contentElement: Element,
-                               onEditor?: (editor: Protyle) => void) => {
+                               onEditor?: (editor: Protyle) => void, onTitle?: (title: string) => void) => {
     const fileId = element.getAttribute("data-id");
     const snapshotId = element.getAttribute("data-snapshot") || "";
     const requestId = (++repoFileRequestId).toString();
@@ -135,6 +135,7 @@ export const renderRepoFile = (app: App, element: Element, contentElement: Eleme
         if (!contentElement.isConnected || contentElement.getAttribute("data-request-id") !== requestId) {
             return;
         }
+        onTitle?.(response.data.title);
         const type = pathPosix().extname(response.data.content).toLowerCase();
         if (Constants.SIYUAN_ASSETS_IMAGE.concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(type)) {
             contentElement.firstElementChild.innerHTML = renderAssetsPreview(response.data.content);

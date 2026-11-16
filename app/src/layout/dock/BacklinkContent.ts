@@ -1,6 +1,7 @@
 import {config as configApi} from "../../config/util/configApi";
 import {toggleMenu} from "../../menus/menuToggle";
 import {GlobalBacklinkList} from "./GlobalBacklinkList";
+import {bindBacklinkSelection} from "./backlinkSelection";
 import {bindPanelSearch} from "./panelSearch";
 import type {Tab} from "../Tab";
 import {Model} from "../Model";
@@ -149,6 +150,7 @@ export class BacklinkContent extends Model {
     } = {};
     private dirty = false;
     private destroyed = false;
+    private unbindSelection: () => void;
     private refreshQueued = false;
     private searchQueued = false;
     private requestID = 0;
@@ -391,6 +393,7 @@ export class BacklinkContent extends Model {
             },
             blockExtHTML: `<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`
         });
+        this.unbindSelection = bindBacklinkSelection(this.element);
         this.tree.element.addEventListener("scroll", (event) => {
             this.tree.element.querySelectorAll(".protyle-gutters").forEach(item => {
                 item.classList.add("fn__none");
@@ -2551,6 +2554,7 @@ export class BacklinkContent extends Model {
         this.globalList?.destroy();
         this.globalList = undefined;
         this.destroyed = true;
+        this.unbindSelection();
         this.clearIndexRefresh();
         this.viewStateGeneration++;
         this.clearReadingAnchorTimers();

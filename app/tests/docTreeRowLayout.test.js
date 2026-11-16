@@ -22,7 +22,7 @@ const browserCases = (source, css, mobile) => {
         getFileTreeDefaultIconAttr: () => "", getPublishAccessOptionByLevel: () => ({iconHTML: "A"}),
         getTreeItemTailHTML: (count, actions) => count + actions,
     }));
-    const step = mobile ? 30 : 24;
+    const step = mobile ? 22 : 16;
     const size = mobile ? 32 : 22;
     for (const pinned of [false, true]) {
         const container = document.createElement("ul");
@@ -38,12 +38,12 @@ const browserCases = (source, css, mobile) => {
         check.equal(placeholder.querySelector(".b3-list-item__text").getAttribute("aria-label"), "Upgrade SiYuan");
         check.equal(placeholder.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden"), false,
             "a placeholder with children keeps its expand arrow");
-        for (const width of [240, 420]) {
+        for (const width of mobile ? [240, 320, 420] : [240, 420]) {
             for (const fontSize of [14, 24]) {
                 document.body.style.fontSize = fontSize + "px";
                 document.body.innerHTML = `<div class="file-tree" style="width:${width}px"><ul class="b3-list b3-list--background${mobile ? " b3-list--mobile" : ""}"></ul></div>`;
                 const list = document.querySelector("ul");
-                for (let depth = 0; depth < 4; depth++) {
+                for (let depth = 0; depth <= 5; depth++) {
                     const root = !pinned && depth === 0;
                     list.insertAdjacentHTML("beforeend", exports.renderDocTreeRowHTML({
                         id: "doc" + depth, notebookId: "box", occurrenceKey: "key" + depth, depth,
@@ -71,13 +71,26 @@ const browserCases = (source, css, mobile) => {
                     contentRange.selectNodeContents(text);
                     check.ok(contentRange.getBoundingClientRect().height > text.clientHeight,
                         "long titles remain clipped inside the available row width");
-                    if (!mobile) {
+                    if (mobile) {
+                        const arrowBounds = toggle.firstElementChild.getBoundingClientRect();
+                        const hit = document.elementFromPoint(arrowBounds.left + arrowBounds.width / 2,
+                            arrowBounds.top + arrowBounds.height / 2);
+                        check.equal(hit?.closest(".b3-list-item__toggle"), toggle,
+                            "the arrow remains tappable at each depth");
+                    } else {
                         const bounds = row.getBoundingClientRect();
                         const hit = document.elementFromPoint(bounds.left + 2, bounds.top + bounds.height / 2);
                         check.equal(hit.closest(".b3-list-item__toggle"), toggle,
                             "the left edge remains part of the collapse target");
                     }
                 });
+                if (!mobile || width >= 320) {
+                    const deepest = rows.at(-1);
+                    const text = deepest.querySelector(".b3-list-item__text");
+                    const availableWidth = text.clientWidth;
+                    deepest.style.setProperty("--file-tree-indent", mobile ? "30px" : "24px");
+                    check.equal(availableWidth - text.clientWidth, 40, "five levels leave 40 more pixels for the title");
+                }
                 rows.forEach(row => row.style.setProperty("--file-tree-indent", "18px"));
                 check.equal(arrowLeft(rows[1]) - arrowLeft(rows[0]), 18,
                     "theme overrides change the first and subsequent increments together");

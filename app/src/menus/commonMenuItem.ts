@@ -1,4 +1,6 @@
 import {toggleMenu} from "./menuToggle";
+import {getKeymapBindings} from "../util/keymapBindings";
+import {bindInlineDatePicker, getInlineDateValue} from "../datePicker/inline";
 import type {BlockQueryRequestInput} from "../types/api";
 import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
 import {isMobile, isValidCustomAttrName} from "../util/functions";
@@ -67,6 +69,12 @@ const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     });
 };
 
+const getWechatTipHTML = () => {
+    const text = document.createElement("span");
+    text.textContent = window.siyuan.languages.wechatTip;
+    return text.innerHTML.replace(/\n/g, "<br>");
+};
+
 export const openWechatNotify = (nodeElement: Element) => {
     const id = nodeElement.getAttribute("data-node-id");
     const range = getEditorRange(nodeElement);
@@ -76,15 +84,17 @@ export const openWechatNotify = (nodeElement: Element) => {
         reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
     }
     const dialog = new MobileDialog({
-        width: isMobile() ? "92vw" : "50vw",
+        width: isMobile() ? "92vw" : "min(300px, 92vw)",
+        containerClassName: isMobile() ? undefined : "date-picker-reminder-dialog",
         title: window.siyuan.languages.wechatReminder,
         content: `<div class="b3-dialog__content custom-attr">
-    <div class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;flex: 0 0 100px;overflow-wrap: anywhere">${window.siyuan.languages.notifyTime}</span>
-        <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
+    <div class="date-picker__reminder">
+        <label class="ft__on-surface">${window.siyuan.languages.notifyTime}
+            <input class="b3-text-field" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
+        </label>
+        <div data-role="reminder-date-calendar"></div>
     </div>
-    <div class="b3-label__text" style="text-align: center">${window.siyuan.languages.wechatTip}</div>
+    <div class="b3-label__text" style="text-align: center">${getWechatTipHTML()}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -92,11 +102,15 @@ export const openWechatNotify = (nodeElement: Element) => {
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         destroyCallback() {
+            datePicker?.destroy();
             focusByRange(range);
         }
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_WECHATREMINDER);
-    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    const dateInput = dialog.element.querySelector<HTMLInputElement>('input[type="datetime-local"]');
+    const datePicker = bindInlineDatePicker(dialog.element.querySelector<HTMLElement>('[data-role="reminder-date-calendar"]'), dateInput);
+    datePicker.activate(dateInput);
+    const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
     });
@@ -120,7 +134,8 @@ export const openWechatNotify = (nodeElement: Element) => {
         });
     });
     btnsElement[2].addEventListener("click", () => {
-        const date = dialog.element.querySelector("input").value;
+        if (!datePicker.validate()) { return; }
+        const date = getInlineDateValue(dateInput);
         if (date) {
             if (new Date(date) <= new Date()) {
                 showMessage(window.siyuan.languages.reminderTip);
@@ -165,24 +180,30 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
             reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
         }
         const dialog = new MobileDialog({
-            width: isMobile() ? "92vw" : "50vw",
+            width: isMobile() ? "92vw" : "min(300px, 92vw)",
+            containerClassName: isMobile() ? undefined : "date-picker-reminder-dialog",
             title: window.siyuan.languages.wechatReminder,
             content: `<div class="b3-dialog__content custom-attr">
-    <div class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;flex: 0 0 100px;overflow-wrap: anywhere">${window.siyuan.languages.notifyTime}</span>
-        <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
+    <div class="date-picker__reminder">
+        <label class="ft__on-surface">${window.siyuan.languages.notifyTime}
+            <input class="b3-text-field" type="datetime-local" max="9999-12-31 23:59" value="${reminderFormat}">
+        </label>
+        <div data-role="reminder-date-calendar"></div>
     </div>
-    <div class="b3-label__text" style="text-align: center">${window.siyuan.languages.wechatTip}</div>
+    <div class="b3-label__text" style="text-align: center">${getWechatTipHTML()}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.remove}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`
+</div>`,
+            destroyCallback() { datePicker?.destroy(); }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_WECHATREMINDER);
-        const btnsElement = dialog.element.querySelectorAll(".b3-button");
+        const dateInput = dialog.element.querySelector<HTMLInputElement>('input[type="datetime-local"]');
+        const datePicker = bindInlineDatePicker(dialog.element.querySelector<HTMLElement>('[data-role="reminder-date-calendar"]'), dateInput);
+        datePicker.activate(dateInput);
+        const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();
         });
@@ -199,7 +220,8 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
             });
         });
         btnsElement[2].addEventListener("click", () => {
-            const date = dialog.element.querySelector("input").value;
+            if (!datePicker.validate()) { return; }
+            const date = getInlineDateValue(dateInput);
             if (date) {
                 if (new Date(date) <= new Date()) {
                     showMessage(window.siyuan.languages.reminderTip);
@@ -976,12 +998,13 @@ ${databaseOptions}`,
                 label: window.siyuan.languages.print,
                 icon: "iconPDF",
                 ignore: !isInMobileApp() || !getHostCapabilities().importExport,
-                click: () => openHeadingPageBreakDialog(() => {
+                click: () => openHeadingPageBreakDialog((blockRefMode) => {
                     const msgId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
                     fetchPost("/api/export/exportPreviewHTML", {
                         id,
                         pdf: true,
+                        blockRefMode,
                         excludeTitleImage: localData.titleImage === false,
                         keepFold: localData.keepFold,
                         merge: localData.mergeSubdocs,
@@ -1043,8 +1066,18 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             (extension !== ".pdf" ||
                 (extension === ".pdf" && !src.startsWith("file://")));
         const getAccelerator = (action: Config.TAssetOpenAction) => {
-            if (!showAccelerator || !src.startsWith("assets/")) {
+            if (!showAccelerator) {
                 return "";
+            }
+            const shortcuts: string[] = [];
+            /// #if !BROWSER
+            if (action === "folder") {
+                shortcuts.push(...getKeymapBindings(window.siyuan.config.keymap.editor.general.showInFolder)
+                    .map((key) => updateHotkeyTip(key)));
+            }
+            /// #endif
+            if (!src.startsWith("assets/")) {
+                return shortcuts.join(" / ");
             }
             let config = window.siyuan.config.editor.assetOpen;
             /// #if BROWSER
@@ -1056,10 +1089,11 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 altClick: "⌥" + window.siyuan.languages.click,
                 shiftClick: "⇧" + window.siyuan.languages.click,
             };
-            return getAssetOpenGestures(config, action, {
+            shortcuts.push(...getAssetOpenGestures(config, action, {
                 previewable,
                 noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
-            }).map((gesture) => updateHotkeyTip(gestureLabels[gesture])).join(" / ");
+            }).map((gesture) => updateHotkeyTip(gestureLabels[gesture])));
+            return shortcuts.join(" / ");
         };
         // 与链接点击一致：PDF 去掉片段并单独取出页码或标注 ID，其他资源保留原始地址（如视频的 #t=）
         const {linkAddress: assetPath, pdfParams} = resolvePdfAssetLink(src.trim());

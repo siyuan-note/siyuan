@@ -67,6 +67,16 @@ describe("inline format selection coverage", () => {
                 {text: "second", types: `${type} text a`},
             ], 2, 3)), [type]);
         });
+
+        it(`ignores selected soft breaks when checking ${type} coverage`, () => {
+            const marked = {text: "marked", types: type};
+            assert.deepEqual(formats(selection([marked, {text: "\nnext"}], 0, 1)), [type]);
+            assert.deepEqual(formats(selection([{text: "before\n"}, marked], 6)), [type]);
+            assert.deepEqual(formats(selection([marked, {text: "\n\n"}, marked])), [type]);
+            assert.deepEqual(formats(selection([marked, {text: "\nnext"}], 0, 2)), []);
+            assert.deepEqual(formats(selection([marked, {text: "\n "}])), []);
+            assert.deepEqual(formats(selection([marked, {text: "\t\n"}])), []);
+        });
     });
 
     it("checks common formats independently and includes inherited marks", () => {
@@ -149,6 +159,7 @@ describe("inline format selection coverage", () => {
     it("does not infer formats from empty or collapsed text selections", () => {
         assert.equal(formats(selection([{text: "bold", types: "strong"}], 2, 2)), undefined);
         assert.equal(formats(selection([{text: "\u200b", types: "strong"}])), undefined);
+        assert.equal(formats(selection([{text: "\n\u200b\n"}])), undefined);
         assert.deepEqual(getRangesInlineFormats([]), []);
     });
 

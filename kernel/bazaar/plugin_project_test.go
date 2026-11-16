@@ -9,11 +9,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -276,6 +278,61 @@ func TestPluginProjectPackageExternalChangeDoesNotPublish(t *testing.T) {
 	}
 	if _, err = os.Stat(filepath.Join(util.PluginProjectRoot(grant.TaskID), "artifacts")); !os.IsNotExist(err) {
 		t.Fatal("archive published after external change", err)
+	}
+}
+
+func TestPluginProjectPackageRetainsRecentArtifacts(t *testing.T) {
+	ctx, grant := pluginPackageProjectFixture(t)
+	var packages []*util.PluginProjectArtifact
+	for i := 0; i < 10; i++ {
+		old, err := os.ReadFile(filepath.Join(grant.SourceRoot, "index.js"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		content := []byte(fmt.Sprintf("module.exports = %d;", i))
+		err = util.WithPluginProjectSource(ctx, true, func(g *util.PluginDevelopmentGrant, root *os.Root) error {
+			if err := util.BeginPluginProjectMutation(g, "index.js", util.PluginProjectDigest(old), util.PluginProjectDigest(content)); err != nil {
+				return err
+			}
+			if err := root.WriteFile("index.js", content, 0600); err != nil {
+				return err
+			}
+			return util.FinishPluginProjectMutation(g, "index.js")
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		status, err := util.GetPluginProjectStatus(ctx, grant.TaskID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		artifact, err := PackagePluginProject(ctx, grant.TaskID, status.SourceRevision)
+		if err != nil {
+			t.Fatalf("package %d: %v", i+1, err)
+		}
+		packages = append(packages, artifact)
+		stamp := time.Unix(int64(i+1), 0)
+		if err = os.Chtimes(filepath.Join(util.WorkspaceDir, artifact.PackagePath), stamp, stamp); err != nil {
+			t.Fatal(err)
+		}
+		if _, err = PackagePluginProject(ctx, grant.TaskID, status.SourceRevision); err != nil {
+			t.Fatal("idempotent package", err)
+		}
+	}
+	for i, artifact := range packages {
+		for _, name := range []string{artifact.PackagePath, artifact.DeliveryPath} {
+			_, err := os.Stat(filepath.Join(util.WorkspaceDir, name))
+			if i < 2 && !os.IsNotExist(err) {
+				t.Fatalf("old package retained: %s: %v", name, err)
+			}
+			if i >= 2 && err != nil {
+				t.Fatalf("recent package removed: %s: %v", name, err)
+			}
+		}
+	}
+	latest := packages[len(packages)-1]
+	if _, err := ResolvePluginProjectArtifact(ctx, grant.TaskID, latest.DeliveryPath, latest.PackageHash); err != nil {
+		t.Fatal(err)
 	}
 }
 

@@ -96,7 +96,7 @@ import {prepareListMindmapConversion} from "../render/listMindmap/conversion";
 import {buildCancelListOperations} from "./cancelList";
 import {markMirror, refreshUndoButtons} from "../undo/globalUndo";
 import type {TransactionListConversionResult} from "../../types/api";
-import {getProtyleTransactionOwner} from "../runtimeCapabilities";
+import {getProtyleTransactionOwner, ignoresProtyleEditLock} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
@@ -1169,7 +1169,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 if (data.new[Constants.CUSTOM_SY_FULLWIDTH] !== data.old[Constants.CUSTOM_SY_FULLWIDTH]) {
                     resize(protyle);
                 }
-                if (data.new[Constants.CUSTOM_SY_READONLY] !== data.old[Constants.CUSTOM_SY_READONLY]) {
+                if (data.new[Constants.CUSTOM_SY_READONLY] !== data.old[Constants.CUSTOM_SY_READONLY] &&
+                    !ignoresProtyleEditLock(protyle)) {
                     let customReadOnly = data.new[Constants.CUSTOM_SY_READONLY];
                     if (!customReadOnly) {
                         customReadOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
@@ -1587,7 +1588,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             "setAttrViewColRollupFilters", "sortAttrViewKey", "setAttrViewColDesc", "setAttrViewColAttributePanelVisibility",
             "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewCoverFrom", "setAttrViewCoverFromAssetKeyID", "setAttrViewCardCoverPosition",
             "setAttrViewBlockView", "setAttrViewBlockVisibleViews", "setAttrViewContextFilter", "setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
-            "setAttrViewConditionalColors", "setAttrViewCalendar", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow", "hideAttrViewName", "setAttrViewShowIcon",
+            "setAttrViewConditionalColors", "setAttrViewCalendar", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow", "hideAttrViewName", "setAttrViewShowIcon", "setAttrViewShowRelationIcon",
             "setAttrViewWrapField", "setAttrViewGroup", "removeAttrViewGroup", "hideAttrViewGroup", "sortAttrViewGroup",
             "foldAttrViewGroup", "foldAttrViewGroups", "hideAttrViewAllGroups", "setAttrViewFitImage", "setAttrViewDisplayFieldName", "setAttrViewDisplayEmptyFields",
             "insertAttrViewBlock", "setAttrViewColDateFillSpecificTime", "setAttrViewFillColBackgroundColor", "setAttrViewUpdatedIncludeTime",
@@ -2681,7 +2682,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             const resumeTitleEditingExit = suspendTabTitleEditingExit(
                 focusElement?.closest(".tab-item-title")?.closest<HTMLElement>(".tab-item"));
             const keyboard = !wasDisabled && !wasInert ? preserveMobileEditorKeyboard(element) : undefined;
-            selection.removeAllRanges();
+            // Android 输入法会将清空选区视为结束编辑，临时输入框持有焦点时保留选区。
+            if (!keyboard?.hasFocus()) selection.removeAllRanges();
             element.inert = true;
             const pending: Promise<void> = (async () => {
                 let sourceRestored = false;

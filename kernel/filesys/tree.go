@@ -281,6 +281,11 @@ func loadTreeByDataWithParentRecovery(data []byte, boxID, p string, luteEngine *
 		logging.LogErrorf("parse tree [%s] failed: %s", p, err)
 		return
 	}
+	return finishLoadedTree(ret, boxID, p, luteEngine, mode, recoverParents)
+}
+
+func finishLoadedTree(tree *parse.Tree, boxID, p string, luteEngine *lute.Lute, mode int, recoverParents bool) (ret *parse.Tree, err error) {
+	ret = tree
 	ret.Path = p
 	ret.Root.Path = p
 
@@ -799,6 +804,12 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 }
 
 func fixTreeJSONDataInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lute, dek []byte, encrypted, persist bool, mode int) (data []byte, needFix bool, err error) {
+	data, needFix, _, err = prepareTreeJSONDataInMode(boxID, p, jsonData, luteEngine, dek, encrypted, persist, mode)
+	return
+}
+
+// 仅无需修复的源返回已验证树；修复后仍从最终序列化结果构造快照。
+func prepareTreeJSONDataInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lute, dek []byte, encrypted, persist bool, mode int) (data []byte, needFix bool, tree *parse.Tree, err error) {
 	// 这里只处理解密后的 JSON，密文必须先通过认证，订正成功后才允许写回。
 	originalJSON := jsonData
 	withoutBOM := bytes.TrimPrefix(jsonData, []byte("\xef\xbb\xbf"))
@@ -865,7 +876,7 @@ func fixTreeJSONDataInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lu
 	}
 
 	if !needFix {
-		return jsonData, false, nil
+		return jsonData, false, ret, nil
 	}
 
 	renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions, luteEngine.ParseOptions)

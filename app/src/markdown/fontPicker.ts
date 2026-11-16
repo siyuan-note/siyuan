@@ -7,10 +7,10 @@ export const markdownFontVariants = (fonts: IFontItem[], family: string) =>
         .sort((a, b) => a.weight - b.weight);
 
 export const filterMarkdownFonts = (fonts: IFontItem[], query: string, codeOnly: boolean, selected: MarkdownFont[]) => {
-    const search = query.trim().toLocaleLowerCase();
+    const search = query.trim().toLowerCase();
     return getUniqueFontFamilies(fonts).filter(font =>
         (!codeOnly || ["monospace", "dual", "character-cell"].includes(font.spacing) || selected.some(item => item.family === font.family)) &&
-        (!search || [font.family, font.displayName, ...font.aliases ?? []].some(name => name.toLocaleLowerCase().includes(search))));
+        (!search || [font.family, font.displayName, ...font.aliases ?? []].some(name => name.toLowerCase().includes(search))));
 };
 
 export const reorderMarkdownFonts = (fonts: MarkdownFont[], from: number, to: number) => {

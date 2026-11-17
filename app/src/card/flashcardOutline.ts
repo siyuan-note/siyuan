@@ -10,7 +10,7 @@ interface IOutlineHeading {
 }
 
 // 大纲只读取已显示的卡面文字，避免从原文标题中提前暴露答案。
-export const createFlashcardOutline = (app: App, surface: HTMLElement) => {
+export const createFlashcardOutline = (app: App, surface: HTMLElement, openSource?: (blockID: string) => void) => {
     const panel = surface.querySelector<HTMLElement>("[data-flashcard-outline]");
     const content = surface.querySelector<HTMLElement>(".card__block");
     const toggle = surface.querySelector<HTMLButtonElement>('[data-type="toggle-outline"]');
@@ -60,10 +60,13 @@ export const createFlashcardOutline = (app: App, surface: HTMLElement) => {
                 text?.trim() : `${window.siyuan.languages.outline} ${position}`;
             button.appendChild(label);
             button.addEventListener("click", () => {
+                if (disposed) { return; }
                 const target = visibleHeading(item.id);
                 if (target) {
                     content.scrollTop += target.getBoundingClientRect().top - content.getBoundingClientRect().top;
                     highlight();
+                } else if (openSource) {
+                    openSource(item.id);
                 } else {
                     void openFileById({app, id: item.id, action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]});
                 }

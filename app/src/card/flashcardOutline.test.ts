@@ -8,7 +8,7 @@ const compiled = transpileModule(readFileSync("src/card/flashcardOutline.ts", "u
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const fixture = () => {
+const fixture = (openSource?: (blockID: string) => void) => {
     interface IElement {
         dataset: Record<string, string>;
         style: Record<string, string>;
@@ -63,7 +63,7 @@ const fixture = () => {
     const toggle = element();
     const requests: Array<{url: string, data: unknown, callback: (response: unknown) => void, fail: () => void}> = [];
     const opened: string[] = [];
-    const exports: {createFlashcardOutline?: (app: unknown, surface: unknown) => {
+    const exports: {createFlashcardOutline?: (app: unknown, surface: unknown, openSource?: (blockID: string) => void) => {
         update: (id?: string) => void;
         toggle: () => void;
         destroy: () => void;
@@ -83,7 +83,7 @@ const fixture = () => {
     const controller = exports.createFlashcardOutline({}, {
         querySelector: (selector: string) => selector === ".card__block" ? content :
             selector === "[data-flashcard-outline]" ? panel : toggle,
-    });
+    }, openSource);
     return {controller, panel, requests, opened, content, element};
 };
 
@@ -126,7 +126,8 @@ test("outline can retry a failed request by reopening the panel", () => {
 });
 
 test("visible headings scroll within the card without opening another document", () => {
-    const f = fixture();
+    const sourceCalls: string[] = [];
+    const f = fixture((blockID) => sourceCalls.push(blockID));
     const heading = f.element();
     heading.dataset.nodeId = "heading";
     heading.textContent = "Chapter";
@@ -140,4 +141,22 @@ test("visible headings scroll within the card without opening another document",
     f.panel.children[0].click();
     assert.equal(f.content.scrollTop, 300);
     assert.equal(f.opened.length, 0);
+    assert.equal(sourceCalls.length, 0);
+});
+
+test("hidden headings use the supplied foreground editor without leaking text or background navigation", () => {
+    const sourceCalls: string[] = [];
+    const f = fixture((blockID) => sourceCalls.push(blockID));
+    f.controller.update("source");
+    f.controller.toggle();
+    f.requests[0].callback({data: {rootID: "doc", box: "box"}});
+    f.requests[1].callback({data: [{id: "hidden", name: "Secret"}]});
+    const button = f.panel.children[0];
+    assert.equal(button.children[0].textContent, "Outline 1");
+    button.click();
+    assert.deepEqual(sourceCalls, ["hidden"]);
+    assert.equal(f.opened.length, 0);
+    f.controller.destroy();
+    button.click();
+    assert.deepEqual(sourceCalls, ["hidden"]);
 });

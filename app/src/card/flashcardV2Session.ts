@@ -844,7 +844,7 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0,
     load();
 };
 
-export const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => void) => {
+export const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => void, locate = false) => {
     const editorHolder: { current?: Protyle } = {};
     const dialog = new Dialog({
         title: window.siyuan.languages.edit,
@@ -862,7 +862,7 @@ export const openFlashcardV2SourceEditor = (app: App, blockID: string, callback:
     });
     const editor = new Protyle(app, dialog.element.querySelector('[data-type="flashcardSourceEditor"]'), {
         blockId: blockID,
-        action: [Constants.CB_GET_ALL],
+        action: locate ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL] : [Constants.CB_GET_ALL],
         render: {
             background: true,
             breadcrumbDocName: true,
@@ -1058,7 +1058,18 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             }, mount);
             dialog.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
             dialog.element.setAttribute("data-flashcard-v2-review", "");
-            const outline = createFlashcardOutline(app, dialog.element);
+            let outlineSourceOpen = false;
+            const outline = createFlashcardOutline(app, dialog.element, (blockID) => {
+                if (outlineSourceOpen || sessionFinished || requestPending || renderPending ||
+                    !dialog.element.isConnected || dialog.element.dataset.dialogClosing === "true") { return; }
+                outlineSourceOpen = true;
+                openFlashcardV2SourceEditor(app, blockID, () => {
+                    outlineSourceOpen = false;
+                    if (!sessionFinished && dialog.element.isConnected && dialog.element.dataset.dialogClosing !== "true") {
+                        refreshCurrent();
+                    }
+                }, true);
+            });
             releaseOpening();
             const canUseReviewActions = () => canUseFlashcardV2ReviewActions({
                 renderPending,

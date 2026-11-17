@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "Pengaturan kartu flash dokumen",
+	"flashcardNotebookSettings": "Pengaturan kartu flash buku catatan",
 	"flashcardChoiceCorrectSelected": "Opsi benar, dipilih",
 	"flashcardChoiceCorrectUnselected": "Opsi benar, tidak dipilih",
 	"flashcardChoiceIncorrectSelected": "Opsi salah, dipilih",

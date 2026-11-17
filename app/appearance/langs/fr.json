@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "Paramètres des cartes mémoire du document",
+	"flashcardNotebookSettings": "Paramètres des cartes mémoire du carnet",
 	"flashcardChoiceCorrectSelected": "Option correcte, sélectionnée",
 	"flashcardChoiceCorrectUnselected": "Option correcte, non sélectionnée",
 	"flashcardChoiceIncorrectSelected": "Option incorrecte, sélectionnée",

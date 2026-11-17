@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "Karteikarteneinstellungen des Dokuments",
+	"flashcardNotebookSettings": "Karteikarteneinstellungen des Notizbuchs",
 	"flashcardChoiceCorrectSelected": "Richtige Option, ausgewählt",
 	"flashcardChoiceCorrectUnselected": "Richtige Option, nicht ausgewählt",
 	"flashcardChoiceIncorrectSelected": "Falsche Option, ausgewählt",

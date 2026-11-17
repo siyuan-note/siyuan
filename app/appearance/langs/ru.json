@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "Настройки карточек документа",
+	"flashcardNotebookSettings": "Настройки карточек блокнота",
 	"flashcardChoiceCorrectSelected": "Верный вариант, выбран",
 	"flashcardChoiceCorrectUnselected": "Верный вариант, не выбран",
 	"flashcardChoiceIncorrectSelected": "Неверный вариант, выбран",

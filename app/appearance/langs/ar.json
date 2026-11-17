@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "إعدادات بطاقات المستند",
+	"flashcardNotebookSettings": "إعدادات بطاقات دفتر الملاحظات",
 	"flashcardChoiceCorrectSelected": "خيار صحيح، تم اختياره",
 	"flashcardChoiceCorrectUnselected": "خيار صحيح، لم يتم اختياره",
 	"flashcardChoiceIncorrectSelected": "خيار خاطئ، تم اختياره",

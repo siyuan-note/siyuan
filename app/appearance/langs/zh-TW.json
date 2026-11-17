@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "文件閃卡設定",
+	"flashcardNotebookSettings": "筆記本閃卡設定",
 	"flashcardChoiceCorrectSelected": "正確選項，已選擇",
 	"flashcardChoiceCorrectUnselected": "正確選項，未選擇",
 	"flashcardChoiceIncorrectSelected": "錯誤選項，已選擇",

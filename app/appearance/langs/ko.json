@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "문서 플래시카드 설정",
+	"flashcardNotebookSettings": "노트북 플래시카드 설정",
 	"flashcardChoiceCorrectSelected": "정답 선택지, 선택됨",
 	"flashcardChoiceCorrectUnselected": "정답 선택지, 선택하지 않음",
 	"flashcardChoiceIncorrectSelected": "오답 선택지, 선택됨",

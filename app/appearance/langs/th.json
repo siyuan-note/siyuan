@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "การตั้งค่าแฟลชการ์ดของเอกสาร",
+	"flashcardNotebookSettings": "การตั้งค่าแฟลชการ์ดของสมุดบันทึก",
 	"flashcardChoiceCorrectSelected": "ตัวเลือกที่ถูกต้อง เลือกแล้ว",
 	"flashcardChoiceCorrectUnselected": "ตัวเลือกที่ถูกต้อง ยังไม่ได้เลือก",
 	"flashcardChoiceIncorrectSelected": "ตัวเลือกที่ผิด เลือกแล้ว",

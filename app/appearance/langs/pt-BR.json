@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "Configurações de flashcards do documento",
+	"flashcardNotebookSettings": "Configurações de flashcards do caderno",
 	"flashcardChoiceCorrectSelected": "Opção correta, selecionada",
 	"flashcardChoiceCorrectUnselected": "Opção correta, não selecionada",
 	"flashcardChoiceIncorrectSelected": "Opção incorreta, selecionada",

@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "ドキュメントのフラッシュカード設定",
+	"flashcardNotebookSettings": "ノートブックのフラッシュカード設定",
 	"flashcardChoiceCorrectSelected": "正しい選択肢・選択済み",
 	"flashcardChoiceCorrectUnselected": "正しい選択肢・未選択",
 	"flashcardChoiceIncorrectSelected": "誤った選択肢・選択済み",

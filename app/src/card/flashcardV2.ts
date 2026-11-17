@@ -1036,8 +1036,8 @@ const renderManagedCards = (cards: IFlashcardSearchResult[], grouped: boolean, r
 ${editable && !deleted ? `<span data-type="editSource" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></span>` : ""}
 <span data-type="sourceTags" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.tag}"><svg><use xlink:href="#iconTag"></use></svg></span>
 <span data-type="sourcePreset" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardSourcePreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
-<span data-type="documentPolicy" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.doc} - ${window.siyuan.languages.flashcardScopeSettings}"><svg><use xlink:href="#iconFile"></use></svg></span>
-<span data-type="notebookPolicy" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardScopeSettings}"><svg><use xlink:href="#iconFilesRoot"></use></svg></span>
+<span data-type="documentPolicy" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDocumentSettings}"><svg><use xlink:href="#iconFile"></use></svg></span>
+<span data-type="notebookPolicy" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNotebookSettings}"><svg><use xlink:href="#iconFilesRoot"></use></svg></span>
 <span data-type="sourceLifecycle" class="fn__none b3-list-item__action${deleted ? "" : " b3-list-item__action--warning"} b3-tooltips b3-tooltips__w" aria-label="${deleted ? window.siyuan.languages.restore : window.siyuan.languages.delete}"><svg><use xlink:href="#icon${deleted ? "Undo" : "Trashcan"}"></use></svg></span>
 <button data-type="sourceMore" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
 </li>${sourceCards.map((card, index) => renderManagedCard(card, reviewSetID, selectedCardIDs, flagDefinitions, true, index)).join("")}`;
@@ -1330,7 +1330,8 @@ const openFlashcardV2StudyPolicy = (scopeType: "document" | "notebook", scopeID:
         const options = ["exam", "learning", "retaining", "paused", "unset"]
             .map((priority) => `<option value="${priority}">${escapeHtml(priorityLabel(priority))}</option>`).join("");
         const dialog = new Dialog({
-            title: `${scopeType === "document" ? window.siyuan.languages.doc : window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardScopeSettings}`,
+            title: scopeType === "document" ? window.siyuan.languages.flashcardDocumentSettings :
+                window.siyuan.languages.flashcardNotebookSettings,
             width: isMobile() ? "92vw" : "440px",
             content: `<div class="b3-dialog__content card__v2-form"><label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardPriority}</div><select data-type="priority" class="b3-select fn__block"><option value="">${window.siyuan.languages.default}</option>${options}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardDefaultPreset}</div><select data-type="defaultPreset" class="b3-select fn__block"><option value="">${window.siyuan.languages.default}</option>${presets.map((preset) => `<option value="${escapeAttr(preset.id)}">${escapeHtml(preset.name)}</option>`).join("")}</select><div class="b3-label__text">${window.siyuan.languages.flashcardDefaultPresetTip}</div></label>

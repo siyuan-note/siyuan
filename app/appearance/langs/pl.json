@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "Ustawienia fiszek dokumentu",
+	"flashcardNotebookSettings": "Ustawienia fiszek notatnika",
 	"flashcardChoiceCorrectSelected": "Poprawna opcja, wybrana",
 	"flashcardChoiceCorrectUnselected": "Poprawna opcja, niewybrana",
 	"flashcardChoiceIncorrectSelected": "Niepoprawna opcja, wybrana",

@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "Ajustes de tarjetas del documento",
+	"flashcardNotebookSettings": "Ajustes de tarjetas del cuaderno",
 	"flashcardChoiceCorrectSelected": "Opción correcta, seleccionada",
 	"flashcardChoiceCorrectUnselected": "Opción correcta, no seleccionada",
 	"flashcardChoiceIncorrectSelected": "Opción incorrecta, seleccionada",

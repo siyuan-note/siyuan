@@ -1,4 +1,6 @@
 {
+	"flashcardDocumentSettings": "Подешавања картица документа",
+	"flashcardNotebookSettings": "Подешавања картица бележнице",
 	"flashcardChoiceCorrectSelected": "Тачна опција, изабрана",
 	"flashcardChoiceCorrectUnselected": "Тачна опција, није изабрана",
 	"flashcardChoiceIncorrectSelected": "Нетачна опција, изабрана",

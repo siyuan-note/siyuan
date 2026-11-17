@@ -731,6 +731,13 @@
     min-height: 0;
     gap: 12px;
 
+    &-bar {
+      display: block;
+      height: 8px;
+      background: var(--b3-theme-primary);
+      border-radius: 4px;
+    }
+
     &-filter {
       flex: 0 0 auto;
     }

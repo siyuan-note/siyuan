@@ -4108,10 +4108,13 @@ const flashcardV2StatisticsDate = (date: Date) => {
 
 const flashcardV2StatisticsBars = <T, >(values: T[], label: (value: T) => string,
     count: (value: T) => number, detail?: (value: T) => string) => {
+    if (values.length === 0) {
+        return `<div class="ft__on-surface">${escapeHtml(window.siyuan.languages.emptyContent)}</div>`;
+    }
     const maximum = Math.max(1, ...values.map(count));
     return `<div class="b3-list b3-list--background">${values.map((value) => {
         const current = count(value);
-        return `<div class="b3-list-item"><span class="b3-list-item__text" style="flex:0 0 112px">${escapeHtml(label(value))}</span><span class="fn__flex-1"><span class="fn__block" style="height:8px;width:${current / maximum * 100}%;min-width:${current > 0 ? "2px" : "0"};background:var(--b3-theme-primary);border-radius:4px"></span></span><span class="b3-list-item__meta" style="min-width:48px;text-align:right">${current}${detail ? ` · ${escapeHtml(detail(value))}` : ""}</span></div>`;
+        return `<div class="b3-list-item"><span class="b3-list-item__text" style="flex:0 0 112px">${escapeHtml(label(value))}</span><span class="fn__flex-1" aria-hidden="true"><span class="card__v2-statistics-bar" style="width:${current / maximum * 100}%;min-width:${current > 0 ? "2px" : "0"}"></span></span><span class="b3-list-item__meta" style="min-width:48px;text-align:right">${current}${detail ? ` · ${escapeHtml(detail(value))}` : ""}</span></div>`;
     }).join("")}</div>`;
 };
 

@@ -4,6 +4,7 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {escapeHtmlTextAndAttr} from "../util/escape";
 
 const source = createSourceFile("protyle.ts", readFileSync(join(__dirname, "protyle.ts"), "utf8"), ScriptTarget.Latest, true);
 const declaration = source.statements.filter(isVariableStatement).flatMap(statement =>
@@ -38,6 +39,52 @@ test("link menus show missing targets as empty on desktop and mobile", () => {
             assert.equal(inputs[0].value, target || "");
             assert.equal(inputs[1].value, "anchor");
         }
+    }
+});
+
+test("closing link menus preserves database parameters and edited literal attribute characters", () => {
+    if (typeof Lute === "undefined") {
+        require("../../stage/protyle/js/lute/lute.min.js");
+    }
+    for (const mobile of [false, true]) {
+        const address = "siyuan://blocks/20261117232737-eoabkc3?avViewID=view&avItemID=item&avStandalone=1";
+        const title = 'A & B <title> "quoted"';
+        const attributes = new Map([["data-href", address], ["data-title", title], ["data-type", "a"]]);
+        const linkElement = {getAttribute: (name: string) => attributes.get(name) || "",
+            setAttribute: (name: string, value: string) => attributes.set(name, value),
+            removeAttribute: (name: string) => attributes.delete(name),
+            textContent: "anchor", getBoundingClientRect: () => ({left: 0, top: 0})};
+        const inputs = Array.from({length: 3}, () => ({value: "", addEventListener() {}, select() {}}));
+        const menu = {remove() {}, removeCB: (): void => {}, append() {}, fullscreen() {}, popup() {},
+            element: {setAttribute() {}}};
+        let updates = 0;
+        runInNewContext(code, {
+            Lute, protyle: {lute: {GetLinkDest: () => ""}, element: {}}, linkElement,
+            Constants: {MENU_INLINE_A: "a", ZWSP: "\u200b"},
+            window: {siyuan: {languages: {}, menus: {menu}}},
+            hasClosestBlock: () => ({get outerHTML() {return JSON.stringify([...attributes]);}, setAttribute() {}}),
+            hasTopClosestByClassName: (): undefined => undefined,
+            hideTooltip() {}, hideElements() {}, isMobile: () => mobile,
+            isLocalHTMLAssetPath: () => false, emitOpenMenu() {}, openMenu() {},
+            getSelection: () => ({rangeCount: 0}), escapeHtmlTextAndAttr,
+            updateTransaction: () => updates++, dayjs: () => ({format: () => "20261118010000"}),
+            MenuItem: class {
+                element = {};
+                constructor(options: {bind?: (element: unknown) => void}) {
+                    options.bind?.({style: {}, querySelectorAll: () => inputs, addEventListener() {}});
+                }
+            },
+        });
+        menu.removeCB();
+        assert.equal(attributes.get("data-href"), address);
+        assert.equal(attributes.get("data-title"), title);
+        assert.equal(updates, 0, "opening and closing a menu does not mutate the link");
+        inputs[0].value = 'https://example.com/?a=1&b="two"<three>';
+        inputs[2].value = title + " edited";
+        menu.removeCB();
+        assert.equal(attributes.get("data-href"), inputs[0].value);
+        assert.equal(attributes.get("data-title"), inputs[2].value);
+        assert.equal(updates, 1);
     }
 });
 

@@ -1938,12 +1938,12 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
     }
     window.siyuan.menus.menu.removeCB = () => {
         if (inputElements[2].value) {
-            linkElement.setAttribute("data-title", escapeHtmlTextAndAttr(inputElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
+            linkElement.setAttribute("data-title", inputElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
         } else {
             linkElement.removeAttribute("data-title");
         }
         if (linkElement.getAttribute("data-type").indexOf("a") > -1) {
-            linkElement.setAttribute("data-href", escapeHtmlTextAndAttr(inputElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
+            linkElement.setAttribute("data-href", inputElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
         } else {
             linkElement.removeAttribute("data-href");
         }

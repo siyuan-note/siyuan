@@ -1043,7 +1043,7 @@ ${editable && !deleted ? `<span data-type="editSource" class="b3-list-item__acti
 <span data-type="sourcePreset" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardSourcePreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
 <span data-type="documentPolicy" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDocumentSettings}"><svg><use xlink:href="#iconFile"></use></svg></span>
 <span data-type="notebookPolicy" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNotebookSettings}"><svg><use xlink:href="#iconFilesRoot"></use></svg></span>
-<span data-type="sourceLifecycle" class="fn__none b3-list-item__action${deleted ? "" : " b3-list-item__action--warning"} b3-tooltips b3-tooltips__w" aria-label="${deleted ? window.siyuan.languages.restore : window.siyuan.languages.delete}"><svg><use xlink:href="#icon${deleted ? "Undo" : "Trashcan"}"></use></svg></span>
+<span data-type="sourceLifecycle" class="fn__none b3-list-item__action${deleted ? "" : " b3-list-item__action--warning"} b3-tooltips b3-tooltips__w" aria-label="${deleted ? window.siyuan.languages.flashcardRestoreSource : window.siyuan.languages.delete}"><svg><use xlink:href="#icon${deleted ? "Undo" : "Trashcan"}"></use></svg></span>
 <button data-type="sourceMore" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
 </li>${sourceCards.map((card, index) => renderManagedCard(card, reviewSetID, selectedCardIDs, flagDefinitions, true, index)).join("")}`;
     }).join("");

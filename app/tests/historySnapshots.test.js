@@ -257,6 +257,7 @@ const runCases = async (sources, css, mobile, dark) => {
     let finishDetail;
     let detailSignal;
     let deferDetail = false;
+    let emptyPluginData = false;
     const operations = [];
     const queries = [];
     let lastPackage = "";
@@ -284,7 +285,7 @@ const runCases = async (sources, css, mobile, dark) => {
             detailSignal = abortSignal;
             const response = {code: 0, data: {snapshots: [{id: body.id, created: snapshots[0].created, memo: "Plugin", files: [
                 {id: "program-file", path: `plugins/${lastPackage}/index.js`},
-                {id: "data-file", path: `storage/petal/${lastPackage}/data.json`},
+                ...emptyPluginData ? [] : [{id: "data-file", path: `storage/petal/${lastPackage}/data.json`}],
                 {id: "other-file", path: `storage/petal/${lastPackage}-other/data.json`},
             ]}]}};
             if (deferDetail) return new Promise(resolve => { finishDetail = () => resolve(response); });
@@ -342,6 +343,8 @@ const runCases = async (sources, css, mobile, dark) => {
     assert.equal(rows[0].querySelector("img"), null);
     await require("electron").ipcRenderer.invoke("history-snapshots-capture", `plugin-list-${mobile ? "mobile" : "desktop"}-${dark ? "dark" : "light"}`);
     const actions = rows[0].querySelectorAll("button");
+    assert.ok(actions[0].getBoundingClientRect().top - rows[0].querySelector(".history__association-memo").getBoundingClientRect().bottom >= 8,
+        "plugin actions have space above the button row");
     actions[0].click();
     await tick();
     assert.equal(window.siyuan.dialogs.length, dialogCount, "plugin files and preview stay inside the same dialog");
@@ -352,6 +355,23 @@ const runCases = async (sources, css, mobile, dark) => {
     await tick();
     assert.equal(pluginRoot.querySelector("textarea").value, "文档内容 data-file");
     assert.ok(pluginRoot.scrollWidth <= pluginRoot.clientWidth + 1);
+    const checkPluginDetail = () => {
+        const panel = pluginRoot.querySelector(".history__plugin-detail");
+        const content = panel.querySelector(".history__snapshot-detail-content");
+        const panels = panel.querySelector(".history__snapshot-detail-panels");
+        const bounds = panel.getBoundingClientRect();
+        assert.ok(content.getBoundingClientRect().bottom <= bounds.bottom + 1, "snapshot detail fits below its toolbar");
+        assert.ok(panels.getBoundingClientRect().bottom <= bounds.bottom + 1, "file list and preview remain inside the panel");
+        assert.ok(panel.scrollHeight <= panel.clientHeight + 1, "the embedded detail does not overflow vertically");
+        assert.ok(panel.scrollWidth <= panel.clientWidth + 1, "the embedded detail does not overflow horizontally");
+        if (!mobile) {
+            const result = pluginRoot.querySelector("[data-plugin-result]");
+            const toolbar = panel.firstElementChild;
+            assert.equal(result.getBoundingClientRect().bottom, toolbar.getBoundingClientRect().bottom, "list and detail headers align");
+            assert.equal(getComputedStyle(panel).borderLeftWidth, "1px", "desktop columns have a visible boundary");
+        }
+    };
+    checkPluginDetail();
     await require("electron").ipcRenderer.invoke("history-snapshots-capture", `plugin-detail-${mobile ? "mobile" : "desktop"}-${dark ? "dark" : "light"}`);
     pluginRoot.querySelector("[data-plugin-back]").click();
     actions[1].click();
@@ -360,6 +380,17 @@ const runCases = async (sources, css, mobile, dark) => {
     assert.equal(pluginFiles.length, 1);
     assert.equal(pluginFiles[0].dataset.id, "program-file");
     pluginRoot.querySelector("[data-plugin-back]").click();
+    emptyPluginData = true;
+    actions[0].click();
+    await tick();
+    checkPluginDetail();
+    const empty = pluginRoot.querySelector(".history__snapshot-detail-panels");
+    assert.equal(empty.textContent, window.siyuan.languages.emptyContent);
+    assert.equal(empty.querySelector(".history__snapshot-detail-files"), null, "empty data does not leave a narrow file column");
+    assert.equal(empty.querySelector(".history__snapshot-detail-preview"), null, "empty data does not leave a blank preview column");
+    await require("electron").ipcRenderer.invoke("history-snapshots-capture", `plugin-empty-${mobile ? "mobile" : "desktop"}-${dark ? "dark" : "light"}`);
+    pluginRoot.querySelector("[data-plugin-back]").click();
+    emptyPluginData = false;
     for (const font of [16, 28]) {
         pluginRoot.style.fontSize = font + "px";
         await tick();
@@ -367,6 +398,12 @@ const runCases = async (sources, css, mobile, dark) => {
         assert.ok(list.scrollHeight > list.clientHeight, "plugin rows scroll within their panel");
         assert.ok(list.getBoundingClientRect().bottom <= innerHeight + 1);
         assert.ok(pluginRoot.scrollWidth <= pluginRoot.clientWidth + 1, "plugin controls fit narrow and enlarged layouts");
+        const buttons = list.querySelectorAll("button");
+        assert.ok(buttons[0].getBoundingClientRect().top - list.querySelector(".history__association-memo").getBoundingClientRect().bottom >= 8);
+        buttons[0].click();
+        await tick();
+        checkPluginDetail();
+        pluginRoot.querySelector("[data-plugin-back]").click();
     }
     pluginInput.value = "Dis"; pluginInput.dispatchEvent(new Event("input", {bubbles: true}));
     pluginInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
@@ -409,7 +446,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             ipcMain.handle("history-snapshots-capture", async (_event, name) => {
                 if (process.env.SIYUAN_HISTORY_CAPTURE_DIR) {
-                    assert.match(name, /^(history-|plugin-list-|plugin-detail-|plugin-chooser-)?(mobile|desktop)-(dark|light)$/);
+                    assert.match(name, /^(history-|plugin-list-|plugin-detail-|plugin-empty-|plugin-chooser-)?(mobile|desktop)-(dark|light)$/);
                     win.webContents.invalidate();
                     await new Promise(resolve => setTimeout(resolve, 350));
                     fs.writeFileSync(path.join(process.env.SIYUAN_HISTORY_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());

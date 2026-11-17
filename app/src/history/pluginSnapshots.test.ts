@@ -120,7 +120,7 @@ test("plugin snapshots search exact package names and render metadata as text", 
     assert.match(state.root.innerHTML, /class="history__plugin-list" data-plugin-list/);
     assert.match(state.root.innerHTML, /class="history__plugin-pagination"/);
     const actions = state.list.children[0].children.at(-1);
-    assert.equal(actions.className, "fn__flex history__repo-actions");
+    assert.equal(actions.className, "fn__flex history__repo-actions history__plugin-actions");
     assert.equal(actions.children[0].textContent, "Open data");
     assert.equal(actions.children[1].textContent, "Open program");
     assert.equal(actions.children[2].textContent, "Rollback");

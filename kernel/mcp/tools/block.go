@@ -628,7 +628,7 @@ func blockDom(args map[string]any) (CallToolResult, error) {
 	}
 	defer release()
 
-	dom := model.GetBlockDOMInBox(id, boxID)
+	dom := model.GetBlockDOMInBox(id, boxID, false)
 	if dom == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block not found or empty: " + id}}, IsError: true}, nil
 	}

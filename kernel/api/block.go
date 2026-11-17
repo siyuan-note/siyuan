@@ -197,7 +197,7 @@ var getHeadingChildrenDOM = contractHandler(apicontract.GetHeadingChildrenDOM, f
 	if request.RemoveFoldAttr != nil {
 		removeFoldAttr = *request.RemoveFoldAttr
 	}
-	return apicontract.Success(model.GetHeadingChildrenDOM(request.ID, removeFoldAttr))
+	return apicontract.Success(model.GetHeadingChildrenDOM(request.ID, removeFoldAttr, model.IsReadOnlyRoleContext(c)))
 })
 
 var getHeadingDeleteTransaction = contractHandler(apicontract.GetHeadingDeleteTransaction, func(c *gin.Context, request apicontract.BlockIDRequest) apicontract.Response[*apicontract.BlockTransaction] {
@@ -808,7 +808,7 @@ var getBlockDOM = contractHandler(apicontract.GetBlockDOM, func(c *gin.Context, 
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockDOMData](-1, err.Error())
 	}
-	dom := model.GetBlockDOMInBox(id, boxID)
+	dom := model.GetBlockDOMInBox(id, boxID, model.IsReadOnlyRoleContext(c))
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
@@ -854,7 +854,7 @@ var getBlockDOMs = contractHandler(apicontract.GetBlockDOMs, func(c *gin.Context
 	if err != nil {
 		return apicontract.Failure[map[string]string](-1, err.Error())
 	}
-	doms := model.GetBlockDOMsInBox(ids, boxID)
+	doms := model.GetBlockDOMsInBox(ids, boxID, model.IsReadOnlyRoleContext(c))
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
@@ -884,7 +884,7 @@ var getBlockDOMWithEmbed = contractHandler(apicontract.GetBlockDOMWithEmbed, fun
 			return model.CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, blockID, boxID)
 		}
 	}
-	dom := model.GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID, accessChecker)
+	dom := model.GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID, accessChecker, model.IsReadOnlyRoleContext(c))
 
 	if isReadOnlyRole {
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
@@ -922,7 +922,7 @@ var getBlockDOMsWithEmbed = contractHandler(apicontract.GetBlockDOMsWithEmbed, f
 			return model.CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, blockID, boxID)
 		}
 	}
-	doms := model.GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids, boxID, accessChecker)
+	doms := model.GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids, boxID, accessChecker, model.IsReadOnlyRoleContext(c))
 
 	if isReadOnlyRole {
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)

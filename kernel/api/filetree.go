@@ -1207,10 +1207,10 @@ func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) a
 	// 加密笔记本的打开文档走 InBox 版（查加密 blocktree + content db）
 	if requestedNotebook != "" && model.IsEncryptedBox(requestedNotebook) {
 		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, docInfo, err =
-			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, requestedNotebook)
+			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, requestedNotebook, model.IsReadOnlyRoleContext(c))
 	} else {
 		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, docInfo, err =
-			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo)
+			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, model.IsReadOnlyRoleContext(c))
 	}
 	if errors.Is(err, model.ErrBlockNotFound) {
 		return apicontract.Failure[apicontract.FileTreeGetDocData](3, "")

@@ -2511,7 +2511,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const managers = ["listMindmapManageNodeColors", "listMindmapManageLineColors"]
             .map(key => popup.querySelector<HTMLButtonElement>(`[aria-label="${key}"]`));
         check.deepEqual(managers.map(control => control.querySelector("use").getAttribute("xlink:href")),
-            ["#iconFont", "#iconLine"], "distinct icons identify the two settings controls");
+            ["#iconFont", "#iconSettings"], "distinct icons identify the two settings controls");
         check.equal(managers[0].getBoundingClientRect().right, managers[1].getBoundingClientRect().right,
             "settings stay in one fixed right-hand column with unequal custom palette sizes");
         check.ok(palettes[1].getBoundingClientRect().top >= palettes[0].getBoundingClientRect().bottom,

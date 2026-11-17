@@ -223,6 +223,10 @@ const browserCases = async (source: string, css: string) => {
             stage = "relation";
             await settle();
             visible(inspector);
+            check.equal(inspector.querySelector('[aria-label="listMindmapManageLineColors"] use')?.getAttribute("xlink:href"),
+                "#iconSettings");
+            check.equal(inspector.querySelector('[aria-label="listMindmapRelationAppearance"] use')?.getAttribute("xlink:href"),
+                "#iconLine", "palette management and relation appearance use distinct icons on desktop and mobile");
             const relationPalette = inspector.querySelector(".mindmap-view__palette");
             const relationColors = Array.from(relationPalette.children).slice(0, 5);
             const [paletteRow, ...relationActions] = Array.from(inspector.children);

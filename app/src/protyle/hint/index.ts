@@ -324,7 +324,7 @@ export class Hint {
             const caretOffset = getWholeTextOffset(textNode, protyle.toolbar.range.startOffset);
             textAfterCaret = textNode.wholeText.substring(caretOffset);
         }
-        const key = this.getKey(currentLineValue, textAfterCaret, protyle.options.hint.extend);
+        let key = this.getKey(currentLineValue, textAfterCaret, protyle.options.hint.extend);
         if (typeof key === "undefined" ||
             hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "code") ||
             hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "NodeCodeBlock") ||
@@ -335,7 +335,7 @@ export class Hint {
             clearTimeout(this.timeId);
             return;
         }
-        this.trackBlockHintQuery(protyle.toolbar.range, currentLineValue, textAfterCaret, key);
+        key = this.trackBlockHintQuery(protyle.toolbar.range, currentLineValue, textAfterCaret, key);
 
         // https://github.com/siyuan-note/siyuan/issues/7933
         if (this.splitChar === "#") {
@@ -545,11 +545,11 @@ export class Hint {
         const previous = this.blockHintQuery;
         this.blockHintQuery = undefined;
         if (!Constants.BLOCK_HINT_KEYS.includes(this.splitChar) || !range.collapsed || range.startContainer.nodeType !== 3) {
-            return;
+            return key;
         }
         const block = hasClosestBlock(range.startContainer);
         if (!block) {
-            return;
+            return key;
         }
         const blockID = block.dataset.nodeId;
         const prefix = textBeforeCaret.substring(0, this.lastIndex + this.splitChar.length);
@@ -563,6 +563,7 @@ export class Hint {
             }
         }
         this.blockHintQuery = {blockID, prefix, query: key + suffix, tail: textAfterCaret.slice(suffix.length), suffix};
+        return this.blockHintQuery.query;
     }
 
     private extendBlockHintQuery(range: Range) {

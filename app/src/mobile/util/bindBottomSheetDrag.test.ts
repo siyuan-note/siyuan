@@ -4,6 +4,8 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as gesture from "./mobileSheetGesture";
+import * as platform from "../../protyle/util/browserCompatibility";
+import * as nativeTextMenu from "../../protyle/wysiwyg/nativeTextMenu";
 
 const source = transpileModule(readFileSync("src/mobile/util/bindBottomSheetDrag.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -27,8 +29,10 @@ const setup = (initialHeight = 700) => {
     const body = {parentElement: element, closest: (): null => null};
     const scrim = {style: {opacity: ""}};
     const api: any = {};
-    runInNewContext(source, {exports: api, require: () => gesture, window, performance: {now: () => time},
-        console, getComputedStyle: () => ({overflowY: "auto"})});
+    const modules = {"./mobileSheetGesture": gesture, "../../protyle/util/browserCompatibility": platform,
+        "../../protyle/wysiwyg/nativeTextMenu": nativeTextMenu};
+    runInNewContext(source, {exports: api, require: (id: keyof typeof modules) => modules[id], window,
+        navigator: {userAgent: "Android"}, performance: {now: () => time}, console, getComputedStyle: () => ({overflowY: "auto"})});
     const dispose = api.bindBottomSheetDrag(element, scrim, () => { closeCount++; return close(); }, {
         grip, getBounds: () => ({min: 180, max: 800}), resize: (value: number) => { height = value; },
         canStart: () => permitted, isClosing: () => exiting,

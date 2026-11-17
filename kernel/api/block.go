@@ -117,7 +117,7 @@ var checkBlockRef = contractHandler(apicontract.CheckBlockRef, func(c *gin.Conte
 })
 
 var getBlockTreeInfos = contractHandler(apicontract.GetBlockTreeInfos, func(c *gin.Context, request apicontract.BlocksQueryRequest) apicontract.Response[map[string]*apicontract.BlockTreeInfo] {
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[map[string]*apicontract.BlockTreeInfo](-1, err.Error())
 	}
@@ -126,7 +126,7 @@ var getBlockTreeInfos = contractHandler(apicontract.GetBlockTreeInfos, func(c *g
 })
 
 var getBlockSiblingID = contractHandler(apicontract.GetBlockSiblingID, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[apicontract.BlockSiblingData] {
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockSiblingData](-1, err.Error())
 	}
@@ -138,7 +138,7 @@ var getBlockSiblingID = contractHandler(apicontract.GetBlockSiblingID, func(c *g
 })
 
 var getBlockRelevantIDs = contractHandler(apicontract.GetBlockRelevantIDs, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[apicontract.BlockRelevantData] {
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockRelevantData](-1, err.Error())
 	}
@@ -276,7 +276,7 @@ var setCloudReminder = contractHandler(apicontract.SetCloudReminder, func(c *gin
 })
 
 var getUnfoldedParentID = contractHandler(apicontract.GetUnfoldedParentID, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[apicontract.UnfoldedParentData] {
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.UnfoldedParentData](-1, err.Error())
 	}
@@ -435,7 +435,7 @@ var getTreeStat = contractHandler(apicontract.GetTreeStat, func(c *gin.Context, 
 	if err := util.ValidateID(id); err != nil {
 		return apicontract.FailureFrom[apicontract.TreeStatData](err)
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.TreeStatData](-1, err.Error())
 	}
@@ -616,7 +616,7 @@ var getBlockIndex = contractHandler(apicontract.GetBlockIndex, func(c *gin.Conte
 })
 
 var getBlocksIndexes = contractHandler(apicontract.GetBlocksIndexes, func(c *gin.Context, request apicontract.BlocksQueryRequest) apicontract.Response[map[string]int] {
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[map[string]int](-1, err.Error())
 	}
@@ -804,7 +804,7 @@ var getBlockDOM = contractHandler(apicontract.GetBlockDOM, func(c *gin.Context, 
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(apicontract.BlockDOMData{ID: id})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockDOMData](-1, err.Error())
 	}
@@ -850,7 +850,7 @@ var getBlockDOMs = contractHandler(apicontract.GetBlockDOMs, func(c *gin.Context
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(map[string]string{})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[map[string]string](-1, err.Error())
 	}
@@ -871,7 +871,7 @@ var getBlockDOMWithEmbed = contractHandler(apicontract.GetBlockDOMWithEmbed, fun
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(apicontract.BlockDOMData{ID: id})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockDOMData](-1, err.Error())
 	}
@@ -909,7 +909,7 @@ var getBlockDOMsWithEmbed = contractHandler(apicontract.GetBlockDOMsWithEmbed, f
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(map[string]string{})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[map[string]string](-1, err.Error())
 	}
@@ -948,7 +948,7 @@ func blockPublishDenied(c *gin.Context, id, boxID string, publishAccess, publish
 		!model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore)
 }
 
-// filterBlocksByPublishAccess 把被发布访问控制屏蔽的块内容置空，保留原有键位。
+// filterBlocksByPublishAccess 把被发布访问控制屏蔽的块从结果中移除，避免保留键位泄露块存在性。
 func filterBlocksByPublishAccess(c *gin.Context, contents map[string]string, ids []string, boxID string,
 	publishAccess, publishIgnore model.PublishAccess) {
 	for _, id := range ids {
@@ -956,7 +956,7 @@ func filterBlocksByPublishAccess(c *gin.Context, contents map[string]string, ids
 			continue
 		}
 		if blockPublishDenied(c, id, boxID, publishAccess, publishIgnore) {
-			contents[id] = ""
+			delete(contents, id)
 		}
 	}
 }
@@ -982,7 +982,7 @@ var getBlockKramdown = contractHandler(apicontract.GetBlockKramdown, func(c *gin
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(apicontract.BlockKramdownData{ID: id})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockKramdownData](-1, err.Error())
 	}
@@ -1027,7 +1027,7 @@ var getBlockKramdowns = contractHandler(apicontract.GetBlockKramdowns, func(c *g
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(map[string]string{})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[map[string]string](-1, err.Error())
 	}

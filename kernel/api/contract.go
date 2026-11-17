@@ -211,3 +211,8 @@ func holdContractBlockRequest(c *gin.Context, notebook, id string, ids []string,
 	err = holdEncryptedBlockRequests(c, boxID, leaseIDs, allowMissing)
 	return
 }
+
+// holdContractBlockReadRequest 读取块时对只读角色放行缺失 ID：发布拒绝与不存在都返回空结果，避免暴露块存在性。
+func holdContractBlockReadRequest(c *gin.Context, notebook, id string, ids []string) (boxID string, err error) {
+	return holdContractBlockRequest(c, notebook, id, ids, model.IsReadOnlyRoleContext(c))
+}

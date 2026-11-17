@@ -1413,6 +1413,31 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         f.dispose();
     }
     for (const kind of ["row", "column"]) {
+        const f = fixture();
+        const cell = f.cell(1, 1);
+        const rect = cell.getBoundingClientRect();
+        const x = kind === "row" ? rect.left + rect.width / 2 : rect.right;
+        const y = kind === "row" ? rect.bottom : rect.top + rect.height / 2;
+        pointer(cell, "pointermove", x, y);
+        const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+        f.table.style.transform = kind === "row" ? "translateY(20px)" : "translateX(20px)";
+        await delay();
+        check.ok(guide.classList.contains("fn__none"), "a pending hover cannot reveal a boundary that moved away");
+        f.table.style.transform = "";
+        await frames(3);
+        check.ok(guide.classList.contains("fn__none"), "returning layout alone does not restore expired feedback");
+        pointer(cell, "pointermove", x, y);
+        await delay();
+        check.equal(guide.classList.contains("fn__none"), false);
+        f.table.style.transform = kind === "row" ? "translateX(10px)" : "translateY(10px)";
+        await frames(3);
+        check.equal(guide.classList.contains("fn__none"), false,
+            "layout changes retain feedback while the pointer remains on the same boundary");
+        pointer(cell, "pointermove", rect.left + rect.width / 2, rect.top + rect.height / 2);
+        check.ok(guide.classList.contains("fn__none"), "moving into the cell clears boundary feedback immediately");
+        f.dispose();
+    }
+    for (const kind of ["row", "column"]) {
         for (const fromControl of [false, true]) {
             const f = fixture();
             const cell = f.cell(0, 0);
@@ -1453,14 +1478,23 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
                     check.ok(kind === "row" ? rect.height > initial.height : rect.width > initial.width,
                         "typing changes the table's intrinsic row height or column width");
                 }
-                const coordinate = parseFloat(kind === "row" ? guide.style.top : guide.style.left);
-                check.ok(Math.abs(coordinate - (kind === "row" ? rect.bottom : rect.right)) <= 1,
-                    `${kind} boundary feedback follows typing and deletion without pointer movement (control=${fromControl})`);
+                check.ok(guide.classList.contains("fn__none"),
+                    `${kind} feedback clears when typing or deletion moves the boundary away from the pointer (control=${fromControl})`);
+                f.render();
+                check.ok(guide.classList.contains("fn__none"), "rendering does not restore expired boundary feedback");
                 if (kind === "row") {
                     const handle = Reflect.get(f.core, "rowResizeHandle") as HTMLElement;
                     check.ok(Math.abs(parseFloat(handle.style.top) - rect.bottom) <= 1,
                         "the row resize handle follows automatic wrapping");
                 }
+                pointer(cell, "pointermove", kind === "row" ? rect.left + rect.width / 2 : rect.right,
+                    kind === "row" ? rect.bottom : rect.top + rect.height / 2);
+                check.ok(guide.classList.contains("fn__none"), "returning to the boundary restarts the hover delay");
+                await delay();
+                check.equal(guide.classList.contains("fn__none"), false, "hovering the new boundary reveals its feedback");
+                const coordinate = parseFloat(kind === "row" ? guide.style.top : guide.style.left);
+                check.ok(Math.abs(coordinate - (kind === "row" ? rect.bottom : rect.right)) <= 1,
+                    "the feedback uses the new boundary position");
             }
             f.dispose();
         }

@@ -40,3 +40,54 @@ test("link menus show missing targets as empty on desktop and mobile", () => {
         }
     }
 });
+
+test("only complete block links can become references, including after editing the destination", () => {
+    if (typeof Lute === "undefined") {
+        require("../../stage/protyle/js/lute/lute.min.js");
+    }
+    const id = "20261117232737-eoabkc3";
+    for (const mobile of [false, true]) {
+        for (const target of [`siyuan://blocks/${id}`, `siyuan://blocks/${id}?avViewID=view&avItemID=item`,
+            `siyuan://blocks/${id}#fragment`, `siyuan://blocks/${id}/child`, "siyuan://blocks/invalid",
+            `siyuan://blocks/${id}\n`]) {
+            const items = new Map<string, {click?: () => void}>();
+            const attributes = new Map([["data-href", target], ["data-type", "a"]]);
+            const inputs = Array.from({length: 3}, () => ({value: "", addEventListener() {}, select() {}}));
+            const menu = {remove() {}, append() {}, fullscreen() {}, popup() {}, element: {setAttribute() {}}};
+            const linkElement = {getAttribute: (name: string) => attributes.get(name) || "",
+                setAttribute: (name: string, value: string) => attributes.set(name, value),
+                removeAttribute: (name: string) => attributes.delete(name),
+                textContent: "anchor", getBoundingClientRect: () => ({left: 0, top: 0})};
+            runInNewContext(code, {
+                Lute, protyle: {lute: {GetLinkDest: () => ""}, element: {},
+                    toolbar: {range: {selectNode() {}, collapse() {}}}}, linkElement,
+                Constants: {MENU_INLINE_A: "a", ZWSP: "\u200b"},
+                window: {siyuan: {languages: {}, menus: {menu}}},
+                hasClosestBlock: () => ({outerHTML: "", setAttribute() {}}),
+                hasTopClosestByClassName: (): undefined => undefined,
+                hideTooltip() {}, hideElements() {}, isMobile: () => mobile,
+                isLocalHTMLAssetPath: () => false, emitOpenMenu() {}, openMenu() {},
+                updateTransaction() {}, focusByRange() {}, dayjs: () => ({format: () => "20261118010000"}),
+                MenuItem: class {
+                    element = {};
+                    constructor(options: {id: string, click?: () => void, bind?: (element: unknown) => void}) {
+                        items.set(options.id, options);
+                        options.bind?.({style: {}, querySelectorAll: () => inputs, addEventListener() {}});
+                    }
+                },
+            });
+            const convert = items.get("turnIntoRef");
+            assert.equal(!!convert, target === `siyuan://blocks/${id}`);
+            if (convert) {
+                inputs[0].value += "?avItemID=item";
+                convert.click();
+                assert.equal(attributes.get("data-type"), "a");
+                inputs[0].value = `siyuan://blocks/${id}`;
+                convert.click();
+                assert.equal(attributes.get("data-type"), "block-ref");
+                assert.equal(attributes.get("data-id"), id);
+                assert.equal(attributes.has("data-href"), false);
+            }
+        }
+    }
+});

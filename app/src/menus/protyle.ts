@@ -1852,18 +1852,22 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                 }
             }).element);
         }
-        if (linkAddress?.startsWith("siyuan://blocks/")) {
+        if (/^siyuan:\/\/blocks\/\d{14}-[a-z0-9]{7}$/.test(linkAddress)) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "turnIntoRef",
                 label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.ref}</b>`,
                 icon: "iconTurnInto",
                 click() {
+                    const target = /^siyuan:\/\/blocks\/(\d{14}-[a-z0-9]{7})$/.exec(inputElements[0].value);
+                    if (!target) {
+                        return;
+                    }
                     linkElement.setAttribute("data-subtype", "s");
                     const types = linkElement.getAttribute("data-type").split(" ");
                     types.push("block-ref");
                     types.splice(types.indexOf("a"), 1);
                     linkElement.setAttribute("data-type", types.join(" "));
-                    linkElement.setAttribute("data-id", inputElements[0].value.replace("siyuan://blocks/", ""));
+                    linkElement.setAttribute("data-id", target[1]);
                     inputElements[0].value = "";
                     inputElements[2].value = "";
                     linkElement.removeAttribute("data-href");

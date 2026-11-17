@@ -725,10 +725,15 @@ const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IRevi
 };
 
 const renderFlashcardV2Preset = (revision: IFlashcardEntityRevision<IFlashcardPreset>) => {
-    return `<li class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${escapeAttr(revision.entityID)}" data-revision="${escapeAttr(revision.revisionID)}">
+    const retention = `${Number((revision.payload.requestRetention * 100).toFixed(10))}%`;
+    return `<li class="b3-list-item b3-list-item--narrow card__v2-preset${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${escapeAttr(revision.entityID)}" data-revision="${escapeAttr(revision.revisionID)}">
 <svg class="b3-list-item__graphic"><use xlink:href="#iconSettings"></use></svg>
-<span class="b3-list-item__text">${escapeHtml(revision.payload.name)}</span>
-<span class="b3-list-item__meta">${revision.payload.requestRetention} / ${revision.payload.maximumInterval}</span>
+<div class="card__v2-preset-content"><div>${escapeHtml(revision.payload.name)}</div>
+<dl class="card__v2-preset-summary">
+<div><dt>${escapeHtml(window.siyuan.languages.flashcardNewCardLimit)}</dt><dd>${revision.payload.newLimit}</dd></div>
+<div><dt>${escapeHtml(window.siyuan.languages.flashcardReviewCardLimit)}</dt><dd>${revision.payload.reviewLimit}</dd></div>
+<div><dt>${escapeHtml(window.siyuan.languages.flashcardTargetRetention)}</dt><dd>${retention}</dd></div>
+</dl></div>
 <span data-type="copy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>
 <span data-type="edit" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></span>
 <span data-type="delete" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>

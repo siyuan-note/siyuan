@@ -441,6 +441,45 @@
     }
   }
 
+  &__v2-preset {
+    height: auto;
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    > .b3-list-item__action {
+      flex-shrink: 0;
+    }
+
+    &-content {
+      flex: 1;
+      min-width: 0;
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: anywhere;
+    }
+
+    &-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 16px;
+      margin: 4px 0 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--b3-theme-on-surface);
+
+      > div {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      dd {
+        margin: 0;
+      }
+    }
+  }
+
   &__v2-form,
   &__v2-basic,
   &__v2-advanced {

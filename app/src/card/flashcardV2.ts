@@ -1,3 +1,4 @@
+import {createFlashcardV2AnkiImportState} from "./flashcardV2AnkiImport";
 import {openFlashcardV2Template} from "./flashcardV2Template";
 import {openFlashcardV2Ordered} from "./flashcardV2Ordered";
 import {Dialog} from "../dialog";
@@ -363,8 +364,20 @@ const refreshEffectiveCardValues = (card: IFlashcardSearchResult) => {
     card.effectiveTagIDs = mergedTagIDs(card.cardTagIDs || [], card.sourceTagIDs || []);
 };
 
-const activateFlashcardV2 = (callback: () => void) => {
+interface IFlashcardV2Readiness {
+    cancelled: () => void;
+    failed: () => void;
+    isCurrent: () => boolean;
+}
+
+const activateFlashcardV2 = (callback: () => void, readiness?: IFlashcardV2Readiness) => {
+    let previewReceived = false;
     fetchPost("/api/flashcard/previewMigration", {}, (previewResponse) => {
+        previewReceived = true;
+        if (readiness && !readiness.isCurrent()) {
+            readiness.cancelled();
+            return;
+        }
         const report = previewResponse.data.report as IFlashcardMigrationReport;
         const unresolved = report.InvalidCards + report.UnmappedLogs;
         const summary = [
@@ -376,27 +389,42 @@ const activateFlashcardV2 = (callback: () => void) => {
         ].join("<br>");
         if (!report.Complete) {
             showMessage(`${window.siyuan.languages.dataMigration}<br>${summary}`, 0, "error");
+            readiness?.cancelled();
             return;
         }
         const details = `${window.siyuan.languages.flashcardMigrationConfirm}<br><br>${summary}`;
         confirmDialog(window.siyuan.languages.dataMigration, details, () => {
+            if (readiness && !readiness.isCurrent()) {
+                readiness.cancelled();
+                return;
+            }
+            let activated = false;
             fetchPost("/api/flashcard/activateMigration", {
                 migrationID: previewResponse.data.migrationID,
                 recordDigest: previewResponse.data.recordDigest,
-            }, () => callback());
-        });
-    });
+            }, () => { activated = true; callback(); }, undefined, readiness?.failed, undefined, readiness ? 30000 : 0)
+                .finally(() => { if (!activated) readiness?.cancelled(); });
+        }, readiness?.cancelled);
+    }, undefined, readiness?.failed, undefined, readiness ? 30000 : 0)
+        .finally(() => { if (!previewReceived) readiness?.cancelled(); });
 };
 
-export const ensureFlashcardV2 = (callback: () => void) => {
+export const ensureFlashcardV2 = (callback: () => void, readiness?: IFlashcardV2Readiness) => {
+    let statusReceived = false;
     fetchPost("/api/flashcard/getMigrationStatus", {}, (response) => {
+        statusReceived = true;
+        if (readiness && !readiness.isCurrent()) {
+            readiness.cancelled();
+            return;
+        }
         const status = response.data as IFlashcardMigrationStatus;
         if (status.state === "Active") {
             callback();
             return;
         }
-        activateFlashcardV2(callback);
-    });
+        activateFlashcardV2(callback, readiness);
+    }, undefined, readiness?.failed, undefined, readiness ? 30000 : 0)
+        .finally(() => { if (!statusReceived) readiness?.cancelled(); });
 };
 
 const renderReviewSet = (revision: IFlashcardEntityRevision<IReviewSet>, summary?: IFlashcardReviewSetSummary) => {
@@ -3922,7 +3950,9 @@ export const openFlashcardV2AnkiPreview = () => {
         fetchPost("/api/flashcard/previewAnkiPackage", formData, (response) => {
             const preview = response.data as IAnkiPackagePreview;
             const notebooks = window.siyuan.notebooks.filter((notebook) => !notebook.closed && !notebook.encrypted);
+            const importState = createFlashcardV2AnkiImportState();
             const dialog = new Dialog({
+                beforeClose: () => { importState.close(); return true; },
                 title: `Anki - ${window.siyuan.languages.dataMigration}`,
                 width: isMobile() ? "92vw" : "720px",
                 height: "70vh",
@@ -3951,21 +3981,45 @@ ${notebooks.map((notebook) => `<option value="${escapeAttr(notebook.id)}">${esca
 </div>`,
             });
             const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
-            let importController: AbortController | undefined;
             buttons[0].addEventListener("click", () => {
-                importController?.abort();
                 dialog.destroy();
             });
             buttons[1].addEventListener("click", () => {
                 const notebookID = (dialog.element.querySelector('[data-type="notebook"]') as HTMLSelectElement).value;
-                if (!notebookID) {
+                const attempt = importState.begin(file, notebookID);
+                if (!attempt) {
                     return;
                 }
+                buttons[1].disabled = true;
+                const target = dialog.element.querySelector<HTMLSelectElement>('[data-type="notebook"]');
+                target.disabled = true;
+                const finish = (saved: boolean) => {
+                    attempt.finish(saved);
+                    if (!importState.closed && !importState.pending) {
+                        buttons[0].textContent = window.siyuan.languages.cancel;
+                        buttons[1].disabled = false;
+                        target.disabled = false;
+                    }
+                };
+                const reportFailure = () => {
+                    if (!importState.closed) {
+                        showMessage(window.siyuan.languages.flashcardSaveFailed, 6000, "error");
+                    }
+                };
                 ensureFlashcardV2(() => {
-                    const importData = new ContractFormData({file, notebookID, operationID: genUUID()});
-                    buttons[1].disabled = true;
-                    importController = new AbortController();
+                    if (!attempt.start()) {
+                        finish(false);
+                        return;
+                    }
+                    buttons[0].textContent = window.siyuan.languages.close;
+                    const importData = new ContractFormData({file: attempt.file, notebookID: attempt.notebookID,
+                        operationID: attempt.operationID});
+                    let saved = false;
                     fetchPost("/api/flashcard/importAnkiPackage", importData, (importResponse) => {
+                        saved = true;
+                        if (importState.closed) {
+                            return;
+                        }
                         const report = importResponse.data as IAnkiImportReport;
                         dialog.destroy();
                         new Dialog({
@@ -3982,11 +4036,8 @@ ${statisticsItem(window.siyuan.languages.update, report.updatedSources)}
 ${statisticsItem(window.siyuan.languages.remove, report.retiredSources)}
 </div>`,
                         });
-                    }, undefined, undefined, importController.signal).finally(() => {
-                        importController = undefined;
-                        buttons[1].disabled = false;
-                    });
-                });
+                    }, undefined, reportFailure).finally(() => finish(saved));
+                }, {cancelled: () => finish(false), failed: reportFailure, isCurrent: () => !importState.closed});
             });
         });
     }, {once: true});

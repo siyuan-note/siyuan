@@ -42,6 +42,29 @@ func TestFilterHandlerIALAttrs(t *testing.T) {
 	}
 }
 
+// TestBlockAttrsOperationDropsHandlerIAL 覆盖 updateAttrs 推送：历史数据里的处理器属性不能随推送下发给客户端。
+func TestBlockAttrsOperationDropsHandlerIAL(t *testing.T) {
+	node := &ast.Node{ID: "20260101000000-abcdefg", Type: ast.NodeParagraph}
+	node.KramdownIAL = [][]string{
+		{"id", node.ID},
+		{"bookmark", "x"},
+		{"onmouseover", "window.xssFired=true"},
+	}
+	operation := blockAttrsOperation(map[string]string{"bookmark": "old", "onmouseover": "old"}, node)
+	data := operation.Data.(map[string]any)
+	newAttrs := data["new"].(map[string]string)
+	if _, ok := newAttrs["onmouseover"]; ok {
+		t.Fatalf("push payload must not carry handler attributes: %v", newAttrs)
+	}
+	if "x" != newAttrs["bookmark"] {
+		t.Fatalf("push payload lost regular attributes: %v", newAttrs)
+	}
+	// old 保留处理器属性，客户端据此清理元素上已有的同名属性
+	if _, ok := data["old"].(map[string]string)["onmouseover"]; !ok {
+		t.Fatal("old attributes should keep handler names so clients remove stale attributes")
+	}
+}
+
 func hasHandlerIAL(root *ast.Node) bool {
 	found := false
 	ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {

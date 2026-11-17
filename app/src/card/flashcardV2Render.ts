@@ -1,4 +1,5 @@
 import {escapeAttr, escapeHtml} from "../util/escape";
+import {genUUID} from "../util/genID";
 import type {FlashcardV2CardRenderModel} from "../types/api";
 import {isFlashcardV2Object, isFlashcardV2Strings, readFlashcardV2Payload} from "./flashcardV2Contract";
 
@@ -719,6 +720,14 @@ export const prepareFlashcardV2Choice = (element: Element,
     if (inputs.length === 0 || !Array.isArray(config?.correctOptionIDs)) {
         return;
     }
+    let summary = element.querySelector<HTMLElement>("[data-choice-result]");
+    if (!summary) {
+        summary = document.createElement("div");
+        summary.dataset.choiceResult = "true";
+        summary.className = "b3-label__text ft__on-surface";
+        summary.setAttribute("role", "status");
+        element.appendChild(summary);
+    }
     return {
         check: () => {
             const selectedOptionIDs = inputs.filter((input) => input.checked).map((input) => input.value).sort();
@@ -732,7 +741,30 @@ export const prepareFlashcardV2Choice = (element: Element,
                 option?.classList.toggle("card__v2-choice-option--correct", correctSet.has(input.value));
                 option?.classList.toggle("card__v2-choice-option--incorrect", input.checked &&
                     !correctSet.has(input.value));
+                if (option) {
+                    let feedback = option.nextElementSibling as HTMLElement;
+                    if (!correctSet.has(input.value) && !input.checked && !feedback?.hasAttribute("data-choice-feedback")) {
+                        return;
+                    }
+                    if (!feedback?.hasAttribute("data-choice-feedback")) {
+                        feedback = document.createElement("div");
+                        feedback.dataset.choiceFeedback = "true";
+                        feedback.id = `choice-feedback-${genUUID()}`;
+                        feedback.className = "b3-label__text ft__on-surface";
+                        option.insertAdjacentElement("afterend", feedback);
+                    }
+                    const lang = window.siyuan.languages;
+                    feedback.textContent = correctSet.has(input.value) ?
+                        input.checked ? lang.flashcardChoiceCorrectSelected : lang.flashcardChoiceCorrectUnselected :
+                        input.checked ? lang.flashcardChoiceIncorrectSelected : "";
+                    feedback.classList.toggle("fn__none", !feedback.textContent);
+                    const descriptions = new Set((input.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
+                    descriptions.add(feedback.id);
+                    input.setAttribute("aria-describedby", [...descriptions].join(" "));
+                }
             });
+            summary.textContent = correct ? window.siyuan.languages.flashcardChoiceAnswerCorrect :
+                window.siyuan.languages.flashcardChoiceAnswerIncorrect;
             return {
                 type: "choice",
                 correct,

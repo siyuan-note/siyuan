@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "सही विकल्प, चुना गया",
+	"flashcardChoiceCorrectUnselected": "सही विकल्प, नहीं चुना गया",
+	"flashcardChoiceIncorrectSelected": "गलत विकल्प, चुना गया",
+	"flashcardChoiceAnswerCorrect": "उत्तर सही है",
+	"flashcardChoiceAnswerIncorrect": "उत्तर गलत है",
 	"flashcardTypedFuzzyTip": "अनुमानित मिलान चालू है; बड़े-छोटे अक्षरों, विशेष चिह्नों या वर्तनी में छोटे अंतर स्वीकार हो सकते हैं। उत्तर जाँचें और स्वयं मूल्यांकन करें",
 	"flashcardSourceRestore": "यह संस्करण पुनर्स्थापित करें",
 	"flashcardImageTarget": "इस प्रश्न का उत्तर क्षेत्र",

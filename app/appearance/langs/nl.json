@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "Juiste optie, geselecteerd",
+	"flashcardChoiceCorrectUnselected": "Juiste optie, niet geselecteerd",
+	"flashcardChoiceIncorrectSelected": "Onjuiste optie, geselecteerd",
+	"flashcardChoiceAnswerCorrect": "Antwoord correct",
+	"flashcardChoiceAnswerIncorrect": "Antwoord onjuist",
 	"flashcardTypedFuzzyTip": "Benaderende vergelijking is ingeschakeld; kleine verschillen in hoofdletters, diakritische tekens of spelling kunnen worden geaccepteerd. Controleer en beoordeel het antwoord zelf",
 	"flashcardSourceRestore": "Deze versie herstellen",
 	"flashcardImageTarget": "Antwoordgebied voor deze vraag",

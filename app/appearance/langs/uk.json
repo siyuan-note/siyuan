@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "Правильний варіант, вибрано",
+	"flashcardChoiceCorrectUnselected": "Правильний варіант, не вибрано",
+	"flashcardChoiceIncorrectSelected": "Неправильний варіант, вибрано",
+	"flashcardChoiceAnswerCorrect": "Відповідь правильна",
+	"flashcardChoiceAnswerIncorrect": "Відповідь неправильна",
 	"flashcardTypedFuzzyTip": "Наближене зіставлення ввімкнено; невеликі відмінності в регістрі, діакритиці чи написанні можуть бути прийняті. Перевірте відповідь і оцініть її самостійно",
 	"flashcardSourceRestore": "Відновити цю версію",
 	"flashcardImageTarget": "Область відповіді на це запитання",

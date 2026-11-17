@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "Doğru seçenek, seçildi",
+	"flashcardChoiceCorrectUnselected": "Doğru seçenek, seçilmedi",
+	"flashcardChoiceIncorrectSelected": "Yanlış seçenek, seçildi",
+	"flashcardChoiceAnswerCorrect": "Yanıt doğru",
+	"flashcardChoiceAnswerIncorrect": "Yanıt yanlış",
 	"flashcardTypedFuzzyTip": "Yaklaşık eşleştirme etkin; büyük/küçük harf, aksan işaretleri veya yazımdaki küçük farklar kabul edilebilir. Yanıtı kontrol edip kendiniz değerlendirin",
 	"flashcardSourceRestore": "Bu sürümü geri yükle",
 	"flashcardImageTarget": "Bu sorunun yanıt alanı",

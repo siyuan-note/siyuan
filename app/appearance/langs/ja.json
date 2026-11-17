@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "正しい選択肢・選択済み",
+	"flashcardChoiceCorrectUnselected": "正しい選択肢・未選択",
+	"flashcardChoiceIncorrectSelected": "誤った選択肢・選択済み",
+	"flashcardChoiceAnswerCorrect": "正解です",
+	"flashcardChoiceAnswerIncorrect": "不正解です",
 	"flashcardTypedFuzzyTip": "近似一致が有効です。大文字・小文字、発音区別符号、つづりのわずかな違いは許容される場合があります。解答を確認し、自分で評価してください",
 	"flashcardSourceRestore": "このバージョンを復元",
 	"flashcardImageTarget": "この問題の解答範囲",

@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "Верный вариант, выбран",
+	"flashcardChoiceCorrectUnselected": "Верный вариант, не выбран",
+	"flashcardChoiceIncorrectSelected": "Неверный вариант, выбран",
+	"flashcardChoiceAnswerCorrect": "Ответ верный",
+	"flashcardChoiceAnswerIncorrect": "Ответ неверный",
 	"flashcardTypedFuzzyTip": "Приблизительное сопоставление включено; небольшие различия в регистре, диакритике или написании могут быть приняты. Проверьте ответ и оцените его самостоятельно",
 	"flashcardSourceRestore": "Восстановить эту версию",
 	"flashcardImageTarget": "Область ответа на этот вопрос",

@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "Opsi benar, dipilih",
+	"flashcardChoiceCorrectUnselected": "Opsi benar, tidak dipilih",
+	"flashcardChoiceIncorrectSelected": "Opsi salah, dipilih",
+	"flashcardChoiceAnswerCorrect": "Jawaban benar",
+	"flashcardChoiceAnswerIncorrect": "Jawaban salah",
 	"flashcardTypedFuzzyTip": "Pencocokan perkiraan diaktifkan; perbedaan kecil pada huruf besar/kecil, diakritik, atau ejaan masih dapat diterima. Periksa jawaban dan nilai sendiri",
 	"flashcardSourceRestore": "Pulihkan versi ini",
 	"flashcardImageTarget": "Area jawaban pertanyaan ini",

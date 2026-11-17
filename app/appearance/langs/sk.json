@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "Správna možnosť, vybraná",
+	"flashcardChoiceCorrectUnselected": "Správna možnosť, nevybraná",
+	"flashcardChoiceIncorrectSelected": "Nesprávna možnosť, vybraná",
+	"flashcardChoiceAnswerCorrect": "Správna odpoveď",
+	"flashcardChoiceAnswerIncorrect": "Nesprávna odpoveď",
 	"flashcardTypedFuzzyTip": "Približná zhoda je zapnutá; malé rozdiely vo veľkosti písmen, diakritike alebo pravopise môžu byť prijaté. Skontrolujte odpoveď a ohodnoťte ju sami",
 	"flashcardSourceRestore": "Obnoviť túto verziu",
 	"flashcardImageTarget": "Oblasť odpovede na túto otázku",

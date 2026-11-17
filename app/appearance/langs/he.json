@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "אפשרות נכונה, נבחרה",
+	"flashcardChoiceCorrectUnselected": "אפשרות נכונה, לא נבחרה",
+	"flashcardChoiceIncorrectSelected": "אפשרות שגויה, נבחרה",
+	"flashcardChoiceAnswerCorrect": "התשובה נכונה",
+	"flashcardChoiceAnswerIncorrect": "התשובה שגויה",
 	"flashcardTypedFuzzyTip": "התאמה מקורבת מופעלת; הבדלים קטנים ברישיות, בסימנים דיאקריטיים או באיות עשויים להתקבל. יש לבדוק את התשובה ולדרג אותה בעצמך",
 	"flashcardSourceRestore": "שחזור גרסה זו",
 	"flashcardImageTarget": "אזור התשובה לשאלה זו",

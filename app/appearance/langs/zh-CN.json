@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "正确选项，已选择",
+	"flashcardChoiceCorrectUnselected": "正确选项，未选择",
+	"flashcardChoiceIncorrectSelected": "错误选项，已选择",
+	"flashcardChoiceAnswerCorrect": "回答正确",
+	"flashcardChoiceAnswerIncorrect": "回答不正确",
 	"flashcardTypedFuzzyTip": "已启用近似匹配，少量大小写、变音符号或拼写差异仍可能被接受，请核对答案并自行评分",
 	"flashcardSourceRestore": "恢复此版本",
 	"flashcardImageTarget": "本题答案区域",

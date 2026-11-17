@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "خيار صحيح، تم اختياره",
+	"flashcardChoiceCorrectUnselected": "خيار صحيح، لم يتم اختياره",
+	"flashcardChoiceIncorrectSelected": "خيار خاطئ، تم اختياره",
+	"flashcardChoiceAnswerCorrect": "الإجابة صحيحة",
+	"flashcardChoiceAnswerIncorrect": "الإجابة غير صحيحة",
 	"flashcardTypedFuzzyTip": "المطابقة التقريبية مفعّلة؛ قد تُقبل اختلافات طفيفة في حالة الأحرف أو علامات التشكيل أو الإملاء، راجع الإجابة وقيّمها بنفسك",
 	"flashcardSourceRestore": "استعادة هذا الإصدار",
 	"flashcardImageTarget": "منطقة إجابة السؤال الحالي",

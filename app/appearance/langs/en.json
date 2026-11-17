@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "Correct option, selected",
+	"flashcardChoiceCorrectUnselected": "Correct option, not selected",
+	"flashcardChoiceIncorrectSelected": "Incorrect option, selected",
+	"flashcardChoiceAnswerCorrect": "Answer correct",
+	"flashcardChoiceAnswerIncorrect": "Answer incorrect",
 	"flashcardTypedFuzzyTip": "Approximate matching is enabled; small differences in case, diacritics or spelling may still be accepted. Check the answer and rate it yourself",
 	"flashcardSourceRestore": "Restore this version",
 	"flashcardImageTarget": "Answer area for this question",

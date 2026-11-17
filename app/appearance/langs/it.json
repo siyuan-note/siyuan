@@ -1,4 +1,9 @@
 {
+	"flashcardChoiceCorrectSelected": "Opzione corretta, selezionata",
+	"flashcardChoiceCorrectUnselected": "Opzione corretta, non selezionata",
+	"flashcardChoiceIncorrectSelected": "Opzione errata, selezionata",
+	"flashcardChoiceAnswerCorrect": "Risposta corretta",
+	"flashcardChoiceAnswerIncorrect": "Risposta errata",
 	"flashcardTypedFuzzyTip": "La corrispondenza approssimativa è attiva; piccole differenze di maiuscole, segni diacritici o ortografia possono essere accettate. Controlla la risposta e valutala personalmente",
 	"flashcardSourceRestore": "Ripristina questa versione",
 	"flashcardImageTarget": "Area della risposta a questa domanda",

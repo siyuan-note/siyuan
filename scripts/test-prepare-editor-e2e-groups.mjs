@@ -171,6 +171,32 @@ test("unsupported shards cannot create configurations or reinterpret listings", 
     }
 });
 
+test("editor timing baseline uses traceable measured samples and keeps complete file groups", () => {
+    const history = JSON.parse(readFileSync(new URL("editor-e2e-durations.json", import.meta.url), "utf8"));
+    assert.match(history.source, /^https:\/\/github\.com\/siyuan-note\/siyuan\/actions\/runs\/\d+$/);
+    assert.ok(history.samples.length >= 2);
+    for (const sample of history.samples) {
+        assert.match(sample.source, /^https:\/\/github\.com\/siyuan-note\/siyuan\/actions\/runs\/\d+$/);
+        assert.match(sample.testingCommit, /^[0-9a-f]{40}$/);
+        assert.match(sample.productCommit, /^[0-9a-f]{40}$/);
+        assert.equal(sample.testingCommit, history.testingCommit);
+    }
+    assert.match(history.measurement, /median/);
+    assert.match(history.measurement, /including retries/);
+    assert.match(history.measurement, /Excludes setup, cleanup and runner overhead/);
+    const entries = Object.entries(history.durationsMs);
+    assert.ok(entries.length >= 2);
+    for (const [file, duration] of entries) {
+        assert.match(file, /^editor.*\.spec\.ts$/);
+        assert.ok(Number.isFinite(duration) && duration > 0, `Invalid baseline duration for ${file}`);
+    }
+    const source = [...dependencies, ...entries.map(([file]) => editorTest(file)), editorTest("editor-new.spec.ts")];
+    const groups = partitionFiles(source, history.durationsMs);
+    assert.deepEqual(groups, partitionFiles([...source].reverse(), history.durationsMs));
+    validateGroups(source, select(source, groups), groups);
+    assert.equal(groups.flatMap(group => group.files).filter(file => file.estimated).length, 1);
+});
+
 
 test("main timing baseline is traceable, positive and deterministically balances new files", () => {
     const history = JSON.parse(readFileSync(new URL("main-e2e-durations.json", import.meta.url), "utf8"));

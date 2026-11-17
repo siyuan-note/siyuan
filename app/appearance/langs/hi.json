@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "इस प्रश्न का उत्तर क्षेत्र",
+	"flashcardImageTargetTip": "धारीदार क्षेत्र इस प्रश्न का उत्तर है",
 	"flashcardSkipIncomplete": "छोड़ने की प्रक्रिया अधूरी है; कृपया फिर से प्रयास करें",
 	"flashcardAnswerCheckFailed": "उत्तर की जाँच विफल हुई; कृपया स्वयं उत्तर जाँचें",
 	"flashcardMembershipAutomatic": "डेक के नियमों का पालन करें",

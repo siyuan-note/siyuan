@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Area della risposta a questa domanda",
+	"flashcardImageTargetTip": "L’area a strisce è la risposta a questa domanda",
 	"flashcardSkipIncomplete": "L’operazione di salto non è completa; riprova",
 	"flashcardAnswerCheckFailed": "Verifica della risposta non riuscita; controlla la risposta tu",
 	"flashcardMembershipAutomatic": "Segui le regole del mazzo",

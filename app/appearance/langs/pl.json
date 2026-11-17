@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Obszar odpowiedzi na to pytanie",
+	"flashcardImageTargetTip": "Pasiasty obszar jest odpowiedzią na to pytanie",
 	"flashcardSkipIncomplete": "Pomijanie nie zostało ukończone; spróbuj ponownie",
 	"flashcardAnswerCheckFailed": "Sprawdzanie odpowiedzi nie powiodło się; sprawdź odpowiedź samodzielnie",
 	"flashcardMembershipAutomatic": "Stosuj reguły talii",

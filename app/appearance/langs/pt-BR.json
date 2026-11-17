@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Área da resposta desta pergunta",
+	"flashcardImageTargetTip": "A área listrada é a resposta desta pergunta",
 	"flashcardSkipIncomplete": "A operação de pular não foi concluída; tente novamente",
 	"flashcardAnswerCheckFailed": "Falha ao verificar a resposta; confira a resposta por conta própria",
 	"flashcardMembershipAutomatic": "Seguir as regras do baralho",

@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Antwoordgebied voor deze vraag",
+	"flashcardImageTargetTip": "Het gestreepte gebied is het antwoord op deze vraag",
 	"flashcardSkipIncomplete": "Het overslaan is niet voltooid; probeer het opnieuw",
 	"flashcardAnswerCheckFailed": "Het controleren van het antwoord is mislukt; controleer het antwoord zelf",
 	"flashcardMembershipAutomatic": "Regels van de kaartenset volgen",

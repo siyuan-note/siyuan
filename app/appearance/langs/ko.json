@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "이 문제의 답 영역",
+	"flashcardImageTargetTip": "줄무늬 영역이 이 문제의 답입니다",
 	"flashcardSkipIncomplete": "건너뛰기가 완료되지 않았습니다. 다시 시도하세요",
 	"flashcardAnswerCheckFailed": "답안 확인에 실패했습니다. 직접 답을 확인하세요",
 	"flashcardMembershipAutomatic": "덱 규칙 따르기",

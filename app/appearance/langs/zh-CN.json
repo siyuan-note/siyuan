@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "本题答案区域",
+	"flashcardImageTargetTip": "条纹区域为本题答案",
 	"flashcardSkipIncomplete": "跳过未完成，请重试",
 	"flashcardAnswerCheckFailed": "答案检查失败，请自行核对答案",
 	"flashcardMembershipAutomatic": "按卡包规则",

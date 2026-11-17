@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Antwortbereich dieser Frage",
+	"flashcardImageTargetTip": "Der gestreifte Bereich ist die Antwort auf diese Frage",
 	"flashcardSkipIncomplete": "Das Überspringen ist nicht abgeschlossen; bitte erneut versuchen",
 	"flashcardAnswerCheckFailed": "Die Antwortprüfung ist fehlgeschlagen; prüfe die Antwort selbst",
 	"flashcardMembershipAutomatic": "Regeln des Kartenstapels verwenden",

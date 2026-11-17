@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "منطقة إجابة السؤال الحالي",
+	"flashcardImageTargetTip": "المنطقة المخططة هي إجابة السؤال الحالي",
 	"flashcardSkipIncomplete": "لم يكتمل التخطي؛ يرجى المحاولة مجددًا",
 	"flashcardAnswerCheckFailed": "تعذّر التحقق من الإجابة؛ تحقق منها بنفسك",
 	"flashcardMembershipAutomatic": "اتباع قواعد حزمة البطاقات",

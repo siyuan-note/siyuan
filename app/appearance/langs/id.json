@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Area jawaban pertanyaan ini",
+	"flashcardImageTargetTip": "Area bergaris adalah jawaban untuk pertanyaan ini",
 	"flashcardSkipIncomplete": "Proses melewati belum selesai; silakan coba lagi",
 	"flashcardAnswerCheckFailed": "Pemeriksaan jawaban gagal; periksa jawabannya sendiri",
 	"flashcardMembershipAutomatic": "Ikuti aturan dek",

@@ -961,12 +961,24 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
         }
         const overlay = document.createElement("span");
         overlay.className = "card__v2-image-shape";
+        if (targetShapeIDs.has(shape.id)) {
+            overlay.classList.add("card__v2-image-shape--target");
+            overlay.setAttribute("role", "img");
+            overlay.setAttribute("aria-label", window.siyuan.languages.flashcardImageTarget);
+        } else {
+            overlay.setAttribute("aria-hidden", "true");
+        }
         overlay.dataset.shapeId = shape.id;
         overlay.setAttribute("style", style);
         wrapper.appendChild(overlay);
     });
+    const hint = document.createElement("div");
+    hint.className = "b3-label__text ft__on-surface";
+    hint.textContent = window.siyuan.languages.flashcardImageTargetTip;
+    wrapper.insertAdjacentElement("afterend", hint);
     return {
         revealNext: () => {
+            hint.remove();
             wrapper.querySelectorAll("[data-shape-id]").forEach((overlay) => {
                 if (targetShapeIDs.has((overlay as HTMLElement).dataset.shapeId)) {
                     overlay.remove();

@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "本題答案區域",
+	"flashcardImageTargetTip": "條紋區域為本題答案",
 	"flashcardSkipIncomplete": "略過尚未完成，請重試",
 	"flashcardAnswerCheckFailed": "答案檢查失敗，請自行核對答案",
 	"flashcardMembershipAutomatic": "依卡包規則",

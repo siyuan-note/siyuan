@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "この問題の解答範囲",
+	"flashcardImageTargetTip": "縞模様の範囲がこの問題の解答です",
 	"flashcardSkipIncomplete": "スキップが完了していません。再試行してください",
 	"flashcardAnswerCheckFailed": "回答の確認に失敗しました。自分で答えを確認してください",
 	"flashcardMembershipAutomatic": "デッキのルールに従う",

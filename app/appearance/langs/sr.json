@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Област одговора на ово питање",
+	"flashcardImageTargetTip": "Пругаста област је одговор на ово питање",
 	"flashcardSkipIncomplete": "Прескакање није довршено; покушајте поново",
 	"flashcardAnswerCheckFailed": "Провера одговора није успела; сами проверите одговор",
 	"flashcardMembershipAutomatic": "Прати правила шпила",

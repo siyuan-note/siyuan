@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "אזור התשובה לשאלה זו",
+	"flashcardImageTargetTip": "האזור המפוספס הוא התשובה לשאלה זו",
 	"flashcardSkipIncomplete": "הדילוג לא הושלם; יש לנסות שוב",
 	"flashcardAnswerCheckFailed": "בדיקת התשובה נכשלה; יש לבדוק את התשובה בעצמך",
 	"flashcardMembershipAutomatic": "לפי כללי החפיסה",

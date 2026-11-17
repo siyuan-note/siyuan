@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Answer area for this question",
+	"flashcardImageTargetTip": "The striped area is the answer to this question",
 	"flashcardSkipIncomplete": "Skipping is incomplete; please retry",
 	"flashcardAnswerCheckFailed": "Answer check failed; check the answer yourself",
 	"flashcardMembershipAutomatic": "Follow deck rules",

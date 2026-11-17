@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Область відповіді на це запитання",
+	"flashcardImageTargetTip": "Смугаста область — відповідь на це запитання",
 	"flashcardSkipIncomplete": "Пропуск не завершено; повторіть спробу",
 	"flashcardAnswerCheckFailed": "Не вдалося перевірити відповідь; перевірте її самостійно",
 	"flashcardMembershipAutomatic": "Дотримуватися правил колоди",

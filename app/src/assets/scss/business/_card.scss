@@ -258,9 +258,15 @@
   &__v2-image-shape {
     position: absolute;
     box-sizing: border-box;
-    background-color: var(--b3-theme-primary);
+    background-color: var(--b3-theme-surface);
     border: 1px solid var(--b3-theme-background);
     pointer-events: none;
+
+    &--target {
+      background-color: var(--b3-theme-primary);
+      background-image: repeating-linear-gradient(135deg, transparent 0, transparent 6px,
+        var(--b3-theme-on-primary) 6px, var(--b3-theme-on-primary) 8px);
+    }
   }
 
   &__v2-image-editor {

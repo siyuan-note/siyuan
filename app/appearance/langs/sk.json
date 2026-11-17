@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Oblasť odpovede na túto otázku",
+	"flashcardImageTargetTip": "Pruhovaná oblasť je odpoveďou na túto otázku",
 	"flashcardSkipIncomplete": "Preskočenie nie je dokončené; skúste to znova",
 	"flashcardAnswerCheckFailed": "Kontrola odpovede zlyhala; skontrolujte odpoveď sami",
 	"flashcardMembershipAutomatic": "Použiť pravidlá balíčka",

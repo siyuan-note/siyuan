@@ -1,4 +1,6 @@
 {
+	"flashcardImageTarget": "Zone de réponse à cette question",
+	"flashcardImageTargetTip": "La zone rayée est la réponse à cette question",
 	"flashcardSkipIncomplete": "L’action de passer les cartes est incomplète ; veuillez réessayer",
 	"flashcardAnswerCheckFailed": "La vérification de la réponse a échoué ; vérifiez-la vous-même",
 	"flashcardMembershipAutomatic": "Suivre les règles du paquet",

@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {escapeHtml, escapeAttr} from "../util/escape";
 
 const compile = (source: string) => transpileModule(source, {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -15,7 +16,7 @@ const operation = forms.slice(forms.indexOf("export const createFlashcardV2Opera
     forms.indexOf("export const reportFlashcardV2Field =")).replace("export const", "const");
 const flush = async () => { for (let i = 0; i < 16; i++) { await Promise.resolve(); } };
 
-const setup = async () => {
+const setup = async (previewData: unknown = {noteTypes: [], decks: [], unsupported: []}) => {
     let uuid = 0;
     const createFlashcardV2Operation = runInNewContext(compile(`${operation}\ncreateFlashcardV2Operation;`), {
         genUUID: () => `operation-${++uuid}`,
@@ -30,7 +31,7 @@ const setup = async () => {
     const confirmations: Array<{yes: () => void, no: () => void}> = [];
     const messages: string[] = [];
     const dialogs: Array<{clicks: Array<() => void>, buttons: Array<{disabled: boolean, textContent: string}>,
-        target: {value: string, disabled: boolean}, close: () => void}> = [];
+        target: {value: string, disabled: boolean}, content: string, close: () => void}> = [];
     const exports = {} as {openFlashcardV2AnkiPreview: () => void};
     runInNewContext(compile(`${readiness}\n${preview}`), {
         exports, createFlashcardV2AnkiImportState: helpers.createFlashcardV2AnkiImportState,
@@ -41,13 +42,13 @@ const setup = async () => {
         ContractFormData: class {constructor(value: unknown) { Object.assign(this, value); }},
         Dialog: class {
             readonly element: {isConnected: boolean, dataset: Record<string, string>, querySelectorAll: () => unknown[], querySelector: () => unknown};
-            constructor(private options: {beforeClose?: () => boolean}) {
+            constructor(private options: {beforeClose?: () => boolean, content: string}) {
                 const clicks: Array<() => void> = [];
                 const buttons = [0, 1].map(index => ({disabled: false, textContent: index === 0 ? "cancel" : "import",
                     addEventListener: (_event: string, cb: () => void) => { clicks[index] = cb; }}));
                 const target = {value: "notebook", disabled: false};
                 this.element = {isConnected: true, dataset: {}, querySelectorAll: () => buttons, querySelector: () => target};
-                dialogs.push({clicks, buttons, target, close: () => this.destroy()});
+                dialogs.push({clicks, buttons, target, content: options.content, close: () => this.destroy()});
             }
             destroy() {
                 if (this.options.beforeClose?.() === false) { return; }
@@ -56,8 +57,8 @@ const setup = async () => {
             }
         },
         confirmDialog: (_title: string, _content: string, yes: () => void, no: () => void) => confirmations.push({yes, no}),
-        isMobile: () => false, statisticsItem: () => "", escapeHtml: (value: string) => value,
-        escapeAttr: (value: string) => value, showMessage: (message: string) => messages.push(message),
+        isMobile: () => false, statisticsItem: () => "", escapeHtml,
+        escapeAttr, showMessage: (message: string) => messages.push(message),
         fetchPost: (url: string, data: Record<string, unknown>, success: (response: unknown) => void,
             _headers?: unknown, failure?: (response: unknown) => void, signal?: AbortSignal, timeout?: number) =>
             new Promise<void>(settle => { requests.push({url, data, success, failure, signal, timeout, settle}); }),
@@ -71,10 +72,31 @@ const setup = async () => {
     };
     exports.openFlashcardV2AnkiPreview();
     fileChange();
-    await respond(0, {noteTypes: [], decks: [], unsupported: []});
+    await respond(0, previewData);
     return {requests, dialogs, confirmations, messages, respond,
         imports: () => requests.filter(request => request.url.endsWith("importAnkiPackage"))};
 };
+
+test("Anki preview accepts the real HTTP shape with a null unsupported list", async () => {
+    const h = await setup({noteCount: 1, cardCount: 1, reviewCount: 1, mediaCount: 1,
+        noteTypes: [{id: 100, name: "Synthetic Basic", noteCount: 1, conversion: "declarative"}],
+        decks: [{id: 1, name: "Synthetic Arithmetic", cardCount: 1}], unsupported: null});
+    assert.equal(h.dialogs.length, 1);
+    assert.match(h.dialogs[0].content, /Synthetic Basic/);
+    assert.match(h.dialogs[0].content, /Synthetic Arithmetic/);
+    assert.doesNotMatch(h.dialogs[0].content, /class="ft__error"/);
+    h.dialogs[0].clicks[1]();
+    await h.respond(1, {state: "Active"});
+    assert.equal(h.imports().length, 1);
+});
+
+test("Anki preview retains and escapes nonempty compatibility warnings", async () => {
+    const h = await setup({noteTypes: [], decks: [], unsupported: ['<script>alert("qa")</script>&', "second warning"]});
+    const content = h.dialogs[0].content;
+    assert.match(content, /class="ft__error"/);
+    assert.match(content, /&lt;script>alert\("qa"\)&lt;\/script>&amp;<br>second warning/);
+    assert.doesNotMatch(content, /<script>/);
+});
 
 test("Anki integration locks during readiness and rejects a second click", async () => {
     const h = await setup();

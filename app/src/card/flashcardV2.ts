@@ -311,7 +311,7 @@ interface IAnkiPackagePreview {
     mediaCount: number;
     noteTypes: Array<{ id: number, name: string, noteCount: number, conversion: string }>;
     decks: Array<{ id: number, name: string, cardCount: number }>;
-    unsupported: string[];
+    unsupported: string[] | null;
 }
 
 interface IAnkiImportReport {
@@ -3949,6 +3949,7 @@ export const openFlashcardV2AnkiPreview = () => {
         const formData = new ContractFormData({file});
         fetchPost("/api/flashcard/previewAnkiPackage", formData, (response) => {
             const preview = response.data as IAnkiPackagePreview;
+            const unsupported = preview.unsupported ?? [];
             const notebooks = window.siyuan.notebooks.filter((notebook) => !notebook.closed && !notebook.encrypted);
             const importState = createFlashcardV2AnkiImportState();
             const dialog = new Dialog({
@@ -3969,7 +3970,7 @@ ${preview.noteTypes.map((noteType) => `<li class="b3-list-item"><span class="b3-
 <ul class="b3-list b3-list--background card__v2-panel-list">
 ${preview.decks.map((deck) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(deck.name)}</span><span class="b3-list-item__meta">${deck.cardCount}</span></li>`).join("")}
 </ul>
-${preview.unsupported.length === 0 ? "" : `<div class="ft__error">${preview.unsupported.map(escapeHtml).join("<br>")}</div>`}
+${unsupported.length === 0 ? "" : `<div class="ft__error">${unsupported.map(escapeHtml).join("<br>")}</div>`}
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.targetNotebook}</div>
 <select data-type="notebook" class="b3-select fn__block"${notebooks.length === 0 ? " disabled" : ""}>
 ${notebooks.map((notebook) => `<option value="${escapeAttr(notebook.id)}">${escapeHtml(notebook.name)}</option>`).join("")}
@@ -4147,10 +4148,10 @@ export const openFlashcardV2Statistics = (reviewSetID = "", query?: IFlashcardQu
             destroyCallback: () => requestGeneration++,
             content: `<div class="b3-dialog__content fn__flex-column card__v2-statistics">
 <div class="card__v2-statistics-filter"><div class="card__v2-section-title">${window.siyuan.languages.flashcardStatisticsRange}</div><div class="card__v2-statistics-controls">
-<select data-type="statisticsRange" class="b3-select">${[1, 7, 30, 365].map((days) => `<option value="${days}"${days === 30 ? " selected" : ""}>${days} ${window.siyuan.languages.day}</option>`).join("")}<option value="all">${window.siyuan.languages.flashcardAllHistory}</option><option value="custom">${window.siyuan.languages.custom}</option></select>
-<input data-type="statisticsFrom" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(fromDate)}">
-<input data-type="statisticsTo" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(toDate)}">
-<select data-type="statisticsBucket" class="b3-select"><option value="day">${window.siyuan.languages.day}</option><option value="week">${window.siyuan.languages.week}</option><option value="month">${window.siyuan.languages.month}</option></select>
+<select data-type="statisticsRange" aria-label="${escapeAttr(window.siyuan.languages.flashcardStatisticsRange)}" class="b3-select">${[1, 7, 30, 365].map((days) => `<option value="${days}"${days === 30 ? " selected" : ""}>${days} ${window.siyuan.languages.day}</option>`).join("")}<option value="all">${window.siyuan.languages.flashcardAllHistory}</option><option value="custom">${window.siyuan.languages.custom}</option></select>
+<input data-type="statisticsFrom" aria-label="${escapeAttr(window.siyuan.languages.startDate)}" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(fromDate)}">
+<input data-type="statisticsTo" aria-label="${escapeAttr(window.siyuan.languages.endDate)}" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(toDate)}">
+<select data-type="statisticsBucket" aria-label="${escapeAttr(window.siyuan.languages.group)}" class="b3-select"><option value="day">${window.siyuan.languages.day}</option><option value="week">${window.siyuan.languages.week}</option><option value="month">${window.siyuan.languages.month}</option></select>
 <button data-type="statisticsApply" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div></div><div data-type="statisticsContent" class="card__v2-statistics-content"></div></div>`,
         });
@@ -4160,7 +4161,10 @@ export const openFlashcardV2Statistics = (reviewSetID = "", query?: IFlashcardQu
         const bucket = dialog.element.querySelector('[data-type="statisticsBucket"]') as HTMLSelectElement;
         const content = dialog.element.querySelector('[data-type="statisticsContent"]');
         const apply = dialog.element.querySelector('[data-type="statisticsApply"]') as HTMLButtonElement;
+        const isCurrent = (generation = requestGeneration) => generation === requestGeneration &&
+            dialog.element.isConnected && dialog.element.dataset.dialogClosing !== "true";
         const load = () => {
+            if (!isCurrent()) { return; }
             const fromTime = range.value === "all" ? 0 : new Date(`${from.value}T00:00:00`).getTime();
             const toExclusive = new Date(`${to.value}T00:00:00`);
             toExclusive.setDate(toExclusive.getDate() + 1);
@@ -4183,13 +4187,13 @@ export const openFlashcardV2Statistics = (reviewSetID = "", query?: IFlashcardQu
                 timezoneOffsetMinutes: -new Date().getTimezoneOffset(),
                 futureDays: 30,
             }, (response) => {
-                if (generation !== requestGeneration) {
+                if (!isCurrent(generation)) {
                     return;
                 }
                 loaded = true;
                 content.innerHTML = renderFlashcardV2Statistics(response.data as IFlashcardStatistics);
-            }).finally(() => {
-                if (generation === requestGeneration) {
+            }).catch(error => console.error("Flashcard statistics request failed", error)).finally(() => {
+                if (isCurrent(generation)) {
                     apply.disabled = false;
                     content.setAttribute("aria-busy", "false");
                     if (!loaded) {

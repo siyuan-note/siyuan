@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "ช่วงวันที่มีผลเฉพาะประวัติการทบทวน สถานะและการกระจายของการ์ดแสดงข้อมูลปัจจุบัน ส่วนการทบทวนที่กำลังจะมาถึงแสดง 30 วันนับจากวันนี้",
 	"flashcardDirectionSettings": "ทิศทางของการ์ด",
 	"flashcardRestoreSource": "กู้คืนแหล่งที่มาของการ์ด",
 	"flashcardSuspensionStatus": "สถานะการระงับ",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "สถานะการทบทวน",
 	"flashcardReviews": "การทบทวน",
 	"flashcardLapses": "การลืม",
-	"flashcardStatisticsRange": "ช่วงสถิติ",
+	"flashcardStatisticsRange": "ช่วงวันที่ของประวัติการทบทวน",
 	"flashcardReviewHistory": "ประวัติการทบทวน",
 	"flashcardUpcomingReviews": "การทบทวนที่กำลังจะมาถึง",
 	"flashcardReviewedCards": "การ์ดที่ทบทวนแล้ว",

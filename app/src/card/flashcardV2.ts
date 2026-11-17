@@ -4208,7 +4208,7 @@ export const openFlashcardV2Statistics = (reviewSetID = "", query?: IFlashcardQu
 <input data-type="statisticsTo" aria-label="${escapeAttr(window.siyuan.languages.endDate)}" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(toDate)}">
 <select data-type="statisticsBucket" aria-label="${escapeAttr(window.siyuan.languages.group)}" class="b3-select"><option value="day">${window.siyuan.languages.day}</option><option value="week">${window.siyuan.languages.week}</option><option value="month">${window.siyuan.languages.month}</option></select>
 <button data-type="statisticsApply" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div></div><div data-type="statisticsContent" class="card__v2-statistics-content"></div></div>`,
+</div><div class="b3-label__text ft__on-surface">${escapeHtml(window.siyuan.languages.flashcardStatisticsScopeTip)}</div></div><div data-type="statisticsContent" class="card__v2-statistics-content"></div></div>`,
         });
         const from = dialog.element.querySelector('[data-type="statisticsFrom"]') as HTMLInputElement;
         const to = dialog.element.querySelector('[data-type="statisticsTo"]') as HTMLInputElement;

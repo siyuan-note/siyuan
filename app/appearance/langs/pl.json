@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "Zakres dat dotyczy tylko historii powtórek; stany i rozkłady kart pokazują stan bieżący, a nadchodzące powtórki obejmują 30 dni od dzisiaj",
 	"flashcardDirectionSettings": "Kierunek karty",
 	"flashcardRestoreSource": "Przywróć źródło kart",
 	"flashcardSuspensionStatus": "Stan wstrzymania",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "Stan powtórki",
 	"flashcardReviews": "Powtórki",
 	"flashcardLapses": "Zapomnienia",
-	"flashcardStatisticsRange": "Zakres statystyk",
+	"flashcardStatisticsRange": "Zakres dat historii powtórek",
 	"flashcardReviewHistory": "Historia powtórek",
 	"flashcardUpcomingReviews": "Nadchodzące powtórki",
 	"flashcardReviewedCards": "Powtórzone karty",

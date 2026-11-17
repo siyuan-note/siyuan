@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "Het datumbereik geldt alleen voor de herhalingsgeschiedenis; kaartstatussen en verdelingen tonen de huidige situatie, en komende herhalingen beslaan 30 dagen vanaf vandaag",
 	"flashcardDirectionSettings": "Kaartrichting",
 	"flashcardRestoreSource": "Kaartbron herstellen",
 	"flashcardSuspensionStatus": "Opschortingsstatus",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "Herhalingsstatus",
 	"flashcardReviews": "Herhalingen",
 	"flashcardLapses": "Vergetingen",
-	"flashcardStatisticsRange": "Statistiekperiode",
+	"flashcardStatisticsRange": "Datumbereik van herhalingsgeschiedenis",
 	"flashcardReviewHistory": "Herhalingsgeschiedenis",
 	"flashcardUpcomingReviews": "Aankomende herhalingen",
 	"flashcardReviewedCards": "Herhaalde kaarten",

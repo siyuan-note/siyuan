@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "Rozsah dátumov ovplyvňuje iba históriu opakovaní; stavy a rozdelenia kariet odrážajú aktuálny stav a nadchádzajúce opakovania zahŕňajú 30 dní od dneška",
 	"flashcardDirectionSettings": "Smer karty",
 	"flashcardRestoreSource": "Obnoviť zdroj kariet",
 	"flashcardSuspensionStatus": "Stav pozastavenia",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "Stav opakovania",
 	"flashcardReviews": "Opakovania",
 	"flashcardLapses": "Zabudnutia",
-	"flashcardStatisticsRange": "Rozsah štatistík",
+	"flashcardStatisticsRange": "Rozsah dátumov histórie opakovaní",
 	"flashcardReviewHistory": "História opakovaní",
 	"flashcardUpcomingReviews": "Nadchádzajúce opakovania",
 	"flashcardReviewedCards": "Zopakované karty",

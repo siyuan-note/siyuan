@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "Rentang tanggal hanya memengaruhi riwayat tinjauan; status dan distribusi kartu mencerminkan kondisi saat ini, dan tinjauan mendatang mencakup 30 hari mulai hari ini",
 	"flashcardDirectionSettings": "Arah kartu",
 	"flashcardRestoreSource": "Pulihkan sumber kartu",
 	"flashcardSuspensionStatus": "Status penangguhan",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "Status ulasan",
 	"flashcardReviews": "Ulasan",
 	"flashcardLapses": "Kelupaan",
-	"flashcardStatisticsRange": "Rentang statistik",
+	"flashcardStatisticsRange": "Rentang tanggal riwayat tinjauan",
 	"flashcardReviewHistory": "Riwayat tinjauan",
 	"flashcardUpcomingReviews": "Tinjauan mendatang",
 	"flashcardReviewedCards": "Kartu yang ditinjau",

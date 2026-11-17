@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "يؤثر نطاق التاريخ في سجل المراجعات فقط؛ تعكس حالات البطاقات وتوزيعاتها الوضع الحالي، وتعرض المراجعات القادمة 30 يومًا بدءًا من اليوم",
 	"flashcardDirectionSettings": "اتجاه البطاقة",
 	"flashcardRestoreSource": "استعادة مصدر البطاقات",
 	"flashcardSuspensionStatus": "حالة التعليق",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "حالة المراجعة",
 	"flashcardReviews": "المراجعات",
 	"flashcardLapses": "مرات النسيان",
-	"flashcardStatisticsRange": "نطاق الإحصاءات",
+	"flashcardStatisticsRange": "النطاق الزمني لسجل المراجعات",
 	"flashcardReviewHistory": "سجل المراجعة",
 	"flashcardUpcomingReviews": "المراجعات القادمة",
 	"flashcardReviewedCards": "البطاقات التي تمت مراجعتها",

@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "El intervalo solo afecta al historial de repasos; los estados y distribuciones de las tarjetas reflejan la situación actual, y los próximos repasos abarcan 30 días desde hoy",
 	"flashcardDirectionSettings": "Dirección de la tarjeta",
 	"flashcardRestoreSource": "Restaurar fuente de tarjetas",
 	"flashcardSuspensionStatus": "Estado de suspensión",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "Estado de repaso",
 	"flashcardReviews": "Repasos",
 	"flashcardLapses": "Olvidos",
-	"flashcardStatisticsRange": "Intervalo de estadísticas",
+	"flashcardStatisticsRange": "Intervalo de fechas del historial de repasos",
 	"flashcardReviewHistory": "Historial de repaso",
 	"flashcardUpcomingReviews": "Próximos repasos",
 	"flashcardReviewedCards": "Tarjetas repasadas",

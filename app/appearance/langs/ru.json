@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "Диапазон дат влияет только на историю повторений; состояния и распределения карточек отражают текущую ситуацию, а предстоящие повторения охватывают 30 дней начиная с сегодняшнего дня",
 	"flashcardDirectionSettings": "Направление карточки",
 	"flashcardRestoreSource": "Восстановить источник карточек",
 	"flashcardSuspensionStatus": "Состояние приостановки",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "Состояние повторения",
 	"flashcardReviews": "Повторения",
 	"flashcardLapses": "Забывания",
-	"flashcardStatisticsRange": "Период статистики",
+	"flashcardStatisticsRange": "Диапазон дат истории повторений",
 	"flashcardReviewHistory": "История повторений",
 	"flashcardUpcomingReviews": "Предстоящие повторения",
 	"flashcardReviewedCards": "Повторённые карточки",

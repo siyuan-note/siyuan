@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "Tarih aralığı yalnızca tekrar geçmişini etkiler; kart durumları ve dağılımları mevcut durumu yansıtır, yaklaşan tekrarlar bugünden başlayan 30 günü kapsar",
 	"flashcardDirectionSettings": "Kart yönü",
 	"flashcardRestoreSource": "Kart kaynağını geri yükle",
 	"flashcardSuspensionStatus": "Askıya alma durumu",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "İnceleme durumu",
 	"flashcardReviews": "İncelemeler",
 	"flashcardLapses": "Unutmalar",
-	"flashcardStatisticsRange": "İstatistik aralığı",
+	"flashcardStatisticsRange": "Tekrar geçmişinin tarih aralığı",
 	"flashcardReviewHistory": "Gözden geçirme geçmişi",
 	"flashcardUpcomingReviews": "Yaklaşan gözden geçirmeler",
 	"flashcardReviewedCards": "Gözden geçirilen kartlar",

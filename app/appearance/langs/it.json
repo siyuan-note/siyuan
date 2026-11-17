@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "L’intervallo riguarda solo la cronologia dei ripassi; stati e distribuzioni delle carte riflettono la situazione attuale e i ripassi futuri coprono 30 giorni a partire da oggi",
 	"flashcardDirectionSettings": "Direzione della carta",
 	"flashcardRestoreSource": "Ripristina la fonte delle carte",
 	"flashcardSuspensionStatus": "Stato di sospensione",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "Stato di ripasso",
 	"flashcardReviews": "Ripassi",
 	"flashcardLapses": "Dimenticanze",
-	"flashcardStatisticsRange": "Intervallo statistiche",
+	"flashcardStatisticsRange": "Intervallo di date della cronologia dei ripassi",
 	"flashcardReviewHistory": "Cronologia ripassi",
 	"flashcardUpcomingReviews": "Ripassi in arrivo",
 	"flashcardReviewedCards": "Schede ripassate",

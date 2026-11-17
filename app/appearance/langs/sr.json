@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "Опсег датума утиче само на историју понављања; стања и расподеле картица приказују тренутно стање, а предстојећа понављања обухватају 30 дана почевши од данас",
 	"flashcardDirectionSettings": "Смер картице",
 	"flashcardRestoreSource": "Врати извор картица",
 	"flashcardSuspensionStatus": "Стање обуставе",
@@ -990,7 +991,7 @@
 	"flashcardReviewState": "Стање понављања",
 	"flashcardReviews": "Понављања",
 	"flashcardLapses": "Заборављања",
-	"flashcardStatisticsRange": "Опсег статистике",
+	"flashcardStatisticsRange": "Опсег датума историје понављања",
 	"flashcardReviewHistory": "Историја понављања",
 	"flashcardUpcomingReviews": "Предстојећа понављања",
 	"flashcardReviewedCards": "Поновљене картице",

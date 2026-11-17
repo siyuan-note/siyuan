@@ -1,9 +1,9 @@
 import {test} from "node:test";
 import * as assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
+import {readFileSync, readdirSync} from "node:fs";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-import {escapeAttr} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 
 const source = readFileSync("src/card/flashcardV2.ts", "utf8");
 const start = source.indexOf("export const openFlashcardV2Statistics =");
@@ -27,20 +27,21 @@ const harness = () => {
     const element = {isConnected: true, dataset: {dialogClosing: "false"},
         querySelector: (selector: string) => controls[selector.match(/"([^"]+)"/)[1] as keyof typeof controls]};
     let options: {content: string, destroyCallback: () => void};
-    const requests: Array<{success: (response: unknown) => void, resolve: () => void,
+    const requests: Array<{data: Record<string, unknown>, success: (response: unknown) => void, resolve: () => void,
         reject: (error: Error) => void}> = [];
     const exports: Record<string, () => void> = {};
     const languages = {flashcardStatisticsRange: 'Range "<&', startDate: 'Start "<&',
-        endDate: 'End "<&', group: 'Group "<&', flashcardLoadFailed: "Load failed", retry: "Retry"};
-    runInNewContext(compiled, {exports, escapeAttr, console,
+        endDate: 'End "<&', group: 'Group "<&', flashcardLoadFailed: "Load failed", retry: "Retry",
+        flashcardStatisticsScopeTip: 'History only; current snapshot and 30 days "<&'};
+    runInNewContext(compiled, {exports, escapeAttr, escapeHtml, console,
         ensureFlashcardV2: (callback: () => void) => callback(),
         Dialog: class {element = element; constructor(value: typeof options) { options = value; }},
         window: {siyuan: {languages}}, isMobile: () => false,
         flashcardV2StatisticsDate: () => "2026-10-01",
         reportFlashcardV2Field: () => assert.fail("unexpected invalid dates"),
         renderFlashcardV2Statistics: (value: {name: string}) => value.name,
-        fetchPost: (_url: string, _data: unknown, success: (response: unknown) => void) =>
-            new Promise<void>((resolve, reject) => requests.push({success, resolve, reject})),
+        fetchPost: (_url: string, data: Record<string, unknown>, success: (response: unknown) => void) =>
+            new Promise<void>((resolve, reject) => requests.push({data, success, resolve, reject})),
     });
     exports.openFlashcardV2Statistics();
     return {requests, controls, content, element, handlers, languages,
@@ -53,6 +54,35 @@ test("statistics filters have distinct escaped accessible names without layout c
         ["statisticsTo", "endDate"], ["statisticsBucket", "group"]]) {
         assert.ok(h.options.content.includes(`data-type="${control}" aria-label="${escapeAttr(h.languages[key as keyof typeof h.languages])}"`));
     }
+});
+
+test("scope explanation is below controls, translated completely and safely escaped", () => {
+    const h = harness();
+    assert.ok(h.options.content.includes(`<div class="b3-label__text ft__on-surface">${escapeHtml(h.languages.flashcardStatisticsScopeTip)}</div>`));
+    assert.ok(h.options.content.indexOf(escapeHtml(h.languages.flashcardStatisticsScopeTip)) >
+        h.options.content.indexOf('data-type="statisticsApply"'));
+    const files = readdirSync("appearance/langs").filter(name => name.endsWith(".json"));
+    assert.equal(files.length, 22);
+    for (const file of files) {
+        const language = JSON.parse(readFileSync(`appearance/langs/${file}`, "utf8"));
+        assert.ok(language.flashcardStatisticsRange.length > 0);
+        assert.ok(language.flashcardStatisticsScopeTip.includes("30"));
+    }
+});
+
+test("custom past dates only change history bounds, not current time or the future horizon", () => {
+    const before = Date.now();
+    const h = harness();
+    h.controls.statisticsRange.value = "custom";
+    h.controls.statisticsFrom.value = "2020-01-01";
+    h.controls.statisticsTo.value = "2020-01-07";
+    h.handlers.get("apply:click")();
+    const request = h.requests.at(-1).data;
+    assert.equal(request.from, new Date("2020-01-01T00:00:00").getTime());
+    assert.equal(request.to, new Date("2020-01-08T00:00:00").getTime());
+    assert.ok(Number(request.now) >= before && Number(request.now) <= Date.now());
+    assert.equal(request.futureDays, 30);
+    assert.equal(request.bucket, "day");
 });
 
 for (const state of ["closing", "detached", "destroyed"]) {

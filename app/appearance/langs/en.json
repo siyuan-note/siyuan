@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "The date range only affects review history; card states and distributions reflect the current snapshot, and upcoming reviews cover 30 days starting today",
 	"flashcardDirectionSettings": "Card direction",
 	"flashcardRestoreSource": "Restore card source",
 	"flashcardSuspensionStatus": "Suspension status",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "Review state",
 	"flashcardReviews": "Reviews",
 	"flashcardLapses": "Lapses",
-	"flashcardStatisticsRange": "Statistics range",
+	"flashcardStatisticsRange": "Review history date range",
 	"flashcardReviewHistory": "Review history",
 	"flashcardUpcomingReviews": "Upcoming reviews",
 	"flashcardReviewedCards": "Reviewed cards",

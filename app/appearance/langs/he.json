@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "טווח התאריכים משפיע רק על היסטוריית החזרות; מצבי הכרטיסיות וההתפלגויות משקפים את המצב הנוכחי, והחזרות הקרובות מוצגות ל־30 ימים החל מהיום",
 	"flashcardDirectionSettings": "כיוון הכרטיסייה",
 	"flashcardRestoreSource": "שחזור מקור הכרטיסיות",
 	"flashcardSuspensionStatus": "מצב השעיה",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "מצב חזרה",
 	"flashcardReviews": "חזרות",
 	"flashcardLapses": "כשלי זכירה",
-	"flashcardStatisticsRange": "טווח סטטיסטיקה",
+	"flashcardStatisticsRange": "טווח תאריכים של היסטוריית החזרות",
 	"flashcardReviewHistory": "היסטוריית חזרות",
 	"flashcardUpcomingReviews": "חזרות קרובות",
 	"flashcardReviewedCards": "כרטיסים שנלמדו",

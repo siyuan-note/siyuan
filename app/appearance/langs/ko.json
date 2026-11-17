@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "날짜 범위는 복습 기록에만 적용됩니다. 카드 상태와 분포는 현재 상태를 나타내며, 예정된 복습은 오늘부터 30일간 표시됩니다",
 	"flashcardDirectionSettings": "출제 방향",
 	"flashcardRestoreSource": "카드 소스 복원",
 	"flashcardSuspensionStatus": "일시 중지 상태",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "복습 상태",
 	"flashcardReviews": "복습 횟수",
 	"flashcardLapses": "망각 횟수",
-	"flashcardStatisticsRange": "통계 기간",
+	"flashcardStatisticsRange": "복습 기록 날짜 범위",
 	"flashcardReviewHistory": "복습 기록",
 	"flashcardUpcomingReviews": "예정된 복습",
 	"flashcardReviewedCards": "복습한 카드",

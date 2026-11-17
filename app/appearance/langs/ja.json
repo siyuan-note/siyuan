@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "日付範囲は復習履歴のみに適用されます。カードの状態と分布は現在の状況を、今後の復習は今日から30日間を表示します",
 	"flashcardDirectionSettings": "出題方向",
 	"flashcardRestoreSource": "カードソースを復元",
 	"flashcardSuspensionStatus": "保留状態",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "復習状態",
 	"flashcardReviews": "復習回数",
 	"flashcardLapses": "忘却回数",
-	"flashcardStatisticsRange": "統計期間",
+	"flashcardStatisticsRange": "復習履歴の日付範囲",
 	"flashcardReviewHistory": "復習履歴",
 	"flashcardUpcomingReviews": "今後の復習",
 	"flashcardReviewedCards": "復習したカード",

@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "Der Datumsbereich gilt nur für den Wiederholungsverlauf; Kartenstatus und Verteilungen zeigen den aktuellen Stand, kommende Wiederholungen die 30 Tage ab heute",
 	"flashcardDirectionSettings": "Kartenrichtung",
 	"flashcardRestoreSource": "Kartenquelle wiederherstellen",
 	"flashcardSuspensionStatus": "Aussetzungsstatus",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "Wiederholungsstatus",
 	"flashcardReviews": "Wiederholungen",
 	"flashcardLapses": "Fehlschläge",
-	"flashcardStatisticsRange": "Statistikzeitraum",
+	"flashcardStatisticsRange": "Datumsbereich des Wiederholungsverlaufs",
 	"flashcardReviewHistory": "Wiederholungsverlauf",
 	"flashcardUpcomingReviews": "Anstehende Wiederholungen",
 	"flashcardReviewedCards": "Wiederholte Karten",

@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "तारीख सीमा केवल दोहराव इतिहास पर लागू होती है; कार्ड की स्थितियाँ और वितरण वर्तमान स्थिति दिखाते हैं, और आगामी दोहराव आज से 30 दिनों के लिए दिखाए जाते हैं",
 	"flashcardDirectionSettings": "कार्ड की दिशा",
 	"flashcardRestoreSource": "कार्ड स्रोत पुनर्स्थापित करें",
 	"flashcardSuspensionStatus": "निलंबन स्थिति",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "समीक्षा स्थिति",
 	"flashcardReviews": "समीक्षाएँ",
 	"flashcardLapses": "भूलें",
-	"flashcardStatisticsRange": "आँकड़ों की अवधि",
+	"flashcardStatisticsRange": "दोहराव इतिहास की तारीख सीमा",
 	"flashcardReviewHistory": "समीक्षा इतिहास",
 	"flashcardUpcomingReviews": "आगामी समीक्षाएँ",
 	"flashcardReviewedCards": "समीक्षित कार्ड",

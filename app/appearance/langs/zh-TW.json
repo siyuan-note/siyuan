@@ -1,4 +1,5 @@
 {
+	"flashcardStatisticsScopeTip": "日期範圍僅影響複習歷史；卡片狀態和分布為目前情況，未來複習顯示從今天起的 30 天",
 	"flashcardDirectionSettings": "出題方向",
 	"flashcardRestoreSource": "還原卡源",
 	"flashcardSuspensionStatus": "暫停狀態",
@@ -1284,7 +1285,7 @@
 	"flashcardReviewState": "複習狀態",
 	"flashcardReviews": "複習次數",
 	"flashcardLapses": "遺忘次數",
-	"flashcardStatisticsRange": "統計範圍",
+	"flashcardStatisticsRange": "複習歷史日期範圍",
 	"flashcardReviewHistory": "複習歷史",
 	"flashcardUpcomingReviews": "未來複習",
 	"flashcardReviewedCards": "已複習卡片",

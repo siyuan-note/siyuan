@@ -13,7 +13,9 @@ import {showMessage} from "../../dialog/message";
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
-import {isInAndroid, isInHarmony, isInIOS, isInMobileApp, saveExportFile} from "../../protyle/util/compatibility";
+import {
+    isInAndroid, isInHarmony, isInIOS, isInMobileApp, isMac, isWindows, saveExportFile,
+} from "../../protyle/util/compatibility";
 import {openByMobile, openLink} from "../../editor/openLink";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../render/fragments";
 import {
@@ -74,7 +76,7 @@ const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
             afterMount: mountAuthCodeButton,
         });
     }
-    if (window.siyuan.config.accessAuthCode && !onWeb) {
+    if (window.siyuan.config.accessAuthCode && !onWeb && (isInMobileApp() || isMac() || isWindows())) {
         group.switch("system.lockScreenMode", {
             title: window.siyuan.languages.about7,
             desc: window.siyuan.languages.about8,

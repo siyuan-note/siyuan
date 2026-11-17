@@ -1881,7 +1881,8 @@ export class ListMindmapView {
             const selected = this.selectedSummary === summary.id && !this.printTransform && !this.options.printLayout;
             const hovered = this.hoveredLine === `summary:${summary.id}` && !this.printTransform && !this.options.printLayout;
             const inherited = resolveListMindmapSummaryStyle(this.model, summary, this.themeColors);
-            element.style.color = inherited.textColor || "";
+            const canvasBackground = this.model.metadata.appearance?.backgroundColor;
+            element.style.color = inherited.textColor || (canvasBackground ? getMindmapTextColor(canvasBackground) : "");
             element.style.backgroundColor = inherited.backgroundColor || "";
             const style = resolveStyle(inherited.lineColor, selected, hovered);
             context.strokeStyle = style.color;

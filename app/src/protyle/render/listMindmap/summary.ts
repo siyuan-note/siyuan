@@ -1,4 +1,5 @@
 import type {ListMindmapModel, ListMindmapNodeStyle, ListMindmapPosition} from "./model";
+import {getMindmapTextColor, isMindmapColor} from "./appearance";
 
 export interface ListMindmapSummary {
     id: string;
@@ -29,10 +30,12 @@ export const resolveListMindmapSummaryStyle = (model: ListMindmapModel, summary:
     const id = summary.nodeIds[0];
     const style = model.metadata.nodes[id];
     const theme = themed.get(id);
+    const backgroundColor = id === model.root.id ? style?.backgroundColor || theme?.backgroundColor : undefined;
     return {
-        textColor: summary.color || style?.textColor || theme?.textColor,
+        textColor: summary.color || style?.textColor || (backgroundColor ?
+            isMindmapColor(backgroundColor) ? getMindmapTextColor(backgroundColor) : theme?.textColor : undefined),
         lineColor: summary.color || style?.lineColor || theme?.lineColor,
-        backgroundColor: id === model.root.id ? style?.backgroundColor || theme?.backgroundColor : undefined,
+        backgroundColor,
     };
 };
 

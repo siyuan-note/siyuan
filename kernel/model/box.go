@@ -1059,8 +1059,24 @@ func fullReindex() {
 	fullReindexWithTxFlush(true)
 }
 
-// Snapshot checkout already drained transactions while holding flushLock.
+// 快照恢复已经持有事务锁并完成旧事务；普通重建需先取得相同边界，再清理缓存和数据库。
 func fullReindexWithTxFlush(flushTransactions bool) {
+	if flushTransactions {
+		for {
+			FlushTxQueue()
+			flushLock.Lock()
+			if txQueueSize() == 0 {
+				break
+			}
+			flushLock.Unlock()
+		}
+		isFlushing.Store(true)
+		defer func() {
+			isFlushing.Store(false)
+			flushLock.Unlock()
+		}()
+	}
+
 	cache.ClearTreeCache()
 	cache.ClearDocsIAL()
 	cache.ClearBlocksIAL()
@@ -1071,10 +1087,6 @@ func fullReindexWithTxFlush(flushTransactions bool) {
 		sql.FlushQueue()
 		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
 	}()
-
-	if flushTransactions {
-		FlushTxQueue()
-	}
 
 	sql.InitDatabase(true)
 

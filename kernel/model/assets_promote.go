@@ -41,10 +41,8 @@ func promoteAssetDirectory(source, destination string) error {
 }
 
 func copyPromotedAsset(source, destination string) (err error) {
-	filelock.Lock(source)
-	defer filelock.Unlock(source)
-	filelock.Lock(destination)
-	defer filelock.Unlock(destination)
+	unlock := filelock.LockPaths(source, destination)
+	defer unlock()
 	input, err := os.Open(source)
 	if err != nil {
 		return err

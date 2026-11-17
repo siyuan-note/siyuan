@@ -7,6 +7,7 @@ package plugin
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -135,11 +137,9 @@ func pluginServiceHTTPResponse(p *KernelPlugin, c *gin.Context, name string, res
 				// 越界与文件缺失返回同样的响应，插件无法借状态差异探测工作空间外的文件
 				return pluginServiceError(c, http.StatusNotFound, fmt.Sprintf("[plugin:%s] file not found", name))
 			}
-			if response.Body.File.Name != "" {
-				return pluginServiceStream(apicontract.PluginServiceFile, 200, func() { c.FileAttachment(fileAbsPath, response.Body.File.Name) })
-			} else {
-				return pluginServiceStream(apicontract.PluginServiceFile, 200, func() { c.File(fileAbsPath) })
-			}
+			return pluginServiceStream(apicontract.PluginServiceFile, 200, func() {
+				servePluginServiceFile(c, fileAbsPath, response.Body.File.Name)
+			})
 		} else if response.Body.String != nil {
 			return pluginServiceStream(apicontract.PluginServiceString, response.StatusCode, func() { c.String(response.StatusCode, response.Body.String.Format, response.Body.String.Values...) })
 		} else if response.Body.Raw != nil {
@@ -153,6 +153,80 @@ func pluginServiceHTTPResponse(p *KernelPlugin, c *gin.Context, name string, res
 		}
 	}
 	return pluginServiceStream(apicontract.PluginServiceEmpty, response.StatusCode, func() { c.Status(response.StatusCode) })
+}
+
+func servePluginServiceFile(c *gin.Context, filename, downloadName string) {
+	if strings.EqualFold(filepath.Ext(filename), ".sy") {
+		info, err := os.Stat(filename)
+		if err != nil || !info.IsDir() {
+			// 文档快照在短文件锁内完成，网络发送不持有原文档句柄或阻塞后续保存。
+			snapshot, snapshotErr := snapshotPluginDocument(filename)
+			if snapshotErr != nil {
+				status := http.StatusInternalServerError
+				if !errors.Is(snapshotErr, errPluginDocumentSnapshot) && errors.Is(snapshotErr, os.ErrNotExist) {
+					status = http.StatusNotFound
+				} else if !errors.Is(snapshotErr, errPluginDocumentSnapshot) && errors.Is(snapshotErr, os.ErrPermission) {
+					status = http.StatusForbidden
+				}
+				http.Error(c.Writer, http.StatusText(status), status)
+				return
+			}
+			defer os.Remove(snapshot)
+			filename = snapshot
+		}
+	}
+	if downloadName != "" {
+		c.FileAttachment(filename, downloadName)
+	} else {
+		c.File(filename)
+	}
+}
+
+var errPluginDocumentSnapshot = errors.New("prepare plugin document snapshot")
+
+func snapshotPluginDocument(filename string) (snapshot string, err error) {
+	filelock.Lock(filename)
+	defer filelock.Unlock(filename)
+	source, err := os.Open(filename)
+	if err != nil {
+		return "", err
+	}
+	preparingSnapshot := false
+	defer func() {
+		err = errors.Join(err, source.Close())
+		if err != nil && snapshot != "" {
+			os.Remove(snapshot)
+		}
+		if err != nil && preparingSnapshot {
+			err = fmt.Errorf("%w: %w", errPluginDocumentSnapshot, err)
+		}
+	}()
+	info, err := source.Stat()
+	if err != nil {
+		return "", err
+	}
+	if !info.Mode().IsRegular() {
+		return "", os.ErrInvalid
+	}
+	preparingSnapshot = true
+	directory := filepath.Join(util.TempDir, "os")
+	if util.TempDir == "" {
+		directory = os.TempDir()
+	}
+	if err = os.MkdirAll(directory, 0700); err != nil {
+		return "", err
+	}
+	target, err := os.CreateTemp(directory, ".plugin-document-*.sy")
+	if err != nil {
+		return "", err
+	}
+	snapshot = target.Name()
+	_, err = io.Copy(target, source)
+	err = errors.Join(err, target.Close())
+	if err == nil {
+		err = os.Chtimes(snapshot, info.ModTime(), info.ModTime())
+	}
+	return snapshot, err
 }
 
 // errPluginServiceFilePathOutsideWorkspace 表示插件响应请求的文件落在工作空间之外。

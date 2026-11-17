@@ -584,7 +584,7 @@ const flashcardManagementFilterCount = (filters: IFlashcardManagementFilters) =>
         value !== undefined && value !== "").length;
 
 const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IReviewSet> | undefined,
-    callback: (saved: IFlashcardEntityRevision<IReviewSet>) => void, initialName = "",
+    callback: (saved: IFlashcardEntityRevision<IReviewSet>, canContinue: boolean) => void, initialName = "",
     initialQuery?: IFlashcardQueryAST) => {
     fetchPost("/api/flashcard/listEntities", {
         entityType: "tag",
@@ -681,8 +681,11 @@ const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IRevi
                     }],
                 }, (mutationResponse) => {
                     saved = true;
-                    callback(readFlashcardV2Revision(mutationResponse.data.revisions[0], isFlashcardReviewSet));
-                    dialog.destroy();
+                    const canContinue = dialog.element.isConnected && dialog.element.dataset.dialogClosing !== "true";
+                    callback(readFlashcardV2Revision(mutationResponse.data.revisions[0], isFlashcardReviewSet), canContinue);
+                    if (canContinue) {
+                        dialog.destroy();
+                    }
                 });
                 return saved;
             });
@@ -1026,6 +1029,28 @@ const openFlashcardV2Membership = (cardIDs: string | string[], callback: () => v
     }, (response) => {
         const reviewSets = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardReviewSet));
         if (reviewSets.length === 0) {
+            const empty = new Dialog({
+                title: window.siyuan.languages.flashcardReviewSet,
+                width: isMobile() ? "92vw" : "460px",
+                content: `<div class="b3-dialog__content">${window.siyuan.languages.emptyContent}</div>
+<div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.new}</button></div>`,
+            });
+            const buttons = empty.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
+            buttons[0].addEventListener("click", () => empty.destroy());
+            let creating = false;
+            buttons[1].addEventListener("click", () => {
+                if (creating) {
+                    return;
+                }
+                creating = true;
+                buttons[1].disabled = true;
+                empty.destroy();
+                openFlashcardV2ReviewSetEditor(undefined, (_saved, canContinue) => {
+                    if (canContinue) {
+                        openFlashcardV2Membership(cardIDs, callback);
+                    }
+                });
+            });
             return;
         }
         const dialog = new Dialog({
@@ -2555,8 +2580,8 @@ export const openFlashcardV2PendingEdits = () => {
         0, {editLater: "true"}, undefined, false));
 };
 
-export const openFlashcardV2ManagementByNotebook = (notebookID: string, name: string) => {
-    ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", name, 0, {notebookID}));
+export const openFlashcardV2ManagementByNotebook = (notebookID: string) => {
+    ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", window.siyuan.languages.manage, 0, {notebookID}));
 };
 
 export const openFlashcardV2ManagementByBlocks = (blockIDs: string[], name: string) => {

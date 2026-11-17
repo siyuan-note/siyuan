@@ -617,7 +617,7 @@ const initNotebookMenu = (app: App, selection: IDocTreeMenuContext, item: IDocTr
                 iconHTML: "",
                 label: window.siyuan.languages.manage,
                 click: () => {
-                    openFlashcardV2ManagementByNotebook(notebookId, name);
+                    openFlashcardV2ManagementByNotebook(notebookId);
                     /// #if MOBILE
                     closePanel();
                     /// #endif

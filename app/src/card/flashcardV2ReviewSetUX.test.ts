@@ -13,7 +13,7 @@ test("membership labels describe adding existing cards without changing operatio
     assert.match(membership, /<option value="exclude">\$\{window\.siyuan\.languages\.removeDeck\}/);
     assert.match(membership, /<option value="automatic">/);
     assert.match(membership, /setFlashcardV2ReviewSetMembership\(reviewSetID, cardIDs, mode,/);
-    assert.doesNotMatch(membership, /languages\.new\}/);
+    assert.doesNotMatch(membership, /<option value="include">\$\{window\.siyuan\.languages\.new\}/);
 });
 const render = (summary?: {cards: number, due: number, included: number, excluded: number}) => {
     const snippet = source.slice(source.indexOf("const renderReviewSet ="),
@@ -86,4 +86,90 @@ test("advanced source choices reuse keyboard-accessible picker controls", () => 
     assert.match(picker, /<li><button type="button" data-candidate-index=/);
     assert.doesNotMatch(picker, /<li data-(?:type|candidate-index)=/);
     assert.match(picker, /closest<HTMLElement>\("\[data-type='newAdvancedSource'\], \[data-candidate-index\]"\)/);
+});
+
+test("empty membership shows a cancellable create path without assigning cards automatically", () => {
+    const snippet = source.slice(source.indexOf("const openFlashcardV2Membership ="),
+        source.indexOf("const basicSourceDirection ="));
+    for (const create of [false, true]) {
+        const requests: string[] = [];
+        const dialogs: Array<{content: string, closed: boolean, clicks: Array<() => void>}> = [];
+        let saved: (revision: unknown, canContinue: boolean) => void;
+        let refreshed = false;
+        runInNewContext(transpileModule(`${snippet}\nopenFlashcardV2Membership(["card"], () => refreshed());`, {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText, {
+            window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)})}},
+            isMobile: () => false,
+            readFlashcardV2Revision: (revision: unknown) => revision,
+            isFlashcardReviewSet: () => true,
+            escapeAttr: (value: string) => value,
+            escapeHtml: (value: string) => value,
+            fetchPost: (url: string, _data: unknown, callback: (response: unknown) => void) => {
+                requests.push(url);
+                callback({data: {entities: requests.length === 1 ? [] : [{entityID: "new-set", payload: {name: "New deck"}}]}});
+            },
+            Dialog: class {
+                readonly state: typeof dialogs[number];
+                readonly element: {querySelectorAll: () => unknown[]};
+                constructor(options: {content: string}) {
+                    this.state = {content: options.content, closed: false, clicks: []};
+                    dialogs.push(this.state);
+                    this.element = {querySelectorAll: () => [0, 1].map((index) => ({
+                        addEventListener: (_event: string, click: () => void) => { this.state.clicks[index] = click; },
+                    }))};
+                }
+                destroy() { this.state.closed = true; }
+            },
+            openFlashcardV2ReviewSetEditor: (revision: unknown, callback: (revision: unknown, canContinue: boolean) => void) => {
+                assert.equal(revision, undefined);
+                saved = callback;
+            },
+            refreshed: () => { refreshed = true; },
+        });
+        assert.match(dialogs[0].content, /emptyContent/);
+        assert.match(dialogs[0].content, />new<\/button>/);
+        dialogs[0].clicks[create ? 1 : 0]();
+        assert.equal(dialogs[0].closed, true);
+        assert.equal(requests.length, 1);
+        assert.equal(Boolean(saved), create);
+        if (create) {
+            const firstSave = saved;
+            dialogs[0].clicks[1]();
+            assert.strictEqual(saved, firstSave);
+            saved({}, false);
+            assert.equal(dialogs.length, 1);
+            saved({}, true);
+            assert.equal(dialogs.length, 2);
+            assert.match(dialogs[1].content, /New deck/);
+            assert.match(dialogs[1].content, />confirm<\/button>/);
+            assert.equal(requests.length, 2);
+        }
+        assert.ok(requests.every(url => url === "/api/flashcard/listEntities"));
+        assert.equal(refreshed, false);
+    }
+});
+
+
+test("a late review-set save still refreshes data but cannot continue closed UI", () => {
+    const start = source.indexOf("}, (mutationResponse) => {");
+    const snippet = source.slice(start + "}, (mutationResponse) => {".length, source.indexOf("\n                });", start));
+    for (const state of [{isConnected: true, closing: false}, {isConnected: true, closing: true}, {isConnected: false, closing: false}]) {
+        let callbacks = 0;
+        let mayContinue: boolean;
+        let closed = 0;
+        const scope = {
+            saved: false,
+            mutationResponse: {data: {revisions: [{}]}},
+            readFlashcardV2Revision: (revision: unknown) => revision,
+            isFlashcardReviewSet: () => true,
+            callback: (_revision: unknown, canContinue: boolean) => { callbacks++; mayContinue = canContinue; },
+            dialog: {element: {isConnected: state.isConnected, dataset: {dialogClosing: state.closing ? "true" : undefined}}, destroy: () => { closed++; }},
+        };
+        runInNewContext(snippet, scope);
+        assert.equal(scope.saved, true);
+        assert.equal(callbacks, 1);
+        assert.equal(mayContinue, state.isConnected && !state.closing);
+        assert.equal(closed, mayContinue ? 1 : 0);
+    }
 });

@@ -193,3 +193,20 @@ test("an open batch menu cannot mutate controls after its page has been replaced
     assert.equal(target.textContent, "Manage");
     assert.equal(refreshes, 0);
 });
+
+
+test("notebook entry keeps its initial scope but uses the stable management title", () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const snippet = source.slice(source.indexOf("export const openFlashcardV2ManagementByNotebook ="),
+        source.indexOf("export const openFlashcardV2ManagementByBlocks =")).replace("export const", "const");
+    let args: unknown[];
+    runInNewContext(transpileModule(`${snippet}\nopenFlashcardV2ManagementByNotebook("notebook-a");`, {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText, {
+        window: {siyuan: {languages: {manage: "Manage"}}},
+        ensureFlashcardV2: (callback: () => void) => callback(),
+        openFlashcardV2ReviewSetCards: (...values: unknown[]) => { args = values; },
+    });
+    assert.equal(args[1], "Manage");
+    assert.equal((args[3] as {notebookID: string}).notebookID, "notebook-a");
+});

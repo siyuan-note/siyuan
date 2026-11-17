@@ -58,6 +58,10 @@ export const PROVIDER_PRESETS: IProviderPreset[] = [
         protocolBaseURLs: {"anthropic-messages": "https://api.xiaomimimo.com/anthropic"},
     },
     {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/siliconflow.svg"},
+    {
+        id: "teapotrouter", name: "TeapotRouter", baseURL: "https://api.teapotrouter.com/v1", category: "aggregator", responsesSupport: "unsupported",
+        protocolBaseURLs: {"anthropic-messages": "https://api.teapotrouter.com"},
+    },
     {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", responsesSupport: "supported", icon: "/stage/images/ai-providers/openrouter.svg"},
     {id: "groq", name: "Groq", baseURL: "https://api.groq.com/openai/v1", category: "aggregator", responsesSupport: "experimental", icon: "/stage/images/ai-providers/groq.svg"},
     {id: "ollama", name: "Ollama", baseURL: "http://localhost:11434/v1", category: "local", responsesSupport: "supported", icon: "/stage/images/ai-providers/ollama.svg"},

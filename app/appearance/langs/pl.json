@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "Pomijanie nie zostało ukończone; spróbuj ponownie",
 	"flashcardAnswerCheckFailed": "Sprawdzanie odpowiedzi nie powiodło się; sprawdź odpowiedź samodzielnie",
 	"flashcardMembershipAutomatic": "Stosuj reguły talii",
 	"flashcardMembershipAutomaticTip": "Usuń ręczne włączenie lub wykluczenie i zastosuj filtry talii. Bez filtrów karty zostaną usunięte z tej talii. Same karty, harmonogramy i historia powtórek zostaną zachowane",

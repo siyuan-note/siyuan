@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "הדילוג לא הושלם; יש לנסות שוב",
 	"flashcardAnswerCheckFailed": "בדיקת התשובה נכשלה; יש לבדוק את התשובה בעצמך",
 	"flashcardMembershipAutomatic": "לפי כללי החפיסה",
 	"flashcardMembershipAutomaticTip": "ביטול ההכללה או ההחרגה הידנית ושימוש במסנני החפיסה. ללא מסננים, הכרטיסים יוסרו מחפיסה זו. הכרטיסים, מועדי החזרה והיסטוריית החזרות נשמרים",

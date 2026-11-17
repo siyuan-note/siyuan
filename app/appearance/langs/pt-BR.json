@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "A operação de pular não foi concluída; tente novamente",
 	"flashcardAnswerCheckFailed": "Falha ao verificar a resposta; confira a resposta por conta própria",
 	"flashcardMembershipAutomatic": "Seguir as regras do baralho",
 	"flashcardMembershipAutomaticTip": "Remova a inclusão ou exclusão manual e siga os filtros do baralho. Sem filtros, os cartões saem deste baralho. Os cartões, os agendamentos e o histórico de revisão são preservados",

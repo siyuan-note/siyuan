@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "Das Überspringen ist nicht abgeschlossen; bitte erneut versuchen",
 	"flashcardAnswerCheckFailed": "Die Antwortprüfung ist fehlgeschlagen; prüfe die Antwort selbst",
 	"flashcardMembershipAutomatic": "Regeln des Kartenstapels verwenden",
 	"flashcardMembershipAutomaticTip": "Manuelles Ein- oder Ausschließen aufheben und die Filter des Kartenstapels verwenden. Ohne Filter werden die Karten aus diesem Stapel entfernt. Karten, Wiederholungspläne und Verlauf bleiben erhalten",

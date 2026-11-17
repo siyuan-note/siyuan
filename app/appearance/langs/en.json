@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "Skipping is incomplete; please retry",
 	"flashcardAnswerCheckFailed": "Answer check failed; check the answer yourself",
 	"flashcardMembershipAutomatic": "Follow deck rules",
 	"flashcardMembershipAutomaticTip": "Clear manual inclusion or exclusion and follow the deck's filters. Without filters, the cards leave this deck. Cards, schedules and review history are preserved",

@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "スキップが完了していません。再試行してください",
 	"flashcardAnswerCheckFailed": "回答の確認に失敗しました。自分で答えを確認してください",
 	"flashcardMembershipAutomatic": "デッキのルールに従う",
 	"flashcardMembershipAutomaticTip": "手動での追加・除外を解除し、デッキの絞り込み条件に従います。条件がない場合は、このデッキからカードが外れます。カード、復習スケジュール、復習履歴は保持されます",

@@ -538,6 +538,10 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
     <div class="fn__none" data-flashcard-answer><div class="fn__hr"></div><div class="protyle-wysiwyg" contenteditable="false"></div></div>
 </div>
 </div>
+<div data-flashcard-skip-recovery class="fn__flex card__action card__v2-session-actions fn__none" role="status">
+    <span class="ft__error">${window.siyuan.languages.flashcardSkipIncomplete}</span>
+    <button data-type="retry-skip" class="b3-button b3-button--outline">${window.siyuan.languages.retry}</button>
+</div>
 <div data-flashcard-action="reveal" class="fn__flex card__action card__v2-session-actions">
     <button data-type="show" class="b3-button b3-button--text" disabled><div class="card__icon">👀</div>${window.siyuan.languages.cardShowAnswer}</button>
     <span class="fn__space"></span>
@@ -995,6 +999,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             let pluginEdit: (() => Promise<void>) | undefined;
             let sessionFinished = false;
             let requestPending = false;
+            let retryManagedSkip: (() => void) | undefined;
             let renderPending = true;
             let completedPending = false;
             let waitingTimer: number | undefined;
@@ -1274,36 +1279,64 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 const selected = new Set(cardIDs);
                 const active = queue.filter((item) => selected.has(item.card.id) &&
                     (item.sessionCard.status === "queued" || item.sessionCard.status === "shown" || item.repeatDue));
-                const updateNext = (position: number) => {
-                    if (position >= active.length) {
+                const requests = active.map(item => ({
+                    operationID: genUUID(), sessionID, cardID: item.card.id,
+                    status: "skipped" as const, skipReason: reason, updatedAt: Date.now(),
+                }));
+                const alive = () => !sessionFinished && dialog.element.isConnected &&
+                    dialog.element.dataset.dialogClosing !== "true";
+                if (!alive()) { return; }
+                requestPending = true;
+                const recovery = dialog.element.querySelector<HTMLElement>("[data-flashcard-skip-recovery]");
+                const retry = recovery.querySelector<HTMLButtonElement>('[data-type="retry-skip"]');
+                const controls = Array.from(dialog.element.querySelectorAll<HTMLButtonElement>(
+                    '[data-type="more"], [data-type="edit-source"], [data-type="undo-review"]'))
+                    .map(button => ({button, disabled: button.disabled}));
+                controls.forEach(({button}) => { button.disabled = true; });
+                let position = 0;
+                let inFlight = false;
+                const run = async () => {
+                    if (inFlight || !alive()) { return; }
+                    inFlight = true;
+                    retry.disabled = true;
+                    recovery.classList.add("fn__none");
+                    setReviewActionsEnabled(dialog, false);
+                    try {
+                        while (position < active.length && alive()) {
+                            let updated = false;
+                            await fetchPost("/api/flashcard/updateSessionCard", requests[position], () => {
+                                updated = true;
+                            }, undefined, undefined, undefined, 30000);
+                            if (!alive()) { return; }
+                            if (!updated) { return; }
+                            active[position].sessionCard.status = "skipped";
+                            position++;
+                        }
+                        if (!alive()) { return; }
+                        retryManagedSkip = undefined;
+                        controls.forEach(({button, disabled}) => { button.disabled = disabled; });
                         requestPending = false;
                         lastReview = undefined;
                         setUndoVisible(dialog, false);
                         nextCard();
-                        return;
-                    }
-                    let updated = false;
-                    void fetchPost("/api/flashcard/updateSessionCard", {
-                        operationID: genUUID(),
-                        sessionID,
-                        cardID: active[position].card.id,
-                        status: "skipped",
-                        skipReason: reason,
-                        updatedAt: Date.now(),
-                    }, () => {
-                        updated = true;
-                        active[position].sessionCard.status = "skipped";
-                        updateNext(position + 1);
-                    }).then(() => {
-                        if (!updated) {
-                            requestPending = false;
+                    } catch (error) {
+                        console.error("Flashcard session skip failed", error);
+                    } finally {
+                        inFlight = false;
+                        if (alive() && position < active.length) {
+                            dialog.element.querySelector(".card__block").setAttribute("aria-busy", "false");
+                            recovery.classList.remove("fn__none");
+                            retry.disabled = false;
                         }
-                    });
+                    }
                 };
-                updateNext(0);
+                retryManagedSkip = () => { void run(); };
+                retryManagedSkip();
             };
             const manageAndSkip = (cardIDs: string[], action: string, values: Record<string, unknown>,
                 reason: string) => {
+                if (requestPending || sessionFinished || !dialog.element.isConnected ||
+                    dialog.element.dataset.dialogClosing === "true") { return; }
                 requestPending = true;
                 let managed = false;
                 void fetchPost("/api/flashcard/manageCards", {
@@ -1314,10 +1347,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     ...values,
                 }, (response) => {
                     managed = true;
+                    if (sessionFinished || !dialog.element.isConnected ||
+                        dialog.element.dataset.dialogClosing === "true") { return; }
                     updateManagedQueueCards(response.data);
                     skipManagedSessionCards(cardIDs, reason);
-                }).then(() => {
-                    if (!managed) {
+                }).catch(error => console.error("Flashcard management failed", error)).finally(() => {
+                    if (!managed && !sessionFinished && dialog.element.isConnected &&
+                        dialog.element.dataset.dialogClosing !== "true") {
                         requestPending = false;
                     }
                 });
@@ -1570,6 +1606,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             });
             dialog.element.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
+                if (target.closest('[data-type="retry-skip"]')) {
+                    retryManagedSkip?.();
+                    return;
+                }
                 if (target.closest('[data-type="pending-edits"]')) {
                     if (mount) {
                         openPendingEditList();

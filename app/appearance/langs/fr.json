@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "L’action de passer les cartes est incomplète ; veuillez réessayer",
 	"flashcardAnswerCheckFailed": "La vérification de la réponse a échoué ; vérifiez-la vous-même",
 	"flashcardMembershipAutomatic": "Suivre les règles du paquet",
 	"flashcardMembershipAutomaticTip": "Annuler l’inclusion ou l’exclusion manuelle et suivre les filtres du paquet. Sans filtres, les cartes quittent ce paquet. Les cartes, leur planification et l’historique de révision sont conservés",

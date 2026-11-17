@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "跳过未完成，请重试",
 	"flashcardAnswerCheckFailed": "答案检查失败，请自行核对答案",
 	"flashcardMembershipAutomatic": "按卡包规则",
 	"flashcardMembershipAutomaticTip": "清除手动加入或排除，按卡包筛选条件收录；未设置筛选条件时会移出卡包。卡片、排期和复习记录均保留",

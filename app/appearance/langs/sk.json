@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "Preskočenie nie je dokončené; skúste to znova",
 	"flashcardAnswerCheckFailed": "Kontrola odpovede zlyhala; skontrolujte odpoveď sami",
 	"flashcardMembershipAutomatic": "Použiť pravidlá balíčka",
 	"flashcardMembershipAutomaticTip": "Zrušiť ručné zahrnutie alebo vylúčenie a použiť filtre balíčka. Bez filtrov sa karty odstránia z tohto balíčka. Samotné karty, rozvrhy a história opakovania zostanú zachované",

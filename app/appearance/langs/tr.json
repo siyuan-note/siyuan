@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "Atlama tamamlanmadı; lütfen yeniden deneyin",
 	"flashcardAnswerCheckFailed": "Yanıt denetimi başarısız oldu; yanıtı kendiniz kontrol edin",
 	"flashcardMembershipAutomatic": "Deste kurallarını uygula",
 	"flashcardMembershipAutomaticTip": "Elle dahil etme veya hariç tutma ayarını kaldırıp destenin filtrelerini uygular. Filtre yoksa kartlar bu desteden çıkarılır. Kartlar, tekrar programları ve tekrar geçmişi korunur",

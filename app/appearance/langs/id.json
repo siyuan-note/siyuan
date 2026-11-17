@@ -1,4 +1,5 @@
 {
+	"flashcardSkipIncomplete": "Proses melewati belum selesai; silakan coba lagi",
 	"flashcardAnswerCheckFailed": "Pemeriksaan jawaban gagal; periksa jawabannya sendiri",
 	"flashcardMembershipAutomatic": "Ikuti aturan dek",
 	"flashcardMembershipAutomaticTip": "Hapus pengaturan penyertaan atau pengecualian manual dan ikuti filter dek. Tanpa filter, kartu akan dikeluarkan dari dek ini. Kartu, jadwal, dan riwayat ulasan tetap tersimpan",

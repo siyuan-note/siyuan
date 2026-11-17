@@ -372,13 +372,13 @@ func readLegacyInputs(root string) ([]legacyDeckInput, []legacyLogInput, []Legac
 			cardsFile: cardsFile,
 		})
 	}
-	if len(decks) == 0 {
-		return nil, nil, nil, ErrNoLegacyFlashcards
-	}
 	sort.Slice(decks, func(i, j int) bool { return decks[i].id < decks[j].id })
 	logs, logFingerprints, err := readLegacyLogs(root)
 	if err != nil {
 		return nil, nil, nil, err
+	}
+	if len(decks) == 0 && len(logs) == 0 {
+		return nil, nil, nil, ErrNoLegacyFlashcards
 	}
 	fingerprints = append(fingerprints, logFingerprints...)
 	sort.Slice(fingerprints, func(i, j int) bool { return fingerprints[i].Path < fingerprints[j].Path })
@@ -541,7 +541,7 @@ func buildLegacyRecords(ctx context.Context, decks []legacyDeckInput, logs []leg
 	safeCardMappings := map[string]map[string]string{}
 	encryptedLegacyCardIDs := map[string]struct{}{}
 	deckCards := map[string]map[string]struct{}{}
-	if len(decks) > 0 {
+	if len(decks) > 0 || len(logs) > 0 {
 		entities = append(entities, builtinLegacyEntities(options, logicalTime)...)
 	}
 	for _, blockID := range blockIDs {

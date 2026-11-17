@@ -3271,6 +3271,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     let start: IFlashcardV2ImagePoint | undefined;
     let current: IFlashcardV2ImagePoint | undefined;
     let polygon: IFlashcardV2ImagePoint[] = [];
+    let destroyed = false;
     if (initial?.groups && initial?.shapes) {
         [...initial.groups].sort((left, right) => left.displayOrder - right.displayOrder).forEach((group) => {
             groupOrder.push(group.id);
@@ -3319,16 +3320,19 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         context.stroke();
     };
     const redraw = () => {
-        const rect = image.getBoundingClientRect();
+        if (destroyed) {
+            return;
+        }
         const ratio = window.devicePixelRatio || 1;
-        const width = Math.max(1, Math.round(rect.width));
-        const height = Math.max(1, Math.round(rect.height));
+        // 画布与图片共享父级变换，使用布局尺寸避免将弹窗缩放重复应用到画布。
+        const width = Math.max(1, image.clientWidth);
+        const height = Math.max(1, image.clientHeight);
         if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
             canvas.width = Math.round(width * ratio);
             canvas.height = Math.round(height * ratio);
-            canvas.style.width = `${width}px`;
-            canvas.style.height = `${height}px`;
         }
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
         context.setTransform(ratio, 0, 0, ratio, 0, 0);
         context.clearRect(0, 0, width, height);
         shapes.forEach((shape) => drawShape(shape, width, height));
@@ -3448,7 +3452,10 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     polygonButton.addEventListener("click", finishPolygon);
     undoButton.addEventListener("click", undo);
     image.addEventListener("load", redraw);
-    requestAnimationFrame(redraw);
+    window.addEventListener("resize", redraw);
+    const observer = new ResizeObserver(redraw);
+    observer.observe(image);
+    const frame = requestAnimationFrame(redraw);
     return {
         getConfig: () => ({
             assetID,
@@ -3470,7 +3477,14 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         }),
         hasShapes: () => shapes.length > 0,
         redraw,
-        destroy: () => document.removeEventListener("keydown", keydown, true),
+        destroy: () => {
+            destroyed = true;
+            observer.disconnect();
+            cancelAnimationFrame(frame);
+            image.removeEventListener("load", redraw);
+            window.removeEventListener("resize", redraw);
+            document.removeEventListener("keydown", keydown, true);
+        },
     };
 };
 

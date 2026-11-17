@@ -1068,9 +1068,12 @@
 
   &__inspector--relation {
     width: max-content;
+    column-gap: 4px;
 
     .mindmap-view__palette-row {
-      width: 176px;
+      width: 180px;
+      // 抵消色块在首尾列的半个间距，使色块与操作按钮等距。
+      margin-inline: -2px;
       flex-shrink: 0;
     }
   }

@@ -623,7 +623,11 @@ func IsBlockFolded(id string) (isFolded, isRoot, isHidden bool) {
 	return
 }
 
-func RecentUpdatedBlocks() (ret []*Block) {
+// RecentUpdatedBlocks 返回全库最近更新的块。
+//
+// excludeBoxIDs 与 excludeDocIDs 在排序和截断前排除读者不可见的笔记本与文档，
+// 避免被隐藏的更新挤占固定窗口，泄露其活动。
+func RecentUpdatedBlocks(excludeBoxIDs, excludeDocIDs []string) (ret []*Block) {
 	ret = []*Block{}
 
 	sqlStmt := "SELECT * FROM blocks WHERE type = 'p' AND length > 1"
@@ -641,8 +645,9 @@ func RecentUpdatedBlocks() (ret []*Block) {
 		sqlStmt += buf.String()
 	}
 
-	sqlStmt += " ORDER BY updated DESC"
-	sqlBlocks := sql.SelectBlocksRawStmt(sqlStmt, 1, 16)
+	excludeFilter, excludeArgs := buildPublishAccessExclusionFilter(excludeBoxIDs, excludeDocIDs)
+	sqlStmt += excludeFilter + " ORDER BY updated DESC"
+	sqlBlocks := sql.SelectBlocksRawStmtArgs(sqlStmt, excludeArgs, 16)
 	if 1 > len(sqlBlocks) {
 		return
 	}

@@ -406,10 +406,15 @@ var getDocsInfo = contractHandler(apicontract.GetDocsInfo, func(c *gin.Context, 
 })
 
 var getRecentUpdatedBlocks = contractHandler(apicontract.GetRecentUpdatedBlocks, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.SearchBlock] {
-	blocks := model.RecentUpdatedBlocks()
+	var blocks []*model.Block
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+		denyAll, excludeBoxIDs, excludeDocIDs := model.GetPublishAccessSearchExclusion(c)
+		if denyAll {
+			return apicontract.Success([]*apicontract.SearchBlock{})
+		}
+		blocks = model.RecentUpdatedBlocks(excludeBoxIDs, excludeDocIDs)
+	} else {
+		blocks = model.RecentUpdatedBlocks(nil, nil)
 	}
 	return apicontract.Success(searchBlockContracts(blocks))
 })

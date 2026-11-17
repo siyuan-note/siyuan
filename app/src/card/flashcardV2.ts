@@ -1,4 +1,5 @@
 import {createFlashcardV2AnkiImportState} from "./flashcardV2AnkiImport";
+import {loadFlashcardV2GroupNumbers} from "./flashcardV2GroupNumber";
 import {openFlashcardV2Template} from "./flashcardV2Template";
 import {openFlashcardV2Ordered} from "./flashcardV2Ordered";
 import {Dialog} from "../dialog";
@@ -11,7 +12,8 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {toggleMenu} from "../menus/menuToggle";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {withFetchTimeout} from "../util/fetchTimeout";
 import {ContractFormData} from "../util/contractFormData";
 import {isFlashcardV2Object, isFlashcardV2Strings, readFlashcardV2Payload, readFlashcardV2Revision, toFlashcardV2JSON} from "./flashcardV2Contract";
 import {isMobile} from "../util/functions";
@@ -963,7 +965,10 @@ const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
     const type = flashcardV2SourceTypeLabels()[result.sourceType] || result.sourceType;
     const variant = result.card.variantKey === "forward" ? window.siyuan.languages.flashcardDirectionForward :
         result.card.variantKey === "reverse" ? window.siyuan.languages.flashcardDirectionReverse : "";
-    const title = grouped ? `${type} ${variant || position + 1}` :
+    const groupedTitle = ["cloze", "image-occlusion"].includes(result.sourceType) ?
+        type :
+        `${type} ${variant || position + 1}`;
+    const title = grouped ? groupedTitle :
         result.sourceTitle || result.sourceBlockID || result.card.id;
     const statuses = [reviewStateLabel(result.reviewState.state)];
     if (result.card.editLater) {
@@ -2030,6 +2035,28 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
             }
             const dialog = owner.dialog;
             const listenerOptions = owner.view.bind();
+            if (grouped) {
+                void loadFlashcardV2GroupNumbers(cards, async sourceID => {
+                    const response = await withFetchTimeout(signal => fetchSyncPost(
+                        "/api/flashcard/getEntity", {entityType: "cardSource", entityID: sourceID},
+                        undefined, false, signal), listenerOptions.signal, 30000);
+                    const payload = response.code === 0 && response.data?.found ?
+                        response.data.revision?.payload : undefined;
+                    return isFlashcardV2Object(payload) ? payload.generationConfig : undefined;
+                }).then(numbers => {
+                    if (!isCurrent() || listenerOptions.signal.aborted) { return; }
+                    dialog.element.querySelectorAll<HTMLElement>(".card__v2-managed-card").forEach(item => {
+                        const card = cards.find(candidate => candidate.card.id === item.dataset.id);
+                        const number = numbers.get(item.dataset.id);
+                        if (!card || number === undefined) { return; }
+                        const title = `${flashcardV2SourceTypeLabels()[card.sourceType] || card.sourceType} ${number}`;
+                        const preview = item.querySelector<HTMLElement>('[data-type="preview"]');
+                        preview.textContent = title;
+                        preview.setAttribute("aria-label", `${window.siyuan.languages.flashcardPreview} - ${title}`);
+                        item.querySelector('[data-type="selectCard"]').setAttribute("aria-label", title);
+                    });
+                });
+            }
             owner.view.setRefresh(() =>
                 openFlashcardV2ReviewSetCards(reviewSetID, name, offset, filters, undefined, grouped, owner));
             let batchAction = "";

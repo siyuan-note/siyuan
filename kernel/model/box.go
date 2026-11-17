@@ -1057,9 +1057,10 @@ func ReindexFTS() {
 
 func fullReindex() {
 	fullReindexWithTxFlush(true)
+	debug.FreeOSMemory()
 }
 
-// 快照恢复已经持有事务锁并完成旧事务；普通重建需先取得相同边界，再清理缓存和数据库。
+// 快照恢复已经持有事务锁并完成旧事务；缓存、数据库和文档索引需共享该边界，避免旧索引覆盖编辑。
 func fullReindexWithTxFlush(flushTransactions bool) {
 	if flushTransactions {
 		for {
@@ -1070,12 +1071,10 @@ func fullReindexWithTxFlush(flushTransactions bool) {
 			}
 			flushLock.Unlock()
 		}
-		isFlushing.Store(true)
-		defer func() {
-			isFlushing.Store(false)
-			flushLock.Unlock()
-		}()
+		defer flushLock.Unlock()
 	}
+	wasFlushing := isFlushing.Swap(true)
+	defer isFlushing.Store(wasFlushing)
 
 	cache.ClearTreeCache()
 	cache.ClearDocsIAL()
@@ -1096,7 +1095,6 @@ func fullReindexWithTxFlush(flushTransactions bool) {
 		indexBox(openedBox.ID)
 	}
 	LoadFlashcards()
-	debug.FreeOSMemory()
 }
 
 func ChangeBoxSort(boxIDs []string) {

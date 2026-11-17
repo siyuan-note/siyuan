@@ -151,11 +151,35 @@ func TestPluginDocumentResponseSnapshotFailureReleasesSource(t *testing.T) {
 		t.Fatal(err)
 	}
 	engine := gin.New()
-	engine.GET("/document", func(c *gin.Context) { servePluginServiceFile(c, filename, "") })
+	engine.GET("/document", func(c *gin.Context) {
+		serviceTestWrite(c, pluginServiceHTTPResponse(nil, c, "test", &HttpResponse{
+			Headers: map[string][]string{
+				"Content-Disposition": {"attachment; filename=wrong.sy"},
+				"Content-Type":        {"application/json"},
+				"Content-Length":      {"10000"},
+				"Content-Range":       {"bytes 0-9/10000"},
+				"Content-Encoding":    {"gzip"},
+				"Accept-Ranges":       {"bytes"},
+				"Last-Modified":       {time.Now().UTC().Format(http.TimeFormat)},
+				"ETag":                {"old-content"},
+				"X-Plugin-Test":       {"preserved"},
+			},
+			Body: &ResponseBody{File: &ResponseFile{Path: filename, Name: "download.sy"}},
+		}))
+	})
 	recorder := httptest.NewRecorder()
 	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/document", nil))
 	if recorder.Code != http.StatusInternalServerError || strings.Contains(recorder.Body.String(), workspace) {
 		t.Fatalf("snapshot failure response changed or exposed a source path: %d %q", recorder.Code, recorder.Body.String())
+	}
+	if recorder.Body.String() != "[plugin:test] could not prepare document response" ||
+		recorder.Header().Get("Content-Type") != "text/plain; charset=utf-8" || recorder.Header().Get("X-Plugin-Test") != "preserved" {
+		t.Fatalf("snapshot failure did not use the plugin error response: %v %q", recorder.Header(), recorder.Body.String())
+	}
+	for _, header := range []string{"Content-Disposition", "Content-Length", "Content-Range", "Content-Encoding", "Accept-Ranges", "Last-Modified", "ETag"} {
+		if recorder.Header().Get(header) != "" {
+			t.Fatalf("snapshot failure retained file header %s", header)
+		}
 	}
 	saved := make(chan error, 1)
 	go func() {
@@ -168,5 +192,60 @@ func TestPluginDocumentResponseSnapshotFailureReleasesSource(t *testing.T) {
 		}
 	case <-time.After(3 * time.Second):
 		t.Fatal("snapshot failure retained the source lock")
+	}
+}
+
+func TestPluginDocumentResponseMissingFile(t *testing.T) {
+	filename := filepath.Join(newPluginServiceWorkspace(t), "missing.sy")
+	engine := gin.New()
+	engine.GET("/document", func(c *gin.Context) {
+		serviceTestWrite(c, pluginServiceHTTPResponse(nil, c, "test", &HttpResponse{
+			Body: &ResponseBody{File: &ResponseFile{Path: filename}},
+		}))
+	})
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/document", nil))
+	if recorder.Code != http.StatusNotFound || recorder.Body.String() != "[plugin:test] file not found" {
+		t.Fatalf("missing source response changed: %d %q", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestPluginServiceNonDocumentDoesNotRequireSnapshot(t *testing.T) {
+	workspace := newPluginServiceWorkspace(t)
+	oldTemp := util.TempDir
+	util.TempDir = filepath.Join(t.TempDir(), "not-a-directory")
+	t.Cleanup(func() { util.TempDir = oldTemp })
+	if err := os.WriteFile(util.TempDir, []byte("occupied"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, scenario := range []struct{ name, filename string }{
+		{"asset", filepath.Join(workspace, "asset.txt")},
+		{"directory", filepath.Join(workspace, "directory.sy", "index.html")},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			if err := os.MkdirAll(filepath.Dir(scenario.filename), 0700); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(scenario.filename, []byte("original"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			filename := scenario.filename
+			requestPath := "/file"
+			if scenario.name == "directory" {
+				filename = filepath.Dir(filename)
+				requestPath += "/"
+			}
+			engine := gin.New()
+			engine.GET(requestPath, func(c *gin.Context) {
+				serviceTestWrite(c, pluginServiceHTTPResponse(nil, c, "test", &HttpResponse{
+					Body: &ResponseBody{File: &ResponseFile{Path: filename}},
+				}))
+			})
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, requestPath, nil))
+			if recorder.Code != http.StatusOK || recorder.Body.String() != "original" {
+				t.Fatalf("non-document response required a snapshot: %d %q", recorder.Code, recorder.Body.String())
+			}
+		})
 	}
 }

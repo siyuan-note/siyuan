@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -101,7 +102,76 @@ func TestFullReindexTransactionBoundary(t *testing.T) {
 			t.Fatalf("transaction edit was not retained after rebuild: %s", check.attribute)
 		}
 	}
-	flushLock.Lock()
-	fullReindexWithTxFlush(false)
-	flushLock.Unlock()
+	for _, scenario := range []struct {
+		name string
+		busy bool
+	}{
+		{"snapshot-restore", false},
+		{"nested-busy-state", true},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			flushLock.Lock()
+			defer flushLock.Unlock()
+			isFlushing.Store(scenario.busy)
+			defer isFlushing.Store(false)
+			cache.PutDocIALInBox(fixture.sourcePath, fixture.box.ID, map[string]string{"test": "before-rebuild"})
+			filelock.Lock(filename)
+			locked := true
+			finished := make(chan struct{})
+			var flushed chan struct{}
+			go func() { defer close(finished); fullReindexWithTxFlush(false) }()
+			defer func() {
+				if locked {
+					filelock.Unlock(filename)
+				}
+				<-finished
+				isFlushing.Store(false)
+				if flushed != nil {
+					<-flushed
+				}
+			}()
+			deadline := time.Now().Add(5 * time.Second)
+			for cache.GetDocIALInBox(fixture.sourcePath, fixture.box.ID) != nil {
+				if time.Now().After(deadline) {
+					t.Fatal("already-locked rebuild did not clear the source cache")
+				}
+				time.Sleep(time.Millisecond)
+			}
+			if !isFlushing.Load() {
+				t.Fatal("already-locked rebuild did not mark transactions busy")
+			}
+			flushed = make(chan struct{})
+			go func() { FlushTxQueue(); close(flushed) }()
+			select {
+			case <-flushed:
+				t.Fatal("transaction wait completed before snapshot restoration was indexed")
+			case <-time.After(30 * time.Millisecond):
+			}
+			filelock.Unlock(filename)
+			locked = false
+			select {
+			case <-finished:
+			case <-time.After(15 * time.Second):
+				t.Fatal("already-locked rebuild acquired the transaction lock again")
+			}
+			if isFlushing.Load() != scenario.busy {
+				t.Fatal("already-locked rebuild changed the caller's busy state")
+			}
+			isFlushing.Store(false)
+			select {
+			case <-flushed:
+			case <-time.After(time.Second):
+				t.Fatal("transaction wait did not complete after snapshot restoration")
+			}
+			for _, check := range []struct{ id, attribute string }{
+				{fixture.childID, "custom-test-queued"},
+				{fixture.targetID, "custom-test-sync"},
+			} {
+				block := sql.GetBlock(check.id)
+				if block == nil || !strings.Contains(block.IAL, check.attribute+`="saved"`) {
+					t.Fatalf("restored block attributes were not indexed: %s, %+v", check.id, block)
+				}
+			}
+		})
+	}
 }

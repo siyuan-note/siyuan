@@ -1934,6 +1934,9 @@ interface IFlashcardManagementDialog {
     view: FlashcardV2ManagementView;
     dialog?: Dialog;
     membershipSubmission?: ReturnType<typeof createFlashcardV2MembershipSubmission>;
+    batchPending?: symbol;
+    batchOperation?: ReturnType<typeof createFlashcardV2Operation>;
+    refreshBatch?: () => void;
 }
 
 const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset = 0,
@@ -2075,11 +2078,22 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                 selectPage.checked = cards.length > 0 && selectedOnPage === cards.length;
                 selectPage.indeterminate = selectedOnPage > 0 && selectedOnPage < cards.length;
                 selectedCount.textContent = `${window.siyuan.languages.selected} ${selectedOnPage}`;
-                batchMenu.disabled = selectedOnPage === 0;
-                batchApply.disabled = selectedOnPage === 0 || batchAction === "";
+                batchMenu.disabled = Boolean(owner.batchPending) || selectedOnPage === 0;
+                batchApply.disabled = Boolean(owner.batchPending) || selectedOnPage === 0 || batchAction === "";
+                if (owner.batchPending) {
+                    batchApply.setAttribute("aria-busy", "true");
+                } else {
+                    batchApply.removeAttribute("aria-busy");
+                }
                 batchApply.textContent = batchAction === "tags" || batchAction === "setDue" ||
                     (batchAction === "membership" && !reviewSetID) ?
                     window.siyuan.languages.next : window.siyuan.languages.confirm;
+            };
+            owner.refreshBatch = () => {
+                if (!listenerOptions.signal.aborted && dialog.element.isConnected &&
+                    dialog.element.dataset.dialogClosing !== "true") {
+                    refreshSelection();
+                }
             };
             const refreshList = () => {
                 owner.view.capture(dialog.element, true);
@@ -2237,11 +2251,12 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "batchMenu") {
+                    if (owner.batchPending) { return; }
                     const lang = window.siyuan.languages;
                     const option = (value: string, label: string): IMenu => ({
                         label, type: "submenu", checked: batchAction === value,
                         click: () => {
-                            if (listenerOptions.signal.aborted) { return; }
+                            if (listenerOptions.signal.aborted || owner.batchPending) { return; }
                             batchAction = value;
                             target.textContent = label;
                             refreshSelection();
@@ -2274,6 +2289,8 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "batchApply") {
+                    if (owner.batchPending || listenerOptions.signal.aborted ||
+                        !dialog.element.isConnected || dialog.element.dataset.dialogClosing === "true") { return; }
                     const [action, flagValue] = batchAction.split(":");
                     const selectedCards = cards.filter((card) => selectedCardIDs.has(card.card.id));
                     const selected = selectedCards.map((card) => card.card.id);
@@ -2312,18 +2329,58 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     } else if (action === "setPriority") {
                         request.priority = flagValue;
                     }
-                    const execute = () => fetchPost("/api/flashcard/manageCards", {
-                        operationID: genUUID(),
-                        cardIDs: selected,
-                        action,
-                        changedAt: Date.now(),
-                        ...request,
-                    }, reloadPage);
+                    const token = Symbol();
+                    owner.batchPending = token;
+                    owner.refreshBatch?.();
+                    let started = false;
+                    const release = () => {
+                        if (owner.batchPending !== token) { return; }
+                        owner.batchPending = undefined;
+                        owner.refreshBatch?.();
+                    };
+                    const execute = async () => {
+                        if (started || owner.batchPending !== token) { return; }
+                        started = true;
+                        if (listenerOptions.signal.aborted || !dialog.element.isConnected ||
+                            dialog.element.dataset.dialogClosing === "true") {
+                            release();
+                            return;
+                        }
+                        const payload = {cardIDs: selected, action, ...request};
+                        owner.batchOperation ||= createFlashcardV2Operation();
+                        const operation = owner.batchOperation(payload);
+                        let saved = false;
+                        let failureMessage = window.siyuan.languages.flashcardSaveFailed;
+                        try {
+                            const response = await withFetchTimeout(signal => fetchSyncPost(
+                                "/api/flashcard/manageCards", {...payload, ...operation}, undefined, false, signal),
+                            undefined, 30000);
+                            saved = response.code === 0;
+                            if (saved) {
+                                owner.batchOperation = undefined;
+                                if (dialog.element.isConnected &&
+                                    dialog.element.dataset.dialogClosing !== "true") {
+                                    reloadPage();
+                                }
+                            } else if (response.msg) {
+                                failureMessage = response.msg;
+                            }
+                        } catch (error) {
+                            console.error(error);
+                        } finally {
+                            release();
+                            if (!saved && dialog.element.isConnected &&
+                                dialog.element.dataset.dialogClosing !== "true") {
+                                showMessage(escapeHtml(failureMessage), 6000, "error");
+                            }
+                        }
+                    };
                     if (action === "reset") {
                         confirmDialog(window.siyuan.languages.reset,
-                            window.siyuan.languages.resetCardTip.replace("${x}", selected.length.toString()), execute);
+                            window.siyuan.languages.resetCardTip.replace("${x}", selected.length.toString()),
+                            () => { void execute(); }, release);
                     } else {
-                        execute();
+                        void execute();
                     }
                     return;
                 }

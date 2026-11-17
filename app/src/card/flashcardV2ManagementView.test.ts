@@ -159,6 +159,9 @@ test("batch reset waits for confirmation and only submits cards selected on the 
     const requests: unknown[] = [];
     runInNewContext(script, {
         type: "batchApply", batchAction: "reset",
+        owner: {}, listenerOptions: {signal: {aborted: false}},
+        dialog: {element: {isConnected: true, dataset: {}}},
+        createFlashcardV2Operation: () => () => ({operationID: "operation", changedAt: 1000}),
         selectedCardIDs: new Set(["selected", "not-on-page"]),
         cards: [{card: {id: "selected"}}, {card: {id: "not-selected"}}],
         window: {siyuan: {languages: {reset: "Reset", resetCardTip: "Reset ${x}"}}},
@@ -167,7 +170,8 @@ test("batch reset waits for confirmation and only submits cards selected on the 
             assert.equal(message, "Reset 1");
             confirm = callback;
         },
-        fetchPost: (_url: string, payload: unknown) => { requests.push(payload); },
+        withFetchTimeout: (request: () => Promise<unknown>) => request(),
+        fetchSyncPost: async (_url: string, payload: unknown) => { requests.push(payload); return {code: 0}; },
     });
     assert.equal(requests.length, 0);
     assert.ok(confirm);

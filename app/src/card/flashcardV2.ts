@@ -309,8 +309,8 @@ interface IAnkiPackagePreview {
     cardCount: number;
     reviewCount: number;
     mediaCount: number;
-    noteTypes: Array<{ id: number, name: string, noteCount: number, conversion: string }>;
-    decks: Array<{ id: number, name: string, cardCount: number }>;
+    noteTypes: Array<{ id: number, name: string, noteCount: number, conversion: string }> | null;
+    decks: Array<{ id: number, name: string, cardCount: number }> | null;
     unsupported: string[] | null;
 }
 
@@ -3964,11 +3964,11 @@ ${statisticsItem(window.siyuan.languages.revisionCount, preview.reviewCount)}
 ${statisticsItem(window.siyuan.languages.assets, preview.mediaCount)}
 <div class="card__v2-section-title">${window.siyuan.languages.template}</div>
 <ul class="b3-list b3-list--background card__v2-panel-list">
-${preview.noteTypes.map((noteType) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(noteType.name)}</span><span class="b3-list-item__meta">${escapeHtml(noteType.conversion)} · ${noteType.noteCount}</span></li>`).join("")}
+${(preview.noteTypes ?? []).map((noteType) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(noteType.name)}</span><span class="b3-list-item__meta">${escapeHtml(noteType.conversion)} · ${noteType.noteCount}</span></li>`).join("")}
 </ul>
 <div class="card__v2-section-title">${window.siyuan.languages.flashcardReviewSet}</div>
 <ul class="b3-list b3-list--background card__v2-panel-list">
-${preview.decks.map((deck) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(deck.name)}</span><span class="b3-list-item__meta">${deck.cardCount}</span></li>`).join("")}
+${(preview.decks ?? []).map((deck) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(deck.name)}</span><span class="b3-list-item__meta">${deck.cardCount}</span></li>`).join("")}
 </ul>
 ${unsupported.length === 0 ? "" : `<div class="ft__error">${unsupported.map(escapeHtml).join("<br>")}</div>`}
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.targetNotebook}</div>

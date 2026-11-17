@@ -98,6 +98,17 @@ test("Anki preview retains and escapes nonempty compatibility warnings", async (
     assert.doesNotMatch(content, /<script>/);
 });
 
+test("Anki preview accepts an empty HTTP collection with null note types and decks", async () => {
+    const h = await setup({collectionCrt: 1700000000, schemaVersion: 11, collectionEntry: "collection.anki2",
+        noteCount: 0, cardCount: 0, reviewCount: 0, mediaCount: 0,
+        noteTypes: null, decks: null, unsupported: null});
+    assert.equal(h.dialogs.length, 1);
+    assert.doesNotMatch(h.dialogs[0].content, /class="ft__error"/);
+    assert.match(h.dialogs[0].content, /data-type="notebook"/);
+    assert.match(h.dialogs[0].content, /data-type="import"/);
+    assert.equal(h.dialogs[0].buttons[1].disabled, false);
+});
+
 test("Anki integration locks during readiness and rejects a second click", async () => {
     const h = await setup();
     h.dialogs[0].clicks[1]();

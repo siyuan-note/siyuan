@@ -468,7 +468,17 @@ if (process.versions.electron && process.type === "browser") {
                     await win.loadURL("data:text/html,<html><body></body></html>");
                     win.show();
                     win.focus();
-                    assert.deepEqual(await win.webContents.executeJavaScript("[innerWidth, innerHeight]"), [mobile ? 390 : 1280, 800]);
+                    const expectedViewport = [mobile ? 390 : 1280, 800];
+                    let viewport;
+                    const deadline = Date.now() + 3000;
+                    do {
+                        viewport = await win.webContents.executeJavaScript("[innerWidth, innerHeight]");
+                        if (viewport.every((value, index) => value === expectedViewport[index])) {
+                            break;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 16));
+                    } while (Date.now() < deadline);
+                    assert.deepEqual(viewport, expectedViewport);
                     const theme = fs.readFileSync(path.join(__dirname, `../appearance/themes/${dark ? "midnight" : "daylight"}/theme.css`), "utf8");
                     await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(theme + styles)}, ${mobile}, ${dark})`);
                 }

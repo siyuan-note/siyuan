@@ -2177,7 +2177,12 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                 }
                 if (type === "study") {
                     openFlashcardV2SubsetSession(window.siyuan.ws.app, name, reviewSetID, managementQuery,
-                        cards.filter((card) => selectedCardIDs.has(card.card.id)));
+                        cards.filter((card) => selectedCardIDs.has(card.card.id)), () => {
+                            if (owner.dialog !== dialog || !dialog.element.isConnected ||
+                                dialog.element.dataset.dialogClosing === "true") { return; }
+                            owner.view.close();
+                            dialog.destroy();
+                        });
                     return;
                 }
                 if (type === "pagePrevious" || type === "pageNext") {

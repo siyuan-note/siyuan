@@ -12,7 +12,8 @@ import {
 } from "./flashcardV2Study";
 
 export const openFlashcardV2SubsetSession = (app: App, name: string, reviewSetID: string,
-                                           query: IFlashcardQueryAST | undefined, cards: IFlashcardV2StudyCard[]) => {
+                                           query: IFlashcardQueryAST | undefined, cards: IFlashcardV2StudyCard[],
+                                           onTabOpened?: () => void) => {
     const languages = window.siyuan.languages;
     const dialog = new Dialog({
         title: languages.flashcardStudy,
@@ -47,6 +48,6 @@ export const openFlashcardV2SubsetSession = (app: App, name: string, reviewSetID
         const options = flashcardV2SubsetOptions(reviewSetID, query, cardIDs,
             mode.value === "reinforcement" ? "reinforcement" : "normal");
         dialog.destroy();
-        openFlashcardV2ReviewSession(app, "", name, options);
+        openFlashcardV2ReviewSession(app, "", name, options, undefined, onTabOpened);
     });
 };

@@ -131,7 +131,11 @@ test("management reuses its dialog and keeps grouped actions behind the explicit
     const source = readFileSync("src/card/flashcardV2.ts", "utf8");
     const management = source.slice(source.indexOf("const openFlashcardV2ReviewSetCards ="),
         source.indexOf("export const openFlashcardV2Management ="));
-    assert.doesNotMatch(management, /dialog\.destroy\(\)/);
+    const studyStart = management.indexOf('if (type === "study")');
+    const studyEnd = management.indexOf('if (type === "pagePrevious"', studyStart);
+    assert.ok(studyStart >= 0 && studyEnd > studyStart);
+    // Opening a review tab may close the source modal; ordinary refresh still reuses it.
+    assert.doesNotMatch(management.slice(0, studyStart) + management.slice(studyEnd), /dialog\.destroy\(\)/);
     assert.match(management, /owner\.dialog\.element\.querySelector\("\.card__v2-management"\)\.outerHTML = content/);
     assert.match(management, /if \(!isCurrent\(\)\) \{ return; \}/);
     const reload = management.slice(management.indexOf("const reloadPage ="),

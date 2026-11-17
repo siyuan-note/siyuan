@@ -878,11 +878,12 @@ export const openFlashcardV2SourceEditor = (app: App, blockID: string, callback:
 };
 
 export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name: string,
-    options: IFlashcardV2ReviewSessionOptions = {reviewMode: "normal"}, mount?: IFlashcardSessionMount) => {
+    options: IFlashcardV2ReviewSessionOptions = {reviewMode: "normal"}, mount?: IFlashcardSessionMount,
+    onTabOpened?: () => void) => {
     if (mount?.signal.aborted) {
         return;
     }
-    if (!mount && openFlashcardReviewTab(app, reviewSetID, name, options)) {
+    if (!mount && openFlashcardReviewTab(app, reviewSetID, name, options, onTabOpened)) {
         return;
     }
     const existing = !mount && window.siyuan.dialogs.find((item) =>

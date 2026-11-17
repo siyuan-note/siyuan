@@ -12,7 +12,7 @@ import {appendRemoteQuery} from "../util/hostCapabilities";
 /// #endif
 
 export const openFlashcardReviewTab = (app: App, reviewSetID: string, name: string,
-                                      options: IFlashcardV2ReviewSessionOptions) => {
+                                      options: IFlashcardV2ReviewSessionOptions, onTabOpened?: () => void) => {
     const mode = resolveFlashcardOpenMode(window.siyuan.config.flashcard.openMode, isMobile(), isBrowser());
     if (mode === 0) {
         return false;
@@ -38,11 +38,16 @@ export const openFlashcardReviewTab = (app: App, reviewSetID: string, name: stri
         return true;
     }
     /// #endif
-    openFile({
+    void openFile({
         app,
         position: mode === 2 ? "right" : undefined,
         custom: {icon: "iconRiffCard", title, data, id: "siyuan-card"},
-    });
+    }).then((tab) => {
+        if (tab?.headElement.classList.contains("item--focus") && tab.panelElement.isConnected &&
+            !tab.panelElement.classList.contains("fn__none")) {
+            onTabOpened?.();
+        }
+    }).catch(error => console.error("Flashcard review tab failed", error));
     return true;
     /// #endif
     return false;

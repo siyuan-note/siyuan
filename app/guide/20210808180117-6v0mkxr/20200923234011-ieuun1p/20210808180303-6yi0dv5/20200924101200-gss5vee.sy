@@ -196,7 +196,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select Focus from the block menu to focus the editor on that content block"
+									"Data": "Select Focus from the block menu to focus the editor on that content block. Embedded content cannot be focused in place; focus the embed block itself or open the source document"
 								}
 							]
 						}

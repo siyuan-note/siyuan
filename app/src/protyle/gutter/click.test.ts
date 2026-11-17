@@ -19,13 +19,13 @@ const collect = (node: import("typescript").Node) => {
 collect(source);
 assert.equal(listeners.size, 2);
 
-const fixture = (type: string, mobile: boolean, cached: Record<string, boolean>) => {
+const fixture = (type: string, mobile: boolean, cached: Record<string, boolean>, embedded = false) => {
     const calls: string[] = [];
     const noop = () => {};
     const button = {
         closest: (): null => null,
         setAttribute: noop,
-        dataset: {type: "NodeList"},
+        dataset: {type: "NodeList", embedId: embedded ? "embed" : ""},
         classList: {contains: () => false},
         getAttribute: (key: string) => key === "data-node-id" ? "list-id" : "NodeList",
         getBoundingClientRect: () => ({left: 10, bottom: 30}),
@@ -81,5 +81,12 @@ test("block icon clicks still honor modifiers carried by the mouse event", () =>
         for (const modifier of ["ctrlKey", "metaKey", "shiftKey", "altKey"]) {
             assert.deepEqual(fixture("contextmenu", mobile, {})({[modifier]: true}), []);
         }
+    }
+});
+
+test("embedded block icons do not replace the owning document when Ctrl or Command is clicked", () => {
+    for (const mobile of [false, true]) {
+        assert.deepEqual(fixture("click", mobile, {}, true)({ctrlKey: true}), []);
+        assert.deepEqual(fixture("click", mobile, {}, true)({metaKey: true}), []);
     }
 });

@@ -75,16 +75,17 @@ func TLSRedirectHandler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if ShouldRedirectToTLS(request) && TLSRequired() && TLSEnforced() {
 			host := request.Host
-			if "" == host || !IsValidRedirectHost(host) {
-				logging.LogWarnf("reject plaintext request with invalid host [host=%s, remote=%s]",
-					host, GetRemoteAddr(request))
+			target, targetOK := RedirectTarget(request)
+			if "" == host || !IsValidRedirectHost(host) || !targetOK {
+				logging.LogWarnf("reject plaintext request with invalid host or request target [host=%q, target=%q, remote=%s]",
+					host, request.RequestURI, GetRemoteAddr(request))
 				writer.WriteHeader(http.StatusBadRequest)
 				return
 			}
 
 			// 跳转目标取决于 Host，声明 Vary 避免中间缓存串用响应
 			writer.Header().Set("Vary", "Host")
-			writer.Header().Set("Location", "https://"+host+request.URL.RequestURI())
+			writer.Header().Set("Location", "https://"+host+target)
 			writer.WriteHeader(http.StatusTemporaryRedirect)
 			return
 		}
@@ -111,7 +112,11 @@ func IsSecureRequest(request *http.Request) bool {
 //
 // 仅在用户开启「启用 HTTPS」且证书可用时生效；本机明文请求放行，否则桌面端、
 // 固定端口反代与浏览器扩展无法连接。CORS 预检不携带凭据且浏览器不跟随跳转，故同样放行。
+//
+// 这里只依据连接与请求方法判断，不读取请求目标：查询串中的数据不能改变传输层强制策略。
+// 请求目标是否适合拼接跳转地址由 RedirectTarget 单独校验。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-cv86-qp5w-79wh
 func ShouldRedirectToTLS(request *http.Request) bool {
 	if nil == request {
 		return false
@@ -122,6 +127,20 @@ func ShouldRedirectToTLS(request *http.Request) bool {
 	if http.MethodOptions == request.Method {
 		return false
 	}
-	// HTTPS 端口上不接受绝对形式或带协议相对前缀的请求目标，避免拼出站外跳转地址
-	return !strings.HasPrefix(request.RequestURI, "//") && !strings.Contains(request.RequestURI, "://")
+	return true
+}
+
+// RedirectTarget 返回可以安全拼接到 https://<host> 的请求目标。
+//
+// 只接受源站形式的路径与查询串；绝对形式会退化为路径与查询串，协议相对形式与 opaque
+// 目标返回 false，由调用方拒绝，绝不因为目标不合规而放行明文请求。
+func RedirectTarget(request *http.Request) (target string, ok bool) {
+	if nil == request || nil == request.URL {
+		return "", false
+	}
+	target = request.URL.RequestURI()
+	if "" == target || !strings.HasPrefix(target, "/") || strings.HasPrefix(target, "//") {
+		return "", false
+	}
+	return target, true
 }

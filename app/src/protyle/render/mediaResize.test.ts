@@ -796,8 +796,10 @@ const visibilityCases = async (move: (x: number, y: number) => Promise<void>, ta
                     "the bottom hit areas sit below the player");
                 check.ok(Math.abs(decorationBottom(1) - edge.bottom - 5) <= 1,
                     "the bottom markings sit close below the player");
-                check.ok(Math.abs(rects[2].right - parseFloat(decorations[2].right) - edge.right - 3) <= 1,
-                    "the corner marking extends slightly past the right edge");
+                const sideMarkRight = rects[0].left + parseFloat(decorations[0].left) + parseFloat(decorations[0].width);
+                const cornerMarkRight = rects[2].right - parseFloat(decorations[2].right);
+                check.ok(Math.abs(cornerMarkRight - sideMarkRight) <= 1 && cornerMarkRight > edge.right,
+                    "the corner marking aligns with the side marking outside the player");
                 check.equal(decorations[2].pointerEvents, "none", "the corner marking does not intercept input");
                 check.ok(Math.abs(rects[1].left + rects[1].width / 2 - (edge.left + edge.width / 2)) <= 1,
                     "the bottom handle is centered under the video");

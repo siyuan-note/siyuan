@@ -268,7 +268,8 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
             }
             /// #endif
 
-            confirmDialog(window.siyuan.languages.updateVersion, response.msg, () => {
+            confirmDialog(window.siyuan.languages.updateVersion, `${response.msg}<div class="fn__hr"></div>
+<a href="https://github.com/siyuan-note/siyuan/releases" target="_blank" rel="noopener">${escapeHtml(window.siyuan.languages.changelog)}</a>`, () => {
                 installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
             }, () => {
                 void requestSystemExit({

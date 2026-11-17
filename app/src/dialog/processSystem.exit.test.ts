@@ -7,6 +7,45 @@ import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} fr
 const {parse} = require("ifdef-loader/preprocessor");
 
 for (const mobile of [false, true]) {
+    test(`downloaded update prompt links to changelogs before installation (mobile=${mobile})`, async () => {
+        const source = createSourceFile("processSystem.ts", parse(readFileSync("src/dialog/processSystem.ts", "utf8"),
+            {MOBILE: mobile, BROWSER: true}, false, true), ScriptTarget.ES2021, true);
+        const declaration = source.statements.filter(isVariableStatement)
+            .flatMap(item => Array.from(item.declarationList.declarations))
+            .find(item => item.name.getText(source) === "exitSiYuan");
+        const dialogs: any[][] = [];
+        const installs: unknown[][] = [];
+        const requests: any[] = [];
+        let quits = 0;
+        const context = {
+            clearReloadSnapshot() {}, getSettingsWindowHost: (): undefined => undefined,
+            hideAllElements() {}, hideMessage() {}, saveMobileLayout: async () => true,
+            getHostCapabilities: () => ({ownsKernel: true}),
+            forceQuit: () => quits++, escapeHtml: (text: string) => text,
+            confirmDialog: (...args: any[]) => dialogs.push(args),
+            installNewVersion: (...args: unknown[]) => installs.push(args),
+            requestSystemExit: async (options: unknown, callback: (response: unknown) => void) => {
+                requests.push(options);
+                callback(requests.length === 1 ? {code: 2, msg: "Install new version?", data: {installPkgPath: "update.dmg"}} : {code: 0});
+            },
+            window: {siyuan: {config: {system: {}}, languages: {updateVersion: "Update", changelog: "Changelog"}}},
+        };
+        const exit = runInNewContext(transpileModule(`const exitSiYuan = ${declaration.initializer.getText(source)}; exitSiYuan;`, {
+            compilerOptions: {target: ScriptTarget.ES2021},
+        }).outputText, context);
+        await exit(false);
+        assert.equal(installs.length, 0);
+        assert.equal(quits, 0);
+        assert.match(dialogs[0][1], /Install new version\?/);
+        assert.match(dialogs[0][1], /<a href="https:\/\/github.com\/siyuan-note\/siyuan\/releases" target="_blank" rel="noopener">Changelog<\/a>/);
+        dialogs[0][2]();
+        assert.deepEqual(installs, [["update.dmg", false]]);
+        dialogs[0][3]();
+        assert.equal(requests[1].execInstallPkg, 1);
+        assert.equal(requests[1].force, true);
+        assert.equal(quits, 1);
+    });
+
     test(`exit sync failure offers retry and explicit force exit (mobile=${mobile})`, async () => {
         for (const installPkgPath of ["", "update.dmg"]) {
             const source = createSourceFile("processSystem.ts", parse(readFileSync("src/dialog/processSystem.ts", "utf8"),

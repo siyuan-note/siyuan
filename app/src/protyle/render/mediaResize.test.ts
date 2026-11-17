@@ -791,9 +791,14 @@ const visibilityCases = async (move: (x: number, y: number) => Promise<void>, ta
             if (video) {
                 const edge = video.getBoundingClientRect();
                 check.ok(rects[0].left >= edge.right && rects[2].right <= edge.right + 1,
-                    "the side marking sits beside the video and the corner aligns to the player's right edge");
+                    "the side hit area sits beside the video and the corner hit area ends at the player's right edge");
                 check.ok(rects[1].top >= edge.bottom && rects[2].top >= edge.bottom,
-                    "the bottom markings sit outside the video");
+                    "the bottom hit areas sit below the player");
+                check.ok(Math.abs(decorationBottom(1) - edge.bottom - 5) <= 1,
+                    "the bottom markings sit close below the player");
+                check.ok(Math.abs(rects[2].right - parseFloat(decorations[2].right) - edge.right - 3) <= 1,
+                    "the corner marking extends slightly past the right edge");
+                check.equal(decorations[2].pointerEvents, "none", "the corner marking does not intercept input");
                 check.ok(Math.abs(rects[1].left + rects[1].width / 2 - (edge.left + edge.width / 2)) <= 1,
                     "the bottom handle is centered under the video");
                 const wrapper = getComputedStyle(video.parentElement);

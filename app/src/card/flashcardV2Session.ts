@@ -1177,11 +1177,11 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 renderPending = true;
                 index = queue.length;
                 const front = dialog.element.querySelector("[data-flashcard-front]");
-                front.innerHTML = `<div class="card__empty-icon">⏳</div><div data-flashcard-wait></div>
-<div class="fn__hr"></div><button data-type="finish" class="b3-button">${window.siyuan.languages.flashcardFinishSession}</button>`;
+                front.innerHTML = `<div class="card__empty-icon">⏳</div><span data-flashcard-wait></span>
+<span class="card__v2-completion-actions"><button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.flashcardFinishSession}</button></span>`;
                 if (lastReview) {
-                    front.insertAdjacentHTML("beforeend", `<div class="fn__hr"></div>
-<button data-type="undo-review" class="b3-button b3-button--cancel">${window.siyuan.languages.undo}</button>`);
+                    front.querySelector(".card__v2-completion-actions").insertAdjacentHTML("afterbegin",
+                        `<button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button>`);
                 }
                 const label = front.querySelector("[data-flashcard-wait]");
                 const checkedAt = Date.now();

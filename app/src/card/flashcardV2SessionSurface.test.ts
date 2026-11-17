@@ -62,3 +62,45 @@ test("practice replaces a mounted session without closing its tab or leaving abo
     assert.deepEqual(calls, ["mount", "cleanup-first", "remove-surface", "mount", "close-tab",
         "cleanup-second", "remove-surface"]);
 });
+
+test("waiting text stays outside the empty-state icon rule and actions share one row", () => {
+    const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
+    const snippet = source.slice(source.indexOf("const showWaiting ="),
+        source.indexOf("const refreshQueueAfterFailedReview ="));
+    const script = transpileModule(`${snippet}\nshowWaiting(due);`, {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    for (const lastReview of [undefined, {}]) {
+        for (const due of [0, 61000]) {
+            const label = {textContent: ""};
+            let action = "";
+            const front = {
+                innerHTML: "",
+                querySelector: (selector: string) => selector === "[data-flashcard-wait]" ? label : {
+                    insertAdjacentHTML: (position: string, html: string) => {
+                        assert.equal(selector, ".card__v2-completion-actions");
+                        assert.equal(position, "afterbegin");
+                        action = html;
+                    },
+                },
+            };
+            runInNewContext(script, {
+                due, lastReview, queue: [], completedPending: true, renderPending: false, index: 0,
+                requestPending: false, waitingTimer: undefined,
+                showCompletion: () => {}, nextCard: () => assert.fail("not due yet"),
+                Date: {now: () => 1000},
+                dialog: {element: {querySelector: () => front}},
+                window: {setInterval: () => 1, siyuan: {languages: {
+                    flashcardFinishSession: "Finish", undo: "Undo", loading: "Loading",
+                    flashcardWaitingDue: "Next in ${time}",
+                }}},
+            });
+            assert.match(front.innerHTML, /<span data-flashcard-wait><\/span>/);
+            assert.doesNotMatch(front.innerHTML, /<div data-flashcard-wait/);
+            assert.match(front.innerHTML, /card__v2-completion-actions/);
+            assert.match(front.innerHTML, /data-type="finish"/);
+            assert.equal(label.textContent, due ? "Next in 1:00" : "Loading");
+            assert.equal(action.includes('data-type="undo-review"'), Boolean(lastReview));
+        }
+    }
+});

@@ -62,17 +62,36 @@ test("clicking the readonly document after a file tree menu action restores its 
             const ${dispatch.declarationList.declarations[0].getText(keydown)};
             return windowKeyDown;`),
     }, "", {interact: async win => {
+        const input = async (type: "click" | "keyup", send: () => void) => {
+            // 原生输入与脚本执行分属不同队列，下一步必须等待对应 DOM 事件处理完毕。
+            await win.webContents.executeJavaScript(`(() => {
+                window.readonlyInput = new Promise((resolve, reject) => {
+                    const done = () => { clearTimeout(timer); resolve(true); };
+                    const timer = setTimeout(() => {
+                        window.removeEventListener(${JSON.stringify(type)}, done);
+                        reject(new Error("Timed out waiting for readonly focus input: " + ${JSON.stringify(type)}));
+                    }, 5000);
+                    window.addEventListener(${JSON.stringify(type)}, done, {once: true});
+                });
+            })()`);
+            send();
+            await win.webContents.executeJavaScript("window.readonlyInput");
+        };
         const click = async (selector: string) => {
             const point = await win.webContents.executeJavaScript(`(() => {
                 const rect = document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();
                 return {x: Math.round(rect.left + 15), y: Math.round(rect.top + rect.height / 2)};
             })()`);
-            win.webContents.sendInputEvent({type: "mouseDown", button: "left", clickCount: 1, ...point});
-            win.webContents.sendInputEvent({type: "mouseUp", button: "left", clickCount: 1, ...point});
+            await input("click", () => {
+                win.webContents.sendInputEvent({type: "mouseDown", button: "left", clickCount: 1, ...point});
+                win.webContents.sendInputEvent({type: "mouseUp", button: "left", clickCount: 1, ...point});
+            });
         };
         const shortcut = async () => {
-            win.webContents.sendInputEvent({type: "keyDown", keyCode: "G", modifiers: ["control"]});
-            win.webContents.sendInputEvent({type: "keyUp", keyCode: "G", modifiers: ["control"]});
+            await input("keyup", () => {
+                win.webContents.sendInputEvent({type: "keyDown", keyCode: "G", modifiers: ["control"]});
+                win.webContents.sendInputEvent({type: "keyUp", keyCode: "G", modifiers: ["control"]});
+            });
         };
         await click("#copy");
         await click(".protyle-wysiwyg");

@@ -1002,7 +1002,7 @@ const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
 ${result.card.editLater?.note ? `<span class="card__v2-edit-later-note ft__on-surface">${escapeHtml(result.card.editLater.note)}</span>` : ""}
 ${result.card.editLater ? `<span class="card__v2-edit-later-tools">${result.sourceBlockID ? `<button data-type="editCard" class="b3-button b3-button--outline"><svg><use xlink:href="#iconEdit"></use></svg>${window.siyuan.languages.edit}</button>` : ""}<button data-type="editLater" class="b3-button b3-button--text">${window.siyuan.languages.flashcardEditLaterComplete}</button></span>` : ""}
 </span>
-${result.sourceType === "qa" ? `<span data-type="direction" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDirectionBidirectional}"><svg><use xlink:href="#iconBoth"></use></svg></span>` : ""}
+${result.sourceType === "qa" ? `<span data-type="direction" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDirectionSettings}"><svg><use xlink:href="#iconBoth"></use></svg></span>` : ""}
 <span data-type="preset" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardPreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
 <span data-type="priority" class="fn__none"></span>
 <span data-type="tags" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.tag}"><svg><use xlink:href="#iconTag"></use></svg></span>
@@ -1166,7 +1166,7 @@ const basicSourceDirection = (cards: IFlashcardSearchResult[]) => {
 
 const openFlashcardV2Direction = (sourceID: string, cards: IFlashcardSearchResult[], callback: () => void) => {
     const dialog = new Dialog({
-        title: window.siyuan.languages.type,
+        title: window.siyuan.languages.flashcardDirectionSettings,
         width: isMobile() ? "92vw" : "420px",
         content: `<div class="b3-dialog__content card__v2-form"><div class="card__v2-form-note">${window.siyuan.languages.flashcardSourceActionTip}</div><select class="b3-select fn__block">
 <option value="forward">${window.siyuan.languages.flashcardDirectionForward}</option>
@@ -2947,7 +2947,7 @@ export const openFlashcardV2BasicSource = (blockIDs: string[]) => {
                 width: isMobile() ? "92vw" : "520px",
                 content: `<div class="b3-dialog__content card__v2-basic card__v2-form">
 <label class="b3-label b3-label--inner card__v2-basic-field">
-    <div class="b3-label__text">${window.siyuan.languages.type}</div>
+    <div class="b3-label__text">${window.siyuan.languages.flashcardDirectionSettings}</div>
     <select data-type="direction" class="b3-select fn__block">
         <option value="forward">${window.siyuan.languages.flashcardDirectionForward}</option>
         <option value="reverse">${window.siyuan.languages.flashcardDirectionReverse}</option>

@@ -5,6 +5,7 @@
 package plugin
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -21,6 +22,8 @@ import (
 )
 
 func TestPluginDocumentResponseAccessDenied(t *testing.T) {
+	restoreToken := pluginTestWithoutPrivileges(t)
+	defer restoreToken()
 	filename := filepath.Join(newPluginServiceWorkspace(t), "denied.sy")
 	if err := os.WriteFile(filename, []byte("private"), 0600); err != nil {
 		t.Fatal(err)
@@ -51,6 +54,12 @@ func TestPluginDocumentResponseAccessDenied(t *testing.T) {
 		runtime.KeepAlive(original)
 	})
 	runtime.KeepAlive(denied)
+	if source, openErr := os.Open(filename); openErr == nil {
+		source.Close()
+		t.Fatal("access-denied fixture is readable")
+	} else if !errors.Is(openErr, os.ErrPermission) {
+		t.Fatalf("access-denied fixture returned an unexpected error: %v", openErr)
+	}
 	engine := gin.New()
 	engine.GET("/document", func(c *gin.Context) { servePluginServiceFile(c, "test", filename, "download.sy") })
 	recorder := httptest.NewRecorder()
@@ -60,6 +69,49 @@ func TestPluginDocumentResponseAccessDenied(t *testing.T) {
 	}
 	if recorder.Header().Get("Content-Disposition") != "" {
 		t.Fatal("unreadable source was returned as a download")
+	}
+}
+
+func pluginTestWithoutPrivileges(t *testing.T) func() {
+	t.Helper()
+	// MSYS2 管理员进程启用的备份特权会绕过 DACL；仅在当前测试线程使用无特权的身份副本。
+	runtime.LockOSThread()
+	var original windows.Token
+	if err := windows.OpenThreadToken(windows.CurrentThread(), windows.TOKEN_QUERY|windows.TOKEN_IMPERSONATE|windows.TOKEN_DUPLICATE, true, &original); err != nil && err != windows.ERROR_NO_TOKEN {
+		runtime.UnlockOSThread()
+		t.Fatal(err)
+	}
+	source := original
+	if source == 0 {
+		if err := windows.OpenProcessToken(windows.CurrentProcess(), windows.TOKEN_QUERY|windows.TOKEN_DUPLICATE, &source); err != nil {
+			runtime.UnlockOSThread()
+			t.Fatal(err)
+		}
+		defer source.Close()
+	}
+	var restricted windows.Token
+	err := windows.DuplicateTokenEx(source, windows.TOKEN_QUERY|windows.TOKEN_ADJUST_PRIVILEGES|windows.TOKEN_IMPERSONATE, nil, windows.SecurityImpersonation, windows.TokenImpersonation, &restricted)
+	if err == nil {
+		err = windows.AdjustTokenPrivileges(restricted, true, nil, 0, nil, nil)
+	}
+	if err == nil {
+		err = windows.SetThreadToken(nil, restricted)
+	}
+	if err != nil {
+		restricted.Close()
+		original.Close()
+		runtime.UnlockOSThread()
+		t.Fatal(err)
+	}
+	return func() {
+		defer restricted.Close()
+		defer original.Close()
+		if err := windows.SetThreadToken(nil, original); err != nil {
+			// 恢复失败时保持线程绑定，避免受限身份被其他测试复用。
+			t.Error(err)
+			return
+		}
+		runtime.UnlockOSThread()
 	}
 }
 

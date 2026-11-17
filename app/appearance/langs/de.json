@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "Aussetzungsstatus",
+	"flashcardBurialStatus": "Vergrabungsstatus",
+	"flashcardUnsuspendedCards": "Nicht ausgesetzte Karten",
+	"flashcardUnburiedCards": "Nicht vergrabene Karten",
+	"flashcardDueOnOrAfter": "Fällig am oder nach",
+	"flashcardDueOnOrBefore": "Fällig am oder vor",
 	"flashcardDocumentSettings": "Karteikarteneinstellungen des Dokuments",
 	"flashcardNotebookSettings": "Karteikarteneinstellungen des Notizbuchs",
 	"flashcardChoiceCorrectSelected": "Richtige Option, ausgewählt",

@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "מצב השעיה",
+	"flashcardBurialStatus": "מצב קבורה",
+	"flashcardUnsuspendedCards": "כרטיסיות שאינן מושעות",
+	"flashcardUnburiedCards": "כרטיסיות שאינן קבורות",
+	"flashcardDueOnOrAfter": "מועד החל מתאריך",
+	"flashcardDueOnOrBefore": "מועד עד לתאריך כולל",
 	"flashcardDocumentSettings": "הגדרות כרטיסיות המסמך",
 	"flashcardNotebookSettings": "הגדרות כרטיסיות המחברת",
 	"flashcardChoiceCorrectSelected": "אפשרות נכונה, נבחרה",

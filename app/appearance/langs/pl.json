@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "Stan wstrzymania",
+	"flashcardBurialStatus": "Stan zakopania",
+	"flashcardUnsuspendedCards": "Niewstrzymane karty",
+	"flashcardUnburiedCards": "Niezakopane karty",
+	"flashcardDueOnOrAfter": "Termin nie wcześniej niż",
+	"flashcardDueOnOrBefore": "Termin nie później niż",
 	"flashcardDocumentSettings": "Ustawienia fiszek dokumentu",
 	"flashcardNotebookSettings": "Ustawienia fiszek notatnika",
 	"flashcardChoiceCorrectSelected": "Poprawna opcja, wybrana",

@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "निलंबन स्थिति",
+	"flashcardBurialStatus": "छिपाने की स्थिति",
+	"flashcardUnsuspendedCards": "गैर-निलंबित कार्ड",
+	"flashcardUnburiedCards": "न छिपाए गए कार्ड",
+	"flashcardDueOnOrAfter": "नियत समय इस समय या इसके बाद",
+	"flashcardDueOnOrBefore": "नियत समय इस समय या इससे पहले",
 	"flashcardDocumentSettings": "दस्तावेज़ के फ़्लैशकार्ड की सेटिंग",
 	"flashcardNotebookSettings": "नोटबुक के फ़्लैशकार्ड की सेटिंग",
 	"flashcardChoiceCorrectSelected": "सही विकल्प, चुना गया",

@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "暫停狀態",
+	"flashcardBurialStatus": "埋藏狀態",
+	"flashcardUnsuspendedCards": "未暫停卡片",
+	"flashcardUnburiedCards": "未埋藏卡片",
+	"flashcardDueOnOrAfter": "到期時間不早於",
+	"flashcardDueOnOrBefore": "到期時間不晚於",
 	"flashcardDocumentSettings": "文件閃卡設定",
 	"flashcardNotebookSettings": "筆記本閃卡設定",
 	"flashcardChoiceCorrectSelected": "正確選項，已選擇",

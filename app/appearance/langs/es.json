@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "Estado de suspensión",
+	"flashcardBurialStatus": "Estado de entierro",
+	"flashcardUnsuspendedCards": "Tarjetas no suspendidas",
+	"flashcardUnburiedCards": "Tarjetas no enterradas",
+	"flashcardDueOnOrAfter": "Vencimiento en o después de",
+	"flashcardDueOnOrBefore": "Vencimiento en o antes de",
 	"flashcardDocumentSettings": "Ajustes de tarjetas del documento",
 	"flashcardNotebookSettings": "Ajustes de tarjetas del cuaderno",
 	"flashcardChoiceCorrectSelected": "Opción correcta, seleccionada",

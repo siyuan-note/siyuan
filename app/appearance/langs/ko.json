@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "일시 중지 상태",
+	"flashcardBurialStatus": "묻기 상태",
+	"flashcardUnsuspendedCards": "일시 중지되지 않은 카드",
+	"flashcardUnburiedCards": "묻히지 않은 카드",
+	"flashcardDueOnOrAfter": "마감 시간이 다음 시간 이후",
+	"flashcardDueOnOrBefore": "마감 시간이 다음 시간 이전",
 	"flashcardDocumentSettings": "문서 플래시카드 설정",
 	"flashcardNotebookSettings": "노트북 플래시카드 설정",
 	"flashcardChoiceCorrectSelected": "정답 선택지, 선택됨",

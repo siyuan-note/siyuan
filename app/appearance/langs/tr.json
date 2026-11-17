@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "Askıya alma durumu",
+	"flashcardBurialStatus": "Gömme durumu",
+	"flashcardUnsuspendedCards": "Askıya alınmamış kartlar",
+	"flashcardUnburiedCards": "Gömülmemiş kartlar",
+	"flashcardDueOnOrAfter": "Son tarih bu tarih veya sonrası",
+	"flashcardDueOnOrBefore": "Son tarih bu tarih veya öncesi",
 	"flashcardDocumentSettings": "Belge bilgi kartı ayarları",
 	"flashcardNotebookSettings": "Not defteri bilgi kartı ayarları",
 	"flashcardChoiceCorrectSelected": "Doğru seçenek, seçildi",

@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "Suspension status",
+	"flashcardBurialStatus": "Burial status",
+	"flashcardUnsuspendedCards": "Unsuspended cards",
+	"flashcardUnburiedCards": "Unburied cards",
+	"flashcardDueOnOrAfter": "Due on or after",
+	"flashcardDueOnOrBefore": "Due on or before",
 	"flashcardDocumentSettings": "Document flashcard settings",
 	"flashcardNotebookSettings": "Notebook flashcard settings",
 	"flashcardChoiceCorrectSelected": "Correct option, selected",

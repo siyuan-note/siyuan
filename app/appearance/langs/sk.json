@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "Stav pozastavenia",
+	"flashcardBurialStatus": "Stav odloženia",
+	"flashcardUnsuspendedCards": "Nepozastavené kartičky",
+	"flashcardUnburiedCards": "Neodložené karty",
+	"flashcardDueOnOrAfter": "Termín najskôr",
+	"flashcardDueOnOrBefore": "Termín najneskôr",
 	"flashcardDocumentSettings": "Nastavenia kartičiek dokumentu",
 	"flashcardNotebookSettings": "Nastavenia kartičiek zápisníka",
 	"flashcardChoiceCorrectSelected": "Správna možnosť, vybraná",

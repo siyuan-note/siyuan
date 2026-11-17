@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "保留状態",
+	"flashcardBurialStatus": "埋めた状態",
+	"flashcardUnsuspendedCards": "保留されていないカード",
+	"flashcardUnburiedCards": "埋めていないカード",
+	"flashcardDueOnOrAfter": "期限が指定日時以降",
+	"flashcardDueOnOrBefore": "期限が指定日時以前",
 	"flashcardDocumentSettings": "ドキュメントのフラッシュカード設定",
 	"flashcardNotebookSettings": "ノートブックのフラッシュカード設定",
 	"flashcardChoiceCorrectSelected": "正しい選択肢・選択済み",

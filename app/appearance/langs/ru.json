@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "Состояние приостановки",
+	"flashcardBurialStatus": "Состояние откладывания",
+	"flashcardUnsuspendedCards": "Неприостановленные карточки",
+	"flashcardUnburiedCards": "Неотложенные карточки",
+	"flashcardDueOnOrAfter": "Срок не раньше",
+	"flashcardDueOnOrBefore": "Срок не позже",
 	"flashcardDocumentSettings": "Настройки карточек документа",
 	"flashcardNotebookSettings": "Настройки карточек блокнота",
 	"flashcardChoiceCorrectSelected": "Верный вариант, выбран",

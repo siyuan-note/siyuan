@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "حالة التعليق",
+	"flashcardBurialStatus": "حالة الدفن",
+	"flashcardUnsuspendedCards": "بطاقات غير معلّقة",
+	"flashcardUnburiedCards": "بطاقات غير مدفونة",
+	"flashcardDueOnOrAfter": "موعد الاستحقاق في أو بعد",
+	"flashcardDueOnOrBefore": "موعد الاستحقاق في أو قبل",
 	"flashcardDocumentSettings": "إعدادات بطاقات المستند",
 	"flashcardNotebookSettings": "إعدادات بطاقات دفتر الملاحظات",
 	"flashcardChoiceCorrectSelected": "خيار صحيح، تم اختياره",

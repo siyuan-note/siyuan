@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "สถานะการระงับ",
+	"flashcardBurialStatus": "สถานะการฝัง",
+	"flashcardUnsuspendedCards": "การ์ดที่ไม่ถูกระงับ",
+	"flashcardUnburiedCards": "การ์ดที่ไม่ถูกฝัง",
+	"flashcardDueOnOrAfter": "ครบกำหนดตั้งแต่เวลานี้",
+	"flashcardDueOnOrBefore": "ครบกำหนดไม่เกินเวลานี้",
 	"flashcardDocumentSettings": "การตั้งค่าแฟลชการ์ดของเอกสาร",
 	"flashcardNotebookSettings": "การตั้งค่าแฟลชการ์ดของสมุดบันทึก",
 	"flashcardChoiceCorrectSelected": "ตัวเลือกที่ถูกต้อง เลือกแล้ว",

@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "Стање обуставе",
+	"flashcardBurialStatus": "Стање привременог скривања",
+	"flashcardUnsuspendedCards": "Необустављене картице",
+	"flashcardUnburiedCards": "Картице које нису привремено скривене",
+	"flashcardDueOnOrAfter": "Рок није пре",
+	"flashcardDueOnOrBefore": "Рок није после",
 	"flashcardDocumentSettings": "Подешавања картица документа",
 	"flashcardNotebookSettings": "Подешавања картица бележнице",
 	"flashcardChoiceCorrectSelected": "Тачна опција, изабрана",

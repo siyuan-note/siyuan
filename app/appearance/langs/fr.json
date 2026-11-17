@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "État de suspension",
+	"flashcardBurialStatus": "État d’enfouissement",
+	"flashcardUnsuspendedCards": "Cartes non suspendues",
+	"flashcardUnburiedCards": "Cartes non enfouies",
+	"flashcardDueOnOrAfter": "Échéance le ou après le",
+	"flashcardDueOnOrBefore": "Échéance le ou avant le",
 	"flashcardDocumentSettings": "Paramètres des cartes mémoire du document",
 	"flashcardNotebookSettings": "Paramètres des cartes mémoire du carnet",
 	"flashcardChoiceCorrectSelected": "Option correcte, sélectionnée",

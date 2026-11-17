@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "Status penangguhan",
+	"flashcardBurialStatus": "Status penguburan",
+	"flashcardUnsuspendedCards": "Kartu tidak ditangguhkan",
+	"flashcardUnburiedCards": "Kartu tidak dikubur",
+	"flashcardDueOnOrAfter": "Jatuh tempo pada atau setelah",
+	"flashcardDueOnOrBefore": "Jatuh tempo pada atau sebelum",
 	"flashcardDocumentSettings": "Pengaturan kartu flash dokumen",
 	"flashcardNotebookSettings": "Pengaturan kartu flash buku catatan",
 	"flashcardChoiceCorrectSelected": "Opsi benar, dipilih",

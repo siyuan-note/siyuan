@@ -1,4 +1,10 @@
 {
+	"flashcardSuspensionStatus": "Opschortingsstatus",
+	"flashcardBurialStatus": "Begraafstatus",
+	"flashcardUnsuspendedCards": "Niet-opgeschorte kaarten",
+	"flashcardUnburiedCards": "Niet-begraven kaarten",
+	"flashcardDueOnOrAfter": "Vervalt op of na",
+	"flashcardDueOnOrBefore": "Vervalt op of voor",
 	"flashcardDocumentSettings": "Flashcardinstellingen voor document",
 	"flashcardNotebookSettings": "Flashcardinstellingen voor notitieboek",
 	"flashcardChoiceCorrectSelected": "Juiste optie, geselecteerd",

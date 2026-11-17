@@ -1408,11 +1408,21 @@ func processEmbedHTML(htmlStr string) string {
 }
 
 func GetBlockKramdown(id, mode string) (ret string) {
-	return GetBlockKramdownInBox(id, mode, "")
+	return GetBlockKramdownFiltered(id, mode, nil)
+}
+
+// GetBlockKramdownFiltered 与 GetBlockKramdown 一致，并在导出前应用 IAL 过滤。
+func GetBlockKramdownFiltered(id, mode string, filterIAL func([][]string) [][]string) (ret string) {
+	return GetBlockKramdownInBoxFiltered(id, mode, "", filterIAL)
 }
 
 // GetBlockKramdownInBox 与 GetBlockKramdown 一致，但按 boxID 路由 blocktree 查询。
 func GetBlockKramdownInBox(id, mode, boxID string) (ret string) {
+	return GetBlockKramdownInBoxFiltered(id, mode, boxID, nil)
+}
+
+// GetBlockKramdownInBoxFiltered 与 GetBlockKramdownInBox 一致，并在导出前应用 IAL 过滤。
+func GetBlockKramdownInBoxFiltered(id, mode, boxID string, filterIAL func([][]string) [][]string) (ret string) {
 	if "" == id {
 		return
 	}
@@ -1423,15 +1433,25 @@ func GetBlockKramdownInBox(id, mode, boxID string) (ret string) {
 	}
 
 	luteEngine := NewLute()
-	return getBlockKramdown0(tree, id, mode, luteEngine)
+	return getBlockKramdown0Filtered(tree, id, mode, luteEngine, filterIAL)
 }
 
 func GetBlockKramdowns(ids []string, mode string) (ret map[string]string) {
-	return GetBlockKramdownsInBox(ids, mode, "")
+	return GetBlockKramdownsFiltered(ids, mode, nil)
+}
+
+// GetBlockKramdownsFiltered 与 GetBlockKramdowns 一致，并在导出前应用 IAL 过滤。
+func GetBlockKramdownsFiltered(ids []string, mode string, filterIAL func([][]string) [][]string) (ret map[string]string) {
+	return GetBlockKramdownsInBoxFiltered(ids, mode, "", filterIAL)
 }
 
 // GetBlockKramdownsInBox 与 GetBlockKramdowns 一致，但按 boxID 路由 blocktree 查询。
 func GetBlockKramdownsInBox(ids []string, mode, boxID string) (ret map[string]string) {
+	return GetBlockKramdownsInBoxFiltered(ids, mode, boxID, nil)
+}
+
+// GetBlockKramdownsInBoxFiltered 与 GetBlockKramdownsInBox 一致，并在导出前应用 IAL 过滤。
+func GetBlockKramdownsInBoxFiltered(ids []string, mode, boxID string, filterIAL func([][]string) [][]string) (ret map[string]string) {
 	ret = make(map[string]string, len(ids))
 	if 0 == len(ids) {
 		return
@@ -1444,12 +1464,21 @@ func GetBlockKramdownsInBox(ids []string, mode, boxID string) (ret map[string]st
 		if err != nil {
 			continue
 		}
-		ret[id] = getBlockKramdown0(tree, id, mode, luteEngine)
+		ret[id] = getBlockKramdown0Filtered(tree, id, mode, luteEngine, filterIAL)
 	}
 	return
 }
 
 func getBlockKramdown0(tree *parse.Tree, id, mode string, luteEngine *lute.Lute) (ret string) {
+	return getBlockKramdown0Filtered(tree, id, mode, luteEngine, nil)
+}
+
+func getBlockKramdown0Filtered(tree *parse.Tree, id, mode string, luteEngine *lute.Lute, filterIAL func([][]string) [][]string) (ret string) {
+	if nil != filterIAL {
+		if node := treenode.GetNodeInTree(tree, id); nil != node {
+			node.KramdownIAL = filterIAL(node.KramdownIAL)
+		}
+	}
 	addCanonicalBlockIALNodes(tree, false)
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {

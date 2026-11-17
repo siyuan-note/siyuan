@@ -991,11 +991,18 @@ var getBlockKramdown = contractHandler(apicontract.GetBlockKramdown, func(c *gin
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockKramdownData](-1, err.Error())
 	}
+	var filterIAL func([][]string) [][]string
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		filterIAL = func(ial [][]string) [][]string {
+			return model.FilterBlockIALByPublishAccess(c, publishAccess, ial)
+		}
+	}
 	var kramdown string
 	if boxID != "" {
-		kramdown = model.GetBlockKramdownInBox(id, mode, boxID)
+		kramdown = model.GetBlockKramdownInBoxFiltered(id, mode, boxID, filterIAL)
 	} else {
-		kramdown = model.GetBlockKramdown(id, mode)
+		kramdown = model.GetBlockKramdownFiltered(id, mode, filterIAL)
 	}
 
 	if model.IsReadOnlyRoleContext(c) {
@@ -1036,11 +1043,18 @@ var getBlockKramdowns = contractHandler(apicontract.GetBlockKramdowns, func(c *g
 	if err != nil {
 		return apicontract.Failure[map[string]string](-1, err.Error())
 	}
+	var filterIAL func([][]string) [][]string
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		filterIAL = func(ial [][]string) [][]string {
+			return model.FilterBlockIALByPublishAccess(c, publishAccess, ial)
+		}
+	}
 	var kramdowns map[string]string
 	if boxID != "" {
-		kramdowns = model.GetBlockKramdownsInBox(ids, mode, boxID)
+		kramdowns = model.GetBlockKramdownsInBoxFiltered(ids, mode, boxID, filterIAL)
 	} else {
-		kramdowns = model.GetBlockKramdowns(ids, mode)
+		kramdowns = model.GetBlockKramdownsFiltered(ids, mode, filterIAL)
 	}
 
 	if model.IsReadOnlyRoleContext(c) {

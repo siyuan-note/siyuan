@@ -5,6 +5,16 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+
+test("membership labels describe adding existing cards without changing operation values", () => {
+    const membership = source.slice(source.indexOf("const openFlashcardV2Membership ="),
+        source.indexOf("const basicSourceDirection ="));
+    assert.match(membership, /<option value="include">\$\{window\.siyuan\.languages\.addDeck\}/);
+    assert.match(membership, /<option value="exclude">\$\{window\.siyuan\.languages\.removeDeck\}/);
+    assert.match(membership, /<option value="automatic">/);
+    assert.match(membership, /setFlashcardV2ReviewSetMembership\(reviewSetID, cardIDs, mode,/);
+    assert.doesNotMatch(membership, /languages\.new\}/);
+});
 const render = (summary?: {cards: number, due: number, included: number, excluded: number}) => {
     const snippet = source.slice(source.indexOf("const renderReviewSet ="),
         source.indexOf("const loadFlashcardV2ReviewSetSummaries ="));

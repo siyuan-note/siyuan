@@ -16,6 +16,39 @@ const surface = (inside = true) => {
     return {element: element as unknown as HTMLElement, list, focused: () => focused};
 };
 
+test("pending-edit entry keeps a stable management title while retaining its initial filter", () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const snippet = source.slice(source.indexOf("export const openFlashcardV2PendingEdits ="),
+        source.indexOf("export const openFlashcardV2ManagementByNotebook =")).replace("export const", "const");
+    let args: unknown[];
+    runInNewContext(transpileModule(`${snippet}\nopenFlashcardV2PendingEdits();`, {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText, {
+        window: {siyuan: {languages: {manage: "Manage", flashcardPendingEdits: "Pending edits"}}},
+        ensureFlashcardV2: (callback: () => void) => callback(),
+        openFlashcardV2ReviewSetCards: (...values: unknown[]) => { args = values; },
+    });
+    assert.equal(args[1], "Manage");
+    assert.equal((args[3] as {editLater: string}).editLater, "true");
+    assert.equal(args[5], false);
+});
+
+test("batch labels distinguish configuration steps from direct actions", () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const start = source.indexOf("batchApply.textContent =");
+    const snippet = source.slice(start, source.indexOf(";", start) + 1);
+    for (const reviewSetID of ["", "set"]) {
+        for (const batchAction of ["", "tags", "setDue", "membership", "suspend", "reset", "setFlag:1"]) {
+            const batchApply = {textContent: ""};
+            runInNewContext(snippet, {batchApply, batchAction, reviewSetID,
+                window: {siyuan: {languages: {next: "Next", confirm: "Confirm"}}}});
+            const configures = ["tags", "setDue"].includes(batchAction) ||
+                (batchAction === "membership" && reviewSetID === "");
+            assert.equal(batchApply.textContent, configures ? "Next" : "Confirm");
+        }
+    }
+});
+
 test("new requests invalidate older responses and closure permanently prevents revival", () => {
     const view = new FlashcardV2ManagementView();
     const first = view.request();

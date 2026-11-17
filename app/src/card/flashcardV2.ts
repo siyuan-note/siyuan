@@ -1033,7 +1033,7 @@ const openFlashcardV2Membership = (cardIDs: string | string[], callback: () => v
             width: isMobile() ? "92vw" : "460px",
             content: `<div class="b3-dialog__content card__v2-form">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardReviewSet}</div><select data-type="reviewSet" class="b3-select fn__block">${reviewSets.map((revision) => `<option value="${escapeAttr(revision.entityID)}">${escapeHtml(revision.payload.name)}</option>`).join("")}</select></label>
-<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.manage}</div><select data-type="mode" class="b3-select fn__block"><option value="include">${window.siyuan.languages.new}</option><option value="exclude">${window.siyuan.languages.remove}</option><option value="automatic">${window.siyuan.languages.default}</option></select></label>
+<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.manage}</div><select data-type="mode" class="b3-select fn__block"><option value="include">${window.siyuan.languages.addDeck}</option><option value="exclude">${window.siyuan.languages.removeDeck}</option><option value="automatic">${window.siyuan.languages.default}</option></select></label>
 </div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
         });
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
@@ -1954,6 +1954,9 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                 selectedCount.textContent = `${window.siyuan.languages.selected} ${selectedOnPage}`;
                 batchMenu.disabled = selectedOnPage === 0;
                 batchApply.disabled = selectedOnPage === 0 || batchAction === "";
+                batchApply.textContent = batchAction === "tags" || batchAction === "setDue" ||
+                    (batchAction === "membership" && !reviewSetID) ?
+                    window.siyuan.languages.next : window.siyuan.languages.confirm;
             };
             const refreshList = () => {
                 owner.view.capture(dialog.element, true);
@@ -2548,7 +2551,7 @@ export const openFlashcardV2Management = () => {
 };
 
 export const openFlashcardV2PendingEdits = () => {
-    ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", window.siyuan.languages.flashcardPendingEdits,
+    ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", window.siyuan.languages.manage,
         0, {editLater: "true"}, undefined, false));
 };
 

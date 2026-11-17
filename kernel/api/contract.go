@@ -203,12 +203,18 @@ func notebookInfoContract(info *model.BoxInfo) *apicontract.NotebookInfo {
 }
 
 // holdContractBlockRequest 保留显式笔记本选择及全部附带 ID 的租约检查。
+// 只读角色对发布门禁拒绝的加密笔记本不取得租约，并统一按块缺失处理，避免锁定状态经响应差异泄露
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-v79r-27qf-2pmg
 func holdContractBlockRequest(c *gin.Context, notebook, id string, ids []string, allowMissing bool) (boxID string, err error) {
+	readOnly := model.IsReadOnlyRoleContext(c)
 	if notebook != "" && model.IsEncryptedBox(notebook) {
 		boxID = notebook
+		if readOnly && model.IsEncryptedBoxDeniedByPublishAccess(notebook) {
+			return
+		}
 	}
 	leaseIDs := append([]string{id}, ids...)
-	err = holdEncryptedBlockRequests(c, boxID, leaseIDs, allowMissing)
+	err = holdEncryptedBlockRequests(c, boxID, leaseIDs, allowMissing || readOnly)
 	return
 }
 

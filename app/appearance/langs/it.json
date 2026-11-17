@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "La corrispondenza approssimativa è attiva; piccole differenze di maiuscole, segni diacritici o ortografia possono essere accettate. Controlla la risposta e valutala personalmente",
+	"flashcardSourceRestore": "Ripristina questa versione",
 	"flashcardImageTarget": "Area della risposta a questa domanda",
 	"flashcardImageTargetTip": "L’area a strisce è la risposta a questa domanda",
 	"flashcardSkipIncomplete": "L’operazione di salto non è completa; riprova",

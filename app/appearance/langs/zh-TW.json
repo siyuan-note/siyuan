@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "已啟用近似比對，少量大小寫、變音符號或拼字差異仍可能被接受，請核對答案並自行評分",
+	"flashcardSourceRestore": "還原此版本",
 	"flashcardImageTarget": "本題答案區域",
 	"flashcardImageTargetTip": "條紋區域為本題答案",
 	"flashcardSkipIncomplete": "略過尚未完成，請重試",

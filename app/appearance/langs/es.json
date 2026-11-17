@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "La coincidencia aproximada está activada; pueden aceptarse pequeñas diferencias de mayúsculas, signos diacríticos u ortografía. Comprueba la respuesta y califícala tú mismo",
+	"flashcardSourceRestore": "Restaurar esta versión",
 	"flashcardImageTarget": "Área de respuesta de esta pregunta",
 	"flashcardImageTargetTip": "El área rayada es la respuesta a esta pregunta",
 	"flashcardSkipIncomplete": "No se ha completado la omisión; inténtalo de nuevo",

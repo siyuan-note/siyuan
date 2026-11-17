@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "Approximate matching is enabled; small differences in case, diacritics or spelling may still be accepted. Check the answer and rate it yourself",
+	"flashcardSourceRestore": "Restore this version",
 	"flashcardImageTarget": "Answer area for this question",
 	"flashcardImageTargetTip": "The striped area is the answer to this question",
 	"flashcardSkipIncomplete": "Skipping is incomplete; please retry",

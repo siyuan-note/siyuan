@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "المطابقة التقريبية مفعّلة؛ قد تُقبل اختلافات طفيفة في حالة الأحرف أو علامات التشكيل أو الإملاء، راجع الإجابة وقيّمها بنفسك",
+	"flashcardSourceRestore": "استعادة هذا الإصدار",
 	"flashcardImageTarget": "منطقة إجابة السؤال الحالي",
 	"flashcardImageTargetTip": "المنطقة المخططة هي إجابة السؤال الحالي",
 	"flashcardSkipIncomplete": "لم يكتمل التخطي؛ يرجى المحاولة مجددًا",

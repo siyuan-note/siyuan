@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "התאמה מקורבת מופעלת; הבדלים קטנים ברישיות, בסימנים דיאקריטיים או באיות עשויים להתקבל. יש לבדוק את התשובה ולדרג אותה בעצמך",
+	"flashcardSourceRestore": "שחזור גרסה זו",
 	"flashcardImageTarget": "אזור התשובה לשאלה זו",
 	"flashcardImageTargetTip": "האזור המפוספס הוא התשובה לשאלה זו",
 	"flashcardSkipIncomplete": "הדילוג לא הושלם; יש לנסות שוב",

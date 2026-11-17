@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "La correspondance approximative est activée ; de petites différences de casse, de signes diacritiques ou d’orthographe peuvent être acceptées. Vérifiez la réponse et évaluez-la vous-même",
+	"flashcardSourceRestore": "Restaurer cette version",
 	"flashcardImageTarget": "Zone de réponse à cette question",
 	"flashcardImageTargetTip": "La zone rayée est la réponse à cette question",
 	"flashcardSkipIncomplete": "L’action de passer les cartes est incomplète ; veuillez réessayer",

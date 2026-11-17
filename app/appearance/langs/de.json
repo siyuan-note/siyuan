@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "Ungefähre Übereinstimmung ist aktiviert; kleine Unterschiede bei Groß-/Kleinschreibung, diakritischen Zeichen oder Schreibweise können akzeptiert werden. Prüfe und bewerte die Antwort selbst",
+	"flashcardSourceRestore": "Diese Version wiederherstellen",
 	"flashcardImageTarget": "Antwortbereich dieser Frage",
 	"flashcardImageTargetTip": "Der gestreifte Bereich ist die Antwort auf diese Frage",
 	"flashcardSkipIncomplete": "Das Überspringen ist nicht abgeschlossen; bitte erneut versuchen",

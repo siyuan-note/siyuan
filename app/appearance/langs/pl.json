@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "Dopasowanie przybliżone jest włączone; niewielkie różnice w wielkości liter, znakach diakrytycznych lub pisowni mogą być akceptowane. Sprawdź odpowiedź i oceń ją samodzielnie",
+	"flashcardSourceRestore": "Przywróć tę wersję",
 	"flashcardImageTarget": "Obszar odpowiedzi na to pytanie",
 	"flashcardImageTargetTip": "Pasiasty obszar jest odpowiedzią na to pytanie",
 	"flashcardSkipIncomplete": "Pomijanie nie zostało ukończone; spróbuj ponownie",

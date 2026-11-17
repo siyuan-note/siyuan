@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "유사 일치가 활성화되어 있어 대소문자, 발음 구별 기호 또는 철자의 작은 차이가 허용될 수 있습니다. 답을 확인하고 직접 평가하세요",
+	"flashcardSourceRestore": "이 버전 복원",
 	"flashcardImageTarget": "이 문제의 답 영역",
 	"flashcardImageTargetTip": "줄무늬 영역이 이 문제의 답입니다",
 	"flashcardSkipIncomplete": "건너뛰기가 완료되지 않았습니다. 다시 시도하세요",

@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "A correspondência aproximada está ativada; pequenas diferenças de maiúsculas, sinais diacríticos ou ortografia podem ser aceitas. Confira a resposta e avalie por conta própria",
+	"flashcardSourceRestore": "Restaurar esta versão",
 	"flashcardImageTarget": "Área da resposta desta pergunta",
 	"flashcardImageTargetTip": "A área listrada é a resposta desta pergunta",
 	"flashcardSkipIncomplete": "A operação de pular não foi concluída; tente novamente",

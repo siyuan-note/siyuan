@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "近似一致が有効です。大文字・小文字、発音区別符号、つづりのわずかな違いは許容される場合があります。解答を確認し、自分で評価してください",
+	"flashcardSourceRestore": "このバージョンを復元",
 	"flashcardImageTarget": "この問題の解答範囲",
 	"flashcardImageTargetTip": "縞模様の範囲がこの問題の解答です",
 	"flashcardSkipIncomplete": "スキップが完了していません。再試行してください",

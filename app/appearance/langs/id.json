@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "Pencocokan perkiraan diaktifkan; perbedaan kecil pada huruf besar/kecil, diakritik, atau ejaan masih dapat diterima. Periksa jawaban dan nilai sendiri",
+	"flashcardSourceRestore": "Pulihkan versi ini",
 	"flashcardImageTarget": "Area jawaban pertanyaan ini",
 	"flashcardImageTargetTip": "Area bergaris adalah jawaban untuk pertanyaan ini",
 	"flashcardSkipIncomplete": "Proses melewati belum selesai; silakan coba lagi",

@@ -69,7 +69,7 @@ export const openFlashcardV2SourceHistory = async (sourceID: string, changed: ()
 <div class="card__v2-management-pagination"><button data-action="previous" class="b3-button b3-button--outline" disabled>${lang.previous}</button><select data-action="version" class="b3-select fn__flex-1"></select><button data-action="next" class="b3-button b3-button--outline" disabled>${lang.next}</button></div>
 <button data-action="retry" class="b3-button b3-button--outline fn__none">${lang.retry}</button>
 <div data-preview class="card__v2-source-history-preview fn__flex-1"></div>
-</div><div class="b3-dialog__action"><button data-action="documents" class="b3-button b3-button--outline">${lang.fileHistory}</button><div class="fn__space"></div><button data-action="restore" class="b3-button b3-button--text" disabled>${lang.restore}</button></div>`,
+</div><div class="b3-dialog__action"><button data-action="documents" class="b3-button b3-button--outline">${lang.fileHistory}</button><div class="fn__space"></div><button data-action="restore" class="b3-button b3-button--text" disabled>${lang.flashcardSourceRestore}</button></div>`,
     });
     const select = dialog.element.querySelector<HTMLSelectElement>('[data-action="version"]');
     const previous = dialog.element.querySelector<HTMLButtonElement>('[data-action="previous"]');
@@ -211,7 +211,7 @@ ${renderSourceHistoryConfiguration(item.revision.payload.generationConfig, ids, 
             openHistory(window.siyuan.ws.app);
         } else if (target.dataset.action === "restore" && selected && !restore.disabled) {
             const revisionID = selected.revision.revisionID;
-            confirmDialog(lang.restore, lang.flashcardSourceRestoreConfirm, async () => {
+            confirmDialog(lang.flashcardSourceRestore, lang.flashcardSourceRestoreConfirm, async () => {
                 if (!alive() || restoring || selected?.revision.revisionID !== revisionID || restore.disabled) {
                     return;
                 }

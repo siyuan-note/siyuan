@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "Yaklaşık eşleştirme etkin; büyük/küçük harf, aksan işaretleri veya yazımdaki küçük farklar kabul edilebilir. Yanıtı kontrol edip kendiniz değerlendirin",
+	"flashcardSourceRestore": "Bu sürümü geri yükle",
 	"flashcardImageTarget": "Bu sorunun yanıt alanı",
 	"flashcardImageTargetTip": "Çizgili alan bu sorunun yanıtıdır",
 	"flashcardSkipIncomplete": "Atlama tamamlanmadı; lütfen yeniden deneyin",

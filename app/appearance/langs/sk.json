@@ -1,4 +1,6 @@
 {
+	"flashcardTypedFuzzyTip": "Približná zhoda je zapnutá; malé rozdiely vo veľkosti písmen, diakritike alebo pravopise môžu byť prijaté. Skontrolujte odpoveď a ohodnoťte ju sami",
+	"flashcardSourceRestore": "Obnoviť túto verziu",
 	"flashcardImageTarget": "Oblasť odpovede na túto otázku",
 	"flashcardImageTargetTip": "Pruhovaná oblasť je odpoveďou na túto otázku",
 	"flashcardSkipIncomplete": "Preskočenie nie je dokončené; skúste to znova",

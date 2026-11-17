@@ -3580,9 +3580,14 @@ ${blockIDs.slice(1).map((blockID, index) => `<label class="fn__flex card__v2-cho
 <label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="choiceRandomize" class="b3-switch fn__flex-center" type="checkbox" checked><span class="fn__space"></span>${window.siyuan.languages.flashcardRandomizeOptions}</label>
 <label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="choiceDynamic" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardDynamicDistractors}<span class="fn__flex-1"></span><input data-type="choiceDynamicCount" class="b3-text-field" style="width:72px" type="number" min="1" max="50" value="3" disabled></label>
 </div>` : "";
+                const typedFuzzyDistance = edit?.generationConfig.fuzzyMaxDistance;
+                const typedFuzzyRatio = edit?.generationConfig.fuzzyMaxRatio ?? 0.1;
+                const typedFuzzyEnabled = (Number.isInteger(typedFuzzyDistance) && typedFuzzyDistance > 0) ||
+                    (Number.isFinite(typedFuzzyRatio) && typedFuzzyRatio > 0 && typedFuzzyRatio <= 1);
                 const typedEditorHTML = blockIDs.length >= 2 ? `<div data-type="typedEditor" class="fn__none card__v2-advanced-section">
 <label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="typedCaseSensitive" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.searchCaseSensitive}</label>
 <label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="typedMatchDiacritics" class="b3-switch fn__flex-center" type="checkbox" checked><span class="fn__space"></span>${window.siyuan.languages.matchDiacritics}</label>
+${typedFuzzyEnabled ? `<div class="b3-label__text ft__on-surface">${window.siyuan.languages.flashcardTypedFuzzyTip}</div>` : ""}
 </div>` : "";
                 let imageEditor: IFlashcardV2ImageEditor | undefined;
                 const draftPreview = new FlashcardV2DraftPreview();

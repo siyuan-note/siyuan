@@ -33,6 +33,8 @@ const setup = async () => {
     let confirm: () => Promise<void>;
     let changes = 0;
     let closes = 0;
+    let content = "";
+    let confirmTitle = "";
     const element = {isConnected: true, dataset: {} as Record<string, string>, querySelector: node,
         addEventListener: (_name: string, cb: typeof handler) => { handler = cb; }};
     runInNewContext(code, {
@@ -42,15 +44,20 @@ const setup = async () => {
             return new Promise(resolve => pending.push({data, resolve}));
         },
         window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)})}},
-        Dialog: class {element = element; destroy() { closes++; element.dataset.dialogClosing = "true"; }},
+        Dialog: class {
+            element = element;
+            constructor(options: {content: string}) { content = options.content; }
+            destroy() { closes++; element.dataset.dialogClosing = "true"; }
+        },
         isMobile: () => false, escapeHtml: (s: string) => s, escapeAttr: (s: string) => s,
         renderSourceHistoryConfiguration: () => "", genUUID: () => "operation",
-        confirmDialog: (_title: string, _text: string, cb: typeof confirm) => { confirm = cb; },
+        confirmDialog: (title: string, _text: string, cb: typeof confirm) => { confirmTitle = title; confirm = cb; },
         changed: () => { changes++; },
     });
     await flush();
     return {pending, node, element, action: (action: string) => handler({target: {closest: () => ({dataset: {action}})}}),
-        confirm: () => confirm(), changes: () => changes, closes: () => closes};
+        confirm: () => confirm(), changes: () => changes, closes: () => closes,
+        content: () => content, confirmTitle: () => confirmTitle};
 };
 const ready = async () => {
     const h = await setup();
@@ -60,6 +67,14 @@ const ready = async () => {
     await flush();
     return h;
 };
+
+test("source version restoration uses its own label instead of window restoration", async () => {
+    const h = await ready();
+    assert.match(h.content(), /data-action="restore"[^>]*>flashcardSourceRestore<\/button>/);
+    h.action("restore");
+    assert.equal(h.confirmTitle(), "flashcardSourceRestore");
+    assert.doesNotMatch(source, /lang\.restore\b/);
+});
 
 test("failed list and preview have same-request retry", async () => {
     const h = await setup();

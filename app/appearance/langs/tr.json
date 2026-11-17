@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "Yanıt denetimi başarısız oldu; yanıtı kendiniz kontrol edin",
+	"flashcardMembershipAutomatic": "Deste kurallarını uygula",
+	"flashcardMembershipAutomaticTip": "Elle dahil etme veya hariç tutma ayarını kaldırıp destenin filtrelerini uygular. Filtre yoksa kartlar bu desteden çıkarılır. Kartlar, tekrar programları ve tekrar geçmişi korunur",
 	"flashcardInspectTemplate": "Şablonu görüntüle",
 	"flashcardTemplateReadOnlyTip": "Salt okunur yapılandırma. Bildirimler yazarlığı veya eklenti kullanılabilirliğini doğrulamaz. Şablon, betik veya stil çalıştırılmaz",
 	"flashcardTemplateDeclarations": "Bildirilen türler ve ad alanı (yazarlık doğrulanmadı)",

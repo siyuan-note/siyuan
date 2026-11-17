@@ -81,3 +81,20 @@ export const snapshotFlashcardV2AnswerResult = (value: unknown): JSONValue | und
         console.error("Flashcard plugin answer result is not JSON serializable", error);
     }
 };
+
+export const checkFlashcardV2Answer = (check: () => unknown, failed: () => void): unknown => {
+    try {
+        const result = check();
+        // 检查结果同步用于当前卡片；异步结果不能作为答案快照或覆盖后续卡片。
+        if (result !== null && (typeof result === "object" || typeof result === "function") &&
+            "then" in result && typeof result.then === "function") {
+            void Promise.resolve(result).catch(error => console.error("Flashcard asynchronous answer check failed", error));
+            failed();
+            return;
+        }
+        return result;
+    } catch (error) {
+        console.error("Flashcard answer check failed", error);
+        failed();
+    }
+};

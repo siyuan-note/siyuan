@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "回答の確認に失敗しました。自分で答えを確認してください",
+	"flashcardMembershipAutomatic": "デッキのルールに従う",
+	"flashcardMembershipAutomaticTip": "手動での追加・除外を解除し、デッキの絞り込み条件に従います。条件がない場合は、このデッキからカードが外れます。カード、復習スケジュール、復習履歴は保持されます",
 	"flashcardInspectTemplate": "テンプレートを表示",
 	"flashcardTemplateReadOnlyTip": "今回読み取った設定の閲覧専用です。宣言は作者の認証やプラグインの利用可否を保証しません。テンプレート、スクリプト、スタイルは実行しません",
 	"flashcardTemplateDeclarations": "型と名前空間の宣言（作者認証ではありません）",

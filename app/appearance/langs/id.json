@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "Pemeriksaan jawaban gagal; periksa jawabannya sendiri",
+	"flashcardMembershipAutomatic": "Ikuti aturan dek",
+	"flashcardMembershipAutomaticTip": "Hapus pengaturan penyertaan atau pengecualian manual dan ikuti filter dek. Tanpa filter, kartu akan dikeluarkan dari dek ini. Kartu, jadwal, dan riwayat ulasan tetap tersimpan",
 	"flashcardInspectTemplate": "Lihat templat",
 	"flashcardTemplateReadOnlyTip": "Konfigurasi hanya-baca. Deklarasi tidak memverifikasi pembuat atau ketersediaan plugin. Templat, skrip, dan gaya tidak dijalankan",
 	"flashcardTemplateDeclarations": "Tipe dan namespace yang dideklarasikan (pembuat belum diverifikasi)",

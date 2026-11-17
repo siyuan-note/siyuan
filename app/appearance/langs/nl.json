@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "Het controleren van het antwoord is mislukt; controleer het antwoord zelf",
+	"flashcardMembershipAutomatic": "Regels van de kaartenset volgen",
+	"flashcardMembershipAutomaticTip": "Handmatig opnemen of uitsluiten ongedaan maken en de filters van de kaartenset volgen. Zonder filters worden de kaarten uit deze set verwijderd. Kaarten, herhalingsschema’s en geschiedenis blijven behouden",
 	"flashcardInspectTemplate": "Sjabloon bekijken",
 	"flashcardTemplateReadOnlyTip": "Alleen-lezen configuratie. Verklaringen bevestigen geen auteurschap of beschikbaarheid van plugins. Sjablonen, scripts en stijlen worden niet uitgevoerd",
 	"flashcardTemplateDeclarations": "Opgegeven typen en naamruimte (auteurschap niet geverifieerd)",

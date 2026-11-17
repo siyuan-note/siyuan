@@ -85,7 +85,8 @@ test("dialog submission freezes controls, retries failure, and keeps data refres
         const element = {isConnected: true, dataset: {} as Record<string, string>,
             getAttribute: (key: string) => attrs.get(key), setAttribute: (key: string, value: string) => attrs.set(key, value),
             removeAttribute: (key: string) => attrs.delete(key), querySelectorAll: () => controls,
-            querySelector: (key: string) => ({value: key.includes("reviewSet") ? "deck" : "include"})};
+            querySelector: (key: string) => ({value: key.includes("reviewSet") ? "deck" : "include",
+                addEventListener: () => {}, classList: {toggle: () => {}}})};
         runInNewContext(js(`${form}\n${dialogSource}\nopenFlashcardV2Membership("card", changed);`), {
             window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)})}},
             isMobile: () => false, escapeHtml: (s: string) => s, escapeAttr: (s: string) => s,

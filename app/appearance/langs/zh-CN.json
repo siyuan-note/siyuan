@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "答案检查失败，请自行核对答案",
+	"flashcardMembershipAutomatic": "按卡包规则",
+	"flashcardMembershipAutomaticTip": "清除手动加入或排除，按卡包筛选条件收录；未设置筛选条件时会移出卡包。卡片、排期和复习记录均保留",
 	"flashcardInspectTemplate": "查看模板",
 	"flashcardTemplateReadOnlyTip": "仅查看本次读取的配置，声明不代表作者认证或插件可用，不执行模板、脚本或样式",
 	"flashcardTemplateDeclarations": "类型与命名空间声明（不代表作者认证）",

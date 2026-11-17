@@ -37,6 +37,7 @@ import {
 } from "./flashcardV2Render";
 import {readFlashcardV2RenderModel} from "./flashcardV2Render";
 import {
+    checkFlashcardV2Answer,
     getFlashcardV2PluginType,
     type IFlashcardV2PluginAnswerController,
     type IFlashcardV2PluginRenderResult,
@@ -820,8 +821,9 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0,
         }
         if (button.dataset.type === "show" && rendered) {
             if (rendered.revealController?.revealNext() ?? true) {
-                void (rendered.pluginAnswerController?.check() ?? rendered.choiceController?.check() ??
-                    rendered.typedAnswerController?.check());
+                checkFlashcardV2Answer(() => rendered.pluginAnswerController?.check() ??
+                    rendered.choiceController?.check() ?? rendered.typedAnswerController?.check(),
+                () => showMessage(window.siyuan.languages.flashcardAnswerCheckFailed, 6000, "error"));
                 showFlashcardAnswer(dialog.element.querySelector(".card__block"));
                 dialog.element.querySelector("[data-flashcard-answer]").classList.remove("fn__none");
                 show.disabled = true;
@@ -1236,8 +1238,9 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 const contentElement = dialog.element.querySelector(".card__block");
                 const complete = revealController?.revealNext() ?? true;
                 if (complete) {
-                    answerResult = pluginAnswerController?.check() ?? choiceController?.check() ??
-                        typedAnswerController?.check();
+                    answerResult = checkFlashcardV2Answer(() => pluginAnswerController?.check() ??
+                        choiceController?.check() ?? typedAnswerController?.check(),
+                    () => showMessage(window.siyuan.languages.flashcardAnswerCheckFailed, 6000, "error"));
                     showFlashcardAnswer(contentElement);
                     dialog.element.querySelector("[data-flashcard-answer]").classList.remove("fn__none");
                     playbackController?.activate("back");

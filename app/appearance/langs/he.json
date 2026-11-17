@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "בדיקת התשובה נכשלה; יש לבדוק את התשובה בעצמך",
+	"flashcardMembershipAutomatic": "לפי כללי החפיסה",
+	"flashcardMembershipAutomaticTip": "ביטול ההכללה או ההחרגה הידנית ושימוש במסנני החפיסה. ללא מסננים, הכרטיסים יוסרו מחפיסה זו. הכרטיסים, מועדי החזרה והיסטוריית החזרות נשמרים",
 	"flashcardInspectTemplate": "הצגת תבנית",
 	"flashcardTemplateReadOnlyTip": "הגדרות לקריאה בלבד. ההצהרות אינן מאמתות מחבר או זמינות תוסף. תבניות, סקריפטים וסגנונות אינם מופעלים",
 	"flashcardTemplateDeclarations": "סוגים ומרחב שמות מוצהרים (המחבר לא אומת)",

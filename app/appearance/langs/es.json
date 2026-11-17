@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "No se pudo comprobar la respuesta; compruébala tú mismo",
+	"flashcardMembershipAutomatic": "Seguir las reglas del mazo",
+	"flashcardMembershipAutomaticTip": "Eliminar la inclusión o exclusión manual y seguir los filtros del mazo. Sin filtros, las tarjetas salen de este mazo. Se conservan las tarjetas, su programación y el historial de repaso",
 	"flashcardInspectTemplate": "Ver plantilla",
 	"flashcardTemplateReadOnlyTip": "Configuración de solo lectura. Las declaraciones no verifican autoría ni disponibilidad del complemento. No se ejecutan plantillas, scripts ni estilos",
 	"flashcardTemplateDeclarations": "Tipos y espacio de nombres declarados (autoría no verificada)",

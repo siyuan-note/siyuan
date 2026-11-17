@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "La vérification de la réponse a échoué ; vérifiez-la vous-même",
+	"flashcardMembershipAutomatic": "Suivre les règles du paquet",
+	"flashcardMembershipAutomaticTip": "Annuler l’inclusion ou l’exclusion manuelle et suivre les filtres du paquet. Sans filtres, les cartes quittent ce paquet. Les cartes, leur planification et l’historique de révision sont conservés",
 	"flashcardInspectTemplate": "Afficher le modèle",
 	"flashcardTemplateReadOnlyTip": "Configuration lue uniquement. Les déclarations ne vérifient ni l’auteur ni la disponibilité du plugin. Aucun modèle, script ou style n’est exécuté",
 	"flashcardTemplateDeclarations": "Types et espace de noms déclarés (auteur non vérifié)",

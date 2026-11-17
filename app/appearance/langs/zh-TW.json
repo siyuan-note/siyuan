@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "答案檢查失敗，請自行核對答案",
+	"flashcardMembershipAutomatic": "依卡包規則",
+	"flashcardMembershipAutomaticTip": "清除手動加入或排除，依卡包篩選條件收錄；未設定篩選條件時會移出卡包。卡片、排程和複習記錄均保留",
 	"flashcardInspectTemplate": "查看模板",
 	"flashcardTemplateReadOnlyTip": "僅查看本次讀取的設定，宣告不代表作者認證或外掛可用，不執行模板、指令碼或樣式",
 	"flashcardTemplateDeclarations": "類型與命名空間宣告（不代表作者認證）",

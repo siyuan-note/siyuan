@@ -112,11 +112,12 @@ test("empty membership shows a cancellable create path without assigning cards a
             },
             Dialog: class {
                 readonly state: typeof dialogs[number];
-                readonly element: {querySelectorAll: () => unknown[]};
+                readonly element: {querySelectorAll: () => unknown[], querySelector: () => unknown};
                 constructor(options: {content: string}) {
                     this.state = {content: options.content, closed: false, clicks: []};
                     dialogs.push(this.state);
-                    this.element = {querySelectorAll: () => [0, 1].map((index) => ({
+                    this.element = {querySelector: () => ({value: "include", addEventListener: () => {}, classList: {toggle: () => {}}}),
+                        querySelectorAll: () => [0, 1].map((index) => ({
                         addEventListener: (_event: string, click: () => void) => { this.state.clicks[index] = click; },
                     }))};
                 }

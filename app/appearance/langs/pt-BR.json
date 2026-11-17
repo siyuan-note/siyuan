@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "Falha ao verificar a resposta; confira a resposta por conta própria",
+	"flashcardMembershipAutomatic": "Seguir as regras do baralho",
+	"flashcardMembershipAutomaticTip": "Remova a inclusão ou exclusão manual e siga os filtros do baralho. Sem filtros, os cartões saem deste baralho. Os cartões, os agendamentos e o histórico de revisão são preservados",
 	"flashcardInspectTemplate": "Ver modelo",
 	"flashcardTemplateReadOnlyTip": "Configuração somente leitura. As declarações não verificam autoria nem disponibilidade do plugin. Nenhum modelo, script ou estilo é executado",
 	"flashcardTemplateDeclarations": "Tipos e namespace declarados (autoria não verificada)",

@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "Verifica della risposta non riuscita; controlla la risposta tu",
+	"flashcardMembershipAutomatic": "Segui le regole del mazzo",
+	"flashcardMembershipAutomaticTip": "Annulla l’inclusione o l’esclusione manuale e segui i filtri del mazzo. Senza filtri, le schede escono da questo mazzo. Schede, programmazione e cronologia dei ripassi vengono conservate",
 	"flashcardInspectTemplate": "Visualizza modello",
 	"flashcardTemplateReadOnlyTip": "Configurazione di sola lettura. Le dichiarazioni non verificano autore o disponibilità del plugin. Modelli, script e stili non vengono eseguiti",
 	"flashcardTemplateDeclarations": "Tipi e spazio dei nomi dichiarati (autore non verificato)",

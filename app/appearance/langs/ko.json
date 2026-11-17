@@ -1,4 +1,7 @@
 {
+	"flashcardAnswerCheckFailed": "답안 확인에 실패했습니다. 직접 답을 확인하세요",
+	"flashcardMembershipAutomatic": "덱 규칙 따르기",
+	"flashcardMembershipAutomaticTip": "수동 포함 또는 제외 설정을 해제하고 덱 필터를 따릅니다. 필터가 없으면 카드가 이 덱에서 제외됩니다. 카드, 복습 일정과 기록은 유지됩니다",
 	"flashcardInspectTemplate": "템플릿 보기",
 	"flashcardTemplateReadOnlyTip": "읽기 전용 설정입니다. 선언은 작성자나 플러그인 사용 가능 여부를 보증하지 않습니다. 템플릿, 스크립트, 스타일을 실행하지 않습니다",
 	"flashcardTemplateDeclarations": "선언된 유형과 네임스페이스 (작성자 미확인)",

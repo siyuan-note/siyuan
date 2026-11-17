@@ -1083,9 +1083,14 @@ const openFlashcardV2Membership = (cardIDs: string | string[], callback: () => v
             width: isMobile() ? "92vw" : "460px",
             content: `<div class="b3-dialog__content card__v2-form">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardReviewSet}</div><select data-type="reviewSet" class="b3-select fn__block">${reviewSets.map((revision) => `<option value="${escapeAttr(revision.entityID)}">${escapeHtml(revision.payload.name)}</option>`).join("")}</select></label>
-<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.manage}</div><select data-type="mode" class="b3-select fn__block"><option value="include">${window.siyuan.languages.addDeck}</option><option value="exclude">${window.siyuan.languages.removeDeck}</option><option value="automatic">${window.siyuan.languages.default}</option></select></label>
+<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.manage}</div><select data-type="mode" class="b3-select fn__block"><option value="include">${window.siyuan.languages.addDeck}</option><option value="exclude">${window.siyuan.languages.removeDeck}</option><option value="automatic">${window.siyuan.languages.flashcardMembershipAutomatic}</option></select><div data-type="automaticTip" class="b3-label__text ft__on-surface fn__none">${window.siyuan.languages.flashcardMembershipAutomaticTip}</div></label>
 </div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
         });
+        const modeSelect = dialog.element.querySelector<HTMLSelectElement>('[data-type="mode"]');
+        const automaticTip = dialog.element.querySelector<HTMLElement>('[data-type="automaticTip"]');
+        const updateAutomaticTip = () => automaticTip.classList.toggle("fn__none", modeSelect.value !== "automatic");
+        modeSelect.addEventListener("change", updateAutomaticTip);
+        updateAutomaticTip();
         const submission = createFlashcardV2MembershipSubmission();
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
         buttons[0].addEventListener("click", () => dialog.destroy());

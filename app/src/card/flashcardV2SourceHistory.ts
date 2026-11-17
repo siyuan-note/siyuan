@@ -28,7 +28,7 @@ interface ISourceVersion {
 }
 
 const requestData = <T>(url: string, data: unknown) => new Promise<T | undefined>((resolve) => {
-    fetchPost(url, data, (response) => resolve(response.data as T)).finally(() => resolve(undefined));
+    fetchPost(url, data, (response) => resolve(response.data as T)).then(() => resolve(undefined), () => resolve(undefined));
 });
 
 export const openFlashcardV2DocumentHistory = async (blockID: string) => {
@@ -67,6 +67,7 @@ export const openFlashcardV2SourceHistory = async (sourceID: string, changed: ()
         content: `<div class="b3-dialog__content fn__flex-column card__v2-source-history">
 <div class="ft__on-surface">${escapeHtml(lang.flashcardSourceHistoryTip)}</div>
 <div class="card__v2-management-pagination"><button data-action="previous" class="b3-button b3-button--outline" disabled>${lang.previous}</button><select data-action="version" class="b3-select fn__flex-1"></select><button data-action="next" class="b3-button b3-button--outline" disabled>${lang.next}</button></div>
+<button data-action="retry" class="b3-button b3-button--outline fn__none">${lang.retry}</button>
 <div data-preview class="card__v2-source-history-preview fn__flex-1"></div>
 </div><div class="b3-dialog__action"><button data-action="documents" class="b3-button b3-button--outline">${lang.fileHistory}</button><div class="fn__space"></div><button data-action="restore" class="b3-button b3-button--text" disabled>${lang.restore}</button></div>`,
     });
@@ -74,13 +75,37 @@ export const openFlashcardV2SourceHistory = async (sourceID: string, changed: ()
     const previous = dialog.element.querySelector<HTMLButtonElement>('[data-action="previous"]');
     const next = dialog.element.querySelector<HTMLButtonElement>('[data-action="next"]');
     const restore = dialog.element.querySelector<HTMLButtonElement>('[data-action="restore"]');
+    const retry = dialog.element.querySelector<HTMLButtonElement>('[data-action="retry"]');
+    const alive = () => !closed && dialog.element.isConnected && dialog.element.dataset.dialogClosing !== "true";
+    let retryAction: (() => Promise<void>) | undefined;
+    let restoring = false;
+    let hasNext = false;
+    const clearRetry = () => {
+        retryAction = undefined;
+        retry.classList.add("fn__none");
+    };
+    const showRetry = (action: () => Promise<void>) => {
+        retryAction = action;
+        retry.classList.remove("fn__none");
+    };
     let selected: ISourceVersion | undefined;
+    const refreshControls = () => {
+        previous.disabled = restoring || offset === 0;
+        next.disabled = restoring || !hasNext;
+        select.disabled = restoring;
+        restore.disabled = restoring || !selected || selected.revision.revisionID === current.revision.revisionID ||
+            !!selected.revision.payload.pluginNamespace;
+    };
     const restoreRequests = new Map<string, {
         operationID: string, sourceID: string, revisionID: string, expectedRevisionID: string, updatedAt: number
     }>();
     let offset = 0;
     let sequence = 0;
     const preview = async () => {
+        if (!alive() || restoring) {
+            return;
+        }
+        clearRetry();
         const request = ++sequence;
         selected = undefined;
         restore.disabled = true;
@@ -89,7 +114,11 @@ export const openFlashcardV2SourceHistory = async (sourceID: string, changed: ()
             return;
         }
         const version = await requestData<ISourceVersion>("/api/flashcard/getSourceHistory", {sourceID, revisionID: select.value});
-        if (!version || closed || request !== sequence) {
+        if (!alive() || request !== sequence) {
+            return;
+        }
+        if (!version) {
+            showRetry(preview);
             return;
         }
         selected = version;
@@ -131,27 +160,32 @@ export const openFlashcardV2SourceHistory = async (sourceID: string, changed: ()
 ${renderSourceHistoryConfiguration(item.revision.payload.generationConfig, ids, lang, item === current ? version.revision.payload.generationConfig : current.revision.payload.generationConfig)}</section>`;
         dialog.element.querySelector("[data-preview]").innerHTML = pane(current, lang.currentVer) +
             pane(version, new Date(version.revision.updatedAt).toLocaleString());
-        restore.disabled = version.revision.revisionID === current.revision.revisionID || !!version.revision.payload.pluginNamespace;
+        refreshControls();
     };
     const load = async (nextOffset: number) => {
-        ++sequence;
+        if (!alive() || restoring) {
+            return;
+        }
+        clearRetry();
+        const request = ++sequence;
         selected = undefined;
         previous.disabled = true;
         next.disabled = true;
         select.disabled = true;
         restore.disabled = true;
         const data = await requestData<{versions: ISourceRevision[]}>("/api/flashcard/getSourceHistory", {sourceID, limit: 51, offset: nextOffset});
-        if (!data || closed) {
-            previous.disabled = offset === 0;
-            next.disabled = select.options.length < 50;
-            select.disabled = false;
+        if (!alive() || request !== sequence) {
+            return;
+        }
+        if (!data) {
+            refreshControls();
+            showRetry(() => load(nextOffset));
             return;
         }
         offset = nextOffset;
         select.innerHTML = data.versions.slice(0, 50).map((version) => `<option value="${escapeAttr(version.revisionID)}"${version.deleted ? " disabled" : ""}>${escapeHtml(new Date(version.updatedAt).toLocaleString())}${version.revisionID === current.revision.revisionID ? ` - ${lang.currentVer}` : ""}</option>`).join("");
-        previous.disabled = offset === 0;
-        next.disabled = data.versions.length <= 50;
-        select.disabled = false;
+        hasNext = data.versions.length > 50;
+        refreshControls();
         await preview();
     };
     select.addEventListener("change", preview);
@@ -159,10 +193,14 @@ ${renderSourceHistoryConfiguration(item.revision.payload.generationConfig, ids, 
     next.addEventListener("click", () => load(offset + 50));
     dialog.element.addEventListener("click", (event) => {
         const target = (event.target as HTMLElement).closest<HTMLElement>("[data-block], [data-action]");
-        if (!target) {
+        if (!target || !alive()) {
             return;
         }
-        if (target.dataset.block) {
+        if (target.dataset.action === "retry") {
+            if (!restoring) {
+                void retryAction?.();
+            }
+        } else if (target.dataset.block) {
             const doc = selected?.documents[target.dataset.block] || current.documents[target.dataset.block];
             if (doc) {
                 openDocHistory({app: window.siyuan.ws.app, id: doc.rootID, notebookId: doc.notebookID, pathString: doc.title});
@@ -174,10 +212,12 @@ ${renderSourceHistoryConfiguration(item.revision.payload.generationConfig, ids, 
         } else if (target.dataset.action === "restore" && selected && !restore.disabled) {
             const revisionID = selected.revision.revisionID;
             confirmDialog(lang.restore, lang.flashcardSourceRestoreConfirm, async () => {
-                if (closed) {
+                if (!alive() || restoring || selected?.revision.revisionID !== revisionID || restore.disabled) {
                     return;
                 }
-                restore.disabled = true;
+                restoring = true;
+                clearRetry();
+                refreshControls();
                 if (!restoreRequests.has(revisionID)) {
                     restoreRequests.set(revisionID, {
                         operationID: genUUID(), sourceID, revisionID,
@@ -185,11 +225,14 @@ ${renderSourceHistoryConfiguration(item.revision.payload.generationConfig, ids, 
                     });
                 }
                 const result = await requestData<ISourceRevision>("/api/flashcard/restoreSourceHistory", restoreRequests.get(revisionID));
+                restoring = false;
                 if (result) {
-                    dialog.destroy();
+                    if (alive()) {
+                        dialog.destroy();
+                    }
                     changed();
-                } else if (!closed) {
-                    restore.disabled = false;
+                } else if (alive()) {
+                    refreshControls();
                 }
             });
         }

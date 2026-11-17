@@ -2532,6 +2532,8 @@
 	"new": "Baru",
 	"share2LiandiConfirmTip": "Apakah Anda yakin ingin <b>menerbitkan</b> dokumen ini ke <a href=\"${accountServer}\" target=\"_blank\">komunitas</a>?<br>Setelah diterbitkan, semua orang akan dapat melihat dokumen ini, harap pastikan tidak mengandung informasi sensitif",
 	"share2Liandi": "Bagikan ke komunitas",
+	"flashcardNoEligibleCards": "Saat ini tidak ada kartu yang tersedia untuk ditinjau dalam cakupan belajar ini.",
+	"flashcardNoEligibleCardsTip": "Tinjauan normal bergantung pada waktu jatuh tempo, batas harian, dan status kartu. Tidak adanya kartu yang tersedia bukan berarti semua kartu telah dipelajari.",
 	"noDueCard": "Kerja bagus! Tidak ada tugas ulasan lagi saat ini, periksa kembali nanti!",
 	"createDeck": "Buat Dek",
 	"addDeck": "Tambahkan ke dek",

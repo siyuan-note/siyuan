@@ -517,8 +517,10 @@ const openFlashcardV2SessionTags = (targetType: "source" | "card", targetID: str
     });
 };
 
-const sessionCompletionContent = (canUndo: boolean, weakCount = 0) => `<div class="card__empty-icon">🔮</div>
-<span>${window.siyuan.languages.noDueCard}</span>
+const sessionCompletionContent = (canUndo: boolean, reviewMode: IFlashcardV2ReviewSessionOptions["reviewMode"],
+    weakCount = 0) => `<div class="card__empty-icon">🔮</div>
+<span>${escapeHtml(window.siyuan.languages.flashcardNoEligibleCards)}</span>
+${reviewMode === "normal" ? `<span class="ft__on-surface">${escapeHtml(window.siyuan.languages.flashcardNoEligibleCardsTip)}</span>` : ""}
 ${weakCount ? `<div class="fn__hr"></div><span class="ft__on-surface">${window.siyuan.languages.flashcardReviewReinforcementTip}</span>` : ""}
 <span class="card__v2-completion-actions"><button data-type="pending-edits" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardPendingEdits}</button>${weakCount ? `<button data-type="practice-weak" class="b3-button b3-button--outline">${escapeHtml(window.siyuan.languages.flashcardRetryWeak.replace("${count}", weakCount.toString()))}</button>` : ""}${canUndo ? `<button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button>` : ""}<button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.flashcardFinishSession}</button></span>`;
 
@@ -969,7 +971,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     const completionDialog = createSessionSurface({
                         title: name,
                         width: isMobile() ? "92vw" : "520px",
-                        content: `<div class="b3-dialog__content card__empty card__empty--space card__v2-completion">${sessionCompletionContent(false)}</div>`,
+                        content: `<div class="b3-dialog__content card__empty card__empty--space card__v2-completion">${sessionCompletionContent(false, options.reviewMode)}</div>`,
                     }, mount);
                     completionDialog.element.setAttribute("data-flashcard-v2-review", "");
                     completionDialog.element.querySelector('[data-type="finish"]').addEventListener("click", () =>
@@ -1138,7 +1140,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 dialog.element.querySelector("[data-flashcard-toolbar]").classList.add("fn__none");
                 contentElement.querySelector("[data-flashcard-context]").classList.add("fn__none");
                 frontElement.className = "card__empty card__empty--space card__v2-completion";
-                frontElement.innerHTML = sessionCompletionContent(Boolean(lastReview), weakCards.cards(queue).length);
+                frontElement.innerHTML = sessionCompletionContent(Boolean(lastReview), options.reviewMode,
+                    weakCards.cards(queue).length);
                 contentElement.querySelector("[data-flashcard-answer]").classList.add("fn__none");
                 dialog.element.querySelector('[data-flashcard-action="reveal"]').classList.add("fn__none");
                 dialog.element.querySelector('[data-flashcard-action="ratings"]').classList.add("fn__none");

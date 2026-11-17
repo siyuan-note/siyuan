@@ -2532,6 +2532,8 @@
 	"new": "Nowy",
 	"share2LiandiConfirmTip": "Czy na pewno chcesz <b>opublikować</b> ten dokument w <a href=\"${accountServer}\" target=\"_blank\">społeczności</a>?<br>Po opublikowaniu wszyscy będą mogli zobaczyć ten dokument, upewnij się, że nie zawiera on poufnych informacji",
 	"share2Liandi": "Udostępnij społeczności",
+	"flashcardNoEligibleCards": "W tym zakresie nauki nie ma obecnie kart dostępnych do powtórki.",
+	"flashcardNoEligibleCardsTip": "Zwykłe powtórki zależą od terminów, dziennych limitów i stanu kart. Brak dostępnych kart nie oznacza, że wszystkie karty zostały już opanowane.",
 	"noDueCard": "Świetna robota! Obecnie nie ma więcej zadań do przeglądu, sprawdź później!",
 	"createDeck": "Utwórz talię",
 	"addDeck": "Dodaj do talii",

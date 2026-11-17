@@ -2532,6 +2532,8 @@
 	"new": "Novo",
 	"share2LiandiConfirmTip": "<b>Objaviti</b> ovaj dokument u <a href=\"${accountServer}\" target=\"_blank\">zajednici</a>?<br>Kada se objavi, svi će moći da ga vide; proverite da sadržaj nije osetljiv",
 	"share2Liandi": "Podeli sa zajednicom",
+	"flashcardNoEligibleCards": "У тренутном опсегу учења сада нема картица доступних за понављање.",
+	"flashcardNoEligibleCardsTip": "Редовно понављање зависи од заказаног времена, дневних ограничења и стања картица. Ако нема доступних картица, то не значи да су све картице научене.",
 	"noDueCard": "Odlično! Trenutno nema više zadataka za ponavljanje, svrati kasnije!",
 	"createDeck": "Napravi špil",
 	"addDeck": "Dodaj u špil",

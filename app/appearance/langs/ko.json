@@ -2532,6 +2532,8 @@
 	"new": "새로 만들기",
 	"share2LiandiConfirmTip": "이 문서를 <a href=\"${accountServer}\" target=\"_blank\">커뮤니티</a>에 <b>게시</b>하시겠습니까?<br>게시되면 누구나 이 문서를 볼 수 있습니다. 민감한 정보가 포함되어 있지 않은지 확인하세요",
 	"share2Liandi": "커뮤니티에 공유",
+	"flashcardNoEligibleCards": "현재 학습 범위에 지금 복습할 수 있는 카드가 없습니다.",
+	"flashcardNoEligibleCardsTip": "일반 복습은 복습 예정 시간, 일일 한도 및 카드 상태에 따라 제한됩니다. 복습할 카드가 없다고 해서 모든 카드의 학습이 끝난 것은 아닙니다.",
 	"noDueCard": "잘하셨습니다! 현재 복습 작업이 더 이상 없습니다. 나중에 다시 확인하세요!",
 	"createDeck": "덱 만들기",
 	"addDeck": "덱에 추가",

@@ -2532,6 +2532,8 @@
 	"new": "Nieuw",
 	"share2LiandiConfirmTip": "Weet u zeker dat u dit document <b>openbaar</b> wilt delen naar de <a href=\"${accountServer}\" target=\"_blank\">community</a>?<br>Na publicatie kan iedereen dit document bekijken. Zorg dat het geen gevoelige informatie bevat",
 	"share2Liandi": "Delen naar community",
+	"flashcardNoEligibleCards": "Binnen dit studiegebied zijn momenteel geen kaarten beschikbaar om te herhalen.",
+	"flashcardNoEligibleCardsTip": "Normaal herhalen hangt af van geplande tijden, dagelijkse limieten en de kaartstatus. Geen beschikbare kaarten betekent niet dat alle kaarten zijn geleerd.",
 	"noDueCard": "Goed gedaan! Er zijn momenteel geen herhalingstaken meer; kom later terug!",
 	"createDeck": "Kaartspel aanmaken",
 	"addDeck": "Aan kaartspel",

@@ -2532,6 +2532,8 @@
 	"new": "Yeni",
 	"share2LiandiConfirmTip": "Bu belgeyi <a href=\"${accountServer}\" target=\"_blank\">topluluğa</a> <b>yayınlamak</b> istediğine emin misin?<br>Yayınlandıktan sonra herkes bu belgeyi görebilir, lütfen hassas bilgi içermediğinden emin ol",
 	"share2Liandi": "Toplulukta paylaş",
+	"flashcardNoEligibleCards": "Mevcut çalışma kapsamında şu anda tekrarlanabilecek kart yok.",
+	"flashcardNoEligibleCardsTip": "Normal tekrar; zamanı gelen kartlara, günlük sınırlara ve kart durumuna bağlıdır. Kullanılabilir kart olmaması, tüm kartların öğrenildiği anlamına gelmez.",
 	"noDueCard": "Harika! Şu anda gözden geçirilecek kart kalmadı, sonra tekrar kontrol et!",
 	"createDeck": "Deste oluştur",
 	"addDeck": "Desteye ekle",

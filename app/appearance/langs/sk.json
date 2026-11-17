@@ -2532,6 +2532,8 @@
 	"new": "Nový",
 	"share2LiandiConfirmTip": "Naozaj chcete <b>publikovať</b> tento dokument do <a href=\"${accountServer}\" target=\"_blank\">komunity</a>?<br>Po publikovaní ho bude môcť zobraziť každý, uistite sa, že neobsahuje citlivé informácie",
 	"share2Liandi": "Zdieľať do komunity",
+	"flashcardNoEligibleCards": "V tomto rozsahu učenia momentálne nie sú dostupné žiadne karty na opakovanie.",
+	"flashcardNoEligibleCardsTip": "Bežné opakovanie závisí od termínov, denných limitov a stavu kariet. Ak nie sú dostupné žiadne karty, neznamená to, že ste sa už naučili všetky karty.",
 	"noDueCard": "Skvelá práca! Žiadne ďalšie karty na opakovanie.",
 	"createDeck": "Vytvoriť balíček",
 	"addDeck": "Pridať do balíčka",

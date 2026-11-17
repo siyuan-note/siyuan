@@ -2532,6 +2532,8 @@
 	"new": "Nuevo",
 	"share2LiandiConfirmTip": "¿Estás seguro de que deseas <b>publicar</b> este documento en la <a href=\"${accountServer}\" target=\"_blank\">comunidad</a>?<br>Después de la publicación, todos podrán ver este documento, asegúrate de que no contenga información confidencial",
 	"share2Liandi": "Compartir con comunidad",
+	"flashcardNoEligibleCards": "No hay tarjetas disponibles para repasar ahora en este ámbito de estudio.",
+	"flashcardNoEligibleCardsTip": "El repaso normal depende de las fechas previstas, los límites diarios y el estado de las tarjetas. Que no haya tarjetas disponibles no significa que se hayan aprendido todas.",
 	"noDueCard": "¡Buen trabajo! No hay más tareas de revisión en este momento, ¡vuelve a comprobar más tarde!",
 	"createDeck": "Crear mazo",
 	"addDeck": "Añadir al mazo",

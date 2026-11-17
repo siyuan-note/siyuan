@@ -2532,6 +2532,8 @@
 	"new": "Nuovo",
 	"share2LiandiConfirmTip": "Sei sicuro di voler <b>pubblicare</b> questo documento nella <a href=\"${accountServer}\" target=\"_blank\">comunità</a>?<br>Dopo la pubblicazione, tutti potranno visualizzare questo documento, assicurati che non contenga informazioni riservate",
 	"share2Liandi": "Condividi con la comunità",
+	"flashcardNoEligibleCards": "Al momento non ci sono schede disponibili per il ripasso in questo ambito di studio.",
+	"flashcardNoEligibleCardsTip": "Il ripasso normale dipende dalle scadenze, dai limiti giornalieri e dallo stato delle schede. L’assenza di schede disponibili non significa che siano state imparate tutte.",
 	"noDueCard": "Ottimo lavoro! Non ci sono altre attività di revisione al momento, ricontrolla più tardi!",
 	"createDeck": "Crea mazzo",
 	"addDeck": "Aggiungi al mazzo",

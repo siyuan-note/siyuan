@@ -2532,6 +2532,8 @@
 	"new": "新建",
 	"share2LiandiConfirmTip": "確定將該文件<b>公開</b>分享到<a href=\"${accountServer}\" target=\"_blank\">社區</a>嗎？<br>公開分享後所有人都可以查看該文件，請確保文件內容不包含敏感信息",
 	"share2Liandi": "分享到社區",
+	"flashcardNoEligibleCards": "目前學習範圍內暫無可複習卡片。",
+	"flashcardNoEligibleCardsTip": "正常複習受到期時間、每日限額和卡片狀態限制；暫無可複習卡片不代表所有卡片都已學完。",
 	"noDueCard": "幹得漂亮！目前已經沒有更多複習任務，過一會再來看看吧！",
 	"createDeck": "建立卡包",
 	"addDeck": "加入卡包",

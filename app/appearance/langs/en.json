@@ -2532,6 +2532,8 @@
 	"new": "New",
 	"share2LiandiConfirmTip": "Are you sure you want to <b>publish</b> this document to the <a href=\"${accountServer}\" target=\"_blank\">community</a>?<br>Once published, everyone will be able to view this document, please ensure it does not contain sensitive information",
 	"share2Liandi": "Share to community",
+	"flashcardNoEligibleCards": "No cards are currently available for review in this study scope.",
+	"flashcardNoEligibleCardsTip": "Normal review depends on due times, daily limits, and card status. No available cards does not mean all cards have been learned.",
 	"noDueCard": "Great job! There are no more review tasks at the moment, check back later!",
 	"createDeck": "Create Deck",
 	"addDeck": "Add to deck",

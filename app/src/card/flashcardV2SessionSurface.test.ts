@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {getFlashcardLocateBlockID, isCurrentFlashcardLocateTarget, setFlashcardLocateBlockID} from "./flashcardLocate";
+import {escapeHtml} from "../util/escape";
 
 const loadSurface = (globals: Record<string, unknown>) => {
     const path = "src/card/flashcardV2Session.ts";
@@ -137,6 +138,7 @@ test("real waiting completion chain clears the previous locate target and invali
         let waitingClears = 0;
         const globals: Record<string, unknown> = {
             due, queue: [{}], index: 0, completedPending: false, renderPending: false, renderGeneration: 7,
+            options: {reviewMode: "normal"},
             requestPending: false, waitingTimer: undefined, lastReview: undefined,
             dialog: {element}, setFlashcardLocateBlockID,
             outline: {update: () => { outlineResets++; }}, clearWaiting: () => { waitingClears++; },
@@ -158,4 +160,38 @@ test("real waiting completion chain clears the previous locate target and invali
         assert.equal(globals.index, 1);
         assert.equal(label.textContent, due ? "Next in 1:00" : "Loading");
     }
+});
+
+test("v2 completion explains normal eligibility without changing buttons or claiming all cards learned", () => {
+    const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
+    const start = source.indexOf("const sessionCompletionContent =");
+    const end = source.indexOf("const sessionContent =", start);
+    assert.ok(start > 0 && end > start);
+    const script = transpileModule(`${source.slice(start, end)}\nsessionCompletionContent(canUndo, mode, weakCount);`, {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
+    for (const mode of ["normal", "reinforcement"]) {
+        for (const canUndo of [false, true]) {
+            for (const weakCount of [0, 2]) {
+                const html = runInNewContext(script, {mode, canUndo, weakCount, escapeHtml,
+                    window: {siyuan: {languages: {
+                        noDueCard: "OLD_ALL_DONE", flashcardNoEligibleCards: "No cards <now>",
+                        flashcardNoEligibleCardsTip: "Eligibility <rules>", flashcardReviewReinforcementTip: "Practice tip",
+                        flashcardRetryWeak: "Retry ${count}", flashcardPendingEdits: "Pending",
+                        flashcardFinishSession: "Finish", undo: "Undo",
+                    }}},
+                }) as string;
+                assert.ok(html.includes(escapeHtml("No cards <now>")));
+                assert.equal(html.includes(escapeHtml("Eligibility <rules>")), mode === "normal");
+                assert.doesNotMatch(html, /OLD_ALL_DONE/);
+                assert.match(html, /data-type="pending-edits"/);
+                assert.match(html, /data-type="finish"/);
+                assert.equal(html.includes('data-type="undo-review"'), canUndo);
+                assert.equal(html.includes('data-type="practice-weak"'), weakCount > 0);
+                assert.equal(html.includes("Practice tip"), weakCount > 0);
+            }
+        }
+    }
+    assert.match(source, /sessionCompletionContent\(false, options.reviewMode\)/);
+    assert.match(source, /sessionCompletionContent\(Boolean\(lastReview\), options.reviewMode,/);
 });

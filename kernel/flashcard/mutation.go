@@ -42,6 +42,12 @@ func (store *Store) MutateEntities(ctx context.Context, operationID string,
 	mutations []EntityMutation) (EntityMutationResult, error) {
 	store.mu.Lock()
 	defer store.mu.Unlock()
+	return store.mutateEntitiesLocked(ctx, operationID, mutations)
+}
+
+// mutateEntitiesLocked 要求调用方持有 store.mu，保证读取与提交使用同一串行边界。
+func (store *Store) mutateEntitiesLocked(ctx context.Context, operationID string,
+	mutations []EntityMutation) (EntityMutationResult, error) {
 	if store.closed {
 		return EntityMutationResult{}, errors.New("flashcard store is closed")
 	}

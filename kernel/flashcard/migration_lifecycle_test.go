@@ -5,6 +5,7 @@
 package flashcard
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"path/filepath"
@@ -24,6 +25,19 @@ func TestLegacyMigrationActivationAndDivergenceAreImmutableAndIdempotent(t *test
 	writeMsgpack(t, cardsPath, map[string]*riff.FSRSCard{
 		"legacy-lifecycle": legacyFSRSCard("legacy-lifecycle", "block-lifecycle", 1785900000000, 3),
 	})
+	logsPath := filepath.Join(legacyRoot, "logs", "202608.msgpack")
+	writeMsgpack(t, logsPath, []*riff.Log{
+		{ID: "log-lifecycle", CardID: "legacy-lifecycle", Rating: riff.Good, ScheduledDays: 3,
+			ElapsedDays: 2, Reviewed: 1785900000, State: riff.Review},
+	})
+	inputs := make(map[string][]byte)
+	for _, path := range []string{filepath.Join(legacyRoot, "deck-lifecycle.deck"), cardsPath, logsPath} {
+		data, readErr := os.ReadFile(path)
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		inputs[path] = data
+	}
 	weights := fsrs.DefaultWeights()
 	plan, err := PrepareLegacyMigration(ctx, legacyRoot, LegacyMigrationOptions{
 		RequestRetention: 0.9, MaximumInterval: 36500, Weights: append([]float64(nil), weights[:]...),
@@ -58,6 +72,16 @@ func TestLegacyMigrationActivationAndDivergenceAreImmutableAndIdempotent(t *test
 	if retry.PreparedBatch.BatchID != first.PreparedBatch.BatchID ||
 		retry.ActivationBatch.BatchID != first.ActivationBatch.BatchID {
 		t.Fatal("migration activation retry created different authority batches")
+	}
+	for path, before := range inputs {
+		after, readErr := os.ReadFile(path)
+		if readErr != nil || !bytes.Equal(before, after) {
+			t.Fatalf("legacy input changed during preparation, activation or retry: path=%s err=%v", path, readErr)
+		}
+	}
+	var historyCount int
+	if err = store.Projection().db.QueryRowContext(ctx, "SELECT COUNT(*) FROM review_events").Scan(&historyCount); err != nil || historyCount != 1 {
+		t.Fatalf("legacy review history lost or duplicated during activation retry: count=%d err=%v", historyCount, err)
 	}
 
 	data, err := os.ReadFile(cardsPath)

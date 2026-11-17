@@ -2,7 +2,7 @@ import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchPost} from "../util/fetch";
 import {escapeAttr, escapeHtml} from "../util/escape";
-import {genUUID} from "../util/genID";
+import {createFlashcardV2Operation} from "./flashcardV2Form";
 
 interface IInvalidSource {
     sourceID: string;
@@ -18,14 +18,22 @@ export const openFlashcardV2Cleanup = (onChanged: () => void) => {
     let changed = false;
     let busy = false;
     let sources: IInvalidSource[] = [];
+    const operationFor = createFlashcardV2Operation();
+    const notifyChanged = () => {
+        if (changed) {
+            changed = false;
+            onChanged();
+        }
+    };
     const dialog = new Dialog({
         title: lang.flashcardCleanup,
         width: "min(900px, 96vw)",
         height: "min(700px, 90vh)",
-        destroyCallback: () => {
+        beforeClose: () => {
             closed = true;
-            if (changed) { onChanged(); }
+            return true;
         },
+        destroyCallback: notifyChanged,
         content: `<div class="b3-dialog__content card__v2-panel">
 <div class="ft__secondary">${lang.flashcardCleanupTip}</div>
 <div class="card__v2-panel-toolbar">
@@ -58,19 +66,31 @@ export const openFlashcardV2Cleanup = (onChanged: () => void) => {
             .replace("${cards}", selection.reduce((sum, source) => sum + source.cardCount, 0).toString());
     };
     const scan = async () => {
+        if (closed || busy) { return; }
         busy = true;
+        let succeeded = false;
+        result.textContent = "";
         refresh();
-        await fetchPost("/api/flashcard/inspectInvalidSources", {}, (response) => {
-            if (closed) { return; }
-            sources = response.data.sources;
-            list.innerHTML = sources.map((source) => `<li class="b3-list-item">
+        try {
+            await fetchPost("/api/flashcard/inspectInvalidSources", {}, (response) => {
+                if (closed) { return; }
+                sources = response.data.sources;
+                list.innerHTML = sources.map((source) => `<li class="b3-list-item">
 ${source.reason === "missing" ? `<input type="checkbox" data-id="${escapeAttr(source.sourceID)}" aria-label="${escapeAttr(source.sourceID)}" class="b3-list-item__graphic">` : ""}
-<span class="b3-list-item__text">${escapeHtml(source.blockIDs.join(", "))}<br><span class="ft__secondary">${escapeHtml(source.sourceID)}</span></span>
-<span class="b3-list-item__meta">${source.cardCount}</span><span class="fn__space"></span>
-<span>${source.reason === "missing" ? lang.flashcardCleanupMissing : source.reason === "closed" ? lang.flashcardCleanupClosed : lang.flashcardCleanupUnknown}</span></li>`).join("") || `<li class="b3-list-item">${lang.emptyContent}</li>`;
-        });
-        busy = false;
-        if (!closed) { refresh(); }
+<div class="fn__flex-1"><div>${source.reason === "missing" ? lang.flashcardCleanupMissing : source.reason === "closed" ? lang.flashcardCleanupClosed : lang.flashcardCleanupUnknown}</div>
+<details><summary>${lang.flashcardCardSource}</summary><div class="ft__breakword">${escapeHtml(source.sourceID)}<br>${source.blockIDs.map(id => escapeHtml(id)).join("<br>")}</div></details></div>
+<span class="b3-list-item__meta">${lang.riffCard} ${source.cardCount}</span></li>`).join("") || `<li class="b3-list-item">${lang.emptyContent}</li>`;
+                succeeded = true;
+            }, undefined, undefined, undefined, 30000);
+        } catch (error) {
+            console.warn(error);
+        } finally {
+            busy = false;
+            if (!closed) {
+                if (!succeeded) { result.textContent = lang.flashcardCleanupUnknown; }
+                refresh();
+            }
+        }
     };
     all.addEventListener("change", () => {
         list.querySelectorAll<HTMLInputElement>("input").forEach((input) => { input.checked = all.checked; });
@@ -83,27 +103,46 @@ ${source.reason === "missing" ? `<input type="checkbox" data-id="${escapeAttr(so
         confirmDialog(lang.deleteOpConfirm, `${lang.flashcardCleanupTip}<br>${escapeHtml(dialog.element.querySelector("[data-summary]").textContent)}`, async () => {
             if (closed || busy) { return; }
             busy = true;
+            let succeeded = false;
+            result.textContent = "";
             refresh();
-            await fetchPost("/api/flashcard/deleteInvalidSources", {
-                operationID: genUUID(),
-                sources: selection,
-            }, (response) => {
-                const deleted = new Set<string>(response.data.deleted);
-                if (deleted.size > 0) {
+            const identity = selection.map(({sourceID, revisionID, blockIDs, cardCount, reason}) =>
+                ({sourceID, revisionID, blockIDs, cardCount, reason}))
+                .sort((a, b) => a.sourceID.localeCompare(b.sourceID));
+            try {
+                await fetchPost("/api/flashcard/deleteInvalidSources", {
+                    operationID: operationFor(identity).operationID,
+                    sources: selection,
+                }, (response) => {
+                    succeeded = true;
+                    const deleted = new Set<string>(response.data.deleted);
+                    if (deleted.size > 0) {
+                        changed = true;
+                        if (closed) { notifyChanged(); }
+                    }
+                    if (closed) { return; }
+                    sources = sources.filter((source) => !deleted.has(source.sourceID));
+                    list.querySelectorAll<HTMLInputElement>("input").forEach((input) => {
+                        if (deleted.has(input.dataset.id)) { input.closest("li").remove(); }
+                        input.checked = false;
+                    });
+                    result.textContent = lang.flashcardCleanupResult.replace("${deleted}", deleted.size.toString())
+                        .replace("${skipped}", response.data.skipped.length.toString());
+                }, undefined, undefined, undefined, 30000);
+            } catch (error) {
+                console.warn(error);
+            } finally {
+                busy = false;
+                if (!succeeded) {
+                    // 超时不代表服务端未删除，关闭后重新读取实际状态。
                     changed = true;
-                    if (closed) { onChanged(); }
+                    if (closed) { notifyChanged(); }
                 }
-                if (closed) { return; }
-                sources = sources.filter((source) => !deleted.has(source.sourceID));
-                list.querySelectorAll<HTMLInputElement>("input").forEach((input) => {
-                    if (deleted.has(input.dataset.id)) { input.closest("li").remove(); }
-                    input.checked = false;
-                });
-                result.textContent = lang.flashcardCleanupResult.replace("${deleted}", deleted.size.toString())
-                    .replace("${skipped}", response.data.skipped.length.toString());
-            });
-            busy = false;
-            if (!closed) { refresh(); }
+                if (!closed) {
+                    if (!succeeded) { result.textContent = `${lang.flashcardCleanupUnknown} · ${lang.refresh}`; }
+                    refresh();
+                }
+            }
         });
     });
     void scan();

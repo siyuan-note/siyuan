@@ -872,8 +872,13 @@ func validateFlashcardV2AdvancedSourceInput(blockIDs []string,
 	if err := validateFlashcardV2QueryBoundary(distractorQuery); err != nil {
 		return err
 	}
+	return validateFlashcardV2AdvancedSourceDOM(blockIDs, inlineOcclusions, mode, imageConfig, GetBlockDOM)
+}
+
+func validateFlashcardV2AdvancedSourceDOM(blockIDs []string, inlineOcclusions []flashcardv2.AdvancedInlineOcclusion,
+	mode string, imageConfig *flashcardv2.ImageOcclusionConfig, getDOM func(string) string) error {
 	for _, occlusion := range inlineOcclusions {
-		dom := GetBlockDOM(occlusion.BlockID)
+		dom := getDOM(occlusion.BlockID)
 		attribute := `data-occlusion-id="` + html.EscapeString(occlusion.ID) + `"`
 		if dom == "" || !strings.Contains(dom, attribute) {
 			return fmt.Errorf("flashcard inline occlusion [%s] was not found in block [%s]", occlusion.ID,
@@ -881,7 +886,7 @@ func validateFlashcardV2AdvancedSourceInput(blockIDs []string,
 		}
 	}
 	if mode == flashcardv2.AdvancedModeImageOcclusion && imageConfig != nil && len(blockIDs) == 1 {
-		dom := GetBlockDOM(blockIDs[0])
+		dom := getDOM(blockIDs[0])
 		assetID := imageConfig.AssetID
 		if dom == "" || (!strings.Contains(dom, assetID) && !strings.Contains(dom, html.EscapeString(assetID))) {
 			return errors.New("image occlusion asset does not belong to the source block")

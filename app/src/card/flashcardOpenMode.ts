@@ -15,5 +15,5 @@ export const createFlashcardReviewTabData = (reviewSetID: string, title: string,
     title,
     // 单个复习集标识还用于会话策略和插件事件，随页签完整保留。
     ...(reviewSetID ? {reviewSetID} : {}),
-    review: {...options},
+    review: structuredClone(options),
 });

@@ -1,4 +1,5 @@
 import {Dialog} from "../dialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {toggleMenu} from "../menus/menuToggle";
@@ -559,18 +560,17 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
 const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
     current: Pick<IFlashcardV2SessionQueueCard["sessionCard"], "cardID" | "optionOrder" | "dynamicOptions">,
     isCurrent: () => boolean, callback: (rendered: IFlashcardV2RenderedCard) => void,
-    unavailable: () => void, preview = false) => {
+    unavailable: () => void, preview = false,
+    draft?: {model: IFlashcardV2RenderModel, doms: Record<string, string>}) => {
     const contentElement = dialog.element.querySelector(".card__block") as HTMLElement;
     const contextElement = dialog.element.querySelector("[data-flashcard-context]") as HTMLElement;
     const frontElement = dialog.element.querySelector("[data-flashcard-front]") as HTMLElement;
     const answerElement = dialog.element.querySelector("[data-flashcard-answer]") as HTMLElement;
     setReviewActionsEnabled(dialog, false);
-    let modelLoaded = false;
-    void fetchPost("/api/flashcard/getRenderModel", {cardID: current.cardID}, (modelResponse) => {
+    const renderModel = (model: IFlashcardV2RenderModel) => {
         if (!isCurrent()) {
             return;
         }
-        const model = readFlashcardV2RenderModel(modelResponse.data);
         const dynamicReferences: IFlashcardV2SourceReference[] = (current.dynamicOptions || [])
             .filter((option) => option.entityType === "block")
             .map((option, optionIndex) => ({
@@ -583,8 +583,9 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
         const references = model.references.filter((reference) => reference.entityType === "block")
             .sort((left, right) => left.sort - right.sort);
         let blocksLoaded = false;
-        modelLoaded = true;
-        void loadFlashcardV2DOMs(model, references, (doms) => {
+        const loadDOMs = (loaded: (doms: Record<string, string>) => void) => draft ?
+            Promise.resolve().then(() => loaded(draft.doms)) : loadFlashcardV2DOMs(model, references, loaded);
+        void loadDOMs((doms) => {
             if (!isCurrent()) {
                 return;
             }
@@ -692,8 +693,11 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
                 ".card__v2-occlusion,[data-multi-line-answer],span[data-type~=mark]")]
                 .concat([...answerElement.querySelectorAll(".card__v2-anki-cloze")])
                 .map((item) => item.textContent || "");
-            renderFlashcardV2Context(model, sourceBlockID, sensitiveReferences, sensitiveTextValues, doms,
-                contextElement, isCurrent);
+            // 草稿只使用经过权限检查的快照，避免再次读取正文触发修复写回。
+            if (!draft) {
+                renderFlashcardV2Context(model, sourceBlockID, sensitiveReferences, sensitiveTextValues, doms,
+                    contextElement, isCurrent);
+            }
             callback({
                 shownAt: performance.now(),
                 model,
@@ -720,6 +724,15 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
                 unavailable();
             }
         });
+    };
+    if (draft) {
+        renderModel(structuredClone(draft.model));
+        return;
+    }
+    let modelLoaded = false;
+    void fetchPost("/api/flashcard/getRenderModel", {cardID: current.cardID}, (response) => {
+        modelLoaded = true;
+        renderModel(readFlashcardV2RenderModel(response.data));
     }).then(() => {
         if (!modelLoaded && isCurrent()) {
             unavailable();
@@ -735,7 +748,8 @@ const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2
 };
 
 // 预览仅加载渲染模型和块内容，不打开复习会话，也不发送评分或会话事件。
-export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0) => {
+export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0,
+    draft?: {models: IFlashcardV2RenderModel[], doms: Record<string, string>}) => {
     if (cardIDs.length === 0) {
         return;
     }
@@ -797,7 +811,7 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0) => {
             dialog.element.querySelector("[data-flashcard-front]").textContent = window.siyuan.languages.flashcardLoadFailed;
             show.classList.add("fn__none");
             retry.classList.remove("fn__none");
-        }, true);
+        }, true, draft ? {model: draft.models[index], doms: draft.doms} : undefined);
     };
     dialog.element.addEventListener("click", (event) => {
         const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-type]");
@@ -1401,8 +1415,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         menu.addItem({
                             id: "flashcardV2Suspend",
                             icon: current.reviewState.suspended ? "iconPlay" : "iconPause",
-                            label: current.reviewState.suspended ? window.siyuan.languages.continueReview1 :
-                                window.siyuan.languages.flashcardSuspendCard,
+                            label: current.reviewState.suspended ? window.siyuan.languages.flashcardResumeReview :
+                                window.siyuan.languages.flashcardSuspendUntilResumed,
                             click: () => current.reviewState.suspended ?
                                 manageWithoutSkipping([current.card.id], "resume", {}) :
                                 manageAndSkip([current.card.id], "suspend", {}, "userSuspended"),
@@ -1412,6 +1426,9 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                             icon: "iconPause",
                             label: window.siyuan.languages.flashcardSuspendSource,
                             click: () => {
+                                const isCurrent = () => !sessionFinished && dialog.element.isConnected &&
+                                    queue[index]?.card.id === current.card.id;
+                                if (!isCurrent() || requestPending) { return; }
                                 requestPending = true;
                                 let queried = false;
                                 void fetchPost("/api/flashcard/queryCards", {
@@ -1425,14 +1442,22 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                                     },
                                 }, (response) => {
                                     queried = true;
+                                    requestPending = false;
+                                    if (!isCurrent()) { return; }
                                     const cardIDs = (response.data.cards as Array<{ card: { id: string } }>)
                                         .map((item) => item.card.id);
                                     if (cardIDs.length === 0) {
                                         requestPending = false;
                                         return;
                                     }
-                                    manageAndSkip(cardIDs, "suspend", {}, "sourceSuspended");
-                                }).then(() => {
+                                    confirmDialog(window.siyuan.languages.flashcardSuspendSource,
+                                        `${window.siyuan.languages.flashcardSourceActionTip}<div>${window.siyuan.languages.riffCard} ${cardIDs.length}</div>`,
+                                        () => {
+                                            if (isCurrent() && !requestPending) {
+                                                manageAndSkip(cardIDs, "suspend", {}, "sourceSuspended");
+                                            }
+                                        });
+                                }, undefined, undefined, undefined, 30000).then(() => {
                                     if (!queried) {
                                         requestPending = false;
                                     }
@@ -1443,7 +1468,15 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                             id: "flashcardV2Reset",
                             icon: "iconRefresh",
                             label: window.siyuan.languages.reset,
-                            click: () => manageAndSkip([current.card.id], "reset", {}, "userReset"),
+                            click: () => {
+                                confirmDialog(window.siyuan.languages.reset,
+                                    window.siyuan.languages.resetCardTip.replace("${x}", "1"), () => {
+                                        if (!sessionFinished && dialog.element.isConnected && !requestPending &&
+                                            queue[index]?.card.id === current.card.id) {
+                                            manageAndSkip([current.card.id], "reset", {}, "userReset");
+                                        }
+                                    });
+                            },
                         });
                         menu.addItem({
                             id: "flashcardV2SetDue",

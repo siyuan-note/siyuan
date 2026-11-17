@@ -616,6 +616,13 @@ func (request *AdvancedSourceRequest) validate() error {
 		request.CreatedAt <= 0 || len(request.BlockIDs) == 0 {
 		return errors.New("advanced flashcard source requires an operation, source, blocks and time")
 	}
+	return request.validateDraft()
+}
+
+func (request *AdvancedSourceRequest) validateDraft() error {
+	if strings.TrimSpace(request.SourceID) == "" || len(request.BlockIDs) == 0 {
+		return errors.New("advanced flashcard draft requires a source and blocks")
+	}
 	if request.Mode != AdvancedModeTypedAnswer && request.TypedConfig != nil {
 		return errors.New("non-typed flashcard mode must not contain typed answer configuration")
 	}

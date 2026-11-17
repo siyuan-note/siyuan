@@ -2219,3 +2219,26 @@ var AIMemoryCancel = define[AIMemoryTaskRequest, EmptyRequest]("cancelAIMemory",
 // 可用模型使用受支持协议时，efforts 为 none、low、medium、high、xhigh、max；默认空字符串不列入其中。
 // 未选择模型、模型不可用或协议不支持时返回空数组；这些选项不保证供应商接受每个值，实际请求由协议适配器处理。
 var AIMemoryCapabilities = define[EmptyRequest, AIMemoryCapabilitiesData]("capabilitiesAIMemory", "/api/ai/memory/capabilities", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// PreviewAdvancedFlashcardSource 只读构造内置静态题型模型及普通块快照，不打开闪卡存储或迁移旧数据。
+// 来源必须存在于开放的非加密笔记本；不支持动态干扰项和插件，最多 1000 个块和变体。
+// 模型 ID 仅供草稿渲染，未保存卡片、排期、历史或会话；失败返回 code=-1 和空 data。
+var PreviewAdvancedFlashcardSource = define[FlashcardV2AdvancedPreviewRequest, FlashcardV2AdvancedPreviewData](
+	"previewAdvancedFlashcardSource", "/api/flashcard/previewAdvancedSource", AuthenticatedAccess|AdminAccess,
+	StructJSONBody, ResponseOptions{}, "POST")
+
+// ReorderAdvancedFlashcardSource 仅接受内置有序卡源的完整 StepID 排列，保留主引用、步骤身份和卡片状态。
+// 卡源及现存卡片的顺序数据在单一批次更新，不增删卡片、不改变排期和历史；不激活旧数据迁移。
+// 需当前修订、内容指纹与稳定操作 ID；初次执行前检查正文快照变化，并非跨文件系统原子 CAS。
+// 已成功的原操作可在当前权限仍允许时重放，同操作 ID 的不同顺序、修订或时间被拒绝。
+// 来源必须可访问；关闭及加密笔记本被拒绝。失败返回 code=-1 和空 data。
+var ReorderAdvancedFlashcardSource = define[FlashcardV2ReorderAdvancedSourceRequest, FlashcardV2ReorderAdvancedSourceResult](
+	"reorderAdvancedFlashcardSource", "/api/flashcard/reorderAdvancedSource", AuthenticatedAccess|AdminAccess|WritableAccess,
+	StructJSONBody, ResponseOptions{}, "POST")
+
+// GetOrderedFlashcardSourceDetails 读取同一源修订及引用的普通块快照，不写正文、不创建卡片、不主动迁移旧数据。
+// 仅支持内置有序卡源；关闭、加密、缺失或读取期间变化的来源被拒绝。返回内容指纹供初次排序提交前检查。
+// DOMs 仅供离线提取文本摘要，不应直接挂载或执行。读取会打开既有卡片存储，失败 code=-1。
+var GetOrderedFlashcardSourceDetails = define[FlashcardV2OrderedSourceDetailsRequest, FlashcardV2OrderedSourceDetails](
+	"getOrderedFlashcardSourceDetails", "/api/flashcard/getOrderedSourceDetails", AuthenticatedAccess|AdminAccess,
+	StructJSONBody, ResponseOptions{}, "POST")

@@ -31236,6 +31236,119 @@
       },
       "additionalProperties": false
     },
+    "FlashcardV2AdvancedPreviewData": {
+      "type": "object",
+      "properties": {
+        "doms": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "models": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/FlashcardV2CardRenderModel"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "doms",
+        "models"
+      ],
+      "additionalProperties": false
+    },
+    "FlashcardV2AdvancedPreviewRequestInput": {
+      "type": "object",
+      "properties": {
+        "blockIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "clozeGroups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FlashcardV2AdvancedClozeGroupInput"
+          }
+        },
+        "correctOptionIndexes": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "distractorQuery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FlashcardV2QueryASTInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dynamicDistractors": {
+          "type": "integer"
+        },
+        "imageConfig": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FlashcardV2ImageOcclusionConfigInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineOcclusions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FlashcardV2AdvancedInlineOcclusionInput"
+          }
+        },
+        "mode": {
+          "type": "string"
+        },
+        "randomizeOptions": {
+          "type": "boolean"
+        },
+        "sourceID": {
+          "type": "string"
+        },
+        "typedConfig": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FlashcardV2TypedAnswerConfigInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "blockIDs",
+        "mode",
+        "sourceID"
+      ],
+      "additionalProperties": false
+    },
     "FlashcardV2AdvancedSourceRequestInput": {
       "type": "object",
       "properties": {
@@ -34096,6 +34209,62 @@
       ],
       "additionalProperties": false
     },
+    "FlashcardV2OrderedSourceDetails": {
+      "type": "object",
+      "properties": {
+        "contentFingerprint": {
+          "type": "string"
+        },
+        "doms": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "references": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/FlashcardV2CardSourceRef"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sourceRevision": {
+          "$ref": "#/$defs/FlashcardV2EntityRevision"
+        }
+      },
+      "required": [
+        "contentFingerprint",
+        "doms",
+        "references",
+        "sourceRevision"
+      ],
+      "additionalProperties": false
+    },
+    "FlashcardV2OrderedSourceDetailsRequestInput": {
+      "type": "object",
+      "properties": {
+        "sourceID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "sourceID"
+      ],
+      "additionalProperties": false
+    },
     "FlashcardV2PreviewFlashcardReviewSetRequestInput": {
       "type": "object",
       "properties": {
@@ -34325,6 +34494,71 @@
         "created",
         "unchanged",
         "updated"
+      ],
+      "additionalProperties": false
+    },
+    "FlashcardV2ReorderAdvancedSourceRequestInput": {
+      "type": "object",
+      "properties": {
+        "contentFingerprint": {
+          "type": "string"
+        },
+        "expectedRevisionID": {
+          "type": "string"
+        },
+        "operationID": {
+          "type": "string"
+        },
+        "orderedStepIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sourceID": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "contentFingerprint",
+        "expectedRevisionID",
+        "operationID",
+        "orderedStepIDs",
+        "sourceID",
+        "updatedAt"
+      ],
+      "additionalProperties": false
+    },
+    "FlashcardV2ReorderAdvancedSourceResult": {
+      "type": "object",
+      "properties": {
+        "batch": {
+          "$ref": "#/$defs/FlashcardV2OperationBatch"
+        },
+        "sourceRevision": {
+          "$ref": "#/$defs/FlashcardV2EntityRevision"
+        },
+        "updatedCardIDs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "batch",
+        "sourceRevision",
+        "updatedCardIDs"
       ],
       "additionalProperties": false
     },
@@ -170674,6 +170908,85 @@
     },
     {
       "method": "POST",
+      "path": "/api/flashcard/getOrderedSourceDetails",
+      "handler": "getOrderedFlashcardSourceDetails",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/FlashcardV2OrderedSourceDetailsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/FlashcardV2OrderedSourceDetails"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/flashcard/getRenderModel",
       "handler": "getFlashcardRenderModel",
       "authorization": [
@@ -171643,6 +171956,85 @@
     },
     {
       "method": "POST",
+      "path": "/api/flashcard/previewAdvancedSource",
+      "handler": "previewAdvancedFlashcardSource",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/FlashcardV2AdvancedPreviewRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/FlashcardV2AdvancedPreviewData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/flashcard/previewAnkiPackage",
       "handler": "previewAnkiFlashcardPackage",
       "authorization": [
@@ -171983,6 +172375,86 @@
               },
               "data": {
                 "$ref": "#/$defs/FlashcardV2ReconcileResult"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/flashcard/reorderAdvancedSource",
+      "handler": "reorderAdvancedFlashcardSource",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/FlashcardV2ReorderAdvancedSourceRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/FlashcardV2ReorderAdvancedSourceResult"
               },
               "msg": {
                 "type": "string"

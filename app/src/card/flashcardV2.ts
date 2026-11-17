@@ -1,4 +1,11 @@
+import {openFlashcardV2Template} from "./flashcardV2Template";
+import {openFlashcardV2Ordered} from "./flashcardV2Ordered";
 import {Dialog} from "../dialog";
+import {FlashcardV2DraftPreview} from "./flashcardV2DraftPreview";
+import {FlashcardV2TagSave} from "./flashcardV2TagSave";
+import {readFlashcardV2RenderModel} from "./flashcardV2Render";
+import {FlashcardV2ManagementView} from "./flashcardV2ManagementView";
+import {flashcardV2ConflictSummary, FlashcardV2ConflictProgress} from "./flashcardV2ConflictSummary";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
@@ -263,6 +270,7 @@ interface IFlashcardManagementFilters {
     sourceType?: string;
     templateID?: string;
     tagID?: string;
+    tagScope?: string;
     flag?: string;
     generationStatus?: string;
     reviewState?: string;
@@ -392,20 +400,18 @@ export const ensureFlashcardV2 = (callback: () => void) => {
 };
 
 const renderReviewSet = (revision: IFlashcardEntityRevision<IReviewSet>, summary?: IFlashcardReviewSetSummary) => {
-    const summaryHTML = summary ? `<span class="b3-list-item__meta b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.riffCard}">${summary.cards}</span>
-<span class="b3-list-item__meta b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDueCard}">${summary.due}</span>
-<span class="b3-list-item__meta b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.new}">${summary.included}</span>
-<span class="b3-list-item__meta b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">${summary.excluded}</span>` : "";
-    return `<li class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${escapeAttr(revision.entityID)}" data-revision="${escapeAttr(revision.revisionID)}" data-review-mode="${escapeAttr(revision.payload.defaultReviewMode || "normal")}">
+    const summaryHTML = summary ? `<span class="b3-list-item__meta">${window.siyuan.languages.riffCard} ${summary.cards}</span>
+<span class="b3-list-item__meta">${window.siyuan.languages.flashcardDueCard} ${summary.due}</span>` : "";
+    return `<li class="b3-list-item b3-list-item--narrow card__v2-review-set" data-id="${escapeAttr(revision.entityID)}" data-revision="${escapeAttr(revision.revisionID)}" data-review-mode="${escapeAttr(revision.payload.defaultReviewMode || "normal")}">
 <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg>
-<span class="b3-list-item__text">${escapeHtml(revision.payload.name)}</span>
+<button type="button" data-type="cards" class="b3-list-item__text">${escapeHtml(revision.payload.name)}</button>
 <span class="b3-list-item__meta">${revision.payload.defaultReviewMode === "reinforcement" ? window.siyuan.languages.flashcardReviewReinforcement : window.siyuan.languages.flashcardReviewNormal}</span>
 ${revision.payload.queryAST ? `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href="#iconFilter"></use></svg></span>` : ""}
 ${summaryHTML}
-<span data-type="review" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.continueReview1}"><svg><use xlink:href="#iconPlay"></use></svg></span>
-<span data-type="statistics" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardStatistics}"><svg><use xlink:href="#iconGraph"></use></svg></span>
-<span data-type="edit" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></span>
-<span data-type="delete" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
+<button type="button" data-type="review" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.continueReview1}"><svg><use xlink:href="#iconPlay"></use></svg></button>
+<button type="button" data-type="statistics" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardStatistics}"><svg><use xlink:href="#iconGraph"></use></svg></button>
+<button type="button" data-type="edit" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
+<button type="button" data-type="delete" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
 </li>`;
 };
 
@@ -430,7 +436,8 @@ const editableReviewSetPredicates: Record<string, string> = {
 const isEditableReviewSetPredicate = (expression: IFlashcardQueryExpression): expression is
     IFlashcardQueryExpression & { field: string, value: string } => expression.operator === "predicate" &&
         typeof expression.field === "string" && typeof expression.value === "string" &&
-        editableReviewSetPredicates[expression.field] === expression.comparator;
+        (editableReviewSetPredicates[expression.field] === expression.comparator ||
+            expression.field === "tagID" && expression.comparator === "descendantOf");
 
 const reviewSetPredicateValues = (query?: IFlashcardQueryAST) => {
     const ret: Record<string, string> = {};
@@ -441,6 +448,9 @@ const reviewSetPredicateValues = (query?: IFlashcardQueryAST) => {
     expressions.forEach((expression) => {
         if (isEditableReviewSetPredicate(expression)) {
             ret[expression.field] = expression.value;
+            if (expression.field === "tagID") {
+                ret.tagScope = expression.comparator === "descendantOf" ? "descendantOf" : "";
+            }
         }
     });
     return ret;
@@ -458,7 +468,8 @@ const reviewSetQuery = (values: Record<string, string>, base?: IFlashcardQueryAS
         predicates.push({operator: "predicate", field: "path", comparator: "startsWith", value: values.path});
     }
     if (values.tagID) {
-        predicates.push({operator: "predicate", field: "tagID", comparator: "equal", value: values.tagID});
+        predicates.push({operator: "predicate", field: "tagID",
+            comparator: values.tagScope === "descendantOf" ? "descendantOf" : "equal", value: values.tagID});
     }
     if (values.priority) {
         predicates.push({operator: "predicate", field: "priority", comparator: "equal", value: values.priority});
@@ -512,7 +523,7 @@ const flashcardManagementQuery = (filters: IFlashcardManagementFilters): IFlashc
         add("templateID", "equal", filters.templateID);
     }
     if (filters.tagID) {
-        add("tagID", "equal", filters.tagID);
+        add("tagID", filters.tagScope === "descendantOf" ? "descendantOf" : "equal", filters.tagID);
     }
     if (filters.flag !== undefined && filters.flag !== "") {
         add("flag", "equal", Number(filters.flag));
@@ -569,7 +580,7 @@ const flashcardManagementQuery = (filters: IFlashcardManagementFilters): IFlashc
 };
 
 const flashcardManagementFilterCount = (filters: IFlashcardManagementFilters) =>
-    Object.entries(filters).filter(([key, value]) => !["blockIDs", "rootIDs"].includes(key) &&
+    Object.entries(filters).filter(([key, value]) => !["blockIDs", "rootIDs", "tagScope"].includes(key) &&
         value !== undefined && value !== "").length;
 
 const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IReviewSet> | undefined,
@@ -602,6 +613,7 @@ const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IRevi
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.targetNotebook}</div><select data-filter="notebookID" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${notebooks.map((notebook) => `<option value="${escapeAttr(notebook.id)}">${escapeHtml(notebook.name)}</option>`).join("")}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardDocumentPath}</div><input data-filter="path" class="b3-text-field fn__block" value="${escapeAttr(filters.path || "")}" placeholder="/"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.tag}</div><select data-filter="tagID" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${tags.map((tag) => `<option value="${escapeAttr(tag.id)}">${escapeHtml(flashcardTagPath(tag, tagMap))}</option>`).join("")}</select></label>
+<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardTagScope}</div><select data-filter="tagScope" class="b3-select fn__block"><option value="">${window.siyuan.languages.flashcardTagOnly}</option><option value="descendantOf">${window.siyuan.languages.flashcardTagWithChildren}</option></select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardPriority}</div><select data-filter="priority" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${priorityOptions}</select></label>
 </div>
 </div>
@@ -953,10 +965,10 @@ ${result.sourceType === "qa" ? `<span data-type="direction" class="fn__none b3-l
 <span data-type="preset" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardPreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
 <span data-type="priority" class="fn__none"></span>
 <span data-type="tags" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.tag}"><svg><use xlink:href="#iconTag"></use></svg></span>
-<span data-type="suspend" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${result.reviewState.suspended ? window.siyuan.languages.continueReview1 : window.siyuan.languages.flashcardSuspendCard}"><svg><use xlink:href="#icon${result.reviewState.suspended ? "Play" : "Pause"}"></use></svg></span>
+<span data-type="suspend" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${result.reviewState.suspended ? window.siyuan.languages.flashcardResumeReview : window.siyuan.languages.flashcardSuspendUntilResumed}"><svg><use xlink:href="#icon${result.reviewState.suspended ? "Play" : "Pause"}"></use></svg></span>
 <span data-type="bury" class="fn__none"></span>
 <span data-type="due" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.setDueTime}"><svg><use xlink:href="#iconCalendar"></use></svg></span>
-<span data-type="flag" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardFlag} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></span>
+<button type="button" data-type="flag" data-menu="true" aria-haspopup="menu" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${escapeAttr(window.siyuan.languages.flashcardFlag)} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></button>
 <span data-type="history" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewHistory}"><svg><use xlink:href="#iconHistory"></use></svg></span>
 <span data-type="sourceHistory" class="fn__none" aria-label="${window.siyuan.languages.flashcardSourceHistory}"></span>
 ${reviewSetID ? `<span data-type="exclude" class="fn__none b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconClose"></use></svg></span>` : '<span data-type="membership" class="fn__none"></span>'}
@@ -1162,13 +1174,16 @@ const openFlashcardV2CardSetting = (card: IFlashcardSearchResult, type: "preset"
         const priorityOptions = ["exam", "learning", "retaining", "paused", "unset"]
             .map((priority) => `<option value="${priority}">${escapeHtml(priorityLabel(priority))}</option>`).join("");
         const presetOptions = presets.map((preset) => `<option value="${escapeAttr(preset.id)}">${escapeHtml(preset.name)}</option>`).join("");
+        const inheritedPreset = presets.find((preset) => preset.id === card.defaultPresetID);
+        const defaultLabel = type === "preset" ? window.siyuan.languages.flashcardInheritedPreset
+            .replace("${name}", inheritedPreset?.name || window.siyuan.languages.default) : window.siyuan.languages.default;
         const dialog = new Dialog({
             title: type === "preset" ? window.siyuan.languages.flashcardPreset : window.siyuan.languages.flashcardPriority,
             width: isMobile() ? "92vw" : "420px",
             content: `<div class="b3-dialog__content card__v2-form"><select class="b3-select fn__block">
-<option value="">${window.siyuan.languages.default}</option>
+<option value="">${escapeHtml(defaultLabel)}</option>
 ${type === "preset" ? presetOptions : priorityOptions}
-</select></div>
+</select>${type === "preset" ? `<div class="b3-label__text">${window.siyuan.languages.flashcardInheritedPresetTip}</div>` : ""}</div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
@@ -1316,7 +1331,7 @@ const renderFlashcardTagChoices = (tags: IFlashcardTag[], selected: Set<string>,
     return [...tags].sort((left, right) => flashcardTagPath(left, byID).localeCompare(flashcardTagPath(right, byID)))
         .map((tag) => `<div class="b3-list-item b3-list-item--narrow card__v2-tag-choice${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${escapeAttr(tag.id)}"${mixed.has(tag.id) ? " data-mixed=\"true\"" : ""}>
 <span class="b3-list-item__text">${escapeHtml(flashcardTagPath(tag, byID))}</span>
-<input class="b3-switch" type="checkbox" value="${escapeAttr(tag.id)}" aria-checked="${mixed.has(tag.id) ? "mixed" : selected.has(tag.id)}"${selected.has(tag.id) ? " checked" : ""}>
+<input class="b3-switch" type="checkbox" value="${escapeAttr(tag.id)}" aria-label="${escapeAttr(flashcardTagPath(tag, byID))}" aria-checked="${mixed.has(tag.id) ? "mixed" : selected.has(tag.id)}"${selected.has(tag.id) ? " checked" : ""}>
 <span data-type="editTag" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></span>
 </div>`).join("");
 };
@@ -1346,9 +1361,13 @@ const flashcardTagParentOptions = (tags: IFlashcardTag[], excluded: ReadonlySet<
 };
 
 const openFlashcardV2TagEditor = (revision: IFlashcardEntityRevision<IFlashcardTag>, tags: IFlashcardTag[],
-    callback: (saved: IFlashcardEntityRevision<IFlashcardTag>) => void) => {
+    callback: (saved: IFlashcardEntityRevision<IFlashcardTag>) => void, onClose?: () => void,
+    onAttempt?: () => void) => {
+    const operationFor = createFlashcardV2Operation();
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
+        beforeClose: () => dialog.element.getAttribute("aria-busy") !== "true",
+        destroyCallback: onClose,
         width: isMobile() ? "92vw" : "460px",
         content: `<div class="b3-dialog__content card__v2-form">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.name}</div><input data-type="name" class="b3-text-field fn__block" value="${escapeAttr(revision.payload.name)}"></label>
@@ -1364,42 +1383,75 @@ const openFlashcardV2TagEditor = (revision: IFlashcardEntityRevision<IFlashcardT
         if (!name) {
             return;
         }
-        fetchPost("/api/flashcard/saveTag", {
-            operationID: genUUID(),
+        const payload = {
             tagID: revision.entityID,
             parentID: parent.value,
             name,
             expectedRevisionID: revision.revisionID,
-            updatedAt: Date.now(),
-        }, (response) => {
-            callback(readFlashcardV2Revision(response.data, isFlashcardTag));
-            dialog.destroy();
+        };
+        const operation = operationFor(payload);
+        void submitFlashcardV2Form(dialog.element, async () => {
+            let saved = false;
+            onAttempt?.();
+            await fetchPost("/api/flashcard/saveTag", {
+                ...payload, operationID: operation.operationID, updatedAt: operation.changedAt,
+            }, (response) => {
+                saved = true;
+                if (dialog.element.isConnected) {
+                    callback(readFlashcardV2Revision(response.data, isFlashcardTag));
+                    dialog.element.removeAttribute("aria-busy");
+                    dialog.destroy();
+                }
+            }, undefined, undefined, undefined, 30000);
+            return saved;
         });
     });
 };
 
+const renderFlashcardInheritedTags = (tags: IFlashcardTag[], inheritedTagIDs: readonly string[]) => {
+    const byID = new Map(tags.map(tag => [tag.id, tag]));
+    const names = [...new Set(inheritedTagIDs)].map(id => {
+        const tag = byID.get(id);
+        return tag ? flashcardTagPath(tag, byID) : id;
+    });
+    return `<div class="b3-label__text">${escapeHtml(window.siyuan.languages.flashcardDirectTagsTip)}</div>
+<div class="ft__breakword">${escapeHtml(window.siyuan.languages.flashcardInheritedTags)}: ${names.length ? names.map(escapeHtml).join("; ") : escapeHtml(window.siyuan.languages.empty)}</div>`;
+};
+
 const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | string[], selectedTagIDs: string[],
-    callback: (tagIDs: string[]) => void,
-    initialAssignments?: Readonly<Record<string, readonly string[]>>) => {
+    callback: () => void,
+    initialAssignments?: Readonly<Record<string, readonly string[]>>, inheritedTagIDs?: readonly string[]) => {
     fetchPost("/api/flashcard/listEntities", {
         entityType: "tag",
         options: {limit: 1000, offset: 0},
     }, (response) => {
         const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardTag));
         const tags = revisions.map((revision) => revision.payload);
-        const targetIDs = Array.isArray(targetID) ? targetID : [targetID];
-        const initialSelection = initialAssignments ? getFlashcardV2TagSelection(targetIDs, initialAssignments) : {
-            selected: selectedTagIDs,
-            mixed: [],
-        };
+        const targetIDs = [...new Set(Array.isArray(targetID) ? targetID : [targetID])];
+        const assignments = Object.fromEntries(targetIDs.map((id) =>
+            [id, [...(initialAssignments ? initialAssignments[id] || [] : selectedTagIDs)]]));
+        const initialSelection = getFlashcardV2TagSelection(targetIDs, assignments);
         const selected = new Set(initialSelection.selected);
         const mixed = new Set(initialSelection.mixed);
         const changes = new Map<string, boolean>();
+        const tagSave = new FlashcardV2TagSave();
+        let refreshOnClose = false;
+        let closed = false;
+        let createOperationFor = createFlashcardV2Operation();
         const dialog = new Dialog({
             title: window.siyuan.languages.tag,
+            beforeClose: () => dialog.element.getAttribute("aria-busy") !== "true",
+            destroyCallback: () => {
+                closed = true;
+                tagSave.close();
+                if (refreshOnClose) {
+                    callback();
+                }
+            },
             width: isMobile() ? "92vw" : "520px",
             height: "70vh",
             content: `<div class="b3-dialog__content card__v2-panel">
+${inheritedTagIDs === undefined ? "" : `<div data-inherited-tags>${renderFlashcardInheritedTags(tags, inheritedTagIDs)}</div>`}
 <div class="card__v2-panel-toolbar"><input class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.newTag}">
 <button data-type="createTag" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}</button></div>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.move}</div><select data-type="createTagParent" class="b3-select fn__block">${flashcardTagParentOptions(tags)}</select></label>
@@ -1409,6 +1461,22 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         });
+        const unavailable = () => closed || !dialog.element.isConnected ||
+            dialog.element.getAttribute("aria-busy") === "true";
+        const beginAuxiliary = () => {
+            if (unavailable()) {
+                return;
+            }
+            const controls = [...dialog.element.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>(
+                "input, select, button")];
+            const disabled = controls.map(control => control.disabled);
+            dialog.element.setAttribute("aria-busy", "true");
+            controls.forEach(control => control.disabled = true);
+            return () => {
+                dialog.element.removeAttribute("aria-busy");
+                controls.forEach((control, index) => control.disabled = disabled[index]);
+            };
+        };
         const applyMixedState = () => {
             dialog.element.querySelectorAll<HTMLInputElement>("[data-tag-list] input[type=checkbox]")
                 .forEach((input) => {
@@ -1418,8 +1486,14 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
                 });
         };
         const refreshTags = () => {
+            if (closed || !dialog.element.isConnected) {
+                return;
+            }
             dialog.element.querySelector("[data-tag-list]").innerHTML =
                 renderFlashcardTagChoices(tags, selected, mixed);
+            if (inheritedTagIDs !== undefined) {
+                dialog.element.querySelector("[data-inherited-tags]").innerHTML = renderFlashcardInheritedTags(tags, inheritedTagIDs);
+            }
             const parent = dialog.element.querySelector('[data-type="createTagParent"]') as HTMLSelectElement;
             const parentID = parent.value;
             parent.innerHTML = flashcardTagParentOptions(tags);
@@ -1428,6 +1502,9 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
         };
         applyMixedState();
         dialog.element.querySelector("[data-tag-list]").addEventListener("change", (event) => {
+            if (unavailable()) {
+                return;
+            }
             const input = event.target as HTMLInputElement;
             if (input.type !== "checkbox") {
                 return;
@@ -1444,6 +1521,9 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
             input.closest("[data-mixed]")?.removeAttribute("data-mixed");
         });
         dialog.element.querySelector("[data-tag-list]").addEventListener("click", (event) => {
+            if (unavailable()) {
+                return;
+            }
             const target = (event.target as HTMLElement).closest('[data-type="editTag"]');
             const item = (event.target as HTMLElement).closest<HTMLElement>("[data-id]");
             if (!target || !item) {
@@ -1453,28 +1533,50 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
             if (index < 0) {
                 return;
             }
+            const release = beginAuxiliary();
+            if (!release) {
+                return;
+            }
             openFlashcardV2TagEditor(revisions[index], tags, (saved) => {
+                if (closed || !dialog.element.isConnected) {
+                    return;
+                }
                 revisions[index] = saved;
                 const tagIndex = tags.findIndex((tag) => tag.id === saved.entityID);
                 tags[tagIndex] = saved.payload;
-                refreshTags();
-            });
+            }, () => { release(); refreshTags(); }, () => { refreshOnClose = true; });
         });
         dialog.element.querySelector('[data-type="createTag"]').addEventListener("click", () => {
+            if (unavailable()) {
+                return;
+            }
             const input = dialog.element.querySelector("input.b3-text-field") as HTMLInputElement;
             const name = input.value.trim();
             if (!name) {
                 input.focus();
                 return;
             }
-            const tagID = genUUID();
-            fetchPost("/api/flashcard/saveTag", {
-                operationID: genUUID(),
+            const parentID = (dialog.element.querySelector('[data-type="createTagParent"]') as HTMLSelectElement).value;
+            const operation = createOperationFor({name, parentID});
+            const tagID = operation.operationID;
+            const release = beginAuxiliary();
+            if (!release) {
+                return;
+            }
+            refreshOnClose = true;
+            let saved = false;
+            void fetchPost("/api/flashcard/saveTag", {
+                operationID: operation.operationID,
                 tagID,
-                parentID: (dialog.element.querySelector('[data-type="createTagParent"]') as HTMLSelectElement).value,
+                parentID,
                 name,
-                updatedAt: Date.now(),
+                updatedAt: operation.changedAt,
             }, (saveResponse) => {
+                saved = true;
+                createOperationFor = createFlashcardV2Operation();
+                if (closed || !dialog.element.isConnected) {
+                    return;
+                }
                 const revision = readFlashcardV2Revision(saveResponse.data, isFlashcardTag);
                 revisions.push(revision);
                 tags.push(revision.payload);
@@ -1482,45 +1584,42 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
                 mixed.delete(tagID);
                 changes.set(tagID, true);
                 input.value = "";
+            }, undefined, undefined, undefined, 30000).finally(() => {
+                release();
                 refreshTags();
+                if (!saved && !closed && dialog.element.isConnected) {
+                    showMessage(window.siyuan.languages.flashcardSaveFailed);
+                }
             });
         });
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
         buttons[0].addEventListener("click", () => dialog.destroy());
         buttons[1].addEventListener("click", () => {
-            const tagIDs = [...dialog.element.querySelectorAll<HTMLInputElement>("[data-tag-list] input:checked")]
-                .map((input) => input.value).sort();
-            if (initialAssignments && changes.size === 0) {
+            if (unavailable()) {
+                return;
+            }
+            if (changes.size === 0) {
                 dialog.destroy();
                 return;
             }
-            const groups = initialAssignments ? buildFlashcardV2TagAssignmentGroups(targetIDs, initialAssignments,
-                Object.fromEntries(changes)) : [{targetIDs, tagIDs}];
-            const changedAt = Date.now();
-            buttons.forEach((button) => button.disabled = true);
-            const saveGroup = (index: number) => {
-                if (index >= groups.length) {
-                    callback(tagIDs);
-                    dialog.destroy();
-                    return;
-                }
-                let saved = false;
-                void fetchPost("/api/flashcard/setTagAssignments", {
-                    operationID: genUUID(),
-                    targetType,
-                    targetIDs: groups[index].targetIDs,
-                    tagIDs: groups[index].tagIDs,
-                    changedAt,
-                }, () => {
-                    saved = true;
-                    saveGroup(index + 1);
-                }).then(() => {
-                    if (!saved) {
-                        buttons.forEach((button) => button.disabled = false);
-                    }
+            const groups = buildFlashcardV2TagAssignmentGroups(targetIDs, assignments, Object.fromEntries(changes));
+            void submitFlashcardV2Form(dialog.element, async () => {
+                const saved = await tagSave.run(groups, async (group, operation) => {
+                    let completed = false;
+                    refreshOnClose = true;
+                    await fetchPost("/api/flashcard/setTagAssignments", {
+                        ...operation, targetType, ...group,
+                    }, () => { completed = true; refreshOnClose = true; }, undefined, undefined, undefined, 30000);
+                    return completed;
                 });
-            };
-            saveGroup(0);
+                if (saved) {
+                    refreshOnClose = false;
+                    callback();
+                    dialog.element.removeAttribute("aria-busy");
+                    dialog.destroy();
+                }
+                return saved;
+            });
         });
     });
 };
@@ -1596,6 +1695,7 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.type}</div><select data-filter="sourceType" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${sourceTypeOptions}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.template}</div><select data-filter="templateID" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${options.templates.map((template) => `<option value="${escapeAttr(template.id)}">${escapeHtml(template.name)}</option>`).join("")}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.tag}</div><select data-filter="tagID" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${options.tags.map((tag) => `<option value="${escapeAttr(tag.id)}">${escapeHtml(flashcardTagPath(tag, tagMap))}</option>`).join("")}</select></label>
+<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardTagScope}</div><select data-filter="tagScope" class="b3-select fn__block"><option value="">${window.siyuan.languages.flashcardTagOnly}</option><option value="descendantOf">${window.siyuan.languages.flashcardTagWithChildren}</option></select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardFlag}</div><select data-filter="flag" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${flagOptions}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardGenerationStatus}</div><select data-filter="generationStatus" class="b3-select fn__block">${generationOptions}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardReviewState}</div><select data-filter="reviewState" class="b3-select fn__block">${reviewStateOptions}</select></label>
@@ -1660,16 +1760,33 @@ const flashcardV2ManagementPageSize = 200;
 const openFlashcardV2Conflicts = (callback: () => void) => {
     fetchPost("/api/flashcard/listConflicts", {limit: 1000}, (response) => {
         const conflicts = response.data as IFlashcardEntityConflict[];
+        const progress = new FlashcardV2ConflictProgress();
+        const operations = conflicts.map(() => createFlashcardV2Operation());
+        let changed = false;
+        const entityLabels: Record<string, string> = {
+            reviewSet: window.siyuan.languages.flashcardReviewSet,
+            schedulerPreset: window.siyuan.languages.flashcardPreset,
+            cardSource: window.siyuan.languages.flashcardCardSource,
+            card: window.siyuan.languages.riffCard,
+            tag: window.siyuan.languages.tag,
+            flagDefinition: window.siyuan.languages.flashcardFlag,
+        };
         const dialog = new Dialog({
             title: window.siyuan.languages.conflict,
             width: isMobile() ? "96vw" : "760px",
             height: "70vh",
+            beforeClose: () => dialog.element.getAttribute("aria-busy") !== "true",
+            destroyCallback: () => { if (changed) { callback(); } },
             content: `<div class="b3-dialog__content card__v2-conflicts">
 ${conflicts.length === 0 ? `<div class="card__empty">${window.siyuan.languages.emptyContent}</div>` : conflicts.map((conflict, conflictIndex) => `<div class="card__v2-conflict" data-conflict-index="${conflictIndex}">
-<div class="card__v2-section-title">${escapeHtml(conflict.entityType)} - ${escapeHtml(conflict.entityID)}</div>
+<div class="card__v2-section-title">${escapeHtml(entityLabels[conflict.entityType] || conflict.entityType)}</div>
 ${conflict.revisions.map((revision) => {
                 const payload = JSON.stringify(revision.payload, undefined, 2);
-                return `<label class="card__v2-conflict-revision"><div class="fn__flex-center"><input type="radio" name="flashcardConflict${conflictIndex}" value="${escapeAttr(revision.revisionID)}"${revision.revisionID === conflict.selectedRevisionID ? " checked" : ""}><span class="fn__space"></span><span class="fn__flex-1">${new Date(revision.updatedAt).toLocaleString()}</span><span class="b3-list-item__meta">${escapeHtml(revision.revisionID)}</span></div><pre class="fn__code">${escapeHtml(payload.length > 4000 ? `${payload.slice(0, 4000)}...` : payload)}</pre></label>`;
+                const summary = flashcardV2ConflictSummary(revision.payload, window.siyuan.languages,
+                    conflict.revisions.map(item => item.payload));
+                return `<div class="card__v2-conflict-revision"><label class="fn__flex-center"><input type="radio" name="flashcardConflict${conflictIndex}" value="${escapeAttr(revision.revisionID)}"${revision.revisionID === conflict.selectedRevisionID ? " checked" : ""}><span class="fn__space"></span><span class="fn__flex-1">${new Date(revision.updatedAt).toLocaleString()}</span>${revision.deleted ? `<span class="ft__error">${window.siyuan.languages.delete}</span>` : ""}</label>
+${summary.map(field => `<div class="fn__flex"><span class="ft__secondary">${escapeHtml(field.label)}</span><span class="fn__space"></span>${field.different ? `<mark>${escapeHtml(field.value)}</mark>` : `<span>${escapeHtml(field.value)}</span>`}</div>`).join("")}
+<details><summary>JSON</summary><div class="ft__secondary">${escapeHtml(conflict.entityID)} / ${escapeHtml(revision.revisionID)}</div><pre class="fn__code">${escapeHtml(payload || "null")}</pre></details></div>`;
             }).join("")}
 </div>`).join("")}
 </div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text"${conflicts.length === 0 ? " disabled" : ""}>${window.siyuan.languages.confirm}</button></div>`,
@@ -1677,34 +1794,52 @@ ${conflict.revisions.map((revision) => {
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
         buttons[0].addEventListener("click", () => dialog.destroy());
         buttons[1].addEventListener("click", () => {
-            const resolveNext = (index: number) => {
-                if (index >= conflicts.length) {
+            void submitFlashcardV2Form(dialog.element, async () => {
+                const complete = await progress.resolve(conflicts.length, async (index) => {
+                    const selected = dialog.element.querySelector<HTMLInputElement>(
+                        `input[name="flashcardConflict${index}"]:checked`);
+                    if (!selected) {
+                        return false;
+                    }
+                    const payload = {
+                        entityType: conflicts[index].entityType,
+                        entityID: conflicts[index].entityID,
+                        selectedRevisionID: selected.value,
+                    };
+                    const operation = operations[index](payload);
+                    let saved = false;
+                    await fetchPost("/api/flashcard/resolveConflict", {
+                        ...payload, operationID: operation.operationID, resolvedAt: operation.changedAt,
+                    }, () => { saved = true; changed = true; }, undefined, undefined, undefined, 30000);
+                    return saved;
+                });
+                if (complete) {
+                    dialog.element.removeAttribute("aria-busy");
                     dialog.destroy();
-                    callback();
-                    return;
                 }
-                const selected = dialog.element.querySelector<HTMLInputElement>(
-                    `input[name="flashcardConflict${index}"]:checked`);
-                if (!selected) {
-                    resolveNext(index + 1);
-                    return;
-                }
-                fetchPost("/api/flashcard/resolveConflict", {
-                    operationID: genUUID(),
-                    entityType: conflicts[index].entityType,
-                    entityID: conflicts[index].entityID,
-                    selectedRevisionID: selected.value,
-                    resolvedAt: Date.now(),
-                }, () => resolveNext(index + 1));
-            };
-            buttons[1].disabled = true;
-            resolveNext(0);
+                return complete;
+            }).then(() => {
+                conflicts.forEach((_conflict, index) => {
+                    if (progress.has(index)) {
+                        dialog.element.querySelectorAll<HTMLInputElement>(`input[name="flashcardConflict${index}"]`)
+                            .forEach(input => input.disabled = true);
+                    }
+                });
+            });
         });
     });
 };
 
+interface IFlashcardManagementDialog {
+    view: FlashcardV2ManagementView;
+    dialog?: Dialog;
+}
+
 const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset = 0,
-    filters: IFlashcardManagementFilters = {}, managementOptions?: IFlashcardManagementOptions, grouped = true) => {
+    filters: IFlashcardManagementFilters = {}, managementOptions?: IFlashcardManagementOptions, grouped = true,
+    owner: IFlashcardManagementDialog = {view: new FlashcardV2ManagementView()}, preserve = true) => {
+    const isCurrent = owner.view.request(() =>
+        openFlashcardV2ReviewSetCards(reviewSetID, name, offset, filters, undefined, grouped, owner, preserve));
     if (!managementOptions) {
         fetchPost("/api/flashcard/listEntities", {
             entityType: "tag",
@@ -1722,6 +1857,7 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
                         entityType: "flagDefinition",
                         options: {limit: 7, offset: 0},
                     }, (flagResponse) => {
+                        if (!isCurrent()) { return; }
                         openFlashcardV2ReviewSetCards(reviewSetID, name, offset, filters, {
                             tags: (tagResponse.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardTag)))
                                 .map((item) => item.payload),
@@ -1731,7 +1867,7 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
                                 readFlashcardV2Revision(revision, isFlashcardTemplate).payload),
                             flagDefinitions: flagResponse.data.entities.map((revision) =>
                                 readFlashcardV2Revision(revision, isFlashcardFlagDefinition)),
-                        }, grouped);
+                        }, grouped, owner, preserve);
                     });
                 });
             });
@@ -1746,9 +1882,10 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
             {type: "notebook" as const, id: filters.notebookID} : undefined;
     const queryCards = (cardIDs?: string[], total?: number, resolvedCards?: IFlashcardSearchResult[]) => {
         const renderCards = (fetchedCards: IFlashcardSearchResult[]) => {
+            if (!isCurrent()) { return; }
             if (fetchedCards.length === 0 && offset > 0) {
                 openFlashcardV2ReviewSetCards(reviewSetID, name,
-                    Math.max(0, offset - flashcardV2ManagementPageSize), filters, managementOptions, grouped);
+                    Math.max(0, offset - flashcardV2ManagementPageSize), filters, managementOptions, grouped, owner, false);
                 return;
             }
             const fetchedSourceIDs = [...new Set(fetchedCards.map((card) => card.card.sourceID))];
@@ -1760,18 +1897,13 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
                 fetchedSourceIDs.length > flashcardV2ManagementPageSize :
                 fetchedCards.length > flashcardV2ManagementPageSize :
                 offset + pageLength < total;
-            const selectedCardIDs = new Set<string>();
+            if (owner.dialog) {
+                owner.view.capture(owner.dialog.element, preserve);
+            }
+            owner.view.reconcile(cards.map(card => card.card.id));
+            const selectedCardIDs = owner.view.selected;
             const flagDefinitions = managementOptions.flagDefinitions.map((revision) => revision.payload);
-            const batchFlagOptions = Array.from({length: 8}, (_, flag) =>
-                `<option value="setFlag:${flag}"${flashcardFlagStyle(flag)}>${window.siyuan.languages.flashcardFlag} - ${escapeHtml(flashcardFlagLabel(flag, flagDefinitions))}</option>`).join("");
-            const batchPresetOptions = `<option value="setPreset:">${window.siyuan.languages.flashcardPreset} - ${window.siyuan.languages.default}</option>${managementOptions.presets.map((preset) => `<option value="${escapeAttr(`setPreset:${preset.id}`)}">${window.siyuan.languages.flashcardPreset} - ${escapeHtml(preset.name)}</option>`).join("")}`;
-            const batchPriorityOptions = ["", "exam", "learning", "retaining", "paused"]
-                .map((priority) => `<option value="setPriority:${priority}">${window.siyuan.languages.flashcardPriority} - ${escapeHtml(priority === "" ? window.siyuan.languages.default : priorityLabel(priority))}</option>`).join("");
-            const dialog = new Dialog({
-                title: name,
-                width: "min(1100px, 96vw)",
-                height: "min(800px, 90vh)",
-                content: `<div class="b3-dialog__content fn__flex-column card__v2-management">
+            const content = `<div class="b3-dialog__content fn__flex-column card__v2-management">
 <div class="card__v2-management-toolbar">
 <div class="card__v2-management-pagination">
 <button data-type="pagePrevious" class="b3-button b3-button--outline"${offset === 0 ? " disabled" : ""}>${window.siyuan.languages.previous}</button>
@@ -1795,39 +1927,47 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
 <div class="card__v2-management-selection">
 <label class="fn__flex-center"><input data-type="selectPage" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardSelectPage}</label>
 <span data-type="selectedCount" class="b3-list-item__meta fn__flex-1">${window.siyuan.languages.selected} 0</span>
-<select data-type="batchAction" class="b3-select"><option value="">${window.siyuan.languages.manage}</option><option value="tags">${window.siyuan.languages.tag}</option><option value="membership">${reviewSetID ? window.siyuan.languages.remove : window.siyuan.languages.flashcardReviewSet}</option><option value="setDue">${window.siyuan.languages.setDueTime}</option><option value="suspend">${window.siyuan.languages.flashcardSuspendCard}</option><option value="resume">${window.siyuan.languages.continueReview1}</option><option value="bury">${window.siyuan.languages.flashcardBury}</option><option value="unbury">${window.siyuan.languages.flashcardUnbury}</option><option value="reset">${window.siyuan.languages.reset}</option>${batchFlagOptions}${batchPresetOptions}${batchPriorityOptions}</select>
+<button data-type="batchMenu" class="b3-button b3-button--outline" disabled>${window.siyuan.languages.manage}</button>
 <button data-type="batchApply" class="b3-button b3-button--text" disabled>${window.siyuan.languages.confirm}</button>
 </div>
-<ul class="b3-list b3-list--background fn__flex-1 card__v2-management-list">${cards.length === 0 ? `<li class="b3-list-item card__empty">${filters.editLater === "true" ? window.siyuan.languages.flashcardEditLaterEmpty : window.siyuan.languages.emptyContent}</li>` : renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul></div>`,
-            });
+<ul class="b3-list b3-list--background fn__flex-1 card__v2-management-list" tabindex="-1">${cards.length === 0 ? `<li class="b3-list-item card__empty">${filters.editLater === "true" ? window.siyuan.languages.flashcardEditLaterEmpty : window.siyuan.languages.emptyContent}</li>` : renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul></div>`;
+            if (owner.dialog) {
+                owner.dialog.element.querySelector(".card__v2-management").outerHTML = content;
+            } else {
+                owner.dialog = new Dialog({title: name, width: "min(1100px, 96vw)", height: "min(800px, 90vh)",
+                    content, beforeClose: () => { owner.view.close(); return true; },
+                    destroyCallback: () => owner.view.close()});
+            }
+            const dialog = owner.dialog;
+            const listenerOptions = owner.view.bind();
+            owner.view.setRefresh(() =>
+                openFlashcardV2ReviewSetCards(reviewSetID, name, offset, filters, undefined, grouped, owner));
+            let batchAction = "";
             const refreshSelection = () => {
                 const selectPage = dialog.element.querySelector('[data-type="selectPage"]') as HTMLInputElement;
                 const selectedCount = dialog.element.querySelector('[data-type="selectedCount"]');
-                const batchAction = dialog.element.querySelector('[data-type="batchAction"]') as HTMLSelectElement;
+                const batchMenu = dialog.element.querySelector('[data-type="batchMenu"]') as HTMLButtonElement;
                 const batchApply = dialog.element.querySelector('[data-type="batchApply"]') as HTMLButtonElement;
                 const selectedOnPage = cards.filter((card) => selectedCardIDs.has(card.card.id)).length;
                 selectPage.checked = cards.length > 0 && selectedOnPage === cards.length;
                 selectPage.indeterminate = selectedOnPage > 0 && selectedOnPage < cards.length;
                 selectedCount.textContent = `${window.siyuan.languages.selected} ${selectedOnPage}`;
-                batchApply.disabled = selectedOnPage === 0 || batchAction.value === "";
+                batchMenu.disabled = selectedOnPage === 0;
+                batchApply.disabled = selectedOnPage === 0 || batchAction === "";
             };
             const refreshList = () => {
+                owner.view.capture(dialog.element, true);
                 dialog.element.querySelector(".b3-list").innerHTML = renderManagedCards(cards, grouped, reviewSetID,
                     selectedCardIDs, flagDefinitions);
                 refreshSelection();
+                owner.view.restore(dialog.element);
             };
             const reloadPage = () => {
                 if (!dialog.element.isConnected) {
                     return;
                 }
-                dialog.destroy();
-                openFlashcardV2ReviewSetCards(reviewSetID, name, offset, filters, undefined, grouped);
+                owner.view.refresh();
             };
-            dialog.element.addEventListener("change", (event) => {
-                if ((event.target as HTMLElement).dataset.type === "batchAction") {
-                    refreshSelection();
-                }
-            });
             dialog.element.addEventListener("click", (event) => {
                 const target = (event.target as HTMLElement).closest("[data-type]") as HTMLElement;
                 const item = (event.target as HTMLElement).closest(".b3-list-item") as HTMLElement;
@@ -1840,9 +1980,8 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                 }
                 const type = target.dataset.type;
                 if (type === "pendingEdits") {
-                    dialog.destroy();
                     openFlashcardV2ReviewSetCards(reviewSetID, name, 0,
-                        {...filters, editLater: filters.editLater === "true" ? undefined : "true"}, managementOptions, false);
+                        {...filters, editLater: filters.editLater === "true" ? undefined : "true"}, managementOptions, false, owner, false);
                     return;
                 }
                 if (type === "editLater" && item) {
@@ -1890,14 +2029,13 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                 if (type === "pagePrevious" || type === "pageNext") {
                     const nextOffset = type === "pagePrevious" ? Math.max(0, offset - flashcardV2ManagementPageSize) :
                         offset + flashcardV2ManagementPageSize;
-                    dialog.destroy();
-                    openFlashcardV2ReviewSetCards(reviewSetID, name, nextOffset, filters, managementOptions, grouped);
+                    openFlashcardV2ReviewSetCards(reviewSetID, name, nextOffset, filters, managementOptions, grouped, owner, false);
                     return;
                 }
                 if (type === "filter") {
                     openFlashcardV2ManagementFilter(filters, managementOptions, (nextFilters) => {
-                        dialog.destroy();
-                        openFlashcardV2ReviewSetCards(reviewSetID, name, 0, nextFilters, managementOptions, grouped);
+                        if (listenerOptions.signal.aborted) { return; }
+                        openFlashcardV2ReviewSetCards(reviewSetID, name, 0, nextFilters, managementOptions, grouped, owner, false);
                     });
                     return;
                 }
@@ -1925,8 +2063,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "group") {
-                    dialog.destroy();
-                    openFlashcardV2ReviewSetCards(reviewSetID, name, 0, filters, managementOptions, !grouped);
+                    openFlashcardV2ReviewSetCards(reviewSetID, name, 0, filters, managementOptions, !grouped, owner, false);
                     return;
                 }
                 if (type === "selectPage") {
@@ -1940,9 +2077,45 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     refreshList();
                     return;
                 }
+                if (type === "batchMenu") {
+                    const lang = window.siyuan.languages;
+                    const option = (value: string, label: string): IMenu => ({
+                        label, type: "submenu", checked: batchAction === value,
+                        click: () => {
+                            if (listenerOptions.signal.aborted) { return; }
+                            batchAction = value;
+                            target.textContent = label;
+                            refreshSelection();
+                        },
+                    });
+                    toggleMenu({target, build: (_menu, session) => {
+                        const menu = new Menu();
+                        menu.addItem(option("tags", lang.tag));
+                        menu.addItem(option("membership", reviewSetID ? lang.remove : lang.flashcardReviewSet));
+                        menu.addItem({label: lang.flashcardReviewState, submenu: [
+                            option("suspend", lang.flashcardSuspendUntilResumed), option("resume", lang.flashcardResumeReview),
+                            option("bury", lang.flashcardBury), option("unbury", lang.flashcardUnbury),
+                        ]});
+                        menu.addItem({label: lang.setDueTime, submenu: [
+                            option("setDue", lang.setDueTime), option("reset", lang.reset),
+                        ]});
+                        menu.addItem({label: lang.flashcardFlag, submenu: Array.from({length: 8}, (_, flag) =>
+                            option("setFlag:" + flag, flashcardFlagLabel(flag, flagDefinitions)))});
+                        menu.addItem({label: lang.flashcardPreset, submenu: [option("setPreset:", lang.default),
+                            ...managementOptions.presets.map(preset => option("setPreset:" + preset.id, preset.name))]});
+                        menu.addItem({label: lang.flashcardPriority, submenu: ["", "exam", "learning", "retaining", "paused"]
+                            .map(priority => option("setPriority:" + priority, priority ? priorityLabel(priority) : lang.default))});
+                        if (isMobile()) {
+                            session.show(() => menu.fullscreen());
+                        } else {
+                            const rect = target.getBoundingClientRect();
+                            session.show(() => menu.open({x: rect.left, y: rect.bottom}));
+                        }
+                    }});
+                    return;
+                }
                 if (type === "batchApply") {
-                    const actionElement = dialog.element.querySelector('[data-type="batchAction"]') as HTMLSelectElement;
-                    const [action, flagValue] = actionElement.value.split(":");
+                    const [action, flagValue] = batchAction.split(":");
                     const selectedCards = cards.filter((card) => selectedCardIDs.has(card.card.id));
                     const selected = selectedCards.map((card) => card.card.id);
                     if (action === "" || selected.length === 0) {
@@ -2048,6 +2221,18 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                                 }
                             };
                             addAction("flashcardV2Preview", window.siyuan.languages.flashcardPreview, "preview");
+                            menu.addItem({
+                                id: "flashcardV2InspectTemplate",
+                                label: window.siyuan.languages.flashcardInspectTemplate,
+                                click: () => openFlashcardV2Template(card.card.id),
+                            });
+                            if (card.sourceType === "ordered") {
+                                menu.addItem({
+                                    id: "flashcardV2ReorderSteps",
+                                    label: window.siyuan.languages.flashcardReorderSteps,
+                                    click: () => openFlashcardV2Ordered(card.card.sourceID, reloadPage, () => dialog.element.isConnected),
+                                });
+                            }
                             if (card.sourceBlockID) {
                                 menu.addItem({
                                     id: "flashcardV2EditCard",
@@ -2135,13 +2320,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     const sourceID = item.dataset.sourceId;
                     const sourceCards = sourceID ? cards.filter((card) => card.card.sourceID === sourceID) : [];
                     if (sourceID && sourceCards.length > 0) {
-                        openFlashcardV2Tags("source", sourceID, sourceCards[0].sourceTagIDs || [], (tagIDs) => {
-                            sourceCards.forEach((card) => {
-                                card.sourceTagIDs = tagIDs;
-                                refreshEffectiveCardValues(card);
-                            });
-                            reloadPage();
-                        });
+                        openFlashcardV2Tags("source", sourceID, sourceCards[0].sourceTagIDs || [], reloadPage);
                     }
                     return;
                 }
@@ -2217,13 +2396,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "exclude" && reviewSetID && item.dataset.id) {
-                    setFlashcardV2ReviewSetMembership(reviewSetID, item.dataset.id, "exclude", () => {
-                        const nextOffset = cards.length === 1 ? Math.max(0, offset - flashcardV2ManagementPageSize) :
-                            offset;
-                        dialog.destroy();
-                        openFlashcardV2ReviewSetCards(reviewSetID, name, nextOffset, filters, managementOptions,
-                            grouped);
-                    });
+                    setFlashcardV2ReviewSetMembership(reviewSetID, item.dataset.id, "exclude", reloadPage);
                     return;
                 }
                 if (type === "membership" && item.dataset.id) {
@@ -2240,11 +2413,8 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                 }
                 const selectedCard = cards.find((result) => result.card.id === item.dataset.id);
                 if (type === "tags" && selectedCard) {
-                    openFlashcardV2Tags("card", selectedCard.card.id, selectedCard.cardTagIDs || [], (tagIDs) => {
-                        selectedCard.cardTagIDs = tagIDs;
-                        refreshEffectiveCardValues(selectedCard);
-                        reloadPage();
-                    });
+                    openFlashcardV2Tags("card", selectedCard.card.id, selectedCard.cardTagIDs || [], reloadPage, undefined,
+                        selectedCard.sourceTagIDs || []);
                     return;
                 }
                 if ((type === "preset" || type === "priority") && selectedCard) {
@@ -2320,8 +2490,9 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                 } else {
                     void execute();
                 }
-            });
+            }, listenerOptions);
             refreshSelection();
+            owner.view.restore(dialog.element);
         };
         if (resolvedCards) {
             renderCards(resolvedCards);
@@ -2526,7 +2697,14 @@ export const openFlashcardV2ReviewSets = (app: App) => {
                 const item = [...dialog.element.querySelectorAll<HTMLElement>(".b3-list-item")]
                     .find((element) => element.dataset.id === revision.entityID);
                 if (item) {
+                    const active = document.activeElement as HTMLElement;
+                    const action = item.contains(active) ? active.dataset.type : undefined;
                     item.outerHTML = renderReviewSet(revision, summaries[revision.entityID]);
+                    if (action) {
+                        [...dialog.element.querySelectorAll<HTMLElement>(".b3-list-item")]
+                            .find((element) => element.dataset.id === revision.entityID)
+                            ?.querySelector<HTMLElement>(`[data-type="${action}"]`)?.focus();
+                    }
                 }
             };
             const refreshReviewSetSummary = (revision: IFlashcardEntityRevision<IReviewSet>) => {
@@ -2585,7 +2763,7 @@ export const openFlashcardV2ReviewSets = (app: App) => {
                         }, undefined, true);
                         return;
                     }
-                    if (!type && item && !actionTarget) {
+                    if (item && (type === "cards" || (!type && !actionTarget))) {
                         openFlashcardV2ReviewSetCards(item.dataset.id, item.querySelector(".b3-list-item__text").textContent);
                         return;
                     }
@@ -3245,11 +3423,13 @@ ${blockIDs.slice(1).map((blockID, index) => `<label class="fn__flex card__v2-cho
 <label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="typedMatchDiacritics" class="b3-switch fn__flex-center" type="checkbox" checked><span class="fn__space"></span>${window.siyuan.languages.matchDiacritics}</label>
 </div>` : "";
                 let imageEditor: IFlashcardV2ImageEditor | undefined;
+                const draftPreview = new FlashcardV2DraftPreview();
                 const dialog = new Dialog({
                     title: window.siyuan.languages.configGroupAdvanced,
                     width: isMobile() ? "96vw" : "720px",
                     height: imageSource || blockIDs.length >= 3 ? "82vh" : undefined,
                     containerClassName: "card__v2-advanced-dialog",
+                    beforeClose: () => { draftPreview.close(); return true; },
                     destroyCallback: () => imageEditor?.destroy(),
                     content: `<div class="b3-dialog__content card__v2-advanced">
 ${edit ? `<div class="card__v2-form-note">${window.siyuan.languages.flashcardSourceActionTip}</div>` : ""}
@@ -3280,7 +3460,8 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button><div class="fn__space"></div>
+    <button data-type="draftPreview" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardPreview}</button>
 </div>`,
                 });
                 const sourceID = edit?.sourceID || genUUID();
@@ -3290,6 +3471,9 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                     enhanceFlashcardV2MultiSelect(reviewSets);
                 }
                 const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
+                const previewButton = buttons[2];
+                ["input", "change", "click", "pointerup"].forEach((type) =>
+                    dialog.element.addEventListener(type, () => draftPreview.invalidate(), true));
                 const modeElement = dialog.element.querySelector('[data-type="mode"]') as HTMLSelectElement;
                 const clozeElement = dialog.element.querySelector('[data-type="clozeEditor"]');
                 const imageElement = dialog.element.querySelector('[data-type="imageEditor"]');
@@ -3302,6 +3486,7 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                 const clozeChoices = new Map(clozeSelects.map((select) =>
                     [select, enhanceFlashcardV2MultiSelect(select)]));
                 const updateConfirm = () => {
+                    draftPreview.invalidate();
                     const clozeMode = modeElement.value === "cloze";
                     const orderedMode = modeElement.value === "orderedSingle" || modeElement.value === "orderedCards";
                     const imageMode = modeElement.value === "imageOcclusion";
@@ -3310,6 +3495,10 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                         clozeMode && clozeSelects.some((select) => select.selectedOptions.length === 0) ||
                         imageMode && !imageEditor?.hasShapes() ||
                         choiceMode && !choiceInputs.some((input) => input.checked);
+                    const unavailable = modeElement.value.startsWith("plugin:") || choiceMode && dynamicChoice?.checked ||
+                        (clozeMode || orderedMode) && usesInlineTargets && preparedInline.updates.length > 0;
+                    previewButton.disabled = buttons[1].disabled || previewButton.dataset.busy === "true" || unavailable;
+                    previewButton.title = unavailable ? window.siyuan.languages.flashcardDraftPreviewUnsupported : "";
                 };
                 dialog.element.querySelector<HTMLButtonElement>('[data-type="includeNewMarks"]')
                     ?.addEventListener("click", (event) => {
@@ -3399,6 +3588,7 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                 choiceInputs.forEach((input) => input.addEventListener("change", updateConfirm));
                 dynamicChoice?.addEventListener("change", () => {
                     dynamicChoiceCount.disabled = !dynamicChoice.checked;
+                    updateConfirm();
                 });
                 modeElement.value = flashcardV2AdvancedEditMode(edit);
                 if (edit?.sourceType === "choice") {
@@ -3423,7 +3613,7 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                 }
                 modeElement.dispatchEvent(new Event("change"));
                 buttons[0].addEventListener("click", () => dialog.destroy());
-                buttons[1].addEventListener("click", () => {
+                const submit = (preview = false) => {
                     const mode = modeElement.value;
                     if (!validateFlashcardV2Fields(dialog.element) ||
                         mode === "imageOcclusion" && !imageEditor?.hasShapes()) {
@@ -3444,6 +3634,13 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                                 .map((select) => clozeTargets[Number(select.dataset.targetIndex)].blockID),
                         }),
                     })) : undefined;
+                    if (preview && (mode.startsWith("plugin:") ||
+                        (mode === "choiceSingle" || mode === "choiceMultiple") && dynamicChoice?.checked ||
+                        (mode === "cloze" || mode === "orderedSingle" || mode === "orderedCards") &&
+                        usesInlineTargets && preparedInline.updates.length > 0)) {
+                        showMessage(window.siyuan.languages.flashcardDraftPreviewUnsupported);
+                        return;
+                    }
                     if (mode.startsWith("plugin:")) {
                         const pluginType = pluginTypes.find((item) => item.sourceType === mode);
                         if (pluginType?.registration.create) {
@@ -3490,6 +3687,35 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                         } : undefined,
                         reviewSetIDs: edit ? undefined : reviewSetIDs,
                     };
+                    if (preview) {
+                        previewButton.dataset.busy = "true";
+                        previewButton.disabled = true;
+                        void draftPreview.run(async () => {
+                            const request = {...payload};
+                            delete request.expectedRevisionID;
+                            delete request.reviewSetIDs;
+                            let result: {models: ReturnType<typeof readFlashcardV2RenderModel>[], doms: Record<string, string>};
+                            let failed = false;
+                            await fetchPost("/api/flashcard/previewAdvancedSource", request, (response) => {
+                                result = {models: response.data.models.map(readFlashcardV2RenderModel), doms: response.data.doms};
+                            }, undefined, () => { failed = true; }, undefined, 30000);
+                            return {result, failed};
+                        }, ({result, failed}) => {
+                            if (failed) {
+                                showMessage(window.siyuan.languages.flashcardLoadFailed);
+                                return;
+                            }
+                            if (result?.models.length) {
+                                openFlashcardV2Preview(result.models.map((model) => model.card.id), 0, result);
+                            }
+                        }, () => dialog.element.isConnected).catch((error) => {
+                            console.error("Flashcard draft preview failed", error);
+                        }).finally(() => {
+                            delete previewButton.dataset.busy;
+                            updateConfirm();
+                        });
+                        return;
+                    }
                     const operation = operationFor(payload);
                     void submitFlashcardV2Form(dialog.element, async () => {
                         if (usesInlineTargets && (mode === "cloze" || mode === "orderedSingle" ||
@@ -3522,7 +3748,9 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                         }
                         return saved;
                     });
-                });
+                };
+                buttons[1].addEventListener("click", () => submit());
+                previewButton.addEventListener("click", () => submit(true));
             };
             fetchPost("/api/block/getBlockDOMs", {ids: blockIDs}, (domResponse) => {
                 const doms = domResponse.data as Record<string, string>;
@@ -3539,16 +3767,16 @@ const openFlashcardV2AdvancedSourcePicker = (blockIDs: string[], candidates: IFl
     const dialog = new Dialog({
         title: window.siyuan.languages.configGroupAdvanced,
         width: isMobile() ? "92vw" : "520px",
-        content: `<div class="b3-dialog__content"><ul class="b3-list b3-list--background">
-<li data-type="newAdvancedSource" class="b3-list-item b3-list-item--narrow">
+        content: `<div class="b3-dialog__content card__v2-review-picker"><ul class="b3-list b3-list--background">
+<li><button type="button" data-type="newAdvancedSource" class="b3-list-item b3-list-item--narrow">
 <svg class="b3-list-item__graphic"><use xlink:href="#iconAdd"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.new}</span>
-</li>
-${candidates.map((candidate, index) => `<li data-candidate-index="${index}" class="b3-list-item b3-list-item--narrow">
+</button></li>
+${candidates.map((candidate, index) => `<li><button type="button" data-candidate-index="${index}" class="b3-list-item b3-list-item--narrow">
 <svg class="b3-list-item__graphic"><use xlink:href="#iconEdit"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.edit} - ${escapeHtml(flashcardV2AdvancedModeLabel(candidate.edit))}</span>
 <span class="b3-list-item__meta">${escapeHtml(new Date(candidate.updatedAt).toLocaleString())}</span>
-</li>`).join("")}
+</button></li>`).join("")}
 </ul></div>
 <div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button></div>`,
     });

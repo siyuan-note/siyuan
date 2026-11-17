@@ -45,3 +45,16 @@ test("review set and reinforcement filters survive transfer to another window", 
     const mixed = {...options, reviewSetIDs: ["a", "b"]};
     assert.deepEqual(createFlashcardReviewTabData("", "Mixed", mixed).review, mixed);
 });
+
+test("opening a review captures options independently of later caller edits", () => {
+    const options = {
+        reviewMode: "normal" as const, cardIDs: ["first"], reviewSetIDs: ["set"],
+        query: flashcardV2LocationQuery("rootID", "original-document"),
+    };
+    const data = createFlashcardReviewTabData("", "Review", options);
+    const snapshot = structuredClone(data.review);
+    options.cardIDs.push("later");
+    options.reviewSetIDs.length = 0;
+    options.query.root = {operator: "matchAll"};
+    assert.deepEqual(data.review, snapshot);
+});

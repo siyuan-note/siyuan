@@ -1418,6 +1418,10 @@ export type FlashcardV2AdvancedClozeGroupInput = { "blockIDs"?: Array<string> | 
 
 export type FlashcardV2AdvancedInlineOcclusionInput = { "blockID"?: string | null; "displayOrder"?: number | null; "id"?: string | null; };
 
+export type FlashcardV2AdvancedPreviewData = { "doms": Record<string, string> | null; "models": Array<FlashcardV2CardRenderModel> | null; };
+
+export type FlashcardV2AdvancedPreviewRequestInput = { "blockIDs": Array<string>; "clozeGroups"?: Array<FlashcardV2AdvancedClozeGroupInput>; "correctOptionIndexes"?: Array<number>; "distractorQuery"?: FlashcardV2QueryASTInput | null; "dynamicDistractors"?: number; "imageConfig"?: FlashcardV2ImageOcclusionConfigInput | null; "inlineOcclusions"?: Array<FlashcardV2AdvancedInlineOcclusionInput>; "mode": string; "randomizeOptions"?: boolean; "sourceID": string; "typedConfig"?: FlashcardV2TypedAnswerConfigInput | null; };
+
 export type FlashcardV2AdvancedSourceRequestInput = { "blockIDs"?: Array<string> | null; "clozeGroups"?: Array<FlashcardV2AdvancedClozeGroupInput> | null; "correctOptionIndexes"?: Array<number> | null; "createdAt"?: number | null; "defaultPresetID"?: string | null; "distractorQuery"?: FlashcardV2QueryASTInput | null; "dynamicDistractors"?: number | null; "imageConfig"?: FlashcardV2ImageOcclusionConfigInput | null; "inlineOcclusions"?: Array<FlashcardV2AdvancedInlineOcclusionInput> | null; "mode"?: string | null; "operationID"?: string | null; "randomizeOptions"?: boolean | null; "reviewSetIDs"?: Array<string> | null; "sourceID"?: string | null; "typedConfig"?: FlashcardV2TypedAnswerConfigInput | null; };
 
 export type FlashcardV2AdvancedSourceResult = { "cards": FlashcardV2ReconcileResult; "memberships": Array<string> | null; "sourceRevision": FlashcardV2EntityRevision; };
@@ -1542,6 +1546,10 @@ export type FlashcardV2MutateFlashcardEntitiesRequestInput = { "mutations"?: Arr
 
 export type FlashcardV2OperationBatch = { "batchID": string; "changes": Array<FlashcardV2Change> | null; "checksum": string; "deviceID": string; "formatVersion": number; "operationDigest": string; "operationID": string; "recordedAt": number; "sequence": number; "writerID": string; };
 
+export type FlashcardV2OrderedSourceDetails = { "contentFingerprint": string; "doms": Record<string, string> | null; "references": Array<FlashcardV2CardSourceRef> | null; "sourceRevision": FlashcardV2EntityRevision; };
+
+export type FlashcardV2OrderedSourceDetailsRequestInput = { "sourceID": string; };
+
 export type FlashcardV2PreviewFlashcardReviewSetRequestInput = { "options"?: FlashcardV2CardSearchOptionsInput | null; "query"?: FlashcardV2QueryASTInput | null; "reviewSetID"?: string | null; };
 
 export type FlashcardV2QueryASTInput = { "root"?: FlashcardV2QueryExpressionInput | null; "version"?: number | null; };
@@ -1553,6 +1561,10 @@ export type FlashcardV2QueueData = { "cards": Array<FlashcardV2SessionQueueCard>
 export type FlashcardV2ReconcileFlashcardSourceRequestInput = { "operationID"?: string | null; "sourceID"?: string | null; "updatedAt"?: number | null; };
 
 export type FlashcardV2ReconcileResult = { "batch"?: FlashcardV2OperationBatch; "created": Array<string> | null; "unchanged": Array<string> | null; "updated": Array<string> | null; };
+
+export type FlashcardV2ReorderAdvancedSourceRequestInput = { "contentFingerprint": string; "expectedRevisionID": string; "operationID": string; "orderedStepIDs": Array<string>; "sourceID": string; "updatedAt": number; };
+
+export type FlashcardV2ReorderAdvancedSourceResult = { "batch": FlashcardV2OperationBatch; "sourceRevision": FlashcardV2EntityRevision; "updatedCardIDs": Array<string> | null; };
 
 export type FlashcardV2RestoreSourceHistoryRequestInput = { "expectedRevisionID"?: string | null; "operationID"?: string | null; "revisionID"?: string | null; "sourceID"?: string | null; "updatedAt"?: number | null; };
 
@@ -6695,6 +6707,18 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
+     * 读取同一源修订及引用的普通块快照，不写正文、不创建卡片、不主动迁移旧数据。
+     * 仅支持内置有序卡源；关闭、加密、缺失或读取期间变化的来源被拒绝。返回内容指纹供初次排序提交前检查。
+     * DOMs 仅供离线提取文本摘要，不应直接挂载或执行。读取会打开既有卡片存储，失败 code=-1。
+     */
+    "/api/flashcard/getOrderedSourceDetails": {
+        request: FlashcardV2OrderedSourceDetailsRequestInput;
+        response: { "code": 0; "data": FlashcardV2OrderedSourceDetails; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
      * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
      */
     "/api/flashcard/getRenderModel": {
@@ -6815,6 +6839,18 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
+     * 只读构造内置静态题型模型及普通块快照，不打开闪卡存储或迁移旧数据。
+     * 来源必须存在于开放的非加密笔记本；不支持动态干扰项和插件，最多 1000 个块和变体。
+     * 模型 ID 仅供草稿渲染，未保存卡片、排期、历史或会话；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/previewAdvancedSource": {
+        request: FlashcardV2AdvancedPreviewRequestInput;
+        response: { "code": 0; "data": FlashcardV2AdvancedPreviewData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
      * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
      */
     "/api/flashcard/previewAnkiPackage": {
@@ -6857,6 +6893,20 @@ export interface APIPOSTRoutes {
     "/api/flashcard/reconcileSource": {
         request: FlashcardV2ReconcileFlashcardSourceRequestInput;
         response: { "code": 0; "data": FlashcardV2ReconcileResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 仅接受内置有序卡源的完整 StepID 排列，保留主引用、步骤身份和卡片状态。
+     * 卡源及现存卡片的顺序数据在单一批次更新，不增删卡片、不改变排期和历史；不激活旧数据迁移。
+     * 需当前修订、内容指纹与稳定操作 ID；初次执行前检查正文快照变化，并非跨文件系统原子 CAS。
+     * 已成功的原操作可在当前权限仍允许时重放，同操作 ID 的不同顺序、修订或时间被拒绝。
+     * 来源必须可访问；关闭及加密笔记本被拒绝。失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/reorderAdvancedSource": {
+        request: FlashcardV2ReorderAdvancedSourceRequestInput;
+        response: { "code": 0; "data": FlashcardV2ReorderAdvancedSourceResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];

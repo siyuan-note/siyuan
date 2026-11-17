@@ -296,8 +296,15 @@ const getCurrentFlashcardElement = () => {
     if (dialog) {
         return dialog.element;
     }
-    return document.querySelector<HTMLElement>(
-        `.layout__wnd--active div[data-key="${Constants.DIALOG_OPENCARD}"]:not(.fn__none)`);
+    const activeWnd = document.querySelector(".layout__wnd--active");
+    const wnd = activeWnd ? getInstanceById(activeWnd.getAttribute("data-id")) as Wnd :
+        getWndByLayout(window.siyuan.layout.centerLayout);
+    const panel = wnd?.children.find((tab) => tab.headElement?.classList.contains("item--focus"))?.panelElement;
+    if (!panel?.isConnected || panel.classList.contains("fn__none")) {
+        return;
+    }
+    return panel.getAttribute("data-key") === Constants.DIALOG_OPENCARD ? panel :
+        panel.querySelector<HTMLElement>(`div[data-key="${Constants.DIALOG_OPENCARD}"]:not(.fn__none)`);
 };
 
 export const selectOpenTab = async () => {
@@ -311,11 +318,15 @@ export const selectOpenTab = async () => {
         const blockID = getFlashcardLocateBlockID(flashcardElement);
         if (blockID) {
             const response = await fetchSyncPost("/api/block/getBlockInfo", {id: blockID});
-            if (response.code === 0 && response.data.box && response.data.path &&
-                isCurrentFlashcardLocateTarget(flashcardElement, blockID, getCurrentFlashcardElement())) {
-                await files.selectItem(response.data.box, response.data.path);
-                files.lastSelectedElement = files.element.querySelector(".b3-list-item--focus");
+            if (response.code !== 0 || !response.data?.box || !response.data.path ||
+                !isCurrentFlashcardLocateTarget(flashcardElement, blockID, getCurrentFlashcardElement())) {
+                return;
             }
+            await files.selectItem(response.data.box, response.data.path);
+            if (!isCurrentFlashcardLocateTarget(flashcardElement, blockID, getCurrentFlashcardElement())) {
+                return;
+            }
+            files.lastSelectedElement = files.element.querySelector(".b3-list-item--focus");
         }
         dockFile.toggleModel("file", true);
         return;

@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {getFlashcardLocateBlockID, isCurrentFlashcardLocateTarget, setFlashcardLocateBlockID} from "./flashcardLocate";
 
 const loadSurface = (globals: Record<string, unknown>) => {
     const path = "src/card/flashcardV2Session.ts";
@@ -102,5 +103,59 @@ test("waiting text stays outside the empty-state icon rule and actions share one
             assert.equal(label.textContent, due ? "Next in 1:00" : "Loading");
             assert.equal(action.includes('data-type="undo-review"'), Boolean(lastReview));
         }
+    }
+});
+
+test("real waiting completion chain clears the previous locate target and invalidates its pending response", () => {
+    const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
+    const completion = source.slice(source.indexOf("const showCompletion ="), source.indexOf("const nextCard ="));
+    const waiting = source.slice(source.indexOf("const showWaiting ="),
+        source.indexOf("const refreshQueueAfterFailedReview ="));
+    assert.ok(completion.includes("setFlashcardLocateBlockID(dialog.element)"));
+    const script = transpileModule(`${completion}\n${waiting}\nshowWaiting(due);`, {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    for (const due of [0, 61000]) {
+        const attributes = new Map<string, string>();
+        const label = {textContent: ""};
+        const hidden = {classList: {add: () => {}}};
+        const front = {innerHTML: "", className: "", querySelector: () => label};
+        const content = {querySelector: (selector: string) =>
+            selector === "[data-flashcard-front]" ? front : hidden};
+        const element = {
+            getAttribute: (name: string) => attributes.get(name) || null,
+            setAttribute: (name: string, value: string) => attributes.set(name, value),
+            removeAttribute: (name: string) => attributes.delete(name),
+            querySelector: (selector: string) => selector === ".card__block" ? content :
+                selector === "[data-flashcard-front]" ? front :
+                    selector === "[data-flashcard-count]" ? {textContent: ""} : hidden,
+        };
+        const previousBlock = "synthetic-previous-source";
+        setFlashcardLocateBlockID(element, previousBlock);
+        assert.equal(isCurrentFlashcardLocateTarget(element, previousBlock, element), true);
+        let outlineResets = 0;
+        let waitingClears = 0;
+        const globals: Record<string, unknown> = {
+            due, queue: [{}], index: 0, completedPending: false, renderPending: false, renderGeneration: 7,
+            requestPending: false, waitingTimer: undefined, lastReview: undefined,
+            dialog: {element}, setFlashcardLocateBlockID,
+            outline: {update: () => { outlineResets++; }}, clearWaiting: () => { waitingClears++; },
+            setReviewActionsEnabled: () => {}, flashcardV2QueueProgress: () => "1 / 1",
+            sessionCompletionContent: () => "Completed", weakCards: {cards: (): unknown[] => []},
+            nextCard: () => assert.fail("not due yet"), Date: {now: () => 1000},
+            window: {setInterval: () => 1, siyuan: {languages: {
+                flashcardFinishSession: "Finish", loading: "Loading", flashcardWaitingDue: "Next in ${time}",
+            }}},
+        };
+        runInNewContext(script, globals);
+        assert.equal(getFlashcardLocateBlockID(element), "");
+        assert.equal(isCurrentFlashcardLocateTarget(element, previousBlock, element), false);
+        assert.equal(outlineResets, 1);
+        assert.equal(waitingClears, 1);
+        assert.equal(globals.renderGeneration, 8);
+        assert.equal(globals.completedPending, false);
+        assert.equal(globals.renderPending, true);
+        assert.equal(globals.index, 1);
+        assert.equal(label.textContent, due ? "Next in 1:00" : "Loading");
     }
 });

@@ -65,7 +65,7 @@ export const makeCard = (app: App, ids: string[]) => {
     }
     const sourceActions = ids.length === 0 ? "" : [
         actionHTML("quick", "iconRiffCard", window.siyuan.languages.quickMakeCard),
-        ids.length > 1 ? actionHTML("basic", "iconBoth", window.siyuan.languages.flashcardDirectionBidirectional) : "",
+        ids.length > 1 ? actionHTML("basic", "iconBoth", window.siyuan.languages.flashcardQA) : "",
         actionHTML("advanced", "iconSettings", window.siyuan.languages.configGroupAdvanced),
     ].join("");
     const dialog = new MobileDialog({

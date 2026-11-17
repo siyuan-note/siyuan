@@ -2943,7 +2943,7 @@ export const openFlashcardV2BasicSource = (blockIDs: string[]) => {
         }, (response) => {
             const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardReviewSet));
             const dialog = new Dialog({
-                title: window.siyuan.languages.riffCard,
+                title: window.siyuan.languages.flashcardQA,
                 width: isMobile() ? "92vw" : "520px",
                 content: `<div class="b3-dialog__content card__v2-basic card__v2-form">
 <label class="b3-label b3-label--inner card__v2-basic-field">

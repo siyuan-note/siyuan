@@ -1,4 +1,5 @@
 import {Dialog} from "../dialog";
+import {notifyFlashcardV2ReviewChange} from "./flashcardV2ReviewChanges";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
@@ -440,6 +441,7 @@ const finishSession = (sessionID: string, status: "completed" | "abandoned", cal
 };
 
 const emitFlashcardV2Lifecycle = (app: App, type: TEventBus, detail: Record<string, unknown>) => {
+    notifyFlashcardV2ReviewChange(type);
     app.plugins.forEach((plugin) => plugin.eventBus.emit(type, detail));
 };
 
@@ -1652,6 +1654,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     }, (response) => {
                         reviewed = true;
                         if (sessionFinished) {
+                            notifyFlashcardV2ReviewChange("flashcard-review-rating-completed");
                             return;
                         }
                         const result = response.data as IFlashcardV2ReviewResult;
@@ -1713,6 +1716,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     }, (response) => {
                         undone = true;
                         if (sessionFinished) {
+                            notifyFlashcardV2ReviewChange("flashcard-review-undone");
                             return;
                         }
                         queue[undoing.index].sessionCard = response.data.sessionCard ||

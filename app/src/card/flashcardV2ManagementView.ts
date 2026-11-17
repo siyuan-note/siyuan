@@ -1,3 +1,5 @@
+import {onFlashcardV2ReviewChange} from "./flashcardV2ReviewChanges";
+
 export class FlashcardV2ManagementView {
     private version = 0;
     private closed = false;
@@ -31,6 +33,7 @@ export class FlashcardV2ManagementView {
     public bind() {
         this.listener?.abort();
         this.listener = new AbortController();
+        onFlashcardV2ReviewChange(() => this.refresh(), this.listener.signal);
         return {signal: this.listener.signal};
     }
 

@@ -12,7 +12,7 @@ test("membership labels describe adding existing cards without changing operatio
     assert.match(membership, /<option value="include">\$\{window\.siyuan\.languages\.addDeck\}/);
     assert.match(membership, /<option value="exclude">\$\{window\.siyuan\.languages\.removeDeck\}/);
     assert.match(membership, /<option value="automatic">/);
-    assert.match(membership, /setFlashcardV2ReviewSetMembership\(reviewSetID, cardIDs, mode,/);
+    assert.match(membership, /submission\.submit\(reviewSetID, cardIDs, mode,/);
     assert.doesNotMatch(membership, /<option value="include">\$\{window\.siyuan\.languages\.new\}/);
 });
 const render = (summary?: {cards: number, due: number, included: number, excluded: number}) => {
@@ -101,6 +101,7 @@ test("empty membership shows a cancellable create path without assigning cards a
         }).outputText, {
             window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)})}},
             isMobile: () => false,
+            createFlashcardV2MembershipSubmission: () => ({}),
             readFlashcardV2Revision: (revision: unknown) => revision,
             isFlashcardReviewSet: () => true,
             escapeAttr: (value: string) => value,

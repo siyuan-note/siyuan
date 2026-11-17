@@ -1011,15 +1011,40 @@ ${editable && !deleted ? `<span data-type="editSource" class="b3-list-item__acti
     }).join("");
 };
 
-const setFlashcardV2ReviewSetMembership = (reviewSetID: string, cardIDs: string | string[],
-    mode: "include" | "exclude" | "automatic", callback: () => void) => {
-    fetchPost("/api/flashcard/setReviewSetMemberships", {
-        operationID: genUUID(),
+const setFlashcardV2ReviewSetMembership = async (reviewSetID: string, cardIDs: string | string[],
+    mode: "include" | "exclude" | "automatic", callback: () => void,
+    operation: {operationID: string, changedAt: number}) => {
+    let saved = false;
+    await fetchPost("/api/flashcard/setReviewSetMemberships", {
+        ...operation,
         reviewSetID,
         cardIDs: typeof cardIDs === "string" ? [cardIDs] : cardIDs,
         mode,
-        changedAt: Date.now(),
-    }, callback);
+    }, () => { saved = true; callback(); });
+    return saved;
+};
+
+const createFlashcardV2MembershipSubmission = () => {
+    let operationFor = createFlashcardV2Operation();
+    let pending = false;
+    return {
+        get pending() { return pending; },
+        submit: async (reviewSetID: string, cardIDs: string | string[],
+            mode: "include" | "exclude" | "automatic", callback: () => void) => {
+            if (pending) { return false; }
+            pending = true;
+            const ids = [...new Set(typeof cardIDs === "string" ? [cardIDs] : cardIDs)].sort();
+            const operation = operationFor({reviewSetID, cardIDs: ids, mode});
+            try {
+                return await setFlashcardV2ReviewSetMembership(reviewSetID, ids, mode, () => {
+                    operationFor = createFlashcardV2Operation();
+                    callback();
+                }, operation);
+            } finally {
+                pending = false;
+            }
+        },
+    };
 };
 
 const openFlashcardV2Membership = (cardIDs: string | string[], callback: () => void) => {
@@ -1061,16 +1086,22 @@ const openFlashcardV2Membership = (cardIDs: string | string[], callback: () => v
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.manage}</div><select data-type="mode" class="b3-select fn__block"><option value="include">${window.siyuan.languages.addDeck}</option><option value="exclude">${window.siyuan.languages.removeDeck}</option><option value="automatic">${window.siyuan.languages.default}</option></select></label>
 </div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
         });
+        const submission = createFlashcardV2MembershipSubmission();
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
         buttons[0].addEventListener("click", () => dialog.destroy());
         buttons[1].addEventListener("click", () => {
             const reviewSetID = (dialog.element.querySelector('[data-type="reviewSet"]') as HTMLSelectElement).value;
             const mode = (dialog.element.querySelector('[data-type="mode"]') as HTMLSelectElement).value as
                 "include" | "exclude" | "automatic";
-            setFlashcardV2ReviewSetMembership(reviewSetID, cardIDs, mode, () => {
+            if (!dialog.element.isConnected || dialog.element.dataset.dialogClosing === "true") {
+                return;
+            }
+            void submitFlashcardV2Form(dialog.element, () => submission.submit(reviewSetID, cardIDs, mode, () => {
                 callback();
-                dialog.destroy();
-            });
+                if (dialog.element.isConnected && dialog.element.dataset.dialogClosing !== "true") {
+                    dialog.destroy();
+                }
+            }));
         });
     });
 };
@@ -1858,6 +1889,7 @@ ${summary.map(field => `<div class="fn__flex"><span class="ft__secondary">${esca
 interface IFlashcardManagementDialog {
     view: FlashcardV2ManagementView;
     dialog?: Dialog;
+    membershipSubmission?: ReturnType<typeof createFlashcardV2MembershipSubmission>;
 }
 
 const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset = 0,
@@ -1995,6 +2027,34 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 owner.view.refresh();
+            };
+            owner.membershipSubmission ||= createFlashcardV2MembershipSubmission();
+            const removeMembership = async (cardIDs: string | string[], target: HTMLElement) => {
+                if (owner.membershipSubmission.pending || listenerOptions.signal.aborted ||
+                    !dialog.element.isConnected || dialog.element.dataset.dialogClosing === "true") {
+                    return;
+                }
+                target.setAttribute("aria-busy", "true");
+                const button = target instanceof HTMLButtonElement ? target : undefined;
+                const disabled = button?.disabled;
+                if (button) { button.disabled = true; }
+                let saved = false;
+                try {
+                    saved = await owner.membershipSubmission.submit(reviewSetID, cardIDs, "exclude", reloadPage);
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    if (!listenerOptions.signal.aborted && target.isConnected &&
+                        dialog.element.dataset.dialogClosing !== "true") {
+                        target.removeAttribute("aria-busy");
+                        if (button?.dataset.type === "batchApply") {
+                            refreshSelection();
+                        } else if (button) {
+                            button.disabled = disabled;
+                        }
+                        if (!saved) { showMessage(window.siyuan.languages.flashcardSaveFailed, 6000, "error"); }
+                    }
+                }
             };
             dialog.element.addEventListener("click", (event) => {
                 const target = (event.target as HTMLElement).closest("[data-type]") as HTMLElement;
@@ -2162,7 +2222,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     }
                     if (action === "membership") {
                         if (reviewSetID) {
-                            setFlashcardV2ReviewSetMembership(reviewSetID, selected, "exclude", reloadPage);
+                            void removeMembership(selected, target);
                         } else {
                             openFlashcardV2Membership(selected, reloadPage);
                         }
@@ -2424,7 +2484,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "exclude" && reviewSetID && item.dataset.id) {
-                    setFlashcardV2ReviewSetMembership(reviewSetID, item.dataset.id, "exclude", reloadPage);
+                    void removeMembership(item.dataset.id, target);
                     return;
                 }
                 if (type === "membership" && item.dataset.id) {

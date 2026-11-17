@@ -135,7 +135,7 @@ test("management reuses its dialog and keeps grouped actions behind the explicit
     assert.match(management, /owner\.dialog\.element\.querySelector\("\.card__v2-management"\)\.outerHTML = content/);
     assert.match(management, /if \(!isCurrent\(\)\) \{ return; \}/);
     const reload = management.slice(management.indexOf("const reloadPage ="),
-        management.indexOf('dialog.element.addEventListener("click"'));
+        management.indexOf("owner.membershipSubmission ||=", management.indexOf("const reloadPage =")));
     assert.match(reload, /owner\.view\.refresh\(\)/);
     assert.doesNotMatch(reload, /signal\.aborted/);
     assert.doesNotMatch(management, /<select data-type="batchAction"/);

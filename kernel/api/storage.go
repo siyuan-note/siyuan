@@ -191,7 +191,7 @@ var getRecentDocs = contractHandler(apicontract.GetRecentDocs, func(c *gin.Conte
 		publishAccess := model.GetPublishAccess()
 		data = model.FilterRecentDocsByPublishAccess(c, publishAccess, data)
 	}
-	return apicontract.Success(recentDocContracts(data))
+	return apicontract.Success(recentDocContracts(data, !model.IsReadOnlyRoleContext(c)))
 })
 
 var clearRecentDocs = contractHandler(apicontract.ClearRecentDocs, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {

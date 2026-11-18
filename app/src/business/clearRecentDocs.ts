@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
 import {fetchSyncPost} from "../util/fetch";
 import {escapeHtmlTextAndAttr} from "../util/escape";
@@ -32,23 +32,28 @@ export const bindClearRecentDocs = (button: HTMLButtonElement, getSortBy: () => 
             pending = false;
             update();
         };
-        mobileConfirmDialog(window.siyuan.languages.clearRecentDocs, window.siyuan.languages.confirmClearRecentDocs, async () => {
-            try {
-                if (!canWrite() || !isActive()) {
+        confirmDialog({
+            title: window.siyuan.languages.clearRecentDocs,
+            text: window.siyuan.languages.confirmClearRecentDocs,
+            confirm: async () => {
+                try {
+                    if (!canWrite() || !isActive()) {
+                        return false;
+                    }
+                    const response = await fetchSyncPost("/api/storage/clearRecentDocs", {});
+                    if (response.code === 0 && isActive()) {
+                        onCleared();
+                    }
+                    return response.code === 0;
+                } catch (error) {
+                    showMessage(error.message, 0, "error");
                     return false;
+                } finally {
+                    finish();
                 }
-                const response = await fetchSyncPost("/api/storage/clearRecentDocs", {});
-                if (response.code === 0 && isActive()) {
-                    onCleared();
-                }
-                return response.code === 0;
-            } catch (error) {
-                showMessage(error.message, 0, "error");
-                return false;
-            } finally {
-                finish();
-            }
-        }, finish, false, undefined, undefined, {awaitConfirm: true});
+            },
+            cancel: finish,
+        });
     });
     update();
     return update;

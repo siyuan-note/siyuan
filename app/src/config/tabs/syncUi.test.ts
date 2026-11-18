@@ -99,8 +99,8 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
                     destroy() {closed++; dialogOptions.destroyCallback();}
                 }};
             }
-            if (name === "../../dialog/mobileConfirmDialog") {
-                return {mobileConfirmDialog: (_title: string, _text: string, confirm: () => void, cancel: () => void) => confirmations.push({confirm, cancel})};
+            if (name === "../../dialog/confirmDialog") {
+                return {confirmDialog: ({confirm, cancel}: {confirm: () => void, cancel: () => void}) => confirmations.push({confirm, cancel})};
             }
             if (name === "../util/configApi") {
                 return {config: {set: (path: string, value: unknown, applied: () => void) => {

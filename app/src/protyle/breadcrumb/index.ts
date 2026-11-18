@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {toggleMenu} from "../../menus/menuToggle";
 import type {FileTreeGetDocRequestInput} from "../../types/api";
 import type {BlockBreadcrumbRequestInput, BlockQueryRequestInput, TreeStatRequestInput} from "../../types/api";
@@ -1068,8 +1068,12 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                             icon: "iconUploadAssets",
                             click() {
                                 if (!needSubscribe()) {
-                                    mobileConfirmDialog("📦 " + window.siyuan.languages.uploadAssets2CDN, window.siyuan.languages.uploadAssets2CDNConfirmTip, () => {
-                                        fetchPost("/api/asset/uploadCloud", {id: protyle.block.id});
+                                    confirmDialog({
+                                        title: "📦 " + window.siyuan.languages.uploadAssets2CDN,
+                                        text: window.siyuan.languages.uploadAssets2CDNConfirmTip,
+                                        confirm: () => {
+                                            fetchPost("/api/asset/uploadCloud", {id: protyle.block.id});
+                                        },
                                     });
                                 }
                             }
@@ -1083,10 +1087,13 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                                     if (!getHostCapabilities().importExport) {
                                         return;
                                     }
-                                    mobileConfirmDialog("🤩 " + window.siyuan.languages.share2Liandi,
-                                        window.siyuan.languages.share2LiandiConfirmTip.replace("${accountServer}", getCloudURL("")), () => {
+                                    confirmDialog({
+                                        title: "🤩 " + window.siyuan.languages.share2Liandi,
+                                        text: window.siyuan.languages.share2LiandiConfirmTip.replace("${accountServer}", getCloudURL("")),
+                                        confirm: () => {
                                             fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});
-                                        });
+                                        },
+                                    });
                                 }
                             }).element);
                         }

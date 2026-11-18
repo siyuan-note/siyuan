@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {MobileDialog} from "../../../dialog/mobileDialog";
 import type {AVBlockCollectionMatch, AVCollectionReview, AVCollectionReviewItem} from "../../../types/api";
 import {fetchSyncPost} from "../../../util/fetch";
@@ -131,12 +131,19 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
         busy = true;
         updateActions();
         let committed = false;
-        mobileConfirmDialog(title, text, async () => {
-            if (!root.isConnected) return true;
-            if (committed) await load();
-            else await perform(operations, undo, () => { committed = true; });
-            return true;
-        }, () => { busy = false; updateActions(); }, true, undefined, lang.confirm, {awaitConfirm: true});
+        confirmDialog({
+            title: title,
+            text: text,
+            confirm: async () => {
+                if (!root.isConnected) return true;
+                if (committed) await load();
+                else await perform(operations, undo, () => { committed = true; });
+                return true;
+            },
+            cancel: () => { busy = false; updateActions(); },
+            isDelete: true,
+            confirmLabel: lang.confirm,
+        });
     };
     root.addEventListener("click", event => {
         const button = (event.target as Element).closest<HTMLElement>("[data-collection-view], [data-collection-status], [data-remove-item]");

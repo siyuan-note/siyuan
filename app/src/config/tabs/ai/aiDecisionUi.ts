@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../../render/fragments";
 import {fetchPost} from "../../../util/fetch";
@@ -193,7 +193,7 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
     const close = () => {
         if (saving || closed || !canEdit()) { return; }
         if (JSON.stringify(draft) !== initial) {
-            mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.discardUnsavedChanges, leave);
+            confirmDialog({title: window.siyuan.languages.confirm, text: window.siyuan.languages.discardUnsavedChanges, confirm: leave});
         } else { leave(); }
     };
     const back = view.querySelector<HTMLElement>("[data-action='back']");

@@ -99,11 +99,9 @@ const setup = (action: Action) => {
             confirm = () => { void dialog.runPending(() => options.onConfirm(dialog.input.value, dialog)); };
             return dialog;
         },
-        mobileConfirmDialog: (_title: string, _content: string, callback: () => Promise<boolean>,
-                              _cancel: unknown, _remove: boolean, _width: unknown, _id: unknown, options: any) => {
-            assert.equal(options.awaitConfirm, true);
+        confirmDialog: ({confirm: handler}: {confirm: () => Promise<boolean>}) => {
             const dialog = new Prompt();
-            confirm = () => { void dialog.runPending(callback); };
+            confirm = () => { void dialog.runPending(handler); };
             return dialog;
         },
         element: {addEventListener: (_event: string, callback: typeof toolbar) => { toolbar = callback; }},

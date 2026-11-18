@@ -1,5 +1,5 @@
 import {MobileDialog} from "../dialog/mobileDialog";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {mobileInputDialog} from "../dialog/mobileInputDialog";
 import {config as configApi} from "../config/util/configApi";
 import {isPaidUser, needSubscribe} from "../util/needSubscribe";
@@ -85,14 +85,18 @@ export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: (ready: b
                         renderSyncCloudList(cloudListElement, true, cb);
                         break;
                     case "removeCloud":
-                        mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDeleteCloudDir} <i>${target.parentElement.getAttribute("data-name")}</i>`,
-                            () => runCloudListAction(cloudListElement, async () => {
+                        confirmDialog({
+                            title: window.siyuan.languages.deleteOpConfirm,
+                            text: `${window.siyuan.languages.confirmDeleteCloudDir} <i>${target.parentElement.getAttribute("data-name")}</i>`,
+                            confirm: () => runCloudListAction(cloudListElement, async () => {
                                 const response = await fetchSyncPost("/api/sync/removeCloudSyncDir", {name: target.parentElement.getAttribute("data-name")});
                                 if (response.code !== 0) return false;
                                 window.siyuan.config.sync.cloudName = response.data;
                                 if (cloudListElement.isConnected) renderSyncCloudList(cloudListElement, true, cb);
                                 return true;
-                            }, cb), undefined, true, undefined, undefined, {awaitConfirm: true});
+                            }, cb),
+                            isDelete: true,
+                        });
                         break;
                     case "selectCloud":
                         void runCloudListAction(cloudListElement, async () => {
@@ -420,8 +424,12 @@ const setSync = (key?: string, dialog?: MobileDialog) => {
             }, {close: false}).then(success => {
                 if (!success) return;
                 dialog.destroy();
-                mobileConfirmDialog("🔄 " + window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
-                    syncNow();
+                confirmDialog({
+                    title: "🔄 " + window.siyuan.languages.syncConfGuide4,
+                    text: window.siyuan.languages.syncConfGuide5,
+                    confirm: () => {
+                        syncNow();
+                    },
                 });
             });
         });
@@ -429,8 +437,12 @@ const setSync = (key?: string, dialog?: MobileDialog) => {
         if (dialog) {
             dialog.destroy();
         }
-        mobileConfirmDialog("🔄 " + window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
-            syncNow();
+        confirmDialog({
+            title: "🔄 " + window.siyuan.languages.syncConfGuide4,
+            text: window.siyuan.languages.syncConfGuide5,
+            confirm: () => {
+                syncNow();
+            },
         });
     }
 };
@@ -484,33 +496,37 @@ export const setKey = (isSync: boolean, cb?: () => void) => {
             showMessage(window.siyuan.languages.passwordNoMatch);
             return;
         }
-        mobileConfirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
-            if (isMobile()) {
-                void dialog.runPending(async () => {
-                    const response = await fetchSyncPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElements[0].value});
-                    if (response.code !== 0) return false;
+        confirmDialog({
+            title: "🔑 " + window.siyuan.languages.genKeyByPW,
+            text: window.siyuan.languages.initRepoKeyTip,
+            confirm: () => {
+                if (isMobile()) {
+                    void dialog.runPending(async () => {
+                        const response = await fetchSyncPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElements[0].value});
+                        if (response.code !== 0) return false;
+                        window.siyuan.config.repo.key = response.data.key;
+                        cb?.();
+                        return true;
+                    }, {close: false}).then(success => {
+                        if (!success) return;
+                        if (isSync) setSync(window.siyuan.config.repo.key, dialog);
+                        else dialog.destroy();
+                    });
+                    return;
+                }
+                if (!isSync) {
+                    dialog.destroy();
+                }
+                fetchPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElements[0].value}, (response) => {
                     window.siyuan.config.repo.key = response.data.key;
-                    cb?.();
-                    return true;
-                }, {close: false}).then(success => {
-                    if (!success) return;
-                    if (isSync) setSync(window.siyuan.config.repo.key, dialog);
-                    else dialog.destroy();
+                    if (cb) {
+                        cb();
+                    }
+                    if (isSync) {
+                        setSync(response.data.key, dialog);
+                    }
                 });
-                return;
-            }
-            if (!isSync) {
-                dialog.destroy();
-            }
-            fetchPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElements[0].value}, (response) => {
-                window.siyuan.config.repo.key = response.data.key;
-                if (cb) {
-                    cb();
-                }
-                if (isSync) {
-                    setSync(response.data.key, dialog);
-                }
-            });
+            },
         });
     });
     dialog.focusWhenReady(() => inputElements[0]);

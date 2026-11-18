@@ -117,7 +117,7 @@ const createHistory = (mobile: boolean, readonly: boolean) => {
     const snapshots = {reset: noop, load: noop, select: noop};
     const module = loadModule("history/doc.ts", mobile, {
         "../dialog/mobileDialog": {MobileDialog: class {element = root;}},
-        "../dialog/mobileConfirmDialog": {mobileConfirmDialog: () => { confirmations++; }},
+        "../dialog/confirmDialog": {confirmDialog: () => { confirmations++; }},
         "../protyle": {Protyle: class {protyle = {options: {history: {}}};}},
         "../protyle/util/onGet": {disabledProtyle: noop, onGet: noop},
         "../util/fetch": {fetchPost: (url: string, _body: unknown, callback: (response: unknown) => void) =>

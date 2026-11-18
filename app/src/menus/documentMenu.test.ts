@@ -24,7 +24,7 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
     const renames: Parameters<typeof import("./commonMenuItem").renameMenu>[0][] = [];
     const histories: Parameters<typeof import("../history/doc").openDocHistory>[0][] = [];
     const databases: unknown[][] = [];
-    const confirmations: unknown[][] = [];
+    const confirmations: unknown[] = [];
     const icons: unknown[][] = [];
     const deletions: string[][] = [];
     const treeDeletions: unknown[][] = [];
@@ -62,7 +62,7 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
                     saveNotebookConf: (_id: string, _config: unknown, callback: (response: unknown) => void) => callback({code: 0}),
                     saveNotebookConfSync: async () => ({code: 0}),
                 },
-                "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (...args: unknown[]) => confirmations.push(args)},
+                "../dialog/confirmDialog": {confirmDialog: (options: unknown) => confirmations.push(options)},
                 "../emoji": {openEmojiPanel: (...args: unknown[]) => icons.push(args)},
                 "../config/encryptedAssets": {canCleanEncryptedNotebookAssets: () => false},
                 "../util/contractFormData": {ContractFormData: class {}},

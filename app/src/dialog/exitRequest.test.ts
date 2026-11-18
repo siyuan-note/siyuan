@@ -46,9 +46,9 @@ const fixture = (mobile = false) => {
                 }
                 if (action) actions.set(id, action.callback);
             }};
-            if (name === "./mobileConfirmDialog") return {mobileConfirmDialog: (_title: string, text: string,
-                confirm: () => void, cancel: () => void, _delete: boolean, _extra: unknown, label: string) => {
-                assert.equal(label, "Skip sync and exit");
+            if (name === "./confirmDialog") return {confirmDialog: ({text, confirm, cancel, confirmLabel}: {
+                text: string, confirm: () => void, cancel: () => void, confirmLabel: string}) => {
+                assert.equal(confirmLabel, "Skip sync and exit");
                 assert.match(text, /Unsynced/);
                 const confirmation = {destroyed: false, confirm, cancel: () => { confirmation.destroyed = true; cancel(); }};
                 confirmations.push(confirmation);

@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {MobileDialog} from "../../dialog/mobileDialog";
 import {Constants} from "../../constants";
 import {showMessage} from "../../dialog/message";
@@ -179,7 +179,7 @@ export const exportMarkdownZip = async(options: IExportMdOptions) => {
             }
         };
         if (encrypted) {
-            mobileConfirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, exportMarkdown);
+            confirmDialog({title: "⚠️ " + window.siyuan.languages.export, text: window.siyuan.languages.encryptedExportRiskTip, confirm: exportMarkdown});
             return;
         }
         exportMarkdown();

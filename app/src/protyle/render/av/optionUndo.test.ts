@@ -65,7 +65,7 @@ const setupOptionMenu = (kanban = false) => {
         escapeAttr: (text: string) => text,
         escapeHtml: (text: string) => text,
         dayjs: () => ({format: () => "20260916120000"}),
-        mobileConfirmDialog: (_title: string, _text: string, confirm: () => void) => confirm(),
+        confirmDialog: ({confirm}: {confirm: () => void}) => confirm(),
         transaction: (_protyle: any, operations: any[], inverse: any[]) => transactions.push({operations, inverse}),
         getEditHTML: () => "",
         bindEditEvent: () => {},

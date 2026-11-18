@@ -1214,13 +1214,18 @@ export class Files extends Model {
             click: () => {
                 if (!this.element.getAttribute("disabled")) {
                     this.element.setAttribute("disabled", "disabled");
-                    confirmDialog(window.siyuan.languages.rebuildDataIndex, window.siyuan.languages.rebuildDataIndexTip, () => {
-                        refreshFileTree(() => {
+                    confirmDialog({
+                        title: window.siyuan.languages.rebuildDataIndex,
+                        text: window.siyuan.languages.rebuildDataIndexTip,
+                        confirm: () => {
+                            refreshFileTree(() => {
+                                this.element.removeAttribute("disabled");
+                                this.init(false);
+                            });
+                        },
+                        cancel: () => {
                             this.element.removeAttribute("disabled");
-                            this.init(false);
-                        });
-                    }, () => {
-                        this.element.removeAttribute("disabled");
+                        },
                     });
                 }
             }

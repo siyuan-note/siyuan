@@ -11,6 +11,8 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
     }).outputText;
     let dependenciesReady = false;
+    const confirmations: unknown[][] = [];
+    const dialog = {};
     const adaptHotkey = (value: string) => value;
     const openInputDialog = (): void => undefined;
     const openAssetPicker = async (): Promise<null> => null;
@@ -19,6 +21,9 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
         get(_target, key) {
             if (key === "__esModule") return true;
             assert.ok(dependenciesReady, `Dependency ${String(key)} was read during module initialization`);
+            if (key === "createDesktopConfirmDialog") {
+                return (...args: unknown[]) => { confirmations.push(args); return dialog; };
+            }
             if (key === "openInputDialog") {
                 return openInputDialog;
             }
@@ -36,6 +41,7 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
         openInputDialog: typeof openInputDialog,
         openAssetPicker: typeof openAssetPicker,
         openDatePicker: typeof openDatePicker,
+        confirm: (title: string, text: string, callback?: (...args: unknown[]) => void) => unknown,
         insertContent: (options: import("./insertContent").IInsertContentOptions) =>
             import("./insertContent").IInsertContentResult
     }} = {};
@@ -48,4 +54,12 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     assert.equal(api.openDatePicker, openDatePicker);
     assert.equal(typeof api.insertContent, "function");
     assert.equal(exports.getAPI(), api);
+    const callbacks: unknown[][] = [];
+    const callback = (...args: unknown[]) => { callbacks.push(args); };
+    assert.equal(api.confirm("", "", callback), undefined);
+    assert.deepEqual(callbacks, [[]]);
+    assert.equal(confirmations.length, 0);
+    assert.equal(api.confirm("Title", "Message", callback), dialog);
+    assert.equal(confirmations[0][1], false);
+    assert.equal((confirmations[0][0] as {confirm: unknown}).confirm, callback);
 });

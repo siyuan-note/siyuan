@@ -80,7 +80,7 @@ const fixture = (initialStorage: Record<string, unknown> = {}, workspaceID = "")
             }};
             return dialogHandle;
         },
-        confirmDialog: (_title: string, _message: string, confirm: () => void) => confirm(),
+        confirmDialog: ({confirm}: {confirm: () => void}) => confirm(),
         showMessage: (message: string) => messages.push(message),
         escapeHtml: (text: string) => text,
         openNewWindowByWorkspace: (workspace: string, geometry?: IWindowGeometry) => {

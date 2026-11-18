@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {MobileDialog} from "../../dialog/mobileDialog";
 import {renderMemoryOverview} from "./overview";
 import {showMessage} from "../../dialog/message";
@@ -61,7 +61,7 @@ export const openMemoryManager = () => {
         beforeClose: () => {
             if (submitting || clearing) { return false; }
             if (!taskDirty) { return true; }
-            mobileConfirmDialog(lang.aiMemory, lang.discardUnsavedChanges, () => { taskDirty = false; dialog.destroy(); });
+            confirmDialog({title: lang.aiMemory, text: lang.discardUnsavedChanges, confirm: () => { taskDirty = false; dialog.destroy(); }});
             return false;
         },
         destroyCallback: () => {
@@ -399,8 +399,12 @@ export const openMemoryManager = () => {
                 icon: "iconTrashcan", warning: true, label: lang.aiMemoryClearAndDisable,
                 click: () => {
                     if (closed || isReadOnly() || submitting || clearing) { return; }
-                    mobileConfirmDialog(lang.aiMemoryClearAndDisable, escapeHtml(lang.aiMemoryClearAndDisableConfirm),
-                        clearMemory, undefined, true, undefined, undefined, {awaitConfirm: true});
+                    confirmDialog({
+                        title: lang.aiMemoryClearAndDisable,
+                        text: escapeHtml(lang.aiMemoryClearAndDisableConfirm),
+                        confirm: clearMemory,
+                        isDelete: true,
+                    });
                 },
             }).element);
             const rect = more.getBoundingClientRect();

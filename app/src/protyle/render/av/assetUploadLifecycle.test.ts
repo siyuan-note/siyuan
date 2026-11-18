@@ -114,19 +114,13 @@ const createHarness = (standalone = true) => {
             },
         },
         "dayjs": () => ({format: () => "20261014070000"}),
+        filesize: {filesize: () => "1 KB"},
         "../../util/escape": {escapeHtml: (text: string) => text},
-        "../../dialog/confirmDialog": {confirmDialog: (_title: string, _message: string, yes: () => void) => {
+        "../../dialog/confirmDialog": {confirmDialog: ({confirm}: {confirm: () => void}) => {
             if (delayConfirmation) {
-                confirmations.push(yes);
+                confirmations.push(confirm);
             } else {
-                yes();
-            }
-        }},
-        "../../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _message: string, yes: () => void) => {
-            if (delayConfirmation) {
-                confirmations.push(yes);
-            } else {
-                yes();
+                confirm();
             }
         }},
         "../../util/fetch": {fetchSyncPost: (_url: string, data: {id: string, assetPaths: string[]}) =>
@@ -149,15 +143,16 @@ const createHarness = (standalone = true) => {
             module, exports: module.exports, require: (name: string) => mocks[name] || {}, Promise,
             document: {body: document.body, baseURI: "https://siyuan.test/stage/build/app/", querySelector: (): Element | null => null},
             location: {origin: "https://siyuan.test"},
-            window: {siyuan: {languages: {uploadInsertTargetUnavailable: "unavailable", uploading: "uploading"}}},
+            window: {siyuan: {languages: {uploadInsertTargetUnavailable: "unavailable", uploading: "uploading",
+                upload: "upload", uploadFileTooLarge: "${x} ${y}"}}},
             FormData: FormDataStub, XMLHttpRequest: XHRStub, DataTransferItem: class {}, console,
         });
         return module.exports;
     };
     mocks["../../upload"] = load(uploadSource);
     const api = load<typeof import("./asset")>(assetSource);
-    const start = (kind: UploadKind, name = "image.png") => {
-        const files = [new File(["image"], name, {type: "image/png"})];
+    const start = (kind: UploadKind, name = "image.png", size = 5) => {
+        const files = [new File([new Uint8Array(size)], name, {type: "image/png"})];
         if (kind === "picker") {
             const menu = document.createElement("div");
             const input = document.createElement("input");
@@ -167,7 +162,7 @@ const createHarness = (standalone = true) => {
                 cellElements: [cell as unknown as HTMLElement], menuElement: menu as unknown as HTMLElement});
             input.dispatch("change");
         } else if (kind === "drop") {
-            api.dragUpload([{path: "/" + name, size: 5}], protyle as unknown as IProtyle, cell as unknown as HTMLElement);
+            api.dragUpload([{path: "/" + name, size}], protyle as unknown as IProtyle, cell as unknown as HTMLElement);
         } else {
             api.uploadFilesToAssetCell(files, protyle as unknown as IProtyle, cell as unknown as HTMLElement, {source: "paste"});
         }
@@ -253,7 +248,7 @@ describe("database asset upload lifecycle", () => {
         it(`${kind}: rechecks a closed owner after upload confirmation`, async () => {
             const h = createHarness();
             h.delayConfirmation();
-            h.start(kind);
+            h.start(kind, "image.png", 1024);
             await h.resume();
             assert.equal(h.requests.length, 0);
             h.owner.remove();

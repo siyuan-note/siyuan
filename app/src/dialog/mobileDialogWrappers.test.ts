@@ -7,6 +7,8 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 const setup = (mobile = true) => {
     const events: string[] = [];
     const pending: Promise<boolean>[] = [];
+    const messages: string[] = [];
+    const pendingOptions: any[] = [];
     let delegated: any;
     class Control {
         value = "";
@@ -33,12 +35,14 @@ const setup = (mobile = true) => {
         focusWhenReady() { events.push("deferred-focus"); }
         bindInput() {}
         requestClose(reason: string) {
+            if (this.options.beforeClose?.() === false) return Promise.resolve(false);
             events.push(reason);
             this.options.destroyCallback?.();
             return Promise.resolve(true);
         }
         destroy() { void this.requestClose("destroy"); }
-        runPending(task: () => Promise<boolean>) {
+        runPending(task: () => Promise<boolean>, options?: any) {
+            pendingOptions.push(options);
             const promise = task().then(success => {
                 if (success) void this.requestClose("confirm");
                 return success;
@@ -47,22 +51,25 @@ const setup = (mobile = true) => {
             return promise;
         }
     }
-    const dependencies = {MobileDialog: MockDialog, isMobile: () => mobile, escapeHtml: (value: string) => value,
+    const dependencies = {MobileDialog: MockDialog, Dialog: MockDialog, isMobile: () => mobile,
+        escapeHtml: (value: string) => value,
+        showMessage: (message: string) => messages.push(message),
         Constants: {}, createInputDialog: (options: any, DialogConstructor: typeof MockDialog) => {
             delegated = options;
             return new DialogConstructor(options);
-        },
-        confirmDialog: (...args: any[]) => { delegated = args; return new MockDialog({}); }};
+        }};
     const load = (file: string) => {
         const exports: any = {};
         runInNewContext(transpileModule(readFileSync("src/dialog/" + file + ".ts", "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText, {exports, require: () => dependencies, HTMLInputElement: Control,
             document: {activeElement: undefined, body: {}, createElement: () => new Control()},
-            window: {siyuan: {languages: {confirm: "Confirm", cancel: "Cancel"}}}, console});
+            window: {siyuan: {languages: {confirm: "Confirm", cancel: "Cancel", confirmActionFailed: "Operation failed"}}},
+            console: {...console, error() {}}});
         return exports;
     };
-    return {...load("mobileInputDialog"), ...load("mobileConfirmDialog"), events, pending, delegated: () => delegated};
+    return {...load("mobileInputDialog"), ...load("confirmDialog"), events, pending, messages, pendingOptions,
+        delegated: () => delegated};
 };
 
 test("input actions use the same full-width touch group as confirmations", () => {
@@ -102,8 +109,8 @@ test("desktop input delegation interprets explicit true success without changing
 test("mobile confirmation failure retains cancellation, success does not invoke cancel", async () => {
     const f = setup();
     let cancelled = 0;
-    const dialog = f.mobileConfirmDialog("Title", "Text", async () => false, () => cancelled++, false,
-        undefined, undefined, {awaitConfirm: true});
+    const dialog = f.confirmDialog({title: "Title", text: "Text", confirm: async () => false,
+        cancel: () => cancelled++});
     const event = {target: {id: "confirmDialogConfirmBtn"}, detail: 0};
     dialog.listeners.click(event);
     assert.equal(await f.pending.pop(), false);
@@ -111,41 +118,121 @@ test("mobile confirmation failure retains cancellation, success does not invoke 
     await dialog.requestClose("cancel");
     await dialog.requestClose("cancel");
     assert.equal(cancelled, 1);
-    const accepted = f.mobileConfirmDialog("Title", "Text", async () => true, () => cancelled++, false,
-        undefined, undefined, {awaitConfirm: true});
+    const accepted = f.confirmDialog({title: "Title", text: "Text", confirm: async () => true,
+        cancel: () => cancelled++});
     accepted.listeners.click(event);
     assert.equal(await f.pending.pop(), true);
     assert.equal(cancelled, 1);
 });
-test("desktop confirmation preserves the legacy seven arguments", () => {
+test("desktop confirmation waits for the confirm handler and keeps the dialog on failure", async () => {
     const f = setup(false);
-    const confirm = () => {};
-    const cancel = () => {};
-    const extra = {label: "Extra", callback() {}};
-    f.mobileConfirmDialog("Title", "Text", confirm, cancel, true, extra, "Delete", {awaitConfirm: true});
-    assert.deepEqual(f.delegated(), ["Title", "Text", confirm, cancel, true, extra, "Delete"]);
+    let attempts = 0;
+    const dialog = f.confirmDialog({title: "Title", text: "Text", confirm: async () => ++attempts > 1});
+    dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(f.events.includes("destroy"), false);
+    dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(f.events.filter((item: string) => item === "destroy").length, 1);
+});
+
+test("desktop confirmation blocks cancel and dismissal during pending work", async () => {
+    const f = setup(false);
+    let finish: (success: boolean) => void;
+    let attempts = 0;
+    let cancelled = 0;
+    const dialog = f.confirmDialog({title: "Title", text: "Text", confirm: () => {
+        attempts++;
+        return new Promise<boolean>(resolve => { finish = resolve; });
+    }, cancel: () => cancelled++});
+    const click = (id: string, detail: number | string = 0) => dialog.listeners.click({target: {id}, detail});
+    click("confirmDialogConfirmBtn");
+    click("confirmDialogConfirmBtn");
+    click("cancelDialogConfirmBtn");
+    click("", "Escape");
+    dialog.destroy();
+    assert.equal(attempts, 1);
+    assert.equal(cancelled, 0);
+    assert.equal(f.events.includes("destroy"), false);
+    finish(false);
+    await new Promise(resolve => setImmediate(resolve));
+    click("cancelDialogConfirmBtn");
+    assert.equal(cancelled, 1);
+    assert.equal(f.events.filter((item: string) => item === "destroy").length, 1);
+});
+
+test("plugin confirmation closes synchronously without waiting for a promise returned by its callback", () => {
+    const f = setup(false);
+    let invoked = false;
+    let cancelled = false;
+    const dialog = f.createDesktopConfirmDialog({title: "Title", text: "Text",
+        confirm: () => {
+            invoked = true;
+            return new Promise<void>(() => {});
+        },
+        cancel: () => { cancelled = true; },
+    }, false);
+    dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
+    assert.equal(invoked, true);
+    assert.equal(cancelled, false);
+    assert.deepEqual(f.events, ["early-focus", "destroy"]);
+});
+
+test("desktop confirmation reports a neutral failure when the handler throws", async () => {
+    const f = setup(false);
+    const dialog = f.confirmDialog({title: "Title", text: "Text", confirm: async () => {
+        throw new Error("boom");
+    }});
+    dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(f.messages, ["Operation failed"]);
+    assert.equal(f.events.includes("destroy"), false);
+});
+
+test("mobile confirmation forwards the neutral failure message to the pending lock", async () => {
+    const f = setup();
+    const dialog = f.confirmDialog({title: "Title", text: "Text", confirm: async () => false});
+    dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
+    await f.pending.pop();
+    assert.equal(f.pendingOptions[0].failureMessage, "Operation failed");
+});
+
+test("desktop confirmation renders its own labels", () => {
+    const f = setup(false);
+    const dialog = f.confirmDialog({title: "Title", text: "Text", cancelLabel: "Later", confirmLabel: "Delete",
+        isDelete: true});
+    assert.match(dialog.options.content, />Later</);
+    assert.match(dialog.options.content, />Delete</);
+    assert.match(dialog.options.content, /b3-button--remove/);
+    assert.doesNotMatch(dialog.options.content, /b3-button--touch|mobile-sheet-action-bar/);
+});
+
+test("mobile confirmation renders the cancel label without affecting the default", () => {
+    const f = setup();
+    assert.match(f.confirmDialog({title: "Title", text: "Text"}).options.content, />Cancel</);
+    assert.match(f.confirmDialog({title: "Title", text: "Text", cancelLabel: "Later"}).options.content, />Later</);
 });
 
 test("mobile confirmation distinguishes an Escape dispatch from explicit cancellation", () => {
     const f = setup();
-    const escaped = f.mobileConfirmDialog("Title", "Text");
+    const escaped = f.confirmDialog({title: "Title", text: "Text"});
     escaped.listeners.click({target: {id: ""}, detail: "Escape"});
     assert.equal(f.events.at(-1), "escape");
-    const cancelled = f.mobileConfirmDialog("Title", "Text");
+    const cancelled = f.confirmDialog({title: "Title", text: "Text"});
     cancelled.listeners.click({target: {id: "cancelDialogConfirmBtn"}, detail: 0});
     assert.equal(f.events.at(-1), "cancel");
 });
 
 test("mobile confirmation groups touch actions and keeps danger and extra action semantics", () => {
     const f = setup();
-    const dialog = f.mobileConfirmDialog("Title", "Text");
+    const dialog = f.confirmDialog({title: "Title", text: "Text"});
     assert.match(dialog.options.content, /b3-dialog__action mobile-sheet-action-bar/);
     assert.match(dialog.options.content, /mobile-sheet-action-group/);
     assert.match(dialog.options.content, /b3-button--touch b3-button--wrap b3-button--cancel b3-button--secondary/);
     assert.doesNotMatch(dialog.options.content, /b3-button--text|fn__space|group--stacked/);
     let extra = 0;
-    const danger = f.mobileConfirmDialog("Title", "Text", undefined, undefined, true,
-        {label: "Extra", callback: () => extra++});
+    const danger = f.confirmDialog({title: "Title", text: "Text", isDelete: true,
+        extraAction: {label: "Extra", callback: () => extra++}});
     assert.match(danger.options.content, /mobile-sheet-action-group--stacked/);
     assert.match(danger.options.content, /b3-button--wrap b3-button--remove/);
     assert.equal(danger.confirm.inserted.length, 1);

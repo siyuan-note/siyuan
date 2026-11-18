@@ -85,7 +85,7 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
             };
             return prompt;
         }},
-        "dialog/mobileConfirmDialog": {mobileConfirmDialog: (title, text, callback) => confirmations.push({title, text, callback})},
+        "dialog/confirmDialog": {confirmDialog: ({title, text, confirm: callback}) => confirmations.push({title, text, callback})},
         "dialog/message": {showMessage() {}},
         "util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: true})},
         "util/functions": {isMobile: () => mobile, isBrowser: () => false},

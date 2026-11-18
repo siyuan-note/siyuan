@@ -1,4 +1,5 @@
 {
+	"confirmActionFailed": "Не вдалося виконати операцію. Спробуйте ще раз",
 	"updateInstallNow": "Встановити зараз",
 	"updateInstallLater": "Не зараз",
 	"hideBreadcrumbIcons": "Приховувати піктограми ланцюжка навігації",

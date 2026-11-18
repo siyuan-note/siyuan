@@ -10,7 +10,7 @@ import {showMessage} from "../dialog/message";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {isDisabledFeature, isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
 import {bindSearchSubtypeFilters} from "./subTypes";
 import {getDefaultSubType, normalizeSearchTypes} from "./getDefault";
@@ -461,53 +461,65 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
             });
             inputElement.blur();
             if (hasSameName && !hasSameConfig) {
-                mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchOverwrite, () => {
-                    if (isMobile()) {
-                        saveCriterionData(config, criteriaData, element, value, saveDialog);
-                        return;
-                    }
-                    Array.from(criteriaElement.children).forEach(item => {
-                        if (item.textContent === value) {
-                            item.remove();
+                confirmDialog({
+                    title: window.siyuan.languages.confirm,
+                    text: window.siyuan.languages.searchOverwrite,
+                    confirm: () => {
+                        if (isMobile()) {
+                            saveCriterionData(config, criteriaData, element, value, saveDialog);
+                            return;
                         }
-                    });
-                    removeCriterionData(criteriaData, [value]);
-                    saveCriterionData(config, criteriaData, element, value, saveDialog);
+                        Array.from(criteriaElement.children).forEach(item => {
+                            if (item.textContent === value) {
+                                item.remove();
+                            }
+                        });
+                        removeCriterionData(criteriaData, [value]);
+                        saveCriterionData(config, criteriaData, element, value, saveDialog);
+                    },
                 });
             } else if (hasSameName && hasSameConfig) {
                 if (hasSameName === hasSameConfig) {
                     saveDialog.destroy();
                 } else {
                     const removeName = hasSameName === value ? hasSameConfig : hasSameName;
-                    mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchRemoveName.replace("${x}", () => escapeHtml(removeName)).replace("${y}", () => escapeHtml(value)), () => {
-                        if (isMobile()) {
-                            saveCriterionData(config, criteriaData, element, value, saveDialog, [hasSameConfig, hasSameName]);
-                            return;
-                        }
-                        Array.from(criteriaElement.children).forEach(item => {
-                            if (item.textContent === hasSameConfig || item.textContent === hasSameName) {
-                                item.remove();
+                    confirmDialog({
+                        title: window.siyuan.languages.confirm,
+                        text: window.siyuan.languages.searchRemoveName.replace("${x}", () => escapeHtml(removeName)).replace("${y}", () => escapeHtml(value)),
+                        confirm: () => {
+                            if (isMobile()) {
+                                saveCriterionData(config, criteriaData, element, value, saveDialog, [hasSameConfig, hasSameName]);
+                                return;
                             }
-                        });
-                        removeSearchCriterion(removeName);
-                        removeCriterionData(criteriaData, [hasSameConfig, hasSameName]);
-                        saveCriterionData(config, criteriaData, element, value, saveDialog);
+                            Array.from(criteriaElement.children).forEach(item => {
+                                if (item.textContent === hasSameConfig || item.textContent === hasSameName) {
+                                    item.remove();
+                                }
+                            });
+                            removeSearchCriterion(removeName);
+                            removeCriterionData(criteriaData, [hasSameConfig, hasSameName]);
+                            saveCriterionData(config, criteriaData, element, value, saveDialog);
+                        },
                     });
                 }
             } else if (!hasSameName && hasSameConfig) {
-                mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", () => escapeHtml(hasSameConfig)).replace("${y}", () => escapeHtml(value)), () => {
-                    if (isMobile()) {
-                        saveCriterionData(config, criteriaData, element, value, saveDialog, [hasSameConfig]);
-                        return;
-                    }
-                    Array.from(criteriaElement.children).forEach(item => {
-                        if (item.textContent === hasSameConfig) {
-                            item.remove();
+                confirmDialog({
+                    title: window.siyuan.languages.confirm,
+                    text: window.siyuan.languages.searchUpdateName.replace("${x}", () => escapeHtml(hasSameConfig)).replace("${y}", () => escapeHtml(value)),
+                    confirm: () => {
+                        if (isMobile()) {
+                            saveCriterionData(config, criteriaData, element, value, saveDialog, [hasSameConfig]);
+                            return;
                         }
-                    });
-                    removeSearchCriterion(hasSameConfig);
-                    removeCriterionData(criteriaData, [hasSameConfig]);
-                    saveCriterionData(config, criteriaData, element, value, saveDialog);
+                        Array.from(criteriaElement.children).forEach(item => {
+                            if (item.textContent === hasSameConfig) {
+                                item.remove();
+                            }
+                        });
+                        removeSearchCriterion(hasSameConfig);
+                        removeCriterionData(criteriaData, [hasSameConfig]);
+                        saveCriterionData(config, criteriaData, element, value, saveDialog);
+                    },
                 });
             } else {
                 saveCriterionData(config, criteriaData, element, value, saveDialog);

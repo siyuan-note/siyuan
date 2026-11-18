@@ -65,7 +65,7 @@ const cases = async compiled => {
             destroy() { this.element.remove(); this.options.destroyCallback(); }
             focusWhenReady() {}
         }},
-        "../../../dialog/mobileConfirmDialog": {mobileConfirmDialog: (title, message, confirm) => confirmations.push({title, message, confirm})},
+        "../../../dialog/confirmDialog": {confirmDialog: ({title, text, confirm}) => confirmations.push({title, message: text, confirm})},
         "../../../dialog/message": {showMessage: message => messages.push(message)},
         "../../../constants": {Constants: {TIMEOUT_INPUT: 10}}, "./viewVisibility": {},
         "../../../mobile/editor": {openMobileFileById: async (_app, blockID) => openedShared.push(blockID)},

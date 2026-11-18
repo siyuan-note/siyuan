@@ -1,4 +1,4 @@
-import {confirmDialog} from "../dialog/confirmDialog";
+import {createDesktopConfirmDialog} from "../dialog/confirmDialog";
 import {openColorPicker} from "../colorPicker";
 import {openDatePicker} from "../datePicker";
 import {Plugin} from "./index";
@@ -408,11 +408,27 @@ const isBottomDockVisible = () => {
     /// #endif
 };
 
+// 插件 API 保持位置参数与桌面行为，与内部统一后的 options 调用形态解耦。
+const confirmForPlugin = (title: string, text: string,
+                          confirmCallback?: (dialog?: Dialog) => void,
+                          cancelCallback?: (dialog: Dialog) => void,
+                          isDelete = false,
+                          extraAction?: {label: string, callback: () => void},
+                          confirmLabel?: string) => {
+    if (!title && !text) {
+        confirmCallback?.();
+        return;
+    }
+    return createDesktopConfirmDialog({
+        title, text, confirm: confirmCallback, cancel: cancelCallback, isDelete, extraAction, confirmLabel,
+    }, false);
+};
+
 const createAPI = () => ({
     openColorPicker,
     openDatePicker,
     adaptHotkey: updateHotkeyTip,
-    confirm: confirmDialog,
+    confirm: confirmForPlugin,
     Constants,
     showMessage,
     hideMessage,

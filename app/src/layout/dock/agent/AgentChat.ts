@@ -18,7 +18,7 @@ import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/
 import {hideTooltip, showTooltip} from "../../../dialog/tooltip";
 import {setPosition} from "../../../util/setPosition";
 import {fetchPost} from "../../../util/fetch";
-import {mobileConfirmDialog as confirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import dayjs from "dayjs";
 import {sendNotification} from "../../../plugin/platformUtils";
@@ -683,19 +683,22 @@ export class AgentChat extends Model {
                     return;
                 }
                 const sessionID = this.sessionId;
-                confirmDialog(window.siyuan.languages.confirm,
-                    window.siyuan.languages.agentModelSwitchWarning,
-                    () => {
+                confirmDialog({
+                    title: window.siyuan.languages.confirm,
+                    text: window.siyuan.languages.agentModelSwitchWarning,
+                    confirm: () => {
                         if (this.sessionId !== sessionID || this.selectedModel !== previousModel ||
                             !this.modelOptions.some(option => option.id === nextModel)) {
-                            this.updateModelLabel();
-                            return;
-                        }
+                                this.updateModelLabel();
+                                return;
+                            }
                         this.selectedModel = nextModel;
                         this.updateModelLabel();
-                    }, () => {
+                    },
+                    cancel: () => {
                         this.updateModelLabel();
-                    });
+                    },
+                });
             },
         });
         // 无模型时拦截下拉展开，改为打开设置 - 人工智能面板（动态 import 避免循环依赖）。
@@ -3866,9 +3869,12 @@ export class AgentChat extends Model {
             return true;
         }
         return new Promise((resolve) => {
-            confirmDialog(window.siyuan.languages.confirm,
-                window.siyuan.languages.agentEditHistoryWarning,
-                () => resolve(true), () => resolve(false));
+            confirmDialog({
+                title: window.siyuan.languages.confirm,
+                text: window.siyuan.languages.agentEditHistoryWarning,
+                confirm: () => resolve(true),
+                cancel: () => resolve(false),
+            });
         });
     }
 
@@ -4260,14 +4266,18 @@ export class AgentChat extends Model {
         const rollbackBtn = el.querySelector(".agent-chat__snapshot-rollback") as HTMLButtonElement;
         rollbackBtn.addEventListener("click", () => {
             const confirmText = (L.rollbackConfirm || "Rollback cannot be undone").replace("${name}", L.dataSnapshot || "Snapshot").replace("${time}", shortID);
-            confirmDialog("⚠️ " + (L.rollback || "Rollback"), confirmText, () => {
-                fetchPost("/api/repo/checkoutRepo", {id: snapshotID, sessionID: this.sessionId}, () => {
-                    // 记录回滚操作，使重载会话后仍可见「已回滚」提示（激活 appendRollbackInfo 渲染分支）。
-                    const rollbackEntryId = SessionStore.newSessionId();
-                    this.entries.push({id: rollbackEntryId, type: "rollback", snapshotID: snapshotID});
-                    this.appendRollbackInfo(snapshotID, rollbackEntryId);
-                    void this.saveSession();
-                });
+            confirmDialog({
+                title: "⚠️ " + (L.rollback || "Rollback"),
+                text: confirmText,
+                confirm: () => {
+                    fetchPost("/api/repo/checkoutRepo", {id: snapshotID, sessionID: this.sessionId}, () => {
+                        // 记录回滚操作，使重载会话后仍可见「已回滚」提示（激活 appendRollbackInfo 渲染分支）。
+                        const rollbackEntryId = SessionStore.newSessionId();
+                        this.entries.push({id: rollbackEntryId, type: "rollback", snapshotID: snapshotID});
+                        this.appendRollbackInfo(snapshotID, rollbackEntryId);
+                        void this.saveSession();
+                    });
+                },
             });
         });
         // 快照在工具执行前产生，应显示在触发写操作的思考和确认内容之后。

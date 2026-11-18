@@ -3,7 +3,7 @@ import {documentParentID} from "./documentCreate";
 import {DocumentCreationAttempt} from "./documentCreationPlan";
 import {showMessage} from "../dialog/message";
 import {escapeHtml} from "./escape";
-import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import type {Dialog} from "../dialog";
 import type {DocumentCreatePlan, PlanDocCreateRequestInput, DocumentSelectionInput, DocumentSelectionFailure} from "../types/api";
 import {selectDocumentAncestor} from "./documentAncestor";
@@ -142,8 +142,10 @@ export const createConfiguredDocument = async (input: Omit<PlanDocCreateRequestI
             showMessage(message, 0, "error");
             return;
         }
-        const dialog = confirmDialog(window.siyuan.languages.newFile,
-            `${message}<br><br>${escapeHtml(window.siyuan.languages.documentCreationRecovery)}`, () => {
+        const dialog = confirmDialog({
+            title: window.siyuan.languages.newFile,
+            text: `${message}<br><br>${escapeHtml(window.siyuan.languages.documentCreationRecovery)}`,
+            confirm: () => {
                 recoveryDialogs.delete(dialog);
                 void (async () => {
                     if (attempts.get(key) !== retained || options.isValid && !options.isValid()) {
@@ -170,12 +172,14 @@ export const createConfiguredDocument = async (input: Omit<PlanDocCreateRequestI
                         showMessage(escapeHtml(error.message), 0, "error");
                     }
                 });
-            }, () => {
+            },
+            cancel: () => {
                 recoveryDialogs.delete(dialog);
                 if (lifecycleRevision === revision) {
                     showMessage(message, 0, "error");
                 }
-            });
+            },
+        });
         recoveryDialogs.set(dialog, retained.notebooks);
     } finally {
         activeInputs.delete(key);

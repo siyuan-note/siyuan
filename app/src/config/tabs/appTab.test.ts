@@ -226,7 +226,7 @@ test("mobile workspace deletion awaits success and keeps list-only cancellation 
     }).outputText;
     let slot: Slot;
     let click: (event: unknown) => void;
-    let confirmation: unknown[];
+    let confirmation: {confirm: () => Promise<boolean>, cancel: () => void};
     let complete: (response: {code: number}) => void;
     let reads = 0;
     const requests: Array<{url: string; path: string}> = [];
@@ -240,8 +240,8 @@ test("mobile workspace deletion awaits success and keeps list-only cancellation 
             if (name === "../../protyle/util/compatibility") return {isInMobileApp: () => true};
             if (name === "../../util/hostCapabilities") return {getHostCapabilities: () => ({workspaces: true})};
             if (name === "../../util/escape") return {escapeAttr: (value: string) => value, escapeHtml: (value: string) => value};
-            if (name === "../../dialog/mobileConfirmDialog") return {
-                mobileConfirmDialog: (...args: unknown[]) => { confirmation = args; },
+            if (name === "../../dialog/confirmDialog") return {
+                confirmDialog: (options: typeof confirmation) => { confirmation = options; },
             };
             if (name === "../../util/fetch") return {
                 fetchPost: (url: string, data: {path: string}, callback?: (response: unknown) => void) => {
@@ -265,9 +265,8 @@ test("mobile workspace deletion awaits success and keeps list-only cancellation 
     const remove = (path: string) => click({target: {id: "", getAttribute: () => "remove",
         parentElement: {getAttribute: () => path}}, preventDefault() {}, stopPropagation() {}});
     remove(target);
-    assert.equal((confirmation[7] as {awaitConfirm: boolean}).awaitConfirm, true);
-    const confirm = confirmation[2] as () => Promise<boolean>;
-    const cancel = confirmation[3] as () => void;
+    const confirm = confirmation.confirm;
+    const cancel = confirmation.cancel;
     const failed = confirm();
     assert.equal(reads, 1);
     complete({code: -1});

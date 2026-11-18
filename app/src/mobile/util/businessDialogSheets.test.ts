@@ -41,7 +41,7 @@ test("mobile business dialogs explicitly opt in, including nested and failure en
                         options.getText(source).includes("mobile-attributes-sheet")) {
                         // 属性编辑器保留原有关闭回调，使用独立的抽屉绑定入口。
                     } else {
-                        const moduleName = name === "confirmDialog" ? "mobileConfirmDialog" :
+                        const moduleName = name === "confirmDialog" ? "confirmDialog" :
                             name === "openInputDialog" ? "mobileInputDialog" : "mobileDialog";
                         assert.ok(source.text.includes(moduleName), `${file}: ${name}`);
                         found++;
@@ -79,7 +79,8 @@ test("existing editable sheets reuse standard geometry without a second construc
     assert.match(reference, /await sheet\.flush\(\)/);
 });
 
-test("desktop-only dialogs and mobile page replacements are not opted in", () => {
+// 这些页面在移动端由独立实现接管，仍保留共享的 confirmDialog 入口，不直接依赖移动适配模块。
+test("desktop-only pages reuse the shared confirmation entry without direct mobile adapters", () => {
     for (const file of ["menus/importObsidian.ts", "menus/workspace.ts", "menus/layouts.ts",
         "menus/onGetnotebookconf.ts", "boot/globalEvent/command/panel.ts", "boot/globalEvent/keydown.ts",
         "editor/util.ts"]) {

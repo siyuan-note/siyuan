@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {fetchPost} from "../../../util/fetch";
 import {transaction} from "../../wysiwyg/transaction";
 import {getAVViewID} from "./filteredTip";
@@ -53,7 +53,7 @@ export const sortAVRows = async (protyle: IProtyle, blockElement: HTMLElement, s
             transaction(protyle, preview.doOperations, preview.undoOperations);
         };
         if (preview.conflict) {
-            mobileConfirmDialog(window.siyuan.languages.removeSorts, window.siyuan.languages.avDragRemoveSorts, apply);
+            confirmDialog({title: window.siyuan.languages.removeSorts, text: window.siyuan.languages.avDragRemoveSorts, confirm: apply});
         } else {
             apply();
         }

@@ -1,4 +1,5 @@
 {
+	"confirmActionFailed": "İşlem başarısız oldu. Lütfen tekrar deneyin",
 	"updateInstallNow": "Şimdi yükle",
 	"updateInstallLater": "Şimdi değil",
 	"hideBreadcrumbIcons": "Gezinme yolu simgelerini gizle",

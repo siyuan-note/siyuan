@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {MobileDialog} from "../../dialog/mobileDialog";
 import {config as configApi} from "../util/configApi";
 import {showMessage} from "../../dialog/message";
@@ -567,7 +567,7 @@ const openSyncProviderConfigDialog = (root: Element) => {
             destroy();
         } else {
             confirming = true;
-            mobileConfirmDialog(L.confirm, L.discardUnsavedChanges, () => destroy(), () => { confirming = false; });
+            confirmDialog({title: L.confirm, text: L.discardUnsavedChanges, confirm: () => destroy(), cancel: () => { confirming = false; }});
         }
     };
     const refresh = () => {
@@ -690,32 +690,39 @@ const openSyncProviderConfigDialog = (root: Element) => {
             return;
         }
         confirming = true;
-        mobileConfirmDialog(L.clearSyncConfig, L.clearSyncConfigConfirm, () => {
-            confirming = false;
-            if (window.siyuan.config.readonly) {
-                return;
-            }
-            setPending(true);
-            setError("");
-            void fetchSyncPost("/api/sync/clearSyncProviderConfig", {provider}).then(response => {
-                if (response.code !== 0) {
-                    setError(response.msg || L.syncConfigSaveFailed);
+        confirmDialog({
+            title: L.clearSyncConfig,
+            text: L.clearSyncConfigConfirm,
+            confirm: () => {
+                confirming = false;
+                if (window.siyuan.config.readonly) {
                     return;
                 }
-                if (response.data.s3) {
-                    window.siyuan.config.sync.s3 = response.data.s3;
-                }
-                if (response.data.webdav) {
-                    window.siyuan.config.sync.webdav = response.data.webdav;
-                }
-                if (response.data.local) {
-                    window.siyuan.config.sync.local = response.data.local;
-                }
-                window.siyuan.config.sync.enabled = response.data.enabled;
-                refresh();
-                destroy();
-            }).catch(() => setError(L.syncConfigSaveFailed)).finally(() => setPending(false));
-        }, () => { confirming = false; }, true, undefined, L.clearSyncConfig);
+                setPending(true);
+                setError("");
+                void fetchSyncPost("/api/sync/clearSyncProviderConfig", {provider}).then(response => {
+                    if (response.code !== 0) {
+                        setError(response.msg || L.syncConfigSaveFailed);
+                        return;
+                    }
+                    if (response.data.s3) {
+                        window.siyuan.config.sync.s3 = response.data.s3;
+                    }
+                    if (response.data.webdav) {
+                        window.siyuan.config.sync.webdav = response.data.webdav;
+                    }
+                    if (response.data.local) {
+                        window.siyuan.config.sync.local = response.data.local;
+                    }
+                    window.siyuan.config.sync.enabled = response.data.enabled;
+                    refresh();
+                    destroy();
+                }).catch(() => setError(L.syncConfigSaveFailed)).finally(() => setPending(false));
+            },
+            cancel: () => { confirming = false; },
+            isDelete: true,
+            confirmLabel: L.clearSyncConfig,
+        });
     });
     configElement.addEventListener("input", () => {
         rulesVersion++;

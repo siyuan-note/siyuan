@@ -49,6 +49,8 @@ export type AgentThinkingStatsLabels = {
     agentThinkingDoneTime?: string;
     agentThinkingStats?: string;
     agentThinkingLiveStats?: string;
+    /** 允许直接传入语言包对象，未列出的键不影响取值 */
+    [key: string]: string | undefined;
 };
 
 // 生成思考卡标题：有工具调用时追加调用次数，无工具调用时沿用原有文案。

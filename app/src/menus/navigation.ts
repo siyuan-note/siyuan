@@ -10,7 +10,7 @@ import {MenuItem} from "./Menu";
 import {getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../util/pathName";
 import {pinnedDocIDs, updatePinnedDocs} from "../util/pinnedDocs";
 import {showMessage} from "../dialog/message";
-import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import {onGetnotebookconf} from "./onGetnotebookconf";
@@ -56,7 +56,7 @@ const confirmEncryptedExport = (notebookId: string, callback: () => void) => {
         callback();
         return;
     }
-    confirmDialog(window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, callback);
+    confirmDialog({title: window.siyuan.languages.export, text: window.siyuan.languages.encryptedExportRiskTip, confirm: callback});
 };
 
 const openFileTreeSearch = async (app: App, notebookId: string, pathString: string, hasReplace: boolean) => {

@@ -75,7 +75,7 @@ const cases = async (compiled, mobile) => {
             requests.push({url, payload});
             return {code: 0, data: {blockIDs: ["target-carrier"], notebookID: "target-notebook"}};
         },
-        mobileConfirmDialog: (_title, _message, callback) => { confirm = callback; },
+        confirmDialog: ({confirm: callback}) => { confirm = callback; },
         openMobileFileById: async (_app, id, _action, _position, notebookID, callback) => {
             navigations.push({id, notebookID, callback}); return true;
         },

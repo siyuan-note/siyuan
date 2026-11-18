@@ -1379,6 +1379,11 @@ var setNetworkProxy = contractHandler(apicontract.SetNetworkProxy, func(c *gin.C
 })
 
 var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	// 注册表用于桌面端存活判断，只接受管理员登记，避免读者占用注册槽位。
+	if !model.IsAdminRoleContext(c) {
+		return apicontract.EmptyHTTPResponse[apicontract.Null](http.StatusOK)
+	}
+
 	pidInt, err := strconv.Atoi(c.Query("pid"))
 	if err != nil || 0 >= pidInt {
 		return apicontract.EmptyHTTPResponse[apicontract.Null](http.StatusOK)

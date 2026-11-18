@@ -460,8 +460,26 @@ func TestAPIContractUIProcessQueryParameters(t *testing.T) {
 	const pid = "2147483001"
 	util.UIProcessIDs.Delete(pid)
 	t.Cleanup(func() { util.UIProcessIDs.Delete(pid) })
+	role := model.RoleAdministrator
 	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(model.RoleContextKey, role)
+		c.Next()
+	})
 	engine.POST("/api/system/uiproc", addUIProcess)
+
+	role = model.RoleReader
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/system/uiproc?pid="+pid, nil))
+	requireAPIContract(t, "POST", "/api/system/uiproc", recorder)
+	if recorder.Code != http.StatusOK || recorder.Body.Len() != 0 {
+		t.Fatalf("reader UI registration response changed: %d %s", recorder.Code, recorder.Body.String())
+	}
+	if _, registered := util.UIProcessIDs.Load(pid); registered {
+		t.Fatal("reader must not consume a UI process registry slot")
+	}
+
+	role = model.RoleAdministrator
 	for _, query := range []string{"", "?pid=" + pid} {
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/system/uiproc"+query, strings.NewReader(`{"pid":"`+pid+`"}`)))

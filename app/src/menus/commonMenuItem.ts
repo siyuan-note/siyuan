@@ -4,6 +4,7 @@ import {bindInlineDatePicker, getInlineDateValue} from "../datePicker/inline";
 import type {BlockQueryRequestInput} from "../types/api";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile, isValidCustomAttrName} from "../util/functions";
+import {escapeHtmlTextAndAttr} from "../util/escape";
 import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
@@ -290,11 +291,11 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         } else if (item.indexOf("custom") > -1) {
             customHTML += `<label class="b3-label b3-label--noborder">
      <div class="fn__flex">
-        <span class="fn__flex-1">${item.replace("custom-", "")}</span>
+        <span class="fn__flex-1">${escapeHtmlTextAndAttr(item.replace("custom-", ""))}</span>
         <span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconMin"></use></svg></span>
     </div>
     <div class="fn__hr"></div>
-    <textarea style="resize: vertical;" spellcheck="false" class="b3-text-field fn__block" rows="1" data-name="${item}"></textarea>
+    <textarea style="resize: vertical;" spellcheck="false" class="b3-text-field fn__block" rows="1" data-name="${escapeHtmlTextAndAttr(item)}"></textarea>
 </label>`;
         }
     });

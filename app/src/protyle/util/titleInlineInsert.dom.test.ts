@@ -136,7 +136,7 @@ test("real Lute titles keep uploaded images, emoji and rich text inside their ed
     const asset = assetAst.statements.find(node => isVariableStatement(node) &&
         node.declarationList.declarations.some(declaration => declaration.name.getText(assetAst) === "genAssetHTML"));
     assert.ok(asset);
-    const source = ["src/protyle/util/hasClosest.ts", "src/protyle/wysiwyg/getBlock.ts"]
+    const source = ["src/util/escape.ts", "src/protyle/util/hasClosest.ts", "src/protyle/wysiwyg/getBlock.ts"]
         .map(file => compile(readFileSync(file, "utf8"))).join("\n") + compile(insert.getText(ast)) +
         compile(asset.getText(assetAst)) + compile(upload.getText(uploadAst));
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-title-inline-"));

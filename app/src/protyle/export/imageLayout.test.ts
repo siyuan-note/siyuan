@@ -4,7 +4,7 @@ import {mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {promisify} from "node:util";
-import test from "node:test";
+import test, {before, describe} from "node:test";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {getExportImageLayoutScale, getExportImageSize, isExportImageSizeSupported, updateExportImageLayout} from "./imageLayout";
 
@@ -400,11 +400,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
     return `Image exports passed (mobile=${mobile}, pixelRatio=${pixelRatio})`;
 };
 
-const runBrowserCase = (mobile: boolean, pixelRatio: number) => test(`wide PNG exports preserve text and all columns (mobile=${mobile}, pixelRatio=${pixelRatio})`, {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
-    // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
-    timeout: 210000,
-}, async () => {
+const prepareBrowserAssets = () => {
     const sass = require("sass");
     const css = sass.compileString('@use "component/dialog"; @use "protyle/wysiwyg"; ' +
         '@use "component/typography"; @use "business/export";', {
@@ -421,6 +417,12 @@ const runBrowserCase = (mobile: boolean, pixelRatio: number) => test(`wide PNG e
     const mobileCSS = sass.compileString('@use "main/mobile";', {
         loadPaths: [path.resolve("src/assets/scss")], logger: sass.Logger.silent,
     }).css;
+    return {css, mobileCSS, layoutSource, fontSource, exportSource, libraries};
+};
+
+const runBrowserCase = async (mobile: boolean, pixelRatio: number, {
+    css, mobileCSS, layoutSource, fontSource, exportSource, libraries,
+}: ReturnType<typeof prepareBrowserAssets>) => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-export-image-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -478,10 +480,20 @@ ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(so
     } finally {
         rmSync(temporary, {recursive: true, force: true});
     }
-});
+};
 
-for (const pixelRatio of [1, 1.25, 1.5, 2, 3]) {
-    for (const mobile of [false, true]) {
-        runBrowserCase(mobile, pixelRatio);
+describe("PNG exports at different device pixel ratios", {
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
+    concurrency: 2,
+}, () => {
+    let assets: ReturnType<typeof prepareBrowserAssets>;
+    before(() => {
+        assets = prepareBrowserAssets();
+    });
+    for (const pixelRatio of [1, 1.25, 1.5, 2, 3]) {
+        for (const mobile of [false, true]) {
+            test(`wide PNG exports preserve text and all columns (mobile=${mobile}, pixelRatio=${pixelRatio})`,
+                {timeout: 210000}, () => runBrowserCase(mobile, pixelRatio, assets));
+        }
     }
-}
+});

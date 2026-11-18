@@ -218,6 +218,38 @@
 			]
 		},
 		{
+			"ID": "20261118205131-60be77f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118205131-60be77f",
+				"updated": "20261118205131"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在標籤面板中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自訂排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可拖曳標籤旁的把手調整同層順序。自訂順序隨工作空間資料儲存。篩選標籤時，請先清除篩選條件再排序。"
+				}
+			]
+		},
+		{
 			"ID": "20261116215152-20a2423",
 			"Type": "NodeParagraph",
 			"Properties": {

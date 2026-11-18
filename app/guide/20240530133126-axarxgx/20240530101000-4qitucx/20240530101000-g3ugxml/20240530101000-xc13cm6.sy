@@ -233,6 +233,38 @@
 			]
 		},
 		{
+			"ID": "20261118205131-28a04da",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118205131-28a04da",
+				"updated": "20261118205131"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タグパネルで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "並べ替え"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "カスタムソート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、タグのハンドルをドラッグして同じ階層内で並べ替えられます。カスタム順序はワークスペースデータとともに保存されます。タグの絞り込み中は、絞り込みを解除してから並べ替えてください。"
+				}
+			]
+		},
+		{
 			"ID": "20261116215152-b9eca1d",
 			"Type": "NodeParagraph",
 			"Properties": {

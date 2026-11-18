@@ -14,6 +14,8 @@ const getFunctionKey = () => {
     return fData;
 };
 
+export const TAG_SORT_MANUAL = 6;
+
 export abstract class Constants {
     public static readonly TABLE_CORNERS = "data-table-corners";
     public static readonly TABLE_CELL_CORNER = "data-table-cell-corner";

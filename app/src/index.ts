@@ -142,9 +142,7 @@ export class App {
                             }
                             break;
                         case "reloadTag":
-                            if (getDockByType("tag")?.data.tag instanceof Tag) {
-                                (getDockByType("tag").data.tag as Tag).update();
-                            }
+                            getAllModels().tag.forEach(tag => tag.update());
                             break;
                         case "setRefDynamicText":
                             setRefDynamicText(data.data);

@@ -1952,6 +1952,8 @@ export type ReorderData = { "changed": boolean; "notebook"?: string; "parentPath
 
 export type ReorderNotebooksRequestInput = { "position"?: string | null; "sourceIDs"?: Array<string> | null; "targetID"?: string | null; };
 
+export type ReorderTagRequestInput = { "label": string; "position": "before" | "after"; "target": string; };
+
 export type RepoCloudSnapshotsData = { "pageCount": number; "snapshots": Array<RepoLog | null> | null; "totalCount": number; };
 
 export type RepoCloudTagsData = { "snapshots": Array<RepoLog | null> | null; };
@@ -9195,6 +9197,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * sort 为 6 时读取手动顺序；无记录的同级标签使用名称自然顺序。ignoreMaxListHint 为 true 时返回完整标签树。
+     */
     "/api/tag/getTag": {
         request: GetTagRequestInput;
         response: { "code": 0; "data": Array<TagData | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -9244,6 +9249,16 @@ export interface APIPOSTRoutes {
         request: RenameTagRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 按未转义的完整标签路径移动同级标签，允许虚拟父标签。保存手动排序，其他排序方式不受影响。
+     */
+    "/api/tag/reorderTag": {
+        request: ReorderTagRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };

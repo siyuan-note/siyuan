@@ -6,6 +6,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -48,6 +49,14 @@ var renameTag = contractHandler(apicontract.RenameTag, func(c *gin.Context, requ
 	}
 	if len(tx.DoOperations) > 0 {
 		pushTransactions("", "", []*model.Transaction{tx})
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+
+var reorderTag = contractHandler(apicontract.ReorderTag, func(_ *gin.Context, request apicontract.ReorderTagRequest) apicontract.Response[apicontract.Null] {
+	if err := model.ReorderTag(request.Label, request.Target, request.Position); err != nil {
+		logging.LogWarnf("reorder tag failed: %s", err)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, model.Conf.Language(258), 5000)
 	}
 	return apicontract.Success(apicontract.Null{})
 })

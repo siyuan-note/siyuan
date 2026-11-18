@@ -163,6 +163,24 @@ func QueryTagSpans(p string) (ret []*Span) {
 	return scanSpans(rows, "QueryTagSpans")
 }
 
+func QueryTagCounts() (map[string]int, error) {
+	rows, err := query("SELECT content, COUNT(*) FROM spans WHERE " + tagSpanPredicate + " GROUP BY content")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	counts := map[string]int{}
+	for rows.Next() {
+		var content string
+		var count int
+		if err := rows.Scan(&content, &count); err != nil {
+			return nil, err
+		}
+		counts[content] = count
+	}
+	return counts, rows.Err()
+}
+
 func scanSpans(rows *sql.Rows, source string) (ret []*Span) {
 	defer rows.Close()
 	columns, err := rows.Columns()

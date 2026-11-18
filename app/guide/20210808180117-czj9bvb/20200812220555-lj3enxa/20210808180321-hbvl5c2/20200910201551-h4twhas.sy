@@ -224,6 +224,38 @@
 			]
 		},
 		{
+			"ID": "20261118205131-bd54f93",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118205131-bd54f93",
+				"updated": "20261118205131"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在标签面板中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自定义排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可拖动标签旁的手柄调整同级顺序。自定义顺序随工作空间数据保存。筛选标签时，请先清除筛选条件再排序。"
+				}
+			]
+		},
+		{
 			"ID": "20261116215152-8d44f6e",
 			"Type": "NodeParagraph",
 			"Properties": {

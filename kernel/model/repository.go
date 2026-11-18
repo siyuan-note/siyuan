@@ -2569,6 +2569,14 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	elapsed time.Duration, immediateIndex bool, previousNotebookConfs map[string][]byte) {
 	memorySyncSourcesChanged(mergeResult)
 	reloadSyncedDAV(mergeResult, &calendars, &contacts)
+	if !exit {
+		for _, files := range [][]*entity.File{mergeResult.Upserts, mergeResult.Removes} {
+			if slices.ContainsFunc(files, func(file *entity.File) bool { return file.Path == "/"+tagSortPath }) {
+				ReloadTag()
+				break
+			}
+		}
+	}
 	confSyncSnapshot := Conf.LoadSync()
 
 	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s, pfc=%d, pcc=%d, pb=%s, pf=%d] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",

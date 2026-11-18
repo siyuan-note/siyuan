@@ -1,4 +1,5 @@
 {
+	"confirmActionFailed": "Радња није успела. Покушајте поново",
 	"updateInstallNow": "Инсталирај сада",
 	"updateInstallLater": "Не сада",
 	"hideBreadcrumbIcons": "Сакриј иконе путање за навигацију",

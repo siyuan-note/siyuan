@@ -1,4 +1,5 @@
 {
+	"confirmActionFailed": "Operácia zlyhala. Skúste to znova",
 	"updateInstallNow": "Nainštalovať teraz",
 	"updateInstallLater": "Teraz nie",
 	"hideBreadcrumbIcons": "Skryť ikony navigačnej cesty",

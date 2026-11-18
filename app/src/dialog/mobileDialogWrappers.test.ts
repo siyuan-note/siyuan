@@ -7,6 +7,8 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 const setup = (mobile = true) => {
     const events: string[] = [];
     const pending: Promise<boolean>[] = [];
+    const messages: string[] = [];
+    const pendingOptions: any[] = [];
     let delegated: any;
     class Control {
         value = "";
@@ -38,7 +40,8 @@ const setup = (mobile = true) => {
             return Promise.resolve(true);
         }
         destroy() { void this.requestClose("destroy"); }
-        runPending(task: () => Promise<boolean>) {
+        runPending(task: () => Promise<boolean>, options?: any) {
+            pendingOptions.push(options);
             const promise = task().then(success => {
                 if (success) void this.requestClose("confirm");
                 return success;
@@ -49,6 +52,7 @@ const setup = (mobile = true) => {
     }
     const dependencies = {MobileDialog: MockDialog, Dialog: MockDialog, isMobile: () => mobile,
         escapeHtml: (value: string) => value,
+        showMessage: (message: string) => messages.push(message),
         Constants: {}, createInputDialog: (options: any, DialogConstructor: typeof MockDialog) => {
             delegated = options;
             return new DialogConstructor(options);
@@ -59,10 +63,12 @@ const setup = (mobile = true) => {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText, {exports, require: () => dependencies, HTMLInputElement: Control,
             document: {activeElement: undefined, body: {}, createElement: () => new Control()},
-            window: {siyuan: {languages: {confirm: "Confirm", cancel: "Cancel"}}}, console});
+            window: {siyuan: {languages: {confirm: "Confirm", cancel: "Cancel", confirmActionFailed: "Operation failed"}}},
+            console: {...console, error() {}}});
         return exports;
     };
-    return {...load("mobileInputDialog"), ...load("confirmDialog"), events, pending, delegated: () => delegated};
+    return {...load("mobileInputDialog"), ...load("confirmDialog"), events, pending, messages, pendingOptions,
+        delegated: () => delegated};
 };
 
 test("input actions use the same full-width touch group as confirmations", () => {
@@ -127,6 +133,25 @@ test("desktop confirmation waits for the confirm handler and keeps the dialog on
     dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(f.events.filter((item: string) => item === "destroy").length, 1);
+});
+
+test("desktop confirmation reports a neutral failure when the handler throws", async () => {
+    const f = setup(false);
+    const dialog = f.confirmDialog({title: "Title", text: "Text", confirm: async () => {
+        throw new Error("boom");
+    }});
+    dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(f.messages, ["Operation failed"]);
+    assert.equal(f.events.includes("destroy"), false);
+});
+
+test("mobile confirmation forwards the neutral failure message to the pending lock", async () => {
+    const f = setup();
+    const dialog = f.confirmDialog({title: "Title", text: "Text", confirm: async () => false});
+    dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
+    await f.pending.pop();
+    assert.equal(f.pendingOptions[0].failureMessage, "Operation failed");
 });
 
 test("desktop confirmation renders its own labels", () => {

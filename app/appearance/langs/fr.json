@@ -1,4 +1,5 @@
 {
+	"confirmActionFailed": "L'opération a échoué. Veuillez réessayer",
 	"updateInstallNow": "Installer maintenant",
 	"updateInstallLater": "Plus tard",
 	"hideBreadcrumbIcons": "Masquer les icônes du fil d’Ariane",

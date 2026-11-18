@@ -1,4 +1,5 @@
 {
+	"confirmActionFailed": "فشلت العملية. يرجى المحاولة مرة أخرى",
 	"updateInstallNow": "التثبيت الآن",
 	"updateInstallLater": "ليس الآن",
 	"hideBreadcrumbIcons": "إخفاء أيقونات مسار التنقل",

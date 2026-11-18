@@ -1,4 +1,5 @@
 {
+	"confirmActionFailed": "Operazione non riuscita. Riprova",
 	"updateInstallNow": "Installa ora",
 	"updateInstallLater": "Non ora",
 	"hideBreadcrumbIcons": "Nascondi le icone del percorso di navigazione",

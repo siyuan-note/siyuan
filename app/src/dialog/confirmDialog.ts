@@ -41,7 +41,7 @@ const runConfirm = async (dialog: Dialog, confirm?: TConfirmDialogHandler) => {
         success = await confirm(dialog) !== false;
     } catch (error) {
         console.error(error);
-        showMessage(window.siyuan.languages.settingsPendingSaveError);
+        showMessage(window.siyuan.languages.confirmActionFailed);
     } finally {
         buttons.forEach(button => {
             if (button.isConnected) {
@@ -188,7 +188,7 @@ const createMobileConfirmDialog = (options: IConfirmDialogOptions) => {
                     const success = confirm ? await confirm(dialog) !== false : true;
                     if (success) handled = true;
                     return success;
-                });
+                }, {failureMessage: window.siyuan.languages.confirmActionFailed});
                 break;
             }
             target = target.parentElement;

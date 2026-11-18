@@ -1,4 +1,5 @@
 {
+	"confirmActionFailed": "Operacja nie powiodła się. Spróbuj ponownie",
 	"updateInstallNow": "Zainstaluj teraz",
 	"updateInstallLater": "Nie teraz",
 	"hideBreadcrumbIcons": "Ukryj ikony ścieżki nawigacji",

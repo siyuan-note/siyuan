@@ -1,4 +1,5 @@
 {
+	"confirmActionFailed": "操作失败，请重试",
 	"updateInstallNow": "现在安装",
 	"updateInstallLater": "暂不安装",
 	"hideBreadcrumbIcons": "隐藏面包屑图标",

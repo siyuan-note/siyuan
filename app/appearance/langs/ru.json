@@ -1,4 +1,5 @@
 {
+	"confirmActionFailed": "Не удалось выполнить операцию. Попробуйте ещё раз",
 	"updateInstallNow": "Установить сейчас",
 	"updateInstallLater": "Не сейчас",
 	"hideBreadcrumbIcons": "Скрывать значки цепочки навигации",

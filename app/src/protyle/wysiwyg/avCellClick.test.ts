@@ -64,9 +64,10 @@ const checkClicks = (code: string, mobile: boolean) => {
     const menu = document.createElement("div");
     menu.className = "fn__none";
     window.siyuan = {menus: {menu: {element: menu}}, config: {keymap: {editor: {general: {}}}}} as any;
+    const closestAV = (target: Element) => closest(target, "av");
     const dependencies = {
         protyle, isMobile: () => mobile, isOnlyMeta: (event: MouseEvent) => event.ctrlKey || event.metaKey,
-        hasClosestByClassName: closest, hasClosestBlock: (target: Element) => closest(target, "av"),
+        hasClosestByClassName: closest, hasClosestBlock: closestAV, getAVHost: closestAV,
         hasClosestByTag: (target: Element, tag: string) => target?.closest(tag),
         hasClosestByAttribute: (target: Element, name: string, value: string) => target.closest(`[${name}="${value}"]`),
         getBlockSelectionModeElement: (): HTMLElement => null, getAVTemplateInteractiveElement: (): HTMLElement => null,

@@ -107,7 +107,7 @@ const fixture = (type = "number", {groups = false, batch = false, count = 1, vie
         getAVRelationHost: () => undefined,
         canEditAVHost: (_block, editor) => !editor.disabled && !window.siyuan.config.readonly &&
             !window.siyuan.isPublish && !editor.options.history?.created && !editor.options.history?.snapshot,
-        hasClosestBlock: () => block,
+        getAVHost: () => block,
         hasClosestByClassName: (element, name) => name === "custom-attr" ?
             (element.dataset.avId ? {} : null) : name === "av__row" ? element.row : name === "av__body" ? element.group : null,
         getColId: element => element.dataset.colId,

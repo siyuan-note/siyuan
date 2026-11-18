@@ -98,7 +98,7 @@ const browserCases = async sources => {
     const shared = {Constants: constants, escapeAttr: escape, escapeHtml: escape,
         escapeHtmlTextAndAttr: escape, escapeAriaLabel: escape, ...load("./capabilities"),
         ...load("./cellValue"), ...load("./viewType"), ...load("./entryIcon"), hasClosestByClassName: closest,
-        hasClosestBlock: element => element.closest(".av"), renderAVRichTextElements() {},
+        getAVHost: element => element.closest(".av"), renderAVRichTextElements() {},
         renderAVBlockIcon: () => "", getColIconByType: () => "iconText", getCalcValue: () => "",
         updateAVSelectionStatus() {}, addDragFill() {}, matchHotKey: () => false, isMobile: () => false,
     };

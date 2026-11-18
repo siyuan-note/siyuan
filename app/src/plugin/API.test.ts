@@ -56,10 +56,12 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     assert.equal(exports.getAPI(), api);
     const callbacks: unknown[][] = [];
     const callback = (...args: unknown[]) => { callbacks.push(args); };
-    assert.equal(api.confirm("", "", callback), undefined);
-    assert.deepEqual(callbacks, [[]]);
-    assert.equal(confirmations.length, 0);
-    assert.equal(api.confirm("Title", "Message", callback), dialog);
-    assert.equal(confirmations[0][1], false);
-    assert.equal((confirmations[0][0] as {confirm: unknown}).confirm, callback);
+    assert.equal(api.confirm("", "", callback), dialog);
+    assert.deepEqual(callbacks, []);
+    assert.equal(confirmations.length, 1);
+    assert.equal(confirmations[0].length, 1);
+    const options = confirmations[0][0] as import("../dialog/confirmDialog").IConfirmDialogOptions;
+    assert.equal(options.title, "");
+    assert.equal(options.text, "");
+    assert.equal(options.confirm, callback);
 });

@@ -161,20 +161,24 @@ test("desktop confirmation blocks cancel and dismissal during pending work", asy
     assert.equal(f.events.filter((item: string) => item === "destroy").length, 1);
 });
 
-test("plugin confirmation closes synchronously without waiting for a promise returned by its callback", () => {
+test("plugin confirmation with empty content waits for the explicitly confirmed action", async () => {
     const f = setup(false);
-    let invoked = false;
-    let cancelled = false;
-    const dialog = f.createDesktopConfirmDialog({title: "Title", text: "Text",
+    let complete: () => void;
+    let calls = 0;
+    const dialog = f.createDesktopConfirmDialog({title: "", text: "",
         confirm: () => {
-            invoked = true;
-            return new Promise<void>(() => {});
+            calls++;
+            return new Promise<void>(resolve => { complete = resolve; });
         },
-        cancel: () => { cancelled = true; },
-    }, false);
+        cancel: () => assert.fail("successful confirmation must not cancel"),
+    });
+    assert.equal(calls, 0);
+    assert.deepEqual(f.events, ["early-focus"]);
     dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
-    assert.equal(invoked, true);
-    assert.equal(cancelled, false);
+    assert.equal(calls, 1);
+    assert.deepEqual(f.events, ["early-focus"]);
+    complete();
+    await new Promise(resolve => setImmediate(resolve));
     assert.deepEqual(f.events, ["early-focus", "destroy"]);
 });
 

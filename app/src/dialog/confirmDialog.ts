@@ -11,7 +11,6 @@ import {showMessage} from "./message";
 export type TConfirmDialogHandler = (dialog?: Dialog) => boolean | void | Promise<boolean | void>;
 
 export interface IConfirmDialogOptions {
-    /** 与 text 不能同时为空；需要不打断用户时由调用方直接执行动作 */
     title: string;
     text: string;
     /** 桌面端与移动端都会等待其完成，失败时保留对话框 */
@@ -53,7 +52,7 @@ const runConfirm = async (dialog: Dialog, confirm?: TConfirmDialogHandler) => {
 };
 
 // 桌面实现单独导出，插件 API 按位置参数调用它，避免插件跟随移动端适配变化。
-export const createDesktopConfirmDialog = (options: IConfirmDialogOptions, awaitConfirm = true) => {
+export const createDesktopConfirmDialog = (options: IConfirmDialogOptions) => {
     const {title, text, confirm, cancel, isDelete = false, extraAction, confirmLabel, cancelLabel} = options;
     const previousActiveElement = document.activeElement as HTMLElement;
     let handled = false;
@@ -107,12 +106,6 @@ export const createDesktopConfirmDialog = (options: IConfirmDialogOptions, await
                 dialog.destroy();
                 break;
             } else if (target.id === "confirmDialogConfirmBtn" || (isDispatch && event.detail=== "Enter")) {
-                if (!awaitConfirm) {
-                    handled = true;
-                    confirm?.(dialog);
-                    dialog.destroy();
-                    break;
-                }
                 pending = true;
                 void runConfirm(dialog, confirm).then(success => {
                     pending = false;

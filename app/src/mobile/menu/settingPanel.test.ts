@@ -39,6 +39,12 @@ test("mobile authentication panels rebuild conditional settings when reopened", 
 
 test("iOS settings keep focused inputs reachable during keyboard resize and remove viewport listeners when closed", () => {
     const viewport = new EventTarget();
+    let pending: (() => void) | undefined;
+    const browser = Object.assign(new EventTarget(), {
+        innerHeight: 812, visualViewport: viewport,
+        setTimeout: (callback: () => void) => { pending = callback; return 1; },
+        clearTimeout: () => { pending = undefined; },
+    });
     const bounds = {top: 0, bottom: 812};
     const input = {};
     const root = Object.assign(new EventTarget(), {
@@ -48,9 +54,11 @@ test("iOS settings keep focused inputs reachable during keyboard resize and remo
     let options: {bindEvent: (element: unknown) => void; destroyCallback: () => void};
     let scrolls = 0;
     const exports = {} as {openSettingTab: (app: unknown, tab: unknown) => void};
-    runInNewContext(compiled, {exports, window: {innerHeight: 812, visualViewport: viewport}, document: {activeElement: input},
+    const document = {activeElement: input};
+    runInNewContext(compiled, {exports, window: browser, document,
         require: () => ({
             isInIOS: () => true, isMobile: () => true,
+            Constants: {TIMEOUT_TRANSITION: 300},
             openModel: (value: typeof options) => { options = value; },
             watchSettingTabInteractions() {}, bindSettingSaveDelegation() {},
             getSettingTab: () => ({mount: () => new Promise(() => {})}),
@@ -60,19 +68,40 @@ test("iOS settings keep focused inputs reachable during keyboard resize and remo
     exports.openSettingTab({}, {id: "flashcard", title: "Settings"});
     options.bindEvent({firstElementChild: root});
     assert.equal(root.style.maxHeight, "");
+    assert.equal(scrolls, 1);
     bounds.bottom = 483;
     viewport.dispatchEvent(new Event("resize"));
     assert.equal(root.style.maxHeight, "435px");
-    assert.equal(scrolls, 1);
-    root.dispatchEvent(new Event("focusin"));
     assert.equal(scrolls, 2);
+    root.dispatchEvent(new Event("focusin"));
+    assert.equal(scrolls, 3);
+
+    // 键盘可以同步缩小布局视口和可见视口。
+    browser.innerHeight = 483;
+    browser.dispatchEvent(new Event("resize"));
+    assert.equal(root.style.maxHeight, "");
+    assert.equal(scrolls, 4);
+    viewport.dispatchEvent(new Event("resize"));
+    assert.equal(scrolls, 5);
+    // 原生滚动可能在视口事件之后发生。
+    assert.ok(pending);
+    pending();
+    assert.equal(scrolls, 6);
+
+    document.activeElement = {};
+    browser.innerHeight = 812;
     bounds.bottom = 812;
     viewport.dispatchEvent(new Event("resize"));
     assert.equal(root.style.maxHeight, "");
+    document.activeElement = input;
+    root.dispatchEvent(new Event("focusin"));
+    assert.ok(pending);
     options.destroyCallback();
+    assert.equal(pending, undefined);
     bounds.bottom = 483;
     viewport.dispatchEvent(new Event("scroll"));
+    browser.dispatchEvent(new Event("resize"));
     root.dispatchEvent(new Event("focusin"));
     assert.equal(root.style.maxHeight, "");
-    assert.equal(scrolls, 2);
+    assert.equal(scrolls, 7);
 });

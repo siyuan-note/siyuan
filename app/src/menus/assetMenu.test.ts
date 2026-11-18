@@ -4,6 +4,7 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {escapeHtmlTextAndAttr} from "../util/escape";
 
 const source = createSourceFile("protyle.ts", readFileSync(join(__dirname, "protyle.ts"), "utf8"), ScriptTarget.Latest);
 const declarations = ["renderAssetPreview", "renderAssetList"].map(name => {
@@ -31,6 +32,7 @@ const fixture = (mobile: boolean) => {
         compilerOptions: {target: ScriptTarget.ES2020},
     }).outputText, {
         isMobile: () => mobile,
+        escapeHtmlTextAndAttr,
         fetchPost: (_url: string, _data: unknown, callback: typeof responses[number]) => responses.push(callback),
         renderAssetsPreview: (path: string) => { previews.push(path); return path; },
         window: {siyuan: {languages: {emptyContent: "Empty"}, menus: {menu: {
@@ -90,3 +92,14 @@ for (const mobile of [false, true]) {
         assert.deepEqual(f.previews, ["assets/example.png", "assets/example.png"]);
     });
 }
+
+test("asset rows escape imported filenames in text and in the value attribute", () => {
+    const f = fixture(false);
+    const path = "assets/cover\" onmouseover=\"window.__row=1.png";
+    const hName = "cover<img src=y onerror=\"window.__asset=1\">.png";
+    f.search("");
+    f.respond([{path, hName}]);
+    assert.equal(f.list.innerHTML,
+        "<div data-value=\"assets/cover&quot; onmouseover=&quot;window.__row=1.png\" class=\"b3-list-item b3-list-item--focus\"><div class=\"b3-list-item__text\">cover&lt;img src=y onerror=&quot;window.__asset=1&quot;&gt;.png</div></div>");
+    assert.ok(!f.list.innerHTML.includes("<img"));
+});

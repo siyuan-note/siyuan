@@ -122,7 +122,7 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
         }
         let searchHTML = "";
         response.data.forEach((item: { path: string, hName: string }, index: number) => {
-            searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${item.hName}</div></div>`;
+            searchHTML += `<div data-value="${escapeHtmlTextAndAttr(item.path)}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${escapeHtmlTextAndAttr(item.hName)}</div></div>`;
         });
 
         const listElement = element.querySelector(".b3-list");

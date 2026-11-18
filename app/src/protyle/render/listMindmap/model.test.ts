@@ -3352,12 +3352,14 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     view.update(model);
     await settle();
     check.equal(view.fallbackRoutes.has("drag-route"), true);
-    check.equal(host.querySelector<HTMLElement>(".mindmap-view__route-status").hidden, false);
+    check.equal(routeStatus.hidden, false);
+    check.equal(routeStatus.textContent, "listMindmapRouteFallback");
     check.equal(model.metadata.relations[0].route.points.length, 1, "unavailable routes retain their saved controls");
     model.metadata.relations[0].route = savedRoute;
     view.update(model);
     await settle();
     check.equal(view.fallbackRoutes.has("drag-route"), false);
+    check.equal(routeStatus.hidden, true);
     check.equal(JSON.stringify(view.relationRoutes.get("drag-route")), savedGeometry);
     relationChanges.length = 0;
     await dragHandle(-15);
@@ -4330,6 +4332,10 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             }), "at least one actual node remains visible after panning the cropped map");
             check.equal(panView.offsetX, fixedX, "vertical movement does not shift the horizontal position");
         };
+        const status = panHost.querySelector<HTMLElement>(".mindmap-view__route-status");
+        check.equal(status.hidden, true);
+        const statusObserver = new MutationObserver(() => {});
+        statusObserver.observe(status, {attributes: true, childList: true, characterData: true, subtree: true});
         for (const deltaY of [100000, -100000]) {
             const event = new WheelEvent("wheel", {deltaY, bubbles: true, cancelable: true});
             viewport.dispatchEvent(event);
@@ -4339,6 +4345,9 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
             viewport.dispatchEvent(next);
             check.equal(next.defaultPrevented, true, "active canvas keeps wheel input at the pan boundary");
         }
+        const statusMutations = statusObserver.takeRecords();
+        statusObserver.disconnect();
+        check.equal(statusMutations.length, 0, "wheel panning leaves the unchanged route status DOM alone");
         panView.offsetY = 120 - rootPosition.y;
         panView.draw();
         viewport.dispatchEvent(new PointerEvent("pointerdown", touch));

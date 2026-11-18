@@ -2087,10 +2087,16 @@ export class ListMindmapView {
         const routeFallback = drag ? drag.valid && drag.routeFallback :
             this.readOnly ? this.fallbackRoutes.size > 0 : this.fallbackRoutes.has(id);
         this.viewport.classList.toggle("mindmap-view__viewport--route-invalid", !!invalid);
-        this.routeStatus.hidden = !!this.options.printLayout || !!this.printTransform ||
+        const statusHidden = !!this.options.printLayout || !!this.printTransform ||
             (!invalid && !anchorFallback && !routeFallback);
-        this.routeStatus.textContent = this.label(invalid ? drag.anchor ? "listMindmapAnchorInvalid" : "invalid" :
+        if (this.routeStatus.hidden !== statusHidden) {
+            this.routeStatus.hidden = statusHidden;
+        }
+        const statusText = this.label(invalid ? drag.anchor ? "listMindmapAnchorInvalid" : "invalid" :
             anchorFallback ? "listMindmapAnchorFallback" : "listMindmapRouteFallback");
+        if (this.routeStatus.textContent !== statusText) {
+            this.routeStatus.textContent = statusText;
+        }
     }
 
     private getRouteHandle(id: string, part: number | "from" | "to") {

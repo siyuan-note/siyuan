@@ -2,7 +2,7 @@
 	"updateInstallNow": "Zainstaluj teraz",
 	"updateInstallLater": "Nie teraz",
 	"hideGlobalBreadcrumbIcons": "Ukryj ikony ścieżki nawigacji",
-	"hideGlobalBreadcrumbIconsTip": "Po włączeniu ukrywa ikony pozycji z tekstem w globalnej ścieżce nawigacji",
+	"hideGlobalBreadcrumbIconsTip": "Po włączeniu ukrywa ikony pozycji z tekstem w ścieżce nawigacji",
 	"updateReleaseAnnouncement": "Ogłoszenie wydania: ${link}",
 	"docOpenPosition": "Pozycja otwierania dokumentu",
 	"docOpenAtStart": "Otwórz od początku",

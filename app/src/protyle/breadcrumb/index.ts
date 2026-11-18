@@ -76,7 +76,7 @@ export class Breadcrumb {
     private renderedRequestID = 0;
     private menuRequestID = 0;
     private globalBreadcrumb: boolean;
-    private hideGlobalBreadcrumbIcons: boolean;
+    private hideBreadcrumbIcons: boolean;
     private destroyed = false;
     private previousFocusElement: HTMLElement;
     private previousRange: Range;
@@ -837,7 +837,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                         rootID !== protyle.block.rootID || notebook !== protyle.notebookId ||
                         global !== window.siyuan.config.editor.globalBreadcrumb ||
                         (global && !isBreadcrumbNotebookAvailable(notebook))) return;
-                    const hideIcons = global && window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true;
+                    const hideIcons = window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true;
                     const pathIDs = new Set(paths.filter(item => item.globalType !== "notebook").map(item => item.id));
                     paths.forEach((item: GlobalBreadcrumb) => {
                         const hideIcon = hideIcons && !!item.name?.trim();
@@ -1389,9 +1389,9 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         blockElement = isInEmbedBlock(blockElement) || blockElement;
         const id = blockElement.getAttribute("data-node-id");
         const global = window.siyuan.config.editor.globalBreadcrumb;
-        const hideIcons = global && window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true;
+        const hideIcons = window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true;
         if (id === this.id && !update && this.globalBreadcrumb === global &&
-            this.hideGlobalBreadcrumbIcons === hideIcons && this.renderedRequestID === this.renderRequestID) {
+            this.hideBreadcrumbIcons === hideIcons && this.renderedRequestID === this.renderRequestID) {
             protyle.breadcrumb.element.querySelectorAll(".protyle-breadcrumb__item--active").forEach(item => {
                 item.classList.remove("protyle-breadcrumb__item--active");
             });
@@ -1403,7 +1403,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         }
         this.id = id;
         this.globalBreadcrumb = global;
-        this.hideGlobalBreadcrumbIcons = hideIcons;
+        this.hideBreadcrumbIcons = hideIcons;
         const requestID = ++this.renderRequestID;
         const rootID = protyle.block.rootID;
         const notebook = protyle.notebookId;
@@ -1416,8 +1416,8 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         // 等待当前块的创建事务完成，并丢弃切换文档或选择位置后过期的读取。
         const isCurrent = () => !this.destroyed && requestID === this.renderRequestID && rootID === protyle.block.rootID &&
             notebook === protyle.notebookId && global === window.siyuan.config.editor.globalBreadcrumb &&
-            (!global || ((window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true) === hideIcons &&
-                isBreadcrumbNotebookAvailable(notebook))) && blockElement.isConnected;
+            (window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true) === hideIcons &&
+            (!global || isBreadcrumbNotebookAvailable(notebook)) && blockElement.isConnected;
         await waitForPendingTransactions(protyle);
         if (!isCurrent()) {
             return;

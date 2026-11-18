@@ -2,7 +2,7 @@
 	"updateInstallNow": "Installa ora",
 	"updateInstallLater": "Non ora",
 	"hideGlobalBreadcrumbIcons": "Nascondi le icone del percorso di navigazione",
-	"hideGlobalBreadcrumbIconsTip": "Quando è attiva, questa opzione nasconde le icone delle voci con testo nel percorso di navigazione globale",
+	"hideGlobalBreadcrumbIconsTip": "Quando è attiva, questa opzione nasconde le icone delle voci con testo nel percorso di navigazione",
 	"updateReleaseAnnouncement": "Annuncio della versione: ${link}",
 	"docOpenPosition": "Posizione di apertura del documento",
 	"docOpenAtStart": "Apri dall’inizio",

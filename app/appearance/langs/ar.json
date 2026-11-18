@@ -2,7 +2,7 @@
 	"updateInstallNow": "التثبيت الآن",
 	"updateInstallLater": "ليس الآن",
 	"hideGlobalBreadcrumbIcons": "إخفاء أيقونات مسار التنقل",
-	"hideGlobalBreadcrumbIconsTip": "إخفاء أيقونات عناصر مسار التنقل العام التي تحتوي على نص عند تفعيل هذا الإعداد",
+	"hideGlobalBreadcrumbIconsTip": "إخفاء أيقونات عناصر مسار التنقل التي تحتوي على نص عند تفعيل هذا الإعداد",
 	"updateReleaseAnnouncement": "إعلان الإصدار: ${link}",
 	"docOpenPosition": "موضع فتح المستند",
 	"docOpenAtStart": "الفتح من البداية",

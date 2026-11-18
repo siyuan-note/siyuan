@@ -2,7 +2,7 @@
 	"updateInstallNow": "今すぐインストール",
 	"updateInstallLater": "今はインストールしない",
 	"hideGlobalBreadcrumbIcons": "パンくずリストのアイコンを非表示にする",
-	"hideGlobalBreadcrumbIconsTip": "有効にすると、グローバルパンくずリストの文字付き項目のアイコンを非表示にします",
+	"hideGlobalBreadcrumbIconsTip": "有効にすると、パンくずリストの文字付き項目のアイコンを非表示にします",
 	"updateReleaseAnnouncement": "リリースのお知らせ：${link}",
 	"docOpenPosition": "ドキュメントを開く位置",
 	"docOpenAtStart": "先頭から開く",

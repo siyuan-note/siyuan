@@ -82,16 +82,6 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.globalBreadcrumb", {
         title: window.siyuan.languages.globalBreadcrumb,
         desc: window.siyuan.languages.globalBreadcrumbTip,
-        keywords: [window.siyuan.languages.hideGlobalBreadcrumbIcons],
-        afterMount: (root) => {
-            const global = root.querySelector<HTMLInputElement>(`#${CSS.escape("editor.globalBreadcrumb")}`);
-            const row = root.querySelector(`#${CSS.escape("editor.hideGlobalBreadcrumbIcons")}`)?.closest(".config-item");
-            if (global && row) {
-                const toggle = () => { row.classList.toggle("fn__none", !global.checked); };
-                global.addEventListener("change", toggle);
-                toggle();
-            }
-        },
     });
     group.switch("editor.hideGlobalBreadcrumbIcons", {
         title: window.siyuan.languages.hideGlobalBreadcrumbIcons,

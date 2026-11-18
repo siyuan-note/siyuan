@@ -2,7 +2,7 @@
 	"updateInstallNow": "现在安装",
 	"updateInstallLater": "暂不安装",
 	"hideGlobalBreadcrumbIcons": "隐藏面包屑图标",
-	"hideGlobalBreadcrumbIconsTip": "启用后隐藏全局面包屑中有文字的路径项图标",
+	"hideGlobalBreadcrumbIconsTip": "启用后隐藏面包屑中有文字的路径项图标",
 	"updateReleaseAnnouncement": "发布公告：${link}",
 	"docOpenPosition": "文档打开位置",
 	"docOpenAtStart": "从文档开头打开",

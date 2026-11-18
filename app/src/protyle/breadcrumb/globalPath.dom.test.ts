@@ -49,8 +49,9 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
     new Function("exports", sources.hasClosest)(hasClosest);
     const appearance: any = {};
     new Function("exports", "require", sources.appearance)(appearance, () => hasClosest);
-    const blocks = [{id: root, name: "Current", type: "NodeDocument"},
+    const blocks = [{id: root, name: "Notebook/Parent/Current", type: "NodeDocument"},
         {id: leaf, name: "Block", type: "NodeParagraph"}];
+    let ordinaryResult = async (items: typeof blocks) => items;
     const pathItems = [
         {id: notebook, name: escape("Notebook & <literal>"), type: "NodeNotebook", globalType: "notebook", icon: "1f4d2"},
         {id: ancestor, name: escape("Parent / & <literal>"), type: "NodeDocument", globalType: "document", icon: "custom.png"},
@@ -84,10 +85,10 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         getDocDisplayName: (value: string) => escape(value),
         isBreadcrumbNotebookAvailable: () => true,
         getGlobalBreadcrumb: async (items: typeof blocks, _notebook: string, _root: string, enabled: boolean) =>
-            enabled ? globalResult() : items,
+            enabled ? globalResult() : ordinaryResult(items),
         openMobileFileById: (_app: unknown, id: string) => opened.push(id),
         openFileById: ({id}: {id: string}) => opened.push(id),
-        zoomOut: ({id}: {id: string}) => opened.push(id),
+        zoomOut: ({id}: {id: string}) => { opened.push(id); },
         Menu: PluginMenu, MenuItem,
         toggleMenu: async ({build}: {build: (menu: unknown, session: unknown) => Promise<void>}) => {
             await build(menu, {isCurrent: () => true, show: (callback: () => void) => callback()});
@@ -164,6 +165,19 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         secondParent.querySelector<HTMLElement>(`[data-id="${leaf}"]`).click();
         check.deepEqual(opened, [folder, leaf], "Leaf documents open directly");
         window.siyuan.config.editor.globalBreadcrumb = false;
+        blocks.push({id: folder, name: "", type: "NodeHeading"});
+        menuElement.removeAttribute("data-name");
+        await breadcrumb.genMobileMenu(protyle);
+        await callbackWork;
+        const ordinaryRoot = menuElement.firstElementChild as HTMLElement;
+        check.equal(ordinaryRoot.querySelector(".b3-menu__label").textContent, "Notebook/Parent/Current");
+        check.equal(ordinaryRoot.querySelector(":scope > svg.b3-menu__icon"), null);
+        check.equal(menuElement.children[1].querySelector(":scope > svg.b3-menu__icon"), null);
+        check.ok(menuElement.lastElementChild.querySelector(":scope > svg.b3-menu__icon"));
+        ordinaryRoot.click();
+        check.deepEqual(opened, [folder, leaf, root]);
+        check.equal(menuElement.childElementCount, 0);
+        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = false;
         menuElement.removeAttribute("data-name");
         await breadcrumb.genMobileMenu(protyle);
         await callbackWork;
@@ -292,8 +306,37 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         blockIcon.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
         check.deepEqual(opened, [ancestor, ancestor, leaf]);
         window.siyuan.config.editor.globalBreadcrumb = false;
+        blocks.splice(1, 0, {id: folder, name: "Section", type: "NodeHeading"});
         await render(false);
         check.ok(getPathItem(root).querySelector("svg.popover__block"));
+        check.ok(getPathItem(leaf).querySelector("svg.popover__block"));
+        check.equal(getPathItem(folder).querySelector("svg"), null);
+        check.ok(getPathItem(folder).matches(".popover__block"));
+        protyle.options.render.breadcrumbDocName = true;
+        await render();
+        const ordinaryRoot = getPathItem(root);
+        const ordinaryText = ordinaryRoot.querySelector(".protyle-breadcrumb__text") as HTMLElement;
+        check.equal(ordinaryText.textContent, "Notebook/Parent/Current");
+        check.equal(ordinaryText.closest(".popover__block"), ordinaryRoot);
+        check.equal(ordinaryRoot.getAttribute("data-id"), root);
+        check.equal(ordinaryRoot.querySelector("svg"), null);
+        check.ok(ordinaryRoot.nextElementSibling.matches("button.protyle-breadcrumb__arrow"));
+        ordinaryText.click();
+        check.deepEqual(opened, [ancestor, ancestor, leaf, root]);
+        const ordinaryHTML = breadcrumb.element.innerHTML;
+        let releaseOrdinary: (items: typeof blocks) => void;
+        ordinaryResult = () => new Promise(resolve => { releaseOrdinary = resolve; });
+        await breadcrumb.render(protyle, true, wysiwyg.firstElementChild);
+        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = false;
+        releaseOrdinary(blocks);
+        await callbackWork;
+        check.equal(breadcrumb.element.innerHTML, ordinaryHTML, "Late ordinary results are ignored after the icon setting changes");
+        ordinaryResult = async (items) => items;
+        await render(false);
+        check.ok(getPathItem(root).querySelector("svg.popover__block"));
+        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = true;
+        await render(false);
+        check.equal(getPathItem(root).querySelector("svg"), null);
         window.siyuan.config.editor.globalBreadcrumb = true;
         window.siyuan.config.editor.hideGlobalBreadcrumbIcons = false;
         await render(false);
@@ -342,7 +385,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
 };
 
 for (const mobile of [true, false]) {
-    test(`global breadcrumbs support real ${mobile ? "mobile MenuItem navigation" : "desktop pointer and keyboard dispatch"}`,
+    test(`editor breadcrumbs support real ${mobile ? "mobile MenuItem navigation" : "desktop pointer and keyboard dispatch"}`,
         {timeout: 45000}, async () => {
         const menuSource = readFileSync(path.join(__dirname, "../../menus/Menu.ts"), "utf8");
         const sources = {

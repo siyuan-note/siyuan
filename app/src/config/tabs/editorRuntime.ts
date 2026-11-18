@@ -49,7 +49,7 @@ const runtime = createSectionRuntime<Config.IEditor>({
             /// #endif
             getAllEditor().forEach(({protyle}) => {
                 if (old.globalBreadcrumb !== next.globalBreadcrumb ||
-                    (next.globalBreadcrumb && old.hideGlobalBreadcrumbIcons !== next.hideGlobalBreadcrumbIcons)) {
+                    old.hideGlobalBreadcrumbIcons !== next.hideGlobalBreadcrumbIcons) {
                     protyle.breadcrumb?.render(protyle, true);
                 }
                 if (old.blockGutterMode !== next.blockGutterMode) protyle.gutter?.element.classList.add("fn__none");

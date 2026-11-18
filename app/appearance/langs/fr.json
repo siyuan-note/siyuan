@@ -2,7 +2,7 @@
 	"updateInstallNow": "Installer maintenant",
 	"updateInstallLater": "Plus tard",
 	"hideGlobalBreadcrumbIcons": "Masquer les icônes du fil d’Ariane",
-	"hideGlobalBreadcrumbIconsTip": "Masque les icônes des entrées avec du texte dans le fil d’Ariane global lorsque cette option est activée",
+	"hideGlobalBreadcrumbIconsTip": "Masque les icônes des entrées avec du texte dans le fil d’Ariane lorsque cette option est activée",
 	"updateReleaseAnnouncement": "Annonce de la version : ${link}",
 	"docOpenPosition": "Position à l’ouverture du document",
 	"docOpenAtStart": "Ouvrir au début",

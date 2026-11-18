@@ -304,7 +304,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         cellValue[colType as "date"] = JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"));
     } else if (colType === "checkbox") {
         cellValue.checkbox = {
-            checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
+            checked: cellElement.querySelector(".av__checkbox use").getAttribute("xlink:href") === "#iconCheck"
         };
     } else if (colType === "relation") {
         const blockIDs: string[] = [];

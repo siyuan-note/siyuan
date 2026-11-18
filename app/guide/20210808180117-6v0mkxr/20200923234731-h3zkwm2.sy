@@ -1040,7 +1040,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", so that SiYuan will automatically download The latest version of the installation package and prompts to install. The update prompt shown on exit includes a changelog link to review before installing"
+									"Data": ", so that SiYuan will automatically download The latest version of the installation package and prompts to install. The update prompt shown on exit includes the release announcement link for the version about to be installed"
 								}
 							]
 						}

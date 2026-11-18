@@ -1,4 +1,5 @@
 {
+	"updateReleaseAnnouncement": "הכרזת גרסה: ${link}",
 	"docOpenPosition": "מיקום פתיחת המסמך",
 	"docOpenAtStart": "פתיחה מההתחלה",
 	"searchGroupState": "תוצאות מקובצות",

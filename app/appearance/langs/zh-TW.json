@@ -1,4 +1,5 @@
 {
+	"updateReleaseAnnouncement": "發布公告：${link}",
 	"docOpenPosition": "文件開啟位置",
 	"docOpenAtStart": "從文件開頭開啟",
 	"searchGroupState": "分組結果",

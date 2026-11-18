@@ -1,4 +1,5 @@
 {
+	"updateReleaseAnnouncement": "Pengumuman rilis: ${link}",
 	"docOpenPosition": "Posisi pembukaan dokumen",
 	"docOpenAtStart": "Buka dari awal",
 	"searchGroupState": "Hasil yang dikelompokkan",

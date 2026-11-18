@@ -1,4 +1,5 @@
 {
+	"updateReleaseAnnouncement": "릴리스 공지: ${link}",
 	"docOpenPosition": "문서 열기 위치",
 	"docOpenAtStart": "처음부터 열기",
 	"searchGroupState": "그룹화된 결과",

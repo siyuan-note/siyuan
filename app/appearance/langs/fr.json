@@ -1,4 +1,5 @@
 {
+	"updateReleaseAnnouncement": "Annonce de la version : ${link}",
 	"docOpenPosition": "Position à l’ouverture du document",
 	"docOpenAtStart": "Ouvrir au début",
 	"searchGroupState": "Résultats groupés",

@@ -1,4 +1,5 @@
 {
+	"updateReleaseAnnouncement": "إعلان الإصدار: ${link}",
 	"docOpenPosition": "موضع فتح المستند",
 	"docOpenAtStart": "الفتح من البداية",
 	"searchGroupState": "النتائج المجمعة",

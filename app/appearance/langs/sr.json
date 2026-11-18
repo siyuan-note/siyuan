@@ -1,4 +1,5 @@
 {
+	"updateReleaseAnnouncement": "Објава издања: ${link}",
 	"docOpenPosition": "Положај отварања документа",
 	"docOpenAtStart": "Отвори од почетка",
 	"searchGroupState": "Груписани резултати",

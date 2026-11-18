@@ -17,7 +17,7 @@ import {hideMessage, showMessage} from "./message";
 import {MobileDialog as Dialog} from "./mobileDialog";
 import {isMobile} from "../util/functions";
 import {mobileConfirmDialog as confirmDialog} from "./mobileConfirmDialog";
-import {escapeHtml} from "../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {saveMobileLayout} from "../mobile/util/saveLayout";
@@ -268,8 +268,14 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
             }
             /// #endif
 
-            confirmDialog(window.siyuan.languages.updateVersion, `${response.msg}<div class="fn__hr"></div>
-<a href="https://github.com/siyuan-note/siyuan/releases" target="_blank" rel="noopener">${escapeHtml(window.siyuan.languages.changelog)}</a>`, () => {
+            let announcement = "";
+            const releaseURL = response.data.releaseURL;
+            if (releaseURL && /^https?:\/\//i.test(releaseURL)) {
+                const escapedURL = escapeHtmlTextAndAttr(releaseURL);
+                const link = `<a href="${escapedURL}" target="_blank" rel="noopener">${escapedURL}</a>`;
+                announcement = `<div class="fn__hr"></div>${escapeHtml(window.siyuan.languages.updateReleaseAnnouncement).replace("${link}", () => link)}`;
+            }
+            confirmDialog(window.siyuan.languages.updateVersion, response.msg + announcement, () => {
                 installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
             }, () => {
                 void requestSystemExit({

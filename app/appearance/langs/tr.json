@@ -1,4 +1,5 @@
 {
+	"updateReleaseAnnouncement": "Sürüm duyurusu: ${link}",
 	"docOpenPosition": "Belge açılış konumu",
 	"docOpenAtStart": "Baştan aç",
 	"searchGroupState": "Gruplanmış sonuçlar",

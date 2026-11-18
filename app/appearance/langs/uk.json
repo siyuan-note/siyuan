@@ -1,4 +1,5 @@
 {
+	"updateReleaseAnnouncement": "Оголошення про випуск: ${link}",
 	"docOpenPosition": "Позиція відкриття документа",
 	"docOpenAtStart": "Відкривати з початку",
 	"searchGroupState": "Згруповані результати",

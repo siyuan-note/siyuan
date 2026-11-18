@@ -1,4 +1,5 @@
 {
+	"updateReleaseAnnouncement": "リリースのお知らせ：${link}",
 	"docOpenPosition": "ドキュメントを開く位置",
 	"docOpenAtStart": "先頭から開く",
 	"searchGroupState": "グループ化した結果",

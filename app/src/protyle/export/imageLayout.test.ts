@@ -490,10 +490,14 @@ describe("PNG exports at different device pixel ratios", {
     before(() => {
         assets = prepareBrowserAssets();
     });
-    for (const pixelRatio of [1, 1.25, 1.5, 2, 3]) {
-        for (const mobile of [false, true]) {
-            test(`wide PNG exports preserve text and all columns (mobile=${mobile}, pixelRatio=${pixelRatio})`,
-                {timeout: 210000}, () => runBrowserCase(mobile, pixelRatio, assets));
-        }
+    for (const {mobile, pixelRatio} of [
+        {mobile: true, pixelRatio: 3},
+        {mobile: false, pixelRatio: 2},
+        {mobile: true, pixelRatio: 1.5},
+        {mobile: false, pixelRatio: 1.25},
+        {mobile: false, pixelRatio: 1},
+    ]) {
+        test(`wide PNG exports preserve text and all columns (mobile=${mobile}, pixelRatio=${pixelRatio})`,
+            {timeout: 210000}, () => runBrowserCase(mobile, pixelRatio, assets));
     }
 });

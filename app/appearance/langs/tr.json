@@ -483,7 +483,7 @@
 	"automationAttrNotExists": "Yok",
 	"automationCollectionAction": "Bu veritabanında topla",
 	"pdfHeadingPageBreaks": "Başlıkları yeni sayfada başlat",
-	"pdfHeadingPageBreaksTip": "Birden fazla başlık düzeyi seçilebilir; seçim yapılmazsa düzen kesintisiz kalır; aralarında içerik olmayan ardışık başlıklar birlikte kalır",
+	"pdfHeadingPageBreaksTip": "Birden fazla başlık düzeyi seçilebilir; seçim yapılmazsa düzen kesintisiz kalır; aynı belgedeki ardışık başlıklar aralarında içerik yoksa birlikte kalır",
 	"configGroupHeadings": "Başlık bloğu",
 	"configGroupBadges": "Rozetler",
 	"workspaceLockWaiting": "Çalışma alanı kullanımda. Yeniden denemek için bekleniyor...",

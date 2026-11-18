@@ -483,7 +483,7 @@
 	"automationAttrNotExists": "Neexistuje",
 	"automationCollectionAction": "Zhromaždiť do tejto databázy",
 	"pdfHeadingPageBreaks": "Začínať nadpisy na novej strane",
-	"pdfHeadingPageBreaksTip": "Možno vybrať viacero úrovní; bez výberu zostane rozloženie plynulé; po sebe idúce nadpisy bez obsahu medzi nimi zostanú spolu",
+	"pdfHeadingPageBreaksTip": "Možno vybrať viacero úrovní; bez výberu zostane rozloženie plynulé; po sebe idúce nadpisy v tom istom dokumente zostanú spolu, ak medzi nimi nie je obsah",
 	"configGroupHeadings": "Blok nadpisu",
 	"configGroupBadges": "Odznaky",
 	"workspaceLockWaiting": "Pracovný priestor sa používa. Čaká sa na opätovný pokus...",

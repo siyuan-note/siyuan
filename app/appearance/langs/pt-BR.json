@@ -483,7 +483,7 @@
 	"automationAttrNotExists": "Não existe",
 	"automationCollectionAction": "Coletar neste banco de dados",
 	"pdfHeadingPageBreaks": "Iniciar títulos em uma nova página",
-	"pdfHeadingPageBreaksTip": "É possível selecionar vários níveis; sem seleção, o conteúdo permanece contínuo; títulos consecutivos sem conteúdo entre eles permanecem juntos",
+	"pdfHeadingPageBreaksTip": "É possível selecionar vários níveis; sem seleção, o conteúdo permanece contínuo; títulos consecutivos do mesmo documento permanecem juntos se não houver conteúdo entre eles",
 	"configGroupHeadings": "Bloco de título",
 	"configGroupBadges": "Indicadores",
 	"workspaceLockWaiting": "O espaço de trabalho está em uso. Aguardando para tentar novamente...",

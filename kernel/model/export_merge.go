@@ -23,8 +23,9 @@ const (
 )
 
 type MergeHeadingOptions struct {
-	DocHeadingMode     string
-	ContentHeadingMode string
+	DocHeadingMode        string
+	ContentHeadingMode    string
+	MarkSubdocumentTitles bool
 }
 
 func mergeHeadingOptionsOrDefault(options []MergeHeadingOptions) (ret MergeHeadingOptions) {
@@ -137,6 +138,9 @@ func loadTreeNodes(box string, p string, level int, options MergeHeadingOptions,
 	heading, err := exportDocumentHeading(tree.Root, hLevel, "")
 	if err != nil {
 		return nil, err
+	}
+	if options.MarkSubdocumentTitles {
+		heading.SetIALAttr("data-export-subdocument-title", "true")
 	}
 	tree.Root.PrependChild(heading)
 	for c := tree.Root.FirstChild; nil != c; c = c.Next {

@@ -483,7 +483,7 @@
 	"automationAttrNotExists": "Bestaat niet",
 	"automationCollectionAction": "Verzamelen in deze database",
 	"pdfHeadingPageBreaks": "Koppen op een nieuwe pagina beginnen",
-	"pdfHeadingPageBreaksTip": "Meerdere kopniveaus kunnen worden geselecteerd; zonder selectie blijft de indeling doorlopend; opeenvolgende koppen zonder inhoud ertussen blijven bij elkaar",
+	"pdfHeadingPageBreaksTip": "Meerdere kopniveaus kunnen worden geselecteerd; zonder selectie blijft de indeling doorlopend; opeenvolgende koppen in hetzelfde document blijven bij elkaar als er geen inhoud tussen staat",
 	"configGroupHeadings": "Kopblok",
 	"configGroupBadges": "Badges",
 	"workspaceLockWaiting": "De werkruimte is in gebruik. Wachten op een nieuwe poging...",

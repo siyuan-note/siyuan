@@ -917,6 +917,47 @@
 			]
 		},
 		{
+			"ID": "20261118183342-v5k8d3n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118183342-v5k8d3n",
+				"updated": "20261118183342"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端的 PDF 导出预览中，开启 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "分页"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，然后在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "标题另起一页"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择标题级别。启用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "合并子文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后，子文档标题只要符合选中的级别，就会另起一页，即使上一篇文档以标题结尾。同一篇文档内，连续标题之间没有正文时会排在一起。"
+				}
+			]
+		},
+		{
 			"ID": "20261111230000-0m8fpxd",
 			"Type": "NodeParagraph",
 			"Properties": {

@@ -905,6 +905,47 @@
 			]
 		},
 		{
+			"ID": "20261118183342-r7g4f6q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118183342-r7g4f6q",
+				"updated": "20261118183342"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端的 PDF 導出預覽中，開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "分頁"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，接著在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "標題另起一頁"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇標題層級。啟用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "合併子文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後，子文件標題只要符合選取的層級，就會另起一頁，即使上一篇文件以標題結尾。同一份文件內，連續標題之間沒有內文時會排在一起。"
+				}
+			]
+		},
+		{
 			"ID": "20261111230000-bsppz8u",
 			"Type": "NodeParagraph",
 			"Properties": {

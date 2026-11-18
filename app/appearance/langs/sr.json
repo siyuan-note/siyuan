@@ -483,7 +483,7 @@
 	"automationAttrNotExists": "Не постоји",
 	"automationCollectionAction": "Прикупи у ову базу података",
 	"pdfHeadingPageBreaks": "Започни наслове на новој страници",
-	"pdfHeadingPageBreaksTip": "Могуће је изабрати више нивоа наслова; без избора распоред остаје непрекидан; узастопни наслови без садржаја између њих остају заједно",
+	"pdfHeadingPageBreaksTip": "Могуће је изабрати више нивоа наслова; без избора распоред остаје непрекидан; узастопни наслови у истом документу остају заједно ако између њих нема садржаја",
 	"configGroupHeadings": "Blok naslova",
 	"configGroupBadges": "Ознаке",
 	"workspaceLockWaiting": "Radni prostor je u upotrebi. Čekanje na ponovni pokušaj...",

@@ -520,7 +520,11 @@ var exportPreviewHTML = contractHandler(apicontract.ExportPreviewHTML, func(c *g
 		return apicontract.FailureFrom[apicontract.ExportPreviewHTMLData](err)
 	}
 	addTitle, customTitle := exportTitleOptions(request.ExportTitleOptions)
-	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
+	mergeHeadingOptions := model.MergeHeadingOptions{
+		DocHeadingMode:        mergeDocHeadingMode,
+		ContentHeadingMode:    mergeContentHeadingMode,
+		MarkSubdocumentTitles: request.PDF,
+	}
 	var blockRefMode *int
 	if request.PDF && request.BlockRefMode != nil {
 		if *request.BlockRefMode < 2 || *request.BlockRefMode > 4 {

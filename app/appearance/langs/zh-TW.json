@@ -483,7 +483,7 @@
 	"automationAttrNotExists": "不存在",
 	"automationCollectionAction": "收集到目前資料庫",
 	"pdfHeadingPageBreaks": "標題另起一頁",
-	"pdfHeadingPageBreaksTip": "可多選標題層級；全部不選時連續排版，連續標題之間沒有內文時不額外分頁",
+	"pdfHeadingPageBreaksTip": "可多選標題層級；全部不選時連續排版；同一文件內的連續標題之間沒有內文時不額外分頁",
 	"configGroupHeadings": "標題區塊",
 	"configGroupBadges": "角標",
 	"workspaceLockWaiting": "工作空間正在被使用，等待重試...",

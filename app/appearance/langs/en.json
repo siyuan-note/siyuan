@@ -483,7 +483,7 @@
 	"automationAttrNotExists": "Does not exist",
 	"automationCollectionAction": "Collect into this database",
 	"pdfHeadingPageBreaks": "Start headings on a new page",
-	"pdfHeadingPageBreaksTip": "Select any heading levels; leave all unchecked for continuous layout; consecutive headings without body content stay together",
+	"pdfHeadingPageBreaksTip": "Select any heading levels; leave all unchecked for continuous layout; consecutive headings within the same document stay together if there is no body content between them",
 	"configGroupHeadings": "Heading block",
 	"configGroupBadges": "Badges",
 	"workspaceLockWaiting": "Workspace is in use. Waiting to retry...",

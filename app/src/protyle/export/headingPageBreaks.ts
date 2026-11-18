@@ -2,6 +2,9 @@ export const normalizeHeadingPageBreakLevels = (levels: unknown): number[] => {
     return Array.isArray(levels) ? [1, 2, 3, 4, 5, 6].filter(level => levels.includes(level)) : [];
 };
 
+const hasTextOrMedia = (element: Element) => /[^\s\u200B-\u200D\uFEFF]/.test(element.textContent) ||
+    element.querySelector("img, svg, canvas, audio, video, iframe, input") !== null;
+
 export const applyExportHeadingPageBreaks = (root: HTMLElement, levels: unknown, enabled = true) => {
     root.querySelectorAll("[data-export-heading-page-break]").forEach(element => {
         element.removeAttribute("data-export-heading-page-break");
@@ -23,17 +26,18 @@ export const applyExportHeadingPageBreaks = (root: HTMLElement, levels: unknown,
         if (heading) {
             const level = Number(type === "NodeHeading" ? element.getAttribute("data-subtype")?.slice(1) :
                 element.tagName.slice(1));
-            // 首个内容块和连续标题不强制分页，避免空白首页和只有标题的页面。
-            if (hasContent && !previousHeading && selected.includes(level)) {
+            // 子文档标题开始新的文档，同一文档内的连续标题合排，首个内容块直接使用首页。
+            const subdocumentTitle = element.getAttribute("data-export-subdocument-title") === "true";
+            if (hasContent && (!previousHeading || subdocumentTitle) && selected.includes(level)) {
                 element.setAttribute("data-export-heading-page-break", "true");
             }
-            hasContent = true;
+            const content = type === "NodeHeading" ? element.firstElementChild ?? element : element;
+            hasContent ||= hasTextOrMedia(content) || content.querySelector('[data-type~="inline-math"][data-content]') !== null;
             previousHeading = true;
             return;
         }
         if (type === "NodeParagraph" || element.tagName === "P") {
-            if (!element.textContent.replace(/[\s\u200B-\u200D\uFEFF]/g, "") &&
-                !element.querySelector("img, svg, canvas, audio, video, iframe, input")) {
+            if (!hasTextOrMedia(element)) {
                 return;
             }
         } else if (!type || ["NodeSuperBlock", "NodeBlockquote", "NodeList", "NodeListItem", "NodeCallout",

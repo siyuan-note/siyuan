@@ -19,7 +19,8 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     root.className = "protyle-wysiwyg";
     root.style.cssText = "font:16px/24px Arial;padding:0;margin:0";
     document.body.append(root);
-    const h = (level, id) => `<div data-type="NodeHeading" data-subtype="h${level}" data-node-id="${id}">${id}</div>`;
+    const h = (level, id, subdocument = false) => `<div data-type="NodeHeading" data-subtype="h${level}" data-node-id="${id}"${
+        subdocument ? ' data-export-subdocument-title="true"' : ""}>${id}</div>`;
     const p = text => `<div data-type="NodeParagraph" data-node-id="p">${text}</div>`;
     const marked = () => Array.from(root.querySelectorAll("[data-export-heading-page-break]"))
         .map(element => element.getAttribute("data-node-id"));
@@ -141,7 +142,8 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         return {ok: true, json: async () => ({code: 0, data: {name: "Test", attrs: {},
             content: (request.excludeTitleImage ? "" : "<div data-cover>Title image</div>") +
                 (request.addTitle ? h(1, "root-title") : "") + p("Body") +
-                h(2, "child-title") + p("Child body") + h(6, "deep-title")}})};
+                h(2, "child-title") + p("Child body") +
+                (request.merge ? h(3, "last-heading") + h(6, "deep-title", true) : h(6, "deep-title"))}})};
     };
     await new Function(inline + "; return new Promise(resolve => setTimeout(resolve, 30));")();
     const preview = document.getElementById("preview");
@@ -197,8 +199,9 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     document.getElementById("mergeDocHeadingMode").value = "tree";
     document.getElementById("mergeSubdocs").dispatchEvent(new Event("change"));
     await new Promise(resolve => setTimeout(resolve, 30));
-    check.equal(preview.querySelectorAll("[data-export-heading-page-break]").length, 1,
-        "Refreshing merged previews reapplies the selected levels");
+    check.deepEqual(Array.from(preview.querySelectorAll("[data-export-heading-page-break]"))
+        .map(element => element.getAttribute("data-node-id")), ["deep-title"],
+    "Refreshing merged previews starts a selected subdocument even after a heading");
     const exportStyle = html.match(/<style>([\s\S]*?)<\/style>/)[1];
 
     const persist = new Function("Constants", "setStorageVal", "ipcData", persistSource);
@@ -217,7 +220,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         "getPluginStyle", "getSnippetCSS", "getSnippetJS", "getIconScript", "getExportLanguages", "normalizeHeadingPageBreakLevels",
         mobileSource + ";return onExport;")(Constants, () => true, () => 390, () => "light", async () => "",
         async () => "", () => "", () => "", () => "", () => "{}", normalize);
-    const data = {data: {name: "Mobile", content: h(1, "first") + p("Body") + h(2, "second") + p("Body") + h(6, "sixth")}};
+    const data = {data: {name: "Mobile", content: h(1, "first") + p("Body") + h(2, "second") + h(6, "sixth", true)}};
     const mobileHTML = await onExport(data, undefined, "/", {type: "pdf", id: "root"});
     const ordinaryHTML = await onExport(data, undefined, "/", {type: "html", id: "root"});
     check.ok(!ordinaryHTML.includes("Protyle.applyExportHeadingPageBreaks"), "HTML export ignores PDF preferences");
@@ -291,6 +294,9 @@ const runElectron = async () => {
 
         const h = level => `<div data-node-id="h${level}" data-type="NodeHeading" data-subtype="h${level}">Heading ${level}</div>`;
         const p = '<div data-node-id="p" data-type="NodeParagraph">Body</div>';
+        const title = level => h(level).replace("<div ", '<div data-export-subdocument-title="true" ');
+        const merged = h(1) + title(1) + h(2) + title(1) + h(2);
+        const emptyTitle = h(1).replace("Heading 1", '<div><a href="pdf-outline://parent"> </a></div>');
         const cases = [
             {html: h(1) + p + h(2) + p + h(6) + p, levels: [], pages: 1},
             {html: h(1) + p + h(2) + p + h(6) + p, levels: [2, 6], pages: 3},
@@ -299,6 +305,11 @@ const runElectron = async () => {
             {html: p + h(1) + '<div data-type="NodeParagraph"><br></div>' + h(3) + p, levels: [1, 3], pages: 2},
             {html: p + h(2) + p + h(6) + p, levels: [2, 6], enabled: false, pages: 1},
             {html: h(1) + p + h(1) + p, levels: [1], pages: 2},
+            {html: merged, levels: [1], pages: 3},
+            {html: merged, levels: [2], pages: 1},
+            {html: merged, levels: [1], enabled: false, pages: 1},
+            {html: emptyTitle + title(1) + h(2), levels: [1], pages: 1},
+            {html: title(1) + h(2) + title(2) + h(3), levels: [1, 2, 3], pages: 2},
         ];
         for (const item of cases) {
             await win.loadURL("data:text/html,<!DOCTYPE html><html><body style='margin:0'></body></html>");

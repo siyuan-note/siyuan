@@ -12,15 +12,17 @@ import {
     isContinuousBlockSelection
 } from "./blockSelection";
 
-export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Range) => {
+export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range?: Range) => {
     let previousElement: Element;
     let oldListHTML = "";
     let sourceElements: Element[] = Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>(`.${BLOCK_SELECTION_CLASS}`));
     if (sourceElements.length > 1 && !isContinuousBlockSelection(sourceElements)) {
         return;
     }
+    const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+    let scrollTarget = sourceElements[0];
     if (sourceElements.length === 0) {
-        let sourceElement = getTopAloneElement(getBlockSelectionModeElement(protyle.wysiwyg.element) || nodeElement);
+        let sourceElement = getTopAloneElement(selectionModeElement || nodeElement);
         const foldElement = hasClosestByAttribute(sourceElement, "fold", "1");
         if (foldElement) {
             sourceElement = foldElement;
@@ -29,8 +31,11 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
             sourceElement = getTopAloneElement(sourceElement.parentElement);
         }
         sourceElements = [sourceElement];
+        if (selectionModeElement) {
+            scrollTarget = sourceElement;
+        }
     }
-    const rangeIsInSource = sourceElements.some(item => item.contains(range.startContainer));
+    const rangeIsInSource = range && sourceElements.some(item => item.contains(range.startContainer));
     const type = sourceElements[0].getAttribute("data-type");
     // 子列表
     if (type === "NodeListItem" &&
@@ -67,7 +72,7 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
                 if (rangeIsInSource) {
                     focusByWbr(sourceElements[0], range);
                 }
-                scrollCenter(protyle);
+                scrollCenter(protyle, scrollTarget);
                 return;
             }
         } else {
@@ -75,6 +80,8 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         }
     }
     if (previousElement) {
+        const movedEdge = scrollTarget?.classList.contains("list") ?
+            scrollTarget.querySelector(":scope > .li") : scrollTarget;
         previousElement = previousElement.lastElementChild.previousElementSibling;
         const sourceParentElement = sourceElements[0].classList.contains("list") ? sourceElements[0] : sourceElements[0].parentElement;
         const orderIndex = parseInt(sourceParentElement.firstElementChild.getAttribute("data-marker"));
@@ -103,7 +110,7 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         if (rangeIsInSource) {
             focusByWbr(previousElement.parentElement, range);
         }
-        scrollCenter(protyle);
+        scrollCenter(protyle, movedEdge);
         return;
     }
     previousElement = getPreviousBlockSibling(sourceElements[0]);
@@ -132,18 +139,20 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         refreshSbResize(sourceElements[0].parentElement);
     }
     preventScroll(protyle);
-    scrollCenter(protyle);
+    scrollCenter(protyle, scrollTarget);
 };
 
-export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: Range) => {
+export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range?: Range) => {
     let nextElement: Element;
     let oldListHTML = "";
     let sourceElements: Element[] = Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>(`.${BLOCK_SELECTION_CLASS}`));
     if (sourceElements.length > 1 && !isContinuousBlockSelection(sourceElements)) {
         return;
     }
+    const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+    let scrollTarget = sourceElements[sourceElements.length - 1];
     if (sourceElements.length === 0) {
-        let sourceElement = getTopAloneElement(getBlockSelectionModeElement(protyle.wysiwyg.element) || nodeElement);
+        let sourceElement = getTopAloneElement(selectionModeElement || nodeElement);
         const foldElement = hasClosestByAttribute(sourceElement, "fold", "1");
         if (foldElement) {
             sourceElement = foldElement;
@@ -152,8 +161,11 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
             sourceElement = getTopAloneElement(sourceElement.parentElement);
         }
         sourceElements = [sourceElement];
+        if (selectionModeElement) {
+            scrollTarget = sourceElement;
+        }
     }
-    const rangeIsInSource = sourceElements.some(item => item.contains(range.startContainer));
+    const rangeIsInSource = range && sourceElements.some(item => item.contains(range.startContainer));
     const type = sourceElements[0].getAttribute("data-type");
     // 子列表
     if (type === "NodeListItem" &&
@@ -190,7 +202,7 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
                 if (rangeIsInSource) {
                     focusByWbr(sourceElements[0], range);
                 }
-                scrollCenter(protyle);
+                scrollCenter(protyle, scrollTarget);
                 return;
             }
         } else {
@@ -198,6 +210,8 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         }
     }
     if (nextElement) {
+        const movedEdge = scrollTarget?.classList.contains("list") ?
+            Array.from(scrollTarget.querySelectorAll(":scope > .li")).at(-1) : scrollTarget;
         const orderIndex = parseInt(nextElement.getAttribute("data-marker"));
         const sourceParentElement = sourceElements[0].classList.contains("list") ? sourceElements[0] : sourceElements[0].parentElement;
         sourceElements.forEach(item => {
@@ -219,7 +233,7 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         if (rangeIsInSource) {
             focusByWbr(nextElement.parentElement, range);
         }
-        scrollCenter(protyle);
+        scrollCenter(protyle, movedEdge);
         return;
     }
     nextElement = getNextBlockSibling(sourceElements[sourceElements.length - 1]);
@@ -248,5 +262,5 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         refreshSbResize(sourceElements[0].parentElement);
     }
     preventScroll(protyle);
-    scrollCenter(protyle);
+    scrollCenter(protyle, scrollTarget);
 };

@@ -400,6 +400,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.code !== "") { // 悬浮工具会触发但 code 为空 https://github.com/siyuan-note/siyuan/issues/6573
             hideElements(["toolbar"], protyle);
         }
+        const move = matchHotKey(window.siyuan.config.keymap.editor.general.moveToUp, event) ? moveToUp :
+            matchHotKey(window.siyuan.config.keymap.editor.general.moveToDown, event) ? moveToDown : undefined;
+        if (move && event.target.closest(".protyle-wysiwyg") === editorElement) {
+            const selectedBlock = editorElement.querySelector<HTMLElement>(`.${BLOCK_SELECTION_CLASS}`) ||
+                getBlockSelectionModeElement(editorElement);
+            if (selectedBlock) {
+                // 框选块可能没有文字光标，移动前直接使用块选区。
+                const selection = editorElement.ownerDocument.getSelection();
+                event.preventDefault();
+                event.stopPropagation();
+                move(protyle, selectedBlock, selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined);
+                return;
+            }
+        }
         const range = getEditorRange(protyle.wysiwyg.element);
         const nodeElement = hasClosestBlock(range.startContainer);
         if (!nodeElement) {
@@ -2589,17 +2603,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.moveToUp, event)) {
+        if (move) {
             event.preventDefault();
             event.stopPropagation();
-            moveToUp(protyle, nodeElement, range);
-            return;
-        }
-
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.moveToDown, event)) {
-            event.preventDefault();
-            event.stopPropagation();
-            moveToDown(protyle, nodeElement, range);
+            move(protyle, nodeElement, range);
             return;
         }
 

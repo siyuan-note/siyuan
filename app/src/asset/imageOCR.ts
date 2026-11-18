@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {showMessage} from "../dialog/message";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {writeText} from "../protyle/util/compatibility";
@@ -36,7 +36,7 @@ export const openImageOCR = (path: string) => {
     let closed = false;
     let originalText = "";
     const controller = new AbortController();
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: window.siyuan.languages.ocrResult,
         transparent: true,
         disableClose: true,

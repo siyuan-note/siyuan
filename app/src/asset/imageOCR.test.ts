@@ -28,7 +28,7 @@ const browserCases = async (source: string, actionsSource: string, statusSource:
     });
     const dependencies = {
         isMobile: () => false,
-        MobileDialog: class {
+        AdaptiveDialog: class {
             element: HTMLElement;
             constructor(options: {content: string, disableClose: boolean}) {
                 check.equal(options.disableClose, true);

@@ -127,7 +127,7 @@ test("browser and native mobile continue to save through their own download hand
 test("remote notebook and migration dialogs offer archive uploads without binding local file controls", () => {
     const env = createEnvironment();
     const contents = [];
-    env.dependencies["dialog/mobileDialog"] = {MobileDialog: class {
+    env.dependencies["dialog/adaptiveDialog"] = {AdaptiveDialog: class {
         constructor(options) {
             contents.push(options.content);
             this.element = {

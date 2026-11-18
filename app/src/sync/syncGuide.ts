@@ -1,6 +1,6 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {config as configApi} from "../config/util/configApi";
 import {isPaidUser, needSubscribe} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
@@ -53,7 +53,7 @@ const openSyncSetting = (app?: App) => {
 };
 
 export const addCloudName = (cloudListElement: Element, cb?: (ready: boolean) => void) => {
-    const dialog = mobileInputDialog({
+    const dialog = openInputDialog({
         awaitConfirm: true,
         title: window.siyuan.languages.cloudSyncDir,
         value: "main",
@@ -288,7 +288,7 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState, refr
             (_match: string, key: string) => escapeHtml(String(values[key]))) : "";
     };
     let previewReady = true;
-    const manualDialog = new MobileDialog({
+    const manualDialog = new AdaptiveDialog({
         title: window.siyuan.languages.chooseSyncDirection,
         content: `<div class="b3-dialog__content">
     <div class="b3-label${state.pending ? "" : " fn__none"}" data-type="sync-source-preview">${renderPreview()}</div>
@@ -382,7 +382,7 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState, refr
     }
 };
 
-const setSync = (key?: string, dialog?: MobileDialog) => {
+const setSync = (key?: string, dialog?: AdaptiveDialog) => {
     if (key) {
         window.siyuan.config.repo.key = key;
     }
@@ -400,7 +400,7 @@ const setSync = (key?: string, dialog?: MobileDialog) => {
             dialog.element.querySelector(".b3-dialog__header").innerHTML = "🗂️ " + window.siyuan.languages.cloudSyncDir;
             dialog.element.querySelector(".b3-dialog__body").innerHTML = listHTML;
         } else {
-            dialog = new MobileDialog({
+            dialog = new AdaptiveDialog({
                 title: "🗂️ " + window.siyuan.languages.cloudSyncDir,
                 content: listHTML,
                 width: isMobile() ? "92vw" : "520px",
@@ -448,7 +448,7 @@ const setSync = (key?: string, dialog?: MobileDialog) => {
 };
 
 export const setKey = (isSync: boolean, cb?: () => void) => {
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: "🔑 " + window.siyuan.languages.syncConfGuide1,
         content: `<div class="b3-dialog__content ft__center">
     <img style="width: 260px" src="/stage/images/sync-guide.svg"/>

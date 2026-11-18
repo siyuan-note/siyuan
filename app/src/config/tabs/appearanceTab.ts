@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {toggleMenu} from "../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../menus/Menu";
 /// #if !BROWSER
@@ -1188,7 +1188,7 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
             }
             return true;
         };
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             mobileSheet: {beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
@@ -1250,7 +1250,7 @@ const mountAppearanceSetNotifications = (root: HTMLElement) => {
             }
             return true;
         };
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             mobileSheet: {beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",

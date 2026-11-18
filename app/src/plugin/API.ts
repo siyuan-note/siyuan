@@ -4,7 +4,7 @@ import {openDatePicker} from "../datePicker";
 import {Plugin} from "./index";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
-import {openInputDialog} from "../dialog/inputDialog";
+import {openPluginInputDialog} from "../dialog/inputDialog";
 import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
 import {getBackend, getFrontend} from "../util/functions";
 /// #if !MOBILE
@@ -445,7 +445,7 @@ const createAPI = () => ({
     ProtyleMethod,
     Plugin,
     Dialog,
-    openInputDialog,
+    openInputDialog: openPluginInputDialog,
     Menu,
     Setting,
     getAllEditor,

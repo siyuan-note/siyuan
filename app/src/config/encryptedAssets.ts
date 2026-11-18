@@ -1,5 +1,5 @@
 import {confirmDialog} from "../dialog/confirmDialog";
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {showMessage} from "../dialog/message";
 import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "../history/notebookDialogs";
 import {escapeHtml} from "../util/escape";
@@ -21,7 +21,7 @@ export const openEncryptedAssetsCleanup = (notebook: string) => {
     let busy = false;
     let disposed = false;
     let items: AssetUnusedItem[] = [];
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: `${escapeHtml(getNotebookName(notebook))} - ${lang.cleanUnusedAssets}`,
         width: isMobile() ? "92vw" : "720px",
         height: "72vh",

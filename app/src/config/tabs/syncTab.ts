@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import type {SettingTabBuilder} from "../setting/builder";
 import {registerAccountGroup} from "./accountUi";
@@ -306,7 +306,7 @@ const mountRepoKey = (root: HTMLElement) => {
     };
     toggleRepoKeyActions();
     root.querySelector("#importKey")?.addEventListener("click", () => {
-        const passwordDialog = mobileInputDialog({
+        const passwordDialog = openInputDialog({
             awaitConfirm: true,
             title: "🔑 " + window.siyuan.languages.key,
             value: "",

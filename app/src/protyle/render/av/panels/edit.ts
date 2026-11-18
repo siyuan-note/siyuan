@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../../dialog/adaptiveDialog";
 import { getEditHTML, bindEditEvent, addCol, getColIconByType, getColNameByType, duplicateCol, removeCol } from "../col";
 import { openEmojiPanel, unicode2Emoji } from "../../../../emoji";
 import { transaction } from "../../../wysiwyg/transaction";
@@ -237,7 +237,7 @@ export const editPanel: IAVPanelDescriptor = {
             });
             const isTwoWay = colData.type === "relation" && colData.relation?.isTwoWay;
             if (context.isCustomAttr || isTwoWay) {
-                const dialog = new MobileDialog({
+                const dialog = new AdaptiveDialog({
                     title: isTwoWay ? window.siyuan.languages.removeColConfirm : window.siyuan.languages.deleteOpConfirm,
                     content: `<div class="b3-dialog__content">
     ${isTwoWay ? window.siyuan.languages.confirmRemoveRelationField

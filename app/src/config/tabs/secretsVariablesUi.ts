@@ -1,5 +1,5 @@
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {bindPasswordIconaToggle} from "../render/fragments";
 import {showMessage} from "../../dialog/message";
@@ -297,7 +297,7 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
 </div>`
         : "";
 
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: titleKey,
         width: mobile ? "92vw" : "520px",
         content: `<div class="b3-dialog__content">

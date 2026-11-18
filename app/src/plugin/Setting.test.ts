@@ -15,8 +15,8 @@ test("plugin settings await confirmation, retain failed drafts and guard repeate
     runInNewContext(transpileModule(readFileSync("src/plugin/Setting.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
     }).outputText, {exports, document: {}, window: {siyuan: {languages: {}}},
-        require: (name: string) => name === "../dialog/mobileDialog" ? {
-            MobileDialog: class {
+        require: (name: string) => name === "../dialog/adaptiveDialog" ? {
+            AdaptiveDialog: class {
                 element = {
                     querySelector: () => ({}), querySelectorAll: () => buttons,
                 };
@@ -40,7 +40,7 @@ test("plugin settings await confirmation, retain failed drafts and guard repeate
     }, destroyCallback: () => cleanups++});
     setting.open("Fixture");
     buttons[1].click();
-    assert.equal(guarded, 1, "confirmation delegates repeated-click and close protection to MobileDialog");
+    assert.equal(guarded, 1, "confirmation delegates repeated-click and close protection to AdaptiveDialog");
     assert.equal(saves, 0);
     const failed = task();
     assert.equal(saves, 1);
@@ -71,8 +71,8 @@ for (const mobile of [false, true]) {
         runInNewContext(transpileModule(readFileSync("src/plugin/Setting.ts", "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS},
         }).outputText, {exports, document: {}, window: {siyuan: {languages: {}}},
-            require: (name: string) => name === "../dialog/mobileDialog" ? {
-                MobileDialog: class {
+            require: (name: string) => name === "../dialog/adaptiveDialog" ? {
+                AdaptiveDialog: class {
                     element = {querySelector: () => content, querySelectorAll: () => buttons};
                     bindInput(input: unknown, _callback: () => void, enter: boolean, focus = true) {
                         bindings.push({input, enter, focus});

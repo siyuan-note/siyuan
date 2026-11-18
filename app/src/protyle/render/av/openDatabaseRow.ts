@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {Constants} from "../../../constants";
 /// #if MOBILE
 import {openMobileFileById} from "../../../mobile/editor";
@@ -79,7 +79,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
     let openingBoundID = "";
     let contextProtyle: IProtyle;
     let pendingRow: {data: IDatabaseRowOpenData, resolve: (opened: boolean) => void};
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {mode: "expanded"},
         content: `<div class="protyle-db-row protyle-db-row--mobile protyle-content">
     <div class="protyle-db-row__title"><svg><use xlink:href="#iconDatabase"></use></svg><span></span></div>

@@ -1,4 +1,4 @@
-import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {fetchPost, fetchSyncPost} from "./fetch";
 import {Constants} from "../constants";
 /// #if !MOBILE

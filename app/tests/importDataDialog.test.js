@@ -54,7 +54,7 @@ const checkDialog = async (css, languages, sources, mobile, rtl) => {
     conflicts.push("<unsafe-notebook>");
     const requests = [];
     const imported = load(sources.importData, {
-        "../dialog/mobileDialog": mobileRuntime, "../util/escape": escape,
+        "../dialog/adaptiveDialog": mobileRuntime, "../util/escape": escape,
         "../util/functions": {isMobile: () => mobile},
         "../util/contractFormData": {ContractFormData: class {}},
         "../dialog/message": {showMessage: message => check.fail(message)},
@@ -139,7 +139,7 @@ if (process.versions.electron && process.type === "browser") {
         }});
         try {
             const sources = {overlayOwnership: compile("../src/menus/overlayOwnership.ts"), dialog: compile("../src/dialog/index.ts"), escape: compile("../src/util/escape.ts"),
-                mobileRuntime: require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource(),
+                mobileRuntime: require("./fixtures/dialogRuntime.cjs").dialogRuntimeSource(),
                 importData: compile("../src/menus/importData.ts")};
             for (const name of ["base", "mobile"]) {
                 const styles = sass.compile(path.join(__dirname, `../src/assets/scss/${name}.scss`), {logger: sass.Logger.silent}).css;

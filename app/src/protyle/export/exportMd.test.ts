@@ -13,7 +13,7 @@ test("Markdown export uses persisted numbering without adding a heading number c
     const dependencies: Record<string, unknown> = {
         "../../constants": {Constants: {}},
         "../../util/functions": {isMobile: () => false},
-        "../../dialog/mobileDialog": {MobileDialog: class {
+        "../../dialog/adaptiveDialog": {AdaptiveDialog: class {
             element = {
                 setAttribute: () => {},
                 querySelector: () => ({checked: false, value: ""}),

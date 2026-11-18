@@ -1,5 +1,5 @@
 import {escapeHtml} from "../../../util/escape";
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {showMessage} from "../../../dialog/message";
 import {isMobile} from "../../../util/functions";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
@@ -113,7 +113,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
 </div>${mobile ? `<div class="b3-dialog__action">
         <button type="button" class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button>
     </div>` : ""}`;
-    const dialog = mobile ? new MobileDialog({
+    const dialog = mobile ? new AdaptiveDialog({
         title: primary ? window.siyuan.languages._attrView.key : window.siyuan.languages.text,
         content,
         containerClassName: "mobile-av-richtext-sheet",

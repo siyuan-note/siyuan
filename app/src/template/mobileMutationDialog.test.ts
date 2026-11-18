@@ -6,7 +6,7 @@ import {ScriptTarget, transpileModule} from "typescript";
 import {getFileRenameTarget} from "../util/fileTree";
 
 const source = readFileSync("src/template/manager.ts", "utf8");
-const dialogSource = readFileSync("src/dialog/mobileDialog.ts", "utf8");
+const dialogSource = readFileSync("src/dialog/adaptiveDialog.ts", "utf8");
 const between = (text: string, start: string, end: string) => {
     const first = text.indexOf(start);
     const last = text.indexOf(end, first);
@@ -90,9 +90,9 @@ const setup = (action: Action) => {
             refreshes.push(args);
             await refresh();
         },
-        MobileDialog: Prompt,
+        AdaptiveDialog: Prompt,
         Option: class {},
-        mobileInputDialog: (options: any) => {
+        openInputDialog: (options: any) => {
             assert.equal(options.awaitConfirm, true);
             const dialog = new Prompt();
             dialog.input.value = options.value;

@@ -1,5 +1,5 @@
 import {fetchSyncPost} from "../util/fetch";
-import {MobileDialog as Dialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog as Dialog} from "../dialog/adaptiveDialog";
 import {highlightRender} from "../protyle/render/highlightRender";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";

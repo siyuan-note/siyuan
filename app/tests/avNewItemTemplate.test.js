@@ -47,7 +47,7 @@ const runCases = async (sources, mobile) => {
     let holdTransactions = false;
     const writes = [];
     const api = load(sources.template, {
-        "../../../dialog/mobileDialog": {MobileDialog: class {
+        "../../../dialog/adaptiveDialog": {AdaptiveDialog: class {
             pending = false;
             constructor(options) {
                 this.element = document.createElement("div");

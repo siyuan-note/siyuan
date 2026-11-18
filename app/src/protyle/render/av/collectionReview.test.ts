@@ -50,7 +50,7 @@ const setup = (unmatched = 1) => {
     runInNewContext(compiled, {
         exports: methods, window: {siyuan: {languages}},
         require: (name: string) => ({
-            "../../../dialog/mobileDialog": {MobileDialog: class {
+            "../../../dialog/adaptiveDialog": {AdaptiveDialog: class {
                 element = root;
                 async runPending(task: () => Promise<boolean>, options: {close: boolean; disableButtons: boolean}) {
                     assert.equal(options.close, false);

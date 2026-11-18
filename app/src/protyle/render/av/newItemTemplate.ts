@@ -3,7 +3,7 @@ import {bindFieldDates, genFieldValue, getValueInputHTML, openFieldSelectMenu, g
 import {isAVLocationEmpty} from "./locationValue";
 import {getCalendarCreationDate} from "./calendar/state";
 import {Constants} from "../../../constants";
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {showMessage} from "../../../dialog/message";
 import {Menu} from "../../../plugin/Menu";
 import {MenuItem} from "../../../menus/Menu";
@@ -340,7 +340,7 @@ export const openNewItemTemplateDialog = (options: {
         selectedIndex = 0;
     }
     let defaultTemplateID = options.data.defaultTemplateID || "";
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: isMobile() ? undefined : window.siyuan.languages.itemTemplate,
         width: isMobile() ? "100vw" : "820px",
         height: isMobile() ? "60vh" : "70vh",

@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {isAVDateType} from "./capabilities";
 import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
@@ -489,7 +489,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         label: getNameByOperator("Template", !!panelData?.data),
         click() {
             menu.close();
-            const dialog = new MobileDialog({
+            const dialog = new AdaptiveDialog({
                 title: window.siyuan.languages.calcOperatorTemplate,
                 content: `<div class="b3-dialog__content">
     <textarea spellcheck="false" class="fn__block b3-text-field" placeholder="${escapeAttr(window.siyuan.languages.rollupTemplateTip)}" rows="8" style="resize: vertical;font-family: var(--b3-font-family-code);">${escapeHtml(currentTemplate)}</textarea>

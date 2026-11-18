@@ -17,7 +17,7 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {fetchWithDocumentSelection} from "../../../util/documentSelectionRequest";
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import {Constants} from "../../../constants";
@@ -81,7 +81,7 @@ class RelatedAVView {
     private disposed = false;
     private renderVersion = 0;
     private timeout?: ReturnType<typeof setTimeout>;
-    private dialog?: MobileDialog;
+    private dialog?: AdaptiveDialog;
     private query = "";
     private unregisterRefresh: () => void;
     private wasConnected = false;
@@ -611,7 +611,7 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
         let preview: AVRelationItemPreview;
         let page = 1;
         let keyword = "";
-        const dialog = new MobileDialog({title: window.siyuan.languages._attrView.relatedDatabaseViewAdd,
+        const dialog = new AdaptiveDialog({title: window.siyuan.languages._attrView.relatedDatabaseViewAdd,
             width: "520px", mobileSheet: {mode: "expanded"},
             content: `<div class="b3-dialog__content av-related-view__picker">
     <input class="b3-text-field fn__block" type="search" placeholder="${window.siyuan.languages.searchPlaceholder}" aria-label="${window.siyuan.languages.search}">

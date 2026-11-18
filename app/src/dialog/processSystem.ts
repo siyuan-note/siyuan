@@ -14,7 +14,7 @@ import {getAllEditor, getAllModels} from "../layout/getAll";
 import {ipcRenderer} from "electron";
 /// #endif
 import {hideMessage, showMessage} from "./message";
-import {MobileDialog as Dialog} from "./mobileDialog";
+import {AdaptiveDialog as Dialog} from "./adaptiveDialog";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
 import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";

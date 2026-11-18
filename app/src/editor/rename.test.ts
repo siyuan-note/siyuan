@@ -89,7 +89,7 @@ test("mobile notebook rename waits for a confirmed response and preserves the dr
         exports: api,
         window: {siyuan: {config: {readonly: false}, languages: {rename: "Rename"}}},
         require: (name: string) => ({
-            "../dialog/mobileInputDialog": {mobileInputDialog: (value: typeof options) => { options = value; return dialog; }},
+            "../dialog/inputDialog": {openInputDialog: (value: typeof options) => { options = value; return dialog; }},
             "../util/functions": {isMobile: () => true},
             "../constants": {Constants: {SIZE_TITLE: 512}},
             "../util/pathName": {setNotebookName: (_id: string, name: string) => displayed.push(name)},

@@ -12,7 +12,7 @@ const pickerSources = () => browserSources(Object.fromEntries([
         "bindBottomSheetDrag", "bindBottomSheetDialog"].map(name => [name, "../../../mobile/util/" + name + ".ts"]),
     ["menuPosition", "../../../menus/menuPosition.ts"], ["overlayOwnership", "../../../menus/overlayOwnership.ts"],
     ["sheetOpen", "../../../menus/sheetOpen.ts"], ["dialog", "../../../dialog/index.ts"],
-    ["mobileDialog", "../../../dialog/mobileDialog.ts"], ["filterDateDropdown", "filterDateDropdown.ts"],
+    ["adaptiveDialog", "../../../dialog/adaptiveDialog.ts"], ["filterDateDropdown", "filterDateDropdown.ts"],
 ].map(([name, path]) => [name, join(__dirname, path)])));
 
 const setupPicker = (source: Record<string, string>, modules: Record<string, any>, stubs: Record<string, any>) => {
@@ -38,13 +38,13 @@ const setupPicker = (source: Record<string, string>, modules: Record<string, any
     ["overlayOwnership", "dialog", "model", "yearInput", "field", "menuPosition", "position", "runtime", "owners",
         "sheetOpen", "mobileSheetGesture", "visibleViewport", "orientation", "keyboardSheetState", "mobileSheetLayout",
         "bindBottomSheetDrag", "bindBottomSheetDialog"].forEach(name => load(name));
-    load("mobileDialog", {"./index": modules.dialog});
+    load("adaptiveDialog", {"./index": modules.dialog});
     modules.panel = {registerDatePickerWindow() {}};
     modules.index = {};
     load("binding"); load("index");
     stubs["../../../datePicker"] = modules.index;
     stubs.__fallback = fallback;
-    modules.runtime.registerDatePickerRuntime(document, (options: unknown) => new modules.mobileDialog.MobileDialog(options),
+    modules.runtime.registerDatePickerRuntime(document, (options: unknown) => new modules.adaptiveDialog.AdaptiveDialog(options),
         () => window.siyuan.languages);
     load("filterDateDropdown");
 };

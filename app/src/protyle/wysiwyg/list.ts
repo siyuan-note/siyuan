@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {focusByWbr, getEditorRange, getUndoFocusContext} from "../util/selection";
 import {focusByRange} from "../util/selectionOffsets";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
@@ -107,7 +107,7 @@ export const openOrderedListStartDialog = (protyle: IProtyle, listElement: HTMLE
         return;
     }
     const initialStart = Number.parseInt(listItemElements[0].getAttribute("data-marker"), 10);
-    mobileInputDialog({
+    openInputDialog({
         title: window.siyuan.languages.orderedListStart,
         value: Number.isFinite(initialStart) ? Math.trunc(initialStart).toString() : "1",
         type: "number",

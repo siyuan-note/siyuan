@@ -47,8 +47,8 @@ const runCases = async (sources, appDirectory) => {
         new Function("require", "exports", code)(name => loadDialogModule(name, path.posix.dirname(moduleKey)), exports);
         return exports;
     };
-    const {MobileDialog} = loadDialogModule("dialog/mobileDialog");
-    window.qaAVMobileDialog = options => { mobile = true; return new MobileDialog(options); };
+    const {AdaptiveDialog} = loadDialogModule("dialog/adaptiveDialog");
+    window.qaAVAdaptiveDialog = options => { mobile = true; return new AdaptiveDialog(options); };
     const mask = () => document.querySelector(".av__richtext-mask, .mobile-bottom-sheet-dialog");
     const hiddenElement = () => {
         const element = document.createElement("div");
@@ -81,7 +81,7 @@ const runCases = async (sources, appDirectory) => {
         "./host": {getAVHostIdentity: element => element.dataset.avHost || element.dataset.nodeId || "",
             getAVHostBlockID: element => element.dataset.nodeId || ""},
         "./cellEditor": {AV_CELL_EDITOR_CLOSE_EVENT: "siyuan-av-cell-editor-close"},
-        "../../../dialog/mobileDialog": {MobileDialog},
+        "../../../dialog/adaptiveDialog": {AdaptiveDialog},
         "../../../dialog/message": {showMessage() {}},
         "../../../util/escape": {escapeHtml: value => value},
         "../../../util/functions": {isMobile: () => mobile},
@@ -464,7 +464,7 @@ const checkMobileSafeArea = async (safeTop, width, height) => {
     ]) {
         document.documentElement.dataset.frontend = frontend;
         document.body.className = "body--" + platform;
-        const dialog = window.qaAVMobileDialog({content: '<div class="av__richtext-editor av__richtext-editor--sheet"><div class="av__richtext-host">Text</div></div><div class="b3-dialog__action"><button class="b3-button b3-button--text">Confirm</button></div>',
+        const dialog = window.qaAVAdaptiveDialog({content: '<div class="av__richtext-editor av__richtext-editor--sheet"><div class="av__richtext-host">Text</div></div><div class="b3-dialog__action"><button class="b3-button b3-button--text">Confirm</button></div>',
             containerClassName: "mobile-av-richtext-sheet", mobileSheet: {mode: "expanded"}});
         await new Promise(resolve => setTimeout(resolve, 180));
         const panel = dialog.element.querySelector(".mobile-sheet-panel");

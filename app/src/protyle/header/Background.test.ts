@@ -116,7 +116,7 @@ const createCoverHarness = (mobile: boolean, importCovers = false) => {
         options.build(menu);
         options.show(menu);
     };
-    const Background = new Function("window", "toggleMenu", "assetMenu", "mobileInputDialog", "openCoverPicker",
+    const Background = new Function("window", "toggleMenu", "assetMenu", "openInputDialog", "openCoverPicker",
         "bindPopoverDialog", "Constants", "fetchPost", "hideElements", "fetchCoverData", "getRandom", "bgs",
         "fetch", "uploadFiles", "getAssetUploadSuccesses", "showMessage", "console", transpileModule(
             `class Background {${methods.join("\n")} bind(protyle) {${listener}}} return Background;`,

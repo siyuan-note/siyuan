@@ -28,7 +28,7 @@ test("parent selection waits for its original transaction and invalidates a depa
     }
     const exports = {} as typeof import("./subItems");
     const dependencies = {
-        MobileDialog: Dialog, Constants: {CUSTOM_SY_AV_VIEW: "view"},
+        AdaptiveDialog: Dialog, Constants: {CUSTOM_SY_AV_VIEW: "view"},
         isMobile: () => true, escapeAttr: String, escapeHtml: String,
         getAVData: () => ({subItems: {enabled: true, parentKeyID: "parent-column"}}),
         beginAVEditorSession: () => () => {}, registerSubItemsCleanup: () => () => {},

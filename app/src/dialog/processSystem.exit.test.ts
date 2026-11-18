@@ -51,7 +51,7 @@ for (const mobile of [false, true]) {
             }
             runInNewContext(confirmSource, {
                 exports, window: context.window, document: {activeElement: null},
-                require: () => ({isMobile: () => mobile, Constants: {}, Dialog: TestDialog, MobileDialog: TestDialog}),
+                require: () => ({isMobile: () => mobile, Constants: {}, Dialog: TestDialog, AdaptiveDialog: TestDialog}),
             });
             const exit = runInNewContext(transpileModule(`const exitSiYuan = ${declaration.initializer.getText(source)}; exitSiYuan;`, {
                 compilerOptions: {target: ScriptTarget.ES2021},

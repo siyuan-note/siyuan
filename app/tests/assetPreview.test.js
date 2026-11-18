@@ -409,7 +409,7 @@ const runCases = async source => {
     const annotationRequests = [];
     const anno = load(source.annotations, {
         ...Object.fromEntries(["../util/setPosition", "../protyle/util/hasClosest", "../protyle/util/compatibility",
-            "../config/tabs/appearancePreferences", "../protyle/util/selectionOffsets", "../constants", "../dialog/mobileDialog",
+            "../config/tabs/appearancePreferences", "../protyle/util/selectionOffsets", "../constants", "../dialog/adaptiveDialog",
             "../dialog/message", "../util/functions", "../dialog/confirmDialog", "../util/escape", "filesize",
             "blueimp-md5", "./rectAnnotationResize", "./pdfRectCapture", "../protyle/upload",
             "../protyle/upload/uploadResult", "../editor/pdfAssetLink", "./pdfTextAnnotation", "./pdfCoordinates",

@@ -128,7 +128,7 @@ size-adjust: 85%;
             suspendedColumns.add(element);
             return () => check.equal(suspendedColumns.delete(element), true);
         }},
-        "../../dialog/mobileDialog": {MobileDialog: ExportDialog},
+        "../../dialog/adaptiveDialog": {AdaptiveDialog: ExportDialog},
         "../../dialog/message": {showMessage: (message: string) => messages.push(message), hideMessage: () => {}},
         "../../util/fetch": {fetchPost: (url: string, data: {file: File, excludeTitleImage: boolean, addTitle: boolean}, callback: (response: unknown) => void) => {
             if (url === "/api/export/exportPreviewHTML") {

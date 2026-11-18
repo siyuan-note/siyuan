@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {prepareInlineElementBoundaryMutation} from "./inlineElementBoundary";
 import {
     hasClosestBlock,
@@ -253,7 +253,7 @@ const confirmAVPasteHeader = () => {
                 resolve(useHeader);
             }
         };
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             title: window.siyuan.languages.avPasteHeaderTitle,
             content: `<div class="b3-dialog__content">
     <div class="ft__breakword">${window.siyuan.languages.avPasteHeaderTip}</div>

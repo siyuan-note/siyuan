@@ -1,5 +1,5 @@
 import {getAVCellShowIcon} from "./entryIcon";
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {prepareAVColumnWindow} from "./columnWindow";
 import {insertAVTableColumn} from "./columnPresentation";
 import {getTablePinIndex} from "./groupTableVirtual";
@@ -1525,7 +1525,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         if (relResponse.code !== 0) {
                             return;
                         }
-                        const dialog = new MobileDialog({
+                        const dialog = new AdaptiveDialog({
                             title: window.siyuan.languages.removeColConfirm,
                             content: `<div class="b3-dialog__content">
     ${window.siyuan.languages.confirmRemoveRelationField

@@ -69,7 +69,7 @@ const runCases = async (sources, css, mobile, manifest, languages, image, mobile
         }
         return cache[name];
     };
-    stubs["dialog/mobileDialog"] = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(load("dialog").Dialog, mobile);
+    stubs["dialog/adaptiveDialog"] = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(load("dialog").Dialog, mobile);
     const {Background} = load("protyle/header/Background");
     const owner = document.createElement("div");
     const protyle = {element: owner, block: {rootID: "cover-document"}, disabled: false};
@@ -289,7 +289,7 @@ const runElectron = async () => {
                 await win.loadURL("data:text/html,<html><body></body></html>");
                 await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)},
                     ${JSON.stringify(css)}, ${mobile}, ${JSON.stringify(manifest)}, ${JSON.stringify(languages)}, ${JSON.stringify(image)},
-                    ${JSON.stringify(require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource())})`);
+                    ${JSON.stringify(require("./fixtures/dialogRuntime.cjs").dialogRuntimeSource())})`);
             }
         }
         console.log("Cover picker layout cases passed");

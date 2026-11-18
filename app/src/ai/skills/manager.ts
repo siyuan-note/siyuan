@@ -1,5 +1,5 @@
-import {mobileInputDialog} from "../../dialog/mobileInputDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {openInputDialog} from "../../dialog/inputDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {Dialog} from "../../dialog";
 import {showMessage} from "../../dialog/message";
 import {fetchSyncPost} from "../../util/fetch";
@@ -16,7 +16,7 @@ import {openBy} from "../../editor/util";
 
 const confirmSkillAction = (title: string, text: string, remove = false): Promise<boolean> => new Promise(resolve => {
     let accepted = false;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title,
         width: isMobile() ? "92vw" : "520px",
         content: `<div class="b3-dialog__content ft__breakword">${text}</div>
@@ -342,7 +342,7 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
         const directory = getSkillDirectory(entry);
         const title = action === "newSkill" ? lang.agentSkillNew : action === "newFile" ? lang.agentSkillNewFile :
             action === "mkdir" ? lang.agentSkillNewFolder : lang.rename;
-        const prompt = mobileInputDialog({
+        const prompt = openInputDialog({
             title,
             label: lang.name,
             value: action === "rename" ? entry.path.split("/").pop() : "",

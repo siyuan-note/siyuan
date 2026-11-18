@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import type {App} from "../index";
 import type {DocHistorySnapshot} from "../types/api";
 import {Protyle} from "../protyle";
@@ -11,7 +11,7 @@ import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "./noteboo
 import {isPluginSnapshotPath, TPluginSnapshotPart} from "./pluginSnapshotPaths";
 
 export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot, notebook: string) => {
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {mode: "expanded"},
         title: escapeHtml(reference.tags.join(" / ")),
         content: "",

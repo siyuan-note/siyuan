@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {transaction, turnsOneInto} from "./transaction";
 import {Constants} from "../../constants";
 import {focusByRange} from "../util/selectionOffsets";
@@ -59,7 +59,7 @@ export const updateCustomCalloutType = (blockElements: HTMLElement[], protyle: I
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0).cloneRange() : undefined;
     const currentType = blockElements.every(item => item.dataset.subtype === blockElements[0].dataset.subtype) ?
         blockElements[0].dataset.subtype : "";
-    mobileInputDialog({
+    openInputDialog({
         title: `${window.siyuan.languages.callout} - ${window.siyuan.languages.custom}`,
         value: currentType || "",
         label: window.siyuan.languages.type,

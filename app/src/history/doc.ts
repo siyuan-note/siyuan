@@ -1,5 +1,5 @@
-import {MobileDialog} from "../dialog/mobileDialog";
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
@@ -261,7 +261,7 @@ export const openDocHistory = (options: {
         </div>
     </div>
 </div>`;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {mode: "expanded"},
         title: escapeHtml(options.pathString),
         content: contentHTML,
@@ -525,7 +525,7 @@ export const openDocHistory = (options: {
                 break;
             } else if (type === "jumpRepoPage") {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
-                mobileInputDialog({
+                openInputDialog({
                     title: window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)),
                     value: String(pageNumElement.textContent),
                     type: "number",
@@ -549,7 +549,7 @@ export const openDocHistory = (options: {
                 break;
             } else if (type === "jumpSnapshotPage") {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
-                mobileInputDialog({
+                openInputDialog({
                     title: window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)),
                     value: String(target.textContent),
                     type: "number",

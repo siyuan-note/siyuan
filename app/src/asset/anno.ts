@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {setPosition} from "../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -565,7 +565,7 @@ const setRelation = (pdf: any) => {
     if (!configItem.ids) {
         configItem.ids = [];
     }
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: window.siyuan.languages.relation,
         content: `<div class="b3-dialog__content">
     <div class="fn__flex">

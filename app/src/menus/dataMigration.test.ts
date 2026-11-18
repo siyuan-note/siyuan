@@ -53,7 +53,7 @@ const setup = () => {
         window: {siyuan: {config: {repo: {key: ""}}, notebooks: [{id: "box", name: "Notebook", closed: false}],
             languages: {dataMigration: "Import", targetNotebook: "Target", confirm: "Confirm", cancel: "Cancel"}}},
         require: () => ({
-            MobileDialog: MockDialog,
+            AdaptiveDialog: MockDialog,
             Constants: {HELP_PATH: {}},
             isMobile: () => true,
             getHostCapabilities: () => ({documentImportExport: true, importExport: false, localFileSystem: false}),

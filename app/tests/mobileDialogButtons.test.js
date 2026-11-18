@@ -5,7 +5,7 @@ const path = require("node:path");
 
 const fixtures = () => {
     const ts = require("typescript");
-    return Object.fromEntries(["confirmDialog", "mobileInputDialog"].map(name => [name,
+    return Object.fromEntries(["confirmDialog", "inputDialog"].map(name => [name,
         ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/dialog", name + ".ts"), "utf8"), {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
         }).outputText]));
@@ -25,15 +25,15 @@ const runCases = sources => {
         focusWhenReady() {}
         bindInput() {}
     }
-    const dependencies = {MobileDialog: Dialog, isMobile: () => true, Constants: {},
+    const dependencies = {AdaptiveDialog: Dialog, Dialog, isMobile: () => true, Constants: {},
         escapeHtml: value => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")};
     const load = name => {
         const exports = {};
         new Function("require", "exports", sources[name])(() => dependencies, exports);
-        return exports[name];
+        return exports;
     };
-    const confirmDialog = load("confirmDialog");
-    const inputDialog = load("mobileInputDialog");
+    const confirmDialog = load("confirmDialog").confirmDialog;
+    const inputDialog = load("inputDialog").openInputDialog;
     const theme = {"--b3-theme-primary": "#3366ff", "--b3-theme-on-primary": "#ffffff",
         "--b3-theme-on-surface": "#222222", "--b3-theme-surface-lighter": "#eeeeee", "--b3-theme-error": "#ff3344"};
     for (const [name, value] of Object.entries(theme)) document.body.style.setProperty(name, value);

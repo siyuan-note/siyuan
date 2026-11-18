@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
@@ -267,7 +267,7 @@ const showDeactivateConfirm = (callback: () => void) => {
 };
 
 const openAccountDeactivateAuthDialog = () => {
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: "⚠️ " + window.siyuan.languages.deactivateUser,
         width: isMobile() ? "92vw" : "520px",
         content: `<div class="config-account--auth">${genAccountAuthHTML("deactivate")}</div>`,

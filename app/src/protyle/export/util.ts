@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 /// #if !BROWSER
 import {escapeHtml} from "../../util/escape";
 import * as path from "path";
@@ -39,7 +39,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         return;
     }
     let stopObservingLayout: () => void;
-    const exportDialog = new MobileDialog({
+    const exportDialog = new AdaptiveDialog({
         disableAnimation: true,
         destroyCallback() {
             stopObservingLayout?.();

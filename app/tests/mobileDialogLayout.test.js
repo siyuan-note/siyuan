@@ -42,9 +42,9 @@ const runCases = async appDirectory => {
         new Function("require", "exports", code)(name => load(name, path.posix.dirname(moduleKey)), exports);
         return exports;
     };
-    const {MobileDialog} = load("dialog/mobileDialog");
-    window.shortViewportDialogModule = {MobileDialog};
-    const dialog = new MobileDialog({title: "Text",
+    const {AdaptiveDialog} = load("dialog/adaptiveDialog");
+    window.shortViewportDialogModule = {AdaptiveDialog};
+    const dialog = new AdaptiveDialog({title: "Text",
         content: '<div class="b3-dialog__content"><div style="height:1800px">Long content</div></div><div class="b3-dialog__action"><button class="b3-button" data-confirm>Confirm</button></div>'});
     await wait();
     assert.equal(dialog.element.querySelectorAll("[data-type=sheet-expand]").length, 0);
@@ -67,7 +67,7 @@ const runCases = async appDirectory => {
     assert.ok(Math.abs(actions.getBoundingClientRect().bottom - panel.getBoundingClientRect().bottom) < 1);
     dialog.destroy();
     await wait();
-    const selection = new MobileDialog({title: "Notebook", content:
+    const selection = new AdaptiveDialog({title: "Notebook", content:
         '<div><div class="b3-dialog__content"><select class="b3-select"><option>Notebook</option></select><button class="b3-button" data-inline>Inline</button></div>' +
         '<div class="b3-dialog__action" data-options><label>Option<input type="checkbox"></label></div>' +
         '<div class="b3-dialog__action" data-actions><button class="b3-button b3-button--cancel">Cancel</button><div class="fn__space"></div><button class="b3-button b3-button--text">Confirm</button></div></div>'});
@@ -126,7 +126,7 @@ const runCases = async appDirectory => {
     delete document.documentElement.dataset.themeMode;
     selection.destroy();
     await wait();
-    const sheet = new MobileDialog({title: "Panel", content: "Content"});
+    const sheet = new AdaptiveDialog({title: "Panel", content: "Content"});
     await wait();
     assert.equal(sheet.element.querySelector(".mobile-sheet-actions"), null);
     assert.equal(sheet.element.querySelector("[data-type=sheet-expand]"), null);
@@ -238,7 +238,7 @@ const runCases = async appDirectory => {
     for (const color of ["rgb(245, 245, 245)", "rgb(30, 30, 30)"]) {
         document.body.style.setProperty("--b3-theme-surface", color);
         for (const withActions of [true, false]) {
-            const nativeSheet = new MobileDialog({title: "Sync direction",
+            const nativeSheet = new AdaptiveDialog({title: "Sync direction",
                 content: `<div class="b3-dialog__content"><div style="height:${withActions ? 80 : 1800}px">Choices</div></div>` +
                     (withActions ? '<div class="b3-dialog__action"><button class="b3-button">Confirm</button></div>' : "")});
             await wait();
@@ -297,7 +297,7 @@ const runCases = async appDirectory => {
         document.documentElement.dataset.frontend = frontend;
         document.body.className = `body--${platform}`;
         document.body.style.setProperty("--mobile-bottom-bar-safe-area", "24px");
-        const sheet = new MobileDialog({title: "Other frontend", content: "Content"});
+        const sheet = new AdaptiveDialog({title: "Other frontend", content: "Content"});
         await wait();
         const panel = sheet.element.querySelector(".mobile-bottom-sheet");
         assert.equal(getComputedStyle(sheet.element.querySelector(".b3-dialog")).paddingBottom, `${overlayInset}px`);
@@ -312,10 +312,10 @@ const runCases = async appDirectory => {
 const runShortViewportCase = async () => {
     const check = require("node:assert/strict");
     const wait = () => new Promise(resolve => setTimeout(resolve, 250));
-    const {MobileDialog} = window.shortViewportDialogModule;
+    const {AdaptiveDialog} = window.shortViewportDialogModule;
     window.siyuan.mobile.size.landscape.height1 = 350;
     window.siyuan.mobile.size.isLandscape = true;
-    const dialog = new MobileDialog({title: "Color", content:
+    const dialog = new AdaptiveDialog({title: "Color", content:
         '<div class="b3-dialog__content"><label class="b3-label b3-label--inner">Name<input class="b3-text-field fn__block"></label><div style="height:600px"></div></div>' +
         '<div class="b3-dialog__action"><button class="b3-button">Confirm</button></div>'});
     await new Promise(resolve => setTimeout(resolve, 1250));

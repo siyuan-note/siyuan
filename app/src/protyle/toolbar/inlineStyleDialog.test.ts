@@ -31,7 +31,7 @@ test("inline style persistence delegates pending saves and reports failure or su
     }
     const exports = {} as typeof import("./inlineStyleDialog");
     const dependencies = {
-        MobileDialog: Dialog, isMobile: () => true, escapeHtml: (value: string) => value,
+        AdaptiveDialog: Dialog, isMobile: () => true, escapeHtml: (value: string) => value,
         normalizeInlineStyles: (value: object) => value, getInlineStylesCache: () => data,
         getProperties: (): string[] => [], getThemeColorEditorHTML: () => "", getBuiltinEditorHTML: () => "",
         bindThemeColorEditor: () => ({}), bindBuiltinEditor: () => ({}),

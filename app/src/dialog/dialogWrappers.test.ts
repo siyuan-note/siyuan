@@ -9,7 +9,6 @@ const setup = (mobile = true) => {
     const pending: Promise<boolean>[] = [];
     const messages: string[] = [];
     const pendingOptions: any[] = [];
-    let delegated: any;
     class Control {
         value = "";
         className = "";
@@ -20,6 +19,7 @@ const setup = (mobile = true) => {
         addEventListener(name: string, callback: (event?: any) => void) { this.listeners[name] = callback; }
         click() { this.listeners.click?.(); }
         focus() { events.push("early-focus"); }
+        select() {}
         before(...controls: Control[]) { this.inserted.push(...controls); }
     }
     class MockDialog {
@@ -51,13 +51,10 @@ const setup = (mobile = true) => {
             return promise;
         }
     }
-    const dependencies = {MobileDialog: MockDialog, Dialog: MockDialog, isMobile: () => mobile,
+    const dependencies = {AdaptiveDialog: MockDialog, Dialog: MockDialog, isMobile: () => mobile,
         escapeHtml: (value: string) => value,
         showMessage: (message: string) => messages.push(message),
-        Constants: {}, createInputDialog: (options: any, DialogConstructor: typeof MockDialog) => {
-            delegated = options;
-            return new DialogConstructor(options);
-        }};
+        Constants: {}};
     const load = (file: string) => {
         const exports: any = {};
         runInNewContext(transpileModule(readFileSync("src/dialog/" + file + ".ts", "utf8"), {
@@ -68,14 +65,13 @@ const setup = (mobile = true) => {
             console: {...console, error() {}}});
         return exports;
     };
-    return {...load("mobileInputDialog"), ...load("confirmDialog"), events, pending, messages, pendingOptions,
-        delegated: () => delegated};
+    return {...load("inputDialog"), ...load("confirmDialog"), events, pending, messages, pendingOptions};
 };
 
 test("input actions use the same full-width touch group as confirmations", () => {
     const f = setup();
     const options = {title: "Rename", value: "Draft", onConfirm() {}};
-    const dialog = f.mobileInputDialog(options);
+    const dialog = f.openInputDialog(options);
     assert.match(dialog.options.content, /class="mobile-sheet-action-group"/);
     assert.equal((dialog.options.content.match(/b3-button--touch/g) || []).length, 2);
 });
@@ -83,7 +79,7 @@ test("input actions use the same full-width touch group as confirmations", () =>
 test("mobile input wrapper defers initial focus and only successful awaited confirmation closes", async () => {
     const f = setup();
     let success = false;
-    const dialog = f.mobileInputDialog({title: "Rename", value: "Draft", awaitConfirm: true,
+    const dialog = f.openInputDialog({title: "Rename", value: "Draft", awaitConfirm: true,
         onConfirm: async (value: string) => { assert.equal(value, "Draft"); return success; }});
     assert.deepEqual(f.events, ["deferred-focus"]);
     dialog.confirm.click();
@@ -94,17 +90,18 @@ test("mobile input wrapper defers initial focus and only successful awaited conf
     assert.equal(await f.pending.pop(), true);
     assert.equal(f.events.filter((item: string) => item === "confirm").length, 1);
 });
-test("desktop input delegation interprets explicit true success without changing legacy void callbacks", async () => {
+test("desktop input confirmation closes only after an explicit true result", async () => {
     const f = setup(false);
     let success = false;
-    const dialog = f.mobileInputDialog({title: "Rename", value: "", awaitConfirm: true, onConfirm: async () => success});
-    f.delegated().onConfirm("", dialog);
+    const destroyed = () => f.events.filter((item: string) => item === "destroy");
+    const dialog = f.openInputDialog({title: "Rename", value: "", awaitConfirm: true, onConfirm: async () => success});
+    dialog.confirm.click();
     await new Promise(resolve => setImmediate(resolve));
-    assert.deepEqual(f.events, []);
+    assert.deepEqual(destroyed(), []);
     success = true;
-    f.delegated().onConfirm("", dialog);
+    dialog.confirm.click();
     await new Promise(resolve => setImmediate(resolve));
-    assert.deepEqual(f.events, ["destroy"]);
+    assert.deepEqual(destroyed(), ["destroy"]);
 });
 test("mobile confirmation failure retains cancellation, success does not invoke cancel", async () => {
     const f = setup();
@@ -249,10 +246,10 @@ test("mobile confirmation groups touch actions and keeps danger and extra action
 
 test("mobile input touch actions preserve custom ordering and stack three or more actions", () => {
     const f = setup();
-    const basic = f.mobileInputDialog({title: "Name", value: "", onConfirm() {}});
+    const basic = f.openInputDialog({title: "Name", value: "", onConfirm() {}});
     assert.match(basic.options.content, /b3-dialog__action mobile-sheet-action-bar/);
     assert.doesNotMatch(basic.options.content, /group--stacked|fn__space|b3-button--text/);
-    const dialog = f.mobileInputDialog({title: "Name", value: "", onConfirm() {}, actions: [
+    const dialog = f.openInputDialog({title: "Name", value: "", onConfirm() {}, actions: [
         {text: "First", position: "beforeCancel", onClick() {}},
         {text: "Second", danger: true, onClick() {}},
         {text: "Last", position: "afterConfirm", onClick() {}},

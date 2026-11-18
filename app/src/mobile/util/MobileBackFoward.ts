@@ -8,7 +8,7 @@ import {isAbove} from "../../util/zIndex";
 import {getMobileSelectMenuElement} from "./nativeSelect";
 import {closeAnchoredInput, getAnchoredInputMask} from "../../dialog/anchoredInput";
 import {closeAVCellEditor} from "../../protyle/render/av/cellEditor";
-import {requestMobileDialogClose} from "../../dialog/mobileDialog";
+import {requestDialogClose} from "../../dialog/adaptiveDialog";
 
 export const pushBack = () => {
     window.siyuan.mobile.tabs?.pushCurrent();
@@ -65,7 +65,7 @@ export const goBack = () => {
         avPanelElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;
     } else if (window.siyuan.dialogs.length !== 0) {
-        requestMobileDialogClose(window.siyuan.dialogs[window.siyuan.dialogs.length - 1], "back");
+        requestDialogClose(window.siyuan.dialogs[window.siyuan.dialogs.length - 1], "back");
         return;
     } else if (window.siyuan.mobile.agentChatController?.handleBack()) {
         return;

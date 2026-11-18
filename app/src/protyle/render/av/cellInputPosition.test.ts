@@ -295,7 +295,7 @@ const openInput = (positionByMenu = false) => {
     runInNewContext(popCompiled, {
         ...capabilities,
         getAVHostIdentity, getAVRelationHost,
-        exports, isTableLikeView: () => true, hasClosestBlock: () => block, hasClosestByClassName: (): null => null,
+        exports, isTableLikeView: () => true, getAVHost: () => block, hasClosestByClassName: (): null => null,
         getComputedStyle: () => ({}), getStoredCellValueByElement: (): undefined => undefined,
         createCellInputTarget: () => () => ({cells: [] as import("./selectionState").IAVSelectedCell[]}),
         escapeAttr: (value: string) => value, escapeHtml: (value: string) => value,

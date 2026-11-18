@@ -106,7 +106,7 @@ const textCellFixture = (template: boolean, rich = false, type: "text" | "block"
             body: {insertAdjacentHTML: () => { legacy = true; }}},
         window: {siyuan: {menus: {menu: {remove() {}}}, zIndex: 0}},
         getComputedStyle: () => ({}),
-        hasClosestBlock: () => block,
+        getAVHost: () => block,
         hasClosestByClassName: (_element: unknown, name: string) => name === "av__row" ? row : name === "av__body" ? group : null,
         getAVRelationHost: (): undefined => undefined,
         isTableLikeView: () => true,

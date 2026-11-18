@@ -24,7 +24,7 @@ test("ordinary cell refresh preserves tree controls in a non-primary first field
     const cell = {dataset: {dtype: "select"}, innerHTML: controls, querySelector: (selector: string) =>
         selector === ".av__cellcontent" ? content : null};
     const refresh = load("action.ts", "updateAttrViewCellAnimation", {
-        hasClosestBlock: () => ({getAttribute: () => "table"}),
+        getAVHost: () => ({getAttribute: () => "table"}),
         renderCell: () => '<span class="b3-chip">Updated</span>', renderCellAttr() {}, renderAVRichTextElements() {},
     });
     refresh(cell, {type: "select"});

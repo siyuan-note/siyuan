@@ -6,7 +6,7 @@ import {getConditionalItemStyle, getConditionalCellStyle} from "./conditionalCol
 import {isTableLikeView} from "./viewType";
 import {updateFrozenColumns} from "./frozenColumns";
 import {hasClosestByClassName, hasTopClosestByAttribute} from "../../util/hasClosest";
-import {getAVHost as hasClosestBlock} from "./host";
+import {getAVHost} from "./host";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {openViewSettingMenu} from "./viewSettingMenu";
@@ -332,12 +332,12 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
             }
         }
     }
-    focusBlock(hasClosestBlock(rowElement) as HTMLElement);
+    focusBlock(getAVHost(rowElement) as HTMLElement);
     updateHeader(rowElement);
 };
 
 export const updateHeader = (rowElement: HTMLElement) => {
-    const blockElement = hasClosestBlock(rowElement);
+    const blockElement = getAVHost(rowElement);
     if (!blockElement) {
         return;
     }

@@ -488,10 +488,13 @@
   }
 
   &__text {
-    margin-left: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    &:not(:first-child) {
+      margin-left: 4px;
+    }
   }
 
   &__graphic {
@@ -523,10 +526,6 @@
 
     &.b3-tooltips svg {
       margin-right: 0;
-    }
-
-    &.popover__block > .protyle-breadcrumb__text {
-      margin-left: 0;
     }
 
     svg {

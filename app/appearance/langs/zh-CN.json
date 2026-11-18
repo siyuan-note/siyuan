@@ -1,6 +1,6 @@
 {
-	"hideDefaultBreadcrumbDocIcons": "隐藏默认文档图标",
-	"hideDefaultBreadcrumbDocIconsTip": "隐藏桌面端全局面包屑中的默认文档图标，悬停在文档项上可预览",
+	"hideGlobalBreadcrumbIcons": "隐藏图标",
+	"hideGlobalBreadcrumbIconsTip": "隐藏桌面端全局面包屑中有文字的路径项图标，仅有图标的项仍会显示",
 	"updateReleaseAnnouncement": "发布公告：${link}",
 	"docOpenPosition": "文档打开位置",
 	"docOpenAtStart": "从文档开头打开",

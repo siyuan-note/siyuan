@@ -1,6 +1,6 @@
 {
-	"hideDefaultBreadcrumbDocIcons": "Masquer les icônes de document par défaut",
-	"hideDefaultBreadcrumbDocIconsTip": "Masque les icônes de document par défaut dans le fil d’Ariane global sur ordinateur. Survolez une entrée pour afficher l’aperçu du document",
+	"hideGlobalBreadcrumbIcons": "Masquer les icônes",
+	"hideGlobalBreadcrumbIconsTip": "Masque les icônes à côté du texte dans le fil d’Ariane global sur ordinateur. Les entrées composées uniquement d’une icône restent visibles",
 	"updateReleaseAnnouncement": "Annonce de la version : ${link}",
 	"docOpenPosition": "Position à l’ouverture du document",
 	"docOpenAtStart": "Ouvrir au début",

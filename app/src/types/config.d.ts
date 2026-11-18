@@ -731,8 +731,8 @@ declare namespace Config {
         embedBlockBreadcrumb: boolean;
         /** 是否将笔记本、文档和块路径合并为一条面包屑，默认关闭 */
         globalBreadcrumb: boolean;
-        /** 隐藏桌面全局面包屑中的默认文档图标，默认关闭。 */
-        hideDefaultBreadcrumbDocIcons: boolean;
+        /** 隐藏桌面全局面包屑中有文字的路径项图标，默认关闭。 */
+        hideGlobalBreadcrumbIcons: boolean;
         embedBlockBreadcrumbParentPath: boolean;
         /**
          * Whether to display automatic heading numbers

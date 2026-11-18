@@ -1,6 +1,6 @@
 {
-	"hideDefaultBreadcrumbDocIcons": "Hide default document icons",
-	"hideDefaultBreadcrumbDocIconsTip": "Hide default document icons in the desktop global breadcrumb. Hover over a document entry to preview it",
+	"hideGlobalBreadcrumbIcons": "Hide icons",
+	"hideGlobalBreadcrumbIconsTip": "Hide icons next to text in the desktop global breadcrumb. Icon-only entries stay visible",
 	"updateReleaseAnnouncement": "Release announcement: ${link}",
 	"docOpenPosition": "Document opening position",
 	"docOpenAtStart": "Open at the beginning",

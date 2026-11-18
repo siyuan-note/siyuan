@@ -76,7 +76,7 @@ export class Breadcrumb {
     private renderedRequestID = 0;
     private menuRequestID = 0;
     private globalBreadcrumb: boolean;
-    private hideDefaultBreadcrumbDocIcons: boolean;
+    private hideGlobalBreadcrumbIcons: boolean;
     private destroyed = false;
     private previousFocusElement: HTMLElement;
     private previousRange: Range;
@@ -1385,9 +1385,9 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         }
         const id = blockElement.getAttribute("data-node-id");
         const global = window.siyuan.config.editor.globalBreadcrumb;
-        const hideDefault = global && window.siyuan.config.editor.hideDefaultBreadcrumbDocIcons === true;
+        const hideIcons = global && window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true;
         if (id === this.id && !update && this.globalBreadcrumb === global &&
-            this.hideDefaultBreadcrumbDocIcons === hideDefault && this.renderedRequestID === this.renderRequestID) {
+            this.hideGlobalBreadcrumbIcons === hideIcons && this.renderedRequestID === this.renderRequestID) {
             protyle.breadcrumb.element.querySelectorAll(".protyle-breadcrumb__item--active").forEach(item => {
                 item.classList.remove("protyle-breadcrumb__item--active");
             });
@@ -1399,7 +1399,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         }
         this.id = id;
         this.globalBreadcrumb = global;
-        this.hideDefaultBreadcrumbDocIcons = hideDefault;
+        this.hideGlobalBreadcrumbIcons = hideIcons;
         const requestID = ++this.renderRequestID;
         const rootID = protyle.block.rootID;
         const notebook = protyle.notebookId;
@@ -1412,7 +1412,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         // 等待当前块的创建事务完成，并丢弃切换文档或选择位置后过期的读取。
         const isCurrent = () => !this.destroyed && requestID === this.renderRequestID && rootID === protyle.block.rootID &&
             notebook === protyle.notebookId && global === window.siyuan.config.editor.globalBreadcrumb &&
-            (!global || ((window.siyuan.config.editor.hideDefaultBreadcrumbDocIcons === true) === hideDefault &&
+            (!global || ((window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true) === hideIcons &&
                 isBreadcrumbNotebookAvailable(notebook))) && blockElement.isConnected;
         await waitForPendingTransactions(protyle);
         if (!isCurrent()) {
@@ -1434,8 +1434,9 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                 }
                 const attributes = item.globalType === "notebook" ? 'data-global-type="notebook"' :
                     `data-node-id="${item.id}"${item.globalType ? ' data-global-type="document"' : ""}`;
-                const customIcon = global && getBreadcrumbCustomIcon(item.icon, "protyle-breadcrumb__graphic");
-                const hideIcon = hideDefault && item.type === "NodeDocument" && !!item.name && !customIcon;
+                const hideIcon = hideIcons && !!item.name?.trim();
+                const previewOnItem = hideIcon && item.globalType !== "notebook";
+                const customIcon = !hideIcon && global && getBreadcrumbCustomIcon(item.icon, "protyle-breadcrumb__graphic");
                 const icon = hideIcon ? "" : customIcon ? (item.globalType === "notebook" ? customIcon :
                     `<span class="popover__block protyle-breadcrumb__graphic" data-id="${item.id}">${customIcon}</span>`) :
                     item.globalType === "notebook" ?
@@ -1446,7 +1447,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
     <svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
 </span>`;
                 } else {
-                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}${hideIcon ? " popover__block" : ""}" ${attributes}${hideIcon ? ` data-id="${item.id}"` : ""} role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || (item.type === "NodeDocument" ? window.siyuan.languages._kernel[16] : window.siyuan.languages.untitled))}"${(paths.length === 1 || index === 0) ? ' style="max-width:none"' : ""}>
+                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}${previewOnItem ? " popover__block" : ""}" ${attributes}${previewOnItem ? ` data-id="${item.id}"` : ""} role="button" tabindex="-1" aria-label="${escapeAriaLabel(item.name || (item.type === "NodeDocument" ? window.siyuan.languages._kernel[16] : window.siyuan.languages.untitled))}"${(paths.length === 1 || index === 0) ? ' style="max-width:none"' : ""}>
     ${icon}
     ${item.name ? `<span class="protyle-breadcrumb__text" title="${escapeAttr(escapeHtml(decodeHTML(item.name)))}">${escapeSearchHighlight(item.name)}</span>` : ""}
 </span>`;

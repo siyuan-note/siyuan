@@ -1,6 +1,6 @@
 {
-	"hideDefaultBreadcrumbDocIcons": "הסתרת סמלי המסמכים המוגדרים כברירת מחדל",
-	"hideDefaultBreadcrumbDocIconsTip": "הסתרת סמלי המסמכים המוגדרים כברירת מחדל בנתיב הניווט הכללי במחשב. יש לרחף מעל פריט מסמך כדי להציג תצוגה מקדימה",
+	"hideGlobalBreadcrumbIcons": "הסתרת סמלים",
+	"hideGlobalBreadcrumbIconsTip": "הסתרת סמלים לצד טקסט בנתיב הניווט הכללי במחשב. פריטים שמוצג בהם רק סמל יישארו גלויים",
 	"updateReleaseAnnouncement": "הכרזת גרסה: ${link}",
 	"docOpenPosition": "מיקום פתיחת המסמך",
 	"docOpenAtStart": "פתיחה מההתחלה",

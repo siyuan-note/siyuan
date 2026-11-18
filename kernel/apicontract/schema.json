@@ -45524,7 +45524,7 @@
             }
           ]
         },
-        "hideDefaultBreadcrumbDocIcons": {
+        "hideGlobalBreadcrumbIcons": {
           "anyOf": [
             {
               "type": "boolean"
@@ -49959,7 +49959,7 @@
         "headingNumberFormat": {
           "type": "string"
         },
-        "hideDefaultBreadcrumbDocIcons": {
+        "hideGlobalBreadcrumbIcons": {
           "type": "boolean"
         },
         "historyRetentionDays": {
@@ -50101,7 +50101,7 @@
         "headingEmbedMode",
         "headingNumber",
         "headingNumberFormat",
-        "hideDefaultBreadcrumbDocIcons",
+        "hideGlobalBreadcrumbIcons",
         "historyRetentionDays",
         "justify",
         "katexMacros",
@@ -50766,7 +50766,7 @@
             }
           ]
         },
-        "hideDefaultBreadcrumbDocIcons": {
+        "hideGlobalBreadcrumbIcons": {
           "anyOf": [
             {
               "type": "boolean"

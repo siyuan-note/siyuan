@@ -1,6 +1,6 @@
 {
-	"hideDefaultBreadcrumbDocIcons": "Сакриј подразумеване иконе докумената",
-	"hideDefaultBreadcrumbDocIconsTip": "Сакрива подразумеване иконе докумената у глобалној путањи за навигацију на рачунару. Задржите показивач изнад ставке документа за преглед",
+	"hideGlobalBreadcrumbIcons": "Сакриј иконе",
+	"hideGlobalBreadcrumbIconsTip": "Сакрива иконе поред текста у глобалној путањи за навигацију на рачунару. Ставке које садрже само икону остају видљиве",
 	"updateReleaseAnnouncement": "Објава издања: ${link}",
 	"docOpenPosition": "Положај отварања документа",
 	"docOpenAtStart": "Отвори од почетка",

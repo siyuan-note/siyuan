@@ -25,18 +25,18 @@ func TestEditorGlobalBreadcrumbDefaults(t *testing.T) {
 	}
 }
 
-func TestEditorDefaultBreadcrumbDocIcons(t *testing.T) {
-	if NewEditor().HideDefaultBreadcrumbDocIcons {
-		t.Fatal("default document icons must be visible")
+func TestEditorGlobalBreadcrumbIcons(t *testing.T) {
+	if NewEditor().HideGlobalBreadcrumbIcons {
+		t.Fatal("global breadcrumb icons must be visible")
 	}
-	for _, input := range []string{`{}`, `{"hideDefaultBreadcrumbDocIcons":null}`, `{"hideDefaultBreadcrumbDocIcons":true}`, `{"hideDefaultBreadcrumbDocIcons":false}`} {
+	for _, input := range []string{`{}`, `{"hideGlobalBreadcrumbIcons":null}`, `{"hideGlobalBreadcrumbIcons":true}`, `{"hideGlobalBreadcrumbIcons":false}`} {
 		var editor Editor
 		if err := json.Unmarshal([]byte(input), &editor); err != nil {
 			t.Fatal(err)
 		}
 		NormalizeEditor(&editor)
-		if editor.HideDefaultBreadcrumbDocIcons != (input == `{"hideDefaultBreadcrumbDocIcons":true}`) {
-			t.Fatalf("unexpected default document icon preference for %s", input)
+		if editor.HideGlobalBreadcrumbIcons != (input == `{"hideGlobalBreadcrumbIcons":true}`) {
+			t.Fatalf("unexpected global breadcrumb icon preference for %s", input)
 		}
 	}
 }

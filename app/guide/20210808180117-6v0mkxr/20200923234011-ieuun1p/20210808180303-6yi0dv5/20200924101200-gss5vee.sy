@@ -300,11 +300,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Hide default document icons"
+					"TextMarkTextContent": "Hide icons"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to hide the default document icons in the path. Hover over a document entry whose icon is hidden to preview it. Custom icons, emoji, and the icons in the expanded menu remain visible."
+					"Data": " to hide the icons next to text. Entries that only have an icon stay visible. Hover over a document or block with a hidden icon to preview it. Expand arrows and menu icons remain visible."
 				}
 			]
 		},

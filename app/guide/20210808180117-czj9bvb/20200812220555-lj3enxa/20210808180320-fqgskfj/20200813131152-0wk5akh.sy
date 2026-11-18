@@ -289,11 +289,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "隐藏默认文档图标"
+					"TextMarkTextContent": "隐藏图标"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。隐藏图标的文档仍可通过悬停在文档项上预览。自定义图标、表情和展开菜单中的图标仍会显示。"
+					"Data": " 隐藏有文字的路径项图标。仅有图标的项仍会显示。图标隐藏后，把鼠标停在文档项或块项上仍可预览。展开箭头和菜单中的图标仍会显示。"
 				}
 			]
 		},

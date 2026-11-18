@@ -82,10 +82,10 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.globalBreadcrumb", {
         title: window.siyuan.languages.globalBreadcrumb,
         desc: window.siyuan.languages.globalBreadcrumbTip,
-        keywords: isMobile() ? [] : [window.siyuan.languages.hideDefaultBreadcrumbDocIcons],
+        keywords: isMobile() ? [] : [window.siyuan.languages.hideGlobalBreadcrumbIcons],
         afterMount: isMobile() ? undefined : (root) => {
             const global = root.querySelector<HTMLInputElement>(`#${CSS.escape("editor.globalBreadcrumb")}`);
-            const row = root.querySelector(`#${CSS.escape("editor.hideDefaultBreadcrumbDocIcons")}`)?.closest(".config-item");
+            const row = root.querySelector(`#${CSS.escape("editor.hideGlobalBreadcrumbIcons")}`)?.closest(".config-item");
             if (global && row) {
                 const toggle = () => { row.classList.toggle("fn__none", !global.checked); };
                 global.addEventListener("change", toggle);
@@ -94,9 +94,9 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         },
     });
     if (!isMobile()) {
-        group.switch("editor.hideDefaultBreadcrumbDocIcons", {
-            title: window.siyuan.languages.hideDefaultBreadcrumbDocIcons,
-            desc: window.siyuan.languages.hideDefaultBreadcrumbDocIconsTip,
+        group.switch("editor.hideGlobalBreadcrumbIcons", {
+            title: window.siyuan.languages.hideGlobalBreadcrumbIcons,
+            desc: window.siyuan.languages.hideGlobalBreadcrumbIconsTip,
         });
     }
     group.number("editor.dynamicLoadBlocks", {

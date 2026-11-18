@@ -34,7 +34,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
     Object.assign(window, {siyuan: {
         notebooks: [{id: notebook, name: "Notebook & <literal>", closed: false}],
         languages: new Proxy({}, {get: (_target, key) => String(key)}), menus: {menu},
-        config: {readonly: false, editor: {globalBreadcrumb: true, hideDefaultBreadcrumbDocIcons: mobile}, keymap: {editor: {general: keys}}},
+        config: {readonly: false, editor: {globalBreadcrumb: true, hideGlobalBreadcrumbIcons: mobile}, keymap: {editor: {general: keys}}},
     }});
     const escape = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
     const escapeExports: any = {};
@@ -224,7 +224,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
 
         const getPathItem = (id: string) => breadcrumb.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement;
         const widthWithIcon = getPathItem(ancestor).getBoundingClientRect().width;
-        window.siyuan.config.editor.hideDefaultBreadcrumbDocIcons = true;
+        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = true;
         await render(false);
         const hiddenItem = getPathItem(ancestor);
         const ancestorText = hiddenItem.querySelector(".protyle-breadcrumb__text") as HTMLElement;
@@ -235,24 +235,35 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         check.equal(getComputedStyle(ancestorText).marginLeft, "0px");
         check.equal(widthWithIcon - hiddenItem.getBoundingClientRect().width, 20);
         check.equal(hiddenItem.nextElementSibling.closest(".popover__block"), null);
-        check.ok(getPathItem(root).querySelector(".protyle-breadcrumb__graphic"));
-        check.ok(getPathItem(leaf).querySelector("svg.popover__block"));
-        check.ok(breadcrumb.element.querySelector('[data-global-type="notebook"] .protyle-breadcrumb__graphic'));
+        check.ok(getPathItem(root).matches(".popover__block"));
+        check.equal(getPathItem(root).querySelector(".protyle-breadcrumb__graphic"), null, "Custom emoji is hidden with a title");
+        check.ok(getPathItem(leaf).matches(".popover__block"), "Named blocks also hide their icons");
+        check.equal(getPathItem(leaf).querySelector("svg"), null);
+        const notebookItem = breadcrumb.element.querySelector('[data-global-type="notebook"]') as HTMLElement;
+        check.equal(notebookItem.querySelector("svg, .protyle-breadcrumb__graphic"), null);
+        check.equal(notebookItem.closest(".popover__block"), null);
+        check.equal(notebookItem.querySelector(".protyle-breadcrumb__text").textContent, "Notebook & <literal>");
         ancestorText.click();
         check.deepEqual(opened, [ancestor, ancestor]);
-        Object.assign(pathItems[1], {icon: "d800"});
-        Object.assign(pathItems[2], {icon: ""});
+        Object.assign(pathItems[1], {icon: "custom.png"});
+        Object.assign(pathItems[3], {name: ""});
         await render();
-        check.ok(getPathItem(ancestor).matches(".popover__block"));
-        check.ok(getPathItem(root).matches(".popover__block"));
+        check.equal(getPathItem(ancestor).querySelector("img"), null, "A named document hides its custom image");
+        const iconOnlyBlock = getPathItem(leaf);
+        check.equal(iconOnlyBlock.closest(".popover__block"), null);
+        check.equal(iconOnlyBlock.querySelector(".protyle-breadcrumb__text"), null);
+        const blockIcon = iconOnlyBlock.querySelector("svg.popover__block");
+        check.equal(blockIcon.getAttribute("data-id"), leaf);
+        blockIcon.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+        check.deepEqual(opened, [ancestor, ancestor, leaf]);
         window.siyuan.config.editor.globalBreadcrumb = false;
         await render(false);
         check.ok(getPathItem(root).querySelector("svg.popover__block"));
         window.siyuan.config.editor.globalBreadcrumb = true;
-        window.siyuan.config.editor.hideDefaultBreadcrumbDocIcons = false;
+        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = false;
         await render(false);
-        check.ok(getPathItem(ancestor).querySelector("svg.popover__block"));
-        check.ok(getPathItem(root).querySelector("svg.popover__block"));
+        check.ok(getPathItem(ancestor).querySelector(".popover__block img"));
+        check.ok(getPathItem(root).querySelector(".popover__block .protyle-breadcrumb__graphic"));
         globalResult = async () => [pathItems[0], ...Array.from({length: 12}, (_, index) => ({
             ...pathItems[1], id: `${ancestor}-${index}`, name: escape(`Long parent ${index} / 日本語 & literal title`),
         })), ...pathItems.slice(2)];
@@ -271,14 +282,14 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
             globalResult = () => new Promise(resolve => { release = resolve; });
             await breadcrumb.render(protyle, true, wysiwyg.firstElementChild);
             if (change === "disable") window.siyuan.config.editor.globalBreadcrumb = false;
-            else if (change === "icon preference") window.siyuan.config.editor.hideDefaultBreadcrumbDocIcons = true;
+            else if (change === "icon preference") window.siyuan.config.editor.hideGlobalBreadcrumbIcons = true;
             else if (change === "navigate") protyle.block.rootID = ancestor;
             else breadcrumb.destroy();
             release(pathItems);
             await callbackWork;
             check.equal(breadcrumb.element.innerHTML, existing, `Late global results are ignored after ${change}`);
             window.siyuan.config.editor.globalBreadcrumb = true;
-            window.siyuan.config.editor.hideDefaultBreadcrumbDocIcons = false;
+            window.siyuan.config.editor.hideGlobalBreadcrumbIcons = false;
             protyle.block.rootID = root;
         }
     }

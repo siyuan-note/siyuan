@@ -266,11 +266,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "隱藏預設文件圖示"
+					"TextMarkTextContent": "隱藏圖示"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。隱藏圖示的文件仍可將游標停在文件項目上預覽。自訂圖示、表情符號和展開選單中的圖示仍會顯示。"
+					"Data": " 隱藏有文字的項目圖示。只有圖示的項目仍會顯示。隱藏圖示後，將游標停在文件或區塊項目上仍可預覽。展開箭頭與選單中的圖示仍會顯示。"
 				}
 			]
 		},

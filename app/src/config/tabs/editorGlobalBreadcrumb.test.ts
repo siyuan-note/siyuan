@@ -34,13 +34,13 @@ for (const mobile of [false, true]) {
         assert.equal(row.options.save, undefined);
         const iconsRow = rows[rows.indexOf(row) + 1];
         if (mobile) {
-            assert.equal(rows.some(item => item.id === "editor.hideDefaultBreadcrumbDocIcons"), false);
+            assert.equal(rows.some(item => item.id === "editor.hideGlobalBreadcrumbIcons"), false);
             return;
         }
-        assert.equal(iconsRow.id, "editor.hideDefaultBreadcrumbDocIcons");
+        assert.equal(iconsRow.id, "editor.hideGlobalBreadcrumbIcons");
         assert.equal(iconsRow.kind, "switch");
         assert.equal(iconsRow.options.save, undefined);
-        assert.equal(row.options.keywords?.includes("hideDefaultBreadcrumbDocIcons"), true);
+        assert.equal(row.options.keywords?.includes("hideGlobalBreadcrumbIcons"), true);
 
         const globalSwitch = new EventTarget() as EventTarget & {checked: boolean};
         globalSwitch.checked = false;
@@ -61,7 +61,7 @@ for (const mobile of [false, true]) {
 test("global breadcrumb changes invalidate existing editor paths immediately", () => {
     const source = readFileSync("src/config/tabs/editorRuntime.ts", "utf8");
     assert.match(source, /old\.globalBreadcrumb !== next\.globalBreadcrumb \|\|/);
-    assert.match(source, /next\.globalBreadcrumb && old\.hideDefaultBreadcrumbDocIcons !== next\.hideDefaultBreadcrumbDocIcons\)\) \{\s*protyle\.breadcrumb\?\.render\(protyle, true\)/);
+    assert.match(source, /next\.globalBreadcrumb && old\.hideGlobalBreadcrumbIcons !== next\.hideGlobalBreadcrumbIcons\)\) \{\s*protyle\.breadcrumb\?\.render\(protyle, true\)/);
     const protyle = readFileSync("src/protyle/index.ts", "utf8");
     for (const command of ["renamenotebook", "rename", "moveDoc"]) {
         const handler = protyle.split(`case "${command}":`)[1].split(/\n\s*case /)[0];

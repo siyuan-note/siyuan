@@ -1,6 +1,6 @@
 {
-	"hideDefaultBreadcrumbDocIcons": "Nascondi le icone predefinite dei documenti",
-	"hideDefaultBreadcrumbDocIconsTip": "Nasconde le icone predefinite dei documenti nel percorso di navigazione globale su desktop. Passa il puntatore su una voce per visualizzare l’anteprima del documento",
+	"hideGlobalBreadcrumbIcons": "Nascondi le icone",
+	"hideGlobalBreadcrumbIconsTip": "Nasconde le icone accanto al testo nel percorso di navigazione globale su desktop. Le voci con la sola icona restano visibili",
 	"updateReleaseAnnouncement": "Annuncio della versione: ${link}",
 	"docOpenPosition": "Posizione di apertura del documento",
 	"docOpenAtStart": "Apri dall’inizio",

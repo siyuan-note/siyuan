@@ -1,6 +1,6 @@
 {
-	"hideDefaultBreadcrumbDocIcons": "Ocultar los iconos predeterminados de los documentos",
-	"hideDefaultBreadcrumbDocIconsTip": "Oculta los iconos predeterminados de los documentos en la ruta de navegación global del escritorio. Pasa el puntero sobre una entrada para previsualizar el documento",
+	"hideGlobalBreadcrumbIcons": "Ocultar iconos",
+	"hideGlobalBreadcrumbIconsTip": "Oculta los iconos junto al texto en la ruta de navegación global del escritorio. Las entradas que solo tienen un icono siguen visibles",
 	"updateReleaseAnnouncement": "Anuncio de la versión: ${link}",
 	"docOpenPosition": "Posición al abrir el documento",
 	"docOpenAtStart": "Abrir desde el principio",

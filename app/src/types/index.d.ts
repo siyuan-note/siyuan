@@ -566,6 +566,19 @@ interface INotebook {
     state?: "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error";
 }
 
+/**
+ * 语言包：普通顶层键为字符串；`_kernel` 等分组按二级键再索引。
+ * 分组声明为可选，使只含字符串键的局部语言包也能赋值。
+ */
+type ILanguages = {[key: string]: string} & {
+    replaceTypes?: {[key: string]: string};
+    _time?: {[key: string]: string};
+    _taskAction?: {[key: string]: string};
+    _trayMenu?: {[key: string]: string};
+    _attrView?: {[key: string]: string};
+    _kernel?: {[key: number]: string};
+};
+
 interface ISiyuan {
     /** 当前内核的只读文档标题能力，普通构建默认为 2，不持久化为用户设置。 */
     zIndex: number
@@ -678,9 +691,7 @@ interface ISiyuan {
         screenY: number,
     },
     menus?: import("../menus").Menus
-    languages?: {
-        [key: string]: any;
-    }
+    languages?: ILanguages
     bookmarkLabel?: string[]
     blockPanels: import("../block/Panel").BlockPanel[],
     dialogs: import("../dialog").Dialog[],

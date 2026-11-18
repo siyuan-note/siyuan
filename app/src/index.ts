@@ -364,12 +364,12 @@ export class App {
             setStartupStage("storage");
             getLocalStorage(guardStartup<void>(() => {
                 setStartupStage("language");
-                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, guardStartup<IObject>((languages) => {
+                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, guardStartup((languages) => {
                     setStartupStage("interface");
                     window.siyuan.languages = languages;
                     void initializeEnglishCommandTranslations(
                         window.siyuan.config.appearance.lang,
-                        languages as Record<string, string>,
+                        languages,
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);

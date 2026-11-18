@@ -926,7 +926,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
             // 切到 OFF：没有加密笔记本时允许关闭
             fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
                 if (response.data.count > 0) {
-                    showMessage(window.siyuan.languages.encryptedNotebookDisableTip.replace("${x}", response.data.count), 4000);
+                    showMessage(window.siyuan.languages.encryptedNotebookDisableTip.replace("${x}", String(response.data.count)), 4000);
                     switchElement.checked = true;
                 } else if (response.data.hasHistoryDependency) {
                     // 已删除加密笔记本的历史仍依赖当前密钥备份，禁用会让其永久锁死（详见设计 §19）

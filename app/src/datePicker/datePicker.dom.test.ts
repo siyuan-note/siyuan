@@ -216,7 +216,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     mobileBinding.destroy(); mobileInput.remove(); sidebar.remove();
     const badInput = api.openInternalDatePicker({ownerElement: owner, type: "date", value: "", initialBadInput: true});
     ok(current().querySelector<HTMLButtonElement>('[data-action="confirm"]').disabled);
-    const clearButton = current().querySelector<HTMLButtonElement>(`[data-action="clear"]`);
+    const clearButton = current().querySelector<HTMLButtonElement>("[data-action=\"clear\"]");
     clearButton.click();
     equal(document.activeElement, clearButton, "clearing keeps focus off text fields");
     confirm(current()); equal(await badInput.result, {type: "confirm", value: "", changed: false}); await tick();

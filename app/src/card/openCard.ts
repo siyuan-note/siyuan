@@ -978,7 +978,7 @@ const newRound = (countElement: Element, editor: Protyle, actionElements: NodeLi
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
     emptyElement.innerHTML = `<div class="card__empty-icon">♻️ </div>
-<span>${window.siyuan.languages.continueReview2.replace("${count}", unreviewedCount)}</span>
+<span>${window.siyuan.languages.continueReview2.replace("${count}", String(unreviewedCount))}</span>
 <div class="fn__hr"></div>
 <button data-type="newround" class="b3-button fn__size200">${window.siyuan.languages.continueReview1}</button>`;
     emptyElement.classList.remove("fn__none");

@@ -1051,7 +1051,7 @@ const getUnRefListMobile = (element: Element, page = 1) => {
 <span class="b3-list-item__text b3-list-item__meta">${title}</span>
 </div>`;
         });
-        element.querySelector("#searchUnRefResult").innerHTML = `<span class="fn__flex-center">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>
+        element.querySelector("#searchUnRefResult").innerHTML = `<span class="fn__flex-center">${window.siyuan.languages.findInDoc.replace("${x}", String(response.data.matchedRootCount)).replace("${y}", String(response.data.matchedBlockCount))}</span>
 <span class="fn__flex-1"></span>
 <span class="fn__flex-center">${page}/${response.data.pageCount || 1}</span>`;
         element.querySelector("#searchUnRefList").innerHTML = resultHTML || `<div class="search__empty">

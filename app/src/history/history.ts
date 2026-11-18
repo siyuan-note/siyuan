@@ -224,7 +224,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         }
         pageBtn.setAttribute("data-totalpage", (response.data.pageCount || 1).toString());
         const pageElement = nextElement.nextElementSibling.nextElementSibling;
-        pageElement.textContent = `${window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 0)}`;
+        pageElement.textContent = `${window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", String(response.data.pageCount)).replace("${y}", String(response.data.totalCount || 0))}`;
         pageElement.classList.remove("fn__none");
         const histories = response.data.histories || [];
         if (histories.length === 0) {
@@ -1139,14 +1139,14 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
 
                 if (totalPage > 1) {
                     mobileInputDialog({
-                        title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                        title: window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)),
                         value: String(currentPage),
                         type: "number",
                         min: "1",
                         max: String(totalPage),
                         onConfirm: (value, dialog) => {
                             if (!Number.isFinite(parseInt(value))) {
-                                showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
+                                showMessage(window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)));
                                 return;
                             }
                             let page = parseInt(value);
@@ -1162,14 +1162,14 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
 
                 if (totalPage > 1) {
                     mobileInputDialog({
-                        title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                        title: window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)),
                         value: String(currentPage),
                         type: "number",
                         min: "1",
                         max: String(totalPage),
                         onConfirm: (value, dialog) => {
                             if (!Number.isFinite(parseInt(value))) {
-                                showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
+                                showMessage(window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)));
                                 return;
                             }
                             let page = parseInt(value);

@@ -206,7 +206,7 @@ export const commandPanel = (app: App, options: {
     });
     void initializeEnglishCommandTranslations(
         window.siyuan.config.appearance.lang,
-        window.siyuan.languages as Record<string, string>,
+        window.siyuan.languages,
         Constants.SIYUAN_VERSION,
     ).then(() => {
         if (dialog.element.isConnected) {

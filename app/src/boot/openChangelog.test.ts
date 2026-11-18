@@ -20,7 +20,7 @@ test("release changelogs always pass through a static HTML and HTTP resource pol
     const exports = {} as typeof import("./openChangelog");
     runInNewContext(compile("src/boot/openChangelog.ts"), {exports, require: (name: string) => ({
         "../util/fetch": {fetchSyncPost: async () => ({code: 0, data: {show: true, html: "<script>unsafe</script>", version: "3.8.10-alpha.5"}})},
-        "../dialog/mobileDialog": {MobileDialog: class {
+        "../dialog/adaptiveDialog": {AdaptiveDialog: class {
             element = {setAttribute() {}, querySelector: () => content};
         }},
         "../protyle/render/highlightRender": {highlightRender: () => { rendered = content.innerHTML; }},
@@ -94,7 +94,7 @@ const setup = (shortTimeout = false) => {
             assert.equal(process, false);
             return new Promise((resolve, reject) => requests.push({resolve, reject, force: data.force, signal}));
         }},
-        "../dialog/mobileDialog": {MobileDialog: class {
+        "../dialog/adaptiveDialog": {AdaptiveDialog: class {
             content = new FakeElement();
             element = {setAttribute() {}, querySelector: () => this.content};
             constructor(public options: {title: string; width: string}) { dialogs.push(this); }
@@ -268,7 +268,7 @@ const browserCases = async (source: string, timeoutSource: string) => {
             check(url === "/api/system/getChangelog" && process === false, "explicit API result handling");
             return new Promise((resolve, reject) => requests.push({resolve, reject, force: data.force, signal}));
         }},
-        "../dialog/mobileDialog": {MobileDialog: class {
+        "../dialog/adaptiveDialog": {AdaptiveDialog: class {
             element = document.createElement("div");
             constructor(public options: {content: string; width: string; title: string}) {
                 this.element.innerHTML = options.content;

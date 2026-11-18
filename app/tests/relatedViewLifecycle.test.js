@@ -59,7 +59,7 @@ const cases = async compiled => {
         "../../../util/documentSelectionRequest": {fetchWithDocumentSelection: callback => callback()},
         "../../../util/escape": {escapeHtmlTextAndAttr: value => String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;")},
         "../../wysiwyg/transaction": {transaction: (_editor, forward, undo) => operations.push({forward, undo})},
-        "../../../dialog/mobileDialog": {MobileDialog: class {
+        "../../../dialog/adaptiveDialog": {AdaptiveDialog: class {
             constructor(options) { this.options = options; this.element = document.createElement("div");
                 this.element.className = "fixture-dialog"; this.element.innerHTML = options.content; document.body.append(this.element); }
             destroy() { this.element.remove(); this.options.destroyCallback(); }

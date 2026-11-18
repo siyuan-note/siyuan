@@ -28,7 +28,7 @@ const rendererModules = (sources) => {
         "../util/functions": {isMobile: () => false}, "../protyle/util/compatibility": {isNotCtrl: () => true},
         "../constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
     });
-    const {MobileDialog} = loadRendererModule(sources.mobileDialog, {
+    const {AdaptiveDialog} = loadRendererModule(sources.adaptiveDialog, {
         "./index": {Dialog}, "../util/functions": {isMobile: () => false},
         "../mobile/util/bindBottomSheetDialog": {}, "../constants": {Constants: {}},
         "../mobile/util/mobileAppUtil": {}, "../mobile/util/visibleViewport": {},
@@ -55,13 +55,13 @@ const rendererModules = (sources) => {
     const titles = loadRendererModule(sources.titles, {
         "./escape": {}, "../constants": {Constants: {}}, "./pathName": {pathPosix: () => require("node:path").posix},
     });
-    return {Dialog, MobileDialog, genUUID, context, fit, controls, frontend, titles};
+    return {Dialog, AdaptiveDialog, genUUID, context, fit, controls, frontend, titles};
 };
 
 const bootChild = async (sources) => {
     const {ipcRenderer} = require("electron");
     const {waitForWindowPaint} = loadRendererModule(sources.paint, {});
-    const {Dialog, MobileDialog, genUUID, context, fit, frontend, titles} = rendererModules(sources);
+    const {Dialog, AdaptiveDialog, genUUID, context, fit, frontend, titles} = rendererModules(sources);
     require("node:assert/strict").equal(navigator.userAgent.startsWith("SiYuan/"), false);
     require("node:assert/strict").equal(frontend.getFrontend(), "desktop", navigator.userAgent);
     const host = await new Promise(resolve => {
@@ -106,7 +106,7 @@ const bootChild = async (sources) => {
         document.title = host.title;
         if (host.plugin) {
             const {Setting} = loadRendererModule(sources.setting, {
-                "../dialog/mobileDialog": {MobileDialog},
+                "../dialog/adaptiveDialog": {AdaptiveDialog},
                 "../util/functions": {isMobile: () => false, getFrontend: frontend.getFrontend},
                 "../dialog": {Dialog}, "../config/setting/nativeWindow": {},
                 "../config/setting/windowContext": context, "../config/setting/windowDialog": fit,
@@ -186,7 +186,7 @@ const bootChild = async (sources) => {
     check.ok(pluginEvents.includes("before-hide-tooltip"));
     button.remove();
     const {Setting: NestedSetting} = loadRendererModule(sources.setting, {
-        "../dialog/mobileDialog": {MobileDialog},
+        "../dialog/adaptiveDialog": {AdaptiveDialog},
         "../util/functions": {isMobile: () => false, getFrontend: frontend.getFrontend}, "../dialog": {Dialog},
         "../config/setting/nativeWindow": {}, "../config/setting/windowContext": context,
         "../config/setting/windowDialog": fit, "../util/genID": {genUUID},
@@ -205,7 +205,7 @@ const bootChild = async (sources) => {
 const runCases = async (sources) => {
     const assert = require("node:assert/strict");
     const {ipcRenderer} = require("electron");
-    const {Dialog, MobileDialog, genUUID, context, fit, titles} = rendererModules(sources);
+    const {Dialog, AdaptiveDialog, genUUID, context, fit, titles} = rendererModules(sources);
     window.settingsPaths = [];
     const bazaarPath = loadRendererModule(sources.bazaarPath, {
         path: require("node:path"), "../../util/pathName": {useShell: (...args) => window.settingsPaths.push(args)},
@@ -243,7 +243,7 @@ const runCases = async (sources) => {
         }},
     });
     const {Setting} = loadRendererModule(sources.setting, {
-        "../dialog/mobileDialog": {MobileDialog},
+        "../dialog/adaptiveDialog": {AdaptiveDialog},
         "../util/functions": {isMobile: () => false, getFrontend: () => "desktop"}, "../dialog": {Dialog},
         "../config/setting/nativeWindow": native, "../config/setting/windowContext": context,
         "../config/setting/windowDialog": fit, "../util/genID": {genUUID},
@@ -568,7 +568,7 @@ if (process.versions.electron && process.type === "browser") {
         const themes = Object.fromEntries(["daylight", "midnight"].map(name => [name,
             fs.readFileSync(path.join(__dirname, "../appearance/themes", name, "theme.css"), "utf8") +
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
-        for (const [key, file] of Object.entries({dialog: "dialog/index.ts", mobileDialog: "dialog/mobileDialog.ts", setting: "plugin/Setting.ts",
+        for (const [key, file] of Object.entries({dialog: "dialog/index.ts", adaptiveDialog: "dialog/adaptiveDialog.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
             breadcrumbRegistry: "plugin/breadcrumbButtonRegistry.ts",
             overlay: "boot/windowControlsOverlay.ts", color: "util/color.ts",

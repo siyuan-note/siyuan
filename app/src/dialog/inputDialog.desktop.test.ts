@@ -65,14 +65,14 @@ const setup = () => {
     };
     const functions = {isMobile: () => false};
     const constants = {Constants: {ATTRIBUTE_EDITING: "data-editing"}};
-    const adapter = load("src/dialog/mobileDialog.ts", {
+    const adapter = load("src/dialog/adaptiveDialog.ts", {
         "./index": {Dialog: BaseDialog}, "../util/functions": functions,
         "../mobile/util/bindBottomSheetDialog": {bindBottomSheetDialog: () => sheetBindings++},
         "../constants": constants, "../mobile/util/mobileAppUtil": {}, "../mobile/util/visibleViewport": {},
         "../protyle/util/compatibility": {}, "./message": {showMessage: (message: string) => errors.push(message)},
     });
     const input = load("src/dialog/inputDialog.ts", {
-        "./mobileDialog": adapter, "./index": {Dialog: BaseDialog}, "../util/functions": functions,
+        "./adaptiveDialog": adapter, "./index": {Dialog: BaseDialog}, "../util/functions": functions,
         "../util/escape": {escapeHtml: (value: string) => value},
     });
     const transactions: unknown[] = [];

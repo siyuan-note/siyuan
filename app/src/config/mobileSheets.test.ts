@@ -21,7 +21,7 @@ test("settings and sync route every confirmation through the shared adapter", ()
                 if (name === "Dialog") {
                     original.push(`${relative("src", file).replaceAll("\\", "/")}:${name}`);
                 }
-                if (["MobileDialog", "openInputDialog", "confirmDialog"].includes(name)) adapters++;
+                if (["AdaptiveDialog", "openInputDialog", "confirmDialog"].includes(name)) adapters++;
             }
             forEachChild(node, visit);
         };
@@ -52,7 +52,7 @@ test("complex settings forms use shared drawers without forcing expanded height"
         "tabs/ai/aiInstructions.ts", "tabs/secretsVariablesUi.ts", "tabs/syncUi.ts",
         "tabs/appearanceTab.ts", "notebookArchive.ts", "encryptedAssets.ts"]) {
         const source = readFileSync(`src/config/${file}`, "utf8");
-        assert.match(source, /new MobileDialog\(|openInputDialog\(/, file);
+        assert.match(source, /new AdaptiveDialog\(|openInputDialog\(/, file);
         assert.doesNotMatch(source, /expandable:/, file);
         assert.doesNotMatch(source, /mode: "expanded"/, file);
     }

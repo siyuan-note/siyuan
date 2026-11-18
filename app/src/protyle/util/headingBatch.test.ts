@@ -43,7 +43,7 @@ const fixture = async () => {
         }
     }
     const data = {title: "Fixture", counts: [2, 1, 0, 0, 0, 0], withSubheadingCounts: [3, 1, 0, 0, 0, 0]};
-    const dependencies = {MobileDialog: Dialog, isMobile: () => true, escapeHtml: (value: string) => value,
+    const dependencies = {AdaptiveDialog: Dialog, isMobile: () => true, escapeHtml: (value: string) => value,
         fetchPost: (_url: string, _body: unknown, callback: (response: unknown) => void) => callback({data}),
         fetchSyncPost: async () => ({code: previewCode, data: {...data, transaction:
             {doOperations: hasOperations ? [{action: "update", id: "heading"}] : [], undoOperations: [] as IOperation[]}}}),

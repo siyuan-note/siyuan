@@ -74,7 +74,7 @@ for (const kind of ["secret", "variable"]) {
                 escapeHtmlTextAndAttr: (value: string) => value,
                 bindPasswordIconaToggle: () => {},
                 secretsConfigApi: {patch}, variablesConfigApi: {patch},
-                MobileDialog: class {
+                AdaptiveDialog: class {
                     element = {setAttribute() {}, querySelector: (selector: string) => values[selector.slice(1) as keyof typeof values],
                         querySelectorAll: () => buttons};
                     focusWhenReady() { focusScheduled = true; }

@@ -35,14 +35,14 @@ test("mobile business dialogs explicitly opt in, including nested and failure en
         const visit = (node: import("typescript").Node) => {
             if (isCallExpression(node) || isNewExpression(node)) {
                 const name = node.expression.getText(source);
-                if (["Dialog", "MobileDialog", "openInputDialog", "confirmDialog"].includes(name)) {
+                if (["Dialog", "AdaptiveDialog", "openInputDialog", "confirmDialog"].includes(name)) {
                     const options = node.arguments[0];
                     if (name === "Dialog" && file === "menus/commonMenuItem.ts" &&
                         options.getText(source).includes("mobile-attributes-sheet")) {
                         // 属性编辑器保留原有关闭回调，使用独立的抽屉绑定入口。
                     } else {
                         const moduleName = name === "confirmDialog" ? "confirmDialog" :
-                            name === "openInputDialog" ? "openInputDialog" : "mobileDialog";
+                            name === "openInputDialog" ? "openInputDialog" : "adaptiveDialog";
                         assert.ok(source.text.includes(moduleName), `${file}: ${name}`);
                         found++;
                     }

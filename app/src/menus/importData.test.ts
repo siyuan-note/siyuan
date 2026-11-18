@@ -67,7 +67,7 @@ const setup = (encrypted = ["box"], conflicts = ["box"], commitWait = Promise.re
         needsDataImportPassword: (plan: {encrypted: string[], conflicts: string[]}, mode: string) => boolean;
     };
     const dependencies = {
-        MobileDialog: MockDialog,
+        AdaptiveDialog: MockDialog,
         ContractFormData: class {},
         escapeHtml: (value: string) => value.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
         isMobile: () => true,

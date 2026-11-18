@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -261,7 +261,7 @@ export const openDocHistory = (options: {
         </div>
     </div>
 </div>`;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {mode: "expanded"},
         title: escapeHtml(options.pathString),
         content: contentHTML,

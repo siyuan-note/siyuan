@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Dialog} from "../dialog";
 import {Protyle} from "../protyle";
@@ -439,7 +439,7 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
         expanded: new Set(),
     };
 
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {mode: "expanded"},
         title: window.siyuan.languages.compare,
         content: "",

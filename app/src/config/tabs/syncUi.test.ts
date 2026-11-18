@@ -92,8 +92,8 @@ const setup = (provider = 2, mobile = false, manualRules = false) => {
         document: {querySelector: () => ({closest: (selector: string) =>
             selector.split(", ").includes(mobile ? ".config" : ".config__tab-container") ? replacement : null})},
         require(name: string) {
-            if (name === "../../dialog/mobileDialog") {
-                return {MobileDialog: class {
+            if (name === "../../dialog/adaptiveDialog") {
+                return {AdaptiveDialog: class {
                     element = element;
                     constructor(options: any) {dialog = {destroy: () => this.destroy()}; dialogOptions = options;}
                     destroy() {closed++; dialogOptions.destroyCallback();}

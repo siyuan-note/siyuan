@@ -56,7 +56,7 @@ const createImportDialog = () => {
             fetchSyncPost: (url: string, data: {apiRequest: Record<string, unknown>}, _headers: unknown, process: boolean) =>
                 new Promise<{code: number, msg?: string}>((resolve, reject) =>
                     requests.push({url, process, body: data.apiRequest, resolve, reject})),
-            MobileDialog: class {
+            AdaptiveDialog: class {
                 public element = element;
                 constructor(value: typeof options) { options = value; }
                 async runPending(task: () => Promise<boolean>) {

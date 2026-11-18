@@ -74,7 +74,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
             getAVHostBlockID: (element: typeof node) => element.dataset.nodeId},
         "./cellEditor": {AV_CELL_EDITOR_CLOSE_EVENT: "siyuan-av-cell-editor-close"},
         "../../../dialog/message": {showMessage: () => lifecycle.push("save-error")},
-        "../../../dialog/mobileDialog": {MobileDialog: class {
+        "../../../dialog/adaptiveDialog": {AdaptiveDialog: class {
             element: unknown;
             private closed = false;
             private pending = false;

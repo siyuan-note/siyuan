@@ -1,5 +1,5 @@
 import {Dialog} from "./index";
-import {MobileDialog, MobileSheetOptions} from "./mobileDialog";
+import {AdaptiveDialog, MobileSheetOptions} from "./adaptiveDialog";
 import {isMobile} from "../util/functions";
 import {escapeHtml} from "../util/escape";
 
@@ -29,15 +29,15 @@ export interface IInputDialogOptions {
         text: string,
         position?: "beforeCancel" | "beforeConfirm" | "afterConfirm",
         danger?: boolean,
-        onClick: (value: string, dialog: MobileDialog) => void,
+        onClick: (value: string, dialog: AdaptiveDialog) => void,
     }[],
     // 自动补全等入口可自行处理输入框键盘事件。
     bindInput?: boolean,
-    onConfirm: (value: string, dialog: MobileDialog) => void | boolean | Promise<void | boolean>,
+    onConfirm: (value: string, dialog: AdaptiveDialog) => void | boolean | Promise<void | boolean>,
     destroyCallback?: (options?: IObject) => void,
 }
 
-// 桌面实现由插件与内部共用：不传构造器时使用基础 Dialog（插件路径），内部桌面端传入 MobileDialog
+// 桌面实现由插件与内部共用：不传构造器时使用基础 Dialog（插件路径），内部桌面端传入 AdaptiveDialog
 // 以获得 runPending / invalidate。
 export const createDesktopInputDialog = (options: IInputDialogOptions,
                                          DialogConstructor: new(options: ConstructorParameters<typeof Dialog>[0]) => Dialog = Dialog): Dialog => {
@@ -94,7 +94,7 @@ export const createDesktopInputDialog = (options: IInputDialogOptions,
     confirmElement.addEventListener("click", () => {
         // 提交时将焦点交回输入框，校验未通过时可直接继续输入。
         inputElement.focus();
-        const result = options.onConfirm(inputElement.value, dialog as MobileDialog);
+        const result = options.onConfirm(inputElement.value, dialog as AdaptiveDialog);
         // 未要求等待时关闭时机仍由调用方决定。
         if (!options.awaitConfirm) {
             return;
@@ -108,7 +108,7 @@ export const createDesktopInputDialog = (options: IInputDialogOptions,
     dialog.element.querySelectorAll<HTMLButtonElement>("[data-input-action]").forEach(button => {
         button.addEventListener("click", () => {
             inputElement.focus();
-            options.actions[Number(button.dataset.inputAction)].onClick(inputElement.value, dialog as MobileDialog);
+            options.actions[Number(button.dataset.inputAction)].onClick(inputElement.value, dialog as AdaptiveDialog);
         });
     });
     if (options.bindInput !== false) {
@@ -138,7 +138,7 @@ const createSheetInputDialog = (options: IInputDialogOptions): Dialog => {
         `<button class="b3-button b3-button--touch b3-button--wrap" data-input-confirm>${escapeHtml(options.confirmText || window.siyuan.languages.confirm)}</button>`,
         actionsHTML("afterConfirm"),
     ].filter(Boolean).join("");
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: options.title,
         mobileSheet: options.mobileSheet,
         positionId: options.positionId,
@@ -201,4 +201,4 @@ const createSheetInputDialog = (options: IInputDialogOptions): Dialog => {
 
 // 内部统一入口：移动端使用底部 sheet，桌面端保留提交生命周期。
 export const openInputDialog = (options: IInputDialogOptions): Dialog =>
-    isMobile() ? createSheetInputDialog(options) : createDesktopInputDialog(options, MobileDialog);
+    isMobile() ? createSheetInputDialog(options) : createDesktopInputDialog(options, AdaptiveDialog);

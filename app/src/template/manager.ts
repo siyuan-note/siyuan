@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {createTemplateHTTPPermissionIndicator, templateHTTPPermission, templateHTTPPermissionLabel} from "./httpPermission";
 import {toggleMenu} from "../menus/menuToggle";
 import {Dialog} from "../dialog";
@@ -433,7 +433,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
         input.addEventListener("input", () => input.setCustomValidity(""));
     };
     const move = ({entry, revision}: TemplateActionTarget) => {
-        const prompt = new MobileDialog({
+        const prompt = new AdaptiveDialog({
             title: lang.move,
             width: "min(520px, 92vw)",
             content: `<div class="b3-dialog__content"><label>${lang.savePath}<div class="fn__hr"></div><select class="b3-select fn__block"></select></label></div>

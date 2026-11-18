@@ -31,8 +31,8 @@ test("mobile back saves floating image titles before navigating or closing their
         };
         const api = {} as typeof import("./MobileBackFoward");
         runInNewContext(source, {
-            exports: api, require: (name: string) => name === "../../dialog/mobileDialog" ? {
-                requestMobileDialogClose: (dialog: {destroy: () => void}, reason: string) => {
+            exports: api, require: (name: string) => name === "../../dialog/adaptiveDialog" ? {
+                requestDialogClose: (dialog: {destroy: () => void}, reason: string) => {
                     assert.equal(reason, "back");
                     dialog.destroy();
                 },
@@ -79,8 +79,8 @@ test("mobile back saves the database text editor before leaving its owner", () =
         };
         const api = {} as typeof import("./MobileBackFoward");
         runInNewContext(source, {
-            exports: api, require: (name: string) => name === "../../dialog/mobileDialog" ? {
-                requestMobileDialogClose: (dialog: {destroy: () => void}, reason: string) => {
+            exports: api, require: (name: string) => name === "../../dialog/adaptiveDialog" ? {
+                requestDialogClose: (dialog: {destroy: () => void}, reason: string) => {
                     assert.equal(reason, "back");
                     dialog.destroy();
                 },
@@ -116,8 +116,8 @@ test("mobile back closes a select menu before its containing menu or dialog", ()
         "../../dialog/anchoredInput": {getAnchoredInputMask: (): undefined => undefined},
     };
     runInNewContext(source, {
-        exports: api, require: (name: string) => name === "../../dialog/mobileDialog" ? {
-                requestMobileDialogClose: (dialog: {destroy: () => void}, reason: string) => {
+        exports: api, require: (name: string) => name === "../../dialog/adaptiveDialog" ? {
+                requestDialogClose: (dialog: {destroy: () => void}, reason: string) => {
                     assert.equal(reason, "back");
                     dialog.destroy();
                 },
@@ -147,7 +147,7 @@ test("mobile back closes a child dialog before an underlying fullscreen menu", (
         window: {siyuan: {menus: {menu: {element: menu}}, dialogs: [dialog]}},
         require: () => ({getCurrentEditor: (): undefined => undefined,
             getAnchoredInputMask: (): undefined => undefined, getMobileSelectMenuElement: (): undefined => undefined,
-            isAbove, requestMobileDialogClose: (target: unknown, reason: string) => {
+            isAbove, requestDialogClose: (target: unknown, reason: string) => {
                 assert.equal(target, dialog); assert.equal(reason, "back"); calls.push("dialog");
             }}),
     });
@@ -183,8 +183,8 @@ test("mobile back handles the top database editor before its retained parent and
         };
         const api = {} as typeof import("./MobileBackFoward");
         runInNewContext(source, {
-            exports: api, require: (name: string) => name === "../../dialog/mobileDialog" ? {
-                requestMobileDialogClose: (dialog: {destroy: () => void}, reason: string) => {
+            exports: api, require: (name: string) => name === "../../dialog/adaptiveDialog" ? {
+                requestDialogClose: (dialog: {destroy: () => void}, reason: string) => {
                     assert.equal(reason, "back");
                     dialog.destroy();
                 },

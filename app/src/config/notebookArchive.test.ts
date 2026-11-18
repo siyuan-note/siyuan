@@ -35,7 +35,7 @@ test("archive removal requires a saved copy and explicit confirmation after down
     let saveStatus = "canceled";
     const exports = {} as {openNotebookArchiveDialog: (refresh: () => void) => Promise<void>};
     const dependencies = {
-        MobileDialog: class {
+        AdaptiveDialog: class {
             element = {
                 isConnected: true,
                 querySelector: (selector: string) => controls.get(selector),

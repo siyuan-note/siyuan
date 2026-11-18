@@ -8,26 +8,26 @@ const coverage: Record<string, Record<string, number>> = {
         "confirmDialog": 2
     },
     "protyle/export/exportMd.ts": {
-        "MobileDialog": 1,
+        "AdaptiveDialog": 1,
         "confirmDialog": 1
     },
     "protyle/export/headingPageBreaksUI.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/export/index.ts": {
         "confirmDialog": 3
     },
     "protyle/export/util.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/header/Background.ts": {
         "openInputDialog": 1
     },
     "protyle/header/coverPicker.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/header/documentTitleEditor.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/hint/extend.ts": {
         "confirmDialog": 1
@@ -36,13 +36,13 @@ const coverage: Record<string, Record<string, number>> = {
         "confirmDialog": 1
     },
     "protyle/render/av/calc.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/render/av/calendar/jump.ts": {
         "openInputDialog": 1
     },
     "protyle/render/av/col.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/render/av/collectionConditions.ts": {
         "openInputDialog": 1
@@ -51,27 +51,27 @@ const coverage: Record<string, Record<string, number>> = {
         "openInputDialog": 1
     },
     "protyle/render/av/collectionReview.ts": {
-        "MobileDialog": 1,
+        "AdaptiveDialog": 1,
         "confirmDialog": 1
     },
     "protyle/render/av/colorDialog.ts": {
-        "MobileDialog": 1,
+        "AdaptiveDialog": 1,
         "confirmDialog": 1
     },
     "protyle/render/av/kanban/groupMenu.ts": {
         "confirmDialog": 1
     },
     "protyle/render/av/openDatabaseRow.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/render/av/newItemTemplate.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/render/av/subItems.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/render/av/panels/edit.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/render/av/rowSort.ts": {
         "confirmDialog": 1
@@ -80,7 +80,7 @@ const coverage: Record<string, Record<string, number>> = {
         "confirmDialog": 1
     },
     "protyle/toolbar/inlineStyleDialog.ts": {
-        "MobileDialog": 1,
+        "AdaptiveDialog": 1,
         "confirmDialog": 1
     },
     "protyle/undo/globalUndo.ts": {
@@ -90,13 +90,13 @@ const coverage: Record<string, Record<string, number>> = {
         "confirmDialog": 2
     },
     "protyle/util/headingBatch.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/util/insertHTML.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/util/publishAccess.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "protyle/util/table.ts": {
         "openInputDialog": 1
@@ -114,7 +114,7 @@ const coverage: Record<string, Record<string, number>> = {
         "openInputDialog": 1
     },
     "ai/actions.ts": {
-        "MobileDialog": 2
+        "AdaptiveDialog": 2
     },
     "ai/chat.ts": {
         "openInputDialog": 1
@@ -123,28 +123,28 @@ const coverage: Record<string, Record<string, number>> = {
         "confirmDialog": 1
     },
     "ai/memory/manager.ts": {
-        "MobileDialog": 1,
+        "AdaptiveDialog": 1,
         "confirmDialog": 2
     },
     "ai/skills/manager.ts": {
-        "MobileDialog": 1,
+        "AdaptiveDialog": 1,
         "openInputDialog": 1
     },
     "card/makeCard.ts": {
-        "MobileDialog": 1,
+        "AdaptiveDialog": 1,
         "confirmDialog": 1,
         "openInputDialog": 1
     },
     "card/openCard.ts": {
         "openInputDialog": 1,
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     },
     "card/viewCards.ts": {
-        "MobileDialog": 1,
+        "AdaptiveDialog": 1,
         "confirmDialog": 1
     },
     "protyle/render/av/richTextEditor.ts": {
-        "MobileDialog": 1
+        "AdaptiveDialog": 1
     }
 };
 
@@ -168,11 +168,11 @@ test("AV sheets use one adapter and desktop-only paths remain unmodified", () =>
     for (const file of ["locationEditor"]) {
         const source = readFileSync("src/protyle/render/av/" + file + ".ts", "utf8");
         assert.match(source, /bindBottomSheetDialog\([\s\S]*?\{mode: "standard"(?:, canStart: \(\) => !saving && !closing)?\}/, file);
-        assert.doesNotMatch(source, /new MobileDialog/, file);
+        assert.doesNotMatch(source, /new AdaptiveDialog/, file);
     }
     for (const file of ["newItemTemplate", "subItems"]) {
         const source = readFileSync("src/protyle/render/av/" + file + ".ts", "utf8");
-        assert.equal((source.match(/new MobileDialog/g) || []).length, 1, file);
+        assert.equal((source.match(/new AdaptiveDialog/g) || []).length, 1, file);
         assert.doesNotMatch(source, /bindBottomSheetDialog/, file);
     }
     const exports = readFileSync("src/protyle/export/index.ts", "utf8");

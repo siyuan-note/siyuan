@@ -5,7 +5,7 @@ import {documentParentID} from "./documentCreate";
 import {fetchSyncPost} from "./fetch";
 import {showMessage} from "../dialog/message";
 import type {Dialog} from "../dialog";
-import type {MobileDialog} from "../dialog/mobileDialog";
+import type {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {isMobile} from "./functions";
 import type {DocumentAncestorAmbiguity, DocumentPath} from "../types/api";
 
@@ -95,6 +95,6 @@ ${ambiguity.candidates.map((candidate, index) =>
     const confirm = current.element.querySelector<HTMLButtonElement>("#confirmDialogConfirmBtn");
     select.value = ambiguity.candidates.length ? "0" : "";
     confirm.disabled = ambiguity.candidates.length === 0;
-    if (isMobile()) (current as MobileDialog).focusWhenReady(() => select);
+    if (isMobile()) (current as AdaptiveDialog).focusWhenReady(() => select);
     else select.focus();
 });

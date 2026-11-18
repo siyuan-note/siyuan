@@ -32,7 +32,7 @@ const browserCases = async (code: string, confirmationCode: string, markerCode: 
     let mobile = false;
     const confirmation = {exports: {}};
     new Function("require", "module", "exports", confirmationCode)((dependency: string) => ({
-        "../util/functions": {isMobile: () => mobile}, "./index": {Dialog}, "./mobileDialog": {MobileDialog: Dialog},
+        "../util/functions": {isMobile: () => mobile}, "./index": {Dialog}, "./adaptiveDialog": {AdaptiveDialog: Dialog},
         "../constants": {Constants: {DIALOG_CONFIRM: "confirm"}},
     })[dependency], confirmation, confirmation.exports);
     const sourceVersions = {root: "source-version"};

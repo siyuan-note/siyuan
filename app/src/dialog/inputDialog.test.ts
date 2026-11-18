@@ -81,8 +81,8 @@ const loadDialog = () => {
             if (name === "./index") {
                 return {Dialog: TestDialog};
             }
-            if (name === "./mobileDialog") {
-                return {MobileDialog: TestDialog};
+            if (name === "./adaptiveDialog") {
+                return {AdaptiveDialog: TestDialog};
             }
             if (name === "../util/functions") {
                 return {isMobile: () => false};

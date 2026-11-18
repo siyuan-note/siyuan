@@ -1,5 +1,5 @@
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {showMessage} from "../../dialog/message";
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../dialog/themeColorEditor";
 import {escapeHtml} from "../../util/escape";
@@ -67,7 +67,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
     const properties = getProperties(initialType);
     let editingKey: string | undefined;
     let editingKind: "builtin" | "custom" | "new" | undefined;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: window.siyuan.languages.color,
         width: isMobile() ? "92vw" : "600px",
         content: `<div class="b3-dialog__content" style="max-height:70vh">

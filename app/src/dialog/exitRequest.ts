@@ -1,5 +1,5 @@
 import {Dialog} from "./index";
-import {MobileDialog} from "./mobileDialog";
+import {AdaptiveDialog} from "./adaptiveDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {withFetchTimeout} from "../util/fetchTimeout";
 import {escapeHtml} from "../util/escape";
@@ -108,7 +108,7 @@ export const requestSystemExit = (options: {
         console.warn("exit request failed", error);
         // 请求失败不代表内核已经停止；保留界面供用户重试，并继续接收内核退出事件。
         progressLoading({code: 2, msg: ""}, progressID);
-        const errorDialog = new MobileDialog({
+        const errorDialog = new AdaptiveDialog({
             disableClose: true,
             disableAnimation: true,
             width: "480px",

@@ -39,7 +39,7 @@ const createExitDialog = (sources, languages, mobile) => {
     const mobileRuntime = new Function("Dialog", "mobile", "return " + sources.mobileRuntime)(Dialog, mobile);
     const {requestSystemExit, updateExitProgressStatus} = load(sources.exit, {
         "../util/functions": {isMobile: () => mobile},
-        "./mobileDialog": mobileRuntime,
+        "./adaptiveDialog": mobileRuntime,
         "./confirmDialog": mobileRuntime,
         "./progress": progress,
         "../util/fetch": {fetchSyncPost: () => new Promise((resolve, reject) => {
@@ -75,7 +75,7 @@ if (process.versions.electron && process.type === "browser") {
             .map(([key, file]) => [key, ts.transpileModule(fs.readFileSync(path.join(root, "src", file), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText]));
-        sources.mobileRuntime = require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource();
+        sources.mobileRuntime = require("./fixtures/dialogRuntime.cjs").dialogRuntimeSource();
         const css = require("sass").compile(path.join(root, "src/assets/scss/base.scss"), {logger: {warn() {}, debug() {}}}).css;
         const mobileCSS = require("sass").compile(path.join(root, "src/assets/scss/mobile.scss"), {logger: {warn() {}, debug() {}}}).css;
         const icons = pathToFileURL(path.join(root, "appearance/icons/litheness/icon.js")).href;

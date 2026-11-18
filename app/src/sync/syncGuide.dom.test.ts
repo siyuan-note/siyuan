@@ -43,7 +43,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 }
             }
             const dependencies: Record<string, unknown> = {
-                "../dialog/mobileDialog": {MobileDialog: Dialog},
+                "../dialog/adaptiveDialog": {AdaptiveDialog: Dialog},
                 "../dialog/message": {showMessage: (message: string) => messages.push(message)},
                 "../util/escape": {escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")},
                 "../util/needSubscribe": {needSubscribe: () => false, isPaidUser: () => true},

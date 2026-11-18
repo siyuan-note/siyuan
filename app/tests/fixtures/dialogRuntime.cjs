@@ -30,13 +30,13 @@ const createRuntime = (sources, Dialog, mobile) => {
         }
         return cache[name];
     };
-    return {...load("dialog/mobileDialog"), ...load("dialog/inputDialog"), ...load("dialog/confirmDialog"),
+    return {...load("dialog/adaptiveDialog"), ...load("dialog/inputDialog"), ...load("dialog/confirmDialog"),
         secondaryEditors: load("mobile/util/secondaryEditors"), pendingCardAction: load("card/pendingAction")};
 };
 
-exports.mobileDialogRuntimeSource = () => {
+exports.dialogRuntimeSource = () => {
     const sources = {};
-    for (const name of ["dialog/mobileDialog",
+    for (const name of ["dialog/adaptiveDialog",
         "dialog/inputDialog", "dialog/confirmDialog", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag",
         "mobile/util/mobileSheetLayout", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "mobile/util/visibleViewport", "mobile/util/orientation",
         "protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu", "menus/sheetOpen", "menus/sheetActions", "util/escape",

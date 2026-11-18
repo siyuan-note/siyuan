@@ -1,6 +1,6 @@
 import {openInputDialog} from "../../dialog/inputDialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {switchWorkspace, importConfiguration} from "../util/resourceConfig";
 import {config as configApi} from "../util/configApi";
 /// #if !BROWSER
@@ -89,7 +89,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                     response.data.forEach((item: string, index: number) => {
                         selectHTML += `<option value="${escapeAttr(escapeHtml(item))}"${index === 0 ? " selected" : ""}>${escapeHtml(pathPosix().basename(item))}</option>`;
                     });
-                    const openWorkspaceDialog = new MobileDialog({
+                    const openWorkspaceDialog = new AdaptiveDialog({
                         title: window.siyuan.languages.openBy,
                         content: `<div class="b3-dialog__content">
     <select class="b3-text-field fn__block">${selectHTML}</select>

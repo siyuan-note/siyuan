@@ -1,6 +1,6 @@
 import {isMobile} from "../util/functions";
 import {Dialog} from "./index";
-import {MobileDialog, MobileSheetOptions} from "./mobileDialog";
+import {AdaptiveDialog, MobileSheetOptions} from "./adaptiveDialog";
 import {Constants} from "../constants";
 import {showMessage} from "./message";
 
@@ -134,7 +134,7 @@ export const createDesktopConfirmDialog = (options: IConfirmDialogOptions) => {
     return dialog;
 };
 
-const createMobileConfirmDialog = (options: IConfirmDialogOptions) => {
+const createSheetConfirmDialog = (options: IConfirmDialogOptions) => {
     const {title, text, confirm, cancel, isDelete = false, extraAction, confirmLabel, cancelLabel} = options;
     const previousActiveElement = document.activeElement as HTMLElement;
     let handled = false;
@@ -145,7 +145,7 @@ const createMobileConfirmDialog = (options: IConfirmDialogOptions) => {
         handled = true;
         cancel?.(dialog);
     };
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title,
         mobileSheet: options.mobileSheet,
         content: `<div class="b3-dialog__content">
@@ -207,4 +207,4 @@ const createMobileConfirmDialog = (options: IConfirmDialogOptions) => {
 };
 
 export const confirmDialog = (options: IConfirmDialogOptions) =>
-    isMobile() ? createMobileConfirmDialog(options) : createDesktopConfirmDialog(options);
+    isMobile() ? createSheetConfirmDialog(options) : createDesktopConfirmDialog(options);

@@ -4,7 +4,7 @@ import {showMessage} from "../dialog/message";
 import {isMobile} from "./functions";
 import {fetchPost, fetchSyncPost} from "./fetch";
 import {ContractFormData} from "./contractFormData";
-import {MobileDialog as Dialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog as Dialog} from "../dialog/adaptiveDialog";
 import {getOpenNotebookCount} from "./pathName";
 import {normalizeNotebookName, validateName} from "../editor/rename";
 import {escapeHtml} from "../util/escape";

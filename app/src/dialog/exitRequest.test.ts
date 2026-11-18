@@ -70,7 +70,7 @@ const fixture = (mobile = false) => {
                     expire = () => fail(new Error("Timeout"));
                 })]);
             }};
-            if (name === "./mobileDialog") return {MobileDialog: class {
+            if (name === "./adaptiveDialog") return {AdaptiveDialog: class {
                 state = {
                     destroyed: false,
                     buttons: [0, 1].map(() => ({

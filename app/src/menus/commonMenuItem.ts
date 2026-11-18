@@ -24,7 +24,7 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {loadTemplateDirectories, openTemplateManager} from "../template/manager";
 import {Dialog} from "../dialog";
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {bindAliasInput} from "./aliasInput";
 import {focusBlock, getEditorRange} from "../protyle/util/selection";
@@ -84,7 +84,7 @@ export const openWechatNotify = (nodeElement: Element) => {
     if (reminder) {
         reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
     }
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         width: isMobile() ? "92vw" : "min(300px, 92vw)",
         containerClassName: isMobile() ? undefined : "date-picker-reminder-dialog",
         title: window.siyuan.languages.wechatReminder,
@@ -180,7 +180,7 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
         if (reminder) {
             reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
         }
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             width: isMobile() ? "92vw" : "min(300px, 92vw)",
             containerClassName: isMobile() ? undefined : "date-picker-reminder-dialog",
             title: window.siyuan.languages.wechatReminder,

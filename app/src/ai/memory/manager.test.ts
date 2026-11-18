@@ -77,7 +77,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
             if (name === "../../protyle/util/compatibility") { return compatibility; }
             if (name === "./overview") { return {renderMemoryOverview: (element: ElementStub, markdown: string) => { rendered.push(markdown); element.textContent = markdown; }}; }
             if (name === "../../dialog/message") { return {showMessage: (message: string) => { messages.push(message); }}; }
-            if (name === "../../dialog/mobileDialog") { return {MobileDialog: class {
+            if (name === "../../dialog/adaptiveDialog") { return {AdaptiveDialog: class {
                 element = root;
                 constructor(spec: {title: string; content: string; beforeClose: () => boolean; destroyCallback: () => void}) {
                     title = spec.title; content = spec.content; beforeClose = spec.beforeClose; destroy = spec.destroyCallback;

@@ -1,5 +1,5 @@
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {Constants} from "../../constants";
 import {showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -51,7 +51,7 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
         <span class="fn__space"></span>
         <input id="${rightId}" class="b3-text-field fn__flex-center fn__size96" value="${conf[rightId] ?? ""}">`;
 
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: window.siyuan.languages.export + " Markdown",
         content: `<div class="b3-dialog__content export-md__content">
     <!-- 常用 -->

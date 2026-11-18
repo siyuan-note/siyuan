@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {showMessage} from "../dialog/message";
 import {fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
@@ -15,7 +15,7 @@ export const openNotebookArchiveDialog = async (refresh: () => void) => {
         return;
     }
     const lang = window.siyuan.languages;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {beforeClose: () => !busy},
         title: lang.archiveEncryptedNotebooks,
         width: isMobile() ? "92vw" : "560px",
@@ -105,7 +105,7 @@ export const openNotebookArchiveDialog = async (refresh: () => void) => {
 
 export const openNotebookArchiveImportDialog = (refresh: () => void) => {
     const lang = window.siyuan.languages;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {beforeClose: (): boolean => !button.disabled},
         title: lang.restoreEncryptedNotebooks,
         width: isMobile() ? "92vw" : "560px",

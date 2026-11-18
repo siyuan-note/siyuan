@@ -1,5 +1,5 @@
 import {confirmDialog} from "../../../dialog/confirmDialog";
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {showMessage} from "../../../dialog/message";
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../../dialog/themeColorEditor";
 import {isMobile} from "../../../util/functions";
@@ -54,7 +54,7 @@ export const openAVCustomColorDialog = (options: {
     let editingColorIndex: number | undefined;
     let editingBuiltinKey: string | undefined;
     let saving = false;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: window.siyuan.languages.manageColors,
         width: isMobile() ? "92vw" : "600px",
         content: `<div class="b3-dialog__content" style="max-height:70vh">

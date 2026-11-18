@@ -1,6 +1,6 @@
 import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {hideMessage, showMessage} from "../dialog/message";
@@ -48,7 +48,7 @@ export const makeCard = (app: App, ids: string[]) => {
         response.data.forEach((item: ICardPackage) => {
             html += genCardItem(item);
         });
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             positionId: Constants.DIALOG_MAKECARD,
             width: isMobile() ? "92vw" : "50vw",
             height: "70vh",

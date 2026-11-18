@@ -51,7 +51,7 @@ const setup = (mobile = true) => {
             return promise;
         }
     }
-    const dependencies = {MobileDialog: MockDialog, Dialog: MockDialog, isMobile: () => mobile,
+    const dependencies = {AdaptiveDialog: MockDialog, Dialog: MockDialog, isMobile: () => mobile,
         escapeHtml: (value: string) => value,
         showMessage: (message: string) => messages.push(message),
         Constants: {}};

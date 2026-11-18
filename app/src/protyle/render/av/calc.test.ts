@@ -29,7 +29,7 @@ test("calculation templates delegate confirmation and await the transaction befo
     runInNewContext(transpileModule(readFileSync("src/protyle/render/av/calc.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {exports, window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)})}},
-        require: () => ({MobileDialog: Dialog, Constants: {}, isAVDateType: () => false,
+        require: () => ({AdaptiveDialog: Dialog, Constants: {}, isAVDateType: () => false,
             getFieldsByData: () => columns, escapeAttr: String, escapeHtml: String,
             Menu: class {addItem(item: typeof items[0]) { items.push(item); } close() {} open() {}},
             transaction: (_protyle: unknown, operations: IOperation[], undo: IOperation[], options: {awaitResponse: boolean}) => {

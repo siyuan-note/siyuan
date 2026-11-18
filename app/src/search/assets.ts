@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {toggleMenu} from "../menus/menuToggle";
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
@@ -344,7 +344,7 @@ const filterTypesHTML = (types: IObject) => {
 
 export const assetFilterMenu = (assetsElement: Element) => {
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].types;
-    const filterDialog = new MobileDialog({
+    const filterDialog = new AdaptiveDialog({
         title: window.siyuan.languages.type,
         content: `<div class="b3-dialog__content">${filterTypesHTML(localData)}</div>
 <div class="b3-dialog__action">

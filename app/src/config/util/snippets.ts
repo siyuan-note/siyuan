@@ -1,5 +1,5 @@
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {config as configApi} from "./configApi";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
@@ -117,7 +117,7 @@ const openSnippetDialog = (oldSnippets: ISnippet[], revision: string, draft = ol
         }
     });
     let discard = false;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {beforeClose: async () => {
             if (discard || completedSnippetSaves.has(dialog)) return true;
             if (savingSnippets.has(dialog)) return false;
@@ -313,7 +313,7 @@ const snippetSettings = (dialog: Dialog) => ({
     enabledJS: (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked,
 });
 
-const setSnippetPost = async (dialog: MobileDialog, snippets: ISnippet[], removeIds: string[], revision: string,
+const setSnippetPost = async (dialog: AdaptiveDialog, snippets: ISnippet[], removeIds: string[], revision: string,
                               oldSnippets: ISnippet[], initialSettings: ReturnType<typeof snippetSettings>, close = true) => {
     if (savingSnippets.has(dialog)) return false;
     savingSnippets.add(dialog);
@@ -381,7 +381,7 @@ const readSnippetDraft = (dialog: Dialog): ISnippet[] => {
     return snippets;
 };
 
-const setSnippet = (dialog: MobileDialog, oldSnippets: ISnippet[], removeIds: string[], revision: string,
+const setSnippet = (dialog: AdaptiveDialog, oldSnippets: ISnippet[], removeIds: string[], revision: string,
                     initialSettings: ReturnType<typeof snippetSettings>, confirm = false) => {
     if (savingSnippets.has(dialog) || completedSnippetSaves.has(dialog)) return;
     const snippets = readSnippetDraft(dialog);

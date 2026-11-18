@@ -20,7 +20,7 @@ const cases = async (sources, appPath, languages) => {
     let mobile = false;
     let storedReminder = "";
     window.siyuan = {languages};
-    class MobileDialog {
+    class AdaptiveDialog {
         constructor(options) {
             this.options = options;
             this.element = document.createElement("div");
@@ -33,7 +33,7 @@ const cases = async (sources, appPath, languages) => {
         async runPending(action) { if (await action()) this.destroy(); }
     }
     const dependencies = {
-        bindInlineDatePicker, getInlineDateValue, dayjs, MobileDialog,
+        bindInlineDatePicker, getInlineDateValue, dayjs, AdaptiveDialog,
         Constants: {CUSTOM_REMINDER_WECHAT: "reminder", DIALOG_WECHATREMINDER: "wechat"},
         isMobile: () => mobile, getEditorRange: () => ({}), focusByRange() {},
         isEncryptedBox: () => false, showMessage() {},

@@ -1,5 +1,5 @@
 import {searchConfigApi} from "../config/tabs/searchRuntime";
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {removeSearchCriterion, removeSearchCriterionSync} from "../config/util/resourceConfig";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
@@ -32,7 +32,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         return;
     }
     config.types = normalizeSearchTypes(config.types);
-    const filterDialog = new MobileDialog({
+    const filterDialog = new AdaptiveDialog({
         title: window.siyuan.languages.searchType,
         content: `<div class="b3-dialog__content">
     ${(["mindmap", "mindmapItem"] as const).map(type => `<label class="fn__flex b3-label"><svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#${type === "mindmap" ? "iconMindmap" : "iconListItem"}"></use></svg><span class="fn__space"></span><div class="fn__flex-1 fn__flex-center">${window.siyuan.languages[type]} <sup>[1]</sup></div><input class="b3-switch fn__flex-center" data-type="${type}" type="checkbox"${config.types[type] ? " checked" : ""}></label>`).join("")}
@@ -286,7 +286,7 @@ export const replaceFilterMenu = (config: Config.IUILayoutTabSearchConfig) => {
     <input class="b3-switch fn__flex-center" data-type="${key}" type="checkbox"${config.replaceTypes[key] ? " checked" : ""}>
 </label>`;
     });
-    const filterDialog = new MobileDialog({
+    const filterDialog = new AdaptiveDialog({
         title: window.siyuan.languages.replaceType,
         content: `<div class="b3-dialog__content">${html}</div>
 <div class="b3-dialog__action">
@@ -386,7 +386,7 @@ const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
                            value: string,
                            saveDialog: Dialog, removeNames: string[] = []) => {
     if (isMobile()) {
-        void (saveDialog as MobileDialog).runPending(async () => {
+        void (saveDialog as AdaptiveDialog).runPending(async () => {
             const criterion = {...config, removed: false, name: value};
             if ((await fetchSyncPost("/api/storage/setCriterion", {criterion})).code !== 0) return false;
             for (const name of removeNames.filter(name => name !== value)) {

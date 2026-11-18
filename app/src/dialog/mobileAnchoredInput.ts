@@ -1,4 +1,4 @@
-import {MobileDialog} from "./mobileDialog";
+import {AdaptiveDialog} from "./adaptiveDialog";
 import type {openAnchoredInput} from "./anchoredInput";
 import {escapeAttr} from "../util/escape";
 
@@ -19,7 +19,7 @@ export const openMobileAnchoredInput = (options: Parameters<typeof openAnchoredI
         input.value = "";
         unregister();
     };
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: options.label,
         content: `<div class="b3-dialog__content"><textarea class="b3-text-field fn__block" rows="1" aria-label="${escapeAttr(options.label)}"></textarea></div>
 <div class="b3-dialog__action"><button class="b3-button b3-button--cancel" data-action="cancel">${window.siyuan.languages.cancel}</button>

@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {getFrontend, isMobile} from "../util/functions";
 import {Dialog} from "../dialog";
 import {closeNativeSettings, openNativeSettings} from "../config/setting/nativeWindow";
@@ -69,7 +69,7 @@ export class Setting {
             return;
         }
         const windowRoot = isSettingsWindow() && window.siyuan.dialogs.length === 0;
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             title: name,
             content: `<div class="b3-dialog__content">
 </div>

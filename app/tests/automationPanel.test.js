@@ -1175,7 +1175,7 @@ if (process.versions.electron && process.type === "browser") {
             sources["menus/aliasInput"] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/menus/aliasInput.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
             }).outputText;
-            for (const name of ["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline", "datePicker/runtime", "datePicker/index", "datePicker/binding", "datePicker/panel", "datePicker/owners", "datePicker/position", "menus/menuPosition", "menus/overlayOwnership", "dialog/index", "dialog/confirmDialog", "dialog/mobileDialog",
+            for (const name of ["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline", "datePicker/runtime", "datePicker/index", "datePicker/binding", "datePicker/panel", "datePicker/owners", "datePicker/position", "menus/menuPosition", "menus/overlayOwnership", "dialog/index", "dialog/confirmDialog", "dialog/adaptiveDialog",
                 "mobile/util/keyboardSheetState", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/mobileSheetLayout",
                 "protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu",
                 "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetOpen", "menus/sheetActions"]) {

@@ -1,5 +1,5 @@
 import {confirmDialog} from "../dialog/confirmDialog";
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
 import dayjs from "dayjs";
 import {Protyle} from "../protyle";
@@ -29,7 +29,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         page: pageIndex
     }, (response) => {
         pageCount = Math.max(response.data.pageCount, 1);
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             mobileSheet: {mode: "expanded", beforeClose: createMobileSecondaryEditorCloseGuard(() => edit)},
             hideCloseIcon: true,
             positionId: Constants.DIALOG_VIEWCARDS,

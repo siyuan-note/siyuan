@@ -1,5 +1,5 @@
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {renderMemoryOverview} from "./overview";
 import {showMessage} from "../../dialog/message";
 import {fetchSyncPost} from "../../util/fetch";
@@ -49,7 +49,7 @@ export const openMemoryManager = () => {
             }
         });
     };
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: `<span class="fn__flex"><span class="fn__flex-1">${escapeHtml(lang.aiMemorySummary)}</span><button type="button" class="block__icon block__icon--show" data-memory-more aria-label="${escapeHtml(lang.more)}" aria-haspopup="menu"><svg><use xlink:href="#iconMore"></use></svg></button></span>`,
         width: isMobile() ? "94vw" : "860px",
         content: `<div class="b3-dialog__content memory-manager">

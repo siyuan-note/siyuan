@@ -1,5 +1,5 @@
 import {openInputDialog} from "../../dialog/inputDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {config as configApi} from "../util/configApi";
 import {fetchWithAppId} from "../../util/fetchWithAppId";
@@ -123,7 +123,7 @@ const mountOIDCButton = (root: HTMLElement) => {
         const config = window.siyuan.config.oidc;
         const escape = (value: string) => escapeHtmlTextAndAttr(value);
         let destroyOIDCDialog: () => void = (): undefined => undefined;
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             mobileSheet: {beforeClose: () => !validationActivating},
             title: window.siyuan.languages.oidcLogin,
             content: `<div class="b3-dialog__content" id="oidcConfigForm">
@@ -949,7 +949,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
 };
 
 const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) => {
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: "🔐 " + window.siyuan.languages.setMasterPassword,
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
@@ -1006,7 +1006,7 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
 };
 
 const openChangeMasterPasswordDialog = (onChanged?: () => void) => {
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: "🔐 " + window.siyuan.languages.changeMasterPassword,
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.oldMasterPassword}" class="b3-text-field fn__block">

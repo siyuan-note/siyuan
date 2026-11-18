@@ -14,12 +14,12 @@ const classList = () => {
 };
 
 test("opening flashcards preserves the expanded mobile layout and close guard", async () => {
-    type DialogOptions = ConstructorParameters<typeof import("../dialog/mobileDialog").MobileDialog>[0];
+    type DialogOptions = ConstructorParameters<typeof import("../dialog/adaptiveDialog").AdaptiveDialog>[0];
     let options: DialogOptions;
     const stopped = new Error("Captured dialog options");
     const guard = () => false;
     const dependencies = new Proxy({
-        MobileDialog: class {constructor(value: DialogOptions) {options = value; throw stopped;}},
+        AdaptiveDialog: class {constructor(value: DialogOptions) {options = value; throw stopped;}},
         createMobileSecondaryEditorCloseGuard: () => guard,
         isMobile: () => true,
         Constants: {DIALOG_OPENCARD: "card"},

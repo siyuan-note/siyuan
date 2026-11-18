@@ -25,7 +25,7 @@ const runCases = sources => {
         focusWhenReady() {}
         bindInput() {}
     }
-    const dependencies = {MobileDialog: Dialog, Dialog, isMobile: () => true, Constants: {},
+    const dependencies = {AdaptiveDialog: Dialog, Dialog, isMobile: () => true, Constants: {},
         escapeHtml: value => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")};
     const load = name => {
         const exports = {};

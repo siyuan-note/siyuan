@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
 import {openInputDialog} from "../dialog/inputDialog";
 import {toggleMenu} from "../menus/menuToggle";
@@ -270,7 +270,7 @@ export const bindCardEvent = async (options: {
     cardsData: ICardData
     cardType: TCardType,
     id?: string,
-    dialog?: MobileDialog,
+    dialog?: AdaptiveDialog,
     index?: number,
 }) => {
     if (window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen) {
@@ -878,7 +878,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         cardsData = await app.plugins[i].updateCards(cardsData);
     }
     const state: {editor?: Protyle, loading: boolean} = {loading: true};
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {mode: "expanded", beforeClose: createMobileSecondaryEditorCloseGuard(() => state.editor, () => !state.loading)},
         hideCloseIcon: true,
         positionId: Constants.DIALOG_OPENCARD,

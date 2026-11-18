@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {MobileDialog} from "../../dialog/mobileDialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {config as configApi} from "../util/configApi";
@@ -464,7 +464,7 @@ const mountOIDCButton = (root: HTMLElement) => {
 
 const mountAuthCodeButton = (root: HTMLElement) => {
     root.querySelector("#authCode")?.addEventListener("click", () => {
-        const dialog = mobileInputDialog({
+        const dialog = openInputDialog({
             title: window.siyuan.languages.about5,
             value: window.siyuan.config.accessAuthCode,
             placeholder: window.siyuan.languages.about5,
@@ -888,7 +888,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                 return;
             }
             // 导入前需输入主密码校验（备份文件不含密码，校验用导入备份对应的主密码）
-            mobileInputDialog({
+            openInputDialog({
                 awaitConfirm: true,
                 title: window.siyuan.languages.masterPassword,
                 value: "",

@@ -1,4 +1,4 @@
-import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "./functions";

@@ -17,7 +17,7 @@ test("mobile skill naming awaits an explicit API success without discarding a fa
         update() {}, selected: {path: "skills/SKILL.md"}, selectedRevision: "revision",
         getSkillDirectory: () => "skills", lang: {}, isMobile: () => true,
         getFileRenameTarget: (_path: string, name: string) => name, isValidSkillName: () => true,
-        mobileInputDialog: (value: typeof options) => { options = value; return dialog; },
+        openInputDialog: (value: typeof options) => { options = value; return dialog; },
         api: async () => succeeds ? {} : undefined,
         reload: async () => { reloaded++; }, showMessage() {}, escapeHtml: String,
         inputName: undefined as (action: string) => void};

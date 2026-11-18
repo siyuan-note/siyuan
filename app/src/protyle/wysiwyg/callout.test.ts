@@ -21,7 +21,7 @@ const browserCases = async (sources: string[], luteSource: string) => {
     document.body.append(root);
     const protyle = {lute, wysiwyg: {element: root}, block: {showAll: false}, disabled: false} as unknown as IProtyle;
     let transactions: Array<{doOperations: IOperation[], undoOperations: IOperation[]}> = [];
-    let inputOptions: Parameters<typeof import("../../dialog/mobileInputDialog").mobileInputDialog>[0];
+    let inputOptions: Parameters<typeof import("../../dialog/inputDialog").openInputDialog>[0];
     let destroyed = false;
     let pending: Promise<boolean>;
     let pendingBusy = false;
@@ -77,7 +77,7 @@ const browserCases = async (sources: string[], luteSource: string) => {
         focusByWbr: () => root.querySelector("wbr")?.remove(),
         getEditorRange: () => document.createRange(),
         blockRender: () => {}, processRender: () => {}, highlightRender: () => {}, avRender: () => {},
-        mobileInputDialog: (options: typeof inputOptions) => {
+        openInputDialog: (options: typeof inputOptions) => {
             inputOptions = options;
             destroyed = false;
             return dialog;

@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {MobileDialog} from "../dialog/mobileDialog";
 import {fetchPost} from "../util/fetch";
@@ -141,7 +141,7 @@ export const makeCard = (app: App, ids: string[]) => {
                     event.preventDefault();
                     break;
                 } else if (type === "rename") {
-                    mobileInputDialog({
+                    openInputDialog({
                         title: window.siyuan.languages.rename,
                         value: target.parentElement.getAttribute("data-name"),
                         onConfirm: (value, renameDialog) => {

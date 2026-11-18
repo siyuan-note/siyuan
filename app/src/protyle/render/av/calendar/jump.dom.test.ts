@@ -16,7 +16,7 @@ const cases = async (sources: Record<string, string>) => {
     const fallback = {
         isMobile: () => false,
         escapeAttr: (value: string) => value, escapeHtml: (value: string) => value,
-        mobileInputDialog: (options: any) => {
+        openInputDialog: (options: any) => {
             dialogs++;
             const element = document.createElement("div");
             element.innerHTML = `${options.prefixContent}<input data-dialog-input type="date" min="${options.min}" max="${options.max}" value="${options.value}">${options.extraContent}<button data-input-confirm>Confirm</button><button data-input-cancel>Cancel</button>`;

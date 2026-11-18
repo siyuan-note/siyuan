@@ -1,6 +1,6 @@
 import {MobileDialog} from "../dialog/mobileDialog";
 import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {toggleMenu} from "../menus/menuToggle";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {fetchDueCardsSync} from "./fetchDueCards";
@@ -443,7 +443,7 @@ export const bindCardEvent = async (options: {
                             icon: "iconClock",
                             label: window.siyuan.languages.setDueTime,
                             click() {
-                                mobileInputDialog({
+                                openInputDialog({
                                     title: window.siyuan.languages.setDueTime,
                                     label: window.siyuan.languages.showCardDay,
                                     value: "1",

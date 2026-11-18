@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../../../dialog/mobileInputDialog";
+import {openInputDialog} from "../../../dialog/inputDialog";
 import type {AVAutomationBlockAttributeInput, AVAutomationBlockSourceInput} from "../../../types/api";
 import {Menu} from "../../../plugin/Menu";
 import {toggleMenu} from "../../../menus/menuToggle";
@@ -121,7 +121,7 @@ export const mountCollectionConditions = (host: HTMLElement, source: AVAutomatio
                         renderChips();
                     } else if ((event.target as Element).closest("[data-custom-callout]")) {
                         menu.close();
-                        mobileInputDialog({title: lang.callout, label: lang.type, value: "", maxLength: 256,
+                        openInputDialog({title: lang.callout, label: lang.type, value: "", maxLength: 256,
                             onConfirm: (value, dialog) => {
                                 const type = value.trim();
                                 if (!type || /[\r\n\t]/.test(type)) { return; }

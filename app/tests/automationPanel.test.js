@@ -103,7 +103,7 @@ const runCases = async (sources, css, mobile) => {
         "dialog/moveResize": {moveResize() {}},
         "dialog/anchoredInput": {getAnchoredInputMask() {}},
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
-        "dialog/mobileInputDialog": {mobileInputDialog: options => { collectionTypeInput = options; }},
+        "dialog/inputDialog": {openInputDialog: options => { collectionTypeInput = options; }},
         "block/Panel": {BlockPanel: class {constructor(options) {scopePreviews.push(options);}}},
         "util/pathName": {movePathTo: options => scopeRequests.push(options)},
         "util/fetch": {fetchSyncPost: async (url, request) => {

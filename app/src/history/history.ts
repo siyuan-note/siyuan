@@ -4,7 +4,7 @@ import type {APIPOSTRoutes} from "../types/api";
 import {toggleMenu} from "../menus/menuToggle";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -48,7 +48,7 @@ const destroyRepoPanel = (root: Element) => {
 };
 
 const openSnapshotMemo = (repoElement: Element, id?: string, memo = "", fullCheck = false) => {
-    const dialog = mobileInputDialog({
+    const dialog = openInputDialog({
         title: id ? window.siyuan.languages.editSnapshotMemo : window.siyuan.languages.snapshotMemo,
         value: memo,
         multiline: true,
@@ -1092,7 +1092,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     renderRepo(upload ? repoRoot : repoElement, 1);
                     return true;
                 };
-                const genTagDialog = mobileInputDialog({
+                const genTagDialog = openInputDialog({
                     title: window.siyuan.languages.tagSnapshot,
                     value: dayjs().format("YYYYMMDDHHmmss"),
                     placeholder: window.siyuan.languages.tagSnapshotTip,
@@ -1149,7 +1149,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
-                    mobileInputDialog({
+                    openInputDialog({
                         title: window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)),
                         value: String(currentPage),
                         type: "number",
@@ -1172,7 +1172,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
-                    mobileInputDialog({
+                    openInputDialog({
                         title: window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)),
                         value: String(currentPage),
                         type: "number",

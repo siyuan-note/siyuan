@@ -2,7 +2,7 @@ import {searchConfigApi} from "../config/tabs/searchRuntime";
 import {MobileDialog} from "../dialog/mobileDialog";
 import {removeSearchCriterion, removeSearchCriterionSync} from "../config/util/resourceConfig";
 import {Dialog} from "../dialog";
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {isMobile, objEquals} from "../util/functions";
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
@@ -430,7 +430,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
     if (isSensitiveSearchConfig(config)) {
         return;
     }
-    const saveDialog = mobileInputDialog({
+    const saveDialog = openInputDialog({
         title: window.siyuan.languages.saveCriterion,
         value: element.querySelector("#criteria .b3-chip--current")?.textContent || "",
         placeholder: window.siyuan.languages.memo,

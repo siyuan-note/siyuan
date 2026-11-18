@@ -2,7 +2,7 @@ import {MobileDialog} from "../dialog/mobileDialog";
 import {createTemplateHTTPPermissionIndicator, templateHTTPPermission, templateHTTPPermissionLabel} from "./httpPermission";
 import {toggleMenu} from "../menus/menuToggle";
 import {Dialog} from "../dialog";
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
@@ -402,7 +402,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
     };
     const inputPath = (title: string, value: string, callback: (value: string) => Promise<boolean>, renamePath?: string) => {
         const nameOnly = renamePath !== undefined;
-        const prompt = mobileInputDialog({
+        const prompt = openInputDialog({
             title,
             value,
             awaitConfirm: true,

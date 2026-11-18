@@ -42,7 +42,7 @@ test("mobile business dialogs explicitly opt in, including nested and failure en
                         // 属性编辑器保留原有关闭回调，使用独立的抽屉绑定入口。
                     } else {
                         const moduleName = name === "confirmDialog" ? "confirmDialog" :
-                            name === "openInputDialog" ? "mobileInputDialog" : "mobileDialog";
+                            name === "openInputDialog" ? "openInputDialog" : "mobileDialog";
                         assert.ok(source.text.includes(moduleName), `${file}: ${name}`);
                         found++;
                     }

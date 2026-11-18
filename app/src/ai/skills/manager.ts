@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {MobileDialog} from "../../dialog/mobileDialog";
 import {Dialog} from "../../dialog";
 import {showMessage} from "../../dialog/message";
@@ -342,7 +342,7 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
         const directory = getSkillDirectory(entry);
         const title = action === "newSkill" ? lang.agentSkillNew : action === "newFile" ? lang.agentSkillNewFile :
             action === "mkdir" ? lang.agentSkillNewFolder : lang.rename;
-        const prompt = mobileInputDialog({
+        const prompt = openInputDialog({
             title,
             label: lang.name,
             value: action === "rename" ? entry.path.split("/").pop() : "",

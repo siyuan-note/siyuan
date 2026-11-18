@@ -25,7 +25,7 @@ import {hideMessage, showMessage} from "../dialog/message";
 import {loadTemplateDirectories, openTemplateManager} from "../template/manager";
 import {Dialog} from "../dialog";
 import {MobileDialog} from "../dialog/mobileDialog";
-import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {bindAliasInput} from "./aliasInput";
 import {focusBlock, getEditorRange} from "../protyle/util/selection";
 import {focusByRange} from "../protyle/util/selectionOffsets";

@@ -21,7 +21,7 @@ const coverage: Record<string, Record<string, number>> = {
         "MobileDialog": 1
     },
     "protyle/header/Background.ts": {
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "protyle/header/coverPicker.ts": {
         "MobileDialog": 1
@@ -39,16 +39,16 @@ const coverage: Record<string, Record<string, number>> = {
         "MobileDialog": 1
     },
     "protyle/render/av/calendar/jump.ts": {
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "protyle/render/av/col.ts": {
         "MobileDialog": 1
     },
     "protyle/render/av/collectionConditions.ts": {
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "protyle/render/av/collectionReference.ts": {
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "protyle/render/av/collectionReview.ts": {
         "MobileDialog": 1,
@@ -99,25 +99,25 @@ const coverage: Record<string, Record<string, number>> = {
         "MobileDialog": 1
     },
     "protyle/util/table.ts": {
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "protyle/util/collectionRemoval.ts": {
         "confirmDialog": 1
     },
     "protyle/wysiwyg/callout.ts": {
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "protyle/wysiwyg/list.ts": {
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "protyle/wysiwyg/taskStatusDialog.ts": {
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "ai/actions.ts": {
         "MobileDialog": 2
     },
     "ai/chat.ts": {
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "ai/editor.ts": {
         "confirmDialog": 1
@@ -128,15 +128,15 @@ const coverage: Record<string, Record<string, number>> = {
     },
     "ai/skills/manager.ts": {
         "MobileDialog": 1,
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "card/makeCard.ts": {
         "MobileDialog": 1,
         "confirmDialog": 1,
-        "mobileInputDialog": 1
+        "openInputDialog": 1
     },
     "card/openCard.ts": {
-        "mobileInputDialog": 1,
+        "openInputDialog": 1,
         "MobileDialog": 1
     },
     "card/viewCards.ts": {

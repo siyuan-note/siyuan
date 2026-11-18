@@ -92,7 +92,7 @@ const setup = (action: Action) => {
         },
         MobileDialog: Prompt,
         Option: class {},
-        mobileInputDialog: (options: any) => {
+        openInputDialog: (options: any) => {
             assert.equal(options.awaitConfirm, true);
             const dialog = new Prompt();
             dialog.input.value = options.value;

@@ -14,7 +14,7 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     const confirmations: unknown[][] = [];
     const dialog = {};
     const adaptHotkey = (value: string) => value;
-    const openInputDialog = (): void => undefined;
+    const createDesktopInputDialog = (): void => undefined;
     const openAssetPicker = async (): Promise<null> => null;
     const openDatePicker = (): void => undefined;
     const dependency = new Proxy({}, {
@@ -24,8 +24,8 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
             if (key === "createDesktopConfirmDialog") {
                 return (...args: unknown[]) => { confirmations.push(args); return dialog; };
             }
-            if (key === "openInputDialog") {
-                return openInputDialog;
+            if (key === "createDesktopInputDialog") {
+                return createDesktopInputDialog;
             }
             if (key === "openAssetPicker") {
                 return openAssetPicker;
@@ -38,7 +38,7 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     });
     const exports: {getAPI?: () => {
         adaptHotkey: typeof adaptHotkey,
-        openInputDialog: typeof openInputDialog,
+        openInputDialog: typeof createDesktopInputDialog,
         openAssetPicker: typeof openAssetPicker,
         openDatePicker: typeof openDatePicker,
         confirm: (title: string, text: string, callback?: (...args: unknown[]) => void) => unknown,
@@ -49,7 +49,7 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     dependenciesReady = true;
     const api = exports.getAPI();
     assert.equal(api.adaptHotkey, adaptHotkey);
-    assert.equal(api.openInputDialog, openInputDialog);
+    assert.equal(api.openInputDialog, createDesktopInputDialog);
     assert.equal(api.openAssetPicker, openAssetPicker);
     assert.equal(api.openDatePicker, openDatePicker);
     assert.equal(typeof api.insertContent, "function");

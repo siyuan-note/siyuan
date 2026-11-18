@@ -1,5 +1,5 @@
 import {importConfiguration} from "../config/util/resourceConfig";
-import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {MobileDialog as Dialog} from "../dialog/mobileDialog";
 import {Constants} from "../constants";
 import {escapeHtml} from "../util/escape";

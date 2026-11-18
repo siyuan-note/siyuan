@@ -76,7 +76,7 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
     const stubs = {
         "dialog": {Dialog},
         "dialog/mobileDialog": mobileRuntime,
-        "dialog/mobileInputDialog": {mobileInputDialog(options) {
+        "dialog/inputDialog": {openInputDialog(options) {
             const prompt = new Dialog({content: "<input>"});
             prompt.element.querySelector("input").value = options.value;
             confirmInput = value => {

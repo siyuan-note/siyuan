@@ -72,17 +72,13 @@ const setup = () => {
         "../protyle/util/compatibility": {}, "./message": {showMessage: (message: string) => errors.push(message)},
     });
     const input = load("src/dialog/inputDialog.ts", {
-        "./index": {Dialog: BaseDialog}, "../util/functions": functions,
-        "../util/escape": {escapeHtml: (value: string) => value},
-    });
-    const wrapper = load("src/dialog/mobileInputDialog.ts", {
-        "./mobileDialog": adapter, "./inputDialog": input, "../util/functions": functions,
+        "./mobileDialog": adapter, "./index": {Dialog: BaseDialog}, "../util/functions": functions,
         "../util/escape": {escapeHtml: (value: string) => value},
     });
     const transactions: unknown[] = [];
     let save: () => Promise<void> = () => Promise.resolve();
     const callout = load("src/protyle/wysiwyg/callout.ts", {
-        "../../dialog/mobileInputDialog": wrapper, "../../constants": constants,
+        "../../dialog/inputDialog": input, "../../constants": constants,
         "./transaction": {transaction: (...args: unknown[]) => { transactions.push(args); return save(); }},
         "../util/selectionOffsets": {focusByRange: () => restored++}, "./calloutType": {},
     });
@@ -94,7 +90,7 @@ const setup = () => {
             get outerHTML() { return `<div data-type="NodeCallout" data-subtype="${this.dataset.subtype}">selected</div>`; }}),
     };
     const protyle = {disabled: false, wysiwyg: {element: {contains: () => block.isConnected}}};
-    return {input, wrapper, BaseDialog, adapter, transactions, errors, document, block, protyle,
+    return {input, BaseDialog, adapter, transactions, errors, document, block, protyle,
         setSave: (callback: () => Promise<void>) => { save = callback; },
         open: () => { callout.updateCustomCalloutType([block], protyle); return dialogs.at(-1); },
         stats: () => ({restored, sheetBindings})};
@@ -102,16 +98,18 @@ const setup = () => {
 
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
-test("the public input dialog keeps its single options parameter and base dialog implementation", () => {
+test("the plugin input dialog defaults to the base implementation and keeps pending lifecycles out", () => {
     const source = createSourceFile("inputDialog.ts", readFileSync("src/dialog/inputDialog.ts", "utf8"),
         ScriptTarget.ES2021, true);
     const initializer = source.statements.filter(isVariableStatement)
         .flatMap(statement => Array.from(statement.declarationList.declarations))
-        .find(declaration => declaration.name.getText(source) === "openInputDialog")?.initializer;
+        .find(declaration => declaration.name.getText(source) === "createDesktopInputDialog")?.initializer;
     assert.ok(initializer && isArrowFunction(initializer));
-    assert.equal(initializer.parameters.length, 1);
+    // 第二个参数默认基础 Dialog，插件只传 options 即得到桌面实现。
+    assert.equal(initializer.parameters.length, 2);
+    assert.equal(initializer.parameters[1].initializer?.getText(source), "Dialog");
     const f = setup();
-    const dialog = f.input.openInputDialog({title: "Public", value: "Draft", onConfirm() {}});
+    const dialog = f.input.createDesktopInputDialog({title: "Public", value: "Draft", onConfirm() {}});
     assert.equal(Object.getPrototypeOf(dialog), f.BaseDialog.prototype);
     assert.equal(typeof dialog.runPending, "undefined");
     assert.equal(f.document.activeElement, dialog.input);

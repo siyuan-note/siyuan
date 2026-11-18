@@ -108,7 +108,7 @@ const runCases = async (sources, css, mobile, dark) => {
     const mobileRuntime = new Function("Dialog", "mobile", "return " + sources.mobileRuntime)(Dialog, mobile);
     stubs["dialog/mobileDialog"] = mobileRuntime;
     stubs["dialog/confirmDialog"] = mobileRuntime;
-    stubs["dialog/mobileInputDialog"] = mobileRuntime;
+    stubs["dialog/inputDialog"] = mobileRuntime;
     const {initRepoPanel} = load("history/repoPanel");
     const panel = document.createElement("div");
     panel.className = "history__repo fn__block";

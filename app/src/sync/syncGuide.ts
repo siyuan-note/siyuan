@@ -1,6 +1,6 @@
 import {MobileDialog} from "../dialog/mobileDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {config as configApi} from "../config/util/configApi";
 import {isPaidUser, needSubscribe} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
@@ -53,7 +53,7 @@ const openSyncSetting = (app?: App) => {
 };
 
 export const addCloudName = (cloudListElement: Element, cb?: (ready: boolean) => void) => {
-    const dialog = mobileInputDialog({
+    const dialog = openInputDialog({
         awaitConfirm: true,
         title: window.siyuan.languages.cloudSyncDir,
         value: "main",

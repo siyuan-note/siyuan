@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {MobileDialog} from "../../dialog/mobileDialog";
 import {switchWorkspace, importConfiguration} from "../util/resourceConfig";
@@ -124,7 +124,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "creatWorkspace") {
-                const createWorkspaceDialog = mobileInputDialog({
+                const createWorkspaceDialog = openInputDialog({
                     awaitConfirm: true,
                     title: window.siyuan.languages.new,
                     value: "",

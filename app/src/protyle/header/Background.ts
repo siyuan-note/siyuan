@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {toggleMenu} from "../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../menus/Menu";
 import {hasClosestByClassName} from "../util/hasClosest";
@@ -659,7 +659,7 @@ export class Background {
     }
 
     private openLinkDialog(protyle: IProtyle) {
-        const dialog = mobileInputDialog({
+        const dialog = openInputDialog({
             title: window.siyuan.languages.link,
             value: this.imgElement.src.startsWith("data:") ? "" : this.imgElement.getAttribute("src"),
             onConfirm: (value, dialog) => {

@@ -494,11 +494,11 @@ const createMainWindow = ({
             fullscreenable: true,
             fullscreen: windowState.fullscreen,
             trafficLightPosition: {x: 8, y: 8},
-            webPreferences: kernelWindowPreferences(kernelTarget, getRemoteSession),
             frame: "darwin" === process.platform,
             titleBarStyle: "hidden",
             // 首帧按默认主题的工具栏高度预留，融合页签与自定义主题由渲染进程校正。
-            titleBarOverlay: getTitleBarOverlayOptions(),
+            ...windowOverlay.withWindowControlsOverlay(getTitleBarOverlayOptions(),
+                kernelWindowPreferences(kernelTarget, getRemoteSession)),
             icon: appIconPath(),
         });
         remote.enable(currentWindow.webContents);

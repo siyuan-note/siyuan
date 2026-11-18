@@ -12,7 +12,7 @@ import {windowWorkspaces} from "./windowWorkspaces";
 import {showWindow} from "./windowVisibility";
 import {markExpectedRendererExit, rememberWindowKernelTarget} from "./windowLifecycle";
 import {bindSpellcheckContextMenu} from "./contextMenu";
-import {getCaptionHeight, getTitleBarOverlayOptions} from "./windowControlsOverlay";
+import {getCaptionHeight, getTitleBarOverlayOptions, withWindowControlsOverlay} from "./windowControlsOverlay";
 import {normalizeWindowGeometry} from "./windowGeometry";
 import {requireElectronRemote} from "../shared/electronRemote";
 import type {LogFunction} from "../shared/types";
@@ -138,8 +138,8 @@ const createOpenWindowHandler = ({
         icon: appIconPath(),
         titleBarStyle: "hidden",
         // 独立文档窗口的顶栏使用面板高度，并跟随当前界面密度预留。
-        titleBarOverlay: titleBarOverlay(process.platform, captionHeight(data.compactMode === true, true)),
-        webPreferences: kernelWindowPreferences(kernelTarget, getSession),
+        ...withWindowControlsOverlay(titleBarOverlay(process.platform, captionHeight(data.compactMode === true, true)),
+            kernelWindowPreferences(kernelTarget, getSession)),
     });
     requireElectronRemote().enable(win.webContents);
     bindSpellcheck(win.webContents);

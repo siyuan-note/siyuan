@@ -166,6 +166,7 @@ test("settings popup authorization requires the registered top-level page and ex
     assert.equal(allowed.overrideBrowserWindowOptions.titleBarStyle, "hidden");
     assert.deepEqual(allowed.overrideBrowserWindowOptions.titleBarOverlay,
         {color: "#00000000", symbolColor: "#808080", height: 32});
+    assert.deepEqual(allowed.overrideBrowserWindowOptions.webPreferences.additionalArguments, ["--siyuan-window-controls-overlay"]);
     assert.equal(allowed.overrideBrowserWindowOptions.autoHideMenuBar, true);
     assert.equal(allowed.overrideBrowserWindowOptions.parent, undefined);
     assert.equal(allowed.overrideBrowserWindowOptions.webPreferences.webSecurity, true);
@@ -293,6 +294,7 @@ test("Linux settings windows retain the page window controls", (t) => {
     const allowed = policy(owner, open());
     assert.equal(allowed.overrideBrowserWindowOptions.frame, false);
     assert.equal(allowed.overrideBrowserWindowOptions.titleBarOverlay, false);
+    assert.equal(allowed.overrideBrowserWindowOptions.webPreferences.additionalArguments, undefined);
 });
 
 for (const platform of ["win32", "linux", "darwin"]) {

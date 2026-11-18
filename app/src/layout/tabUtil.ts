@@ -48,7 +48,8 @@ export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
     const toolbarDragElement = document.getElementById("drag");
     const toolbarDragRect = toolbarDragElement?.getBoundingClientRect() || {left: 0, right: 0};
     const toolbarDragRightInset = toolbarDragElement && window.siyuan.config.appearance.hideToolbar &&
-        document.documentElement.dataset.frontend === "desktop" && document.body.classList.contains("body--windows") ? 24 : 0;
+        document.documentElement.dataset.frontend === "desktop" &&
+        document.body.matches(".body--windows, .body--mac, .body--linux") ? 24 : 0;
     const toolbarDragRightMinWidth = toolbarDragRightInset || 8;
     if (toolbarDragElement) {
         toolbarDragElement.style.setProperty("--b3-toolbar-drag-left", "8px");

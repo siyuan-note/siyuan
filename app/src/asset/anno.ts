@@ -1103,7 +1103,6 @@ const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement 
                     text: msg,
                     confirm: capture,
                     isDelete: false,
-                    awaitConfirm: true,
                 });
             }).catch((error) => {
                 if (isActive()) {

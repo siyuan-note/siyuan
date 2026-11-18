@@ -836,7 +836,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         }
                     },
                     isDelete: false,
-                    awaitConfirm: true,
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -1029,7 +1028,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         });
                     },
                     isDelete: true,
-                    awaitConfirm: true,
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -1080,7 +1078,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         });
                     },
                     isDelete: false,
-                    awaitConfirm: true,
                 });
                 event.stopPropagation();
                 event.preventDefault();

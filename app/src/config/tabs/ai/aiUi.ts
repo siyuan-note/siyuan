@@ -329,7 +329,6 @@ const showDeleteConfirm = (title: string, onConfirm: () => Promise<unknown>) => 
             return true;
         },
         isDelete: true,
-        awaitConfirm: true,
     });
 };
 

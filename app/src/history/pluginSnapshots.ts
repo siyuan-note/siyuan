@@ -81,7 +81,6 @@ export const mountPluginSnapshots = (app: App, root: HTMLElement, setRestoring: 
                 }
             },
             isDelete: false,
-            awaitConfirm: true,
         });
     };
     const open = (snapshot: PluginSnapshot, packageName: string, part: TPluginSnapshotPart) => {

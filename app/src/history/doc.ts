@@ -472,7 +472,6 @@ export const openDocHistory = (options: {
                             return response.code === 0;
                         },
                         isDelete: false,
-                        awaitConfirm: true,
                     });
                 });
                 event.stopPropagation();

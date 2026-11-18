@@ -545,7 +545,6 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
                         }) === true;
                     },
                     isDelete: true,
-                    awaitConfirm: true,
                 });
             } else if (action === "rename") {
                 inputPath(lang.rename, entry.path.split("/").pop(), async value => {
@@ -710,7 +709,6 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
                     }) === true;
                 },
                 isDelete: false,
-                awaitConfirm: true,
             });
         } else if (action === "save") {
             void run(async () => {

@@ -770,7 +770,6 @@ ${databaseOptions}`,
                                         return true;
                                     },
                                     isDelete: false,
-                                    awaitConfirm: true,
                                 });
                             }
                             return false;

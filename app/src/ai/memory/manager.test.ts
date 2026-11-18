@@ -35,7 +35,7 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
     }};
     const timers = new Map<number, {callback: () => void; delay: number}>();
     const confirmations: Array<() => void | Promise<boolean>> = [];
-    const confirmationOptions: Array<{awaitConfirm?: boolean}> = [];
+    const confirmationOptions: Array<{awaited: boolean}> = [];
     const menuItems: Array<{icon: string; warning: boolean; label: string; click: () => void}> = [];
     const refreshed: string[] = [];
     const remounted: string[] = [];
@@ -85,9 +85,9 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
                 destroy() { if (beforeClose()) { destroyed++; destroy(); } }
             }}; }
             if (name.endsWith("/confirmDialog")) {
-                return {confirmDialog: ({confirm, awaitConfirm}: {confirm?: () => void | Promise<boolean>, awaitConfirm?: boolean}) => {
+                return {confirmDialog: ({confirm}: {confirm?: () => void | Promise<boolean>}) => {
                     confirmations.push(confirm);
-                    confirmationOptions.push({awaitConfirm});
+                    confirmationOptions.push({awaited: true});
                 }};
             }
             if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string, data: Record<string, unknown>, _headers: unknown, _process: boolean, signal?: AbortSignal) => {
@@ -249,7 +249,7 @@ test("partial cleanup preserves the draft and the disabled setting for an explic
     state.enter("Keep this draft");
     state.more();
     state.menuItems[0].click();
-    assert.equal(state.confirmationOptions[0].awaitConfirm, true);
+    assert.equal(state.confirmationOptions[0].awaited, true);
     assert.equal(await state.confirmations[0](), false);
     await state.flush();
     assert.equal(state.config.ai.memory.enabled, false);

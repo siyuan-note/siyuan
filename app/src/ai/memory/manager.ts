@@ -404,7 +404,6 @@ export const openMemoryManager = () => {
                         text: escapeHtml(lang.aiMemoryClearAndDisableConfirm),
                         confirm: clearMemory,
                         isDelete: true,
-                        awaitConfirm: true,
                     });
                 },
             }).element);

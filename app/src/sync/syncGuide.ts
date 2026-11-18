@@ -96,7 +96,6 @@ export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: (ready: b
                                 return true;
                             }, cb),
                             isDelete: true,
-                            awaitConfirm: true,
                         });
                         break;
                     case "selectCloud":

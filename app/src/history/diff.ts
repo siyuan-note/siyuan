@@ -532,7 +532,6 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                         return response.code === 0;
                     },
                     isDelete: false,
-                    awaitConfirm: true,
                 });
                 event.preventDefault();
                 event.stopPropagation();

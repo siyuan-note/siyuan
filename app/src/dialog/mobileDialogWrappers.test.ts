@@ -103,7 +103,7 @@ test("mobile confirmation failure retains cancellation, success does not invoke 
     const f = setup();
     let cancelled = 0;
     const dialog = f.confirmDialog({title: "Title", text: "Text", confirm: async () => false,
-        cancel: () => cancelled++, awaitConfirm: true});
+        cancel: () => cancelled++});
     const event = {target: {id: "confirmDialogConfirmBtn"}, detail: 0};
     dialog.listeners.click(event);
     assert.equal(await f.pending.pop(), false);
@@ -112,15 +112,27 @@ test("mobile confirmation failure retains cancellation, success does not invoke 
     await dialog.requestClose("cancel");
     assert.equal(cancelled, 1);
     const accepted = f.confirmDialog({title: "Title", text: "Text", confirm: async () => true,
-        cancel: () => cancelled++, awaitConfirm: true});
+        cancel: () => cancelled++});
     accepted.listeners.click(event);
     assert.equal(await f.pending.pop(), true);
     assert.equal(cancelled, 1);
 });
-test("desktop confirmation renders its own labels and does not wait for confirmation", () => {
+test("desktop confirmation waits for the confirm handler and keeps the dialog on failure", async () => {
+    const f = setup(false);
+    let attempts = 0;
+    const dialog = f.confirmDialog({title: "Title", text: "Text", confirm: async () => ++attempts > 1});
+    dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(f.events.includes("destroy"), false);
+    dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(f.events.filter((item: string) => item === "destroy").length, 1);
+});
+
+test("desktop confirmation renders its own labels", () => {
     const f = setup(false);
     const dialog = f.confirmDialog({title: "Title", text: "Text", cancelLabel: "Later", confirmLabel: "Delete",
-        isDelete: true, awaitConfirm: true});
+        isDelete: true});
     assert.match(dialog.options.content, />Later</);
     assert.match(dialog.options.content, />Delete</);
     assert.match(dialog.options.content, /b3-button--remove/);

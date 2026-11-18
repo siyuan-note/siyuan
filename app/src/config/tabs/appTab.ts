@@ -167,7 +167,6 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                         });
                     },
                     isDelete: true,
-                    awaitConfirm: true,
                 });
                 break;
             } else if (target.classList.contains("b3-list-item") && !target.classList.contains("b3-list-item--focus")) {

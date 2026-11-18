@@ -226,7 +226,7 @@ test("mobile workspace deletion awaits success and keeps list-only cancellation 
     }).outputText;
     let slot: Slot;
     let click: (event: unknown) => void;
-    let confirmation: {awaitConfirm?: boolean, confirm: () => Promise<boolean>, cancel: () => void};
+    let confirmation: {confirm: () => Promise<boolean>, cancel: () => void};
     let complete: (response: {code: number}) => void;
     let reads = 0;
     const requests: Array<{url: string; path: string}> = [];
@@ -265,7 +265,6 @@ test("mobile workspace deletion awaits success and keeps list-only cancellation 
     const remove = (path: string) => click({target: {id: "", getAttribute: () => "remove",
         parentElement: {getAttribute: () => path}}, preventDefault() {}, stopPropagation() {}});
     remove(target);
-    assert.equal(confirmation.awaitConfirm, true);
     const confirm = confirmation.confirm;
     const cancel = confirmation.cancel;
     const failed = confirm();

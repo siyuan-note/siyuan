@@ -143,7 +143,6 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
             cancel: () => { busy = false; updateActions(); },
             isDelete: true,
             confirmLabel: lang.confirm,
-            awaitConfirm: true,
         });
     };
     root.addEventListener("click", event => {

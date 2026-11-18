@@ -335,7 +335,6 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
                     }
                 },
                 isDelete: true,
-                awaitConfirm: true,
             });
         } else if (action === "purge") {
             const pane = button.closest<HTMLElement>("[data-repo-source]");
@@ -367,7 +366,6 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
                     }
                 },
                 isDelete: false,
-                awaitConfirm: true,
             });
         }
     });

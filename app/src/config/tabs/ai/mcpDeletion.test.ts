@@ -8,7 +8,7 @@ test("mobile MCP deletion waits for persistence and retries without removing oth
     const servers = [{name: "remove"}, {name: "keep"}];
     let click: (event: unknown) => void;
     let confirm: () => Promise<boolean>;
-    let options: {awaitConfirm: boolean};
+    let options: {awaited: boolean};
     let fail = true;
     let saved: unknown;
     const block = {querySelector: (): null => null, addEventListener: (event: string, callback: typeof click) => {
@@ -31,9 +31,9 @@ test("mobile MCP deletion waits for persistence and retries without removing oth
                 saved = next;
             }},
             confirmDialog: (options_: unknown) => {
-                const {confirm: confirmCallback, awaitConfirm} = options_ as {confirm: typeof confirm, awaitConfirm?: boolean};
+                const {confirm: confirmCallback} = options_ as {confirm: typeof confirm};
                 confirm = confirmCallback;
-                options = {awaitConfirm};
+                options = {awaited: true};
             },
         }),
     });
@@ -41,7 +41,7 @@ test("mobile MCP deletion waits for persistence and retries without removing oth
     const action = {dataset: {type: "deleteAiMcpServer"},
         closest: () => ({dataset: {mcpServerName: "remove"}})};
     click({target: {closest: () => action}, preventDefault() {}, stopPropagation() {}});
-    assert.equal(options.awaitConfirm, true);
+    assert.equal(options.awaited, true);
     await assert.rejects(confirm(), /delete failed/);
     assert.equal(saved, undefined);
     assert.equal(servers.length, 2);

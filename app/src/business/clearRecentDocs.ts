@@ -54,7 +54,6 @@ export const bindClearRecentDocs = (button: HTMLButtonElement, getSortBy: () => 
             },
             cancel: finish,
             isDelete: false,
-            awaitConfirm: true,
         });
     });
     update();

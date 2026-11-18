@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "Installa ora",
+	"updateInstallLater": "Non ora",
 	"hideGlobalBreadcrumbIcons": "Nascondi le icone del percorso di navigazione",
 	"hideGlobalBreadcrumbIconsTip": "Quando è attiva, questa opzione nasconde le icone delle voci con testo nel percorso di navigazione globale",
 	"updateReleaseAnnouncement": "Annuncio della versione: ${link}",

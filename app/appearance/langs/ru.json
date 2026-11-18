@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "Установить сейчас",
+	"updateInstallLater": "Не сейчас",
 	"hideGlobalBreadcrumbIcons": "Скрывать значки цепочки навигации",
 	"hideGlobalBreadcrumbIconsTip": "Скрывает значки элементов с текстом в глобальной цепочке навигации, когда параметр включён",
 	"updateReleaseAnnouncement": "Объявление о выпуске: ${link}",

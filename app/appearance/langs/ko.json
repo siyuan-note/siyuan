@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "지금 설치",
+	"updateInstallLater": "나중에 설치",
 	"hideGlobalBreadcrumbIcons": "이동 경로 아이콘 숨기기",
 	"hideGlobalBreadcrumbIconsTip": "활성화하면 전역 이동 경로에서 텍스트가 있는 항목의 아이콘을 숨깁니다",
 	"updateReleaseAnnouncement": "릴리스 공지: ${link}",

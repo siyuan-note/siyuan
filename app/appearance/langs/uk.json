@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "Встановити зараз",
+	"updateInstallLater": "Не зараз",
 	"hideGlobalBreadcrumbIcons": "Приховувати піктограми ланцюжка навігації",
 	"hideGlobalBreadcrumbIconsTip": "Якщо ввімкнено, приховує піктограми елементів із текстом у глобальному ланцюжку навігації",
 	"updateReleaseAnnouncement": "Оголошення про випуск: ${link}",

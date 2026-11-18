@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "Instalar ahora",
+	"updateInstallLater": "Ahora no",
 	"hideGlobalBreadcrumbIcons": "Ocultar los iconos de la ruta de navegación",
 	"hideGlobalBreadcrumbIconsTip": "Al activarlo, se ocultan los iconos de las entradas con texto en la ruta de navegación global",
 	"updateReleaseAnnouncement": "Anuncio de la versión: ${link}",

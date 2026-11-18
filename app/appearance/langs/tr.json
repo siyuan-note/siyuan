@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "Şimdi yükle",
+	"updateInstallLater": "Şimdi değil",
 	"hideGlobalBreadcrumbIcons": "Gezinme yolu simgelerini gizle",
 	"hideGlobalBreadcrumbIconsTip": "Etkinleştirildiğinde genel gezinme yolunda metin içeren öğelerin simgelerini gizler",
 	"updateReleaseAnnouncement": "Sürüm duyurusu: ${link}",

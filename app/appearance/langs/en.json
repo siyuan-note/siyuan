@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "Install now",
+	"updateInstallLater": "Not now",
 	"hideGlobalBreadcrumbIcons": "Hide breadcrumb icons",
 	"hideGlobalBreadcrumbIconsTip": "When enabled, hide icons on entries with text in the global breadcrumb",
 	"updateReleaseAnnouncement": "Release announcement: ${link}",

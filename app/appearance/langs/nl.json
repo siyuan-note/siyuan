@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "Nu installeren",
+	"updateInstallLater": "Niet nu",
 	"hideGlobalBreadcrumbIcons": "Broodkruimelpictogrammen verbergen",
 	"hideGlobalBreadcrumbIconsTip": "Verbergt pictogrammen van items met tekst in het globale broodkruimelpad wanneer ingeschakeld",
 	"updateReleaseAnnouncement": "Releaseaankondiging: ${link}",

@@ -8,7 +8,8 @@ const compiled = transpileModule(readFileSync("src/dialog/confirmDialog.ts", "ut
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const fixture = (extra = true) => {
+const fixture = (extra = true, labels: [string?, string?] = []) => {
+    let content: string;
     const calls: string[] = [];
     const inserted: {id?: string, textContent?: string}[] = [];
     let click: (event: unknown) => void;
@@ -28,7 +29,8 @@ const fixture = (extra = true) => {
             Constants: {DIALOG_CONFIRM: "confirm"},
             Dialog: class {
                 element = element;
-                constructor(options: {destroyCallback: () => void}) {
+                constructor(options: {content: string, destroyCallback: () => void}) {
+                    content = options.content;
                     destroy = options.destroyCallback;
                 }
                 destroy() {
@@ -38,8 +40,9 @@ const fixture = (extra = true) => {
         }),
     });
     exports.confirmDialog("Title", "Text", () => calls.push("confirm"), () => calls.push("cancel"), false,
-        extra ? {label: "Move and keep sorting", callback: () => calls.push("move")} : undefined);
+        extra ? {label: "Move and keep sorting", callback: () => calls.push("move")} : undefined, ...labels);
     return {
+        content,
         calls,
         inserted,
         close: () => destroy(),
@@ -76,4 +79,16 @@ test("confirmation and Enter retain their original action with or without the ex
             assert.deepEqual(f.calls, ["confirm"]);
         }
     }
+});
+
+test("custom button labels preserve the standard confirm and cancel actions", () => {
+    const labels: [string, string] = ["Install now", "Not now"];
+    const f = fixture(false, labels);
+    assert.match(f.content, /id="cancelDialogConfirmBtn">Not now<\/button>/);
+    assert.match(f.content, /id="confirmDialogConfirmBtn">Install now<\/button>/);
+    f.click("cancelDialogConfirmBtn");
+    assert.deepEqual(f.calls, ["cancel"]);
+    const defaults = fixture(false);
+    assert.match(defaults.content, /id="cancelDialogConfirmBtn">Cancel<\/button>/);
+    assert.match(defaults.content, /id="confirmDialogConfirmBtn">Confirm<\/button>/);
 });

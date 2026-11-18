@@ -268,14 +268,18 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
             }
             /// #endif
 
-            let announcement = "";
+            let message = response.msg;
             const releaseURL = response.data.releaseURL;
             if (releaseURL && /^https?:\/\//i.test(releaseURL)) {
                 const escapedURL = escapeHtmlTextAndAttr(releaseURL);
                 const link = `<a href="${escapedURL}" target="_blank" rel="noopener">${escapedURL}</a>`;
-                announcement = `<div class="fn__hr"></div>${escapeHtml(window.siyuan.languages.updateReleaseAnnouncement).replace("${link}", () => link)}`;
+                const announcement = escapeHtml(window.siyuan.languages.updateReleaseAnnouncement).replace("${link}", () => link);
+                const paragraphBreak = "<br><br>";
+                message = message.includes(paragraphBreak) ?
+                    message.replace(paragraphBreak, () => paragraphBreak + announcement + paragraphBreak) :
+                    message + paragraphBreak + announcement;
             }
-            confirmDialog(window.siyuan.languages.updateVersion, response.msg + announcement, () => {
+            confirmDialog(window.siyuan.languages.updateVersion, message, () => {
                 installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
             }, () => {
                 void requestSystemExit({
@@ -283,7 +287,7 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                     setCurrentWorkspace,
                     execInstallPkg: 1 // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
                 }, forceQuit);
-            });
+            }, false, undefined, window.siyuan.languages.updateInstallNow, window.siyuan.languages.updateInstallLater);
         } else { // 正常退出
             forceQuit();
         }

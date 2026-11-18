@@ -6,6 +6,9 @@ import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} fr
 import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 
 const {parse} = require("ifdef-loader/preprocessor");
+const question = "Install new version?";
+const warning = "<span class='ft__on-surface'>Wait for SiYuan to exit</span>";
+const installMessage = `${question}<br><br>${warning}`;
 
 for (const mobile of [false, true]) {
     for (const releaseURL of [undefined, "javascript:alert(1)",
@@ -30,9 +33,12 @@ for (const mobile of [false, true]) {
                 installNewVersion: (...args: unknown[]) => installs.push(args),
                 requestSystemExit: async (options: unknown, callback: (response: unknown) => void) => {
                     requests.push(options);
-                    callback(requests.length === 1 ? {code: 2, msg: "Install new version?", data: {installPkgPath: "update.dmg", releaseURL}} : {code: 0});
+                    callback(requests.length === 1 ? {code: 2, msg: installMessage, data: {installPkgPath: "update.dmg", releaseURL}} : {code: 0});
                 },
-                window: {siyuan: {config: {system: {}}, languages: {updateVersion: "Update", updateReleaseAnnouncement: "Release announcement: ${link}"}}},
+                window: {siyuan: {config: {system: {}}, languages: {
+                    updateVersion: "Update", updateReleaseAnnouncement: "Release announcement: ${link}",
+                    updateInstallNow: "Install now", updateInstallLater: "Not now",
+                }}},
             };
             const exit = runInNewContext(transpileModule(`const exitSiYuan = ${declaration.initializer.getText(source)}; exitSiYuan;`, {
                 compilerOptions: {target: ScriptTarget.ES2021},
@@ -40,12 +46,12 @@ for (const mobile of [false, true]) {
             await exit(false);
             assert.equal(installs.length, 0);
             assert.equal(quits, 0);
-            assert.match(dialogs[0][1], /Install new version\?/);
+            assert.deepEqual(dialogs[0].slice(6), ["Install now", "Not now"]);
             if (releaseURL?.startsWith("https://")) {
                 const escapedURL = escapeHtmlTextAndAttr(releaseURL);
-                assert.equal(dialogs[0][1], `Install new version?<div class="fn__hr"></div>Release announcement: <a href="${escapedURL}" target="_blank" rel="noopener">${escapedURL}</a>`);
+                assert.equal(dialogs[0][1], `${question}<br><br>Release announcement: <a href="${escapedURL}" target="_blank" rel="noopener">${escapedURL}</a><br><br>${warning}`);
             } else {
-                assert.equal(dialogs[0][1], "Install new version?");
+                assert.equal(dialogs[0][1], installMessage);
             }
             dialogs[0][2]();
             assert.deepEqual(installs, [["update.dmg", false]]);

@@ -6,7 +6,7 @@ export const confirmDialog = (title: string, text: string,
                               confirm?: (dialog?: Dialog) => void,
                               cancel?: (dialog: Dialog) => void,
                               isDelete = false,
-                              extraAction?: {label: string, callback: () => void}, confirmLabel?: string) => {
+                              extraAction?: {label: string, callback: () => void}, confirmLabel?: string, cancelLabel?: string) => {
     if (!text && !title) {
         confirm();
         return;
@@ -26,7 +26,7 @@ export const confirmDialog = (title: string, text: string,
     <div class="ft__breakword">${text}</div>
 </div>
 <div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel" id="cancelDialogConfirmBtn">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--cancel" id="cancelDialogConfirmBtn">${cancelLabel || window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button ${isDelete ? "b3-button--remove" : "b3-button--text"}" id="confirmDialogConfirmBtn">${confirmLabel || window.siyuan.languages[isDelete ? "delete" : "confirm"]}</button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",

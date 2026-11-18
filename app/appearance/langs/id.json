@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "Instal sekarang",
+	"updateInstallLater": "Nanti saja",
 	"hideGlobalBreadcrumbIcons": "Sembunyikan ikon breadcrumb",
 	"hideGlobalBreadcrumbIconsTip": "Jika diaktifkan, ikon pada entri berteks di breadcrumb global disembunyikan",
 	"updateReleaseAnnouncement": "Pengumuman rilis: ${link}",

@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "Jetzt installieren",
+	"updateInstallLater": "Später installieren",
 	"hideGlobalBreadcrumbIcons": "Symbole im Navigationspfad ausblenden",
 	"hideGlobalBreadcrumbIconsTip": "Blendet bei Aktivierung die Symbole von Einträgen mit Text im globalen Navigationspfad aus",
 	"updateReleaseAnnouncement": "Veröffentlichungsankündigung: ${link}",

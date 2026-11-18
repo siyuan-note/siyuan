@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "התקנה עכשיו",
+	"updateInstallLater": "לא עכשיו",
 	"hideGlobalBreadcrumbIcons": "הסתרת סמלים בנתיב הניווט",
 	"hideGlobalBreadcrumbIconsTip": "כאשר אפשרות זו מופעלת, הסמלים של פריטים עם טקסט בנתיב הניווט הכללי יוסתרו",
 	"updateReleaseAnnouncement": "הכרזת גרסה: ${link}",

@@ -1,4 +1,6 @@
 {
+	"updateInstallNow": "Инсталирај сада",
+	"updateInstallLater": "Не сада",
 	"hideGlobalBreadcrumbIcons": "Сакриј иконе путање за навигацију",
 	"hideGlobalBreadcrumbIconsTip": "Када је укључено, сакрива иконе ставки са текстом у глобалној путањи за навигацију",
 	"updateReleaseAnnouncement": "Објава издања: ${link}",

@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20261115223610"
+		"updated": "20261118224805"
 	},
 	"Children": [
 		{
@@ -115,6 +115,20 @@
 				{
 					"Type": "NodeText",
 					"Data": ". Groups are expanded by default. This preference applies only when grouping by document. New searches and refreshed results follow this preference; you can still expand or collapse groups manually. The first result remains available in the desktop preview, and keyboard navigation expands the group containing the selected result."
+				}
+			]
+		},
+		{
+			"ID": "20261118224805-tz4wptt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118224805-tz4wptt",
+				"updated": "20261118224805"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the first highlighted match would be cut off in a single-line search result, the list shortens the text before it to bring the match into view."
 				}
 			]
 		},

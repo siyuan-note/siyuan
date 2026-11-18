@@ -61,6 +61,7 @@ import {electronUndo} from "../protyle/undo";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {IDatabaseItemOpenData, openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
 import {scheduleSearchRequest} from "./request";
+import {observeSearchResultSnippets} from "./resultSnippet";
 import {
     buildSearchRequest,
     cloneSearchConfig,
@@ -1727,7 +1728,8 @@ ${countHTML}
         edit.protyle.element.classList.add("fn__none");
         element.querySelector(".search__drag").classList.add("fn__none");
     }
-    element.querySelector("#searchList").innerHTML = resultHTML || (
+    const listElement = element.querySelector("#searchList");
+    listElement.innerHTML = resultHTML || (
         config.method === 0 ? `<div class="b3-list-item b3-list-item--focus" data-type="search-new">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
     <span class="b3-list-item__text">
@@ -1742,6 +1744,7 @@ ${countHTML}
         ${window.siyuan.languages.emptyContent}
     </span>
 </div>`);
+    observeSearchResultSnippets(listElement);
     if (currentData) {
         const currentList = element.querySelector(`[data-node-id="${currentData.id}"]`) as HTMLElement;
         if (currentList) {

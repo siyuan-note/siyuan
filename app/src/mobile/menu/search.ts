@@ -46,6 +46,7 @@ import {
     toggleSearchHistory
 } from "../../search/toggleHistory";
 import {cancelSearchRequest, scheduleSearchRequest} from "../../search/request";
+import {observeSearchResultSnippets} from "../../search/resultSnippet";
 import {highlightMobileSearchResult} from "./searchHighlight";
 
 let searchOpenVersion = 0;
@@ -274,6 +275,7 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
         ${window.siyuan.languages.newFile} <mark>${(document.querySelector("#toolbarSearch") as HTMLTextAreaElement).value}</mark>
     </span>
 </div>`;
+    observeSearchResultSnippets(listElement);
     listElement.scrollTop = 0;
     let countHTML = "";
     if (response && response.data.matchedBlockCount > 0) {

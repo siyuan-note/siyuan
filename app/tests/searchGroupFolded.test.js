@@ -65,13 +65,18 @@ const fixture = (mobile, folded, group = 1) => {
     const editor = new Element();
     const drag = new Element();
     const previews = [];
+    const observedRows = [];
     const config = {group, method: 0, page: 1};
     const window = {siyuan: {config: {search: folded === undefined ? {} : {groupFolded: folded}}, languages: {}}};
     const context = {window, document: {querySelector: () => list},
         escapeHtml: value => value, escapeHtmlTextAndAttr: value => value, getDisplayName: value => value,
         getNotebookName: () => "Notebook", getNotebookIcon: () => "", getFileTreeIconHTML: () => "",
         unicode2Emoji: () => "", getIconByType: () => "iconParagraph", getAttr: () => "",
-        getArticle: options => previews.push(options.id), getSearchAVMatchesFromHTML: () => []};
+        getArticle: options => previews.push(options.id), getSearchAVMatchesFromHTML: () => [],
+        observeSearchResultSnippets: element => {
+            assert.equal(element, list);
+            observedRows.push(element.querySelectorAll('[data-type="search-item"]').map(row => row.dataset.nodeId));
+        }};
     const onSearch = load(mobile ? "src/mobile/menu/search.ts" : "src/search/util.ts", mobile ? "onRecentBlocks" : "onSearch", context);
     const data = ["one", "two"].map((doc, index) => ({box: "box", hPath: doc, children:
         Array.from({length: index ? 1 : 2}, (_, i) => ({id: doc + i, rootID: doc, type: "NodeParagraph", ial: {}, content: "hit", box: "box", hPath: doc}))}));
@@ -80,7 +85,7 @@ const fixture = (mobile, folded, group = 1) => {
         selector === "#searchInput" ? {value: "hit"} : list.querySelector(selector)};
     const render = (focus) => mobile ? onSearch(group ? data : flat, config, undefined, focus) :
         onSearch(group ? data : flat, {protyle: {element: editor}}, element, config, focus);
-    return {render, context, config, list, host, previews, window};
+    return {render, context, config, list, host, observedRows, previews, window};
 };
 
 const groups = state => state.list.children.filter(child => !child.classList.contains("b3-list-item"));
@@ -107,6 +112,7 @@ for (const mobile of [false, true]) {
             const state = fixture(mobile, preference);
             state.render();
             assertFolded(state, [!!preference, !!preference]);
+            assert.deepEqual(state.observedRows, [["one0", "one1", "two0"]]);
             assert.equal(state.list.querySelector(".b3-list-item--focus").dataset.nodeId, "one0");
             if (!mobile) assert.deepEqual(state.previews, ["one0"]);
             const context = {searchPanelElement: state.list, searchListElement: state.list};
@@ -129,6 +135,7 @@ for (const mobile of [false, true]) {
         const state = fixture(mobile, true, 0);
         state.render();
         assert.equal(state.list.children.length, 3);
+        assert.deepEqual(state.observedRows, [["one0", "one1", "two0"]]);
         assert.equal(state.list.querySelectorAll(".fn__none").length, 0);
         assert.equal(state.list.querySelectorAll(".b3-list-item__arrow").length, 0);
     });

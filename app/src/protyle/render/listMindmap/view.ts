@@ -1881,7 +1881,8 @@ export class ListMindmapView {
             const selected = this.selectedSummary === summary.id && !this.printTransform && !this.options.printLayout;
             const hovered = this.hoveredLine === `summary:${summary.id}` && !this.printTransform && !this.options.printLayout;
             const inherited = resolveListMindmapSummaryStyle(this.model, summary, this.themeColors);
-            element.style.color = inherited.textColor || "";
+            const canvasBackground = this.model.metadata.appearance?.backgroundColor;
+            element.style.color = inherited.textColor || (canvasBackground ? getMindmapTextColor(canvasBackground) : "");
             element.style.backgroundColor = inherited.backgroundColor || "";
             const style = resolveStyle(inherited.lineColor, selected, hovered);
             context.strokeStyle = style.color;
@@ -4488,7 +4489,7 @@ export class ListMindmapView {
                 });
                 const lineControls = [];
                 if (this.options.onManageLineColors) {
-                    lineControls.push(button("listMindmapManageLineColors", "iconLine", this.options.onManageLineColors));
+                    lineControls.push(button("listMindmapManageLineColors", "iconSettings", this.options.onManageLineColors));
                 }
                 this.inspectorPopover.append(this.makePaletteRow(lines, lineControls));
             }
@@ -4589,7 +4590,7 @@ export class ListMindmapView {
                 palette.append(button);
             });
             if (this.options.onManageLineColors) {
-                controls.push(squareButton("listMindmapManageLineColors", "iconLine", this.options.onManageLineColors));
+                controls.push(squareButton("listMindmapManageLineColors", "iconSettings", this.options.onManageLineColors));
             }
             this.inspector.append(this.makePaletteRow(palette, controls, this.selectedRelation ? 6 : 8));
         };

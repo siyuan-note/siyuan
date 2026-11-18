@@ -52,17 +52,20 @@ test("committed summary paths retain their shapes and hit testing across styles,
     }
 });
 
-test("summary colors follow the covered branch, preserve manual colors and inherit the root background", () => {
+test("summary lines follow the covered branch while text uses its actual background and preserves manual colors", () => {
     const model = {root: {id: "root"}, metadata: {nodes: {}}} as ListMindmapModel;
     const summary = {id: "summary", parentId: "root", nodeIds: ["child"], label: "Summary"};
     const themed = new Map([["child", {textColor: "black", lineColor: "blue", backgroundColor: "white"}],
         ["root", {textColor: "white", lineColor: "green", backgroundColor: "black"}]]);
     assert.deepEqual(resolveListMindmapSummaryStyle(model, summary, themed),
-        {textColor: "black", lineColor: "blue", backgroundColor: undefined});
+        {textColor: undefined, lineColor: "blue", backgroundColor: undefined});
     assert.deepEqual(resolveListMindmapSummaryStyle(model, {...summary, color: "red"}, themed),
         {textColor: "red", lineColor: "red", backgroundColor: undefined});
     assert.deepEqual(resolveListMindmapSummaryStyle(model, {...summary, nodeIds: ["root"]}, themed),
         {textColor: "white", lineColor: "green", backgroundColor: "black"});
+    model.metadata.nodes.root = {backgroundColor: "#ffffff"};
+    assert.deepEqual(resolveListMindmapSummaryStyle(model, {...summary, nodeIds: ["root"]}, themed),
+        {textColor: "#000000", lineColor: "green", backgroundColor: "#ffffff"});
     model.metadata.nodes.child = {textColor: "purple", lineColor: "orange"};
     assert.deepEqual(resolveListMindmapSummaryStyle(model, summary, themed),
         {textColor: "purple", lineColor: "orange", backgroundColor: undefined});

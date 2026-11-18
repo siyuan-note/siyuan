@@ -58,12 +58,21 @@ export const createColorField = (host: HTMLElement, options: {
     const hex = makeInput("HEX");
     const rgb = ["R", "G", "B"].map(makeInput);
     rgb.forEach(input => input.inputMode = "numeric");
+    const status = doc.createElement("div");
+    status.className = "color-picker__status ft__error";
+    [lang.invalidColor, lang.colorPickerComposing, lang.nativeColorUnavailable].forEach(message => {
+        const reserve = doc.createElement("div");
+        reserve.className = "color-picker__status-reserve";
+        reserve.setAttribute("aria-hidden", "true");
+        reserve.textContent = message;
+        status.append(reserve);
+    });
     const error = doc.createElement("div");
-    error.className = "ft__error";
     error.setAttribute("role", "status");
     error.id = "color-picker-error-" + Math.random().toString(36).substring(2);
     [hex, ...rgb].forEach(input => input.setAttribute("aria-describedby", error.id));
-    root.append(preview, controls, error);
+    status.append(error);
+    root.append(preview, controls, status);
     host.append(root);
     const validate = (): TColorFieldState => disposed ? "invalid" : disabled ? "valid" : composing.size ? "composing" : invalid ? "invalid" : "valid";
     const notify = () => options.onStateChange?.();

@@ -64070,6 +64070,9 @@
         },
         "installPkgPath": {
           "type": "string"
+        },
+        "releaseURL": {
+          "type": "string"
         }
       },
       "required": [

@@ -494,8 +494,11 @@ jobs:
       testing_ref: ${{ needs.prepare.outputs.testing_ref }}
 
   package_macos_arm64:
-
-    needs: [prepare, build_macos_arm64]
+    # 两个封装任务串行，给四个独立 E2E 分组保留 macOS 并发槽位；Intel 封装失败仍继续。
+    needs: [prepare, build_macos_arm64, package_macos_amd64]
+    if: >-
+      ${{ always() && !cancelled() && needs.prepare.result == 'success' &&
+          needs.build_macos_arm64.result == 'success' && needs.package_macos_amd64.result != 'cancelled' }}
     uses: ./.github/workflows/desktop-package.yml
     with:
       config: >-

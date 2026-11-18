@@ -22,7 +22,14 @@ var getBookmarkLabels = contractHandler(apicontract.GetBookmarkLabels, func(c *g
 
 var batchGetBlockAttrs = contractHandler(apicontract.BatchGetBlockAttrs, func(c *gin.Context, request apicontract.BlockIDsRequest) apicontract.Response[map[string]map[string]string] {
 	ids := filterBlockIDsByPublishAccess(c, request.IDs, "")
-	return apicontract.Success(sql.BatchGetBlockAttrs(ids))
+	attrs := sql.BatchGetBlockAttrs(ids)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		for id, ial := range attrs {
+			attrs[id] = model.FilterBlockAttrsByPublishAccess(c, publishAccess, ial)
+		}
+	}
+	return apicontract.Success(attrs)
 })
 
 var getBlockAttrs = contractHandler(apicontract.GetBlockAttrs, func(c *gin.Context, request apicontract.BlockIDRequest) apicontract.Response[map[string]string] {
@@ -34,7 +41,11 @@ var getBlockAttrs = contractHandler(apicontract.GetBlockAttrs, func(c *gin.Conte
 		return apicontract.FailureFrom[map[string]string](err)
 	}
 
-	return apicontract.Success(sql.GetBlockAttrs(id))
+	attrs := sql.GetBlockAttrs(id)
+	if model.IsReadOnlyRoleContext(c) {
+		attrs = model.FilterBlockAttrsByPublishAccess(c, model.GetPublishAccess(), attrs)
+	}
+	return apicontract.Success(attrs)
 })
 
 var setBlockAttrs = contractHandler(apicontract.SetBlockAttrs, func(c *gin.Context, request apicontract.SetBlockAttrsRequest) apicontract.Response[apicontract.Null] {

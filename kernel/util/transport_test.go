@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 )
 
@@ -25,8 +26,9 @@ func TestShouldRedirectToTLS(t *testing.T) {
 		{name: "plaintext ipv6 loopback", method: http.MethodGet, remoteAddr: "[::1]:54321", requestURI: "/api/system/version", want: false},
 		{name: "cors preflight from other host", method: http.MethodOptions, remoteAddr: "192.0.2.10:54321", requestURI: "/api/system/getConf", want: false},
 		{name: "already tls", method: http.MethodGet, remoteAddr: "192.0.2.10:54321", requestURI: "/api/system/version", tls: true, want: false},
-		{name: "absolute request target", method: http.MethodGet, remoteAddr: "192.0.2.10:54321", requestURI: "https://evil.example/", want: false},
-		{name: "protocol relative request target", method: http.MethodGet, remoteAddr: "192.0.2.10:54321", requestURI: "//evil.example/", want: false},
+		{name: "absolute request target", method: http.MethodGet, remoteAddr: "192.0.2.10:54321", requestURI: "https://evil.example/", want: true},
+		{name: "protocol relative request target", method: http.MethodGet, remoteAddr: "192.0.2.10:54321", requestURI: "//evil.example/", want: true},
+		{name: "query containing scheme", method: http.MethodGet, remoteAddr: "192.0.2.10:54321", requestURI: "/check-auth?next=https://attacker.invalid", want: true},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -40,6 +42,32 @@ func TestShouldRedirectToTLS(t *testing.T) {
 				t.Fatalf("ShouldRedirectToTLS = %v, want %v", actual, test.want)
 			}
 		})
+	}
+}
+
+func TestRedirectTarget(t *testing.T) {
+	tests := []struct {
+		name   string
+		url    *url.URL
+		target string
+		ok     bool
+	}{
+		{name: "origin form", url: &url.URL{Path: "/check-auth", RawQuery: "next=https://attacker.invalid"}, target: "/check-auth?next=https://attacker.invalid", ok: true},
+		{name: "absolute form", url: &url.URL{Scheme: "http", Host: "notes.example.com", Path: "/check-auth"}, target: "/check-auth", ok: true},
+		{name: "protocol relative path", url: &url.URL{Path: "//evil.example/check-auth"}, ok: false},
+		{name: "opaque target", url: &url.URL{Scheme: "http", Opaque: "foo"}, ok: false},
+		{name: "empty path", url: &url.URL{}, target: "/", ok: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			target, ok := RedirectTarget(&http.Request{URL: test.url})
+			if target != test.target || ok != test.ok {
+				t.Fatalf("RedirectTarget = (%q, %v), want (%q, %v)", target, ok, test.target, test.ok)
+			}
+		})
+	}
+	if target, ok := RedirectTarget(nil); ok || "" != target {
+		t.Fatalf("RedirectTarget(nil) = (%q, %v)", target, ok)
 	}
 }
 

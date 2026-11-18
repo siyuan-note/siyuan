@@ -154,7 +154,7 @@ const setupFixture = async ({sources, languages, mobile}) => {
     };
     Object.assign(dependencies, {
         Constants: {LOCAL_BAZAAR: "local-bazaar"},
-        getFrontend: () => mobile ? "browser-mobile" : "browser-desktop", isMobile: () => mobile,
+        getFrontend: () => mobile ? "browser-mobile" : "browser-desktop", isMobile: () => mobile, isInIOS: () => false,
         syncRatingUser: () => false, renderBazaarInstall() {},
         showMessage: message => persistence.messages.push(message),
         fetchPost: (url, data, callback) => {

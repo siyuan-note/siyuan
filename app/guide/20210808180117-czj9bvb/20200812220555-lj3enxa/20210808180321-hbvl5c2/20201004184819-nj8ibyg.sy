@@ -6,7 +6,7 @@
 		"id": "20201004184819-nj8ibyg",
 		"title": "在浏览器上使用",
 		"type": "doc",
-		"updated": "20261024161816"
+		"updated": "20261117222105"
 	},
 	"Children": [
 		{
@@ -344,6 +344,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中配置锁屏密码。留空表示不启用密码登录；正常的非本地访问仍需要密码或有效的 OIDC 配置。请先完成鉴权配置，再将内核开放给其他设备。"
+				}
+			]
+		},
+		{
+			"ID": "20261117222105-dfzwve3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261117222105-dfzwve3",
+				"updated": "20261117222105"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "跟随系统锁屏"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 仅支持 Windows 和 macOS。Linux 请在锁定系统前，通过工作空间菜单中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "锁屏"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 手动锁定思源。"
 				}
 			]
 		},

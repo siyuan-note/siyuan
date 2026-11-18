@@ -33,7 +33,9 @@ const browserCases = async (sources: Record<string, string>, css: string, theme:
     document.body.className = "";
     const languages = {color: "Color", originalValue: "Original", new: "Draft", cancel: "Cancel", confirm: "Apply",
         themeLight: "Light", themeDark: "Dark", colorFont: "Text", colorPrimary: "Background",
-        invalidColor: "Invalid HEX or RGB", colorPickerComposing: "Finish composing", nativeColorUnavailable: "Use numeric inputs"};
+        invalidColor: "Enter a HEX color or integer RGB values from 0 to 255",
+        colorPickerComposing: "Finish composing before applying the color",
+        nativeColorUnavailable: "Graphical color selection is unavailable; use HEX or RGB input"};
     const modules: Record<string, any> = {};
     const load = (name: string, deps: Record<string, unknown> = {}) => {
         const exports = {};
@@ -101,6 +103,31 @@ const browserCases = async (sources: Record<string, string>, css: string, theme:
     const themeHost = document.createElement("div"); themeHost.innerHTML = themeEditor.getThemeColorEditorHTML(); document.body.append(themeHost);
     const colors = themeEditor.bindThemeColorEditor(themeHost);
     const themeInputs = themeHost.querySelectorAll<HTMLInputElement>('[data-field] input[type="text"]');
+    for (const mobile of [false, true]) {
+        document.documentElement.dataset.frontend = mobile ? "mobile" : "desktop";
+        for (const width of [280, 760]) {
+            for (const fontSize of [14, 24]) {
+                themeHost.style.cssText = `width:${width}px;font-size:${fontSize}px`;
+                const bounds = () => [themeHost.getBoundingClientRect().height,
+                    themeHost.querySelector('[data-property="backgroundColor"]').getBoundingClientRect().top];
+                const baseline = bounds();
+                const status = themeHost.querySelector<HTMLElement>('[role="status"]');
+                check.equal(status.textContent, "", "reserved hints are absent from the live status");
+                for (const [input, invalid] of [[themeInputs[0], "#4b83"], [themeInputs[1], "256"]] as const) {
+                    edit(input, invalid);
+                    check.equal(status.textContent, languages.invalidColor);
+                    check.equal(input.getAttribute("aria-invalid"), "true");
+                    check.deepEqual(bounds(), baseline,
+                        `invalid HEX/RGB preserve editor layout (mobile=${mobile}, width=${width}, font=${fontSize})`);
+                    edit(input, input === themeInputs[0] ? "#4bb388" : "68");
+                    check.equal(status.textContent, "");
+                    check.deepEqual(bounds(), baseline, "clearing validation preserves wrapped hint space");
+                }
+            }
+        }
+    }
+    delete document.documentElement.dataset.frontend;
+    themeHost.style.cssText = "";
     edit(themeInputs[0], "#123"); edit(themeInputs[12], "#invalid");
     check.equal(colors.commitDraft("style1"), undefined);
     check.equal(themeInputs[0].value, "#123", "failed parent confirmation must not normalize other fields");
@@ -144,6 +171,18 @@ const browserCases = async (sources: Record<string, string>, css: string, theme:
         check.ok(content.scrollWidth <= content.clientWidth + 1, `no horizontal clipping at ${width}: ${content.scrollWidth}/${content.clientWidth}`);
     }
     const action = unchangedRoot.querySelector<HTMLButtonElement>(".b3-dialog__action .b3-button:last-child");
+    const dialogBounds = () => {
+        const {top, height} = unchangedRoot.querySelector(".b3-dialog__container").getBoundingClientRect();
+        return [top, height, action.getBoundingClientRect().top];
+    };
+    const beforeInvalid = dialogBounds();
+    const dialogHex = unchangedRoot.querySelector<HTMLInputElement>('input[type="text"]');
+    edit(dialogHex, "#12");
+    check.equal(action.disabled, true);
+    check.deepEqual(dialogBounds(), beforeInvalid, "validation never shifts the centered dialog or confirm action");
+    edit(dialogHex, "#abc");
+    check.equal(action.disabled, false);
+    check.deepEqual(dialogBounds(), beforeInvalid);
     check.equal(action.offsetHeight, 28, "desktop actions use the shared compact control");
     check.equal(unchangedRoot.querySelector<HTMLInputElement>('input[type="text"]').offsetHeight, 28);
     const samples = unchangedRoot.querySelectorAll<HTMLElement>(".color-picker__sample");

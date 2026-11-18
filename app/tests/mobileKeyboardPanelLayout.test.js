@@ -5,40 +5,46 @@ const os = require("node:os");
 const path = require("node:path");
 const {promisify} = require("node:util");
 
-const setupPanel = ({panelCode, heightCode, native}) => {
+const setupPanel = ({panelCode, positionCode, heightCode, native, visual = false}) => {
     document.documentElement.setAttribute("data-frontend", native ? "mobile" : "browser-mobile");
-    document.body.className = native ? "body--android" : "";
+    document.body.className = visual ? "body--ios" : native ? "body--android" : "";
     document.body.innerHTML = '<div id="editor"></div><div id="keyboardToolbar" class="keyboard"><div class="keyboard__bar" style="height:48px;min-height:48px;box-sizing:content-box"></div><div class="keyboard__util"></div></div>';
     const getHeight = new Function(`${heightCode};return getKeyboardPanelHeight;`)();
     const toolbar = document.getElementById("keyboardToolbar");
     const editor = document.getElementById("editor");
-    const state = {hidden: 0};
+    const state = {hidden: 0, visibleBottom: undefined};
     const update = new Function("getKeyboardPanelHeight", "getKeyboardViewportBottom", "isMobileLandscape", "isInMobileApp",
+        "getMobileVisualViewport", "getVisibleViewportBounds", "scrollKeyboardSelectionIntoView",
         "getCurrentEditor", "getMobileToolbarPaddingElement", "hideKeyboardToolbarUtil", `
         let keyboardPanelTop = 452;
         let keyboardPanelLandscape = false;
         let keyboardPanelClosing = false;
         ${panelCode}
-        return closing => {keyboardPanelClosing = closing;updateKeyboardPanelHeight();};
-    `)(getHeight, () => innerHeight, () => false, () => native,
+        ${positionCode}
+        return closing => {keyboardPanelClosing = closing;updateKeyboardToolbarPosition();};
+    `)(getHeight, () => state.visibleBottom ?? innerHeight, () => false, () => native,
+        () => visual, () => ({bottom: state.visibleBottom ?? innerHeight}), () => {},
         () => ({protyle: {}}), () => editor, () => state.hidden++);
     window.panelFixture = {toolbar, editor, state, update};
 };
 
-const checkPanel = ({inset, closing = false, update = true}) => {
+const checkPanel = ({inset, closing = false, update = true, visibleBottom}) => {
     const check = require("node:assert/strict");
     document.documentElement.style.setProperty("--android-navigation-bar-height", `${inset}px`);
     const {toolbar, editor, state, update: render} = window.panelFixture;
+    state.visibleBottom = visibleBottom;
     if (update) render(closing);
     if (state.hidden) return state.hidden;
     const rect = toolbar.getBoundingClientRect();
-    const expectedHeight = Math.max(48, innerHeight - inset - 452);
+    const bottom = visibleBottom ?? innerHeight - inset;
+    const expectedHeight = Math.max(48, bottom - 452);
     check.equal(rect.height, expectedHeight, "panel height excludes the native navigation inset");
-    check.equal(rect.bottom, innerHeight - inset, "panel stays above the gesture region");
-    check.equal(rect.top, Math.min(452, innerHeight - inset - 48), "handoff preserves the top until minimum toolbar height");
+    check.equal(rect.bottom, bottom, "panel stays inside the visible window");
+    check.equal(rect.top, Math.min(452, bottom - 48), "handoff preserves the top until minimum toolbar height");
     const padding = parseFloat(getComputedStyle(editor).paddingBottom);
     check.equal(padding, expectedHeight + inset, "editor reserves both the panel and its bottom offset");
-    check.equal(innerHeight - padding, rect.top, "editor boundary and panel top remain aligned");
+    check.equal(visibleBottom === undefined ? innerHeight - padding : visibleBottom - padding, rect.top,
+        "editor boundary and panel top remain aligned");
     return state.hidden;
 };
 
@@ -65,6 +71,7 @@ const runElectron = async () => {
         };
         const sources = {
             panelCode: compileDeclaration("../src/mobile/util/keyboardToolbar.ts", "updateKeyboardPanelHeight"),
+            positionCode: compileDeclaration("../src/mobile/util/keyboardToolbar.ts", "updateKeyboardToolbarPosition"),
             heightCode: compileDeclaration("../src/mobile/util/keyboardPanelHeight.ts", "getKeyboardPanelHeight"),
         };
         const sass = require("sass");
@@ -105,6 +112,12 @@ const runElectron = async () => {
             await resize(500);
             assert.equal(await check({inset: 0, closing: true}), 1, "panel closes once the returning keyboard reaches the toolbar");
         }
+        await resize(800);
+        await win.webContents.executeJavaScript(`(${setupPanel.toString()})(${JSON.stringify({...sources, native: true, visual: true})})`);
+        for (const visibleBottom of [800, 650, 545, 483, 800]) {
+            assert.equal(await check({inset: 0, visibleBottom}), 0);
+        }
+        assert.equal(await check({inset: 0, visibleBottom: 483, closing: true}), 1);
         console.log("Verified mobile keyboard panel navigation layout");
     } catch (error) {
         console.error(error);

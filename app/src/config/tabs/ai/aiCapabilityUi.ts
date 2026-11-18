@@ -163,7 +163,7 @@ const capabilityMatches = (capability: ICapabilityInfo, query: string) => {
         capability.description,
         getGroupLabel(capability),
         ...(capability.actions || []).map((action) => action.name),
-    ].some((value) => value?.toLocaleLowerCase().includes(query));
+    ].some((value) => value?.toLowerCase().includes(query));
 };
 
 const getCapabilityViewHost = (root: HTMLElement) =>
@@ -267,7 +267,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
         view.querySelectorAll<HTMLElement>("[data-capability-scope]").forEach((item) => {
             item.classList.toggle("item--focus", item.dataset.capabilityScope === scope);
         });
-        const normalizedQuery = query.trim().toLocaleLowerCase();
+        const normalizedQuery = query.trim().toLowerCase();
         const visible = capabilities.filter((capability) =>
             (!onlySelected || isCapabilityAllowed(capability.id, scope)) && capabilityMatches(capability, normalizedQuery));
         const groups = new Map<string, ICapabilityInfo[]>();

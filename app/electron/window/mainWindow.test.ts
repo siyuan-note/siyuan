@@ -16,7 +16,7 @@ const path = require("node:path");
 // 被测模块在测试内 require：它从 electron 取值，首次加载时必须已经换成替身。
 const mainWindowModule = () => require("./mainWindow");
 
-const mainWindowSetup = (t: any) => {
+const mainWindowSetup = (t: any, {remote = false} = {}) => {
     const timers = new Map();
     const ipcMain = new EventEmitter();
     let windowId = 0;
@@ -44,6 +44,7 @@ const mainWindowSetup = (t: any) => {
         isDestroyed() { return !!this.destroyed; }
         destroy() { this.destroyed = true; this.emit("closed"); }
         show() { this.shown = true; }
+        loadURL() {}
         isMinimized() { return false; }
         setPosition() {}
         unmaximize() {}
@@ -61,7 +62,8 @@ const mainWindowSetup = (t: any) => {
     const fsStub = {readFileSync: () => "{}"};
     const context = {
         app: appStub,
-        getKernelTarget: port => ({port: String(port), mode: "local", ownsKernel: true} as KernelTarget),
+        getKernelTarget: port => ({port: String(port), origin: "http://127.0.0.1:" + port,
+            mode: remote ? "remote" : "local", ownsKernel: !remote} as KernelTarget),
         localKernelStartups: new Map(), workspaces: [], bootWindow: undefined,
         kernelPort: "", initializedWindowIds: new Set(),
         getWorkspaceStartupKey: workspace => workspace,
@@ -125,7 +127,7 @@ const mainWindowSetup = (t: any) => {
         navigation: {
             setProxy: () => Promise.resolve(),
             installNavigationPolicy: context.installNavigationPolicy,
-            getWindowPathname: () => "/stage/build/app/",
+            getWindowPathname: () => remote ? "/check-auth" : "/stage/build/app/",
         },
         workspace: {
             rememberWindowKernelTarget: context.rememberWindowKernelTarget,
@@ -159,6 +161,48 @@ test("main windows close their own boot windows in either frontend readiness ord
         assert.equal(boots.every(window => window.destroyed), true);
         assert.equal(ipcMain.listenerCount("siyuan-ready-to-show"), 0);
         assert.equal(timers.size, 0);
+    }
+});
+
+test("main window handoff destroys the boot surface before showing in all reveal paths", (t) => {
+    for (const entry of ["ready", "timeout", "auth"]) {
+        for (const bootState of ["live", "destroyed", "absent"]) {
+            const {context, ipcMain, timers, Window} = mainWindowSetup(t, {remote: entry === "auth"});
+            const boot = bootState === "absent" ? undefined : new Window();
+            if (bootState === "destroyed") boot.destroy();
+            if (entry === "auth") {
+                context.bootWindow = boot;
+            } else if (boot) {
+                context.localKernelStartups.set("workspace", {window: boot, workspace: "workspace", port: 6806});
+            }
+            context.initMainWindow(6806);
+            const window = context.workspaces[0].browserWindow;
+            const calls: string[] = [];
+            if (boot) {
+                const destroy = boot.destroy.bind(boot);
+                boot.destroy = () => { calls.push("destroy"); destroy(); };
+            }
+            window.show = () => { calls.push("show"); window.shown = true; };
+            const reveal = () => {
+                if (entry === "ready") {
+                    ipcMain.emit("siyuan-ready-to-show", {sender: window.webContents});
+                } else if (entry === "auth") {
+                    window.webContents.emit("did-finish-load");
+                } else {
+                    const [key, timeout] = timers.entries().next().value;
+                    timers.delete(key);
+                    timeout();
+                }
+            };
+            reveal();
+            assert.deepEqual(calls, bootState === "live" ? ["destroy", "show"] :
+                entry === "timeout" ? [] : ["show"], `${entry}/${bootState}`);
+            if (entry === "auth") {
+                reveal();
+                assert.equal(calls.filter(call => call === "destroy").length, bootState === "live" ? 1 : 0);
+                assert.equal(calls.at(-1), "show");
+            }
+        }
     }
 });
 

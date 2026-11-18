@@ -8,7 +8,7 @@ const preprocess = require("ifdef-loader/preprocessor").parse;
 const source = createSourceFile("index.ts", readFileSync(join(__dirname, "index.ts"), "utf8"), ScriptTarget.Latest, true);
 let menuSource: string;
 const collect = (node: import("typescript").Node) => {
-    if (isIfStatement(node) && node.expression.getText(source) === "!protyle.options.backlinkData") {
+    if (isIfStatement(node) && node.expression.getText(source) === "!protyle.options.backlinkData && !isEmbedMenu") {
         menuSource = node.getText(source);
     }
     forEachChild(node, collect);
@@ -16,13 +16,14 @@ const collect = (node: import("typescript").Node) => {
 collect(source);
 assert.ok(menuSource);
 
-const fixture = (mobile: boolean, backlink = true, folded = false) => {
+const fixture = (mobile: boolean, backlink = true, folded = false, isEmbedMenu = false) => {
     const items: IMenu[] = [];
     const opened: unknown[][] = [];
     const protyle = {app: {}, notebookId: "source-notebook", options: {backlinkData: backlink}};
     const action = folded ? ["highlight", "all"] : ["highlight", "context", "root-scroll"];
     const dependencies = {
         protyle,
+        isEmbedMenu,
         id: "source-block",
         window: {siyuan: {menus: {menu: {append: (item: IMenu) => items.push(item)}},
             config: {keymap: {general: {enter: {custom: "enter"}, enterBack: {custom: "back"}}}},
@@ -72,5 +73,15 @@ test("ordinary block menus retain enter and back actions on both platforms", () 
     for (const mobile of [false, true]) {
         const {items} = fixture(mobile, false);
         assert.deepEqual(items.map(item => item.id), ["enter", "enterBack"]);
+    }
+});
+
+test("embedded child menus omit in-place focus and return actions on both platforms", () => {
+    for (const mobile of [false, true]) {
+        for (const backlink of [false, true]) {
+            const {items, opened} = fixture(mobile, backlink, false, true);
+            assert.deepEqual(items, []);
+            assert.deepEqual(opened, []);
+        }
     }
 });

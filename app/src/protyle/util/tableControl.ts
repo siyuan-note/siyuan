@@ -367,6 +367,7 @@ export class TableControl {
     private rowResizeHandle: HTMLButtonElement;
     private rowBoundary?: {cell: HTMLTableCellElement, row: HTMLTableRowElement};
     private dimensionBoundary?: ITableDimensionBoundary;
+    private dimensionPointer?: {x: number, y: number};
     private dimensionHoverTimer?: number;
     private dimensionDragging = false;
     private dimensionGuide: HTMLElement;
@@ -1118,6 +1119,7 @@ export class TableControl {
             }
         }
         this.hoverDimensionBoundary(boundary);
+        this.dimensionPointer = boundary ? {x: event.clientX, y: event.clientY} : undefined;
         if (!this.rowResizeCleanup && !fromControl) {
             const row = targetCell && !this.protyle.disabled && getTableNode(targetCell) ?
                 getTableRowBoundary(targetCell, event.clientX, event.clientY, 4) : undefined;
@@ -1524,6 +1526,7 @@ export class TableControl {
         clearTimeout(this.dimensionHoverTimer);
         this.dimensionHoverTimer = undefined;
         this.dimensionBoundary = undefined;
+        this.dimensionPointer = undefined;
         this.dimensionDragging = false;
         this.dimensionGuide.classList.add("fn__none");
         this.resizeLabel.classList.add("fn__none");
@@ -1542,6 +1545,14 @@ export class TableControl {
         if (viewport.right <= viewport.left || viewport.bottom <= viewport.top ||
             row && (row.bottom < viewport.top || row.bottom > viewport.bottom + 1) ||
             column && (column.right < viewport.left || column.right > viewport.right + 1) || !row && !column) {
+            return;
+        }
+        const pointer = this.dimensionPointer;
+        // 输入和删除可使边界离开静止的指针，悬停反馈只在当前命中范围内显示。
+        if (!this.dimensionDragging && pointer && (row ?
+            Math.abs(pointer.y - row.bottom) > 4 || pointer.x < viewport.left || pointer.x > viewport.right :
+            Math.abs(pointer.x - column.right) > 4 || pointer.y < viewport.top || pointer.y > viewport.bottom)) {
+            this.clearDimensionFeedback();
             return;
         }
         this.dimensionGuide.className = row ? "protyle-table-control__height-guide" : "protyle-table-control__width-guide";

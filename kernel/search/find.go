@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+
+	"github.com/siyuan-note/filelock"
 )
 
 type Match struct {
@@ -95,6 +97,9 @@ func FindAllMatches(root string, targets []string) []Match {
 
 // scanFileForTargets 在文件中流式搜索所有目标（基于首字节索引），返回去重后的命中目标字符串列表
 func scanFileForTargets(path string, patternIndex map[byte][][]byte, maxLen int) []string {
+	// 扫描句柄关闭后才允许替换文档，避免 Windows 拒绝并发保存。
+	filelock.Lock(path)
+	defer filelock.Unlock(path)
 	f, err := os.Open(path)
 	if err != nil {
 		return nil

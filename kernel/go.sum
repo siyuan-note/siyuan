@@ -436,6 +436,8 @@ github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce h1:356bfC3puc
 github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce/go.mod h1:1/nGgthl89FPA7GzAcEWKl6zRRnfgyTjzLZj9bW7kuw=
 github.com/siyuan-note/filelock v0.0.0-20261025032826-1ff24a81dda9 h1:FBWsxvFXk/T8pIWHV4aNvzPWIhZlVfTX1gKHkEBhc+0=
 github.com/siyuan-note/filelock v0.0.0-20261025032826-1ff24a81dda9/go.mod h1:YdVmeGbHkUfDrtS7eIdagWLtzFabT/7/Xbp6Z6n3hmU=
+github.com/siyuan-note/filelock v0.0.0-20261117030440-cd4f949beba4 h1:FHOwan+aPvld6l95awOCdyOBVoWS9fY5d2mjfe1jid4=
+github.com/siyuan-note/filelock v0.0.0-20261117030440-cd4f949beba4/go.mod h1:dJ8T078OSAArePQ37fGPVEH4noMq10zJH/IdqxfbO9s=
 github.com/siyuan-note/httpclient v0.0.0-20260813083704-4643a83d05de h1:2liBebKn9tCH3goDTLdSoq4JHGLarqfeUbKsIrXHqzs=
 github.com/siyuan-note/httpclient v0.0.0-20260813083704-4643a83d05de/go.mod h1:khLwgEGUZiW+haLJsLamZxQAJy54PgIut1rQzf2RRAg=
 github.com/siyuan-note/httpclient v0.0.0-20261111062713-8b98d6bd0703 h1:zACadG6jrNqnST3vDHLq52MIaaw6pqFoPA8uwSBtzCs=

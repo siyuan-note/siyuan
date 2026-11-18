@@ -244,7 +244,7 @@ const loadFlashcardV2DOMs = (model: IFlashcardV2RenderModel, references: IFlashc
 const flashcardV2PlainText = (value: string) => {
     const element = document.createElement("div");
     element.innerHTML = value;
-    return (element.textContent || "").replace(/\s+/g, " ").trim().toLocaleLowerCase();
+    return (element.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
 };
 
 const renderFlashcardV2Context = (model: IFlashcardV2RenderModel, sourceBlockID: string,
@@ -320,7 +320,7 @@ const renderFlashcardV2Context = (model: IFlashcardV2RenderModel, sourceBlockID:
                 !policy.documentTitle && index === 0 && allPaths.length > 1) {
                 return false;
             }
-            const name = item.name.replace(/\s+/g, " ").trim().toLocaleLowerCase();
+            const name = item.name.replace(/\s+/g, " ").trim().toLowerCase();
             return name.length < 3 || !sensitiveTexts.some((answer) => answer === name || answer.includes(name));
         });
         if (paths.length > 0) {

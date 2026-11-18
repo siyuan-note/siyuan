@@ -6,9 +6,11 @@ package model
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -22,14 +24,28 @@ func TestManualUpdateDownload(t *testing.T) {
 	if currentInstallPackageSuffix() == "" {
 		t.Skip("installation is desktop-only")
 	}
-	for _, scenario := range []string{"ready", "stale", "missing-checksum", "unsupported", "empty"} {
+	languageData, err := os.ReadFile(filepath.Join("..", "..", "app", "appearance", "langs", "en.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var language struct {
+		Kernel map[int]string `json:"_kernel"`
+	}
+	if err = json.Unmarshal(languageData, &language); err != nil {
+		t.Fatal(err)
+	}
+	for _, scenario := range []string{"ready", "local-busy", "local-busy-auto", "stale", "missing-checksum", "unsupported", "empty"} {
 		t.Run(scenario, func(t *testing.T) {
 			dir := prepareInstallPackageTest(t)
-			Conf.System.Load().DownloadInstallPkg = false
+			autoDownload := scenario == "local-busy-auto"
+			localBusy := strings.HasPrefix(scenario, "local-busy")
+			Conf.System.Load().DownloadInstallPkg = autoDownload
 			Conf.System.Load().UpdateChannel = conf.UpdateChannelAlpha
 			Conf.Lang = "en"
 			originalLangs := util.Langs
-			util.Langs = map[string]map[int]string{"en": {9: "New version %s", 62: "Ready", 437: "Download this version"}}
+			util.Langs = map[string]map[int]string{"en": {
+				9: "New version %s", 62: "Ready", 421: language.Kernel[421], 437: "Download this version",
+			}}
 			t.Cleanup(func() { util.Langs = originalLangs })
 			version := "99.0.0-alpha.1"
 			metadata := installPackageFixture(t, dir, version, conf.UpdateChannelAlpha, currentInstallPackageSuffix())
@@ -46,6 +62,9 @@ func TestManualUpdateDownload(t *testing.T) {
 				githubReleasesLock.Unlock()
 			})
 			switch scenario {
+			case "local-busy", "local-busy-auto":
+				checkDownloadInstallPkgLock.Lock()
+				t.Cleanup(checkDownloadInstallPkgLock.Unlock)
 			case "stale":
 				version = "98.0.0-alpha.1"
 			case "missing-checksum":
@@ -56,13 +75,13 @@ func TestManualUpdateDownload(t *testing.T) {
 				version = ""
 			}
 			read := installPackageNotifications(t)
-			// 自动检查不得因缓存中存在安装包而绕过关闭的自动下载设置。
+			// 自动检查遵守自动下载设置和本进程占用状态，即使缓存中已有完整安装包。
 			checkDownloadInstallPkg(false)
 			if events := read(); len(events) != 0 {
-				t.Fatalf("automatic download ran while disabled: %+v", events)
+				t.Fatalf("automatic download ran while disabled or busy: %+v", events)
 			}
 			err := DownloadUpdate(version)
-			if scenario != "ready" {
+			if scenario != "ready" && !localBusy {
 				if err == nil {
 					t.Fatal("invalid manual download was accepted")
 				}
@@ -72,23 +91,36 @@ func TestManualUpdateDownload(t *testing.T) {
 				t.Fatal(err)
 			}
 			deadline := time.Now().Add(5 * time.Second)
-			ready := false
-			for !ready && time.Now().Before(deadline) {
+			wantID := "update-pkg-ready"
+			if localBusy {
+				wantID = "update-pkg-downloading"
+			}
+			notified := false
+			for !notified && time.Now().Before(deadline) {
 				for _, event := range read() {
-					ready = ready || event.Data.ID == "update-pkg-ready"
+					if event.Cmd != "msg" || event.Data.ID != wantID {
+						t.Fatalf("unexpected manual download notification: %+v", event)
+					}
+					if localBusy && event.Msg != "Update packages are being processed. Please try again later" {
+						t.Fatalf("local package processing must not be attributed to another workspace: %q", event.Msg)
+					}
+					notified = true
 				}
-				if !ready {
+				if !notified {
 					time.Sleep(time.Millisecond)
 				}
 			}
-			checkDownloadInstallPkgLock.Lock()
-			checkDownloadInstallPkgLock.Unlock()
-			if !ready {
-				t.Fatal("manual download did not report a ready package")
+			if !notified {
+				t.Fatalf("manual download did not report %s", wantID)
 			}
-			if Conf.System.Load().DownloadInstallPkg {
+			if Conf.System.Load().DownloadInstallPkg != autoDownload {
 				t.Fatal("manual download changed the automatic download setting")
 			}
+			if localBusy {
+				return
+			}
+			checkDownloadInstallPkgLock.Lock()
+			checkDownloadInstallPkgLock.Unlock()
 			if path := getNewVerInstallPkgPath(false); path != filepath.Join(dir, metadata.FileName) {
 				t.Fatalf("manual package unavailable for installation with automatic download disabled: %q", path)
 			}

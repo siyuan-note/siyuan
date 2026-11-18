@@ -31,9 +31,9 @@ export const createPluginSnapshotSelect = (host: HTMLElement, onSelect: () => vo
     const render = (keyword: string) => {
         if (input.disabled || abort.signal.aborted) { return; }
         filter = keyword;
-        const query = keyword.trim().toLocaleLowerCase();
+        const query = keyword.trim().toLowerCase();
         list.replaceChildren();
-        packages.filter(item => `${item.label}\n${item.name}`.toLocaleLowerCase().includes(query)).forEach((item, index) => {
+        packages.filter(item => `${item.label}\n${item.name}`.toLowerCase().includes(query)).forEach((item, index) => {
             const row = document.createElement("li");
             row.className = "b3-list-item" + (index === 0 ? " b3-list-item--focus" : "");
             row.id = id + "-" + index;

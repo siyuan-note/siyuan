@@ -8,7 +8,7 @@ export const getAVPrimaryInitialDOM = (value: IAVCellValue) => {
         return getAVRichTextBlockDOM(value.block.rich.content, true);
     }
     return sanitizeAVRichTextBlockDOM(value.block?.richBlockDOM ? sanitizeKernelHTML(value.block.richBlockDOM) :
-        `<div data-type="NodeParagraph" data-node-id="${id}"><div contenteditable="true">${escapeHtml(value.block?.content || "")}</div></div>`, true);
+        `<div class="p" data-type="NodeParagraph" data-node-id="${id}"><div contenteditable="true" spellcheck="false">${escapeHtml(value.block?.content || "")}</div></div>`, true);
 };
 
 export const getAVPrimaryPreviewHTML = (value: IAVCellValue) => {

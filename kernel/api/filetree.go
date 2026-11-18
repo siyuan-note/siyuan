@@ -1207,10 +1207,10 @@ func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) a
 	// 加密笔记本的打开文档走 InBox 版（查加密 blocktree + content db）
 	if requestedNotebook != "" && model.IsEncryptedBox(requestedNotebook) {
 		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, docInfo, err =
-			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, requestedNotebook)
+			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, requestedNotebook, model.IsReadOnlyRoleContext(c))
 	} else {
 		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, docInfo, err =
-			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo)
+			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, model.IsReadOnlyRoleContext(c))
 	}
 	if errors.Is(err, model.ErrBlockNotFound) {
 		return apicontract.Failure[apicontract.FileTreeGetDocData](3, "")
@@ -1361,32 +1361,45 @@ func authFilePublishAccessContract(c *gin.Context, request apicontract.FileTreeA
 		return apicontract.FailureFrom[apicontract.Null](denied)
 	}
 
-	// 按来源 IP 对发布密码认证进行限流，防止无限次暴力破解密码 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-v362-968x-gp2v
-	ip := c.ClientIP()
-	if retryAfter := util.AuthThrottleCheck(ip); 0 < retryAfter {
+	publishAccess := model.GetPublishAccess()
+	var target *model.PublishAccessItem
+	for _, item := range publishAccess {
+		if item.ID == ID {
+			target = item
+			break
+		}
+	}
+
+	// 发布密码限流按来源 IP 和目标文档分别计数，任一文档认证成功不得清除其他文档的失败次数
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-82v2-rmqc-pprc
+	throttleKey := publishThrottleKey(c.ClientIP(), "")
+	if target != nil {
+		throttleKey = publishThrottleKey(c.ClientIP(), ID)
+	}
+	if retryAfter := util.AuthThrottleCheck(throttleKey); 0 < retryAfter {
 		// 锁定期间持续记录失败，不断延长锁定时间
-		util.AuthThrottleFail(ip)
+		util.AuthThrottleFail(throttleKey)
 		c.Header("Retry-After", strconv.Itoa(retryAfter))
 		return apicontract.AuthFilePublishAccess.WithHTTPStatus(
 			apicontract.Failure[apicontract.Null](-1, model.Conf.Language(354)), http.StatusTooManyRequests)
 	}
 
-	publishAccess := model.GetPublishAccess()
-	for _, item := range publishAccess {
-		if item.ID != ID {
-			continue
-		}
-		if item.Disable || item.Password == "" || !util.AuthCodeEquals(item.Password, password) {
-			// 恒定时间比较，避免通过响应时间差异猜测密码
-			util.AuthThrottleFail(ip)
-			return apicontract.FailureFrom[apicontract.Null](denied)
-		}
-		util.AuthThrottleReset(ip)
+	// 恒定时间比较，避免通过响应时间差异猜测密码
+	if target != nil && !target.Disable && target.Password != "" && util.AuthCodeEquals(target.Password, password) {
+		util.AuthThrottleReset(throttleKey)
 		model.SetPublishAuthCookie(c, ID, password)
 		return apicontract.Failure[apicontract.Null](0, "")
 	}
 
-	// 目标 ID 不在发布配置中，同样记录失败以限制尝试次数
-	util.AuthThrottleFail(ip)
+	// 未知目标与错误密码同样记录失败，避免绕过尝试次数限制
+	util.AuthThrottleFail(throttleKey)
 	return apicontract.FailureFrom[apicontract.Null](denied)
+}
+
+// publishThrottleKey 返回发布密码限流键：目标文档参与计数，未知目标共用该来源 IP 的键。
+func publishThrottleKey(ip, id string) string {
+	if id == "" {
+		return "publish-auth|" + ip
+	}
+	return "publish-auth|" + ip + "|" + id
 }

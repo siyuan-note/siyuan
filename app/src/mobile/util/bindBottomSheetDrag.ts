@@ -1,4 +1,6 @@
 import {moveSheetGesture, SheetGesture} from "./mobileSheetGesture";
+import {isIOSPlatform} from "../../protyle/util/browserCompatibility";
+import {isNativeTextSelectionHandleTouch} from "../../protyle/wysiwyg/nativeTextMenu";
 
 type SheetDragOptions = {
     grip?: HTMLElement,
@@ -38,6 +40,10 @@ export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement,
         reset();
         const target = event.target as HTMLElement;
         if (event.touches.length !== 1 || target.closest('input, textarea, select, button, [contenteditable="true"], .protyle, .block__icon, .b3-dialog__close, [draggable="true"]')) return;
+        if (isIOSPlatform(navigator)) {
+            const editor = element.ownerDocument.activeElement?.closest<HTMLElement>(".protyle-wysiwyg");
+            if (editor && element.contains(editor) && isNativeTextSelectionHandleTouch(event, editor)) return;
+        }
         let parent = target;
         while (parent && parent !== element) {
             if (parent.scrollHeight > parent.clientHeight + 1 && parent.scrollTop > 0 &&

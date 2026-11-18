@@ -32,6 +32,7 @@ const browserCases = async (sources: string[], languages: typeof window.siyuan.l
     const dependencies: Record<string, unknown> = {
         isMobile: () => mobile,
         isInMobileApp: () => native,
+        isIOSDevice: () => false,
         readText: () => { clipboardReads++; return clipboard(); },
         showMessage: (message: string) => messages.push(message),
         Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_AIPROVIDER: "dialog-aiprovider"},

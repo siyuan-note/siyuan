@@ -133,7 +133,7 @@ func TestDocumentReadBoundaryPreservesGetDocProjection(t *testing.T) {
 			for _, query := range []string{"", "source"} {
 				load := func() []any {
 					blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, box, path, backlink, keywords, numbers, info, loadErr := GetDoc(
-						fixture.childID, heading.ID, id, 0, query, nil, nil, 0, mode, 2, false, map[string]string{}, true, true)
+						fixture.childID, heading.ID, id, 0, query, nil, nil, 0, mode, 2, false, map[string]string{}, true, true, false)
 					if loadErr != nil {
 						t.Fatal(loadErr)
 					}

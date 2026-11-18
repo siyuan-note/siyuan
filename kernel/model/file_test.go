@@ -557,7 +557,7 @@ func TestGetDocOptionallyIncludesDocInfo(t *testing.T) {
 	}
 
 	_, _, _, _, rootID, _, _, _, boxID, _, _, _, _, embedded, err := GetDoc(
-		"", "", fixture.sourceID, 0, "", nil, nil, 0, 0, 102400, false, map[string]string{}, true, true)
+		"", "", fixture.sourceID, 0, "", nil, nil, 0, 0, 102400, false, map[string]string{}, true, true, false)
 	if nil != err {
 		t.Fatalf("get document with embedded info failed: %v", err)
 	}
@@ -569,7 +569,7 @@ func TestGetDocOptionallyIncludesDocInfo(t *testing.T) {
 	}
 
 	_, _, _, _, _, _, _, _, _, _, _, _, _, omitted, err := GetDoc(
-		"", "", fixture.sourceID, 0, "", nil, nil, 0, 0, 102400, false, map[string]string{}, true, false)
+		"", "", fixture.sourceID, 0, "", nil, nil, 0, 0, 102400, false, map[string]string{}, true, false, false)
 	if nil != err {
 		t.Fatalf("get document without embedded info failed: %v", err)
 	}

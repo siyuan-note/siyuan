@@ -1682,23 +1682,26 @@
       color: var(--b3-protyle-inline-blockref-color);
     }
 
+    .av__cell--relation {
+      display: inline-flex;
+      max-width: 100%;
+      vertical-align: top;
+
+      > .b3-menu__avemoji {
+        flex-shrink: 0;
+        align-self: flex-start;
+      }
+
+      > .av__celltext {
+        min-width: 0;
+      }
+    }
+
     &[data-wrap="true"] {
       white-space: pre-wrap;
 
-      .av__cell--relation {
-        display: inline-flex;
-        max-width: 100%;
-        vertical-align: top;
-
-        > :first-child {
-          flex-shrink: 0;
-          align-self: flex-start;
-        }
-
-        > .av__celltext {
-          min-width: 0;
-          overflow-wrap: anywhere;
-        }
+      .av__cell--relation > .av__celltext {
+        overflow-wrap: anywhere;
       }
     }
 

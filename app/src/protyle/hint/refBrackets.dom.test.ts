@@ -222,11 +222,12 @@ const browserCases = (source: string) => {
             const after = close + tail;
             range = reset(before + after, before.length);
             hint.splitChar = trigger;
-            hint.trackBlockHintQuery(range, before, after, "test123");
+            check.equal(hint.trackBlockHintQuery(range, before, after, "test123"), "test123");
             const updated = trigger + "test document";
             range = reset(updated + "123" + after, updated.length);
             hint.splitChar = trigger;
-            hint.trackBlockHintQuery(range, updated, "123" + after, "test document");
+            check.equal(hint.trackBlockHintQuery(range, updated, "123" + after, "test document"), "test document123",
+                "reference searches and new-document candidates include the tracked query after the caret");
             const text = range.startContainer as Text;
             text.splitText(range.startOffset + 1);
             range.setStart(text, 0);
@@ -239,7 +240,8 @@ const browserCases = (source: string) => {
         hint.blockHintQuery = undefined;
         range = reset(trigger + "test" + " existing123", trigger.length + 4);
         hint.splitChar = trigger;
-        hint.trackBlockHintQuery(range, trigger + "test", " existing123", "test");
+        check.equal(hint.trackBlockHintQuery(range, trigger + "test", " existing123", "test"), "test",
+            "existing body text after the query does not become part of a new document title");
         range.setStart(range.startContainer, 0);
         hint.extendBlockHintQuery(range);
         check.equal(range.toString(), trigger + "test");

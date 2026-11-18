@@ -15,7 +15,7 @@ const createRuntime = (sources, Dialog, mobile) => {
         dialog: {Dialog}, "dialog/index": {Dialog},
         "util/functions": {isMobile: () => mobile},
         constants: {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_CONFIRM: "confirm"}},
-        "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => mobile},
+        "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => mobile, isIOSDevice: () => false},
         "mobile/util/mobileAppUtil": {callMobileAppShowKeyboard() {}},
         "dialog/message": {showMessage: message => { throw new Error(message); }},
     };
@@ -39,7 +39,7 @@ exports.mobileDialogRuntimeSource = () => {
     for (const name of ["dialog/mobileDialog", "dialog/mobileInputDialog", "dialog/mobileConfirmDialog",
         "dialog/inputDialog", "dialog/confirmDialog", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag",
         "mobile/util/mobileSheetLayout", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "mobile/util/visibleViewport", "mobile/util/orientation",
-        "protyle/util/browserCompatibility", "menus/sheetOpen", "menus/sheetActions", "util/escape",
+        "protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu", "menus/sheetOpen", "menus/sheetActions", "util/escape",
         "mobile/util/secondaryEditors", "protyle/util/editorSave", "card/pendingAction"]) {
         sources[name] = transpileModule(readFileSync(path.join(__dirname, "../../src", name + ".ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},

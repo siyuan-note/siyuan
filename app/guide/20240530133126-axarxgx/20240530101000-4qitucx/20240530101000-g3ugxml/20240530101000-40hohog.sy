@@ -7,7 +7,7 @@
 		"id": "20240530101000-40hohog",
 		"title": "ブラウザ",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261117222105"
 	},
 	"Children": [
 		{
@@ -367,6 +367,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " で画面ロックパスワードを設定します。空欄にするとパスワードログインは無効になりますが、通常のローカル以外からのアクセスにはパスワードまたは有効な OIDC 設定が必要です。他の端末にカーネルを公開する前に認証を設定してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261117222105-zepf1nu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261117222105-zepf1nu",
+				"updated": "20261117222105"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "システムのロック画面に従う"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は Windows と macOS のみで利用できます。Linux では、システムをロックする前にワークスペースメニューの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画面ロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択して SiYuan を手動でロックしてください。"
 				}
 			]
 		},

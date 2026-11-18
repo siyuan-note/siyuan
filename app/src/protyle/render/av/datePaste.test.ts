@@ -39,6 +39,20 @@ test("date paste preserves stored values on invalid text and supports explicit c
         return exports.updateCellsValue({} as IProtyle, block, value, undefined, [column], undefined,
             true, false, false, [selected], false);
     };
+    window.siyuan.languages = JSON.parse(readFileSync("appearance/langs/tr.json", "utf8"));
+    window.siyuan.config = {lang: "tr"} as typeof window.siyuan.config;
+    for (const text of ["12 EKIM 2024", "12 EKİM 2024", "12 MAYIS 2024", "12 Mayıs 2024"]) {
+        const operations = await paste(text, "full");
+        assert.equal(operations.doOperations.length, 1, text);
+        assert.equal(operations.undoOperations.find(isCellUpdate).data.date.content, stored.date.content);
+        assert.equal(JSON.stringify(stored), snapshot);
+    }
+    const invalid = await paste("32 EKIM 2024", "full");
+    assert.equal(invalid.doOperations.length, 0);
+    assert.equal(invalid.undoOperations.length, 0);
+    assert.equal(JSON.stringify(stored), snapshot);
+    window.siyuan.languages = JSON.parse(readFileSync("appearance/langs/en.json", "utf8"));
+    window.siyuan.config.lang = "en_US";
     for (const format of ["full", "lunar"] as TAVDateFormat[]) {
         for (const text of ["not a date", "2025-02-30", "Chinese lunar 2026, Leap Month 6, day 1",
             "2025-07-25 → invalid end"]) {

@@ -23,16 +23,8 @@ func WriteFileWithChangeTracking(path string, data []byte) error {
 
 // CopyFileWithChangeTracking 复制单个文件并保留权限和时间，在目标文件锁内标记内容变化。
 func CopyFileWithChangeTracking(source, destination string) error {
-	first, second := source, destination
-	if first > second {
-		first, second = second, first
-	}
-	filelock.Lock(first)
-	defer filelock.Unlock(first)
-	if second != first {
-		filelock.Lock(second)
-		defer filelock.Unlock(second)
-	}
+	unlock := filelock.LockPaths(source, destination)
+	defer unlock()
 	if err := gulu.File.CopyFile(source, destination); err != nil {
 		return err
 	}

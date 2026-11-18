@@ -27,7 +27,7 @@ const setup = async (directory, mobile, fullHeight) => {
         "layout/getTopBarHeight": {getTopBarHeight: () => 0},
         "util/functions": {isMobile: () => mobile, getRandom: () => 0},
         "protyle": {},
-        "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => mobile,
+        "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => mobile, isIOSDevice: () => false,
             updateHotkeyTip: value => value, setStorageVal() {}},
         "util/fetch": {fetchPost: (url, _data, callback) => {
             check.equal(url, "/api/system/getEmojiConf", "layout interactions never write document data");

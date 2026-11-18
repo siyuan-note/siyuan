@@ -8,7 +8,7 @@ import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {compile} from "sass";
 
-const cases = (sources: Record<string, string>, styles: Record<string, string>) => {
+const cases = async (sources: Record<string, string>, styles: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     const modules: Record<string, any> = {};
     const dependencies = {escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;"),
@@ -41,6 +41,54 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
     load("richTextValue");
     load("richText");
     const primary = load("primaryRich");
+    const position = load("insertPosition");
+    const runtime = load("runtimeCapabilities");
+    const pasteMocks = {
+        "../../constants": {Constants: {ZWSP: "\u200b"}},
+        "../runtimeCapabilities": {...runtime, getProtyleBlockDOMSanitizer: () => (html: string) => html,
+            getProtylePasteTransform: (): undefined => undefined, isProtyleRichHTMLPasteEnabled: () => true,
+            isProtyleUploadDisabled: () => false, areProtylePluginExtensionsEnabled: () => false,
+            getProtyleUnsupportedPasteBlocks: () => modules.richText.getAVRichTextUnsupportedPasteBlocks},
+        "../upload/insertPosition": position,
+        "./selection": {getEditorRange: () => getSelection().getRangeAt(0)},
+        "./hasClosest": {hasClosestBlock: (node: Node) => (node instanceof Element ? node : node.parentElement)?.closest("[data-node-id]"),
+            hasClosestByAttribute: (): undefined => undefined},
+        "./compatibility": {isInHarmony: () => false},
+        "./wpsPresentation": {extractWPSPresentationClipboard: (): undefined => undefined},
+        "./mathPaste": {markdownMathPaste: (lute: Lute, text: string) => lute.Md2BlockDOM(text)},
+        "./tableCellRichContext": {getTableCellRichContext: (): undefined => undefined},
+        "./officeMath": {extractOfficeMathHTML: () => ""},
+        "../ui/hideElements": {hideElements() {}},
+        "./pictureImages": {normalizePictureImages() {}},
+        "../upload/htmlLocalAssets": {getHTMLAssetSourceURL: (): undefined => undefined, resolveHTMLAssetURLs() {}},
+        "./pasteSource": {extractCrossBlockPasteContext: (html: string) => ({html, nestedList: false})},
+        "./inlineElementMarker": {stripSemanticMarkersFromRangeText: (range: Range) => range.toString()},
+        "./normalizeText": {removeZWJ: (text: string) => text},
+        "./insertHTML": {insertHTML: (html: string, protyle: IProtyle) => {
+            pasted.push(html);
+            const range = protyle.toolbar.range;
+            range.insertNode(range.createContextualFragment(html));
+        }},
+    };
+    const pasted: string[] = [];
+    const pasteExports: Record<string, any> = {};
+    new Function("exports", "require", sources.paste)(pasteExports, (id: string) => pasteMocks[id as keyof typeof pasteMocks] || {});
+    const pasteHost = document.createElement("div");
+    pasteHost.innerHTML = primary.getAVPrimaryInitialDOM({type: "block", isDetached: true, block: {content: ""}});
+    document.body.append(pasteHost);
+    const pasteEditable = pasteHost.querySelector<HTMLElement>("[contenteditable]");
+    const pasteRange = document.createRange();
+    pasteRange.selectNodeContents(pasteEditable);
+    pasteRange.collapse(false);
+    getSelection().removeAllRanges();
+    getSelection().addRange(pasteRange);
+    await pasteExports.paste({wysiwyg: {element: pasteHost}, lute: Lute.New(), toolbar: {getCurrentType: (): string[] => []}, hint: {}}, {
+        target: pasteEditable, preventDefault() {}, stopPropagation() {},
+        clipboardData: {files: [], types: ["text/plain"], getData: (type: string) => type === "text/plain" ? "hello" : ""},
+    });
+    check.deepEqual(pasted, ["hello"]);
+    check.equal(pasteEditable.textContent, "hello");
+    pasteHost.remove();
     const attribute = load("attributeValue");
     Object.assign(dependencies, attribute);
     const cell = load("cell");
@@ -135,6 +183,14 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
     document.head.append(style);
     for (const css of Object.values(styles)) {
         style.textContent = css;
+        const emptyHost = document.createElement("div");
+        emptyHost.className = "protyle-wysiwyg";
+        emptyHost.contentEditable = "true";
+        emptyHost.innerHTML = primary.getAVPrimaryInitialDOM({type: "block", isDetached: true, block: {content: ""}});
+        document.body.append(emptyHost);
+        const emptyEditable = emptyHost.querySelector<HTMLElement>('[contenteditable="true"]');
+        check.ok(emptyEditable.getBoundingClientRect().height > 0, "empty primary editor provides a visible caret and paste target");
+        emptyHost.remove();
         (window as any).siyuan.config.editor.markdown = {inlineAsterisk: true, inlineUnderscore: true,
             inlineSup: true, inlineSub: true, inlineTag: true, inlineMath: true, inlineStrikethrough: true,
             inlineFullWidthStrikethrough: true, inlineMark: true};
@@ -199,7 +255,7 @@ const cases = (sources: Record<string, string>, styles: Record<string, string>) 
     style.remove();
 };
 
-test("primary rich text preserves title inline elements across views, details, relations and rollups with literal legacy editing", async () => {
+test("primary rich text preserves inline elements and supports empty legacy editing and plain text paste", async () => {
     const profile = mkdtempSync(join(tmpdir(), "siyuan-primary-rich-"));
     const env = {...process.env}; delete env.ELECTRON_RUN_AS_NODE;
     try {
@@ -209,6 +265,9 @@ test("primary rich text preserves title inline elements across views, details, r
             ["richTextValue", "src/protyle/render/av/richTextValue.ts"],
             ["luteMarkdownSyntax", "src/protyle/render/luteMarkdownSyntax.ts"],
             ["richTextEditorLute", "src/protyle/render/av/richTextEditorLute.ts"],
+            ["paste", "src/protyle/util/paste.ts"],
+            ["insertPosition", "src/protyle/upload/insertPosition.ts"],
+            ["runtimeCapabilities", "src/protyle/runtimeCapabilities.ts"],
         ].map(([name, path]) => [name, transpileModule(readFileSync(path, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
         }).outputText]));
@@ -220,7 +279,7 @@ app.whenReady().then(async()=>{let win;try{win=new BrowserWindow({show:false,web
 await win.loadURL("about:blank");
 await win.webContents.executeJavaScript(${JSON.stringify(readFileSync("stage/protyle/js/protyle-html.js", "utf8").split("\n").slice(0, 2).join("\n"))});
 await win.webContents.executeJavaScript('require('+${JSON.stringify(JSON.stringify(resolve("stage/protyle/js/lute/lute.min.js")))}+');void 0;');
-const result=await win.webContents.executeJavaScript('(()=>{const __name=value=>value;try{('+${JSON.stringify(cases.toString())}+')('+${JSON.stringify(JSON.stringify(sources))}+','+${JSON.stringify(JSON.stringify(styles))}+');return "ok";}catch(error){return String(error.stack);}})()');
+const result=await win.webContents.executeJavaScript('(async()=>{const __name=value=>value;try{await ('+${JSON.stringify(cases.toString())}+')('+${JSON.stringify(JSON.stringify(sources))}+','+${JSON.stringify(JSON.stringify(styles))}+');return "ok";}catch(error){return String(error.stack);}})()');
 if(result!=="ok")throw new Error(result);
 win.destroy();app.exit(0);}catch(error){console.error(error);win?.destroy();app.exit(1);}});`);
         await promisify(execFile)(require("electron"), [runner], {env, windowsHide: true, timeout: 45000});

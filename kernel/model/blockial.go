@@ -612,7 +612,8 @@ func normalizeIconValue(value string) string {
 }
 
 func blockAttrsOperation(oldAttrs map[string]string, node *ast.Node) *Operation {
-	newAttrs := parse.IAL2Map(node.KramdownIAL)
+	// 推送的 new 由前端直接写入块元素，事件处理器属性名在推送前过滤，覆盖 .sy 导入与历史数据中已存在的属性
+	newAttrs := filterHandlerIALAttrs(parse.IAL2Map(node.KramdownIAL))
 	data := map[string]any{"old": oldAttrs, "new": newAttrs}
 	if "" != node.AttributeViewType {
 		data["data-av-type"] = node.AttributeViewType

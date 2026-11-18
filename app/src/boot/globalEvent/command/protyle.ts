@@ -1,4 +1,4 @@
-import {hasClosestBlock} from "../../../protyle/util/hasClosest";
+import {hasClosestBlock, isInEmbedBlock} from "../../../protyle/util/hasClosest";
 import {getContenteditableElement, getTopAloneElement} from "../../../protyle/wysiwyg/getBlock";
 import {enterBack, zoomOut} from "../../../menus/protyle";
 /// #if !MOBILE
@@ -39,6 +39,9 @@ export const onlyProtyleCommand = (options: {
     const nodeElement = hasClosestBlock(options.previousRange.startContainer, true);
     if (!nodeElement) {
         return false;
+    }
+    if (["enter", "enterBack"].includes(options.command) && isInEmbedBlock(nodeElement)) {
+        return true;
     }
     if (options.command === "enter") {
         let topNodeElement = getTopAloneElement(nodeElement);

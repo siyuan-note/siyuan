@@ -29,7 +29,7 @@ const runCases = async (sources, platform, topBarHTML) => {
         "protyle/lite/mobileToolbar": {getMobileToolbarProtyle: () => undefined, getMobileToolbarUndo: () => undefined,
             getMobileToolbarPaddingElement: protyle => protyle.element},
         "protyle/util/compatibility": {isInAndroid: () => platform === "android", isInHarmony: () => platform === "harmony",
-            isInMobileApp: () => platform !== "browser",
+            isInMobileApp: () => platform !== "browser", isIOSDevice: () => platform === "ios",
             isInEdge: () => false},
         "mobile/util/inlineMathSelection": {createInlineMathSelection: () => ({reset() {}, update() {}, prepareInput() {}})},
         "mobile/util/pluginToolbar": {getMobilePluginToolbarItems: () => []},

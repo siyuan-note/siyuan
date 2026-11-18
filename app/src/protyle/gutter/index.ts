@@ -580,6 +580,9 @@ export class Gutter {
                 return;
             }
             if (isOnlyMeta(event)) {
+                if (buttonElement.dataset.embedId) {
+                    return;
+                }
                 if (protyle.options.backlinkData) {
                     checkFold(id, (zoomIn, action) => {
                         openFileById({
@@ -2770,7 +2773,7 @@ export class Gutter {
             }
         }
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
-        if (!protyle.options.backlinkData) {
+        if (!protyle.options.backlinkData && !isEmbedMenu) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "enter",
                 icon: "iconEnter",
@@ -2789,7 +2792,7 @@ export class Gutter {
                     enterBack(protyle, id);
                 }
             }).element);
-        } else {
+        } else if (!isEmbedMenu) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "enter",
                 icon: "iconEnter",

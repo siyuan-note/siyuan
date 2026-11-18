@@ -287,14 +287,8 @@ func RenameEmojiFile(oldPath, newPath string) error {
 	if oldPath == newPath {
 		return nil
 	}
-	first, second := oldPath, newPath
-	if first > second {
-		first, second = second, first
-	}
-	filelock.Lock(first)
-	defer filelock.Unlock(first)
-	filelock.Lock(second)
-	defer filelock.Unlock(second)
+	unlock := filelock.LockPaths(oldPath, newPath)
+	defer unlock()
 	if _, err := os.Lstat(newPath); err == nil {
 		return &os.LinkError{Op: "rename", Old: oldPath, New: newPath, Err: os.ErrExist}
 	} else if !os.IsNotExist(err) {

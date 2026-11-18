@@ -1057,10 +1057,25 @@ func ReindexFTS() {
 
 func fullReindex() {
 	fullReindexWithTxFlush(true)
+	debug.FreeOSMemory()
 }
 
-// Snapshot checkout already drained transactions while holding flushLock.
+// 快照恢复已经持有事务锁并完成旧事务；缓存、数据库和文档索引需共享该边界，避免旧索引覆盖编辑。
 func fullReindexWithTxFlush(flushTransactions bool) {
+	if flushTransactions {
+		for {
+			FlushTxQueue()
+			flushLock.Lock()
+			if txQueueSize() == 0 {
+				break
+			}
+			flushLock.Unlock()
+		}
+		defer flushLock.Unlock()
+	}
+	wasFlushing := isFlushing.Swap(true)
+	defer isFlushing.Store(wasFlushing)
+
 	cache.ClearTreeCache()
 	cache.ClearDocsIAL()
 	cache.ClearBlocksIAL()
@@ -1072,10 +1087,6 @@ func fullReindexWithTxFlush(flushTransactions bool) {
 		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
 	}()
 
-	if flushTransactions {
-		FlushTxQueue()
-	}
-
 	sql.InitDatabase(true)
 
 	sql.IndexIgnoreCached = false
@@ -1084,7 +1095,6 @@ func fullReindexWithTxFlush(flushTransactions bool) {
 		indexBox(openedBox.ID)
 	}
 	LoadFlashcards()
-	debug.FreeOSMemory()
 }
 
 func ChangeBoxSort(boxIDs []string) {

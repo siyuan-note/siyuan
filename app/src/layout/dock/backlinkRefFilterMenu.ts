@@ -39,12 +39,12 @@ export const loadBacklinkRefFilterMenu = async (options: {
     let empty: HTMLElement;
     const refresh = () => {
         const selected = options.getSelected();
-        const keyword = input.value.toLocaleLowerCase();
+        const keyword = input.value.toLowerCase();
         let visible = 0;
         rows.forEach((element, id) => {
             const item = byID.get(id);
             const checked = selected.includes(id);
-            const hidden = !checked && !`${item.text} ${item.path} ${id}`.toLocaleLowerCase().includes(keyword);
+            const hidden = !checked && !`${item.text} ${item.path} ${id}`.toLowerCase().includes(keyword);
             element.classList.toggle("fn__none", hidden);
             if (hidden) {
                 element.classList.remove("b3-menu__item--current");

@@ -121,7 +121,13 @@ export const mountSnapshotDetail = (app: App, root: HTMLElement, reference: DocH
             }
         });
         list.replaceChildren(fragment);
-        if (!list.children.length) { list.textContent = lang.emptyContent; }
+        if (!list.children.length) {
+            const empty = document.createElement("div");
+            empty.className = "history__snapshot-detail-status";
+            empty.setAttribute("role", "status");
+            empty.textContent = lang.emptyContent;
+            root.querySelector(".history__snapshot-detail-panels").replaceChildren(empty);
+        }
         status.classList.add("fn__none");
         root.querySelector(".history__snapshot-detail-content").classList.remove("fn__none");
         if (selected) {

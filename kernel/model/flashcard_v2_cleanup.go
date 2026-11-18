@@ -79,9 +79,13 @@ func flashcardCleanupInventory(ctx context.Context, dataDir string) (map[string]
 			if !d.IsDir() && !strings.HasSuffix(d.Name(), ".sy") && d.Name() != "conf.json" {
 				return nil
 			}
-			info, err := d.Info()
+			// Windows 的目录枚举可能返回缓存的修改时间，扫描前后都要重新读取路径元数据。
+			info, err := os.Lstat(path)
 			if err != nil {
 				return err
+			}
+			if info.Mode()&os.ModeSymlink != 0 {
+				return errors.New("unsupported notebook symbolic link")
 			}
 			ret[path] = flashcardFileStamp{Size: info.Size(), Modified: info.ModTime().UnixNano(), Mode: info.Mode()}
 			return nil

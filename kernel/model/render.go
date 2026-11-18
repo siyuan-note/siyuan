@@ -238,6 +238,19 @@ func cleanRenderNodes(nodes []*ast.Node, visibleOnly bool) (ret []*ast.Node) {
 	return
 }
 
+// clearInlineMemoContent 清除行级备注内容并保留可见文字，读者侧渲染不输出编辑器私有备注。
+func clearInlineMemoContent(node *ast.Node) {
+	if nil == node {
+		return
+	}
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.IsTextMarkType("inline-memo") {
+			n.TextMarkInlineMemoContent = ""
+		}
+		return ast.WalkContinue
+	})
+}
+
 func cleanRenderNode(node *ast.Node, visibleOnly bool) *ast.Node {
 	nodes := cleanRenderNodes([]*ast.Node{node}, visibleOnly)
 	if 0 == len(nodes) {

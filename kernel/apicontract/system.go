@@ -148,6 +148,7 @@ type SystemRecoverExit struct {
 type SystemExitData struct {
 	CloseTimeout   int    `json:"closeTimeout"`
 	InstallPkgPath string `json:"installPkgPath,omitempty"`
+	ReleaseURL     string `json:"releaseURL,omitempty"`
 }
 type SystemOIDCStartRequest struct {
 	Flow       string `json:"flow" api:"optional,nullable"`

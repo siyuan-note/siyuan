@@ -301,8 +301,10 @@ test("real sheet geometry keeps short minimums and footer visible across manual 
     // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
     timeout: 45000,
 }, async () => {
-    const sources = ["keyboardSheetState", "mobileSheetGesture", "mobileSheetLayout", "bindBottomSheetDrag", "bindBottomSheetDialog"].map(id => transpileModule(
-        readFileSync(`src/mobile/util/${id}.ts`, "utf8"), {
+    const sources = ["protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu", "mobile/util/keyboardSheetState",
+        "mobile/util/mobileSheetGesture", "mobile/util/mobileSheetLayout", "mobile/util/bindBottomSheetDrag",
+        "mobile/util/bindBottomSheetDialog"].map(id => transpileModule(
+        readFileSync(`src/${id}.ts`, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText);
     const css = compile("src/assets/scss/mobile.scss", {logger: {warn() {}}}).css;

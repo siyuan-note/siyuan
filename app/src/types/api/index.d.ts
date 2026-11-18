@@ -2854,7 +2854,7 @@ export type SystemEmoji = { "description": string; "description_ja_jp": string; 
 
 export type SystemEmojiGroup = { "id": string; "items": Array<SystemEmoji | null> | null; "title": string; "title_ja_jp": string; "title_zh_cn": string; };
 
-export type SystemExitData = { "closeTimeout": number; "installPkgPath"?: string; };
+export type SystemExitData = { "closeTimeout": number; "installPkgPath"?: string; "releaseURL"?: string; };
 
 export type SystemExitRequestInput = { "execInstallPkg"?: number | null; "force"?: boolean | null; "recoverExit"?: SystemRecoverExitInput | null; "setCurrentWorkspace"?: boolean | null; };
 
@@ -9482,6 +9482,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 默认保留退出同步及更新选择，返回 0 表示完成、1 表示同步失败、2 表示等待更新选择。
+     * 返回 2 时可选 releaseURL 对应待安装包版本；优先使用本次运行检查到的公告地址，否则使用该版本的 GitHub Release。
      * 普通退出请求断开时取消其同步或同步锁等待，不将取消报告为同步成功；已开始的数据清理仍完整执行。
      * force 跳过本次同步，并等待活动同步取消及收尾后再关闭数据库；本地未上传数据保留。
      * 可选 recoverExit 绑定当前进程和退出批次，只接管没有活动会话的桌面退出；不匹配返回 -1，有会话返回 3。
@@ -9491,7 +9492,7 @@ export interface APIPOSTRoutes {
      */
     "/api/system/exit": {
         request: SystemExitRequestInput;
-        response: { "code": 0; "data": SystemExitData; "msg": string; } | { "code": -1 | 1 | 2 | 3; "data": ({ "closeTimeout": number; } & { "installPkgPath"?: never; }) | null | SystemExitData; "msg": string; };
+        response: { "code": 0; "data": SystemExitData; "msg": string; } | { "code": -1 | 1 | 2 | 3; "data": ({ "closeTimeout": number; } & { "installPkgPath"?: never; "releaseURL"?: never; }) | null | SystemExitData; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];

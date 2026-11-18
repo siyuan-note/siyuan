@@ -24,11 +24,11 @@ export const mountPluginSnapshots = (app: App, root: HTMLElement, setRestoring: 
     root.innerHTML = `<form class="history__snapshot-toolbar" data-plugin-search>
 <div data-plugin-select></div><button class="b3-button" type="submit">${lang.search}</button>
 </form><div class="history__plugin-panels"><div class="history__plugin-results">
-<div class="history__snapshot-toolbar" data-plugin-result aria-live="polite"></div>
+<div class="history__snapshot-toolbar history__plugin-heading" data-plugin-result aria-live="polite"></div>
 <ul class="history__plugin-list" data-plugin-list></ul>
 <div class="history__plugin-pagination"><button type="button" class="b3-button b3-button--text" data-plugin-page="previous" disabled>${lang.previousLabel}</button>
 <button type="button" class="b3-button b3-button--text" data-plugin-page="next" disabled>${lang.nextLabel}</button></div></div>
-<div class="history__plugin-detail fn__none"><div class="history__snapshot-toolbar"><button type="button" class="b3-button b3-button--text" data-plugin-back>${lang.back}</button><span data-plugin-detail-title></span></div><div class="history__plugin-detail-content"></div></div></div>`;
+<div class="history__plugin-detail fn__none"><div class="history__snapshot-toolbar history__plugin-heading"><button type="button" class="b3-button b3-button--text" data-plugin-back>${lang.back}</button><span data-plugin-detail-title></span></div><div class="history__plugin-detail-content"></div></div></div>`;
     const form = root.querySelector<HTMLFormElement>("[data-plugin-search]");
     const picker = createPluginSnapshotSelect(root.querySelector("[data-plugin-select]"), () => { void search(1); });
     const input = picker.input;
@@ -120,7 +120,7 @@ export const mountPluginSnapshots = (app: App, root: HTMLElement, setRestoring: 
                 memo.className = "history__association-memo";
                 memo.textContent = snapshot.memo;
                 const actions = document.createElement("div");
-                actions.className = "fn__flex history__repo-actions";
+                actions.className = "fn__flex history__repo-actions history__plugin-actions";
                 for (const part of ["data", "program"] as const) {
                     const button = document.createElement("button");
                     button.className = "b3-button b3-button--text";

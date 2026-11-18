@@ -79,6 +79,7 @@ const browserCases = async (sources: string[], lutePath: string) => {
         host.append(wysiwyg);
         document.body.append(host);
         const saved: string[] = [];
+        let menuDismissals = 0;
         let revision = "r0";
         let changed: () => void;
         const fragment = {
@@ -101,6 +102,10 @@ const browserCases = async (sources: string[], lutePath: string) => {
             getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
             hintRef: () => {}, hintTag: () => {}, getAgentLute: () => lute,
             setMobileToolbarUndo: () => {}, hideAllElements: () => {}, isCommittedTextInput: committed,
+            globalClickHideMenu: (target: HTMLElement) => {
+                check.equal(host.contains(target), true);
+                menuDismissals++;
+            },
             Constants: {TIMEOUT_INPUT: 60000, SIYUAN_APPID: "test"},
             mountProtyleLiteFragment: (_host: HTMLElement, options: {initialBlockHTML: string; onChange: () => void}) => {
                 wysiwyg.innerHTML = options.initialBlockHTML;
@@ -136,6 +141,11 @@ const browserCases = async (sources: string[], lutePath: string) => {
             check.equal(editable.isContentEditable, true);
         };
         assertHost();
+        const stopClick = (event: Event) => event.stopPropagation();
+        editable.addEventListener("click", stopClick);
+        editable.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        check.equal(menuDismissals, 1, "clicks inside the title dismiss menus even when inline handlers stop bubbling");
+        editable.removeEventListener("click", stopClick);
         if (!ipad) {
             editor.destroy(); host.remove();
             continue;

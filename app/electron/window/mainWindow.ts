@@ -231,11 +231,11 @@ const attachMainWindowReady = ({
     const readyToShowTimeout = scheduleTimer(() => {
         ipcMain.removeListener(Channel.SIYUAN_READY_TO_SHOW, readyToShow);
         if (bootWindow && !bootWindow.isDestroyed()) {
+            bootWindow.destroy();
             if (!currentWindow.isDestroyed()) {
                 log("siyuan-ready-to-show timeout, force showing main window");
                 currentWindow.show();
             }
-            bootWindow.destroy();
         }
     }, 60000);
     const readyToShow = (event: IpcMainEvent): void => {
@@ -251,6 +251,11 @@ const attachMainWindowReady = ({
             }
             currentWindow.minimize();
         } else {
+            // X11/EGL 下先释放启动页 surface，避免新窗口显示后立即销毁旧 surface 导致黑窗。
+            // https://github.com/siyuan-note/siyuan/issues/21490
+            if (bootWindow && !bootWindow.isDestroyed()) {
+                bootWindow.destroy();
+            }
             currentWindow.show();
             if (windowState.isMaximized) {
                 currentWindow.maximize();
@@ -340,10 +345,10 @@ const installCheckAuthReveal = (currentWindow: BrowserWindow, {kernelTarget, boo
             return;
         }
         if (getWindowPathname(currentWindow) === CHECK_AUTH_PAGE) {
-            currentWindow.show();
             if (bootWindow && !bootWindow.isDestroyed()) {
                 bootWindow.destroy();
             }
+            currentWindow.show();
         }
     });
 };

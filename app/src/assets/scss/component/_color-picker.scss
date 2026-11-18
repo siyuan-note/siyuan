@@ -3,6 +3,21 @@
   flex-direction: column;
   gap: 8px;
 
+  &__status {
+    display: grid;
+    line-height: normal;
+
+    > div {
+      grid-area: 1 / 1;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__status-reserve {
+    visibility: hidden;
+  }
+
   &__preview {
     display: flex;
     flex-wrap: wrap;

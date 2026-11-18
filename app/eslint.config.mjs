@@ -14,6 +14,14 @@ const compat = new FlatCompat({
     allConfig: js.configs.all
 });
 
+const localeCaseRestrictions = [{
+    selector: "CallExpression[callee.computed=false][callee.property.name=/^toLocale(Lower|Upper)Case$/][arguments.length=0]",
+    message: "大小写匹配请使用 toLowerCase/toUpperCase，语言相关转换须显式指定 locale",
+}, {
+    selector: "CallExpression[callee.computed=true][callee.property.value=/^toLocale(Lower|Upper)Case$/][arguments.length=0]",
+    message: "大小写匹配请使用 toLowerCase/toUpperCase，语言相关转换须显式指定 locale",
+}];
+
 export default [{
     ignores: [
         "build",
@@ -39,6 +47,7 @@ export default [{
     },
 
     rules: {
+        "no-restricted-syntax": ["error", ...localeCaseRestrictions],
         // 条件编译保留的互斥分支会使重复赋值检查误报初始值。
         "no-useless-assignment": "off",
         semi: [2, "always"],
@@ -63,7 +72,7 @@ export default [{
     files: ["electron/**/*.ts"],
     ignores: ["electron/window/windowRegistry.ts", "electron/shared/runtime.ts", "electron/**/*.test.ts"],
     rules: {
-        "no-restricted-syntax": ["error", {
+        "no-restricted-syntax": ["error", ...localeCaseRestrictions, {
             // 覆盖 `state.windows.targets`、`state["windows"]` 与 `const {windows} = state` 三种写法。
             selector: "MemberExpression[object.name=\"state\"][property.name=\"windows\"]",
             message: "窗口账本请通过 windowRegistry 的读写函数访问",

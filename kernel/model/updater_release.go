@@ -11,7 +11,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -65,17 +67,45 @@ var (
 	githubReleasesLock      sync.RWMutex
 	githubReleasesFlight    singleflight.Group
 	githubManifestCache     sync.Map
+	updateReleaseURLs       sync.Map
 )
 
 func getUpdateRelease(force bool) (*updateRelease, error) {
 	channel := Conf.System.Load().UpdateChannel
+	var release *updateRelease
+	var err error
 	if conf.UpdateChannelStable == channel {
-		return getStableUpdateRelease(force)
+		release, err = getStableUpdateRelease(force)
+	} else {
+		if !isValidUpdateChannel(channel) {
+			return nil, errors.New("update channel is invalid")
+		}
+		release, err = getGitHubUpdateRelease(channel, force)
 	}
-	if !isValidUpdateChannel(channel) {
-		return nil, errors.New("update channel is invalid")
+	if err == nil {
+		rememberUpdateReleaseURL(release)
 	}
-	return getGitHubUpdateRelease(channel, force)
+	return release, err
+}
+
+func rememberUpdateReleaseURL(release *updateRelease) {
+	version := normalizeReleaseVersion(release.Version)
+	parsed, err := url.Parse(release.ReleaseURL)
+	if semver.IsValid(version) && err == nil && parsed.Host != "" && (parsed.Scheme == "https" || parsed.Scheme == "http") {
+		updateReleaseURLs.Store(version, release.ReleaseURL)
+	}
+}
+
+func GetInstallPackageReleaseURL(installPkgPath string) string {
+	version := installPackageVersion(filepath.Base(installPkgPath))
+	if version == "" {
+		return ""
+	}
+	if releaseURL, ok := updateReleaseURLs.Load(version); ok {
+		return releaseURL.(string)
+	}
+	// 重启后可能尚未检查更新，按待安装包版本定位公告，退出流程不发起网络请求。
+	return githubReleaseURLPrefix + strings.TrimPrefix(version, "v")
 }
 
 func getStableUpdateRelease(force bool) (*updateRelease, error) {

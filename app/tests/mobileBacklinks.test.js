@@ -12,7 +12,7 @@ const sources = () => {
         "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkContextBatch", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
         "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/MobileEditorDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "menus/sheetOpen", "protyle/util/transactionQueue",
         "mobile/util/mobileSheetLayout", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetActions", "protyle/util/editorSave", "protyle/util/browserCompatibility",
-        "util/escape", "util/zIndex", "menus/overlayOwnership", "dialog/index", "layout/dock/panelSearch", "protyle/wysiwyg/backlinkTypeFold",
+        "util/escape", "util/zIndex", "menus/overlayOwnership", "dialog/index", "layout/dock/panelSearch", "protyle/wysiwyg/backlinkTypeFold", "protyle/wysiwyg/nativeTextMenu",
         "layout/dock/backlinkMentionCache", "layout/dock/backlinkSelection", "layout/dock/bottomBacklinkScroll", "protyle/gutter/layout"]) {
         modules[name] = ts.transpileModule(preprocess(
             readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
@@ -59,7 +59,8 @@ const runCases = async (sources) => {
             requests.push({url, data, reply: response => resolve({code: 0, data: response})});
         })},
         "constants": {Constants: {TIMEOUT_LOAD: 0, TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
-        "protyle/util/compatibility": {updateHotkeyAfterTip: () => "", isNotCtrl: () => true, isInMobileApp: () => true},
+        "protyle/util/compatibility": {updateHotkeyAfterTip: () => "", isNotCtrl: () => true,
+            isInMobileApp: () => true, isIOSDevice: () => false},
         "protyle/index": {Protyle: class {
             constructor(app, element, options) {
                 element.className = "protyle";

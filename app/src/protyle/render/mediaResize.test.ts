@@ -524,29 +524,34 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
                 const handle = video.querySelector<HTMLElement>(`[data-resize-axis="${axis}"]`);
                 const rect = handle.getBoundingClientRect();
                 const videoRect = videoContent.getBoundingClientRect();
-                const frameRect = videoContent.parentElement.getBoundingClientRect();
                 if (axis === "width") {
-                    check.ok(rect.left >= videoRect.right && rect.right <= frameRect.right,
-                        "the right handle stays inside the resize frame and outside native controls");
+                    check.ok(rect.left >= videoRect.right, "the right handle sits outside native controls");
                 } else {
                     check.ok(rect.top >= videoRect.bottom && rect.height > 0, "the bottom handles sit below the native player");
-                    check.equal(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2), handle);
-                    const x = Math.min(rect.left + rect.width / 2, videoRect.right - 2);
+                    const x = rect.left + rect.width / 2;
                     check.equal(document.elementFromPoint(x, videoRect.bottom - 2), videoContent, "the native control bar can receive input");
                 }
+                check.equal(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2), handle);
                 if (axis === "both" && mode === "mouse") {
                     await assertCaretBelow(video, video.querySelector(".iframe-content"));
+                    videoContent.style.width = "2000px";
+                    const side = video.querySelector('[data-resize-axis="width"]');
+                    const sideRect = side.getBoundingClientRect();
+                    check.ok(sideRect.left >= videoContent.getBoundingClientRect().right);
+                    check.equal(document.elementFromPoint(sideRect.left + sideRect.width / 2, sideRect.top + sideRect.height / 2), side,
+                        "a full-width player leaves the external side handle reachable");
+                    videoContent.style.width = "200px";
                     root.dataset.readonly = "true";
                     check.equal(getComputedStyle(video.querySelector('[data-resize-axis="height"]')).display, "none");
                     check.equal(getComputedStyle(videoContent.parentElement).paddingRight, "0px",
-                        "read-only playback does not reserve the editing frame");
+                        "read-only playback does not reserve room for editing controls");
                     root.dataset.readonly = "false";
                     const preview = video.cloneNode(true) as HTMLElement;
                     preview.classList.add("mindmap-view__preview-block");
                     root.appendChild(preview);
                     render(preview);
                     check.equal(getComputedStyle(preview.querySelector(".iframe-content")).paddingRight, "0px",
-                        "a cloned mind map preview does not reserve the video editing frame");
+                        "a cloned mind map preview does not reserve room for editing controls");
                     preview.remove();
                 }
                 updates.length = 0;
@@ -779,19 +784,30 @@ const visibilityCases = async (move: (x: number, y: number) => Promise<void>, ta
                 rects[index].top + parseFloat(decorations[index].top) + parseFloat(decorations[index].height) :
                 rects[index].bottom - parseFloat(decorations[index].bottom);
             const check = require("node:assert/strict");
-            check.ok(rects[2].right <= rects[0].right + 1, "both handles stay inside the right edge");
-            check.ok(rects[0].bottom <= rects[2].top, "the inboard side handle leaves the corner reachable");
+            check.ok(rects[0].bottom <= rects[2].top, "the side handle leaves the corner reachable");
             check.ok(Math.abs(decorationBottom(2) - decorationBottom(1)) <= 1,
                 "corner aligns with the bottom handle");
             const video = block.querySelector("video");
             if (video) {
                 const edge = video.getBoundingClientRect();
-                const frame = video.parentElement.getBoundingClientRect();
-                check.ok(decorationBottom(1) > edge.bottom && decorationBottom(1) < frame.bottom,
-                    "bottom markings sit inside the contrasting frame");
-                check.notEqual(getComputedStyle(video.parentElement).backgroundColor, "rgba(0, 0, 0, 0)");
-                check.equal(parseFloat(decorations[2].right), 2);
-                check.equal(decorations[2].pointerEvents, "none", "the corner marking lets clicks reach the video");
+                check.ok(rects[0].left >= edge.right && rects[2].right <= edge.right + 1,
+                    "the side hit area sits beside the video and the corner hit area ends at the player's right edge");
+                check.ok(rects[1].top >= edge.bottom && rects[2].top >= edge.bottom,
+                    "the bottom hit areas sit below the player");
+                check.ok(Math.abs(decorationBottom(1) - edge.bottom - 5) <= 1,
+                    "the bottom markings sit close below the player");
+                const sideMarkRight = rects[0].left + parseFloat(decorations[0].left) + parseFloat(decorations[0].width);
+                const cornerMarkRight = rects[2].right - parseFloat(decorations[2].right);
+                check.ok(Math.abs(cornerMarkRight - sideMarkRight) <= 1 && cornerMarkRight > edge.right,
+                    "the corner marking aligns with the side marking outside the player");
+                check.equal(decorations[2].pointerEvents, "none", "the corner marking does not intercept input");
+                check.ok(Math.abs(rects[1].left + rects[1].width / 2 - (edge.left + edge.width / 2)) <= 1,
+                    "the bottom handle is centered under the video");
+                const wrapper = getComputedStyle(video.parentElement);
+                check.equal(wrapper.backgroundColor, "rgba(0, 0, 0, 0)");
+                check.equal(wrapper.boxShadow, "none");
+            } else {
+                check.ok(rects[2].right <= rects[0].right + 1, "both handles stay inside the right edge");
             }
         })()`);
     }

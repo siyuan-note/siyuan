@@ -1,5 +1,6 @@
 import {MobileDialog} from "../../dialog/mobileDialog";
 import {Constants} from "../../constants";
+import {globalClickHideMenu} from "../../menus/menuClick";
 import {fetchSyncPost} from "../../util/fetch";
 import {showMessage} from "../../dialog/message";
 import {Dialog} from "../../dialog";
@@ -142,6 +143,7 @@ export class DocumentTitleEditor {
         });
         const events = ["input", "copy", "cut", "paste", "pointerdown", "pointerup", "mousedown", "mouseup",
             "click", "dblclick", "contextmenu", "dragstart", "dragover", "drop", "keyup"];
+        host.addEventListener("click", event => globalClickHideMenu(event.target as HTMLElement), true);
         events.forEach(type => host.addEventListener(type, event => event.stopPropagation()));
         host.addEventListener("compositionstart", event => {
             if (this.fragment.wysiwyg.contains(event.target as Node)) {

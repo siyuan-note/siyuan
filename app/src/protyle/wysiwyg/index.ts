@@ -5416,7 +5416,9 @@ export class WYSIWYG {
                     } else if (shouldOpenListItemAttr(event.shiftKey, protyle.disabled, actionElement)) {
                         openAttr(actionElement.parentElement, "bookmark", protyle);
                     } else if (ctrlIsPressed) {
-                        zoomOut({protyle, id: actionId});
+                        if (!isInEmbedBlock(actionElement)) {
+                            zoomOut({protyle, id: actionId});
+                        }
                     } else {
                         if (actionElement.classList.contains("protyle-action--task")) {
                             if (!protyle.disabled) {
@@ -5428,7 +5430,7 @@ export class WYSIWYG {
                                 /// #endif
                                 toggleTaskListItem(protyle, actionElement.parentElement);
                             }
-                        } else if (window.siyuan.config.editor.listItemDotNumberClickFocus) {
+                        } else if (window.siyuan.config.editor.listItemDotNumberClickFocus && !isInEmbedBlock(actionElement)) {
                             if (protyle.block.showAll && protyle.block.id === actionId) {
                                 enterBack(protyle, actionId);
                             } else {

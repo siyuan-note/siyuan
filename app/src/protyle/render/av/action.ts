@@ -10,7 +10,7 @@ import {addSubItemsMenu} from "./subItems";
 import {Menu} from "../../../plugin/Menu";
 import {toggleMenu} from "../../../menus/menuToggle";
 import {hasClosestByClassName} from "../../util/hasClosest";
-import {getAVHost as hasClosestBlock, getAVRelationHost} from "./host";
+import {getAVHost, getAVRelationHost} from "./host";
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {openFileAttr} from "../../../menus/commonMenuItem";
@@ -407,7 +407,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     }
     // 富文本预览以 b3-typography 作为渲染边界，先回到单元格再查找数据库块。
     const cellElement = hasClosestByClassName(event.target, "av__cell");
-    const blockElement = hasClosestBlock(cellElement || event.target);
+    const blockElement = getAVHost(cellElement || event.target);
     if (!blockElement) {
         return false;
     }
@@ -924,7 +924,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
     if (rowElement?.classList.contains("av__row--header")) {
         return false;
     }
-    const blockElement = options?.blockElement || (rowElement ? hasClosestBlock(rowElement) : undefined);
+    const blockElement = options?.blockElement || (rowElement ? getAVHost(rowElement) : undefined);
     if (!blockElement) {
         return false;
     }
@@ -1540,7 +1540,7 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
         updateHeaderCell(cellElement, headerValue);
     } else {
         const hasDragFill = cellElement.querySelector(".av__drag-fill");
-        const blockElement = hasClosestBlock(cellElement);
+        const blockElement = getAVHost(cellElement);
         if (!blockElement) {
             return;
         }

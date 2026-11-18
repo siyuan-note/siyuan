@@ -4,7 +4,7 @@ import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
-import {getAVHost as hasClosestBlock, getAVRelationHost} from "./host";
+import {getAVHost, getAVRelationHost} from "./host";
 import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getColId, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
@@ -633,7 +633,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         return;
     }
 
-    const nodeElement = hasClosestBlock(cellElements[0]);
+    const nodeElement = getAVHost(cellElements[0]);
     if (!nodeElement && !inputTarget?.cells.length) {
         cellElements.forEach((item, index) => {
             const rowID = getFieldIdByCellElement(item, data.viewType);

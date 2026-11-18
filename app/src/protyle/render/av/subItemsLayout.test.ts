@@ -70,7 +70,7 @@ const checkLayout = (mobile: boolean, clickCode: string) => {
     const check = require("node:assert/strict");
     const navigated: HTMLElement[] = [];
     const click = new Function("prepareAVColumnWindow", "getAVTemplateInteractiveElement", "isOnlyMeta", "hasClosestByClassName",
-        "hasClosestBlock", "navigateSubItems", "isCardCoverPositioning", clickCode + "\nreturn avClick;")(
+        "getAVHost", "navigateSubItems", "isCardCoverPositioning", clickCode + "\nreturn avClick;")(
         () => {}, (): null => null, () => false, (element: HTMLElement, name: string) => element.closest("." + name),
         (element: HTMLElement) => element.closest(".av"), (element: HTMLElement) => { navigated.push(element); return true; },
         () => false);

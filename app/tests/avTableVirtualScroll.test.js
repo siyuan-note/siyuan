@@ -72,7 +72,7 @@ const browserCases = sources => {
                 virtual.initVirtualScroll({protyle, blockElement: block, data: {viewType: avType, view}, selectedItemPoints});
                 flushFrames();
             };
-            const avClick = new Function("prepareAVColumnWindow", "getAVTemplateInteractiveElement", "isOnlyMeta", "hasClosestBlock",
+            const avClick = new Function("prepareAVColumnWindow", "getAVTemplateInteractiveElement", "isOnlyMeta", "getAVHost",
                 "hasClosestByClassName", "avRender", "isMobile", "isCardCoverPositioning", sources.action + "\nreturn avClick;")(
                 () => {}, () => null, () => false, element => element.closest(".av"),
                 (element, name) => element.closest("." + name), render, () => false, () => false);

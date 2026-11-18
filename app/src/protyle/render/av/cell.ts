@@ -5,7 +5,7 @@ import {ensureAVColumnWindow} from "./columnWindow";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
-import {canEditAVHost, getAVHost as hasClosestBlock, getAVHostBlockID, getAVHostIdentity, getAVRelationHost} from "./host";
+import {canEditAVHost, getAVHost, getAVHostBlockID, getAVHostIdentity, getAVRelationHost} from "./host";
 import {openMenuPanel} from "./openMenuPanel";
 import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
@@ -83,7 +83,7 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
     const relationElement = target.closest<HTMLElement>(".av__cell--relation");
     const relationValue = relationElement?.dataset.relationValue ?
         JSON.parse(decodeURIComponent(relationElement.dataset.relationValue)) as IAVCellValue : undefined;
-    const hostElement = hasClosestBlock(target);
+    const hostElement = getAVHost(target);
     if (hostElement && getAVRelationHost(hostElement) && relationValue) {
         showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
         return;
@@ -102,7 +102,7 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
     if (!isDetached && !blockID) {
         return;
     }
-    const blockElement = hasClosestBlock(target);
+    const blockElement = getAVHost(target);
     if (!blockElement) {
         return;
     }
@@ -146,7 +146,7 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
 
 const openAVRelationIcon = async (protyle: IProtyle, target: HTMLElement, relationElement: HTMLElement, value: IAVCellValue) => {
     const sourceCell = relationElement.closest<HTMLElement>('.av__cell[data-dtype="relation"], [data-type="relation"][data-av-id]');
-    const sourceBlock = hasClosestBlock(target);
+    const sourceBlock = getAVHost(target);
     const keyID = sourceCell?.dataset.colId || sourceCell?.dataset.fieldId;
     const rowID = relationElement.dataset.rowId;
     if (!sourceBlock || !keyID || !rowID) {
@@ -797,7 +797,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         options?.destroyCallback?.();
         return;
     }
-    const blockElement = hasClosestBlock(cellElements[0]);
+    const blockElement = getAVHost(cellElements[0]);
     if (!blockElement) {
         options?.destroyCallback?.();
         return;

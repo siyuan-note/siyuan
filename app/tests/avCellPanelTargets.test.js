@@ -147,7 +147,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         canEditAVHost: (_block, editor) => !editor.disabled && !window.siyuan.config.readonly &&
             !window.siyuan.isPublish && !editor.options.history?.created && !editor.options.history?.snapshot &&
             (!state.relationHost || state.relationHost.active && state.relationHost.available && !state.relationHost.readonly()),
-        hasClosestBlock: cell => block.contains(cell) ? block : null,
+        getAVHost: cell => block.contains(cell) ? block : null,
         hasClosestByClassName: (cell, name) => name === "b3-menu" ? menu :
             name === "custom-attr" && cell.dataset.avId ? {} : null,
         getColId: cell => cell.dataset.colId,
@@ -519,7 +519,7 @@ const attributePanelFixture = (type = "mSelect") => {
                 selector.includes(`[data-${name}="${currentCell.getAttribute(`data-${name}`)}"]`)) ? currentCell : null;
     };
     bindCell();
-    f.context.hasClosestBlock = target => currentBlock.contains(target) ? currentBlock : null;
+    f.context.getAVHost = target => currentBlock.contains(target) ? currentBlock : null;
     f.context.updateAttrViewCellInOtherElements = (_protyle, _avID, _rowID, _colID, value, cell) => {
         assert.equal(cell, currentCell);
         cell.dataset.cellValue = encodeURIComponent(JSON.stringify(value));

@@ -14,12 +14,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestAPIContractSettingGlobalBreadcrumb(t *testing.T) {
+func TestAPIContractSettingBreadcrumb(t *testing.T) {
 	compareSettingConfig(t, apicontract.SetEditor, conf.NewEditor, []string{
 		`{}`, `{"globalBreadcrumb":true}`, `{"globalBreadcrumb":false}`,
 		`{"globalBreadcrumb":null}`, `{"GlobalBreadcrumb":true}`, `{"globalBreadcrumb":"bad"}`,
-		`{"hideGlobalBreadcrumbIcons":true}`, `{"hideGlobalBreadcrumbIcons":false}`,
-		`{"hideGlobalBreadcrumbIcons":null}`, `{"HideGlobalBreadcrumbIcons":true}`, `{"hideGlobalBreadcrumbIcons":"bad"}`,
+		`{"hideBreadcrumbIcons":true}`, `{"hideBreadcrumbIcons":false}`,
+		`{"hideBreadcrumbIcons":null}`, `{"HideBreadcrumbIcons":true}`, `{"hideBreadcrumbIcons":"bad"}`,
 	})
 	previousConf, previousReadOnly, previousMarkdown := model.Conf, util.ReadOnly, util.MarkdownSettings.Load()
 	model.Conf = model.NewAppConf()
@@ -53,21 +53,40 @@ func TestAPIContractSettingGlobalBreadcrumb(t *testing.T) {
 		body string
 		want bool
 	}{
-		{`{"hideGlobalBreadcrumbIcons":true}`, true},
+		{`{"hideBreadcrumbIcons":true}`, true},
 		{`{"globalBreadcrumb":true}`, true},
 		{`{"globalBreadcrumb":false}`, true},
 		{`{}`, true},
-		{`{"hideGlobalBreadcrumbIcons":false}`, false},
-		{`{"HideGlobalBreadcrumbIcons":true}`, true},
-		{`{"hideGlobalBreadcrumbIcons":null}`, false},
+		{`{"hideBreadcrumbIcons":false}`, false},
+		{`{"HideBreadcrumbIcons":true}`, true},
+		{`{"hideBreadcrumbIcons":null}`, false},
+		{`{"hideGlobalBreadcrumbIcons":true}`, false},
 	} {
 		code, message, data := settingContractRequest(t, "setEditor", setEditor, entry.body)
-		var response apicontract.SettingEditor
+		var response struct {
+			HideBreadcrumbIcons    *bool           `json:"hideBreadcrumbIcons"`
+			OldHideBreadcrumbIcons json.RawMessage `json:"hideGlobalBreadcrumbIcons"`
+		}
 		if err := json.Unmarshal(data, &response); err != nil {
 			t.Fatal(err)
 		}
-		if code != 0 || model.Conf.Editor.Load().HideGlobalBreadcrumbIcons != entry.want || response.HideGlobalBreadcrumbIcons != entry.want {
-			t.Fatalf("global breadcrumb icon preference update %s: code=%d message=%s data=%s", entry.body, code, message, data)
+		if code != 0 || model.Conf.Editor.Load().HideBreadcrumbIcons != entry.want ||
+			response.HideBreadcrumbIcons == nil || *response.HideBreadcrumbIcons != entry.want || response.OldHideBreadcrumbIcons != nil {
+			t.Fatalf("breadcrumb icon preference update %s: code=%d message=%s data=%s", entry.body, code, message, data)
+		}
+	}
+
+	for _, entry := range []struct {
+		body string
+		want bool
+	}{
+		{`{"editor":{"hideGlobalBreadcrumbIcons":true}}`, false},
+		{`{"editor":{"hideBreadcrumbIcons":true}}`, true},
+		{`{"editor":{"hideBreadcrumbIcons":null}}`, false},
+	} {
+		code, message, _ := settingContractRequest(t, "patch", patchSetting, entry.body)
+		if code != 0 || model.Conf.Editor.Load().HideBreadcrumbIcons != entry.want {
+			t.Fatalf("breadcrumb icon preference patch %s: code=%d message=%s", entry.body, code, message)
 		}
 	}
 }

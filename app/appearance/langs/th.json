@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "ติดตั้งตอนนี้",
 	"updateInstallLater": "ยังไม่ติดตั้ง",
-	"hideGlobalBreadcrumbIcons": "ซ่อนไอคอนในแถบเส้นทางนำทาง",
-	"hideGlobalBreadcrumbIconsTip": "เมื่อเปิดใช้ จะซ่อนไอคอนของรายการที่มีข้อความในแถบเส้นทางนำทาง",
+	"hideBreadcrumbIcons": "ซ่อนไอคอนในแถบเส้นทางนำทาง",
+	"hideBreadcrumbIconsTip": "เมื่อเปิดใช้ จะซ่อนไอคอนของรายการที่มีข้อความในแถบเส้นทางนำทาง",
 	"updateReleaseAnnouncement": "ประกาศรุ่น: ${link}",
 	"docOpenPosition": "ตำแหน่งเมื่อเปิดเอกสาร",
 	"docOpenAtStart": "เปิดจากจุดเริ่มต้น",

@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "Инсталирај сада",
 	"updateInstallLater": "Не сада",
-	"hideGlobalBreadcrumbIcons": "Сакриј иконе путање за навигацију",
-	"hideGlobalBreadcrumbIconsTip": "Када је укључено, сакрива иконе ставки са текстом у путањи за навигацију",
+	"hideBreadcrumbIcons": "Сакриј иконе путање за навигацију",
+	"hideBreadcrumbIconsTip": "Када је укључено, сакрива иконе ставки са текстом у путањи за навигацију",
 	"updateReleaseAnnouncement": "Објава издања: ${link}",
 	"docOpenPosition": "Положај отварања документа",
 	"docOpenAtStart": "Отвори од почетка",

@@ -1545,7 +1545,7 @@ var SetFlashcard = define[SetFlashcardRequest, *SettingFlashcard]("setFlashcard"
 // backlinkGlobalSort、backlinkBlockSort、floatWindowMode、headingEmbedMode 仅接受 0、1、2，越界值回退 0。
 // databaseAttrClickMode、databaseAttrViewMode 仅接受 0、1；codeTabSpaces 仅接受 0、2、4、6、8，越界值回退 0。
 // 只提交 fontFamily、fontWeight 时按新的首选字体重建 fontFamilies；显式提交 fontFamilies 时以该列表为准。
-// hideGlobalBreadcrumbIcons 隐藏面包屑中有文字的路径项图标，独立于 globalBreadcrumb，默认关闭，null 恢复默认。
+// hideBreadcrumbIcons 隐藏面包屑中有文字的路径项图标，独立于 globalBreadcrumb，默认关闭，null 恢复默认。
 var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/setting/setEditor", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "editor", Merge: true}}, "POST")
 
 // PatchSetting 保留省略字段，成功后客户端重新读取配置；通知不包含密码或密钥。

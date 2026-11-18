@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "Instalar agora",
 	"updateInstallLater": "Agora não",
-	"hideGlobalBreadcrumbIcons": "Ocultar ícones da trilha de navegação",
-	"hideGlobalBreadcrumbIconsTip": "Quando ativada, esta opção oculta os ícones das entradas com texto na trilha de navegação",
+	"hideBreadcrumbIcons": "Ocultar ícones da trilha de navegação",
+	"hideBreadcrumbIconsTip": "Quando ativada, esta opção oculta os ícones das entradas com texto na trilha de navegação",
 	"updateReleaseAnnouncement": "Anúncio da versão: ${link}",
 	"docOpenPosition": "Posição de abertura do documento",
 	"docOpenAtStart": "Abrir do início",

@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "Nainštalovať teraz",
 	"updateInstallLater": "Teraz nie",
-	"hideGlobalBreadcrumbIcons": "Skryť ikony navigačnej cesty",
-	"hideGlobalBreadcrumbIconsTip": "Po zapnutí skryje ikony položiek s textom v navigačnej ceste",
+	"hideBreadcrumbIcons": "Skryť ikony navigačnej cesty",
+	"hideBreadcrumbIconsTip": "Po zapnutí skryje ikony položiek s textom v navigačnej ceste",
 	"updateReleaseAnnouncement": "Oznámenie o vydaní: ${link}",
 	"docOpenPosition": "Pozícia otvorenia dokumentu",
 	"docOpenAtStart": "Otvoriť od začiatku",

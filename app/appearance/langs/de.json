@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "Jetzt installieren",
 	"updateInstallLater": "Später installieren",
-	"hideGlobalBreadcrumbIcons": "Symbole im Navigationspfad ausblenden",
-	"hideGlobalBreadcrumbIconsTip": "Blendet bei Aktivierung die Symbole von Einträgen mit Text im Navigationspfad aus",
+	"hideBreadcrumbIcons": "Symbole im Navigationspfad ausblenden",
+	"hideBreadcrumbIconsTip": "Blendet bei Aktivierung die Symbole von Einträgen mit Text im Navigationspfad aus",
 	"updateReleaseAnnouncement": "Veröffentlichungsankündigung: ${link}",
 	"docOpenPosition": "Öffnungsposition des Dokuments",
 	"docOpenAtStart": "Am Anfang öffnen",

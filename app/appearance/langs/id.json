@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "Instal sekarang",
 	"updateInstallLater": "Nanti saja",
-	"hideGlobalBreadcrumbIcons": "Sembunyikan ikon breadcrumb",
-	"hideGlobalBreadcrumbIconsTip": "Jika diaktifkan, ikon pada entri berteks di breadcrumb disembunyikan",
+	"hideBreadcrumbIcons": "Sembunyikan ikon breadcrumb",
+	"hideBreadcrumbIconsTip": "Jika diaktifkan, ikon pada entri berteks di breadcrumb disembunyikan",
 	"updateReleaseAnnouncement": "Pengumuman rilis: ${link}",
 	"docOpenPosition": "Posisi pembukaan dokumen",
 	"docOpenAtStart": "Buka dari awal",

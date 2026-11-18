@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "Встановити зараз",
 	"updateInstallLater": "Не зараз",
-	"hideGlobalBreadcrumbIcons": "Приховувати піктограми ланцюжка навігації",
-	"hideGlobalBreadcrumbIconsTip": "Якщо ввімкнено, приховує піктограми елементів із текстом у ланцюжку навігації",
+	"hideBreadcrumbIcons": "Приховувати піктограми ланцюжка навігації",
+	"hideBreadcrumbIconsTip": "Якщо ввімкнено, приховує піктограми елементів із текстом у ланцюжку навігації",
 	"updateReleaseAnnouncement": "Оголошення про випуск: ${link}",
 	"docOpenPosition": "Позиція відкриття документа",
 	"docOpenAtStart": "Відкривати з початку",

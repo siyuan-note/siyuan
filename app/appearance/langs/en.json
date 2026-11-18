@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "Install now",
 	"updateInstallLater": "Not now",
-	"hideGlobalBreadcrumbIcons": "Hide breadcrumb icons",
-	"hideGlobalBreadcrumbIconsTip": "When enabled, hide icons on entries with text in the breadcrumb",
+	"hideBreadcrumbIcons": "Hide breadcrumb icons",
+	"hideBreadcrumbIconsTip": "When enabled, hide icons on entries with text in the breadcrumb",
 	"updateReleaseAnnouncement": "Release announcement: ${link}",
 	"docOpenPosition": "Document opening position",
 	"docOpenAtStart": "Open at the beginning",

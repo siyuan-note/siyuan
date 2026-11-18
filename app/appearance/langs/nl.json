@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "Nu installeren",
 	"updateInstallLater": "Niet nu",
-	"hideGlobalBreadcrumbIcons": "Broodkruimelpictogrammen verbergen",
-	"hideGlobalBreadcrumbIconsTip": "Verbergt pictogrammen van items met tekst in het broodkruimelpad wanneer ingeschakeld",
+	"hideBreadcrumbIcons": "Broodkruimelpictogrammen verbergen",
+	"hideBreadcrumbIconsTip": "Verbergt pictogrammen van items met tekst in het broodkruimelpad wanneer ingeschakeld",
 	"updateReleaseAnnouncement": "Releaseaankondiging: ${link}",
 	"docOpenPosition": "Openingspositie van document",
 	"docOpenAtStart": "Vanaf het begin openen",

@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "अभी इंस्टॉल करें",
 	"updateInstallLater": "अभी नहीं",
-	"hideGlobalBreadcrumbIcons": "ब्रेडक्रंब आइकन छिपाएँ",
-	"hideGlobalBreadcrumbIconsTip": "चालू करने पर ब्रेडक्रंब में पाठ वाली प्रविष्टियों के आइकन छिप जाते हैं",
+	"hideBreadcrumbIcons": "ब्रेडक्रंब आइकन छिपाएँ",
+	"hideBreadcrumbIconsTip": "चालू करने पर ब्रेडक्रंब में पाठ वाली प्रविष्टियों के आइकन छिप जाते हैं",
 	"updateReleaseAnnouncement": "संस्करण की घोषणा: ${link}",
 	"docOpenPosition": "दस्तावेज़ खोलने का स्थान",
 	"docOpenAtStart": "शुरुआत से खोलें",

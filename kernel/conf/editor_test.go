@@ -25,18 +25,28 @@ func TestEditorGlobalBreadcrumbDefaults(t *testing.T) {
 	}
 }
 
-func TestEditorGlobalBreadcrumbIcons(t *testing.T) {
-	if NewEditor().HideGlobalBreadcrumbIcons {
-		t.Fatal("global breadcrumb icons must be visible")
+func TestEditorBreadcrumbIcons(t *testing.T) {
+	if NewEditor().HideBreadcrumbIcons {
+		t.Fatal("breadcrumb icons must be visible by default")
 	}
-	for _, input := range []string{`{}`, `{"hideGlobalBreadcrumbIcons":null}`, `{"hideGlobalBreadcrumbIcons":true}`, `{"hideGlobalBreadcrumbIcons":false}`} {
+	for _, entry := range []struct {
+		input string
+		want  bool
+	}{
+		{`{}`, false},
+		{`{"hideBreadcrumbIcons":null}`, false},
+		{`{"hideBreadcrumbIcons":true}`, true},
+		{`{"hideBreadcrumbIcons":false}`, false},
+		{`{"hideGlobalBreadcrumbIcons":true}`, false},
+		{`{"hideGlobalBreadcrumbIcons":true,"hideBreadcrumbIcons":false}`, false},
+	} {
 		var editor Editor
-		if err := json.Unmarshal([]byte(input), &editor); err != nil {
+		if err := json.Unmarshal([]byte(entry.input), &editor); err != nil {
 			t.Fatal(err)
 		}
 		NormalizeEditor(&editor)
-		if editor.HideGlobalBreadcrumbIcons != (input == `{"hideGlobalBreadcrumbIcons":true}`) {
-			t.Fatalf("unexpected global breadcrumb icon preference for %s", input)
+		if editor.HideBreadcrumbIcons != entry.want {
+			t.Fatalf("unexpected breadcrumb icon preference for %s", entry.input)
 		}
 	}
 }

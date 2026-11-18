@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "Şimdi yükle",
 	"updateInstallLater": "Şimdi değil",
-	"hideGlobalBreadcrumbIcons": "Gezinme yolu simgelerini gizle",
-	"hideGlobalBreadcrumbIconsTip": "Etkinleştirildiğinde gezinme yolunda metin içeren öğelerin simgelerini gizler",
+	"hideBreadcrumbIcons": "Gezinme yolu simgelerini gizle",
+	"hideBreadcrumbIconsTip": "Etkinleştirildiğinde gezinme yolunda metin içeren öğelerin simgelerini gizler",
 	"updateReleaseAnnouncement": "Sürüm duyurusu: ${link}",
 	"docOpenPosition": "Belge açılış konumu",
 	"docOpenAtStart": "Baştan aç",

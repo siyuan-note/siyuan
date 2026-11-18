@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "立即安裝",
 	"updateInstallLater": "暫不安裝",
-	"hideGlobalBreadcrumbIcons": "隱藏導覽路徑圖示",
-	"hideGlobalBreadcrumbIconsTip": "啟用後隱藏導覽路徑中有文字的項目圖示",
+	"hideBreadcrumbIcons": "隱藏導覽路徑圖示",
+	"hideBreadcrumbIconsTip": "啟用後隱藏導覽路徑中有文字的項目圖示",
 	"updateReleaseAnnouncement": "發布公告：${link}",
 	"docOpenPosition": "文件開啟位置",
 	"docOpenAtStart": "從文件開頭開啟",

@@ -837,7 +837,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                         rootID !== protyle.block.rootID || notebook !== protyle.notebookId ||
                         global !== window.siyuan.config.editor.globalBreadcrumb ||
                         (global && !isBreadcrumbNotebookAvailable(notebook))) return;
-                    const hideIcons = window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true;
+                    const hideIcons = window.siyuan.config.editor.hideBreadcrumbIcons === true;
                     const pathIDs = new Set(paths.filter(item => item.globalType !== "notebook").map(item => item.id));
                     paths.forEach((item: GlobalBreadcrumb) => {
                         const hideIcon = hideIcons && !!item.name?.trim();
@@ -1389,7 +1389,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         blockElement = isInEmbedBlock(blockElement) || blockElement;
         const id = blockElement.getAttribute("data-node-id");
         const global = window.siyuan.config.editor.globalBreadcrumb;
-        const hideIcons = window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true;
+        const hideIcons = window.siyuan.config.editor.hideBreadcrumbIcons === true;
         if (id === this.id && !update && this.globalBreadcrumb === global &&
             this.hideBreadcrumbIcons === hideIcons && this.renderedRequestID === this.renderRequestID) {
             protyle.breadcrumb.element.querySelectorAll(".protyle-breadcrumb__item--active").forEach(item => {
@@ -1416,7 +1416,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
         // 等待当前块的创建事务完成，并丢弃切换文档或选择位置后过期的读取。
         const isCurrent = () => !this.destroyed && requestID === this.renderRequestID && rootID === protyle.block.rootID &&
             notebook === protyle.notebookId && global === window.siyuan.config.editor.globalBreadcrumb &&
-            (window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true) === hideIcons &&
+            (window.siyuan.config.editor.hideBreadcrumbIcons === true) === hideIcons &&
             (!global || isBreadcrumbNotebookAvailable(notebook)) && blockElement.isConnected;
         await waitForPendingTransactions(protyle);
         if (!isCurrent()) {

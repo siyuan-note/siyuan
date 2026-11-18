@@ -1,8 +1,8 @@
 {
 	"updateInstallNow": "התקנה עכשיו",
 	"updateInstallLater": "לא עכשיו",
-	"hideGlobalBreadcrumbIcons": "הסתרת סמלים בנתיב הניווט",
-	"hideGlobalBreadcrumbIconsTip": "כאשר אפשרות זו מופעלת, הסמלים של פריטים עם טקסט בנתיב הניווט יוסתרו",
+	"hideBreadcrumbIcons": "הסתרת סמלים בנתיב הניווט",
+	"hideBreadcrumbIconsTip": "כאשר אפשרות זו מופעלת, הסמלים של פריטים עם טקסט בנתיב הניווט יוסתרו",
 	"updateReleaseAnnouncement": "הכרזת גרסה: ${link}",
 	"docOpenPosition": "מיקום פתיחת המסמך",
 	"docOpenAtStart": "פתיחה מההתחלה",

@@ -36,7 +36,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
     Object.assign(window, {siyuan: {
         notebooks: [{id: notebook, name: "Notebook & <literal>", closed: false}],
         languages: new Proxy({}, {get: (_target, key) => String(key)}), menus: {menu},
-        config: {readonly: false, editor: {globalBreadcrumb: true, hideGlobalBreadcrumbIcons: false}, keymap: {editor: {general: keys}}},
+        config: {readonly: false, editor: {globalBreadcrumb: true, hideBreadcrumbIcons: false}, keymap: {editor: {general: keys}}},
     }});
     const escape = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
     const escapeExports: any = {};
@@ -145,7 +145,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         folderElement.querySelector<HTMLElement>(".b3-menu__submenu .b3-menu__items > .b3-menu__item").click();
         check.deepEqual(opened, [folder], "The explicit Open action navigates to the selected parent");
         check.equal(closed, 1);
-        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = true;
+        window.siyuan.config.editor.hideBreadcrumbIcons = true;
         globalResult = async () => [...pathItems, {id: "20260101000000-fffffff", name: "", type: "NodeHeading"}];
         menuElement.removeAttribute("data-name");
         await breadcrumb.genMobileMenu(protyle);
@@ -177,7 +177,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         ordinaryRoot.click();
         check.deepEqual(opened, [folder, leaf, root]);
         check.equal(menuElement.childElementCount, 0);
-        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = false;
+        window.siyuan.config.editor.hideBreadcrumbIcons = false;
         menuElement.removeAttribute("data-name");
         await breadcrumb.genMobileMenu(protyle);
         await callbackWork;
@@ -273,7 +273,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
 
         const getPathItem = (id: string) => breadcrumb.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement;
         const widthWithIcon = getPathItem(ancestor).getBoundingClientRect().width;
-        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = true;
+        window.siyuan.config.editor.hideBreadcrumbIcons = true;
         await render(false);
         const hiddenItem = getPathItem(ancestor);
         const ancestorText = hiddenItem.querySelector(".protyle-breadcrumb__text") as HTMLElement;
@@ -327,18 +327,18 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         let releaseOrdinary: (items: typeof blocks) => void;
         ordinaryResult = () => new Promise(resolve => { releaseOrdinary = resolve; });
         await breadcrumb.render(protyle, true, wysiwyg.firstElementChild);
-        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = false;
+        window.siyuan.config.editor.hideBreadcrumbIcons = false;
         releaseOrdinary(blocks);
         await callbackWork;
         check.equal(breadcrumb.element.innerHTML, ordinaryHTML, "Late ordinary results are ignored after the icon setting changes");
         ordinaryResult = async (items) => items;
         await render(false);
         check.ok(getPathItem(root).querySelector("svg.popover__block"));
-        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = true;
+        window.siyuan.config.editor.hideBreadcrumbIcons = true;
         await render(false);
         check.equal(getPathItem(root).querySelector("svg"), null);
         window.siyuan.config.editor.globalBreadcrumb = true;
-        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = false;
+        window.siyuan.config.editor.hideBreadcrumbIcons = false;
         await render(false);
         check.ok(getPathItem(ancestor).querySelector(".popover__block img"));
         check.ok(getPathItem(root).querySelector(".popover__block .protyle-breadcrumb__graphic"));
@@ -370,14 +370,14 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
             globalResult = () => new Promise(resolve => { release = resolve; });
             await breadcrumb.render(protyle, true, wysiwyg.firstElementChild);
             if (change === "disable") window.siyuan.config.editor.globalBreadcrumb = false;
-            else if (change === "icon preference") window.siyuan.config.editor.hideGlobalBreadcrumbIcons = true;
+            else if (change === "icon preference") window.siyuan.config.editor.hideBreadcrumbIcons = true;
             else if (change === "navigate") protyle.block.rootID = ancestor;
             else breadcrumb.destroy();
             release(pathItems);
             await callbackWork;
             check.equal(breadcrumb.element.innerHTML, existing, `Late global results are ignored after ${change}`);
             window.siyuan.config.editor.globalBreadcrumb = true;
-            window.siyuan.config.editor.hideGlobalBreadcrumbIcons = false;
+            window.siyuan.config.editor.hideBreadcrumbIcons = false;
             protyle.block.rootID = root;
         }
     }

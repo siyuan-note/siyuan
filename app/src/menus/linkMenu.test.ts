@@ -5,6 +5,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 import {escapeHtmlTextAndAttr} from "../util/escape";
+import {getBlockLinkID} from "../util/nodeID";
 
 const source = createSourceFile("protyle.ts", readFileSync(join(__dirname, "protyle.ts"), "utf8"), ScriptTarget.Latest, true);
 const declaration = source.statements.filter(isVariableStatement).flatMap(statement =>
@@ -23,7 +24,7 @@ test("link menus show missing targets as empty on desktop and mobile", () => {
             const linkElement = {getAttribute: (name: string) => name === "data-href" ? target : "",
                 textContent: "anchor", getBoundingClientRect: () => ({left: 0, top: 0})};
             runInNewContext(code, {
-                Lute, protyle: {lute: {GetLinkDest: () => ""}, element: {}}, linkElement,
+                Lute, getBlockLinkID, protyle: {lute: {GetLinkDest: () => ""}, element: {}}, linkElement,
                 Constants: {MENU_INLINE_A: "a", ZWSP: "\u200b"},
                 window: {siyuan: {languages: {}, menus: {menu}}},
                 hasClosestBlock: () => ({outerHTML: ""}), hasTopClosestByClassName: (): undefined => undefined,
@@ -59,7 +60,7 @@ test("closing link menus preserves database parameters and edited literal attrib
             element: {setAttribute() {}}};
         let updates = 0;
         runInNewContext(code, {
-            Lute, protyle: {lute: {GetLinkDest: () => ""}, element: {}}, linkElement,
+            Lute, getBlockLinkID, protyle: {lute: {GetLinkDest: () => ""}, element: {}}, linkElement,
             Constants: {MENU_INLINE_A: "a", ZWSP: "\u200b"},
             window: {siyuan: {languages: {}, menus: {menu}}},
             hasClosestBlock: () => ({get outerHTML() {return JSON.stringify([...attributes]);}, setAttribute() {}}),
@@ -106,7 +107,7 @@ test("only complete block links can become references, including after editing t
                 removeAttribute: (name: string) => attributes.delete(name),
                 textContent: "anchor", getBoundingClientRect: () => ({left: 0, top: 0})};
             runInNewContext(code, {
-                Lute, protyle: {lute: {GetLinkDest: () => ""}, element: {},
+                Lute, getBlockLinkID, protyle: {lute: {GetLinkDest: () => ""}, element: {},
                     toolbar: {range: {selectNode() {}, collapse() {}}}}, linkElement,
                 Constants: {MENU_INLINE_A: "a", ZWSP: "\u200b"},
                 window: {siyuan: {languages: {}, menus: {menu}}},

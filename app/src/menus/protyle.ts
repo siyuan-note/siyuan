@@ -1,6 +1,7 @@
 import {createImageOCRMenu} from "./imageOCRMenu";
 import {toggleMenu, IMenuSession} from "./menuToggle";
 import {escapeHtmlTextAndAttr} from "../util/escape";
+import {getBlockLinkID} from "../util/nodeID";
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {
     hasClosestBlock,
@@ -1852,13 +1853,13 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                 }
             }).element);
         }
-        if (/^siyuan:\/\/blocks\/\d{14}-[a-z0-9]{7}$/.test(linkAddress)) {
+        if (getBlockLinkID(linkAddress)) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "turnIntoRef",
                 label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.ref}</b>`,
                 icon: "iconTurnInto",
                 click() {
-                    const target = /^siyuan:\/\/blocks\/(\d{14}-[a-z0-9]{7})$/.exec(inputElements[0].value);
+                    const target = getBlockLinkID(inputElements[0].value);
                     if (!target) {
                         return;
                     }
@@ -1867,7 +1868,7 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                     types.push("block-ref");
                     types.splice(types.indexOf("a"), 1);
                     linkElement.setAttribute("data-type", types.join(" "));
-                    linkElement.setAttribute("data-id", target[1]);
+                    linkElement.setAttribute("data-id", target);
                     inputElements[0].value = "";
                     inputElements[2].value = "";
                     linkElement.removeAttribute("data-href");

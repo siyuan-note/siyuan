@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
-import {createSourceFile, isArrowFunction, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const setup = () => {
     const document = {activeElement: undefined as unknown};
@@ -98,22 +98,25 @@ const setup = () => {
 
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
-test("the plugin input dialog defaults to the base implementation and keeps pending lifecycles out", () => {
-    const source = createSourceFile("inputDialog.ts", readFileSync("src/dialog/inputDialog.ts", "utf8"),
-        ScriptTarget.ES2021, true);
-    const initializer = source.statements.filter(isVariableStatement)
-        .flatMap(statement => Array.from(statement.declarationList.declarations))
-        .find(declaration => declaration.name.getText(source) === "createDesktopInputDialog")?.initializer;
-    assert.ok(initializer && isArrowFunction(initializer));
-    // 第二个参数默认基础 Dialog，插件只传 options 即得到桌面实现。
-    assert.equal(initializer.parameters.length, 2);
-    assert.equal(initializer.parameters[1].initializer?.getText(source), "Dialog");
+test("the plugin input dialog accepts callback invocations and closes only when the caller requests it", async () => {
     const f = setup();
-    const dialog = f.input.createDesktopInputDialog({title: "Public", value: "Draft", onConfirm() {}});
+    const confirmations: unknown[][] = [];
+    const options = {title: "Public", value: "Draft", awaitConfirm: true, onConfirm(value: string, dialog: unknown) {
+        confirmations.push([value, dialog]);
+        return true;
+    }};
+    const openPluginInputDialog: (settings: typeof options) => InstanceType<typeof f.BaseDialog> = f.input.openPluginInputDialog;
+    const [dialog] = [options].map(openPluginInputDialog);
     assert.equal(Object.getPrototypeOf(dialog), f.BaseDialog.prototype);
-    assert.equal(typeof dialog.runPending, "undefined");
+    assert.equal("runPending" in dialog, false);
     assert.equal(f.document.activeElement, dialog.input);
     assert.equal(dialog.input.value, "Draft");
+    dialog.confirm.click();
+    await settle();
+    assert.deepEqual(confirmations, [["Draft", dialog]]);
+    assert.equal(dialog.element.dataset.dialogClosing, undefined);
+    dialog.destroy();
+    assert.equal(dialog.element.dataset.dialogClosing, "true");
 });
 
 test("desktop input wrappers supply the pending lifecycle without changing ordinary input dialogs", async () => {

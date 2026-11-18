@@ -3,9 +3,9 @@ import {AdaptiveDialog, MobileSheetOptions} from "./adaptiveDialog";
 import {isMobile} from "../util/functions";
 import {escapeHtml} from "../util/escape";
 
-export interface IInputDialogOptions {
-    mobileSheet?: MobileSheetOptions,
-    awaitConfirm?: boolean,
+type InputDialogConfirmResult = void | boolean | Promise<void | boolean>;
+
+interface IBaseInputDialogOptions<T extends Dialog, ConfirmResult = InputDialogConfirmResult> {
     title: string,
     value: string,
     label?: string,
@@ -29,18 +29,21 @@ export interface IInputDialogOptions {
         text: string,
         position?: "beforeCancel" | "beforeConfirm" | "afterConfirm",
         danger?: boolean,
-        onClick: (value: string, dialog: AdaptiveDialog) => void,
+        onClick: (value: string, dialog: T) => void,
     }[],
     // 自动补全等入口可自行处理输入框键盘事件。
     bindInput?: boolean,
-    onConfirm: (value: string, dialog: AdaptiveDialog) => void | boolean | Promise<void | boolean>,
+    onConfirm: (value: string, dialog: T) => ConfirmResult,
     destroyCallback?: (options?: IObject) => void,
 }
 
-// 桌面实现由插件与内部共用：不传构造器时使用基础 Dialog（插件路径），内部桌面端传入 AdaptiveDialog
-// 以获得 runPending / invalidate。
-export const createDesktopInputDialog = (options: IInputDialogOptions,
-                                         DialogConstructor: new(options: ConstructorParameters<typeof Dialog>[0]) => Dialog = Dialog): Dialog => {
+export interface IInputDialogOptions extends IBaseInputDialogOptions<AdaptiveDialog> {
+    mobileSheet?: MobileSheetOptions,
+    awaitConfirm?: boolean,
+}
+
+const createDesktopInputDialog = <T extends Dialog>(options: IBaseInputDialogOptions<T>,
+    DialogConstructor: new(options: ConstructorParameters<typeof Dialog>[0]) => T, awaitConfirm = false): T => {
     const inputHTML = options.multiline ?
         `<textarea spellcheck="false" class="b3-text-field fn__block" style="resize:${options.resize || "none"};${options.resize === "vertical" ? "min-height:28px;max-height:min(480px, 50vh)" : ""}" data-dialog-input></textarea>` :
         '<input spellcheck="false" class="b3-text-field fn__block" value="" data-dialog-input>';
@@ -94,9 +97,8 @@ export const createDesktopInputDialog = (options: IInputDialogOptions,
     confirmElement.addEventListener("click", () => {
         // 提交时将焦点交回输入框，校验未通过时可直接继续输入。
         inputElement.focus();
-        const result = options.onConfirm(inputElement.value, dialog as AdaptiveDialog);
-        // 未要求等待时关闭时机仍由调用方决定。
-        if (!options.awaitConfirm) {
+        const result = options.onConfirm(inputElement.value, dialog);
+        if (!awaitConfirm) {
             return;
         }
         void Promise.resolve(result).then(success => {
@@ -108,7 +110,7 @@ export const createDesktopInputDialog = (options: IInputDialogOptions,
     dialog.element.querySelectorAll<HTMLButtonElement>("[data-input-action]").forEach(button => {
         button.addEventListener("click", () => {
             inputElement.focus();
-            options.actions[Number(button.dataset.inputAction)].onClick(inputElement.value, dialog as AdaptiveDialog);
+            options.actions[Number(button.dataset.inputAction)].onClick(inputElement.value, dialog);
         });
     });
     if (options.bindInput !== false) {
@@ -122,6 +124,9 @@ export const createDesktopInputDialog = (options: IInputDialogOptions,
     }
     return dialog;
 };
+
+export const openPluginInputDialog = (options: IBaseInputDialogOptions<Dialog, void>): Dialog =>
+    createDesktopInputDialog(options, Dialog);
 
 // 移动端底部 sheet：触控按钮与分组布局与 confirmDialog 一致。
 const createSheetInputDialog = (options: IInputDialogOptions): Dialog => {
@@ -201,4 +206,4 @@ const createSheetInputDialog = (options: IInputDialogOptions): Dialog => {
 
 // 内部统一入口：移动端使用底部 sheet，桌面端保留提交生命周期。
 export const openInputDialog = (options: IInputDialogOptions): Dialog =>
-    isMobile() ? createSheetInputDialog(options) : createDesktopInputDialog(options, AdaptiveDialog);
+    isMobile() ? createSheetInputDialog(options) : createDesktopInputDialog(options, AdaptiveDialog, options.awaitConfirm);

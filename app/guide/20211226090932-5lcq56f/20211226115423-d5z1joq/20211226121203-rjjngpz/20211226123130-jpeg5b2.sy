@@ -250,6 +250,38 @@
 			]
 		},
 		{
+			"ID": "20261118220329-b5e193c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118220329-b5e193c",
+				"updated": "20261118220329"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在標籤面板中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "最近新增"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可依標籤最近一次新增到文件或內容區塊的時間排列同層標籤。新增時間未知的標籤排在最後。"
+				}
+			]
+		},
+		{
 			"ID": "20261116215152-20a2423",
 			"Type": "NodeParagraph",
 			"Properties": {

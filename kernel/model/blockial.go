@@ -170,7 +170,7 @@ func batchSetBlockAttrs(blockAttrs []map[string]any, writeTree func(*parse.Tree)
 				attrs["icon"] = boxIcons[tree.Box]
 			}
 		}
-		oldAttrs, e := setNodeAttrsData(node, attrs, tree.Box)
+		oldAttrs, e := setNodeAttrsWithTagDates(node, attrs, tree.Box)
 		if nil != e {
 			return e
 		}
@@ -266,13 +266,16 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 }
 
 func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {
-	oldAttrs, err := setNodeAttrs0(node, nameValues, tree.Box)
+	oldAttrs, err := setNodeAttrsWithTagDates(node, nameValues, tree.Box)
 	if err != nil {
 		return
 	}
 
 	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return
+	}
+	if oldAttrs["tags"] != node.IALAttr("tags") {
+		ReloadTag()
 	}
 
 	IncSync()
@@ -419,6 +422,9 @@ func setNodeAttrsData(node *ast.Node, nameValues map[string]string, boxID string
 		value = util.RemoveInvalidRetainCtrl(value)
 		value = strings.TrimSpace(value)
 		lowerName := strings.ToLower(name)
+		if lowerName == treenode.TagCreatedAttr {
+			continue
+		}
 		// 转换为小写再验证属性名
 		if !isValidAttrName(lowerName) {
 			err = errors.New(Conf.Language(25) + " [" + node.ID + "]")

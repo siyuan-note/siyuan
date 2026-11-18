@@ -265,6 +265,38 @@
 			]
 		},
 		{
+			"ID": "20261118220329-f3816c6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118220329-f3816c6",
+				"updated": "20261118220329"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タグパネルで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "並べ替え"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "最近追加"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、同じ階層のタグが文書やコンテンツブロックに最後に追加された順に並びます。追加時刻が不明なタグは末尾に表示されます。"
+				}
+			]
+		},
+		{
 			"ID": "20261116215152-b9eca1d",
 			"Type": "NodeParagraph",
 			"Properties": {

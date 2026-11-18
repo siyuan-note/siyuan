@@ -1547,6 +1547,8 @@ if (response.code === 0 && response.data) {
   }
   ```
 
+若返回 `data["custom-sy-tag-created"]`，其值是 JSON 字符串，键为完整标签名，值为标签添加到此块时的 Unix 毫秒时间戳。未记录的标签添加时间未知。
+
 ## SQL
 
 ### 执行 SQL 查询

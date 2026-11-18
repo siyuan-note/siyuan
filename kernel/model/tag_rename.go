@@ -64,7 +64,8 @@ func renameTag(oldLabel, newLabel string, beforeCommit func()) (*Transaction, er
 			}
 			changed[span.BlockID] = true
 		}
-		tx := &Transaction{fromAPI: true, Timestamp: time.Now().UnixMilli(), tagMutationSources: sources}
+		tx := &Transaction{fromAPI: true, Timestamp: time.Now().UnixMilli(), tagMutationSources: sources,
+			tagDateRename: [2]string{oldLabel, newLabel}}
 		tx.appendTagMutationOperations(before, after, changed)
 		if len(tx.DoOperations) == 0 {
 			return result{tx: tx}

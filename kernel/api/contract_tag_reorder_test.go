@@ -6,6 +6,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -41,6 +42,17 @@ func TestAPIContractTagReorderAndFullTree(t *testing.T) {
 
 	fixture := setupAttributeViewContextFilterAPITest(t)
 	util.TempDir, util.ConfDir, util.HistoryDir, util.QueueDir = t.TempDir(), t.TempDir(), t.TempDir(), t.TempDir()
+	languageData, err := os.ReadFile("../../app/appearance/langs/en.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var language struct {
+		Time map[string]any `json:"_time"`
+	}
+	if err = json.Unmarshal(languageData, &language); err != nil {
+		t.Fatal(err)
+	}
+	util.TimeLangs[model.Conf.Lang] = language.Time
 	fileTree := conf.NewFileTree()
 	fileTree.MaxListCount = 10
 	model.Conf.FileTree.Store(fileTree)
@@ -124,6 +136,25 @@ func TestAPIContractTagReorderAndFullTree(t *testing.T) {
 	}
 	if again := read(util.SortModeCustom, true); again[0].Label != "project" || again[0].Children[0].Label != "project/2" {
 		t.Fatal("returning to manual sort lost the saved order")
+	}
+
+	labels = append(labels, "root519/recent")
+	if err = model.SetBlockAttrs(tree.ID, map[string]string{"tags": strings.Join(labels, ",")}); err != nil {
+		t.Fatal(err)
+	}
+	if recent := read(util.SortModeTagCreatedDESC, true); recent[0].Label != "root519" || recent[0].Children[0].Label != "root519/recent" {
+		t.Fatal("recent sorting did not promote the newly tagged branch")
+	}
+	const attrPath = "/api/attr/getBlockAttrs"
+	response := callAttributeViewContextFilterAPI(t, attrPath, map[string]any{"id": tree.ID}, getBlockAttrs)
+	requireAPIContract(t, http.MethodPost, attrPath, response)
+	var attrs struct {
+		Code int
+		Data map[string]string
+	}
+	decodeAttributeViewContextFilterAPIResponse(t, response, &attrs)
+	if attrs.Code != 0 || !strings.HasPrefix(attrs.Data[treenode.TagCreatedAttr], `{"root519/recent":`) {
+		t.Fatalf("getBlockAttrs did not expose the new association: %s", response.Body.String())
 	}
 }
 

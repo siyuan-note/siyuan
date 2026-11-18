@@ -1,4 +1,4 @@
-import {TAG_SORT_MANUAL} from "../../constants";
+import {TAG_SORT_CREATED_DESC, TAG_SORT_MANUAL} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 
 const tagSortModes = [
@@ -8,6 +8,7 @@ const tagSortModes = [
     [5, "fileNameNatDESC"],
     [7, "refCountASC"],
     [8, "refCountDESC"],
+    [TAG_SORT_CREATED_DESC, "tagRecentlyAdded"],
     [TAG_SORT_MANUAL, "customSort"],
 ] as const;
 

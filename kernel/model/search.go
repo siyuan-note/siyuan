@@ -1118,6 +1118,10 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 	if !bytes.Equal(current, original) {
 		return fmt.Errorf("%w: %s", util.ErrFileChanged, tree.Path)
 	}
+	var changedTagDates []string
+	if bytes.Contains(original, []byte(treenode.TagCreatedAttr)) && !IsEncryptedBox(tree.Box) {
+		changedTagDates = pruneInactiveTagDates(tree.Root)
+	}
 	var size uint64
 	var titleChanged, emptyAttrUpdated bool
 	if sourceTitleBefore != nil {
@@ -1163,6 +1167,7 @@ func writeReplacementTree(tree *parse.Tree, original []byte, title string, renam
 		IncSync()
 	}
 	invalidateDocumentHistory(tree.ID)
+	publishTagDateChanges(changedTagDates)
 	publishDocRename(tree, titleChanged, emptyAttrUpdated)
 	if sourceTitleBefore != nil && !titleChanged && !emptyAttrUpdated {
 		IncSync()

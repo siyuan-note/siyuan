@@ -1550,6 +1550,8 @@ Block insert, prepend, append and update operations validate block IDs throughou
   }
   ```
 
+When present, `data["custom-sy-tag-created"]` is a JSON string mapping complete tag names to Unix milliseconds. Each value records when the tag was added to this block. Missing entries have an unknown addition time.
+
 ## SQL
 
 ### Execute SQL query

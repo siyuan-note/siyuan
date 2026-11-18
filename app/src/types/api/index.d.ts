@@ -4104,6 +4104,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * custom-sy-tag-created 存在时为内核维护的 JSON 字符串，键为完整标签名，值为关联创建时的 Unix 毫秒数；缺失表示时间未知。
+     */
     "/api/attr/getBlockAttrs": {
         request: BlockIDRequestInput;
         response: { "code": 0; "data": Record<string, string>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -9198,7 +9201,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * sort 为 6 时读取手动顺序；无记录的同级标签使用名称自然顺序。ignoreMaxListHint 为 true 时返回完整标签树。
+     * sort 为 6 时读取同级手动顺序，为 16 时按最新可见关联的添加时间降序排列同级标签。无记录的标签使用名称自然顺序。
+     * ignoreMaxListHint 为 true 时返回完整标签树。
      */
     "/api/tag/getTag": {
         request: GetTagRequestInput;

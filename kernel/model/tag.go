@@ -136,13 +136,38 @@ type Tag struct {
 	Type     string `json:"type"` // "tag"
 	Depth    int    `json:"depth"`
 	Count    int    `json:"count"`
+	created  int64
 }
 
 type Tags []*Tag
 
-func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int) *Tags {
+func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int, visible func(string, string) bool) *Tags {
 	FlushTxQueue()
 	sql.FlushQueue()
+
+	if sortVal == util.SortModeTagCreatedDESC {
+		counts, created := map[string]int{}, tagDates{}
+		var previousAttrs string
+		var dates tagDates
+		err := sql.ReadTagAssociations(func(label, attrs, box, path string, count int) {
+			if visible != nil && !visible(box, path) {
+				return
+			}
+			label = util.UnescapeHTML(label)
+			counts[label] += count
+			if attrs != previousAttrs {
+				dates = readTagDates(attrs)
+				previousAttrs = attrs
+			}
+			created[label] = max(created[label], dates[label])
+		})
+		if err != nil {
+			logging.LogErrorf("query tag dates failed: %s", err)
+			return &Tags{}
+		}
+		tags := buildTagTreeWithDates(counts, sortVal, nil, created)
+		return limitTagTree(tags, ignoreMaxListHintArg, appID)
+	}
 
 	labels, err := labelTagCounts()
 	if err != nil {
@@ -156,7 +181,11 @@ func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int) *Tags {
 		}
 	}
 	tags := buildTagTree(labels, sortVal, order)
-	if ignoreMaxListHintArg {
+	return limitTagTree(tags, ignoreMaxListHintArg, appID)
+}
+
+func limitTagTree(tags Tags, ignoreLimit bool, appID string) *Tags {
+	if ignoreLimit {
 		return &tags
 	}
 
@@ -204,6 +233,13 @@ func sortTags(tags Tags, sortVal int) {
 		sort.Slice(tags, func(i, j int) bool { return (tags)[i].Count < (tags)[j].Count })
 	case util.SortModeRefCountDESC:
 		sort.Slice(tags, func(i, j int) bool { return (tags)[i].Count > (tags)[j].Count })
+	case util.SortModeTagCreatedDESC:
+		sort.Slice(tags, func(i, j int) bool {
+			if tags[i].created == tags[j].created {
+				return naturalTagLess(tags[i].Name, tags[j].Name)
+			}
+			return tags[i].created > tags[j].created
+		})
 	default:
 		sort.Slice(tags, func(i, j int) bool { return naturalTagLess(tags[i].Name, tags[j].Name) })
 	}
@@ -290,6 +326,10 @@ func labelTagCounts() (map[string]int, error) {
 }
 
 func buildTagTree(labels map[string]int, sortVal int, order tagSortGroups) Tags {
+	return buildTagTreeWithDates(labels, sortVal, order, nil)
+}
+
+func buildTagTreeWithDates(labels map[string]int, sortVal int, order tagSortGroups, created tagDates) Tags {
 	tags := Tags{}
 	nodes := make(map[string]*Tag, len(labels))
 	for label, count := range labels {
@@ -303,6 +343,7 @@ func buildTagTree(labels map[string]int, sortVal int, order tagSortGroups) Tags 
 				nodes[path] = node
 				*children = append(*children, node)
 			}
+			node.created = max(node.created, created[label])
 			children = &node.Children
 			path += "/"
 		}

@@ -181,11 +181,18 @@ const browserCases = async (sources, entries, themes) => {
     for (const name of ["MobileBookmarks", "MobileTags"]) {
         const requests = [];
         const exports = {};
+        const docTree = {};
+        const tagTree = {};
+        new Function("exports", sources.docTreeWindow)(docTree);
         const modules = {
             "../../layout/dock/panelSearch": {bindPanelSearch() {}},
-            "../../util/fetch": {fetchPost: (_url, _data, callback) => requests.push(callback)},
-            "../../constants": {Constants: {SIYUAN_APPID: "loading-test"}},
-            "../../layout/dock/tagFilter": {getTagFilterKeywords: () => []},
+            "../../util/fetch": {
+                fetchPost: (_url, _data, callback) => requests.push(callback),
+                fetchSyncPost: () => new Promise(resolve => requests.push(resolve)),
+            },
+            "../../constants": {Constants: {SIYUAN_APPID: "loading-test"}, TAG_SORT_MANUAL: 6},
+            "../../layout/dock/TagTree": tagTree,
+            "./docTree/DocTreeModel": docTree,
             "../../util/Tree": {Tree: class {
                 updateData() {}
                 getExpandIds() { return []; }
@@ -193,6 +200,7 @@ const browserCases = async (sources, entries, themes) => {
                 setExpandIds() {}
             }},
         };
+        new Function("require", "exports", sources.TagTree)(module => modules[module] || {}, tagTree);
         new Function("require", "exports", sources[name])(module => modules[module] || {}, exports);
         const panel = new exports[name]({}, host);
         const loading = host.lastElementChild;
@@ -202,15 +210,20 @@ const browserCases = async (sources, entries, themes) => {
         const indicator = loading.querySelector(".b3-loading").getBoundingClientRect();
         check.ok(Math.abs(indicator.x + indicator.width / 2 - bounds.x - bounds.width / 2) < 1);
         check.ok(Math.abs(indicator.y + indicator.height / 2 - bounds.y - bounds.height / 2) < 1);
+        const finishRequest = async () => {
+            requests.shift()({code: 0, data: []});
+            await wait(0);
+        };
         panel.update();
-        requests.shift()({data: []});
+        await finishRequest();
         check.equal(getComputedStyle(loading).display, "flex", "queued refresh keeps the indicator visible");
-        requests.shift()({data: []});
+        await finishRequest();
         check.equal(getComputedStyle(loading).display, "none", "mobile completion hides the outer container");
         panel.update();
         check.equal(getComputedStyle(loading).display, "flex");
-        requests.shift()({data: []});
+        await finishRequest();
         check.equal(getComputedStyle(loading).display, "none");
+        check.equal(requests.length, 0);
     }
 
     host.innerHTML = '<div id="packages">' + sources.bazaarLoader + "<img data-content-image>" + spinnerHTML + "</div>";
@@ -249,6 +262,8 @@ if (process.versions.electron && process.type === "browser") {
                 editor: compile(declarations("src/protyle/ui/initUI.ts", ["addLoading", "removeLoading"])),
                 MobileBookmarks: compile(read("src/mobile/dock/MobileBookmarks.ts")),
                 MobileTags: compile(read("src/mobile/dock/MobileTags.ts")),
+                TagTree: compile(read("src/layout/dock/TagTree.ts")),
+                docTreeWindow: compile(declarations("src/layout/dock/docTree/DocTreeModel.ts", ["getDocTreeWindow"])),
                 bazaar: compile(`const bazaar = {element, _isBazaarRequestCurrent: () => true, ${method.getText(bazaarAST)}};`) + "return bazaar;",
                 bazaarLoader: bazaarText.match(/<div data-type="img-loading"[^>]*>[\s\S]*?<\/div>/)[0],
             };

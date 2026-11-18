@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "إخفاء أيقونات المستندات الافتراضية",
+	"hideDefaultBreadcrumbDocIconsTip": "إخفاء أيقونات المستندات الافتراضية في مسار التنقل العام على سطح المكتب؛ مرّر المؤشر فوق اسم المستند لمعاينته",
 	"updateReleaseAnnouncement": "إعلان الإصدار: ${link}",
 	"docOpenPosition": "موضع فتح المستند",
 	"docOpenAtStart": "الفتح من البداية",

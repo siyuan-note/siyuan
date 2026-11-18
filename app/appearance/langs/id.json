@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "Sembunyikan ikon dokumen bawaan",
+	"hideDefaultBreadcrumbDocIconsTip": "Sembunyikan ikon dokumen bawaan di breadcrumb global desktop. Arahkan penunjuk ke entri dokumen untuk melihat pratinjau",
 	"updateReleaseAnnouncement": "Pengumuman rilis: ${link}",
 	"docOpenPosition": "Posisi pembukaan dokumen",
 	"docOpenAtStart": "Buka dari awal",

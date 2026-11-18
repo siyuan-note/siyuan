@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "隱藏預設文件圖示",
+	"hideDefaultBreadcrumbDocIconsTip": "隱藏桌面版全域導覽路徑中的預設文件圖示，將游標停在文件項目上即可預覽",
 	"updateReleaseAnnouncement": "發布公告：${link}",
 	"docOpenPosition": "文件開啟位置",
 	"docOpenAtStart": "從文件開頭開啟",

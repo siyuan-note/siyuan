@@ -25,6 +25,22 @@ func TestEditorGlobalBreadcrumbDefaults(t *testing.T) {
 	}
 }
 
+func TestEditorDefaultBreadcrumbDocIcons(t *testing.T) {
+	if NewEditor().HideDefaultBreadcrumbDocIcons {
+		t.Fatal("default document icons must be visible")
+	}
+	for _, input := range []string{`{}`, `{"hideDefaultBreadcrumbDocIcons":null}`, `{"hideDefaultBreadcrumbDocIcons":true}`, `{"hideDefaultBreadcrumbDocIcons":false}`} {
+		var editor Editor
+		if err := json.Unmarshal([]byte(input), &editor); err != nil {
+			t.Fatal(err)
+		}
+		NormalizeEditor(&editor)
+		if editor.HideDefaultBreadcrumbDocIcons != (input == `{"hideDefaultBreadcrumbDocIcons":true}`) {
+			t.Fatalf("unexpected default document icon preference for %s", input)
+		}
+	}
+}
+
 func TestEditorEmbedBreadcrumbParentPathDefaults(t *testing.T) {
 	for _, input := range []string{`{}`, `{"embedBlockBreadcrumbParentPath":null}`, `{"embedBlockBreadcrumbParentPath":true}`, `{"embedBlockBreadcrumbParentPath":false}`} {
 		var editor Editor

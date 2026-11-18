@@ -45524,6 +45524,16 @@
             }
           ]
         },
+        "hideDefaultBreadcrumbDocIcons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "historyRetentionDays": {
           "anyOf": [
             {
@@ -49949,6 +49959,9 @@
         "headingNumberFormat": {
           "type": "string"
         },
+        "hideDefaultBreadcrumbDocIcons": {
+          "type": "boolean"
+        },
         "historyRetentionDays": {
           "type": "integer"
         },
@@ -50088,6 +50101,7 @@
         "headingEmbedMode",
         "headingNumber",
         "headingNumberFormat",
+        "hideDefaultBreadcrumbDocIcons",
         "historyRetentionDays",
         "justify",
         "katexMacros",
@@ -50746,6 +50760,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hideDefaultBreadcrumbDocIcons": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

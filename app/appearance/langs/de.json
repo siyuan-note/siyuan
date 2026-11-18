@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "Standard-Dokumentsymbole ausblenden",
+	"hideDefaultBreadcrumbDocIconsTip": "Standard-Dokumentsymbole in der globalen Brotkrümelnavigation auf dem Desktop ausblenden und Dokumente beim Überfahren mit der Maus in der Vorschau anzeigen",
 	"updateReleaseAnnouncement": "Veröffentlichungsankündigung: ${link}",
 	"docOpenPosition": "Öffnungsposition des Dokuments",
 	"docOpenAtStart": "Am Anfang öffnen",

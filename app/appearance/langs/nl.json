@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "Standaarddocumentpictogrammen verbergen",
+	"hideDefaultBreadcrumbDocIconsTip": "Verberg standaarddocumentpictogrammen in het globale broodkruimelpad op desktop. Beweeg de aanwijzer over een documentitem voor een voorbeeld",
 	"updateReleaseAnnouncement": "Releaseaankondiging: ${link}",
 	"docOpenPosition": "Openingspositie van document",
 	"docOpenAtStart": "Vanaf het begin openen",

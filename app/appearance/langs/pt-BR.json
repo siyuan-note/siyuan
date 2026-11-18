@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "Ocultar ícones padrão dos documentos",
+	"hideDefaultBreadcrumbDocIconsTip": "Oculta os ícones padrão dos documentos na trilha de navegação global no desktop. Passe o ponteiro sobre uma entrada para visualizar o documento",
 	"updateReleaseAnnouncement": "Anúncio da versão: ${link}",
 	"docOpenPosition": "Posição de abertura do documento",
 	"docOpenAtStart": "Abrir do início",

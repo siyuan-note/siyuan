@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "既定のドキュメントアイコンを非表示にする",
+	"hideDefaultBreadcrumbDocIconsTip": "デスクトップのグローバルパンくずリストで既定のドキュメントアイコンを非表示にします。ドキュメント項目にポインターを合わせるとプレビューできます",
 	"updateReleaseAnnouncement": "リリースのお知らせ：${link}",
 	"docOpenPosition": "ドキュメントを開く位置",
 	"docOpenAtStart": "先頭から開く",

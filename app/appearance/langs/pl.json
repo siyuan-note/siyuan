@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "Ukryj domyślne ikony dokumentów",
+	"hideDefaultBreadcrumbDocIconsTip": "Ukrywa domyślne ikony dokumentów na globalnej ścieżce nawigacji na komputerze. Najedź kursorem na pozycję dokumentu, aby wyświetlić podgląd",
 	"updateReleaseAnnouncement": "Ogłoszenie wydania: ${link}",
 	"docOpenPosition": "Pozycja otwierania dokumentu",
 	"docOpenAtStart": "Otwórz od początku",

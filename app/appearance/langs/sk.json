@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "Skryť predvolené ikony dokumentov",
+	"hideDefaultBreadcrumbDocIconsTip": "Skryje predvolené ikony dokumentov v globálnej navigačnej ceste na počítači. Ukážku zobrazíte podržaním kurzora nad položkou dokumentu",
 	"updateReleaseAnnouncement": "Oznámenie o vydaní: ${link}",
 	"docOpenPosition": "Pozícia otvorenia dokumentu",
 	"docOpenAtStart": "Otvoriť od začiatku",

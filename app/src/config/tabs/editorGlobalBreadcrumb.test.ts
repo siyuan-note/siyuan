@@ -11,11 +11,12 @@ for (const mobile of [false, true]) {
         const source = createSourceFile("editorTab.ts", text, ScriptTarget.ES2021, true);
         const declaration = source.statements.find(node => node.getText(source).startsWith("const registerEditorBehaviorGroup ="));
         assert.ok(declaration);
-        const rows: Array<{kind: string; id: string; options: {title: string; desc: string; save?: unknown}}> = [];
+        const rows: Array<{kind: string; id: string; options: {title: string; desc: string; save?: unknown;
+            afterMount?: (root: object) => void; keywords?: string[]}}> = [];
         const exports = {} as {register: (tab: object) => void};
         runInNewContext(transpileModule(declaration.getText(source), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText +
             "\nexports.register = registerEditorBehaviorGroup;", {
-            exports, isMobile: () => mobile, isBrowser: () => true, updateHotkeyTip: () => "",
+            exports, CSS: {escape: (id: string) => id}, isMobile: () => mobile, isBrowser: () => true, updateHotkeyTip: () => "",
             CODE_TAB_SPACE_VALUES: [], window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)}),
                 config: {keymap: {general: {editReadonly: {custom: ""}}}}}},
         });
@@ -31,12 +32,36 @@ for (const mobile of [false, true]) {
         assert.equal(row.options.title, "globalBreadcrumb");
         assert.equal(row.options.desc, "globalBreadcrumbTip");
         assert.equal(row.options.save, undefined);
+        const iconsRow = rows[rows.indexOf(row) + 1];
+        if (mobile) {
+            assert.equal(rows.some(item => item.id === "editor.hideDefaultBreadcrumbDocIcons"), false);
+            return;
+        }
+        assert.equal(iconsRow.id, "editor.hideDefaultBreadcrumbDocIcons");
+        assert.equal(iconsRow.kind, "switch");
+        assert.equal(iconsRow.options.save, undefined);
+        assert.equal(row.options.keywords?.includes("hideDefaultBreadcrumbDocIcons"), true);
+
+        const globalSwitch = new EventTarget() as EventTarget & {checked: boolean};
+        globalSwitch.checked = false;
+        let hidden: boolean;
+        row.options.afterMount?.({querySelector: (selector: string) => selector === "#editor.globalBreadcrumb" ? globalSwitch : {
+            closest: () => ({classList: {toggle: (_name: string, value: boolean) => { hidden = value; }}}),
+        }});
+        assert.equal(hidden, true);
+        globalSwitch.checked = true;
+        globalSwitch.dispatchEvent(new Event("change"));
+        assert.equal(hidden, false);
+        globalSwitch.checked = false;
+        globalSwitch.dispatchEvent(new Event("change"));
+        assert.equal(hidden, true);
     });
 }
 
 test("global breadcrumb changes invalidate existing editor paths immediately", () => {
     const source = readFileSync("src/config/tabs/editorRuntime.ts", "utf8");
-    assert.match(source, /old\.globalBreadcrumb !== next\.globalBreadcrumb\) protyle\.breadcrumb\?\.render\(protyle, true\)/);
+    assert.match(source, /old\.globalBreadcrumb !== next\.globalBreadcrumb \|\|/);
+    assert.match(source, /next\.globalBreadcrumb && old\.hideDefaultBreadcrumbDocIcons !== next\.hideDefaultBreadcrumbDocIcons\)\) \{\s*protyle\.breadcrumb\?\.render\(protyle, true\)/);
     const protyle = readFileSync("src/protyle/index.ts", "utf8");
     for (const command of ["renamenotebook", "rename", "moveDoc"]) {
         const handler = protyle.split(`case "${command}":`)[1].split(/\n\s*case /)[0];

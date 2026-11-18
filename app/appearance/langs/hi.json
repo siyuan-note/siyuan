@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "डिफ़ॉल्ट दस्तावेज़ आइकन छिपाएँ",
+	"hideDefaultBreadcrumbDocIconsTip": "डेस्कटॉप की वैश्विक ब्रेडक्रंब पट्टी में डिफ़ॉल्ट दस्तावेज़ आइकन छिपाएँ। पूर्वावलोकन के लिए दस्तावेज़ प्रविष्टि पर पॉइंटर रखें",
 	"updateReleaseAnnouncement": "संस्करण की घोषणा: ${link}",
 	"docOpenPosition": "दस्तावेज़ खोलने का स्थान",
 	"docOpenAtStart": "शुरुआत से खोलें",

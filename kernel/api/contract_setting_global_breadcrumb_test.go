@@ -18,6 +18,8 @@ func TestAPIContractSettingGlobalBreadcrumb(t *testing.T) {
 	compareSettingConfig(t, apicontract.SetEditor, conf.NewEditor, []string{
 		`{}`, `{"globalBreadcrumb":true}`, `{"globalBreadcrumb":false}`,
 		`{"globalBreadcrumb":null}`, `{"GlobalBreadcrumb":true}`, `{"globalBreadcrumb":"bad"}`,
+		`{"hideDefaultBreadcrumbDocIcons":true}`, `{"hideDefaultBreadcrumbDocIcons":false}`,
+		`{"hideDefaultBreadcrumbDocIcons":null}`, `{"HideDefaultBreadcrumbDocIcons":true}`, `{"hideDefaultBreadcrumbDocIcons":"bad"}`,
 	})
 	previousConf, previousReadOnly, previousMarkdown := model.Conf, util.ReadOnly, util.MarkdownSettings.Load()
 	model.Conf = model.NewAppConf()
@@ -45,6 +47,27 @@ func TestAPIContractSettingGlobalBreadcrumb(t *testing.T) {
 		}
 		if code != 0 || model.Conf.Editor.Load().GlobalBreadcrumb != entry.want || response.GlobalBreadcrumb != entry.want {
 			t.Fatalf("global breadcrumb update %s: code=%d message=%s data=%s", entry.body, code, message, data)
+		}
+	}
+	for _, entry := range []struct {
+		body string
+		want bool
+	}{
+		{`{"hideDefaultBreadcrumbDocIcons":true}`, true},
+		{`{"globalBreadcrumb":true}`, true},
+		{`{"globalBreadcrumb":false}`, true},
+		{`{}`, true},
+		{`{"hideDefaultBreadcrumbDocIcons":false}`, false},
+		{`{"HideDefaultBreadcrumbDocIcons":true}`, true},
+		{`{"hideDefaultBreadcrumbDocIcons":null}`, false},
+	} {
+		code, message, data := settingContractRequest(t, "setEditor", setEditor, entry.body)
+		var response apicontract.SettingEditor
+		if err := json.Unmarshal(data, &response); err != nil {
+			t.Fatal(err)
+		}
+		if code != 0 || model.Conf.Editor.Load().HideDefaultBreadcrumbDocIcons != entry.want || response.HideDefaultBreadcrumbDocIcons != entry.want {
+			t.Fatalf("default document icon preference update %s: code=%d message=%s data=%s", entry.body, code, message, data)
 		}
 	}
 }

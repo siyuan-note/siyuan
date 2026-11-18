@@ -82,7 +82,23 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.globalBreadcrumb", {
         title: window.siyuan.languages.globalBreadcrumb,
         desc: window.siyuan.languages.globalBreadcrumbTip,
+        keywords: isMobile() ? [] : [window.siyuan.languages.hideDefaultBreadcrumbDocIcons],
+        afterMount: isMobile() ? undefined : (root) => {
+            const global = root.querySelector<HTMLInputElement>(`#${CSS.escape("editor.globalBreadcrumb")}`);
+            const row = root.querySelector(`#${CSS.escape("editor.hideDefaultBreadcrumbDocIcons")}`)?.closest(".config-item");
+            if (global && row) {
+                const toggle = () => { row.classList.toggle("fn__none", !global.checked); };
+                global.addEventListener("change", toggle);
+                toggle();
+            }
+        },
     });
+    if (!isMobile()) {
+        group.switch("editor.hideDefaultBreadcrumbDocIcons", {
+            title: window.siyuan.languages.hideDefaultBreadcrumbDocIcons,
+            desc: window.siyuan.languages.hideDefaultBreadcrumbDocIconsTip,
+        });
+    }
     group.number("editor.dynamicLoadBlocks", {
         title: window.siyuan.languages.dynamicLoadBlocks,
         desc: window.siyuan.languages.dynamicLoadBlocksTip,

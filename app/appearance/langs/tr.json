@@ -1,4 +1,6 @@
 {
+	"hideDefaultBreadcrumbDocIcons": "Varsayılan belge simgelerini gizle",
+	"hideDefaultBreadcrumbDocIconsTip": "Masaüstündeki genel gezinme yolunda varsayılan belge simgelerini gizler. Belgeyi önizlemek için imleci belge öğesinin üzerine getirin",
 	"updateReleaseAnnouncement": "Sürüm duyurusu: ${link}",
 	"docOpenPosition": "Belge açılış konumu",
 	"docOpenAtStart": "Baştan aç",

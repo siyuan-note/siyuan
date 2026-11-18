@@ -847,24 +847,35 @@ describe("plugin lifecycle coordinator", () => {
     });
 
     it("keeps uninstall as a barrier before a later load", async () => {
+        const clock = new FakeClock();
+        const unloadStarted = deferred<void>();
         const unloaded = deferred<void>();
         const {coordinator, events} = createHarness({
             onunload(plugin) {
                 events.push(`onunload:${plugin.name}`);
+                unloadStarted.resolve();
                 return unloaded.promise;
             },
+        }, 20, {
+            now: () => clock.now,
+            setTimeout: clock.setTimeout,
+            clearTimeout: clock.clearTimeout,
         });
         coordinator.start();
         await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
 
         const unloading = coordinator.requestUnload("sample");
-        await nextTurn();
+        // 等待钩子真正开始，卸载预算只由虚拟时钟推进，不受 CI 调度延迟影响。
+        await unloadStarted.promise;
         const uninstalling = coordinator.requestUninstall("sample");
         const loading = coordinator.requestLoad("sample", async () => ({name: "sample", revision: 2}));
         unloaded.resolve();
         await Promise.all([unloading, uninstalling, loading]);
 
-        assert.ok(events.indexOf("uninstall:sample") < events.indexOf("create:sample:2"));
+        const uninstallIndex = events.indexOf("uninstall:sample");
+        const createIndex = events.indexOf("create:sample:2");
+        assert.ok(uninstallIndex >= 0 && createIndex > uninstallIndex);
+        assert.equal(events.some(event => event.startsWith("error:")), false);
         assert.equal(events.includes("dispose:sample:true"), true);
         assert.equal(coordinator.getInstance("sample")?.revision, 2);
     });

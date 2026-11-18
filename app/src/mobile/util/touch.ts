@@ -225,6 +225,24 @@ export const handleTouchSelectionChange = () => {
     }
 };
 
+const isNativeFormTextTouch = (target: HTMLElement, touch: Touch) => {
+    const field = document.activeElement as HTMLInputElement | HTMLTextAreaElement;
+    if ((field?.tagName !== "INPUT" && field?.tagName !== "TEXTAREA") || field.selectionStart === null) {
+        return false;
+    }
+    if (target === field) {
+        return true;
+    }
+    if (field.selectionStart === field.selectionEnd) {
+        return false;
+    }
+    // 选区手柄可以超出输入框，系统派发的触摸事件可能落在旁边的留白上。
+    const rect = field.getBoundingClientRect();
+    const x = Math.max(rect.left - touch.clientX, touch.clientX - rect.right, 0);
+    const y = Math.max(rect.top - touch.clientY, touch.clientY - rect.bottom, 0);
+    return Math.hypot(x, y) <= 24;
+};
+
 export const handleTouchEnd = (event: TouchEvent) => {
     if (event.defaultPrevented) {
         resetTouchGesture();
@@ -275,6 +293,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
                 event.preventDefault();
             }
         } else if (touchDuration > Constants.TIMEOUT_LONGPRESS) {
+            if (isIOSDevice() && isNativeFormTextTouch(target, event.changedTouches[0])) {
+                return;
+            }
             // 长按：多选已在按住满阈值时触发，此处取消定时器避免重复触发
             if (isIPhone() && !isChromeBrowser() && !window.siyuan.touchDragActive) {
                 target.dispatchEvent(new MouseEvent("contextmenu", {

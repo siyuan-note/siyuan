@@ -15,7 +15,7 @@ const createRuntime = (sources, Dialog, mobile) => {
         dialog: {Dialog}, "dialog/index": {Dialog},
         "util/functions": {isMobile: () => mobile},
         constants: {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_CONFIRM: "confirm"}},
-        "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => mobile},
+        "protyle/util/compatibility": {isNotCtrl: () => true, isInMobileApp: () => mobile, isIOSDevice: () => false},
         "mobile/util/mobileAppUtil": {callMobileAppShowKeyboard() {}},
         "dialog/message": {showMessage: message => { throw new Error(message); }},
     };

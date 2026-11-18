@@ -59,7 +59,8 @@ const runCases = async (sources) => {
             requests.push({url, data, reply: response => resolve({code: 0, data: response})});
         })},
         "constants": {Constants: {TIMEOUT_LOAD: 0, TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
-        "protyle/util/compatibility": {updateHotkeyAfterTip: () => "", isNotCtrl: () => true, isInMobileApp: () => true},
+        "protyle/util/compatibility": {updateHotkeyAfterTip: () => "", isNotCtrl: () => true,
+            isInMobileApp: () => true, isIOSDevice: () => false},
         "protyle/index": {Protyle: class {
             constructor(app, element, options) {
                 element.className = "protyle";

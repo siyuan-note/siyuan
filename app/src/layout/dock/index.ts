@@ -293,7 +293,7 @@ export class Dock {
                     currentNowSize = (currentSize + (x - moveEvent.clientY));
                 }
                 currentNowSize = Math.max(direction === "lr" ? this.getResponsiveMinimumSize() : 64, currentNowSize);
-                if (currentNowSize === currentSize) {
+                if (currentNowSize === currentSize && !responsiveResizePrepared) {
                     return;
                 }
                 if (!responsiveResizePrepared) {

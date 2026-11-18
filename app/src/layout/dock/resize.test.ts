@@ -46,3 +46,21 @@ test("dock resizing clamps overshooting pointer samples to the same minimum on e
         }
     }
 });
+
+test("floating docks return to their initial minimum after growing in the same drag", () => {
+    for (const position of ["Left", "Right", "Bottom"]) {
+        const minimum = position === "Bottom" ? 64 : 232;
+        const document = {onmousemove: undefined as (event: unknown) => void, onmouseup: undefined as () => void};
+        const style: Record<string, string> = {};
+        const dock = {position, layout: {element: {clientWidth: minimum, clientHeight: minimum, style}},
+            getResponsiveMinimumSize: () => minimum, prepareForManualResize() {}, setSize() {},
+            elements: [{querySelectorAll: (): unknown[] => []}, {querySelectorAll: (): unknown[] => []}]};
+        new Function("document", code).call(dock, document)({clientX: 500, clientY: 500});
+        for (const growth of [100, 0, -500]) {
+            document.onmousemove({clientX: position === "Left" ? 500 + growth : 500 - growth,
+                clientY: 500 - growth, preventDefault() {}, stopPropagation() {}});
+            assert.equal(style[position === "Bottom" ? "height" : "width"], `${minimum + Math.max(0, growth)}px`);
+        }
+        document.onmouseup();
+    }
+});

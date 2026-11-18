@@ -109,7 +109,6 @@ export const rollbackRepoFile = (element: Element) => {
             });
             return response.code === 0;
         },
-        isDelete: false,
     });
 };
 

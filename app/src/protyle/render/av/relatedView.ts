@@ -541,7 +541,6 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
                     }
                 }
             },
-            isDelete: false,
             confirmLabel: window.siyuan.languages.openBy,
         });
     }

@@ -1102,7 +1102,6 @@ const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement 
                     title: window.siyuan.languages.upload,
                     text: msg,
                     confirm: capture,
-                    isDelete: false,
                 });
             }).catch((error) => {
                 if (isActive()) {

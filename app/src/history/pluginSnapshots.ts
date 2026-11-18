@@ -80,7 +80,6 @@ export const mountPluginSnapshots = (app: App, root: HTMLElement, setRestoring: 
                     if (!disposed) { setBusy(false); }
                 }
             },
-            isDelete: false,
         });
     };
     const open = (snapshot: PluginSnapshot, packageName: string, part: TPluginSnapshotPart) => {

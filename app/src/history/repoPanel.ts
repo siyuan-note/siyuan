@@ -365,7 +365,6 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
                         render(pane, 1);
                     }
                 },
-                isDelete: false,
             });
         }
     });

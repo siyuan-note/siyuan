@@ -113,7 +113,6 @@ const runCases = sources => {
         for (const make of [() => confirmDialog({
             title: "Title",
             text: "Content",
-            isDelete: false,
             extraAction: {label: "An additional translated action with a long label", callback() {}},
             confirmLabel: "Confirm changes",
         }),

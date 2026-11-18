@@ -133,7 +133,6 @@ const openSnippetDialog = (oldSnippets: ISnippet[], revision: string, draft = ol
                         .then(resolve);
                     },
                     cancel: () => resolve(discardConfirmed),
-                    isDelete: false,
                     mobileSheet: {
                         beforeClose: reason => {
                             discardConfirmed = reason === "cancel";

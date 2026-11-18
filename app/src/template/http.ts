@@ -261,7 +261,6 @@ export const processTemplateHTTPEvent = (cmd: string, data: HTTPEvent) => {
         (data.headerNames?.length ? `<br><code>${escape(data.headerNames.join(", "))}</code>` : ""),
         confirm: () => respond(true),
         cancel: () => respond(false),
-        isDelete: false,
         extraAction: data.canPersist ? {
             label: lang.templateHTTPAllowAlways, callback: () => respond(true, "template"),
         } : undefined,

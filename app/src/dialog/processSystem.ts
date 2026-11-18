@@ -253,7 +253,6 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                 confirm: () => {
                     void exitSiYuan(setCurrentWorkspace);
                 },
-                isDelete: false,
                 extraAction: {
                     label: window.siyuan.languages._kernel[97],
                     callback: () => {
@@ -299,7 +298,6 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                         execInstallPkg: 1 // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
                     }, forceQuit);
                 },
-                isDelete: false,
                 confirmLabel: window.siyuan.languages.updateInstallNow,
                 cancelLabel: window.siyuan.languages.updateInstallLater,
             });

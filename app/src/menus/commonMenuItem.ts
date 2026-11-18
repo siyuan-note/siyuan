@@ -769,7 +769,6 @@ ${databaseOptions}`,
                                         dialog.destroy();
                                         return true;
                                     },
-                                    isDelete: false,
                                 });
                             }
                             return false;

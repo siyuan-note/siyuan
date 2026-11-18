@@ -531,7 +531,6 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                         const response = await fetchSyncPost("/api/repo/rollbackRepoSnapshotFile", {id: target.parentElement.dataset.id});
                         return response.code === 0;
                     },
-                    isDelete: false,
                 });
                 event.preventDefault();
                 event.stopPropagation();

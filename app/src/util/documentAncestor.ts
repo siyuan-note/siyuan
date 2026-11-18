@@ -85,7 +85,6 @@ ${ambiguity.candidates.map((candidate, index) =>
             finish(value === "" ? undefined : ambiguity.candidates[Number(value)]);
         },
         cancel: () => finish(),
-        isDelete: false,
         extraAction: {
             label: window.siyuan.languages.documentAncestorMore,
             callback: chooseOther,

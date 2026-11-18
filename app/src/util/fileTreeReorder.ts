@@ -54,7 +54,6 @@ export const reorderSortedFileTree = async (sourceIDs: string[], targetID: strin
                 text: text,
                 confirm: () => resolve("reorder"),
                 cancel: () => resolve("cancel"),
-                isDelete: false,
                 extraAction: moveTarget.fromPaths.length > 0 ? {
                     label: window.siyuan.languages.fileTreeMoveKeepSort,
                     callback: () => resolve("move"),

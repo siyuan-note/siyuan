@@ -59,7 +59,6 @@ export const requestSystemExit = (options: {
                         }
                     },
                     cancel: () => { confirmation = undefined; },
-                    isDelete: false,
                     confirmLabel: languages.skipExitSync,
                 });
             },

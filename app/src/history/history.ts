@@ -835,7 +835,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             });
                         }
                     },
-                    isDelete: false,
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -1077,7 +1076,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             });
                         });
                     },
-                    isDelete: false,
                 });
                 event.stopPropagation();
                 event.preventDefault();

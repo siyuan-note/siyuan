@@ -43,7 +43,6 @@ const setSyncProvider = async (provider: Config.ISync["provider"]) => {
                 text: window.siyuan.languages.syncProviderChangeConfirm,
                 confirm: () => resolve(true),
                 cancel: () => resolve(false),
-                isDelete: false,
                 confirmLabel: window.siyuan.languages.syncProviderChangeContinue,
             });
         });

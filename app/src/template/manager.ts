@@ -708,7 +708,6 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
                         return true;
                     }) === true;
                 },
-                isDelete: false,
             });
         } else if (action === "save") {
             void run(async () => {

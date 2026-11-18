@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {isInEmbedBlock} from "../util/hasClosest";
 
 const compiled = transpileModule(readFileSync("src/protyle/breadcrumb/index.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -23,6 +24,7 @@ const fixture = () => {
             refreshUndoButtons: (): void => undefined,
             improveBreadcrumbAppearance: (): void => undefined,
             getGlobalBreadcrumb: async (blocks: unknown) => blocks,
+            isInEmbedBlock,
             fetchPost: (_url: string, data: any, callback: (response: any) => void) => {
                 requests.push({data, callback});
             },
@@ -37,9 +39,18 @@ const fixture = () => {
         notebookId: "ordinary-notebook",
         breadcrumb,
     };
-    const block = (id: string) => ({
+    interface TestBlock {
+        isConnected: boolean;
+        nodeType: number;
+        parentElement: TestBlock;
+        getAttribute: (name: string) => string;
+        classList: {contains: () => boolean};
+    }
+    const block = (id: string, type = "NodeParagraph", parentElement: TestBlock = null): TestBlock => ({
         isConnected: true,
-        getAttribute: () => id,
+        nodeType: 1,
+        parentElement,
+        getAttribute: name => name === "data-node-id" ? id : name === "data-type" ? type : null,
         classList: {contains: () => false},
     });
     return {editor, breadcrumb, protyle, requests, block, commit: () => commit()};
@@ -55,6 +66,23 @@ test("breadcrumb waits for copied blocks and queries only the latest selection w
     assert.equal(f.requests.length, 1);
     assert.equal(f.requests[0].data.id, "second-copy");
     assert.equal(f.requests[0].data.notebook, "ordinary-notebook");
+});
+
+test("breadcrumb stops at the outer embed for selections in nested embedded content", async () => {
+    for (const global of [false, true]) {
+        const f = fixture();
+        f.editor.globalBreadcrumb = global;
+        f.commit();
+        const embed = f.block("local-embed", "NodeBlockQueryEmbed");
+        const nestedEmbed = f.block("embedded-query", "NodeBlockQueryEmbed", embed);
+        await f.breadcrumb.render(f.protyle, true, f.block("foreign-paragraph", "NodeParagraph", nestedEmbed));
+        assert.equal(f.requests[0].data.id, "local-embed");
+        await f.requests[0].callback({data: []});
+        await f.breadcrumb.render(f.protyle, false, embed);
+        assert.equal(f.requests.length, 1, "the embedded selection and the local embed share the same path");
+        await f.breadcrumb.render(f.protyle, false, f.block("local-paragraph"));
+        assert.equal(f.requests[1].data.id, "local-paragraph");
+    }
 });
 
 test("breadcrumb discards a block removed or a document switched during pending writes", async () => {

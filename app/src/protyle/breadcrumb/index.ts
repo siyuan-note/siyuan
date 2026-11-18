@@ -12,7 +12,7 @@ import {toggleEditMode} from "../util/toggleEditMode";
 import {RecordMedia, RecordMediaInputEndedError} from "../util/RecordMedia";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {uploadFiles} from "../upload";
-import {hasClosestBlock, hasTopClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasTopClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
 import {needSubscribe} from "../../util/needSubscribe";
 import {isMobile} from "../../util/functions";
 import {zoomOut} from "../../menus/protyle";
@@ -811,6 +811,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                 if (!blockElement) {
                     return;
                 }
+                blockElement = isInEmbedBlock(blockElement) || blockElement;
                 const id = blockElement.getAttribute("data-node-id");
                 const breadcrumbParam: BlockBreadcrumbRequestInput = {id, excludeTypes: [], notebook: protyle.notebookId};
                 const rootID = protyle.block.rootID;
@@ -1385,6 +1386,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
             // 浮窗删除单个块后，面包屑无法获取到 blockElement，直接返回即可
             return;
         }
+        blockElement = isInEmbedBlock(blockElement) || blockElement;
         const id = blockElement.getAttribute("data-node-id");
         const global = window.siyuan.config.editor.globalBreadcrumb;
         const hideIcons = global && window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true;

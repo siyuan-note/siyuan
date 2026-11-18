@@ -14,9 +14,11 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
     const check: typeof assert = require("node:assert/strict");
     const notebook = "20260101000000-aaaaaaa", ancestor = "20260101000000-bbbbbbb";
     const root = "20260101000000-ccccccc", leaf = "20260101000000-ddddddd";
+    const embed = "20260101000000-ggggggg", embedded = "20260101000000-hhhhhhh";
     const folder = "20260101000000-eeeeeee";
     const opened: string[] = [];
     const requested: string[] = [];
+    const breadcrumbRequests: string[] = [];
     const style = document.createElement("style");
     style.textContent = css + ".fn__none{display:none!important}svg{width:16px;height:16px}.b3-menu__item{font-size:20px}";
     document.head.append(style);
@@ -43,8 +45,10 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
     new Function("exports", "require", sources.iconValue)(iconValue, () => escapeExports);
     const icon: any = {};
     new Function("exports", "require", sources.icon)(icon, () => iconValue);
+    const hasClosest: any = {};
+    new Function("exports", sources.hasClosest)(hasClosest);
     const appearance: any = {};
-    new Function("exports", "require", sources.appearance)(appearance, () => ({hasClosestByAttribute: (): null => null}));
+    new Function("exports", "require", sources.appearance)(appearance, () => hasClosest);
     const blocks = [{id: root, name: "Current", type: "NodeDocument"},
         {id: leaf, name: "Block", type: "NodeParagraph"}];
     const pathItems = [
@@ -67,7 +71,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         addItem(item: IMenu) { menuElement.append(new MenuItem(item, menu as any).element); }
     }
     const dependency: Record<string, any> = {
-        ...escapeExports, ...appearance, ...icon,
+        ...escapeExports, ...appearance, ...icon, ...hasClosest,
         Constants: new Proxy({}, {get: (_target, key) => String(key)}),
         isMobile: () => mobile, isMac: () => false, isIPad: () => false, isInAndroid: () => false,
         isInHarmony: () => false, updateHotkeyTip: (value: string) => value,
@@ -88,8 +92,10 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         toggleMenu: async ({build}: {build: (menu: unknown, session: unknown) => Promise<void>}) => {
             await build(menu, {isCurrent: () => true, show: (callback: () => void) => callback()});
         },
-        fetchPost: (_url: string, _request: unknown, callback: (response: unknown) => Promise<void>) => {
-            callbackWork = callback({code: 0, data: blocks});
+        fetchPost: (_url: string, request: {id: string}, callback: (response: unknown) => Promise<void>) => {
+            breadcrumbRequests.push(request.id);
+            const items = request.id === embed ? [blocks[0], {id: embed, name: "Embed", type: "NodeBlockQueryEmbed"}] : blocks;
+            callbackWork = callback({code: 0, data: items});
         },
         fetchSyncPost: async (_url: string, request: {parentID: string}) => {
             requested.push(request.parentID);
@@ -101,8 +107,12 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
     const compiled: any = {};
     new Function("require", "exports", sources.breadcrumb)(() => dependency, compiled);
     const wysiwyg = document.createElement("div");
-    wysiwyg.innerHTML = `<div data-node-id="${root}"></div>`;
+    wysiwyg.className = "protyle-wysiwyg";
+    wysiwyg.innerHTML = `<div data-node-id="${root}"></div>
+<div data-node-id="${embed}" data-type="NodeBlockQueryEmbed"><div class="protyle-wysiwyg__embed">
+<div data-node-id="${embedded}" data-type="NodeParagraph">Embedded content</div></div></div>`;
     document.body.append(wysiwyg);
+    const embeddedBlock = wysiwyg.querySelector<HTMLElement>(`[data-node-id="${embedded}"]`);
     const protyle: any = {app: {}, element: wysiwyg, notebookId: notebook, block: {rootID: root, id: root, showAll: true},
         wysiwyg: {element: wysiwyg}, toolbar: {isMultiSelectMode: () => false}, options: {render: {}}};
     if (mobile) {
@@ -158,6 +168,16 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         await breadcrumb.genMobileMenu(protyle);
         await callbackWork;
         check.ok(menuElement.firstElementChild.querySelector(":scope > svg.b3-menu__icon"));
+
+        getSelection().collapse(embeddedBlock.firstChild, 0);
+        menuElement.removeAttribute("data-name");
+        await breadcrumb.genMobileMenu(protyle);
+        await callbackWork;
+        check.equal(breadcrumbRequests.at(-1), embed);
+        const lastPathItem = menuElement.lastElementChild as HTMLElement;
+        check.equal(lastPathItem.querySelector(".b3-menu__label").textContent, "Embed");
+        lastPathItem.click();
+        check.equal(opened.at(-1), embed);
     } else {
         const breadcrumb = new compiled.Breadcrumb(protyle);
         protyle.breadcrumb = breadcrumb;
@@ -291,6 +311,16 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         breadcrumb.element.dispatchEvent(new WheelEvent("mousewheel", {deltaY: 120, bubbles: true}));
         check.ok(breadcrumb.element.scrollLeft > 0, "Wheel movement scrolls the path horizontally");
 
+        window.siyuan.config.editor.globalBreadcrumb = false;
+        await breadcrumb.render(protyle, true, embeddedBlock);
+        await callbackWork;
+        check.equal(breadcrumbRequests.at(-1), embed);
+        check.equal(breadcrumb.element.querySelector(`[data-node-id="${embedded}"]`), null);
+        getPathItem(embed).click();
+        check.equal(opened.at(-1), embed);
+        window.siyuan.config.editor.globalBreadcrumb = true;
+        await render();
+
         for (const change of ["disable", "icon preference", "navigate", "destroy"]) {
             const existing = breadcrumb.element.innerHTML;
             let release: (items: typeof pathItems) => void;
@@ -323,6 +353,7 @@ for (const mobile of [true, false]) {
             icon: readFileSync(path.join(__dirname, "icon.ts"), "utf8"),
             iconValue: readFileSync(path.join(__dirname, "../../emoji/iconValue.ts"), "utf8"),
             appearance: readFileSync(path.join(__dirname, "appearance.ts"), "utf8"),
+            hasClosest: readFileSync(path.join(__dirname, "../util/hasClosest.ts"), "utf8"),
         };
         for (const key of Object.keys(sources) as (keyof typeof sources)[]) {
             sources[key] = transpileModule(sources[key], {

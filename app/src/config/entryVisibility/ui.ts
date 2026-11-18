@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {genUUID} from "../../util/genID";
@@ -774,7 +774,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     };
     const closeEditor = () => {
         if (JSON.stringify(draft) !== initialJSON) {
-            mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.discardUnsavedChanges, leaveEditor);
+            confirmDialog({title: window.siyuan.languages.confirm, text: window.siyuan.languages.discardUnsavedChanges, confirm: leaveEditor});
             return;
         }
         leaveEditor();
@@ -1121,8 +1121,10 @@ export const mountEntryVisibility = (root: HTMLElement) => {
         } else if (action === "export" && profile) {
             exportProfile(profile);
         } else if (action === "delete" && profile) {
-            mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm,
-                window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtml(profile.name)), () => {
+            confirmDialog({
+                title: window.siyuan.languages.deleteOpConfirm,
+                text: window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtml(profile.name)),
+                confirm: () => {
                     const latest = cloneConfig();
                     latest.profiles = latest.profiles.filter((item) => item.id !== profile.id);
                     if (latest.active === profile.id) {
@@ -1130,7 +1132,9 @@ export const mountEntryVisibility = (root: HTMLElement) => {
                     }
                     saveEntryVisibility(latest);
                     renderProfileCards(root);
-                }, undefined, true);
+                },
+                isDelete: true,
+            });
         }
     });
 };

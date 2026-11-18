@@ -3,7 +3,7 @@ import {createTemplateHTTPPermissionIndicator, templateHTTPPermission, templateH
 import {toggleMenu} from "../menus/menuToggle";
 import {Dialog} from "../dialog";
 import {mobileInputDialog} from "../dialog/mobileInputDialog";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {showMessage} from "../dialog/message";
@@ -165,7 +165,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             }
         };
         if (dirty()) {
-            mobileConfirmDialog(lang.confirm, lang.discardUnsavedChanges, proceed);
+            confirmDialog({title: lang.confirm, text: lang.discardUnsavedChanges, confirm: proceed});
         } else {
             proceed();
         }
@@ -532,15 +532,21 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             if (action === "move") {
                 move(target);
             } else if (action === "remove") {
-                mobileConfirmDialog(lang.remove, escapeHtml(entry.path) + "<br>" + lang.templateDeleteTip, async () => {
-                    return await run(async () => {
-                        if (await api({action: "remove", path: entry.path, revision})) {
-                            await refreshAfterMutation("");
-                            return true;
-                        }
-                        return false;
-                    }) === true;
-                }, undefined, true, undefined, undefined, {awaitConfirm: true});
+                confirmDialog({
+                    title: lang.remove,
+                    text: escapeHtml(entry.path) + "<br>" + lang.templateDeleteTip,
+                    confirm: async () => {
+                        return await run(async () => {
+                            if (await api({action: "remove", path: entry.path, revision})) {
+                                await refreshAfterMutation("");
+                                return true;
+                            }
+                            return false;
+                        }) === true;
+                    },
+                    isDelete: true,
+                    awaitConfirm: true,
+                });
             } else if (action === "rename") {
                 inputPath(lang.rename, entry.path.split("/").pop(), async value => {
                     const target = getFileRenameTarget(entry.path, value);
@@ -693,13 +699,19 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
             return;
         }
         if (action === "revokeAllHTTP") {
-            mobileConfirmDialog(lang.templateHTTPRevokeAll, lang.templateHTTPRevokeAllConfirm, async () => {
-                return await run(async () => {
-                    await templateHTTPPermission("revokeAll");
-                    await refreshPermissions();
-                    return true;
-                }) === true;
-            }, undefined, false, undefined, undefined, {awaitConfirm: true});
+            confirmDialog({
+                title: lang.templateHTTPRevokeAll,
+                text: lang.templateHTTPRevokeAllConfirm,
+                confirm: async () => {
+                    return await run(async () => {
+                        await templateHTTPPermission("revokeAll");
+                        await refreshPermissions();
+                        return true;
+                    }) === true;
+                },
+                isDelete: false,
+                awaitConfirm: true,
+            });
         } else if (action === "save") {
             void run(async () => {
                 const content = useCRLF ? source.value.replace(/\n/g, "\r\n") : source.value;

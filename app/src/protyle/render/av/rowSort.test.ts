@@ -26,7 +26,7 @@ const fixture = () => {
             getAVViewID: () => block.viewID,
             fetchPost: (_url: string, data: any, callback: (response: any) => void) => requests.push({data, callback}),
             transaction: (...args: any[]) => transactions.push(args),
-            mobileConfirmDialog: (_title: string, _text: string, confirm: () => void) => confirmations.push(confirm),
+            confirmDialog: ({confirm}: {confirm: () => void}) => confirmations.push(confirm),
         }),
     });
     const legacyDo = [{id: "first"}, {id: "second"}];

@@ -1,6 +1,6 @@
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {Constants} from "../constants";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import type {App} from "../index";
 import {Protyle} from "../protyle";
 import {saveExportFile} from "../protyle/util/compatibility";
@@ -100,14 +100,18 @@ export const rollbackRepoFile = (element: Element) => {
 
     const name = element.getAttribute("data-title") || element.querySelector(".b3-list-item__text").textContent.trim();
     const time = dayjs(parseInt(element.getAttribute("data-created"))).format("YYYY-MM-DD HH:mm:ss");
-    mobileConfirmDialog("⚠️ " + window.siyuan.languages.rollback,
-        window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(name)).replace("${time}", time),
-        async () => {
+    confirmDialog({
+        title: "⚠️ " + window.siyuan.languages.rollback,
+        text: window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(name)).replace("${time}", time),
+        confirm: async () => {
             const response = await fetchSyncPost("/api/repo/rollbackRepoSnapshotFile", {
                 id: element.getAttribute("data-id")
             });
             return response.code === 0;
-        }, undefined, false, undefined, undefined, {awaitConfirm: true});
+        },
+        isDelete: false,
+        awaitConfirm: true,
+    });
 };
 
 export const saveRepoFile = (element: Element) => {

@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
@@ -357,63 +357,68 @@ ${isMobile() ? "" : '<div class="fn__hr--small"></div>'}`,
         label: window.siyuan.languages.delete,
         icon: "iconTrashcan",
         click() {
-            mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
-                if (!isCurrentInput()) return;
-                let colOptions: { name: string, color: string }[] = [];
-                fields.find(column => {
-                    if (column.id === colId) {
-                        colOptions = column.options;
-                        return true;
-                    }
-                });
-                const newName = target.parentElement.dataset.name;
-                transaction(protyle, [{
-                    action: "removeAttrViewColOption",
-                    id: colId,
-                    avID: data.id,
-                    blockID,
-                    data: newName,
-                }, {
-                    action: "doUpdateUpdated",
-                    id: blockID,
-                    data: dayjs().format("YYYYMMDDHHmmss"),
-                }], [{
-                    action: "updateAttrViewColOptions",
-                    id: colId,
-                    avID: data.id,
-                    blockID,
-                    data: colOptions.map(option => ({...option}))
-                }]);
-                colOptions.find((item, index) => {
-                    if (item.name === newName) {
-                        colOptions.splice(index, 1);
-                        return true;
-                    }
-                });
-                const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
-                const selectedElement = menuElement.querySelector(".b3-chips");
-                const oldChipsHeight = selectedElement ? selectedElement.clientHeight : 0;
-                if (!cellElements) {
-                    menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
-                    bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
-                } else {
-                    updateCells(value => {
-                        value.mSelect.find((item, selectIndex) => {
-                            if (item.content === newName) {
-                                value.mSelect.splice(selectIndex, 1);
-                                return true;
-                            }
-                        });
+            confirmDialog({
+                title: window.siyuan.languages.deleteOpConfirm,
+                text: window.siyuan.languages.confirmDelete,
+                confirm: () => {
+                    if (!isCurrentInput()) return;
+                    let colOptions: { name: string, color: string }[] = [];
+                    fields.find(column => {
+                        if (column.id === colId) {
+                            colOptions = column.options;
+                            return true;
+                        }
                     });
-                    menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
-                    bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
-                }
-                if (selectedElement) {
-                    menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
-                    // chips 增减导致菜单高度变化后重新定位（锁底部，顶部自适应，避免底部溢出视口）
-                    setSelectMenuPosition(menuElement, cellElements[cellElements.length - 1]);
-                }
-            }, undefined, true);
+                    const newName = target.parentElement.dataset.name;
+                    transaction(protyle, [{
+                        action: "removeAttrViewColOption",
+                        id: colId,
+                        avID: data.id,
+                        blockID,
+                        data: newName,
+                    }, {
+                        action: "doUpdateUpdated",
+                        id: blockID,
+                        data: dayjs().format("YYYYMMDDHHmmss"),
+                    }], [{
+                        action: "updateAttrViewColOptions",
+                        id: colId,
+                        avID: data.id,
+                        blockID,
+                        data: colOptions.map(option => ({...option}))
+                    }]);
+                    colOptions.find((item, index) => {
+                        if (item.name === newName) {
+                            colOptions.splice(index, 1);
+                            return true;
+                        }
+                    });
+                    const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
+                    const selectedElement = menuElement.querySelector(".b3-chips");
+                    const oldChipsHeight = selectedElement ? selectedElement.clientHeight : 0;
+                    if (!cellElements) {
+                        menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
+                        bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
+                    } else {
+                        updateCells(value => {
+                            value.mSelect.find((item, selectIndex) => {
+                                if (item.content === newName) {
+                                    value.mSelect.splice(selectIndex, 1);
+                                    return true;
+                                }
+                            });
+                        });
+                        menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
+                        bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
+                    }
+                    if (selectedElement) {
+                        menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
+                        // chips 增减导致菜单高度变化后重新定位（锁底部，顶部自适应，避免底部溢出视口）
+                        setSelectMenuPosition(menuElement, cellElements[cellElements.length - 1]);
+                    }
+                },
+                isDelete: true,
+            });
         }
     });
     menu.addSeparator();

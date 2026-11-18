@@ -1,7 +1,7 @@
 import {MobileDialog} from "../dialog/mobileDialog";
 import {mobileInputDialog} from "../dialog/mobileInputDialog";
 import {showMessage} from "../dialog/message";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
 import {Protyle} from "../protyle";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
@@ -462,12 +462,18 @@ export const openDocHistory = (options: {
                     isLoading = false;
                     const confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", escapeHtml(item.title))
                         .replace("${time}", historyItemElement.querySelector(".b3-list-item__text").textContent.trim());
-                    mobileConfirmDialog("⚠️ " + window.siyuan.languages.rollback, confirmTip, async () => {
-                        const response = await fetchSyncPost("/api/history/rollbackDocHistory", {
-                            historyPath: dataPath
-                        });
-                        return response.code === 0;
-                    }, undefined, false, undefined, undefined, {awaitConfirm: true});
+                    confirmDialog({
+                        title: "⚠️ " + window.siyuan.languages.rollback,
+                        text: confirmTip,
+                        confirm: async () => {
+                            const response = await fetchSyncPost("/api/history/rollbackDocHistory", {
+                                historyPath: dataPath
+                            });
+                            return response.code === 0;
+                        },
+                        isDelete: false,
+                        awaitConfirm: true,
+                    });
                 });
                 event.stopPropagation();
                 event.preventDefault();

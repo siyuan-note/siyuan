@@ -30,9 +30,10 @@ test("mobile MCP deletion waits for persistence and retries without removing oth
                 if (fail) throw new Error("delete failed");
                 saved = next;
             }},
-            mobileConfirmDialog: (...args: unknown[]) => {
-                confirm = args[2] as typeof confirm;
-                options = args[7] as typeof options;
+            confirmDialog: (options_: unknown) => {
+                const {confirm: confirmCallback, awaitConfirm} = options_ as {confirm: typeof confirm, awaitConfirm?: boolean};
+                confirm = confirmCallback;
+                options = {awaitConfirm};
             },
         }),
     });

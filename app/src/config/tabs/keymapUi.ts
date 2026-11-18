@@ -66,20 +66,24 @@ const bindKeymapToolbar = (root: HTMLElement) => {
         void reloadUI();
     });
     root.querySelector("#keymapResetBtn")?.addEventListener("click", () => {
-        confirmDialog("⚠️ " + window.siyuan.languages.reset, window.siyuan.languages.confirmReset, () => {
-            keymapSaveQueue = trackSettingSave(keymapSaveQueue.then(async () => {
-                try {
-                    const data = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
-                    await configApi.set("keymap", keymapPayload(data), () => {
-                        savedKeymap = data;
-                        applyKeymap(data);
-                        void reloadUI();
-                    });
-                } catch (error) {
-                    console.error("Could not reset shortcuts:", error);
-                    showMessage(window.siyuan.languages.keymapSaveFailed);
-                }
-            }));
+        confirmDialog({
+            title: "⚠️ " + window.siyuan.languages.reset,
+            text: window.siyuan.languages.confirmReset,
+            confirm: () => {
+                keymapSaveQueue = trackSettingSave(keymapSaveQueue.then(async () => {
+                    try {
+                        const data = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
+                        await configApi.set("keymap", keymapPayload(data), () => {
+                            savedKeymap = data;
+                            applyKeymap(data);
+                            void reloadUI();
+                        });
+                    } catch (error) {
+                        console.error("Could not reset shortcuts:", error);
+                        showMessage(window.siyuan.languages.keymapSaveFailed);
+                    }
+                }));
+            },
         });
     });
 };

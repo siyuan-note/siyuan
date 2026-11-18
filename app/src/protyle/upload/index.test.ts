@@ -29,7 +29,7 @@ const createHarness = (failLocalUpload = false) => {
         block: {rootID: "doc-a"}, notebookId: "box-a", app: {plugins: [] as unknown[]},
         wysiwyg: {element: {}},
         upload: {element: {style: {}}, isUploading: false},
-        options: {upload: {max: 10, accept: "", filename: (name: string) => name,
+        options: {upload: {max: 4096, accept: "", filename: (name: string) => name,
             extraData: {}, fieldName: "file[]", url: "/upload"}},
     };
     const response = {code: 0, data: {succMap: {"image.png": "assets/image.png"},
@@ -74,19 +74,13 @@ const createHarness = (failLocalUpload = false) => {
         "../../constants": {Constants: {SIZE_UPLOAD_TIP_SIZE: 1024, SIYUAN_APPID: "upload-window",
             SIYUAN_ASSETS_IMAGE: [".heic"], SIYUAN_ASSETS_AUDIO: [], SIYUAN_ASSETS_VIDEO: [".mov"]}},
         "../../util/escape": {escapeHtml: (value: string) => value},
+        filesize: {filesize: () => "1 KB"},
         "../../dialog/message": {showMessage: () => "message", hideMessage: () => {}},
-        "../../dialog/confirmDialog": {confirmDialog: (_title: string, _msg: string, yes: () => void) => {
+        "../../dialog/confirmDialog": {confirmDialog: ({confirm: onConfirm}: {confirm: () => void}) => {
             if (delayConfirmation) {
-                confirm = yes;
+                confirm = onConfirm;
             } else {
-                yes();
-            }
-        }},
-        "../../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _msg: string, yes: () => void) => {
-            if (delayConfirmation) {
-                confirm = yes;
-            } else {
-                yes();
+                onConfirm();
             }
         }},
         "../../util/fetch": {fetchSyncPost: (_url: string, data: {id: string}) =>
@@ -112,21 +106,21 @@ const createHarness = (failLocalUpload = false) => {
         FormData: FormDataStub, XMLHttpRequest: XHRStub, DataTransferItem: class {},
         location: {origin: "https://siyuan.test"},
         document: {baseURI: "https://siyuan.test/stage/build/app/", body: {contains: () => protyle.element.isConnected}},
-        window: {siyuan: {languages: {uploading: "uploading"}}}, console, setTimeout: () => 0,
+        window: {siyuan: {languages: {uploading: "uploading", upload: "upload", uploadFileTooLarge: "${x} ${y}"}}}, console, setTimeout: () => 0,
     });
     const api = module.exports as typeof import("./index") & {
         renderUploadedLabel(responseText: string, protyle: IProtyle,
                             options: import("./index").IUploadInsertOptions, input: IAssetUploadInput): Promise<void>;
     };
     let consumed = 0;
-    const start = (kind: "files" | "local-files", document?: insertPosition.IUploadDocument) => {
+    const start = (kind: "files" | "local-files", document?: insertPosition.IUploadDocument, size = 1) => {
         const options = {target: "background" as const, document};
         if (kind === "files") {
             api.uploadFiles(protyle as unknown as IProtyle,
-                [{name: "image.png", size: 1, type: "image/png"} as File], undefined,
+                [{name: "image.png", size, type: "image/png"} as File], undefined,
                 () => { consumed++; }, undefined, options);
         } else {
-            api.uploadLocalFiles([{path: "/image.png", size: 1}], protyle as unknown as IProtyle,
+            api.uploadLocalFiles([{path: "/image.png", size}], protyle as unknown as IProtyle,
                 true, options, () => { consumed++; }, (_succeeded, result) => completions.push(result));
         }
     };
@@ -202,7 +196,7 @@ describe("upload document binding", () => {
         it(`${kind}: rechecks the document after upload confirmation`, async () => {
             const harness = createHarness();
             harness.delayConfirmation();
-            harness.start(kind);
+            harness.start(kind, undefined, 1024);
             harness.resume();
             await settle();
             harness.protyle.block.rootID = "doc-b";

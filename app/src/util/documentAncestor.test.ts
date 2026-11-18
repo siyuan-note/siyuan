@@ -26,8 +26,8 @@ function setup(lookup = async () => ({code: 0, data: {documents: [candidate("unl
     const methods = loadModule<typeof import("./documentAncestor")>("src/util/documentAncestor.ts", {
         window: {siyuan: {languages: {newFile: "New", documentAncestorAmbiguous: "Choose parent", documentAncestorMore: "Other"}}},
         require: (name: string) => ({
-            "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, text: string, yes: () => void,
-                no: () => void, _isDelete: boolean, action: {callback: () => void}) => {
+            "../dialog/confirmDialog": {confirmDialog: ({text, confirm: yes, cancel: no, extraAction: action}: {
+                text: string, confirm: () => void, cancel: () => void, extraAction: {callback: () => void}}) => {
                 html = text; confirm = yes; cancel = no; extra = action; return dialog;
             }},
             "./functions": {isMobile: () => false},

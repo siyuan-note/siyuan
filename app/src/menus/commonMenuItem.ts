@@ -2,7 +2,7 @@ import {toggleMenu} from "./menuToggle";
 import {getKeymapBindings} from "../util/keymapBindings";
 import {bindInlineDatePicker, getInlineDateValue} from "../datePicker/inline";
 import type {BlockQueryRequestInput} from "../types/api";
-import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile, isValidCustomAttrName} from "../util/functions";
 import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
@@ -757,30 +757,40 @@ ${databaseOptions}`,
                                 return true;
                             }
                             if (response.code === 1) {
-                                confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, async () => {
-                                    const result = await fetchSyncPost("/api/template/docSaveAsTemplate", {
-                                        ...requestData, overwrite: true,
-                                    });
-                                    if (result.code !== 0) return false;
-                                    showMessage(window.siyuan.languages.exportTplSucc);
-                                    dialog.destroy();
-                                    return true;
-                                }, undefined, false, undefined, undefined, {awaitConfirm: true});
+                                confirmDialog({
+                                    title: window.siyuan.languages.export,
+                                    text: window.siyuan.languages.exportTplTip,
+                                    confirm: async () => {
+                                        const result = await fetchSyncPost("/api/template/docSaveAsTemplate", {
+                                            ...requestData, overwrite: true,
+                                        });
+                                        if (result.code !== 0) return false;
+                                        showMessage(window.siyuan.languages.exportTplSucc);
+                                        dialog.destroy();
+                                        return true;
+                                    },
+                                    isDelete: false,
+                                    awaitConfirm: true,
+                                });
                             }
                             return false;
                         }
                         fetchPost("/api/template/docSaveAsTemplate", requestData, response => {
                             if (response.code === 1) {
                                 // 重名
-                                confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
-                                    fetchPost("/api/template/docSaveAsTemplate", {
-                                        ...requestData,
-                                        overwrite: true
-                                    }, resp => {
-                                        if (resp.code === 0) {
-                                            showMessage(window.siyuan.languages.exportTplSucc);
-                                        }
-                                    });
+                                confirmDialog({
+                                    title: window.siyuan.languages.export,
+                                    text: window.siyuan.languages.exportTplTip,
+                                    confirm: () => {
+                                        fetchPost("/api/template/docSaveAsTemplate", {
+                                            ...requestData,
+                                            overwrite: true
+                                        }, resp => {
+                                            if (resp.code === 0) {
+                                                showMessage(window.siyuan.languages.exportTplSucc);
+                                            }
+                                        });
+                                    },
                                 });
                                 return;
                             }

@@ -50,8 +50,7 @@ const loadSyncGuide = (mobile: boolean, provider: number, activeCheckout = false
                 confirmCreate = options.onConfirm;
                 return {element: {setAttribute() {}}};
             }};
-            if (name === "../dialog/mobileConfirmDialog") return {mobileConfirmDialog: (_title: string, _text: string,
-                confirm: () => Promise<boolean>) => {confirmations.push(confirm);}};
+            if (name === "../dialog/confirmDialog") return {confirmDialog: ({confirm}: {confirm: () => Promise<boolean>}) => {confirmations.push(confirm);}};
             if (name === "./checkoutProgress") return {openSyncCheckoutProgress: () => activeCheckout};
             if (name === "../config/util/configApi") {
                 return {config: {set: (_path: string, value: unknown, applied?: () => void) => new Promise<void>((resolve, reject) => {

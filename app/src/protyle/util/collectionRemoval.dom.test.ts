@@ -44,7 +44,7 @@ const browserCases = async (code: string, confirmationCode: string, markerCode: 
     const marker = {exports: {}};
     new Function("require", "module", "exports", markerCode)(() => ({}), marker, marker.exports);
     new Function("require", "module", "exports", code)((dependency: string) => ({
-        "../../dialog/mobileConfirmDialog": mobileConfirmation.exports,
+        "../../dialog/confirmDialog": mobileConfirmation.exports,
         "../../util/escape": {escapeAttr: escape, escapeHtml: escape},
         "../../util/fetch": {fetchSyncPost: async (url: string, data: unknown) => { requests.push({url, data}); return response; }},
         "./inlineElementMarker": marker.exports,
@@ -185,7 +185,7 @@ test("source removal detects tag and reference deletions and offers desktop and 
     const code = compile(path.join(__dirname, "collectionRemoval.ts"));
     const confirmation = compile(path.join(__dirname, "../../dialog/confirmDialog.ts"));
     const marker = compile(path.join(__dirname, "inlineElementMarker.ts"));
-    const mobileConfirmation = compile(path.join(__dirname, "../../dialog/mobileConfirmDialog.ts"));
+    const mobileConfirmation = compile(path.join(__dirname, "../../dialog/confirmDialog.ts"));
     const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(code)}, ${JSON.stringify(confirmation)}, ${JSON.stringify(marker)}, ${JSON.stringify(mobileConfirmation)})`;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-collection-removal-test-"));
     const script = path.join(temporary, "run.cjs");

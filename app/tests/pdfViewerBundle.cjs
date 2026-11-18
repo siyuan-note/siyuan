@@ -35,7 +35,7 @@ module.exports = async ({annotations = false} = {}) => {
         "../constants": mocks["../../constants"],
         "../dialog/mobileDialog": mocks["../../dialog/mobileDialog"],
         "../dialog/message": "export const showMessage = () => {};",
-        "../dialog/mobileConfirmDialog": "export const mobileConfirmDialog = () => {};",
+        "../dialog/confirmDialog": mocks["../../dialog/confirmDialog"],
         "../util/functions": "export const isMobile = () => window.pdfTestMobile === true;",
         "../protyle/upload": "export const uploadStandaloneAssetFiles = async () => ({code: 0, data: {succMap: {}}});",
     };

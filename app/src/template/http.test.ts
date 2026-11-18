@@ -56,10 +56,9 @@ const loadHTTP = () => {
                     showMessage: (...args: unknown[]) => messages.push(args),
                     hideMessage: (value: string) => hidden.push(value),
                 };
-                case "../dialog/mobileConfirmDialog": return {mobileConfirmDialog: (_title: string, text: string,
-                                                                          approve: () => void, reject: () => void, _delete: boolean,
-                                                                          extra?: {callback: () => void}) => {
-                    const dialog = {text, approve, reject, always: extra?.callback, destroyed: false};
+                case "../dialog/confirmDialog": return {confirmDialog: ({text, confirm: approve, cancel: reject, extraAction}: {
+                    text: string, confirm: () => void, cancel: () => void, extraAction?: {callback: () => void}}) => {
+                    const dialog = {text, approve, reject, always: extraAction?.callback, destroyed: false};
                     dialogs.push(dialog);
                     return {element: {querySelector: (): Element => null}, destroy: () => {dialog.destroyed = true; reject();}};
                 }};

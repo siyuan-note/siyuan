@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {MobileDialog} from "../../dialog/mobileDialog";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {bindPasswordIconaToggle} from "../render/fragments";
@@ -391,19 +391,16 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
 };
 
 const showDeleteConfirm = (title: string, onConfirm: () => Promise<unknown>) => {
-    mobileConfirmDialog(
-        window.siyuan.languages.deleteOpConfirm,
-        window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
-        async () => {
+    confirmDialog({
+        title: window.siyuan.languages.deleteOpConfirm,
+        text: window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
+        confirm: async () => {
             await onConfirm();
             return true;
         },
-        undefined,
-        true,
-        undefined,
-        undefined,
-        {awaitConfirm: true},
-    );
+        isDelete: true,
+        awaitConfirm: true,
+    });
 };
 
 // endregion

@@ -165,7 +165,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         escapeAriaLabel: value => value, escapeHtml: value => value,
         applyAVColorPalette() {}, getAVCustomColors: () => [], getAVColorGridHTML: () => "",
         getAVColorOrder: () => [], AV_MANAGE_CUSTOM_COLORS_TYPE: "manage",
-        mobileConfirmDialog: (_title, _text, callback) => {state.confirm = callback;},
+        confirmDialog: ({confirm}) => {state.confirm = confirm;},
         Menu: class {
             constructor(_id, callback) {
                 this.items = [];

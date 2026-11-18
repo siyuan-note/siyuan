@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {config as configApi} from "./util/configApi";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
@@ -1707,10 +1707,13 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             const data = response.data;
             if (response.code !== 0) {
                 if (data && "reason" in data && data.reason === "package-exists" && data.packageName) {
-                    mobileConfirmDialog("⚠️ " + window.siyuan.languages.update,
-                        window.siyuan.languages.confirmOverwriteLocalBazaarPackage.replace("${name}", escapeHtml(data.packageName)), () => {
+                    confirmDialog({
+                        title: "⚠️ " + window.siyuan.languages.update,
+                        text: window.siyuan.languages.confirmOverwriteLocalBazaarPackage.replace("${name}", escapeHtml(data.packageName)),
+                        confirm: () => {
                             bazaar._installLocalPackage(file, app, mount, true);
-                        });
+                        },
+                    });
                 } else if (data && "reason" in data && data.reason === "package-incompatible") {
                     showMessage(data.minAppVersion ?
                         window.siyuan.languages.bazaarNeedVersion.replace("${x}", data.minAppVersion) :
@@ -1734,14 +1737,18 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             }
             if (data.packageType === "plugins" && !data.updated) {
                 if (window.siyuan.config.bazaar.petalDisabled) {
-                    mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
+                    confirmDialog({title: window.siyuan.languages.confirm, text: window.siyuan.languages.enablePluginTip2});
                 } else {
-                    mobileConfirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
-                        bazaar._setPluginEnabled(app, {name: data.packageName, enabled: false}, true, () => {
-                            if (bazaar._isMountCurrent(mount)) {
-                                bazaar._genMyHTML("plugins", app, false);
-                            }
-                        });
+                    confirmDialog({
+                        title: "💡 " + window.siyuan.languages.enablePlugin,
+                        text: window.siyuan.languages.enablePluginTip,
+                        confirm: () => {
+                            bazaar._setPluginEnabled(app, {name: data.packageName, enabled: false}, true, () => {
+                                if (bazaar._isMountCurrent(mount)) {
+                                    bazaar._genMyHTML("plugins", app, false);
+                                }
+                            });
+                        },
                     });
                 }
             }

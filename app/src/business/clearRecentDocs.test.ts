@@ -22,7 +22,7 @@ const harness = () => {
     runInNewContext(transpileModule(readFileSync("src/business/clearRecentDocs.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText, {exports, window: {siyuan}, require: createMockRequire({
-        "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _text: string, confirm: () => Promise<boolean>, cancel: () => void) =>
+        "../dialog/confirmDialog": {confirmDialog: ({confirm, cancel}: {confirm: () => Promise<boolean>, cancel: () => void}) =>
             confirmations.push({confirm, cancel})},
         "../dialog/message": {showMessage: (message: string) => errors.push(message)},
         "../util/fetch": {fetchSyncPost: (url: string) => {

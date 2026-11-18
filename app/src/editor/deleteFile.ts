@@ -1,7 +1,7 @@
 import type {BlockQueryRequestInput} from "../types/api";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {getDisplayName, getNotebookName, isEncryptedBox} from "../util/pathName";
-import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {Constants} from "../constants";
 import {checkBlockRef, getBlockRefWarningHTML} from "../util/checkBlockRef";
@@ -45,12 +45,17 @@ export const deleteFile = async (notebookId: string, pathString: string) => {
     if (hasRef) {
         tip += getBlockRefWarningHTML();
     }
-    confirmDialog(window.siyuan.languages.deleteOpConfirm, tip, () => {
-        fetchPost("/api/filetree/removeDoc", {
-            notebook: notebookId,
-            path: pathString
-        });
-    }, undefined, true);
+    confirmDialog({
+        title: window.siyuan.languages.deleteOpConfirm,
+        text: tip,
+        confirm: () => {
+            fetchPost("/api/filetree/removeDoc", {
+                notebook: notebookId,
+                path: pathString
+            });
+        },
+        isDelete: true,
+    });
 };
 
 export const deleteNotebooks = async (notebookIds: string[]) => {
@@ -70,11 +75,16 @@ export const deleteNotebooks = async (notebookIds: string[]) => {
     if (refResults.some((result) => result)) {
         tip += getBlockRefWarningHTML();
     }
-    confirmDialog(window.siyuan.languages.deleteOpConfirm, tip, async () => {
-        for (const notebook of uniqueNotebookIds) {
-            await fetchPost("/api/notebook/removeNotebook", {notebook});
-        }
-    }, undefined, true);
+    confirmDialog({
+        title: window.siyuan.languages.deleteOpConfirm,
+        text: tip,
+        confirm: async () => {
+            for (const notebook of uniqueNotebookIds) {
+                await fetchPost("/api/notebook/removeNotebook", {notebook});
+            }
+        },
+        isDelete: true,
+    });
 };
 
 export const deleteFiles = (liElements: Element[]) => deleteDocTreeItems(liElements.flatMap(element => {
@@ -115,12 +125,16 @@ export const deleteDocTreeItems = async (selected: readonly {
                 if (hasRef) {
                     tip += getBlockRefWarningHTML();
                 }
-                confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                    tip, () => {
+                confirmDialog({
+                    title: window.siyuan.languages.deleteOpConfirm,
+                    text: tip,
+                    confirm: () => {
                         fetchPost("/api/notebook/removeNotebook", {
                             notebook: itemNotebookId,
                         });
-                    }, undefined, true);
+                    },
+                    isDelete: true,
+                });
             }
         }
     } else {
@@ -162,12 +176,17 @@ export const deleteDocTreeItems = async (selected: readonly {
             if (refResults.some((result) => result)) {
                 tip += getBlockRefWarningHTML();
             }
-            confirmDialog(window.siyuan.languages.deleteOpConfirm, tip, async () => {
-                await fetchPost("/api/filetree/removeDocs", {paths});
-                for (const notebook of notebookIds) {
-                    await fetchPost("/api/notebook/removeNotebook", {notebook});
-                }
-            }, undefined, true);
+            confirmDialog({
+                title: window.siyuan.languages.deleteOpConfirm,
+                text: tip,
+                confirm: async () => {
+                    await fetchPost("/api/filetree/removeDocs", {paths});
+                    for (const notebook of notebookIds) {
+                        await fetchPost("/api/notebook/removeNotebook", {notebook});
+                    }
+                },
+                isDelete: true,
+            });
             return;
         }
         const hasRef = await checkBlockRef({
@@ -183,11 +202,15 @@ export const deleteDocTreeItems = async (selected: readonly {
         if (hasRef) {
             tip += getBlockRefWarningHTML();
         }
-        confirmDialog(window.siyuan.languages.deleteOpConfirm,
-            tip, () => {
+        confirmDialog({
+            title: window.siyuan.languages.deleteOpConfirm,
+            text: tip,
+            confirm: () => {
                 fetchPost("/api/filetree/removeDocs", {
                     paths
                 });
-            }, undefined, true);
+            },
+            isDelete: true,
+        });
     }
 };

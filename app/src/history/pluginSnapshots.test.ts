@@ -81,7 +81,7 @@ const setup = () => {
     }).outputText, {exports, AbortController, document: {createElement: (tag: string) => new ElementStub(tag)},
         window: {siyuan: {languages, config}},
         require: (module: string) => {
-            if (module.endsWith("mobileConfirmDialog")) return {mobileConfirmDialog: (_title: string, _tip: string, callback: typeof confirm) => { confirm = callback; }};
+            if (module.endsWith("confirmDialog")) return {confirmDialog: ({confirm: callback}: {confirm: typeof confirm}) => { confirm = callback; }};
             if (module.endsWith("/fetch")) return {fetchSyncPost: async (url: string, body: unknown) => {
                 calls.push({url, body});
                 return {code: 0, data: url.endsWith("getPluginSnapshots") ?

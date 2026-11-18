@@ -5,17 +5,17 @@ import {createSourceFile, forEachChild, isCallExpression, isNewExpression, Scrip
 
 const coverage: Record<string, Record<string, number>> = {
     "protyle/breadcrumb/index.ts": {
-        "mobileConfirmDialog": 2
+        "confirmDialog": 2
     },
     "protyle/export/exportMd.ts": {
         "MobileDialog": 1,
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/export/headingPageBreaksUI.ts": {
         "MobileDialog": 1
     },
     "protyle/export/index.ts": {
-        "mobileConfirmDialog": 1
+        "confirmDialog": 3
     },
     "protyle/export/util.ts": {
         "MobileDialog": 1
@@ -30,10 +30,10 @@ const coverage: Record<string, Record<string, number>> = {
         "MobileDialog": 1
     },
     "protyle/hint/extend.ts": {
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/render/av/blockAttr.ts": {
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/render/av/calc.ts": {
         "MobileDialog": 1
@@ -52,14 +52,14 @@ const coverage: Record<string, Record<string, number>> = {
     },
     "protyle/render/av/collectionReview.ts": {
         "MobileDialog": 1,
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/render/av/colorDialog.ts": {
         "MobileDialog": 1,
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/render/av/kanban/groupMenu.ts": {
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/render/av/openDatabaseRow.ts": {
         "MobileDialog": 1
@@ -74,20 +74,20 @@ const coverage: Record<string, Record<string, number>> = {
         "MobileDialog": 1
     },
     "protyle/render/av/rowSort.ts": {
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/render/av/select.ts": {
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/toolbar/inlineStyleDialog.ts": {
         "MobileDialog": 1,
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/undo/globalUndo.ts": {
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/upload/index.ts": {
-        "mobileConfirmDialog": 1
+        "confirmDialog": 2
     },
     "protyle/util/headingBatch.ts": {
         "MobileDialog": 1
@@ -102,7 +102,7 @@ const coverage: Record<string, Record<string, number>> = {
         "mobileInputDialog": 1
     },
     "protyle/util/collectionRemoval.ts": {
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/wysiwyg/callout.ts": {
         "mobileInputDialog": 1
@@ -120,11 +120,11 @@ const coverage: Record<string, Record<string, number>> = {
         "mobileInputDialog": 1
     },
     "ai/editor.ts": {
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "ai/memory/manager.ts": {
         "MobileDialog": 1,
-        "mobileConfirmDialog": 2
+        "confirmDialog": 2
     },
     "ai/skills/manager.ts": {
         "MobileDialog": 1,
@@ -132,7 +132,7 @@ const coverage: Record<string, Record<string, number>> = {
     },
     "card/makeCard.ts": {
         "MobileDialog": 1,
-        "mobileConfirmDialog": 1,
+        "confirmDialog": 1,
         "mobileInputDialog": 1
     },
     "card/openCard.ts": {
@@ -141,7 +141,7 @@ const coverage: Record<string, Record<string, number>> = {
     },
     "card/viewCards.ts": {
         "MobileDialog": 1,
-        "mobileConfirmDialog": 1
+        "confirmDialog": 1
     },
     "protyle/render/av/richTextEditor.ts": {
         "MobileDialog": 1

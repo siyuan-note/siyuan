@@ -75,7 +75,7 @@ const setup = (mobile = false) => {
             }
             return response;
         },
-        mobileConfirmDialog: (_title: string, _content: string, confirm: () => void) => { callbacks.push(confirm); },
+        confirmDialog: ({confirm}: {confirm: () => void}) => { callbacks.push(confirm); },
         showMessage: () => {},
         trackNotebookHistoryDialog: () => {},
         forgetNotebookHistoryDialog: () => {},

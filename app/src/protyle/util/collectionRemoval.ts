@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import type {TagRemovalChangeInput, TagRemovalCollection} from "../../types/api";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {fetchSyncPost} from "../../util/fetch";
@@ -96,13 +96,19 @@ export const confirmCollectionRemoval = (groups: TagRemovalCollection[], text?: 
         const content = (text ? `<div>${text}</div>` : "") + (groups.length ?
             `<div class="ft__breakword">${escapeHtml(lang.tagRemovalDatabaseTip)}</div>` + groups.map(group =>
                 `<label class="fn__flex b3-label" style="align-items:center"><input type="checkbox" checked class="fn__flex-shrink" data-tag-removal-av="${escapeAttr(group.avID)}"><span class="fn__space"></span><span class="ft__breakword">${escapeHtml(group.name || group.avID)} (${group.cleanup.items.length})</span></label>`).join("") : "");
-        const dialog = mobileConfirmDialog(lang.deleteOpConfirm, content, () => {
-            const selected = new Set(Array.from(dialog.element.querySelectorAll<HTMLInputElement>("[data-tag-removal-av]:checked"))
-                .map(input => input.dataset.tagRemovalAv));
-            resolve(groups.filter(group => selected.has(group.avID)));
-        }, () => resolve(null), true,
-        groups.length ? {label: onlyLabel, callback: () => resolve([])} : undefined,
-        groups.length ? lang.tagRemovalWithEntries : onlyLabel);
+        const dialog = confirmDialog({
+            title: lang.deleteOpConfirm,
+            text: content,
+            confirm: () => {
+                const selected = new Set(Array.from(dialog.element.querySelectorAll<HTMLInputElement>("[data-tag-removal-av]:checked"))
+                    .map(input => input.dataset.tagRemovalAv));
+                resolve(groups.filter(group => selected.has(group.avID)));
+            },
+            cancel: () => resolve(null),
+            isDelete: true,
+            extraAction: groups.length ? {label: onlyLabel, callback: () => resolve([])} : undefined,
+            confirmLabel: groups.length ? lang.tagRemovalWithEntries : onlyLabel,
+        });
     });
 };
 

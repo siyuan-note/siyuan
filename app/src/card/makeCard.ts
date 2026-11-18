@@ -1,5 +1,5 @@
 import {mobileInputDialog} from "../dialog/mobileInputDialog";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {MobileDialog} from "../dialog/mobileDialog";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
@@ -113,13 +113,18 @@ export const makeCard = (app: App, ids: string[]) => {
                     event.preventDefault();
                     break;
                 } else if (type === "delete") {
-                    mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(target.parentElement.getAttribute("data-name"))}</b>?`, () => {
-                        fetchPost("/api/riff/removeRiffDeck", {
-                            deckID: target.parentElement.getAttribute("data-id"),
-                        }, () => {
-                            target.parentElement.remove();
-                        });
-                    }, undefined, true);
+                    confirmDialog({
+                        title: window.siyuan.languages.deleteOpConfirm,
+                        text: `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(target.parentElement.getAttribute("data-name"))}</b>?`,
+                        confirm: () => {
+                            fetchPost("/api/riff/removeRiffDeck", {
+                                deckID: target.parentElement.getAttribute("data-id"),
+                            }, () => {
+                                target.parentElement.remove();
+                            });
+                        },
+                        isDelete: true,
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;

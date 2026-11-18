@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {MobileDialog} from "../dialog/mobileDialog";
 import {showMessage} from "../dialog/message";
 import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "../history/notebookDialogs";
@@ -126,23 +126,27 @@ export const openEncryptedAssetsCleanup = (notebook: string) => {
         if (!paths.length) {
             return;
         }
-        mobileConfirmDialog(lang.deleteOpConfirm, `${escapeHtml(getNotebookName(notebook))} - ${lang.clearAll}`, () => {
-            if (!active() || busy) {
-                return;
-            }
-            busy = true;
-            update();
-            void runSettingsMaintenance(async () => {
-                const response = await fetchSyncPost("/api/asset/removeUnusedEncryptedBoxAssets", {notebook, paths});
-                if (response.code === 0 && active()) {
-                    showMessage(lang.deleted);
+        confirmDialog({
+            title: lang.deleteOpConfirm,
+            text: `${escapeHtml(getNotebookName(notebook))} - ${lang.clearAll}`,
+            confirm: () => {
+                if (!active() || busy) {
+                    return;
                 }
-            }).finally(async () => {
-                busy = false;
-                if (active()) {
-                    await scan();
-                }
-            });
+                busy = true;
+                update();
+                void runSettingsMaintenance(async () => {
+                    const response = await fetchSyncPost("/api/asset/removeUnusedEncryptedBoxAssets", {notebook, paths});
+                    if (response.code === 0 && active()) {
+                        showMessage(lang.deleted);
+                    }
+                }).finally(async () => {
+                    busy = false;
+                    if (active()) {
+                        await scan();
+                    }
+                });
+            },
         });
     });
     void runSettingsMaintenance(scan);

@@ -18,7 +18,7 @@ import {fetchWithDocumentSelection} from "../../../util/documentSelectionRequest
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
 import {MobileDialog} from "../../../dialog/mobileDialog";
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import {Constants} from "../../../constants";
 import type {AVRelationItemPreview} from "../../../types/api";
@@ -453,8 +453,10 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
         const viewID = this.host.viewID;
         const sourceIsCurrent = () => navigation === this.sharedNavigation && this.host.viewID === viewID &&
             canEditAVHost(this.hostElement, this.protyle);
-        mobileConfirmDialog(window.siyuan.languages.config, window.siyuan.languages._attrView.relatedDatabaseViewSharedTip,
-            async () => {
+        confirmDialog({
+            title: window.siyuan.languages.config,
+            text: window.siyuan.languages._attrView.relatedDatabaseViewSharedTip,
+            confirm: async () => {
                 if (!sourceIsCurrent()) return;
                 try {
                     const response = await fetchSyncPost("/api/av/getAttributeViewRelationCandidates", {
@@ -473,10 +475,10 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
                         const rootID = editor.block?.rootID;
                         if (!root) return;
                         const current = () => navigation === this.sharedNavigation && root.isConnected &&
-                            editor.wysiwyg.element === root && editor.block?.rootID === rootID &&
-                            editor.notebookId === target.notebookID && !editor.element.closest(".fn__none") &&
-                            !editor.disabled && !window.siyuan.config.readonly && !window.siyuan.isPublish &&
-                            !editor.options.history?.created && !editor.options.history?.snapshot;
+                        editor.wysiwyg.element === root && editor.block?.rootID === rootID &&
+                        editor.notebookId === target.notebookID && !editor.element.closest(".fn__none") &&
+                        !editor.disabled && !window.siyuan.config.readonly && !window.siyuan.isPublish &&
+                        !editor.options.history?.created && !editor.options.history?.snapshot;
                         const isCurrentEditor = () => {
                             /// #if MOBILE
                             if (window.siyuan.mobile.editor?.protyle !== editor) return false;
@@ -494,7 +496,7 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
                             if (!block) return false;
                             stop();
                             const valid = () => isCurrentEditor() && block.isConnected && root.contains(block) &&
-                                block.dataset.avId === this.definition.targetAVID && block.dataset.nodeId === blockID;
+                            block.dataset.avId === this.definition.targetAVID && block.dataset.nodeId === blockID;
                             if (!valid()) return true;
                             const open = () => {
                                 if (!valid()) return;
@@ -509,7 +511,7 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
                             if (previousViewID === viewID) open();
                             else transaction(editor, [{action: "setAttrViewBlockView", avID: this.definition.targetAVID,
                                 blockID, id: viewID}], [{action: "setAttrViewBlockView", avID: this.definition.targetAVID,
-                                blockID, id: previousViewID}], {callback: open});
+                                    blockID, id: previousViewID}], {callback: open});
                             return true;
                         };
                         if (ready()) return;
@@ -538,7 +540,10 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
                         showMessage(window.siyuan.languages._attrView.relatedDatabaseViewUnavailable);
                     }
                 }
-            }, undefined, false, undefined, window.siyuan.languages.openBy);
+            },
+            isDelete: false,
+            confirmLabel: window.siyuan.languages.openBy,
+        });
     }
 
     private async openRow(itemID: string) {

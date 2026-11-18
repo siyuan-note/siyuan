@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {MobileDialog} from "../../../dialog/mobileDialog";
 import {showMessage} from "../../../dialog/message";
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../../dialog/themeColorEditor";
@@ -289,11 +289,16 @@ export const openAVCustomColorDialog = (options: {
                 showMessage(window.siyuan.languages.invalid, 6000, "error");
                 return;
             }
-            mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
-                draft.splice(draft.indexOf(color), 1);
-                orderDraft = orderDraft.filter(item => item !== key);
-                renderList();
-            }, undefined, true);
+            confirmDialog({
+                title: window.siyuan.languages.deleteOpConfirm,
+                text: window.siyuan.languages.confirmDelete,
+                confirm: () => {
+                    draft.splice(draft.indexOf(color), 1);
+                    orderDraft = orderDraft.filter(item => item !== key);
+                    renderList();
+                },
+                isDelete: true,
+            });
         } else if (action === "cancelEdit") {
             showList();
         } else if (action === "confirmEdit") {

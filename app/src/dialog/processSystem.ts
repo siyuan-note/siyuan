@@ -16,7 +16,7 @@ import {ipcRenderer} from "electron";
 import {hideMessage, showMessage} from "./message";
 import {MobileDialog as Dialog} from "./mobileDialog";
 import {isMobile} from "../util/functions";
-import {mobileConfirmDialog as confirmDialog} from "./mobileConfirmDialog";
+import {confirmDialog} from "./confirmDialog";
 import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
@@ -247,18 +247,25 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
     }
     await requestSystemExit({force: false, setCurrentWorkspace}, (response) => {
         if (response.code === 1) { // 同步执行失败
-            confirmDialog(window.siyuan.languages.sync, escapeHtml(window.siyuan.languages._kernel[96]), () => {
-                void exitSiYuan(setCurrentWorkspace);
-            }, undefined, false, {
-                label: window.siyuan.languages._kernel[97],
-                callback: () => {
-                    if (response.data.installPkgPath) {
-                        installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
-                        return;
+            confirmDialog({
+                title: window.siyuan.languages.sync,
+                text: escapeHtml(window.siyuan.languages._kernel[96]),
+                confirm: () => {
+                    void exitSiYuan(setCurrentWorkspace);
+                },
+                isDelete: false,
+                extraAction: {
+                    label: window.siyuan.languages._kernel[97],
+                    callback: () => {
+                        if (response.data.installPkgPath) {
+                            installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
+                            return;
+                        }
+                        void requestSystemExit({force: true, setCurrentWorkspace}, forceQuit);
                     }
-                    void requestSystemExit({force: true, setCurrentWorkspace}, forceQuit);
-                }
-            }, window.siyuan.languages.retry);
+                },
+                confirmLabel: window.siyuan.languages.retry,
+            });
         } else if (response.code === 2) { // 提示新安装包
             hideMessage();
 
@@ -279,15 +286,23 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                     message.replace(paragraphBreak, () => paragraphBreak + announcement + paragraphBreak) :
                     message + paragraphBreak + announcement;
             }
-            confirmDialog(window.siyuan.languages.updateVersion, message, () => {
-                installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
-            }, () => {
-                void requestSystemExit({
-                    force: true,
-                    setCurrentWorkspace,
-                    execInstallPkg: 1 // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
-                }, forceQuit);
-            }, false, undefined, window.siyuan.languages.updateInstallNow, window.siyuan.languages.updateInstallLater);
+            confirmDialog({
+                title: window.siyuan.languages.updateVersion,
+                text: message,
+                confirm: () => {
+                    installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
+                },
+                cancel: () => {
+                    void requestSystemExit({
+                        force: true,
+                        setCurrentWorkspace,
+                        execInstallPkg: 1 // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
+                    }, forceQuit);
+                },
+                isDelete: false,
+                confirmLabel: window.siyuan.languages.updateInstallNow,
+                cancelLabel: window.siyuan.languages.updateInstallLater,
+            });
         } else { // 正常退出
             forceQuit();
         }

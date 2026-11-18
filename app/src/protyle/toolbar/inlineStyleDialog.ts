@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {MobileDialog} from "../../dialog/mobileDialog";
 import {showMessage} from "../../dialog/message";
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../dialog/themeColorEditor";
@@ -318,9 +318,12 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
                 renderList();
             };
             if (persistedStyleIDs.has(style.id)) {
-                mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm,
-                    window.siyuan.languages.deleteCustomColorTip.replace("${name}", `<b>${escapeHtml(style.name)}</b>`),
-                    removeStyle, undefined, true);
+                confirmDialog({
+                    title: window.siyuan.languages.deleteOpConfirm,
+                    text: window.siyuan.languages.deleteCustomColorTip.replace("${name}", `<b>${escapeHtml(style.name)}</b>`),
+                    confirm: removeStyle,
+                    isDelete: true,
+                });
             } else {
                 removeStyle();
             }

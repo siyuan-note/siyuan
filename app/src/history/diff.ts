@@ -12,7 +12,7 @@ import type {App} from "../index";
 import {pathPosix} from "../util/pathName";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {resizeSide} from "./resizeSide";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {showDocVersionDiff} from "./docDiff";
 import {pairSnapshotFilesByPath} from "./snapshotDiffCore";
 
@@ -524,12 +524,16 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                 event.stopPropagation();
                 break;
             } else if (target.getAttribute("data-type") == "rollback") {
-                mobileConfirmDialog("⚠️ " + window.siyuan.languages.rollback,
-                    window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(target.parentElement.dataset.title)).replace("${time}", dayjs(parseInt(target.parentElement.dataset.created)).format("YYYY-MM-DD HH:mm:ss")),
-                    async () => {
+                confirmDialog({
+                    title: "⚠️ " + window.siyuan.languages.rollback,
+                    text: window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(target.parentElement.dataset.title)).replace("${time}", dayjs(parseInt(target.parentElement.dataset.created)).format("YYYY-MM-DD HH:mm:ss")),
+                    confirm: async () => {
                         const response = await fetchSyncPost("/api/repo/rollbackRepoSnapshotFile", {id: target.parentElement.dataset.id});
                         return response.code === 0;
-                    }, undefined, false, undefined, undefined, {awaitConfirm: true});
+                    },
+                    isDelete: false,
+                    awaitConfirm: true,
+                });
                 event.preventDefault();
                 event.stopPropagation();
                 break;

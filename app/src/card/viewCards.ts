@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {MobileDialog} from "../dialog/mobileDialog";
 import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
 import dayjs from "dayjs";
@@ -227,8 +227,10 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                     event.preventDefault();
                     break;
                 } else if (type === "resetAll") {
-                    mobileConfirmDialog(window.siyuan.languages.reset,
-                        window.siyuan.languages.resetCardTip.replace("${x}", dialog.element.querySelector(".counter").textContent), () => {
+                    confirmDialog({
+                        title: window.siyuan.languages.reset,
+                        text: window.siyuan.languages.resetCardTip.replace("${x}", dialog.element.querySelector(".counter").textContent),
+                        confirm: () => {
                             fetchPost("/api/riff/resetRiffCards", {
                                 type: deckType === "" ? "deck" : deckType.toLowerCase(),
                                 deckID: deckType === "" ? deckID : Constants.QUICK_DECK_ID,
@@ -238,7 +240,8 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                                     item.textContent = dayjs().format("YYYY-MM-DD");
                                 });
                             });
-                        });
+                        },
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;

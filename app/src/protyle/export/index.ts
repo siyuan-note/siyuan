@@ -1,4 +1,3 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
@@ -77,7 +76,7 @@ export const saveExport = (option: IExportOptions) => {
         };
         fetchPost("/api/block/getBlockInfo", {id: option.id}, (response) => {
             if (response.code === 0 && isEncryptedBox(response.data.box)) {
-                mobileConfirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, startExport);
+                confirmDialog({title: "⚠️ " + window.siyuan.languages.export, text: window.siyuan.languages.encryptedExportRiskTip, confirm: startExport});
                 return;
             }
             startExport();
@@ -90,8 +89,12 @@ export const saveExport = (option: IExportOptions) => {
     /// #if !BROWSER
     if (option.type === "pdf") {
         if (window.siyuan.config.appearance.mode === 1) {
-            confirmDialog(window.siyuan.languages.pdfTip, window.siyuan.languages.pdfConfirm, () => {
-                renderPDF(option.id);
+            confirmDialog({
+                title: window.siyuan.languages.pdfTip,
+                text: window.siyuan.languages.pdfConfirm,
+                confirm: () => {
+                    renderPDF(option.id);
+                },
             });
         } else {
             renderPDF(option.id);
@@ -1156,8 +1159,12 @@ const getExportPath = (
             return;
         }
         if (!confirmed && isEncryptedBox(response.data.box)) {
-            confirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, () => {
-                getExportPath(option, removeAssets, mergeSubdocs, mergeDocHeadingMode, mergeContentHeadingMode, true);
+            confirmDialog({
+                title: "⚠️ " + window.siyuan.languages.export,
+                text: window.siyuan.languages.encryptedExportRiskTip,
+                confirm: () => {
+                    getExportPath(option, removeAssets, mergeSubdocs, mergeDocHeadingMode, mergeContentHeadingMode, true);
+                },
             });
             return;
         }

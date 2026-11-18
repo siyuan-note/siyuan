@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {runSettingsMaintenance} from "./setting/maintenance";
 import {isBrowser, isMobile} from "../util/functions";
@@ -332,29 +332,39 @@ const assets = {
                     event.stopPropagation();
                     break;
                 } else if (target.id === "removeAll") {
-                    mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAll}`, () => {
-                        void runSettingsMaintenance(() => fetchPost("/api/asset/removeUnusedAssets", {}, response => {
-                            /// #if !MOBILE
-                            getAllModels().asset.forEach(item => {
-                                if (response.data.paths.includes(item.path)) {
-                                    item.parent.close();
-                                }
-                            });
-                            /// #endif
-                            unusedSearch.clear();
-                        }));
-                    }, undefined, true);
+                    confirmDialog({
+                        title: window.siyuan.languages.deleteOpConfirm,
+                        text: `${window.siyuan.languages.clearAll}`,
+                        confirm: () => {
+                            void runSettingsMaintenance(() => fetchPost("/api/asset/removeUnusedAssets", {}, response => {
+                                /// #if !MOBILE
+                                getAllModels().asset.forEach(item => {
+                                    if (response.data.paths.includes(item.path)) {
+                                        item.parent.close();
+                                    }
+                                });
+                                /// #endif
+                                unusedSearch.clear();
+                            }));
+                        },
+                        isDelete: true,
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (target.id === "removeAVAll") {
-                    mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAllAV}`, () => {
-                        void runSettingsMaintenance(() => fetchPost("/api/av/removeUnusedAttributeViews", {}, () => {
-                            avListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                            avPreviewElement.innerHTML = "";
-                            hidePreview(avListElement, avPreviewElement);
-                        }));
-                    }, undefined, true);
+                    confirmDialog({
+                        title: window.siyuan.languages.deleteOpConfirm,
+                        text: `${window.siyuan.languages.clearAllAV}`,
+                        confirm: () => {
+                            void runSettingsMaintenance(() => fetchPost("/api/av/removeUnusedAttributeViews", {}, () => {
+                                avListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                                avPreviewElement.innerHTML = "";
+                                hidePreview(avListElement, avPreviewElement);
+                            }));
+                        },
+                        isDelete: true,
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -468,51 +478,56 @@ const assets = {
                     break;
                 } else if (type === "clear") {
                     const liElement = target.parentElement;
-                    mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${escapeHtml(liElement.querySelector(".b3-list-item__text").textContent)}</b>`, () => {
-                        if (liElement.getAttribute("data-tab-type") === "unRefAV") {
-                            const id = liElement.getAttribute("data-item");
-                            fetchPost("/api/av/removeUnusedAttributeView", {
-                                id,
-                            }, () => {
-                                if (liElement.parentElement.querySelectorAll("li").length === 1) {
-                                    liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                                } else {
-                                    liElement.remove();
-                                }
-                                if (editor.protyle.element.querySelector(`.av[data-av-id="${id}"]`)) {
-                                    onGet({
-                                        data: {
+                    confirmDialog({
+                        title: window.siyuan.languages.deleteOpConfirm,
+                        text: `${window.siyuan.languages.delete} <b>${escapeHtml(liElement.querySelector(".b3-list-item__text").textContent)}</b>`,
+                        confirm: () => {
+                            if (liElement.getAttribute("data-tab-type") === "unRefAV") {
+                                const id = liElement.getAttribute("data-item");
+                                fetchPost("/api/av/removeUnusedAttributeView", {
+                                    id,
+                                }, () => {
+                                    if (liElement.parentElement.querySelectorAll("li").length === 1) {
+                                        liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                                    } else {
+                                        liElement.remove();
+                                    }
+                                    if (editor.protyle.element.querySelector(`.av[data-av-id="${id}"]`)) {
+                                        onGet({
                                             data: {
-                                                content: "",
-                                                id: Lute.NewNodeID(),
-                                                rootID: Lute.NewNodeID(),
+                                                data: {
+                                                    content: "",
+                                                    id: Lute.NewNodeID(),
+                                                    rootID: Lute.NewNodeID(),
+                                                },
+                                                msg: "",
+                                                code: 0
                                             },
-                                            msg: "",
-                                            code: 0
-                                        },
-                                        protyle: editor.protyle,
-                                        action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
-                                    });
-                                }
-                                if (avPreviewElement.getAttribute("data-item") === id) {
-                                    hidePreview(avListElement, avPreviewElement);
-                                }
-                            });
-                        } else {
-                            fetchPost("/api/asset/removeUnusedAsset", {
-                                path: liElement.getAttribute("data-item"),
-                            }, response => {
-                                /// #if !MOBILE
-                                getAllModels().asset.forEach(item => {
-                                    if (response.data.path === item.path) {
-                                        item.parent.parent.removeTab(item.parent.id);
+                                            protyle: editor.protyle,
+                                            action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
+                                        });
+                                    }
+                                    if (avPreviewElement.getAttribute("data-item") === id) {
+                                        hidePreview(avListElement, avPreviewElement);
                                     }
                                 });
-                                /// #endif
-                                unusedSearch.remove(liElement.getAttribute("data-item"));
-                            });
-                        }
-                    }, undefined, true);
+                            } else {
+                                fetchPost("/api/asset/removeUnusedAsset", {
+                                    path: liElement.getAttribute("data-item"),
+                                }, response => {
+                                    /// #if !MOBILE
+                                    getAllModels().asset.forEach(item => {
+                                        if (response.data.path === item.path) {
+                                            item.parent.parent.removeTab(item.parent.id);
+                                        }
+                                    });
+                                    /// #endif
+                                    unusedSearch.remove(liElement.getAttribute("data-item"));
+                                });
+                            }
+                        },
+                        isDelete: true,
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

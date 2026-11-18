@@ -107,7 +107,7 @@ const runCases = async (sources, css, mobile, dark) => {
     const {Dialog} = load("dialog");
     const mobileRuntime = new Function("Dialog", "mobile", "return " + sources.mobileRuntime)(Dialog, mobile);
     stubs["dialog/mobileDialog"] = mobileRuntime;
-    stubs["dialog/mobileConfirmDialog"] = mobileRuntime;
+    stubs["dialog/confirmDialog"] = mobileRuntime;
     stubs["dialog/mobileInputDialog"] = mobileRuntime;
     const {initRepoPanel} = load("history/repoPanel");
     const panel = document.createElement("div");
@@ -261,7 +261,7 @@ const runCases = async (sources, css, mobile, dark) => {
     const operations = [];
     const queries = [];
     let lastPackage = "";
-    stubs["dialog/mobileConfirmDialog"] = {mobileConfirmDialog: (_title, _tip, callback) => { confirmRestore = callback; }};
+    stubs["dialog/confirmDialog"] = {confirmDialog: ({confirm}) => { confirmRestore = confirm; }};
     stubs["plugin/loader"] = {unloadPlugin: async () => {
         operations.push("unload");
         await new Promise(resolve => { releaseUnload = resolve; });

@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {fetchPost} from "../../../util/fetch";
 import type {ChatGPTAccount} from "../../../types/api";
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
@@ -213,8 +213,13 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider,
                 const selected = profiles.find(item => item.id === accountID);
                 if (!selected) { return; }
                 const confirmed = await new Promise<boolean>(resolve => {
-                    mobileConfirmDialog(L.deleteOpConfirm, L.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(accountLabel(selected))),
-                        () => resolve(true), () => resolve(false), true);
+                    confirmDialog({
+                        title: L.deleteOpConfirm,
+                        text: L.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(accountLabel(selected))),
+                        confirm: () => resolve(true),
+                        cancel: () => resolve(false),
+                        isDelete: true,
+                    });
                 });
                 if (!confirmed || disposed) { return; }
                 await fetchPost("/api/ai/chatgpt/remove", {accountID}, response => {

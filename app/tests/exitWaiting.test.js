@@ -40,7 +40,7 @@ const createExitDialog = (sources, languages, mobile) => {
     const {requestSystemExit, updateExitProgressStatus} = load(sources.exit, {
         "../util/functions": {isMobile: () => mobile},
         "./mobileDialog": mobileRuntime,
-        "./mobileConfirmDialog": mobileRuntime,
+        "./confirmDialog": mobileRuntime,
         "./progress": progress,
         "../util/fetch": {fetchSyncPost: () => new Promise((resolve, reject) => {
             window.finishExit = resolve;

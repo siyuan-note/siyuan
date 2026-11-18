@@ -1,5 +1,5 @@
 import {MobileDialog} from "../../dialog/mobileDialog";
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -263,7 +263,7 @@ const bindAccountMainEvent = (accountSettingsRoot: Element) => {
 };
 
 const showDeactivateConfirm = (callback: () => void) => {
-    mobileConfirmDialog("⚠️ " + window.siyuan.languages.deactivateUser, window.siyuan.languages.deactivateUserTip, callback);
+    confirmDialog({title: "⚠️ " + window.siyuan.languages.deactivateUser, text: window.siyuan.languages.deactivateUserTip, confirm: callback});
 };
 
 const openAccountDeactivateAuthDialog = () => {
@@ -308,12 +308,16 @@ const bindAccountPaymentEvent = (accountSettingsRoot: Element) => {
             if (0 !== response.code) {
                 activationCodeInput.value = "";
             }
-            mobileConfirmDialog(window.siyuan.languages.activationCode, response.msg, () => {
-                if (response.code === 0) {
-                    fetchPost("/api/account/useActivationcode", {data: activationCodeInput.value}, () => {
-                        accountSettingsRoot.querySelector("#refresh")?.dispatchEvent(new CustomEvent("click"));
-                    });
-                }
+            confirmDialog({
+                title: window.siyuan.languages.activationCode,
+                text: response.msg,
+                confirm: () => {
+                    if (response.code === 0) {
+                        fetchPost("/api/account/useActivationcode", {data: activationCodeInput.value}, () => {
+                            accountSettingsRoot.querySelector("#refresh")?.dispatchEvent(new CustomEvent("click"));
+                        });
+                    }
+                },
             });
         });
     });

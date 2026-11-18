@@ -84,12 +84,12 @@ const harness = (respond?: (url: string, data: Record<string, unknown>) => unkno
                 }
                 destroy() { if (beforeClose()) { destroyed++; destroy(); } }
             }}; }
-            if (name.endsWith("/mobileConfirmDialog")) { return {mobileConfirmDialog: (_title: string, _message: string,
-                callback: () => void | Promise<boolean>, _cancel: unknown, _isDelete: boolean, _extra: unknown,
-                _label: unknown, confirmation: {awaitConfirm?: boolean}) => {
-                confirmations.push(callback);
-                confirmationOptions.push(confirmation);
-            }}; }
+            if (name.endsWith("/confirmDialog")) {
+                return {confirmDialog: ({confirm, awaitConfirm}: {confirm?: () => void | Promise<boolean>, awaitConfirm?: boolean}) => {
+                    confirmations.push(confirm);
+                    confirmationOptions.push({awaitConfirm});
+                }};
+            }
             if (name.endsWith("/fetch")) { return {fetchSyncPost: async (url: string, data: Record<string, unknown>, _headers: unknown, _process: boolean, signal?: AbortSignal) => {
                 requests.push({url, data, signal});
                 const response = await respond?.(url, data);

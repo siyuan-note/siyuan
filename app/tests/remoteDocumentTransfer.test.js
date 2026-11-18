@@ -26,7 +26,7 @@ const createEnvironment = ({browser = false, mobile = false, remote = true} = {}
         "constants": {Constants: {SIYUAN_GET: "siyuan-get", HELP_PATH: {}}},
         "menus/Menu": {MenuItem: class {constructor(options) {this.element = options;}}},
         "dialog/message": {showMessage: (...args) => {messages.push(args); return "message";}, hideMessage: id => hidden.push(id)},
-        "dialog/confirmDialog": {confirmDialog: (_title, _text, callback) => callback()},
+        "dialog/confirmDialog": {confirmDialog: ({confirm}) => confirm()},
         "util/fetch": {fetchPost: (...args) => requests.push(args), fetchSyncPost: async () => ({code: 0, data: []})},
         "protyle/util/compatibility": {
             saveExportFile: uri => saved.push(uri), isInMobileApp: () => mobile, getScreenWidth: () => 800,

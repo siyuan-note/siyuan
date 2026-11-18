@@ -1,6 +1,6 @@
 import {mobileInputDialog} from "../../dialog/mobileInputDialog";
 import {MobileDialog} from "../../dialog/mobileDialog";
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {config as configApi} from "../util/configApi";
 import {fetchWithAppId} from "../../util/fetchWithAppId";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
@@ -59,7 +59,7 @@ const confirmWeakPassword = (password: string, confirm: () => void) => {
         confirm();
         return;
     }
-    mobileConfirmDialog("⚠️ " + window.siyuan.languages.weakPasswordConfirmTitle, window.siyuan.languages.weakPasswordConfirmTip, confirm);
+    confirmDialog({title: "⚠️ " + window.siyuan.languages.weakPasswordConfirmTitle, text: window.siyuan.languages.weakPasswordConfirmTip, confirm: confirm});
 };
 
 const registerAccessAuthGroup = (tab: SettingTabBuilder) => {

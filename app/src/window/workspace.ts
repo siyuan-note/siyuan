@@ -234,9 +234,13 @@ export const removeWindowWorkspace = (id: string) => {
     }
     const workspace = getWindowWorkspace(id);
     if (workspace) {
-        confirmDialog(window.siyuan.languages.delete, window.siyuan.languages.windowWorkspaceRemoveTip
-            .replace("${x}", escapeHtml(workspace.name)), () => {
-            void removeWorkspace(id);
+        confirmDialog({
+            title: window.siyuan.languages.delete,
+            text: window.siyuan.languages.windowWorkspaceRemoveTip
+            .replace("${x}", escapeHtml(workspace.name)),
+            confirm: () => {
+                void removeWorkspace(id);
+            },
         });
     }
 };

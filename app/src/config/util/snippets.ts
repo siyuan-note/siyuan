@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {MobileDialog} from "../../dialog/mobileDialog";
 import {config as configApi} from "./configApi";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -125,15 +125,22 @@ const openSnippetDialog = (oldSnippets: ISnippet[], revision: string, draft = ol
             if (objEquals(oldSnippets, snippets) && objEquals(initialSettings, snippetSettings(dialog))) return true;
             return new Promise<boolean>(resolve => {
                 let discardConfirmed = false;
-                mobileConfirmDialog(window.siyuan.languages.save, window.siyuan.languages.snippetsTip, () => {
-                    void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings, false)
+                confirmDialog({
+                    title: window.siyuan.languages.save,
+                    text: window.siyuan.languages.snippetsTip,
+                    confirm: () => {
+                        void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings, false)
                         .then(resolve);
-                }, () => resolve(discardConfirmed), false, undefined, undefined, {mobileSheet: {
-                    beforeClose: reason => {
-                        discardConfirmed = reason === "cancel";
-                        return true;
                     },
-                }});
+                    cancel: () => resolve(discardConfirmed),
+                    isDelete: false,
+                    mobileSheet: {
+                        beforeClose: reason => {
+                            discardConfirmed = reason === "cancel";
+                            return true;
+                        },
+                    },
+                });
             });
         }},
         width: isMobile() ? "100vw" : "50vw",
@@ -385,8 +392,12 @@ const setSnippet = (dialog: MobileDialog, oldSnippets: ISnippet[], removeIds: st
         dialog.destroy({cancel: "true"});
     } else {
         if (confirm) {
-            mobileConfirmDialog(window.siyuan.languages.save, window.siyuan.languages.snippetsTip, () => {
-                void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings);
+            confirmDialog({
+                title: window.siyuan.languages.save,
+                text: window.siyuan.languages.snippetsTip,
+                confirm: () => {
+                    void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings);
+                },
             });
         } else {
             if (isMobile()) {

@@ -52,7 +52,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 "../constants": {Constants: {DIALOG_SYNCCHOOSEDIR: "choose-dir", DIALOG_SETPASSWORD: "set-password"}},
                 "../util/hostCapabilities": {sanitizeKernelHTML: (value: string) => value},
                 "../dialog/processSystem": {processSync() {}},
-                "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _text: string, confirm: () => void) =>
+                "../dialog/confirmDialog": {confirmDialog: ({confirm}: {confirm: () => void}) =>
                     confirmations.push(confirm)},
                 "../util/fetch": {fetchPost: (url: string, data: unknown, reply: (response: unknown) => void) =>
                     requests.push({url, data, reply}), fetchSyncPost: (url: string, data: unknown) =>

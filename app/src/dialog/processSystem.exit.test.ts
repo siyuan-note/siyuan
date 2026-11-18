@@ -2,13 +2,16 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
-import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 
 const {parse} = require("ifdef-loader/preprocessor");
 const question = "Install new version?";
 const warning = "<span class='ft__on-surface'>Wait for SiYuan to exit</span>";
 const installMessage = `${question}<br><br>${warning}`;
+const confirmSource = transpileModule(readFileSync("src/dialog/confirmDialog.ts", "utf8"), {
+    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+}).outputText;
 
 for (const mobile of [false, true]) {
     for (const releaseURL of [undefined, "javascript:alert(1)",
@@ -20,7 +23,8 @@ for (const mobile of [false, true]) {
             const declaration = source.statements.filter(isVariableStatement)
                 .flatMap(item => Array.from(item.declarationList.declarations))
                 .find(item => item.name.getText(source) === "exitSiYuan");
-            const dialogs: any[] = [];
+            const dialogs: (import("./confirmDialog").IConfirmDialogOptions & {confirm: () => void, cancel: () => void})[] = [];
+            const rendered: string[] = [];
             const installs: unknown[][] = [];
             const requests: any[] = [];
             let quits = 0;
@@ -29,7 +33,6 @@ for (const mobile of [false, true]) {
                 hideAllElements() {}, hideMessage() {}, saveMobileLayout: async () => true,
                 getHostCapabilities: () => ({ownsKernel: true}),
                 forceQuit: () => quits++, escapeHtml, escapeHtmlTextAndAttr,
-                confirmDialog: (options: any) => dialogs.push(options),
                 installNewVersion: (...args: unknown[]) => installs.push(args),
                 requestSystemExit: async (options: unknown, callback: (response: unknown) => void) => {
                     requests.push(options);
@@ -40,14 +43,28 @@ for (const mobile of [false, true]) {
                     updateInstallNow: "Install now", updateInstallLater: "Not now",
                 }}},
             };
+            const exports = {} as typeof import("./confirmDialog");
+            class TestDialog {
+                element = {addEventListener() {}, setAttribute() {}, querySelector: () => ({focus() {}})};
+                constructor({content}: {content: string}) { rendered.push(content); }
+                focusWhenReady() {}
+            }
+            runInNewContext(confirmSource, {
+                exports, window: context.window, document: {activeElement: null},
+                require: () => ({isMobile: () => mobile, Constants: {}, Dialog: TestDialog, MobileDialog: TestDialog}),
+            });
             const exit = runInNewContext(transpileModule(`const exitSiYuan = ${declaration.initializer.getText(source)}; exitSiYuan;`, {
                 compilerOptions: {target: ScriptTarget.ES2021},
-            }).outputText, context);
+            }).outputText, {...context, confirmDialog: (options: (typeof dialogs)[number]) => {
+                dialogs.push(options);
+                return exports.confirmDialog(options);
+            }});
             await exit(false);
             assert.equal(installs.length, 0);
             assert.equal(quits, 0);
-            assert.equal(dialogs[0].confirmLabel, "Install now");
-            assert.equal(dialogs[0].cancelLabel, "Not now");
+            assert.equal(rendered.length, 1);
+            assert.match(rendered[0], /id="confirmDialogConfirmBtn">Install now<\/button>/);
+            assert.match(rendered[0], /id="cancelDialogConfirmBtn">Not now<\/button>/);
             if (releaseURL?.startsWith("https://")) {
                 const escapedURL = escapeHtmlTextAndAttr(releaseURL);
                 assert.equal(dialogs[0].text, `${question}<br><br>Release announcement: <a href="${escapedURL}" target="_blank" rel="noopener">${escapedURL}</a><br><br>${warning}`);

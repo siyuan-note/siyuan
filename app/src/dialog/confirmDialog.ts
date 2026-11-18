@@ -53,7 +53,7 @@ const runConfirm = async (dialog: Dialog, confirm?: TConfirmDialogHandler) => {
 };
 
 // 桌面实现单独导出，插件 API 按位置参数调用它，避免插件跟随移动端适配变化。
-export const createDesktopConfirmDialog = (options: IConfirmDialogOptions) => {
+export const createDesktopConfirmDialog = (options: IConfirmDialogOptions, awaitConfirm = true) => {
     const {title, text, confirm, cancel, isDelete = false, extraAction, confirmLabel, cancelLabel} = options;
     const previousActiveElement = document.activeElement as HTMLElement;
     let handled = false;
@@ -76,6 +76,7 @@ export const createDesktopConfirmDialog = (options: IConfirmDialogOptions) => {
     <button class="b3-button ${isDelete ? "b3-button--remove" : "b3-button--text"}" id="confirmDialogConfirmBtn">${confirmLabel || window.siyuan.languages[isDelete ? "delete" : "confirm"]}</button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
+        beforeClose: () => !pending,
         destroyCallback: () => {
             destroyed = true;
             handleCancel();
@@ -92,6 +93,9 @@ export const createDesktopConfirmDialog = (options: IConfirmDialogOptions) => {
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         const isDispatch = typeof event.detail === "string";
+        if (pending || destroyed) {
+            return;
+        }
         while (target && target !== dialog.element || isDispatch) {
             if (target.id === "cancelDialogConfirmBtn" || (isDispatch && event.detail=== "Escape")) {
                 handleCancel();
@@ -103,7 +107,10 @@ export const createDesktopConfirmDialog = (options: IConfirmDialogOptions) => {
                 dialog.destroy();
                 break;
             } else if (target.id === "confirmDialogConfirmBtn" || (isDispatch && event.detail=== "Enter")) {
-                if (pending) {
+                if (!awaitConfirm) {
+                    handled = true;
+                    confirm?.(dialog);
+                    dialog.destroy();
                     break;
                 }
                 pending = true;

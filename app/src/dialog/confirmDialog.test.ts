@@ -17,6 +17,7 @@ const fixture = (extra = true, labels: [string?, string?] = []) => {
     const element = {
         addEventListener: (_name: string, listener: typeof click) => click = listener,
         setAttribute: () => {},
+        querySelectorAll: (): never[] => [],
         querySelector: () => ({before: (...nodes: typeof inserted) => inserted.push(...nodes), focus: () => {}}),
     };
     const exports: any = {};
@@ -39,8 +40,9 @@ const fixture = (extra = true, labels: [string?, string?] = []) => {
             },
         }),
     });
-    exports.confirmDialog("Title", "Text", () => calls.push("confirm"), () => calls.push("cancel"), false,
-        extra ? {label: "Move and keep sorting", callback: () => calls.push("move")} : undefined, ...labels);
+    exports.confirmDialog({title: "Title", text: "Text", confirm: () => { calls.push("confirm"); },
+        cancel: () => calls.push("cancel"), confirmLabel: labels[0], cancelLabel: labels[1],
+        extraAction: extra ? {label: "Move and keep sorting", callback: () => calls.push("move")} : undefined});
     return {
         content,
         calls,
@@ -70,12 +72,13 @@ test("closing and canceling the dialog never trigger the extra action", () => {
     }
 });
 
-test("confirmation and Enter retain their original action with or without the extra button", () => {
+test("confirmation and Enter retain their original action with or without the extra button", async () => {
     for (const extra of [true, false]) {
         for (const enter of [true, false]) {
             const f = fixture(extra);
             assert.equal(f.inserted.length, extra ? 2 : 0);
             f.click(enter ? "" : "confirmDialogConfirmBtn", enter ? "Enter" : undefined);
+            await new Promise(resolve => setImmediate(resolve));
             assert.deepEqual(f.calls, ["confirm"]);
         }
     }

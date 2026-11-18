@@ -415,9 +415,13 @@ const confirmForPlugin = (title: string, text: string,
                           isDelete = false,
                           extraAction?: {label: string, callback: () => void},
                           confirmLabel?: string) => {
-    createDesktopConfirmDialog({
+    if (!title && !text) {
+        confirmCallback?.();
+        return;
+    }
+    return createDesktopConfirmDialog({
         title, text, confirm: confirmCallback, cancel: cancelCallback, isDelete, extraAction, confirmLabel,
-    });
+    }, false);
 };
 
 const createAPI = () => ({

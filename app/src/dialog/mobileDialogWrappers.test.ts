@@ -35,6 +35,7 @@ const setup = (mobile = true) => {
         focusWhenReady() { events.push("deferred-focus"); }
         bindInput() {}
         requestClose(reason: string) {
+            if (this.options.beforeClose?.() === false) return Promise.resolve(false);
             events.push(reason);
             this.options.destroyCallback?.();
             return Promise.resolve(true);
@@ -133,6 +134,48 @@ test("desktop confirmation waits for the confirm handler and keeps the dialog on
     dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(f.events.filter((item: string) => item === "destroy").length, 1);
+});
+
+test("desktop confirmation blocks cancel and dismissal during pending work", async () => {
+    const f = setup(false);
+    let finish: (success: boolean) => void;
+    let attempts = 0;
+    let cancelled = 0;
+    const dialog = f.confirmDialog({title: "Title", text: "Text", confirm: () => {
+        attempts++;
+        return new Promise<boolean>(resolve => { finish = resolve; });
+    }, cancel: () => cancelled++});
+    const click = (id: string, detail: number | string = 0) => dialog.listeners.click({target: {id}, detail});
+    click("confirmDialogConfirmBtn");
+    click("confirmDialogConfirmBtn");
+    click("cancelDialogConfirmBtn");
+    click("", "Escape");
+    dialog.destroy();
+    assert.equal(attempts, 1);
+    assert.equal(cancelled, 0);
+    assert.equal(f.events.includes("destroy"), false);
+    finish(false);
+    await new Promise(resolve => setImmediate(resolve));
+    click("cancelDialogConfirmBtn");
+    assert.equal(cancelled, 1);
+    assert.equal(f.events.filter((item: string) => item === "destroy").length, 1);
+});
+
+test("plugin confirmation closes synchronously without waiting for a promise returned by its callback", () => {
+    const f = setup(false);
+    let invoked = false;
+    let cancelled = false;
+    const dialog = f.createDesktopConfirmDialog({title: "Title", text: "Text",
+        confirm: () => {
+            invoked = true;
+            return new Promise<void>(() => {});
+        },
+        cancel: () => { cancelled = true; },
+    }, false);
+    dialog.listeners.click({target: {id: "confirmDialogConfirmBtn"}, detail: 0});
+    assert.equal(invoked, true);
+    assert.equal(cancelled, false);
+    assert.deepEqual(f.events, ["early-focus", "destroy"]);
 });
 
 test("desktop confirmation reports a neutral failure when the handler throws", async () => {

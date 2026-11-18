@@ -33,12 +33,10 @@ for (const mobile of [false, true]) {
         assert.equal(row.options.desc, "globalBreadcrumbTip");
         assert.equal(row.options.save, undefined);
         const iconsRow = rows[rows.indexOf(row) + 1];
-        if (mobile) {
-            assert.equal(rows.some(item => item.id === "editor.hideGlobalBreadcrumbIcons"), false);
-            return;
-        }
         assert.equal(iconsRow.id, "editor.hideGlobalBreadcrumbIcons");
         assert.equal(iconsRow.kind, "switch");
+        assert.equal(iconsRow.options.title, "hideGlobalBreadcrumbIcons");
+        assert.equal(iconsRow.options.desc, "hideGlobalBreadcrumbIconsTip");
         assert.equal(iconsRow.options.save, undefined);
         assert.equal(row.options.keywords?.includes("hideGlobalBreadcrumbIcons"), true);
 

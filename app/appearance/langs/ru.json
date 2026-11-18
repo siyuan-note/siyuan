@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Скрывать значки",
-	"hideGlobalBreadcrumbIconsTip": "Скрывает значки рядом с текстом в глобальной цепочке навигации на компьютере. Элементы, состоящие только из значка, остаются видимыми",
+	"hideGlobalBreadcrumbIcons": "Скрывать значки цепочки навигации",
+	"hideGlobalBreadcrumbIconsTip": "Скрывает значки элементов с текстом в глобальной цепочке навигации, когда параметр включён",
 	"updateReleaseAnnouncement": "Объявление о выпуске: ${link}",
 	"docOpenPosition": "Позиция открытия документа",
 	"docOpenAtStart": "Открывать с начала",

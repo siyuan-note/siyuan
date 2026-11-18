@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Сакриј иконе",
-	"hideGlobalBreadcrumbIconsTip": "Сакрива иконе поред текста у глобалној путањи за навигацију на рачунару. Ставке које садрже само икону остају видљиве",
+	"hideGlobalBreadcrumbIcons": "Сакриј иконе путање за навигацију",
+	"hideGlobalBreadcrumbIconsTip": "Када је укључено, сакрива иконе ставки са текстом у глобалној путањи за навигацију",
 	"updateReleaseAnnouncement": "Објава издања: ${link}",
 	"docOpenPosition": "Положај отварања документа",
 	"docOpenAtStart": "Отвори од почетка",

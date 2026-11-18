@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Masquer les icônes",
-	"hideGlobalBreadcrumbIconsTip": "Masque les icônes à côté du texte dans le fil d’Ariane global sur ordinateur. Les entrées composées uniquement d’une icône restent visibles",
+	"hideGlobalBreadcrumbIcons": "Masquer les icônes du fil d’Ariane",
+	"hideGlobalBreadcrumbIconsTip": "Masque les icônes des entrées avec du texte dans le fil d’Ariane global lorsque cette option est activée",
 	"updateReleaseAnnouncement": "Annonce de la version : ${link}",
 	"docOpenPosition": "Position à l’ouverture du document",
 	"docOpenAtStart": "Ouvrir au début",

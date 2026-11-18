@@ -7984,7 +7984,7 @@ export interface APIPOSTRoutes {
      * backlinkGlobalSort、backlinkBlockSort、floatWindowMode、headingEmbedMode 仅接受 0、1、2，越界值回退 0。
      * databaseAttrClickMode、databaseAttrViewMode 仅接受 0、1；codeTabSpaces 仅接受 0、2、4、6、8，越界值回退 0。
      * 只提交 fontFamily、fontWeight 时按新的首选字体重建 fontFamilies；显式提交 fontFamilies 时以该列表为准。
-     * hideGlobalBreadcrumbIcons 仅隐藏桌面全局面包屑中有文字的路径项图标，默认关闭，null 恢复默认。
+     * hideGlobalBreadcrumbIcons 仅隐藏全局面包屑中有文字的路径项图标，默认关闭，null 恢复默认。
      */
     "/api/setting/setEditor": {
         request: SetEditorRequestInput;

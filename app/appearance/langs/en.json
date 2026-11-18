@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Hide icons",
-	"hideGlobalBreadcrumbIconsTip": "Hide icons next to text in the desktop global breadcrumb. Icon-only entries stay visible",
+	"hideGlobalBreadcrumbIcons": "Hide breadcrumb icons",
+	"hideGlobalBreadcrumbIconsTip": "When enabled, hide icons on entries with text in the global breadcrumb",
 	"updateReleaseAnnouncement": "Release announcement: ${link}",
 	"docOpenPosition": "Document opening position",
 	"docOpenAtStart": "Open at the beginning",

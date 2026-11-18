@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Skryť ikony",
-	"hideGlobalBreadcrumbIconsTip": "Skryje ikony vedľa textu v globálnej navigačnej ceste na počítači. Položky, ktoré majú iba ikonu, zostanú viditeľné",
+	"hideGlobalBreadcrumbIcons": "Skryť ikony navigačnej cesty",
+	"hideGlobalBreadcrumbIconsTip": "Po zapnutí skryje ikony položiek s textom v globálnej navigačnej ceste",
 	"updateReleaseAnnouncement": "Oznámenie o vydaní: ${link}",
 	"docOpenPosition": "Pozícia otvorenia dokumentu",
 	"docOpenAtStart": "Otvoriť od začiatku",

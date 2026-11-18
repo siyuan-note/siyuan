@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "아이콘 숨기기",
-	"hideGlobalBreadcrumbIconsTip": "데스크톱의 전역 이동 경로에서 텍스트 옆 아이콘을 숨깁니다. 아이콘만 있는 항목은 계속 표시됩니다",
+	"hideGlobalBreadcrumbIcons": "이동 경로 아이콘 숨기기",
+	"hideGlobalBreadcrumbIconsTip": "활성화하면 전역 이동 경로에서 텍스트가 있는 항목의 아이콘을 숨깁니다",
 	"updateReleaseAnnouncement": "릴리스 공지: ${link}",
 	"docOpenPosition": "문서 열기 위치",
 	"docOpenAtStart": "처음부터 열기",

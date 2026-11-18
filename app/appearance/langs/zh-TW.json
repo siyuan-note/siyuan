@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "隱藏圖示",
-	"hideGlobalBreadcrumbIconsTip": "隱藏桌面版全域導覽路徑中有文字的項目圖示，只有圖示的項目仍會顯示",
+	"hideGlobalBreadcrumbIcons": "隱藏導覽路徑圖示",
+	"hideGlobalBreadcrumbIconsTip": "啟用後隱藏全域導覽路徑中有文字的項目圖示",
 	"updateReleaseAnnouncement": "發布公告：${link}",
 	"docOpenPosition": "文件開啟位置",
 	"docOpenAtStart": "從文件開頭開啟",

@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "आइकन छिपाएँ",
-	"hideGlobalBreadcrumbIconsTip": "डेस्कटॉप की वैश्विक ब्रेडक्रंब पट्टी में पाठ के बगल वाले आइकन छिपाएँ। केवल आइकन वाली प्रविष्टियाँ दिखती रहेंगी",
+	"hideGlobalBreadcrumbIcons": "ब्रेडक्रंब आइकन छिपाएँ",
+	"hideGlobalBreadcrumbIconsTip": "चालू करने पर वैश्विक ब्रेडक्रंब में पाठ वाली प्रविष्टियों के आइकन छिप जाते हैं",
 	"updateReleaseAnnouncement": "संस्करण की घोषणा: ${link}",
 	"docOpenPosition": "दस्तावेज़ खोलने का स्थान",
 	"docOpenAtStart": "शुरुआत से खोलें",

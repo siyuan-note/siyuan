@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "隐藏图标",
-	"hideGlobalBreadcrumbIconsTip": "隐藏桌面端全局面包屑中有文字的路径项图标，仅有图标的项仍会显示",
+	"hideGlobalBreadcrumbIcons": "隐藏面包屑图标",
+	"hideGlobalBreadcrumbIconsTip": "启用后隐藏全局面包屑中有文字的路径项图标",
 	"updateReleaseAnnouncement": "发布公告：${link}",
 	"docOpenPosition": "文档打开位置",
 	"docOpenAtStart": "从文档开头打开",

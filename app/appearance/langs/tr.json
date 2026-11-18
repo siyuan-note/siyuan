@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Simgeleri gizle",
-	"hideGlobalBreadcrumbIconsTip": "Masaüstündeki genel gezinme yolunda metnin yanındaki simgeleri gizler. Yalnızca simgesi olan öğeler görünür kalır",
+	"hideGlobalBreadcrumbIcons": "Gezinme yolu simgelerini gizle",
+	"hideGlobalBreadcrumbIconsTip": "Etkinleştirildiğinde genel gezinme yolunda metin içeren öğelerin simgelerini gizler",
 	"updateReleaseAnnouncement": "Sürüm duyurusu: ${link}",
 	"docOpenPosition": "Belge açılış konumu",
 	"docOpenAtStart": "Baştan aç",

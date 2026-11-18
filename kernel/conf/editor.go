@@ -74,7 +74,7 @@ type Editor struct {
 	ReadOnly                        bool           `json:"readOnly"`                        // 只读模式
 	EmbedBlockBreadcrumb            bool           `json:"embedBlockBreadcrumb"`            // 嵌入块是否显示面包屑
 	GlobalBreadcrumb                bool           `json:"globalBreadcrumb"`                // 编辑器面包屑是否包含笔记本和文档路径
-	HideGlobalBreadcrumbIcons       bool           `json:"hideGlobalBreadcrumbIcons"`       // 隐藏桌面全局面包屑中有文字的路径项图标
+	HideGlobalBreadcrumbIcons       bool           `json:"hideGlobalBreadcrumbIcons"`       // 隐藏全局面包屑中有文字的路径项图标
 	EmbedBlockBreadcrumbParentPath  *bool          `json:"embedBlockBreadcrumbParentPath"`  // 嵌入块面包屑是否显示文档上层路径
 	ListLogicalOutdent              bool           `json:"listLogicalOutdent"`              // 列表逻辑反向缩进
 	ListItemDotNumberClickFocus     bool           `json:"listItemDotNumberClickFocus"`     // 单击列表项标记聚焦

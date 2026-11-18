@@ -295,16 +295,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to show the notebook and parent documents before the current document and its block path in one breadcrumb at the top of the desktop editor. This setting is disabled by default. On mobile, the breadcrumb menu shows the same hierarchy. After enabling the global breadcrumb on desktop, turn on "
+					"Data": " to show the notebook and parent documents before the current document and its block path in one breadcrumb at the top of the desktop editor. This setting is disabled by default. On mobile, the breadcrumb menu shows the same hierarchy. After enabling the global breadcrumb, turn on "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Hide icons"
+					"TextMarkTextContent": "Hide breadcrumb icons"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to hide the icons next to text. Entries that only have an icon stay visible. Hover over a document or block with a hidden icon to preview it. Expand arrows and menu icons remain visible."
+					"Data": " to hide icons next to text on desktop and in the mobile breadcrumb menu. Icon-only entries, expand arrows, and icons in submenus remain visible. On desktop, hover over a document or block with a hidden icon to preview it."
 				}
 			]
 		},

@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Ocultar ícones",
-	"hideGlobalBreadcrumbIconsTip": "Oculta os ícones ao lado do texto na trilha de navegação global no desktop. Entradas que têm apenas um ícone permanecem visíveis",
+	"hideGlobalBreadcrumbIcons": "Ocultar ícones da trilha de navegação",
+	"hideGlobalBreadcrumbIconsTip": "Quando ativada, esta opção oculta os ícones das entradas com texto na trilha de navegação global",
 	"updateReleaseAnnouncement": "Anúncio da versão: ${link}",
 	"docOpenPosition": "Posição de abertura do documento",
 	"docOpenAtStart": "Abrir do início",

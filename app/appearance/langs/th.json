@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "ซ่อนไอคอน",
-	"hideGlobalBreadcrumbIconsTip": "ซ่อนไอคอนที่อยู่ข้างข้อความในแถบเส้นทางนำทางส่วนกลางบนเดสก์ท็อป รายการที่มีเฉพาะไอคอนจะยังแสดงอยู่",
+	"hideGlobalBreadcrumbIcons": "ซ่อนไอคอนในแถบเส้นทางนำทาง",
+	"hideGlobalBreadcrumbIconsTip": "เมื่อเปิดใช้ จะซ่อนไอคอนของรายการที่มีข้อความในแถบเส้นทางนำทางส่วนกลาง",
 	"updateReleaseAnnouncement": "ประกาศรุ่น: ${link}",
 	"docOpenPosition": "ตำแหน่งเมื่อเปิดเอกสาร",
 	"docOpenAtStart": "เปิดจากจุดเริ่มต้น",

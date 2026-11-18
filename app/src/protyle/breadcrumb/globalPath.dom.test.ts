@@ -34,7 +34,7 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
     Object.assign(window, {siyuan: {
         notebooks: [{id: notebook, name: "Notebook & <literal>", closed: false}],
         languages: new Proxy({}, {get: (_target, key) => String(key)}), menus: {menu},
-        config: {readonly: false, editor: {globalBreadcrumb: true, hideGlobalBreadcrumbIcons: mobile}, keymap: {editor: {general: keys}}},
+        config: {readonly: false, editor: {globalBreadcrumb: true, hideGlobalBreadcrumbIcons: false}, keymap: {editor: {general: keys}}},
     }});
     const escape = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
     const escapeExports: any = {};
@@ -127,7 +127,6 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         check.equal(folderElement.querySelector(".b3-menu__label").textContent, "Folder & <safe>");
         check.match(folderElement.querySelector(".protyle-breadcrumb__graphic").textContent, /📁/);
         check.ok(children.children[2].querySelector("img.protyle-breadcrumb__graphic"));
-        check.ok(children.firstElementChild.querySelector("svg.b3-menu__icon"), "Default menu icons are still rendered when the preference is true");
         folderElement.querySelector(".b3-menu__icon--small").dispatchEvent(new MouseEvent("click", {bubbles: true}));
         await new Promise(resolve => setTimeout(resolve, 0));
         check.deepEqual(requested, [ancestor, folder]);
@@ -135,14 +134,30 @@ const browserCases = async (sources: Record<string, string>, mobile: boolean, cs
         folderElement.querySelector<HTMLElement>(".b3-menu__submenu .b3-menu__items > .b3-menu__item").click();
         check.deepEqual(opened, [folder], "The explicit Open action navigates to the selected parent");
         check.equal(closed, 1);
+        window.siyuan.config.editor.hideGlobalBreadcrumbIcons = true;
+        globalResult = async () => [...pathItems, {id: "20260101000000-fffffff", name: "", type: "NodeHeading"}];
         menuElement.removeAttribute("data-name");
         await breadcrumb.genMobileMenu(protyle);
         await callbackWork;
+        const namedItems = Array.from(menuElement.children).slice(0, 4);
+        namedItems.forEach((item) => {
+            check.equal(item.querySelector(":scope > .b3-menu__label"), item.firstElementChild);
+            check.equal(item.querySelector(":scope > .b3-menu__icon:not(.b3-menu__icon--small)"), null);
+        });
+        check.ok(menuElement.lastElementChild.querySelector(":scope > svg.b3-menu__icon"));
         const secondParent = menuElement.children[1] as HTMLElement;
+        check.ok(secondParent.querySelector(":scope > .b3-menu__icon--small"));
         secondParent.click();
         await new Promise(resolve => setTimeout(resolve, 0));
+        check.ok(secondParent.querySelector(".b3-menu__submenu .protyle-breadcrumb__graphic"));
+        check.ok(secondParent.querySelector(".b3-menu__submenu .b3-menu__item > svg.b3-menu__icon"));
         secondParent.querySelector<HTMLElement>(`[data-id="${leaf}"]`).click();
         check.deepEqual(opened, [folder, leaf], "Leaf documents open directly");
+        window.siyuan.config.editor.globalBreadcrumb = false;
+        menuElement.removeAttribute("data-name");
+        await breadcrumb.genMobileMenu(protyle);
+        await callbackWork;
+        check.ok(menuElement.firstElementChild.querySelector(":scope > svg.b3-menu__icon"));
     } else {
         const breadcrumb = new compiled.Breadcrumb(protyle);
         protyle.breadcrumb = breadcrumb;

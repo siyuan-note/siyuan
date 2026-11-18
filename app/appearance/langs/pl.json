@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Ukryj ikony",
-	"hideGlobalBreadcrumbIconsTip": "Ukrywa ikony obok tekstu w globalnej ścieżce nawigacji na komputerze. Pozycje zawierające tylko ikonę pozostają widoczne",
+	"hideGlobalBreadcrumbIcons": "Ukryj ikony ścieżki nawigacji",
+	"hideGlobalBreadcrumbIconsTip": "Po włączeniu ukrywa ikony pozycji z tekstem w globalnej ścieżce nawigacji",
 	"updateReleaseAnnouncement": "Ogłoszenie wydania: ${link}",
 	"docOpenPosition": "Pozycja otwierania dokumentu",
 	"docOpenAtStart": "Otwórz od początku",

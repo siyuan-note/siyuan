@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Sembunyikan ikon",
-	"hideGlobalBreadcrumbIconsTip": "Sembunyikan ikon di samping teks pada breadcrumb global desktop. Entri yang hanya berisi ikon tetap terlihat",
+	"hideGlobalBreadcrumbIcons": "Sembunyikan ikon breadcrumb",
+	"hideGlobalBreadcrumbIconsTip": "Jika diaktifkan, ikon pada entri berteks di breadcrumb global disembunyikan",
 	"updateReleaseAnnouncement": "Pengumuman rilis: ${link}",
 	"docOpenPosition": "Posisi pembukaan dokumen",
 	"docOpenAtStart": "Buka dari awal",

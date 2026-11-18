@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Symbole ausblenden",
-	"hideGlobalBreadcrumbIconsTip": "Symbole neben Text in der globalen Brotkrümelnavigation auf dem Desktop ausblenden. Einträge, die nur ein Symbol enthalten, bleiben sichtbar",
+	"hideGlobalBreadcrumbIcons": "Symbole im Navigationspfad ausblenden",
+	"hideGlobalBreadcrumbIconsTip": "Blendet bei Aktivierung die Symbole von Einträgen mit Text im globalen Navigationspfad aus",
 	"updateReleaseAnnouncement": "Veröffentlichungsankündigung: ${link}",
 	"docOpenPosition": "Öffnungsposition des Dokuments",
 	"docOpenAtStart": "Am Anfang öffnen",

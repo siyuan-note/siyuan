@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Pictogrammen verbergen",
-	"hideGlobalBreadcrumbIconsTip": "Verberg pictogrammen naast tekst in het globale broodkruimelpad op desktop. Items die alleen een pictogram bevatten blijven zichtbaar",
+	"hideGlobalBreadcrumbIcons": "Broodkruimelpictogrammen verbergen",
+	"hideGlobalBreadcrumbIconsTip": "Verbergt pictogrammen van items met tekst in het globale broodkruimelpad wanneer ingeschakeld",
 	"updateReleaseAnnouncement": "Releaseaankondiging: ${link}",
 	"docOpenPosition": "Openingspositie van document",
 	"docOpenAtStart": "Vanaf het begin openen",

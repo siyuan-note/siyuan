@@ -836,8 +836,10 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                         rootID !== protyle.block.rootID || notebook !== protyle.notebookId ||
                         global !== window.siyuan.config.editor.globalBreadcrumb ||
                         (global && !isBreadcrumbNotebookAvailable(notebook))) return;
+                    const hideIcons = global && window.siyuan.config.editor.hideGlobalBreadcrumbIcons === true;
                     const pathIDs = new Set(paths.filter(item => item.globalType !== "notebook").map(item => item.id));
                     paths.forEach((item: GlobalBreadcrumb) => {
+                        const hideIcon = hideIcons && !!item.name?.trim();
                         let isCurrent = false;
                         if (!protyle.block.showAll && item.id === protyle.block.parentID) {
                             isCurrent = true;
@@ -847,7 +849,7 @@ ${isMobile() ? `<button class="block__icon fn__flex-center ariaLabel" data-type=
                         menu.addItem({
                             current: isCurrent,
                             icon: item.globalType === "notebook" ? "iconNotebook" : getIconByType(item.type, item.subType),
-                            iconHTML: global ? getBreadcrumbCustomIcon(item.icon, "b3-menu__icon protyle-breadcrumb__graphic") : undefined,
+                            iconHTML: hideIcon ? "" : global ? getBreadcrumbCustomIcon(item.icon, "b3-menu__icon protyle-breadcrumb__graphic") : undefined,
                             label: item.name,
                             click: item.globalType ? undefined : () => zoomOut({protyle, id: item.id}),
                             loadSubmenu: item.globalType ? async () => {

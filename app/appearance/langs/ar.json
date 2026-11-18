@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "إخفاء الأيقونات",
-	"hideGlobalBreadcrumbIconsTip": "إخفاء الأيقونات بجانب النص في مسار التنقل العام على سطح المكتب مع إبقاء العناصر التي تعرض أيقونة فقط",
+	"hideGlobalBreadcrumbIcons": "إخفاء أيقونات مسار التنقل",
+	"hideGlobalBreadcrumbIconsTip": "إخفاء أيقونات عناصر مسار التنقل العام التي تحتوي على نص عند تفعيل هذا الإعداد",
 	"updateReleaseAnnouncement": "إعلان الإصدار: ${link}",
 	"docOpenPosition": "موضع فتح المستند",
 	"docOpenAtStart": "الفتح من البداية",

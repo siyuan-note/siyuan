@@ -284,7 +284,7 @@ type SettingEditor struct {
 	EmbedBlockBreadcrumb            bool              `json:"embedBlockBreadcrumb" api:"optional,nullable"`
 	// 默认关闭；开启后将笔记本、文档和块路径合并为一条面包屑。省略保留当前值，null 恢复默认。
 	GlobalBreadcrumb bool `json:"globalBreadcrumb" api:"optional,nullable"`
-	// 隐藏桌面全局面包屑中有文字的路径项图标，默认关闭；省略保留当前值，null 恢复默认。
+	// 隐藏全局面包屑中有文字的路径项图标，默认关闭；省略保留当前值，null 恢复默认。
 	HideGlobalBreadcrumbIcons bool `json:"hideGlobalBreadcrumbIcons" api:"optional,nullable"`
 	// 默认显示文档上层路径；省略保留当前值，null 恢复默认，块级显式设置优先。
 	EmbedBlockBreadcrumbParentPath *bool `json:"embedBlockBreadcrumbParentPath" api:"optional,nullable"`

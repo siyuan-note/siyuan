@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "הסתרת סמלים",
-	"hideGlobalBreadcrumbIconsTip": "הסתרת סמלים לצד טקסט בנתיב הניווט הכללי במחשב. פריטים שמוצג בהם רק סמל יישארו גלויים",
+	"hideGlobalBreadcrumbIcons": "הסתרת סמלים בנתיב הניווט",
+	"hideGlobalBreadcrumbIconsTip": "כאשר אפשרות זו מופעלת, הסמלים של פריטים עם טקסט בנתיב הניווט הכללי יוסתרו",
 	"updateReleaseAnnouncement": "הכרזת גרסה: ${link}",
 	"docOpenPosition": "מיקום פתיחת המסמך",
 	"docOpenAtStart": "פתיחה מההתחלה",

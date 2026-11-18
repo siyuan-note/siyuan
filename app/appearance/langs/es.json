@@ -1,6 +1,6 @@
 {
-	"hideGlobalBreadcrumbIcons": "Ocultar iconos",
-	"hideGlobalBreadcrumbIconsTip": "Oculta los iconos junto al texto en la ruta de navegación global del escritorio. Las entradas que solo tienen un icono siguen visibles",
+	"hideGlobalBreadcrumbIcons": "Ocultar los iconos de la ruta de navegación",
+	"hideGlobalBreadcrumbIconsTip": "Al activarlo, se ocultan los iconos de las entradas con texto en la ruta de navegación global",
 	"updateReleaseAnnouncement": "Anuncio de la versión: ${link}",
 	"docOpenPosition": "Posición al abrir el documento",
 	"docOpenAtStart": "Abrir desde el principio",

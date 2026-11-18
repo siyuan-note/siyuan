@@ -57,6 +57,13 @@ var activeSyncCheckout struct {
 
 var checkoutDiskUsage = util.GetDiskUsage
 
+func (task *syncCheckoutTask) indexContext(fallback context.Context) context.Context {
+	if task != nil {
+		return task.ctx
+	}
+	return fallback
+}
+
 // startSyncCheckout 将取消和字节进度绑定到这一轮同步，不影响其他仓库操作。
 func startSyncCheckout(repo *dejavu.Repo) *syncCheckoutTask {
 	activeSyncCheckout.Lock()

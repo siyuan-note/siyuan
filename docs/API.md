@@ -1758,6 +1758,8 @@ Without a live interactive window, `httpGet` returns `interaction_required` and 
 
 * `/api/file/putFile`
 
+When sync retries local snapshot indexing after detecting a file change, writes to files included in sync may wait after the form has been received. Canceling a request while it waits leaves its destination untouched.
+
 For `.sy` document paths composed of notebook and document IDs, both the incoming content and any existing document are checked. Unknown formats, invalid document sources, or slash-containing titles without the required Spec 6 declaration return `code: -1`, preserving the original file and modification time. Successful writes retain the request bytes without normalizing titles. Files ending in `.sy` inside asset or plugin directories are not parsed as documents.
 
 An incoming title containing ASCII `/` must declare `Spec` at least `6`; otherwise the endpoint returns `code: -1` and `msg: "document title requires spec 6"` without rewriting the input. Existing lower-spec sources remain readable and can be replaced with valid versioned content.

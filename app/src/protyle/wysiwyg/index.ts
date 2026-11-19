@@ -919,10 +919,12 @@ export class WYSIWYG {
                 }
             }
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(`.${BLOCK_SELECTION_CLASS}`));
-            if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
+            const avCursorSelection = nodeElement.dataset.type === "NodeAttributeView" &&
+                nodeElement.querySelector(".av__cursor")?.contains(range.commonAncestorContainer);
+            if (selectElements.length === 0 && (avCursorSelection || range.toString() === "") && !range.cloneContents().querySelector("img") &&
                 !selectImgElement && !selectAVElement && !selectTableElement) {
                 const copyElement = selectionModeElement || nodeElement;
-                if (!selectionModeElement) {
+                if (!selectionModeElement && !avCursorSelection) {
                     copyElement.classList.add(BLOCK_SELECTION_CLASS);
                     countBlockWord([copyElement.getAttribute("data-node-id")], protyle);
                 }

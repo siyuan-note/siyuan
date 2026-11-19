@@ -112,6 +112,10 @@ const browserCases = async (source: string) => {
         return {plain: clipboardData.getData("text/plain"), html: external, siyuan: clipboardData.getData("text/siyuan")};
     };
 
+    const mirror = await copy('<div class="av" data-node-id="20261119120000-abcdefg" data-type="NodeAttributeView" data-av-id="db" custom-sy-av-view="selected" custom-sy-av-visible-views="selected"><div class="av__cursor" contenteditable="true">&#8203;</div></div>',
+        false, false, (element, range) => range.selectNodeContents(element.querySelector(".av__cursor")));
+    check.match(mirror.siyuan, /data-type="NodeAttributeView"/);
+    check.match(mirror.siyuan, /custom-sy-av-visible-views="selected"/);
     const imageCount = (html: string) => {
         const container = document.createElement("div");
         container.innerHTML = html;

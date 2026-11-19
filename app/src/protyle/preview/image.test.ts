@@ -3,6 +3,7 @@ import {readdirSync, readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 
 const createPreviewHarness = async (language = "en", zIndex = 10) => {
     const actions = ["zoom-in", "zoom-out", "one-to-one", "reset", "prev", "play", "next",
@@ -85,6 +86,7 @@ const createPreviewHarness = async (language = "en", zIndex = 10) => {
         exports,
         require: () => ({
             Constants: {PROTYLE_CDN: ""},
+            escapeHtmlTextAndAttr,
             addScript: () => Promise.resolve(),
             fetchPost: (_url: string, data: {id: string}, callback: (response: {data: string[]}) => void) => {
                 requests.push(data);
@@ -128,6 +130,9 @@ test("embedded image galleries request the source document while ordinary images
         {"data-root-id": "source-doc", "data-id": "source-block"}, {"data-id": "source-block"}, {}];
     for (const attributes of cases) {
         const image = {closest: (selector: string) => {
+            if (selector === ".av__richtext-host, .av__celltext--rich") {
+                return null;
+            }
             assert.equal(selector, ".protyle-wysiwyg__embed");
             return attributes ? {getAttribute: (name: string) => attributes[name]} : null;
         }} as unknown as HTMLElement;

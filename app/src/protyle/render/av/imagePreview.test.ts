@@ -7,6 +7,7 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {DOMFixture, DOMElement} from "./testDOM";
 import type {IAVPanelAction, IAVPanelContext} from "./panels/types";
 import * as host from "./host";
+import {escapeHtmlTextAndAttr} from "../../../util/escape";
 
 const compile = (file: string) => transpileModule(readFileSync(join(__dirname, file), "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
@@ -156,6 +157,7 @@ test("database image preview forwards optional groups and preserves response ord
     runInNewContext(compile("../../preview/image.ts"), {exports, document, Viewer,
         window: {siyuan: {}},
         require: () => ({Constants: {}, addScript: () => Promise.resolve(),
+            escapeHtmlTextAndAttr,
             isBrowserRenderableImagePath: (src: string) => src.endsWith(".png"),
             fetchPost: (path: string, body: Record<string, string>, callback: (response: unknown) => void) => {
                 requests.push({path, body});

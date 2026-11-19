@@ -7,7 +7,7 @@ import {
 import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {goBack, goForward} from "../util/backForward";
 import {syncGuide} from "../sync/syncGuide";
-import {workspaceMenu} from "../menus/workspace";
+import {mainMenu} from "../menus/mainMenu";
 import {initTopBarMenu} from "../menus/topBar";
 import {MenuItem} from "../menus/Menu";
 import {hideTooltip} from "../dialog/tooltip";
@@ -207,7 +207,7 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
                 event.stopPropagation();
                 break;
             } else if (targetId === "barWorkspace") {
-                workspaceMenu(app, target.getBoundingClientRect(), false, target);
+                mainMenu(app, target.getBoundingClientRect(), false, target);
                 event.stopPropagation();
                 break;
             } else if (targetId === "barExit") {

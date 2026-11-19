@@ -63,10 +63,10 @@ test("reference creation visibility has stable paths and preserves existing defa
     }
 });
 
-test("the workspace menu has no standalone Markdown entry or configurable application section", () => {
+test("the desktop main menu has no standalone Markdown entry or configurable application section", () => {
     assert.equal(getEntryCatalogNode("application.markdownEditor"), undefined);
     assert.equal(getEntryCatalogSection("application"), undefined);
-    const source = readFileSync(resolve(process.cwd(), "src/menus/workspace.ts"), "utf8");
+    const source = readFileSync(resolve(process.cwd(), "src/menus/mainMenu.ts"), "utf8");
     assert.doesNotMatch(source, /id: "markdownEditor"/);
     assert.ok(source.indexOf('id: "workspaceList"') < source.indexOf('id: "layout"'));
 });

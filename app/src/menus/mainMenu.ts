@@ -43,9 +43,9 @@ import {openLink} from "../editor/openLink";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {openTemplateManager} from "../template/manager";
 
-export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false, target?: Element) => {
+export const mainMenu = async (app: App, rect: DOMRect, openOnly = false, target?: Element) => {
     if (openOnly && !window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-        window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BAR_WORKSPACE) {
+        window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BAR_MAIN_MENU) {
         return;
     }
     await toggleMenu({
@@ -66,7 +66,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false, t
                 }
 
                 window.siyuan.menus.menu.remove();
-                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_WORKSPACE);
+                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_MAIN_MENU);
                 if (!window.siyuan.config.readonly) {
                     window.siyuan.menus.menu.append(new MenuItem({
                         id: "config",

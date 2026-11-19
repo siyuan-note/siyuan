@@ -81,7 +81,7 @@ test("existing editable sheets reuse standard geometry without a second construc
 
 // 这些页面使用共享的确认入口，移动端由独立页面接管。
 test("desktop-only pages use the shared confirmation entry without importing adaptiveDialog directly", () => {
-    for (const file of ["menus/importObsidian.ts", "menus/workspace.ts", "menus/layouts.ts",
+    for (const file of ["menus/importObsidian.ts", "menus/mainMenu.ts", "menus/layouts.ts",
         "menus/onGetnotebookconf.ts", "boot/globalEvent/command/panel.ts", "boot/globalEvent/keydown.ts",
         "editor/util.ts"]) {
         assert.doesNotMatch(readFileSync(`src/${file}`, "utf8"), /from "[^"\n]*\/adaptiveDialog"/, file);

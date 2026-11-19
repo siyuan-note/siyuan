@@ -130,28 +130,34 @@ func (av *AttributeView) NormalizeRichText() (err error) {
 	if nil == av {
 		return
 	}
-	type normalizedText struct {
-		value       *ValueText
+	type projection struct {
 		content     string
 		richContent string
 	}
+	type normalizedText struct {
+		value *ValueText
+		projection
+	}
 	var normalized []normalizedText
+	projections := map[ValueTextRich]projection{}
 	var luteEngine *lute.Lute
 	av.visitPersistedValues(func(value *Value) {
 		if nil != err || nil == value.Text || !value.Text.IsRich() {
 			return
 		}
 		rich := *value.Text.Rich
+		if cached, ok := projections[rich]; ok {
+			normalized = append(normalized, normalizedText{value.Text, cached})
+			return
+		}
 		if luteEngine == nil {
 			luteEngine = newValueTextRichLute()
 		}
 		var tree *parse.Tree
 		if tree, err = normalizeValueTextRichWithLute(&rich, luteEngine); nil == err {
-			normalized = append(normalized, normalizedText{
-				value:       value.Text,
-				content:     valueTextRichPlainContent(tree),
-				richContent: rich.Content,
-			})
+			result := projection{valueTextRichPlainContent(tree), rich.Content}
+			projections[*value.Text.Rich] = result
+			normalized = append(normalized, normalizedText{value.Text, result})
 		}
 	})
 	if nil != err {

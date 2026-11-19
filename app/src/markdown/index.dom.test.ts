@@ -881,6 +881,17 @@ const browserCases = async (languages: Record<string, string>) => {
     failWrite = true;
     application.session.updateEditor({content: "Unsaved at exit", edited: true, composing: false});
     application.editor.setValue("Unsaved at exit");
+    await application.session.flush(application.editor);
+    for (const width of [1000, 400]) {
+        await ipcRenderer.invoke("markdown-resize", width, 360);
+        await tick();
+        const status = document.getElementById("markdownStatus").getBoundingClientRect();
+        const retry = document.getElementById("markdownRetry").getBoundingClientRect();
+        const gap = retry.left - status.right;
+        check.ok(retry.width > 0 && gap >= 0 && gap <= 8 && retry.right <= innerWidth &&
+            retry.top < status.bottom && retry.bottom > status.top,
+            `retry is visible beside the save error at ${width}px`);
+    }
     onCommand({id: "prepared-close", type: "prepare-quit"});
     await tick();
     check.equal(responses.at(-1), true);

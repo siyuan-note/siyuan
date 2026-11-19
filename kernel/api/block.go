@@ -420,6 +420,9 @@ var getRecentUpdatedBlocks = contractHandler(apicontract.GetRecentUpdatedBlocks,
 })
 
 var getContentWordCount = contractHandler(apicontract.GetContentWordCount, func(c *gin.Context, request apicontract.ContentWordCountRequest) apicontract.Response[apicontract.WordCountData] {
+	if err := filesys.ValidateContentStatContent(request.Content); nil != err {
+		return apicontract.Failure[apicontract.WordCountData](-1, err.Error())
+	}
 	return apicontract.Success(apicontract.WordCountData{ReqID: request.ReqID, Stat: blockStatContract(filesys.ContentStat(request.Content))})
 })
 

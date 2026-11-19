@@ -474,8 +474,8 @@ style="${isList ? "" : `width: ${item.style.width};`}"${colType === "block" ? ' 
     });
     let html = "";
     clearSelect(["cell", "row"], options.blockElement);
-    options.srcIDs.forEach(() => {
-        html += `<div class="av__row" data-type="ghost">
+    options.srcIDs.forEach(itemID => {
+        html += `<div class="av__row" data-type="ghost" data-av-insert-item-id="${escapeAttr(itemID)}">
     ${cellsHTML}
 </div>`;
     });

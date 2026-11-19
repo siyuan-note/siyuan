@@ -10,6 +10,7 @@ import {isFoldedRenderContent} from "../foldedContent";
 import {getCalendarRequestRange} from "./calendar/state";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
+import {getNewAVRow, retainNewAVRow, type NewAVRow} from "./newRowPage";
 import {fetchSyncPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
@@ -593,7 +594,7 @@ const afterRenderTable = (options: ITableOptions) => {
 };
 
 export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true,
-                               avData?: IAV, automaticRefresh: AVAutomaticRefresh = false, inheritedRenderToken?: symbol) => {
+                               avData?: IAV, automaticRefresh: AVAutomaticRefresh = false, inheritedRenderToken?: symbol, newRow?: NewAVRow) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         avElements = [element];
@@ -743,11 +744,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             };
             const carrierViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
             const requestGuard = guardTemplateHTTPRequest(() => isCurrentAVRender(e, renderToken), e);
-            const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
-                ...common, ...paging, created, carrierViewID,
-            }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
-                ...common, ...paging, snapshot, carrierViewID,
-            }, undefined, false) : fetchAVRender({
+            const request = {
                 ...common, ...paging,
                 automaticRefresh: !!automaticRefresh,
                 preserveHTTPResults: automaticRefresh === "presentation",
@@ -758,7 +755,12 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 temporarySort: relationHost ? relationHost.temporarySort : getReadonlyAVSortRequest(e, protyle, common.viewID),
                 temporaryFilters: relationHost?.temporaryFilters,
                 relationContext: relationHost?.relationContext,
-            }, requestGuard.signal, e, () => isCurrentAVRender(e, renderToken),
+            };
+            const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
+                ...common, ...paging, created, carrierViewID,
+            }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
+                ...common, ...paging, snapshot, carrierViewID,
+            }, undefined, false) : fetchAVRender(request, requestGuard.signal, e, () => isCurrentAVRender(e, renderToken),
             preview => avRender(e, protyle, undefined, true, preview, automaticRefresh, renderToken))).finally(requestGuard.dispose);
             if (!isCurrentAVRender(e, renderToken)) {
                 continue;
@@ -774,6 +776,31 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 continue;
             }
             data = response.data;
+            if (newRow && !locateParams && !relationHost && !created && !snapshot && !protyle.disabled && !window.siyuan.isPublish) {
+                const guard = guardTemplateHTTPRequest(() => isCurrentAVRender(e, renderToken), e);
+                try {
+                    data = await retainNewAVRow(data, newRow, resetData.virtualData, async (itemID, groupID) => {
+                        const target = await fetchSyncPost("/api/av/renderAttributeView", {
+                            ...request,
+                            viewID: data.viewID,
+                            createIfNotExist: false,
+                            preserveHTTPResults: true,
+                            targetItemID: itemID,
+                            targetGroupID: groupID,
+                        }, undefined, false, guard.signal);
+                        if (isCurrentAVRender(e, renderToken) && target.code === 0 && isAVRenderData(target.data)) {
+                            return target.data;
+                        }
+                    });
+                } catch (error) {
+                    // 补查失败时仍展示已读取的当前页。
+                    if (!guard.signal.aborted) {
+                        console.warn("Failed to fetch new database row:", error);
+                    }
+                } finally {
+                    guard.dispose();
+                }
+            }
             if (relationHost && data.viewType !== "table") {
                 relationHost.failed();
                 continue;
@@ -1288,6 +1315,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
             }
             const hasGhost = item.querySelector('[data-type="ghost"]');
+            const newRow = hasGhost ? getNewAVRow(item, protyle, operation, getViewIDByAVElement(item)) : undefined;
             avRender(item, protyle, () => {
                 subItemsRefresh?.restoreViewport?.();
                 if (operation.action === "insertAttrViewBlock" && operation.context?.ignoreTip !== "true") {
@@ -1357,7 +1385,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
                 removeAVPasteSkeleton(item);
                 item.removeAttribute("data-loading");
-            }, true, undefined, operation.action === "setAttrViewSorts" ? "presentation" : true);
+            }, true, undefined, operation.action === "setAttrViewSorts" ? "presentation" : true, undefined, newRow);
         });
     }, ["insertAttrViewBlock", "addAttrViewCol", "removeAttrViewCol", "duplicateAttrViewKey"].includes(operation.action) ? 2 : 100);
 };

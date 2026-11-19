@@ -4,7 +4,11 @@
 
 package conf
 
-import "github.com/siyuan-note/siyuan/kernel/util"
+import (
+	"encoding/json"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
 
 type Appearance struct {
 	ShowFloatingDockBar      *bool               `json:"showFloatingDockBar"`      // 隐藏停靠栏时允许临时显示浮动停靠栏，缺失时默认开启
@@ -225,4 +229,18 @@ type AppearanceTheme struct {
 type AppearanceIcon struct {
 	Name  string `json:"name"`  // litheness
 	Label string `json:"label"` // i18n display name
+}
+
+func (icon *AppearanceIcon) UnmarshalJSON(data []byte) error {
+	// 旧版 appearance.icons 的条目是图标包名称字符串。
+	if len(data) != 0 && data[0] == '"' {
+		var name string
+		if err := json.Unmarshal(data, &name); err != nil {
+			return err
+		}
+		*icon = AppearanceIcon{Name: name, Label: name}
+		return nil
+	}
+	type appearanceIcon AppearanceIcon
+	return json.Unmarshal(data, (*appearanceIcon)(icon))
 }

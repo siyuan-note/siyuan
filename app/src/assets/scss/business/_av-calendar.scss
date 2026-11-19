@@ -332,16 +332,6 @@
           white-space: normal;
         }
       }
-
-      .av__cell--relation {
-        display: inline-flex;
-        max-width: 100%;
-        vertical-align: top;
-
-        > :first-child {
-          flex-shrink: 0;
-        }
-      }
     }
 
     &[data-dtype="select"],

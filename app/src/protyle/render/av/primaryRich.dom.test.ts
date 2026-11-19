@@ -40,6 +40,12 @@ const cases = async (sources: Record<string, string>, styles: Record<string, str
     (window as any).siyuan = {languages: {empty: "Empty", untitled: "Untitled", openBy: "Open", bind: "Bind", rebind: "Rebind", more: "More", block: "Block", documentTitleInlineOnly: "Inline only"}, config: {editor: {}}};
     load("richTextValue");
     load("richText");
+    const textImage = modules.richText.getAVRichTextBlockDOM("Before ![photo](assets/photo.png) after");
+    const savedText = modules.richText.serializeAVRichTextBlockDOM(textImage);
+    check.match(savedText.markdown, /!\[photo\]\(assets\/photo\.png\)/);
+    const textPreview = document.createElement("template");
+    textPreview.innerHTML = modules.richText.getAVRichTextPreviewHTML(savedText.markdown);
+    check.equal(textPreview.content.querySelector("img")?.getAttribute("src"), "assets/photo.png");
     const primary = load("primaryRich");
     const position = load("insertPosition");
     const runtime = load("runtimeCapabilities");

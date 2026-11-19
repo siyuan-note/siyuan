@@ -518,7 +518,7 @@ func validateValueTextRichTreeWithImages(tree *parse.Tree, images bool) (err err
 		if images && !allowed {
 			allowed = isAllowedTableCellRichCustomNode(node)
 		}
-		if !allowed && !(images && isAllowedTableCellRichImageNode(node)) {
+		if !allowed && !isAllowedTableCellRichImageNode(node) {
 			err = fmt.Errorf("unsupported attribute view rich text node [%s]", node.Type.String())
 			return ast.WalkStop
 		}

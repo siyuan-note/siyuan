@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	CurrentSpec   = 16
+	CurrentSpec   = 17
+	TextImageSpec = 17
 	PlainTextSpec = 8
 	RichTextSpec  = 9
 	// 单一 WGS84 位置使用独立版本，防止其他格式的内核重写坐标含义。
@@ -126,7 +127,11 @@ func (av *AttributeView) HasRichText() bool {
 }
 
 // NormalizeRichText 校验所有富文本载荷，并刷新对应的纯文本投影。
-func (av *AttributeView) NormalizeRichText() (err error) {
+func (av *AttributeView) NormalizeRichText() error {
+	return av.normalizeRichText(nil)
+}
+
+func (av *AttributeView) normalizeRichText(saveSpec *int) (err error) {
 	if nil == av {
 		return
 	}
@@ -139,6 +144,7 @@ func (av *AttributeView) NormalizeRichText() (err error) {
 		projection
 	}
 	var normalized []normalizedText
+	spec := av.Spec
 	projections := map[ValueTextRich]projection{}
 	var luteEngine *lute.Lute
 	av.visitPersistedValues(func(value *Value) {
@@ -155,6 +161,15 @@ func (av *AttributeView) NormalizeRichText() (err error) {
 		}
 		var tree *parse.Tree
 		if tree, err = normalizeValueTextRichWithLute(&rich, luteEngine); nil == err {
+			if spec < TextImageSpec {
+				ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+					if entering && node.Type == ast.NodeImage {
+						spec = TextImageSpec
+						return ast.WalkStop
+					}
+					return ast.WalkContinue
+				})
+			}
 			result := projection{valueTextRichPlainContent(tree), rich.Content}
 			projections[*value.Text.Rich] = result
 			normalized = append(normalized, normalizedText{value.Text, result})
@@ -163,12 +178,18 @@ func (av *AttributeView) NormalizeRichText() (err error) {
 	if nil != err {
 		return
 	}
+	if spec != av.Spec && saveSpec == nil {
+		return fmt.Errorf("text field images require database format %d", TextImageSpec)
+	}
 	if err = av.NormalizePrimaryRich(); err != nil {
 		return
 	}
 	for _, text := range normalized {
 		text.value.Content = text.content
 		text.value.Rich.Content = text.richContent
+	}
+	if saveSpec != nil {
+		*saveSpec = spec
 	}
 	return
 }

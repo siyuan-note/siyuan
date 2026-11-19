@@ -156,21 +156,21 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             hint,
         },
         runtimeCapabilities: {
-            upload: primary,
+            upload: true,
             websocket: false,
             lute: createAVRichTextEditorLute(),
             lockedOptions: {toolbar, hint},
             pluginExtensions: false,
             customBlockRender: false,
             sanitizeBlockDOM: blockDOM => sanitizeAVRichTextBlockDOM(blockDOM, primary),
-            getUnsupportedPasteBlocks: blockDOM => getAVRichTextUnsupportedPasteBlocks(blockDOM, primary),
-            richHTMLPaste: primary,
+            getUnsupportedPasteBlocks: blockDOM => getAVRichTextUnsupportedPasteBlocks(blockDOM, true),
+            richHTMLPaste: true,
             restoreLuteMarkdownSyntax: configureAVRichTextEditorLute,
         },
         afterSetContent: (protyle, element) => {
             mathRender(element);
             highlightRender(element);
-            if (primary) { renderImageDisplay(element); }
+            renderImageDisplay(element);
             protyle.undo.clear();
         },
     });

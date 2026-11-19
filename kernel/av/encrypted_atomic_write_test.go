@@ -49,6 +49,12 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy bool,
 	})
 	view := &AttributeView{ID: avID, Spec: PlainTextSpec}
 	view.Name = "first encrypted version"
+	if primary == TextImageSpec {
+		view.Spec = PrimaryBlockRichSpec
+		view.KeyValues = []*KeyValues{{Key: &Key{ID: "text", Type: KeyTypeText}, Values: []*Value{{
+			Type: KeyTypeText, Text: &ValueText{Content: "previous text"},
+		}}}}
+	}
 	if primary == PrimaryBlockRichSpec {
 		view.KeyValues = []*KeyValues{{Key: &Key{ID: "20261110000000-primary", Type: KeyTypeBlock}, Values: []*Value{{
 			Type: KeyTypeBlock, IsDetached: true, BlockID: "20261110000000-row0000", Block: &ValueBlock{Rich: primaryRichFixture(t, `<span data-type="strong">previous primary</span>`)},
@@ -94,7 +100,9 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy bool,
 		t.Fatal(err)
 	}
 	view.Name = "second encrypted version with different length"
-	if primary > 0 {
+	if primary == TextImageSpec {
+		view.KeyValues[0].Values[0].Text.Rich = &ValueTextRich{Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: "![photo](assets/photo.png)"}
+	} else if primary > 0 {
 		view.KeyValues = []*KeyValues{{Key: &Key{ID: "20261110000000-primary", Type: KeyTypeBlock}, Values: []*Value{{
 			Type: KeyTypeBlock, IsDetached: true, BlockID: "20261110000000-row0000", Block: &ValueBlock{Rich: primaryRichFixture(t, `<span data-type="strong">encrypted primary</span>`)},
 		}}}}
@@ -118,7 +126,11 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy bool,
 	if err != nil || loaded.Name != view.Name {
 		t.Fatalf("updated ciphertext did not authenticate: %+v, %v", loaded, err)
 	}
-	if primary > 0 && (loaded.Spec != primary || loaded.KeyValues[0].Values[0].Block.Content != map[int]string{PrimaryRichSpec: "encrypted primary", PrimaryBlockRichSpec: "encrypted primary\nsecond"}[primary] || loaded.KeyValues[0].Values[0].Block.Rich == nil) {
+	if primary == TextImageSpec {
+		if loaded.Spec != TextImageSpec || loaded.KeyValues[0].Values[0].Text.Rich.Content != "![photo](assets/photo.png)" {
+			t.Fatal("encrypted text image source did not survive authenticated reopening")
+		}
+	} else if primary > 0 && (loaded.Spec != primary || loaded.KeyValues[0].Values[0].Block.Content != map[int]string{PrimaryRichSpec: "encrypted primary", PrimaryBlockRichSpec: "encrypted primary\nsecond"}[primary] || loaded.KeyValues[0].Values[0].Block.Rich == nil) {
 		t.Fatal("encrypted primary source did not survive authenticated reopening")
 	}
 	plain, err := decryptAVData(boxID, avID, retained)
@@ -128,6 +140,9 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy bool,
 	previous, err := ParseAttributeViewData(avID, plain)
 	if err != nil || previous.Name != "first encrypted version" {
 		t.Fatalf("previous ciphertext is not recoverable: %+v, %v", previous, err)
+	}
+	if primary == TextImageSpec && (previous.Spec != PrimaryBlockRichSpec || previous.KeyValues[0].Values[0].Text.Content != "previous text") {
+		t.Fatal("previous text field snapshot is not recoverable")
 	}
 	if primary == PrimaryBlockRichSpec && (previous.Spec != PrimaryRichSpec ||
 		previous.KeyValues[0].Values[0].Block.Rich.Format != "inline-ast" || previous.KeyValues[0].Values[0].Block.Content != "previous primary") {
@@ -141,4 +156,8 @@ func testEncryptedAttributeViewSaveReplacesCiphertext(t *testing.T, legacy bool,
 
 func TestEncryptedPrimaryBlockRichPreservesPreviousAuthenticatedSnapshot(t *testing.T) {
 	testEncryptedAttributeViewSaveReplacesCiphertext(t, false, PrimaryBlockRichSpec)
+}
+
+func TestEncryptedTextImagePreservesPreviousAuthenticatedSnapshot(t *testing.T) {
+	testEncryptedAttributeViewSaveReplacesCiphertext(t, false, TextImageSpec)
 }

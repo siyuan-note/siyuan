@@ -657,8 +657,8 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
     const avID = blockElement.dataset.avId;
     const hostID = getAVHostIdentity(blockElement);
     const rootID = protyle.block.rootID;
-    const attributeCell = (type === "select" || type === "mSelect" || type === "date") && cellElements.every(element =>
-        element.classList.contains("custom-attr__avvalue") && !element.dataset.avBatchOriginalValue);
+    const attributeCell = (type === "select" || type === "mSelect" || type === "date" || type === "relation") &&
+        cellElements.every(element => element.classList.contains("custom-attr__avvalue") && !element.dataset.avBatchOriginalValue);
     const cellOwner = getAVCellEditorOwner(blockElement);
     const ownerElement = attributeCell ?
         cellOwner.closest<HTMLElement>(".protyle-db-attr, .protyle-db-row, .b3-dialog__container") || cellOwner : cellOwner;

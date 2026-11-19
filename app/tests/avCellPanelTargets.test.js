@@ -238,9 +238,9 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
     const unmount = () => cells.forEach(cell => {cell.isConnected = false;});
     const select = () => api.addColOptionOrCell(protyle, state.data, cells,
         element({name: "new", color: "1"}), menu, block);
-    const selectRelation = async () => {
-        const target = element({rowId: "new", relationType: "candidate"}, ["b3-menu__item"]);
-        const label = element({content: "New relation"});
+    const selectRelation = async (id = "new") => {
+        const target = element({rowId: id, relationType: "candidate"}, ["b3-menu__item"]);
+        const label = element({content: id});
         const primary = element();
         target.querySelector = selector => selector === ".b3-menu__label" ? label : primary;
         await api.setRelationCell(protyle, block, target, cells);
@@ -688,6 +688,20 @@ test("attribute multi-select does not follow an in-place change to another attri
     f.current().block.dataset.attributeId = "other";
     f.save();
     assert.equal(f.transactions.length, 0);
+});
+
+test("attribute relation writes and undo use the current field across panel replacements", async () => {
+    const f = attributePanelFixture("relation");
+    await f.save("first");
+    f.repaint();
+    await f.save("second");
+    f.repaint();
+    const first = f.menu.querySelectorAll('[data-relation-type="selected"]')[0];
+    await f.api.setRelationCell(f.protyle, f.block, first, f.cells);
+    assert.deepEqual(f.transactions.map(transaction => plain(transaction.operations[0].data.relation.blockIDs)),
+        [["first"], ["first", "second"], ["second"]]);
+    assert.deepEqual(plain(f.transactions[2].undo[0].data.relation.blockIDs), ["first", "second"]);
+    assert.equal(f.cells[0], f.current().cell);
 });
 
 test("attribute multi-select uses refreshed concurrent values for edits and undo", () => {

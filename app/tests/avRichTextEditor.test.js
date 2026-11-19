@@ -199,6 +199,20 @@ const runCases = async (sources, appDirectory) => {
         }
         return {owner, protyle, nodeElement, anchorElement, value, stableCells, saves, data, closed: () => closed};
     };
+    {
+        const state = createOwner(false, "box", undefined, true);
+        state.data.view.rows[0].cells = [{value: {...state.value, block: {...state.value.block, id: "legacy"}}}];
+        fragment.pendingInput = "draft";
+        state.anchorElement.addEventListener("mouseenter", () => state.anchorElement.append(document.createElement("button")), {once: true});
+        state.anchorElement.dispatchEvent(new MouseEvent("mouseenter"));
+        await settle();
+        assert.equal(state.closed(), 0);
+        assert.equal(getComputedStyle(mask()).backgroundColor, "rgba(0, 0, 0, 0)");
+        mask().dispatchEvent(new MouseEvent("mousedown", {bubbles: true}));
+        await settle();
+        assert.equal(state.saves[0][0].block.content, "Initialdraft");
+        assert.equal(state.closed(), 1);
+    }
     // 文本字段块引复用真实文档上下文，不把临时段落或数据库条目当作搜索来源。
     for (const isMobile of [false, true]) {
         mobile = isMobile;

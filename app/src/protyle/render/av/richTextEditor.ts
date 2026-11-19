@@ -195,8 +195,12 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             const data = getAVData(options.nodeElement);
             if (data && options.stableCells.some(cell => {
                 const current = resolveAVSelectedCell(data, cell)?.cell.value;
-                return !current || current.type !== "block" || current.isDetached !== options.value.isDetached ||
-                    current.block?.id !== options.value.block?.id;
+                const original = cell.cell.value;
+                if (current?.type !== "block" || Boolean(current.isDetached) !== Boolean(original.isDetached)) {
+                    return true;
+                }
+                // 旧版非绑定条目可能带有块 ID，只有绑定条目才需要核对来源块。
+                return !current.isDetached && current.block?.id !== original.block?.id;
             })) { return false; }
         }
         if (options.anchorElement.isConnected) {

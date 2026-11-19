@@ -6,7 +6,7 @@ import {loadModule} from "../../../testSupport/loadModule";
 const continuous = loadModule<typeof import("./continuousInput")>("src/protyle/render/av/continuousInput.ts", {require: () => ({})});
 
 const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; changed?: boolean; flush?: () => Promise<void>; save?: () => Promise<void>;
-    tableInput?: boolean; rangeInput?: boolean; hint?: boolean} = {}) => {
+    tableInput?: boolean; rangeInput?: boolean; hint?: boolean; primaryValues?: IAVCellValue[]} = {}) => {
     const lifecycle: string[] = [];
     const dialogTitles: string[] = [];
     const masks: Array<{
@@ -51,11 +51,12 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         focus: () => {},
         destroy: () => lifecycle.push("destroy"),
     };
+    const primaryValues: IAVCellValue[] = settings.primaryValues || [{type: "block", isDetached: true, block: {content: "initial"}}];
     const options = {
         protyle,
         nodeElement: node,
         anchorElement: anchor,
-        value: settings.primary ? {type: "block", isDetached: true, block: {content: "initial"}} :
+        value: settings.primary ? primaryValues[0] :
             {type: "text", text: {content: "initial"}},
         stableCells: [] as import("./selectionState").IAVSelectedCell[],
         onSave: () => { lifecycle.push("save"); return settings.save?.(); },
@@ -63,10 +64,15 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         prepareNextInput: (_anchor: unknown, rangeOnly = false) =>
             (rangeOnly ? settings.rangeInput : settings.tableInput) ? () => lifecycle.push("next") : undefined,
     };
-    let currentValue = options.value;
+    const currentValues = new Map<string, IAVCellValue>();
+    let notifyMutation: () => void;
     let fragmentOptions: Parameters<typeof import("../../lite/fragmentEditor").mountProtyleLiteFragment>[1];
     if (settings.primary) {
-        options.stableCells.push({rowID: "row", colID: "primary"} as import("./selectionState").IAVSelectedCell);
+        primaryValues.forEach((value, index) => {
+            const rowID = String(index);
+            options.stableCells.push({rowID, colID: "primary", cell: {value}} as import("./selectionState").IAVSelectedCell);
+            currentValues.set(rowID, value);
+        });
     }
     const modules: Record<string, unknown> = {
         "./continuousInput": continuous,
@@ -122,7 +128,8 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         "./primaryRich": {getAVPrimaryInitialDOM: () => "initial",
             createAVPrimaryEditValue: (html: string) => ({type: "block", isDetached: true, block: {content: html}})},
         "./virtualScroll": {getAVData: () => settings.primary ? {} : undefined},
-        "./selectionState": {resolveAVSelectedCell: () => ({cell: {value: currentValue}, column: {type: currentValue.type}})},
+        "./selectionState": {resolveAVSelectedCell: (_data: IAV, cell: {rowID: string}) =>
+            ({cell: {value: currentValues.get(cell.rowID)}, column: {type: "block"}})},
         "./editorSession": {beginAVEditorSession: () => () => lifecycle.push("end-session")},
         "../../util/outlineBlock": {updateOutlineCurrentBlock: () => {}},
         "../../util/selection": {focusBlock: (element: unknown) => {
@@ -164,6 +171,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
             removeEventListener: () => {},
         },
         MutationObserver: class {
+            constructor(callback: () => void) { notifyMutation = callback; }
             observe() {}
             disconnect() {}
         },
@@ -175,7 +183,9 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
     }
     return {
         methods, lifecycle, owner, node, open, fragmentOptions, toolbarTarget, dialogTitles,
-        rebind: () => { currentValue = {type: "block", isDetached: false, block: {content: "other"}}; },
+        notifyMutation: () => notifyMutation(),
+        setCurrentValue: (rowID: string, value: IAVCellValue) => currentValues.set(rowID, value),
+        rebind: () => currentValues.set("0", {type: "block", isDetached: false, block: {content: "other"}}),
         cancel: () => masks.at(-1).handlers.get("siyuan-av-cell-editor-close")({}),
         get inert() { return masks.at(-1).firstElementChild.inert; },
         confirm: () => masks.at(-1).firstElementChild.handlers.get("click")?.({}),
@@ -316,6 +326,32 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         }
     }
     if (primary) {
+        it("keeps the draft through hover mutations with omitted binding flags and legacy detached IDs", async () => {
+            const bound: IAVCellValue = {type: "block", isDetached: false, block: {id: "bound", content: "bound"}};
+            const detached: IAVCellValue = {type: "block", isDetached: true, block: {content: "detached"}};
+            const editor = createEditor({changed: true, primaryValues: [bound, detached]});
+            editor.setCurrentValue("0", {type: "block", block: bound.block});
+            editor.setCurrentValue("1", {...detached, block: {...detached.block, id: "legacy"}});
+            editor.notifyMutation();
+            assert.equal(editor.lifecycle.includes("destroy"), false);
+            editor.clickOutside();
+            await editor.settle();
+            assert.equal(editor.lifecycle.includes("save"), true);
+        });
+
+        it("discards the draft when another selected primary key binds to a different block", async () => {
+            const first: IAVCellValue = {type: "block", block: {id: "a", content: "first"}};
+            const second: IAVCellValue = {type: "block", block: {id: "b", content: "second"}};
+            const editor = createEditor({changed: true, primaryValues: [first, second]});
+            editor.notifyMutation();
+            assert.equal(editor.lifecycle.includes("destroy"), false);
+            editor.setCurrentValue("1", {...second, block: {...second.block, id: "c"}});
+            editor.notifyMutation();
+            await editor.settle();
+            assert.equal(editor.lifecycle.includes("destroy"), true);
+            assert.equal(editor.lifecycle.includes("save"), false);
+        });
+
         it("leaves toolbar and inline element input Enter events to their own handlers", async () => {
             for (const mobile of [false, true]) {
                 const editor = createEditor({mobile, changed: true});

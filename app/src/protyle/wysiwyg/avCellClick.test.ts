@@ -66,6 +66,7 @@ const checkClicks = (code: string, mobile: boolean) => {
     window.siyuan = {menus: {menu: {element: menu}}, config: {keymap: {editor: {general: {}}}}} as any;
     const closestAV = (target: Element) => closest(target, "av");
     const dependencies = {
+        Constants: {SIZE_DRAG_THRESHOLD: 5},
         protyle, isMobile: () => mobile, isOnlyMeta: (event: MouseEvent) => event.ctrlKey || event.metaKey,
         hasClosestByClassName: closest, hasClosestBlock: closestAV, getAVHost: closestAV,
         hasClosestByTag: (target: Element, tag: string) => target?.closest(tag),
@@ -141,6 +142,11 @@ const checkClicks = (code: string, mobile: boolean) => {
                 send("click", target, clientX, clientY);
                 check(opened.length === previous + 2 && selected.includes(cell), `${view}/${id}: moving within a cell selects without editing`);
             }
+            send("mousedown", target);
+            send("mousemove", target, 101, 21);
+            send("mouseup", target, 102, 21);
+            send("click", target, 102, 21);
+            check(opened.length === previous + 3, `${view}/${id}: slight pointer movement still opens the editor`);
         }
         const start = element.querySelector<HTMLElement>('[data-id="filled"]');
         const end = element.querySelector<HTMLElement>('[data-id="rich"]');

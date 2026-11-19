@@ -1975,14 +1975,17 @@ export class WYSIWYG {
                 let moveSelectCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
                 let hasMoved = false;
+                const isDrag = (current: MouseEvent) => Math.abs(current.clientX - event.clientX) >= Constants.SIZE_DRAG_THRESHOLD ||
+                    Math.abs(current.clientY - event.clientY) >= Constants.SIZE_DRAG_THRESHOLD;
                 const nodeRect = nodeElement.getBoundingClientRect();
                 const scrollElement = nodeElement.querySelector(".av__scroll");
                 const bodyElement = hasClosestByClassName(avCellElement, "av__body") as HTMLElement;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                    if (event.clientX !== moveEvent.clientX || event.clientY !== moveEvent.clientY) {
-                        hasMoved = true;
-                        this.preventClick = true;
+                    if (!hasMoved && !isDrag(moveEvent)) {
+                        return;
                     }
+                    hasMoved = true;
+                    this.preventClick = true;
                     const tempCellElement = hasClosestByClassName(moveEvent.target as HTMLElement, "av__cell") as HTMLElement;
                     if (scrollElement.scrollWidth > scrollElement.clientWidth + 2) {
                         if (moveEvent.clientX > nodeRect.right - 10) {
@@ -2000,7 +2003,7 @@ export class WYSIWYG {
                         (moveSelectCellElement && tempCellElement && tempCellElement === moveSelectCellElement)) {
                         return;
                     }
-                    if (tempCellElement && tempCellElement.dataset.id && (event.clientX !== moveEvent.clientX || event.clientY !== moveEvent.clientY)) {
+                    if (tempCellElement && tempCellElement.dataset.id) {
                         selectAVCellRange(nodeElement, tempCellElement);
                         lastCellElement = tempCellElement;
                         moveSelectCellElement = tempCellElement;
@@ -2014,7 +2017,7 @@ export class WYSIWYG {
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
                     // 快速移动可能只在释放事件中体现坐标变化，移出单元格时仍保留起点选区。
-                    if (lastCellElement || hasMoved || event.clientX !== upEvent.clientX || event.clientY !== upEvent.clientY) {
+                    if (hasMoved || isDrag(upEvent)) {
                         selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
                         focusBlock(nodeElement);
                         addDragFill(lastCellElement || avCellElement);

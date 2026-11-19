@@ -2,7 +2,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {showMessage} from "../dialog/message";
 import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "../history/notebookDialogs";
-import {escapeHtml} from "../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {getNotebookName} from "../util/pathName";
@@ -87,7 +87,7 @@ export const openEncryptedAssetsCleanup = (notebook: string) => {
             }
             items = response.data;
             list.innerHTML = items.length ? items.map((item, index) => `<div class="b3-list-item" data-index="${index}">
-    <input class="b3-switch" type="checkbox" aria-label="${escapeHtml(item.name)}"><span class="fn__space"></span>
+    <input class="b3-switch" type="checkbox" aria-label="${escapeHtmlTextAndAttr(item.name)}"><span class="fn__space"></span>
     <button class="b3-button b3-button--text fn__flex-1" data-type="preview-item">${escapeHtml(item.name)}</button>
 </div>`).join("") : `<div class="b3-list--empty">${lang.emptyContent}</div>`;
         } catch (error) {
